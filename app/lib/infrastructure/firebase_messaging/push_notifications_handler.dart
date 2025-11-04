@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -9,10 +8,10 @@ import 'package:synchronized/synchronized.dart';
 
 import '../configuration/environment.dart';
 import '../loggers/app_logger/app_logger.dart';
+import '../providers/app_badge_provider.dart';
 import '../providers/app_logger_provider.dart';
 import '../providers/push_notification_messaging_provider.dart';
 import '../secure_storage/secure_storage.dart';
-import 'push_notification.dart';
 import 'push_notification_messaging.dart';
 
 part 'push_notifications_handler.g.dart';
@@ -93,14 +92,7 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
         name: _logKey,
       );
 
-      if (!kIsWeb && Platform.isAndroid) {
-        final notification = PushNotification.fromPayload(message.data);
-        final pendingCount = notification.data.pendingCount ?? 0;
-
-        if (await AppBadgePlus.isSupported()) {
-          await AppBadgePlus.updateBadge(pendingCount);
-        }
-      }
+      await ref.read(appBadgeServiceProvider).setBadgeFromMessage(message);
 
       _pushNotificationReceivedController.add(null);
     });

@@ -1,12 +1,9 @@
 // ignore_for_file: unreachable_from_main
 
-import 'dart:io';
-
-import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../loggers/app_logger/app_logger.dart';
-import 'push_notification.dart';
+import '../providers/app_badge_provider.dart';
 import 'push_notification_messaging.dart';
 
 /// Background handler for Firebase push notifications.
@@ -22,14 +19,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     name: 'firebaseMessagingBackgroundHandler',
   );
 
-  if (Platform.isAndroid) {
-    final notification = PushNotification.fromPayload(message.data);
-    final pendingCount = notification.data.pendingCount ?? 0;
-
-    if (await AppBadgePlus.isSupported()) {
-      await AppBadgePlus.updateBadge(pendingCount);
-    }
-  }
+  await AppBadgeService.instance.setBadgeFromMessage(message);
 }
 
 class FirebasePushNotificationMessaging implements PushNotificationMessaging {
