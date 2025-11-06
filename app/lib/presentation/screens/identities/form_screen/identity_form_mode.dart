@@ -1,0 +1,4 @@
+enum IdentityFormMode {
+  add,
+  edit,
+}
