@@ -1,0 +1,122 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Meeting Place"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "mpx_flutter_reference_app"
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wir verwenden die Kamera, um QR-Codes zu scannen, Profilbilder aufzunehmen und Fotos zu machen, die Sie an Ihre Nachrichten anhängen können."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We use the camera to scan QR codes, take profile pictures, and let you capture photos to attach to your messages."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usamos la cámara para escanear códigos QR, tomar fotos de perfil y capturar imágenes que puedes adjuntar a tus mensajes."
+          }
+        }
+      }
+    },
+    "NSFaceIDUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit Face ID können Sie die App schnell und sicher entsperren."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Face ID to quickly and securely unlock the app."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usa Face ID para desbloquear la app de forma rápida y segura."
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wir verwenden das Mikrofon, damit Sie Audio aufnehmen und als Nachrichtenanhang versenden können."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We use the microphone so you can record audio and send it as message attachments."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usamos el micrófono para que puedas grabar audio y enviarlo como adjunto en tus mensajes."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wir verwenden Ihre Fotomediathek, damit Sie Bilder als Profilbilder auswählen und an Ihre Nachrichten anhängen können."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We use your photo library so you can select images as profile pictures and attach them to your messages."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usamos tu biblioteca de fotos para que puedas elegir imágenes como fotos de perfil y adjuntarlas a tus mensajes."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

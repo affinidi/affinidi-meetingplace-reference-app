@@ -1,0 +1,4 @@
+<resources>
+    <string name="channel_default_name">Default Channel</string>
+    <string name="channel_default_description">General notifications</string>
+</resources>

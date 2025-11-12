@@ -1,0 +1,111 @@
+name: meetingplace_flutter_reference_app_workspace
+publish_to: "none"
+
+workspace:
+  - app
+  - packages/app-core
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dev_dependencies:
+  coverage: ^1.11.1
+  dart_flutter_team_lints: ^3.2.1
+  drift_dev: ^2.27.0
+  melos: ^7.1.1
+  test: ^1.24.0
+
+dependency_overrides:
+  meeting_place_chat:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: 98c88167cd80712c983461c17e1e7d12950b1c99
+      path: packages/meeting_place_chat
+  meeting_place_control_plane:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: 98c88167cd80712c983461c17e1e7d12950b1c99
+      path: packages/meeting_place_control_plane
+  meeting_place_core:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: 98c88167cd80712c983461c17e1e7d12950b1c99
+      path: packages/meeting_place_core
+  meeting_place_drift_repository:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: 98c88167cd80712c983461c17e1e7d12950b1c99
+      path: packages/meeting_place_drift_repository
+  meeting_place_mediator:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: 98c88167cd80712c983461c17e1e7d12950b1c99
+      path: packages/meeting_place_mediator
+  meta: 1.17.0
+
+melos:
+  scripts:
+    analyze:
+      exec: dart analyze --fatal-infos .
+      concurrency: 4
+      failFast: true
+      noSelect: true
+      packageFilters:
+        flutter: true
+        includePrivatePackages: false
+        #diff: 'origin/main'
+
+    test:
+      run: |
+        melos run test-flutter &&
+        melos run coverage-report
+
+    test-flutter:
+      description: Run tests in each flutter package
+      exec: flutter test --coverage
+      dirExists: test
+      concurrency: 4
+      failFast: true
+      noSelect: true
+      packageFilters:
+        flutter: true
+        includePrivatePackages: true
+        #diff: 'origin/main'
+        ignore:
+          - "*_example*"
+
+    coverage-report:
+      run: >
+        mkdir -p coverage
+
+        find ./packages -name "lcov.info" -path "*/coverage/lcov.info" -exec cat
+        {} + > coverage/lcov.info
+
+    pubget:
+      run: flutter pub get
+      exec:
+        concurrency: 5
+        orderDependents: true
+      description: Get dependencies for all workspace packages
+
+    ios-deps:
+      run: |
+        melos exec --scope=mpx_flutter_reference_app -- flutter precache --ios
+        melos exec --scope=mpx_flutter_reference_app -- "cd ios; pod install --repo-update"
+
+    gen:
+      run: |
+        echo "------------------------------------------------------------------------"
+        echo "Generating code"
+        echo "------------------------------------------------------------------------"
+        melos exec --scope=mpx_flutter_reference_app -- flutter clean
+        melos exec --scope=mpx_flutter_reference_app -- dart run build_runner build --delete-conflicting-outputs
+        dart format -l 80 .
+
+    strings:
+      run: |
+        echo "------------------------------------------------------------------------"
+        echo "Generating localized strings"
+        echo "------------------------------------------------------------------------"
+        melos exec --scope=mpx_flutter_reference_app -- flutter gen-l10n
+        dart format -l 80 .
