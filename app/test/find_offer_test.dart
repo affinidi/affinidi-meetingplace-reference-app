@@ -203,8 +203,8 @@ void main() {
       });
 
       testWidgets(
-          'it calls acceptOffer with correct parameters when Connect is pressed',
-          (tester) async {
+          'it calls acceptOffer with correct parameters when Connect is '
+          'pressed', (tester) async {
         final offer = FakeConnectionOffers.testOffer;
         final fakeSdk = FakeMeetingPlaceSDK(offerToFind: offer);
         final l10n = await getL10n();
