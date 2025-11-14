@@ -22,6 +22,7 @@ import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 
 import '../fakes/fake_app_badge_service.dart';
 import '../fakes/fake_cache_manager.dart';
+import '../fakes/fake_connections_service.dart';
 import '../fakes/fake_connectivity.dart';
 import '../fakes/fake_environment.dart';
 import '../fakes/fake_local_authentication.dart';

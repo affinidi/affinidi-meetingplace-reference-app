@@ -432,7 +432,7 @@ class ConnectionsService extends _$ConnectionsService {
   Future<void> findOffer(String mnemonic) async {
     if (mnemonic.isEmpty) {
       throw AppException(
-        'mnemonic is required',
+        'Mnemonic is required',
         code: AppExceptionType.missingMnemonic.name,
       );
     }
@@ -450,7 +450,7 @@ class ConnectionsService extends _$ConnectionsService {
     if (result.connectionOffer == null) {
       throw AppException(
         'Unable to find offer',
-        code: AppExceptionType.other.name,
+        code: AppExceptionType.offerNotFound.name,
       );
     }
 
