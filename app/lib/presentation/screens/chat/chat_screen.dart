@@ -33,6 +33,8 @@ import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/bottom_sheet_menu.dart';
+import '../../widgets/images/default_profile_image.dart';
+import '../../widgets/images/group_image.dart';
 import 'chat_activity_progress_indicator.dart';
 import 'chat_items/chat_encryption_notice.dart';
 import 'chat_items/group_deleted_chat_item.dart';

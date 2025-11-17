@@ -18,15 +18,32 @@ class _ProfilePictures extends ConsumerWidget {
     );
     final controller = ref.read(provider.notifier);
 
-    final myProfilePic = ref.watch(
+    final isGroupChat = ref.read(
       provider.select(
-        (state) => state.channel?.vCard?.profilePic,
+        (state) => state.channel?.isGroup,
       ),
     );
 
-    final hasOtherPartyPic =
-        otherPartyProfilePic != null && otherPartyProfilePic.isNotEmpty;
+    final myProfilePic = ref.watch(
+      provider.select(
+        (state) {
+          if (isGroupChat == true) {
+            final otherPartyPic = state.channel?.otherPartyVCard?.profilePic;
+            // If group admin (no otherPartyVCard), use vCard instead
+            return otherPartyPic ?? state.channel?.vCard?.profilePic;
+          }
+          return state.channel?.vCard?.profilePic;
+        },
+      ),
+    );
+
+    final hasOtherPartyPic = isGroupChat != null &&
+        !isGroupChat &&
+        otherPartyProfilePic != null &&
+        otherPartyProfilePic.isNotEmpty;
     final hasMyPic = myProfilePic != null && myProfilePic.isNotEmpty;
+
+    final useWhiteBackgroundForOtherParty = !hasOtherPartyPic;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -36,7 +53,13 @@ class _ProfilePictures extends ConsumerWidget {
           image: hasOtherPartyPic
               ? CachedBase64Image(otherPartyProfilePic,
                   cacheManager: cacheManager)
-              : defaultProfileImage,
+              : isGroupChat != null
+                  ? isGroupChat
+                      ? groupImage
+                      : defaultProfileImage
+                  : null,
+          backgroundColor:
+              useWhiteBackgroundForOtherParty ? Colors.white : null,
           size: _picSize,
           onPressed: () async {
             final imageBytes = await controller.getImageBytes(
@@ -62,10 +85,13 @@ class _ProfilePictures extends ConsumerWidget {
           image: hasMyPic
               ? CachedBase64Image(myProfilePic, cacheManager: cacheManager)
               : defaultProfileImage,
+          backgroundColor: !hasMyPic ? Colors.white : null,
           size: _picSize,
           onPressed: () async {
             final imageBytes = await controller.getImageBytes(
-                hasOtherPartyPic: hasMyPic, otherPartyProfilePic: myProfilePic);
+                hasOtherPartyPic: true,
+                otherPartyProfilePic:
+                    hasMyPic ? myProfilePic : defaultProfileBase64);
 
             if (!context.mounted) return;
 
@@ -92,15 +118,20 @@ class _TranslatedPicture extends StatelessWidget {
     required this.size,
     required this.offset,
     this.onPressed,
+    this.backgroundColor,
   });
 
-  final ImageProvider<Object> image;
+  final ImageProvider<Object>? image;
   final double size;
   final Offset offset;
   final VoidCallback? onPressed;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
+    final isGroupOrDefaultImage =
+        image == groupImage || image == defaultProfileImage;
+
     return Transform.translate(
       offset: offset,
       child: Container(
@@ -117,7 +148,16 @@ class _TranslatedPicture extends StatelessWidget {
           onTap: onPressed,
           child: CircleAvatar(
             radius: size / 2, // match size dynamically
-            backgroundImage: image,
+            backgroundColor: backgroundColor,
+            backgroundImage: isGroupOrDefaultImage ? null : image,
+            child: isGroupOrDefaultImage && image != null
+                ? Image(
+                    image: image!,
+                    fit: BoxFit.contain,
+                    width: 80,
+                    height: 80,
+                  )
+                : null,
           ),
         ),
       ),

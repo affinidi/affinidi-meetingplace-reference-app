@@ -22,6 +22,7 @@ import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../widgets/async_loaders/async_loading_controller.dart';
 import '../../../widgets/images/default_profile_image.dart';
+import '../../../widgets/images/group_image.dart';
 import 'connection_details_screen_state.dart';
 
 part 'connection_details_screen_controller.g.dart';
@@ -223,7 +224,9 @@ class ConnectionDetailsScreenController
   }) async {
     final base64Image = (hasOtherPartyPic && otherPartyProfilePic != null)
         ? otherPartyProfilePic
-        : defaultProfileBase64;
+        : state.isGroupChat
+            ? defaultGroupImageBase64
+            : defaultProfileBase64;
 
     final bytes = base64Decode(base64Image);
 

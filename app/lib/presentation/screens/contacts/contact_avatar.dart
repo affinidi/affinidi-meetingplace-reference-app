@@ -15,60 +15,12 @@ class _ContactAvatar extends ConsumerWidget {
     final statusColor = contact.getStatusColor(context, asAvatar: true);
     final iconSize = 70.0;
     final cacheManager = ref.read(cacheManagerProvider);
+    final isGroup = contact.type == ContactType.group;
 
-    if (contact.type == ContactType.group) {
-      final avatarSize = isList ? 30 : 54;
-      const double overlap = 30;
-
-      return SizedBox(
-        width: avatarSize + overlap,
-        height: avatarSize + overlap,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            if (contact.status == ContactStatus.pendingApproval)
-              Positioned(
-                top: isList ? -5 : -5,
-                right: isList ? 0 : -5,
-                child: Icon(
-                  Icons.star,
-                  color: statusColor,
-                  size: isList ? 20 : 24,
-                ),
-              ),
-            Positioned(
-              left: 0,
-              top: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: statusColor, width: 4),
-                ),
-                child: CircleAvatar(
-                  radius: avatarSize / 2,
-                  backgroundImage:
-                      contact.otherPartyImage(cacheManager: cacheManager),
-                ),
-              ),
-            ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: statusColor, width: 4),
-                ),
-                child: CircleAvatar(
-                  radius: avatarSize / 2,
-                  backgroundImage: vCard.image(cacheManager: cacheManager),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    final displayImage =
+        isGroup ? groupImage : vCard.image(cacheManager: cacheManager);
+    final isGroupOrDefaultImage =
+        displayImage == groupImage || displayImage == defaultProfileImage;
 
     return Container(
       decoration: BoxDecoration(
@@ -77,7 +29,16 @@ class _ContactAvatar extends ConsumerWidget {
       ),
       child: CircleAvatar(
         radius: iconSize / 2,
-        backgroundImage: vCard.image(cacheManager: cacheManager),
+        backgroundColor: isGroupOrDefaultImage ? Colors.white : null,
+        backgroundImage: !isGroupOrDefaultImage ? displayImage : null,
+        child: isGroupOrDefaultImage
+            ? Image(
+                image: displayImage,
+                fit: BoxFit.contain,
+                width: 40,
+                height: 40,
+              )
+            : null,
       ),
     );
   }

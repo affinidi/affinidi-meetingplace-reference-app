@@ -36,6 +36,7 @@ class ProfilePicture extends StatelessWidget {
             : null,
       ),
       child: CircleAvatar(
+        backgroundColor: Colors.white,
         radius: (size - border) / 2,
         foregroundImage: image,
       ),

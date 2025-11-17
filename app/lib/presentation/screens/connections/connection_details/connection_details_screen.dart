@@ -19,6 +19,7 @@ import '../../../widgets/form_rows/form_row_icon_title.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
 import '../../../widgets/identity_picker/identity_card.dart';
 import '../../../widgets/images/default_profile_image.dart';
+import '../../../widgets/images/group_image.dart';
 import '../../../widgets/mnemonic_pill.dart';
 import '../../../widgets/qr/qr_code_view.dart';
 import '../../media/image_view_screen/image_view_screen.dart';
