@@ -253,6 +253,17 @@ extension ConnectionDetailsScreenControllerProviderSelector
         return state.channel?.otherPartyVCard?.firstName ?? '';
       });
 
+  ProviderListenable<VCard?> get groupAdminVCard => select((state) {
+        if (state.group == null) return null;
+
+        final groupAdmin = state.group!.members.firstWhere(
+          (member) => member.membershipType == GroupMembershipType.admin,
+          orElse: () => state.group!.members.first,
+        );
+
+        return groupAdmin.vCard;
+      });
+
   ProviderListenable<bool> get isGroupChat =>
       select((state) => state.isGroupChat);
 

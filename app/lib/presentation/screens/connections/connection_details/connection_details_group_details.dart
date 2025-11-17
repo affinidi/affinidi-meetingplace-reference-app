@@ -1,22 +1,23 @@
 part of 'connection_details_screen.dart';
 
-class _TheirDetailsPanel extends ConsumerWidget {
-  const _TheirDetailsPanel(this.contactId);
+class _GroupDetailsPanel extends ConsumerWidget {
+  const _GroupDetailsPanel(this.contactId);
 
   final String contactId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(contactId);
-    final otherPartyVCard = ref.watch(provider.otherPartyVCard);
+    final groupAdminVCard = ref.read(provider.groupAdminVCard);
+    final groupName = ref.watch(provider.groupName);
 
-    final contactName = otherPartyVCard?.fullName;
-    final email = otherPartyVCard?.email;
-    final mobile = otherPartyVCard?.mobile;
+    final contactName = groupAdminVCard?.fullName;
+    final email = groupAdminVCard?.email;
+    final mobile = groupAdminVCard?.mobile;
 
-    final theirDid = ref.watch(provider
+    final adminDid = ref.watch(provider
         .select((state) => state.channel?.otherPartyPermanentChannelDid));
-    final theirDidSha256 = theirDid?.toDidSha256;
+    final adminDidSha256 = adminDid?.toDidSha256;
 
     final isDebugMode =
         ref.watch(provider.select((state) => state.isDebugMode));
@@ -26,16 +27,16 @@ class _TheirDetailsPanel extends ConsumerWidget {
         ref.watch(provider.select((state) => state.group?.id ?? ''));
 
     return FormCard(
-      title: context.l10n.theirDetails,
+      title: context.l10n.groupDetails,
       child: Column(
         spacing: 5,
         children: [
-          if (contactName != null)
+          if (groupName != null)
             FormRowIconTitle(
               icon: Icons.person,
               iconColor: context.colorScheme.primary,
               label: context.l10n.generalName,
-              value: contactName,
+              value: groupName,
             ),
           if (email != null && email.isNotEmpty) ...[
             const Divider(),
@@ -55,25 +56,25 @@ class _TheirDetailsPanel extends ConsumerWidget {
               value: mobile,
             ),
           ],
-          if (isDebugMode && theirDid != null && theirDid.isNotEmpty) ...[
+          if (isDebugMode && adminDid != null && adminDid.isNotEmpty) ...[
             const Divider(),
             FormRowIconTitle(
               icon: Icons.fingerprint,
               iconColor: context.customColors.orange,
               label: context.l10n.generalDid,
-              value: theirDid.topAndTail(),
+              value: adminDid.topAndTail(),
               isCopiable: true,
             ),
           ],
           if (isDebugMode &&
-              theirDidSha256 != null &&
-              theirDidSha256.isNotEmpty) ...[
+              adminDidSha256 != null &&
+              adminDidSha256.isNotEmpty) ...[
             const Divider(),
             FormRowIconTitle(
               icon: Icons.drag_indicator_sharp,
               iconColor: context.customColors.success,
               label: context.l10n.generalDidSha256,
-              value: theirDidSha256.topAndTail(),
+              value: adminDidSha256.topAndTail(),
               isCopiable: true,
             ),
           ],
