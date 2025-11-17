@@ -1,4 +1,4 @@
-package com.affinidi.mpx.meetingplace
+package com.example.meetingplace
 
 import android.os.Build
 import android.os.Bundle
