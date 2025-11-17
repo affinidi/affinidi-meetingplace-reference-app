@@ -206,10 +206,7 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      await sdk.approveConnectionRequest(
-        channel: channel,
-        connectionOffer: connectionOffer,
-      );
+      await sdk.approveConnectionRequest(channel: channel);
 
       _logger.info(
         'Connection request approved successfully',
@@ -253,13 +250,10 @@ class ConnectionsService extends _$ConnectionsService {
     required Identity identity,
   }) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
-    final result = await sdk.acceptOffer(
-      connectionOffer: connectionOffer,
-      vCard: identity.card.toVCard(),
-      externalRef: identity.id,
-    );
-    await sdk.notifyAcceptance(
-        connectionOffer: result.connectionOffer,
+    await sdk.acceptOffer(
+        connectionOffer: connectionOffer,
+        vCard: identity.card.toVCard(),
+        externalRef: identity.id,
         senderInfo: identity.card.firstName);
     await fetchConnections();
   }

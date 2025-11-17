@@ -56,7 +56,7 @@ class _ConnectionListItem extends ConsumerWidget {
         connectionsScreenControllerProvider
             .select((state) => state.selectedConnections.length));
 
-    if (connection.isDeleted()) {
+    if (connection.isDeleted) {
       return _ConnectionCard(
         connection: connection,
         onConnectionPress: onConnectionPress,
@@ -286,7 +286,7 @@ class _ConnectionTrailingWidget extends ConsumerWidget {
     );
     final isOwnedByMe = connection.ownedByMe;
 
-    if (connection.isDeleted()) {
+    if (connection.isDeleted) {
       return const SizedBox.shrink();
     }
 
