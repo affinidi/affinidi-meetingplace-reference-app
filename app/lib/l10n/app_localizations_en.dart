@@ -389,6 +389,11 @@ class AppLocalizationsEn extends AppLocalizations {
         'unableToFindMediator': 'No message server found at the provided URL',
         'oobFlowFailed':
             'Unable to establish a connection with other party, QR code was likely already used',
+        'connection_offer_expired': 'This invitation has expired',
+        'connection_offer_limit_exceeded':
+            'This invitation has reached its maximum number of uses',
+        'register_offer_mnemonic_in_use':
+            'This phrase is already in use, please choose another one',
         'other': '$errorCode',
       },
     );
