@@ -11,7 +11,6 @@ class _GroupDetailsPanel extends ConsumerWidget {
     final groupAdminVCard = ref.read(provider.groupAdminVCard);
     final groupName = ref.watch(provider.groupName);
 
-    final contactName = groupAdminVCard?.fullName;
     final email = groupAdminVCard?.email;
     final mobile = groupAdminVCard?.mobile;
 
