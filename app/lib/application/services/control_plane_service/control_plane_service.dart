@@ -113,7 +113,7 @@ class ControlPlaneService extends _$ControlPlaneService
           if (_lastRegisteredDeviceToken != null) return;
 
           _registrationGracePeriodTimer = Timer(
-            const Duration(seconds: 2),
+            const Duration(seconds: 5),
             () {
               if (_lastAttemptedDeviceToken != null) {
                 Future(() => _registerDeviceToken(_lastAttemptedDeviceToken!));

@@ -55,7 +55,7 @@ void main() {
 
           final l10n = await getL10n();
           fakeConnectivity.emitConnectivityChange([ConnectivityResult.wifi]);
-          await tester.binding.delayed(const Duration(seconds: 2));
+          await tester.binding.delayed(const Duration(seconds: 5));
           await tester.pumpAndSettle();
 
           expect(find.text(l10n.networkDisconnected), findsNothing);
@@ -222,7 +222,7 @@ void main() {
 
               fakeConnectivity
                   .emitConnectivityChange([ConnectivityResult.wifi]);
-              await tester.binding.delayed(const Duration(seconds: 2));
+              await tester.binding.delayed(const Duration(seconds: 5));
               await tester.pumpAndSettle();
 
               expect(fakeMeetingPlaceCoreSDK.tokenRegistrationsAttempts, 2);
