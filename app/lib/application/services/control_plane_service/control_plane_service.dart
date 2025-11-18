@@ -8,7 +8,6 @@ import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/firebase_messaging/push_notifications_handler.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
-import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
@@ -293,7 +292,6 @@ class ControlPlaneService extends _$ControlPlaneService
   /// Throws:
   /// - Propagates exceptions from app badge service or event processing.
   Future<void> _handleAppResumed() async {
-    await ref.read(appBadgeServiceProvider).clearBadge();
     await _processEvents();
   }
 

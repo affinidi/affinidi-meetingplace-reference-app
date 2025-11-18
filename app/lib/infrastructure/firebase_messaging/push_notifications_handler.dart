@@ -8,6 +8,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../configuration/environment.dart';
 import '../loggers/app_logger/app_logger.dart';
+import '../providers/app_badge_provider.dart';
 import '../providers/app_logger_provider.dart';
 import '../providers/push_notification_messaging_provider.dart';
 import '../secure_storage/secure_storage.dart';
@@ -90,6 +91,9 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
         'Push notification data: ${message.data}',
         name: _logKey,
       );
+
+      await ref.read(appBadgeServiceProvider).setBadgeFromMessage(message);
+
       _pushNotificationReceivedController.add(null);
     });
 

@@ -1,17 +1,19 @@
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 
-class FakeAppBadgeService extends AppBadgeService {
-  FakeAppBadgeService({this.badgeCount = 0});
+class FakeAppBadgeService implements AppBadgeService {
+  FakeAppBadgeService({int initialBadgeCount = 0})
+      : _lastBadgeCount = initialBadgeCount;
 
-  int badgeCount;
-
-  @override
-  Future<void> setBadge(int count) async {
-    badgeCount = count;
-  }
+  int _lastBadgeCount;
+  int get lastBadgeCount => _lastBadgeCount;
 
   @override
   Future<void> clearBadge() async {
-    badgeCount = 0;
+    _lastBadgeCount = 0;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
   }
 }
