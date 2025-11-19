@@ -22,24 +22,39 @@ class _ContactAvatar extends ConsumerWidget {
     final isGroupOrDefaultImage =
         displayImage == groupImage || displayImage == defaultProfileImage;
 
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: statusColor, width: 4),
-      ),
-      child: CircleAvatar(
-        radius: iconSize / 2,
-        backgroundColor: isGroupOrDefaultImage ? Colors.white : null,
-        backgroundImage: !isGroupOrDefaultImage ? displayImage : null,
-        child: isGroupOrDefaultImage
-            ? Image(
-                image: displayImage,
-                fit: BoxFit.contain,
-                width: 40,
-                height: 40,
-              )
-            : null,
-      ),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        if (contact.status == ContactStatus.pendingApproval)
+          Positioned(
+            top: isList ? -5 : -5,
+            right: isList ? 0 : -5,
+            child: Icon(
+              Icons.star,
+              color: statusColor,
+              size: isList ? 20 : 24,
+            ),
+          ),
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: statusColor, width: 4),
+          ),
+          child: CircleAvatar(
+            radius: iconSize / 2,
+            backgroundColor: isGroupOrDefaultImage ? Colors.white : null,
+            backgroundImage: !isGroupOrDefaultImage ? displayImage : null,
+            child: isGroupOrDefaultImage
+                ? Image(
+                    image: displayImage,
+                    fit: BoxFit.contain,
+                    width: 40,
+                    height: 40,
+                  )
+                : null,
+          ),
+        ),
+      ],
     );
   }
 }
