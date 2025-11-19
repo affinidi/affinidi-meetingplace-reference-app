@@ -45,6 +45,34 @@ class _ProfilePictures extends ConsumerWidget {
 
     final useWhiteBackgroundForOtherParty = !hasOtherPartyPic;
 
+    if (isGroupChat == true) {
+      return Center(
+        child: _TranslatedPicture(
+          offset: Offset.zero,
+          image: groupImage,
+          backgroundColor: Colors.white,
+          size: _picSize,
+          onPressed: () async {
+            final imageBytes = await controller.getImageBytes(
+              hasOtherPartyPic: false,
+              otherPartyProfilePic: null,
+            );
+            if (!context.mounted) return;
+            await Navigator.of(
+              context,
+              rootNavigator: true,
+            ).push<void>(
+              MaterialPageRoute<void>(
+                builder: (context) => ImageViewScreen(
+                  imageBytes: imageBytes,
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -53,11 +81,7 @@ class _ProfilePictures extends ConsumerWidget {
           image: hasOtherPartyPic
               ? CachedBase64Image(otherPartyProfilePic,
                   cacheManager: cacheManager)
-              : isGroupChat != null
-                  ? isGroupChat
-                      ? groupImage
-                      : defaultProfileImage
-                  : null,
+              : defaultProfileImage,
           backgroundColor:
               useWhiteBackgroundForOtherParty ? Colors.white : null,
           size: _picSize,
