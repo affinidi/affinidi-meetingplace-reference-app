@@ -25,7 +25,7 @@ class _ContactAvatar extends ConsumerWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        if (contact.status == ContactStatus.pendingApproval)
+        if (isGroup && contact.status == ContactStatus.pendingApproval)
           Positioned(
             top: isList ? -5 : -5,
             right: isList ? 0 : -5,
