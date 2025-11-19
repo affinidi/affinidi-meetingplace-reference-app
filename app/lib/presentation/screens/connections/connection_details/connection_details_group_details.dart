@@ -14,8 +14,8 @@ class _GroupDetailsPanel extends ConsumerWidget {
     final email = groupAdminVCard?.email;
     final mobile = groupAdminVCard?.mobile;
 
-    final adminDid = ref.watch(provider
-        .select((state) => state.channel?.otherPartyPermanentChannelDid));
+    final adminDid =
+        ref.watch(provider.select((state) => state.group?.ownerDid));
     final adminDidSha256 = adminDid?.toDidSha256;
 
     final isDebugMode =
