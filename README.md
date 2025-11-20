@@ -257,7 +257,7 @@ To enable push notification, create a [Firebase](https://firebase.google.com/doc
 
 > **NOTE:** Skip other steps, you only need to generate and download the `google-services.json` file.
 
-After downloading and copying the Firebase app files, populate the environment variable from the values found on each files downloaded.
+After setting up the Firebase apps, populate the Firebase-related environment variables that can be found in the Firebase console or in the downloaded files.
 
 ```bash
 # Required for Firebase integration
