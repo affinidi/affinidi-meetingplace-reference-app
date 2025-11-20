@@ -224,7 +224,8 @@ void main() {
   });
 
   group('When opening the app on find offer', () {
-    final location = '/connections/find-offer?identity-id=primary-identity-id';
+    final location =
+        '/connections/find-offer?identity-id=${FakeIdentities.primaryIdentity.id}';
     testWidgets('it shows the find offer screen', (tester) async {
       await navigateToLocation(tester, location, identities: [
         FakeIdentities.primaryIdentity,

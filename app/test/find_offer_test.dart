@@ -95,7 +95,7 @@ void main() {
       });
     });
 
-    group('when passphrase is empty', () {
+    group('and passphrase is empty', () {
       testWidgets('it shows error snackbar when searching', (tester) async {
         final l10n = await getL10n();
         await setupFindOfferTest(tester, location, testIdentity);
@@ -112,7 +112,7 @@ void main() {
       });
     });
 
-    group('when SDK cannot find the offer', () {
+    group('and SDK cannot find the offer', () {
       testWidgets('it shows error snackbar when offer not found',
           (tester) async {
         final l10n = await getL10n();
@@ -147,7 +147,7 @@ void main() {
       });
     });
 
-    group('when SDK successfully finds the offer', () {
+    group('and SDK successfully finds the offer', () {
       testWidgets('it navigates to accept offer screen and shows all details',
           (tester) async {
         final offer = FakeConnectionOffers.testOffer;
