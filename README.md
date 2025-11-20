@@ -192,17 +192,18 @@ melos strings
 
 ## Environment Variables
 
-Most environment variables have sensible defaults defined in the application. You only need to provide values specific to your setup or when you want to override the defaults.
-
-### Required Environment Variables
+The Meeting Place reference app provides a `.example.env` template to populate the required variables and quickly setup the app.
 
 To prepare the env variable, copy the environment file from the template.
 
 ```bash
 mkdir -p configurations && cp templates/.example.env configurations/.env
 ```
-
 > **NOTE:** Execute the command inside the root folder of the reference app.
+
+Most environment variables have sensible defaults defined in the application. You only need to provide values specific to your setup or when you want to override the defaults.
+
+### Required Environment Variables
 
 The following variables **must** be provided in your `configurations/.env` file.
 
