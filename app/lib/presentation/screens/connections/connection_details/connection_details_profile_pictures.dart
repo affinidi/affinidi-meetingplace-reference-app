@@ -29,7 +29,6 @@ class _ProfilePictures extends ConsumerWidget {
         (state) {
           if (isGroupChat == true) {
             final otherPartyPic = state.channel?.otherPartyVCard?.profilePic;
-            // If group admin (no otherPartyVCard), use vCard instead
             return otherPartyPic ?? state.channel?.vCard?.profilePic;
           }
           return state.channel?.vCard?.profilePic;

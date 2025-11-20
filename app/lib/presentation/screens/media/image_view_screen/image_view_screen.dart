@@ -45,13 +45,11 @@ class _ImageViewScreenState extends ConsumerState<ImageViewScreen> {
       var totalBrightness = 0;
       var sampleCount = 0;
 
-      // Sample every 10th pixel for performance
       for (var i = 0; i < pixels.length; i += 40) {
         final r = pixels[i];
         final g = pixels[i + 1];
         final b = pixels[i + 2];
 
-        // Calculate perceived brightness (weighted formula)
         final brightness = 0.299 * r + 0.587 * g + 0.114 * b;
         totalBrightness += brightness.toInt();
         sampleCount++;
@@ -59,8 +57,6 @@ class _ImageViewScreenState extends ConsumerState<ImageViewScreen> {
 
       final avgBrightness = totalBrightness / sampleCount;
 
-      // If average brightness is less than 128 (on 0-255 scale),
-      // use white background
       if (mounted) {
         setState(() {
           _backgroundColor = avgBrightness < 128 ? Colors.white : Colors.black;
