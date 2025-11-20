@@ -18,15 +18,13 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
   - [Affinidi Meeting Place SDK Integration](#affinidi-meeting-place-sdk-integration)
 - [Requirements](#requirements)
 - [Getting started](#getting-started)
-- [Environment variables](#environment-variables)
-  - [Required environment variables](#required-environment-variables)
-  - [Optional environment variables](#optional-environment-variables)
-  - [iOS](#ios)
-  - [Android](#android)
-- [VS Code Configuration](#vs-code-configuration)
+- [Environment Variables](#environment-variables)
+  - [Required Environment Variables](#required-environment-variables)
+  - [Optional Environment Variables](#optional-environment-variables)
+- [VSCode Configuration](#vscode-configuration)
 - [Run App on Simulator](#run-app-on-simulator)
-- [Support \& feedback](#support--feedback)
-  - [Reporting technical issues](#reporting-technical-issues)
+- [Support \& Feedback](#support--feedback)
+  - [Reporting Technical Issues](#reporting-technical-issues)
 - [Contributing](#contributing)
 
 ## Core Concepts
@@ -62,6 +60,7 @@ The reference application showcases the implementation of the Affinidi Meeting P
 Refer to [the documentation](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/) to learn more about Affinidi Meeting Place SDK.
 
 ## Architecture Overview
+
 The architecture is organised into distinct layers, each with specific responsibilities to ensure maintainability, testability, and separation of concerns.
 
 ### Architectural Layers
@@ -167,6 +166,8 @@ Set up your environment to run the Meeting Place application.
 dart pub global activate melos && export PATH="$PATH":"$HOME/.pub-cache/bin"
 ```
 
+> **NOTE:** Add the `export PATH="$PATH":"$HOME/.pub-cache/bin"` into your shell configuration file, like `~/.zshrc` or `~/.bashrc` to apply the new `PATH` permanently into your terminal.
+
 #### Install Dependencies
 
 ```bash
@@ -189,51 +190,90 @@ To generate localised strings from arb files, run the following command in your 
 melos strings
 ```
 
-## Environment variables
+## Environment Variables
+
+The Meeting Place reference app provides a `.example.env` template to populate the required variables and quickly setup the app.
+
+To prepare the env variable, copy the environment file from the template.
+
+```bash
+mkdir -p configurations && cp templates/.example.env configurations/.env
+```
+> **NOTE:** Execute the command inside the root folder of the reference app.
 
 Most environment variables have sensible defaults defined in the application. You only need to provide values specific to your setup or when you want to override the defaults.
 
-### Required environment variables
+### Required Environment Variables
 
 The following variables **must** be provided in your `configurations/.env` file.
 
-#### To Connect to Control Plane API
+#### Connect to Control Plane API
+
+The Control Plane API enables discovery and secure channel creation using DIDComm v2.1. Participants can publish a connection offer or invitation with one of their identities (e.g., gaming persona) for direct or group chat.
+
+To create an instance of Control Plane API locally, follow the guide from the [Control Plane API for Dart](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/deployment-options/control-plane-open-sourced/) open source project.
+
+After setting up the API server, copy the `CONTROL_PLANE_DID` containing the `did:web` value from the env file.
 
 ```bash
 # Required for MeetingPlaceCoreSDK functionality
-# Control Plane DID
+# YourControl Plane DID
 CONTROL_PLANE_DID=""
 ```
 
-To create an instance of Control Plane API locally, follow the guide from the [Control Plane API for Dart](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/deployment-options/control-plane-open-sourced/) GitHub project. After setting up the API server, copy the `CONTROL_PLANE_DID` containing the `did:web` value from the env file.
-
 The `did:web` value can differ depending on your domain hosting the Control Plane API.
 
-#### To Connect to DIDComm Mediator
+#### Connect to DIDComm Mediator
+
+The DIDComm Mediator is a messaging server that routes messages securely between parties, such as individuals, businesses, or AI agents. Mediators cannot access message content.
+
+To create an instance of DIDComm Mediator locally, follow the guide from the [DIDComm Mediator](https://docs.affinidi.com/products/affinidi-messaging/didcomm-mediator/deployment-options/mediator-open-sourced/) open source project.
+
+Setting up DIDComm Mediator generates the Mediator DID that you can use to populate the `DEFAULT_MEDIATOR_DID` env variable.
 
 ```bash
-# Required for MPX SDK core functionality
+# Required for MeetingPlaceCoreSDK functionality
 # Your Mediator DID
 DEFAULT_MEDIATOR_DID=""
 ```
 
-To create an instance of DIDComm Mediator locally, follow the guide from the [DIDComm Mediator](https://docs.affinidi.com/products/affinidi-messaging/didcomm-mediator/deployment-options/mediator-open-sourced/) GitHub project. When setting up the DIDComm Mediator, it generates the Mediator DID that you can use to populate the `DEFAULT_MEDIATOR_DID` env variable.
+#### Enable Push Notifications
 
-#### To Enable Push Notifications
+To enable push notification, create a [Firebase](https://firebase.google.com/docs/projects/learn-more) project. After creating the project, follows the steps below:
+
+##### Firebase iOS App
+
+1. [Create an iOS app](https://firebase.google.com/docs/ios/setup#register-app) from your Firebase project.
+2. Download the `GoogleService-Info.plist` from the iOS app settings.
+3. Copy the downloaded `GoogleService-Info.plist` into the `app/ios/Runner` folder of the Meeting Place reference app.
+
+> **NOTE:** Skip other steps, you only need to generate and download the `GoogleService-Info.plist` file.
+
+##### Firebase Android App
+
+1. [Create an Android app](https://firebase.google.com/docs/android/setup#register-app) from your Firebase project.
+2. Download the `google-services.json` from the iOS app settings.
+3. Copy the downloaded `google-services.json` into the `app/android/app` folder of the Meeting Place reference app.
+
+> **NOTE:** Skip other steps, you only need to generate and download the `google-services.json` file.
+
+After setting up the Firebase apps, populate the Firebase-related environment variables that can be found in the Firebase console or in the downloaded files.
 
 ```bash
 # Required for Firebase integration
-FIREBASE_IOS_APIKEY=""
-FIREBASE_IOS_APP_ID=""
 FIREBASE_MESSAGING_SENDER_ID=""
 FIREBASE_PROJECT_ID=""
 FIREBASE_STORAGE_BUCKET=""
+
+FIREBASE_IOS_APIKEY=""
+FIREBASE_IOS_APP_ID=""
 FIREBASE_IOS_BUNDLE_ID=""
+
 FIREBASE_ANDROID_APIKEY=""
 FIREBASE_ANDROID_APP_ID=""
 ```
 
-### Optional environment variables
+### Optional Environment Variables
 
 The following variables have default values but can be customized:
 
@@ -259,22 +299,15 @@ PROFILE_IMAGE_QUALITY_PERCENT="80"               # Default: 80
 MARKETPLACE_QR_PREFIX=""                         # Default: ""
 ```
 
-> **Note:** You can find all available configuration options and their default values in `lib/infrastructure/configuration/environment.dart`.
+> **NOTE:** You can find all available configuration options and their default values in `lib/infrastructure/configuration/environment.dart`.
 
-### iOS
-
-Make sure to add the configuration file to your iOS project by adding `GoogleService-Info.plist` in the folder `ios/Runner`
-
-### Android
-
-Make sure to add the configuration file to your Android project by adding `google-services.json` in the folder `android/app`
-
-## VS Code Configuration
+## VSCode Configuration
 
 If you are using VS Code as your IDE, you can quickly set up your launch configuration for this project:
 
-1. Copy the template file from `/templates/.example.launch.json`
-2. Paste it into your project’s `.vscode` directory and rename it to `launch.json`
+```bash
+mkdir -p .vscode && cp templates/.example.launch.json .vscode/launch.json
+```
 
 This pre-defined configuration is set up to point to the appropriate environment file for your project. You can further customize this file to add or modify device IDs, change environment files, or extend it to suit your development needs.
 
@@ -282,11 +315,11 @@ This pre-defined configuration is set up to point to the appropriate environment
 
 Refer to Flutter's [Get Started](https://docs.flutter.dev/get-started/install) page to learn more about setting up your environment to run the Flutter application on simulators.
 
-## Support & feedback
+## Support & Feedback
 
 If you face any issues or have suggestions, please don't hesitate to contact us using [this link](https://share.hsforms.com/1i-4HKZRXSsmENzXtPdIG4g8oa2v).
 
-### Reporting technical issues
+### Reporting Technical Issues
 
 If you have a technical issue with the project's codebase, you can also create an issue directly in GitHub.
 
