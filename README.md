@@ -253,7 +253,7 @@ To enable push notification, create a [Firebase](https://firebase.google.com/doc
 
 1. [Create an Android app](https://firebase.google.com/docs/android/setup#register-app) from your Firebase project.
 2. Download the `google-services.json` from the iOS app settings.
-3. Copy the downloaded `google-services.json` into the `app/ios/Runner` folder of the Meeting Place reference app.
+3. Copy the downloaded `google-services.json` into the `app/android/app` folder of the Meeting Place reference app.
 
 > **NOTE:** Skip other steps, you only need to generate and download the `google-services.json` file.
 
