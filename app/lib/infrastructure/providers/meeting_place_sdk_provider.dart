@@ -9,17 +9,8 @@ import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
 import 'group_repository_provider.dart';
+import 'identity_repository_provider.dart';
 
-/// A provider that initializes and supplies the [MeetingPlaceCoreSDK]
-/// instance.
-///
-/// This provider:
-/// - Creates a [PersistentWallet] using [SecureStorage]
-/// - Configures repositories ([ConnectionOfferRepository],
-///   [ChannelRepository], [GroupRepository]) and key repository
-/// - Uses mediator DID from settings and control plane DID from environment
-/// - Provides comprehensive logging throughout the initialization process
-/// - Handles initialization errors gracefully with proper error logging
 final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
   (ref) async {
     const logKey = 'meetingPlaceSdkProvider';
@@ -55,6 +46,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
           channelRepository: await ref.read(channelRepositoryProvider.future),
           groupRepository: await ref.read(groupsRepositoryProvider.future),
           keyRepository: secureStorage,
+          identityRepository: await ref.read(identityRepositoryProvider.future),
         ),
         mediatorDid: initialMediatorDid,
         controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,

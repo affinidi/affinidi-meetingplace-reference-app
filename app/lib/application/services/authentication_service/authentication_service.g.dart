@@ -7,7 +7,7 @@ part of 'authentication_service.dart';
 // **************************************************************************
 
 String _$authenticationServiceHash() =>
-    r'2346147e3fea23c050827b219fffd8cc117e7592';
+    r'426a847f8e51d5a750682960ce41e55ee21f74af';
 
 /// Service responsible for managing authentication state and biometric flows.
 ///

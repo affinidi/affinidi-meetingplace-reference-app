@@ -4,13 +4,13 @@ import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' show Identity;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/connections_service/connections_service.dart';
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../application/services/mediator_service/mediator_service.dart';
 import '../../../../application/services/settings_service/settings_service.dart';
-import '../../../../domain/models/identity/identity.dart';
 import '../../../../domain/models/mediator/mediator_status.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';

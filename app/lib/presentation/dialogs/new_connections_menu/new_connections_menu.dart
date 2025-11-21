@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-
-import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../widgets/bottom_sheet_menu.dart';

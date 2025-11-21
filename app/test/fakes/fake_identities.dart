@@ -1,9 +1,9 @@
-import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
-import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 
 class FakeIdentities {
   static const primaryIdentity = Identity(
     id: 'primary-identity-id',
+    did: 'did:example:primary-identity-id',
     card: ContactCard(
       id: 'primary-identity-id',
       firstName: 'John',
@@ -16,10 +16,12 @@ class FakeIdentities {
 
   static const secondaryIdentity = Identity(
     id: 'secondary-identity-id',
+    did: 'did:example:secondary-identity-id',
     card: ContactCard(
-        id: 'secondary-identity-id',
-        firstName: 'Jane',
-        displayName: 'Jane Doe'),
+      id: 'secondary-identity-id',
+      firstName: 'Jane',
+      displayName: 'Jane Doe',
+    ),
     isPrimary: false,
   );
 }

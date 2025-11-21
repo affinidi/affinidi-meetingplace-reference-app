@@ -1,4 +1,5 @@
-import '../../domain/models/identity/identity.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' show Identity;
+
 import '../../presentation/screens/identities/identities_screen_filter.dart';
 import 'identities_extensions.dart';
 

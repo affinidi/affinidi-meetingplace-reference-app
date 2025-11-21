@@ -1,8 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-
 import '../../../../domain/models/contacts/contact.dart';
-import '../../../../domain/models/identity/identity.dart';
 
 part 'connection_details_screen_state.freezed.dart';
 

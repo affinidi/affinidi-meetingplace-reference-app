@@ -4,8 +4,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    show Identity, MeetingPlaceCoreSDK;
 import 'package:mpx_flutter_reference_app/domain/models/mediator/mediator.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/biometrics/local_auth_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/app_info.dart';
@@ -70,8 +70,8 @@ Future<void> startApp(
       pushNotificationMessagingProvider.overrideWith((ref) =>
           pushNotificationMessaging ?? FakePushNotificationMessaging()),
       groupsRepositoryProvider.overrideWith(groupsRepositoryInMemoryDrift),
-      identitiesRepositoryProvider.overrideWith((ref) async {
-        final repo = await identitiesRepositoryInMemoryDrift(ref);
+      identityRepositoryProvider.overrideWith((ref) async {
+        final repo = await identityRepositoryInMemoryDrift(ref);
         for (final identity in identities) {
           await repo.addIdentity(identity);
         }

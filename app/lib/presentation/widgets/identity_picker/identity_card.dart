@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' show Identity;
 import 'package:pie_menu/pie_menu.dart';
-
-import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/identities_extensions.dart';

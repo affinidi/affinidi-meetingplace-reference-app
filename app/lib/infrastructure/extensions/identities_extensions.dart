@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-
-import '../../domain/models/identity/identity.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' show Identity;
 import '../../l10n/app_localizations.dart';
 import 'contact_card_extensions.dart';
+
+const placeholderIdentityId = 'add-new';
 
 /// Extension methods on [Identity] for handling display properties,
 /// colors, gradients, images, and identity-specific information.

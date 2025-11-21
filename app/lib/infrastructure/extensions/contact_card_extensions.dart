@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
-
-import '../../domain/models/contact_card/contact_card.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    show ContactCard, VCard;
 import '../../presentation/painting/cached_base64_image.dart';
 import '../../presentation/widgets/images/default_profile_image.dart';
 import 'vcard_extensions.dart';

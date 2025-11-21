@@ -21,12 +21,11 @@ import 'infrastructure/providers/chat_repository_provider.dart';
 import 'infrastructure/providers/connection_offer_repository_provider.dart';
 import 'infrastructure/providers/contacts_repository_provider.dart';
 import 'infrastructure/providers/group_repository_provider.dart';
-import 'infrastructure/providers/identities_repository_provider.dart';
+import 'infrastructure/providers/identity_repository_provider.dart';
 import 'infrastructure/providers/mediators_repository_provider.dart';
 import 'infrastructure/providers/push_notification_messaging_provider.dart';
 import 'infrastructure/providers/shared_preferences_provider.dart';
 import 'infrastructure/repositories/contacts_repository/contacts_repository_drift/contacts_repository_drift.dart';
-import 'infrastructure/repositories/identities_repository/identities_repository_drift/identities_repository_drift.dart';
 import 'infrastructure/repositories/mediators_repository/mediators_repository_drift/mediators_repository_drift.dart';
 import 'presentation/app/app.dart';
 
@@ -72,7 +71,7 @@ void main() async {
             .overrideWith(connectionOfferRepositoryDrift),
         contactsRepositoryProvider.overrideWith(contactsRepositoryDrift),
         groupsRepositoryProvider.overrideWith(groupsRepositoryDrift),
-        identitiesRepositoryProvider.overrideWith(identitiesRepositoryDrift),
+        identityRepositoryProvider.overrideWith(identityRepositoryDrift),
         mediatorsRepositoryProvider.overrideWith(mediatorsRepositoryDrift),
         pushNotificationMessagingProvider.overrideWith((ref) =>
             FirebasePushNotificationMessaging(FirebaseMessaging.instance)

@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';

@@ -7,7 +7,7 @@ part of 'accept_offer_screen_controller.dart';
 // **************************************************************************
 
 String _$acceptOfferScreenControllerHash() =>
-    r'a101f9eba9eeed075de638fad344c02ffa58180d';
+    r'90c9518d311761d7a04a4e2c4daa2767e40b013d';
 
 /// Copied from Dart SDK
 class _SystemHash {

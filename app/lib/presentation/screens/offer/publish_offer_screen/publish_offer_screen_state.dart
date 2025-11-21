@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../../domain/models/identity/identity.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'publish_offer_form_data.dart';
 
 part 'publish_offer_screen_state.freezed.dart';

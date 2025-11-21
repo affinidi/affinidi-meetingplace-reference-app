@@ -1,8 +1,8 @@
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    show ConnectionOfferType, Identity;
 
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_mediators.dart';
@@ -29,7 +29,7 @@ void verifyPublishCall(
   Map<String, dynamic> publishCall,
   dynamic l10n, {
   required String offerName,
-  required SDKConnectionOfferType type,
+  required ConnectionOfferType type,
   required String offerDescription,
   String? customPhrase,
   DateTime? validUntil,
@@ -88,10 +88,7 @@ void verifyToggleSwitchStateByKey(
 }
 
 Future<void> tapPublishButton(WidgetTester tester, String buttonText) async {
-  final publishButton = find.widgetWithText(
-    ElevatedButton,
-    buttonText,
-  );
+  final publishButton = find.byKey(const ValueKey('publish_offer_button'));
   expect(publishButton, findsOneWidget);
   await tester.tap(publishButton);
   await tester.pumpAndSettle();
@@ -102,12 +99,14 @@ void verifyPublishButtonState(
   String buttonText, {
   required bool isEnabled,
 }) {
-  final publishButton = find.widgetWithText(
-    ElevatedButton,
-    buttonText,
+  final publishButtonKey = find.byKey(const ValueKey('publish_offer_button'));
+  expect(publishButtonKey, findsOneWidget);
+  final elevatedButtonFinder = find.descendant(
+    of: publishButtonKey,
+    matching: find.byType(ElevatedButton),
   );
-  expect(publishButton, findsOneWidget);
-  final buttonWidget = tester.widget<ElevatedButton>(publishButton);
+  expect(elevatedButtonFinder, findsOneWidget);
+  final buttonWidget = tester.widget<ElevatedButton>(elevatedButtonFinder);
   if (isEnabled) {
     expect(buttonWidget.onPressed, isNotNull);
   } else {
@@ -201,7 +200,8 @@ void main() {
     testWidgets('it publishes the invitation with default settings',
         (tester) async {
       final l10n = await getL10n();
-      final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+      final fakeMeetingPlaceCoreSDK =
+          FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
       await setupPublishOfferTest(
         tester,
@@ -220,7 +220,7 @@ void main() {
 
       expect(publishCall['offerName'],
           l10n.connectWithFirstName(testIdentity.card.firstName));
-      expect(publishCall['type'], SDKConnectionOfferType.invitation);
+      expect(publishCall['type'], ConnectionOfferType.meetingPlaceInvitation);
       expect(publishCall['offerDescription'], l10n.passphraseDescription);
       expect(publishCall['customPhrase'], isNull); // Random phrase enabled
       expect(publishCall['validUntil'], isNull); // No expiry set
@@ -233,7 +233,8 @@ void main() {
     group('and group chat is enabled', () {
       testWidgets('it publishes the invitation as group chat', (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK =
+            FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
         await setupPublishOfferTest(
           tester,
@@ -263,7 +264,7 @@ void main() {
           publishCall,
           l10n,
           offerName: l10n.firstNameChatGroup(testIdentity.card.firstName),
-          type: SDKConnectionOfferType.groupInvitation,
+          type: ConnectionOfferType.meetingPlaceOutreachInvitation,
           offerDescription: l10n.passphraseDescription,
           customPhrase: null,
           validUntil: null,
@@ -277,7 +278,8 @@ void main() {
     group('and generate a random phrase is disabled', () {
       testWidgets('it disables the publish button', (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK =
+            FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
         await setupPublishOfferTest(
           tester,
@@ -306,6 +308,7 @@ void main() {
           final l10n = await getL10n();
           final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
             isPhraseAvailable: true,
+            initialIdentities: [testIdentity],
           );
           const customPhrase = 'my-unique-custom-phrase';
 
@@ -342,7 +345,8 @@ void main() {
 
           expect(publishCall['offerName'],
               l10n.connectWithFirstName(testIdentity.card.firstName));
-          expect(publishCall['type'], SDKConnectionOfferType.invitation);
+          expect(
+              publishCall['type'], ConnectionOfferType.meetingPlaceInvitation);
           expect(publishCall['offerDescription'], l10n.passphraseDescription);
           expect(publishCall['customPhrase'], customPhrase);
           expect(publishCall['validUntil'], isNull);
@@ -358,6 +362,7 @@ void main() {
             final l10n = await getL10n();
             final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
               isPhraseAvailable: true,
+              initialIdentities: [testIdentity],
             );
             const customPhrase = 'my-unique-custom-phrase';
 
@@ -393,7 +398,7 @@ void main() {
               publishCall,
               l10n,
               offerName: l10n.connectWithFirstName(testIdentity.card.firstName),
-              type: SDKConnectionOfferType.invitation,
+              type: ConnectionOfferType.meetingPlaceInvitation,
               offerDescription: l10n.passphraseDescription,
               customPhrase: null,
               validUntil: null,
@@ -410,6 +415,7 @@ void main() {
             final l10n = await getL10n();
             final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
               isPhraseAvailable: false,
+              initialIdentities: [testIdentity],
             );
             const customPhrase = 'already-taken-phrase';
 
@@ -448,6 +454,7 @@ void main() {
             final l10n = await getL10n();
             final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
               isPhraseAvailable: true,
+              initialIdentities: [testIdentity],
             );
             const customPhrase = 'validating-phrase';
 
@@ -485,7 +492,8 @@ void main() {
       testWidgets('it publishes the invitation with new headline',
           (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK =
+            FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
         await setupPublishOfferTest(
           tester,
@@ -518,7 +526,7 @@ void main() {
           publishCall,
           l10n,
           offerName: 'New Custom Headline',
-          type: SDKConnectionOfferType.invitation,
+          type: ConnectionOfferType.meetingPlaceInvitation,
           offerDescription: l10n.passphraseDescription,
           customPhrase: null,
           validUntil: null,
@@ -533,7 +541,8 @@ void main() {
       testWidgets('it publishes the invitation with new description',
           (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK =
+            FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
         await setupPublishOfferTest(
           tester,
@@ -567,7 +576,7 @@ void main() {
           publishCall,
           l10n,
           offerName: l10n.connectWithFirstName(testIdentity.card.firstName),
-          type: SDKConnectionOfferType.invitation,
+          type: ConnectionOfferType.meetingPlaceInvitation,
           offerDescription: 'This is a custom description for my offer',
           customPhrase: null,
           validUntil: null,
@@ -582,7 +591,8 @@ void main() {
       testWidgets('it publishes the invitation with expiry date',
           (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK =
+            FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
         const defaultExpiryDays = 3;
 
         await setupPublishOfferTest(
@@ -605,7 +615,7 @@ void main() {
 
         expect(publishCall['offerName'],
             l10n.connectWithFirstName(testIdentity.card.firstName));
-        expect(publishCall['type'], SDKConnectionOfferType.invitation);
+        expect(publishCall['type'], ConnectionOfferType.meetingPlaceInvitation);
         expect(publishCall['offerDescription'], l10n.passphraseDescription);
         expect(publishCall['customPhrase'], isNull);
 
@@ -623,9 +633,83 @@ void main() {
 
       group('and change the expiry date', () {
         testWidgets('it publishes with the new expiry date', (tester) async {
-          await withClock(Clock.fixed(DateTime(2026, 6, 15)), () async {
+          final l10n = await getL10n();
+          final fakeMeetingPlaceCoreSDK =
+              FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
+
+          await setupPublishOfferTest(
+            tester,
+            location,
+            testIdentity,
+            fakeSdk: fakeMeetingPlaceCoreSDK,
+          );
+
+          // Turn on the expiry switch using key
+          await tapToggleSwitchByKey(
+              tester, 'set_expiry_switch_${testIdentity.id}',
+              ensureVisible: true);
+
+          // Verify the "Change" button appears for the expiry date picker
+          // The FormRowPicker with Change button should now be visible
+          final changeButtons = find.text(l10n.changeButton);
+
+          // Should find at least one Change button (for expiry date picker)
+          expect(changeButtons, findsWidgets);
+
+          // Verify the expiry date helper text appears
+          final expiryHelperText = find.text(l10n.selectExpiryHelperText);
+          expect(expiryHelperText, findsOneWidget);
+
+          // Tap the first Change button (for expiry date)
+          await tester.tap(changeButtons.first);
+          await tester.pumpAndSettle();
+
+          // Select a date 5 days from now in the date picker
+          final newExpiryDate = DateTime.now().add(const Duration(days: 5));
+          await tester.tap(find.text(newExpiryDate.day.toString()));
+          await tester.pumpAndSettle();
+
+          // Tap OK button on date picker
+          await tester.tap(find.text('OK'));
+          await tester.pumpAndSettle();
+
+          // Time picker should now appear - tap OK to accept default time
+          await tester.tap(find.text('OK'));
+          await tester.pumpAndSettle();
+
+          // Tap the publish button
+          await tapPublishButton(tester, l10n.publishToMeetingPlace);
+
+          // Verify SDK was called with updated expiry date
+          expect(fakeMeetingPlaceCoreSDK.publishOfferCalls, hasLength(1));
+          final publishCall = fakeMeetingPlaceCoreSDK.publishOfferCalls.first;
+
+          expect(publishCall['offerName'],
+              l10n.connectWithFirstName(testIdentity.card.firstName));
+          expect(
+              publishCall['type'], ConnectionOfferType.meetingPlaceInvitation);
+          expect(publishCall['offerDescription'], l10n.passphraseDescription);
+          expect(publishCall['customPhrase'], isNull);
+
+          // Verify the expiry date is approximately 5 days from now
+          final validUntil = publishCall['validUntil'] as DateTime;
+          final expectedExpiry = DateTime.now().add(const Duration(days: 5));
+          final difference = validUntil.difference(expectedExpiry).abs();
+          expect(difference.inMinutes < 5, true);
+
+          expect(publishCall['maximumUsage'], isNull);
+          expect(publishCall['mediatorDid'],
+              FakeMediators.defaultMediator.mediatorDid);
+          expect(publishCall['externalRef'], testIdentity.id);
+        });
+
+        group('and switch back to no expiry', () {
+          testWidgets(
+              'it publishes without expiry after changing date then switching'
+              ' back', (tester) async {
             final l10n = await getL10n();
-            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+            final fakeMeetingPlaceCoreSDK =
+                FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
             const expireAfterDays = 5;
 
             await setupPublishOfferTest(
@@ -669,7 +753,8 @@ void main() {
 
             expect(publishCall['offerName'],
                 l10n.connectWithFirstName(testIdentity.card.firstName));
-            expect(publishCall['type'], SDKConnectionOfferType.invitation);
+            expect(publishCall['type'],
+                ConnectionOfferType.meetingPlaceInvitation);
             expect(publishCall['offerDescription'], l10n.passphraseDescription);
             expect(publishCall['customPhrase'], isNull);
 
@@ -692,7 +777,8 @@ void main() {
               ' back', (tester) async {
             await withClock(Clock.fixed(DateTime(2026, 6, 15)), () async {
               final l10n = await getL10n();
-              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+              final fakeMeetingPlaceCoreSDK =
+                  FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
               await setupPublishOfferTest(
                 tester,
@@ -736,7 +822,7 @@ void main() {
                 l10n,
                 offerName:
                     l10n.connectWithFirstName(testIdentity.card.firstName),
-                type: SDKConnectionOfferType.invitation,
+                type: ConnectionOfferType.meetingPlaceInvitation,
                 offerDescription: l10n.passphraseDescription,
                 customPhrase: null,
                 validUntil: null,
@@ -754,7 +840,8 @@ void main() {
       testWidgets('it publishes with default maximum usage of 3',
           (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK =
+            FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
         await setupPublishOfferTest(
           tester,
@@ -778,7 +865,7 @@ void main() {
           publishCall,
           l10n,
           offerName: l10n.connectWithFirstName(testIdentity.card.firstName),
-          type: SDKConnectionOfferType.invitation,
+          type: ConnectionOfferType.meetingPlaceInvitation,
           offerDescription: l10n.passphraseDescription,
           customPhrase: null,
           validUntil: null,
@@ -792,7 +879,8 @@ void main() {
         testWidgets('it publishes with the new maximum usage of 5',
             (tester) async {
           final l10n = await getL10n();
-          final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+          final fakeMeetingPlaceCoreSDK =
+              FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
           await setupPublishOfferTest(
             tester,
@@ -830,7 +918,7 @@ void main() {
             publishCall,
             l10n,
             offerName: l10n.connectWithFirstName(testIdentity.card.firstName),
-            type: SDKConnectionOfferType.invitation,
+            type: ConnectionOfferType.meetingPlaceInvitation,
             offerDescription: l10n.passphraseDescription,
             customPhrase: null,
             validUntil: null,
@@ -845,7 +933,8 @@ void main() {
               'it publishes with default limit after changing usage then '
               'switching back', (tester) async {
             final l10n = await getL10n();
-            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+            final fakeMeetingPlaceCoreSDK =
+                FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
             await setupPublishOfferTest(
               tester,
@@ -891,7 +980,7 @@ void main() {
               publishCall,
               l10n,
               offerName: l10n.connectWithFirstName(testIdentity.card.firstName),
-              type: SDKConnectionOfferType.invitation,
+              type: ConnectionOfferType.meetingPlaceInvitation,
               offerDescription: l10n.passphraseDescription,
               customPhrase: null,
               validUntil: null,
@@ -907,7 +996,8 @@ void main() {
     group('and change the mediator', () {
       testWidgets('it publishes with the new mediator', (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK =
+            FakeMeetingPlaceSDK(initialIdentities: [testIdentity]);
 
         await setupPublishOfferTest(
           tester,
@@ -942,7 +1032,7 @@ void main() {
           publishCall,
           l10n,
           offerName: l10n.connectWithFirstName(testIdentity.card.firstName),
-          type: SDKConnectionOfferType.invitation,
+          type: ConnectionOfferType.meetingPlaceInvitation,
           offerDescription: l10n.passphraseDescription,
           customPhrase: null,
           validUntil: null,

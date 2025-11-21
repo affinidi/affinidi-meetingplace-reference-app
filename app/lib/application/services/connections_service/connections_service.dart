@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -253,8 +252,8 @@ class ConnectionsService extends _$ConnectionsService {
     await sdk.acceptOffer(
       connectionOffer: connectionOffer,
       vCard: identity.card.toVCard(),
-      externalRef: identity.id,
       senderInfo: identity.card.firstName,
+      externalRef: identity.id,
     );
     await fetchConnections();
   }

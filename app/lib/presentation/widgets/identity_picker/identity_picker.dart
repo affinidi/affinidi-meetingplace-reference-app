@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-
-import '../../../domain/models/identity/identity.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' show Identity;
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/identities_extensions.dart';
 import '../swipeable_cards.dart';

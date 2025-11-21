@@ -1,9 +1,10 @@
 import 'package:collection/collection.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    show ContactCard, Identity;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../application/services/identities_service/identities_service.dart';
-import '../../../domain/models/contact_card/contact_card.dart';
-import '../../../domain/models/identity/identity.dart';
+import '../../../infrastructure/extensions/identities_extensions.dart';
 import '../../../infrastructure/extensions/identities_screen_filter_extensions.dart';
 import 'identities_screen_filter.dart';
 import 'identities_screen_state.dart';
@@ -14,9 +15,14 @@ part 'identities_screen_controller.g.dart';
 class IdentitiesScreenController extends _$IdentitiesScreenController {
   String _lastSearchQuery = '';
   IdentitiesScreenFilter _currentFilter = IdentitiesScreenFilter.all;
-  late final createNewIdentityPlaceholder = Identity(
+  late final createNewIdentityPlaceholder = const Identity(
     id: placeholderIdentityId,
-    card: ContactCard.empty(),
+    did: '',
+    card: ContactCard(
+      id: placeholderIdentityId,
+      firstName: '',
+      displayName: '',
+    ),
   );
 
   @override

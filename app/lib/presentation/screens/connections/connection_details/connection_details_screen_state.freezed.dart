@@ -40,13 +40,13 @@ mixin _$ConnectionDetailsScreenState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ConnectionDetailsScreenState &&
-            (identical(other.contact, contact) || other.contact == contact) &&
+            const DeepCollectionEquality().equals(other.contact, contact) &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.connection, connection) ||
-                other.connection == connection) &&
+            const DeepCollectionEquality()
+                .equals(other.connection, connection) &&
             (identical(other.identity, identity) ||
                 other.identity == identity) &&
-            (identical(other.group, group) || other.group == group) &&
+            const DeepCollectionEquality().equals(other.group, group) &&
             (identical(other.showDeletedMembers, showDeletedMembers) ||
                 other.showDeletedMembers == showDeletedMembers) &&
             (identical(other.mediatorName, mediatorName) ||
@@ -64,11 +64,11 @@ mixin _$ConnectionDetailsScreenState {
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      contact,
+      const DeepCollectionEquality().hash(contact),
       channel,
-      connection,
+      const DeepCollectionEquality().hash(connection),
       identity,
-      group,
+      const DeepCollectionEquality().hash(group),
       showDeletedMembers,
       mediatorName,
       isDebugMode,
@@ -479,13 +479,13 @@ class _ConnectionDetailsScreenState extends ConnectionDetailsScreenState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _ConnectionDetailsScreenState &&
-            (identical(other.contact, contact) || other.contact == contact) &&
+            const DeepCollectionEquality().equals(other.contact, contact) &&
             (identical(other.channel, channel) || other.channel == channel) &&
-            (identical(other.connection, connection) ||
-                other.connection == connection) &&
+            const DeepCollectionEquality()
+                .equals(other.connection, connection) &&
             (identical(other.identity, identity) ||
                 other.identity == identity) &&
-            (identical(other.group, group) || other.group == group) &&
+            const DeepCollectionEquality().equals(other.group, group) &&
             (identical(other.showDeletedMembers, showDeletedMembers) ||
                 other.showDeletedMembers == showDeletedMembers) &&
             (identical(other.mediatorName, mediatorName) ||
@@ -503,11 +503,11 @@ class _ConnectionDetailsScreenState extends ConnectionDetailsScreenState {
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      contact,
+      const DeepCollectionEquality().hash(contact),
       channel,
-      connection,
+      const DeepCollectionEquality().hash(connection),
       identity,
-      group,
+      const DeepCollectionEquality().hash(group),
       showDeletedMembers,
       mediatorName,
       isDebugMode,

@@ -1,7 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-
-import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/mediator/mediator.dart';
 import 'connections_screen_filter.dart';
 

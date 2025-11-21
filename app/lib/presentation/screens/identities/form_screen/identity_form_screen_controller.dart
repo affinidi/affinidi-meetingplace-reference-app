@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    show ContactCard, Identity;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../application/services/identities_service/identities_service.dart';
-import '../../../../domain/models/contact_card/contact_card.dart';
-import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../validators/input_validators.dart';
@@ -54,6 +54,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     return Identity(
       id: uuid.v4(),
+      did: '',
       card: newCard,
     );
   }

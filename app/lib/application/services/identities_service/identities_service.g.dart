@@ -6,20 +6,9 @@ part of 'identities_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$identitiesServiceHash() => r'd93b8ddc2e7ea4fcb3231195b8427833bad18425';
+String _$identitiesServiceHash() => r'96239f014a8309f1106359a07ac1caefb3614191';
 
-/// Service responsible for managing identities and the current contact card.
-///
-/// This service provides functionality to:
-/// - Load and persist identities via a repository
-/// - Add, update and delete identities
-/// - Resolve and manage the currently selected identity
-/// - Expose the current contact card derived from the selected identity
-///
-/// The service initializes by loading identities and keeps the current identity
-/// in sync with environment defaults and repository state.
-///
-/// Copied from [IdentitiesService].
+/// See also [IdentitiesService].
 @ProviderFor(IdentitiesService)
 final identitiesServiceProvider =
     NotifierProvider<IdentitiesService, IdentitiesServiceState>.internal(

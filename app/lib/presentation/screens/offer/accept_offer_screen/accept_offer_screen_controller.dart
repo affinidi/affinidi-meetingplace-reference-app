@@ -1,8 +1,8 @@
+import 'package:meeting_place_core/meeting_place_core.dart' show Identity;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/connections_service/connections_service.dart';
 import '../../../../application/services/identities_service/identities_service.dart';
-import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../navigation/navigator.dart';
