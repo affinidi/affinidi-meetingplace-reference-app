@@ -128,25 +128,19 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>({
     required T connectionOffer,
     required VCard vCard,
+    required String senderInfo,
     String? externalRef,
   }) async {
     // Record the call parameters
     _acceptOfferCalls.add({
       'connectionOffer': connectionOffer,
       'vCard': vCard,
+      'senderInfo': senderInfo,
       'externalRef': externalRef,
     });
 
     // Return a fake result with the accepted connection offer
     return _FakeAcceptOfferResult<T>(connectionOffer: connectionOffer);
-  }
-
-  @override
-  Future<void> notifyAcceptance({
-    required ConnectionOffer connectionOffer,
-    required String senderInfo,
-  }) async {
-    // No-op for fake
   }
 
   @override
