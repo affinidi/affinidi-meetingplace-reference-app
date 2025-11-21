@@ -112,9 +112,8 @@ class _ProfilePictures extends ConsumerWidget {
           size: _picSize,
           onPressed: () async {
             final imageBytes = await controller.getImageBytes(
-                hasOtherPartyPic: true,
-                otherPartyProfilePic:
-                    hasMyPic ? myProfilePic : defaultProfileBase64);
+                hasOtherPartyPic: !hasMyPic,
+                otherPartyProfilePic: hasMyPic ? myProfilePic : null);
 
             if (!context.mounted) return;
 

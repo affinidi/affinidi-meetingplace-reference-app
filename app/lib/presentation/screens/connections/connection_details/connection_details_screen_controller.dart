@@ -222,13 +222,20 @@ class ConnectionDetailsScreenController
     required bool hasOtherPartyPic,
     required String? otherPartyProfilePic,
   }) async {
-    final base64Image = (hasOtherPartyPic && otherPartyProfilePic != null)
-        ? otherPartyProfilePic
-        : state.isGroupChat
-            ? defaultGroupImageBase64
-            : defaultProfileBase64;
+    if (hasOtherPartyPic && otherPartyProfilePic != null) {
+      return base64Decode(otherPartyProfilePic);
+    }
 
-    final bytes = base64Decode(base64Image);
+    final assetImage = state.isGroupChat ? groupImage : defaultProfileImage;
+
+    final bundle = assetImage.bundle ??
+        DefaultAssetBundle.of(
+          WidgetsBinding.instance.rootElement!,
+        );
+
+    final bytes = await bundle
+        .load(assetImage.keyName)
+        .then((data) => data.buffer.asUint8List());
 
     return bytes;
   }
