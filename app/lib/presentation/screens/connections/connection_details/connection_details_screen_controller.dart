@@ -13,7 +13,6 @@ import '../../../../application/services/mediator_service/mediator_service.dart'
 import '../../../../application/services/settings_service/settings_service.dart';
 import '../../../../domain/models/contacts/contact.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
-import '../../../../domain/models/contacts/contact_type.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../infrastructure/extensions/vcard_extensions.dart';
@@ -311,7 +310,7 @@ extension ConnectionDetailsScreenControllerProviderSelector
 
 extension _ConnectionDetailsScreenStateExtensions
     on ConnectionDetailsScreenState {
-  bool get isGroupChat => contact?.type == ContactType.group;
+  bool get isGroupChat => contact?.isGroup ?? false;
 
   bool get canRevealMnemonic => connection?.ownedByMe ?? false;
 }

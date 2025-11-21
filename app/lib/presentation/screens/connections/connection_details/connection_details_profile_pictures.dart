@@ -7,127 +7,95 @@ class _ProfilePictures extends ConsumerWidget {
 
   static final double _picSize = 150.0;
 
+  Future<void> _navigateToImageView(
+    BuildContext context,
+    Future<Uint8List> imageBytesFuture,
+  ) async {
+    final imageBytes = await imageBytesFuture;
+    if (!context.mounted) return;
+    await Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute<void>(
+        builder: (context) => ImageViewScreen(imageBytes: imageBytes),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(contactId);
     final cacheManager = ref.read(cacheManagerProvider);
-    final otherPartyProfilePic = ref.watch(
-      provider.select(
-        (state) => state.channel?.otherPartyVCard?.profilePic,
-      ),
-    );
     final controller = ref.read(provider.notifier);
 
-    final isGroupChat = ref.read(
-      provider.select(
-        (state) => state.channel?.isGroup,
-      ),
+    final contact = ref.watch(
+      provider.select((state) => state.contact),
     );
+    final isGroupChat = contact?.isGroup ?? false;
 
-    final myProfilePic = ref.watch(
-      provider.select(
-        (state) {
-          if (isGroupChat == true) {
-            final otherPartyPic = state.channel?.otherPartyVCard?.profilePic;
-            return otherPartyPic ?? state.channel?.vCard?.profilePic;
-          }
-          return state.channel?.vCard?.profilePic;
-        },
-      ),
-    );
-
-    final hasOtherPartyPic = isGroupChat != null &&
-        !isGroupChat &&
-        otherPartyProfilePic != null &&
-        otherPartyProfilePic.isNotEmpty;
-    final hasMyPic = myProfilePic != null && myProfilePic.isNotEmpty;
-
-    final useWhiteBackgroundForOtherParty = !hasOtherPartyPic;
-
-    if (isGroupChat == true) {
+    // For group chats, display only the group image
+    if (isGroupChat) {
       return Center(
         child: _TranslatedPicture(
           offset: Offset.zero,
-          image: groupImage,
           backgroundColor: Colors.white,
           size: _picSize,
-          onPressed: () async {
-            final imageBytes = await controller.getImageBytes(
+          child: _DefaultImage(image: groupImage),
+          onPressed: () => _navigateToImageView(
+            context,
+            controller.getImageBytes(
               hasOtherPartyPic: false,
               otherPartyProfilePic: null,
-            );
-            if (!context.mounted) return;
-            await Navigator.of(
-              context,
-              rootNavigator: true,
-            ).push<void>(
-              MaterialPageRoute<void>(
-                builder: (context) => ImageViewScreen(
-                  imageBytes: imageBytes,
-                ),
-              ),
-            );
-          },
+            ),
+          ),
         ),
       );
     }
+
+    final channel = ref.watch(
+      provider.select((state) => state.channel),
+    );
+
+    final hasOtherPartyPic = channel?.hasOtherPartyProfilePic ?? false;
+    final hasMyPic = channel?.hasMyProfilePic ?? false;
+
+    final otherPartyImage =
+        channel?.otherPartyImage(cacheManager: cacheManager) ??
+            defaultProfileImage;
+    final myImage =
+        channel?.myImage(cacheManager: cacheManager) ?? defaultProfileImage;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _TranslatedPicture(
           offset: const Offset(30, 0),
-          image: hasOtherPartyPic
-              ? CachedBase64Image(otherPartyProfilePic,
-                  cacheManager: cacheManager)
-              : defaultProfileImage,
-          backgroundColor:
-              useWhiteBackgroundForOtherParty ? Colors.white : null,
+          backgroundColor: hasOtherPartyPic ? null : Colors.white,
+          backgroundImage: hasOtherPartyPic ? otherPartyImage : null,
+          child:
+              hasOtherPartyPic ? null : _DefaultImage(image: otherPartyImage),
           size: _picSize,
-          onPressed: () async {
-            final imageBytes = await controller.getImageBytes(
-                hasOtherPartyPic: hasOtherPartyPic,
-                otherPartyProfilePic: otherPartyProfilePic);
-
-            if (!context.mounted) return;
-
-            unawaited(Navigator.of(
+          onPressed: () => unawaited(
+            _navigateToImageView(
               context,
-              rootNavigator: true,
-            ).push(
-              MaterialPageRoute(
-                builder: (context) => ImageViewScreen(
-                  imageBytes: imageBytes,
-                ),
+              controller.getImageBytes(
+                hasOtherPartyPic: hasOtherPartyPic,
+                otherPartyProfilePic: channel?.otherPartyVCard?.profilePic,
               ),
-            ));
-          },
+            ),
+          ),
         ),
         _TranslatedPicture(
           offset: const Offset(-30, 0),
-          image: hasMyPic
-              ? CachedBase64Image(myProfilePic, cacheManager: cacheManager)
-              : defaultProfileImage,
-          backgroundColor: !hasMyPic ? Colors.white : null,
+          backgroundColor: hasMyPic ? null : Colors.white,
+          backgroundImage: hasMyPic ? myImage : null,
+          child: hasMyPic ? null : _DefaultImage(image: myImage),
           size: _picSize,
-          onPressed: () async {
-            final imageBytes = await controller.getImageBytes(
-                hasOtherPartyPic: !hasMyPic,
-                otherPartyProfilePic: hasMyPic ? myProfilePic : null);
-
-            if (!context.mounted) return;
-
-            await Navigator.of(
-              context,
-              rootNavigator: true,
-            ).push<MediaReviewResult>(
-              MaterialPageRoute(
-                builder: (context) => ImageViewScreen(
-                  imageBytes: imageBytes,
-                ),
-              ),
-            );
-          },
+          onPressed: () => _navigateToImageView(
+            context,
+            controller.getImageBytes(
+              hasOtherPartyPic: hasMyPic,
+              otherPartyProfilePic: channel?.vCard?.profilePic,
+            ),
+          ),
         ),
       ],
     );
@@ -136,24 +104,23 @@ class _ProfilePictures extends ConsumerWidget {
 
 class _TranslatedPicture extends StatelessWidget {
   const _TranslatedPicture({
-    required this.image,
     required this.size,
     required this.offset,
     this.onPressed,
     this.backgroundColor,
+    this.backgroundImage,
+    this.child,
   });
 
-  final ImageProvider<Object>? image;
   final double size;
   final Offset offset;
   final VoidCallback? onPressed;
   final Color? backgroundColor;
+  final ImageProvider<Object>? backgroundImage;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
-    final isGroupOrDefaultImage =
-        image == groupImage || image == defaultProfileImage;
-
     return Transform.translate(
       offset: offset,
       child: Container(
@@ -169,20 +136,31 @@ class _TranslatedPicture extends StatelessWidget {
         child: GestureDetector(
           onTap: onPressed,
           child: CircleAvatar(
-            radius: size / 2, // match size dynamically
+            radius: size / 2,
             backgroundColor: backgroundColor,
-            backgroundImage: isGroupOrDefaultImage ? null : image,
-            child: isGroupOrDefaultImage && image != null
-                ? Image(
-                    image: image!,
-                    fit: BoxFit.contain,
-                    width: 80,
-                    height: 80,
-                  )
-                : null,
+            backgroundImage: backgroundImage,
+            child: child,
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DefaultImage extends StatelessWidget {
+  const _DefaultImage({required this.image});
+
+  final ImageProvider<Object> image;
+
+  static const double _defaultImageSize = 80.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image(
+      image: image,
+      fit: BoxFit.contain,
+      width: _defaultImageSize,
+      height: _defaultImageSize,
     );
   }
 }

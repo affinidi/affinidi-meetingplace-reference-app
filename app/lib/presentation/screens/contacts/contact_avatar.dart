@@ -11,21 +11,17 @@ class _ContactAvatar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vCard = contact.vCard;
     final statusColor = contact.getStatusColor(context, asAvatar: true);
     final iconSize = 70.0;
     final cacheManager = ref.read(cacheManagerProvider);
-    final isGroup = contact.type == ContactType.group;
 
-    final displayImage =
-        isGroup ? groupImage : vCard.image(cacheManager: cacheManager);
-    final isGroupOrDefaultImage =
-        displayImage == groupImage || displayImage == defaultProfileImage;
+    final displayImage = contact.image(cacheManager: cacheManager);
+    final isGroupOrDefaultImage = contact.hasDefaultImage;
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        if (isGroup && contact.status == ContactStatus.pendingApproval)
+        if (contact.isGroup && contact.status == ContactStatus.pendingApproval)
           Positioned(
             top: isList ? -5 : -5,
             right: isList ? 0 : -5,

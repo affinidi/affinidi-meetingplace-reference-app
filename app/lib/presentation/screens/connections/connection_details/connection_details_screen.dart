@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -6,12 +7,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../../infrastructure/extensions/channel_extensions.dart';
 import '../../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../../infrastructure/extensions/date_time_extensions.dart';
 import '../../../../infrastructure/extensions/did_extensions.dart';
 import '../../../../infrastructure/extensions/vcard_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
-import '../../../painting/cached_base64_image.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/buttons/elevated_loading_button.dart';
 import '../../../widgets/form_rows/form_card.dart';
@@ -23,7 +24,6 @@ import '../../../widgets/images/group_image.dart';
 import '../../../widgets/mnemonic_pill.dart';
 import '../../../widgets/qr/qr_code_view.dart';
 import '../../media/image_view_screen/image_view_screen.dart';
-import '../../media/media_screen/media_screen.dart';
 import 'connection_details_screen_controller.dart';
 
 part 'connection_details_actions_bar.dart';
