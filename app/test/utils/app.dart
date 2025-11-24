@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/mediator/mediator.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/biometrics/local_auth_provider.dart';
@@ -22,7 +24,10 @@ import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 
 import '../fakes/fake_app_badge_service.dart';
 import '../fakes/fake_cache_manager.dart';
+import '../fakes/fake_channels.dart';
+import '../fakes/fake_chat_repository.dart';
 import '../fakes/fake_connectivity.dart';
+import '../fakes/fake_contacts_service.dart';
 import '../fakes/fake_environment.dart';
 import '../fakes/fake_local_authentication.dart';
 import '../fakes/fake_meeting_place_sdk.dart';
@@ -41,6 +46,7 @@ Future<void> startApp(
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
   required List<Identity> identities,
   required List<Mediator> mediators,
+  List<Contact> contacts = const [],
   SecureStorage? secureStorage,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -59,13 +65,26 @@ Future<void> startApp(
       localAuthProvider.overrideWith(
           (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated)),
       cacheManagerProvider.overrideWith((ref) => FakeCacheManager()),
+      chatRepositoryProvider.overrideWith((ref) async => FakeChatRepository()),
       environmentProvider.overrideWithValue(FakeEnvironment()),
       channelRepositoryProvider.overrideWith(channelRepositoryInMemoryDrift),
       connectionOfferRepositoryProvider
           .overrideWith(connectionOfferRepositoryInMemoryDrift),
       connectivityProvider
           .overrideWith((ref) => connectivity ?? FakeConnectivity()),
-      contactsRepositoryProvider.overrideWith(contactsRepositoryInMemoryDrift),
+      contactsRepositoryProvider.overrideWith((ref) async {
+        final repo = await contactsRepositoryInMemoryDrift(ref);
+        // Add all contacts and wait for them to be persisted
+        for (final contact in contacts) {
+          await repo.addContact(contact);
+        }
+        // Give a small delay to ensure all database operations complete
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        return repo;
+      }),
+      if (contacts.isNotEmpty)
+        contactsServiceProvider
+            .overrideWith(() => FakeContactsService(contacts)),
       environmentProvider.overrideWith((ref) => FakeEnvironment()),
       pushNotificationMessagingProvider.overrideWith((ref) =>
           pushNotificationMessaging ?? FakePushNotificationMessaging()),
@@ -87,8 +106,11 @@ Future<void> startApp(
         }
         return repo;
       }),
-      meetingPlaceSdkProvider
-          .overrideWith((ref) => meetingPlaceCoreSDK ?? FakeMeetingPlaceSDK()),
+      meetingPlaceSdkProvider.overrideWith((ref) =>
+          meetingPlaceCoreSDK ??
+          FakeMeetingPlaceSDK(
+            channels: contacts.isNotEmpty ? FakeChannels.allChannels : null,
+          )),
       secureStorageProvider
           .overrideWith((ref) async => secureStorage ?? FakeSecureStorage()),
       sharedPreferencesProvider.overrideWithValue(sharedPreferences),
@@ -109,6 +131,7 @@ Future<void> navigateToLocation(
   bool alreadyOnboarded = true,
   List<Identity> identities = const [],
   List<Mediator> mediators = const [],
+  List<Contact> contacts = const [],
   PushNotificationMessaging? pushNotificationMessaging,
   Connectivity? connectivity,
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
@@ -124,6 +147,7 @@ Future<void> navigateToLocation(
     meetingPlaceCoreSDK: meetingPlaceCoreSDK,
     secureStorage: secureStorage,
     mediators: mediators,
+    contacts: contacts,
   );
 
   await tester.pumpAndSettle();

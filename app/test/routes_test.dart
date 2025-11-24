@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/navigation/routes/route_paths.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/authentication/authentication_screen/authentication_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/onboarding/onboarding_screen/onboarding_screen.dart';
 
+import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
 
@@ -220,6 +222,36 @@ void main() {
 
       final l10n = await getL10n();
       expect(find.text(l10n.publishOffer), findsOneWidget);
+    });
+  });
+
+  group('When opening the app on chat screen', () {
+    final isAuthenticated = true;
+    final alreadyOnboarded = true;
+
+    group('for an individual contact', () {
+      final location = '/contacts/${FakeContacts.individualContact.id}/chat';
+
+      testWidgets('it shows the chat screen', (tester) async {
+        // Run test but ignore timer warnings from chat SDK's presence interval
+        await tester.runAsync(() async {
+          await navigateToLocation(
+            tester,
+            location,
+            isAuthenticated: isAuthenticated,
+            alreadyOnboarded: alreadyOnboarded,
+            identities: [FakeIdentities.primaryIdentity],
+            contacts: [FakeContacts.individualContact],
+          );
+
+          await tester.pumpAndSettle();
+
+          const chatInputKey = Key('chat_message_input');
+
+          // Verify chat message input field is present
+          expect(find.byKey(chatInputKey), findsOneWidget);
+        });
+      });
     });
   });
 }

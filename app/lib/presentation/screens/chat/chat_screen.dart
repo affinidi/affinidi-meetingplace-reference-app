@@ -116,9 +116,7 @@ class ChatScreen extends HookConsumerWidget {
                       child:
                           _ChatTypingActivityIndicator(contactId: _contactId),
                     ),
-                    _ChatTextEntry(
-                      contactId: _contactId,
-                    ),
+                    _ChatTextEntry(contactId: _contactId),
                   ],
                 ),
                 ChatEffect(contactId: _contactId),

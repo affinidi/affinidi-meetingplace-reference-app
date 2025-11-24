@@ -45,6 +45,7 @@ class _ChatContactDisplayName extends ConsumerWidget {
                     Flexible(
                       child: Text(
                         navigationBarTitle,
+                        key: const Key('chat_contact_title'),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: hasDisplayName
@@ -69,6 +70,7 @@ class _ChatContactDisplayName extends ConsumerWidget {
                 if (isGroupChat)
                   Text(
                     context.l10n.chatScreenTapForMemberDetails,
+                    key: const Key('group_member_details_hint'),
                     style: context.textTheme.labelMedium?.copyWith(
                       color: context.theme.colorScheme.onPrimary
                           .withValues(alpha: 0.8),
@@ -95,6 +97,7 @@ class _IndividualChatName extends ConsumerWidget {
 
     return Text(
       fullName,
+      key: const Key('individual_chat_name'),
       style: context.textTheme.labelMedium?.copyWith(
           color: context.theme.colorScheme.onPrimary.withValues(alpha: 0.8)),
     );
@@ -117,6 +120,7 @@ class _ChatContactImage extends ConsumerWidget {
       height: 55,
       width: 55,
       child: Card(
+        key: const Key('chat_contact_avatar'),
         color: const Color.fromARGB(10, 255, 255, 255),
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
