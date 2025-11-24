@@ -86,6 +86,7 @@ dev_dependencies:
   copy_with_extension_gen: any
   dart_flutter_team_lints: ^3.5.2
   drift_dev: ^2.28.0
+  file: ^7.0.1
   flutter_test:
     sdk: flutter
   riverpod_generator: ^2.6.5

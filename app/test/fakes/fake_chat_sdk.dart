@@ -29,7 +29,7 @@ class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
     return _MergedChatStream(realStream, _fakeMessageController.stream);
   }
 
-  /// Simulates receiving an incoming text message by injecting it into the stream.
+  /// Simulates receiving an incoming text message.
   void simulateIncomingTextMessage({
     required String text,
     required String senderDid,

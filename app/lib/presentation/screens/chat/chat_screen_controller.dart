@@ -918,7 +918,6 @@ class ChatScreenController extends _$ChatScreenController {
     final messageToSave =
         unsentMessage?.isNotEmpty == true ? unsentMessage : null;
 
-    // Wrap in try-catch to handle cases where the container is already disposed (e.g., in tests)
     try {
       await ref.read(contactsServiceProvider.notifier).updateContact(
             contact.copyWith(
@@ -927,7 +926,6 @@ class ChatScreenController extends _$ChatScreenController {
             ),
           );
     } catch (e) {
-      // Silently ignore if the container is disposed
       if (!e.toString().contains('already disposed')) {
         rethrow;
       }

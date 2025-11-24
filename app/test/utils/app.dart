@@ -15,17 +15,14 @@ import 'package:mpx_flutter_reference_app/infrastructure/biometrics/local_auth_p
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/app_info.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/firebase_messaging/push_notification_messaging.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/media/image_picker/image_picker_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_info_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/applications_documents_directory_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/available_attachment_plugins_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/media/image_picker/image_picker_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
 import 'package:mpx_flutter_reference_app/mpx_flutter_reference_app.dart';
@@ -44,7 +41,7 @@ import '../fakes/fake_meeting_place_sdk.dart';
 import '../fakes/fake_push_notification_messaging.dart';
 import '../fakes/fake_secure_storage.dart';
 
-/// Callback type for wrapping the real Chat SDK (e.g., with ChatSDKTestWrapper).
+/// Callback type for wrapping the real Chat SDK.
 typedef ChatSDKWrapper = MeetingPlaceChatSDK Function(
     MeetingPlaceChatSDK realSdk);
 
@@ -159,7 +156,8 @@ Future<void> startApp(
       if (imagePicker != null)
         imagePickerProvider.overrideWith((ref) => imagePicker),
       if (cameraService != null)
-        cameraServiceProvider.overrideWith(() => FakeCameraServiceNotifier(cameraService)),
+        cameraServiceProvider
+            .overrideWith(() => FakeCameraServiceNotifier(cameraService)),
       secureStorageProvider
           .overrideWith((ref) async => secureStorage ?? FakeSecureStorage()),
       sharedPreferencesProvider.overrideWithValue(sharedPreferences),
