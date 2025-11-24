@@ -9,16 +9,9 @@ class FakeCoreSDKStreamSubscription
   final _controller = StreamController<MediatorMessage>.broadcast();
   bool _isClosed = false;
 
-  // Allow external code to add messages to the stream
-  // Accept dynamic to allow both MediatorMessage and its subtypes like PlainTextMessage
   void addMessage(dynamic message) {
     if (!_isClosed && message is MediatorMessage) {
-      // ignore: avoid_print
-      print(
-          'DEBUG addMessage: Adding message to stream. hasListener=${_controller.hasListener}');
       _controller.add(message);
-      // ignore: avoid_print
-      print('DEBUG addMessage: Message added to stream');
     }
   }
 
@@ -35,9 +28,6 @@ class FakeCoreSDKStreamSubscription
     void Function()? onDone,
     bool? cancelOnError,
   }) {
-    // ignore: avoid_print
-    print(
-        'DEBUG FakeCoreSDKStreamSubscription.listen: Someone is listening to the stream');
     return _controller.stream.listen(
       onData,
       onError: onError,
@@ -92,17 +82,13 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       _controlPlaneEventStreamManager.stream;
 
   // Allow tests to simulate receiving messages
-  // PlainTextMessage extends MediatorMessage so we can accept it and add it to the stream
+  // PlainTextMessage extends MediatorMessage so we can accept it and add it
+  // to the stream
   void simulateIncomingMessage(String channelDid, PlainTextMessage message) {
     final subscription = _subscriptions[channelDid];
-    // ignore: avoid_print
-    print(
-        'DEBUG simulateIncomingMessage: channelDid=$channelDid, subscription=${subscription != null ? "exists" : "null"}');
+
     if (subscription != null) {
-      // PlainTextMessage is a subtype of MediatorMessage
       subscription.addMessage(message);
-      // ignore: avoid_print
-      print('DEBUG: Message added to subscription stream');
     }
   }
 
