@@ -72,7 +72,7 @@ class _ProfilePictures extends ConsumerWidget {
           child:
               hasOtherPartyPic ? null : _DefaultImage(image: otherPartyImage),
           size: _picSize,
-          onPressed: () => unawaited(
+          onPressed: () => (
             _navigateToImageView(
               context: context,
               imageBytesFuture: controller.getImageBytes(
