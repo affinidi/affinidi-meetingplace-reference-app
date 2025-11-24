@@ -100,18 +100,6 @@ abstract class AppLocalizations {
     Locale('es')
   ];
 
-  /// No description provided for @poweredBy.
-  ///
-  /// In en, this message translates to:
-  /// **'powered by'**
-  String get poweredBy;
-
-  /// No description provided for @messagingEngine.
-  ///
-  /// In en, this message translates to:
-  /// **'Affinidi Meeting Place SDK'**
-  String get messagingEngine;
-
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
