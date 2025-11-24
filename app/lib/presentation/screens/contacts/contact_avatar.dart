@@ -43,9 +43,7 @@ class _ContactAvatar extends ConsumerWidget {
             child: isGroupOrDefaultImage
                 ? Image(
                     image: displayImage,
-                    fit: BoxFit.contain,
-                    width: 40,
-                    height: 40,
+                    fit: BoxFit.cover,
                   )
                 : null,
           ),

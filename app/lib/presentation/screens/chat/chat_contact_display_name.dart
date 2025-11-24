@@ -128,21 +128,10 @@ class _ChatContactImage extends ConsumerWidget {
           borderRadius: BorderRadius.circular(100.0),
         ),
         elevation: 5,
-        child: isGroupOrDefaultImage
-            ? Center(
-                child: SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: Image(
-                    fit: BoxFit.contain,
-                    image: displayImage,
-                  ),
-                ),
-              )
-            : Image(
-                fit: BoxFit.cover,
-                image: displayImage,
-              ),
+        child: Image(
+          fit: BoxFit.cover,
+          image: displayImage,
+        ),
       ),
     );
   }

@@ -151,15 +151,11 @@ class _DefaultImage extends StatelessWidget {
 
   final ImageProvider<Object> image;
 
-  static const double _defaultImageSize = 80.0;
-
   @override
   Widget build(BuildContext context) {
     return Image(
       image: image,
-      fit: BoxFit.contain,
-      width: _defaultImageSize,
-      height: _defaultImageSize,
+      fit: BoxFit.cover,
     );
   }
 }
