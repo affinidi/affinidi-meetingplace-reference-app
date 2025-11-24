@@ -198,8 +198,6 @@ void main() {
         const incomingMessage = 'Hello from the other side!';
         final channel = FakeChannels.individualChannel;
 
-        // Create a reference to store the wrapper so we can call
-        // simulateIncomingTextMessage
         ChatSDKTestWrapper? wrapperInstance;
 
         await navigateToChatScreen(
@@ -218,15 +216,11 @@ void main() {
             senderDid: channel.otherPartyPermanentChannelDid!,
             recipientDid: channel.permanentChannelDid!,
           );
-
-          // Give time for the message to be processed and UI to update
           await Future<void>.delayed(const Duration(milliseconds: 500));
         });
 
-        // Wait for the UI to update
         await tester.pumpAndSettle();
 
-        // Verify the incoming message appears in the chat
         expect(find.text(incomingMessage), findsOneWidget);
       });
 
@@ -235,7 +229,6 @@ void main() {
           const incomingMessage = 'Test message for reactions';
           final channel = FakeChannels.individualChannel;
 
-          // Create a reference to store the wrapper
           ChatSDKTestWrapper? wrapperInstance;
 
           await navigateToChatScreen(
@@ -248,7 +241,6 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          // Simulate an incoming message
           await tester.runAsync(() async {
             wrapperInstance!.simulateIncomingTextMessage(
               text: incomingMessage,
@@ -264,7 +256,6 @@ void main() {
           await tester.longPress(find.text(incomingMessage));
           await tester.pumpAndSettle();
 
-          // Verify reaction menu appears with expected emojis
           expect(find.text('👍'), findsWidgets);
           expect(find.text('👎'), findsWidgets);
 
@@ -272,8 +263,6 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(find.text('👍'), findsWidgets);
-
-          // Verify the reaction menu is dismissed after selecting a reaction
           expect(find.text('👎'), findsNothing);
         });
       });
@@ -286,14 +275,12 @@ void main() {
 
         await navigateToChatScreen(tester, contactId: contactId);
 
-        // Find and tap the add media button (Plus icon)
         final addMediaButton = findAddMediaButton();
         expect(addMediaButton, findsOneWidget);
 
         await tester.tap(addMediaButton);
         await tester.pumpAndSettle();
 
-        // Verify the menu appears with expected options
         expect(find.text(l10n.generalCamera), findsOneWidget);
         expect(find.text(l10n.generalPhoto), findsOneWidget);
         expect(find.text(l10n.generalBalloons), findsOneWidget);
@@ -304,8 +291,6 @@ void main() {
         testWidgets('should call sendEffect with balloons effect',
             (tester) async {
           final l10n = await getL10n();
-
-          // Create a reference to store the wrapper so we can inspect method calls
           ChatSDKTestWrapper? wrapperInstance;
 
           await navigateToChatScreen(
@@ -326,7 +311,6 @@ void main() {
           await tester.tap(find.text(l10n.generalBalloons));
           await tester.pumpAndSettle();
 
-          // Verify sendEffect was called with balloons
           expect(wrapperInstance!.sendEffectCalls, hasLength(1));
           final sendEffectCall = wrapperInstance!.sendEffectCalls.first;
           expect(sendEffectCall['effect'], Effect.balloons);
@@ -337,8 +321,6 @@ void main() {
         testWidgets('should call sendEffect with confetti effect',
             (tester) async {
           final l10n = await getL10n();
-
-          // Create a reference to store the wrapper so we can inspect method calls
           ChatSDKTestWrapper? wrapperInstance;
 
           await navigateToChatScreen(
@@ -359,7 +341,6 @@ void main() {
           await tester.tap(find.text(l10n.generalConfetti));
           await tester.pumpAndSettle();
 
-          // Verify sendEffect was called with confetti
           expect(wrapperInstance!.sendEffectCalls, hasLength(1));
           final sendEffectCall = wrapperInstance!.sendEffectCalls.first;
           expect(sendEffectCall['effect'], Effect.confetti);
@@ -371,8 +352,6 @@ void main() {
             (tester) async {
           final l10n = await getL10n();
           final fakeImagePicker = FakeImagePicker.withDefaultImage();
-
-          // Create a reference to store the wrapper so we can verify method calls
           ChatSDKTestWrapper? wrapperInstance;
 
           await navigateToChatScreen(
@@ -394,7 +373,6 @@ void main() {
           await tester.tap(find.text(l10n.generalPhoto));
           await tester.pumpAndSettle();
 
-          // Verify the MediaReviewScreen appears with send/cancel buttons
           final submitButton =
               find.byKey(const Key('media_review_submit_button'));
           expect(submitButton, findsOneWidget);
@@ -406,16 +384,13 @@ void main() {
           await tester.enterText(textInput, photoMessage);
           await tester.pump();
 
-          // Tap the green submit button to send the image
           await tester.runAsync(() async {
             await tester.tap(submitButton);
             await tester.pump();
           });
 
-          // Wait for navigation animation to complete
           await tester.pumpAndSettle();
 
-          // Verify sendTextMessage was called with both text and attachment
           expect(wrapperInstance!.sendTextMessageCalls, hasLength(1));
           final sendCall = wrapperInstance!.sendTextMessageCalls.first;
           expect(sendCall['text'], photoMessage);
@@ -423,10 +398,7 @@ void main() {
           expect(sendCall['attachments'], isA<List<Attachment>>());
           expect(sendCall['attachments'] as List<Attachment>, hasLength(1));
 
-          // Verify navigation back to chat screen
           expect(find.text(contactName), findsOneWidget);
-
-          // Verify both the text message and image appear in the chat
           expect(find.text(photoMessage), findsOneWidget);
           expect(find.byType(Image), findsWidgets);
         });
@@ -461,26 +433,21 @@ void main() {
 
           expect(find.text(l10n.generalCamera), findsOneWidget);
 
-          // Now camera is available, MediaScreen should show camera UI
           await tester.tap(find.text(l10n.generalCamera));
-          await tester.pump(); // Start the navigation
+          await tester.pump();
 
-          // Verify camera service is available
           expect(fakeCameraService.state.isAvailable, isTrue);
 
-          // Wait for MediaScreen to appear and check for camera capture button
           await tester.pump(const Duration(seconds: 2));
           final captureButton = find.byKey(const Key('camera_capture_button'));
           expect(captureButton, findsOneWidget);
           await tester.pump(const Duration(seconds: 2));
 
-          // Wrap tap in runAsync to allow async captureWithCamera to complete
           await tester.runAsync(() async {
             await tester.tap(captureButton);
             await tester.pump();
           });
 
-          // After capture, MediaReviewScreen should appear
           await tester.pumpAndSettle();
 
           final submitButton =
@@ -493,16 +460,13 @@ void main() {
           await tester.enterText(textInput, cameraMessage);
           await tester.pump();
 
-          // Tap the green submit button to send the image
           await tester.runAsync(() async {
             await tester.tap(submitButton);
             await tester.pump();
           });
 
-          // Wait for navigation animation to complete
           await tester.pumpAndSettle();
 
-          // Verify sendTextMessage was called with both text and attachment
           expect(wrapperInstance!.sendTextMessageCalls, hasLength(1));
           final sendCall = wrapperInstance!.sendTextMessageCalls.first;
           expect(sendCall['text'], cameraMessage);
@@ -510,10 +474,7 @@ void main() {
           expect(sendCall['attachments'], isA<List<Attachment>>());
           expect(sendCall['attachments'] as List<Attachment>, hasLength(1));
 
-          // Verify navigation back to chat screen
           expect(find.text(contactName), findsOneWidget);
-
-          // Verify both the text message and image appear in the chat
           expect(find.text(cameraMessage), findsOneWidget);
           expect(find.byType(Image), findsWidgets);
         });
