@@ -8,9 +8,8 @@ class _ProfilePictures extends ConsumerWidget {
   static final double _picSize = 150.0;
 
   Future<void> _navigateToImageView(
-    BuildContext context,
-    Future<Uint8List> imageBytesFuture,
-  ) async {
+      {required BuildContext context,
+      required Future<Uint8List> imageBytesFuture}) async {
     final imageBytes = await imageBytesFuture;
     if (!context.mounted) return;
     await Navigator.of(context, rootNavigator: true).push(
@@ -40,8 +39,8 @@ class _ProfilePictures extends ConsumerWidget {
           size: _picSize,
           child: _DefaultImage(image: groupImage),
           onPressed: () => _navigateToImageView(
-            context,
-            controller.getImageBytes(
+            context: context,
+            imageBytesFuture: controller.getImageBytes(
               hasOtherPartyPic: false,
               otherPartyProfilePic: null,
             ),
@@ -75,8 +74,8 @@ class _ProfilePictures extends ConsumerWidget {
           size: _picSize,
           onPressed: () => unawaited(
             _navigateToImageView(
-              context,
-              controller.getImageBytes(
+              context: context,
+              imageBytesFuture: controller.getImageBytes(
                 hasOtherPartyPic: hasOtherPartyPic,
                 otherPartyProfilePic: channel?.otherPartyVCard?.profilePic,
               ),
@@ -90,8 +89,8 @@ class _ProfilePictures extends ConsumerWidget {
           child: hasMyPic ? null : _DefaultImage(image: myImage),
           size: _picSize,
           onPressed: () => _navigateToImageView(
-            context,
-            controller.getImageBytes(
+            context: context,
+            imageBytesFuture: controller.getImageBytes(
               hasOtherPartyPic: hasMyPic,
               otherPartyProfilePic: channel?.vCard?.profilePic,
             ),
