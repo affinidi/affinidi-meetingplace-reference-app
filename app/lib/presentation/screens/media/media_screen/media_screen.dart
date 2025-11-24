@@ -152,6 +152,7 @@ class MediaScreen extends HookConsumerWidget {
                 const SizedBox(height: 20),
                 // Capture
                 FloatingActionButton(
+                  key: const Key('camera_capture_button'),
                   heroTag: 2,
                   backgroundColor: Colors.green,
                   onPressed: () => _captureImage(controller, context, ref),

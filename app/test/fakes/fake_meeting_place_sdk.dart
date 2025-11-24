@@ -197,14 +197,9 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     String channelDid, {
     String? mediatorDid,
   }) async {
-    // ignore: avoid_print
-    print('DEBUG subscribeToMediator: channelDid=$channelDid');
     // Create and store a subscription for this channel
     final subscription = FakeCoreSDKStreamSubscription();
     _subscriptions[channelDid] = subscription;
-    // ignore: avoid_print
-    print(
-        'DEBUG: Subscription created. Total subscriptions: ${_subscriptions.length}');
     return subscription;
   }
 

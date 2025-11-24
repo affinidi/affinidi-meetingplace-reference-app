@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart';
 
+import 'fakes/fake_camera_service.dart';
 import 'fakes/fake_channels.dart';
+import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_image_picker.dart';
 import 'utils/app.dart';
-
-/// Shared fake SDK instance for tests that need to simulate incoming messages
-FakeMeetingPlaceSDK? _sharedFakeSdk;
 
 /// Helper function to navigate to chat screen
 Future<void> navigateToChatScreen(
@@ -17,14 +17,12 @@ Future<void> navigateToChatScreen(
   required String contactId,
   bool isAuthenticated = true,
   bool alreadyOnboarded = true,
-  FakeMeetingPlaceSDK? fakeSdk,
+  MeetingPlaceChatSDK? chatSdk,
+  ChatSDKWrapper? chatSdkWrapper,
+  ImagePicker? imagePicker,
+  FakeCameraService? cameraService,
 }) async {
   final location = '/contacts/$contactId/chat';
-
-  // Store the SDK instance if provided so tests can access it later
-  if (fakeSdk != null) {
-    _sharedFakeSdk = fakeSdk;
-  }
 
   await tester.runAsync(() async {
     await navigateToLocation(
@@ -34,7 +32,10 @@ Future<void> navigateToChatScreen(
       alreadyOnboarded: alreadyOnboarded,
       identities: [FakeIdentities.primaryIdentity],
       contacts: [FakeContacts.individualContact],
-      meetingPlaceCoreSDK: fakeSdk,
+      meetingPlaceChatSDK: chatSdk,
+      chatSdkWrapper: chatSdkWrapper,
+      imagePicker: imagePicker,
+      cameraService: cameraService,
     );
 
     await tester.pumpAndSettle(const Duration(seconds: 10));
@@ -79,18 +80,15 @@ void main() {
     testWidgets('it shows the chat screen with correct title', (tester) async {
       await navigateToChatScreen(tester, contactId: contactId);
 
-      // Verify contact name is displayed in app bar
       expect(find.text(contactName), findsOneWidget);
     });
 
     testWidgets('it shows the message input field', (tester) async {
       await navigateToChatScreen(tester, contactId: contactId);
 
-      // Verify message input field exists
       final inputField = findChatMessageInput();
       expect(inputField, findsOneWidget);
 
-      // Verify the input field is enabled
       final textField = tester.widget<TextFormField>(inputField);
       expect(textField.enabled, isNot(false));
     });
@@ -98,7 +96,6 @@ void main() {
     testWidgets('it shows the send button', (tester) async {
       await navigateToChatScreen(tester, contactId: contactId);
 
-      // Verify send button exists
       final sendButton = findSendButton();
       expect(sendButton, findsOneWidget);
     });
@@ -106,7 +103,6 @@ void main() {
     testWidgets('it shows the add media button', (tester) async {
       await navigateToChatScreen(tester, contactId: contactId);
 
-      // Verify add media button exists
       final addButton = findAddMediaButton();
       expect(addButton, findsOneWidget);
     });
@@ -116,7 +112,6 @@ void main() {
 
       await navigateToChatScreen(tester, contactId: contactId);
 
-      // Verify encryption notice is displayed
       expect(find.text(l10n.chatEncryptionNotice), findsOneWidget);
     });
 
@@ -125,10 +120,8 @@ void main() {
 
       const testMessage = 'Hello, this is a test message!';
 
-      // Enter text in the input field
       await enterChatMessage(tester, testMessage);
 
-      // Verify the text was entered
       final inputField = findChatMessageInput();
       final textField = tester.widget<TextFormField>(inputField);
       expect(textField.controller?.text, testMessage);
@@ -137,63 +130,51 @@ void main() {
     testWidgets('it shows contact presence status', (tester) async {
       await navigateToChatScreen(tester, contactId: contactId);
 
-      // The presence status widget should be visible in the app bar
-      // We can verify by checking if the contact display name area exists
       expect(find.text(contactName), findsOneWidget);
     });
 
-    group('when contact has an avatar', () {
+    group('and contact has an avatar', () {
       testWidgets('it shows the contact avatar', (tester) async {
         await navigateToChatScreen(tester, contactId: contactId);
 
-        // Verify the contact avatar widget is present in the app bar
         final contactAvatarKey = const Key('chat_contact_avatar');
         expect(find.byKey(contactAvatarKey), findsOneWidget);
       });
     });
 
-    group('when entering a message', () {
+    group('and entering a message', () {
       testWidgets('it has the send button available', (tester) async {
         await navigateToChatScreen(tester, contactId: contactId);
 
         const testMessage = 'Test message';
 
-        // Enter text in the input field
         await enterChatMessage(tester, testMessage);
 
-        // Verify send button exists
         final sendButton = findSendButton();
         expect(sendButton, findsOneWidget);
       });
     });
 
-    group('when message list is empty', () {
+    group('and message list is empty', () {
       testWidgets('it shows only the encryption notice', (tester) async {
         final l10n = await getL10n();
 
         await navigateToChatScreen(tester, contactId: contactId);
 
-        // Verify encryption notice is the only message shown
         expect(find.text(l10n.chatEncryptionNotice), findsOneWidget);
       });
     });
 
-    group('when sending a message', () {
+    group('and sending a message', () {
       testWidgets('it appears on the screen', (tester) async {
         await navigateToChatScreen(tester, contactId: contactId);
 
         const testMessage = 'Hello, this is my test message!';
 
-        // Enter text in the input field
         await enterChatMessage(tester, testMessage);
-
-        // Tap the send button
         await tapSendButton(tester);
-
-        // Wait for the message to appear
         await tester.pumpAndSettle();
 
-        // Verify the message appears in the chat
         expect(find.text(testMessage), findsOneWidget);
       });
 
@@ -202,76 +183,44 @@ void main() {
 
         const testMessage = 'Another test message';
 
-        // Enter text in the input field
         await enterChatMessage(tester, testMessage);
-
-        // Tap the send button
         await tapSendButton(tester);
-
-        // Wait for the action to complete
         await tester.pumpAndSettle();
 
-        // Verify the input field is cleared
         final inputField = findChatMessageInput();
         final textField = tester.widget<TextFormField>(inputField);
         expect(textField.controller?.text, isEmpty);
       });
     });
 
-    group('when receiving a message', () {
+    group('and receiving a message', () {
       testWidgets('an incoming message appears on the screen', (tester) async {
-        // Create a fake SDK that we can use to simulate incoming messages
-        final fakeSdk = FakeMeetingPlaceSDK(
-          channels: FakeChannels.allChannels,
-        );
-
-        // Navigate to chat with the fake SDK
-        await navigateToChatScreen(
-          tester,
-          contactId: contactId,
-          fakeSdk: fakeSdk,
-        );
-
         const incomingMessage = 'Hello from the other side!';
         final channel = FakeChannels.individualChannel;
 
-        // Simulate an incoming message through the fake SDK
-        // PlainTextMessage implements MediatorMessage, so we can pass it directly
-        final message = PlainTextMessage(
-          id: 'test-incoming-message-id',
-          type: Uri.parse('https://didcomm.org/basicmessage/2.0/message'),
-          body: {'text': incomingMessage},
-          from: channel.otherPartyPermanentChannelDid!,
-          to: [channel.permanentChannelDid!],
+        // Create a reference to store the wrapper so we can call
+        // simulateIncomingTextMessage
+        ChatSDKTestWrapper? wrapperInstance;
+
+        await navigateToChatScreen(
+          tester,
+          contactId: contactId,
+          chatSdkWrapper: (realSdk) {
+            wrapperInstance = ChatSDKTestWrapper(realSdk);
+            return wrapperInstance!;
+          },
         );
+        await tester.pumpAndSettle();
 
         await tester.runAsync(() async {
-          // Wait for the chat screen to fully initialize and subscribe to the stream
-          // The chat controller needs time to:
-          // 1. Load contact
-          // 2. Create chat SDK
-          // 3. Start chat session
-          // 4. Subscribe to mediator stream
-          var attempts = 0;
-          while (fakeSdk.subscriptionCount == 0 && attempts < 50) {
-            await Future<void>.delayed(const Duration(milliseconds: 100));
-            attempts++;
-          }
+          wrapperInstance!.simulateIncomingTextMessage(
+            text: incomingMessage,
+            senderDid: channel.otherPartyPermanentChannelDid!,
+            recipientDid: channel.permanentChannelDid!,
+          );
 
-          debugPrint(
-              'DEBUG: Waited for subscription. Subscriptions in fake SDK: ${fakeSdk.subscriptionCount}');
-
-          if (fakeSdk.subscriptionCount > 0) {
-            fakeSdk.simulateIncomingMessage(
-              channel.permanentChannelDid!,
-              message,
-            );
-
-            // Give time for the message to be processed through the stream
-            await Future<void>.delayed(const Duration(seconds: 5));
-          } else {
-            debugPrint('WARNING: No subscription created after waiting');
-          }
+          // Give time for the message to be processed and UI to update
+          await Future<void>.delayed(const Duration(milliseconds: 500));
         });
 
         // Wait for the UI to update
@@ -279,6 +228,295 @@ void main() {
 
         // Verify the incoming message appears in the chat
         expect(find.text(incomingMessage), findsOneWidget);
+      });
+
+      group('and user long press on the received message', () {
+        testWidgets('should let user react to the message', (tester) async {
+          const incomingMessage = 'Test message for reactions';
+          final channel = FakeChannels.individualChannel;
+
+          // Create a reference to store the wrapper
+          ChatSDKTestWrapper? wrapperInstance;
+
+          await navigateToChatScreen(
+            tester,
+            contactId: contactId,
+            chatSdkWrapper: (realSdk) {
+              wrapperInstance = ChatSDKTestWrapper(realSdk);
+              return wrapperInstance!;
+            },
+          );
+          await tester.pumpAndSettle();
+
+          // Simulate an incoming message
+          await tester.runAsync(() async {
+            wrapperInstance!.simulateIncomingTextMessage(
+              text: incomingMessage,
+              senderDid: channel.otherPartyPermanentChannelDid!,
+              recipientDid: channel.permanentChannelDid!,
+            );
+            await Future<void>.delayed(const Duration(milliseconds: 500));
+          });
+          await tester.pumpAndSettle();
+
+          expect(find.text(incomingMessage), findsOneWidget);
+
+          await tester.longPress(find.text(incomingMessage));
+          await tester.pumpAndSettle();
+
+          // Verify reaction menu appears with expected emojis
+          expect(find.text('👍'), findsWidgets);
+          expect(find.text('👎'), findsWidgets);
+
+          await tester.tap(find.text('👍').first);
+          await tester.pumpAndSettle();
+
+          expect(find.text('👍'), findsWidgets);
+
+          // Verify the reaction menu is dismissed after selecting a reaction
+          expect(find.text('👎'), findsNothing);
+        });
+      });
+    });
+
+    group('and clicking the add media button', () {
+      testWidgets('should show a menu with media and effects options',
+          (tester) async {
+        final l10n = await getL10n();
+
+        await navigateToChatScreen(tester, contactId: contactId);
+
+        // Find and tap the add media button (Plus icon)
+        final addMediaButton = findAddMediaButton();
+        expect(addMediaButton, findsOneWidget);
+
+        await tester.tap(addMediaButton);
+        await tester.pumpAndSettle();
+
+        // Verify the menu appears with expected options
+        expect(find.text(l10n.generalCamera), findsOneWidget);
+        expect(find.text(l10n.generalPhoto), findsOneWidget);
+        expect(find.text(l10n.generalBalloons), findsOneWidget);
+        expect(find.text(l10n.generalConfetti), findsOneWidget);
+      });
+
+      group('and pressing on balloons', () {
+        testWidgets('should call sendEffect with balloons effect',
+            (tester) async {
+          final l10n = await getL10n();
+
+          // Create a reference to store the wrapper so we can inspect method calls
+          ChatSDKTestWrapper? wrapperInstance;
+
+          await navigateToChatScreen(
+            tester,
+            contactId: contactId,
+            chatSdkWrapper: (realSdk) {
+              wrapperInstance = ChatSDKTestWrapper(realSdk);
+              return wrapperInstance!;
+            },
+          );
+
+          final addMediaButton = findAddMediaButton();
+          await tester.tap(addMediaButton);
+          await tester.pumpAndSettle();
+
+          expect(find.text(l10n.generalBalloons), findsOneWidget);
+
+          await tester.tap(find.text(l10n.generalBalloons));
+          await tester.pumpAndSettle();
+
+          // Verify sendEffect was called with balloons
+          expect(wrapperInstance!.sendEffectCalls, hasLength(1));
+          final sendEffectCall = wrapperInstance!.sendEffectCalls.first;
+          expect(sendEffectCall['effect'], Effect.balloons);
+        });
+      });
+
+      group('and pressing on confetti', () {
+        testWidgets('should call sendEffect with confetti effect',
+            (tester) async {
+          final l10n = await getL10n();
+
+          // Create a reference to store the wrapper so we can inspect method calls
+          ChatSDKTestWrapper? wrapperInstance;
+
+          await navigateToChatScreen(
+            tester,
+            contactId: contactId,
+            chatSdkWrapper: (realSdk) {
+              wrapperInstance = ChatSDKTestWrapper(realSdk);
+              return wrapperInstance!;
+            },
+          );
+
+          final addMediaButton = findAddMediaButton();
+          await tester.tap(addMediaButton);
+          await tester.pumpAndSettle();
+
+          expect(find.text(l10n.generalConfetti), findsOneWidget);
+
+          await tester.tap(find.text(l10n.generalConfetti));
+          await tester.pumpAndSettle();
+
+          // Verify sendEffect was called with confetti
+          expect(wrapperInstance!.sendEffectCalls, hasLength(1));
+          final sendEffectCall = wrapperInstance!.sendEffectCalls.first;
+          expect(sendEffectCall['effect'], Effect.confetti);
+        });
+      });
+
+      group('and pressing on photo', () {
+        testWidgets('should send photo and return to chat screen',
+            (tester) async {
+          final l10n = await getL10n();
+          final fakeImagePicker = FakeImagePicker.withDefaultImage();
+
+          // Create a reference to store the wrapper so we can verify method calls
+          ChatSDKTestWrapper? wrapperInstance;
+
+          await navigateToChatScreen(
+            tester,
+            contactId: contactId,
+            imagePicker: fakeImagePicker,
+            chatSdkWrapper: (realSdk) {
+              wrapperInstance = ChatSDKTestWrapper(realSdk);
+              return wrapperInstance!;
+            },
+          );
+
+          final addMediaButton = findAddMediaButton();
+          await tester.tap(addMediaButton);
+          await tester.pumpAndSettle();
+
+          expect(find.text(l10n.generalPhoto), findsOneWidget);
+
+          await tester.tap(find.text(l10n.generalPhoto));
+          await tester.pumpAndSettle();
+
+          // Verify the MediaReviewScreen appears with send/cancel buttons
+          final submitButton =
+              find.byKey(const Key('media_review_submit_button'));
+          expect(submitButton, findsOneWidget);
+          expect(find.byIcon(Icons.cancel_sharp), findsOneWidget);
+
+          const photoMessage = 'Check out this photo!';
+          final textInput = find.byKey(const Key('media_review_text_input'));
+          expect(textInput, findsOneWidget);
+          await tester.enterText(textInput, photoMessage);
+          await tester.pump();
+
+          // Tap the green submit button to send the image
+          await tester.runAsync(() async {
+            await tester.tap(submitButton);
+            await tester.pump();
+          });
+
+          // Wait for navigation animation to complete
+          await tester.pumpAndSettle();
+
+          // Verify sendTextMessage was called with both text and attachment
+          expect(wrapperInstance!.sendTextMessageCalls, hasLength(1));
+          final sendCall = wrapperInstance!.sendTextMessageCalls.first;
+          expect(sendCall['text'], photoMessage);
+          expect(sendCall['attachments'], isNotNull);
+          expect(sendCall['attachments'], isA<List<Attachment>>());
+          expect(sendCall['attachments'] as List<Attachment>, hasLength(1));
+
+          // Verify navigation back to chat screen
+          expect(find.text(contactName), findsOneWidget);
+
+          // Verify both the text message and image appear in the chat
+          expect(find.text(photoMessage), findsOneWidget);
+          expect(find.byType(Image), findsWidgets);
+        });
+      });
+
+      group('and pressing on camera', () {
+        testWidgets('should send photo and return to chat screen',
+            (tester) async {
+          final l10n = await getL10n();
+          final fakeImagePicker = FakeImagePicker.withDefaultImage();
+
+          final fakeCameraService = FakeCameraService(
+            isAvailable: true,
+            mockImageBytes: FakeImagePicker.defaultImageBytes,
+          );
+          ChatSDKTestWrapper? wrapperInstance;
+
+          await navigateToChatScreen(
+            tester,
+            contactId: contactId,
+            imagePicker: fakeImagePicker,
+            cameraService: fakeCameraService,
+            chatSdkWrapper: (realSdk) {
+              wrapperInstance = ChatSDKTestWrapper(realSdk);
+              return wrapperInstance!;
+            },
+          );
+
+          final addMediaButton = findAddMediaButton();
+          await tester.tap(addMediaButton);
+          await tester.pumpAndSettle();
+
+          expect(find.text(l10n.generalCamera), findsOneWidget);
+
+          // Now camera is available, MediaScreen should show camera UI
+          await tester.tap(find.text(l10n.generalCamera));
+          await tester.pump(); // Start the navigation
+
+          // Verify camera service is available
+          expect(fakeCameraService.state.isAvailable, isTrue);
+
+          // Wait for MediaScreen to appear and check for camera capture button
+          await tester.pump(const Duration(seconds: 2));
+          final captureButton = find.byKey(const Key('camera_capture_button'));
+          expect(captureButton, findsOneWidget);
+          await tester.pump(const Duration(seconds: 2));
+
+          // Wrap tap in runAsync to allow async captureWithCamera to complete
+          await tester.runAsync(() async {
+            await tester.tap(captureButton);
+            await tester.pump();
+          });
+
+          // After capture, MediaReviewScreen should appear
+          await tester.pumpAndSettle();
+
+          final submitButton =
+              find.byKey(const Key('media_review_submit_button'));
+          expect(submitButton, findsOneWidget);
+
+          const cameraMessage = 'Check out this photo!';
+          final textInput = find.byKey(const Key('media_review_text_input'));
+          expect(textInput, findsOneWidget);
+          await tester.enterText(textInput, cameraMessage);
+          await tester.pump();
+
+          // Tap the green submit button to send the image
+          await tester.runAsync(() async {
+            await tester.tap(submitButton);
+            await tester.pump();
+          });
+
+          // Wait for navigation animation to complete
+          await tester.pumpAndSettle();
+
+          // Verify sendTextMessage was called with both text and attachment
+          expect(wrapperInstance!.sendTextMessageCalls, hasLength(1));
+          final sendCall = wrapperInstance!.sendTextMessageCalls.first;
+          expect(sendCall['text'], cameraMessage);
+          expect(sendCall['attachments'], isNotNull);
+          expect(sendCall['attachments'], isA<List<Attachment>>());
+          expect(sendCall['attachments'] as List<Attachment>, hasLength(1));
+
+          // Verify navigation back to chat screen
+          expect(find.text(contactName), findsOneWidget);
+
+          // Verify both the text message and image appear in the chat
+          expect(find.text(cameraMessage), findsOneWidget);
+          expect(find.byType(Image), findsWidgets);
+        });
       });
     });
   });

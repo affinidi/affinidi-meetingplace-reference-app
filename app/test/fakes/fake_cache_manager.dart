@@ -1,11 +1,13 @@
 import 'dart:io' as io;
 import 'dart:typed_data';
 
-import 'package:flutter_cache_manager/file.dart';
+import 'package:file/file.dart' as file_pkg;
+import 'package:file/local.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class FakeCacheManager implements BaseCacheManager {
   final Map<String, Uint8List> _cache = {};
+  final file_pkg.FileSystem _fileSystem = const LocalFileSystem();
 
   @override
   Future<FileInfo?> getFileFromCache(String key,
@@ -72,7 +74,7 @@ class FakeCacheManager implements BaseCacheManager {
   }
 
   @override
-  Future<File> getSingleFile(String url,
+  Future<file_pkg.File> getSingleFile(String url,
       {String key = '', Map<String, String> headers = const {}}) async {
     final fileKey = key.isEmpty ? url : key;
     final storedData = _cache[fileKey];
@@ -83,7 +85,7 @@ class FakeCacheManager implements BaseCacheManager {
   }
 
   @override
-  Future<File> putFile(String url, Uint8List fileBytes,
+  Future<file_pkg.File> putFile(String url, Uint8List fileBytes,
       {String? key,
       String? eTag,
       Duration maxAge = const Duration(days: 30),
@@ -97,7 +99,7 @@ class FakeCacheManager implements BaseCacheManager {
   }
 
   @override
-  Future<File> putFileStream(String url, Stream<List<int>> source,
+  Future<file_pkg.File> putFileStream(String url, Stream<List<int>> source,
       {String? key,
       String? eTag,
       Duration maxAge = const Duration(days: 30),
@@ -105,11 +107,13 @@ class FakeCacheManager implements BaseCacheManager {
     throw UnimplementedError();
   }
 
-  Future<File> _createTempFileFromData(String key, Uint8List data) async {
+  Future<file_pkg.File> _createTempFileFromData(
+      String key, Uint8List data) async {
     final tempDir = io.Directory.systemTemp;
     final fileName = 'fake_cache_${key.hashCode}.tmp';
-    final ioFile = io.File('${tempDir.path}/$fileName');
-    await ioFile.writeAsBytes(data);
-    return ioFile as File;
+    final filePath = '${tempDir.path}/$fileName';
+    final file = _fileSystem.file(filePath);
+    await file.writeAsBytes(data);
+    return file;
   }
 }

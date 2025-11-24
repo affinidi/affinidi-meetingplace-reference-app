@@ -4,6 +4,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
@@ -13,17 +15,25 @@ import 'package:mpx_flutter_reference_app/infrastructure/biometrics/local_auth_p
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/app_info.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/firebase_messaging/push_notification_messaging.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_info_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/applications_documents_directory_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/available_attachment_plugins_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/media/image_picker/image_picker_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
 import 'package:mpx_flutter_reference_app/mpx_flutter_reference_app.dart';
 import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 
 import '../fakes/fake_app_badge_service.dart';
 import '../fakes/fake_cache_manager.dart';
+import '../fakes/fake_camera_service.dart';
 import '../fakes/fake_channels.dart';
 import '../fakes/fake_chat_repository.dart';
 import '../fakes/fake_connectivity.dart';
@@ -33,6 +43,10 @@ import '../fakes/fake_local_authentication.dart';
 import '../fakes/fake_meeting_place_sdk.dart';
 import '../fakes/fake_push_notification_messaging.dart';
 import '../fakes/fake_secure_storage.dart';
+
+/// Callback type for wrapping the real Chat SDK (e.g., with ChatSDKTestWrapper).
+typedef ChatSDKWrapper = MeetingPlaceChatSDK Function(
+    MeetingPlaceChatSDK realSdk);
 
 Future<void> startApp(
   WidgetTester tester, {
@@ -44,6 +58,10 @@ Future<void> startApp(
   PushNotificationMessaging? pushNotificationMessaging,
   Connectivity? connectivity,
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
+  MeetingPlaceChatSDK? meetingPlaceChatSDK,
+  ChatSDKWrapper? chatSdkWrapper,
+  ImagePicker? imagePicker,
+  FakeCameraService? cameraService,
   required List<Identity> identities,
   required List<Mediator> mediators,
   List<Contact> contacts = const [],
@@ -62,6 +80,14 @@ Future<void> startApp(
           AppInfo(versionName: 'Test', buildNumber: '1', version: '0.0.0')),
       applicationDocumentsDirectoryProvider
           .overrideWith((ref) async => Directory('/tmp')),
+      availableAttachmentPluginsProvider.overrideWith((ref) => [
+            CameraAttachmentsPlugin(
+              cacheManager: ref.read(cacheManagerProvider),
+            ),
+            GalleryAttachmentsPlugin(
+              cacheManager: ref.read(cacheManagerProvider),
+            ),
+          ]),
       localAuthProvider.overrideWith(
           (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated)),
       cacheManagerProvider.overrideWith((ref) => FakeCacheManager()),
@@ -111,6 +137,29 @@ Future<void> startApp(
           FakeMeetingPlaceSDK(
             channels: contacts.isNotEmpty ? FakeChannels.allChannels : null,
           )),
+      if (meetingPlaceChatSDK != null)
+        chatSdkProvider
+            .overrideWith((ref, channel) async => meetingPlaceChatSDK),
+      // If a wrapper is provided, wrap the real SDK after it's created
+      if (chatSdkWrapper != null && meetingPlaceChatSDK == null)
+        chatSdkProvider.overrideWith((ref, channel) async {
+          final coreSDK = await ref.read(meetingPlaceSdkProvider.future);
+          final realSdk = await MeetingPlaceChatSDK.initialiseFromChannel(
+            channel,
+            coreSDK: coreSDK,
+            chatRepository: await ref.read(chatRepositoryProvider.future),
+            options: ChatSDKOptions(
+              chatActivityExpiry: const Duration(seconds: 60),
+              chatPresenceSendInterval: const Duration(seconds: 30),
+            ),
+            logger: ref.read(appLoggerProvider),
+          );
+          return chatSdkWrapper(realSdk);
+        }),
+      if (imagePicker != null)
+        imagePickerProvider.overrideWith((ref) => imagePicker),
+      if (cameraService != null)
+        cameraServiceProvider.overrideWith(() => FakeCameraServiceNotifier(cameraService)),
       secureStorageProvider
           .overrideWith((ref) async => secureStorage ?? FakeSecureStorage()),
       sharedPreferencesProvider.overrideWithValue(sharedPreferences),
@@ -135,6 +184,10 @@ Future<void> navigateToLocation(
   PushNotificationMessaging? pushNotificationMessaging,
   Connectivity? connectivity,
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
+  MeetingPlaceChatSDK? meetingPlaceChatSDK,
+  ChatSDKWrapper? chatSdkWrapper,
+  ImagePicker? imagePicker,
+  FakeCameraService? cameraService,
   SecureStorage? secureStorage,
 }) async {
   await startApp(
@@ -145,6 +198,10 @@ Future<void> navigateToLocation(
     pushNotificationMessaging: pushNotificationMessaging,
     connectivity: connectivity,
     meetingPlaceCoreSDK: meetingPlaceCoreSDK,
+    meetingPlaceChatSDK: meetingPlaceChatSDK,
+    chatSdkWrapper: chatSdkWrapper,
+    imagePicker: imagePicker,
+    cameraService: cameraService,
     secureStorage: secureStorage,
     mediators: mediators,
     contacts: contacts,
