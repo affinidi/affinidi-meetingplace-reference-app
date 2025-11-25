@@ -222,4 +222,18 @@ void main() {
       expect(find.text(l10n.publishOffer), findsOneWidget);
     });
   });
+
+  group('When opening the app on find offer', () {
+    final location =
+        '/connections/find-offer?identity-id=${FakeIdentities.primaryIdentity.id}';
+    testWidgets('it shows the find offer screen', (tester) async {
+      await navigateToLocation(tester, location, identities: [
+        FakeIdentities.primaryIdentity,
+      ]);
+      await tester.pumpAndSettle();
+
+      final l10n = await getL10n();
+      expect(find.text(l10n.claimOfferTitle), findsOneWidget);
+    });
+  });
 }

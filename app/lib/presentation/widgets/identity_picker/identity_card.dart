@@ -14,6 +14,7 @@ import '../profile_picture.dart';
 
 class IdentityCard extends StatelessWidget {
   const IdentityCard({
+    super.key,
     required this.identity,
     this.onDeleteIdentity,
     this.onFindOfferForIdentity,
