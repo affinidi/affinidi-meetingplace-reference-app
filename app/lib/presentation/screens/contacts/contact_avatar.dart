@@ -24,7 +24,7 @@ class _ContactAvatar extends ConsumerWidget {
         if (contact.isGroup && contact.status == ContactStatus.pendingApproval)
           Positioned(
             top: isList ? -5 : -5,
-            right: isList ? 0 : -5,
+            right: isList ? -10 : -15,
             child: Icon(
               Icons.star,
               color: statusColor,
