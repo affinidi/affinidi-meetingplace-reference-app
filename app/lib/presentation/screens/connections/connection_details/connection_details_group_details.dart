@@ -98,7 +98,7 @@ class _GroupDetailsPanel extends ConsumerWidget {
       title: context.l10n.groupDetails,
       child: ListView.separated(
         shrinkWrap: true,
-        physics: const ScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: items.length,
         separatorBuilder: (context, index) => const Divider(),
         itemBuilder: (context, index) => items[index],
