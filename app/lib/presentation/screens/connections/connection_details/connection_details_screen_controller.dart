@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
@@ -254,14 +255,11 @@ extension ConnectionDetailsScreenControllerProviderSelector
       });
 
   ProviderListenable<VCard?> get groupAdminVCard => select((state) {
-        if (state.group == null) return null;
-
-        final groupAdmin = state.group!.members.firstWhere(
-          (member) => member.membershipType == GroupMembershipType.admin,
-          orElse: () => state.group!.members.first,
-        );
-
-        return groupAdmin.vCard;
+        final group = state.group;
+        if (group == null) return null;
+        final groupAdmin = group.members.firstWhereOrNull(
+            (member) => member.membershipType == GroupMembershipType.admin);
+        return groupAdmin?.vCard;
       });
 
   ProviderListenable<bool> get isGroupChat =>
