@@ -9,12 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get poweredBy => 'powered by';
-
-  @override
-  String get messagingEngine => 'Affinidi Meeting Place SDK';
-
-  @override
   String get appName => 'Meeting Place';
 
   @override

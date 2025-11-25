@@ -1,12 +1,4 @@
 {
-  "poweredBy": "powered by",
-  "@poweredBy": {
-    "type": "text"
-  },
-  "messagingEngine": "Affinidi Meeting Place SDK",
-  "@messagingEngine": {
-    "type": "text"
-  },
   "appName": "Meeting Place",
   "@appName": {
     "type": "text"

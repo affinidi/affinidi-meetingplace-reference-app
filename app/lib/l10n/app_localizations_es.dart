@@ -9,12 +9,6 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get poweredBy => 'Funciona con';
-
-  @override
-  String get messagingEngine => 'Mensajería de Affinidi';
-
-  @override
   String get appName => 'Lugar de encuentro';
 
   @override
