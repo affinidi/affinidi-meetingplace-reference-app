@@ -9,12 +9,6 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
-  String get poweredBy => 'Powered by';
-
-  @override
-  String get messagingEngine => 'Affinidi-Nachrichten';
-
-  @override
   String get appName => 'Treffpunkt';
 
   @override

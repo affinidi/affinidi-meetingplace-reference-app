@@ -1,17 +1,17 @@
 // ignore_for_file: unreachable_from_main
 
-import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../loggers/app_logger/app_logger.dart';
-import 'push_notification.dart';
+import '../providers/app_badge_provider.dart';
 import 'push_notification_messaging.dart';
 
 /// Background handler for Firebase push notifications.
 ///
 /// Called when a message is received while the app is in the background.
-/// Logs the message, parses it into a [PushNotification], and updates
-/// the app badge count if supported.
+/// Logs the message and updates the app badge count for Android devices.
+/// iOS badge is handled automatically by the OS using the native APNS
+/// badge field.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   AppLogger.instance.info(
@@ -19,12 +19,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     name: 'firebaseMessagingBackgroundHandler',
   );
 
-  final notification = PushNotification.fromPayload(message.data);
-  final pendingCount = notification.data.pendingCount ?? 0;
-
-  if (await AppBadgePlus.isSupported()) {
-    await AppBadgePlus.updateBadge(pendingCount);
-  }
+  await AppBadgeService.instance.setBadgeFromMessage(message);
 }
 
 class FirebasePushNotificationMessaging implements PushNotificationMessaging {

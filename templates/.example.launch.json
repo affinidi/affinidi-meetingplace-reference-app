@@ -2,23 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug (App Dev)",
+      "name": "Meeting Place Ref App (App Dev)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
       "program": "app/lib/main.dart",
       "toolArgs": [
-        "--dart-define-from-file=../configurations/.env.dev"
-      ]
-    },
-    {
-      "name": "Debug (App Prod)",
-      "request": "launch",
-      "type": "dart",
-      "flutterMode": "debug",
-      "program": "app/lib/main.dart",
-      "toolArgs": [
-        "--dart-define-from-file=../configurations/.env.prod"
+        "--dart-define-from-file=../configurations/.env"
       ]
     }
   ]

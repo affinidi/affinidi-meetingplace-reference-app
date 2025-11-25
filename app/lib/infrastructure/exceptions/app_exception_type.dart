@@ -22,4 +22,5 @@ enum AppExceptionType {
   cannotRemoveDefaultMediator,
   mediatorAlreadyExists,
   unableToFindMediator,
+  offerNotFound,
 }

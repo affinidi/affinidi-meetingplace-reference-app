@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../application/services/authentication_service/authentication_service.dart';
@@ -14,7 +15,7 @@ import '../../infrastructure/providers/app_badge_provider.dart';
 part 'app_controller.g.dart';
 
 @Riverpod(keepAlive: true)
-class AppController extends _$AppController {
+class AppController extends _$AppController with WidgetsBindingObserver {
   AppController() : super();
 
   @override
@@ -36,6 +37,12 @@ class AppController extends _$AppController {
 
     ref.read(settingsServiceProvider);
     ref.read(networkConnectivityServiceProvider);
-    unawaited(ref.read(appBadgeServiceProvider).clearBadge());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
+    }
   }
 }

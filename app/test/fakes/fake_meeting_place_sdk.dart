@@ -10,6 +10,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     PublishOfferResult? offerToReturn,
     Exception? publishOfferException,
     bool isPhraseAvailable = true,
+    this.offerToFind,
+    this.findOfferHasError = false,
   })  : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
         _offerToReturn = offerToReturn,
         _publishOfferException = publishOfferException,
@@ -19,6 +21,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final PublishOfferResult? _offerToReturn;
   final Exception? _publishOfferException;
   final bool _isPhraseAvailable;
+  final ConnectionOffer? offerToFind;
+  final bool findOfferHasError;
 
   final _controlPlaneEventStreamManager =
       StreamController<ControlPlaneStreamEvent>.broadcast();
@@ -100,11 +104,63 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     return FakePublishOfferResult() as PublishOfferResult<T>;
   }
 
+  // Track findOffer calls
+  final List<String> _findOfferCalls = [];
+  List<String> get findOfferCalls => _findOfferCalls;
+
+  @override
+  Future<FindOfferResult> findOffer({required String mnemonic}) async {
+    // Record the call
+    _findOfferCalls.add(mnemonic);
+
+    // For now, just return the offer if available
+    return FindOfferResult(
+      connectionOffer: offerToFind,
+      errorCode: null,
+    );
+  }
+
+  // Track acceptOffer calls
+  final List<Map<String, dynamic>> _acceptOfferCalls = [];
+  List<Map<String, dynamic>> get acceptOfferCalls => _acceptOfferCalls;
+
+  @override
+  Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>({
+    required T connectionOffer,
+    required VCard vCard,
+    required String senderInfo,
+    String? externalRef,
+  }) async {
+    // Record the call parameters
+    _acceptOfferCalls.add({
+      'connectionOffer': connectionOffer,
+      'vCard': vCard,
+      'senderInfo': senderInfo,
+      'externalRef': externalRef,
+    });
+
+    // Return a fake result with the accepted connection offer
+    return _FakeAcceptOfferResult<T>(connectionOffer: connectionOffer);
+  }
+
   @override
   Future<void> processControlPlaneEvents({Function? onDone}) async {
     // ignore: avoid_dynamic_calls
     onDone?.call();
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
+}
+
+class _FakeAcceptOfferResult<T extends ConnectionOffer>
+    implements AcceptOfferResult<T> {
+  _FakeAcceptOfferResult({required this.connectionOffer});
+
+  @override
+  final T connectionOffer;
 
   @override
   dynamic noSuchMethod(Invocation invocation) {

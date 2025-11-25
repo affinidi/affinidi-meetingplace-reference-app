@@ -14,6 +14,7 @@ final cacheManagerProvider = Provider<BaseCacheManager>((ref) {
     'assets/images/meetingplace-banner.png',
     'assets/images/default_profile_image.png',
     'assets/images/group_image.png',
+    'assets/images/powered_by_mpx.png',
   ];
   final config = ImageConfiguration(
     devicePixelRatio:

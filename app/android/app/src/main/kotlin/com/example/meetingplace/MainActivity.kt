@@ -25,4 +25,4 @@ class MainActivity: FlutterFragmentActivity() {
             notificationManager.createNotificationChannel(channel)
         }
     }
-} 
+}
