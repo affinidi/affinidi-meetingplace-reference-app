@@ -18,6 +18,7 @@ class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
 
   final List<Map<String, dynamic>> sendEffectCalls = [];
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
+  final List<Map<String, dynamic>> reactOnMessageCalls = [];
 
   @override
   Future<ChatStream?> get chatStreamSubscription async {
@@ -105,6 +106,8 @@ class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
     _fakeMessageController.close();
   }
 
+  void endChatSession() => _realSdk.endChatSession();
+
   @override
   Future<Message> sendTextMessage(String text,
       {List<Attachment>? attachments}) async {
@@ -113,6 +116,16 @@ class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
       'attachments': attachments,
     });
     return _realSdk.sendTextMessage(text, attachments: attachments);
+  }
+
+  @override
+  Future<void> reactOnMessage(Message message,
+      {required String reaction}) async {
+    reactOnMessageCalls.add({
+      'message': message,
+      'reaction': reaction,
+    });
+    return _realSdk.reactOnMessage(message, reaction: reaction);
   }
 
   @override
@@ -125,16 +138,14 @@ class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
-    return Function.apply(
-      _realSdk.noSuchMethod,
-      [invocation],
-      {},
-    );
+    if (invocation.memberName == #startChatSession) {
+      return _realSdk.startChatSession();
+    }
+    return super.noSuchMethod(invocation);
   }
 }
 
-/// A ChatStream that merges messages from both the real SDK and
-///  injected fake messages.
+/// A ChatStream that merges messages from both the real SDK and injected fake messages.
 class _MergedChatStream implements ChatStream {
   _MergedChatStream(this._realStream, this._fakeStream);
 
@@ -180,14 +191,50 @@ class _MergedChatStream implements ChatStream {
   }
 }
 
+// Extension to convert ChatStream to Stream<StreamData>
 extension _ChatStreamExt on ChatStream {
   Stream<StreamData> _toStream() {
     final controller = StreamController<StreamData>();
     listen(
-      controller.add,
-      onError: controller.addError,
-      onDone: controller.close,
+      (data) => controller.add(data),
+      onError: (Object error) => controller.addError(error),
+      onDone: () => controller.close(),
     );
     return controller.stream;
+  }
+}
+
+/// A fake implementation of ChatStream for testing.
+class FakeChatStream implements ChatStream {
+  FakeChatStream(this._stream);
+
+  final Stream<StreamData> _stream;
+  StreamSubscription<StreamData>? _subscription;
+
+  @override
+  ChatStream listen(
+    void Function(StreamData) onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    _subscription = _stream.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+    return this;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _subscription?.cancel();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError(
+        'Method ${invocation.memberName} not implemented in FakeChatStream');
   }
 }
