@@ -110,14 +110,19 @@ class _ChatContactImage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final cacheManager = ref.read(cacheManagerProvider);
-    final image = ref.watch(provider.select(
-        (state) => state.contact?.vCard.image(cacheManager: cacheManager)));
+    final contact = ref.watch(provider.select((state) => state.contact));
+
+    if (contact == null) return const SizedBox.shrink();
+
+    final displayImage = contact.image(cacheManager: cacheManager);
+    final isGroupOrDefaultImage = contact.hasDefaultImage;
 
     return SizedBox(
       height: 55,
       width: 55,
       child: Card(
-        color: const Color.fromARGB(10, 255, 255, 255),
+        color:
+            isGroupOrDefaultImage ? Colors.white : Colors.white.withAlpha(10),
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(100.0),
@@ -125,7 +130,7 @@ class _ChatContactImage extends ConsumerWidget {
         elevation: 5,
         child: Image(
           fit: BoxFit.cover,
-          image: image!,
+          image: displayImage,
         ),
       ),
     );

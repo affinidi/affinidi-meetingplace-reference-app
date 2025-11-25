@@ -13,7 +13,6 @@ import '../../../../application/services/mediator_service/mediator_service.dart'
 import '../../../../application/services/settings_service/settings_service.dart';
 import '../../../../domain/models/contacts/contact.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
-import '../../../../domain/models/contacts/contact_type.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../infrastructure/extensions/vcard_extensions.dart';
@@ -22,6 +21,7 @@ import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../widgets/async_loaders/async_loading_controller.dart';
 import '../../../widgets/images/default_profile_image.dart';
+import '../../../widgets/images/group_image.dart';
 import 'connection_details_screen_state.dart';
 
 part 'connection_details_screen_controller.g.dart';
@@ -221,11 +221,20 @@ class ConnectionDetailsScreenController
     required bool hasOtherPartyPic,
     required String? otherPartyProfilePic,
   }) async {
-    final base64Image = (hasOtherPartyPic && otherPartyProfilePic != null)
-        ? otherPartyProfilePic
-        : defaultProfileBase64;
+    if (hasOtherPartyPic && otherPartyProfilePic != null) {
+      return base64Decode(otherPartyProfilePic);
+    }
 
-    final bytes = base64Decode(base64Image);
+    final assetImage = state.isGroupChat ? groupImage : defaultProfileImage;
+
+    final bundle = assetImage.bundle ??
+        DefaultAssetBundle.of(
+          WidgetsBinding.instance.rootElement!,
+        );
+
+    final bytes = await bundle
+        .load(assetImage.keyName)
+        .then((data) => data.buffer.asUint8List());
 
     return bytes;
   }
@@ -301,7 +310,7 @@ extension ConnectionDetailsScreenControllerProviderSelector
 
 extension _ConnectionDetailsScreenStateExtensions
     on ConnectionDetailsScreenState {
-  bool get isGroupChat => contact?.type == ContactType.group;
+  bool get isGroupChat => contact?.isGroup ?? false;
 
   bool get canRevealMnemonic => connection?.ownedByMe ?? false;
 }

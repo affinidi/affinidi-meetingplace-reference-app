@@ -15,7 +15,6 @@ import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_status.dart';
-import '../../../domain/models/contacts/contact_type.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
@@ -968,7 +967,7 @@ extension ChatScreenControllerProviderSelectors
 
   ProviderListenable<String?> get otherPartyName {
     return select((state) {
-      if (state.contact?.type == ContactType.group) return null;
+      if (state.contact?.isGroup ?? false) return null;
 
       return state.otherPartyVCard?.firstName;
     });
@@ -1023,7 +1022,7 @@ extension ChatScreenControllerProviderSelectors
 }
 
 extension _ChatScreenStateExtensions on ChatScreenState {
-  bool get isGroupChat => contact?.type == ContactType.group;
+  bool get isGroupChat => contact?.isGroup ?? false;
   bool get isGroupDeleted {
     final groupDeleted = messages
         .whereType<chat.EventMessage>()
