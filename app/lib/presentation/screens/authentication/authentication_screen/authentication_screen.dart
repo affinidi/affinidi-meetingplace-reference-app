@@ -153,23 +153,13 @@ class AuthenticationScreen extends HookConsumerWidget {
             Padding(
               padding:
                   EdgeInsets.only(bottom: isSmallScreenLandscape ? 20.0 : 40.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        l10n.poweredBy,
-                        style: textTheme.bodySmall,
-                      ),
-                      Text(
-                        l10n.messagingEngine,
-                        style: textTheme.bodyMedium,
-                      ),
-                    ],
+              child: Center(
+                child: SizedBox(
+                  height: 40,
+                  child: Image.asset(
+                    'assets/images/powered_by_mpx.png',
                   ),
-                ],
+                ),
               ),
             ),
           ],

@@ -206,10 +206,7 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      await sdk.approveConnectionRequest(
-        channel: channel,
-        connectionOffer: connectionOffer,
-      );
+      await sdk.approveConnectionRequest(channel: channel);
 
       _logger.info(
         'Connection request approved successfully',
@@ -253,14 +250,12 @@ class ConnectionsService extends _$ConnectionsService {
     required Identity identity,
   }) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
-    final result = await sdk.acceptOffer(
+    await sdk.acceptOffer(
       connectionOffer: connectionOffer,
       vCard: identity.card.toVCard(),
       externalRef: identity.id,
+      senderInfo: identity.card.firstName,
     );
-    await sdk.notifyAcceptance(
-        connectionOffer: result.connectionOffer,
-        senderInfo: identity.card.firstName);
     await fetchConnections();
   }
 
@@ -437,7 +432,7 @@ class ConnectionsService extends _$ConnectionsService {
   Future<void> findOffer(String mnemonic) async {
     if (mnemonic.isEmpty) {
       throw AppException(
-        'mnemonic is required',
+        'Mnemonic is required',
         code: AppExceptionType.missingMnemonic.name,
       );
     }
@@ -455,7 +450,7 @@ class ConnectionsService extends _$ConnectionsService {
     if (result.connectionOffer == null) {
       throw AppException(
         'Unable to find offer',
-        code: AppExceptionType.other.name,
+        code: AppExceptionType.offerNotFound.name,
       );
     }
 

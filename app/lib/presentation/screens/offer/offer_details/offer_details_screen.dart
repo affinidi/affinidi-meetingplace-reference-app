@@ -28,6 +28,7 @@ part 'offer_details_did_info_panel.dart';
 part 'offer_details_header.dart';
 part 'offer_details_info_panel.dart';
 part 'offer_details_name.dart';
+part 'offer_details_description.dart';
 part 'offer_details_personal_info_panel.dart';
 part 'offer_details_phrase.dart';
 part 'offer_details_validity_visibility_panel.dart';
@@ -74,10 +75,7 @@ class OfferDetailsScreen extends HookConsumerWidget {
                         spacing: 10,
                         children: [
                           _OfferDetailsName(offerLink),
-                          Text(
-                            context.l10n.offerDetailsDescription,
-                            textAlign: TextAlign.center,
-                          ),
+                          _OfferDetailsDescription(offerLink),
                           _OfferDetailsPhrase(offerLink),
                           _OfferDetailsValidityVisibilityPanel(offerLink),
                           _OfferDetailsPersonalInfoPanel(offerLink),
