@@ -25,79 +25,83 @@ class _GroupDetailsPanel extends ConsumerWidget {
     final groupId =
         ref.watch(provider.select((state) => state.group?.id ?? ''));
 
+    final items = <Widget>[];
+
+    if (groupName != null) {
+      items.add(FormRowIconTitle(
+        icon: Icons.person,
+        iconColor: context.colorScheme.primary,
+        label: context.l10n.generalName,
+        value: groupName,
+      ));
+    }
+
+    if (email != null && email.isNotEmpty) {
+      items.add(FormRowIconTitle(
+        icon: Icons.email,
+        iconColor: context.customColors.purple,
+        label: context.l10n.generalEmail,
+        value: email,
+      ));
+    }
+
+    if (mobile != null && mobile.isNotEmpty) {
+      items.add(FormRowIconTitle(
+        icon: Icons.cell_tower,
+        iconColor: context.customColors.brown,
+        label: context.l10n.generalMobile,
+        value: mobile,
+      ));
+    }
+
+    if (isDebugMode && adminDid != null && adminDid.isNotEmpty) {
+      items.add(FormRowIconTitle(
+        icon: Icons.fingerprint,
+        iconColor: context.customColors.orange,
+        label: context.l10n.generalDid,
+        value: adminDid.topAndTail(),
+        isCopiable: true,
+      ));
+    }
+
+    if (isDebugMode && adminDidSha256 != null && adminDidSha256.isNotEmpty) {
+      items.add(FormRowIconTitle(
+        icon: Icons.drag_indicator_sharp,
+        iconColor: context.customColors.success,
+        label: context.l10n.generalDidSha256,
+        value: adminDidSha256.topAndTail(),
+        isCopiable: true,
+      ));
+    }
+
+    if (isDebugMode && offerLink.isNotEmpty) {
+      items.add(FormRowIconTitle(
+        icon: Icons.link,
+        iconColor: context.colorScheme.secondary,
+        label: context.l10n.generalOfferLink,
+        value: offerLink,
+        isCopiable: true,
+      ));
+    }
+
+    if (isDebugMode && groupId.isNotEmpty) {
+      items.add(FormRowIconTitle(
+        icon: Icons.group,
+        iconColor: context.customColors.purple,
+        label: context.l10n.generalGroupId,
+        value: groupId.topAndTail(),
+        isCopiable: true,
+      ));
+    }
+
     return FormCard(
       title: context.l10n.groupDetails,
-      child: Column(
-        spacing: 5,
-        children: [
-          if (groupName != null)
-            FormRowIconTitle(
-              icon: Icons.person,
-              iconColor: context.colorScheme.primary,
-              label: context.l10n.generalName,
-              value: groupName,
-            ),
-          if (email != null && email.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.email,
-              iconColor: context.customColors.purple,
-              label: context.l10n.generalEmail,
-              value: email,
-            ),
-          ],
-          if (mobile != null && mobile.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.cell_tower,
-              iconColor: context.customColors.brown,
-              label: context.l10n.generalMobile,
-              value: mobile,
-            ),
-          ],
-          if (isDebugMode && adminDid != null && adminDid.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.fingerprint,
-              iconColor: context.customColors.orange,
-              label: context.l10n.generalDid,
-              value: adminDid.topAndTail(),
-              isCopiable: true,
-            ),
-          ],
-          if (isDebugMode &&
-              adminDidSha256 != null &&
-              adminDidSha256.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.drag_indicator_sharp,
-              iconColor: context.customColors.success,
-              label: context.l10n.generalDidSha256,
-              value: adminDidSha256.topAndTail(),
-              isCopiable: true,
-            ),
-          ],
-          if (isDebugMode && offerLink.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.link,
-              iconColor: context.colorScheme.secondary,
-              label: context.l10n.generalOfferLink,
-              value: offerLink,
-              isCopiable: true,
-            ),
-          ],
-          if (isDebugMode && groupId.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.group,
-              iconColor: context.customColors.purple,
-              label: context.l10n.generalGroupId,
-              value: groupId.topAndTail(),
-              isCopiable: true,
-            ),
-          ],
-        ],
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const ScrollPhysics(),
+        itemCount: items.length,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) => items[index],
       ),
     );
   }
