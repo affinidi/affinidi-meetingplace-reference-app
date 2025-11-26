@@ -34,6 +34,7 @@ part 'connection_details_profile_pictures.dart';
 part 'connection_details_shared_identity.dart';
 part 'connection_details_status.dart';
 part 'connection_details_their_details.dart';
+part 'connection_details_group_details.dart';
 part 'connection_mnemonic.dart';
 part 'connection_qr_code_view.dart';
 part 'group_members_panel.dart';
@@ -100,7 +101,9 @@ class ConnectionDetailsScreen extends HookConsumerWidget {
                         children: [
                           _DisplayNamePanel(contactId),
                           if (isGroupChat) _GroupMembersPanel(contactId),
-                          _TheirDetailsPanel(contactId),
+                          isGroupChat
+                              ? _GroupDetailsPanel(contactId)
+                              : _TheirDetailsPanel(contactId),
                           _SharedIdentityPanel(contactId),
                           _ConnectionDetailsPanel(contactId),
                           _ConnectionMnenomicPanel(contactId),
