@@ -50,8 +50,6 @@ class FindOfferScreen extends HookConsumerWidget {
       FocusManager.instance.primaryFocus?.unfocus();
 
       final trimmed = mnemonic.trim();
-      if (trimmed.isEmpty) return;
-
       var success = false;
       await ref
           .read(controller.findOfferLoadingController.notifier)
@@ -115,6 +113,7 @@ class FindOfferScreen extends HookConsumerWidget {
                 ),
                 if (identity != null)
                   IdentityCard(
+                    key: const ValueKey('find_offer_identity_picker'),
                     identity: identity,
                     displayMode: true,
                     cacheManager: cacheManager,

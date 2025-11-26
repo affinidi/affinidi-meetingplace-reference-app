@@ -9,12 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get poweredBy => 'powered by';
-
-  @override
-  String get messagingEngine => 'Affinidi Meeting Place SDK';
-
-  @override
   String get appName => 'Meeting Place';
 
   @override
@@ -372,6 +366,7 @@ class AppLocalizationsEn extends AppLocalizations {
             'You cannot accept this invitation because you are the inviter!',
         'connection_offer_already_claimed_by_claiming_party':
             'You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress',
+        'missingMnemonic': 'Please enter an invitation passphrase to search',
         'connection_offer_not_found_error':
             'The details you provided did not match any active invitations.',
         'discovery_register_offer_group_generic':

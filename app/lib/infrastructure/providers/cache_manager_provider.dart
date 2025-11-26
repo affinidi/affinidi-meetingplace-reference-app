@@ -11,7 +11,10 @@ final cacheManagerProvider = Provider<BaseCacheManager>((ref) {
   final images = <String>[
     'assets/images/version_cat.jpg',
     'assets/images/meeting-place-splash-white-1024.png',
-    'assets/images/meetingplace-banner.png'
+    'assets/images/meetingplace-banner.png',
+    'assets/images/default_profile_image.png',
+    'assets/images/group_image.png',
+    'assets/images/powered_by_mpx.png',
   ];
   final config = ImageConfiguration(
     devicePixelRatio:

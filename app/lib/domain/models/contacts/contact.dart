@@ -88,4 +88,7 @@ class Contact {
   final bool hasBeenOpened;
   final String? unsentMessage;
   final DateTime? lastKeepAliveMessage;
+
+  bool get isGroup => type == ContactType.group;
+  bool get isIndividual => type == ContactType.individual;
 }
