@@ -12,6 +12,33 @@ import 'camera_service_state.dart';
 
 part 'camera_service.g.dart';
 
+final availableCamerasProvider =
+    Provider<Future<List<CameraDescription>> Function()>(
+  (ref) => availableCameras,
+);
+
+typedef CameraControllerFactory = CameraController Function(
+  CameraDescription description,
+  ResolutionPreset resolutionPreset, {
+  bool enableAudio,
+  ImageFormatGroup? imageFormatGroup,
+});
+
+final cameraControllerFactoryProvider = Provider<CameraControllerFactory>(
+  (ref) => (
+    description,
+    resolutionPreset, {
+    enableAudio = true,
+    imageFormatGroup,
+  }) =>
+      CameraController(
+        description,
+        resolutionPreset,
+        enableAudio: enableAudio,
+        imageFormatGroup: imageFormatGroup,
+      ),
+);
+
 /// A service class for managing camera functionality in the app.
 ///
 /// - Manages camera initialization, switching between front/back lenses,
@@ -52,14 +79,16 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   /// Returns an initialized [CameraController].
   Future<CameraController> initializeCamera(
       CameraLensDirection cameraLensDirection) async {
-    final cameras = await availableCameras();
+    final getCameras = ref.read(availableCamerasProvider);
+    final cameras = await getCameras();
     final description = cameras.firstWhere(
       (c) => c.lensDirection == cameraLensDirection,
       orElse: () =>
           throw Exception('No camera found for $cameraLensDirection direction'),
     );
 
-    final controller = CameraController(
+    final controllerFactory = ref.read(cameraControllerFactoryProvider);
+    final controller = controllerFactory(
       description,
       ResolutionPreset.high,
       enableAudio: false,
@@ -175,7 +204,8 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
       name: _logKey,
     );
     try {
-      final cameras = await availableCameras();
+      final getCameras = ref.read(availableCamerasProvider);
+      final cameras = await getCameras();
       state = state.copyWith(
         isAvailable: cameras.isNotEmpty,
         cameras: cameras,

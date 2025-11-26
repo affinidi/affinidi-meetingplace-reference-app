@@ -106,6 +106,7 @@ class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
     _fakeMessageController.close();
   }
 
+  @override
   void endChatSession() => _realSdk.endChatSession();
 
   @override

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:camera/camera.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +31,7 @@ import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 
 import '../fakes/fake_app_badge_service.dart';
 import '../fakes/fake_cache_manager.dart';
-import '../fakes/fake_camera_service.dart';
+import '../fakes/fake_camera_controller.dart';
 import '../fakes/fake_channels.dart';
 import '../fakes/fake_chat_repository.dart';
 import '../fakes/fake_connectivity.dart';
@@ -58,7 +59,7 @@ Future<void> startApp(
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ChatSDKWrapper? chatSdkWrapper,
   ImagePicker? imagePicker,
-  FakeCameraService? cameraService,
+  List<CameraDescription>? mockCameras,
   required List<Identity> identities,
   required List<Mediator> mediators,
   List<Contact> contacts = const [],
@@ -155,9 +156,23 @@ Future<void> startApp(
         }),
       if (imagePicker != null)
         imagePickerProvider.overrideWith((ref) => imagePicker),
-      if (cameraService != null)
-        cameraServiceProvider
-            .overrideWith(() => FakeCameraServiceNotifier(cameraService)),
+      if (mockCameras != null) ...[
+        availableCamerasProvider.overrideWith((ref) => () async => mockCameras),
+        cameraControllerFactoryProvider.overrideWith(
+          (ref) => (
+            description,
+            resolutionPreset, {
+            enableAudio = true,
+            imageFormatGroup,
+          }) =>
+              FakeCameraController(
+                description,
+                resolutionPreset,
+                enableAudio: enableAudio,
+                imageFormatGroup: imageFormatGroup,
+              ),
+        ),
+      ],
       secureStorageProvider
           .overrideWith((ref) async => secureStorage ?? FakeSecureStorage()),
       sharedPreferencesProvider.overrideWithValue(sharedPreferences),
@@ -185,7 +200,7 @@ Future<void> navigateToLocation(
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ChatSDKWrapper? chatSdkWrapper,
   ImagePicker? imagePicker,
-  FakeCameraService? cameraService,
+  List<CameraDescription>? mockCameras,
   SecureStorage? secureStorage,
 }) async {
   await startApp(
@@ -199,7 +214,7 @@ Future<void> navigateToLocation(
     meetingPlaceChatSDK: meetingPlaceChatSDK,
     chatSdkWrapper: chatSdkWrapper,
     imagePicker: imagePicker,
-    cameraService: cameraService,
+    mockCameras: mockCameras,
     secureStorage: secureStorage,
     mediators: mediators,
     contacts: contacts,
