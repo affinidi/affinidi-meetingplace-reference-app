@@ -328,7 +328,7 @@ class ChatScreenController extends _$ChatScreenController {
         _upsertChatItem(chatItem);
       }
 
-      if (chatItem is chat.Message) {
+      if (chatItem is chat.Message && !chatItem.isFromMe) {
         final groupMessageSenderName = plainTextMessage != null
             ? _getGroupMemberNameFromMessage(plainTextMessage)
             : null;
