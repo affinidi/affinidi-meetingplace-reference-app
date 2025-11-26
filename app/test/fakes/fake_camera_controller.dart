@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-import 'dart:ui';
+import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
@@ -21,16 +20,9 @@ class FakeCameraController extends CameraController {
   });
 
   final Uint8List? mockImageBytes;
-  bool _isDisposed = false;
 
   @override
   Future<void> initialize() async {
-    if (_isDisposed) {
-      throw CameraException(
-        'Disposed CameraController',
-        'initialize was called on a disposed CameraController',
-      );
-    }
     await Future<void>.delayed(const Duration(milliseconds: 10));
 
     value = value.copyWith(
@@ -40,23 +32,11 @@ class FakeCameraController extends CameraController {
   }
 
   @override
-  Future<void> dispose() async {
-    _isDisposed = true;
-    super.dispose();
-  }
-
-  @override
   Future<XFile> takePicture() async {
     if (!value.isInitialized) {
       throw CameraException(
         'Uninitialized CameraController',
         'takePicture was called on an uninitialized CameraController',
-      );
-    }
-    if (_isDisposed) {
-      throw CameraException(
-        'Disposed CameraController',
-        'takePicture was called on a disposed CameraController',
       );
     }
 

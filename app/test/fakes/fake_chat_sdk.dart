@@ -146,7 +146,8 @@ class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
   }
 }
 
-/// A ChatStream that merges messages from both the real SDK and injected fake messages.
+/// A ChatStream that merges messages from both the real SDK and injected
+/// fake messages.
 class _MergedChatStream implements ChatStream {
   _MergedChatStream(this._realStream, this._fakeStream);
 
@@ -197,9 +198,9 @@ extension _ChatStreamExt on ChatStream {
   Stream<StreamData> _toStream() {
     final controller = StreamController<StreamData>();
     listen(
-      (data) => controller.add(data),
-      onError: (Object error) => controller.addError(error),
-      onDone: () => controller.close(),
+      controller.add,
+      onError: controller.addError,
+      onDone: controller.close,
     );
     return controller.stream;
   }
