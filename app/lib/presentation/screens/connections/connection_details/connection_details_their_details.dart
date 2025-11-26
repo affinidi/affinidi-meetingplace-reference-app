@@ -8,8 +8,6 @@ class _TheirDetailsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(contactId);
-    final isGroupChat = ref.watch(provider.isGroupChat);
-    final groupName = ref.watch(provider.groupName);
     final otherPartyVCard = ref.watch(provider.otherPartyVCard);
 
     final contactName = otherPartyVCard?.fullName;
@@ -28,18 +26,10 @@ class _TheirDetailsPanel extends ConsumerWidget {
         ref.watch(provider.select((state) => state.group?.id ?? ''));
 
     return FormCard(
-      title:
-          isGroupChat ? context.l10n.groupDetails : context.l10n.theirDetails,
+      title: context.l10n.theirDetails,
       child: Column(
         spacing: 5,
         children: [
-          if (groupName != null)
-            FormRowIconTitle(
-              icon: Icons.person,
-              iconColor: context.colorScheme.primary,
-              label: context.l10n.generalName,
-              value: groupName,
-            ),
           if (contactName != null)
             FormRowIconTitle(
               icon: Icons.person,
