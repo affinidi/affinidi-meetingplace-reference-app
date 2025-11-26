@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -43,10 +44,7 @@ void main() async {
 
   logger.info('Application starting up', name: logKey);
   logger.info(
-    'Flutter version: ${const String.fromEnvironment(
-      'FLUTTER_VERSION',
-      defaultValue: 'unknown',
-    )}',
+    'Flutter version: ${FlutterVersion.version ?? 'unknown'}',
     name: logKey,
   );
   logger.info('Build mode: ${kDebugMode ? 'debug' : 'release'}', name: logKey);
