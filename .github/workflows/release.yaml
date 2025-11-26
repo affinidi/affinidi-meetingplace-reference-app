@@ -4,8 +4,38 @@ on:
     branches:
       - main
 jobs:
-  dart-pipeline:
-    uses: affinidi/pipeline-dart/.github/workflows/release.yaml@main
-    secrets: inherit
-    with:
-      flutter-version: '3.35.3'
+  release:
+    needs: [rust-scan]
+    runs-on: ubuntu-24.04
+    environment: 'release'
+    steps:
+      # https://github.com/actions/create-github-app-token
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: configure git
+        run: |
+          echo "GITHUB_ACTOR=${GITHUB_ACTOR}"
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      - run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+
