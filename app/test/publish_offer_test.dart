@@ -724,7 +724,6 @@ void main() {
           await tester.tap(changeButtons.first);
           await tester.pumpAndSettle();
 
-          // Select a date 5 days from now in the date picker
           final today = DateTime.now();
           final newExpiryDate =
               today.add(const Duration(days: expireAfterDays));
