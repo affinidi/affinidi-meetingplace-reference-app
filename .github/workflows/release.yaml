@@ -9,20 +9,16 @@ jobs:
     environment: 'main'
     steps:
       # https://github.com/actions/create-github-app-token
-      - uses: actions/create-github-app-token@v2
-        id: app-token
+      - name: Generate token from app token #https://github.com/tibdex/github-app-token
+        id: generate_token
+        uses: actions/create-github-app-token@v2
         with:
-          owner: ${{ github.repository_owner }}
-          repositories: ${{ github.event.repository.name }}
           app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
-          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
-
+          private-key: ${{ secrets.RELEASE_BOT_PKEY }}
       - uses: actions/checkout@v4
         with:
-          token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0
-          ref: ${{ github.head_ref }}
-
+          token: ${{ steps.generate_token.outputs.token }}
       - name: configure git
         run: |
           echo "GITHUB_ACTOR=${GITHUB_ACTOR}"
@@ -35,6 +31,6 @@ jobs:
 
       - run: npx semantic-release
         env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
 
 
