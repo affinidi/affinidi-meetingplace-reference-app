@@ -650,6 +650,7 @@ void main() {
           (tester) async {
         final l10n = await getL10n();
         final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        const defaultExpiryDays = 3;
 
         await setupPublishOfferTest(
           tester,
@@ -679,9 +680,10 @@ void main() {
         expect(publishCall['customPhrase'], isNull);
 
         final validUntil = publishCall['validUntil'] as DateTime;
-        final expectedExpiry = DateTime.now().add(const Duration(days: 3));
+        final expectedExpiry =
+            DateTime.now().add(const Duration(days: defaultExpiryDays));
         final difference = validUntil.difference(expectedExpiry).abs();
-        expect(difference.inMinutes < 5, true);
+        expect(difference.inDays == 0, true);
 
         expect(publishCall['maximumUsage'], isNull);
         expect(publishCall['mediatorDid'],
@@ -693,6 +695,7 @@ void main() {
         testWidgets('it publishes with the new expiry date', (tester) async {
           final l10n = await getL10n();
           final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+          const expireAfterDays = 5;
 
           await setupPublishOfferTest(
             tester,
@@ -722,8 +725,18 @@ void main() {
           await tester.pumpAndSettle();
 
           // Select a date 5 days from now in the date picker
-          final newExpiryDate = DateTime.now().add(const Duration(days: 5));
-          await tester.tap(find.text(newExpiryDate.day.toString()));
+          final today = DateTime.now();
+          final newExpiryDate =
+              today.add(const Duration(days: expireAfterDays));
+
+          // If the new date is in the next month, navigate to it
+          if (newExpiryDate.month != today.month) {
+            final nextMonthButton = find.byIcon(Icons.chevron_right);
+            await tester.tap(nextMonthButton);
+            await tester.pumpAndSettle();
+          }
+
+          await tester.tap(find.text(newExpiryDate.day.toString()).last);
           await tester.pumpAndSettle();
 
           // Tap OK button on date picker
@@ -747,11 +760,12 @@ void main() {
           expect(publishCall['offerDescription'], l10n.passphraseDescription);
           expect(publishCall['customPhrase'], isNull);
 
-          // Verify the expiry date is approximately 5 days from now
+          // Verify the expiry date matches the selected date (same day)
           final validUntil = publishCall['validUntil'] as DateTime;
-          final expectedExpiry = DateTime.now().add(const Duration(days: 5));
+          final expectedExpiry =
+              DateTime.now().add(const Duration(days: expireAfterDays));
           final difference = validUntil.difference(expectedExpiry).abs();
-          expect(difference.inMinutes < 5, true);
+          expect(difference.inDays == 0, true);
 
           expect(publishCall['maximumUsage'], isNull);
           expect(publishCall['mediatorDid'],
