@@ -6,7 +6,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-24.04
-    environment: 'release'
+    environment: 'main'
     steps:
       # https://github.com/actions/create-github-app-token
       - uses: actions/create-github-app-token@v2
