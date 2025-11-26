@@ -2115,6 +2115,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send or save QR code'**
   String get shareSheetCTA_QRCode;
+
+  /// No description provided for @firebaseConfigurationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Firebase configuration error'**
+  String get firebaseConfigurationError;
+
+  /// No description provided for @firebaseInitializationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to initialize Firebase'**
+  String get firebaseInitializationError;
 }
 
 class _AppLocalizationsDelegate

@@ -1495,4 +1495,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get shareSheetCTA_QRCode => 'QR-Code senden oder speichern';
+
+  @override
+  String get firebaseConfigurationError => 'Firebase configuration error';
+
+  @override
+  String get firebaseInitializationError => 'Failed to initialize Firebase';
 }

@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'infrastructure/database/setup_sql_cipher.dart';
-import 'infrastructure/firebase_messaging/firebase_options.dart';
+import 'infrastructure/firebase_messaging/firebase_initialization.dart';
 import 'infrastructure/firebase_messaging/firebase_push_notification_messaging.dart';
 import 'infrastructure/loggers/app_logger/app_logger.dart';
 import 'infrastructure/loggers/error_logger/error_logger.dart';
@@ -20,6 +19,7 @@ import 'infrastructure/providers/channel_repository_provider.dart';
 import 'infrastructure/providers/chat_repository_provider.dart';
 import 'infrastructure/providers/connection_offer_repository_provider.dart';
 import 'infrastructure/providers/contacts_repository_provider.dart';
+import 'infrastructure/providers/firebase_initialization_provider.dart';
 import 'infrastructure/providers/group_repository_provider.dart';
 import 'infrastructure/providers/identities_repository_provider.dart';
 import 'infrastructure/providers/mediators_repository_provider.dart';
@@ -33,11 +33,12 @@ import 'presentation/app/app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   ErrorLoggingHandler.instance.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  final sharedPreferences = await SharedPreferences.getInstance();
 
   final logger = AppLogger.instance;
   const logKey = 'Main';
+
+  final firebaseError = await initializeFirebase(logger);
+  final sharedPreferences = await SharedPreferences.getInstance();
 
   logger.info('MeetingPlaceCoreSDK logger configured to use debug collector',
       name: logKey);
@@ -78,6 +79,8 @@ void main() async {
             FirebasePushNotificationMessaging(FirebaseMessaging.instance)
               ..setBackgroundHandler(firebaseMessagingBackgroundHandler)),
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+        if (firebaseError != null)
+          firebaseInitializationErrorProvider.overrideWithValue(firebaseError),
       ],
       observers: [
         ProviderDebugLogger(),
