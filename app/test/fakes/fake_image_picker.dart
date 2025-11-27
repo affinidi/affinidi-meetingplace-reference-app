@@ -8,14 +8,14 @@ import 'package:image_picker/image_picker.dart';
 /// actual camera/gallery access.
 class FakeImagePicker extends ImagePicker {
   FakeImagePicker({
-    Uint8List? mockImageBytes,
+    XFile? xFileToReturn,
     bool shouldReturnNull = false,
-  })  : _mockImageBytes = mockImageBytes,
+  })  : _xFileToReturn = xFileToReturn,
         _shouldReturnNull = shouldReturnNull;
 
   /// Creates a default fake image picker with a 1x1 red pixel PNG.
   factory FakeImagePicker.withDefaultImage() {
-    return FakeImagePicker(mockImageBytes: defaultImageBytes);
+    return FakeImagePicker(xFileToReturn: XFile.fromData(defaultImageBytes));
   }
 
   /// A minimal 1x1 red pixel PNG image as bytes.
@@ -92,7 +92,7 @@ class FakeImagePicker extends ImagePicker {
     130
   ]);
 
-  final Uint8List? _mockImageBytes;
+  final XFile? _xFileToReturn;
   final bool _shouldReturnNull;
 
   @override
@@ -108,11 +108,6 @@ class FakeImagePicker extends ImagePicker {
       return null;
     }
 
-    if (_mockImageBytes == null) {
-      return null;
-    }
-
-    // Create a temporary XFile from bytes
-    return XFile.fromData(_mockImageBytes);
+    return _xFileToReturn;
   }
 }
