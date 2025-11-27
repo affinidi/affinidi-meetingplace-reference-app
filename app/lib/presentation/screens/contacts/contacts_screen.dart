@@ -24,6 +24,7 @@ import '../../widgets/action_button.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/section_banner.dart';
 import '../../widgets/tab_bar_tab.dart';
+import '../../widgets/gradients/avatar_gradient.dart';
 import '../chat/chat_screen_controller.dart';
 import 'contacts_screen_controller.dart';
 import 'contacts_screen_filter.dart';

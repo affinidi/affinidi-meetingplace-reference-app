@@ -35,7 +35,6 @@ class _ProfilePictures extends ConsumerWidget {
       return Center(
         child: _TranslatedPicture(
           offset: Offset.zero,
-          backgroundColor: Colors.white,
           size: _picSize,
           child: _DefaultImage(image: groupImage),
           onPressed: () => _navigateToImageView(
@@ -67,7 +66,6 @@ class _ProfilePictures extends ConsumerWidget {
       children: [
         _TranslatedPicture(
           offset: const Offset(30, 0),
-          backgroundColor: hasOtherPartyPic ? null : Colors.white,
           backgroundImage: hasOtherPartyPic ? otherPartyImage : null,
           child:
               hasOtherPartyPic ? null : _DefaultImage(image: otherPartyImage),
@@ -84,7 +82,6 @@ class _ProfilePictures extends ConsumerWidget {
         ),
         _TranslatedPicture(
           offset: const Offset(-30, 0),
-          backgroundColor: hasMyPic ? null : Colors.white,
           backgroundImage: hasMyPic ? myImage : null,
           child: hasMyPic ? null : _DefaultImage(image: myImage),
           size: _picSize,
@@ -106,7 +103,6 @@ class _TranslatedPicture extends StatelessWidget {
     required this.size,
     required this.offset,
     this.onPressed,
-    this.backgroundColor,
     this.backgroundImage,
     this.child,
   });
@@ -114,7 +110,6 @@ class _TranslatedPicture extends StatelessWidget {
   final double size;
   final Offset offset;
   final VoidCallback? onPressed;
-  final Color? backgroundColor;
   final ImageProvider<Object>? backgroundImage;
   final Widget? child;
 
@@ -133,14 +128,15 @@ class _TranslatedPicture extends StatelessWidget {
           ),
         ),
         child: GestureDetector(
-          onTap: onPressed,
-          child: CircleAvatar(
-            radius: size / 2,
-            backgroundColor: backgroundColor,
-            backgroundImage: backgroundImage,
-            child: child,
-          ),
-        ),
+            onTap: onPressed,
+            child: AvatarGradientContainer(
+              child: CircleAvatar(
+                radius: size / 2,
+                backgroundColor: Colors.transparent,
+                foregroundImage: backgroundImage,
+                child: child,
+              ),
+            )),
       ),
     );
   }
