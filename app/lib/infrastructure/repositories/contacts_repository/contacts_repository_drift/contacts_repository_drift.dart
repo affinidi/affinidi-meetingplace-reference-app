@@ -39,7 +39,7 @@ class ContactsRepositoryDrift implements ContactsRepository {
     late model.Contact addedEntry;
 
     await _database.transaction(() async {
-      final contactId = contact.id.isEmpty ? const Uuid().v4() : contact.id;
+      final contactId = const Uuid().v4();
 
       await _database.into(_database.contacts).insert(
             db.ContactsCompanion(

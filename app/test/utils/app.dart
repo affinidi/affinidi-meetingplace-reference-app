@@ -31,7 +31,9 @@ import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 import '../fakes/fake_app_badge_service.dart';
 import '../fakes/fake_camera_controller.dart';
 import '../fakes/fake_channels.dart';
+import '../fakes/fake_chat_repository.dart';
 import '../fakes/fake_connectivity.dart';
+import '../fakes/fake_contacts_service.dart';
 import '../fakes/fake_environment.dart';
 import '../fakes/fake_local_authentication.dart';
 import '../fakes/fake_meeting_place_sdk.dart';
@@ -79,7 +81,7 @@ Future<void> startApp(
           ]),
       localAuthProvider.overrideWith(
           (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated)),
-      chatRepositoryProvider.overrideWith(chatRepositoryInMemoryDrift),
+      chatRepositoryProvider.overrideWith((ref) async => FakeChatRepository()),
       environmentProvider.overrideWithValue(FakeEnvironment()),
       channelRepositoryProvider.overrideWith(channelRepositoryInMemoryDrift),
       connectionOfferRepositoryProvider
@@ -93,6 +95,9 @@ Future<void> startApp(
         }
         return repo;
       }),
+      if (contacts.isNotEmpty)
+        contactsServiceProvider
+            .overrideWith(() => FakeContactsService(contacts)),
       environmentProvider.overrideWith((ref) => FakeEnvironment()),
       pushNotificationMessagingProvider.overrideWith((ref) =>
           pushNotificationMessaging ?? FakePushNotificationMessaging()),
