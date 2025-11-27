@@ -23,6 +23,7 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
   - [Optional Environment Variables](#optional-environment-variables)
 - [VSCode Configuration](#vscode-configuration)
 - [Run App on Simulator](#run-app-on-simulator)
+- [Troubleshooting](#troubleshooting)
 - [Support \& Feedback](#support--feedback)
   - [Reporting Technical Issues](#reporting-technical-issues)
 - [Contributing](#contributing)
@@ -325,11 +326,11 @@ Refer to Flutter's [Get Started](https://docs.flutter.dev/get-started/install) p
 
 **Solution:** Ensure the following values match:
 
-1. Values in `google-services.json` (Android) must match `FIREBASE_ANDROID_*` variables in `.env`
-2. Values in `GoogleService-Info.plist` (iOS or macOS) must match `FIREBASE_IOS_*` variables in `.env`
-3. Common values like `FIREBASE_PROJECT_ID`, `FIREBASE_MESSAGING_SENDER_ID`, and `FIREBASE_STORAGE_BUCKET` must match across both platform files
+1. Values in `google-services.json` (Android) must match `FIREBASE_ANDROID_*` variables in `.env`.
+2. Values in `GoogleService-Info.plist` (iOS or macOS) must match `FIREBASE_IOS_*` variables in `.env`.
+3. Common values like `FIREBASE_PROJECT_ID`, `FIREBASE_MESSAGING_SENDER_ID`, and `FIREBASE_STORAGE_BUCKET` must match across both platform files.
 
-**Reference:** See [Firebase duplicate-app](https://github.com/firebase/flutterfire/blob/main/packages/firebase_core/firebase_core_platform_interface/lib/src/firebase_core_exceptions.dart#L20-L25) error definition
+**Reference:** See [Firebase duplicate-app](https://github.com/firebase/flutterfire/blob/main/packages/firebase_core/firebase_core_platform_interface/lib/src/firebase_core_exceptions.dart#L20-L25) error definition.
 
 ## Support & Feedback
 
