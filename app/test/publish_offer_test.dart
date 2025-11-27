@@ -653,28 +653,6 @@ void main() {
             final newExpiryDate =
                 today.add(const Duration(days: expireAfterDays));
 
-            final months = [
-              'January',
-              'February',
-              'March',
-              'April',
-              'May',
-              'June',
-              'July',
-              'August',
-              'September',
-              'October',
-              'November',
-              'December'
-            ];
-            final targetMonthName = months[newExpiryDate.month - 1];
-
-            if (find.textContaining(targetMonthName).evaluate().isEmpty) {
-              final nextMonthButton = find.byIcon(Icons.chevron_right);
-              await tester.tap(nextMonthButton);
-              await tester.pumpAndSettle();
-            }
-
             await tester.tap(find.text(newExpiryDate.day.toString()).last);
             await tester.pumpAndSettle();
 
