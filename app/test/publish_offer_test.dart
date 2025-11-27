@@ -691,6 +691,7 @@ void main() {
         expect(publishCall['externalRef'], testIdentity.id);
       });
 
+      group('and change the expiry date', () {
         testWidgets('it publishes with the new expiry date', (tester) async {
           final l10n = await getL10n();
           final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
