@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/navigation/routes/route_paths.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/authentication/authentication_screen/authentication_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/onboarding/onboarding_screen/onboarding_screen.dart';
 
+import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
@@ -247,24 +247,22 @@ void main() {
       final location = '/contacts/${FakeContacts.individualContact.id}/chat';
 
       testWidgets('it shows the chat screen', (tester) async {
-        // Run test but ignore timer warnings from chat SDK's presence interval
-        await tester.runAsync(() async {
-          await navigateToLocation(
-            tester,
-            location,
-            isAuthenticated: isAuthenticated,
-            alreadyOnboarded: alreadyOnboarded,
-            identities: [FakeIdentities.primaryIdentity],
-            contacts: [FakeContacts.individualContact],
-          );
+        final meetingPlaceChatSDK = FakeChatSdk();
 
-          await tester.pumpAndSettle();
+        await navigateToLocation(
+          tester,
+          location,
+          isAuthenticated: isAuthenticated,
+          alreadyOnboarded: alreadyOnboarded,
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [FakeContacts.individualContact],
+          meetingPlaceChatSDK: meetingPlaceChatSDK,
+        );
 
-          const chatInputKey = Key('chat_message_input');
+        await tester.pumpAndSettle();
 
-          // Verify chat message input field is present
-          expect(find.byKey(chatInputKey), findsOneWidget);
-        });
+        // Verify chat session was started
+        expect(meetingPlaceChatSDK.startChatSessionCallCount, 1);
       });
     });
   });

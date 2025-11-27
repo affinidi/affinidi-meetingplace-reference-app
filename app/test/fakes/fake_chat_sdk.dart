@@ -1,69 +1,49 @@
 import 'dart:async';
 
-import 'package:async/async.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_chat/src/sdk/chat.dart';
 
-/// Wraps real MeetingPlaceChatSDK to inject fake messages for testing.
-///
-/// We can't fully mock the SDK because `Chat` type isn't exported.
-/// Instead, we delegate to the real SDK and intercept streams.
-///
-/// Inject test messages via `simulateIncomingTextMessage()`.
-class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
-  ChatSDKTestWrapper(this._realSdk);
-
-  final MeetingPlaceChatSDK _realSdk;
-  final StreamController<StreamData> _fakeMessageController =
+class FakeChatSdk implements MeetingPlaceChatSDK {
+  int _chatSessionStartedCalls = 0;
+  final StreamController<StreamData> _streamController =
       StreamController<StreamData>.broadcast();
 
-  final List<Map<String, dynamic>> sendEffectCalls = [];
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
+  final List<Map<String, dynamic>> sendEffectCalls = [];
   final List<Map<String, dynamic>> reactOnMessageCalls = [];
 
-  @override
-  Future<ChatStream?> get chatStreamSubscription async {
-    // Get the real stream from the SDK
-    final realStream = await _realSdk.chatStreamSubscription;
-    if (realStream == null) return null;
+  int get startChatSessionCallCount => _chatSessionStartedCalls;
 
-    // Create a merged stream that combines real messages and fake messages
-    return _MergedChatStream(realStream, _fakeMessageController.stream);
-  }
-
-  /// Simulates receiving an incoming text message.
+  /// Simulates an incoming text message by emitting it through the stream
   void simulateIncomingTextMessage({
     required String text,
     required String senderDid,
     required String recipientDid,
-    String? messageId,
   }) {
-    final now = DateTime.now();
-    final id = messageId ?? 'incoming-${now.millisecondsSinceEpoch}';
-
     final message = Message(
       chatId: 'fake-chat-id',
-      messageId: id,
+      messageId: 'msg-incoming-${DateTime.now().millisecondsSinceEpoch}',
       value: text,
-      dateCreated: now,
-      status: ChatItemStatus.received,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
       isFromMe: false,
       senderDid: senderDid,
       attachments: [],
     );
 
     final plainTextMessage = PlainTextMessage(
-      id: id,
+      id: message.messageId,
       type: Uri.parse('https://affinidi.com/chat/1.0/message'),
       body: {
         'text': text,
-        'timestamp': now.toIso8601String(),
+        'timestamp': message.dateCreated.toIso8601String(),
       },
       from: senderDid,
       to: [recipientDid],
-      createdTime: now,
+      createdTime: message.dateCreated,
     );
 
-    _fakeMessageController.add(
+    _streamController.add(
       StreamData(
         plainTextMessage: plainTextMessage,
         chatItem: message,
@@ -71,53 +51,31 @@ class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
     );
   }
 
-  /// Simulates receiving an effect (balloons, confetti, etc.) by injecting it
-  ///  into the stream.
-  void simulateIncomingEffect({
-    required Effect effect,
-    required String senderDid,
-    required String recipientDid,
-    String? messageId,
-  }) {
-    final now = DateTime.now();
-    final id = messageId ?? 'effect-${now.millisecondsSinceEpoch}';
-
-    final plainTextMessage = PlainTextMessage(
-      id: id,
-      type: Uri.parse('https://affinidi.com/chat/1.0/effect'),
-      body: {
-        'effect': effect.name,
-        'timestamp': now.toIso8601String(),
-      },
-      from: senderDid,
-      to: [recipientDid],
-      createdTime: now,
-    );
-
-    _fakeMessageController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: null,
-      ),
-    );
-  }
-
-  void dispose() {
-    _fakeMessageController.close();
+  @override
+  Future<void> approveConnectionRequest(ConciergeMessage message) {
+    throw UnimplementedError();
   }
 
   @override
-  void endChatSession() => _realSdk.endChatSession();
+  Future<ChatStream?> get chatStreamSubscription async {
+    return _FakeChatStream(_streamController.stream);
+  }
 
   @override
-  Future<Message> sendTextMessage(String text,
-      {List<Attachment>? attachments}) async {
-    sendTextMessageCalls.add({
-      'text': text,
-      'attachments': attachments,
-    });
-    return _realSdk.sendTextMessage(text, attachments: attachments);
+  void endChatSession() {}
+
+  @override
+  Future<List<Message>> fetchNewMessages() {
+    throw UnimplementedError();
   }
+
+  @override
+  Future<ChatItem?> getMessageById(String messageId) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<ChatItem>> get messages => throw UnimplementedError();
 
   @override
   Future<void> reactOnMessage(Message message,
@@ -126,89 +84,120 @@ class ChatSDKTestWrapper implements MeetingPlaceChatSDK {
       'message': message,
       'reaction': reaction,
     });
-    return _realSdk.reactOnMessage(message, reaction: reaction);
+  }
+
+  @override
+  Future<void> rejectChatContactDetailsUpdate(ConciergeMessage message) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> rejectConnectionRequest(ConciergeMessage message) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> sendChatActivity() async {
+    // No-op for tests - just return successfully
+  }
+
+  @override
+  Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
+    // No-op for tests
+  }
+
+  @override
+  Future<void> sendChatDeliveredMessage(PlainTextMessage message) async {
+    // No-op for tests
+  }
+
+  @override
+  Future<void> sendChatPresence() async {
+    // No-op for tests
   }
 
   @override
   Future<void> sendEffect(Effect effect) async {
-    sendEffectCalls.add({
-      'effect': effect,
+    sendEffectCalls.add({'effect': effect});
+  }
+
+  @override
+  Future<void> sendProfileHash() async {
+    // No-op for tests
+  }
+
+  @override
+  Future<Message> sendTextMessage(String text,
+      {List<Attachment>? attachments}) async {
+    // Track the call
+    sendTextMessageCalls.add({
+      'text': text,
+      'attachments': attachments,
     });
-    return _realSdk.sendEffect(effect);
+
+    final message = Message(
+      chatId: 'fake-chat-id',
+      messageId: 'msg-${DateTime.now().millisecondsSinceEpoch}',
+      value: text,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.queued,
+      isFromMe: true,
+      senderDid: 'fake-sender-did',
+      attachments: attachments ?? [],
+    );
+
+    // Emit the message through the stream so it appears in the UI
+    final plainTextMessage = PlainTextMessage(
+      id: message.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/message'),
+      body: {
+        'text': text,
+        'timestamp': message.dateCreated.toIso8601String(),
+      },
+      from: 'fake-sender-did',
+      to: ['fake-recipient-did'],
+      createdTime: message.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(
+        plainTextMessage: plainTextMessage,
+        chatItem: message,
+      ),
+    );
+
+    return message;
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == #startChatSession) {
-      return _realSdk.startChatSession();
-    }
-    return super.noSuchMethod(invocation);
+  Future<Chat> startChatSession() async {
+    _chatSessionStartedCalls = 1;
+    return FakeChat();
   }
 }
 
-/// A ChatStream that merges messages from both the real SDK and injected
-/// fake messages.
-class _MergedChatStream implements ChatStream {
-  _MergedChatStream(this._realStream, this._fakeStream);
-
-  final ChatStream _realStream;
-  final Stream<StreamData> _fakeStream;
-  StreamSubscription<StreamData>? _mergedSubscription;
+class FakeChat implements Chat {
+  @override
+  ChatStream? stream;
 
   @override
-  ChatStream listen(
-    void Function(StreamData) onData, {
-    Function? onError,
-    void Function()? onDone,
-    bool? cancelOnError,
-  }) {
-    // Merge the real stream and fake stream
-    // When either emits data, forward it to the listener
-    final mergedStream = StreamGroup.merge([
-      _realStream._toStream(),
-      _fakeStream,
-    ]);
-
-    _mergedSubscription = mergedStream.listen(
-      onData,
-      onError: onError,
-      onDone: onDone,
-      cancelOnError: cancelOnError,
-    );
-
-    return this;
-  }
+  String get id => throw UnimplementedError();
 
   @override
-  Future<void> dispose() async {
-    await _mergedSubscription?.cancel();
-    _realStream.dispose();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError(
-      'Method ${invocation.memberName} not implemented in _MergedChatStream',
-    );
-  }
+  List<ChatItem> get messages => [
+        ChatItem(
+            chatId: 'chatId',
+            messageId: 'messageId',
+            senderDid: 'senderDid',
+            isFromMe: true,
+            dateCreated: DateTime.now(),
+            status: ChatItemStatus.confirmed,
+            type: ChatItemType.message)
+      ];
 }
 
-// Extension to convert ChatStream to Stream<StreamData>
-extension _ChatStreamExt on ChatStream {
-  Stream<StreamData> _toStream() {
-    final controller = StreamController<StreamData>();
-    listen(
-      controller.add,
-      onError: controller.addError,
-      onDone: controller.close,
-    );
-    return controller.stream;
-  }
-}
-
-/// A fake implementation of ChatStream for testing.
-class FakeChatStream implements ChatStream {
-  FakeChatStream(this._stream);
+class _FakeChatStream implements ChatStream {
+  _FakeChatStream(this._stream);
 
   final Stream<StreamData> _stream;
   StreamSubscription<StreamData>? _subscription;
@@ -237,6 +226,7 @@ class FakeChatStream implements ChatStream {
   @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError(
-        'Method ${invocation.memberName} not implemented in FakeChatStream');
+      'Method ${invocation.memberName} not implemented in _FakeChatStream',
+    );
   }
 }
