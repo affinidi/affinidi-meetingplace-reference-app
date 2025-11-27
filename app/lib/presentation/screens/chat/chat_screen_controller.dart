@@ -81,11 +81,9 @@ class ChatScreenController extends _$ChatScreenController {
       });
     }, fireImmediately: true);
 
-    ref.onDispose(() async {
-      await _endChatSession(unsentMessage: messageTextController.text);
+    ref.onDispose(() {
       messagesSubscription?.dispose();
       messageTextController.dispose();
-      _chatSDK?.endChatSession();
 
       _disposeConciergeLoadingControllers();
     });
@@ -109,6 +107,34 @@ class ChatScreenController extends _$ChatScreenController {
     initializing ??= loadContact(contactId);
 
     await initializing;
+  }
+
+  Future<void> cleanup() async {
+    final unsentMessage = messageTextController.text;
+    _sendChatActivityTimedAction?.cancel();
+    _membersTypingTimedAction?.cancel();
+    _updateContactPresenceStatusTimedAction?.cancel();
+
+    final contact = state.contact;
+    if (contact == null) {
+      return;
+    }
+
+    final messageToSave =
+        unsentMessage.isNotEmpty == true ? unsentMessage : null;
+    await ref.read(contactsServiceProvider.notifier).updateContact(
+          contact.copyWith(
+            unsentMessage: messageToSave,
+            chatInProgress: false,
+          ),
+        );
+
+    _chatSDK?.endChatSession();
+
+    _logger.info(
+      'Chat session ended',
+      name: _logKey,
+    );
   }
 
   void _disposeConciergeLoadingControllers() {
@@ -891,31 +917,6 @@ class ChatScreenController extends _$ChatScreenController {
     unawaited(ref
         .read(contactsServiceProvider.notifier)
         .updateContactSequenceNumber(channelDid, channel.seqNo));
-  }
-
-  Future<void> _endChatSession({required String? unsentMessage}) async {
-    _sendChatActivityTimedAction?.cancel();
-    _membersTypingTimedAction?.cancel();
-    _updateContactPresenceStatusTimedAction?.cancel();
-
-    final contact = state.contact;
-    if (contact == null) {
-      return;
-    }
-
-    final messageToSave =
-        unsentMessage?.isNotEmpty == true ? unsentMessage : null;
-    await ref.read(contactsServiceProvider.notifier).updateContact(
-          contact.copyWith(
-            unsentMessage: messageToSave,
-            chatInProgress: false,
-          ),
-        );
-
-    _logger.info(
-      'Chat session ended',
-      name: _logKey,
-    );
   }
 
   Future<void> _startChatSession(Contact contact) async {

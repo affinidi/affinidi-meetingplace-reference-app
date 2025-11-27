@@ -72,15 +72,14 @@ class ChatScreen extends HookConsumerWidget {
     ref.keepAround(provider);
 
     useEffect(() {
-      if (!context.mounted) return;
+      if (!context.mounted) return null;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.initialize();
       });
 
-      return null;
+      return controller.cleanup;
     }, []);
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: context.colorScheme.primary,
