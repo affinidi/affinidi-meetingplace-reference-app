@@ -1390,7 +1390,5 @@
     "type": "text"
   },
   "meetingPlaceInvitationTitle": "Meeting Place Invitation",
-  "shareSheetCTA_QRCode": "Send or save QR code",
-  "firebaseConfigurationError": "Firebase configuration error",
-  "firebaseInitializationError": "Failed to initialize Firebase"
+  "shareSheetCTA_QRCode": "Send or save QR code"
 }
