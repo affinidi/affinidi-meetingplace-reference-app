@@ -82,14 +82,11 @@ class ChatScreenController extends _$ChatScreenController {
     }, fireImmediately: true);
 
     ref.onDispose(() async {
-      // CRITICAL: End chat session FIRST to cancel the 60-second presence timer
-      // before any async operations that might delay execution
-      _chatSDK?.endChatSession();
-      messagesSubscription?.dispose();
-
-      // Then cleanup other resources (these can access providers)
       await _endChatSession(unsentMessage: messageTextController.text);
+      messagesSubscription?.dispose();
       messageTextController.dispose();
+      _chatSDK?.endChatSession();
+
       _disposeConciergeLoadingControllers();
     });
 
@@ -331,7 +328,7 @@ class ChatScreenController extends _$ChatScreenController {
         _upsertChatItem(chatItem);
       }
 
-      if (chatItem is chat.Message) {
+      if (chatItem is chat.Message && !chatItem.isFromMe) {
         final groupMessageSenderName = plainTextMessage != null
             ? _getGroupMemberNameFromMessage(plainTextMessage)
             : null;
@@ -881,27 +878,19 @@ class ChatScreenController extends _$ChatScreenController {
   }
 
   Future<void> _updateContactSequenceNumber(String channelDid) async {
-    try {
-      final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-      final channel =
-          await coreSdk.getChannelByOtherPartyPermanentDid(channelDid);
-      if (channel == null) {
-        _logger.warning(
-            'Cannot update contact sequence number: channel cannot be found',
-            name: _logKey);
-        return;
-      }
-
-      unawaited(ref
-          .read(contactsServiceProvider.notifier)
-          .updateContactSequenceNumber(channelDid, channel.seqNo));
-    } catch (e) {
-      // Silently handle disposal errors (e.g., in tests)
-      if (e is StateError && e.message.contains('already disposed')) {
-        return;
-      }
-      rethrow;
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    final channel =
+        await coreSdk.getChannelByOtherPartyPermanentDid(channelDid);
+    if (channel == null) {
+      _logger.warning(
+          'Cannot update contact sequence number: channel cannot be found',
+          name: _logKey);
+      return;
     }
+
+    unawaited(ref
+        .read(contactsServiceProvider.notifier)
+        .updateContactSequenceNumber(channelDid, channel.seqNo));
   }
 
   Future<void> _endChatSession({required String? unsentMessage}) async {
@@ -916,19 +905,12 @@ class ChatScreenController extends _$ChatScreenController {
 
     final messageToSave =
         unsentMessage?.isNotEmpty == true ? unsentMessage : null;
-
-    try {
-      await ref.read(contactsServiceProvider.notifier).updateContact(
-            contact.copyWith(
-              unsentMessage: messageToSave,
-              chatInProgress: false,
-            ),
-          );
-    } catch (e) {
-      if (!e.toString().contains('already disposed')) {
-        rethrow;
-      }
-    }
+    await ref.read(contactsServiceProvider.notifier).updateContact(
+          contact.copyWith(
+            unsentMessage: messageToSave,
+            chatInProgress: false,
+          ),
+        );
 
     _logger.info(
       'Chat session ended',
