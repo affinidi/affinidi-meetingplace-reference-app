@@ -227,7 +227,6 @@ void main() {
 
         await enterChatMessage(tester, testMessage);
         await tapSendButton(tester);
-        // Wait for message to appear in UI and input field to be cleared
         await tester.pump(_uiUpdateDelayDuration);
 
         expect(find.text(testMessage), findsOneWidget);
@@ -248,7 +247,6 @@ void main() {
 
         await enterChatMessage(tester, testMessage);
         await tapSendButton(tester);
-        // Wait for message to appear in UI and input field to be cleared
         await tester.pump(_uiUpdateDelayDuration);
 
         final inputField = findChatMessageInput();
@@ -376,7 +374,6 @@ void main() {
           expect(find.byIcon(Icons.cancel_sharp), findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
-          // Wait for message to appear in UI and media review screen to close
           await tester.pump(_uiUpdateDelayDuration);
 
           expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
@@ -423,7 +420,6 @@ void main() {
               findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
-          // Wait for message to appear in UI and media review screen to close
           await tester.pump(_uiUpdateDelayDuration);
 
           final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;

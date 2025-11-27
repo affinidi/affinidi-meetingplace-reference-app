@@ -90,12 +90,9 @@ Future<void> startApp(
           .overrideWith((ref) => connectivity ?? FakeConnectivity()),
       contactsRepositoryProvider.overrideWith((ref) async {
         final repo = await contactsRepositoryInMemoryDrift(ref);
-        // Add all contacts and wait for them to be persisted
         for (final contact in contacts) {
           await repo.addContact(contact);
         }
-        // Give a small delay to ensure all database operations complete
-        await Future<void>.delayed(const Duration(milliseconds: 100));
         return repo;
       }),
       if (contacts.isNotEmpty)
