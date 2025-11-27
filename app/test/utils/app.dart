@@ -31,7 +31,6 @@ import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 import '../fakes/fake_app_badge_service.dart';
 import '../fakes/fake_camera_controller.dart';
 import '../fakes/fake_channels.dart';
-import '../fakes/fake_chat_repository.dart';
 import '../fakes/fake_connectivity.dart';
 import '../fakes/fake_contacts_service.dart';
 import '../fakes/fake_environment.dart';
@@ -81,7 +80,7 @@ Future<void> startApp(
           ]),
       localAuthProvider.overrideWith(
           (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated)),
-      chatRepositoryProvider.overrideWith((ref) async => FakeChatRepository()),
+      chatRepositoryProvider.overrideWith(chatRepositoryInMemoryDrift),
       environmentProvider.overrideWithValue(FakeEnvironment()),
       channelRepositoryProvider.overrideWith(channelRepositoryInMemoryDrift),
       connectionOfferRepositoryProvider
