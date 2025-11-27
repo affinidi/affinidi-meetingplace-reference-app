@@ -66,7 +66,7 @@ class _ProfilePictures extends ConsumerWidget {
       children: [
         _TranslatedPicture(
           offset: const Offset(30, 0),
-          backgroundImage: hasOtherPartyPic ? otherPartyImage : null,
+          foregroundImage: hasOtherPartyPic ? otherPartyImage : null,
           child:
               hasOtherPartyPic ? null : _DefaultImage(image: otherPartyImage),
           size: _picSize,
@@ -82,7 +82,7 @@ class _ProfilePictures extends ConsumerWidget {
         ),
         _TranslatedPicture(
           offset: const Offset(-30, 0),
-          backgroundImage: hasMyPic ? myImage : null,
+          foregroundImage: hasMyPic ? myImage : null,
           child: hasMyPic ? null : _DefaultImage(image: myImage),
           size: _picSize,
           onPressed: () => _navigateToImageView(
@@ -103,14 +103,14 @@ class _TranslatedPicture extends StatelessWidget {
     required this.size,
     required this.offset,
     this.onPressed,
-    this.backgroundImage,
+    this.foregroundImage,
     this.child,
   });
 
   final double size;
   final Offset offset;
   final VoidCallback? onPressed;
-  final ImageProvider<Object>? backgroundImage;
+  final ImageProvider<Object>? foregroundImage;
   final Widget? child;
 
   @override
@@ -133,7 +133,7 @@ class _TranslatedPicture extends StatelessWidget {
               child: CircleAvatar(
                 radius: size / 2,
                 backgroundColor: Colors.transparent,
-                foregroundImage: backgroundImage,
+                foregroundImage: foregroundImage,
                 child: child,
               ),
             )),
