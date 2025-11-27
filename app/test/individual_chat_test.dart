@@ -31,7 +31,6 @@ Future<void> navigateToChatScreen(
   WidgetTester tester, {
   required String contactId,
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
-  ChatSDKWrapper? chatSdkWrapper,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
 }) async {
@@ -43,7 +42,6 @@ Future<void> navigateToChatScreen(
     identities: [FakeIdentities.primaryIdentity],
     contacts: [FakeContacts.individualContact],
     meetingPlaceChatSDK: meetingPlaceChatSDK,
-    chatSdkWrapper: chatSdkWrapper,
     imagePicker: imagePicker,
     mockCameras: mockCameras,
   );

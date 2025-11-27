@@ -52,11 +52,6 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
-  Future<void> approveConnectionRequest(ConciergeMessage message) {
-    throw UnimplementedError();
-  }
-
-  @override
   Future<ChatStream?> get chatStreamSubscription async {
     return _FakeChatStream(_streamController.stream);
   }
@@ -65,35 +60,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   void endChatSession() {}
 
   @override
-  Future<List<Message>> fetchNewMessages() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<ChatItem?> getMessageById(String messageId) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<List<ChatItem>> get messages => throw UnimplementedError();
-
-  @override
   Future<void> reactOnMessage(Message message,
       {required String reaction}) async {
     reactOnMessageCalls.add({
       'message': message,
       'reaction': reaction,
     });
-  }
-
-  @override
-  Future<void> rejectChatContactDetailsUpdate(ConciergeMessage message) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> rejectConnectionRequest(ConciergeMessage message) {
-    throw UnimplementedError();
   }
 
   @override
@@ -174,14 +146,18 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     _chatSessionStartedCalls = 1;
     return FakeChat();
   }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError(
+      'Method ${invocation.memberName} not implemented in FakeChatSdk',
+    );
+  }
 }
 
 class FakeChat implements Chat {
   @override
   ChatStream? stream;
-
-  @override
-  String get id => throw UnimplementedError();
 
   @override
   List<ChatItem> get messages => [
@@ -194,6 +170,13 @@ class FakeChat implements Chat {
             status: ChatItemStatus.confirmed,
             type: ChatItemType.message)
       ];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError(
+      'Method ${invocation.memberName} not implemented in FakeChat',
+    );
+  }
 }
 
 class _FakeChatStream implements ChatStream {

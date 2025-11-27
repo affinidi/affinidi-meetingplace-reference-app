@@ -19,7 +19,6 @@ import 'package:mpx_flutter_reference_app/infrastructure/firebase_messaging/push
 import 'package:mpx_flutter_reference_app/infrastructure/media/image_picker/image_picker_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_info_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/applications_documents_directory_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
@@ -30,7 +29,6 @@ import 'package:mpx_flutter_reference_app/mpx_flutter_reference_app.dart';
 import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 
 import '../fakes/fake_app_badge_service.dart';
-import '../fakes/fake_cache_manager.dart';
 import '../fakes/fake_camera_controller.dart';
 import '../fakes/fake_channels.dart';
 import '../fakes/fake_chat_repository.dart';
@@ -41,10 +39,6 @@ import '../fakes/fake_local_authentication.dart';
 import '../fakes/fake_meeting_place_sdk.dart';
 import '../fakes/fake_push_notification_messaging.dart';
 import '../fakes/fake_secure_storage.dart';
-
-/// Callback type for wrapping the real Chat SDK.
-typedef ChatSDKWrapper = MeetingPlaceChatSDK Function(
-    MeetingPlaceChatSDK realSdk);
 
 Future<void> startApp(
   WidgetTester tester, {
@@ -57,7 +51,6 @@ Future<void> startApp(
   Connectivity? connectivity,
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
-  ChatSDKWrapper? chatSdkWrapper,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
   required List<Identity> identities,
@@ -88,7 +81,6 @@ Future<void> startApp(
           ]),
       localAuthProvider.overrideWith(
           (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated)),
-      cacheManagerProvider.overrideWith((ref) => FakeCacheManager()),
       chatRepositoryProvider.overrideWith((ref) async => FakeChatRepository()),
       environmentProvider.overrideWithValue(FakeEnvironment()),
       channelRepositoryProvider.overrideWith(channelRepositoryInMemoryDrift),
@@ -138,22 +130,6 @@ Future<void> startApp(
       if (meetingPlaceChatSDK != null)
         chatSdkProvider
             .overrideWith((ref, channel) async => meetingPlaceChatSDK),
-      // If a wrapper is provided, wrap the real SDK after it's created
-      if (chatSdkWrapper != null && meetingPlaceChatSDK == null)
-        chatSdkProvider.overrideWith((ref, channel) async {
-          final coreSDK = await ref.read(meetingPlaceSdkProvider.future);
-          final realSdk = await MeetingPlaceChatSDK.initialiseFromChannel(
-            channel,
-            coreSDK: coreSDK,
-            chatRepository: await ref.read(chatRepositoryProvider.future),
-            options: ChatSDKOptions(
-              chatActivityExpiry: const Duration(seconds: 60),
-              chatPresenceSendInterval: const Duration(seconds: 30),
-            ),
-            logger: ref.read(appLoggerProvider),
-          );
-          return chatSdkWrapper(realSdk);
-        }),
       if (imagePicker != null)
         imagePickerProvider.overrideWith((ref) => imagePicker),
       if (mockCameras != null) ...[
@@ -198,7 +174,6 @@ Future<void> navigateToLocation(
   Connectivity? connectivity,
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
-  ChatSDKWrapper? chatSdkWrapper,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
   SecureStorage? secureStorage,
@@ -212,7 +187,6 @@ Future<void> navigateToLocation(
     connectivity: connectivity,
     meetingPlaceCoreSDK: meetingPlaceCoreSDK,
     meetingPlaceChatSDK: meetingPlaceChatSDK,
-    chatSdkWrapper: chatSdkWrapper,
     imagePicker: imagePicker,
     mockCameras: mockCameras,
     secureStorage: secureStorage,
