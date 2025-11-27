@@ -23,8 +23,6 @@ class FakeCameraController extends CameraController {
 
   @override
   Future<void> initialize() async {
-    await Future<void>.delayed(const Duration(milliseconds: 10));
-
     value = value.copyWith(
       isInitialized: true,
       previewSize: const Size(1920, 1080),
