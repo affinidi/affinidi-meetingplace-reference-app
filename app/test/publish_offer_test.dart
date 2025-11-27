@@ -691,7 +691,6 @@ void main() {
         expect(publishCall['externalRef'], testIdentity.id);
       });
 
-      group('and change the expiry date', () {
         testWidgets('it publishes with the new expiry date', (tester) async {
           final l10n = await getL10n();
           final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
@@ -728,8 +727,23 @@ void main() {
           final newExpiryDate =
               today.add(const Duration(days: expireAfterDays));
 
-          // If the new date is in the next month, navigate to it
-          if (newExpiryDate.month != today.month) {
+          final months = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December'
+          ];
+          final targetMonthName = months[newExpiryDate.month - 1];
+
+          if (find.textContaining(targetMonthName).evaluate().isEmpty) {
             final nextMonthButton = find.byIcon(Icons.chevron_right);
             await tester.tap(nextMonthButton);
             await tester.pumpAndSettle();
