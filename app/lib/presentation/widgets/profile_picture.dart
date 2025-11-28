@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
+import 'containers/avatar_gradient_container.dart';
 
 class ProfilePicture extends StatelessWidget {
   const ProfilePicture({
@@ -35,10 +36,12 @@ class ProfilePicture extends StatelessWidget {
               )
             : null,
       ),
-      child: CircleAvatar(
-        backgroundColor: Colors.white,
-        radius: (size - border) / 2,
-        foregroundImage: image,
+      child: AvatarGradientContainer(
+        child: CircleAvatar(
+          backgroundColor: Colors.transparent,
+          radius: (size - border) / 2,
+          foregroundImage: image,
+        ),
       ),
     );
   }
