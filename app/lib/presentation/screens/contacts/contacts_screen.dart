@@ -22,6 +22,7 @@ import '../../dialogs/new_connections_menu/new_connections_menu.dart';
 import '../../helpers/screensize_helper.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
+import '../../widgets/containers/avatar_gradient_container.dart';
 import '../../widgets/section_banner.dart';
 import '../../widgets/tab_bar_tab.dart';
 import '../chat/chat_screen_controller.dart';

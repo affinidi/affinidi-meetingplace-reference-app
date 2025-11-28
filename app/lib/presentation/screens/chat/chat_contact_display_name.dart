@@ -118,25 +118,23 @@ class _ChatContactImage extends ConsumerWidget {
     if (contact == null) return const SizedBox.shrink();
 
     final displayImage = contact.image(cacheManager: cacheManager);
-    final isGroupOrDefaultImage = contact.hasDefaultImage;
 
     return SizedBox(
       height: 55,
       width: 55,
       child: Card(
-        key: const Key('chat_contact_avatar'),
-        color:
-            isGroupOrDefaultImage ? Colors.white : Colors.white.withAlpha(10),
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(100.0),
-        ),
-        elevation: 5,
-        child: Image(
-          fit: BoxFit.cover,
-          image: displayImage,
-        ),
-      ),
+          key: const Key('chat_contact_avatar'),
+          clipBehavior: Clip.hardEdge,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(100.0),
+          ),
+          elevation: 5,
+          child: AvatarGradientContainer(
+            child: Image(
+              fit: BoxFit.cover,
+              image: displayImage,
+            ),
+          )),
     );
   }
 }

@@ -16,7 +16,6 @@ class _ContactAvatar extends ConsumerWidget {
     final cacheManager = ref.read(cacheManagerProvider);
 
     final displayImage = contact.image(cacheManager: cacheManager);
-    final isGroupOrDefaultImage = contact.hasDefaultImage;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -31,21 +30,11 @@ class _ContactAvatar extends ConsumerWidget {
               size: isList ? 20 : 24,
             ),
           ),
-        Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(color: statusColor, width: 4),
-          ),
+        AvatarGradientContainer(
           child: CircleAvatar(
             radius: iconSize / 2,
-            backgroundColor: isGroupOrDefaultImage ? Colors.white : null,
-            backgroundImage: !isGroupOrDefaultImage ? displayImage : null,
-            child: isGroupOrDefaultImage
-                ? Image(
-                    image: displayImage,
-                    fit: BoxFit.cover,
-                  )
-                : null,
+            backgroundColor: Colors.transparent,
+            foregroundImage: displayImage,
           ),
         ),
       ],
