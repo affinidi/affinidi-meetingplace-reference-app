@@ -84,7 +84,6 @@ class Contacts extends Table {
   IntColumn get origin => integer().map(const _ContactOriginConverter())();
   IntColumn get category => integer().map(const _ContactCategoryConverter())();
   TextColumn get displayName => text().nullable()();
-  BoolColumn get chatInProgress => boolean().clientDefault(() => false)();
   BoolColumn get badgeUpdateInProgress =>
       boolean().clientDefault(() => false)();
   IntColumn get badgeCount => integer().clientDefault(() => 0)();

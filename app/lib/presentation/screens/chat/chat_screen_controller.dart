@@ -908,7 +908,6 @@ class ChatScreenController extends _$ChatScreenController {
     await ref.read(contactsServiceProvider.notifier).updateContact(
           contact.copyWith(
             unsentMessage: messageToSave,
-            chatInProgress: false,
           ),
         );
 
@@ -929,7 +928,6 @@ class ChatScreenController extends _$ChatScreenController {
     await ref.read(contactsServiceProvider.notifier).updateContact(
           contact.copyWith(
             unsentMessage: null,
-            chatInProgress: true,
             badgeCount: 0,
             hasBeenOpened: true,
           ),
