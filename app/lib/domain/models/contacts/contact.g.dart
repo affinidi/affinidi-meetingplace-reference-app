@@ -29,8 +29,6 @@ abstract class _$ContactCWProxy {
 
   Contact displayName(String? displayName);
 
-  Contact chatInProgress(bool chatInProgress);
-
   Contact badgeUpdateInProgress(bool badgeUpdateInProgress);
 
   Contact badgeCount(int badgeCount);
@@ -61,7 +59,6 @@ abstract class _$ContactCWProxy {
     ContactCategory category,
     VCard? otherPartyVCard,
     String? displayName,
-    bool chatInProgress,
     bool badgeUpdateInProgress,
     int badgeCount,
     int currentMessageSeqNo,
@@ -113,10 +110,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
   Contact displayName(String? displayName) => this(displayName: displayName);
 
   @override
-  Contact chatInProgress(bool chatInProgress) =>
-      this(chatInProgress: chatInProgress);
-
-  @override
   Contact badgeUpdateInProgress(bool badgeUpdateInProgress) =>
       this(badgeUpdateInProgress: badgeUpdateInProgress);
 
@@ -159,7 +152,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? category = const $CopyWithPlaceholder(),
     Object? otherPartyVCard = const $CopyWithPlaceholder(),
     Object? displayName = const $CopyWithPlaceholder(),
-    Object? chatInProgress = const $CopyWithPlaceholder(),
     Object? badgeUpdateInProgress = const $CopyWithPlaceholder(),
     Object? badgeCount = const $CopyWithPlaceholder(),
     Object? currentMessageSeqNo = const $CopyWithPlaceholder(),
@@ -214,10 +206,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.displayName
           // ignore: cast_nullable_to_non_nullable
           : displayName as String?,
-      chatInProgress: chatInProgress == const $CopyWithPlaceholder()
-          ? _value.chatInProgress
-          // ignore: cast_nullable_to_non_nullable
-          : chatInProgress as bool,
       badgeUpdateInProgress:
           badgeUpdateInProgress == const $CopyWithPlaceholder()
               ? _value.badgeUpdateInProgress

@@ -34,7 +34,6 @@ part 'contact.g.dart';
 ///   connection offer).
 /// - `badgeCount` / `badgeUpdateInProgress` - Local unread/activity count and
 ///   processing flag.
-/// - `chatInProgress` - Whether a chat session is currently active for this
 ///   contact.
 /// - `currentMessageSeqNo` - Message sequence numbers for
 ///   ordering.
@@ -57,7 +56,6 @@ class Contact {
     required this.category,
     this.otherPartyVCard,
     this.displayName,
-    this.chatInProgress = false,
     this.badgeUpdateInProgress = false,
     this.badgeCount = 0,
     this.currentMessageSeqNo = 0,
@@ -81,7 +79,6 @@ class Contact {
   final ContactCategory category;
   final VCard? otherPartyVCard;
   final String? displayName;
-  final bool chatInProgress;
   final bool badgeUpdateInProgress;
   final int badgeCount;
   final int currentMessageSeqNo;
