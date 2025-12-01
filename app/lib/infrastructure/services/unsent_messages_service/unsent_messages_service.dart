@@ -83,16 +83,4 @@ class UnsentMessagesService extends _$UnsentMessagesService {
   String? getUnsentMessage(String contactId) {
     return state.unsentMessages[contactId];
   }
-
-  Future<void> clearUnsentMessage(String contactId) async {
-    final currentMessages = Map<String, String>.from(state.unsentMessages);
-    currentMessages.remove(contactId);
-    state = state.copyWith(unsentMessages: currentMessages);
-    await _saveToPrefs();
-  }
-
-  Future<void> clearAll() async {
-    state = const UnsentMessagesServiceState();
-    await _saveToPrefs();
-  }
 }
