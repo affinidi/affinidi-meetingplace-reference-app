@@ -14,6 +14,7 @@ import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../dialogs/new_connections_menu/new_connections_menu.dart';
 import '../../dialogs/offer/delete_connection_dialog.dart';
+import '../../widgets/containers/avatar_gradient_container.dart';
 import '../../widgets/section_banner.dart';
 import '../../widgets/tab_bar_tab.dart';
 import 'connections_screen_controller.dart';
