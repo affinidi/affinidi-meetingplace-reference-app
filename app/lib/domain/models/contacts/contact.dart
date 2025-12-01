@@ -34,9 +34,7 @@ part 'contact.g.dart';
 ///   connection offer).
 /// - `badgeCount` / `badgeUpdateInProgress` - Local unread/activity count and
 ///   processing flag.
-///   contact.
-/// - `currentMessageSeqNo` - Message sequence numbers for
-///   ordering.
+/// - `currentMessageSeqNo` - Message sequence numbers for ordering.
 /// - `lastKeepAliveMessage` - Timestamp of the last keep-alive message received
 ///   (used to show liveness).
 @CopyWith()
