@@ -9,7 +9,6 @@ class FakeCoreSDKStreamSubscription
   final _controller = StreamController<MediatorMessage>.broadcast();
   bool _isClosed = false;
 
-  // Allow external code to add messages to the stream
   void addMessage(dynamic message) {
     if (!_isClosed && message is MediatorMessage) {
       _controller.add(message);
@@ -42,7 +41,6 @@ class FakeCoreSDKStreamSubscription
     Duration duration, [
     void Function()? onTimeout,
   ]) {
-    // Return the stream subscription directly
     return _controller.stream.listen(null);
   }
 
@@ -75,7 +73,6 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final Map<String, Channel> _channels;
   final Map<String, FakeCoreSDKStreamSubscription> _subscriptions = {};
 
-  // Getter to check if subscriptions have been created (useful for debugging)
   int get subscriptionCount => _subscriptions.length;
   final ConnectionOffer? offerToFind;
   final bool findOfferHasError;
@@ -86,9 +83,6 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Stream<ControlPlaneStreamEvent> get controlPlaneEventsStream =>
       _controlPlaneEventStreamManager.stream;
 
-  // Allow tests to simulate receiving messages
-  // PlainTextMessage extends MediatorMessage so we can accept it and add it
-  // to the stream
   void simulateIncomingMessage(String channelDid, PlainTextMessage message) {
     final subscription = _subscriptions[channelDid];
     if (subscription != null) {
@@ -116,7 +110,6 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     );
   }
 
-  // Track publishOffer calls
   final List<Map<String, dynamic>> _publishOfferCalls = [];
   List<Map<String, dynamic>> get publishOfferCalls => _publishOfferCalls;
 
@@ -157,12 +150,10 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'externalRef': externalRef,
     });
 
-    // Check if we should throw an exception
     if (_publishOfferException != null) {
       throw _publishOfferException;
     }
 
-    // Return the specified offer result or default fake result
     if (_offerToReturn != null) {
       return _offerToReturn as PublishOfferResult<T>;
     }
@@ -170,23 +161,19 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     return FakePublishOfferResult() as PublishOfferResult<T>;
   }
 
-  // Track findOffer calls
   final List<String> _findOfferCalls = [];
   List<String> get findOfferCalls => _findOfferCalls;
 
   @override
   Future<FindOfferResult> findOffer({required String mnemonic}) async {
-    // Record the call
     _findOfferCalls.add(mnemonic);
 
-    // For now, just return the offer if available
     return FindOfferResult(
       connectionOffer: offerToFind,
       errorCode: null,
     );
   }
 
-  // Track acceptOffer calls
   final List<Map<String, dynamic>> _acceptOfferCalls = [];
   List<Map<String, dynamic>> get acceptOfferCalls => _acceptOfferCalls;
 
@@ -197,7 +184,6 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     required String senderInfo,
     String? externalRef,
   }) async {
-    // Record the call parameters
     _acceptOfferCalls.add({
       'connectionOffer': connectionOffer,
       'vCard': vCard,
@@ -205,13 +191,11 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'externalRef': externalRef,
     });
 
-    // Return a fake result with the accepted connection offer
     return _FakeAcceptOfferResult<T>(connectionOffer: connectionOffer);
   }
 
   @override
   Future<void> processControlPlaneEvents({Function? onDone}) async {
-    // ignore: avoid_dynamic_calls
     onDone?.call();
   }
 
@@ -226,7 +210,6 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     String channelDid, {
     String? mediatorDid,
   }) async {
-    // Create and store a subscription for this channel
     final subscription = FakeCoreSDKStreamSubscription();
     _subscriptions[channelDid] = subscription;
     return subscription;
@@ -239,7 +222,6 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     bool deleteOnRetrieve = false,
     bool deleteFailedMessages = false,
   }) async {
-    // Return empty list - no messages in fake
     return [];
   }
 
@@ -253,8 +235,22 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     int? forwardExpiryInSeconds,
     String? notifyChannelType,
   }) async {
-    // Fake implementation - just return successfully
     return;
+  }
+
+  @override
+  Future<Group?> getGroupByOfferLink(String offerLink) async {
+    return null;
+  }
+
+  @override
+  Future<ConnectionOffer?> getConnectionOffer(String offerLink) async {
+    return null;
+  }
+
+  @override
+  Future<Group?> getGroupById(String groupId) async {
+    return null;
   }
 
   @override

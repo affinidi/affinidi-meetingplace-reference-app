@@ -11,6 +11,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
   final List<Map<String, dynamic>> reactOnMessageCalls = [];
+  final List<Map<String, dynamic>> approveConnectionRequestCalls = [];
+  final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
+  final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
+  final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
 
   int get startChatSessionCallCount => _chatSessionStartedCalls;
 
@@ -51,6 +55,231 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     );
   }
 
+  /// Simulates an incoming concierge message for join group requests
+  /// Returns the created ConciergeMessage for verification in tests
+  ConciergeMessage simulateJoinGroupRequest({
+    required String memberName,
+    required String senderDid,
+    required String recipientDid,
+  }) {
+    final conciergeMessage = ConciergeMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'concierge-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.userInput,
+      data: {
+        'memberVCard': {
+          'values': {
+            'n': {
+              'given': memberName,
+            },
+          },
+        },
+      },
+      conciergeType: ConciergeMessageType.permissionToJoinGroup,
+    );
+
+    final plainTextMessage = PlainTextMessage(
+      id: conciergeMessage.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/concierge'),
+      body: {
+        'type': 'permissionToJoinGroup',
+        'memberName': memberName,
+        'timestamp': conciergeMessage.dateCreated.toIso8601String(),
+      },
+      from: senderDid,
+      to: [recipientDid],
+      createdTime: conciergeMessage.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(
+        plainTextMessage: plainTextMessage,
+        chatItem: conciergeMessage,
+      ),
+    );
+
+    return conciergeMessage;
+  }
+
+  /// Simulates a profile update request concierge message
+  ConciergeMessage simulateProfileUpdateRequest({
+    required String senderDid,
+    required String recipientDid,
+  }) {
+    final conciergeMessage = ConciergeMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'concierge-update-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.userInput,
+      data: {},
+      conciergeType: ConciergeMessageType.permissionToUpdateProfile,
+    );
+
+    final plainTextMessage = PlainTextMessage(
+      id: conciergeMessage.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/concierge'),
+      body: {
+        'type': 'permissionToUpdateProfile',
+        'timestamp': conciergeMessage.dateCreated.toIso8601String(),
+      },
+      from: senderDid,
+      to: [recipientDid],
+      createdTime: conciergeMessage.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(
+        plainTextMessage: plainTextMessage,
+        chatItem: conciergeMessage,
+      ),
+    );
+
+    return conciergeMessage;
+  }
+
+  /// Simulates a member joining the group event
+  EventMessage simulateMemberJoinedGroup({
+    required String memberName,
+    required String memberDid,
+    required String senderDid,
+    required String recipientDid,
+  }) {
+    final eventMessage = EventMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'event-join-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.received,
+      eventType: EventMessageType.groupMemberJoinedGroup,
+      data: {
+        'memberDid': memberDid,
+        'vCard': {
+          'values': {
+            'n': {
+              'given': memberName,
+            },
+          },
+        },
+      },
+    );
+
+    final plainTextMessage = PlainTextMessage(
+      id: eventMessage.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+      body: {
+        'type': 'groupMemberJoinedGroup',
+        'memberName': memberName,
+        'timestamp': eventMessage.dateCreated.toIso8601String(),
+      },
+      from: senderDid,
+      to: [recipientDid],
+      createdTime: eventMessage.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(
+        plainTextMessage: plainTextMessage,
+        chatItem: eventMessage,
+      ),
+    );
+
+    return eventMessage;
+  }
+
+  /// Simulates a member leaving the group event
+  EventMessage simulateMemberLeftGroup({
+    required String memberName,
+    required String memberDid,
+    required String senderDid,
+    required String recipientDid,
+  }) {
+    final eventMessage = EventMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'event-leave-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.received,
+      eventType: EventMessageType.groupMemberLeftGroup,
+      data: {
+        'memberDid': memberDid,
+        'vCard': {
+          'values': {
+            'n': {
+              'given': memberName,
+            },
+          },
+        },
+      },
+    );
+
+    final plainTextMessage = PlainTextMessage(
+      id: eventMessage.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+      body: {
+        'type': 'groupMemberLeftGroup',
+        'memberName': memberName,
+        'timestamp': eventMessage.dateCreated.toIso8601String(),
+      },
+      from: senderDid,
+      to: [recipientDid],
+      createdTime: eventMessage.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(
+        plainTextMessage: plainTextMessage,
+        chatItem: eventMessage,
+      ),
+    );
+
+    return eventMessage;
+  }
+
+  /// Simulates a group deleted event
+  EventMessage simulateGroupDeleted({
+    required String senderDid,
+    required String recipientDid,
+  }) {
+    final eventMessage = EventMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'event-deleted-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.received,
+      eventType: EventMessageType.groupDeleted,
+      data: {},
+    );
+
+    final plainTextMessage = PlainTextMessage(
+      id: eventMessage.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+      body: {
+        'type': 'groupDeleted',
+        'timestamp': eventMessage.dateCreated.toIso8601String(),
+      },
+      from: senderDid,
+      to: [recipientDid],
+      createdTime: eventMessage.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(
+        plainTextMessage: plainTextMessage,
+        chatItem: eventMessage,
+      ),
+    );
+
+    return eventMessage;
+  }
+
   @override
   Future<ChatStream?> get chatStreamSubscription async {
     return _FakeChatStream(_streamController.stream);
@@ -75,17 +304,16 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
-    // No-op for tests
+    sendContactDetailsUpdateCalls.add({
+      'message': message,
+    });
   }
 
   @override
-  Future<void> sendChatDeliveredMessage(PlainTextMessage message) async {
-    // No-op for tests
-  }
-
-  @override
-  Future<void> sendChatPresence() async {
-    // No-op for tests
+  Future<void> rejectChatContactDetailsUpdate(ConciergeMessage message) async {
+    cancelUpdatingContactDetailsCalls.add({
+      'message': message,
+    });
   }
 
   @override
@@ -94,8 +322,17 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
-  Future<void> sendProfileHash() async {
-    // No-op for tests
+  Future<void> approveConnectionRequest(ConciergeMessage message) async {
+    approveConnectionRequestCalls.add({
+      'message': message,
+    });
+  }
+
+  @override
+  Future<void> rejectConnectionRequest(ConciergeMessage message) async {
+    rejectConnectionRequestCalls.add({
+      'message': message,
+    });
   }
 
   @override
