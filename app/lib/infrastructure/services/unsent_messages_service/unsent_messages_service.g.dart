@@ -7,17 +7,17 @@ part of 'unsent_messages_service.dart';
 // **************************************************************************
 
 String _$unsentMessagesServiceHash() =>
-    r'fcc3417eecfe942f742663070d860d82534bac67';
+    r'fc6187b96a65ea4bb21bbb52dcf403559354f0d1';
 
-/// In-memory service for managing unsent messages per contact.
+/// Service for managing unsent messages per contact.
 ///
-/// This service provides a lightweight, memory-only cache for draft messages
-/// that users have typed but not sent.
+/// This service persists draft messages to SharedPreferences, allowing them
+/// to survive app restarts while keeping them separate from the main database.
 ///
 /// Copied from [UnsentMessagesService].
 @ProviderFor(UnsentMessagesService)
-final unsentMessagesServiceProvider = AutoDisposeNotifierProvider<
-    UnsentMessagesService, UnsentMessagesServiceState>.internal(
+final unsentMessagesServiceProvider = NotifierProvider<UnsentMessagesService,
+    UnsentMessagesServiceState>.internal(
   UnsentMessagesService.new,
   name: r'unsentMessagesServiceProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -27,7 +27,6 @@ final unsentMessagesServiceProvider = AutoDisposeNotifierProvider<
   allTransitiveDependencies: null,
 );
 
-typedef _$UnsentMessagesService
-    = AutoDisposeNotifier<UnsentMessagesServiceState>;
+typedef _$UnsentMessagesService = Notifier<UnsentMessagesServiceState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
