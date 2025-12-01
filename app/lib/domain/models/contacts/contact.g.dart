@@ -37,8 +37,6 @@ abstract class _$ContactCWProxy {
 
   Contact hasBeenOpened(bool hasBeenOpened);
 
-  Contact unsentMessage(String? unsentMessage);
-
   Contact lastKeepAliveMessage(DateTime? lastKeepAliveMessage);
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Contact(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
@@ -63,7 +61,6 @@ abstract class _$ContactCWProxy {
     int badgeCount,
     int currentMessageSeqNo,
     bool hasBeenOpened,
-    String? unsentMessage,
     DateTime? lastKeepAliveMessage,
   });
 }
@@ -125,10 +122,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       this(hasBeenOpened: hasBeenOpened);
 
   @override
-  Contact unsentMessage(String? unsentMessage) =>
-      this(unsentMessage: unsentMessage);
-
-  @override
   Contact lastKeepAliveMessage(DateTime? lastKeepAliveMessage) =>
       this(lastKeepAliveMessage: lastKeepAliveMessage);
 
@@ -156,7 +149,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? badgeCount = const $CopyWithPlaceholder(),
     Object? currentMessageSeqNo = const $CopyWithPlaceholder(),
     Object? hasBeenOpened = const $CopyWithPlaceholder(),
-    Object? unsentMessage = const $CopyWithPlaceholder(),
     Object? lastKeepAliveMessage = const $CopyWithPlaceholder(),
   }) {
     return Contact(
@@ -223,10 +215,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.hasBeenOpened
           // ignore: cast_nullable_to_non_nullable
           : hasBeenOpened as bool,
-      unsentMessage: unsentMessage == const $CopyWithPlaceholder()
-          ? _value.unsentMessage
-          // ignore: cast_nullable_to_non_nullable
-          : unsentMessage as String?,
       lastKeepAliveMessage: lastKeepAliveMessage == const $CopyWithPlaceholder()
           ? _value.lastKeepAliveMessage
           // ignore: cast_nullable_to_non_nullable
