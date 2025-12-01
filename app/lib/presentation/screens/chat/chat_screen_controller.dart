@@ -904,7 +904,7 @@ class ChatScreenController extends _$ChatScreenController {
       return;
     }
 
-    ref
+    await ref
         .read(unsentMessagesServiceProvider.notifier)
         .saveUnsentMessage(contact.id, unsentMessage);
 

@@ -44,7 +44,7 @@ class ContactsDatabase extends _$ContactsDatabase {
         ));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -65,6 +65,33 @@ class ContactsDatabase extends _$ContactsDatabase {
                 'NULL DEFAULT 0 CHECK (has_been_opened IN (0, 1))',
               );
             }
+          }
+
+          if (from < 3) {
+            await migrator.alterTable(
+              TableMigration(
+                contacts,
+                columnTransformer: {
+                  contacts.id: contacts.id,
+                  contacts.channelDid: contacts.channelDid,
+                  contacts.channelDidSha256: contacts.channelDidSha256,
+                  contacts.dateAdded: contacts.dateAdded,
+                  contacts.offerLink: contacts.offerLink,
+                  contacts.mediatorDid: contacts.mediatorDid,
+                  contacts.type: contacts.type,
+                  contacts.status: contacts.status,
+                  contacts.origin: contacts.origin,
+                  contacts.category: contacts.category,
+                  contacts.displayName: contacts.displayName,
+                  contacts.badgeUpdateInProgress:
+                      contacts.badgeUpdateInProgress,
+                  contacts.badgeCount: contacts.badgeCount,
+                  contacts.currentMessageSeqNo: contacts.currentMessageSeqNo,
+                  contacts.hasBeenOpened: contacts.hasBeenOpened,
+                  contacts.lastKeepAliveMessage: contacts.lastKeepAliveMessage,
+                },
+              ),
+            );
           }
         },
       );
