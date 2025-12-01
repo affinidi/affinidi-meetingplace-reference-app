@@ -37,7 +37,6 @@ part 'contact.g.dart';
 ///   contact.
 /// - `currentMessageSeqNo` - Message sequence numbers for
 ///   ordering.
-/// - `unsentMessage` - Cached unsent message content.
 /// - `lastKeepAliveMessage` - Timestamp of the last keep-alive message received
 ///   (used to show liveness).
 @CopyWith()
@@ -60,7 +59,6 @@ class Contact {
     this.badgeCount = 0,
     this.currentMessageSeqNo = 0,
     this.hasBeenOpened = false,
-    this.unsentMessage,
     this.lastKeepAliveMessage,
   });
 
@@ -83,7 +81,6 @@ class Contact {
   final int badgeCount;
   final int currentMessageSeqNo;
   final bool hasBeenOpened;
-  final String? unsentMessage;
   final DateTime? lastKeepAliveMessage;
 
   bool get isGroup => type == ContactType.group;
