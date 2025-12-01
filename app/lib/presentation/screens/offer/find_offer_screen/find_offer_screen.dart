@@ -128,6 +128,7 @@ class FindOfferScreen extends HookConsumerWidget {
                     _QrButton(onDidReceiveQrData: onDidReceiveQrData),
                     Expanded(
                       child: TextField(
+                        key: const ValueKey('find_offer_passphrase_field'),
                         textInputAction: TextInputAction.search,
                         onSubmitted: (value) {
                           if (!context.mounted) return;

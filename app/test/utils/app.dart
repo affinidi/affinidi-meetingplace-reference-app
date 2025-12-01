@@ -87,8 +87,9 @@ Future<void> startApp(
         }
         return repo;
       }),
-      meetingPlaceSdkProvider
-          .overrideWith((ref) => meetingPlaceCoreSDK ?? FakeMeetingPlaceSDK()),
+      meetingPlaceSdkProvider.overrideWith((ref) =>
+          meetingPlaceCoreSDK ??
+          FakeMeetingPlaceSDK(initialIdentities: identities)),
       secureStorageProvider
           .overrideWith((ref) async => secureStorage ?? FakeSecureStorage()),
       sharedPreferencesProvider.overrideWithValue(sharedPreferences),

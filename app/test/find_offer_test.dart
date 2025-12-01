@@ -64,7 +64,8 @@ void main() {
           (tester) async {
         await setupFindOfferTest(tester, location, testIdentity);
 
-        final passphraseField = find.byType(TextField);
+        final passphraseField =
+            find.byKey(const ValueKey('find_offer_passphrase_field'));
         expect(passphraseField, findsOneWidget);
 
         await tester.enterText(passphraseField, 'test-passphrase-123');
@@ -107,11 +108,13 @@ void main() {
           mediators: FakeMediators.all,
           meetingPlaceCoreSDK: FakeMeetingPlaceSDK(
             offerToFind: null,
+            initialIdentities: [testIdentity],
           ),
         );
         await tester.pumpAndSettle();
 
-        final passphraseField = find.byType(TextField);
+        final passphraseField =
+            find.byKey(const ValueKey('find_offer_passphrase_field'));
         await tester.enterText(passphraseField, 'nonexistent-passphrase');
         await tester.pumpAndSettle();
 
@@ -139,11 +142,13 @@ void main() {
           mediators: FakeMediators.all,
           meetingPlaceCoreSDK: FakeMeetingPlaceSDK(
             offerToFind: offer,
+            initialIdentities: [testIdentity],
           ),
         );
         await tester.pumpAndSettle();
 
-        final passphraseField = find.byType(TextField);
+        final passphraseField =
+            find.byKey(const ValueKey('find_offer_passphrase_field'));
         await tester.enterText(passphraseField, offer.mnemonic);
         await tester.pumpAndSettle();
 
@@ -175,7 +180,8 @@ void main() {
           'it calls acceptOffer with correct parameters when Connect is '
           'pressed', (tester) async {
         final offer = FakeConnectionOffers.testOffer;
-        final fakeSdk = FakeMeetingPlaceSDK(offerToFind: offer);
+        final fakeSdk = FakeMeetingPlaceSDK(
+            offerToFind: offer, initialIdentities: [testIdentity]);
         final l10n = await getL10n();
 
         await navigateToLocation(

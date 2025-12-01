@@ -29,6 +29,7 @@ class _OfferBottomContainer extends ConsumerWidget {
               loadingMessage: context.l10n.publishing,
             ),
             ElevatedLoadingButton(
+              key: const ValueKey('publish_offer_button'),
               onPressed: canPublish ? publishOffer : null,
               child: Text(
                 context.l10n.publishToMeetingPlace,

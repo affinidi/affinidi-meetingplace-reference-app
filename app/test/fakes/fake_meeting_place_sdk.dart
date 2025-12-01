@@ -12,10 +12,12 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     bool isPhraseAvailable = true,
     this.offerToFind,
     this.findOfferHasError = false,
+    List<Identity> initialIdentities = const [],
   })  : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
         _offerToReturn = offerToReturn,
         _publishOfferException = publishOfferException,
-        _isPhraseAvailable = isPhraseAvailable;
+        _isPhraseAvailable = isPhraseAvailable,
+        _identities = List<Identity>.from(initialIdentities);
 
   final bool _shouldFailToRegisterPushToken;
   final PublishOfferResult? _offerToReturn;
@@ -59,6 +61,64 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     return [];
   }
 
+  final List<Identity> _identities;
+
+  @override
+  Future<List<Identity>> listIdentities() async {
+    return List<Identity>.unmodifiable(_identities);
+  }
+
+  @override
+  Future<Identity?> getIdentityById(String id) async {
+    for (final identity in _identities) {
+      if (identity.id == id) {
+        return identity;
+      }
+    }
+    return null;
+  }
+
+  @override
+  Future<Identity> createIdentity({
+    required ContactCard card,
+    bool isPrimary = false,
+  }) async {
+    final id = card.id;
+    final storedCard = ContactCard(
+      id: id,
+      firstName: card.firstName,
+      displayName: card.displayName,
+      lastName: card.lastName,
+      email: card.email,
+      mobile: card.mobile,
+      profilePic: card.profilePic,
+      cardColor: card.cardColor,
+    );
+    final identity = Identity(
+      id: id,
+      did: 'did:example:$id',
+      card: storedCard,
+      isPrimary: isPrimary,
+    );
+    _identities.add(identity);
+    return identity;
+  }
+
+  @override
+  Future<void> updateIdentity(Identity identity) async {
+    for (var i = 0; i < _identities.length; i++) {
+      if (_identities[i].id == identity.id) {
+        _identities[i] = identity;
+        return;
+      }
+    }
+  }
+
+  @override
+  Future<void> deleteIdentity(String id) async {
+    _identities.removeWhere((i) => i.id == id);
+  }
+
   @override
   Future<ValidateOfferPhraseResult> validateOfferPhrase(String phrase) async {
     return ValidateOfferPhraseResult(isAvailable: _isPhraseAvailable);
@@ -81,7 +141,9 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     _publishOfferCalls.add({
       'offerName': offerName,
       'vCard': vCard.toString(),
-      'type': type,
+      'type': type == SDKConnectionOfferType.groupInvitation
+          ? ConnectionOfferType.meetingPlaceOutreachInvitation
+          : ConnectionOfferType.meetingPlaceInvitation,
       'offerDescription': offerDescription,
       'customPhrase': customPhrase,
       'validUntil': validUntil,
