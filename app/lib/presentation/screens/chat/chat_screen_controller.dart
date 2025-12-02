@@ -647,13 +647,6 @@ class ChatScreenController extends _$ChatScreenController {
     unawaited(_chatSDK?.sendTextMessage(trimmedMessage));
     _sendChatActivityTimedAction?.cancel();
     messageTextController.text = '';
-
-    final contact = state.contact;
-    if (contact != null) {
-      unawaited(ref
-          .read(unsentMessagesServiceProvider.notifier)
-          .saveUnsentMessage(contact.id, null));
-    }
   }
 
   Future<void> sendChatActivity() async {
@@ -879,13 +872,6 @@ class ChatScreenController extends _$ChatScreenController {
       attachments: messageAttachment.map((a) => a.toAttachment()).toList(),
     ));
     _sendChatActivityTimedAction?.cancel();
-
-    final contact = state.contact;
-    if (contact != null) {
-      unawaited(ref
-          .read(unsentMessagesServiceProvider.notifier)
-          .saveUnsentMessage(contact.id, null));
-    }
   }
 
   /// Loads an image attachment into the chat screen.
