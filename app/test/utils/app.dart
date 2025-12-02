@@ -94,9 +94,6 @@ Future<void> startApp(
         }
         return repo;
       }),
-      if (contacts.isNotEmpty)
-        contactsServiceProvider
-            .overrideWith(() => FakeContactsService(contacts)),
       environmentProvider.overrideWith((ref) => FakeEnvironment()),
       pushNotificationMessagingProvider.overrideWith((ref) =>
           pushNotificationMessaging ?? FakePushNotificationMessaging()),
