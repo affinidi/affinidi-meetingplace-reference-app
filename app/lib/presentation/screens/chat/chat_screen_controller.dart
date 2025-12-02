@@ -940,7 +940,6 @@ class ChatScreenController extends _$ChatScreenController {
   }
 
   Future<void> _startChatSession(Contact contact) async {
-    // Wait for unsent messages to load from secure storage, then restore
     final unsentMessagesService =
         ref.read(unsentMessagesServiceProvider.notifier);
     await unsentMessagesService.ensureInitialized();
