@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
@@ -70,6 +71,7 @@ class ControlPlaneService extends _$ControlPlaneService
 
   String? _lastAttemptedDeviceToken;
   String? _lastRegisteredDeviceToken;
+  late final _registerDeviceTokenLock = Lock();
 
   @override
   ControlPlaneServiceState build() {
@@ -151,41 +153,43 @@ class ControlPlaneService extends _$ControlPlaneService
   /// - `Future<void>` completes when registration and subsequent processing
   ///  finish.
   Future<void> _registerDeviceToken(String token) async {
-    if (_lastRegisteredDeviceToken == token) return;
+    await _registerDeviceTokenLock.synchronized(() async {
+      if (_lastRegisteredDeviceToken == token) return;
 
-    _lastAttemptedDeviceToken = token;
+      _lastAttemptedDeviceToken = token;
 
-    _logger.info(
-      'Device token received: $token',
-      name: _logKey,
-    );
-
-    try {
-      final sdk = await ref.read(meetingPlaceSdkProvider.future);
-      _logger.info('Registering device with MeetingPlaceCoreSDK',
-          name: _logKey);
-      await sdk.registerForPushNotifications(token);
-      _lastRegisteredDeviceToken = token;
-
-      if (state.isDeviceTokenRegistered != true) {
-        state = state.copyWith(isDeviceTokenRegistered: true);
-      }
       _logger.info(
-        'Device registration completed successfully',
+        'Device token received: $token',
         name: _logKey,
       );
-    } catch (error, stackTrace) {
-      if (state.isDeviceTokenRegistered == null) {
-        state = state.copyWith(isDeviceTokenRegistered: false);
+
+      try {
+        final sdk = await ref.read(meetingPlaceSdkProvider.future);
+        _logger.info('Registering device with MeetingPlaceCoreSDK',
+            name: _logKey);
+        await sdk.registerForPushNotifications(token);
+        _lastRegisteredDeviceToken = token;
+
+        if (state.isDeviceTokenRegistered != true) {
+          state = state.copyWith(isDeviceTokenRegistered: true);
+        }
+        _logger.info(
+          'Device registration completed successfully',
+          name: _logKey,
+        );
+      } catch (error, stackTrace) {
+        if (state.isDeviceTokenRegistered == null) {
+          state = state.copyWith(isDeviceTokenRegistered: false);
+        }
+        _logger.error(
+          'Failed to register device token',
+          error: error,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
       }
-      _logger.error(
-        'Failed to register device token',
-        error: error,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-    }
-    await _processEvents();
+      await _processEvents();
+    });
   }
 
   /// Handle a control plane stream event from the MeetingPlaceCoreSDK.
