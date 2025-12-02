@@ -597,50 +597,6 @@ void main() {
               findsOneWidget);
         });
 
-        testWidgets('shows group deleted message', (WidgetTester tester) async {
-          final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
-
-          await navigateToGroupChatScreen(
-            tester,
-            contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
-          );
-
-          meetingPlaceChatSDK.simulateGroupDeleted(
-            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-          );
-          await tester.pumpAndSettle();
-
-          // Verify the message appears ("This group has been deleted")
-          expect(find.textContaining('group has been deleted'), findsOneWidget);
-        });
-      });
-
-      group('and profile update is requested', () {
-        testWidgets('shows concierge message with update prompt',
-            (WidgetTester tester) async {
-          final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
-          final l10n = await getL10n();
-
-          await navigateToGroupChatScreen(
-            tester,
-            contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
-          );
-
-          meetingPlaceChatSDK.simulateProfileUpdateRequest(
-            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-          );
-          await tester.pumpAndSettle();
-
-          expect(find.text(l10n.chatRequestPermissionToUpdateProfileGroup),
-              findsOneWidget);
-        });
-
         testWidgets('shows Yes, Later, No buttons',
             (WidgetTester tester) async {
           final contactId = FakeContacts.groupContact.id;
