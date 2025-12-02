@@ -44,7 +44,7 @@ class ContactsDatabase extends _$ContactsDatabase {
         ));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -66,6 +66,33 @@ class ContactsDatabase extends _$ContactsDatabase {
               );
             }
           }
+
+          if (from < 3) {
+            await migrator.alterTable(
+              TableMigration(
+                contacts,
+                columnTransformer: {
+                  contacts.id: contacts.id,
+                  contacts.channelDid: contacts.channelDid,
+                  contacts.channelDidSha256: contacts.channelDidSha256,
+                  contacts.dateAdded: contacts.dateAdded,
+                  contacts.offerLink: contacts.offerLink,
+                  contacts.mediatorDid: contacts.mediatorDid,
+                  contacts.type: contacts.type,
+                  contacts.status: contacts.status,
+                  contacts.origin: contacts.origin,
+                  contacts.category: contacts.category,
+                  contacts.displayName: contacts.displayName,
+                  contacts.badgeUpdateInProgress:
+                      contacts.badgeUpdateInProgress,
+                  contacts.badgeCount: contacts.badgeCount,
+                  contacts.currentMessageSeqNo: contacts.currentMessageSeqNo,
+                  contacts.hasBeenOpened: contacts.hasBeenOpened,
+                  contacts.lastKeepAliveMessage: contacts.lastKeepAliveMessage,
+                },
+              ),
+            );
+          }
         },
       );
 }
@@ -84,7 +111,6 @@ class Contacts extends Table {
   IntColumn get origin => integer().map(const _ContactOriginConverter())();
   IntColumn get category => integer().map(const _ContactCategoryConverter())();
   TextColumn get displayName => text().nullable()();
-  BoolColumn get chatInProgress => boolean().clientDefault(() => false)();
   BoolColumn get badgeUpdateInProgress =>
       boolean().clientDefault(() => false)();
   IntColumn get badgeCount => integer().clientDefault(() => 0)();

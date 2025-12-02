@@ -27,6 +27,7 @@ import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
@@ -120,14 +121,9 @@ class ChatScreenController extends _$ChatScreenController {
       return;
     }
 
-    final messageToSave =
-        unsentMessage.isNotEmpty == true ? unsentMessage : null;
-    await ref.read(contactsServiceProvider.notifier).updateContact(
-          contact.copyWith(
-            unsentMessage: messageToSave,
-            chatInProgress: false,
-          ),
-        );
+    await ref
+        .read(unsentMessagesServiceProvider.notifier)
+        .saveUnsentMessage(contact.id, unsentMessage);
 
     _chatSDK?.endChatSession();
 
@@ -920,7 +916,10 @@ class ChatScreenController extends _$ChatScreenController {
   }
 
   Future<void> _startChatSession(Contact contact) async {
-    final unsentMessage = contact.unsentMessage;
+    // Restore unsent message from in-memory service
+    final unsentMessage = ref
+        .read(unsentMessagesServiceProvider.notifier)
+        .getUnsentMessage(contact.id);
     if (unsentMessage != null) {
       messageTextController.text = unsentMessage;
     }
@@ -929,8 +928,6 @@ class ChatScreenController extends _$ChatScreenController {
 
     await ref.read(contactsServiceProvider.notifier).updateContact(
           contact.copyWith(
-            unsentMessage: null,
-            chatInProgress: true,
             badgeCount: 0,
             hasBeenOpened: true,
           ),

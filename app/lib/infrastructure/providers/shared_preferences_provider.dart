@@ -9,7 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// typos when accessing stored preferences.
 enum SharedPreferencesKeys {
   alreadyInstalled,
-  alreadyOnboarded;
+  alreadyOnboarded,
+  unsentMessages;
 }
 
 /// Provider that supplies the global [SharedPreferences] instance.
