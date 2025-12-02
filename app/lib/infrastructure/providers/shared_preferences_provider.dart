@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum SharedPreferencesKeys {
   alreadyInstalled,
   alreadyOnboarded,
-  unsentMessages;
 }
 
 /// Provider that supplies the global [SharedPreferences] instance.

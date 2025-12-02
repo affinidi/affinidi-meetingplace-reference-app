@@ -60,6 +60,7 @@ class ChatScreenController extends _$ChatScreenController {
   TimedAction? _sendChatActivityTimedAction;
   TimedAction? _membersTypingTimedAction;
   TimedAction? _updateContactPresenceStatusTimedAction;
+  Timer? _saveUnsentMessageDebouncer;
 
   late final Map<String, ProviderSubscription<void>>
       _conciergeLoadingControllersSubscriptions = {};
@@ -82,13 +83,25 @@ class ChatScreenController extends _$ChatScreenController {
       });
     }, fireImmediately: true);
 
-    ref.onDispose(() async {
-      await _endChatSession(unsentMessage: messageTextController.text);
+    messageTextController.addListener(_onMessageTextChanged);
+
+    ref.onDispose(() {
+      _sendChatActivityTimedAction?.cancel();
+      _membersTypingTimedAction?.cancel();
+      _updateContactPresenceStatusTimedAction?.cancel();
+      _saveUnsentMessageDebouncer?.cancel();
+
       messagesSubscription?.dispose();
+      messageTextController.removeListener(_onMessageTextChanged);
       messageTextController.dispose();
       _chatSDK?.endChatSession();
 
       _disposeConciergeLoadingControllers();
+
+      _logger.info(
+        'Chat session ended',
+        name: _logKey,
+      );
     });
 
     return ChatScreenState(
@@ -110,6 +123,20 @@ class ChatScreenController extends _$ChatScreenController {
     initializing ??= loadContact(contactId);
 
     await initializing;
+  }
+
+  void _onMessageTextChanged() {
+    _saveUnsentMessageDebouncer?.cancel();
+
+    final contact = state.contact;
+    if (contact == null) return;
+
+    _saveUnsentMessageDebouncer = Timer(const Duration(milliseconds: 500), () {
+      final text = messageTextController.text;
+      ref
+          .read(unsentMessagesServiceProvider.notifier)
+          .saveUnsentMessage(contact.id, text.isEmpty ? null : text);
+    });
   }
 
   void _disposeConciergeLoadingControllers() {
@@ -480,12 +507,16 @@ class ChatScreenController extends _$ChatScreenController {
                 : ContactPresenceStatus.offline);
       },
       onCancel: () {
-        state = state.copyWith(
-            contactPresenceStatus: ContactPresenceStatus.offline);
+        Future.microtask(() {
+          state = state.copyWith(
+              contactPresenceStatus: ContactPresenceStatus.offline);
+        });
       },
       onComplete: () {
-        state = state.copyWith(
-            contactPresenceStatus: ContactPresenceStatus.offline);
+        Future.microtask(() {
+          state = state.copyWith(
+              contactPresenceStatus: ContactPresenceStatus.offline);
+        });
       },
       duration: Duration(seconds: chatPresenceIntervalInSeconds),
     );
@@ -616,6 +647,13 @@ class ChatScreenController extends _$ChatScreenController {
     unawaited(_chatSDK?.sendTextMessage(trimmedMessage));
     _sendChatActivityTimedAction?.cancel();
     messageTextController.text = '';
+
+    final contact = state.contact;
+    if (contact != null) {
+      unawaited(ref
+          .read(unsentMessagesServiceProvider.notifier)
+          .saveUnsentMessage(contact.id, null));
+    }
   }
 
   Future<void> sendChatActivity() async {
@@ -841,6 +879,13 @@ class ChatScreenController extends _$ChatScreenController {
       attachments: messageAttachment.map((a) => a.toAttachment()).toList(),
     ));
     _sendChatActivityTimedAction?.cancel();
+
+    final contact = state.contact;
+    if (contact != null) {
+      unawaited(ref
+          .read(unsentMessagesServiceProvider.notifier)
+          .saveUnsentMessage(contact.id, null));
+    }
   }
 
   /// Loads an image attachment into the chat screen.
@@ -894,31 +939,13 @@ class ChatScreenController extends _$ChatScreenController {
         .updateContactSequenceNumber(channelDid, channel.seqNo));
   }
 
-  Future<void> _endChatSession({required String? unsentMessage}) async {
-    _sendChatActivityTimedAction?.cancel();
-    _membersTypingTimedAction?.cancel();
-    _updateContactPresenceStatusTimedAction?.cancel();
-
-    final contact = state.contact;
-    if (contact == null) {
-      return;
-    }
-
-    await ref
-        .read(unsentMessagesServiceProvider.notifier)
-        .saveUnsentMessage(contact.id, unsentMessage);
-
-    _logger.info(
-      'Chat session ended',
-      name: _logKey,
-    );
-  }
-
   Future<void> _startChatSession(Contact contact) async {
-    // Restore unsent message from in-memory service
-    final unsentMessage = ref
-        .read(unsentMessagesServiceProvider.notifier)
-        .getUnsentMessage(contact.id);
+    // Wait for unsent messages to load from secure storage, then restore
+    final unsentMessagesService =
+        ref.read(unsentMessagesServiceProvider.notifier);
+    await unsentMessagesService.ensureInitialized();
+
+    final unsentMessage = unsentMessagesService.getUnsentMessage(contact.id);
     if (unsentMessage != null) {
       messageTextController.text = unsentMessage;
     }
