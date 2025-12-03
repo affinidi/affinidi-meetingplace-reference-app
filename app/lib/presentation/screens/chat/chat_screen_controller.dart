@@ -94,6 +94,7 @@ class ChatScreenController extends _$ChatScreenController {
       messagesSubscription?.dispose();
       messageTextController.removeListener(_onMessageTextChanged);
       messageTextController.dispose();
+      _chatSDK?.endChatSession();
 
       _disposeConciergeLoadingControllers();
 
