@@ -163,7 +163,7 @@ class OnboardingScreen extends HookConsumerWidget {
                 padding: const EdgeInsets.only(bottom: 40),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: context.colorScheme.primary,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),

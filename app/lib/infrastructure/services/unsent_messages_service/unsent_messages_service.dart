@@ -1,18 +1,17 @@
-import 'dart:convert';
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../loggers/app_logger/app_logger.dart';
 import '../../providers/app_logger_provider.dart';
-import '../../providers/shared_preferences_provider.dart';
+import '../../secure_storage/secure_storage.dart';
 import 'unsent_messages_state.dart';
 
 part 'unsent_messages_service.g.dart';
 
 /// Service for managing unsent messages per contact.
 ///
-/// This service persists draft messages to SharedPreferences, allowing them
-/// to survive app restarts while keeping them separate from the main database.
+/// This service persists draft messages to secure storage (encrypted),
+/// allowing them to survive app restarts while keeping them secure and
+/// separate from the main database.
 @Riverpod(keepAlive: true)
 class UnsentMessagesService extends _$UnsentMessagesService {
   late final AppLogger _logger = ref.read(appLoggerProvider);
@@ -20,46 +19,41 @@ class UnsentMessagesService extends _$UnsentMessagesService {
 
   @override
   UnsentMessagesServiceState build() {
-    final unsentMessages = _loadFromPrefs();
-    return UnsentMessagesServiceState(unsentMessages: unsentMessages);
+    return const UnsentMessagesServiceState();
   }
 
-  Map<String, String> _loadFromPrefs() {
+  Future<void>? initializing;
+  Future<void> ensureInitialized() async {
+    initializing ??= _loadFromSecureStorage();
+    await initializing;
+  }
+
+  Future<void> _loadFromSecureStorage() async {
     try {
-      final prefs = ref.read(sharedPreferencesProvider);
-      final json = prefs.getString(SharedPreferencesKeys.unsentMessages.name);
-      if (json != null && json.isNotEmpty) {
-        final decoded = jsonDecode(json) as Map<String, dynamic>;
-        final messages = Map<String, String>.from(decoded);
-        _logger.info(
-          'Loaded ${messages.length} unsent messages from SharedPreferences',
-          name: _logKey,
-        );
-        return messages;
-      }
+      final storage = await ref.read(secureStorageProvider.future);
+      final messages = await storage.getUnsentMessages();
+      state = state.copyWith(unsentMessages: messages);
+      _logger.info(
+        'Loaded ${messages.length} unsent messages from secure storage',
+        name: _logKey,
+      );
     } catch (e, st) {
       _logger.error(
-        'Failed to load unsent messages from SharedPreferences',
+        'Failed to load unsent messages from secure storage',
         error: e,
         stackTrace: st,
         name: _logKey,
       );
     }
-    return {};
   }
 
-  Future<void> _saveToPrefs() async {
+  Future<void> _saveToSecureStorage() async {
     try {
-      final prefs = ref.read(sharedPreferencesProvider);
-      if (state.unsentMessages.isEmpty) {
-        await prefs.remove(SharedPreferencesKeys.unsentMessages.name);
-      } else {
-        final json = jsonEncode(state.unsentMessages);
-        await prefs.setString(SharedPreferencesKeys.unsentMessages.name, json);
-      }
+      final storage = await ref.read(secureStorageProvider.future);
+      await storage.saveUnsentMessages(state.unsentMessages);
     } catch (e, st) {
       _logger.error(
-        'Failed to save unsent messages to SharedPreferences',
+        'Failed to save unsent messages to secure storage',
         error: e,
         stackTrace: st,
         name: _logKey,
@@ -77,7 +71,7 @@ class UnsentMessagesService extends _$UnsentMessagesService {
     }
 
     state = state.copyWith(unsentMessages: currentMessages);
-    await _saveToPrefs();
+    await _saveToSecureStorage();
   }
 
   String? getUnsentMessage(String contactId) {
