@@ -34,11 +34,7 @@ part 'contact.g.dart';
 ///   connection offer).
 /// - `badgeCount` / `badgeUpdateInProgress` - Local unread/activity count and
 ///   processing flag.
-/// - `chatInProgress` - Whether a chat session is currently active for this
-///   contact.
-/// - `currentMessageSeqNo` - Message sequence numbers for
-///   ordering.
-/// - `unsentMessage` - Cached unsent message content.
+/// - `currentMessageSeqNo` - Message sequence numbers for ordering.
 /// - `lastKeepAliveMessage` - Timestamp of the last keep-alive message received
 ///   (used to show liveness).
 @CopyWith()
@@ -57,12 +53,10 @@ class Contact {
     required this.category,
     this.otherPartyVCard,
     this.displayName,
-    this.chatInProgress = false,
     this.badgeUpdateInProgress = false,
     this.badgeCount = 0,
     this.currentMessageSeqNo = 0,
     this.hasBeenOpened = false,
-    this.unsentMessage,
     this.lastKeepAliveMessage,
   });
 
@@ -81,12 +75,10 @@ class Contact {
   final ContactCategory category;
   final VCard? otherPartyVCard;
   final String? displayName;
-  final bool chatInProgress;
   final bool badgeUpdateInProgress;
   final int badgeCount;
   final int currentMessageSeqNo;
   final bool hasBeenOpened;
-  final String? unsentMessage;
   final DateTime? lastKeepAliveMessage;
 
   bool get isGroup => type == ContactType.group;

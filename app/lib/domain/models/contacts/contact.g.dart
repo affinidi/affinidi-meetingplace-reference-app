@@ -29,8 +29,6 @@ abstract class _$ContactCWProxy {
 
   Contact displayName(String? displayName);
 
-  Contact chatInProgress(bool chatInProgress);
-
   Contact badgeUpdateInProgress(bool badgeUpdateInProgress);
 
   Contact badgeCount(int badgeCount);
@@ -38,8 +36,6 @@ abstract class _$ContactCWProxy {
   Contact currentMessageSeqNo(int currentMessageSeqNo);
 
   Contact hasBeenOpened(bool hasBeenOpened);
-
-  Contact unsentMessage(String? unsentMessage);
 
   Contact lastKeepAliveMessage(DateTime? lastKeepAliveMessage);
 
@@ -61,12 +57,10 @@ abstract class _$ContactCWProxy {
     ContactCategory category,
     VCard? otherPartyVCard,
     String? displayName,
-    bool chatInProgress,
     bool badgeUpdateInProgress,
     int badgeCount,
     int currentMessageSeqNo,
     bool hasBeenOpened,
-    String? unsentMessage,
     DateTime? lastKeepAliveMessage,
   });
 }
@@ -113,10 +107,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
   Contact displayName(String? displayName) => this(displayName: displayName);
 
   @override
-  Contact chatInProgress(bool chatInProgress) =>
-      this(chatInProgress: chatInProgress);
-
-  @override
   Contact badgeUpdateInProgress(bool badgeUpdateInProgress) =>
       this(badgeUpdateInProgress: badgeUpdateInProgress);
 
@@ -130,10 +120,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
   @override
   Contact hasBeenOpened(bool hasBeenOpened) =>
       this(hasBeenOpened: hasBeenOpened);
-
-  @override
-  Contact unsentMessage(String? unsentMessage) =>
-      this(unsentMessage: unsentMessage);
 
   @override
   Contact lastKeepAliveMessage(DateTime? lastKeepAliveMessage) =>
@@ -159,12 +145,10 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? category = const $CopyWithPlaceholder(),
     Object? otherPartyVCard = const $CopyWithPlaceholder(),
     Object? displayName = const $CopyWithPlaceholder(),
-    Object? chatInProgress = const $CopyWithPlaceholder(),
     Object? badgeUpdateInProgress = const $CopyWithPlaceholder(),
     Object? badgeCount = const $CopyWithPlaceholder(),
     Object? currentMessageSeqNo = const $CopyWithPlaceholder(),
     Object? hasBeenOpened = const $CopyWithPlaceholder(),
-    Object? unsentMessage = const $CopyWithPlaceholder(),
     Object? lastKeepAliveMessage = const $CopyWithPlaceholder(),
   }) {
     return Contact(
@@ -214,10 +198,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.displayName
           // ignore: cast_nullable_to_non_nullable
           : displayName as String?,
-      chatInProgress: chatInProgress == const $CopyWithPlaceholder()
-          ? _value.chatInProgress
-          // ignore: cast_nullable_to_non_nullable
-          : chatInProgress as bool,
       badgeUpdateInProgress:
           badgeUpdateInProgress == const $CopyWithPlaceholder()
               ? _value.badgeUpdateInProgress
@@ -235,10 +215,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.hasBeenOpened
           // ignore: cast_nullable_to_non_nullable
           : hasBeenOpened as bool,
-      unsentMessage: unsentMessage == const $CopyWithPlaceholder()
-          ? _value.unsentMessage
-          // ignore: cast_nullable_to_non_nullable
-          : unsentMessage as String?,
       lastKeepAliveMessage: lastKeepAliveMessage == const $CopyWithPlaceholder()
           ? _value.lastKeepAliveMessage
           // ignore: cast_nullable_to_non_nullable
