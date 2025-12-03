@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/mediator/mediator.dart';
@@ -32,7 +31,6 @@ import '../fakes/fake_app_badge_service.dart';
 import '../fakes/fake_camera_controller.dart';
 import '../fakes/fake_channels.dart';
 import '../fakes/fake_connectivity.dart';
-import '../fakes/fake_contacts_service.dart';
 import '../fakes/fake_environment.dart';
 import '../fakes/fake_local_authentication.dart';
 import '../fakes/fake_meeting_place_sdk.dart';
@@ -94,9 +92,6 @@ Future<void> startApp(
         }
         return repo;
       }),
-      if (contacts.isNotEmpty)
-        contactsServiceProvider
-            .overrideWith(() => FakeContactsService(contacts)),
       environmentProvider.overrideWith((ref) => FakeEnvironment()),
       pushNotificationMessagingProvider.overrideWith((ref) =>
           pushNotificationMessaging ?? FakePushNotificationMessaging()),
