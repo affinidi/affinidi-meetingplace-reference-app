@@ -27,6 +27,7 @@ import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
@@ -59,6 +60,7 @@ class ChatScreenController extends _$ChatScreenController {
   TimedAction? _sendChatActivityTimedAction;
   TimedAction? _membersTypingTimedAction;
   TimedAction? _updateContactPresenceStatusTimedAction;
+  Timer? _saveUnsentMessageDebouncer;
 
   late final Map<String, ProviderSubscription<void>>
       _conciergeLoadingControllersSubscriptions = {};
@@ -81,11 +83,24 @@ class ChatScreenController extends _$ChatScreenController {
       });
     }, fireImmediately: true);
 
+    messageTextController.addListener(_onMessageTextChanged);
+
     ref.onDispose(() {
+      _sendChatActivityTimedAction?.cancel();
+      _membersTypingTimedAction?.cancel();
+      _updateContactPresenceStatusTimedAction?.cancel();
+      _saveUnsentMessageDebouncer?.cancel();
+
       messagesSubscription?.dispose();
+      messageTextController.removeListener(_onMessageTextChanged);
       messageTextController.dispose();
 
       _disposeConciergeLoadingControllers();
+
+      _logger.info(
+        'Chat session ended',
+        name: _logKey,
+      );
     });
 
     return ChatScreenState(
@@ -109,32 +124,18 @@ class ChatScreenController extends _$ChatScreenController {
     await initializing;
   }
 
-  Future<void> cleanup() async {
-    final unsentMessage = messageTextController.text;
-    _sendChatActivityTimedAction?.cancel();
-    _membersTypingTimedAction?.cancel();
-    _updateContactPresenceStatusTimedAction?.cancel();
+  void _onMessageTextChanged() {
+    _saveUnsentMessageDebouncer?.cancel();
 
     final contact = state.contact;
-    if (contact == null) {
-      return;
-    }
+    if (contact == null) return;
 
-    final messageToSave =
-        unsentMessage.isNotEmpty == true ? unsentMessage : null;
-    await ref.read(contactsServiceProvider.notifier).updateContact(
-          contact.copyWith(
-            unsentMessage: messageToSave,
-            chatInProgress: false,
-          ),
-        );
-
-    _chatSDK?.endChatSession();
-
-    _logger.info(
-      'Chat session ended',
-      name: _logKey,
-    );
+    _saveUnsentMessageDebouncer = Timer(const Duration(milliseconds: 500), () {
+      final text = messageTextController.text;
+      ref
+          .read(unsentMessagesServiceProvider.notifier)
+          .saveUnsentMessage(contact.id, text.isEmpty ? null : text);
+    });
   }
 
   void _disposeConciergeLoadingControllers() {
@@ -505,12 +506,16 @@ class ChatScreenController extends _$ChatScreenController {
                 : ContactPresenceStatus.offline);
       },
       onCancel: () {
-        state = state.copyWith(
-            contactPresenceStatus: ContactPresenceStatus.offline);
+        Future.microtask(() {
+          state = state.copyWith(
+              contactPresenceStatus: ContactPresenceStatus.offline);
+        });
       },
       onComplete: () {
-        state = state.copyWith(
-            contactPresenceStatus: ContactPresenceStatus.offline);
+        Future.microtask(() {
+          state = state.copyWith(
+              contactPresenceStatus: ContactPresenceStatus.offline);
+        });
       },
       duration: Duration(seconds: chatPresenceIntervalInSeconds),
     );
@@ -920,7 +925,11 @@ class ChatScreenController extends _$ChatScreenController {
   }
 
   Future<void> _startChatSession(Contact contact) async {
-    final unsentMessage = contact.unsentMessage;
+    final unsentMessagesService =
+        ref.read(unsentMessagesServiceProvider.notifier);
+    await unsentMessagesService.ensureInitialized();
+
+    final unsentMessage = unsentMessagesService.getUnsentMessage(contact.id);
     if (unsentMessage != null) {
       messageTextController.text = unsentMessage;
     }
@@ -929,8 +938,6 @@ class ChatScreenController extends _$ChatScreenController {
 
     await ref.read(contactsServiceProvider.notifier).updateContact(
           contact.copyWith(
-            unsentMessage: null,
-            chatInProgress: true,
             badgeCount: 0,
             hasBeenOpened: true,
           ),

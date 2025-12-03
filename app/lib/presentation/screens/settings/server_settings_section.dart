@@ -64,7 +64,7 @@ class _ServerSettingsSection extends ConsumerWidget {
                 title: Center(
                   child: Text(
                     context.l10n.scanCustomMediatorQrCode,
-                    style: const TextStyle(color: Colors.blue),
+                    style: TextStyle(color: context.colorScheme.secondary),
                   ),
                 ),
                 onTap: () async {
