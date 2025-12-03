@@ -73,11 +73,12 @@ class ChatScreen extends HookConsumerWidget {
     ref.keepAround(provider);
 
     useEffect(() {
-      if (!context.mounted) return null;
+      if (!context.mounted) return;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.initialize();
       });
+
       return null;
     }, []);
 
@@ -117,7 +118,9 @@ class ChatScreen extends HookConsumerWidget {
                       child:
                           _ChatTypingActivityIndicator(contactId: _contactId),
                     ),
-                    _ChatTextEntry(contactId: _contactId),
+                    _ChatTextEntry(
+                      contactId: _contactId,
+                    ),
                   ],
                 ),
                 ChatEffect(contactId: _contactId),
