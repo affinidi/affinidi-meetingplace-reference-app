@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -34,6 +36,8 @@ class MediaReviewController extends _$MediaReviewController {
         imageSize: imageConfig.imageMaxSize,
         qualityPercent: imageConfig.qualityPercentage,
       );
+
+      print('XXX: Compressed image size: ${compressedImage.base64.length}');
 
       return MediaReviewResult(success, message, compressedImage);
     } catch (_) {

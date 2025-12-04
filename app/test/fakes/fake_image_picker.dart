@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart';
@@ -104,6 +106,7 @@ class FakeImagePicker extends ImagePicker {
     CameraDevice preferredCameraDevice = CameraDevice.rear,
     bool requestFullMetadata = false,
   }) async {
+    print('XXX: FakeImagePicker.pickImage called');
     if (_shouldReturnNull) {
       return null;
     }
