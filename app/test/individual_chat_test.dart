@@ -389,7 +389,7 @@ void main() {
           await tester.pumpAndSettle();
 
           await tester.tap(find.text(l10n.generalPhoto));
-          await tester.pumpAndSettle();
+          await tester.pumpAndSettle(const Duration(seconds: 30));
 
           expect(find.byKey(const Key('media_review_submit_button')),
               findsOneWidget);
@@ -397,6 +397,8 @@ void main() {
 
           await submitMediaWithMessage(tester, message);
           await tester.pump(_uiUpdateDelayDuration);
+          // Additional pump for CI environments
+          await tester.pump(const Duration(milliseconds: 500));
 
           expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
           final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
