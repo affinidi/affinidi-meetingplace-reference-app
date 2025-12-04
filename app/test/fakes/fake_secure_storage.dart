@@ -9,6 +9,7 @@ class FakeSecureStorage extends SecureStorage {
   FakeSecureStorage({
     bool? debugMode,
     String passphrase = 'test_passphrase',
+    String unsentMessages = 'test_passphrase',
     String? preferredMediatorDid,
     bool? shouldShowMeetingPlaceQR,
     int? savingPushTokenDuration,
@@ -117,6 +118,30 @@ class FakeSecureStorage extends SecureStorage {
   Future<void> saveKeyIdForDid(
       {required String keyId, required String did}) async {
     _storedKeys['$_didPrefix$did'] = keyId;
+  }
+
+  @override
+  Future<Map<String, String>> getUnsentMessages() async {
+    final jsonString = _storedKeys['unsent_messages'];
+    if (jsonString == null || jsonString.isEmpty) {
+      return {};
+    }
+    final decoded = jsonDecode(jsonString);
+    return Map<String, String>.from(decoded as Map);
+  }
+
+  @override
+  Future<void> saveUnsentMessages(Map<String, String> messages) async {
+    if (messages.isEmpty) {
+      _storedKeys.remove('unsent_messages');
+    } else {
+      _storedKeys['unsent_messages'] = jsonEncode(messages);
+    }
+  }
+
+  @override
+  Future<void> clearUnsentMessages() async {
+    _storedKeys.remove('unsent_messages');
   }
 
   @override
