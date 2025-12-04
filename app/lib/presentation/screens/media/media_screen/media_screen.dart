@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
@@ -75,6 +77,8 @@ class MediaScreen extends HookConsumerWidget {
       ),
     );
 
+    print('XXX: MediaScreen review result: $result');
+
     if (!context.mounted) return;
 
     navigator.pop(result);
@@ -95,6 +99,7 @@ class MediaScreen extends HookConsumerWidget {
       if (state.pickedImageBytes != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
+          print('XXX: MediaScreen picked image, navigating to review');
           _reviewImage(state.pickedImageBytes!, ref, context);
         });
       }

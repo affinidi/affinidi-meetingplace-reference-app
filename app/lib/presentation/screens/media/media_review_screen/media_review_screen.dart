@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,6 +66,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
           : environment.profileImageConfig,
     );
 
+    print('XXX: MediaReviewScreen submitResult completed');
     if (context.mounted) navigator.pop(reviewResult);
 
     setState(() => _isSending = false);
