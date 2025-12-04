@@ -109,12 +109,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("has_been_opened" IN (0, 1))'),
       clientDefault: () => false);
-  static const VerificationMeta _unsentMessageMeta =
-      const VerificationMeta('unsentMessage');
-  @override
-  late final GeneratedColumn<String> unsentMessage = GeneratedColumn<String>(
-      'unsent_message', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _lastKeepAliveMessageMeta =
       const VerificationMeta('lastKeepAliveMessage');
   @override
@@ -138,7 +132,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         badgeCount,
         currentMessageSeqNo,
         hasBeenOpened,
-        unsentMessage,
         lastKeepAliveMessage
       ];
   @override
@@ -214,12 +207,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
           hasBeenOpened.isAcceptableOrUnknown(
               data['has_been_opened']!, _hasBeenOpenedMeta));
     }
-    if (data.containsKey('unsent_message')) {
-      context.handle(
-          _unsentMessageMeta,
-          unsentMessage.isAcceptableOrUnknown(
-              data['unsent_message']!, _unsentMessageMeta));
-    }
     if (data.containsKey('last_keep_alive_message')) {
       context.handle(
           _lastKeepAliveMessageMeta,
@@ -269,8 +256,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
           DriftSqlType.int, data['${effectivePrefix}current_message_seq_no'])!,
       hasBeenOpened: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}has_been_opened'])!,
-      unsentMessage: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}unsent_message']),
       lastKeepAliveMessage: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime,
           data['${effectivePrefix}last_keep_alive_message']),
@@ -308,7 +293,6 @@ class Contact extends DataClass implements Insertable<Contact> {
   final int badgeCount;
   final int currentMessageSeqNo;
   final bool hasBeenOpened;
-  final String? unsentMessage;
   final DateTime? lastKeepAliveMessage;
   const Contact(
       {required this.id,
@@ -326,7 +310,6 @@ class Contact extends DataClass implements Insertable<Contact> {
       required this.badgeCount,
       required this.currentMessageSeqNo,
       required this.hasBeenOpened,
-      this.unsentMessage,
       this.lastKeepAliveMessage});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -363,9 +346,6 @@ class Contact extends DataClass implements Insertable<Contact> {
     map['badge_count'] = Variable<int>(badgeCount);
     map['current_message_seq_no'] = Variable<int>(currentMessageSeqNo);
     map['has_been_opened'] = Variable<bool>(hasBeenOpened);
-    if (!nullToAbsent || unsentMessage != null) {
-      map['unsent_message'] = Variable<String>(unsentMessage);
-    }
     if (!nullToAbsent || lastKeepAliveMessage != null) {
       map['last_keep_alive_message'] = Variable<DateTime>(lastKeepAliveMessage);
     }
@@ -395,9 +375,6 @@ class Contact extends DataClass implements Insertable<Contact> {
       badgeCount: Value(badgeCount),
       currentMessageSeqNo: Value(currentMessageSeqNo),
       hasBeenOpened: Value(hasBeenOpened),
-      unsentMessage: unsentMessage == null && nullToAbsent
-          ? const Value.absent()
-          : Value(unsentMessage),
       lastKeepAliveMessage: lastKeepAliveMessage == null && nullToAbsent
           ? const Value.absent()
           : Value(lastKeepAliveMessage),
@@ -425,7 +402,6 @@ class Contact extends DataClass implements Insertable<Contact> {
       currentMessageSeqNo:
           serializer.fromJson<int>(json['currentMessageSeqNo']),
       hasBeenOpened: serializer.fromJson<bool>(json['hasBeenOpened']),
-      unsentMessage: serializer.fromJson<String?>(json['unsentMessage']),
       lastKeepAliveMessage:
           serializer.fromJson<DateTime?>(json['lastKeepAliveMessage']),
     );
@@ -449,7 +425,6 @@ class Contact extends DataClass implements Insertable<Contact> {
       'badgeCount': serializer.toJson<int>(badgeCount),
       'currentMessageSeqNo': serializer.toJson<int>(currentMessageSeqNo),
       'hasBeenOpened': serializer.toJson<bool>(hasBeenOpened),
-      'unsentMessage': serializer.toJson<String?>(unsentMessage),
       'lastKeepAliveMessage':
           serializer.toJson<DateTime?>(lastKeepAliveMessage),
     };
@@ -471,7 +446,6 @@ class Contact extends DataClass implements Insertable<Contact> {
           int? badgeCount,
           int? currentMessageSeqNo,
           bool? hasBeenOpened,
-          Value<String?> unsentMessage = const Value.absent(),
           Value<DateTime?> lastKeepAliveMessage = const Value.absent()}) =>
       Contact(
         id: id ?? this.id,
@@ -492,8 +466,6 @@ class Contact extends DataClass implements Insertable<Contact> {
         badgeCount: badgeCount ?? this.badgeCount,
         currentMessageSeqNo: currentMessageSeqNo ?? this.currentMessageSeqNo,
         hasBeenOpened: hasBeenOpened ?? this.hasBeenOpened,
-        unsentMessage:
-            unsentMessage.present ? unsentMessage.value : this.unsentMessage,
         lastKeepAliveMessage: lastKeepAliveMessage.present
             ? lastKeepAliveMessage.value
             : this.lastKeepAliveMessage,
@@ -527,9 +499,6 @@ class Contact extends DataClass implements Insertable<Contact> {
       hasBeenOpened: data.hasBeenOpened.present
           ? data.hasBeenOpened.value
           : this.hasBeenOpened,
-      unsentMessage: data.unsentMessage.present
-          ? data.unsentMessage.value
-          : this.unsentMessage,
       lastKeepAliveMessage: data.lastKeepAliveMessage.present
           ? data.lastKeepAliveMessage.value
           : this.lastKeepAliveMessage,
@@ -554,7 +523,6 @@ class Contact extends DataClass implements Insertable<Contact> {
           ..write('badgeCount: $badgeCount, ')
           ..write('currentMessageSeqNo: $currentMessageSeqNo, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
-          ..write('unsentMessage: $unsentMessage, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage')
           ..write(')'))
         .toString();
@@ -577,7 +545,6 @@ class Contact extends DataClass implements Insertable<Contact> {
       badgeCount,
       currentMessageSeqNo,
       hasBeenOpened,
-      unsentMessage,
       lastKeepAliveMessage);
   @override
   bool operator ==(Object other) =>
@@ -598,7 +565,6 @@ class Contact extends DataClass implements Insertable<Contact> {
           other.badgeCount == this.badgeCount &&
           other.currentMessageSeqNo == this.currentMessageSeqNo &&
           other.hasBeenOpened == this.hasBeenOpened &&
-          other.unsentMessage == this.unsentMessage &&
           other.lastKeepAliveMessage == this.lastKeepAliveMessage);
 }
 
@@ -618,7 +584,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
   final Value<int> badgeCount;
   final Value<int> currentMessageSeqNo;
   final Value<bool> hasBeenOpened;
-  final Value<String?> unsentMessage;
   final Value<DateTime?> lastKeepAliveMessage;
   final Value<int> rowid;
   const ContactsCompanion({
@@ -637,7 +602,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.badgeCount = const Value.absent(),
     this.currentMessageSeqNo = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
-    this.unsentMessage = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -657,7 +621,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.badgeCount = const Value.absent(),
     this.currentMessageSeqNo = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
-    this.unsentMessage = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : offerLink = Value(offerLink),
@@ -682,7 +645,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Expression<int>? badgeCount,
     Expression<int>? currentMessageSeqNo,
     Expression<bool>? hasBeenOpened,
-    Expression<String>? unsentMessage,
     Expression<DateTime>? lastKeepAliveMessage,
     Expression<int>? rowid,
   }) {
@@ -704,7 +666,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       if (currentMessageSeqNo != null)
         'current_message_seq_no': currentMessageSeqNo,
       if (hasBeenOpened != null) 'has_been_opened': hasBeenOpened,
-      if (unsentMessage != null) 'unsent_message': unsentMessage,
       if (lastKeepAliveMessage != null)
         'last_keep_alive_message': lastKeepAliveMessage,
       if (rowid != null) 'rowid': rowid,
@@ -727,7 +688,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       Value<int>? badgeCount,
       Value<int>? currentMessageSeqNo,
       Value<bool>? hasBeenOpened,
-      Value<String?>? unsentMessage,
       Value<DateTime?>? lastKeepAliveMessage,
       Value<int>? rowid}) {
     return ContactsCompanion(
@@ -747,7 +707,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       badgeCount: badgeCount ?? this.badgeCount,
       currentMessageSeqNo: currentMessageSeqNo ?? this.currentMessageSeqNo,
       hasBeenOpened: hasBeenOpened ?? this.hasBeenOpened,
-      unsentMessage: unsentMessage ?? this.unsentMessage,
       lastKeepAliveMessage: lastKeepAliveMessage ?? this.lastKeepAliveMessage,
       rowid: rowid ?? this.rowid,
     );
@@ -806,9 +765,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     if (hasBeenOpened.present) {
       map['has_been_opened'] = Variable<bool>(hasBeenOpened.value);
     }
-    if (unsentMessage.present) {
-      map['unsent_message'] = Variable<String>(unsentMessage.value);
-    }
     if (lastKeepAliveMessage.present) {
       map['last_keep_alive_message'] =
           Variable<DateTime>(lastKeepAliveMessage.value);
@@ -837,7 +793,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
           ..write('badgeCount: $badgeCount, ')
           ..write('currentMessageSeqNo: $currentMessageSeqNo, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
-          ..write('unsentMessage: $unsentMessage, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1325,7 +1280,6 @@ typedef $$ContactsTableCreateCompanionBuilder = ContactsCompanion Function({
   Value<int> badgeCount,
   Value<int> currentMessageSeqNo,
   Value<bool> hasBeenOpened,
-  Value<String?> unsentMessage,
   Value<DateTime?> lastKeepAliveMessage,
   Value<int> rowid,
 });
@@ -1345,7 +1299,6 @@ typedef $$ContactsTableUpdateCompanionBuilder = ContactsCompanion Function({
   Value<int> badgeCount,
   Value<int> currentMessageSeqNo,
   Value<bool> hasBeenOpened,
-  Value<String?> unsentMessage,
   Value<DateTime?> lastKeepAliveMessage,
   Value<int> rowid,
 });
@@ -1435,9 +1388,6 @@ class $$ContactsTableFilterComposer
   ColumnFilters<bool> get hasBeenOpened => $composableBuilder(
       column: $table.hasBeenOpened, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get unsentMessage => $composableBuilder(
-      column: $table.unsentMessage, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<DateTime> get lastKeepAliveMessage => $composableBuilder(
       column: $table.lastKeepAliveMessage,
       builder: (column) => ColumnFilters(column));
@@ -1522,10 +1472,6 @@ class $$ContactsTableOrderingComposer
       column: $table.hasBeenOpened,
       builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get unsentMessage => $composableBuilder(
-      column: $table.unsentMessage,
-      builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<DateTime> get lastKeepAliveMessage => $composableBuilder(
       column: $table.lastKeepAliveMessage,
       builder: (column) => ColumnOrderings(column));
@@ -1584,9 +1530,6 @@ class $$ContactsTableAnnotationComposer
 
   GeneratedColumn<bool> get hasBeenOpened => $composableBuilder(
       column: $table.hasBeenOpened, builder: (column) => column);
-
-  GeneratedColumn<String> get unsentMessage => $composableBuilder(
-      column: $table.unsentMessage, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastKeepAliveMessage => $composableBuilder(
       column: $table.lastKeepAliveMessage, builder: (column) => column);
@@ -1651,7 +1594,6 @@ class $$ContactsTableTableManager extends RootTableManager<
             Value<int> badgeCount = const Value.absent(),
             Value<int> currentMessageSeqNo = const Value.absent(),
             Value<bool> hasBeenOpened = const Value.absent(),
-            Value<String?> unsentMessage = const Value.absent(),
             Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -1671,7 +1613,6 @@ class $$ContactsTableTableManager extends RootTableManager<
             badgeCount: badgeCount,
             currentMessageSeqNo: currentMessageSeqNo,
             hasBeenOpened: hasBeenOpened,
-            unsentMessage: unsentMessage,
             lastKeepAliveMessage: lastKeepAliveMessage,
             rowid: rowid,
           ),
@@ -1691,7 +1632,6 @@ class $$ContactsTableTableManager extends RootTableManager<
             Value<int> badgeCount = const Value.absent(),
             Value<int> currentMessageSeqNo = const Value.absent(),
             Value<bool> hasBeenOpened = const Value.absent(),
-            Value<String?> unsentMessage = const Value.absent(),
             Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -1711,7 +1651,6 @@ class $$ContactsTableTableManager extends RootTableManager<
             badgeCount: badgeCount,
             currentMessageSeqNo: currentMessageSeqNo,
             hasBeenOpened: hasBeenOpened,
-            unsentMessage: unsentMessage,
             lastKeepAliveMessage: lastKeepAliveMessage,
             rowid: rowid,
           ),

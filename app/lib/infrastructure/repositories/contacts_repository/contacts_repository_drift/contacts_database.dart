@@ -116,7 +116,6 @@ class Contacts extends Table {
   IntColumn get badgeCount => integer().clientDefault(() => 0)();
   IntColumn get currentMessageSeqNo => integer().clientDefault(() => 0)();
   BoolColumn get hasBeenOpened => boolean().clientDefault(() => false)();
-  TextColumn get unsentMessage => text().nullable()();
   DateTimeColumn get lastKeepAliveMessage => dateTime().nullable()();
 
   @override
