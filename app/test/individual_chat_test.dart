@@ -371,44 +371,45 @@ void main() {
         });
       }
 
-      // group('and pressing on photo', () {
-      //   testWidgets('should send photo and return to chat screen',
-      //       (tester) async {
-      //     final l10n = await getL10n();
-      //     const message = 'Check out this photo!';
-      //     final meetingPlaceChatSDK = FakeChatSdk();
+      group('and pressing on photo', () {
+        testWidgets('should send photo and return to chat screen',
+            (tester) async {
+          final l10n = await getL10n();
+          const message = 'Check out this photo!';
+          final meetingPlaceChatSDK = FakeChatSdk();
 
-      //     await navigateToChatScreen(
-      //       tester,
-      //       contactId: contactId,
-      //       imagePicker: FakeImagePicker.withDefaultImage(),
-      //       meetingPlaceChatSDK: meetingPlaceChatSDK,
-      //     );
+          await navigateToChatScreen(
+            tester,
+            contactId: contactId,
+            imagePicker: FakeImagePicker.withDefaultImage(),
+            meetingPlaceChatSDK: meetingPlaceChatSDK,
+          );
 
-      //     await tester.tap(findAddMediaButton());
-      //     await tester.pumpAndSettle();
+          await tester.tap(findAddMediaButton());
+          await tester.pumpAndSettle();
 
-      //     await tester.tap(find.text(l10n.generalPhoto));
-      //     await tester.pumpAndSettle();
+          await tester.tap(find.text(l10n.generalPhoto));
+          await tester.pumpAndSettle(const Duration(milliseconds: 100),
+              EnginePhase.sendSemanticsUpdate, const Duration(seconds: 10));
 
-      //     expect(find.byKey(const Key('media_review_submit_button')),
-      //         findsOneWidget);
-      //     expect(find.byIcon(Icons.cancel_sharp), findsOneWidget);
+          expect(find.byKey(const Key('media_review_submit_button')),
+              findsOneWidget);
+          expect(find.byIcon(Icons.cancel_sharp), findsOneWidget);
 
-      //     await submitMediaWithMessage(tester, message);
-      //     await tester.pump(_uiUpdateDelayDuration);
+          await submitMediaWithMessage(tester, message);
+          await tester.pump(_uiUpdateDelayDuration);
 
-      //     expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
-      //     final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
-      //     expect(sendCall['text'], message);
-      //     expect(sendCall['attachments'], isA<List<Attachment>>());
-      //     expect((sendCall['attachments'] as List).length, 1);
+          expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
+          final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
+          expect(sendCall['text'], message);
+          expect(sendCall['attachments'], isA<List<Attachment>>());
+          expect((sendCall['attachments'] as List).length, 1);
 
-      //     expect(find.text(contactName), findsOneWidget);
-      //     expect(find.text(message), findsOneWidget);
-      //     expect(find.byType(Image), findsWidgets);
-      //   });
-      // });
+          expect(find.text(contactName), findsOneWidget);
+          expect(find.text(message), findsOneWidget);
+          expect(find.byType(Image), findsWidgets);
+        });
+      });
 
       group('and pressing on camera', () {
         testWidgets('should send photo and return to chat screen',
