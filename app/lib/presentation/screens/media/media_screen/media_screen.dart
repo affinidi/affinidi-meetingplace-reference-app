@@ -82,10 +82,12 @@ class MediaScreen extends HookConsumerWidget {
     if (!context.mounted) return;
 
     navigator.pop(result);
+    print('XXX: MediaScreen pop result');
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('XXX: MediaScreen build called');
     final navigator = ref.read(navigatorProvider);
 
     final provider = mediaScreenControllerProvider(

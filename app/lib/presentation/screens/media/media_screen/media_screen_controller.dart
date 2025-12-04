@@ -75,6 +75,7 @@ class MediaScreenController extends _$MediaScreenController {
   }
 
   Future<void> captureWithCamera() async {
+    print('XXX: MediaScreenController.captureWithCamera called');
     final file = await ref.read(cameraServiceProvider.notifier).captureImage();
     if (file != null) {
       state = state.copyWith(pickedImageBytes: await file.readAsBytes());
