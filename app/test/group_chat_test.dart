@@ -11,9 +11,9 @@ import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_image_picker.dart';
+import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
 
-const _chatScreenInitTimeout = Duration(seconds: 1);
 const _uiUpdateDelayDuration = Duration(milliseconds: 500);
 
 const _mockCameras = [
@@ -35,6 +35,7 @@ Future<void> navigateToGroupChatScreen(
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
+  FakeSecureStorage? secureStorage,
 }) async {
   final connectivity = FakeConnectivity(
     initialConnectivityToReturn: [ConnectivityResult.wifi],
@@ -51,8 +52,9 @@ Future<void> navigateToGroupChatScreen(
     meetingPlaceChatSDK: meetingPlaceChatSDK,
     imagePicker: imagePicker,
     mockCameras: mockCameras,
+    secureStorage: secureStorage,
   );
-  await tester.pumpAndSettle(_chatScreenInitTimeout);
+  await tester.pumpAndSettle();
 }
 
 Finder findChatMessageInput() => find.byKey(const Key('chat_message_input'));
