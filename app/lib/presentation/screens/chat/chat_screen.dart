@@ -73,14 +73,15 @@ class ChatScreen extends HookConsumerWidget {
     ref.keepAround(provider);
 
     useEffect(() {
-      if (!context.mounted) return null;
+      if (!context.mounted) return;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.initialize();
       });
 
-      return controller.cleanup;
+      return null;
     }, []);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: context.colorScheme.primary,
@@ -117,7 +118,9 @@ class ChatScreen extends HookConsumerWidget {
                       child:
                           _ChatTypingActivityIndicator(contactId: _contactId),
                     ),
-                    _ChatTextEntry(contactId: _contactId),
+                    _ChatTextEntry(
+                      contactId: _contactId,
+                    ),
                   ],
                 ),
                 ChatEffect(contactId: _contactId),

@@ -240,6 +240,40 @@ class SecureStorage implements KeyRepository, KeyStore {
     await _secureStorage.write(
         key: _Key.pushNotificationToken.name, value: pushNotificationToken);
   }
+
+  /// Gets all unsent messages stored in secure storage.
+  ///
+  /// Returns a map of contact IDs to unsent message text.
+  /// Returns an empty map if no unsent messages are stored.
+  Future<Map<String, String>> getUnsentMessages() async {
+    final json = await _secureStorage.read(key: 'unsent_messages');
+    if (json == null || json.isEmpty) return {};
+
+    try {
+      final decoded = jsonDecode(json) as Map<String, dynamic>;
+      return Map<String, String>.from(decoded);
+    } catch (e) {
+      return {};
+    }
+  }
+
+  /// Saves unsent messages to secure storage.
+  ///
+  /// [messages] - Map of contact IDs to unsent message text.
+  /// If the map is empty, the stored data will be deleted.
+  Future<void> saveUnsentMessages(Map<String, String> messages) async {
+    if (messages.isEmpty) {
+      await _secureStorage.delete(key: 'unsent_messages');
+    } else {
+      final json = jsonEncode(messages);
+      await _secureStorage.write(key: 'unsent_messages', value: json);
+    }
+  }
+
+  /// Clears all unsent messages from secure storage.
+  Future<void> clearUnsentMessages() async {
+    await _secureStorage.delete(key: 'unsent_messages');
+  }
 }
 
 /// Provides a configured [SecureStorage] instance.

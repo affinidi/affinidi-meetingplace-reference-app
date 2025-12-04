@@ -9,10 +9,10 @@ import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_image_picker.dart';
+import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
 
-const _chatScreenInitTimeout = Duration(seconds: 1);
-const _uiUpdateDelayDuration = Duration(milliseconds: 500);
+const _uiUpdateDelayDuration = Duration(milliseconds: 5000);
 
 const _mockCameras = [
   CameraDescription(
@@ -33,6 +33,7 @@ Future<void> navigateToChatScreen(
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
+  FakeSecureStorage? secureStorage,
 }) async {
   await navigateToLocation(
     tester,
@@ -44,8 +45,9 @@ Future<void> navigateToChatScreen(
     meetingPlaceChatSDK: meetingPlaceChatSDK,
     imagePicker: imagePicker,
     mockCameras: mockCameras,
+    secureStorage: secureStorage,
   );
-  await tester.pumpAndSettle(_chatScreenInitTimeout);
+  await tester.pumpAndSettle();
 }
 
 Finder findChatMessageInput() => find.byKey(const Key('chat_message_input'));
@@ -171,6 +173,26 @@ void main() {
         meetingPlaceChatSDK: meetingPlaceChatSDK,
       );
       expect(find.text(contactName), findsOneWidget);
+    });
+
+    group('and there is an unsent message', () {
+      testWidgets('it shows the unsent message in the text field',
+          (tester) async {
+        const unsentMessage = 'Draft message';
+        final secureStorage = FakeSecureStorage();
+        await secureStorage.saveUnsentMessages({contactId: unsentMessage});
+
+        await navigateToChatScreen(
+          tester,
+          contactId: contactId,
+          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          secureStorage: secureStorage,
+        );
+
+        final inputField = findChatMessageInput();
+        final textField = tester.widget<TextFormField>(inputField);
+        expect(textField.controller?.text, unsentMessage);
+      });
     });
 
     group('and contact has an avatar', () {
@@ -367,7 +389,8 @@ void main() {
           await tester.pumpAndSettle();
 
           await tester.tap(find.text(l10n.generalPhoto));
-          await tester.pumpAndSettle();
+          await tester.pumpAndSettle(const Duration(milliseconds: 100),
+              EnginePhase.sendSemanticsUpdate, const Duration(seconds: 10));
 
           expect(find.byKey(const Key('media_review_submit_button')),
               findsOneWidget);

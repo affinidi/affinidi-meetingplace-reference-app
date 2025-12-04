@@ -73,16 +73,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
   late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
       'display_name', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _chatInProgressMeta =
-      const VerificationMeta('chatInProgress');
-  @override
-  late final GeneratedColumn<bool> chatInProgress = GeneratedColumn<bool>(
-      'chat_in_progress', aliasedName, false,
-      type: DriftSqlType.bool,
-      requiredDuringInsert: false,
-      defaultConstraints: GeneratedColumn.constraintIsAlways(
-          'CHECK ("chat_in_progress" IN (0, 1))'),
-      clientDefault: () => false);
   static const VerificationMeta _badgeUpdateInProgressMeta =
       const VerificationMeta('badgeUpdateInProgress');
   @override
@@ -119,12 +109,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'CHECK ("has_been_opened" IN (0, 1))'),
       clientDefault: () => false);
-  static const VerificationMeta _unsentMessageMeta =
-      const VerificationMeta('unsentMessage');
-  @override
-  late final GeneratedColumn<String> unsentMessage = GeneratedColumn<String>(
-      'unsent_message', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _lastKeepAliveMessageMeta =
       const VerificationMeta('lastKeepAliveMessage');
   @override
@@ -144,12 +128,10 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         origin,
         category,
         displayName,
-        chatInProgress,
         badgeUpdateInProgress,
         badgeCount,
         currentMessageSeqNo,
         hasBeenOpened,
-        unsentMessage,
         lastKeepAliveMessage
       ];
   @override
@@ -201,12 +183,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
           displayName.isAcceptableOrUnknown(
               data['display_name']!, _displayNameMeta));
     }
-    if (data.containsKey('chat_in_progress')) {
-      context.handle(
-          _chatInProgressMeta,
-          chatInProgress.isAcceptableOrUnknown(
-              data['chat_in_progress']!, _chatInProgressMeta));
-    }
     if (data.containsKey('badge_update_in_progress')) {
       context.handle(
           _badgeUpdateInProgressMeta,
@@ -230,12 +206,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
           _hasBeenOpenedMeta,
           hasBeenOpened.isAcceptableOrUnknown(
               data['has_been_opened']!, _hasBeenOpenedMeta));
-    }
-    if (data.containsKey('unsent_message')) {
-      context.handle(
-          _unsentMessageMeta,
-          unsentMessage.isAcceptableOrUnknown(
-              data['unsent_message']!, _unsentMessageMeta));
     }
     if (data.containsKey('last_keep_alive_message')) {
       context.handle(
@@ -277,8 +247,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
           .read(DriftSqlType.int, data['${effectivePrefix}category'])!),
       displayName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}display_name']),
-      chatInProgress: attachedDatabase.typeMapping
-          .read(DriftSqlType.bool, data['${effectivePrefix}chat_in_progress'])!,
       badgeUpdateInProgress: attachedDatabase.typeMapping.read(
           DriftSqlType.bool,
           data['${effectivePrefix}badge_update_in_progress'])!,
@@ -288,8 +256,6 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
           DriftSqlType.int, data['${effectivePrefix}current_message_seq_no'])!,
       hasBeenOpened: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}has_been_opened'])!,
-      unsentMessage: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}unsent_message']),
       lastKeepAliveMessage: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime,
           data['${effectivePrefix}last_keep_alive_message']),
@@ -323,12 +289,10 @@ class Contact extends DataClass implements Insertable<Contact> {
   final ContactOrigin origin;
   final ContactCategory category;
   final String? displayName;
-  final bool chatInProgress;
   final bool badgeUpdateInProgress;
   final int badgeCount;
   final int currentMessageSeqNo;
   final bool hasBeenOpened;
-  final String? unsentMessage;
   final DateTime? lastKeepAliveMessage;
   const Contact(
       {required this.id,
@@ -342,12 +306,10 @@ class Contact extends DataClass implements Insertable<Contact> {
       required this.origin,
       required this.category,
       this.displayName,
-      required this.chatInProgress,
       required this.badgeUpdateInProgress,
       required this.badgeCount,
       required this.currentMessageSeqNo,
       required this.hasBeenOpened,
-      this.unsentMessage,
       this.lastKeepAliveMessage});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -380,14 +342,10 @@ class Contact extends DataClass implements Insertable<Contact> {
     if (!nullToAbsent || displayName != null) {
       map['display_name'] = Variable<String>(displayName);
     }
-    map['chat_in_progress'] = Variable<bool>(chatInProgress);
     map['badge_update_in_progress'] = Variable<bool>(badgeUpdateInProgress);
     map['badge_count'] = Variable<int>(badgeCount);
     map['current_message_seq_no'] = Variable<int>(currentMessageSeqNo);
     map['has_been_opened'] = Variable<bool>(hasBeenOpened);
-    if (!nullToAbsent || unsentMessage != null) {
-      map['unsent_message'] = Variable<String>(unsentMessage);
-    }
     if (!nullToAbsent || lastKeepAliveMessage != null) {
       map['last_keep_alive_message'] = Variable<DateTime>(lastKeepAliveMessage);
     }
@@ -413,14 +371,10 @@ class Contact extends DataClass implements Insertable<Contact> {
       displayName: displayName == null && nullToAbsent
           ? const Value.absent()
           : Value(displayName),
-      chatInProgress: Value(chatInProgress),
       badgeUpdateInProgress: Value(badgeUpdateInProgress),
       badgeCount: Value(badgeCount),
       currentMessageSeqNo: Value(currentMessageSeqNo),
       hasBeenOpened: Value(hasBeenOpened),
-      unsentMessage: unsentMessage == null && nullToAbsent
-          ? const Value.absent()
-          : Value(unsentMessage),
       lastKeepAliveMessage: lastKeepAliveMessage == null && nullToAbsent
           ? const Value.absent()
           : Value(lastKeepAliveMessage),
@@ -442,14 +396,12 @@ class Contact extends DataClass implements Insertable<Contact> {
       origin: serializer.fromJson<ContactOrigin>(json['origin']),
       category: serializer.fromJson<ContactCategory>(json['category']),
       displayName: serializer.fromJson<String?>(json['displayName']),
-      chatInProgress: serializer.fromJson<bool>(json['chatInProgress']),
       badgeUpdateInProgress:
           serializer.fromJson<bool>(json['badgeUpdateInProgress']),
       badgeCount: serializer.fromJson<int>(json['badgeCount']),
       currentMessageSeqNo:
           serializer.fromJson<int>(json['currentMessageSeqNo']),
       hasBeenOpened: serializer.fromJson<bool>(json['hasBeenOpened']),
-      unsentMessage: serializer.fromJson<String?>(json['unsentMessage']),
       lastKeepAliveMessage:
           serializer.fromJson<DateTime?>(json['lastKeepAliveMessage']),
     );
@@ -469,12 +421,10 @@ class Contact extends DataClass implements Insertable<Contact> {
       'origin': serializer.toJson<ContactOrigin>(origin),
       'category': serializer.toJson<ContactCategory>(category),
       'displayName': serializer.toJson<String?>(displayName),
-      'chatInProgress': serializer.toJson<bool>(chatInProgress),
       'badgeUpdateInProgress': serializer.toJson<bool>(badgeUpdateInProgress),
       'badgeCount': serializer.toJson<int>(badgeCount),
       'currentMessageSeqNo': serializer.toJson<int>(currentMessageSeqNo),
       'hasBeenOpened': serializer.toJson<bool>(hasBeenOpened),
-      'unsentMessage': serializer.toJson<String?>(unsentMessage),
       'lastKeepAliveMessage':
           serializer.toJson<DateTime?>(lastKeepAliveMessage),
     };
@@ -492,12 +442,10 @@ class Contact extends DataClass implements Insertable<Contact> {
           ContactOrigin? origin,
           ContactCategory? category,
           Value<String?> displayName = const Value.absent(),
-          bool? chatInProgress,
           bool? badgeUpdateInProgress,
           int? badgeCount,
           int? currentMessageSeqNo,
           bool? hasBeenOpened,
-          Value<String?> unsentMessage = const Value.absent(),
           Value<DateTime?> lastKeepAliveMessage = const Value.absent()}) =>
       Contact(
         id: id ?? this.id,
@@ -513,14 +461,11 @@ class Contact extends DataClass implements Insertable<Contact> {
         origin: origin ?? this.origin,
         category: category ?? this.category,
         displayName: displayName.present ? displayName.value : this.displayName,
-        chatInProgress: chatInProgress ?? this.chatInProgress,
         badgeUpdateInProgress:
             badgeUpdateInProgress ?? this.badgeUpdateInProgress,
         badgeCount: badgeCount ?? this.badgeCount,
         currentMessageSeqNo: currentMessageSeqNo ?? this.currentMessageSeqNo,
         hasBeenOpened: hasBeenOpened ?? this.hasBeenOpened,
-        unsentMessage:
-            unsentMessage.present ? unsentMessage.value : this.unsentMessage,
         lastKeepAliveMessage: lastKeepAliveMessage.present
             ? lastKeepAliveMessage.value
             : this.lastKeepAliveMessage,
@@ -543,9 +488,6 @@ class Contact extends DataClass implements Insertable<Contact> {
       category: data.category.present ? data.category.value : this.category,
       displayName:
           data.displayName.present ? data.displayName.value : this.displayName,
-      chatInProgress: data.chatInProgress.present
-          ? data.chatInProgress.value
-          : this.chatInProgress,
       badgeUpdateInProgress: data.badgeUpdateInProgress.present
           ? data.badgeUpdateInProgress.value
           : this.badgeUpdateInProgress,
@@ -557,9 +499,6 @@ class Contact extends DataClass implements Insertable<Contact> {
       hasBeenOpened: data.hasBeenOpened.present
           ? data.hasBeenOpened.value
           : this.hasBeenOpened,
-      unsentMessage: data.unsentMessage.present
-          ? data.unsentMessage.value
-          : this.unsentMessage,
       lastKeepAliveMessage: data.lastKeepAliveMessage.present
           ? data.lastKeepAliveMessage.value
           : this.lastKeepAliveMessage,
@@ -580,12 +519,10 @@ class Contact extends DataClass implements Insertable<Contact> {
           ..write('origin: $origin, ')
           ..write('category: $category, ')
           ..write('displayName: $displayName, ')
-          ..write('chatInProgress: $chatInProgress, ')
           ..write('badgeUpdateInProgress: $badgeUpdateInProgress, ')
           ..write('badgeCount: $badgeCount, ')
           ..write('currentMessageSeqNo: $currentMessageSeqNo, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
-          ..write('unsentMessage: $unsentMessage, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage')
           ..write(')'))
         .toString();
@@ -604,12 +541,10 @@ class Contact extends DataClass implements Insertable<Contact> {
       origin,
       category,
       displayName,
-      chatInProgress,
       badgeUpdateInProgress,
       badgeCount,
       currentMessageSeqNo,
       hasBeenOpened,
-      unsentMessage,
       lastKeepAliveMessage);
   @override
   bool operator ==(Object other) =>
@@ -626,12 +561,10 @@ class Contact extends DataClass implements Insertable<Contact> {
           other.origin == this.origin &&
           other.category == this.category &&
           other.displayName == this.displayName &&
-          other.chatInProgress == this.chatInProgress &&
           other.badgeUpdateInProgress == this.badgeUpdateInProgress &&
           other.badgeCount == this.badgeCount &&
           other.currentMessageSeqNo == this.currentMessageSeqNo &&
           other.hasBeenOpened == this.hasBeenOpened &&
-          other.unsentMessage == this.unsentMessage &&
           other.lastKeepAliveMessage == this.lastKeepAliveMessage);
 }
 
@@ -647,12 +580,10 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
   final Value<ContactOrigin> origin;
   final Value<ContactCategory> category;
   final Value<String?> displayName;
-  final Value<bool> chatInProgress;
   final Value<bool> badgeUpdateInProgress;
   final Value<int> badgeCount;
   final Value<int> currentMessageSeqNo;
   final Value<bool> hasBeenOpened;
-  final Value<String?> unsentMessage;
   final Value<DateTime?> lastKeepAliveMessage;
   final Value<int> rowid;
   const ContactsCompanion({
@@ -667,12 +598,10 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.origin = const Value.absent(),
     this.category = const Value.absent(),
     this.displayName = const Value.absent(),
-    this.chatInProgress = const Value.absent(),
     this.badgeUpdateInProgress = const Value.absent(),
     this.badgeCount = const Value.absent(),
     this.currentMessageSeqNo = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
-    this.unsentMessage = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -688,12 +617,10 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     required ContactOrigin origin,
     required ContactCategory category,
     this.displayName = const Value.absent(),
-    this.chatInProgress = const Value.absent(),
     this.badgeUpdateInProgress = const Value.absent(),
     this.badgeCount = const Value.absent(),
     this.currentMessageSeqNo = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
-    this.unsentMessage = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : offerLink = Value(offerLink),
@@ -714,12 +641,10 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Expression<int>? origin,
     Expression<int>? category,
     Expression<String>? displayName,
-    Expression<bool>? chatInProgress,
     Expression<bool>? badgeUpdateInProgress,
     Expression<int>? badgeCount,
     Expression<int>? currentMessageSeqNo,
     Expression<bool>? hasBeenOpened,
-    Expression<String>? unsentMessage,
     Expression<DateTime>? lastKeepAliveMessage,
     Expression<int>? rowid,
   }) {
@@ -735,14 +660,12 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       if (origin != null) 'origin': origin,
       if (category != null) 'category': category,
       if (displayName != null) 'display_name': displayName,
-      if (chatInProgress != null) 'chat_in_progress': chatInProgress,
       if (badgeUpdateInProgress != null)
         'badge_update_in_progress': badgeUpdateInProgress,
       if (badgeCount != null) 'badge_count': badgeCount,
       if (currentMessageSeqNo != null)
         'current_message_seq_no': currentMessageSeqNo,
       if (hasBeenOpened != null) 'has_been_opened': hasBeenOpened,
-      if (unsentMessage != null) 'unsent_message': unsentMessage,
       if (lastKeepAliveMessage != null)
         'last_keep_alive_message': lastKeepAliveMessage,
       if (rowid != null) 'rowid': rowid,
@@ -761,12 +684,10 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       Value<ContactOrigin>? origin,
       Value<ContactCategory>? category,
       Value<String?>? displayName,
-      Value<bool>? chatInProgress,
       Value<bool>? badgeUpdateInProgress,
       Value<int>? badgeCount,
       Value<int>? currentMessageSeqNo,
       Value<bool>? hasBeenOpened,
-      Value<String?>? unsentMessage,
       Value<DateTime?>? lastKeepAliveMessage,
       Value<int>? rowid}) {
     return ContactsCompanion(
@@ -781,13 +702,11 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       origin: origin ?? this.origin,
       category: category ?? this.category,
       displayName: displayName ?? this.displayName,
-      chatInProgress: chatInProgress ?? this.chatInProgress,
       badgeUpdateInProgress:
           badgeUpdateInProgress ?? this.badgeUpdateInProgress,
       badgeCount: badgeCount ?? this.badgeCount,
       currentMessageSeqNo: currentMessageSeqNo ?? this.currentMessageSeqNo,
       hasBeenOpened: hasBeenOpened ?? this.hasBeenOpened,
-      unsentMessage: unsentMessage ?? this.unsentMessage,
       lastKeepAliveMessage: lastKeepAliveMessage ?? this.lastKeepAliveMessage,
       rowid: rowid ?? this.rowid,
     );
@@ -833,9 +752,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     if (displayName.present) {
       map['display_name'] = Variable<String>(displayName.value);
     }
-    if (chatInProgress.present) {
-      map['chat_in_progress'] = Variable<bool>(chatInProgress.value);
-    }
     if (badgeUpdateInProgress.present) {
       map['badge_update_in_progress'] =
           Variable<bool>(badgeUpdateInProgress.value);
@@ -848,9 +764,6 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     }
     if (hasBeenOpened.present) {
       map['has_been_opened'] = Variable<bool>(hasBeenOpened.value);
-    }
-    if (unsentMessage.present) {
-      map['unsent_message'] = Variable<String>(unsentMessage.value);
     }
     if (lastKeepAliveMessage.present) {
       map['last_keep_alive_message'] =
@@ -876,12 +789,10 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
           ..write('origin: $origin, ')
           ..write('category: $category, ')
           ..write('displayName: $displayName, ')
-          ..write('chatInProgress: $chatInProgress, ')
           ..write('badgeUpdateInProgress: $badgeUpdateInProgress, ')
           ..write('badgeCount: $badgeCount, ')
           ..write('currentMessageSeqNo: $currentMessageSeqNo, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
-          ..write('unsentMessage: $unsentMessage, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1365,12 +1276,10 @@ typedef $$ContactsTableCreateCompanionBuilder = ContactsCompanion Function({
   required ContactOrigin origin,
   required ContactCategory category,
   Value<String?> displayName,
-  Value<bool> chatInProgress,
   Value<bool> badgeUpdateInProgress,
   Value<int> badgeCount,
   Value<int> currentMessageSeqNo,
   Value<bool> hasBeenOpened,
-  Value<String?> unsentMessage,
   Value<DateTime?> lastKeepAliveMessage,
   Value<int> rowid,
 });
@@ -1386,12 +1295,10 @@ typedef $$ContactsTableUpdateCompanionBuilder = ContactsCompanion Function({
   Value<ContactOrigin> origin,
   Value<ContactCategory> category,
   Value<String?> displayName,
-  Value<bool> chatInProgress,
   Value<bool> badgeUpdateInProgress,
   Value<int> badgeCount,
   Value<int> currentMessageSeqNo,
   Value<bool> hasBeenOpened,
-  Value<String?> unsentMessage,
   Value<DateTime?> lastKeepAliveMessage,
   Value<int> rowid,
 });
@@ -1467,10 +1374,6 @@ class $$ContactsTableFilterComposer
   ColumnFilters<String> get displayName => $composableBuilder(
       column: $table.displayName, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<bool> get chatInProgress => $composableBuilder(
-      column: $table.chatInProgress,
-      builder: (column) => ColumnFilters(column));
-
   ColumnFilters<bool> get badgeUpdateInProgress => $composableBuilder(
       column: $table.badgeUpdateInProgress,
       builder: (column) => ColumnFilters(column));
@@ -1484,9 +1387,6 @@ class $$ContactsTableFilterComposer
 
   ColumnFilters<bool> get hasBeenOpened => $composableBuilder(
       column: $table.hasBeenOpened, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get unsentMessage => $composableBuilder(
-      column: $table.unsentMessage, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get lastKeepAliveMessage => $composableBuilder(
       column: $table.lastKeepAliveMessage,
@@ -1557,10 +1457,6 @@ class $$ContactsTableOrderingComposer
   ColumnOrderings<String> get displayName => $composableBuilder(
       column: $table.displayName, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<bool> get chatInProgress => $composableBuilder(
-      column: $table.chatInProgress,
-      builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<bool> get badgeUpdateInProgress => $composableBuilder(
       column: $table.badgeUpdateInProgress,
       builder: (column) => ColumnOrderings(column));
@@ -1574,10 +1470,6 @@ class $$ContactsTableOrderingComposer
 
   ColumnOrderings<bool> get hasBeenOpened => $composableBuilder(
       column: $table.hasBeenOpened,
-      builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get unsentMessage => $composableBuilder(
-      column: $table.unsentMessage,
       builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<DateTime> get lastKeepAliveMessage => $composableBuilder(
@@ -1627,9 +1519,6 @@ class $$ContactsTableAnnotationComposer
   GeneratedColumn<String> get displayName => $composableBuilder(
       column: $table.displayName, builder: (column) => column);
 
-  GeneratedColumn<bool> get chatInProgress => $composableBuilder(
-      column: $table.chatInProgress, builder: (column) => column);
-
   GeneratedColumn<bool> get badgeUpdateInProgress => $composableBuilder(
       column: $table.badgeUpdateInProgress, builder: (column) => column);
 
@@ -1641,9 +1530,6 @@ class $$ContactsTableAnnotationComposer
 
   GeneratedColumn<bool> get hasBeenOpened => $composableBuilder(
       column: $table.hasBeenOpened, builder: (column) => column);
-
-  GeneratedColumn<String> get unsentMessage => $composableBuilder(
-      column: $table.unsentMessage, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastKeepAliveMessage => $composableBuilder(
       column: $table.lastKeepAliveMessage, builder: (column) => column);
@@ -1704,12 +1590,10 @@ class $$ContactsTableTableManager extends RootTableManager<
             Value<ContactOrigin> origin = const Value.absent(),
             Value<ContactCategory> category = const Value.absent(),
             Value<String?> displayName = const Value.absent(),
-            Value<bool> chatInProgress = const Value.absent(),
             Value<bool> badgeUpdateInProgress = const Value.absent(),
             Value<int> badgeCount = const Value.absent(),
             Value<int> currentMessageSeqNo = const Value.absent(),
             Value<bool> hasBeenOpened = const Value.absent(),
-            Value<String?> unsentMessage = const Value.absent(),
             Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -1725,12 +1609,10 @@ class $$ContactsTableTableManager extends RootTableManager<
             origin: origin,
             category: category,
             displayName: displayName,
-            chatInProgress: chatInProgress,
             badgeUpdateInProgress: badgeUpdateInProgress,
             badgeCount: badgeCount,
             currentMessageSeqNo: currentMessageSeqNo,
             hasBeenOpened: hasBeenOpened,
-            unsentMessage: unsentMessage,
             lastKeepAliveMessage: lastKeepAliveMessage,
             rowid: rowid,
           ),
@@ -1746,12 +1628,10 @@ class $$ContactsTableTableManager extends RootTableManager<
             required ContactOrigin origin,
             required ContactCategory category,
             Value<String?> displayName = const Value.absent(),
-            Value<bool> chatInProgress = const Value.absent(),
             Value<bool> badgeUpdateInProgress = const Value.absent(),
             Value<int> badgeCount = const Value.absent(),
             Value<int> currentMessageSeqNo = const Value.absent(),
             Value<bool> hasBeenOpened = const Value.absent(),
-            Value<String?> unsentMessage = const Value.absent(),
             Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -1767,12 +1647,10 @@ class $$ContactsTableTableManager extends RootTableManager<
             origin: origin,
             category: category,
             displayName: displayName,
-            chatInProgress: chatInProgress,
             badgeUpdateInProgress: badgeUpdateInProgress,
             badgeCount: badgeCount,
             currentMessageSeqNo: currentMessageSeqNo,
             hasBeenOpened: hasBeenOpened,
-            unsentMessage: unsentMessage,
             lastKeepAliveMessage: lastKeepAliveMessage,
             rowid: rowid,
           ),
