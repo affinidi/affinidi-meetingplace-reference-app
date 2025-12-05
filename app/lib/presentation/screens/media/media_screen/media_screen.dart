@@ -77,17 +77,13 @@ class MediaScreen extends HookConsumerWidget {
       ),
     );
 
-    print('XXX: MediaScreen review result: $result');
-
     if (!context.mounted) return;
 
     navigator.pop(result);
-    print('XXX: MediaScreen pop result');
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    print('XXX: MediaScreen build called');
     final navigator = ref.read(navigatorProvider);
 
     final provider = mediaScreenControllerProvider(
@@ -101,7 +97,6 @@ class MediaScreen extends HookConsumerWidget {
       if (state.pickedImageBytes != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
-          print('XXX: MediaScreen picked image, navigating to review');
           _reviewImage(state.pickedImageBytes!, ref, context);
         });
       }

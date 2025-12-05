@@ -37,8 +37,6 @@ class MediaReviewController extends _$MediaReviewController {
         qualityPercent: imageConfig.qualityPercentage,
       );
 
-      print('XXX: Compressed image size: ${compressedImage.base64.length}');
-
       return MediaReviewResult(success, message, compressedImage);
     } catch (_) {
       return MediaReviewResult.empty();

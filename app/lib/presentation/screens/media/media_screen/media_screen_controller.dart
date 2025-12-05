@@ -47,7 +47,6 @@ class MediaScreenController extends _$MediaScreenController {
   Future<void> pickFromGallery({
     required bool useChatSemantics,
   }) async {
-    print('XXX: MediaScreenController.pickFromGallery called');
     final picker = ref.read(imagePickerProvider);
 
     final environment = ref.read(environmentProvider);
@@ -62,7 +61,6 @@ class MediaScreenController extends _$MediaScreenController {
       imageQuality: imageConfig.qualityPercentage,
     );
 
-    print('XXX: picked $picked');
     if (picked != null) {
       state = state.copyWith(pickedImageBytes: await picked.readAsBytes());
     } else {
@@ -75,7 +73,6 @@ class MediaScreenController extends _$MediaScreenController {
   }
 
   Future<void> captureWithCamera() async {
-    print('XXX: MediaScreenController.captureWithCamera called');
     final file = await ref.read(cameraServiceProvider.notifier).captureImage();
     if (file != null) {
       state = state.copyWith(pickedImageBytes: await file.readAsBytes());

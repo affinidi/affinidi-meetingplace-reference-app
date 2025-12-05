@@ -66,7 +66,6 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
           : environment.profileImageConfig,
     );
 
-    print('XXX: MediaReviewScreen submitResult completed');
     if (context.mounted) navigator.pop(reviewResult);
 
     setState(() => _isSending = false);

@@ -106,7 +106,6 @@ class FakeImagePicker extends ImagePicker {
     CameraDevice preferredCameraDevice = CameraDevice.rear,
     bool requestFullMetadata = false,
   }) async {
-    print('XXX: FakeImagePicker.pickImage called');
     if (_shouldReturnNull) {
       return null;
     }
