@@ -43,7 +43,7 @@ final cameraControllerFactoryProvider = Provider<CameraControllerFactory>(
 ///   and capturing images.
 /// - Observes the app lifecycle to recheck camera availability when resuming.
 /// - Maintains camera state via [CameraServiceState].
-@riverpod
+@Riverpod(keepAlive: true)
 class CameraService extends _$CameraService with WidgetsBindingObserver {
   CameraService() : super();
 

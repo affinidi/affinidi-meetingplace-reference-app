@@ -32,15 +32,24 @@ class MediaScreenController extends _$MediaScreenController {
       );
       return MediaScreenState();
     }
-    ref.listen<CameraServiceState>(
-      cameraServiceProvider,
-      (prev, next) {
-        if (prev?.isAvailable == null && next.isAvailable != null) {
-          _initializeMediaSource(
-              next.isAvailable!, useCamera, cameraLensDirection);
-        }
-      },
-    );
+
+    final cameraState = ref.read(cameraServiceProvider);
+
+    if (cameraState.isAvailable != null) {
+      Future.microtask(() => _initializeMediaSource(
+          cameraState.isAvailable!, useCamera, cameraLensDirection));
+    } else {
+      ref.listen<CameraServiceState>(
+        cameraServiceProvider,
+        (prev, next) {
+          if (prev?.isAvailable == null && next.isAvailable != null) {
+            _initializeMediaSource(
+                next.isAvailable!, useCamera, cameraLensDirection);
+          }
+        },
+      );
+    }
+
     return MediaScreenState();
   }
 
