@@ -17,8 +17,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   /// Simulates an incoming text message by emitting it through the stream
   void simulateIncomingTextMessage({
     required String text,
-    required String senderDid,
     required String recipientDid,
+    List<Attachment>? attachments,
   }) {
     final message = Message(
       chatId: 'fake-chat-id',
@@ -27,8 +27,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       dateCreated: DateTime.now(),
       status: ChatItemStatus.confirmed,
       isFromMe: false,
-      senderDid: senderDid,
-      attachments: [],
+      senderDid: 'fake-sender-did',
+      attachments: attachments ?? [],
     );
 
     final plainTextMessage = PlainTextMessage(
@@ -38,7 +38,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
         'text': text,
         'timestamp': message.dateCreated.toIso8601String(),
       },
-      from: senderDid,
+      from: 'fake-sender-did',
       to: [recipientDid],
       createdTime: message.dateCreated,
     );
@@ -116,26 +116,6 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       isFromMe: true,
       senderDid: 'fake-sender-did',
       attachments: attachments ?? [],
-    );
-
-    // Emit the message through the stream so it appears in the UI
-    final plainTextMessage = PlainTextMessage(
-      id: message.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/message'),
-      body: {
-        'text': text,
-        'timestamp': message.dateCreated.toIso8601String(),
-      },
-      from: 'fake-sender-did',
-      to: ['fake-recipient-did'],
-      createdTime: message.dateCreated,
-    );
-
-    _streamController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: message,
-      ),
     );
 
     return message;
