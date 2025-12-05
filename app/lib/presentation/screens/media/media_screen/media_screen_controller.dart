@@ -26,9 +26,9 @@ class MediaScreenController extends _$MediaScreenController {
   }) {
     final cameraState = ref.read(cameraServiceProvider);
 
-    if (cameraState.isAvailable != null) {
-      _handleAvailability(
-          cameraState.isAvailable!, useCamera, cameraLensDirection);
+    if (cameraState.isAvailable != null || !useCamera) {
+      Future.microtask(() => _handleAvailability(
+          cameraState.isAvailable ?? false, useCamera, cameraLensDirection));
     } else {
       ref.listen<CameraServiceState>(
         cameraServiceProvider,
