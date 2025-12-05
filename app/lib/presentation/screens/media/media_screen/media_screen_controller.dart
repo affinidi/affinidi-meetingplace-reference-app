@@ -24,22 +24,15 @@ class MediaScreenController extends _$MediaScreenController {
     required CameraLensDirection cameraLensDirection,
     required bool useCamera,
   }) {
-    final cameraState = ref.read(cameraServiceProvider);
-
-    if (cameraState.isAvailable != null || !useCamera) {
-      Future.microtask(() => _handleAvailability(
-          cameraState.isAvailable ?? false, useCamera, cameraLensDirection));
-    } else {
-      ref.listen<CameraServiceState>(
-        cameraServiceProvider,
-        (prev, next) {
-          if (prev?.isAvailable == null && next.isAvailable != null) {
-            _handleAvailability(
-                next.isAvailable!, useCamera, cameraLensDirection);
-          }
-        },
-      );
-    }
+    ref.listen<CameraServiceState>(
+      cameraServiceProvider,
+      (prev, next) {
+        if (prev?.isAvailable == null && next.isAvailable != null) {
+          _initializeMediaSource(
+              next.isAvailable!, useCamera, cameraLensDirection);
+        }
+      },
+    );
 
     return MediaScreenState();
   }
@@ -96,19 +89,19 @@ class MediaScreenController extends _$MediaScreenController {
     state = state.copyWith(cameraController: null);
   }
 
-  void _handleAvailability(
-    bool isAvailable,
+  void _initializeMediaSource(
+    bool isCameraAvailable,
     bool useCamera,
     CameraLensDirection cameraLensDirection,
   ) {
-    if (!isAvailable || !useCamera) {
+    if (isCameraAvailable && useCamera) {
+      unawaited(_initCamera(cameraLensDirection));
+    } else {
       unawaited(
         pickFromGallery(
           useChatSemantics: false,
         ),
       );
-    } else {
-      unawaited(_initCamera(cameraLensDirection));
     }
   }
 
