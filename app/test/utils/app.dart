@@ -28,6 +28,7 @@ import 'package:mpx_flutter_reference_app/mpx_flutter_reference_app.dart';
 import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 
 import '../fakes/fake_app_badge_service.dart';
+import '../fakes/fake_cache_manager.dart';
 import '../fakes/fake_camera_controller.dart';
 import '../fakes/fake_channels.dart';
 import '../fakes/fake_connectivity.dart';
@@ -60,9 +61,11 @@ Future<void> startApp(
     'alreadyOnboarded': alreadyOnboarded,
   });
   final sharedPreferences = await SharedPreferences.getInstance();
+  final cacheManager = FakeCacheManager();
 
   final app = ProviderScope(
     overrides: [
+      cacheManagerProvider.overrideWith((ref) => cacheManager),
       appBadgeServiceProvider.overrideWithValue(FakeAppBadgeService()),
       appInfoProvider.overrideWith((ref) =>
           AppInfo(versionName: 'Test', buildNumber: '1', version: '0.0.0')),

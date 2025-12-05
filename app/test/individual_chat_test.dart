@@ -389,8 +389,7 @@ void main() {
           await tester.pumpAndSettle();
 
           await tester.tap(find.text(l10n.generalPhoto));
-          await tester.pumpAndSettle(const Duration(milliseconds: 100),
-              EnginePhase.sendSemanticsUpdate, const Duration(seconds: 10));
+          await tester.pumpAndSettle();
 
           expect(find.byKey(const Key('media_review_submit_button')),
               findsOneWidget);
