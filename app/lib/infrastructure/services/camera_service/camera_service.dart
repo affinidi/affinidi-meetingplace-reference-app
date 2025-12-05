@@ -43,7 +43,7 @@ final cameraControllerFactoryProvider = Provider<CameraControllerFactory>(
 ///   and capturing images.
 /// - Observes the app lifecycle to recheck camera availability when resuming.
 /// - Maintains camera state via [CameraServiceState].
-@Riverpod(keepAlive: true)
+@riverpod
 class CameraService extends _$CameraService with WidgetsBindingObserver {
   CameraService() : super();
 
@@ -192,7 +192,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   ///  does not support it.
   Future<void> _checkCameraAvailability() async {
     // Camera plugin does not support macOS: assume camera is unavailable
-    if (!kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
       state = state.copyWith(isAvailable: false);
       return;
     }
