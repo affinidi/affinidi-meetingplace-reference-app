@@ -106,13 +106,11 @@ class MediaScreen extends HookConsumerWidget {
     return Scaffold(
       body: Builder(
         builder: (context) {
-          if (!useCamera) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          final isCameraReady = state.isCameraAvailable &&
+              state.cameraController != null &&
+              state.cameraController!.value.isInitialized;
 
-          if (!state.isCameraAvailable ||
-              state.cameraController == null ||
-              !state.cameraController!.value.isInitialized) {
+          if (!useCamera || !isCameraReady) {
             return const Center(child: CircularProgressIndicator());
           }
 
