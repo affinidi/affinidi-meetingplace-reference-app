@@ -24,6 +24,14 @@ class MediaScreenController extends _$MediaScreenController {
     required CameraLensDirection cameraLensDirection,
     required bool useCamera,
   }) {
+    if (!useCamera) {
+      unawaited(
+        pickFromGallery(
+          useChatSemantics: false,
+        ),
+      );
+      return MediaScreenState();
+    }
     ref.listen<CameraServiceState>(
       cameraServiceProvider,
       (prev, next) {
@@ -33,7 +41,6 @@ class MediaScreenController extends _$MediaScreenController {
         }
       },
     );
-
     return MediaScreenState();
   }
 
