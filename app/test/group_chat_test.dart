@@ -672,14 +672,12 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          // Verify message is shown
           expect(find.text(l10n.chatRequestPermissionToUpdateProfileGroup),
               findsOneWidget);
 
           await tester.tap(find.text(l10n.genWordLater));
           await tester.pumpAndSettle();
 
-          // Verify message is removed from UI
           expect(find.text(l10n.chatRequestPermissionToUpdateProfileGroup),
               findsNothing);
         });
@@ -737,7 +735,6 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          // Verify the message appears (format: "{memberName} has joined the group")
           expect(find.textContaining('has joined the group'), findsOneWidget);
           expect(find.textContaining(memberName), findsWidgets);
         });

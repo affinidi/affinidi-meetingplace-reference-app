@@ -140,11 +140,6 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   }
 
   @override
-  Future<void> processControlPlaneEvents({Function? onDone}) async {
-    onDone?.call();
-  }
-
-  @override
   Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
     final channel = _channels[channelDid];
     return channel;
