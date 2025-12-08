@@ -6,7 +6,7 @@ part of 'camera_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$cameraServiceHash() => r'6b27390f70407d62e4dfa2f5fafb95b76ab20206';
+String _$cameraServiceHash() => r'9f07aaf0729c13960a19481b38a13dc173fac7ca';
 
 /// A service class for managing camera functionality in the app.
 ///

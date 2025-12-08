@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +9,33 @@ import '../../providers/app_logger_provider.dart';
 import 'camera_service_state.dart';
 
 part 'camera_service.g.dart';
+
+final availableCamerasProvider =
+    Provider<Future<List<CameraDescription>> Function()>(
+  (ref) => availableCameras,
+);
+
+typedef CameraControllerFactory = CameraController Function(
+  CameraDescription description,
+  ResolutionPreset resolutionPreset, {
+  bool enableAudio,
+  ImageFormatGroup? imageFormatGroup,
+});
+
+final cameraControllerFactoryProvider = Provider<CameraControllerFactory>(
+  (ref) => (
+    description,
+    resolutionPreset, {
+    enableAudio = true,
+    imageFormatGroup,
+  }) =>
+      CameraController(
+        description,
+        resolutionPreset,
+        enableAudio: enableAudio,
+        imageFormatGroup: imageFormatGroup,
+      ),
+);
 
 /// A service class for managing camera functionality in the app.
 ///
@@ -52,14 +77,16 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   /// Returns an initialized [CameraController].
   Future<CameraController> initializeCamera(
       CameraLensDirection cameraLensDirection) async {
-    final cameras = await availableCameras();
+    final getCameras = ref.read(availableCamerasProvider);
+    final cameras = await getCameras();
     final description = cameras.firstWhere(
       (c) => c.lensDirection == cameraLensDirection,
       orElse: () =>
           throw Exception('No camera found for $cameraLensDirection direction'),
     );
 
-    final controller = CameraController(
+    final controllerFactory = ref.read(cameraControllerFactoryProvider);
+    final controller = controllerFactory(
       description,
       ResolutionPreset.high,
       enableAudio: false,
@@ -164,9 +191,9 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   /// On macOS, assumes a camera is always available as the plugin
   ///  does not support it.
   Future<void> _checkCameraAvailability() async {
-    // Camera plugin does not support MacOS: assume a camera is available
-    if (!kIsWeb && Platform.isMacOS) {
-      state = state.copyWith(isAvailable: true);
+    // Camera plugin does not support macOS: assume camera is unavailable
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
+      state = state.copyWith(isAvailable: false);
       return;
     }
 
@@ -175,7 +202,8 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
       name: _logKey,
     );
     try {
-      final cameras = await availableCameras();
+      final getCameras = ref.read(availableCamerasProvider);
+      final cameras = await getCameras();
       state = state.copyWith(
         isAvailable: cameras.isNotEmpty,
         cameras: cameras,
@@ -192,6 +220,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
         stackTrace: stackTrace,
         name: _logKey,
       );
+      state = state.copyWith(isAvailable: false, cameras: []);
     }
   }
 }

@@ -10,17 +10,22 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     PublishOfferResult? offerToReturn,
     Exception? publishOfferException,
     bool isPhraseAvailable = true,
+    Map<String, Channel>? channels,
     this.offerToFind,
     this.findOfferHasError = false,
   })  : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
         _offerToReturn = offerToReturn,
         _publishOfferException = publishOfferException,
-        _isPhraseAvailable = isPhraseAvailable;
+        _isPhraseAvailable = isPhraseAvailable,
+        _channels = channels ?? {};
 
   final bool _shouldFailToRegisterPushToken;
   final PublishOfferResult? _offerToReturn;
   final Exception? _publishOfferException;
   final bool _isPhraseAvailable;
+  final Map<String, Channel> _channels;
+
+  // Getter to check if subscriptions have been created (useful for debugging)
   final ConnectionOffer? offerToFind;
   final bool findOfferHasError;
 
@@ -147,6 +152,12 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Future<void> processControlPlaneEvents({Function? onDone}) async {
     // ignore: avoid_dynamic_calls
     onDone?.call();
+  }
+
+  @override
+  Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
+    final channel = _channels[channelDid];
+    return channel;
   }
 
   @override

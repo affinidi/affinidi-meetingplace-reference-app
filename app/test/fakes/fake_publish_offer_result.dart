@@ -4,11 +4,7 @@ class FakePublishOfferResult implements PublishOfferResult<ConnectionOffer> {
   FakePublishOfferResult();
 
   @override
-  ConnectionOffer get connectionOffer => throw UnimplementedError();
-
-  @override
-  DidManager get groupOwnerDidManager => throw UnimplementedError();
-
-  @override
-  DidManager get publishedOfferDidManager => throw UnimplementedError();
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError();
+  }
 }

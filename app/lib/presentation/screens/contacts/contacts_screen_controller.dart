@@ -24,14 +24,22 @@ class ContactsScreenController extends _$ContactsScreenController {
       AsyncLoadingController.provider(
           'deleteMultipleContactsLoadingController');
 
+  bool _isDisposed = false;
+
   @override
   ContactsScreenState build() {
+    ref.onDispose(() {
+      _isDisposed = true;
+    });
+
     ref.listen(
       identitiesServiceProvider.currentIdentityOrPrimary,
       (prev, next) {
         if (prev == next) return;
 
         Future.microtask(() {
+          if (_isDisposed) return;
+
           state = state.copyWith(identity: next);
         });
       },
@@ -50,6 +58,8 @@ class ContactsScreenController extends _$ContactsScreenController {
         final newContacts = next.where((c) => newIds.contains(c.mediatorDid));
 
         Future.microtask(() {
+          if (_isDisposed) return;
+
           state = state.copyWith(contacts: _sortContacts(next));
           _updateContactMediators(newContacts);
         });
@@ -62,7 +72,11 @@ class ContactsScreenController extends _$ContactsScreenController {
     ref.listen(mediatorServiceProvider, (prev, next) {
       if (prev == next) return;
 
-      Future.microtask(_updateContactMediators);
+      Future.microtask(() {
+        if (_isDisposed) return;
+
+        _updateContactMediators();
+      });
     }, fireImmediately: true);
 
     return ContactsScreenState();

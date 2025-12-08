@@ -20,17 +20,25 @@ part 'notification_service.g.dart';
 class NotificationService extends _$NotificationService {
   NotificationService() : super();
 
+  bool _isDisposed = false;
+
   @override
   NotificationServiceState build() {
+    ref.onDispose(() {
+      _isDisposed = true;
+    });
+
     ref.listen(
       contactsServiceProvider.select((state) => state.contacts),
       (previous, next) {
-        Future(
-          () => _updateCounter(
+        Future.microtask(() {
+          if (_isDisposed) return;
+
+          _updateCounter(
             NotificationCounterType.contacts,
             next.badgeCount,
-          ),
-        );
+          );
+        });
       },
       fireImmediately: true,
     );
@@ -38,12 +46,14 @@ class NotificationService extends _$NotificationService {
     ref.listen(
       connectionsServiceProvider.select((state) => state.connections),
       (previous, next) {
-        Future(
-          () => _updateCounter(
+        Future.microtask(() {
+          if (_isDisposed) return;
+
+          _updateCounter(
             NotificationCounterType.connections,
             next.badgeCount,
-          ),
-        );
+          );
+        });
       },
       fireImmediately: true,
     );

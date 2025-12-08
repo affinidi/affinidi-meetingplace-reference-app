@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 
 import 'package:camera/camera.dart';
@@ -22,17 +24,26 @@ class MediaScreenController extends _$MediaScreenController {
     required CameraLensDirection cameraLensDirection,
     required bool useCamera,
   }) {
+    if (!useCamera) {
+      unawaited(
+        pickFromGallery(
+          useChatSemantics: false,
+        ),
+      );
+      return MediaScreenState();
+    }
+
     final cameraState = ref.read(cameraServiceProvider);
 
     if (cameraState.isAvailable != null) {
-      _handleAvailability(
-          cameraState.isAvailable!, useCamera, cameraLensDirection);
+      Future.microtask(() => _initializeMediaSource(
+          cameraState.isAvailable!, useCamera, cameraLensDirection));
     } else {
       ref.listen<CameraServiceState>(
         cameraServiceProvider,
         (prev, next) {
           if (prev?.isAvailable == null && next.isAvailable != null) {
-            _handleAvailability(
+            _initializeMediaSource(
                 next.isAvailable!, useCamera, cameraLensDirection);
           }
         },
@@ -94,19 +105,19 @@ class MediaScreenController extends _$MediaScreenController {
     state = state.copyWith(cameraController: null);
   }
 
-  void _handleAvailability(
-    bool isAvailable,
+  void _initializeMediaSource(
+    bool isCameraAvailable,
     bool useCamera,
     CameraLensDirection cameraLensDirection,
   ) {
-    if (!isAvailable || !useCamera) {
+    if (isCameraAvailable && useCamera) {
+      unawaited(_initCamera(cameraLensDirection));
+    } else {
       unawaited(
         pickFromGallery(
           useChatSemantics: false,
         ),
       );
-    } else {
-      unawaited(_initCamera(cameraLensDirection));
     }
   }
 

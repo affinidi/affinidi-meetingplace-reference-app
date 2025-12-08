@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,6 +105,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                 const SizedBox(width: 10),
                 if (_imageBytes != null)
                   FloatingActionButton(
+                    key: const Key('media_review_submit_button'),
                     heroTag: 1,
                     backgroundColor: Colors.green,
                     onPressed:
@@ -141,6 +144,7 @@ class _MessageInput extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(
+        key: const Key('media_review_text_input'),
         controller: controller,
         maxLines: 3,
         minLines: 1,

@@ -42,6 +42,7 @@ class _ChatTextEntry extends HookConsumerWidget {
                 shape: BoxShape.circle,
               ),
               child: InkWell(
+                key: const Key('chat_add_media_button'),
                 radius: 60,
                 child: const Icon(
                   Icons.add,
@@ -53,6 +54,7 @@ class _ChatTextEntry extends HookConsumerWidget {
             ),
             Expanded(
               child: TextFormField(
+                key: const Key('chat_message_input'),
                 enabled: !shouldDisable,
                 onChanged: shouldDisable ? null : (text) => sendChatActivity(),
                 textInputAction: TextInputAction.send,
@@ -96,6 +98,7 @@ class _ChatTextEntry extends HookConsumerWidget {
                 shape: BoxShape.circle,
               ),
               child: InkWell(
+                key: const Key('chat_send_button'),
                 radius: 60,
                 onTap: shouldDisable ? null : sendMessage,
                 child: const Icon(

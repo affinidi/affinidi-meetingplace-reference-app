@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
@@ -104,13 +106,11 @@ class MediaScreen extends HookConsumerWidget {
     return Scaffold(
       body: Builder(
         builder: (context) {
-          if (!useCamera) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          final isCameraReady = state.isCameraAvailable &&
+              state.cameraController != null &&
+              state.cameraController!.value.isInitialized;
 
-          if (!state.isCameraAvailable ||
-              state.cameraController == null ||
-              !state.cameraController!.value.isInitialized) {
+          if (!useCamera || !isCameraReady) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -152,6 +152,7 @@ class MediaScreen extends HookConsumerWidget {
                 const SizedBox(height: 20),
                 // Capture
                 FloatingActionButton(
+                  key: const Key('camera_capture_button'),
                   heroTag: 2,
                   backgroundColor: Colors.green,
                   onPressed: () => _captureImage(controller, context, ref),
