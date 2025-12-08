@@ -1,18 +1,17 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../domain/models/contacts/contact.dart' as model;
 import '../../../../domain/repositories/contacts_repository.dart';
 import '../../../exceptions/app_exception.dart';
 import '../../../exceptions/app_exception_type.dart';
-import '../../../extensions/vcard_extensions.dart';
 import 'contacts_database.dart' as db;
 
 /// Drift implementation of [ContactsRepository].
 ///
-/// - Persists contacts and their vCards in the local [db.ContactsDatabase].
+/// - Persists contacts and their cards in the local [db.ContactsDatabase].
 /// - Ensures operations like add and update run inside transactions.
 Future<ContactsRepository> contactsRepositoryDrift(Ref ref) async {
   final database = await ref.read(db.contactsDatabaseProvider.future);
@@ -62,17 +61,16 @@ class ContactsRepositoryDrift implements ContactsRepository {
             ),
           );
 
-      final vCard = contact.vCard;
+      final card = contact.card;
       await _database.into(_database.contactCards).insert(
             db.ContactCardsCompanion(
               contactId: Value(contactId),
-              firstName: Value(vCard.firstName),
-              lastName: Value(vCard.lastName),
-              email: Value(vCard.email),
-              mobile: Value(vCard.mobile),
-              profilePic: Value(vCard.profilePic),
-              meetingplaceIdentityCardColor:
-                  Value(vCard.meetingplaceIdentityCardColor),
+              firstName: Value(card.firstName),
+              lastName: Value(card.lastName ?? ''),
+              email: Value(card.email ?? ''),
+              mobile: Value(card.mobile ?? ''),
+              profilePic: Value(card.profilePic ?? ''),
+              meetingplaceIdentityCardColor: Value(card.cardColor ?? ''),
             ),
           );
 
@@ -164,18 +162,17 @@ class ContactsRepositoryDrift implements ContactsRepository {
         ),
       );
 
-      final vCard = contact.vCard;
+      final card = contact.card;
       await (_database.update(_database.contactCards)
             ..where((c) => c.contactId.equals(contact.id)))
           .write(
         db.ContactCardsCompanion(
-          firstName: Value(vCard.firstName),
-          lastName: Value(vCard.lastName),
-          email: Value(vCard.email),
-          mobile: Value(vCard.mobile),
-          profilePic: Value(vCard.profilePic),
-          meetingplaceIdentityCardColor:
-              Value(vCard.meetingplaceIdentityCardColor),
+          firstName: Value(card.firstName),
+          lastName: Value(card.lastName ?? ''),
+          email: Value(card.email ?? ''),
+          mobile: Value(card.mobile ?? ''),
+          profilePic: Value(card.profilePic ?? ''),
+          meetingplaceIdentityCardColor: Value(card.cardColor ?? ''),
         ),
       );
     });
@@ -187,19 +184,26 @@ class _ContactMapper {
     db.Contact contact,
     db.ContactCard contactCard,
   ) {
-    final vCard = VCard(values: {});
-    vCard.firstName = contactCard.firstName;
-    vCard.lastName = contactCard.lastName;
-    vCard.email = contactCard.email;
-    vCard.mobile = contactCard.mobile;
-    vCard.profilePic = contactCard.profilePic;
-    vCard.meetingplaceIdentityCardColor =
-        contactCard.meetingplaceIdentityCardColor;
+    final domainCard = ContactCard(
+      id: const Uuid().v4(),
+      firstName: contactCard.firstName,
+      displayName: [contactCard.firstName, contactCard.lastName]
+          .where((s) => s.isNotEmpty)
+          .join(' '),
+      lastName: contactCard.lastName.isEmpty ? null : contactCard.lastName,
+      email: contactCard.email.isEmpty ? null : contactCard.email,
+      mobile: contactCard.mobile.isEmpty ? null : contactCard.mobile,
+      profilePic:
+          contactCard.profilePic.isEmpty ? null : contactCard.profilePic,
+      cardColor: contactCard.meetingplaceIdentityCardColor.isEmpty
+          ? null
+          : contactCard.meetingplaceIdentityCardColor,
+    );
 
     return model.Contact(
       id: contact.id,
       offerLink: contact.offerLink,
-      vCard: vCard,
+      card: domainCard,
       dateAdded: contact.dateAdded,
       type: contact.type,
       status: contact.status,

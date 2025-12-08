@@ -6,22 +6,24 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
-import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
+import '../../../domain/models/contact_card/contact_card.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/event_message_extentions.dart';
 import '../../../infrastructure/extensions/list_extensions.dart';
 import '../../../infrastructure/extensions/plain_text_message_extensions.dart';
-import '../../../infrastructure/extensions/vcard_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -220,8 +222,23 @@ class ChatScreenController extends _$ChatScreenController {
       throw AppException('Unable to find channel associated to contact',
           code: AppExceptionType.missingChannel.name);
     }
+    final srcCard = channel.otherPartyCard;
     state = state.copyWith(
-      otherPartyVCard: channel.otherPartyVCard,
+      otherPartyCard: srcCard == null
+          ? null
+          : ContactCard(
+              id: const Uuid().v4(),
+              firstName: srcCard.firstName,
+              displayName: srcCard.fullName,
+              lastName: srcCard.lastName.isEmpty ? null : srcCard.lastName,
+              email: srcCard.email.isEmpty ? null : srcCard.email,
+              mobile: srcCard.mobile.isEmpty ? null : srcCard.mobile,
+              profilePic:
+                  srcCard.profilePic.isEmpty ? null : srcCard.profilePic,
+              cardColor: srcCard.meetingplaceIdentityCardColor.isEmpty
+                  ? null
+                  : srcCard.meetingplaceIdentityCardColor,
+            ),
       notificationToken: channel.otherPartyNotificationToken,
     );
 
@@ -321,7 +338,7 @@ class ChatScreenController extends _$ChatScreenController {
           chat.ChatProtocol.chatActivity.value) {
         final groupMessageSenderName =
             _getGroupMemberNameFromMessage(plainTextMessage);
-        final contactName = state.contact?.vCard.firstName;
+        final contactName = state.contact?.card.firstName;
 
         _updateMembersTypingActivityIfNeeded(
           plainTextMessage: plainTextMessage,
@@ -360,7 +377,7 @@ class ChatScreenController extends _$ChatScreenController {
         final groupMessageSenderName = plainTextMessage != null
             ? _getGroupMemberNameFromMessage(plainTextMessage)
             : null;
-        final contactName = state.contact?.vCard.firstName;
+        final contactName = state.contact?.card.firstName;
         _clearMembersTypingActivity(
           groupMessageSenderName: groupMessageSenderName,
           contactName: contactName,
@@ -377,7 +394,7 @@ class ChatScreenController extends _$ChatScreenController {
     final senderDid = plainTextMessage.from;
     if (senderDid == null) return null;
 
-    return state.getGroupMemberByDid(senderDid)?.vCard.firstName;
+    return state.getGroupMemberByDid(senderDid)?.card.firstName;
   }
 
   void _applyEffect(chat.StreamData data) {
@@ -460,10 +477,10 @@ class ChatScreenController extends _$ChatScreenController {
       return;
     }
 
-    final vCardValues = body['values'] as Map<String, dynamic>?;
-    if (vCardValues == null) {
+    final cardValues = body['values'] as Map<String, dynamic>?;
+    if (cardValues == null) {
       _logger.info(
-        'Received a contact details update without a vCard',
+        'Received a contact details update without a contact card',
         name: _logKey,
       );
       return;
@@ -473,11 +490,46 @@ class ChatScreenController extends _$ChatScreenController {
       'Updating Contact Card',
       name: _logKey,
     );
-    final updatedVCard = VCard(values: vCardValues);
-    state = state.copyWith(otherPartyVCard: updatedVCard);
+    final domainCard = ContactCard(
+      id: const Uuid().v4(),
+      firstName: ContactCardUtils.getPathValue(
+          cardValues, ContactCardPaths.firstName.paths),
+      displayName: ContactCardUtils.getFullName(cardValues),
+      lastName: ContactCardUtils.getPathValue(
+                  cardValues, ContactCardPaths.lastName.paths)
+              .isEmpty
+          ? null
+          : ContactCardUtils.getPathValue(
+              cardValues, ContactCardPaths.lastName.paths),
+      email: ContactCardUtils.getPathValue(
+                  cardValues, ContactCardPaths.email.paths)
+              .isEmpty
+          ? null
+          : ContactCardUtils.getPathValue(
+              cardValues, ContactCardPaths.email.paths),
+      mobile: ContactCardUtils.getPathValue(
+                  cardValues, ContactCardPaths.mobile.paths)
+              .isEmpty
+          ? null
+          : ContactCardUtils.getPathValue(
+              cardValues, ContactCardPaths.mobile.paths),
+      profilePic: ContactCardUtils.getPathValue(
+                  cardValues, ContactCardPaths.profilePic.paths)
+              .isEmpty
+          ? null
+          : ContactCardUtils.getPathValue(
+              cardValues, ContactCardPaths.profilePic.paths),
+      cardColor: ContactCardUtils.getPathValue(cardValues,
+                  ContactCardPaths.meetingplaceIdentityCardColor.paths)
+              .isEmpty
+          ? null
+          : ContactCardUtils.getPathValue(
+              cardValues, ContactCardPaths.meetingplaceIdentityCardColor.paths),
+    );
+    state = state.copyWith(otherPartyCard: domainCard);
     ref
         .read(contactsServiceProvider.notifier)
-        .updateContactVcard(contactDid, updatedVCard);
+        .updateContactCard(contactDid, domainCard);
   }
 
   Future<void> _refreshGroup() async {
@@ -966,7 +1018,7 @@ extension ChatScreenControllerProviderSelectors
         return state.offerName ?? '';
       }
 
-      return state.otherPartyVCard?.firstName ?? '';
+      return state.otherPartyCard?.firstName ?? '';
     });
   }
 
@@ -978,7 +1030,7 @@ extension ChatScreenControllerProviderSelectors
     return select((state) {
       if (state.contact?.isGroup ?? false) return null;
 
-      return state.otherPartyVCard?.firstName;
+      return state.otherPartyCard?.firstName;
     });
   }
 
@@ -1006,7 +1058,7 @@ extension ChatScreenControllerProviderSelectors
 
       final awaitingMemberNames = awaitingMembers
           .where((message) => !memberDidsWhoLeft.contains(message.memberDid))
-          .map((message) => message.vCard?.firstName)
+          .map((message) => message.contactCard?.firstName)
           .where((firstName) => firstName != null)
           .cast<String>();
 
@@ -1038,7 +1090,7 @@ extension _ChatScreenStateExtensions on ChatScreenState {
         .where((message) =>
             message.eventType == chat.EventMessageType.groupDeleted &&
             message.status == chat.ChatItemStatus.received)
-        .map((message) => message.vCard?.firstName)
+        .map((message) => message.contactCard?.firstName)
         .where((firstName) => firstName != null)
         .cast<String>();
 

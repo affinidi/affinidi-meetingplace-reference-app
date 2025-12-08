@@ -335,8 +335,8 @@
   "@generalConnect": {
     "type": "text"
   },
-  "vCardFieldName": "{field, select, firstName{First name} lastName{Last name} email{Email} mobile{Mobile} other{}}",
-  "@vCardFieldName": {
+  "contactCardFieldName": "{field, select, firstName{First name} lastName{Last name} email{Email} mobile{Mobile} other{}}",
+  "@contactCardFieldName": {
     "type": "text",
     "placeholders": {
       "field": {

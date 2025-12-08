@@ -148,11 +148,11 @@ class _ConnectionCard extends ConsumerWidget {
 
     final identityText = (mediatorName != null && mediatorName.isNotEmpty)
         ? context.l10n.usesIdentityViaMediator(
-            _connection.vCard.firstName,
+            _connection.card.firstName,
             mediatorName,
           )
         : context.l10n.usesIdentity(
-            _connection.vCard.firstName,
+            _connection.card.firstName,
           );
 
     return Card.outlined(
@@ -184,8 +184,8 @@ class _ConnectionCard extends ConsumerWidget {
                   AvatarGradientContainer(
                     child: CircleAvatar(
                         backgroundColor: Colors.transparent,
-                        foregroundImage: _connection.vCard
-                            .image(cacheManager: cacheManager)),
+                        foregroundImage:
+                            _connection.card.image(cacheManager: cacheManager)),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

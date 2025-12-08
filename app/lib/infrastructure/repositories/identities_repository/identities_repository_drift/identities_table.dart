@@ -12,6 +12,7 @@ String generateUuid() => const Uuid().v4();
 @DataClassName('IdentityRecord')
 class IdentitiesTable extends Table {
   TextColumn get id => text().clientDefault(generateUuid)();
+  TextColumn get did => text().nullable()();
   TextColumn get displayName => text()();
   TextColumn get firstName => text()();
   TextColumn get lastName => text().nullable()();

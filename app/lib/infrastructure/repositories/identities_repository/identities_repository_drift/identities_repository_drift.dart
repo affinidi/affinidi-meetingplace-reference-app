@@ -78,6 +78,7 @@ extension IdentityMapper on Identity {
   /// Converts an [Identity] into an [IdentityRecord] for persistence.
   IdentityRecord toRecord() => IdentityRecord(
         id: id,
+        did: did,
         isPrimary: isPrimary,
         displayName: card.displayName,
         firstName: card.firstName,
@@ -91,6 +92,7 @@ extension IdentityMapper on Identity {
   /// Creates an [Identity] domain model from a [IdentityRecord].
   static Identity fromRecord(IdentityRecord record) => Identity(
         id: record.id,
+        did: record.did,
         isPrimary: record.isPrimary,
         card: ContactCard(
           id: record.id,

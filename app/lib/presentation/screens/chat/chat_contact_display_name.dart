@@ -93,7 +93,7 @@ class _IndividualChatName extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
-    final fullName = ref.watch(provider).contact?.vCard.fullName ?? '';
+    final fullName = ref.watch(provider).contact?.card.displayName ?? '';
 
     return Text(
       fullName,

@@ -7,6 +7,7 @@ import '../../../domain/repositories/identities_repository.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/identities_repository_provider.dart';
+import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'identities_service_state.dart';
 
 part 'identities_service.g.dart';
@@ -83,6 +84,12 @@ class IdentitiesService extends _$IdentitiesService {
     if (state.identities.isEmpty) {
       identityToAdd = identity.copyWith(isPrimary: true);
     }
+
+    final sdk = await ref.read(meetingPlaceSdkProvider.future);
+    final didManager = await sdk.generateDid();
+    final didDoc = await didManager.getDidDocument();
+
+    identityToAdd = identityToAdd.copyWith(did: didDoc.id);
 
     await _repository!.addIdentity(identityToAdd);
     state = state.copyWith(currentIdentity: identityToAdd);

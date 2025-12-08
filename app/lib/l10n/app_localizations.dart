@@ -520,11 +520,11 @@ abstract class AppLocalizations {
   /// **'Connect'**
   String get generalConnect;
 
-  /// No description provided for @vCardFieldName.
+  /// No description provided for @contactCardFieldName.
   ///
   /// In en, this message translates to:
   /// **'{field, select, firstName{First name} lastName{Last name} email{Email} mobile{Mobile} other{}}'**
-  String vCardFieldName(String field);
+  String contactCardFieldName(String field);
 
   /// No description provided for @offerDetailsHeader.
   ///

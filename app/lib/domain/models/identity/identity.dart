@@ -20,6 +20,7 @@ const placeholderIdentityId = 'add-new';
 abstract class Identity with _$Identity {
   const factory Identity({
     required String id,
+    String? did,
     required ContactCard card,
     @Default(false) bool isPrimary,
   }) = _Identity;

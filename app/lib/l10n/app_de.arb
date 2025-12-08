@@ -263,7 +263,7 @@
 	"usesIdentityViaMediator": "Verwendet Ihre {identity} Identität über {mediator}",
 	"validityVisibilityDetails": "Details zur Gültigkeit und Sichtbarkeit",
 	"validityVisibilitySettings": "Gültigkeits- und Sichtbarkeitseinstellungen",
-	"vCardFieldName": "{field, select, firstName{Vorname} lastName{Nachname} email{E-Mail} mobile{Mobil} other{}}",
+	"contactCardFieldName": "{field, select, firstName{Vorname} lastName{Nachname} email{E-Mail} mobile{Mobil} other{}}",
 	"versionInfoBuild": "Baujahr: {buildNumber}",
 	"versionInfoHeader": "Version des Treffpunkts",
 	"versionInfoVersion": "Version {version}",

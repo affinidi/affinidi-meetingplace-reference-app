@@ -56,8 +56,7 @@ class _ContactGridItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vCard = contact.vCard;
-    final fullName = vCard.fullName;
+    final fullName = contact.card.displayName;
     final hasDisplayName = contact.displayName?.isNotEmpty ?? false;
 
     final isEditMode = ref.watch(

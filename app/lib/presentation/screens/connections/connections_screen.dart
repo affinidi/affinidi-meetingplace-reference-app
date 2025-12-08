@@ -6,8 +6,8 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/connection_color_extensions.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/date_time_extensions.dart';
-import '../../../infrastructure/extensions/vcard_extensions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';

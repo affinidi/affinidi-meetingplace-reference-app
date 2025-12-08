@@ -8,11 +8,11 @@ class _TheirDetailsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(contactId);
-    final otherPartyVCard = ref.watch(provider.otherPartyVCard);
+    final otherPartyCard = ref.watch(provider.otherPartyCard);
 
-    final contactName = otherPartyVCard?.fullName;
-    final email = otherPartyVCard?.email;
-    final mobile = otherPartyVCard?.mobile;
+    final contactName = otherPartyCard?.fullName;
+    final email = otherPartyCard?.email;
+    final mobile = otherPartyCard?.mobile;
 
     final theirDid = ref.watch(provider
         .select((state) => state.channel?.otherPartyPermanentChannelDid));

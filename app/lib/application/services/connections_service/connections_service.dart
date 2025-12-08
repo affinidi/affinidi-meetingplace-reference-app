@@ -12,6 +12,7 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../presentation/screens/offer/publish_offer_screen/publish_offer_form_data.dart';
 import '../control_plane_service/control_plane_service.dart';
+import '../identities_service/identities_service.dart';
 import 'connections_service_state.dart';
 
 part 'connections_service.g.dart';
@@ -206,7 +207,10 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      await sdk.approveConnectionRequest(channel: channel);
+      final currentIdentity =
+          ref.read(identitiesServiceProvider.currentIdentityOrPrimary);
+      final did = currentIdentity?.did;
+      await sdk.approveConnectionRequest(channel: channel, did: did);
 
       _logger.info(
         'Connection request approved successfully',
@@ -229,8 +233,9 @@ class ConnectionsService extends _$ConnectionsService {
   /// Accept a connection offer and notify acceptance.
   ///
   /// This method will accept the provided [connectionOffer], using the current
-  /// contact card (from IdentitiesService) as the vCard and [identity] as an
-  /// external reference. It notifies the issuer of acceptance and refreshes
+  /// contact card (from IdentitiesService) as the ContactCard
+  /// and [identity] as an external reference.
+  /// It notifies the issuer of acceptance and refreshes
   /// connections. Specific SDK errors are mapped to domain [AppException]s.
   ///
   /// [connectionOffer] - The offer to accept.
@@ -252,9 +257,12 @@ class ConnectionsService extends _$ConnectionsService {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
     await sdk.acceptOffer(
       connectionOffer: connectionOffer,
-      vCard: identity.card.toVCard(),
+      contactCard: identity.card.toSdkContactCard(
+        did: identity.did ?? '',
+        type: 'human',
+      ),
+      did: identity.did,
       externalRef: identity.id,
-      senderInfo: identity.card.firstName,
     );
     await fetchConnections();
   }
@@ -299,7 +307,7 @@ class ConnectionsService extends _$ConnectionsService {
   /// Publish a new connection offer.
   ///
   /// Publishes an offer with data from [data], using the current identity's
-  /// contact card as vCard and [identity] as an external reference. On
+  /// contact card as ContactCard and [identity] as an external reference. On
   /// success the published offer is stored in state and connections are
   /// refreshed. For group offers the group channel inauguration stream is
   /// announced.
@@ -327,7 +335,10 @@ class ConnectionsService extends _$ConnectionsService {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
       final result = await sdk.publishOffer(
         offerName: data.headline,
-        vCard: identity.card.toVCard(),
+        contactCard: identity.card.toSdkContactCard(
+          did: identity.did ?? '',
+          type: 'human',
+        ),
         type: isGroupOffer
             ? SDKConnectionOfferType.groupInvitation
             : SDKConnectionOfferType.invitation,

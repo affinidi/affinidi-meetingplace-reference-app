@@ -7,7 +7,7 @@ part of 'connections_service.dart';
 // **************************************************************************
 
 String _$connectionsServiceHash() =>
-    r'4c8b8000e99ae582defb3da4cc1445e26cbeb629';
+    r'0988c2ee99aa289e19d1001e2465214e5624ddfa';
 
 /// Service responsible for managing connection offers and channels.
 ///

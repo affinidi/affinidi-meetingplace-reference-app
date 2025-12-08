@@ -158,7 +158,7 @@ void main() {
         expect(find.text(offer.offerName), findsWidgets);
 
         expect(find.text(l10n.offerDetailsHeader), findsOneWidget);
-        expect(find.text(l10n.vCardFieldName('firstName')), findsWidgets);
+        expect(find.text(l10n.contactCardFieldName('firstName')), findsWidgets);
 
         expect(find.text(l10n.aliasPickerTitle), findsOneWidget);
         expect(find.byKey(const ValueKey('accept_offer_identity_picker')),

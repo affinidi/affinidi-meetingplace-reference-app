@@ -9,26 +9,26 @@ class _OfferDetailsPersonalInfoPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return FormCard(
       title: context.l10n.personalInformationShared,
-      child: _VCardView(offerLink),
+      child: _ContactCardPanelView(offerLink),
     );
   }
 }
 
-class _VCardView extends ConsumerWidget {
-  const _VCardView(this.offerLink);
+class _ContactCardPanelView extends ConsumerWidget {
+  const _ContactCardPanelView(this.offerLink);
 
   final String offerLink;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
-    final vCard = ref.watch(controllerProvider
-        .select((state) => state.publisherIdentity?.card.toVCard()));
+    final card = ref.watch(
+        controllerProvider.select((state) => state.publisherIdentity?.card));
 
-    if (vCard == null) {
+    if (card == null) {
       return const SizedBox.shrink();
     }
 
-    return VCardView(vCard: vCard);
+    return ContactCardView(card: card);
   }
 }

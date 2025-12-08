@@ -70,9 +70,15 @@ class OOBService extends _$OOBService {
 
     _logger.info('createOobFlow', name: _logKey);
 
-    final oobVCard = _currentIdentity!.card.toVCard();
+    final contactCard = _currentIdentity!.card.toSdkContactCard(
+      did: _currentIdentity!.did ?? '',
+      type: 'human',
+    );
 
-    final createOobFlowResult = await sdk.createOobFlow(vCard: oobVCard);
+    final createOobFlowResult = await sdk.createOobFlow(
+      contactCard: contactCard,
+      did: _currentIdentity!.did,
+    );
 
     if (_publishOfferStreamSubscription != null) {
       await _publishOfferStreamSubscription?.dispose();
@@ -117,7 +123,11 @@ class OOBService extends _$OOBService {
 
     final result = await sdk.acceptOobFlow(
       oobUri,
-      vCard: _currentIdentity!.card.toVCard(),
+      contactCard: _currentIdentity!.card.toSdkContactCard(
+        did: _currentIdentity!.did ?? '',
+        type: 'human',
+      ),
+      did: _currentIdentity!.did,
       externalRef: _currentIdentity!.id,
     );
     final acceptedOfferCompleter = Completer<void>();
