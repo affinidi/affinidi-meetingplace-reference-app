@@ -14,7 +14,7 @@ String _$contactsServiceHash() => r'23fd47a3c57e6b258e9cc6c7699bda2a3d6faf74';
 /// - Create contacts from invitation accepted events and approved offers
 /// - Update contacts when a channel is inaugurated
 /// - Persist, fetch, add, update and delete contacts via a repository
-/// - Maintain contact-specific state such as badge counts and vCard updates
+/// - Maintain contact-specific state such as badge counts and ContactCard updates
 ///
 /// The service listens to control plane events to automatically create/update
 /// contacts and exposes streams for processing and contact-card updates.
