@@ -33,7 +33,7 @@ melos:
     test:
       run: |
         melos run test-flutter &&
-        melos run coverage-report
+        melos run coverage-html
 
     test-flutter:
       description: Run tests in each flutter package
@@ -49,12 +49,12 @@ melos:
         ignore:
           - "*_example*"
 
-    coverage-report:
-      run: >
-        mkdir -p coverage
-
-        find ./packages -name "lcov.info" -path "*/coverage/lcov.info" -exec cat
-        {} + > coverage/lcov.info
+    coverage-html:
+      run: dart run melos exec -- "genhtml coverage/lcov.info --output-directory=coverage/html"
+      packageFilters:
+        scope:
+          - mpx_flutter_reference_app
+      description: Generate HTML coverage report for app
 
     pubget:
       run: flutter pub get
