@@ -88,10 +88,35 @@ Future<void> submitMediaWithMessage(
 ) async {
   final textInput = find.byKey(const Key('media_review_text_input'));
   await tester.enterText(textInput, message);
-  await tester.pump();
+  await tester.pumpAndSettle();
 
   await tester.tap(find.byKey(const Key('media_review_submit_button')));
-  await tester.pump();
+  await tester.pumpAndSettle();
+}
+
+Future<void> verifyMessageWithAttachmentSent(
+  WidgetTester tester,
+  FakeChatSdk meetingPlaceChatSDK,
+  String message,
+  String groupName,
+) async {
+  expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
+  final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
+  expect(sendCall['text'], message);
+  expect(sendCall['attachments'], isA<List<Attachment>>());
+  expect((sendCall['attachments'] as List).length, 1);
+
+  final attachments = sendCall['attachments'] as List<Attachment>;
+  meetingPlaceChatSDK.simulateIncomingTextMessage(
+    text: message,
+    recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+    attachments: attachments,
+  );
+  await tester.pumpAndSettle();
+
+  expect(find.text(groupName), findsOneWidget);
+  expect(find.text(message), findsOneWidget);
+  expect(find.byType(Image), findsWidgets);
 }
 
 void main() {
@@ -383,17 +408,14 @@ void main() {
           expect(find.byIcon(Icons.cancel_sharp), findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
-          await tester.pump(_uiUpdateDelayDuration);
+          await tester.pumpAndSettle();
 
-          expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
-          final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
-          expect(sendCall['text'], message);
-          expect(sendCall['attachments'], isA<List<Attachment>>());
-          expect((sendCall['attachments'] as List).length, 1);
-
-          expect(find.text(groupName), findsOneWidget);
-          expect(find.text(message), findsOneWidget);
-          expect(find.byType(Image), findsWidgets);
+          await verifyMessageWithAttachmentSent(
+            tester,
+            meetingPlaceChatSDK,
+            message,
+            groupName,
+          );
         });
       });
 
@@ -429,16 +451,14 @@ void main() {
               findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
-          await tester.pump(_uiUpdateDelayDuration);
+          await tester.pumpAndSettle();
 
-          final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
-          expect(sendCall['text'], message);
-          expect(sendCall['attachments'], isA<List<Attachment>>());
-          expect((sendCall['attachments'] as List).length, 1);
-
-          expect(find.text(groupName), findsOneWidget);
-          expect(find.text(message), findsOneWidget);
-          expect(find.byType(Image), findsWidgets);
+          await verifyMessageWithAttachmentSent(
+            tester,
+            meetingPlaceChatSDK,
+            message,
+            groupName,
+          );
         });
       });
     });
