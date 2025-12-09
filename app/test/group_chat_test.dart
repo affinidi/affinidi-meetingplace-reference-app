@@ -14,8 +14,6 @@ import 'fakes/fake_image_picker.dart';
 import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
 
-const _uiUpdateDelayDuration = Duration(milliseconds: 500);
-
 const _mockCameras = [
   CameraDescription(
     name: 'Mock Front Camera',
@@ -261,14 +259,21 @@ void main() {
 
         await enterChatMessage(tester, testMessage);
         await tapSendButton(tester);
-        await tester.pump(_uiUpdateDelayDuration);
-
-        expect(find.text(testMessage), findsOneWidget);
+        await tester.pumpAndSettle();
 
         expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
         final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
         expect(sendCall['text'], testMessage);
         expect(sendCall['attachments'], isNull);
+
+        // Simulate the message appearing in the UI
+        meetingPlaceChatSDK.simulateIncomingTextMessage(
+          text: testMessage,
+          recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text(testMessage), findsOneWidget);
       });
 
       testWidgets('the input field is cleared after sending', (tester) async {
@@ -281,7 +286,7 @@ void main() {
 
         await enterChatMessage(tester, testMessage);
         await tapSendButton(tester);
-        await tester.pump(_uiUpdateDelayDuration);
+        await tester.pumpAndSettle();
 
         final inputField = findChatMessageInput();
         final textField = tester.widget<TextFormField>(inputField);
@@ -323,7 +328,7 @@ void main() {
           expect(find.text(message), findsOneWidget);
 
           await tester.tap(find.text('👍').first);
-          await tester.pump(_uiUpdateDelayDuration);
+          await tester.pumpAndSettle();
 
           expect(meetingPlaceChatSDK.reactOnMessageCalls, hasLength(1));
           final reactionCall = meetingPlaceChatSDK.reactOnMessageCalls.first;
