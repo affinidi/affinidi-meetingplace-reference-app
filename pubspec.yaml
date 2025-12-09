@@ -32,8 +32,7 @@ melos:
 
     test:
       run: |
-        melos run test-flutter &&
-        melos run coverage-html
+        melos run test-flutter
 
     test-flutter:
       description: Run tests in each flutter package
