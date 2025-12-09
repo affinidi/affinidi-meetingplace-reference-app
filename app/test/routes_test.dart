@@ -261,7 +261,28 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        // Verify chat session was started
+        expect(meetingPlaceChatSDK.startChatSessionCallCount, 1);
+      });
+    });
+
+    group('for a group contact', () {
+      final location = '/contacts/${FakeContacts.groupContact.id}/chat';
+
+      testWidgets('it shows the group chat screen', (tester) async {
+        final meetingPlaceChatSDK = FakeChatSdk();
+
+        await navigateToLocation(
+          tester,
+          location,
+          isAuthenticated: isAuthenticated,
+          alreadyOnboarded: alreadyOnboarded,
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [FakeContacts.groupContact],
+          meetingPlaceChatSDK: meetingPlaceChatSDK,
+        );
+
+        await tester.pumpAndSettle();
+
         expect(meetingPlaceChatSDK.startChatSessionCallCount, 1);
       });
     });
