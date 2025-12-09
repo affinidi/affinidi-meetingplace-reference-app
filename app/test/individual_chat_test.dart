@@ -12,8 +12,6 @@ import 'fakes/fake_image_picker.dart';
 import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
 
-const _uiUpdateDelayDuration = Duration(milliseconds: 5000);
-
 const _mockCameras = [
   CameraDescription(
     name: 'Mock Front Camera',
@@ -70,7 +68,6 @@ Future<void> simulateIncomingMessage(
 ) async {
   meetingPlaceChatSDK.simulateIncomingTextMessage(
     text: message,
-    senderDid: FakeChannels.individualChannel.otherPartyPermanentChannelDid!,
     recipientDid: FakeChannels.individualChannel.permanentChannelDid!,
   );
   await tester.pumpAndSettle();
@@ -82,10 +79,35 @@ Future<void> submitMediaWithMessage(
 ) async {
   final textInput = find.byKey(const Key('media_review_text_input'));
   await tester.enterText(textInput, message);
-  await tester.pump();
+  await tester.pumpAndSettle();
 
   await tester.tap(find.byKey(const Key('media_review_submit_button')));
-  await tester.pump();
+  await tester.pumpAndSettle();
+}
+
+Future<void> verifyMessageWithAttachmentSent(
+  WidgetTester tester,
+  FakeChatSdk meetingPlaceChatSDK,
+  String message,
+  String contactName,
+) async {
+  expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
+  final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
+  expect(sendCall['text'], message);
+  expect(sendCall['attachments'], isA<List<Attachment>>());
+  expect((sendCall['attachments'] as List).length, 1);
+
+  final attachments = sendCall['attachments'] as List<Attachment>;
+  meetingPlaceChatSDK.simulateIncomingTextMessage(
+    text: message,
+    recipientDid: FakeChannels.individualChannel.permanentChannelDid!,
+    attachments: attachments,
+  );
+  await tester.pumpAndSettle();
+
+  expect(find.text(contactName), findsOneWidget);
+  expect(find.text(message), findsOneWidget);
+  expect(find.byType(Image), findsWidgets);
 }
 
 void main() {
@@ -249,14 +271,21 @@ void main() {
 
         await enterChatMessage(tester, testMessage);
         await tapSendButton(tester);
-        await tester.pump(_uiUpdateDelayDuration);
-
-        expect(find.text(testMessage), findsOneWidget);
+        await tester.pumpAndSettle();
 
         expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
         final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
         expect(sendCall['text'], testMessage);
         expect(sendCall['attachments'], isNull);
+
+        // Simulate the message appearing in the UI
+        meetingPlaceChatSDK.simulateIncomingTextMessage(
+          text: testMessage,
+          recipientDid: FakeChannels.individualChannel.permanentChannelDid!,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text(testMessage), findsOneWidget);
       });
 
       testWidgets('the input field is cleared after sending', (tester) async {
@@ -269,7 +298,7 @@ void main() {
 
         await enterChatMessage(tester, testMessage);
         await tapSendButton(tester);
-        await tester.pump(_uiUpdateDelayDuration);
+        await tester.pumpAndSettle();
 
         final inputField = findChatMessageInput();
         final textField = tester.widget<TextFormField>(inputField);
@@ -311,7 +340,7 @@ void main() {
           expect(find.text(message), findsOneWidget);
 
           await tester.tap(find.text('👍').first);
-          await tester.pump(_uiUpdateDelayDuration);
+          await tester.pumpAndSettle();
 
           expect(meetingPlaceChatSDK.reactOnMessageCalls, hasLength(1));
           final reactionCall = meetingPlaceChatSDK.reactOnMessageCalls.first;
@@ -396,17 +425,14 @@ void main() {
           expect(find.byIcon(Icons.cancel_sharp), findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
-          await tester.pump(_uiUpdateDelayDuration);
+          await tester.pumpAndSettle();
 
-          expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
-          final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
-          expect(sendCall['text'], message);
-          expect(sendCall['attachments'], isA<List<Attachment>>());
-          expect((sendCall['attachments'] as List).length, 1);
-
-          expect(find.text(contactName), findsOneWidget);
-          expect(find.text(message), findsOneWidget);
-          expect(find.byType(Image), findsWidgets);
+          await verifyMessageWithAttachmentSent(
+            tester,
+            meetingPlaceChatSDK,
+            message,
+            contactName,
+          );
         });
       });
 
@@ -442,16 +468,49 @@ void main() {
               findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
-          await tester.pump(_uiUpdateDelayDuration);
+          await tester.pumpAndSettle();
 
-          final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
-          expect(sendCall['text'], message);
-          expect(sendCall['attachments'], isA<List<Attachment>>());
-          expect((sendCall['attachments'] as List).length, 1);
+          await verifyMessageWithAttachmentSent(
+            tester,
+            meetingPlaceChatSDK,
+            message,
+            contactName,
+          );
+        });
 
-          expect(find.text(contactName), findsOneWidget);
-          expect(find.text(message), findsOneWidget);
-          expect(find.byType(Image), findsWidgets);
+        testWidgets('should fallback to gallery when camera is not available',
+            (tester) async {
+          final l10n = await getL10n();
+          const message = 'Photo from gallery!';
+          final meetingPlaceChatSDK = FakeChatSdk();
+
+          await navigateToChatScreen(
+            tester,
+            contactId: contactId,
+            imagePicker: FakeImagePicker.withDefaultImage(),
+            mockCameras: [],
+            meetingPlaceChatSDK: meetingPlaceChatSDK,
+          );
+
+          await tester.tap(findAddMediaButton());
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.text(l10n.generalCamera));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('camera_capture_button')), findsNothing);
+          expect(find.byKey(const Key('media_review_submit_button')),
+              findsOneWidget);
+
+          await submitMediaWithMessage(tester, message);
+          await tester.pumpAndSettle();
+
+          await verifyMessageWithAttachmentSent(
+            tester,
+            meetingPlaceChatSDK,
+            message,
+            contactName,
+          );
         });
       });
     });

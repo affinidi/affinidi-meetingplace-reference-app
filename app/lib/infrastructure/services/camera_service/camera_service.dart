@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -193,9 +191,9 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   /// On macOS, assumes a camera is always available as the plugin
   ///  does not support it.
   Future<void> _checkCameraAvailability() async {
-    // Camera plugin does not support MacOS: assume a camera is available
-    if (!kIsWeb && Platform.isMacOS) {
-      state = state.copyWith(isAvailable: true);
+    // Camera plugin does not support macOS: assume camera is unavailable
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
+      state = state.copyWith(isAvailable: false);
       return;
     }
 
@@ -222,6 +220,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
         stackTrace: stackTrace,
         name: _logKey,
       );
+      state = state.copyWith(isAvailable: false, cameras: []);
     }
   }
 }
