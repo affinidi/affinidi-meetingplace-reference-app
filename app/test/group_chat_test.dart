@@ -77,7 +77,6 @@ Future<void> simulateIncomingMessage(
 ) async {
   meetingPlaceChatSDK.simulateIncomingTextMessage(
     text: message,
-    senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
     recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
   );
   await tester.pumpAndSettle();
