@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
+import 'package:uuid/uuid.dart' as uuid;
 
 import '../../domain/models/contact_card/contact_card.dart';
 import '../../presentation/painting/cached_base64_image.dart';
 import '../../presentation/widgets/images/default_profile_image.dart';
 import 'string_list_extensions.dart';
+
+enum ContactCardType {
+  human('human'),
+  contactCard('contactCard');
+
+  const ContactCardType(this.value);
+  final String value;
+}
 
 enum ContactCardPaths {
   firstName(['n', 'given']),
@@ -93,6 +102,31 @@ class ContactCardUtils {
     final lastName = getPathValue(contactInfo, ContactCardPaths.lastName.paths);
     return [firstName, lastName].nonEmpty.join(' ');
   }
+
+  /// Creates a domain ContactCard from an SDK ContactCard
+  static ContactCard fromSdkContactCard(sdk.ContactCard sdkCard) {
+    final values = sdkCard.contactInfo;
+    final firstName = getPathValue(values, ContactCardPaths.firstName.paths);
+    final lastName = getPathValue(values, ContactCardPaths.lastName.paths);
+    final email = getPathValue(values, ContactCardPaths.email.paths);
+    final mobile = getPathValue(values, ContactCardPaths.mobile.paths);
+    final profilePic = getPathValue(values, ContactCardPaths.profilePic.paths);
+    final color = getPathValue(
+      values,
+      ContactCardPaths.meetingplaceIdentityCardColor.paths,
+    );
+
+    return ContactCard(
+      id: const uuid.Uuid().v4(),
+      firstName: firstName,
+      displayName: getFullName(values),
+      lastName: lastName.isEmpty ? null : lastName,
+      email: email.isEmpty ? null : email,
+      mobile: mobile.isEmpty ? null : mobile,
+      profilePic: profilePic.isEmpty ? null : profilePic,
+      cardColor: color.isEmpty ? null : color,
+    );
+  }
 }
 
 /// Convenience helpers on ContactCard:
@@ -116,6 +150,9 @@ extension ContactCardExtensions on ContactCard {
 
   /// Primary email or empty string.
   String get emailAddress => email ?? '';
+
+  /// Last name or empty string for fallback.
+  String get lastNameOrEmpty => lastName ?? '';
 
   sdk.ContactCard toSdkContactCard({
     required String did,

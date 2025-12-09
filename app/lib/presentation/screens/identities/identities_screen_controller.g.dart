@@ -7,7 +7,7 @@ part of 'identities_screen_controller.dart';
 // **************************************************************************
 
 String _$identitiesScreenControllerHash() =>
-    r'82de0aca3810e0b748eea72c0cd748cfbf5a41e2';
+    r'7644a32dd8e4e376ee5aff14596b117f32587f04';
 
 /// See also [IdentitiesScreenController].
 @ProviderFor(IdentitiesScreenController)

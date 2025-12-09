@@ -8,8 +8,8 @@ class _OfferDetailsAliasProfilePanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
-    final alias = ref.watch(controllerProvider
-        .select((state) => state.publisherIdentity?.card.firstName));
+    final alias = ref.watch(
+        controllerProvider.select((state) => state.offer?.card.firstName));
     final isUsingPrimaryIdentity = ref.watch(
         controllerProvider.select((state) => state.isUsingPrimaryIdentity));
 

@@ -7,7 +7,7 @@ part of 'connection_details_screen_controller.dart';
 // **************************************************************************
 
 String _$connectionDetailsScreenControllerHash() =>
-    r'7606df11936bb1f2074fba1b1c5c34eff2596cb4';
+    r'3daeaf2aac89936233b856e624e8985fc432b439';
 
 /// Copied from Dart SDK
 class _SystemHash {

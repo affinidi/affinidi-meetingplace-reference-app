@@ -7,6 +7,7 @@ import '../../../application/services/mediator_service/mediator_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/mediator/mediator.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/contacts_screen_filter_extensions.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'contacts_screen_filter.dart';
@@ -120,7 +121,7 @@ class ContactsScreenController extends _$ContactsScreenController {
       final card = contact.card;
       final displayName = contact.displayName?.toLowerCase() ?? '';
       final firstName = card.firstName.toLowerCase();
-      final lastName = (card.lastName ?? '').toLowerCase();
+      final lastName = card.lastNameOrEmpty.toLowerCase();
       return firstName.contains(lowerQuery) ||
           lastName.contains(lowerQuery) ||
           displayName.contains(lowerQuery);

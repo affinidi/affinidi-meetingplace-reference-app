@@ -19,8 +19,8 @@ class $IdentitiesTableTable extends IdentitiesTable
   static const VerificationMeta _didMeta = const VerificationMeta('did');
   @override
   late final GeneratedColumn<String> did = GeneratedColumn<String>(
-      'did', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'did', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _displayNameMeta =
       const VerificationMeta('displayName');
   @override
@@ -100,6 +100,8 @@ class $IdentitiesTableTable extends IdentitiesTable
     if (data.containsKey('did')) {
       context.handle(
           _didMeta, did.isAcceptableOrUnknown(data['did']!, _didMeta));
+    } else if (isInserting) {
+      context.missing(_didMeta);
     }
     if (data.containsKey('display_name')) {
       context.handle(
@@ -153,7 +155,7 @@ class $IdentitiesTableTable extends IdentitiesTable
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       did: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}did']),
+          .read(DriftSqlType.string, data['${effectivePrefix}did'])!,
       displayName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}display_name'])!,
       firstName: attachedDatabase.typeMapping
@@ -181,7 +183,7 @@ class $IdentitiesTableTable extends IdentitiesTable
 
 class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   final String id;
-  final String? did;
+  final String did;
   final String displayName;
   final String firstName;
   final String? lastName;
@@ -192,7 +194,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   final bool isPrimary;
   const IdentityRecord(
       {required this.id,
-      this.did,
+      required this.did,
       required this.displayName,
       required this.firstName,
       this.lastName,
@@ -205,9 +207,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    if (!nullToAbsent || did != null) {
-      map['did'] = Variable<String>(did);
-    }
+    map['did'] = Variable<String>(did);
     map['display_name'] = Variable<String>(displayName);
     map['first_name'] = Variable<String>(firstName);
     if (!nullToAbsent || lastName != null) {
@@ -232,7 +232,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   IdentitiesTableCompanion toCompanion(bool nullToAbsent) {
     return IdentitiesTableCompanion(
       id: Value(id),
-      did: did == null && nullToAbsent ? const Value.absent() : Value(did),
+      did: Value(did),
       displayName: Value(displayName),
       firstName: Value(firstName),
       lastName: lastName == null && nullToAbsent
@@ -257,7 +257,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return IdentityRecord(
       id: serializer.fromJson<String>(json['id']),
-      did: serializer.fromJson<String?>(json['did']),
+      did: serializer.fromJson<String>(json['did']),
       displayName: serializer.fromJson<String>(json['displayName']),
       firstName: serializer.fromJson<String>(json['firstName']),
       lastName: serializer.fromJson<String?>(json['lastName']),
@@ -273,7 +273,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'did': serializer.toJson<String?>(did),
+      'did': serializer.toJson<String>(did),
       'displayName': serializer.toJson<String>(displayName),
       'firstName': serializer.toJson<String>(firstName),
       'lastName': serializer.toJson<String?>(lastName),
@@ -287,7 +287,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
 
   IdentityRecord copyWith(
           {String? id,
-          Value<String?> did = const Value.absent(),
+          String? did,
           String? displayName,
           String? firstName,
           Value<String?> lastName = const Value.absent(),
@@ -298,7 +298,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           bool? isPrimary}) =>
       IdentityRecord(
         id: id ?? this.id,
-        did: did.present ? did.value : this.did,
+        did: did ?? this.did,
         displayName: displayName ?? this.displayName,
         firstName: firstName ?? this.firstName,
         lastName: lastName.present ? lastName.value : this.lastName,
@@ -363,7 +363,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
 
 class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
   final Value<String> id;
-  final Value<String?> did;
+  final Value<String> did;
   final Value<String> displayName;
   final Value<String> firstName;
   final Value<String?> lastName;
@@ -388,7 +388,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
   });
   IdentitiesTableCompanion.insert({
     this.id = const Value.absent(),
-    this.did = const Value.absent(),
+    required String did,
     required String displayName,
     required String firstName,
     this.lastName = const Value.absent(),
@@ -398,7 +398,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     this.cardColor = const Value.absent(),
     this.isPrimary = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : displayName = Value(displayName),
+  })  : did = Value(did),
+        displayName = Value(displayName),
         firstName = Value(firstName);
   static Insertable<IdentityRecord> custom({
     Expression<String>? id,
@@ -430,7 +431,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
 
   IdentitiesTableCompanion copyWith(
       {Value<String>? id,
-      Value<String?>? did,
+      Value<String>? did,
       Value<String>? displayName,
       Value<String>? firstName,
       Value<String?>? lastName,
@@ -528,7 +529,7 @@ abstract class _$IdentitiesDatabase extends GeneratedDatabase {
 typedef $$IdentitiesTableTableCreateCompanionBuilder = IdentitiesTableCompanion
     Function({
   Value<String> id,
-  Value<String?> did,
+  required String did,
   required String displayName,
   required String firstName,
   Value<String?> lastName,
@@ -542,7 +543,7 @@ typedef $$IdentitiesTableTableCreateCompanionBuilder = IdentitiesTableCompanion
 typedef $$IdentitiesTableTableUpdateCompanionBuilder = IdentitiesTableCompanion
     Function({
   Value<String> id,
-  Value<String?> did,
+  Value<String> did,
   Value<String> displayName,
   Value<String> firstName,
   Value<String?> lastName,
@@ -703,7 +704,7 @@ class $$IdentitiesTableTableTableManager extends RootTableManager<
               $$IdentitiesTableTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<String?> did = const Value.absent(),
+            Value<String> did = const Value.absent(),
             Value<String> displayName = const Value.absent(),
             Value<String> firstName = const Value.absent(),
             Value<String?> lastName = const Value.absent(),
@@ -729,7 +730,7 @@ class $$IdentitiesTableTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             Value<String> id = const Value.absent(),
-            Value<String?> did = const Value.absent(),
+            required String did,
             required String displayName,
             required String firstName,
             Value<String?> lastName = const Value.absent(),

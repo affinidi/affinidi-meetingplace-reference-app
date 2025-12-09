@@ -107,6 +107,10 @@ class ContactsService extends _$ContactsService {
     final existingContact =
         state.getContactByChannelDid(channel.otherPartyPermanentChannelDid!);
     if (existingContact == null) {
+      _logger.info(
+        'Contact does not exist - creating new contact',
+        name: _logKey,
+      );
       final contact =
           await _makeContactFromChannel(channel, ContactStatus.active);
       if (contact == null) {
@@ -159,18 +163,7 @@ class ContactsService extends _$ContactsService {
     if (sourceCard == null) return null;
 
     final displayName = await _getGroupOfferNameFromChannel(channel);
-    final domainCard = ContactCard(
-      id: const Uuid().v4(),
-      firstName: sourceCard.firstName,
-      displayName: sourceCard.fullName,
-      lastName: sourceCard.lastName.isEmpty ? null : sourceCard.lastName,
-      email: sourceCard.email.isEmpty ? null : sourceCard.email,
-      mobile: sourceCard.mobile.isEmpty ? null : sourceCard.mobile,
-      profilePic: sourceCard.profilePic.isEmpty ? null : sourceCard.profilePic,
-      cardColor: sourceCard.meetingplaceIdentityCardColor.isEmpty
-          ? null
-          : sourceCard.meetingplaceIdentityCardColor,
-    );
+    final domainCard = ContactCardUtils.fromSdkContactCard(sourceCard);
 
     return Contact(
       id: const Uuid().v4(),

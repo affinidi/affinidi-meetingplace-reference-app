@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    hide ContactCardType;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/identity/identity.dart';
@@ -258,8 +259,8 @@ class ConnectionsService extends _$ConnectionsService {
     await sdk.acceptOffer(
       connectionOffer: connectionOffer,
       contactCard: identity.card.toSdkContactCard(
-        did: identity.did ?? '',
-        type: 'human',
+        did: identity.did,
+        type: ContactCardType.human.value,
       ),
       did: identity.did,
       externalRef: identity.id,
@@ -336,8 +337,8 @@ class ConnectionsService extends _$ConnectionsService {
       final result = await sdk.publishOffer(
         offerName: data.headline,
         contactCard: identity.card.toSdkContactCard(
-          did: identity.did ?? '',
-          type: 'human',
+          did: identity.did,
+          type: ContactCardType.human.value,
         ),
         type: isGroupOffer
             ? SDKConnectionOfferType.groupInvitation

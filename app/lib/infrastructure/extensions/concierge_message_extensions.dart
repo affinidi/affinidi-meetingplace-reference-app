@@ -1,4 +1,5 @@
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import '../../domain/models/contact_card/contact_card.dart';
 
 import 'contact_card_extensions.dart';
@@ -18,40 +19,12 @@ extension ConciergeMessageExtensions on ConciergeMessage {
     final contactInfo = data['contactInfo'];
     if (contactInfo is! Map<String, dynamic>) return null;
 
-    final firstName = ContactCardUtils.getPathValue(
-      contactInfo,
-      ContactCardPaths.firstName.paths,
-    );
-    final lastName = ContactCardUtils.getPathValue(
-      contactInfo,
-      ContactCardPaths.lastName.paths,
-    );
-    final email = ContactCardUtils.getPathValue(
-      contactInfo,
-      ContactCardPaths.email.paths,
-    );
-    final mobile = ContactCardUtils.getPathValue(
-      contactInfo,
-      ContactCardPaths.mobile.paths,
-    );
-    final profilePic = ContactCardUtils.getPathValue(
-      contactInfo,
-      ContactCardPaths.profilePic.paths,
-    );
-    final color = ContactCardUtils.getPathValue(
-      contactInfo,
-      ContactCardPaths.meetingplaceIdentityCardColor.paths,
+    final sdkCard = sdk.ContactCard(
+      did: '',
+      type: '',
+      contactInfo: contactInfo,
     );
 
-    return ContactCard(
-      id: 'concierge-msg-card',
-      firstName: firstName,
-      displayName: [firstName, lastName].where((s) => s.isNotEmpty).join(' '),
-      lastName: lastName.isEmpty ? null : lastName,
-      email: email.isEmpty ? null : email,
-      mobile: mobile.isEmpty ? null : mobile,
-      profilePic: profilePic.isEmpty ? null : profilePic,
-      cardColor: color.isEmpty ? null : color,
-    );
+    return ContactCardUtils.fromSdkContactCard(sdkCard);
   }
 }

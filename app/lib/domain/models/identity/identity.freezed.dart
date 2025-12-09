@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Identity {
   String get id;
-  String? get did;
+  String get did;
   ContactCard get card;
   bool get isPrimary;
 
@@ -52,7 +52,7 @@ abstract mixin class $IdentityCopyWith<$Res> {
   factory $IdentityCopyWith(Identity value, $Res Function(Identity) _then) =
       _$IdentityCopyWithImpl;
   @useResult
-  $Res call({String id, String? did, ContactCard card, bool isPrimary});
+  $Res call({String id, String did, ContactCard card, bool isPrimary});
 
   $ContactCardCopyWith<$Res> get card;
 }
@@ -70,7 +70,7 @@ class _$IdentityCopyWithImpl<$Res> implements $IdentityCopyWith<$Res> {
   @override
   $Res call({
     Object? id = null,
-    Object? did = freezed,
+    Object? did = null,
     Object? card = null,
     Object? isPrimary = null,
   }) {
@@ -79,10 +79,10 @@ class _$IdentityCopyWithImpl<$Res> implements $IdentityCopyWith<$Res> {
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      did: freezed == did
+      did: null == did
           ? _self.did
           : did // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       card: null == card
           ? _self.card
           : card // ignore: cast_nullable_to_non_nullable
@@ -198,7 +198,7 @@ extension IdentityPatterns on Identity {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String id, String? did, ContactCard card, bool isPrimary)?
+    TResult Function(String id, String did, ContactCard card, bool isPrimary)?
         $default, {
     required TResult orElse(),
   }) {
@@ -226,7 +226,7 @@ extension IdentityPatterns on Identity {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String id, String? did, ContactCard card, bool isPrimary)
+    TResult Function(String id, String did, ContactCard card, bool isPrimary)
         $default,
   ) {
     final _that = this;
@@ -252,7 +252,7 @@ extension IdentityPatterns on Identity {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String id, String? did, ContactCard card, bool isPrimary)?
+    TResult? Function(String id, String did, ContactCard card, bool isPrimary)?
         $default,
   ) {
     final _that = this;
@@ -269,12 +269,15 @@ extension IdentityPatterns on Identity {
 
 class _Identity implements Identity {
   const _Identity(
-      {required this.id, this.did, required this.card, this.isPrimary = false});
+      {required this.id,
+      required this.did,
+      required this.card,
+      this.isPrimary = false});
 
   @override
   final String id;
   @override
-  final String? did;
+  final String did;
   @override
   final ContactCard card;
   @override
@@ -317,7 +320,7 @@ abstract mixin class _$IdentityCopyWith<$Res>
       __$IdentityCopyWithImpl;
   @override
   @useResult
-  $Res call({String id, String? did, ContactCard card, bool isPrimary});
+  $Res call({String id, String did, ContactCard card, bool isPrimary});
 
   @override
   $ContactCardCopyWith<$Res> get card;
@@ -336,7 +339,7 @@ class __$IdentityCopyWithImpl<$Res> implements _$IdentityCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   $Res call({
     Object? id = null,
-    Object? did = freezed,
+    Object? did = null,
     Object? card = null,
     Object? isPrimary = null,
   }) {
@@ -345,10 +348,10 @@ class __$IdentityCopyWithImpl<$Res> implements _$IdentityCopyWith<$Res> {
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      did: freezed == did
+      did: null == did
           ? _self.did
           : did // ignore: cast_nullable_to_non_nullable
-              as String?,
+              as String,
       card: null == card
           ? _self.card
           : card // ignore: cast_nullable_to_non_nullable

@@ -6,14 +6,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
-import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
-import '../../../domain/models/contact_card/contact_card.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_status.dart';
@@ -224,21 +222,8 @@ class ChatScreenController extends _$ChatScreenController {
     }
     final srcCard = channel.otherPartyCard;
     state = state.copyWith(
-      otherPartyCard: srcCard == null
-          ? null
-          : ContactCard(
-              id: const Uuid().v4(),
-              firstName: srcCard.firstName,
-              displayName: srcCard.fullName,
-              lastName: srcCard.lastName.isEmpty ? null : srcCard.lastName,
-              email: srcCard.email.isEmpty ? null : srcCard.email,
-              mobile: srcCard.mobile.isEmpty ? null : srcCard.mobile,
-              profilePic:
-                  srcCard.profilePic.isEmpty ? null : srcCard.profilePic,
-              cardColor: srcCard.meetingplaceIdentityCardColor.isEmpty
-                  ? null
-                  : srcCard.meetingplaceIdentityCardColor,
-            ),
+      otherPartyCard:
+          srcCard == null ? null : ContactCardUtils.fromSdkContactCard(srcCard),
       notificationToken: channel.otherPartyNotificationToken,
     );
 
@@ -300,7 +285,7 @@ class ChatScreenController extends _$ChatScreenController {
       messages: messages.sortedBy((item) => item.dateCreated).reversed.toList(),
     );
 
-    if (channel.type == ChannelType.group) {
+    if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
       final connection = await coreSdk.getConnectionOffer(channel.offerLink);
       state = state.copyWith(group: group, offerName: connection?.offerName);
@@ -490,42 +475,12 @@ class ChatScreenController extends _$ChatScreenController {
       'Updating Contact Card',
       name: _logKey,
     );
-    final domainCard = ContactCard(
-      id: const Uuid().v4(),
-      firstName: ContactCardUtils.getPathValue(
-          cardValues, ContactCardPaths.firstName.paths),
-      displayName: ContactCardUtils.getFullName(cardValues),
-      lastName: ContactCardUtils.getPathValue(
-                  cardValues, ContactCardPaths.lastName.paths)
-              .isEmpty
-          ? null
-          : ContactCardUtils.getPathValue(
-              cardValues, ContactCardPaths.lastName.paths),
-      email: ContactCardUtils.getPathValue(
-                  cardValues, ContactCardPaths.email.paths)
-              .isEmpty
-          ? null
-          : ContactCardUtils.getPathValue(
-              cardValues, ContactCardPaths.email.paths),
-      mobile: ContactCardUtils.getPathValue(
-                  cardValues, ContactCardPaths.mobile.paths)
-              .isEmpty
-          ? null
-          : ContactCardUtils.getPathValue(
-              cardValues, ContactCardPaths.mobile.paths),
-      profilePic: ContactCardUtils.getPathValue(
-                  cardValues, ContactCardPaths.profilePic.paths)
-              .isEmpty
-          ? null
-          : ContactCardUtils.getPathValue(
-              cardValues, ContactCardPaths.profilePic.paths),
-      cardColor: ContactCardUtils.getPathValue(cardValues,
-                  ContactCardPaths.meetingplaceIdentityCardColor.paths)
-              .isEmpty
-          ? null
-          : ContactCardUtils.getPathValue(
-              cardValues, ContactCardPaths.meetingplaceIdentityCardColor.paths),
+    final sdkCard = sdk.ContactCard(
+      did: '',
+      type: '',
+      contactInfo: cardValues,
     );
+    final domainCard = ContactCardUtils.fromSdkContactCard(sdkCard);
     state = state.copyWith(otherPartyCard: domainCard);
     ref
         .read(contactsServiceProvider.notifier)
@@ -677,7 +632,7 @@ class ChatScreenController extends _$ChatScreenController {
     if (contact == null) return;
 
     final moreMembersPendingApproval = state.group?.members
-            .any((m) => m.status == GroupMemberStatus.pendingApproval) ??
+            .any((m) => m.status == sdk.GroupMemberStatus.pendingApproval) ??
         false;
     await ref.read(contactsServiceProvider.notifier).updateContact(
           contact.copyWith(

@@ -54,6 +54,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     return Identity(
       id: uuid.v4(),
+      did: '',
       card: newCard,
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    hide ContactCardType;
 
 import '../../application/services/identities_service/identities_service.dart';
 import '../configuration/environment.dart';
@@ -38,7 +39,7 @@ final chatSdkProvider =
     final identityCard = identity?.card;
     final sdkContactCard = identityCard?.toSdkContactCard(
       did: identity?.did ?? channel.permanentChannelDid ?? '',
-      type: 'contactCard',
+      type: ContactCardType.contactCard.value,
     );
 
     try {
