@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
+import '../../../domain/models/contact_card/contact_card.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/repositories/identities_repository.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
@@ -35,7 +37,7 @@ class IdentitiesService extends _$IdentitiesService {
 
   Future<void>? initializing;
   Future<void> ensureInitialized() async {
-    initializing ??= _fetchIdentities();
+    initializing ??= _initialize();
     await initializing;
   }
 
@@ -141,6 +143,29 @@ class IdentitiesService extends _$IdentitiesService {
     state = state.copyWith(
       identities: identities,
     );
+  }
+
+  /// Perform initial load and create a primary identity if none exists.
+  Future<void> _initialize() async {
+    await _fetchIdentities();
+
+    // Auto-create a minimal primary identity on first app launch.
+    if (state.identities.isEmpty) {
+      final id = const Uuid().v4();
+      final emptyCard = ContactCard(
+        id: id,
+        firstName: '',
+        displayName: '',
+      );
+
+      final identity = Identity(
+        id: id,
+        did: '',
+        card: emptyCard,
+      );
+
+      await addIdentity(identity);
+    }
   }
 
   /// Ensure the identities repository is initialized and return it.
