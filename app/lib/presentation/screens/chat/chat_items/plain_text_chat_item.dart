@@ -61,7 +61,29 @@ class _PlainTextChatItem extends ConsumerWidget {
     return GestureDetector(
       onLongPress: selectReaction,
       onTap: () async {
-        await copyToClipboard();
+        // AL ADDED - Matchmaker
+        // If this is a matchmaker item, which we can know if we have an attachment with
+        // a specific id, then we handle it differently
+        final matchmakerAttachment = attachments.firstWhereOrNull(
+          (attachment) => attachment.id == 'matchmaker_passphrase',
+        );
+
+        if (matchmakerAttachment != null) {
+          ///
+          /// Yep, we have a matchmaker
+          ///
+          if (!context.mounted) return;
+          await controller.handleMatchmakerInvitationTap(
+            context,
+            utf8.decode(
+              base64Decode(
+                matchmakerAttachment.data?.base64 ?? '',
+              ),
+            ),
+          );
+        } else {
+          await copyToClipboard();
+        }
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,

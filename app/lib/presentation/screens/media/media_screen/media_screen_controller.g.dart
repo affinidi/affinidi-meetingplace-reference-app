@@ -7,7 +7,7 @@ part of 'media_screen_controller.dart';
 // **************************************************************************
 
 String _$mediaScreenControllerHash() =>
-    r'baae82cae3ebf315cd56456164aefb94c338ecf0';
+    r'a382f32f8ddab0e42be7d38d73b3a6f2a9972ee0';
 
 /// Copied from Dart SDK
 class _SystemHash {

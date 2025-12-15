@@ -1,12 +1,22 @@
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../application/services/connections_service/connections_service.dart';
+import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/mediator_service/mediator_service.dart';
+import '../../../application/services/settings_service/settings_service.dart';
+import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/mediator/mediator.dart';
 import '../../../infrastructure/extensions/connections_screen_filter_extensions.dart';
+import '../../../infrastructure/extensions/vcard_extensions.dart';
+import '../../../navigation/routes/dashboard_routes.dart';
+import '../chat/chat_screen_controller.dart';
+import '../offer/publish_offer_screen/publish_offer_form_data.dart';
 import 'connections_screen_filter.dart';
 import 'connections_screen_state.dart';
 
@@ -85,6 +95,87 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
 
   void applyFilter(ConnectionsScreenFilter filter) {
     state = state.copyWith(filter: filter);
+  }
+
+  /// Starts the match maker flow by publishing an offer and navigating to chat.
+  Future<void> onStartMatchmaker(BuildContext context) async {
+    if (!context.mounted) return;
+
+    // Get the default identity
+    final identity =
+        ref.read(identitiesServiceProvider.currentIdentityOrPrimary);
+    if (identity == null) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No identity found')),
+      );
+      return;
+    }
+
+    // Get the selected mediator DID from settings
+    final selectedMediatorDid =
+        ref.read(settingsServiceProvider).selectedMediatorDid;
+
+    // Build PublishOfferFormData
+    final formData = PublishOfferFormData(
+      headline: 'Match Maker Connection Invitation',
+      description: 'Automated match making request',
+      isGroupOffer: false,
+      hasExpiry: false,
+      hasMaxUsages: false,
+      randomPhraseEnabled: false,
+      isSearchable: false,
+      selectedMediatorDid: selectedMediatorDid,
+    );
+
+    try {
+      final contacts = ref.read(contactsServiceProvider).contacts;
+      final matchingContact = contacts.firstWhereOrNull(
+        (contact) =>
+            contact.status == ContactStatus.active &&
+            contact.vCard.fullName == 'Affinidi Deepseek',
+      );
+
+      if (matchingContact == null) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Matchmaker contact not found')),
+        );
+        return;
+      }
+
+      // Publish the offer
+      ConnectionOffer? connectionOffer =
+          await ref.read(connectionsServiceProvider.notifier).publishOffer(
+                formData,
+                identity: identity,
+              );
+
+      // Navigate to chat with contactId - 'event concierge'
+      if (!context.mounted || connectionOffer == null) return;
+      final container = ProviderScope.containerOf(context);
+      final contactId = matchingContact.id;
+      final provider = chatScreenControllerProvider(contactId);
+      final element = container.readProviderElement(provider);
+
+      final link = (element as AutoDisposeNotifierProviderElement).keepAlive();
+
+      await ref.read(provider.notifier).initialize();
+
+      // Send the message to the chat
+      final chatController = ref.read(provider.notifier);
+      chatController.messageTextController.text =
+          '@Matchmaker - can you make some recommendations for people I should connect with? I\'ve created an invitation they can use to find me - "${connectionOffer.mnemonic}"';
+      await chatController.sendMessage();
+
+      await ChatRoute(contactId: contactId).push<void>(context);
+      link.close();
+    } catch (error) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $error')),
+      );
+    }
   }
 
   /// Updates the connection mediators map by finding the nearest mediator

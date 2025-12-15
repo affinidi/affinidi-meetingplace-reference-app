@@ -7,7 +7,7 @@ part of 'connections_screen_controller.dart';
 // **************************************************************************
 
 String _$connectionsScreenControllerHash() =>
-    r'c8fd0a49c97669a8368862676d20821d245745d4';
+    r'13752e3d0516fdf95132be239e14cf065c42a787';
 
 /// See also [ConnectionsScreenController].
 @ProviderFor(ConnectionsScreenController)

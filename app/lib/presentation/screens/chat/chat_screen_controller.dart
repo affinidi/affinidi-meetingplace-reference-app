@@ -28,6 +28,7 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
+import '../../../navigation/routes/dashboard_routes.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
@@ -950,6 +951,15 @@ class ChatScreenController extends _$ChatScreenController {
       'Chat session started',
       name: _logKey,
     );
+  }
+
+  Future<void> handleMatchmakerInvitationTap(
+      BuildContext context, String passphrase) async {
+    if (!context.mounted) return;
+
+    FindOfferRoute(
+      mnemonic: passphrase,
+    ).go(context);
   }
 }
 

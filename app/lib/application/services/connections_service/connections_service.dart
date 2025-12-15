@@ -313,7 +313,7 @@ class ConnectionsService extends _$ConnectionsService {
   /// Returns:
   /// - `Future<void>` completes when publishing, refresh, and any group
   ///   announcement finish.
-  Future<void> publishOffer(
+  Future<ConnectionOffer?> publishOffer(
     PublishOfferFormData data, {
     required Identity identity,
   }) async {
@@ -351,6 +351,8 @@ class ConnectionsService extends _$ConnectionsService {
       if (isGroupOffer) {
         await _announceGroupChannelIsReady(result);
       }
+
+      return result.connectionOffer;
     } catch (error, stackTrace) {
       _logger.error(
         'Error submitting offer',

@@ -23,6 +23,28 @@ class _ActionsBar extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        InkWell(
+          onTap: hasIdentity
+              ? () async {
+                  if (!context.mounted) return;
+                  final shouldStart = await MatchMakerConcierge.show(context);
+                  if (shouldStart == true) {
+                    if (!context.mounted) return;
+                    await controller.onStartMatchmaker(context);
+                  }
+                }
+              : null,
+          borderRadius: BorderRadius.circular(16),
+          child: Chip(
+            label: const Text('Match maker'),
+            backgroundColor: context.colorScheme.primary,
+            labelStyle: TextStyle(
+              color: Colors.white,
+              fontFamily: context.theme.textTheme.bodyMedium?.fontFamily,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
         if (isEditMode)
           IconButton(
             icon: const Icon(Icons.cancel),

@@ -20,13 +20,17 @@ class FindOfferScreen extends HookConsumerWidget {
   const FindOfferScreen({
     super.key,
     this.identityId,
+    this.mnemonic,
   });
 
   final String? identityId;
+  final String? mnemonic;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mnemonicWordTextController = useTextEditingController();
+    final mnemonicWordTextController = useTextEditingController(
+      text: mnemonic ?? '',
+    );
     final provider = findOfferScreenControllerProvider;
     final controller = ref.read(provider.notifier);
     final cacheManager = ref.read(cacheManagerProvider);

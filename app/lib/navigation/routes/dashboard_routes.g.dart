@@ -230,6 +230,7 @@ mixin _$ConnectionsRoute on GoRouteData {
 mixin _$FindOfferRoute on GoRouteData {
   static FindOfferRoute _fromState(GoRouterState state) => FindOfferRoute(
         identityId: state.uri.queryParameters['identity-id'],
+        mnemonic: state.uri.queryParameters['mnemonic'],
       );
 
   FindOfferRoute get _self => this as FindOfferRoute;
@@ -239,6 +240,7 @@ mixin _$FindOfferRoute on GoRouteData {
         '/connections/find-offer',
         queryParams: {
           if (_self.identityId != null) 'identity-id': _self.identityId,
+          if (_self.mnemonic != null) 'mnemonic': _self.mnemonic,
         },
       );
 

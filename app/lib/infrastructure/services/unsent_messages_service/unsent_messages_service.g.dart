@@ -7,12 +7,13 @@ part of 'unsent_messages_service.dart';
 // **************************************************************************
 
 String _$unsentMessagesServiceHash() =>
-    r'fc6187b96a65ea4bb21bbb52dcf403559354f0d1';
+    r'de387ec0e3196eed7254f20977b9bfe6135e82eb';
 
 /// Service for managing unsent messages per contact.
 ///
-/// This service persists draft messages to SharedPreferences, allowing them
-/// to survive app restarts while keeping them separate from the main database.
+/// This service persists draft messages to secure storage (encrypted),
+/// allowing them to survive app restarts while keeping them secure and
+/// separate from the main database.
 ///
 /// Copied from [UnsentMessagesService].
 @ProviderFor(UnsentMessagesService)
