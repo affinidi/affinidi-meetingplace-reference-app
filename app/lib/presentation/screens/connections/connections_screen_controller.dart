@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../application/services/connections_service/connections_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
@@ -11,6 +10,7 @@ import '../../../application/services/identities_service/identities_service.dart
 import '../../../application/services/mediator_service/mediator_service.dart';
 import '../../../application/services/settings_service/settings_service.dart';
 import '../../../domain/models/contacts/contact_status.dart';
+import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/mediator/mediator.dart';
 import '../../../infrastructure/extensions/connections_screen_filter_extensions.dart';
 import '../../../infrastructure/extensions/vcard_extensions.dart';
@@ -98,19 +98,9 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
   }
 
   /// Starts the match maker flow by publishing an offer and navigating to chat.
-  Future<void> onStartMatchmaker(BuildContext context) async {
+  Future<void> onStartMatchmaker(
+      BuildContext context, Identity identity) async {
     if (!context.mounted) return;
-
-    // Get the default identity
-    final identity =
-        ref.read(identitiesServiceProvider.currentIdentityOrPrimary);
-    if (identity == null) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No identity found')),
-      );
-      return;
-    }
 
     // Get the selected mediator DID from settings
     final selectedMediatorDid =
@@ -165,7 +155,7 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
       // Send the message to the chat
       final chatController = ref.read(provider.notifier);
       chatController.messageTextController.text =
-          '@Matchmaker - can you make some recommendations for people I should connect with? I\'ve created an invitation they can use to find me - "${connectionOffer.mnemonic}"';
+          '@Matchmaker - can you make some recommendations for people I should connect with? I\'ve created an invitation they can use to find me using my persona "${identity.card.displayName}" - "${connectionOffer.mnemonic}"';
       await chatController.sendMessage();
 
       await ChatRoute(contactId: contactId).push<void>(context);
