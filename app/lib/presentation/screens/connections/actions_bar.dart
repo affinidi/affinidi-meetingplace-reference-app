@@ -27,10 +27,12 @@ class _ActionsBar extends ConsumerWidget {
           onTap: hasIdentity
               ? () async {
                   if (!context.mounted) return;
-                  final selectedIdentity = await MatchMakerConcierge.show(context);
+                  final selectedIdentity =
+                      await MatchMakerConcierge.show(context);
                   if (selectedIdentity != null) {
                     if (!context.mounted) return;
-                    await controller.onStartMatchmaker(context, selectedIdentity);
+                    await controller.onStartMatchmaker(
+                        context, selectedIdentity);
                   }
                 }
               : null,

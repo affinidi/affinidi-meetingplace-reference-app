@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +15,7 @@ import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/mediator/mediator.dart';
 import '../../../infrastructure/extensions/connections_screen_filter_extensions.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/vcard_extensions.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../chat/chat_screen_controller.dart';
@@ -154,9 +157,22 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
 
       // Send the message to the chat
       final chatController = ref.read(provider.notifier);
-      chatController.messageTextController.text =
-          '@Matchmaker - can you make some recommendations for people I should connect with? I\'ve created an invitation they can use to find me using my persona "${identity.card.displayName}" - "${connectionOffer.mnemonic}"';
-      await chatController.sendMessage();
+      await chatController.sendMessageDirect(
+          '@Matchmaker - can you make some recommendations for people I should connect with? I will use my persona "${identity.card.displayName}" to connect with them.',
+          attachments: [
+            Attachment(
+              id: 'matchmaker_passphrase',
+              data: AttachmentData(
+                base64: base64Encode(utf8.encode(connectionOffer.mnemonic)),
+              ),
+            ),
+            Attachment(
+              id: 'matchmaker_identity',
+              data: AttachmentData(
+                base64: identity.card.toVCard().toBase64(),
+              ),
+            ),
+          ]);
 
       await ChatRoute(contactId: contactId).push<void>(context);
       link.close();

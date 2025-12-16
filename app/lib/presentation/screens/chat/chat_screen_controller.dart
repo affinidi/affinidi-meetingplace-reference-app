@@ -650,6 +650,16 @@ class ChatScreenController extends _$ChatScreenController {
     messageTextController.text = '';
   }
 
+  // ADDED AL - For matchmaker
+  Future<void> sendMessageDirect(String message,
+      {List<Attachment>? attachments}) async {
+    final trimmedMessage = message;
+    if (trimmedMessage.isEmpty) return;
+
+    unawaited(
+        _chatSDK?.sendTextMessage(trimmedMessage, attachments: attachments));
+  }
+
   Future<void> sendChatActivity() async {
     _sendChatActivityTimedAction ??= TimedAction(
       onRun: (args) async {
