@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../../infrastructure/providers/qr_code_view_factory_provider.dart';
 import '../../../widgets/async_loaders/inline_async_loading_status.dart';
-import '../../../widgets/qr/qr_code_view.dart';
 import 'oob_share_qr_controller.dart';
 
 class OOBShareQrScreen extends HookConsumerWidget {
@@ -16,12 +15,7 @@ class OOBShareQrScreen extends HookConsumerWidget {
     final provider = oobShareQrControllerProvider;
     final controller = ref.read(provider.notifier);
     final qrData = ref.watch(provider.select((state) => state.qrData));
-
-    // Create a reference to the QR code view for exporting
-    final qrCodeView = useMemoized(
-      () => qrData != null ? QrCodeView(data: qrData) : null,
-      [qrData],
-    );
+    final qrCodeViewFactory = ref.read(qrCodeViewFactoryProvider);
 
     final qrScannerTheme = context.qrScannerTheme;
     final colorScheme = context.colorScheme;
@@ -39,21 +33,12 @@ class OOBShareQrScreen extends HookConsumerWidget {
     }
 
     void sendInvitation() async {
-      if (!context.mounted || qrCodeView == null) return;
+      if (!context.mounted || qrData == null) return;
 
-      final box = context.findRenderObject() as RenderBox?;
-      final xFile = await qrCodeView.exportToXFile();
-
-      final params = ShareParams(
-        files: [xFile],
-        downloadFallbackEnabled: true,
-        mailToFallbackEnabled: true,
-        fileNameOverrides: [l10n.meetingPlaceInvitationTitle],
+      await controller.sendInvitation(
+        context: context,
         title: l10n.meetingPlaceInvitationTitle,
-        sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
       );
-
-      await SharePlus.instance.share(params);
     }
 
     useEffect(
@@ -103,7 +88,7 @@ class OOBShareQrScreen extends HookConsumerWidget {
                           ),
                         ),
                       ),
-                      if (qrCodeView != null) qrCodeView,
+                      if (qrData != null) qrCodeViewFactory.create(qrData),
                       Column(
                         children: [
                           Padding(

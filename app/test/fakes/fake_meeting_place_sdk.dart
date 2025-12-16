@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_core/src/sdk/results/accept_oob_flow_result.dart';
+import 'package:meeting_place_core/src/sdk/results/create_oob_flow_result.dart';
+import 'package:meeting_place_core/src/service/oob/oob_stream.dart';
 
 import 'fake_publish_offer_result.dart';
 
@@ -9,6 +12,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     bool shouldFailToRegisterPushToken = false,
     PublishOfferResult? offerToReturn,
     Exception? publishOfferException,
+    Exception? createOobFlowException,
     bool isPhraseAvailable = true,
     Map<String, Channel>? channels,
     this.offerToFind,
@@ -16,12 +20,14 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   })  : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
         _offerToReturn = offerToReturn,
         _publishOfferException = publishOfferException,
+        _createOobFlowException = createOobFlowException,
         _isPhraseAvailable = isPhraseAvailable,
         _channels = channels ?? {};
 
   final bool _shouldFailToRegisterPushToken;
   final PublishOfferResult? _offerToReturn;
   final Exception? _publishOfferException;
+  final Exception? _createOobFlowException;
   final bool _isPhraseAvailable;
   final Map<String, Channel> _channels;
 
@@ -166,6 +172,117 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     return null;
   }
 
+  StreamController<OobStreamData>? _createOobStreamController;
+  StreamController<OobStreamData>? _acceptOobStreamController;
+
+  final List<Map<String, dynamic>> _createOobFlowCalls = [];
+  List<Map<String, dynamic>> get createOobFlowCalls => _createOobFlowCalls;
+
+  final List<Map<String, dynamic>> _acceptOobFlowCalls = [];
+  List<Map<String, dynamic>> get acceptOobFlowCalls => _acceptOobFlowCalls;
+
+  /// Simulates a successful OOB connection by emitting channel data
+  /// through the create OOB flow stream
+  void simulateOobConnectionEstablished(Channel channel) {
+    _createOobStreamController?.add(OobStreamData(
+      eventType: EventType.connectionSetup,
+      message: PlainTextMessage.fromJson({
+        'id': 'fake-message-id',
+        'type': 'fake-type',
+        'from': channel.publishOfferDid,
+        'to': [channel.acceptOfferDid],
+      }),
+      channel: channel,
+    ));
+  }
+
+  /// Simulates a successful OOB connection by emitting channel data
+  /// through the accept OOB flow stream
+  void simulateOobAcceptConnectionEstablished(Channel channel) {
+    _acceptOobStreamController?.add(OobStreamData(
+      eventType: EventType.connectionAccepted,
+      message: PlainTextMessage.fromJson({
+        'id': 'fake-message-id',
+        'type': 'fake-type',
+        'from': channel.acceptOfferDid,
+        'to': [channel.publishOfferDid],
+      }),
+      channel: channel,
+    ));
+  }
+
+  @override
+  Future<CreateOobFlowResult> createOobFlow({
+    String? did,
+    required VCard vCard,
+    String? mediatorDid,
+    String? externalRef,
+  }) async {
+    _createOobFlowCalls.add({
+      'did': did,
+      'vCard': vCard,
+      'mediatorDid': mediatorDid,
+      'externalRef': externalRef,
+    });
+
+    if (_createOobFlowException != null) {
+      throw _createOobFlowException;
+    }
+
+    final oobUrl = Uri.parse('https://example.com/oob?_oob=fake-oob-token');
+    _createOobStreamController = StreamController<OobStreamData>.broadcast();
+
+    return _FakeCreateOobFlowResult(
+      oobUrl: oobUrl,
+      streamSubscription: _FakeCoreSDKStreamSubscription(
+        stream: _createOobStreamController!.stream,
+        onDispose: () async {
+          await _createOobStreamController?.close();
+          _createOobStreamController = null;
+        },
+      ),
+    );
+  }
+
+  @override
+  Future<AcceptOobFlowResult> acceptOobFlow(
+    Uri oobUri, {
+    required VCard vCard,
+    String? externalRef,
+  }) async {
+    _acceptOobFlowCalls.add({
+      'oobUri': oobUri,
+      'vCard': vCard,
+      'externalRef': externalRef,
+    });
+
+    _acceptOobStreamController = StreamController<OobStreamData>.broadcast();
+
+    final fakeChannel = Channel(
+      offerLink: 'fake-offer-link',
+      publishOfferDid: 'fake-publish-did',
+      mediatorDid: 'fake-mediator-did',
+      status: ChannelStatus.waitingForApproval,
+      outboundMessageId: 'fake-message-id',
+      acceptOfferDid: 'fake-accept-did',
+      permanentChannelDid: 'fake-permanent-did',
+      type: ChannelType.oob,
+      vCard: vCard,
+      externalRef: externalRef,
+    );
+
+    return _FakeAcceptOobFlowResult(
+      // streamSubscription: _FakeCoreSDKStreamSubscription(
+      //   stream: _acceptOobStreamController!.stream,
+      //   onDispose: () async {
+      //     await _acceptOobStreamController?.close();
+      //     _acceptOobStreamController = null;
+      //   },
+      // ),
+      channel: fakeChannel,
+    );
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
@@ -182,5 +299,75 @@ class _FakeAcceptOfferResult<T extends ConnectionOffer>
   @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
+  }
+}
+
+class _FakeCreateOobFlowResult implements CreateOobFlowResult {
+  _FakeCreateOobFlowResult({
+    required this.oobUrl,
+    required this.streamSubscription,
+  });
+
+  @override
+  final Uri oobUrl;
+
+  @override
+  final CoreSDKStreamSubscription<OobStreamData> streamSubscription;
+}
+
+class _FakeAcceptOobFlowResult implements AcceptOobFlowResult {
+  _FakeAcceptOobFlowResult({
+    required this.channel,
+  });
+
+  @override
+  final Channel channel;
+
+  @override
+  OobStream get streamSubscription => throw UnimplementedError();
+}
+
+class _FakeCoreSDKStreamSubscription<T>
+    implements CoreSDKStreamSubscription<T> {
+  _FakeCoreSDKStreamSubscription({
+    required this.stream,
+    required this.onDispose,
+  });
+
+  @override
+  final Stream<T> stream;
+
+  final Future<void> Function() onDispose;
+
+  bool _isClosed = false;
+
+  @override
+  bool get isClosed => _isClosed;
+
+  @override
+  Future<void> dispose() async {
+    _isClosed = true;
+    await onDispose();
+  }
+
+  @override
+  StreamSubscription<T> listen(
+    void Function(T data) onData, {
+    bool? cancelOnError,
+    void Function()? onDone,
+    Function? onError,
+  }) {
+    return stream.listen(
+      onData,
+      cancelOnError: cancelOnError,
+      onDone: onDone,
+      onError: onError,
+    );
+  }
+
+  @override
+  StreamSubscription<T> timeout(Duration duration, void Function()? onTimeout) {
+    // No-op for fake - just return a no-op subscription
+    return stream.listen((_) {});
   }
 }
