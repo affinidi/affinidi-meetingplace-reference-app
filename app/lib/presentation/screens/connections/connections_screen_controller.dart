@@ -126,7 +126,7 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
       final matchingContact = contacts.firstWhereOrNull(
         (contact) =>
             contact.status == ContactStatus.active &&
-            contact.vCard.fullName == 'Affinidi Deepseek',
+            contact.vCard.fullName == 'Event Agent',
       );
 
       if (matchingContact == null) {
