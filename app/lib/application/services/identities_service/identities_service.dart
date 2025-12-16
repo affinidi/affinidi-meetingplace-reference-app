@@ -37,7 +37,7 @@ class IdentitiesService extends _$IdentitiesService {
 
   Future<void>? initializing;
   Future<void> ensureInitialized() async {
-    initializing ??= _initialize();
+    initializing ??= _fetchIdentities();
     await initializing;
   }
 
@@ -143,29 +143,6 @@ class IdentitiesService extends _$IdentitiesService {
     state = state.copyWith(
       identities: identities,
     );
-  }
-
-  /// Perform initial load and create a primary identity if none exists.
-  Future<void> _initialize() async {
-    await _fetchIdentities();
-
-    // Auto-create a minimal primary identity on first app launch.
-    if (state.identities.isEmpty) {
-      final id = const Uuid().v4();
-      final emptyCard = ContactCard(
-        id: id,
-        firstName: '',
-        displayName: '',
-      );
-
-      final identity = Identity(
-        id: id,
-        did: '',
-        card: emptyCard,
-      );
-
-      await addIdentity(identity);
-    }
   }
 
   /// Ensure the identities repository is initialized and return it.
