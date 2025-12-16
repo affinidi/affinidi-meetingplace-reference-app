@@ -104,6 +104,51 @@ void main() {
               findsOneWidget);
         });
       });
+
+      group('and scanning multiple QR codes in sequence', () {
+        testWidgets(
+            'should dispose previous subscription before accepting new QR code',
+            (tester) async {
+          final fakeSdk = FakeMeetingPlaceSDK(shouldTimeout: true);
+          final firstQrUrl = 'https://example.com/oob?_oob=first-token';
+          final secondQrUrl = 'https://example.com/oob?_oob=second-token';
+
+          await navigateToLocation(
+            tester,
+            location,
+            identities: [testIdentity],
+            meetingPlaceCoreSDK: fakeSdk,
+            mockCameras: _mockCameras,
+          );
+          await tester.pumpAndSettle();
+
+          final qrCodePicker = find.byType(QrCodePicker);
+          expect(qrCodePicker, findsOneWidget);
+
+          final pickerWidget = tester.widget<QrCodePicker>(qrCodePicker);
+
+          // Scan first QR code
+          pickerWidget.onDetectCode!(firstQrUrl);
+          await tester.pumpAndSettle();
+
+          expect(fakeSdk.acceptOobFlowCalls.length, equals(1));
+          expect(fakeSdk.acceptOobFlowCalls.first['offerLink'],
+              equals(firstQrUrl));
+
+          // Scan second QR code
+          pickerWidget.onDetectCode!(secondQrUrl);
+          await tester.pumpAndSettle();
+
+          // Should have called acceptOobFlow twice
+          expect(fakeSdk.acceptOobFlowCalls.length, equals(2));
+          expect(fakeSdk.acceptOobFlowCalls.last['offerLink'],
+              equals(secondQrUrl));
+
+          // Should have disposed the first subscription
+          expect(fakeSdk.acceptOobStreamDisposals.length, equals(1));
+          expect(fakeSdk.acceptOobStreamDisposals.first, equals(firstQrUrl));
+        });
+      });
     });
   });
 }

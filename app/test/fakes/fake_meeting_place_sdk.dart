@@ -187,6 +187,12 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final List<Map<String, dynamic>> _acceptOobFlowCalls = [];
   List<Map<String, dynamic>> get acceptOobFlowCalls => _acceptOobFlowCalls;
 
+  final List<String> _acceptOobStreamDisposals = [];
+  List<String> get acceptOobStreamDisposals => _acceptOobStreamDisposals;
+
+  final List<String> _createOobStreamDisposals = [];
+  List<String> get createOobStreamDisposals => _createOobStreamDisposals;
+
   /// Simulates a successful OOB connection by emitting channel data
   /// through the create OOB flow stream
   void simulateOobConnectionEstablished(Channel channel) {
@@ -250,6 +256,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       streamSubscription: _FakeCoreSDKStreamSubscription(
         stream: _createOobStreamController!.stream,
         onDispose: () async {
+          _createOobStreamDisposals.add(oobUrl.toString());
           await _createOobStreamController?.close();
           _createOobStreamController = null;
         },
@@ -295,6 +302,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       streamSubscription: _FakeOobStream(
         stream: _acceptOobStreamController!.stream,
         onDispose: () async {
+          _acceptOobStreamDisposals.add(oobUri.toString());
           await _acceptOobStreamController?.close();
           _acceptOobStreamController = null;
         },
