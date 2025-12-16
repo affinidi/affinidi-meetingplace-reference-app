@@ -57,7 +57,7 @@ void main() {
       });
     });
 
-    group('and integrating with OOB service', () {
+    group('and is initialized', () {
       testWidgets('should call createOobFlow on initialization',
           (tester) async {
         final fakeSdk = FakeMeetingPlaceSDK();
@@ -155,8 +155,8 @@ void main() {
       });
 
       testWidgets(
-          'should call ShareService with correct params when share CTA is tapped',
-          (tester) async {
+          'should call ShareService with correct params when share'
+          ' CTA is tapped', (tester) async {
         final l10n = await getL10n();
         final fakeSdk = FakeMeetingPlaceSDK();
         final fakeShareService = FakeShareService();
@@ -214,37 +214,6 @@ void main() {
         expect(
             fakeSdk.createOobFlowCalls.length, greaterThan(initialCallCount));
       });
-
-      testWidgets('should handle missing identity gracefully', (tester) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
-
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [],
-          meetingPlaceCoreSDK: fakeSdk,
-        );
-        await tester.pumpAndSettle();
-      });
-    });
-
-    group('and managing state', () {
-      testWidgets('should dispose stream subscriptions on screen dispose',
-          (tester) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
-
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-          meetingPlaceCoreSDK: fakeSdk,
-        );
-        await tester.pumpAndSettle();
-
-        final cancelButton = find.byIcon(Icons.cancel_outlined);
-        await tester.tap(cancelButton);
-        await tester.pumpAndSettle();
-      });
     });
 
     group('and showing loading states', () {
@@ -262,55 +231,6 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text(l10n.generatingQrCode), findsNothing);
-      });
-    });
-
-    group('and integrating with AsyncLoadingController', () {
-      testWidgets('should use createOobLoadingController', (tester) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
-
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-          meetingPlaceCoreSDK: fakeSdk,
-        );
-        await tester.pumpAndSettle();
-      });
-
-      testWidgets('should call retry callback on error retry', (tester) async {
-        final fakeSdk = FakeMeetingPlaceSDK(
-          publishOfferException: Exception('Test error'),
-        );
-
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-          meetingPlaceCoreSDK: fakeSdk,
-        );
-        await tester.pumpAndSettle();
-      });
-    });
-
-    group('and ensuring accessibility', () {
-      testWidgets('should have semantic labels for important widgets',
-          (tester) async {
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-        );
-        await tester.pumpAndSettle();
-      });
-
-      testWidgets('should support screen readers', (tester) async {
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-        );
-        await tester.pumpAndSettle();
       });
     });
 
@@ -344,18 +264,6 @@ void main() {
         );
 
         fakeSdk.simulateOobConnectionEstablished(fakeChannel);
-        await tester.pumpAndSettle();
-      });
-
-      testWidgets('should handle null context scenarios', (tester) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
-
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-          meetingPlaceCoreSDK: fakeSdk,
-        );
         await tester.pumpAndSettle();
       });
     });

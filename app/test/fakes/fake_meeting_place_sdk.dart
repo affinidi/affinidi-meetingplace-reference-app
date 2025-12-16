@@ -401,6 +401,7 @@ class _FakeOobStream implements OobStream {
     this.shouldTimeout = false,
   });
 
+  @override
   final Stream<OobStreamData> stream;
   final Future<void> Function() onDispose;
   final bool shouldTimeout;
