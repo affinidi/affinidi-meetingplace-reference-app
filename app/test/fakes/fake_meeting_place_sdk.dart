@@ -13,22 +13,28 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     PublishOfferResult? offerToReturn,
     Exception? publishOfferException,
     Exception? createOobFlowException,
+    Exception? acceptOobFlowException,
     bool isPhraseAvailable = true,
     Map<String, Channel>? channels,
     this.offerToFind,
     this.findOfferHasError = false,
+    bool shouldTimeout = false,
   })  : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
         _offerToReturn = offerToReturn,
         _publishOfferException = publishOfferException,
         _createOobFlowException = createOobFlowException,
+        _acceptOobFlowException = acceptOobFlowException,
         _isPhraseAvailable = isPhraseAvailable,
+        _shouldTimeout = shouldTimeout,
         _channels = channels ?? {};
 
   final bool _shouldFailToRegisterPushToken;
   final PublishOfferResult? _offerToReturn;
   final Exception? _publishOfferException;
   final Exception? _createOobFlowException;
+  final Exception? _acceptOobFlowException;
   final bool _isPhraseAvailable;
+  final bool _shouldTimeout;
   final Map<String, Channel> _channels;
 
   // Getter to check if subscriptions have been created (useful for debugging)
@@ -211,6 +217,13 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     ));
   }
 
+  /// Simulates a QR code scan by calling acceptOobFlow with test data
+  void simulateQrScan(String qrData) {
+    // In a real scenario, the QR scanner would trigger the acceptOobFlow
+    // For testing, we just track that a scan occurred
+    // The actual acceptOobFlow call will be made by the controller
+  }
+
   @override
   Future<CreateOobFlowResult> createOobFlow({
     String? did,
@@ -251,10 +264,15 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     String? externalRef,
   }) async {
     _acceptOobFlowCalls.add({
+      'offerLink': oobUri.toString(),
       'oobUri': oobUri,
       'vCard': vCard,
       'externalRef': externalRef,
     });
+
+    if (_acceptOobFlowException != null) {
+      throw _acceptOobFlowException;
+    }
 
     _acceptOobStreamController = StreamController<OobStreamData>.broadcast();
 
@@ -271,14 +289,17 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       externalRef: externalRef,
     );
 
+    _acceptOobFlowCalls.last['channel'] = fakeChannel;
+
     return _FakeAcceptOobFlowResult(
-      // streamSubscription: _FakeCoreSDKStreamSubscription(
-      //   stream: _acceptOobStreamController!.stream,
-      //   onDispose: () async {
-      //     await _acceptOobStreamController?.close();
-      //     _acceptOobStreamController = null;
-      //   },
-      // ),
+      streamSubscription: _FakeOobStream(
+        stream: _acceptOobStreamController!.stream,
+        onDispose: () async {
+          await _acceptOobStreamController?.close();
+          _acceptOobStreamController = null;
+        },
+        shouldTimeout: _shouldTimeout,
+      ),
       channel: fakeChannel,
     );
   }
@@ -318,13 +339,14 @@ class _FakeCreateOobFlowResult implements CreateOobFlowResult {
 class _FakeAcceptOobFlowResult implements AcceptOobFlowResult {
   _FakeAcceptOobFlowResult({
     required this.channel,
+    required this.streamSubscription,
   });
 
   @override
   final Channel channel;
 
   @override
-  OobStream get streamSubscription => throw UnimplementedError();
+  final OobStream streamSubscription;
 }
 
 class _FakeCoreSDKStreamSubscription<T>
@@ -369,5 +391,61 @@ class _FakeCoreSDKStreamSubscription<T>
   StreamSubscription<T> timeout(Duration duration, void Function()? onTimeout) {
     // No-op for fake - just return a no-op subscription
     return stream.listen((_) {});
+  }
+}
+
+class _FakeOobStream implements OobStream {
+  _FakeOobStream({
+    required this.stream,
+    required this.onDispose,
+    this.shouldTimeout = false,
+  });
+
+  final Stream<OobStreamData> stream;
+  final Future<void> Function() onDispose;
+  final bool shouldTimeout;
+  void Function()? _timeoutCallback;
+
+  @override
+  bool get isClosed => false;
+
+  @override
+  Future<void> dispose() async {
+    await onDispose();
+  }
+
+  @override
+  StreamSubscription<OobStreamData> listen(
+    void Function(OobStreamData data) onData, {
+    bool? cancelOnError,
+    void Function()? onDone,
+    Function? onError,
+  }) {
+    return stream.listen(
+      onData,
+      cancelOnError: cancelOnError,
+      onDone: onDone,
+      onError: onError,
+    );
+  }
+
+  @override
+  StreamSubscription<OobStreamData> timeout(
+      Duration duration, void Function()? onTimeout) {
+    _timeoutCallback = onTimeout;
+    if (shouldTimeout && onTimeout != null) {
+      // Trigger timeout immediately in test
+      Future.microtask(() => onTimeout());
+    }
+    return stream.listen((_) {});
+  }
+
+  @override
+  void pushEvent(OobStreamData event) {
+    // No-op for fake
+  }
+
+  void triggerTimeout() {
+    _timeoutCallback?.call();
   }
 }

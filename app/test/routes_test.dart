@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -344,17 +345,37 @@ void main() {
 
       final l10n = await getL10n();
 
-      // Print all text widgets found on the screen
       final textWidgets = find.byType(Text);
-      debugPrint('=== Found ${textWidgets.evaluate().length} Text widgets ===');
       for (final element in textWidgets.evaluate()) {
         final widget = element.widget as Text;
         final textData = widget.data ?? widget.textSpan?.toPlainText();
         debugPrint('Text: "$textData"');
       }
-      debugPrint('=== End of text widgets ===');
 
       expect(find.text(l10n.oobQrPresentInvitationMessage), findsOneWidget);
+    });
+  });
+
+  group('When navigating to OOB Scan QR screen', () {
+    testWidgets('should display the QR scanner screen', (tester) async {
+      final location = '/connections/${RoutePaths.oobScanQr}';
+      await navigateToLocation(
+        tester,
+        location,
+        identities: [FakeIdentities.primaryIdentity],
+        mockCameras: [
+          const CameraDescription(
+            name: 'fake_camera',
+            lensDirection: CameraLensDirection.back,
+            sensorOrientation: 0,
+          ),
+        ],
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(
+          find.byKey(const Key('oob_scan_qr_screen_scaffold')), findsOneWidget);
     });
   });
 }

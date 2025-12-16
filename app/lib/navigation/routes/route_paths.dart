@@ -25,7 +25,7 @@ class RoutePaths {
 
   // OOB
   static const oobShareQr = 'oob-share-qr';
-  static const oobScanQr = 'oob-scann-qr';
+  static const oobScanQr = 'oob-scan-qr';
 
   // Media
   static const media = '/media';
