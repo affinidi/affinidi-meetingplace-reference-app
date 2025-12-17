@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:meeting_place_core/meeting_place_core.dart'
-    hide ContactCardType;
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/identity/identity.dart';
@@ -208,10 +207,7 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      final currentIdentity =
-          ref.read(identitiesServiceProvider.currentIdentityOrPrimary);
-      final did = currentIdentity?.did;
-      await sdk.approveConnectionRequest(channel: channel, did: did);
+      await sdk.approveConnectionRequest(channel: channel);
 
       _logger.info(
         'Connection request approved successfully',
@@ -258,11 +254,7 @@ class ConnectionsService extends _$ConnectionsService {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
     await sdk.acceptOffer(
       connectionOffer: connectionOffer,
-      contactCard: identity.card.toSdkContactCard(
-        did: identity.did,
-        type: ContactCardType.human.value,
-      ),
-      did: identity.did,
+      contactCard: identity.card.toSdkContactCard(),
       externalRef: identity.id,
     );
     await fetchConnections();
@@ -336,10 +328,7 @@ class ConnectionsService extends _$ConnectionsService {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
       final result = await sdk.publishOffer(
         offerName: data.headline,
-        contactCard: identity.card.toSdkContactCard(
-          did: identity.did,
-          type: ContactCardType.human.value,
-        ),
+        contactCard: identity.card.toSdkContactCard(),
         type: isGroupOffer
             ? SDKConnectionOfferType.groupInvitation
             : SDKConnectionOfferType.invitation,

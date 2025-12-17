@@ -27,7 +27,7 @@ class OobScanQrController extends _$OobScanQrController {
       (prev, next) {
         if (next != null) {
           logger.info(
-            'Channel received for contact ${next.otherPartyCard?.firstName}',
+            '''Channel received for contact ${next.otherPartyContactCard?.firstName}''',
             name: logKey,
           );
           Future(() {

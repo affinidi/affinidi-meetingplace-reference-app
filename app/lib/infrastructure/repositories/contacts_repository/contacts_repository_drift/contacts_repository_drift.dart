@@ -65,6 +65,9 @@ class ContactsRepositoryDrift implements ContactsRepository {
       await _database.into(_database.contactCards).insert(
             db.ContactCardsCompanion(
               contactId: Value(contactId),
+              did: Value(card.did),
+              type: Value(card.type),
+              schema: Value(card.schema),
               firstName: Value(card.firstName),
               lastName: Value(card.lastName ?? ''),
               email: Value(card.email ?? ''),
@@ -167,6 +170,9 @@ class ContactsRepositoryDrift implements ContactsRepository {
             ..where((c) => c.contactId.equals(contact.id)))
           .write(
         db.ContactCardsCompanion(
+          did: Value(card.did),
+          type: Value(card.type),
+          schema: Value(card.schema),
           firstName: Value(card.firstName),
           lastName: Value(card.lastName ?? ''),
           email: Value(card.email ?? ''),
@@ -186,6 +192,9 @@ class _ContactMapper {
   ) {
     final domainCard = ContactCard(
       id: const Uuid().v4(),
+      did: contactCard.did,
+      type: contactCard.type,
+      schema: contactCard.schema,
       firstName: contactCard.firstName,
       displayName: [contactCard.firstName, contactCard.lastName]
           .where((s) => s.isNotEmpty)

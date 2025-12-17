@@ -15,6 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ContactCard {
   String get id;
+  String get did;
+  String get type;
+  String get schema;
   String get firstName;
   String get displayName;
   String? get lastName;
@@ -36,6 +39,9 @@ mixin _$ContactCard {
         (other.runtimeType == runtimeType &&
             other is ContactCard &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.did, did) || other.did == did) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.schema, schema) || other.schema == schema) &&
             (identical(other.firstName, firstName) ||
                 other.firstName == firstName) &&
             (identical(other.displayName, displayName) ||
@@ -51,12 +57,12 @@ mixin _$ContactCard {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, firstName, displayName,
-      lastName, email, mobile, profilePic, cardColor);
+  int get hashCode => Object.hash(runtimeType, id, did, type, schema, firstName,
+      displayName, lastName, email, mobile, profilePic, cardColor);
 
   @override
   String toString() {
-    return 'ContactCard(id: $id, firstName: $firstName, displayName: $displayName, lastName: $lastName, email: $email, mobile: $mobile, profilePic: $profilePic, cardColor: $cardColor)';
+    return 'ContactCard(id: $id, did: $did, type: $type, schema: $schema, firstName: $firstName, displayName: $displayName, lastName: $lastName, email: $email, mobile: $mobile, profilePic: $profilePic, cardColor: $cardColor)';
   }
 }
 
@@ -68,6 +74,9 @@ abstract mixin class $ContactCardCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
+      String did,
+      String type,
+      String schema,
       String firstName,
       String displayName,
       String? lastName,
@@ -90,6 +99,9 @@ class _$ContactCardCopyWithImpl<$Res> implements $ContactCardCopyWith<$Res> {
   @override
   $Res call({
     Object? id = null,
+    Object? did = null,
+    Object? type = null,
+    Object? schema = null,
     Object? firstName = null,
     Object? displayName = null,
     Object? lastName = freezed,
@@ -102,6 +114,18 @@ class _$ContactCardCopyWithImpl<$Res> implements $ContactCardCopyWith<$Res> {
       id: null == id
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      did: null == did
+          ? _self.did
+          : did // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _self.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      schema: null == schema
+          ? _self.schema
+          : schema // ignore: cast_nullable_to_non_nullable
               as String,
       firstName: null == firstName
           ? _self.firstName
@@ -230,6 +254,9 @@ extension ContactCardPatterns on ContactCard {
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
             String id,
+            String did,
+            String type,
+            String schema,
             String firstName,
             String displayName,
             String? lastName,
@@ -245,6 +272,9 @@ extension ContactCardPatterns on ContactCard {
       case _ContactCard() when $default != null:
         return $default(
             _that.id,
+            _that.did,
+            _that.type,
+            _that.schema,
             _that.firstName,
             _that.displayName,
             _that.lastName,
@@ -274,6 +304,9 @@ extension ContactCardPatterns on ContactCard {
   TResult when<TResult extends Object?>(
     TResult Function(
             String id,
+            String did,
+            String type,
+            String schema,
             String firstName,
             String displayName,
             String? lastName,
@@ -288,6 +321,9 @@ extension ContactCardPatterns on ContactCard {
       case _ContactCard():
         return $default(
             _that.id,
+            _that.did,
+            _that.type,
+            _that.schema,
             _that.firstName,
             _that.displayName,
             _that.lastName,
@@ -316,6 +352,9 @@ extension ContactCardPatterns on ContactCard {
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
             String id,
+            String did,
+            String type,
+            String schema,
             String firstName,
             String displayName,
             String? lastName,
@@ -330,6 +369,9 @@ extension ContactCardPatterns on ContactCard {
       case _ContactCard() when $default != null:
         return $default(
             _that.id,
+            _that.did,
+            _that.type,
+            _that.schema,
             _that.firstName,
             _that.displayName,
             _that.lastName,
@@ -348,6 +390,9 @@ extension ContactCardPatterns on ContactCard {
 class _ContactCard implements ContactCard {
   const _ContactCard(
       {required this.id,
+      required this.did,
+      required this.type,
+      required this.schema,
       required this.firstName,
       required this.displayName,
       this.lastName,
@@ -358,6 +403,12 @@ class _ContactCard implements ContactCard {
 
   @override
   final String id;
+  @override
+  final String did;
+  @override
+  final String type;
+  @override
+  final String schema;
   @override
   final String firstName;
   @override
@@ -387,6 +438,9 @@ class _ContactCard implements ContactCard {
         (other.runtimeType == runtimeType &&
             other is _ContactCard &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.did, did) || other.did == did) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.schema, schema) || other.schema == schema) &&
             (identical(other.firstName, firstName) ||
                 other.firstName == firstName) &&
             (identical(other.displayName, displayName) ||
@@ -402,12 +456,12 @@ class _ContactCard implements ContactCard {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, firstName, displayName,
-      lastName, email, mobile, profilePic, cardColor);
+  int get hashCode => Object.hash(runtimeType, id, did, type, schema, firstName,
+      displayName, lastName, email, mobile, profilePic, cardColor);
 
   @override
   String toString() {
-    return 'ContactCard(id: $id, firstName: $firstName, displayName: $displayName, lastName: $lastName, email: $email, mobile: $mobile, profilePic: $profilePic, cardColor: $cardColor)';
+    return 'ContactCard(id: $id, did: $did, type: $type, schema: $schema, firstName: $firstName, displayName: $displayName, lastName: $lastName, email: $email, mobile: $mobile, profilePic: $profilePic, cardColor: $cardColor)';
   }
 }
 
@@ -421,6 +475,9 @@ abstract mixin class _$ContactCardCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
+      String did,
+      String type,
+      String schema,
       String firstName,
       String displayName,
       String? lastName,
@@ -443,6 +500,9 @@ class __$ContactCardCopyWithImpl<$Res> implements _$ContactCardCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   $Res call({
     Object? id = null,
+    Object? did = null,
+    Object? type = null,
+    Object? schema = null,
     Object? firstName = null,
     Object? displayName = null,
     Object? lastName = freezed,
@@ -455,6 +515,18 @@ class __$ContactCardCopyWithImpl<$Res> implements _$ContactCardCopyWith<$Res> {
       id: null == id
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      did: null == did
+          ? _self.did
+          : did // ignore: cast_nullable_to_non_nullable
+              as String,
+      type: null == type
+          ? _self.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as String,
+      schema: null == schema
+          ? _self.schema
+          : schema // ignore: cast_nullable_to_non_nullable
               as String,
       firstName: null == firstName
           ? _self.firstName

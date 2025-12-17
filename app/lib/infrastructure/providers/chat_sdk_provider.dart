@@ -36,11 +36,7 @@ final chatSdkProvider =
     final identity = ref
         .read(identitiesServiceProvider)
         .getIdentityById(channel.externalRef);
-    final identityCard = identity?.card;
-    final sdkContactCard = identityCard?.toSdkContactCard(
-      did: identity?.did ?? channel.permanentChannelDid ?? '',
-      type: ContactCardType.contactCard.value,
-    );
+    final sdkContactCard = identity?.card.toSdkContactCard();
 
     try {
       final coreSDK = await ref.read(meetingPlaceSdkProvider.future);

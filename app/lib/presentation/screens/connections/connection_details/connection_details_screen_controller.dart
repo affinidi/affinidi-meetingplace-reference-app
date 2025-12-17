@@ -16,7 +16,6 @@ import '../../../../domain/models/contacts/contact.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
-import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../navigation/navigator.dart';
@@ -248,7 +247,7 @@ class ConnectionDetailsScreenController
 extension ConnectionDetailsScreenControllerProviderSelector
     on ConnectionDetailsScreenControllerProvider {
   ProviderListenable<ContactCard?> get otherPartyCard =>
-      select((state) => state.channel?.otherPartyCard);
+      select((state) => state.channel?.otherPartyContactCard);
 
   ProviderListenable<String> get otherPartyDisplayName => select((state) {
         final displayName = state.contact?.displayName;
@@ -260,7 +259,9 @@ extension ConnectionDetailsScreenControllerProviderSelector
           return state.connection?.offerName ?? '';
         }
 
-        return state.channel?.otherPartyCard?.firstName ?? '';
+        return state.channel?.otherPartyContactCard?.contactInfo['firstName']
+                as String? ??
+            '';
       });
 
   ProviderListenable<ContactCard?> get groupAdminCard => select((state) {
@@ -268,7 +269,7 @@ extension ConnectionDetailsScreenControllerProviderSelector
         if (group == null) return null;
         final groupAdmin = group.members.firstWhereOrNull(
             (member) => member.membershipType == GroupMembershipType.admin);
-        return groupAdmin?.card;
+        return groupAdmin?.contactCard;
       });
 
   ProviderListenable<bool> get isGroupChat =>

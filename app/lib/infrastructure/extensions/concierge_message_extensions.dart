@@ -16,13 +16,14 @@ extension ConciergeMessageExtensions on ConciergeMessage {
   }
 
   ContactCard? get contactCard {
-    final contactInfo = data['contactInfo'];
-    if (contactInfo is! Map<String, dynamic>) return null;
+    final card = data['contactCard'] as Map<String, dynamic>;
+    if (card['contactInfo'] is! Map<String, dynamic>) return null;
 
     final sdkCard = sdk.ContactCard(
-      did: '',
-      type: '',
-      contactInfo: contactInfo,
+      did: card['did'] as String,
+      type: card['type'] as String,
+      schema: card['schema'] as String,
+      contactInfo: card['contactInfo'] as Map<String, dynamic>,
     );
 
     return ContactCardUtils.fromSdkContactCard(sdkCard);

@@ -220,7 +220,7 @@ class ChatScreenController extends _$ChatScreenController {
       throw AppException('Unable to find channel associated to contact',
           code: AppExceptionType.missingChannel.name);
     }
-    final srcCard = channel.otherPartyCard;
+    final srcCard = channel.otherPartyContactCard;
     state = state.copyWith(
       otherPartyCard:
           srcCard == null ? null : ContactCardUtils.fromSdkContactCard(srcCard),
@@ -379,7 +379,7 @@ class ChatScreenController extends _$ChatScreenController {
     final senderDid = plainTextMessage.from;
     if (senderDid == null) return null;
 
-    return state.getGroupMemberByDid(senderDid)?.card.firstName;
+    return state.getGroupMemberByDid(senderDid)?.contactCard.firstName;
   }
 
   void _applyEffect(chat.StreamData data) {
@@ -462,7 +462,7 @@ class ChatScreenController extends _$ChatScreenController {
       return;
     }
 
-    final cardValues = body['values'] as Map<String, dynamic>?;
+    final cardValues = body['contactInfo'] as Map<String, dynamic>?;
     if (cardValues == null) {
       _logger.info(
         'Received a contact details update without a contact card',
@@ -475,11 +475,14 @@ class ChatScreenController extends _$ChatScreenController {
       'Updating Contact Card',
       name: _logKey,
     );
+
     final sdkCard = sdk.ContactCard(
-      did: '',
-      type: '',
+      did: body['did'] as String,
+      type: body['type'] as String,
+      schema: body['schema'] as String,
       contactInfo: cardValues,
     );
+
     final domainCard = ContactCardUtils.fromSdkContactCard(sdkCard);
     state = state.copyWith(otherPartyCard: domainCard);
     ref

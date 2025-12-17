@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../application/services/contacts_service/contacts_service.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
-import '../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
 import '../../navigation/routes/dashboard_routes.dart';
 import '../painting/cached_base64_image.dart';
@@ -36,7 +36,7 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final card = channel.otherPartyCard;
+    final card = channel.otherPartyContactCard;
     final cacheManager = ref.read(cacheManagerProvider);
     final profilePic = card?.hasProfilePic ?? false
         ? CachedBase64Image(

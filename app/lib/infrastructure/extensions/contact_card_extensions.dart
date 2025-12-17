@@ -118,6 +118,9 @@ class ContactCardUtils {
 
     return ContactCard(
       id: const uuid.Uuid().v4(),
+      did: sdkCard.did,
+      type: sdkCard.type,
+      schema: sdkCard.schema,
       firstName: firstName,
       displayName: getFullName(values),
       lastName: lastName.isEmpty ? null : lastName,
@@ -127,6 +130,18 @@ class ContactCardUtils {
       cardColor: color.isEmpty ? null : color,
     );
   }
+}
+
+class SDKContactCard extends sdk.ContactCard {
+  SDKContactCard({
+    required super.did,
+    required super.type,
+    required super.schema,
+    required super.contactInfo,
+  });
+
+  @override
+  String get senderInfo => firstName;
 }
 
 /// Convenience helpers on ContactCard:
@@ -154,13 +169,11 @@ extension ContactCardExtensions on ContactCard {
   /// Last name or empty string for fallback.
   String get lastNameOrEmpty => lastName ?? '';
 
-  sdk.ContactCard toSdkContactCard({
-    required String did,
-    required String type,
-  }) {
-    return sdk.ContactCard(
+  sdk.ContactCard toSdkContactCard() {
+    return SDKContactCard(
       did: did,
       type: type,
+      schema: 'https://affinidi.com/schemas/v1/contact-card',
       contactInfo: {
         'n': {
           'given': firstName,

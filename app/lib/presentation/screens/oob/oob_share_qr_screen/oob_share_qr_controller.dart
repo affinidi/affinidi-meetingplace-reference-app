@@ -25,7 +25,7 @@ class OobShareQrController extends _$OobShareQrController {
       (prev, next) {
         if (next != null) {
           logger.info(
-            'Channel received for contact ${next.otherPartyCard?.firstName}',
+            '''Channel received for contact ${next.otherPartyContactCard?.firstName}''',
             name: logKey,
           );
           Future(() {

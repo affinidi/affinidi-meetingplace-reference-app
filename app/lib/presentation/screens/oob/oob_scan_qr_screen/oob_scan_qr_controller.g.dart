@@ -7,7 +7,7 @@ part of 'oob_scan_qr_controller.dart';
 // **************************************************************************
 
 String _$oobScanQrControllerHash() =>
-    r'56823d92187186f1d37ff776f55e0a81e6b5d779';
+    r'a07dbaaca8320d305fdb37676cbb092fa2260595';
 
 /// See also [OobScanQrController].
 @ProviderFor(OobScanQrController)

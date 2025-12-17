@@ -48,6 +48,9 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final uuid = const Uuid();
     final newCard = ContactCard(
       id: uuid.v4(),
+      did: '',
+      type: '',
+      schema: '',
       firstName: '',
       displayName: '',
     );

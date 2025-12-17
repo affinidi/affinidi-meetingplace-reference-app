@@ -30,7 +30,7 @@ extension ChannelImageExtensions on Channel {
     required BaseCacheManager cacheManager,
   }) {
     return _getImageProvider(
-      otherPartyCard?.profilePic,
+      otherPartyContactCard?.profilePic,
       cacheManager: cacheManager,
     );
   }
@@ -38,13 +38,14 @@ extension ChannelImageExtensions on Channel {
   /// Returns my (local user's) image provider from the channel.
   /// Returns [defaultProfileImage] if card is null or has no profile pic.
   ImageProvider<Object> myImage({required BaseCacheManager cacheManager}) {
-    return _getImageProvider(card?.profilePic, cacheManager: cacheManager);
+    return _getImageProvider(contactCard?.profilePic,
+        cacheManager: cacheManager);
   }
 
   /// Returns true if the other party has a profile picture.
   bool get hasOtherPartyProfilePic =>
-      _hasProfilePic(otherPartyCard?.profilePic);
+      _hasProfilePic(otherPartyContactCard?.profilePic);
 
   /// Returns true if my (local user's) card has a profile picture.
-  bool get hasMyProfilePic => _hasProfilePic(card?.profilePic);
+  bool get hasMyProfilePic => _hasProfilePic(contactCard?.profilePic);
 }

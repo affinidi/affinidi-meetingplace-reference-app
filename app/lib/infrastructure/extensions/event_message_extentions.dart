@@ -12,8 +12,9 @@ extension EventMessageContactCard on EventMessage {
     if (values is! Map<String, dynamic>) return null;
 
     final sdkCard = sdk.ContactCard(
-      did: '',
-      type: '',
+      did: data['did'] as String,
+      type: data['type'] as String,
+      schema: data['schema'] as String,
       contactInfo: values,
     );
 

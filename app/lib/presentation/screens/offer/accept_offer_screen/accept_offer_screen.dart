@@ -91,8 +91,8 @@ class _Loader extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final l10n = context.l10n;
 
-    final alias =
-        ref.watch(provider.select((state) => state.offer?.card.firstName));
+    final alias = ref
+        .watch(provider.select((state) => state.offer?.contactCard.firstName));
 
     return ModalAsyncLoadingStatus(
       controller.acceptOfferLoadingController,
@@ -140,7 +140,7 @@ class _ProfilePicture extends ConsumerWidget {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
     final cacheManager = ref.read(cacheManagerProvider);
     final profileImage = ref.watch(provider.select(
-        (state) => state.offer?.card.image(cacheManager: cacheManager)));
+        (state) => state.offer?.contactCard.image(cacheManager: cacheManager)));
 
     return ProfilePicture(image: profileImage);
   }
@@ -154,8 +154,8 @@ class _PublisherAlias extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
-    final alias =
-        ref.watch(provider.select((state) => state.offer?.card.firstName));
+    final alias = ref
+        .watch(provider.select((state) => state.offer?.contactCard.firstName));
 
     if (alias?.isEmpty ?? true) {
       return const SizedBox.shrink();
@@ -245,7 +245,8 @@ class _ContactCardView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
-    final card = ref.watch(provider.select((state) => state.offer?.card));
+    final card =
+        ref.watch(provider.select((state) => state.offer?.contactCard));
 
     if (card == null) {
       return const SizedBox.shrink();

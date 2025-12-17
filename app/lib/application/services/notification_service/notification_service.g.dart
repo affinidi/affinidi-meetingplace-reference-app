@@ -7,7 +7,7 @@ part of 'notification_service.dart';
 // **************************************************************************
 
 String _$notificationServiceHash() =>
-    r'd28b903a86b6d273ddeff88777f4d6f421924c1c';
+    r'b63bfe651b102ebecb42be4c6c517432e853e9de';
 
 /// Service responsible for tracking notification counters for app features.
 ///

@@ -72,9 +72,9 @@ class OOBService extends _$OOBService {
     _logger.info('createOobFlow', name: _logKey);
 
     final contactCard = _currentIdentity!.card.toSdkContactCard(
-      did: _currentIdentity!.did,
-      type: ContactCardType.human.value,
-    );
+        // did: _currentIdentity!.did,
+        // type: ContactCardType.human.value,
+        );
 
     final createOobFlowResult = await sdk.createOobFlow(
       contactCard: contactCard,
@@ -125,9 +125,9 @@ class OOBService extends _$OOBService {
     final result = await sdk.acceptOobFlow(
       oobUri,
       contactCard: _currentIdentity!.card.toSdkContactCard(
-        did: _currentIdentity!.did,
-        type: ContactCardType.human.value,
-      ),
+          // did: _currentIdentity!.did,
+          // type: ContactCardType.human.value,
+          ),
       did: _currentIdentity!.did,
       externalRef: _currentIdentity!.id,
     );

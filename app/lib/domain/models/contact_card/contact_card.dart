@@ -19,6 +19,9 @@ part 'contact_card.freezed.dart';
 abstract class ContactCard with _$ContactCard {
   const factory ContactCard({
     required String id,
+    required String did,
+    required String type,
+    required String schema,
     required String firstName,
     required String displayName,
     String? lastName,
@@ -31,6 +34,9 @@ abstract class ContactCard with _$ContactCard {
   factory ContactCard.empty() {
     return const ContactCard(
       id: '0',
+      did: '',
+      type: '',
+      schema: '',
       firstName: '',
       displayName: '',
       lastName: null,

@@ -96,6 +96,10 @@ extension IdentityMapper on Identity {
         isPrimary: record.isPrimary,
         card: ContactCard(
           id: record.id,
+          did: record.did,
+          type: 'individual', // TODO: make configurable?
+          schema:
+              'https://affinidi.com/schemas/v1/contact-card', // TODO: make configurable?
           displayName: record.displayName,
           firstName: record.firstName,
           lastName: record.lastName,

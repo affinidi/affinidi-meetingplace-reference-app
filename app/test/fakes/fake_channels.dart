@@ -1,4 +1,5 @@
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 import 'fake_contacts.dart';
 
@@ -9,8 +10,8 @@ class FakeChannels {
       permanentChannelDid: contact.channelDid!,
       otherPartyPermanentChannelDid: contact.channelDid!,
       offerLink: contact.offerLink,
-      vCard: contact.vCard,
-      otherPartyVCard: contact.otherPartyVCard,
+      contactCard: contact.card.toSdkContactCard(),
+      otherPartyContactCard: contact.otherPartyCard?.toSdkContactCard(),
       otherPartyNotificationToken: 'fake-notification-token',
       seqNo: 0,
       type: ChannelType.individual,
@@ -26,8 +27,8 @@ class FakeChannels {
       permanentChannelDid: contact.channelDid!,
       otherPartyPermanentChannelDid: contact.channelDid!,
       offerLink: contact.offerLink,
-      vCard: contact.vCard,
-      otherPartyVCard: contact.otherPartyVCard,
+      contactCard: contact.card.toSdkContactCard(),
+      otherPartyContactCard: contact.otherPartyCard?.toSdkContactCard(),
       otherPartyNotificationToken: 'fake-notification-token',
       seqNo: 3,
       type: ChannelType.group,

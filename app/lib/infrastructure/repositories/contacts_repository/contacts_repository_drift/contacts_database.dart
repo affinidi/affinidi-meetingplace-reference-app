@@ -131,6 +131,9 @@ class ContactCards extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get contactId => text().customConstraint(
       'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL')();
+  TextColumn get did => text()();
+  TextColumn get type => text()();
+  TextColumn get schema => text()();
   TextColumn get firstName => text()();
   TextColumn get lastName => text()();
   TextColumn get email => text()();

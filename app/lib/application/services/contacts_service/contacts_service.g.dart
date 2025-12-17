@@ -6,7 +6,7 @@ part of 'contacts_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$contactsServiceHash() => r'b51a6b12cc30cebd3f13a25fec9d300c953e49db';
+String _$contactsServiceHash() => r'6708b4be7d2c5633dc99359df91205b50d0e8489';
 
 /// Service responsible for managing contacts derived from channels and offers.
 ///

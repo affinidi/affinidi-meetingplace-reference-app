@@ -158,8 +158,8 @@ class ContactsService extends _$ContactsService {
     ContactStatus status,
   ) async {
     final sourceCard = channel.type == sdk.ChannelType.group
-        ? channel.card
-        : channel.otherPartyCard;
+        ? channel.contactCard
+        : channel.otherPartyContactCard;
     if (sourceCard == null) return null;
 
     final displayName = await _getGroupOfferNameFromChannel(channel);
@@ -404,13 +404,16 @@ class ContactsService extends _$ContactsService {
       'Existing contact found, updating status to active',
       name: _logKey,
     );
-    final src = channel.otherPartyCard;
+    final src = channel.otherPartyContactCard;
     final updatedContact = existingContact.copyWith(
       status: ContactStatus.pendingApproval,
       otherPartyCard: src == null
           ? null
           : ContactCard(
               id: const Uuid().v4(),
+              did: src.did,
+              type: src.type,
+              schema: src.schema,
               firstName: src.firstName,
               displayName: src.fullName,
               lastName: src.lastName.isEmpty ? null : src.lastName,
@@ -450,7 +453,7 @@ class ContactsService extends _$ContactsService {
       );
     }
 
-    if (channel.otherPartyCard == null) {
+    if (channel.otherPartyContactCard == null) {
       throw AppException(
         '''An invitation was accepted but did not provide their contact card''',
         code: AppExceptionType.missingOtherPartyCard.name,
@@ -495,7 +498,7 @@ class ContactsService extends _$ContactsService {
       );
     }
 
-    if (channel.otherPartyCard == null) {
+    if (channel.otherPartyContactCard == null) {
       throw AppException(
         '''An offer was approved but did not provide their contact card''',
         code: AppExceptionType.missingOtherPartyCard.name,

@@ -12,7 +12,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  meeting_place_core: ^0.0.1-dev.7
+  meeting_place_core:
+    path: /Users/sebastian.m/workspace/affinidi/github/affinidi-meetingplace-sdk-dart/packages/meeting_place_core
 
 dev_dependencies:
   dart_flutter_team_lints: ^3.3.0

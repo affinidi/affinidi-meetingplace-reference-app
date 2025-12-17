@@ -7,6 +7,9 @@ class FakeIdentities {
     did: '',
     card: ContactCard(
       id: 'primary-identity-id',
+      did: 'did:key:primary-identity',
+      type: 'individual',
+      schema: 'https://affinidi.com/schemas/v1/contact-card',
       firstName: 'John',
       displayName: 'John Doe',
       email: 'john.doe@example.com',
@@ -20,6 +23,9 @@ class FakeIdentities {
     did: '',
     card: ContactCard(
         id: 'secondary-identity-id',
+        did: 'did:key:secondary-identity',
+        type: 'individual',
+        schema: 'https://affinidi.com/schemas/v1/contact-card',
         firstName: 'Jane',
         displayName: 'Jane Doe'),
     isPrimary: false,

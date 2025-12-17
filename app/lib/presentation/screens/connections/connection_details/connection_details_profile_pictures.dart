@@ -75,7 +75,8 @@ class _ProfilePictures extends ConsumerWidget {
               context: context,
               imageBytesFuture: controller.getImageBytes(
                 hasOtherPartyPic: hasOtherPartyPic,
-                otherPartyProfilePic: channel?.otherPartyCard?.profilePic,
+                otherPartyProfilePic:
+                    channel?.otherPartyContactCard?.profilePic,
               ),
             ),
           ),
@@ -89,7 +90,7 @@ class _ProfilePictures extends ConsumerWidget {
             context: context,
             imageBytesFuture: controller.getImageBytes(
               hasOtherPartyPic: hasMyPic,
-              otherPartyProfilePic: channel?.card?.profilePic,
+              otherPartyProfilePic: channel?.contactCard?.profilePic,
             ),
           ),
         ),
