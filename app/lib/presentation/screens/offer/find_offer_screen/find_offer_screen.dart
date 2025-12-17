@@ -12,7 +12,7 @@ import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
 import '../../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
-import '../../../widgets/identity_picker/identity_card.dart';
+import '../../../widgets/identity_picker/identity_picker.dart';
 import '../../../widgets/offer_banner.dart';
 import 'find_offer_screen_controller.dart';
 
@@ -32,7 +32,9 @@ class FindOfferScreen extends HookConsumerWidget {
     final cacheManager = ref.read(cacheManagerProvider);
 
     final env = ref.read(environmentProvider);
-    final identity = ref.watch(provider.select((state) => state.identity));
+    final identities = ref.watch(provider.select((state) => state.identities));
+    final selectedIdentity =
+        ref.watch(provider.select((state) => state.selectedIdentity));
 
     useEffect(() {
       if (!context.mounted) return;
@@ -63,7 +65,7 @@ class FindOfferScreen extends HookConsumerWidget {
         ref.read(navigatorProvider).go(
               AcceptOfferRoute(
                 mnemonic: trimmed,
-                identityId: identity!.id,
+                identityId: selectedIdentity!.id,
               ).location,
             );
       }
@@ -111,11 +113,15 @@ class FindOfferScreen extends HookConsumerWidget {
                       ?.copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
-                if (identity != null)
-                  IdentityCard(
+                if (identities.isNotEmpty)
+                  IdentityPicker(
                     key: const ValueKey('find_offer_identity_picker'),
-                    identity: identity,
+                    identities: identities,
                     displayMode: true,
+                    initialCardIndex: selectedIdentity != null
+                        ? identities.indexOf(selectedIdentity)
+                        : 0,
+                    onSelectedIdentity: controller.selectIdentity,
                     cacheManager: cacheManager,
                   ),
                 Text(
