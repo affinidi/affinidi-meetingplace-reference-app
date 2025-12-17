@@ -87,7 +87,16 @@ class _ContactGridItem extends ConsumerWidget {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  _ContactAvatar(contact: contact),
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: contact.getStatusColor(context, asAvatar: true),
+                        width: 2,
+                      ),
+                    ),
+                    child: _ContactAvatar(contact: contact),
+                  ),
                   if (contact.badgeCount > 0)
                     Positioned(
                       bottom: -5,
