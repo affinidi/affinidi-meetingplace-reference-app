@@ -6,7 +6,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/qr_code_view_
 
 class FakeQrCodeViewFactory implements QrCodeViewFactory {
   @override
-  Widget create(String data) {
+  Widget createView(String data) {
     return Container(
       width: 200,
       height: 200,

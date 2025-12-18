@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../presentation/widgets/qr/qr_code_view.dart';
 
 abstract class QrCodeViewFactory {
-  Widget create(String data);
+  Widget createView(String data);
   Future<XFile> exportToXFile(String data);
 }
 
@@ -13,7 +13,7 @@ class DefaultQrCodeViewFactory implements QrCodeViewFactory {
   final Map<String, QrCodeView> _instances = {};
 
   @override
-  Widget create(String data) {
+  Widget createView(String data) {
     final view = QrCodeView(data: data);
     _instances[data] = view;
     return view;
