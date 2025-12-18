@@ -256,6 +256,7 @@ class ConnectionsService extends _$ConnectionsService {
       connectionOffer: connectionOffer,
       contactCard: identity.card.toSdkContactCard(),
       externalRef: identity.id,
+      senderInfo: identity.card.firstName,
     );
     await fetchConnections();
   }

@@ -5,16 +5,15 @@ import 'contact_card_extensions.dart';
 
 extension EventMessageContactCard on EventMessage {
   ContactCard? get contactCard {
-    final cardField = data['card'];
+    final cardField = data['contactCard'];
     if (cardField is! Map<String, dynamic>) return null;
 
-    final values = cardField['values'];
+    final values = cardField['contactInfo'];
     if (values is! Map<String, dynamic>) return null;
 
     final sdkCard = sdk.ContactCard(
-      did: data['did'] as String,
-      type: data['type'] as String,
-      schema: data['schema'] as String,
+      did: cardField['did'] as String,
+      type: cardField['type'] as String,
       contactInfo: values,
     );
 

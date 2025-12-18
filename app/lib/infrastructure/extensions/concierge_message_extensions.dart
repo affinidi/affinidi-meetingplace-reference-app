@@ -22,7 +22,6 @@ extension ConciergeMessageExtensions on ConciergeMessage {
     final sdkCard = sdk.ContactCard(
       did: card['did'] as String,
       type: card['type'] as String,
-      schema: card['schema'] as String,
       contactInfo: card['contactInfo'] as Map<String, dynamic>,
     );
 

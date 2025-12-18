@@ -126,13 +126,13 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>({
     required T connectionOffer,
     required ContactCard contactCard,
-    String? did,
+    String? senderInfo,
     String? externalRef,
   }) async {
     _acceptOfferCalls.add({
       'connectionOffer': connectionOffer,
       'contactCard': contactCard.toJson(),
-      'did': did,
+      'senderInfo': senderInfo,
       'externalRef': externalRef,
     });
 

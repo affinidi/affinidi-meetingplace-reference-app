@@ -479,7 +479,6 @@ class ChatScreenController extends _$ChatScreenController {
     final sdkCard = sdk.ContactCard(
       did: body['did'] as String,
       type: body['type'] as String,
-      schema: body['schema'] as String,
       contactInfo: cardValues,
     );
 

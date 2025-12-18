@@ -67,7 +67,6 @@ class ContactsRepositoryDrift implements ContactsRepository {
               contactId: Value(contactId),
               did: Value(card.did),
               type: Value(card.type),
-              schema: Value(card.schema),
               firstName: Value(card.firstName),
               lastName: Value(card.lastName ?? ''),
               email: Value(card.email ?? ''),
@@ -172,7 +171,6 @@ class ContactsRepositoryDrift implements ContactsRepository {
         db.ContactCardsCompanion(
           did: Value(card.did),
           type: Value(card.type),
-          schema: Value(card.schema),
           firstName: Value(card.firstName),
           lastName: Value(card.lastName ?? ''),
           email: Value(card.email ?? ''),
@@ -194,7 +192,6 @@ class _ContactMapper {
       id: const Uuid().v4(),
       did: contactCard.did,
       type: contactCard.type,
-      schema: contactCard.schema,
       firstName: contactCard.firstName,
       displayName: [contactCard.firstName, contactCard.lastName]
           .where((s) => s.isNotEmpty)

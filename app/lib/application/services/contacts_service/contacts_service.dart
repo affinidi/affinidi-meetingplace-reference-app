@@ -413,7 +413,6 @@ class ContactsService extends _$ContactsService {
               id: const Uuid().v4(),
               did: src.did,
               type: src.type,
-              schema: src.schema,
               firstName: src.firstName,
               displayName: src.fullName,
               lastName: src.lastName.isEmpty ? null : src.lastName,

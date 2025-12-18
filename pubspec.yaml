@@ -18,15 +18,30 @@ dev_dependencies:
 dependency_overrides:
   meta: 1.17.0
   meeting_place_control_plane:
-    path: /Users/sebastian.m/workspace/affinidi/github/affinidi-meetingplace-sdk-dart/packages/meeting_place_control_plane
+    git:
+      url: git@github.com:affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_control_plane
+      ref: ec6686acbab3d37e295b4b2e03f1c7d3cf237bfc
   meeting_place_mediator:
-    path: /Users/sebastian.m/workspace/affinidi/github/affinidi-meetingplace-sdk-dart/packages/meeting_place_mediator
+    git:
+      url: git@github.com:affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_mediator
+      ref: ec6686acbab3d37e295b4b2e03f1c7d3cf237bfc
   meeting_place_chat:
-    path: /Users/sebastian.m/workspace/affinidi/github/affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
+    git:
+      url: git@github.com:affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_chat
+      ref: ec6686acbab3d37e295b4b2e03f1c7d3cf237bfc
   meeting_place_core:
-    path: /Users/sebastian.m/workspace/affinidi/github/affinidi-meetingplace-sdk-dart/packages/meeting_place_core
+    git:
+      url: git@github.com:affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_core
+      ref: ec6686acbab3d37e295b4b2e03f1c7d3cf237bfc
   meeting_place_drift_repository:
-    path: /Users/sebastian.m/workspace/affinidi/github/affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
+    git:
+      url: git@github.com:affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_drift_repository
+      ref: ec6686acbab3d37e295b4b2e03f1c7d3cf237bfc
 
 melos:
   scripts:

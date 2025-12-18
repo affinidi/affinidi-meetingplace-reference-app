@@ -50,7 +50,6 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       id: uuid.v4(),
       did: '',
       type: '',
-      schema: '',
       firstName: '',
       displayName: '',
     );

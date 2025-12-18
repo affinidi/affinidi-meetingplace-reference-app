@@ -133,7 +133,6 @@ class ContactCards extends Table {
       'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL')();
   TextColumn get did => text()();
   TextColumn get type => text()();
-  TextColumn get schema => text()();
   TextColumn get firstName => text()();
   TextColumn get lastName => text()();
   TextColumn get email => text()();
