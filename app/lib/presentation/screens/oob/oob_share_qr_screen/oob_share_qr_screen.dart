@@ -88,7 +88,7 @@ class OOBShareQrScreen extends HookConsumerWidget {
                           ),
                         ),
                       ),
-                      if (qrData != null) qrCodeViewFactory.create(qrData),
+                      if (qrData != null) qrCodeViewFactory.createView(qrData),
                       Column(
                         children: [
                           Padding(
