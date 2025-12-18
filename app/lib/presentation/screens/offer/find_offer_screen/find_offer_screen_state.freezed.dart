@@ -14,7 +14,8 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$FindOfferScreenState {
-  Identity? get identity;
+  List<Identity> get identities;
+  Identity? get selectedIdentity;
 
   /// Create a copy of FindOfferScreenState
   /// with the given fields replaced by the non-null parameter values.
@@ -29,16 +30,19 @@ mixin _$FindOfferScreenState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FindOfferScreenState &&
-            (identical(other.identity, identity) ||
-                other.identity == identity));
+            const DeepCollectionEquality()
+                .equals(other.identities, identities) &&
+            (identical(other.selectedIdentity, selectedIdentity) ||
+                other.selectedIdentity == selectedIdentity));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, identity);
+  int get hashCode => Object.hash(runtimeType,
+      const DeepCollectionEquality().hash(identities), selectedIdentity);
 
   @override
   String toString() {
-    return 'FindOfferScreenState(identity: $identity)';
+    return 'FindOfferScreenState(identities: $identities, selectedIdentity: $selectedIdentity)';
   }
 }
 
@@ -48,9 +52,9 @@ abstract mixin class $FindOfferScreenStateCopyWith<$Res> {
           $Res Function(FindOfferScreenState) _then) =
       _$FindOfferScreenStateCopyWithImpl;
   @useResult
-  $Res call({Identity? identity});
+  $Res call({List<Identity> identities, Identity? selectedIdentity});
 
-  $IdentityCopyWith<$Res>? get identity;
+  $IdentityCopyWith<$Res>? get selectedIdentity;
 }
 
 /// @nodoc
@@ -66,12 +70,17 @@ class _$FindOfferScreenStateCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? identity = freezed,
+    Object? identities = null,
+    Object? selectedIdentity = freezed,
   }) {
     return _then(_self.copyWith(
-      identity: freezed == identity
-          ? _self.identity
-          : identity // ignore: cast_nullable_to_non_nullable
+      identities: null == identities
+          ? _self.identities
+          : identities // ignore: cast_nullable_to_non_nullable
+              as List<Identity>,
+      selectedIdentity: freezed == selectedIdentity
+          ? _self.selectedIdentity
+          : selectedIdentity // ignore: cast_nullable_to_non_nullable
               as Identity?,
     ));
   }
@@ -80,13 +89,13 @@ class _$FindOfferScreenStateCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $IdentityCopyWith<$Res>? get identity {
-    if (_self.identity == null) {
+  $IdentityCopyWith<$Res>? get selectedIdentity {
+    if (_self.selectedIdentity == null) {
       return null;
     }
 
-    return $IdentityCopyWith<$Res>(_self.identity!, (value) {
-      return _then(_self.copyWith(identity: value));
+    return $IdentityCopyWith<$Res>(_self.selectedIdentity!, (value) {
+      return _then(_self.copyWith(selectedIdentity: value));
     });
   }
 }
@@ -184,13 +193,14 @@ extension FindOfferScreenStatePatterns on FindOfferScreenState {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(Identity? identity)? $default, {
+    TResult Function(List<Identity> identities, Identity? selectedIdentity)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _FindOfferScreenState() when $default != null:
-        return $default(_that.identity);
+        return $default(_that.identities, _that.selectedIdentity);
       case _:
         return orElse();
     }
@@ -211,12 +221,13 @@ extension FindOfferScreenStatePatterns on FindOfferScreenState {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(Identity? identity) $default,
+    TResult Function(List<Identity> identities, Identity? selectedIdentity)
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _FindOfferScreenState():
-        return $default(_that.identity);
+        return $default(_that.identities, _that.selectedIdentity);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -236,12 +247,13 @@ extension FindOfferScreenStatePatterns on FindOfferScreenState {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(Identity? identity)? $default,
+    TResult? Function(List<Identity> identities, Identity? selectedIdentity)?
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _FindOfferScreenState() when $default != null:
-        return $default(_that.identity);
+        return $default(_that.identities, _that.selectedIdentity);
       case _:
         return null;
     }
@@ -251,10 +263,21 @@ extension FindOfferScreenStatePatterns on FindOfferScreenState {
 /// @nodoc
 
 class _FindOfferScreenState implements FindOfferScreenState {
-  _FindOfferScreenState({this.identity});
+  _FindOfferScreenState(
+      {final List<Identity> identities = const [], this.selectedIdentity})
+      : _identities = identities;
+
+  final List<Identity> _identities;
+  @override
+  @JsonKey()
+  List<Identity> get identities {
+    if (_identities is EqualUnmodifiableListView) return _identities;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_identities);
+  }
 
   @override
-  final Identity? identity;
+  final Identity? selectedIdentity;
 
   /// Create a copy of FindOfferScreenState
   /// with the given fields replaced by the non-null parameter values.
@@ -270,16 +293,19 @@ class _FindOfferScreenState implements FindOfferScreenState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _FindOfferScreenState &&
-            (identical(other.identity, identity) ||
-                other.identity == identity));
+            const DeepCollectionEquality()
+                .equals(other._identities, _identities) &&
+            (identical(other.selectedIdentity, selectedIdentity) ||
+                other.selectedIdentity == selectedIdentity));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, identity);
+  int get hashCode => Object.hash(runtimeType,
+      const DeepCollectionEquality().hash(_identities), selectedIdentity);
 
   @override
   String toString() {
-    return 'FindOfferScreenState(identity: $identity)';
+    return 'FindOfferScreenState(identities: $identities, selectedIdentity: $selectedIdentity)';
   }
 }
 
@@ -291,10 +317,10 @@ abstract mixin class _$FindOfferScreenStateCopyWith<$Res>
       __$FindOfferScreenStateCopyWithImpl;
   @override
   @useResult
-  $Res call({Identity? identity});
+  $Res call({List<Identity> identities, Identity? selectedIdentity});
 
   @override
-  $IdentityCopyWith<$Res>? get identity;
+  $IdentityCopyWith<$Res>? get selectedIdentity;
 }
 
 /// @nodoc
@@ -310,12 +336,17 @@ class __$FindOfferScreenStateCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? identity = freezed,
+    Object? identities = null,
+    Object? selectedIdentity = freezed,
   }) {
     return _then(_FindOfferScreenState(
-      identity: freezed == identity
-          ? _self.identity
-          : identity // ignore: cast_nullable_to_non_nullable
+      identities: null == identities
+          ? _self._identities
+          : identities // ignore: cast_nullable_to_non_nullable
+              as List<Identity>,
+      selectedIdentity: freezed == selectedIdentity
+          ? _self.selectedIdentity
+          : selectedIdentity // ignore: cast_nullable_to_non_nullable
               as Identity?,
     ));
   }
@@ -324,13 +355,13 @@ class __$FindOfferScreenStateCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
-  $IdentityCopyWith<$Res>? get identity {
-    if (_self.identity == null) {
+  $IdentityCopyWith<$Res>? get selectedIdentity {
+    if (_self.selectedIdentity == null) {
       return null;
     }
 
-    return $IdentityCopyWith<$Res>(_self.identity!, (value) {
-      return _then(_self.copyWith(identity: value));
+    return $IdentityCopyWith<$Res>(_self.selectedIdentity!, (value) {
+      return _then(_self.copyWith(selectedIdentity: value));
     });
   }
 }

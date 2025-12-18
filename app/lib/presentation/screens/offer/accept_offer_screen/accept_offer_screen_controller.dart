@@ -44,10 +44,15 @@ class AcceptOfferScreenController extends _$AcceptOfferScreenController {
     return AcceptOfferScreenState();
   }
 
-  void initialize() {
+  void initialize(String identityId) {
     ref.read(connectionsServiceProvider.notifier).getOffer(mnemonic);
-    final preselectedIdentity =
-        ref.read(identitiesServiceProvider.currentIdentityOrPrimary);
+
+    final identities = ref.read(identitiesServiceProvider).identities;
+    final preselectedIdentity = identities.firstWhere(
+      (identity) => identity.id == identityId,
+      orElse: () =>
+          ref.read(identitiesServiceProvider.currentIdentityOrPrimary)!,
+    );
 
     state = state.copyWith(selectedIdentity: preselectedIdentity);
   }

@@ -278,7 +278,7 @@ class _AliasPicker extends HookConsumerWidget {
       if (!context.mounted) return;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.initialize();
+        controller.initialize(_identityId);
       });
 
       return null;
