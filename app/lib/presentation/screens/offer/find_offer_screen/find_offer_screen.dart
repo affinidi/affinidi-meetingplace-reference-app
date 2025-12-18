@@ -62,7 +62,7 @@ class FindOfferScreen extends HookConsumerWidget {
 
       if (!context.mounted) return;
       if (success) {
-        ref.read(navigatorProvider).go(
+        await ref.read(navigatorProvider).push(
               AcceptOfferRoute(
                 mnemonic: trimmed,
                 identityId: selectedIdentity!.id,

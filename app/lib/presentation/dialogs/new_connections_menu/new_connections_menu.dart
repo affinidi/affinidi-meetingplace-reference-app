@@ -86,10 +86,11 @@ class NewConnectionsMenu extends StatelessWidget {
         await _oobScanQrCode(context: context);
         break;
       case NewConnectionsMenuOption.claimAnOffer:
-        const FindOfferRoute().go(context);
+        await const FindOfferRoute().push<void>(context);
         break;
       case NewConnectionsMenuOption.publishAnOffer:
-        PublishOfferRoute(identityId: currentIdentity?.id ?? '').go(context);
+        await PublishOfferRoute(identityId: currentIdentity?.id ?? '')
+            .push<void>(context);
         break;
     }
   }
