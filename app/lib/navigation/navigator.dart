@@ -30,11 +30,12 @@ class Navigator {
   /// Pushes a new route onto the navigation stack.
   ///
   /// [path] - The target route path to push.
-  void push(String path) {
+  Future<T?> push<T extends Object?>(String path) async {
     try {
-      _router.push(path);
+      return await _router.push<T>(path);
     } catch (e, stackTrace) {
       _handleNavigationError('push', path, e, stackTrace);
+      return null;
     }
   }
 
