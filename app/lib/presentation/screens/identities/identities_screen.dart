@@ -130,11 +130,11 @@ class _IdentityPicker extends ConsumerWidget {
         }
       },
       onFindOfferForIdentity: (identity) =>
-          FindOfferRoute(identityId: identity.id).go(context),
+          FindOfferRoute(identityId: identity.id).push<void>(context),
       onEditIdentity: (identity) =>
           IdentityFormRoute(identityId: identity.id).go(context),
       onPublishOfferForIdentity: (identity) =>
-          PublishOfferRoute(identityId: identity.id).go(context),
+          PublishOfferRoute(identityId: identity.id).push<void>(context),
       onSelectedIdentity: controller.setCurrentIdentity,
       swipeDirection: const AllowedSwipeDirection.only(
         left: true,
