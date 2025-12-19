@@ -148,11 +148,11 @@ class _ConnectionCard extends ConsumerWidget {
 
     final identityText = (mediatorName != null && mediatorName.isNotEmpty)
         ? context.l10n.usesIdentityViaMediator(
-            _connection.contactCard.contactInfo['firstName'] as String? ?? '',
+            _connection.contactCard.firstName,
             mediatorName,
           )
         : context.l10n.usesIdentity(
-            _connection.contactCard.contactInfo['firstName'] as String? ?? '',
+            _connection.contactCard.firstName,
           );
 
     return Card.outlined(

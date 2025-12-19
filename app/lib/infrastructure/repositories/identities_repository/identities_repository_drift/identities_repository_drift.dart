@@ -97,7 +97,7 @@ extension IdentityMapper on Identity {
         card: ContactCard(
           id: record.id,
           did: record.did,
-          type: 'individual', // TODO: make configurable?
+          type: 'individual',
           displayName: record.displayName,
           firstName: record.firstName,
           lastName: record.lastName,

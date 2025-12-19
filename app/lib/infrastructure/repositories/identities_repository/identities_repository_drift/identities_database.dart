@@ -34,7 +34,7 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
         ));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
