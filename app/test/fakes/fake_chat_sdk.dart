@@ -70,8 +70,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       dateCreated: DateTime.now(),
       status: ChatItemStatus.userInput,
       data: {
-        'memberVCard': {
-          'values': {
+        'contactCard': {
+          'did': 'did:key:identity-id',
+          'type': 'individual',
+          'contactInfo': {
             'n': {
               'given': memberName,
             },
@@ -159,8 +161,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       eventType: EventMessageType.groupMemberJoinedGroup,
       data: {
         'memberDid': memberDid,
-        'vCard': {
-          'values': {
+        'contactCard': {
+          'did': 'did:key:identity-id',
+          'type': 'individual',
+          'contactInfo': {
             'n': {
               'given': memberName,
             },
@@ -209,8 +213,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       eventType: EventMessageType.groupMemberLeftGroup,
       data: {
         'memberDid': memberDid,
-        'vCard': {
-          'values': {
+        'contactCard': {
+          'did': 'did:key:identity-id',
+          'type': 'individual',
+          'contactInfo': {
             'n': {
               'given': memberName,
             },
