@@ -1,9 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:uuid/uuid.dart';
 
-import '../../../domain/models/contact_card/contact_card.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/repositories/identities_repository.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';

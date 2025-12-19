@@ -12,7 +12,6 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../presentation/screens/offer/publish_offer_screen/publish_offer_form_data.dart';
 import '../control_plane_service/control_plane_service.dart';
-import '../identities_service/identities_service.dart';
 import 'connections_service_state.dart';
 
 part 'connections_service.g.dart';

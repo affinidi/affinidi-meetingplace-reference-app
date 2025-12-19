@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_core/meeting_place_core.dart'
-    hide ContactCardType;
+import 'package:meeting_place_core/meeting_place_core.dart';
 
 import '../../application/services/identities_service/identities_service.dart';
 import '../configuration/environment.dart';
