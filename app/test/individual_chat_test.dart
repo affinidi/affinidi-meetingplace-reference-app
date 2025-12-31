@@ -518,10 +518,7 @@ void main() {
             find.text(l10n.cameraOpenSettings),
             findsOneWidget,
           );
-          expect(
-            find.text(l10n.generalRetry),
-            findsOneWidget,
-          );
+          expect(find.text(l10n.generalRetry), findsOneWidget);
         });
       });
     });
