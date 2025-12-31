@@ -72,15 +72,6 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     }
   }
 
-  /// Ensures the camera is initialized for the given [direction].
-  Future<void> ensureCameraInitialized(CameraLensDirection direction) async {
-    await checkCameraAvailability();
-
-    if (state.isAvailable == true && state.controller == null) {
-      await initializeCamera(direction);
-    }
-  }
-
   /// Initializes the camera with the given [cameraLensDirection].
   ///
   /// [cameraLensDirection] - The lens direction (front or back) to use.
