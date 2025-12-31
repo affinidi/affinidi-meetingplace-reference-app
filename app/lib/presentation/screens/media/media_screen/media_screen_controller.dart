@@ -180,13 +180,4 @@ class MediaScreenController extends _$MediaScreenController {
     _logger.info('Opening app settings for camera permission', name: _logKey);
     await openAppSettings();
   }
-
-  /// Ensure to recheck camera availability when re-entering the Media Screen.
-  Future<void> ensureCameraInitialized([
-    CameraLensDirection direction = CameraLensDirection.front,
-  ]) async {
-    await ref
-        .read(cameraServiceProvider.notifier)
-        .ensureCameraInitialized(direction);
-  }
 }

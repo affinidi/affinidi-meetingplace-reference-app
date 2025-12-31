@@ -99,14 +99,6 @@ class MediaScreen extends HookConsumerWidget {
 
     useEffect(
       () {
-        controller.ensureCameraInitialized(cameraLensDirection);
-        return null;
-      },
-      const [],
-    );
-
-    useEffect(
-      () {
         if (state.pickedImageBytes != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!context.mounted) return;
