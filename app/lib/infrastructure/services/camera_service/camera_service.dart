@@ -250,21 +250,11 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
 
   /// Checks and requests camera permission if not already granted
   Future<bool> _ensureCameraPermission() async {
-    try {
-      final permissionService = ref.read(permissionServiceProvider);
-      var status = await permissionService.getCameraPermissionStatus();
-      if (status.isDenied) {
-        status = await permissionService.requestCameraPermission();
-      }
-      return status.isGranted;
-    } catch (e) {
-      // In test environments, permission_handler may not be properly initialized
-      // Assume permission is granted if the check fails
-      _logger.warning(
-        'Permission check failed (likely in test): $e',
-        name: _logKey,
-      );
-      return true;
+    final permissionService = ref.read(permissionServiceProvider);
+    var status = await permissionService.getCameraPermissionStatus();
+    if (status.isDenied) {
+      status = await permissionService.requestCameraPermission();
     }
+    return status.isGranted;
   }
 }
