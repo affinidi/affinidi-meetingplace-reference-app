@@ -1468,4 +1468,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shareSheetCTA_QRCode => 'Send or save QR code';
+
+  @override
+  String get cameraInstructionAndroid =>
+      'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Apps > H2H > Permissions > Camera > Allow only while using the app.';
+
+  @override
+  String get cameraInstructionIos =>
+      'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > H2H > Camera and enable access for this app.';
+
+  @override
+  String get cameraInstructionMacos =>
+      'Go to System Settings > Privacy & Security > Camera and allow camera access for this app.';
+
+  @override
+  String get cameraAccessDenied => 'Camera access denied or unavailable.';
+
+  @override
+  String get cameraOpenSettings => 'Open Settings';
 }

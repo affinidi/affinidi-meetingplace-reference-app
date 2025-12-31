@@ -1,16 +1,16 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../infrastructure/configuration/environment.dart';
+import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../infrastructure/media/image_picker/image_picker_provider.dart';
+import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/services/camera_service/camera_service.dart';
-import '../../../../infrastructure/services/camera_service/camera_service_state.dart';
 import '../../../../navigation/navigator.dart';
 import 'media_screen.dart';
 import 'media_screen_state.dart';
@@ -19,51 +19,53 @@ part 'media_screen_controller.g.dart';
 
 @riverpod
 class MediaScreenController extends _$MediaScreenController {
+  late final AppLogger _logger = ref.read(appLoggerProvider);
+  static const _logKey = 'MEDSCRCTRL';
+
   @override
   MediaScreenState build({
     required CameraLensDirection cameraLensDirection,
     required bool useCamera,
   }) {
     if (!useCamera) {
-      unawaited(
-        pickFromGallery(
-          useChatSemantics: false,
-        ),
-      );
-      return MediaScreenState();
+      Future(() => pickFromGallery(useChatSemantics: false));
+      return MediaScreenState(isLoading: true);
     }
 
-    final cameraState = ref.read(cameraServiceProvider);
+    ref.listen(
+      cameraServiceProvider,
+      (prev, next) {
+        final becameAvailable =
+            prev?.isAvailable != true && next.isAvailable == true;
+        final permissionJustGranted =
+            prev?.permissionGranted != true && next.permissionGranted == true;
 
-    if (cameraState.isAvailable != null) {
-      Future.microtask(
-        () => _initializeMediaSource(
-          cameraState.isAvailable!,
-          useCamera,
-          cameraLensDirection,
-        ),
-      );
-    } else {
-      ref.listen<CameraServiceState>(
-        cameraServiceProvider,
-        (prev, next) {
-          if (prev?.isAvailable == null && next.isAvailable != null) {
-            _initializeMediaSource(
-              next.isAvailable!,
-              useCamera,
-              cameraLensDirection,
-            );
-          }
-        },
-      );
-    }
+        if (becameAvailable || permissionJustGranted) {
+          _initializeMediaSource(
+            isCameraAvailable: next.isAvailable ?? false,
+            useCamera: useCamera,
+            cameraLensDirection: cameraLensDirection,
+          );
+        }
 
-    return MediaScreenState();
+        state = state.copyWith(
+          cameraController: next.controller,
+          isCameraAvailable: next.isAvailable ?? false,
+          isFrontCamera: next.controller?.description.lensDirection ==
+              CameraLensDirection.front,
+          isLoading: false,
+          permissionGranted: next.permissionGranted,
+        );
+      },
+    );
+
+    return MediaScreenState(isLoading: true);
   }
 
   Future<void> pickFromGallery({
     required bool useChatSemantics,
   }) async {
+    state = state.copyWith(isLoading: true);
     final picker = ref.read(imagePickerProvider);
 
     final environment = ref.read(environmentProvider);
@@ -77,6 +79,8 @@ class MediaScreenController extends _$MediaScreenController {
       maxWidth: imageConfig.imageMaxSize.toDouble(),
       imageQuality: imageConfig.qualityPercentage,
     );
+
+    state = state.copyWith(isLoading: false);
 
     if (picked != null) {
       state = state.copyWith(pickedImageBytes: await picked.readAsBytes());
@@ -97,6 +101,7 @@ class MediaScreenController extends _$MediaScreenController {
   }
 
   Future<void> toggleCamera() async {
+    state = state.copyWith(isLoading: true);
     await ref.read(cameraServiceProvider.notifier).toggleCamera();
     final current = ref.read(cameraServiceProvider).controller;
     if (current != null) {
@@ -105,20 +110,25 @@ class MediaScreenController extends _$MediaScreenController {
         isFrontCamera:
             current.description.lensDirection == CameraLensDirection.front,
         isCameraAvailable: true,
+        isLoading: false,
+      );
+    } else {
+      state = state.copyWith(
+        isLoading: false,
       );
     }
   }
 
   Future<void> closeCamera() async {
     await ref.read(cameraServiceProvider.notifier).closeCamera();
-    state = state.copyWith(cameraController: null);
+    state = state.copyWith(cameraController: null, isCameraAvailable: false);
   }
 
-  void _initializeMediaSource(
-    bool isCameraAvailable,
-    bool useCamera,
-    CameraLensDirection cameraLensDirection,
-  ) {
+  void _initializeMediaSource({
+    required bool isCameraAvailable,
+    required bool useCamera,
+    required CameraLensDirection cameraLensDirection,
+  }) {
     if (isCameraAvailable && useCamera) {
       unawaited(_initCamera(cameraLensDirection));
     } else {
@@ -132,6 +142,7 @@ class MediaScreenController extends _$MediaScreenController {
 
   Future<void> _initCamera(CameraLensDirection direction) async {
     try {
+      state = state.copyWith(isLoading: true);
       final controller = await ref
           .read(cameraServiceProvider.notifier)
           .initializeCamera(direction);
@@ -140,11 +151,42 @@ class MediaScreenController extends _$MediaScreenController {
         cameraController: controller,
         isCameraAvailable: true,
         isFrontCamera: direction == CameraLensDirection.front,
+        isLoading: false,
       );
 
       ref.onDispose(controller.dispose);
-    } catch (_) {
-      state = state.copyWith(isCameraAvailable: false);
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Error initializing camera',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      state = state.copyWith(
+        isCameraAvailable: false,
+        isLoading: false,
+      );
     }
+  }
+
+  /// Retries camera initialization when permission was previously denied.
+  Future<void> retryInitCamera(CameraLensDirection direction) async {
+    _logger.info('Retrying camera initialization', name: _logKey);
+    await _initCamera(direction);
+  }
+
+  /// Opens the app settings for the user to grant camera permission.
+  Future<void> openSettings() async {
+    _logger.info('Opening app settings for camera permission', name: _logKey);
+    await openAppSettings();
+  }
+
+  /// Ensure to recheck camera availability when re-entering the Media Screen.
+  Future<void> ensureCameraInitialized([
+    CameraLensDirection direction = CameraLensDirection.front,
+  ]) async {
+    await ref
+        .read(cameraServiceProvider.notifier)
+        .ensureCameraInitialized(direction);
   }
 }

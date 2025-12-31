@@ -23,5 +23,6 @@ abstract class CameraServiceState with _$CameraServiceState {
     @Default([]) List<CameraDescription> cameras,
     bool? isAvailable,
     CameraController? controller,
+    @Default(true) bool permissionGranted,
   }) = _CameraServiceState;
 }

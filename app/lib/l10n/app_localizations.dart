@@ -2115,6 +2115,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send or save QR code'**
   String get shareSheetCTA_QRCode;
+
+  /// No description provided for @cameraInstructionAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Apps > H2H > Permissions > Camera > Allow only while using the app.'**
+  String get cameraInstructionAndroid;
+
+  /// No description provided for @cameraInstructionIos.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > H2H > Camera and enable access for this app.'**
+  String get cameraInstructionIos;
+
+  /// No description provided for @cameraInstructionMacos.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to System Settings > Privacy & Security > Camera and allow camera access for this app.'**
+  String get cameraInstructionMacos;
+
+  /// No description provided for @cameraAccessDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access denied or unavailable.'**
+  String get cameraAccessDenied;
+
+  /// No description provided for @cameraOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get cameraOpenSettings;
 }
 
 class _AppLocalizationsDelegate

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../navigation/navigator.dart' hide Navigator;
 import '../../../widgets/images/compressed_image.dart';
 import '../media_review_screen/media_review_screen.dart';
@@ -98,6 +99,14 @@ class MediaScreen extends HookConsumerWidget {
 
     useEffect(
       () {
+        controller.ensureCameraInitialized(cameraLensDirection);
+        return null;
+      },
+      const [],
+    );
+
+    useEffect(
+      () {
         if (state.pickedImageBytes != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!context.mounted) return;
@@ -112,12 +121,21 @@ class MediaScreen extends HookConsumerWidget {
     return Scaffold(
       body: Builder(
         builder: (context) {
-          final isCameraReady = state.isCameraAvailable &&
-              state.cameraController != null &&
-              state.cameraController!.value.isInitialized;
+          // Show loading indicator while initializing camera
+          if (state.isLoading || !useCamera) {
+            return const Center(child: CircularProgressIndicator.adaptive());
+          }
 
-          if (!useCamera || !isCameraReady) {
-            return const Center(child: CircularProgressIndicator());
+          if (!state.permissionGranted && !state.isLoading) {
+            return _CameraPermissionInstruction(
+              cameraLensDirection: cameraLensDirection,
+              useCamera: useCamera,
+            );
+          }
+
+          // Show loading indicator while toggling or initializing camera
+          if (state.cameraController == null || !state.isCameraAvailable) {
+            return const Center(child: CircularProgressIndicator.adaptive());
           }
 
           final camController = state.cameraController!;
@@ -143,7 +161,9 @@ class MediaScreen extends HookConsumerWidget {
           );
         },
       ),
-      floatingActionButton: useCamera && state.isCameraAvailable
+      floatingActionButton: useCamera &&
+              state.isCameraAvailable &&
+              state.cameraController != null
           ? Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -190,9 +210,9 @@ class MediaScreen extends HookConsumerWidget {
                 FloatingActionButton(
                   heroTag: 4,
                   backgroundColor: Colors.red,
-                  onPressed: () async {
-                    await controller.closeCamera();
+                  onPressed: () {
                     navigator.pop(MediaReviewResult.empty());
+                    Future(controller.closeCamera);
                   },
                   child:
                       const Icon(Icons.cancel, size: 50, color: Colors.white),
@@ -200,6 +220,122 @@ class MediaScreen extends HookConsumerWidget {
               ],
             )
           : null,
+    );
+  }
+}
+
+class _CameraPermissionInstruction extends ConsumerWidget {
+  const _CameraPermissionInstruction({
+    required this.cameraLensDirection,
+    required this.useCamera,
+  });
+
+  final CameraLensDirection cameraLensDirection;
+  final bool useCamera;
+
+  String cameraPlatformInstruction(BuildContext context) {
+    final l10n = context.l10n;
+    final platform = Theme.of(context).platform;
+    switch (platform) {
+      case TargetPlatform.android:
+        return l10n.cameraInstructionAndroid;
+      case TargetPlatform.iOS:
+        return l10n.cameraInstructionIos;
+      case TargetPlatform.macOS:
+        return l10n.cameraInstructionMacos;
+      default:
+        return '';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final colorScheme = context.colorScheme;
+    final instruction = cameraPlatformInstruction(context);
+    final controller = ref.read(
+      mediaScreenControllerProvider(
+        cameraLensDirection: cameraLensDirection,
+        useCamera: true,
+      ).notifier,
+    );
+
+    Future<void> onOpenSettings() async {
+      await controller.openSettings();
+    }
+
+    Future<void> onRetry() async {
+      await controller.retryInitCamera(cameraLensDirection);
+    }
+
+    return Container(
+      color: colorScheme.surface,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.cameraAccessDenied,
+                style: TextStyle(
+                  color: colorScheme.onSurface,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (instruction.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  instruction,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: colorScheme.onSurfaceVariant.withAlpha(180),
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  icon: Icon(Icons.settings, color: colorScheme.onSurface),
+                  label: Text(
+                    l10n.cameraOpenSettings,
+                    style: TextStyle(color: colorScheme.onSurface),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side:
+                        BorderSide(color: colorScheme.onSurface.withAlpha(180)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: onOpenSettings,
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: Icon(Icons.refresh, color: colorScheme.onSurface),
+                  label: Text(
+                    l10n.generalRetry,
+                    style: TextStyle(
+                      color: colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: onRetry,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
