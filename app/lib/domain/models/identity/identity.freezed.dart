@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Identity {
   String get id;
+  String get did;
   ContactCard get card;
   bool get isPrimary;
 
@@ -31,17 +32,18 @@ mixin _$Identity {
         (other.runtimeType == runtimeType &&
             other is Identity &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.did, did) || other.did == did) &&
             (identical(other.card, card) || other.card == card) &&
             (identical(other.isPrimary, isPrimary) ||
                 other.isPrimary == isPrimary));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, card, isPrimary);
+  int get hashCode => Object.hash(runtimeType, id, did, card, isPrimary);
 
   @override
   String toString() {
-    return 'Identity(id: $id, card: $card, isPrimary: $isPrimary)';
+    return 'Identity(id: $id, did: $did, card: $card, isPrimary: $isPrimary)';
   }
 }
 
@@ -50,7 +52,7 @@ abstract mixin class $IdentityCopyWith<$Res> {
   factory $IdentityCopyWith(Identity value, $Res Function(Identity) _then) =
       _$IdentityCopyWithImpl;
   @useResult
-  $Res call({String id, ContactCard card, bool isPrimary});
+  $Res call({String id, String did, ContactCard card, bool isPrimary});
 
   $ContactCardCopyWith<$Res> get card;
 }
@@ -68,6 +70,7 @@ class _$IdentityCopyWithImpl<$Res> implements $IdentityCopyWith<$Res> {
   @override
   $Res call({
     Object? id = null,
+    Object? did = null,
     Object? card = null,
     Object? isPrimary = null,
   }) {
@@ -75,6 +78,10 @@ class _$IdentityCopyWithImpl<$Res> implements $IdentityCopyWith<$Res> {
       id: null == id
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      did: null == did
+          ? _self.did
+          : did // ignore: cast_nullable_to_non_nullable
               as String,
       card: null == card
           ? _self.card
@@ -191,13 +198,14 @@ extension IdentityPatterns on Identity {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String id, ContactCard card, bool isPrimary)? $default, {
+    TResult Function(String id, String did, ContactCard card, bool isPrimary)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _Identity() when $default != null:
-        return $default(_that.id, _that.card, _that.isPrimary);
+        return $default(_that.id, _that.did, _that.card, _that.isPrimary);
       case _:
         return orElse();
     }
@@ -218,12 +226,13 @@ extension IdentityPatterns on Identity {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String id, ContactCard card, bool isPrimary) $default,
+    TResult Function(String id, String did, ContactCard card, bool isPrimary)
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Identity():
-        return $default(_that.id, _that.card, _that.isPrimary);
+        return $default(_that.id, _that.did, _that.card, _that.isPrimary);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -243,12 +252,13 @@ extension IdentityPatterns on Identity {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String id, ContactCard card, bool isPrimary)? $default,
+    TResult? Function(String id, String did, ContactCard card, bool isPrimary)?
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Identity() when $default != null:
-        return $default(_that.id, _that.card, _that.isPrimary);
+        return $default(_that.id, _that.did, _that.card, _that.isPrimary);
       case _:
         return null;
     }
@@ -259,10 +269,15 @@ extension IdentityPatterns on Identity {
 
 class _Identity implements Identity {
   const _Identity(
-      {required this.id, required this.card, this.isPrimary = false});
+      {required this.id,
+      required this.did,
+      required this.card,
+      this.isPrimary = false});
 
   @override
   final String id;
+  @override
+  final String did;
   @override
   final ContactCard card;
   @override
@@ -283,17 +298,18 @@ class _Identity implements Identity {
         (other.runtimeType == runtimeType &&
             other is _Identity &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.did, did) || other.did == did) &&
             (identical(other.card, card) || other.card == card) &&
             (identical(other.isPrimary, isPrimary) ||
                 other.isPrimary == isPrimary));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, card, isPrimary);
+  int get hashCode => Object.hash(runtimeType, id, did, card, isPrimary);
 
   @override
   String toString() {
-    return 'Identity(id: $id, card: $card, isPrimary: $isPrimary)';
+    return 'Identity(id: $id, did: $did, card: $card, isPrimary: $isPrimary)';
   }
 }
 
@@ -304,7 +320,7 @@ abstract mixin class _$IdentityCopyWith<$Res>
       __$IdentityCopyWithImpl;
   @override
   @useResult
-  $Res call({String id, ContactCard card, bool isPrimary});
+  $Res call({String id, String did, ContactCard card, bool isPrimary});
 
   @override
   $ContactCardCopyWith<$Res> get card;
@@ -323,6 +339,7 @@ class __$IdentityCopyWithImpl<$Res> implements _$IdentityCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   $Res call({
     Object? id = null,
+    Object? did = null,
     Object? card = null,
     Object? isPrimary = null,
   }) {
@@ -330,6 +347,10 @@ class __$IdentityCopyWithImpl<$Res> implements _$IdentityCopyWith<$Res> {
       id: null == id
           ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      did: null == did
+          ? _self.did
+          : did // ignore: cast_nullable_to_non_nullable
               as String,
       card: null == card
           ? _self.card

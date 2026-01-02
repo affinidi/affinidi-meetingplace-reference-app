@@ -16,6 +16,7 @@ class IdentitiesScreenController extends _$IdentitiesScreenController {
   IdentitiesScreenFilter _currentFilter = IdentitiesScreenFilter.all;
   late final createNewIdentityPlaceholder = Identity(
     id: placeholderIdentityId,
+    did: '',
     card: ContactCard.empty(),
   );
 

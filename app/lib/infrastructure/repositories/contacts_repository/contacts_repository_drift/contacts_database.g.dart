@@ -824,6 +824,16 @@ class $ContactCardsTable extends ContactCards
       requiredDuringInsert: true,
       $customConstraints:
           'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL');
+  static const VerificationMeta _didMeta = const VerificationMeta('did');
+  @override
+  late final GeneratedColumn<String> did = GeneratedColumn<String>(
+      'did', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+      'type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _firstNameMeta =
       const VerificationMeta('firstName');
   @override
@@ -863,6 +873,8 @@ class $ContactCardsTable extends ContactCards
   List<GeneratedColumn> get $columns => [
         id,
         contactId,
+        did,
+        type,
         firstName,
         lastName,
         email,
@@ -888,6 +900,18 @@ class $ContactCardsTable extends ContactCards
           contactId.isAcceptableOrUnknown(data['contact_id']!, _contactIdMeta));
     } else if (isInserting) {
       context.missing(_contactIdMeta);
+    }
+    if (data.containsKey('did')) {
+      context.handle(
+          _didMeta, did.isAcceptableOrUnknown(data['did']!, _didMeta));
+    } else if (isInserting) {
+      context.missing(_didMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+          _typeMeta, type.isAcceptableOrUnknown(data['type']!, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
     }
     if (data.containsKey('first_name')) {
       context.handle(_firstNameMeta,
@@ -943,6 +967,10 @@ class $ContactCardsTable extends ContactCards
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       contactId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}contact_id'])!,
+      did: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}did'])!,
+      type: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}type'])!,
       firstName: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}first_name'])!,
       lastName: attachedDatabase.typeMapping
@@ -968,6 +996,8 @@ class $ContactCardsTable extends ContactCards
 class ContactCard extends DataClass implements Insertable<ContactCard> {
   final int id;
   final String contactId;
+  final String did;
+  final String type;
   final String firstName;
   final String lastName;
   final String email;
@@ -977,6 +1007,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
   const ContactCard(
       {required this.id,
       required this.contactId,
+      required this.did,
+      required this.type,
       required this.firstName,
       required this.lastName,
       required this.email,
@@ -988,6 +1020,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['contact_id'] = Variable<String>(contactId);
+    map['did'] = Variable<String>(did);
+    map['type'] = Variable<String>(type);
     map['first_name'] = Variable<String>(firstName);
     map['last_name'] = Variable<String>(lastName);
     map['email'] = Variable<String>(email);
@@ -1002,6 +1036,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     return ContactCardsCompanion(
       id: Value(id),
       contactId: Value(contactId),
+      did: Value(did),
+      type: Value(type),
       firstName: Value(firstName),
       lastName: Value(lastName),
       email: Value(email),
@@ -1017,6 +1053,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     return ContactCard(
       id: serializer.fromJson<int>(json['id']),
       contactId: serializer.fromJson<String>(json['contactId']),
+      did: serializer.fromJson<String>(json['did']),
+      type: serializer.fromJson<String>(json['type']),
       firstName: serializer.fromJson<String>(json['firstName']),
       lastName: serializer.fromJson<String>(json['lastName']),
       email: serializer.fromJson<String>(json['email']),
@@ -1032,6 +1070,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'contactId': serializer.toJson<String>(contactId),
+      'did': serializer.toJson<String>(did),
+      'type': serializer.toJson<String>(type),
       'firstName': serializer.toJson<String>(firstName),
       'lastName': serializer.toJson<String>(lastName),
       'email': serializer.toJson<String>(email),
@@ -1045,6 +1085,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
   ContactCard copyWith(
           {int? id,
           String? contactId,
+          String? did,
+          String? type,
           String? firstName,
           String? lastName,
           String? email,
@@ -1054,6 +1096,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       ContactCard(
         id: id ?? this.id,
         contactId: contactId ?? this.contactId,
+        did: did ?? this.did,
+        type: type ?? this.type,
         firstName: firstName ?? this.firstName,
         lastName: lastName ?? this.lastName,
         email: email ?? this.email,
@@ -1066,6 +1110,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     return ContactCard(
       id: data.id.present ? data.id.value : this.id,
       contactId: data.contactId.present ? data.contactId.value : this.contactId,
+      did: data.did.present ? data.did.value : this.did,
+      type: data.type.present ? data.type.value : this.type,
       firstName: data.firstName.present ? data.firstName.value : this.firstName,
       lastName: data.lastName.present ? data.lastName.value : this.lastName,
       email: data.email.present ? data.email.value : this.email,
@@ -1083,6 +1129,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     return (StringBuffer('ContactCard(')
           ..write('id: $id, ')
           ..write('contactId: $contactId, ')
+          ..write('did: $did, ')
+          ..write('type: $type, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('email: $email, ')
@@ -1095,14 +1143,16 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
   }
 
   @override
-  int get hashCode => Object.hash(id, contactId, firstName, lastName, email,
-      mobile, profilePic, meetingplaceIdentityCardColor);
+  int get hashCode => Object.hash(id, contactId, did, type, firstName, lastName,
+      email, mobile, profilePic, meetingplaceIdentityCardColor);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ContactCard &&
           other.id == this.id &&
           other.contactId == this.contactId &&
+          other.did == this.did &&
+          other.type == this.type &&
           other.firstName == this.firstName &&
           other.lastName == this.lastName &&
           other.email == this.email &&
@@ -1115,6 +1165,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
 class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   final Value<int> id;
   final Value<String> contactId;
+  final Value<String> did;
+  final Value<String> type;
   final Value<String> firstName;
   final Value<String> lastName;
   final Value<String> email;
@@ -1124,6 +1176,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   const ContactCardsCompanion({
     this.id = const Value.absent(),
     this.contactId = const Value.absent(),
+    this.did = const Value.absent(),
+    this.type = const Value.absent(),
     this.firstName = const Value.absent(),
     this.lastName = const Value.absent(),
     this.email = const Value.absent(),
@@ -1134,6 +1188,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   ContactCardsCompanion.insert({
     this.id = const Value.absent(),
     required String contactId,
+    required String did,
+    required String type,
     required String firstName,
     required String lastName,
     required String email,
@@ -1141,6 +1197,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     required String profilePic,
     required String meetingplaceIdentityCardColor,
   })  : contactId = Value(contactId),
+        did = Value(did),
+        type = Value(type),
         firstName = Value(firstName),
         lastName = Value(lastName),
         email = Value(email),
@@ -1150,6 +1208,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   static Insertable<ContactCard> custom({
     Expression<int>? id,
     Expression<String>? contactId,
+    Expression<String>? did,
+    Expression<String>? type,
     Expression<String>? firstName,
     Expression<String>? lastName,
     Expression<String>? email,
@@ -1160,6 +1220,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (contactId != null) 'contact_id': contactId,
+      if (did != null) 'did': did,
+      if (type != null) 'type': type,
       if (firstName != null) 'first_name': firstName,
       if (lastName != null) 'last_name': lastName,
       if (email != null) 'email': email,
@@ -1173,6 +1235,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   ContactCardsCompanion copyWith(
       {Value<int>? id,
       Value<String>? contactId,
+      Value<String>? did,
+      Value<String>? type,
       Value<String>? firstName,
       Value<String>? lastName,
       Value<String>? email,
@@ -1182,6 +1246,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     return ContactCardsCompanion(
       id: id ?? this.id,
       contactId: contactId ?? this.contactId,
+      did: did ?? this.did,
+      type: type ?? this.type,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
@@ -1200,6 +1266,12 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     }
     if (contactId.present) {
       map['contact_id'] = Variable<String>(contactId.value);
+    }
+    if (did.present) {
+      map['did'] = Variable<String>(did.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
     }
     if (firstName.present) {
       map['first_name'] = Variable<String>(firstName.value);
@@ -1228,6 +1300,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     return (StringBuffer('ContactCardsCompanion(')
           ..write('id: $id, ')
           ..write('contactId: $contactId, ')
+          ..write('did: $did, ')
+          ..write('type: $type, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('email: $email, ')
@@ -1701,6 +1775,8 @@ typedef $$ContactCardsTableCreateCompanionBuilder = ContactCardsCompanion
     Function({
   Value<int> id,
   required String contactId,
+  required String did,
+  required String type,
   required String firstName,
   required String lastName,
   required String email,
@@ -1712,6 +1788,8 @@ typedef $$ContactCardsTableUpdateCompanionBuilder = ContactCardsCompanion
     Function({
   Value<int> id,
   Value<String> contactId,
+  Value<String> did,
+  Value<String> type,
   Value<String> firstName,
   Value<String> lastName,
   Value<String> email,
@@ -1751,6 +1829,12 @@ class $$ContactCardsTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get did => $composableBuilder(
+      column: $table.did, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get firstName => $composableBuilder(
       column: $table.firstName, builder: (column) => ColumnFilters(column));
@@ -1804,6 +1888,12 @@ class $$ContactCardsTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get did => $composableBuilder(
+      column: $table.did, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get type => $composableBuilder(
+      column: $table.type, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get firstName => $composableBuilder(
       column: $table.firstName, builder: (column) => ColumnOrderings(column));
 
@@ -1856,6 +1946,12 @@ class $$ContactCardsTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get did =>
+      $composableBuilder(column: $table.did, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<String> get firstName =>
       $composableBuilder(column: $table.firstName, builder: (column) => column);
@@ -1924,6 +2020,8 @@ class $$ContactCardsTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> contactId = const Value.absent(),
+            Value<String> did = const Value.absent(),
+            Value<String> type = const Value.absent(),
             Value<String> firstName = const Value.absent(),
             Value<String> lastName = const Value.absent(),
             Value<String> email = const Value.absent(),
@@ -1934,6 +2032,8 @@ class $$ContactCardsTableTableManager extends RootTableManager<
               ContactCardsCompanion(
             id: id,
             contactId: contactId,
+            did: did,
+            type: type,
             firstName: firstName,
             lastName: lastName,
             email: email,
@@ -1944,6 +2044,8 @@ class $$ContactCardsTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             required String contactId,
+            required String did,
+            required String type,
             required String firstName,
             required String lastName,
             required String email,
@@ -1954,6 +2056,8 @@ class $$ContactCardsTableTableManager extends RootTableManager<
               ContactCardsCompanion.insert(
             id: id,
             contactId: contactId,
+            did: did,
+            type: type,
             firstName: firstName,
             lastName: lastName,
             email: email,

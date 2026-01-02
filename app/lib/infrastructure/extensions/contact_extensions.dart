@@ -6,7 +6,6 @@ import '../../domain/models/contacts/contact_status.dart';
 import '../../presentation/painting/cached_base64_image.dart';
 import '../../presentation/widgets/images/default_profile_image.dart';
 import 'build_context_extensions.dart';
-import 'vcard_extensions.dart';
 
 /// UI helper accessors for Contact model used by widgets:
 extension ContactExtensions on Contact {
@@ -56,8 +55,8 @@ extension ContactExtensions on Contact {
   /// ImageProvider for the other party profile picture or default.
   ImageProvider<Object> otherPartyImage(
           {required BaseCacheManager cacheManager}) =>
-      (otherPartyVCard != null && otherPartyVCard!.profilePic.isNotEmpty)
-          ? CachedBase64Image(otherPartyVCard!.profilePic,
+      (otherPartyCard != null && (otherPartyCard!.profilePic ?? '').isNotEmpty)
+          ? CachedBase64Image(otherPartyCard!.profilePic!,
               cacheManager: cacheManager)
           : defaultProfileImage;
 }

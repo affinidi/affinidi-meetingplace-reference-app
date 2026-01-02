@@ -6,7 +6,7 @@ part of 'mediator_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$mediatorServiceHash() => r'986c5eef0a06519365e99f5d94f2dbbc215bbabd';
+String _$mediatorServiceHash() => r'59ab60881a851487557792f56781515f633037c4';
 
 /// Service to manage mediators: loading, adding, renaming, and removing.
 ///

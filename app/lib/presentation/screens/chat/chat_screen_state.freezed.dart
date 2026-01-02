@@ -17,7 +17,7 @@ mixin _$ChatScreenState {
   Contact? get contact;
   Group? get group;
   String? get offerName;
-  VCard? get otherPartyVCard;
+  ContactCard? get otherPartyCard;
   List<chat.ChatItem> get messages;
   List<String> get membersTyping;
   int get selectedReactionIndex;
@@ -45,8 +45,8 @@ mixin _$ChatScreenState {
             (identical(other.group, group) || other.group == group) &&
             (identical(other.offerName, offerName) ||
                 other.offerName == offerName) &&
-            (identical(other.otherPartyVCard, otherPartyVCard) ||
-                other.otherPartyVCard == otherPartyVCard) &&
+            (identical(other.otherPartyCard, otherPartyCard) ||
+                other.otherPartyCard == otherPartyCard) &&
             const DeepCollectionEquality().equals(other.messages, messages) &&
             const DeepCollectionEquality()
                 .equals(other.membersTyping, membersTyping) &&
@@ -71,7 +71,7 @@ mixin _$ChatScreenState {
       contact,
       group,
       offerName,
-      otherPartyVCard,
+      otherPartyCard,
       const DeepCollectionEquality().hash(messages),
       const DeepCollectionEquality().hash(membersTyping),
       selectedReactionIndex,
@@ -84,7 +84,7 @@ mixin _$ChatScreenState {
 
   @override
   String toString() {
-    return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyVCard: $otherPartyVCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
+    return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
   }
 }
 
@@ -98,7 +98,7 @@ abstract mixin class $ChatScreenStateCopyWith<$Res> {
       {Contact? contact,
       Group? group,
       String? offerName,
-      VCard? otherPartyVCard,
+      ContactCard? otherPartyCard,
       List<chat.ChatItem> messages,
       List<String> membersTyping,
       int selectedReactionIndex,
@@ -108,6 +108,8 @@ abstract mixin class $ChatScreenStateCopyWith<$Res> {
       ScreenEffect? effect,
       Map<String, Uint8List> attachmentsDataCache,
       String? notificationToken});
+
+  $ContactCardCopyWith<$Res>? get otherPartyCard;
 }
 
 /// @nodoc
@@ -126,7 +128,7 @@ class _$ChatScreenStateCopyWithImpl<$Res>
     Object? contact = freezed,
     Object? group = freezed,
     Object? offerName = freezed,
-    Object? otherPartyVCard = freezed,
+    Object? otherPartyCard = freezed,
     Object? messages = null,
     Object? membersTyping = null,
     Object? selectedReactionIndex = null,
@@ -150,10 +152,10 @@ class _$ChatScreenStateCopyWithImpl<$Res>
           ? _self.offerName
           : offerName // ignore: cast_nullable_to_non_nullable
               as String?,
-      otherPartyVCard: freezed == otherPartyVCard
-          ? _self.otherPartyVCard
-          : otherPartyVCard // ignore: cast_nullable_to_non_nullable
-              as VCard?,
+      otherPartyCard: freezed == otherPartyCard
+          ? _self.otherPartyCard
+          : otherPartyCard // ignore: cast_nullable_to_non_nullable
+              as ContactCard?,
       messages: null == messages
           ? _self.messages
           : messages // ignore: cast_nullable_to_non_nullable
@@ -191,6 +193,20 @@ class _$ChatScreenStateCopyWithImpl<$Res>
           : notificationToken // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
+  }
+
+  /// Create a copy of ChatScreenState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ContactCardCopyWith<$Res>? get otherPartyCard {
+    if (_self.otherPartyCard == null) {
+      return null;
+    }
+
+    return $ContactCardCopyWith<$Res>(_self.otherPartyCard!, (value) {
+      return _then(_self.copyWith(otherPartyCard: value));
+    });
   }
 }
 
@@ -291,7 +307,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             Contact? contact,
             Group? group,
             String? offerName,
-            VCard? otherPartyVCard,
+            ContactCard? otherPartyCard,
             List<chat.ChatItem> messages,
             List<String> membersTyping,
             int selectedReactionIndex,
@@ -311,7 +327,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             _that.contact,
             _that.group,
             _that.offerName,
-            _that.otherPartyVCard,
+            _that.otherPartyCard,
             _that.messages,
             _that.membersTyping,
             _that.selectedReactionIndex,
@@ -345,7 +361,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             Contact? contact,
             Group? group,
             String? offerName,
-            VCard? otherPartyVCard,
+            ContactCard? otherPartyCard,
             List<chat.ChatItem> messages,
             List<String> membersTyping,
             int selectedReactionIndex,
@@ -364,7 +380,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             _that.contact,
             _that.group,
             _that.offerName,
-            _that.otherPartyVCard,
+            _that.otherPartyCard,
             _that.messages,
             _that.membersTyping,
             _that.selectedReactionIndex,
@@ -397,7 +413,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             Contact? contact,
             Group? group,
             String? offerName,
-            VCard? otherPartyVCard,
+            ContactCard? otherPartyCard,
             List<chat.ChatItem> messages,
             List<String> membersTyping,
             int selectedReactionIndex,
@@ -416,7 +432,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             _that.contact,
             _that.group,
             _that.offerName,
-            _that.otherPartyVCard,
+            _that.otherPartyCard,
             _that.messages,
             _that.membersTyping,
             _that.selectedReactionIndex,
@@ -439,7 +455,7 @@ class _ChatScreenState extends ChatScreenState {
       {this.contact,
       this.group,
       this.offerName,
-      this.otherPartyVCard,
+      this.otherPartyCard,
       final List<chat.ChatItem> messages = const [],
       final List<String> membersTyping = const [],
       this.selectedReactionIndex = -1,
@@ -461,7 +477,7 @@ class _ChatScreenState extends ChatScreenState {
   @override
   final String? offerName;
   @override
-  final VCard? otherPartyVCard;
+  final ContactCard? otherPartyCard;
   final List<chat.ChatItem> _messages;
   @override
   @JsonKey()
@@ -524,8 +540,8 @@ class _ChatScreenState extends ChatScreenState {
             (identical(other.group, group) || other.group == group) &&
             (identical(other.offerName, offerName) ||
                 other.offerName == offerName) &&
-            (identical(other.otherPartyVCard, otherPartyVCard) ||
-                other.otherPartyVCard == otherPartyVCard) &&
+            (identical(other.otherPartyCard, otherPartyCard) ||
+                other.otherPartyCard == otherPartyCard) &&
             const DeepCollectionEquality().equals(other._messages, _messages) &&
             const DeepCollectionEquality()
                 .equals(other._membersTyping, _membersTyping) &&
@@ -550,7 +566,7 @@ class _ChatScreenState extends ChatScreenState {
       contact,
       group,
       offerName,
-      otherPartyVCard,
+      otherPartyCard,
       const DeepCollectionEquality().hash(_messages),
       const DeepCollectionEquality().hash(_membersTyping),
       selectedReactionIndex,
@@ -563,7 +579,7 @@ class _ChatScreenState extends ChatScreenState {
 
   @override
   String toString() {
-    return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyVCard: $otherPartyVCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
+    return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
   }
 }
 
@@ -579,7 +595,7 @@ abstract mixin class _$ChatScreenStateCopyWith<$Res>
       {Contact? contact,
       Group? group,
       String? offerName,
-      VCard? otherPartyVCard,
+      ContactCard? otherPartyCard,
       List<chat.ChatItem> messages,
       List<String> membersTyping,
       int selectedReactionIndex,
@@ -589,6 +605,9 @@ abstract mixin class _$ChatScreenStateCopyWith<$Res>
       ScreenEffect? effect,
       Map<String, Uint8List> attachmentsDataCache,
       String? notificationToken});
+
+  @override
+  $ContactCardCopyWith<$Res>? get otherPartyCard;
 }
 
 /// @nodoc
@@ -607,7 +626,7 @@ class __$ChatScreenStateCopyWithImpl<$Res>
     Object? contact = freezed,
     Object? group = freezed,
     Object? offerName = freezed,
-    Object? otherPartyVCard = freezed,
+    Object? otherPartyCard = freezed,
     Object? messages = null,
     Object? membersTyping = null,
     Object? selectedReactionIndex = null,
@@ -631,10 +650,10 @@ class __$ChatScreenStateCopyWithImpl<$Res>
           ? _self.offerName
           : offerName // ignore: cast_nullable_to_non_nullable
               as String?,
-      otherPartyVCard: freezed == otherPartyVCard
-          ? _self.otherPartyVCard
-          : otherPartyVCard // ignore: cast_nullable_to_non_nullable
-              as VCard?,
+      otherPartyCard: freezed == otherPartyCard
+          ? _self.otherPartyCard
+          : otherPartyCard // ignore: cast_nullable_to_non_nullable
+              as ContactCard?,
       messages: null == messages
           ? _self._messages
           : messages // ignore: cast_nullable_to_non_nullable
@@ -672,6 +691,20 @@ class __$ChatScreenStateCopyWithImpl<$Res>
           : notificationToken // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
+  }
+
+  /// Create a copy of ChatScreenState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ContactCardCopyWith<$Res>? get otherPartyCard {
+    if (_self.otherPartyCard == null) {
+      return null;
+    }
+
+    return $ContactCardCopyWith<$Res>(_self.otherPartyCard!, (value) {
+      return _then(_self.copyWith(otherPartyCard: value));
+    });
   }
 }
 

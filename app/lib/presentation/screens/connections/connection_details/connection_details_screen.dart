@@ -8,10 +8,10 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/channel_extensions.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../../infrastructure/extensions/date_time_extensions.dart';
 import '../../../../infrastructure/extensions/did_extensions.dart';
-import '../../../../infrastructure/extensions/vcard_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/buttons/elevated_loading_button.dart';

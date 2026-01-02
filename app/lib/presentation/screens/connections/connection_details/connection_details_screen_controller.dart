@@ -16,7 +16,6 @@ import '../../../../domain/models/contacts/contact.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
-import '../../../../infrastructure/extensions/vcard_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../navigation/navigator.dart';
@@ -129,7 +128,7 @@ class ConnectionDetailsScreenController
     } else if (group != null && (connection?.offerName.isNotEmpty ?? false)) {
       contactName = connection!.offerName;
     } else {
-      contactName = contact.vCard.fullName;
+      contactName = contact.card.displayName;
     }
     return contactName;
   }
@@ -163,7 +162,7 @@ class ConnectionDetailsScreenController
         );
       }
 
-      final initialDisplayName = currentContact.vCard.fullName;
+      final initialDisplayName = currentContact.card.displayName;
       final newDisplayName = displayNameController.text;
       final displayNameChanged = newDisplayName != initialDisplayName;
 
@@ -247,8 +246,8 @@ class ConnectionDetailsScreenController
 
 extension ConnectionDetailsScreenControllerProviderSelector
     on ConnectionDetailsScreenControllerProvider {
-  ProviderListenable<VCard?> get otherPartyVCard =>
-      select((state) => state.channel?.otherPartyVCard);
+  ProviderListenable<ContactCard?> get otherPartyCard =>
+      select((state) => state.channel?.otherPartyContactCard);
 
   ProviderListenable<String> get otherPartyDisplayName => select((state) {
         final displayName = state.contact?.displayName;
@@ -260,15 +259,17 @@ extension ConnectionDetailsScreenControllerProviderSelector
           return state.connection?.offerName ?? '';
         }
 
-        return state.channel?.otherPartyVCard?.firstName ?? '';
+        return state.channel?.otherPartyContactCard?.contactInfo['firstName']
+                as String? ??
+            '';
       });
 
-  ProviderListenable<VCard?> get groupAdminVCard => select((state) {
+  ProviderListenable<ContactCard?> get groupAdminCard => select((state) {
         final group = state.group;
         if (group == null) return null;
         final groupAdmin = group.members.firstWhereOrNull(
             (member) => member.membershipType == GroupMembershipType.admin);
-        return groupAdmin?.vCard;
+        return groupAdmin?.contactCard;
       });
 
   ProviderListenable<bool> get isGroupChat =>

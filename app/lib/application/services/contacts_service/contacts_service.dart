@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:clock/clock.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../domain/models/contact_card/contact_card.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
@@ -14,8 +15,8 @@ import '../../../domain/models/contacts/contact_type.dart';
 import '../../../domain/repositories/contacts_repository.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/did_extensions.dart';
-import '../../../infrastructure/extensions/vcard_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/contacts_repository_provider.dart';
@@ -32,7 +33,7 @@ part 'contacts_service.g.dart';
 /// - Create contacts from invitation accepted events and approved offers
 /// - Update contacts when a channel is inaugurated
 /// - Persist, fetch, add, update and delete contacts via a repository
-/// - Maintain contact-specific state such as badge counts and vCard updates
+/// - Maintain contact-specific state such as badge counts and card updates
 ///
 /// The service listens to control plane events to automatically create/update
 /// contacts and exposes streams for processing and contact-card updates.
@@ -50,9 +51,10 @@ class ContactsService extends _$ContactsService {
   Stream<String> get onContactCardUpdated =>
       _contactCardUpdatedController.stream;
 
-  final StreamController<Channel> _contactLeftChatController =
-      StreamController<Channel>.broadcast();
-  Stream<Channel> get onContactLeftChat => _contactLeftChatController.stream;
+  final StreamController<sdk.Channel> _contactLeftChatController =
+      StreamController<sdk.Channel>.broadcast();
+  Stream<sdk.Channel> get onContactLeftChat =>
+      _contactLeftChatController.stream;
 
   @override
   ContactsServiceState build() {
@@ -96,7 +98,7 @@ class ContactsService extends _$ContactsService {
   ///
   /// Throws [AppException] if:
   /// - Unable to extract a contact from the channel when one does not exist.
-  Future<void> updateContactFromChannelActivity(Channel channel) async {
+  Future<void> updateContactFromChannelActivity(sdk.Channel channel) async {
     _logger.info(
       'Channel inaugurated - creating/updating contact for channel: ${channel.permanentChannelDid}',
       name: _logKey,
@@ -105,8 +107,10 @@ class ContactsService extends _$ContactsService {
     final existingContact =
         state.getContactByChannelDid(channel.otherPartyPermanentChannelDid!);
     if (existingContact == null) {
-      _logger
-          .info('No existing contact found, creating new contact from channel');
+      _logger.info(
+        'Contact does not exist - creating new contact',
+        name: _logKey,
+      );
       final contact =
           await _makeContactFromChannel(channel, ContactStatus.active);
       if (contact == null) {
@@ -114,12 +118,12 @@ class ContactsService extends _$ContactsService {
             code: AppExceptionType.missingContactCard.name);
       }
       _logger.info(
-        'Creating contact with contact: ${contact.vCard.fullName}',
+        'Creating contact with contact: ${contact.card.displayName}',
         name: _logKey,
       );
       await addContact(contact);
       _logger.info(
-        'Contact created successfully: ${contact.vCard.fullName}',
+        'Contact created successfully: ${contact.card.displayName}',
         name: _logKey,
       );
     } else {
@@ -141,27 +145,32 @@ class ContactsService extends _$ContactsService {
 
   /// Build a Contact model from a channel if possible.
   ///
-  /// Extracts vCard and metadata from [channel] and constructs a Contact.
+  /// Extracts contact card and metadata from [channel]
+  /// and constructs a Contact.
   ///
   /// [channel] - The channel to convert into a Contact.
   ///
   /// Returns:
   /// - `Contact?` the constructed contact, or `null` if the channel
-  ///  lacks a vCard.
+  ///  lacks a contact card.
   Future<Contact?> _makeContactFromChannel(
-      Channel channel, ContactStatus status) async {
-    final contactVCard = channel.type == ChannelType.group
-        ? channel.vCard
-        : channel.otherPartyVCard;
-    if (contactVCard == null) return null;
+    sdk.Channel channel,
+    ContactStatus status,
+  ) async {
+    final sourceCard = channel.type == sdk.ChannelType.group
+        ? channel.contactCard
+        : channel.otherPartyContactCard;
+    if (sourceCard == null) return null;
 
     final displayName = await _getGroupOfferNameFromChannel(channel);
+    final domainCard = ContactCardUtils.fromSdkContactCard(sourceCard);
+
     return Contact(
       id: const Uuid().v4(),
       channelDid: channel.otherPartyPermanentChannelDid,
       channelDidSha256: channel.otherPartyPermanentChannelDid?.toDidSha256,
       offerLink: channel.offerLink,
-      vCard: contactVCard,
+      card: domainCard,
       displayName: displayName,
       dateAdded: clock.now(),
       mediatorDid: channel.mediatorDid,
@@ -172,8 +181,8 @@ class ContactsService extends _$ContactsService {
     );
   }
 
-  Future<String?> _getGroupOfferNameFromChannel(Channel channel) async {
-    if (channel.type != ChannelType.group) {
+  Future<String?> _getGroupOfferNameFromChannel(sdk.Channel channel) async {
+    if (channel.type != sdk.ChannelType.group) {
       return null;
     }
 
@@ -305,22 +314,22 @@ class ContactsService extends _$ContactsService {
     await fetchContacts();
   }
 
-  /// Update the vCard for a contact identified by channel DID.
+  /// Update the contact card for a contact identified by channel DID.
   ///
   /// This method updates the in-memory state and schedules a repository update
   /// asynchronously. Also emits a `onContactCardUpdated` event with the DID.
   ///
   /// [did] - Channel DID identifying the contact to update.
-  /// [vCard] - New vCard to set on the contact.
-  void updateContactVcard(
+  /// [card] - New ContactCard to set on the contact.
+  void updateContactCard(
     String did,
-    VCard vCard,
+    ContactCard card,
   ) async {
     final contact = state.getContactByChannelDid(did);
     if (contact == null) {
       return;
     }
-    final amendedContact = contact.copyWith(vCard: vCard);
+    final amendedContact = contact.copyWith(card: card);
     unawaited(updateContact(amendedContact));
     _contactCardUpdatedController.add(did);
   }
@@ -361,7 +370,7 @@ class ContactsService extends _$ContactsService {
 
   /// Update an existing contact when a group invitation is accepted.
   ///
-  /// Sets the contact status to pending approval and updates vCard/profile
+  /// Sets the contact status to pending approval and updates card/profile
   /// picture and member count.
   ///
   /// [channel] - The channel event triggering the update.
@@ -373,7 +382,7 @@ class ContactsService extends _$ContactsService {
   /// - None. Domain validation is performed elsewhere; unexpected errors
   ///   propagate as exceptions.
   Future<void> _updateContactFromGroupInvitationAccepted(
-    Channel channel,
+    sdk.Channel channel,
   ) async {
     _logger.info(
       'Group invitation accepted for channel ${channel.permanentChannelDid}',
@@ -395,9 +404,25 @@ class ContactsService extends _$ContactsService {
       'Existing contact found, updating status to active',
       name: _logKey,
     );
+    final src = channel.otherPartyContactCard;
     final updatedContact = existingContact.copyWith(
       status: ContactStatus.pendingApproval,
-      otherPartyVCard: channel.otherPartyVCard,
+      otherPartyCard: src == null
+          ? null
+          : ContactCard(
+              id: const Uuid().v4(),
+              did: src.did,
+              type: src.type,
+              firstName: src.firstName,
+              displayName: src.fullName,
+              lastName: src.lastName.isEmpty ? null : src.lastName,
+              email: src.email.isEmpty ? null : src.email,
+              mobile: src.mobile.isEmpty ? null : src.mobile,
+              profilePic: src.profilePic.isEmpty ? null : src.profilePic,
+              cardColor: src.meetingplaceIdentityCardColor.isEmpty
+                  ? null
+                  : src.meetingplaceIdentityCardColor,
+            ),
     );
     await updateContact(updatedContact);
   }
@@ -413,8 +438,8 @@ class ContactsService extends _$ContactsService {
   ///
   /// Throws [AppException] if:
   /// - The channel does not include the other party permanent channel DID.
-  /// - The channel does not include the other party vCard.
-  Future<void> _createContactFromInvitationAccepted(Channel channel) async {
+  /// - The channel does not include the other party contact card.
+  Future<void> _createContactFromInvitationAccepted(sdk.Channel channel) async {
     _logger.info(
       'Creating new contact with channel $channel',
       name: _logKey,
@@ -427,10 +452,10 @@ class ContactsService extends _$ContactsService {
       );
     }
 
-    if (channel.otherPartyVCard == null) {
+    if (channel.otherPartyContactCard == null) {
       throw AppException(
-        '''An invitation was accepted but did not provide their vCard''',
-        code: AppExceptionType.missingOtherPartyVCard.name,
+        '''An invitation was accepted but did not provide their contact card''',
+        code: AppExceptionType.missingOtherPartyCard.name,
       );
     }
 
@@ -459,8 +484,8 @@ class ContactsService extends _$ContactsService {
   ///
   /// Throws [AppException] if:
   /// - The channel is missing a permanent channel DID.
-  /// - The channel does not include the other party vCard.
-  Future<void> _createContactFromOfferApproved(Channel channel) async {
+  /// - The channel does not include the other party contact card.
+  Future<void> _createContactFromOfferApproved(sdk.Channel channel) async {
     _logger.info(
       'Creating new contact with connection $channel',
       name: _logKey,
@@ -472,10 +497,10 @@ class ContactsService extends _$ContactsService {
       );
     }
 
-    if (channel.otherPartyVCard == null) {
+    if (channel.otherPartyContactCard == null) {
       throw AppException(
-        '''An offer was approved but did not provide their vCard''',
-        code: AppExceptionType.missingOtherPartyVCard.name,
+        '''An offer was approved but did not provide their contact card''',
+        code: AppExceptionType.missingOtherPartyCard.name,
       );
     }
 

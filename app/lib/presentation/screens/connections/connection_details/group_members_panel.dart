@@ -104,7 +104,7 @@ class _GroupMembersList extends ConsumerWidget {
       ].join(', ');
 
       return [
-        member.vCard.fullName,
+        member.contactCard.fullName,
         if (extras.isNotEmpty) '($extras)',
       ].join(' ');
     }

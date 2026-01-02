@@ -14,7 +14,7 @@ import 'meeting_place_sdk_provider.dart';
 ///
 /// This provider:
 /// - Sets up the [MeetingPlaceChatSDK] with the correct channel, repository,
-///   and identity VCard
+///   and identity ContactCard
 /// - Configures chat activity expiration and presence send intervals from
 ///   environment settings
 /// - Logs both successful and failed initialization attempts
@@ -35,7 +35,7 @@ final chatSdkProvider =
     final identity = ref
         .read(identitiesServiceProvider)
         .getIdentityById(channel.externalRef);
-    final identityVcard = identity?.card.toVCard();
+    final sdkContactCard = identity?.card.toSdkContactCard();
 
     try {
       final coreSDK = await ref.read(meetingPlaceSdkProvider.future);
@@ -49,7 +49,7 @@ final chatSdkProvider =
           chatPresenceSendInterval:
               Duration(seconds: environment.chatPresenceIntervalInSeconds),
         ),
-        vCard: identityVcard,
+        card: sdkContactCard,
         logger: logger,
       );
 

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/oob_service/oob_service.dart';
-import '../../../../infrastructure/extensions/vcard_extensions.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../widgets/async_loaders/async_loading_controller.dart';
@@ -27,7 +27,7 @@ class OobScanQrController extends _$OobScanQrController {
       (prev, next) {
         if (next != null) {
           logger.info(
-            'Channel received for contact ${next.otherPartyVCard?.firstName}',
+            '''Channel received for contact ${next.otherPartyContactCard?.firstName}''',
             name: logKey,
           );
           Future(() {

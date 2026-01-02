@@ -27,6 +27,19 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
 - [Support \& Feedback](#support--feedback)
   - [Reporting Technical Issues](#reporting-technical-issues)
 - [Contributing](#contributing)
+      - [Connect to Control Plane API](#connect-to-control-plane-api)
+      - [Connect to DIDComm Mediator](#connect-to-didcomm-mediator)
+      - [Enable Push Notifications](#enable-push-notifications)
+        - [Firebase iOS App](#firebase-ios-app)
+        - [Firebase Android App](#firebase-android-app)
+    - [Optional Environment Variables](#optional-environment-variables)
+  - [VSCode Configuration](#vscode-configuration)
+  - [Run App on Simulator](#run-app-on-simulator)
+  - [Troubleshooting](#troubleshooting)
+    - [Firebase Configuration Issues](#firebase-configuration-issues)
+  - [Support \& Feedback](#support--feedback)
+    - [Reporting Technical Issues](#reporting-technical-issues)
+  - [Contributing](#contributing)
 
 ## Core Concepts
 
@@ -36,7 +49,7 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
 
 - **Messaging Server (Mediator):** A service that handles and routes messages securely between parties (e.g., users, businesses, other mediators, or even AI agents). The mediators process the message without being able to access the message’s content intended for the recipient.
 
-- **Invitation:** A vCard containing information about the invitation, such as name, description, and validity. It also includes a unique phrase or mnemonic that a user can publish to allow others to initiate a connection request. It serves as an entry point for users who wish to connect with you securely.
+- **Invitation:** A ContactCard containing information about the invitation, such as name, description, and validity. It also includes a unique phrase or mnemonic that a user can publish to allow others to initiate a connection request. It serves as an entry point for users who wish to connect with you securely.
 
 - **Channel:** A secure connection that forms once an invitation to connect is accepted and finalised by the offerer. Each channels creates its own DID as an identifier along with the DID of each participants.
 

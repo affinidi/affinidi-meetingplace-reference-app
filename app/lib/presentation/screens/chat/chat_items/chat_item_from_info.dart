@@ -32,7 +32,7 @@ class _ChatItemFromInfo extends ConsumerWidget {
 
     return Text(
       context.l10n.groupMessageInfo(
-        groupMember.vCard.fullName,
+        groupMember.contactCard.fullName,
         DateFormat.MMMd().format(dateCreated),
         DateFormat.jm().format(dateCreated),
       ),

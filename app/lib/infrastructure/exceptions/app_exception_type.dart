@@ -14,7 +14,7 @@ enum AppExceptionType {
   missingMemberDidOnConciergeMessage,
   missingMnemonic,
   missingOtherPartyChannelDid,
-  missingOtherPartyVCard,
+  missingOtherPartyCard,
   missingPermanentChannelDid,
   oobFlowFailed,
   other,

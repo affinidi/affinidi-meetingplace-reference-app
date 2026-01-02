@@ -331,7 +331,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get generalConnect => 'Verbinden';
 
   @override
-  String vCardFieldName(String field) {
+  String contactCardFieldName(String field) {
     String _temp0 = intl.Intl.selectLogic(
       field,
       {

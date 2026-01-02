@@ -4,7 +4,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 
 import '../../presentation/painting/cached_base64_image.dart';
 import '../../presentation/widgets/images/default_profile_image.dart';
-import 'vcard_extensions.dart';
+import 'contact_card_extensions.dart';
 
 /// Extension to simplify image handling for channels.
 extension ChannelImageExtensions on Channel {
@@ -24,27 +24,28 @@ extension ChannelImageExtensions on Channel {
   }
 
   /// Returns the other party's image provider from the channel.
-  /// Returns [defaultProfileImage] if otherPartyVCard is null or has no
+  /// Returns [defaultProfileImage] if otherPartyCard is null or has no
   /// profile pic.
   ImageProvider<Object> otherPartyImage({
     required BaseCacheManager cacheManager,
   }) {
     return _getImageProvider(
-      otherPartyVCard?.profilePic,
+      otherPartyContactCard?.profilePic,
       cacheManager: cacheManager,
     );
   }
 
   /// Returns my (local user's) image provider from the channel.
-  /// Returns [defaultProfileImage] if vCard is null or has no profile pic.
+  /// Returns [defaultProfileImage] if card is null or has no profile pic.
   ImageProvider<Object> myImage({required BaseCacheManager cacheManager}) {
-    return _getImageProvider(vCard?.profilePic, cacheManager: cacheManager);
+    return _getImageProvider(contactCard?.profilePic,
+        cacheManager: cacheManager);
   }
 
   /// Returns true if the other party has a profile picture.
   bool get hasOtherPartyProfilePic =>
-      _hasProfilePic(otherPartyVCard?.profilePic);
+      _hasProfilePic(otherPartyContactCard?.profilePic);
 
-  /// Returns true if my (local user's) vCard has a profile picture.
-  bool get hasMyProfilePic => _hasProfilePic(vCard?.profilePic);
+  /// Returns true if my (local user's) card has a profile picture.
+  bool get hasMyProfilePic => _hasProfilePic(contactCard?.profilePic);
 }

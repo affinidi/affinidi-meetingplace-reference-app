@@ -62,8 +62,7 @@ class _ContactListItem extends ConsumerWidget {
         (state) => state.contactMediators[contact.mediatorDid],
       ),
     );
-    final vCard = contact.vCard;
-    final fullName = vCard.fullName;
+    final fullName = contact.card.displayName;
     final hasDisplayName = contact.displayName?.isNotEmpty ?? false;
     final dateAdded =
         DateFormat.yMMMd(Localizations.localeOf(context).toString())

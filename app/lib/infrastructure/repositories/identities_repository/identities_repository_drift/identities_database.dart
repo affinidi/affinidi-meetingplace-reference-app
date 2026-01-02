@@ -35,6 +35,15 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (migrator, from, to) async {
+          if (from < 2) {
+            await migrator.addColumn(identitiesTable, identitiesTable.did);
+          }
+        },
+      );
 }
 
 /// A provider that initializes and supplies the [IdentitiesDatabase].

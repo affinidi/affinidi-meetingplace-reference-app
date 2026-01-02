@@ -6,7 +6,7 @@ part of 'contacts_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$contactsServiceHash() => r'78a289bd7c626df79aea63ddbcf1cbc7eda80070';
+String _$contactsServiceHash() => r'67fbd49210ad48266581c20f56f997f8fdea6888';
 
 /// Service responsible for managing contacts derived from channels and offers.
 ///
@@ -14,7 +14,7 @@ String _$contactsServiceHash() => r'78a289bd7c626df79aea63ddbcf1cbc7eda80070';
 /// - Create contacts from invitation accepted events and approved offers
 /// - Update contacts when a channel is inaugurated
 /// - Persist, fetch, add, update and delete contacts via a repository
-/// - Maintain contact-specific state such as badge counts and vCard updates
+/// - Maintain contact-specific state such as badge counts and card updates
 ///
 /// The service listens to control plane events to automatically create/update
 /// contacts and exposes streams for processing and contact-card updates.

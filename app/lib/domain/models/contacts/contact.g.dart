@@ -13,7 +13,7 @@ abstract class _$ContactCWProxy {
 
   Contact offerLink(String offerLink);
 
-  Contact vCard(VCard vCard);
+  Contact card(ContactCard card);
 
   Contact type(ContactType type);
 
@@ -25,7 +25,7 @@ abstract class _$ContactCWProxy {
 
   Contact category(ContactCategory category);
 
-  Contact otherPartyVCard(VCard? otherPartyVCard);
+  Contact otherPartyCard(ContactCard? otherPartyCard);
 
   Contact displayName(String? displayName);
 
@@ -49,13 +49,13 @@ abstract class _$ContactCWProxy {
     String? channelDid,
     String? channelDidSha256,
     String offerLink,
-    VCard vCard,
+    ContactCard card,
     ContactType type,
     ContactStatus status,
     String mediatorDid,
     ContactOrigin origin,
     ContactCategory category,
-    VCard? otherPartyVCard,
+    ContactCard? otherPartyCard,
     String? displayName,
     bool badgeUpdateInProgress,
     int badgeCount,
@@ -82,7 +82,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
   Contact offerLink(String offerLink) => this(offerLink: offerLink);
 
   @override
-  Contact vCard(VCard vCard) => this(vCard: vCard);
+  Contact card(ContactCard card) => this(card: card);
 
   @override
   Contact type(ContactType type) => this(type: type);
@@ -100,8 +100,8 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
   Contact category(ContactCategory category) => this(category: category);
 
   @override
-  Contact otherPartyVCard(VCard? otherPartyVCard) =>
-      this(otherPartyVCard: otherPartyVCard);
+  Contact otherPartyCard(ContactCard? otherPartyCard) =>
+      this(otherPartyCard: otherPartyCard);
 
   @override
   Contact displayName(String? displayName) => this(displayName: displayName);
@@ -137,13 +137,13 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? channelDid = const $CopyWithPlaceholder(),
     Object? channelDidSha256 = const $CopyWithPlaceholder(),
     Object? offerLink = const $CopyWithPlaceholder(),
-    Object? vCard = const $CopyWithPlaceholder(),
+    Object? card = const $CopyWithPlaceholder(),
     Object? type = const $CopyWithPlaceholder(),
     Object? status = const $CopyWithPlaceholder(),
     Object? mediatorDid = const $CopyWithPlaceholder(),
     Object? origin = const $CopyWithPlaceholder(),
     Object? category = const $CopyWithPlaceholder(),
-    Object? otherPartyVCard = const $CopyWithPlaceholder(),
+    Object? otherPartyCard = const $CopyWithPlaceholder(),
     Object? displayName = const $CopyWithPlaceholder(),
     Object? badgeUpdateInProgress = const $CopyWithPlaceholder(),
     Object? badgeCount = const $CopyWithPlaceholder(),
@@ -165,10 +165,10 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.offerLink
           // ignore: cast_nullable_to_non_nullable
           : offerLink as String,
-      vCard: vCard == const $CopyWithPlaceholder()
-          ? _value.vCard
+      card: card == const $CopyWithPlaceholder()
+          ? _value.card
           // ignore: cast_nullable_to_non_nullable
-          : vCard as VCard,
+          : card as ContactCard,
       dateAdded: _value.dateAdded,
       type: type == const $CopyWithPlaceholder()
           ? _value.type
@@ -190,10 +190,10 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.category
           // ignore: cast_nullable_to_non_nullable
           : category as ContactCategory,
-      otherPartyVCard: otherPartyVCard == const $CopyWithPlaceholder()
-          ? _value.otherPartyVCard
+      otherPartyCard: otherPartyCard == const $CopyWithPlaceholder()
+          ? _value.otherPartyCard
           // ignore: cast_nullable_to_non_nullable
-          : otherPartyVCard as VCard?,
+          : otherPartyCard as ContactCard?,
       displayName: displayName == const $CopyWithPlaceholder()
           ? _value.displayName
           // ignore: cast_nullable_to_non_nullable

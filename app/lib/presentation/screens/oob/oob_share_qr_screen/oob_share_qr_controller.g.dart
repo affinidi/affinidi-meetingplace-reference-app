@@ -7,7 +7,7 @@ part of 'oob_share_qr_controller.dart';
 // **************************************************************************
 
 String _$oobShareQrControllerHash() =>
-    r'3935d8abc9b606e048905b6ae6102e476863ed56';
+    r'f3409f3e4c0a3069c605028ca1817c676bb1659e';
 
 /// See also [OobShareQrController].
 @ProviderFor(OobShareQrController)

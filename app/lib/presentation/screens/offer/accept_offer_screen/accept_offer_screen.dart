@@ -4,15 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../../infrastructure/extensions/vcard_extensions.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
+import '../../../widgets/contact_card_view.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/identity_picker/identity_picker.dart';
 import '../../../widgets/offer_banner.dart';
 import '../../../widgets/profile_picture.dart';
-import '../../../widgets/vcard_view.dart';
 import 'accept_offer_screen_controller.dart';
 
 class AcceptOfferScreen extends ConsumerWidget {
@@ -91,8 +91,8 @@ class _Loader extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final l10n = context.l10n;
 
-    final alias =
-        ref.watch(provider.select((state) => state.offer?.vCard.firstName));
+    final alias = ref
+        .watch(provider.select((state) => state.offer?.contactCard.firstName));
 
     return ModalAsyncLoadingStatus(
       controller.acceptOfferLoadingController,
@@ -140,7 +140,7 @@ class _ProfilePicture extends ConsumerWidget {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
     final cacheManager = ref.read(cacheManagerProvider);
     final profileImage = ref.watch(provider.select(
-        (state) => state.offer?.vCard.image(cacheManager: cacheManager)));
+        (state) => state.offer?.contactCard.image(cacheManager: cacheManager)));
 
     return ProfilePicture(image: profileImage);
   }
@@ -154,8 +154,8 @@ class _PublisherAlias extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
-    final alias =
-        ref.watch(provider.select((state) => state.offer?.vCard.firstName));
+    final alias = ref
+        .watch(provider.select((state) => state.offer?.contactCard.firstName));
 
     if (alias?.isEmpty ?? true) {
       return const SizedBox.shrink();
@@ -232,26 +232,27 @@ class _ContactDetailsPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return FormCard(
       title: context.l10n.offerDetailsHeader,
-      child: _VCardView(mnemonic: _mnemonic),
+      child: _ContactCardView(mnemonic: _mnemonic),
     );
   }
 }
 
-class _VCardView extends ConsumerWidget {
-  _VCardView({required String mnemonic}) : _mnemonic = mnemonic;
+class _ContactCardView extends ConsumerWidget {
+  _ContactCardView({required String mnemonic}) : _mnemonic = mnemonic;
 
   final String _mnemonic;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
-    final vCard = ref.watch(provider.select((state) => state.offer?.vCard));
+    final card =
+        ref.watch(provider.select((state) => state.offer?.contactCard));
 
-    if (vCard == null) {
+    if (card == null) {
       return const SizedBox.shrink();
     }
 
-    return VCardView(vCard: vCard);
+    return SdkContactCardView(card: card);
   }
 }
 

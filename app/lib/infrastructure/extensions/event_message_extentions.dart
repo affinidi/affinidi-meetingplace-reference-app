@@ -1,17 +1,23 @@
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
+import '../../domain/models/contact_card/contact_card.dart';
+import 'contact_card_extensions.dart';
 
-extension EventMessageVcard on EventMessage {
-  /// Returns a VCard constructed from `data['vCard']['values']`, or `null`
-  /// if the structure is missing or has unexpected types.
-  VCard? get vCard {
-    final vCardField = data['vCard'];
-    if (vCardField is! Map<String, dynamic>) return null;
+extension EventMessageContactCard on EventMessage {
+  ContactCard? get contactCard {
+    final cardField = data['contactCard'];
+    if (cardField is! Map<String, dynamic>) return null;
 
-    final values = vCardField['values'];
+    final values = cardField['contactInfo'];
     if (values is! Map<String, dynamic>) return null;
 
-    return VCard(values: values);
+    final sdkCard = sdk.ContactCard(
+      did: cardField['did'] as String,
+      type: cardField['type'] as String,
+      contactInfo: values,
+    );
+
+    return ContactCardUtils.fromSdkContactCard(sdkCard);
   }
 
   /// Returns the memberDid from data, or null if not present.

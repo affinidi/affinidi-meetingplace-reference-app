@@ -48,12 +48,15 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final uuid = const Uuid();
     final newCard = ContactCard(
       id: uuid.v4(),
+      did: '',
+      type: '',
       firstName: '',
       displayName: '',
     );
 
     return Identity(
       id: uuid.v4(),
+      did: '',
       card: newCard,
     );
   }

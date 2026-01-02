@@ -8,11 +8,11 @@ class _GroupDetailsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(contactId);
-    final groupAdminVCard = ref.read(provider.groupAdminVCard);
+    final groupAdminCard = ref.read(provider.groupAdminCard);
     final groupName = ref.watch(provider.groupName);
 
-    final email = groupAdminVCard?.email;
-    final mobile = groupAdminVCard?.mobile;
+    final email = groupAdminCard?.email;
+    final mobile = groupAdminCard?.mobile;
 
     final adminDid =
         ref.watch(provider.select((state) => state.group?.ownerDid));

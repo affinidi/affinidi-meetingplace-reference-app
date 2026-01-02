@@ -37,7 +37,7 @@ class _ProfilePicture extends ConsumerWidget {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
     final cacheManager = ref.read(cacheManagerProvider);
     final profileImage = ref.watch(controllerProvider.select(
-        (state) => state.offer?.vCard.image(cacheManager: cacheManager)));
+        (state) => state.offer?.contactCard.image(cacheManager: cacheManager)));
 
     if (profileImage == null) {
       return const SizedBox.shrink();

@@ -71,7 +71,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   @override
   Future<PublishOfferResult<T>> publishOffer<T extends ConnectionOffer>({
     required String offerName,
-    required VCard vCard,
+    required ContactCard contactCard,
     required SDKConnectionOfferType type,
     required String offerDescription,
     String? customPhrase,
@@ -84,7 +84,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     // Record the call parameters
     _publishOfferCalls.add({
       'offerName': offerName,
-      'vCard': vCard.toString(),
+      'contactCard': contactCard.toJson(),
       'type': type,
       'offerDescription': offerDescription,
       'customPhrase': customPhrase,
@@ -125,13 +125,13 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   @override
   Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>({
     required T connectionOffer,
-    required VCard vCard,
-    required String senderInfo,
+    required ContactCard contactCard,
+    String? senderInfo,
     String? externalRef,
   }) async {
     _acceptOfferCalls.add({
       'connectionOffer': connectionOffer,
-      'vCard': vCard,
+      'contactCard': contactCard.toJson(),
       'senderInfo': senderInfo,
       'externalRef': externalRef,
     });

@@ -3,9 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../application/services/contacts_service/contacts_service.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
-import '../../infrastructure/extensions/vcard_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
 import '../../navigation/routes/dashboard_routes.dart';
 import '../painting/cached_base64_image.dart';
@@ -36,11 +36,11 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final vCard = channel.otherPartyVCard;
+    final card = channel.otherPartyContactCard;
     final cacheManager = ref.read(cacheManagerProvider);
-    final profilePic = vCard?.hasProfilePic ?? false
+    final profilePic = card?.hasProfilePic ?? false
         ? CachedBase64Image(
-            vCard!.profilePic,
+            card!.profilePic,
             cacheManager: cacheManager,
           )
         : defaultProfileImage;
@@ -89,13 +89,13 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
                       backgroundImage: profilePic as ImageProvider<Object>,
                     ),
                   ),
-                  if (vCard != null)
+                  if (card != null)
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: SizedBox(
                         width: 180,
                         child: Text(
-                          l10n.oobConnectedTo(vCard.firstName),
+                          l10n.oobConnectedTo(card.firstName),
                           maxLines: 3,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,

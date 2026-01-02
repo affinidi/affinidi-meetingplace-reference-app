@@ -1,5 +1,5 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
+import '../contact_card/contact_card.dart';
 
 import 'contact_category.dart';
 import 'contact_origin.dart';
@@ -20,8 +20,8 @@ part 'contact.g.dart';
 /// - `id` - Local unique identifier for the contact record.
 /// - `channelDid` - Permanent channel DID used to identify the remote party.
 /// - `channelDidSha256` - SHA256 hash of the channel DID for indexing.
-/// - `vCard` / `otherPartyVCard` - Local and remote vCard information used for
-///   display and sharing.
+/// - `card` / `otherPartyCard` - Local and remote ContactCard information used
+///   for display and sharing.
 /// - `offerLink` - Offer mnemonic/link used to correlate published/offered
 ///   connections.
 /// - `dateAdded` - When the contact was created locally.
@@ -44,14 +44,14 @@ class Contact {
     this.channelDid,
     this.channelDidSha256,
     required this.offerLink,
-    required this.vCard,
+    required this.card,
     required this.dateAdded,
     required this.type,
     required this.status,
     required this.mediatorDid,
     required this.origin,
     required this.category,
-    this.otherPartyVCard,
+    this.otherPartyCard,
     this.displayName,
     this.badgeUpdateInProgress = false,
     this.badgeCount = 0,
@@ -65,7 +65,7 @@ class Contact {
   final String? channelDid;
   final String? channelDidSha256;
   final String offerLink;
-  final VCard vCard;
+  final ContactCard card;
   @CopyWithField(immutable: true)
   final DateTime dateAdded;
   final ContactType type;
@@ -73,7 +73,7 @@ class Contact {
   final String mediatorDid;
   final ContactOrigin origin;
   final ContactCategory category;
-  final VCard? otherPartyVCard;
+  final ContactCard? otherPartyCard;
   final String? displayName;
   final bool badgeUpdateInProgress;
   final int badgeCount;

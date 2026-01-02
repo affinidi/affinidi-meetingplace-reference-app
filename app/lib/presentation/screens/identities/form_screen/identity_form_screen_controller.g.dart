@@ -7,7 +7,7 @@ part of 'identity_form_screen_controller.dart';
 // **************************************************************************
 
 String _$identityFormScreenControllerHash() =>
-    r'6b55fd4b799e86144f9856ca8b3288d71636e20d';
+    r'e507f8b878f55d8c487ad81357a8f0efb34c012b';
 
 /// Copied from Dart SDK
 class _SystemHash {

@@ -4,7 +4,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../../domain/models/contacts/contact.dart';
 import '../../presentation/widgets/images/default_profile_image.dart';
 import '../../presentation/widgets/images/group_image.dart';
-import 'vcard_extensions.dart';
+import 'contact_card_extensions.dart';
 
 /// Extension to simplify image handling for contacts.
 extension ContactImageExtensions on Contact {
@@ -16,12 +16,12 @@ extension ContactImageExtensions on Contact {
     if (isGroup) {
       return groupImage;
     }
-    return vCard.image(cacheManager: cacheManager);
+    return card.image(cacheManager: cacheManager);
   }
 
   /// Returns true if this contact uses the default group or profile image.
   bool get hasDefaultImage {
     if (isGroup) return true;
-    return !vCard.hasProfilePic;
+    return !card.hasProfilePic;
   }
 }

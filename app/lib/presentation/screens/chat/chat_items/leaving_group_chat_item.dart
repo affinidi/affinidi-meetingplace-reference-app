@@ -4,7 +4,6 @@ import 'package:meeting_place_chat/meeting_place_chat.dart'
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/event_message_extentions.dart';
-import '../../../../infrastructure/extensions/vcard_extensions.dart';
 import 'concierge_message.dart';
 
 class LeavingGroupChatItem extends StatelessWidget {
@@ -14,7 +13,7 @@ class LeavingGroupChatItem extends StatelessWidget {
   final EventMessage _chatItem;
   @override
   Widget build(BuildContext context) {
-    final memberCard = _chatItem.vCard;
+    final memberCard = _chatItem.contactCard;
     final l10n = context.l10n;
     final memberName = memberCard?.firstName;
 

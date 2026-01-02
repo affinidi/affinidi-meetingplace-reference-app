@@ -229,8 +229,9 @@ class ConnectionsService extends _$ConnectionsService {
   /// Accept a connection offer and notify acceptance.
   ///
   /// This method will accept the provided [connectionOffer], using the current
-  /// contact card (from IdentitiesService) as the vCard and [identity] as an
-  /// external reference. It notifies the issuer of acceptance and refreshes
+  /// contact card (from IdentitiesService) as the ContactCard
+  /// and [identity] as an external reference.
+  /// It notifies the issuer of acceptance and refreshes
   /// connections. Specific SDK errors are mapped to domain [AppException]s.
   ///
   /// [connectionOffer] - The offer to accept.
@@ -252,7 +253,7 @@ class ConnectionsService extends _$ConnectionsService {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
     await sdk.acceptOffer(
       connectionOffer: connectionOffer,
-      vCard: identity.card.toVCard(),
+      contactCard: identity.card.toSdkContactCard(),
       externalRef: identity.id,
       senderInfo: identity.card.firstName,
     );
@@ -299,7 +300,7 @@ class ConnectionsService extends _$ConnectionsService {
   /// Publish a new connection offer.
   ///
   /// Publishes an offer with data from [data], using the current identity's
-  /// contact card as vCard and [identity] as an external reference. On
+  /// contact card as ContactCard and [identity] as an external reference. On
   /// success the published offer is stored in state and connections are
   /// refreshed. For group offers the group channel inauguration stream is
   /// announced.
@@ -327,7 +328,7 @@ class ConnectionsService extends _$ConnectionsService {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
       final result = await sdk.publishOffer(
         offerName: data.headline,
-        vCard: identity.card.toVCard(),
+        contactCard: identity.card.toSdkContactCard(),
         type: isGroupOffer
             ? SDKConnectionOfferType.groupInvitation
             : SDKConnectionOfferType.invitation,
