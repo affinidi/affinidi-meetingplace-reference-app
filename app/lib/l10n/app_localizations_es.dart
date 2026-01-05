@@ -1490,11 +1490,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cameraInstructionAndroid =>
-      'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Apps > H2H > Permissions > Camera > Allow only while using the app.';
+      'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Apps > Meeting Place > Permissions > Camera > Allow only while using the app.';
 
   @override
   String get cameraInstructionIos =>
-      'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > H2H > Camera and enable access for this app.';
+      'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Meeting Place > Camera and enable access for this app.';
 
   @override
   String get cameraInstructionMacos =>

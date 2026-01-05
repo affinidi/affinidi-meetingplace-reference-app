@@ -2119,13 +2119,13 @@ abstract class AppLocalizations {
   /// No description provided for @cameraInstructionAndroid.
   ///
   /// In en, this message translates to:
-  /// **'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Apps > H2H > Permissions > Camera > Allow only while using the app.'**
+  /// **'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Apps > Meeting Place > Permissions > Camera > Allow only while using the app.'**
   String get cameraInstructionAndroid;
 
   /// No description provided for @cameraInstructionIos.
   ///
   /// In en, this message translates to:
-  /// **'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > H2H > Camera and enable access for this app.'**
+  /// **'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Meeting Place > Camera and enable access for this app.'**
   String get cameraInstructionIos;
 
   /// No description provided for @cameraInstructionMacos.
