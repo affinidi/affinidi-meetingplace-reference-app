@@ -73,7 +73,8 @@ void main() {
         expect(fakeSdk.createOobFlowCalls.length, greaterThan(0));
       });
 
-      testWidgets('should pass correct vCard to createOobFlow', (tester) async {
+      testWidgets('should pass correct contactCard to createOobFlow',
+          (tester) async {
         final fakeSdk = FakeMeetingPlaceSDK();
 
         await navigateToLocation(
@@ -86,7 +87,7 @@ void main() {
 
         final calls = fakeSdk.createOobFlowCalls;
         expect(calls.isNotEmpty, true);
-        expect(calls.first['vCard'], isNotNull);
+        expect(calls.first['contactCard'], isNotNull);
       });
 
       testWidgets('should display QR code after successful OOB creation',
@@ -120,7 +121,7 @@ void main() {
           acceptOfferDid: 'test-accept-did',
           permanentChannelDid: 'test-permanent-did',
           type: ChannelType.oob,
-          vCard: VCard(values: {}),
+          contactCard: ContactCard(did: '', type: '', contactInfo: {}),
         );
 
         await navigateToLocation(
@@ -260,7 +261,7 @@ void main() {
           acceptOfferDid: 'test-accept-did',
           permanentChannelDid: 'test-permanent-did',
           type: ChannelType.oob,
-          vCard: VCard(values: {}),
+          contactCard: ContactCard(did: '', type: '', contactInfo: {}),
         );
 
         fakeSdk.simulateOobConnectionEstablished(fakeChannel);

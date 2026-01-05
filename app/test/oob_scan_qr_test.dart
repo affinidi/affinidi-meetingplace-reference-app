@@ -64,7 +64,7 @@ void main() {
           expect(fakeSdk.acceptOobFlowCalls.length, equals(1));
           expect(
               fakeSdk.acceptOobFlowCalls.first['offerLink'], equals(testQrUrl));
-          expect(fakeSdk.acceptOobFlowCalls.first['vCard'], isNotNull);
+          expect(fakeSdk.acceptOobFlowCalls.first['contactCard'], isNotNull);
 
           final channel =
               fakeSdk.acceptOobFlowCalls.first['channel'] as Channel;

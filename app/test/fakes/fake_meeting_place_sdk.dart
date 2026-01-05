@@ -233,13 +233,13 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   @override
   Future<CreateOobFlowResult> createOobFlow({
     String? did,
-    required VCard vCard,
+    required ContactCard contactCard,
     String? mediatorDid,
     String? externalRef,
   }) async {
     _createOobFlowCalls.add({
       'did': did,
-      'vCard': vCard,
+      'contactCard': contactCard,
       'mediatorDid': mediatorDid,
       'externalRef': externalRef,
     });
@@ -267,13 +267,15 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   @override
   Future<AcceptOobFlowResult> acceptOobFlow(
     Uri oobUri, {
-    required VCard vCard,
+    required ContactCard contactCard,
+    String? did,
     String? externalRef,
   }) async {
     _acceptOobFlowCalls.add({
       'offerLink': oobUri.toString(),
       'oobUri': oobUri,
-      'vCard': vCard,
+      'contactCard': contactCard,
+      'did': did,
       'externalRef': externalRef,
     });
 
@@ -292,7 +294,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       acceptOfferDid: 'fake-accept-did',
       permanentChannelDid: 'fake-permanent-did',
       type: ChannelType.oob,
-      vCard: vCard,
+      contactCard: contactCard,
       externalRef: externalRef,
     );
 
