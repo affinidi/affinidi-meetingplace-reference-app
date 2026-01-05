@@ -7,6 +7,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../infrastructure/configuration/environment.dart';
+import '../../../../infrastructure/exceptions/app_exception.dart';
+import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../infrastructure/media/image_picker/image_picker_provider.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
@@ -31,6 +33,8 @@ class MediaScreenController extends _$MediaScreenController {
       Future(() => pickFromGallery(useChatSemantics: false));
       return MediaScreenState(isLoading: true);
     }
+
+    Future(() => _initCamera(cameraLensDirection));
 
     ref.listen(
       cameraServiceProvider,
@@ -143,9 +147,28 @@ class MediaScreenController extends _$MediaScreenController {
   Future<void> _initCamera(CameraLensDirection direction) async {
     try {
       state = state.copyWith(isLoading: true);
-      final controller = await ref
-          .read(cameraServiceProvider.notifier)
-          .initializeCamera(direction);
+      final service = ref.read(cameraServiceProvider.notifier);
+      final isReady = await service.ensureCameraReady(direction: direction);
+
+      if (!isReady) {
+        _logger.warning(
+          'Camera not ready - permission denied or unavailable',
+          name: _logKey,
+        );
+        state = state.copyWith(
+          isCameraAvailable: false,
+          isLoading: false,
+        );
+        return;
+      }
+
+      final controller = ref.read(cameraServiceProvider).controller;
+      if (controller == null) {
+        throw AppException(
+          'Cannot initialize camera',
+          code: AppExceptionType.cameraInitializationFailed.name,
+        );
+      }
 
       state = state.copyWith(
         cameraController: controller,

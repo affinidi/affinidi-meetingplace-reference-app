@@ -194,34 +194,103 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     );
   }
 
+  /// Checks if the device has camera hardware available.
+  ///
+  /// Returns `true` if the platform supports cameras and at least one camera
+  /// is available. Does NOT request permission.
+  ///
+  /// Use this to show/hide camera features in the UI without prompting.
+  Future<bool> isCameraAvailable() async {
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
+      return false;
+    }
+
+    try {
+      final getCameras = ref.read(availableCamerasProvider);
+      final cameras = await getCameras();
+      return cameras.isNotEmpty;
+    } catch (error) {
+      _logger.warning(
+        'Error checking camera availability: $error',
+        name: _logKey,
+      );
+      return false;
+    }
+  }
+
+  /// Gets the current camera permission status without prompting.
+  ///
+  /// Returns [PermissionStatus] indicating whether permission is:
+  /// - granted
+  /// - denied
+  /// - restricted
+  /// - permanentlyDenied
+  /// - limited
+  ///
+  /// Use this to check permission state before showing camera UI.
+  Future<PermissionStatus> getCameraPermissionStatus() async {
+    final permissionService = ref.read(permissionServiceProvider);
+    return permissionService.getCameraPermissionStatus();
+  }
+
+  /// Ensures camera is ready by checking permission and initializing if needed.
+  ///
+  /// Call this when user initiates a camera action (e.g., taps "Scan QR").
+  /// Requests permission if not granted, then initializes the camera.
+  ///
+  /// Returns `true` if camera is ready, `false` if permission denied or error.
+  Future<bool> ensureCameraReady({
+    CameraLensDirection direction = CameraLensDirection.back,
+  }) async {
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
+      _logger.warning('Camera not available on this platform', name: _logKey);
+      return false;
+    }
+
+    final permissionService = ref.read(permissionServiceProvider);
+    var status = await permissionService.getCameraPermissionStatus();
+
+    if (status.isDenied) {
+      status = await permissionService.requestCameraPermission();
+    }
+
+    if (!status.isGranted) {
+      _logger.warning('Camera permission not granted', name: _logKey);
+      state = state.copyWith(
+        permissionGranted: false,
+      );
+      return false;
+    }
+
+    try {
+      await initializeCamera(direction);
+      return true;
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to initialize camera',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return false;
+    }
+  }
+
   /// Checks whether cameras are available on the device and updates the state.
   ///
-  /// On macOS, assumes a camera is always available as the plugin
-  ///  does not support it.
+  /// Does NOT request permission. Only queries hardware availability.
+  /// On macOS/web, sets isAvailable to false.
   Future<void> checkCameraAvailability() async {
     // Camera plugin does not support macOS: assume camera is unavailable
     if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
       _logger.warning('Camera not available on this platform', name: _logKey);
       state = state.copyWith(
         isAvailable: false,
-        permissionGranted: false,
       );
       return;
     }
 
     _logger.info('checkCameraAvailability', name: _logKey);
-
-    final hasPermission = await _ensureCameraPermission();
-    if (!hasPermission) {
-      _logger.warning('Camera permission not granted', name: _logKey);
-      state = state.copyWith(
-        isAvailable: false,
-        cameras: [],
-        permissionGranted: false,
-        controller: null,
-      );
-      return;
-    }
 
     try {
       final getCameras = ref.read(availableCamerasProvider);
@@ -229,7 +298,6 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
       state = state.copyWith(
         isAvailable: cameras.isNotEmpty,
         cameras: cameras,
-        permissionGranted: true,
       );
 
       _logger.info('${cameras.length} camera(s) found', name: _logKey);
@@ -243,18 +311,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
       state = state.copyWith(
         isAvailable: false,
         cameras: [],
-        permissionGranted: false,
       );
     }
-  }
-
-  /// Checks and requests camera permission if not already granted
-  Future<bool> _ensureCameraPermission() async {
-    final permissionService = ref.read(permissionServiceProvider);
-    var status = await permissionService.getCameraPermissionStatus();
-    if (status.isDenied) {
-      status = await permissionService.requestCameraPermission();
-    }
-    return status.isGranted;
   }
 }
