@@ -8,7 +8,10 @@ class ProviderDebugLogger extends ProviderObserver {
 
   @override
   void didAddProvider(
-      ProviderBase provider, Object? value, ProviderContainer container) {
+    ProviderBase provider,
+    Object? value,
+    ProviderContainer container,
+  ) {
     _logger.info(
       'Add: "${provider.name ?? provider.runtimeType}"',
       name: _logKey,

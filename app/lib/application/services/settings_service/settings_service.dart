@@ -37,8 +37,9 @@ class SettingsService extends _$SettingsService {
 
     final alreadyOnboarded = _getFinishOnboarding();
     return SettingsServiceState(
-        selectedMediatorDid: defaultMediatorDid,
-        alreadyOnboarded: alreadyOnboarded);
+      selectedMediatorDid: defaultMediatorDid,
+      alreadyOnboarded: alreadyOnboarded,
+    );
   }
 
   /// Restore the preferred mediator DID from secure storage if present.

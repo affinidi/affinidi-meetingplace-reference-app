@@ -7,14 +7,17 @@ class RoundedInputDecoration extends ThemeExtension<RoundedInputDecoration> {
   final InputDecoration inputDecoration;
 
   @override
-  ThemeExtension<RoundedInputDecoration> copyWith(
-      {InputDecoration? inputDecoration}) {
+  ThemeExtension<RoundedInputDecoration> copyWith({
+    InputDecoration? inputDecoration,
+  }) {
     return RoundedInputDecoration(inputDecoration ?? this.inputDecoration);
   }
 
   @override
   ThemeExtension<RoundedInputDecoration> lerp(
-      covariant ThemeExtension<RoundedInputDecoration>? other, double t) {
+    covariant ThemeExtension<RoundedInputDecoration>? other,
+    double t,
+  ) {
     return this;
   }
 }

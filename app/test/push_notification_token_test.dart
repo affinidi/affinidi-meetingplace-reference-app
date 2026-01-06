@@ -14,7 +14,8 @@ void main() {
     final location = RoutePaths.root;
     group('and there is no network', () {
       final fakeConnectivity = FakeConnectivity(
-          initialConnectivityToReturn: [ConnectivityResult.none]);
+        initialConnectivityToReturn: [ConnectivityResult.none],
+      );
 
       testWidgets('it shows a network error banner', (tester) async {
         final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
@@ -65,7 +66,8 @@ void main() {
 
     group('and there is network', () {
       final fakeConnectivity = FakeConnectivity(
-          initialConnectivityToReturn: [ConnectivityResult.wifi]);
+        initialConnectivityToReturn: [ConnectivityResult.wifi],
+      );
       testWidgets('it does not show a network error banner', (tester) async {
         await navigateToLocation(
           tester,
@@ -178,7 +180,8 @@ void main() {
           final shouldFailToRegisterPushToken = true;
           testWidgets('it shows a network error banner', (tester) async {
             final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
-                shouldFailToRegisterPushToken: shouldFailToRegisterPushToken);
+              shouldFailToRegisterPushToken: shouldFailToRegisterPushToken,
+            );
 
             await navigateToLocation(
               tester,
@@ -200,7 +203,8 @@ void main() {
             testWidgets('it attempts to register the token again',
                 (tester) async {
               final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
-                  shouldFailToRegisterPushToken: shouldFailToRegisterPushToken);
+                shouldFailToRegisterPushToken: shouldFailToRegisterPushToken,
+              );
 
               await navigateToLocation(
                 tester,
@@ -234,7 +238,8 @@ void main() {
                   FakeMeetingPlaceSDK(shouldFailToRegisterPushToken: false);
               final savingPushTokenDuration = 100;
               final fakeSecureStorage = FakeSecureStorage(
-                  savingPushTokenDuration: savingPushTokenDuration);
+                savingPushTokenDuration: savingPushTokenDuration,
+              );
               final fakePushNotificationMessaging =
                   FakePushNotificationMessaging();
 
@@ -252,8 +257,11 @@ void main() {
                 final tokenList = ['token 1', 'token 2'];
                 await fakePushNotificationMessaging
                     .emitRefreshTokens(tokenList);
-                await tester.binding.delayed(Duration(
-                    milliseconds: tokenList.length * savingPushTokenDuration));
+                await tester.binding.delayed(
+                  Duration(
+                    milliseconds: tokenList.length * savingPushTokenDuration,
+                  ),
+                );
               }();
 
               await expectLater(multipleTokens, completes);

@@ -295,8 +295,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   void endChatSession() {}
 
   @override
-  Future<void> reactOnMessage(Message message,
-      {required String reaction}) async {
+  Future<void> reactOnMessage(
+    Message message, {
+    required String reaction,
+  }) async {
     reactOnMessageCalls.add({
       'message': message,
       'reaction': reaction,
@@ -342,8 +344,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
-  Future<Message> sendTextMessage(String text,
-      {List<Attachment>? attachments}) async {
+  Future<Message> sendTextMessage(
+    String text, {
+    List<Attachment>? attachments,
+  }) async {
     // Track the call
     sendTextMessageCalls.add({
       'text': text,
@@ -385,13 +389,14 @@ class FakeChat implements Chat {
   @override
   List<ChatItem> get messages => [
         ChatItem(
-            chatId: 'chatId',
-            messageId: 'messageId',
-            senderDid: 'senderDid',
-            isFromMe: true,
-            dateCreated: DateTime.now(),
-            status: ChatItemStatus.confirmed,
-            type: ChatItemType.message)
+          chatId: 'chatId',
+          messageId: 'messageId',
+          senderDid: 'senderDid',
+          isFromMe: true,
+          dateCreated: DateTime.now(),
+          status: ChatItemStatus.confirmed,
+          type: ChatItemType.message,
+        ),
       ];
 
   @override

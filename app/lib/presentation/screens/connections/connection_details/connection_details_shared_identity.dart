@@ -9,7 +9,8 @@ class _SharedIdentityPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(contactId);
     final myDid = ref.watch(
-        provider.select((state) => state.channel?.publishOfferDid.toDidSha256));
+      provider.select((state) => state.channel?.publishOfferDid.toDidSha256),
+    );
     final myDidSha256 = myDid?.toDidSha256;
     final isDebugMode =
         ref.watch(provider.select((state) => state.isDebugMode));

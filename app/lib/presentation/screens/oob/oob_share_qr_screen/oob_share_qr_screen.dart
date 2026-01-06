@@ -19,7 +19,9 @@ class OOBShareQrScreen extends HookConsumerWidget {
 
     // Create a reference to the QR code view for exporting
     final qrCodeView = useMemoized(
-        () => qrData != null ? QrCodeView(data: qrData) : null, [qrData]);
+      () => qrData != null ? QrCodeView(data: qrData) : null,
+      [qrData],
+    );
 
     final qrScannerTheme = context.qrScannerTheme;
     final colorScheme = context.colorScheme;
@@ -54,15 +56,18 @@ class OOBShareQrScreen extends HookConsumerWidget {
       await SharePlus.instance.share(params);
     }
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.initialize();
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.initialize();
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     return Scaffold(
       backgroundColor: qrScannerTheme.backgroundColor,
@@ -115,9 +120,9 @@ class OOBShareQrScreen extends HookConsumerWidget {
                                 ),
                               ),
                             ),
-                          )
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -138,7 +143,7 @@ class OOBShareQrScreen extends HookConsumerWidget {
                   onPressed: cancelOobFlow,
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

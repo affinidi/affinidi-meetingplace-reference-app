@@ -60,7 +60,8 @@ class _GroupOffer extends ConsumerWidget {
         publishOfferScreenControllerProvider(_identityId, context.l10n);
     final controller = ref.read(provider.notifier);
     final name = ref.watch(
-        provider.select((state) => state.selectedIdentity?.card.firstName));
+      provider.select((state) => state.selectedIdentity?.card.firstName),
+    );
     final isGroupOffer =
         ref.watch(provider.select((state) => state.formData.isGroupOffer));
 

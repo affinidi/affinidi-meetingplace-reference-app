@@ -53,10 +53,13 @@ extension ContactExtensions on Contact {
   }
 
   /// ImageProvider for the other party profile picture or default.
-  ImageProvider<Object> otherPartyImage(
-          {required BaseCacheManager cacheManager}) =>
+  ImageProvider<Object> otherPartyImage({
+    required BaseCacheManager cacheManager,
+  }) =>
       (otherPartyCard != null && (otherPartyCard!.profilePic ?? '').isNotEmpty)
-          ? CachedBase64Image(otherPartyCard!.profilePic!,
-              cacheManager: cacheManager)
+          ? CachedBase64Image(
+              otherPartyCard!.profilePic!,
+              cacheManager: cacheManager,
+            )
           : defaultProfileImage;
 }

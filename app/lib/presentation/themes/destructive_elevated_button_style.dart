@@ -8,15 +8,17 @@ class DestructiveElevatedButtonStyle
   final ButtonStyle buttonStyle;
 
   @override
-  ThemeExtension<DestructiveElevatedButtonStyle> copyWith(
-      {ButtonStyle? buttonStyle}) {
+  ThemeExtension<DestructiveElevatedButtonStyle> copyWith({
+    ButtonStyle? buttonStyle,
+  }) {
     return DestructiveElevatedButtonStyle(buttonStyle ?? this.buttonStyle);
   }
 
   @override
   ThemeExtension<DestructiveElevatedButtonStyle> lerp(
-      covariant ThemeExtension<DestructiveElevatedButtonStyle>? other,
-      double t) {
+    covariant ThemeExtension<DestructiveElevatedButtonStyle>? other,
+    double t,
+  ) {
     return this;
   }
 }

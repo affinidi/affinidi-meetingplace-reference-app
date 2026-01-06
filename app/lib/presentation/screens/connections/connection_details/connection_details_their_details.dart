@@ -14,8 +14,9 @@ class _TheirDetailsPanel extends ConsumerWidget {
     final email = otherPartyCard?.email;
     final mobile = otherPartyCard?.mobile;
 
-    final theirDid = ref.watch(provider
-        .select((state) => state.channel?.otherPartyPermanentChannelDid));
+    final theirDid = ref.watch(
+      provider.select((state) => state.channel?.otherPartyPermanentChannelDid),
+    );
     final theirDidSha256 = theirDid?.toDidSha256;
 
     final isDebugMode =

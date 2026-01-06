@@ -118,6 +118,7 @@ class FakePushNotificationMessaging implements PushNotificationMessaging {
 
   Future<void> emitRefreshTokens(List<String> list) async {
     await Future.wait(
-        list.map((token) async => _deviceTokenRefreshController.add(token)));
+      list.map((token) async => _deviceTokenRefreshController.add(token)),
+    );
   }
 }

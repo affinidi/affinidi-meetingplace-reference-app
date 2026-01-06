@@ -32,12 +32,16 @@ class CachedBase64Image extends ImageProvider<CachedBase64Image> {
 
   @override
   ImageStreamCompleter loadImage(
-      CachedBase64Image key, ImageDecoderCallback decode) {
+    CachedBase64Image key,
+    ImageDecoderCallback decode,
+  ) {
     return OneFrameImageStreamCompleter(_loadAsync(key, decode: decode));
   }
 
-  Future<ImageInfo> _loadAsync(CachedBase64Image key,
-      {required ImageDecoderCallback decode}) async {
+  Future<ImageInfo> _loadAsync(
+    CachedBase64Image key, {
+    required ImageDecoderCallback decode,
+  }) async {
     assert(key == this);
 
     final fileInfo = await _cacheManager.getFileFromCache(base64String);

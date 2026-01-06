@@ -37,7 +37,9 @@ class NewConnectionsMenu extends StatelessWidget {
       );
 
   static void _showConnectionSuccessBottomSheet(
-      BuildContext context, Channel channel) {
+    BuildContext context,
+    Channel channel,
+  ) {
     if (!context.mounted) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

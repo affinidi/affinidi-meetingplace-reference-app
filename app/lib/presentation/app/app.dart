@@ -29,11 +29,13 @@ class App extends ConsumerWidget {
 
     return MaterialApp.router(
       scrollBehavior: (!kIsWeb && Platform.isMacOS)
-          ? const ScrollBehavior().copyWith(dragDevices: {
-              PointerDeviceKind.touch,
-              PointerDeviceKind.mouse,
-              PointerDeviceKind.trackpad,
-            })
+          ? const ScrollBehavior().copyWith(
+              dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.trackpad,
+              },
+            )
           : null,
       debugShowCheckedModeBanner: false,
       title: 'Meeting Place',

@@ -34,8 +34,10 @@ class SwipeableCards<T> extends StatelessWidget {
 
   /// Called when a card is swiped.
   final void Function(
-          int previousIndex, int currentIndex, CardSwiperDirection direction)?
-      onSwipe;
+    int previousIndex,
+    int currentIndex,
+    CardSwiperDirection direction,
+  )? onSwipe;
 
   /// Maximum width of each card.
   final double? maxWidth;

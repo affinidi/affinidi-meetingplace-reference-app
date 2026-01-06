@@ -39,7 +39,7 @@ class AppLogger
       message,
       error,
       _getOriginalException(error),
-      stackTrace
+      stackTrace,
     ].where((e) => e != null).join('\n');
 
     for (final logger in _loggers) {

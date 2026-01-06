@@ -5,13 +5,14 @@ import '../../infrastructure/extensions/color_extensions.dart';
 import '../helpers/screensize_helper.dart';
 
 class SectionBanner extends StatelessWidget {
-  const SectionBanner(
-      {super.key,
-      required this.title,
-      required this.subtitle,
-      this.onTap,
-      required this.icon,
-      this.showProgress});
+  const SectionBanner({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    this.onTap,
+    required this.icon,
+    this.showProgress,
+  });
 
   final String title;
   final String subtitle;

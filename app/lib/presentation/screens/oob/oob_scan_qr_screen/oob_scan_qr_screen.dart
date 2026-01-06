@@ -19,23 +19,25 @@ class OOBScanQrScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: Column(children: [
-          ModalAsyncLoadingStatus(
-            controller.processOobQrLoadingController,
-            loadingMessage: l10n.processing,
-          ),
-          Expanded(
-            child: !state.isProcessing
-                ? QrCodePicker(
-                    popOnDetect: false,
-                    onDetectCode: (code) async {
-                      if (state.isProcessing) return;
-                      await controller.processScannedQRCode(code);
-                    },
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ]),
+        child: Column(
+          children: [
+            ModalAsyncLoadingStatus(
+              controller.processOobQrLoadingController,
+              loadingMessage: l10n.processing,
+            ),
+            Expanded(
+              child: !state.isProcessing
+                  ? QrCodePicker(
+                      popOnDetect: false,
+                      onDetectCode: (code) async {
+                        if (state.isProcessing) return;
+                        await controller.processScannedQRCode(code);
+                      },
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        ),
       ),
     );
   }

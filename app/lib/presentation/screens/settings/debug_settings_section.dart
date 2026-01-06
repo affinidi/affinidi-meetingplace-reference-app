@@ -6,9 +6,12 @@ class _DebugSettingsSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDebugMode = ref.watch(
-        settingsScreenControllerProvider.select((state) => state.isDebugMode));
-    final numberOfTapsToUnlockDebug = ref.read(settingsScreenControllerProvider
-        .select((state) => state.numberOfTapsToUnlockDebug));
+      settingsScreenControllerProvider.select((state) => state.isDebugMode),
+    );
+    final numberOfTapsToUnlockDebug = ref.read(
+      settingsScreenControllerProvider
+          .select((state) => state.numberOfTapsToUnlockDebug),
+    );
 
     if (!isDebugMode) {
       return const SizedBox.shrink();

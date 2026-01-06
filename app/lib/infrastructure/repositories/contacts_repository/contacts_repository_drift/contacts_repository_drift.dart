@@ -97,7 +97,7 @@ class ContactsRepositoryDrift implements ContactsRepository {
           .getSingleOrNull(),
       (_database.select(_database.contactCards)
             ..where((filter) => filter.contactId.equals(contactId)))
-          .getSingleOrNull()
+          .getSingleOrNull(),
     ]);
 
     final contact = results[0] as db.Contact?;
@@ -127,8 +127,10 @@ class ContactsRepositoryDrift implements ContactsRepository {
   @override
   Future<List<model.Contact>> listContacts() async {
     final results = await _database.select(_database.contacts).join([
-      leftOuterJoin(_database.contactCards,
-          _database.contactCards.contactId.equalsExp(_database.contacts.id)),
+      leftOuterJoin(
+        _database.contactCards,
+        _database.contactCards.contactId.equalsExp(_database.contacts.id),
+      ),
     ]).get();
 
     return results.map((result) {

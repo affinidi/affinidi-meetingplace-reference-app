@@ -38,8 +38,10 @@ void main() {
     testWidgets('it shows the primary identity card', (tester) async {
       await setupFindOfferTest(tester, location, testIdentity);
 
-      expect(find.byKey(const ValueKey('find_offer_identity_picker')),
-          findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('find_offer_identity_picker')),
+        findsOneWidget,
+      );
       expect(find.text(testIdentity.card.firstName), findsOneWidget);
       expect(find.text(testIdentity.card.email!), findsOneWidget);
       expect(find.text(testIdentity.card.mobile!), findsOneWidget);
@@ -161,8 +163,10 @@ void main() {
         expect(find.text(l10n.contactCardFieldName('firstName')), findsWidgets);
 
         expect(find.text(l10n.aliasPickerTitle), findsOneWidget);
-        expect(find.byKey(const ValueKey('accept_offer_identity_picker')),
-            findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('accept_offer_identity_picker')),
+          findsOneWidget,
+        );
 
         expect(find.text(testIdentity.card.firstName), findsWidgets);
         expect(find.text(testIdentity.card.email!), findsWidgets);

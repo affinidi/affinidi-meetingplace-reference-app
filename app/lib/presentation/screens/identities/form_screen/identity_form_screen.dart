@@ -44,17 +44,20 @@ class IdentityFormScreen extends HookConsumerWidget {
 
     ref.keepAround(provider);
 
-    useEffect(() {
-      // Save identity on screen exit
-      return () {
-        Future(() async {
-          await controller.saveIdentity(
-            anonymousLabel: anonymousLabel,
-            mode: mode,
-          );
-        });
-      };
-    }, [identityId]);
+    useEffect(
+      () {
+        // Save identity on screen exit
+        return () {
+          Future(() async {
+            await controller.saveIdentity(
+              anonymousLabel: anonymousLabel,
+              mode: mode,
+            );
+          });
+        };
+      },
+      [identityId],
+    );
 
     return Scaffold(
       appBar: _IdentityFormAppBar(identityId, mode: mode),
@@ -72,7 +75,7 @@ class IdentityFormScreen extends HookConsumerWidget {
                     children: [
                       _IdentitySection(identityId),
                       _IdentityFormSection(identityId),
-                      _IdentityFormAliasField(identityId)
+                      _IdentityFormAliasField(identityId),
                     ],
                   ),
                 ),
@@ -113,20 +116,23 @@ class _IdentitySection extends ConsumerWidget {
       }
     }
 
-    return Column(spacing: 20, children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: IdentityCard(
-          identity: identity,
-          displayMode: true,
-          cacheManager: cacheManager,
+    return Column(
+      spacing: 20,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: IdentityCard(
+            identity: identity,
+            displayMode: true,
+            cacheManager: cacheManager,
+          ),
         ),
-      ),
-      if (!identity.isPrimary)
-        TextButton(
-          onPressed: showIdentityCardCustomizer,
-          child: Text(context.l10n.customiseIdentityCard),
-        ),
-    ]);
+        if (!identity.isPrimary)
+          TextButton(
+            onPressed: showIdentityCardCustomizer,
+            child: Text(context.l10n.customiseIdentityCard),
+          ),
+      ],
+    );
   }
 }

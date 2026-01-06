@@ -31,12 +31,14 @@ class MediatorsDatabase extends _$MediatorsDatabase {
     required Directory directory,
     required Map<String, String> defaultMediators,
   })  : _defaultMediators = defaultMediators,
-        super(openConnection(
-          databaseName: databaseName,
-          passphrase: passphrase,
-          inMemory: inMemory,
-          directory: directory,
-        ));
+        super(
+          openConnection(
+            databaseName: databaseName,
+            passphrase: passphrase,
+            inMemory: inMemory,
+            directory: directory,
+          ),
+        );
 
   final Map<String, String> _defaultMediators;
 

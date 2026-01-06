@@ -62,7 +62,7 @@ class IdentitiesScreen extends ConsumerWidget {
                   size: 24,
                 ),
               ),
-              _IdentitiesPanel()
+              _IdentitiesPanel(),
             ],
           ),
         ),
@@ -88,15 +88,17 @@ class _IdentitiesPanel extends ConsumerWidget {
       return _PrimaryIdentitySetup(formKey: identitiesScreenFormKey);
     }
 
-    return Column(children: [
-      _FiltersBar(),
-      Padding(
-        padding: const EdgeInsets.all(2),
-        child: _ActionsBar(onAddIdentity: onAddIdentity),
-      ),
-      _IdentityPicker(),
-      const SizedBox(height: 20),
-    ]);
+    return Column(
+      children: [
+        _FiltersBar(),
+        Padding(
+          padding: const EdgeInsets.all(2),
+          child: _ActionsBar(onAddIdentity: onAddIdentity),
+        ),
+        _IdentityPicker(),
+        const SizedBox(height: 20),
+      ],
+    );
   }
 }
 
@@ -154,10 +156,14 @@ class _ActionsBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(identitiesScreenControllerProvider.notifier);
-    final shouldShowFilter = ref.watch(identitiesScreenControllerProvider
-        .select((state) => state.shouldShowFilter));
-    final currentIdentity = ref.watch(identitiesScreenControllerProvider
-        .select((state) => state.currentIdentity));
+    final shouldShowFilter = ref.watch(
+      identitiesScreenControllerProvider
+          .select((state) => state.shouldShowFilter),
+    );
+    final currentIdentity = ref.watch(
+      identitiesScreenControllerProvider
+          .select((state) => state.currentIdentity),
+    );
 
     final isDefault = currentIdentity?.isPrimary ?? false;
     final isPlaceholder = currentIdentity?.isPlaceholder ?? false;
@@ -225,12 +231,15 @@ class _SearchField extends HookConsumerWidget {
           .select((state) => state.shouldShowFilter),
     );
 
-    useEffect(() {
-      if (!shouldShowFilter) {
-        searchTextController.clear();
-      }
-      return null;
-    }, [shouldShowFilter]);
+    useEffect(
+      () {
+        if (!shouldShowFilter) {
+          searchTextController.clear();
+        }
+        return null;
+      },
+      [shouldShowFilter],
+    );
 
     if (!shouldShowFilter) return const SizedBox.shrink();
 

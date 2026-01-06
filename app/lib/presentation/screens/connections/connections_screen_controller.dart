@@ -18,37 +18,48 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
 
   @override
   ConnectionsScreenState build() {
-    ref.listen(identitiesServiceProvider.currentIdentityOrPrimary,
-        (prev, next) {
-      if (prev == next) return;
+    ref.listen(
+      identitiesServiceProvider.currentIdentityOrPrimary,
+      (prev, next) {
+        if (prev == next) return;
 
-      Future.microtask(() {
-        state = state.copyWith(identity: next);
-      });
-    }, fireImmediately: true);
+        Future.microtask(() {
+          state = state.copyWith(identity: next);
+        });
+      },
+      fireImmediately: true,
+    );
 
-    ref.listen(connectionsServiceProvider.select((state) => state.connections),
-        (prev, next) {
-      if (prev == next) return;
+    ref.listen(
+      connectionsServiceProvider.select((state) => state.connections),
+      (prev, next) {
+        if (prev == next) return;
 
-      final prevIds = prev?.map((c) => c.publishOfferDid).toSet() ?? <String>{};
-      final nextIds = next.map((c) => c.publishOfferDid).toSet();
-      final newIds = nextIds.difference(prevIds);
+        final prevIds =
+            prev?.map((c) => c.publishOfferDid).toSet() ?? <String>{};
+        final nextIds = next.map((c) => c.publishOfferDid).toSet();
+        final newIds = nextIds.difference(prevIds);
 
-      final newConnections =
-          next.where((c) => newIds.contains(c.publishOfferDid));
+        final newConnections =
+            next.where((c) => newIds.contains(c.publishOfferDid));
 
-      Future.microtask(() {
-        state = state.copyWith(connections: next);
-        _updateConnectionMediators(newConnections);
-      });
-    }, fireImmediately: true);
+        Future.microtask(() {
+          state = state.copyWith(connections: next);
+          _updateConnectionMediators(newConnections);
+        });
+      },
+      fireImmediately: true,
+    );
 
-    ref.listen(mediatorServiceProvider, (prev, next) {
-      if (prev == next) return;
+    ref.listen(
+      mediatorServiceProvider,
+      (prev, next) {
+        if (prev == next) return;
 
-      Future.microtask(_updateConnectionMediators);
-    }, fireImmediately: true);
+        Future.microtask(_updateConnectionMediators);
+      },
+      fireImmediately: true,
+    );
 
     return ConnectionsScreenState(isEditMode: false);
   }
@@ -114,9 +125,11 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
 
 extension ConnectionsScreenControllerProviderSelectors
     on NotifierProvider<ConnectionsScreenController, ConnectionsScreenState> {
-  ProviderListenable<bool> get hasConnections => select((state) => state
-      .connections
-      .any((connection) => connection.status != ConnectionOfferStatus.deleted));
+  ProviderListenable<bool> get hasConnections => select(
+        (state) => state.connections.any(
+          (connection) => connection.status != ConnectionOfferStatus.deleted,
+        ),
+      );
   ProviderListenable<bool> get hasAnySelectedConnections =>
       select((state) => state.selectedConnections.isNotEmpty);
   ProviderListenable<bool> get hasIdentity =>
@@ -124,9 +137,11 @@ extension ConnectionsScreenControllerProviderSelectors
   ProviderListenable<List<ConnectionOffer>> get filteredConnections =>
       select((state) {
         return state.connections
-            .where((connection) =>
-                connection.status != ConnectionOfferStatus.deleted &&
-                state.filter.statuses.contains(connection.status))
+            .where(
+              (connection) =>
+                  connection.status != ConnectionOfferStatus.deleted &&
+                  state.filter.statuses.contains(connection.status),
+            )
             .toList();
       });
 }

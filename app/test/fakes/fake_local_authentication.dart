@@ -13,14 +13,15 @@ class FakeLocalAuthentication implements LocalAuthentication {
   final bool _isAuthenticated;
 
   @override
-  Future<bool> authenticate(
-      {required String localizedReason,
-      Iterable<AuthMessages> authMessages = const <AuthMessages>[
-        IOSAuthMessages(),
-        AndroidAuthMessages(),
-        WindowsAuthMessages()
-      ],
-      AuthenticationOptions options = const AuthenticationOptions()}) {
+  Future<bool> authenticate({
+    required String localizedReason,
+    Iterable<AuthMessages> authMessages = const <AuthMessages>[
+      IOSAuthMessages(),
+      AndroidAuthMessages(),
+      WindowsAuthMessages(),
+    ],
+    AuthenticationOptions options = const AuthenticationOptions(),
+  }) {
     return Future.value(_isAuthenticated);
   }
 

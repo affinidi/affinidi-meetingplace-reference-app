@@ -63,7 +63,8 @@ final _connectionOffersInMemoryDatabaseProvider =
 ///  initialization.
 /// - Keeps the repository alive across the app lifecycle.
 Future<model.ConnectionOfferRepository> connectionOfferRepositoryDrift(
-    Ref ref) async {
+  Ref ref,
+) async {
   final database = await ref.read(_connectionOffersDatabaseProvider.future);
   return ConnectionOfferRepositoryDrift(
     database: database,
@@ -71,7 +72,8 @@ Future<model.ConnectionOfferRepository> connectionOfferRepositoryDrift(
 }
 
 Future<model.ConnectionOfferRepository> connectionOfferRepositoryInMemoryDrift(
-    Ref ref) async {
+  Ref ref,
+) async {
   final database =
       await ref.read(_connectionOffersInMemoryDatabaseProvider.future);
   return ConnectionOfferRepositoryDrift(
@@ -81,7 +83,9 @@ Future<model.ConnectionOfferRepository> connectionOfferRepositoryInMemoryDrift(
 
 @Riverpod(keepAlive: true)
 Future<model.ConnectionOfferRepository> connectionOfferRepository(
-    Ref ref) async {
+  Ref ref,
+) async {
   throw UnimplementedError(
-      '''Please configure the application by providing an ConnectionOfferRepository implementation in ProviderScope overrides.''');
+    '''Please configure the application by providing an ConnectionOfferRepository implementation in ProviderScope overrides.''',
+  );
 }

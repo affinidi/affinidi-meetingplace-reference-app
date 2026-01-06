@@ -8,5 +8,6 @@ part 'contacts_repository_provider.g.dart';
 @Riverpod(keepAlive: true)
 Future<ContactsRepository> contactsRepository(Ref ref) async {
   throw UnimplementedError(
-      '''Please configure the application by providing an ContactsRepository implementation in ProviderScope overrides.''');
+    '''Please configure the application by providing an ContactsRepository implementation in ProviderScope overrides.''',
+  );
 }

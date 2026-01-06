@@ -22,9 +22,13 @@ class _PlainTextChatItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final chatItem = ref.watch(provider.select((state) => (state.messages
-            .firstWhereOrNull((m) => m.messageId == _chatItem.messageId) ??
-        _chatItem) as chat.Message));
+    final chatItem = ref.watch(
+      provider.select(
+        (state) => (state.messages
+                .firstWhereOrNull((m) => m.messageId == _chatItem.messageId) ??
+            _chatItem) as chat.Message,
+      ),
+    );
 
     void selectReaction() {
       if (!context.mounted) return;

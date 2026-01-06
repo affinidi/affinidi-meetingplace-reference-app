@@ -67,7 +67,8 @@ class FakeSecureStorage extends SecureStorage {
     _startedSavePushNotificationToken++;
     if (_startedSavePushNotificationToken - _endSavePushNotificationToken > 1) {
       throw Exception(
-          'Cannot save multiple pushNotificationToken concurrently');
+        'Cannot save multiple pushNotificationToken concurrently',
+      );
     }
 
     await Future.delayed(Duration(milliseconds: _savingPushTokenDuration), () {
@@ -115,8 +116,10 @@ class FakeSecureStorage extends SecureStorage {
   }
 
   @override
-  Future<void> saveKeyIdForDid(
-      {required String keyId, required String did}) async {
+  Future<void> saveKeyIdForDid({
+    required String keyId,
+    required String did,
+  }) async {
     _storedKeys['$_didPrefix$did'] = keyId;
   }
 

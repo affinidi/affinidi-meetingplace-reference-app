@@ -168,12 +168,12 @@ extension ContactCardExtensions on ContactCard {
         'email': {
           'type': {
             'work': (email ?? ''),
-          }
+          },
         },
         'tel': {
           'type': {
             'cell': (mobile ?? ''),
-          }
+          },
         },
         'photo': (profilePic ?? ''),
         'x-meetingplace-identity-card-color': (cardColor ?? ''),

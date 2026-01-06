@@ -43,25 +43,30 @@ class Environment {
 
   bool get isDatabaseLoggingEnabled =>
       const bool.fromEnvironment('DATABASE_LOGGING_ENABLED') && kDebugMode;
-  bool get isForegroundNotificationsEnabled =>
-      const bool.fromEnvironment('FOREGROUND_NOTIFICATIONS_ENABLED',
-          defaultValue: false);
+  bool get isForegroundNotificationsEnabled => const bool.fromEnvironment(
+        'FOREGROUND_NOTIFICATIONS_ENABLED',
+        defaultValue: false,
+      );
   String get marketplaceQrPrefix =>
       const String.fromEnvironment('MARKETPLACE_QR_PREFIX');
 
   ImageConfig get chatImageConfig => ImageConfig(
         qualityPercentage: const int.fromEnvironment(
-            'CHAT_IMAGE_QUALITY_PERCENT',
-            defaultValue: 80),
+          'CHAT_IMAGE_QUALITY_PERCENT',
+          defaultValue: 80,
+        ),
         imageMaxSize:
             const int.fromEnvironment('CHAT_IMAGE_MAX_SIZE', defaultValue: 800),
       );
   ImageConfig get profileImageConfig => ImageConfig(
         qualityPercentage: const int.fromEnvironment(
-            'PROFILE_IMAGE_QUALITY_PERCENT',
-            defaultValue: 80),
-        imageMaxSize: const int.fromEnvironment('PROFILE_IMAGE_MAX_SIZE',
-            defaultValue: 100),
+          'PROFILE_IMAGE_QUALITY_PERCENT',
+          defaultValue: 80,
+        ),
+        imageMaxSize: const int.fromEnvironment(
+          'PROFILE_IMAGE_MAX_SIZE',
+          defaultValue: 100,
+        ),
       );
 
   bool get isBiometricsEnabled =>
@@ -70,23 +75,34 @@ class Environment {
   String get appVersionName =>
       const String.fromEnvironment('APP_VERSION_NAME', defaultValue: '');
 
-  int get chatActivityExpiresInSeconds =>
-      const int.fromEnvironment('CHAT_ACTIVITY_EXPIRES_IN_SECONDS',
-          defaultValue: 3);
-  int get chatPresenceIntervalInSeconds =>
-      const int.fromEnvironment('CHAT_PRESENCE_SEND_INTERVAL_IN_SECONDS',
-          defaultValue: 60);
+  int get chatActivityExpiresInSeconds => const int.fromEnvironment(
+        'CHAT_ACTIVITY_EXPIRES_IN_SECONDS',
+        defaultValue: 3,
+      );
+  int get chatPresenceIntervalInSeconds => const int.fromEnvironment(
+        'CHAT_PRESENCE_SEND_INTERVAL_IN_SECONDS',
+        defaultValue: 60,
+      );
 
-  int get extraDelayAtLaunchInMilliseconds =>
-      const int.fromEnvironment('EXTRA_DELAY_AT_LAUNCH_IN_MILLISECONDS',
-          defaultValue: 500);
+  int get extraDelayAtLaunchInMilliseconds => const int.fromEnvironment(
+        'EXTRA_DELAY_AT_LAUNCH_IN_MILLISECONDS',
+        defaultValue: 500,
+      );
 
   late final Map<String, String> _defaultMediators = Map<String, String>.from(
-      jsonDecode(const String.fromEnvironment('DEFAULT_MEDIATORS',
-          defaultValue: '{}')) as Map<String, dynamic>);
+    jsonDecode(
+      const String.fromEnvironment(
+        'DEFAULT_MEDIATORS',
+        defaultValue: '{}',
+      ),
+    ) as Map<String, dynamic>,
+  );
   Map<String, String> get defaultMediators => _defaultMediators;
 }
 
-Provider<Environment> environmentProvider = Provider<Environment>((ref) {
-  return Environment.instance;
-}, name: 'environmentProvider');
+Provider<Environment> environmentProvider = Provider<Environment>(
+  (ref) {
+    return Environment.instance;
+  },
+  name: 'environmentProvider',
+);

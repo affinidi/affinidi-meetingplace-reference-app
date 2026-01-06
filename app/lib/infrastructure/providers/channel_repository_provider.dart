@@ -72,5 +72,6 @@ Future<model.ChannelRepository> channelRepositoryInMemoryDrift(Ref ref) async {
 @Riverpod(keepAlive: true)
 Future<model.ChannelRepository> channelRepository(Ref ref) async {
   throw UnimplementedError(
-      '''Please configure the application by providing an ChannelRepository implementation in ProviderScope overrides.''');
+    '''Please configure the application by providing an ChannelRepository implementation in ProviderScope overrides.''',
+  );
 }

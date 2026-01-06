@@ -71,17 +71,20 @@ class ChatScreenController extends _$ChatScreenController {
   @override
   ChatScreenState build(String contactId) {
     ref.listen(
-        contactsServiceProvider.select(
-          (state) => state.getContactById(contactId),
-        ), (previous, next) {
-      if (next == null) {
-        return;
-      }
+      contactsServiceProvider.select(
+        (state) => state.getContactById(contactId),
+      ),
+      (previous, next) {
+        if (next == null) {
+          return;
+        }
 
-      Future.microtask(() {
-        state = state.copyWith(contact: next);
-      });
-    }, fireImmediately: true);
+        Future.microtask(() {
+          state = state.copyWith(contact: next);
+        });
+      },
+      fireImmediately: true,
+    );
 
     messageTextController.addListener(_onMessageTextChanged);
 
@@ -170,21 +173,26 @@ class ChatScreenController extends _$ChatScreenController {
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
       conciergeSendProfileLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded(
-        'send_profile_${message.messageId}');
+      'send_profile_${message.messageId}',
+    );
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
       conciergeAskLaterToSendProfileLoadingController(
-          chat.ConciergeMessage message) {
+    chat.ConciergeMessage message,
+  ) {
     return _addConciergeSubscriptionIfNeeded(
-        'ask_later_send_profile_${message.messageId}');
+      'ask_later_send_profile_${message.messageId}',
+    );
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
       conciergeCancelSendProfileLoadingController(
-          chat.ConciergeMessage message) {
+    chat.ConciergeMessage message,
+  ) {
     return _addConciergeSubscriptionIfNeeded(
-        'cancel_send_profile_${message.messageId}');
+      'cancel_send_profile_${message.messageId}',
+    );
   }
 
   /// Loads the contact details for the given [contactId].
@@ -197,16 +205,20 @@ class ChatScreenController extends _$ChatScreenController {
   Future<void> loadContact(String contactId) async {
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     if (contact == null) {
-      throw AppException('Unable to find contact with identifier $contactId',
-          code: AppExceptionType.missingContact.name);
+      throw AppException(
+        'Unable to find contact with identifier $contactId',
+        code: AppExceptionType.missingContact.name,
+      );
     }
 
     state = state.copyWith(contact: contact);
 
     final channelDid = contact.channelDid;
     if (channelDid == null) {
-      throw AppException('Contact has not been associated to any channels',
-          code: AppExceptionType.missingChannel.name);
+      throw AppException(
+        'Contact has not been associated to any channels',
+        code: AppExceptionType.missingChannel.name,
+      );
     }
     _logger.info(
       'ChannelID: $channelDid',
@@ -217,8 +229,10 @@ class ChatScreenController extends _$ChatScreenController {
     final channel =
         await coreSdk.getChannelByOtherPartyPermanentDid(channelDid);
     if (channel == null) {
-      throw AppException('Unable to find channel associated to contact',
-          code: AppExceptionType.missingChannel.name);
+      throw AppException(
+        'Unable to find channel associated to contact',
+        code: AppExceptionType.missingChannel.name,
+      );
     }
     final srcCard = channel.otherPartyContactCard;
     state = state.copyWith(
@@ -238,8 +252,10 @@ class ChatScreenController extends _$ChatScreenController {
 
     final chatSDK = _chatSDK;
     if (chatSDK == null) {
-      throw AppException('Unable to find initialized chat sdk',
-          code: AppExceptionType.other.name);
+      throw AppException(
+        'Unable to find initialized chat sdk',
+        code: AppExceptionType.other.name,
+      );
     }
 
     final chat = await chatSDK.startChatSession();
@@ -248,30 +264,32 @@ class ChatScreenController extends _$ChatScreenController {
       name: _logKey,
     );
 
-    unawaited(chatSDK.chatStreamSubscription.then(
-      (stream) {
-        if (stream == null) return;
-        messagesSubscription = stream.listen(
-          (data) => _onChannelMessagesData(data, channelDid),
-          onError: (Object error, StackTrace stackTrace) {
-            _logger.error(
-              'Error in message stream',
-              error: error,
-              stackTrace: stackTrace,
-              name: _logKey,
-            );
-          },
-        );
-      },
-      onError: (Object error, StackTrace stackTrace) {
-        _logger.error(
-          'Failed to get chat stream subscription',
-          error: error,
-          stackTrace: stackTrace,
-          name: _logKey,
-        );
-      },
-    ));
+    unawaited(
+      chatSDK.chatStreamSubscription.then(
+        (stream) {
+          if (stream == null) return;
+          messagesSubscription = stream.listen(
+            (data) => _onChannelMessagesData(data, channelDid),
+            onError: (Object error, StackTrace stackTrace) {
+              _logger.error(
+                'Error in message stream',
+                error: error,
+                stackTrace: stackTrace,
+                name: _logKey,
+              );
+            },
+          );
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          _logger.error(
+            'Failed to get chat stream subscription',
+            error: error,
+            stackTrace: stackTrace,
+            name: _logKey,
+          );
+        },
+      ),
+    );
 
     final messages = [EncryptionNotice(), ...chat.messages];
     _logger.info(
@@ -373,7 +391,8 @@ class ChatScreenController extends _$ChatScreenController {
   }
 
   String? _getGroupMemberNameFromMessage(
-      chat.PlainTextMessage plainTextMessage) {
+    chat.PlainTextMessage plainTextMessage,
+  ) {
     if (!state.isGroupChat) return null;
 
     final senderDid = plainTextMessage.from;
@@ -414,9 +433,11 @@ class ChatScreenController extends _$ChatScreenController {
     );
 
     if (datePresence != null) {
-      unawaited(ref
-          .read(contactsServiceProvider.notifier)
-          .updateContactLastKeepAliveMessage(channelDid, datePresence));
+      unawaited(
+        ref
+            .read(contactsServiceProvider.notifier)
+            .updateContactLastKeepAliveMessage(channelDid, datePresence),
+      );
       _updateContactPresenceStatus(datePresence);
     }
   }
@@ -508,23 +529,27 @@ class ChatScreenController extends _$ChatScreenController {
         final now = clock.now();
         final datePresence = args?[0] as DateTime? ?? now;
         final hasReceivedAnyActivity = datePresence.toLocal().isAfter(
-            now.subtract(Duration(seconds: chatPresenceIntervalInSeconds)));
+              now.subtract(Duration(seconds: chatPresenceIntervalInSeconds)),
+            );
 
         state = state.copyWith(
-            contactPresenceStatus: hasReceivedAnyActivity
-                ? ContactPresenceStatus.online
-                : ContactPresenceStatus.offline);
+          contactPresenceStatus: hasReceivedAnyActivity
+              ? ContactPresenceStatus.online
+              : ContactPresenceStatus.offline,
+        );
       },
       onCancel: () {
         Future.microtask(() {
           state = state.copyWith(
-              contactPresenceStatus: ContactPresenceStatus.offline);
+            contactPresenceStatus: ContactPresenceStatus.offline,
+          );
         });
       },
       onComplete: () {
         Future.microtask(() {
           state = state.copyWith(
-              contactPresenceStatus: ContactPresenceStatus.offline);
+            contactPresenceStatus: ContactPresenceStatus.offline,
+          );
         });
       },
       duration: Duration(seconds: chatPresenceIntervalInSeconds),
@@ -546,7 +571,8 @@ class ChatScreenController extends _$ChatScreenController {
     }
 
     memberNames.removeWhere(
-        (name) => name == groupMessageSenderName || name == contactName);
+      (name) => name == groupMessageSenderName || name == contactName,
+    );
     state = state.copyWith(membersTyping: memberNames);
   }
 
@@ -778,7 +804,8 @@ class ChatScreenController extends _$ChatScreenController {
   ///
   /// Returns a [Future] that completes when the operation is finished.
   Future<void> askMeLaterToSendContactDetailsUpdate(
-      chat.ConciergeMessage message) async {
+    chat.ConciergeMessage message,
+  ) async {
     await ref
         .read(conciergeAskLaterToSendProfileLoadingController(message).notifier)
         .start(() async {
@@ -797,7 +824,8 @@ class ChatScreenController extends _$ChatScreenController {
   /// details remain unchanged if the update process is interrupted or
   /// cancelled.
   Future<void> cancelUpdatingContactDetails(
-      chat.ConciergeMessage message) async {
+    chat.ConciergeMessage message,
+  ) async {
     await ref
         .read(conciergeCancelSendProfileLoadingController(message).notifier)
         .start(() async {
@@ -822,8 +850,10 @@ class ChatScreenController extends _$ChatScreenController {
           .firstWhereOrNull((m) => m.messageId == messageId) as chat.Message?;
 
       if (message == null) {
-        throw AppException('Unable to find message with id $messageId',
-            code: AppExceptionType.missingMessage.name);
+        throw AppException(
+          'Unable to find message with id $messageId',
+          code: AppExceptionType.missingMessage.name,
+        );
       }
 
       await _chatSDK?.reactOnMessage(message, reaction: reaction);
@@ -874,12 +904,16 @@ class ChatScreenController extends _$ChatScreenController {
   ///
   /// Returns a [Future] that completes when the attachment has been sent.
   Future<void> sendAttachment(
-      String text, List<MessageAttachment> messageAttachment) async {
+    String text,
+    List<MessageAttachment> messageAttachment,
+  ) async {
     messageTextController.clear();
-    unawaited(_chatSDK?.sendTextMessage(
-      text,
-      attachments: messageAttachment.map((a) => a.toAttachment()).toList(),
-    ));
+    unawaited(
+      _chatSDK?.sendTextMessage(
+        text,
+        attachments: messageAttachment.map((a) => a.toAttachment()).toList(),
+      ),
+    );
     _sendChatActivityTimedAction?.cancel();
   }
 
@@ -924,14 +958,17 @@ class ChatScreenController extends _$ChatScreenController {
         await coreSdk.getChannelByOtherPartyPermanentDid(channelDid);
     if (channel == null) {
       _logger.warning(
-          'Cannot update contact sequence number: channel cannot be found',
-          name: _logKey);
+        'Cannot update contact sequence number: channel cannot be found',
+        name: _logKey,
+      );
       return;
     }
 
-    unawaited(ref
-        .read(contactsServiceProvider.notifier)
-        .updateContactSequenceNumber(channelDid, channel.seqNo));
+    unawaited(
+      ref
+          .read(contactsServiceProvider.notifier)
+          .updateContactSequenceNumber(channelDid, channel.seqNo),
+    );
   }
 
   Future<void> _startChatSession(Contact contact) async {
@@ -993,22 +1030,26 @@ extension ChatScreenControllerProviderSelectors
 
   ProviderListenable<int> get indexOfLastMessageFromMe {
     return select(
-        (state) => state.messages.indexWhere((message) => message.isFromMe));
+      (state) => state.messages.indexWhere((message) => message.isFromMe),
+    );
   }
 
   ProviderListenable<List<String>> get awaitingMemberNames {
     return select((state) {
-      final awaitingMembers = state.messages
-          .whereType<chat.EventMessage>()
-          .where((message) =>
-              message.eventType ==
-                  chat.EventMessageType.awaitingGroupMemberToJoin &&
-              message.status == chat.ChatItemStatus.received);
+      final awaitingMembers =
+          state.messages.whereType<chat.EventMessage>().where(
+                (message) =>
+                    message.eventType ==
+                        chat.EventMessageType.awaitingGroupMemberToJoin &&
+                    message.status == chat.ChatItemStatus.received,
+              );
 
       final memberDidsWhoLeft = state.messages
           .whereType<chat.EventMessage>()
-          .where((message) =>
-              message.eventType == chat.EventMessageType.groupMemberLeftGroup)
+          .where(
+            (message) =>
+                message.eventType == chat.EventMessageType.groupMemberLeftGroup,
+          )
           .map((message) => message.memberDid)
           .where((did) => did != null)
           .toSet();
@@ -1028,10 +1069,12 @@ extension ChatScreenControllerProviderSelectors
   }
 
   ProviderListenable<bool> get shouldShowProgress {
-    return select((state) =>
-        state.isActive ||
-        state.messages
-            .any((message) => message.status == chat.ChatItemStatus.queued));
+    return select(
+      (state) =>
+          state.isActive ||
+          state.messages
+              .any((message) => message.status == chat.ChatItemStatus.queued),
+    );
   }
 
   ProviderListenable<bool> get shouldDisable {
@@ -1044,9 +1087,11 @@ extension _ChatScreenStateExtensions on ChatScreenState {
   bool get isGroupDeleted {
     final groupDeleted = messages
         .whereType<chat.EventMessage>()
-        .where((message) =>
-            message.eventType == chat.EventMessageType.groupDeleted &&
-            message.status == chat.ChatItemStatus.received)
+        .where(
+          (message) =>
+              message.eventType == chat.EventMessageType.groupDeleted &&
+              message.status == chat.ChatItemStatus.received,
+        )
         .map((message) => message.contactCard?.firstName)
         .where((firstName) => firstName != null)
         .cast<String>();

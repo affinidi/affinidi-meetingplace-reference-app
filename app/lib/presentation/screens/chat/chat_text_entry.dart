@@ -80,7 +80,8 @@ class _ChatTextEntry extends HookConsumerWidget {
                 ),
                 validator: MultiValidator([
                   ZalgoTextValidator(
-                      errorText: context.l10n.zalgoTextDetectedError),
+                    errorText: context.l10n.zalgoTextDetectedError,
+                  ),
                   MaxLengthValidator(
                     MaxLengthValidatorType.extraLong.value,
                     errorText: context.l10n.chatTooLong,
@@ -107,7 +108,7 @@ class _ChatTextEntry extends HookConsumerWidget {
                   color: Colors.white,
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

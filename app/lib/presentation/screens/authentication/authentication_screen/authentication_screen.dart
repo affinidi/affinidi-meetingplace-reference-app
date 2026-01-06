@@ -34,15 +34,18 @@ class AuthenticationScreen extends HookConsumerWidget {
       }
     }
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await controller.initialize(l10n.authUnlockReason);
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await controller.initialize(l10n.authUnlockReason);
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     // AL: Calculate width to constrain for large screen size
     final screenWidth = MediaQuery.of(context).size.width;
@@ -110,7 +113,8 @@ class AuthenticationScreen extends HookConsumerWidget {
                                   style: context.textTheme.bodyMedium,
                                 ),
                                 SizedBox(
-                                    height: isSmallScreenLandscape ? 8 : 12),
+                                  height: isSmallScreenLandscape ? 8 : 12,
+                                ),
                                 Text(
                                   platformInstruction(context),
                                   textAlign: TextAlign.center,
@@ -129,8 +133,11 @@ class AuthenticationScreen extends HookConsumerWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.refresh,
-                                    color: Colors.white, size: 18),
+                                const Icon(
+                                  Icons.refresh,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
                                 const SizedBox(width: 6),
                                 Text(
                                   l10n.generalRetry,

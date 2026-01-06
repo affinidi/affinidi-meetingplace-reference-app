@@ -8,8 +8,9 @@ class _ActionsBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(connectionsScreenControllerProvider.notifier);
-    final isEditMode = ref.watch(connectionsScreenControllerProvider
-        .select((state) => state.isEditMode));
+    final isEditMode = ref.watch(
+      connectionsScreenControllerProvider.select((state) => state.isEditMode),
+    );
     final hasConnections =
         ref.watch(connectionsScreenControllerProvider.hasConnections);
     final hasIdentity =
@@ -17,8 +18,10 @@ class _ActionsBar extends ConsumerWidget {
 
     final hasAnySelectedConnections = ref
         .watch(connectionsScreenControllerProvider.hasAnySelectedConnections);
-    final selectedConnections = ref.watch(connectionsScreenControllerProvider
-        .select((state) => state.selectedConnections));
+    final selectedConnections = ref.watch(
+      connectionsScreenControllerProvider
+          .select((state) => state.selectedConnections),
+    );
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,

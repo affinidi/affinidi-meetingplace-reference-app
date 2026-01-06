@@ -22,8 +22,10 @@ class _FiltersBar extends HookConsumerWidget {
         controller.applyFilter(ConnectionsScreenFilter.values[index]);
       },
       tabs: ConnectionsScreenFilter.values
-          .map((filter) =>
-              TabBarTab(label: l10n.connectionsFilterLabel(filter.name)))
+          .map(
+            (filter) =>
+                TabBarTab(label: l10n.connectionsFilterLabel(filter.name)),
+          )
           .toList(),
     );
   }

@@ -16,6 +16,9 @@ enum SharedPreferencesKeys {
 ///
 /// Used for storing and retrieving simple key-value pairs across the app
 /// lifecycle.
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('Make sure to override this provider');
-}, name: 'sharedPreferencesProvider');
+final sharedPreferencesProvider = Provider<SharedPreferences>(
+  (ref) {
+    throw UnimplementedError('Make sure to override this provider');
+  },
+  name: 'sharedPreferencesProvider',
+);

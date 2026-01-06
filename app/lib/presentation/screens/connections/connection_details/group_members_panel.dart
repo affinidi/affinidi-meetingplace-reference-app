@@ -121,14 +121,15 @@ class _GroupMembersList extends ConsumerWidget {
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(6.0),
             child: Container(
-                height: 24.0,
-                width: 24.0,
-                color: isDeleted ? Colors.red : Colors.blue,
-                child: _GroupMemberIcon(
-                  memberDid: member.did,
-                  myDid: contact?.channelDid,
-                  isAdmin: member.membershipType == GroupMembershipType.admin,
-                )),
+              height: 24.0,
+              width: 24.0,
+              color: isDeleted ? Colors.red : Colors.blue,
+              child: _GroupMemberIcon(
+                memberDid: member.did,
+                myDid: contact?.channelDid,
+                isAdmin: member.membershipType == GroupMembershipType.admin,
+              ),
+            ),
           ),
           title: Text(
             getMemberText(member),
@@ -148,7 +149,7 @@ class _GroupMembersList extends ConsumerWidget {
                 Text(
                   member.status.name,
                   style: const TextStyle(fontSize: 12, color: Colors.white70),
-                )
+                ),
               ],
               Text(
                 isDeleted
@@ -158,7 +159,7 @@ class _GroupMembersList extends ConsumerWidget {
                   fontSize: 12,
                   color: isDeleted ? Colors.red : Colors.white70,
                 ),
-              )
+              ),
             ],
           ),
         );

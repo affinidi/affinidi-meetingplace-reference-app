@@ -14,12 +14,15 @@ class _ContactsSearchField extends HookConsumerWidget {
           .select((state) => state.shouldShowFilter),
     );
 
-    useEffect(() {
-      if (!shouldShowFilter) {
-        searchTextController.clear();
-      }
-      return null;
-    }, [shouldShowFilter]);
+    useEffect(
+      () {
+        if (!shouldShowFilter) {
+          searchTextController.clear();
+        }
+        return null;
+      },
+      [shouldShowFilter],
+    );
 
     if (!shouldShowFilter) return const SizedBox.shrink();
 

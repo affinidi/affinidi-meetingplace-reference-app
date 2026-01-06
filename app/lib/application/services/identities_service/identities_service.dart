@@ -154,8 +154,10 @@ class IdentitiesService extends _$IdentitiesService {
 extension IdentitiesServiceSelectors
     on NotifierProvider<IdentitiesService, IdentitiesServiceState> {
   ProviderListenable<Identity?> get currentIdentityOrPrimary {
-    return select((state) =>
-        state.currentIdentity ??
-        state.identities.firstWhereOrNull((identity) => identity.isPrimary));
+    return select(
+      (state) =>
+          state.currentIdentity ??
+          state.identities.firstWhereOrNull((identity) => identity.isPrimary),
+    );
   }
 }

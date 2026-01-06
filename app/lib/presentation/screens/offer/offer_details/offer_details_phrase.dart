@@ -44,7 +44,7 @@ class _OfferDetailsPhrase extends ConsumerWidget {
         _OfferQrCodeView(
           offerLink: offerLink,
           mnemonic: mnemonic,
-        )
+        ),
       ],
     );
   }

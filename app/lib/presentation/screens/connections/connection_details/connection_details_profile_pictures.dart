@@ -7,9 +7,10 @@ class _ProfilePictures extends ConsumerWidget {
 
   static final double _picSize = 150.0;
 
-  Future<void> _navigateToImageView(
-      {required BuildContext context,
-      required Future<Uint8List> imageBytesFuture}) async {
+  Future<void> _navigateToImageView({
+    required BuildContext context,
+    required Future<Uint8List> imageBytesFuture,
+  }) async {
     final imageBytes = await imageBytesFuture;
     if (!context.mounted) return;
     await Navigator.of(context, rootNavigator: true).push(
@@ -129,15 +130,16 @@ class _TranslatedPicture extends StatelessWidget {
           ),
         ),
         child: GestureDetector(
-            onTap: onPressed,
-            child: AvatarGradientContainer(
-              child: CircleAvatar(
-                radius: size / 2,
-                backgroundColor: Colors.transparent,
-                foregroundImage: foregroundImage,
-                child: child,
-              ),
-            )),
+          onTap: onPressed,
+          child: AvatarGradientContainer(
+            child: CircleAvatar(
+              radius: size / 2,
+              backgroundColor: Colors.transparent,
+              foregroundImage: foregroundImage,
+              child: child,
+            ),
+          ),
+        ),
       ),
     );
   }

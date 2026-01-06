@@ -36,12 +36,14 @@ class ContactsDatabase extends _$ContactsDatabase {
     required String passphrase,
     required bool inMemory,
     required Directory directory,
-  }) : super(openConnection(
-          databaseName: databaseName,
-          passphrase: passphrase,
-          inMemory: inMemory,
-          directory: directory,
-        ));
+  }) : super(
+          openConnection(
+            databaseName: databaseName,
+            passphrase: passphrase,
+            inMemory: inMemory,
+            directory: directory,
+          ),
+        );
 
   @override
   int get schemaVersion => 3;
@@ -130,7 +132,8 @@ class Contacts extends Table {
 class ContactCards extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get contactId => text().customConstraint(
-      'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL')();
+        'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL',
+      )();
   TextColumn get did => text()();
   TextColumn get type => text()();
   TextColumn get firstName => text()();

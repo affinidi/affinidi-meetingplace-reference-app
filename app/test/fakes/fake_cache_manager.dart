@@ -6,8 +6,10 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class FakeCacheManager implements BaseCacheManager {
   @override
-  Future<FileInfo?> getFileFromCache(String key,
-      {bool ignoreMemCache = false}) async {
+  Future<FileInfo?> getFileFromCache(
+    String key, {
+    bool ignoreMemCache = false,
+  }) async {
     return null;
   }
 

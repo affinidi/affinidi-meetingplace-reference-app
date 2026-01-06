@@ -87,7 +87,8 @@ class ContactsScreen extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     final currentIdentity = ref.read(
-        contactsScreenControllerProvider.select((state) => state.identity));
+      contactsScreenControllerProvider.select((state) => state.identity),
+    );
 
     await NewConnectionsMenu.onSelectOption(
       context: context,

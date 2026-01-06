@@ -118,7 +118,7 @@ class _Header extends StatelessWidget {
             OfferBanner(),
             SizedBox(
               height: 110,
-            )
+            ),
           ],
         ),
         Positioned(
@@ -139,8 +139,11 @@ class _ProfilePicture extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
     final cacheManager = ref.read(cacheManagerProvider);
-    final profileImage = ref.watch(provider.select(
-        (state) => state.offer?.contactCard.image(cacheManager: cacheManager)));
+    final profileImage = ref.watch(
+      provider.select(
+        (state) => state.offer?.contactCard.image(cacheManager: cacheManager),
+      ),
+    );
 
     return ProfilePicture(image: profileImage);
   }
@@ -275,15 +278,18 @@ class _AliasPicker extends HookConsumerWidget {
         identities.indexWhere((element) => element.id == _identityId);
     final cacheManager = ref.read(cacheManagerProvider);
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.initialize(_identityId);
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.initialize(_identityId);
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

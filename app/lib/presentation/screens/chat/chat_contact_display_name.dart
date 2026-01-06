@@ -8,16 +8,19 @@ class _ChatContactDisplayName extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
-    final hasContact = ref.watch(provider
-        .select((state) => state.isInitialized && state.contact != null));
+    final hasContact = ref.watch(
+      provider.select((state) => state.isInitialized && state.contact != null),
+    );
 
     if (!hasContact) {
       return const SizedBox.shrink();
     }
 
     final navigationBarTitle = ref.watch(provider.navigationBarTitle);
-    final hasDisplayName = ref.read(provider
-        .select((state) => state.contact?.displayName?.isNotEmpty ?? false));
+    final hasDisplayName = ref.read(
+      provider
+          .select((state) => state.contact?.displayName?.isNotEmpty ?? false),
+    );
     final isGroupChat = ref.read(provider.isGroupChat);
 
     return GestureDetector(
@@ -79,7 +82,7 @@ class _ChatContactDisplayName extends ConsumerWidget {
                   ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -99,7 +102,8 @@ class _IndividualChatName extends ConsumerWidget {
       fullName,
       key: const Key('individual_chat_name'),
       style: context.textTheme.labelMedium?.copyWith(
-          color: context.theme.colorScheme.onPrimary.withValues(alpha: 0.8)),
+        color: context.theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+      ),
     );
   }
 }
@@ -123,18 +127,19 @@ class _ChatContactImage extends ConsumerWidget {
       height: 55,
       width: 55,
       child: Card(
-          key: const Key('chat_contact_avatar'),
-          clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(100.0),
+        key: const Key('chat_contact_avatar'),
+        clipBehavior: Clip.hardEdge,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(100.0),
+        ),
+        elevation: 5,
+        child: AvatarGradientContainer(
+          child: Image(
+            fit: BoxFit.cover,
+            image: displayImage,
           ),
-          elevation: 5,
-          child: AvatarGradientContainer(
-            child: Image(
-              fit: BoxFit.cover,
-              image: displayImage,
-            ),
-          )),
+        ),
+      ),
     );
   }
 }

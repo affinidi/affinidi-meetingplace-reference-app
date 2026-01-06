@@ -43,7 +43,8 @@ class SettingsScreenController extends _$SettingsScreenController {
 
     ref.listen(
       settingsServiceProvider.select(
-          (state) => (state.isDebugMode, state.shouldShowMeetingPlaceQR)),
+        (state) => (state.isDebugMode, state.shouldShowMeetingPlaceQR),
+      ),
       (prev, next) {
         Future.microtask(() {
           final (isDebugMode, shouldShowMeetingPlaceQR) = next;

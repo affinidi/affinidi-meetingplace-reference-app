@@ -31,13 +31,18 @@ extension IdentityExtensions on Identity {
 
     if (isPrimary) {
       return Color.fromARGB(
-          255,
-          (colorScheme.primary.r * 255 * intensity).round(),
-          (colorScheme.primary.g * 255 * intensity).round(),
-          (colorScheme.primary.b * 255 * intensity).round());
+        255,
+        (colorScheme.primary.r * 255 * intensity).round(),
+        (colorScheme.primary.g * 255 * intensity).round(),
+        (colorScheme.primary.b * 255 * intensity).round(),
+      );
     } else if (isPlaceholder) {
-      return Color.fromARGB(255, (180 * intensity).round(),
-          (180 * intensity).round(), (180 * intensity).round());
+      return Color.fromARGB(
+        255,
+        (180 * intensity).round(),
+        (180 * intensity).round(),
+        (180 * intensity).round(),
+      );
     } else {
       final defaultColor = colorScheme.primary;
       final r = (defaultColor.r * 255 * intensity).round();

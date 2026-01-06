@@ -91,7 +91,7 @@ class FakeImagePicker extends ImagePicker {
     174,
     66,
     96,
-    130
+    130,
   ]);
 
   final XFile? _xFileToReturn;

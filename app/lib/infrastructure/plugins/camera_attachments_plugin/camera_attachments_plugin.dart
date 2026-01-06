@@ -35,17 +35,22 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
   /// and optional text message, or `null` if cancelled or failed.
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     if (!context.mounted) return null;
 
-    final result = await Navigator.push<MediaReviewResult>(context,
-        MaterialPageRoute(builder: (context) {
-      return const MediaScreen(
-        cameraLensDirection: CameraLensDirection.back,
-        useCamera: true,
-        useChatSemantics: true,
-      );
-    }));
+    final result = await Navigator.push<MediaReviewResult>(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return const MediaScreen(
+            cameraLensDirection: CameraLensDirection.back,
+            useCamera: true,
+            useChatSemantics: true,
+          );
+        },
+      ),
+    );
 
     if (result == null) {
       return null;

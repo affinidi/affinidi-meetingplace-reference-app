@@ -53,8 +53,9 @@ class _ConnectionListItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedConnectionsCount = ref.watch(
-        connectionsScreenControllerProvider
-            .select((state) => state.selectedConnections.length));
+      connectionsScreenControllerProvider
+          .select((state) => state.selectedConnections.length),
+    );
 
     if (connection.isDeleted) {
       return _ConnectionCard(
@@ -79,9 +80,11 @@ class _ConnectionListItem extends ConsumerWidget {
           spacing: 5,
           children: [
             Icon(Icons.delete, color: context.colorScheme.onError),
-            Text(context.l10n.generalDelete,
-                style: context.textTheme.bodySmall
-                    ?.copyWith(color: context.colorScheme.onError)),
+            Text(
+              context.l10n.generalDelete,
+              style: context.textTheme.bodySmall
+                  ?.copyWith(color: context.colorScheme.onError),
+            ),
           ],
         ),
       ),
@@ -107,16 +110,17 @@ class _ConnectionListItem extends ConsumerWidget {
 }
 
 class _ConnectionCard extends ConsumerWidget {
-  const _ConnectionCard(
-      {required ConnectionOffer connection,
-      required void Function(
-              {required ConnectionOffer connection, required bool isSelected})
-          onConnectionPress,
-      required void Function(
-              {required ConnectionOffer connection,
-              required BuildContext context})
-          onConnectionLongPress})
-      : _onConnectionLongPress = onConnectionLongPress,
+  const _ConnectionCard({
+    required ConnectionOffer connection,
+    required void Function({
+      required ConnectionOffer connection,
+      required bool isSelected,
+    }) onConnectionPress,
+    required void Function({
+      required ConnectionOffer connection,
+      required BuildContext context,
+    }) onConnectionLongPress,
+  })  : _onConnectionLongPress = onConnectionLongPress,
         _onConnectionPress = onConnectionPress,
         _connection = connection;
 
@@ -183,9 +187,10 @@ class _ConnectionCard extends ConsumerWidget {
                 children: [
                   AvatarGradientContainer(
                     child: CircleAvatar(
-                        backgroundColor: Colors.transparent,
-                        foregroundImage: _connection.contactCard
-                            .image(cacheManager: cacheManager)),
+                      backgroundColor: Colors.transparent,
+                      foregroundImage: _connection.contactCard
+                          .image(cacheManager: cacheManager),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -218,14 +223,15 @@ class _ConnectionCard extends ConsumerWidget {
                               _connection.expiresAt == null
                                   ? context.l10n.createdValidWithoutExpiration(
                                       _connection.createdAt
-                                          .timeAgo(context.l10n))
+                                          .timeAgo(context.l10n),
+                                    )
                                   : context.l10n.createdValidUntil(
                                       _connection.createdAt
                                           .timeAgo(context.l10n),
                                       DateFormat.yMMMd(
-                                              Localizations.localeOf(context)
-                                                  .toString())
-                                          .format(_connection.expiresAt!),
+                                        Localizations.localeOf(context)
+                                            .toString(),
+                                      ).format(_connection.expiresAt!),
                                     ),
                               style: context.textTheme.bodySmall,
                             ),

@@ -36,8 +36,11 @@ class QrCodeView extends StatelessWidget {
       final file = File(filePath);
       await file.writeAsBytes(pngBytes);
 
-      return XFile(filePath,
-          mimeType: 'image/png', name: 'Meeting Place Invitation.png');
+      return XFile(
+        filePath,
+        mimeType: 'image/png',
+        name: 'Meeting Place Invitation.png',
+      );
     } catch (e) {
       throw Exception('Failed to export QR code: $e');
     }

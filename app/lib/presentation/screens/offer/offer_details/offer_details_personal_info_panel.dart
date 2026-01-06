@@ -23,7 +23,8 @@ class _ContactCardPanelView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
     final card = ref.watch(
-        controllerProvider.select((state) => state.publisherIdentity?.card));
+      controllerProvider.select((state) => state.publisherIdentity?.card),
+    );
 
     if (card == null) {
       return const SizedBox.shrink();

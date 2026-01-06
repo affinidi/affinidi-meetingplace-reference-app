@@ -77,7 +77,8 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
                 ref.read(mediatorServiceProvider.filteredMediators);
             final selectedMediatorName = activeMediators
                 .firstWhereOrNull(
-                    (mediator) => mediator.mediatorDid == selectedMediatorDid)
+                  (mediator) => mediator.mediatorDid == selectedMediatorDid,
+                )
                 ?.mediatorName;
             state = state.copyWith(
               formData: state.formData.copyWith(
@@ -85,7 +86,7 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
               ),
               availableMediators: {
                 for (var mediator in activeMediators)
-                  mediator.mediatorName: mediator.mediatorDid
+                  mediator.mediatorName: mediator.mediatorDid,
               },
             );
           });
@@ -140,9 +141,11 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
     final mediators = mediatorServiceState.mediators;
 
     final mediatorName = mediators
-        .firstWhereOrNull((mediator) =>
-            mediator.mediatorDid == mediatorDid &&
-            mediator.status == MediatorStatus.active)
+        .firstWhereOrNull(
+          (mediator) =>
+              mediator.mediatorDid == mediatorDid &&
+              mediator.status == MediatorStatus.active,
+        )
         ?.mediatorName;
 
     final updatedFormData = state.formData.copyWith(
@@ -262,17 +265,19 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
     }
 
     state = state.copyWith(
-        formData: formData.copyWith(
-      customPhrase: trimmed,
-      isPhraseValidating: true,
-    ));
+      formData: formData.copyWith(
+        customPhrase: trimmed,
+        isPhraseValidating: true,
+      ),
+    );
 
     try {
       await ref
           .read(connectionsServiceProvider.notifier)
           .validateOfferPhrase(trimmed);
       final isPhraseAvailable = ref.read(
-          connectionsServiceProvider.select((s) => s.isCustomPhraseAvailable));
+        connectionsServiceProvider.select((s) => s.isCustomPhraseAvailable),
+      );
       final finalFormData = state.formData.copyWith(
         isPhraseAvailable: isPhraseAvailable,
         isPhraseValidating: false,
@@ -280,13 +285,18 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
       state = state.copyWith(formData: finalFormData);
       return isPhraseAvailable == true;
     } catch (error, stackTrace) {
-      _logger.error('Error validating phrase',
-          error: error, stackTrace: stackTrace, name: _logKey);
+      _logger.error(
+        'Error validating phrase',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
       state = state.copyWith(
-          formData: state.formData.copyWith(
-        isPhraseAvailable: false,
-        isPhraseValidating: false,
-      ));
+        formData: state.formData.copyWith(
+          isPhraseAvailable: false,
+          isPhraseValidating: false,
+        ),
+      );
       return false;
     }
   }
@@ -295,8 +305,10 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
     await ref.read(publishOfferLoadingController.notifier).start(() async {
       final selectedIdentity = state.selectedIdentity;
       if (selectedIdentity == null) {
-        throw AppException('You must select an identity',
-            code: AppExceptionType.missingIdentity.name);
+        throw AppException(
+          'You must select an identity',
+          code: AppExceptionType.missingIdentity.name,
+        );
       }
 
       var latestFormData = state.formData;
@@ -345,10 +357,12 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
     if (!updatedFormData.randomPhraseEnabled) {
       // If custom phrase is empty, reset validation state immediately
       if (customPhrase.isEmpty) {
-        updateFormData(updatedFormData.copyWith(
-          isPhraseAvailable: null,
-          isPhraseValidating: false,
-        ));
+        updateFormData(
+          updatedFormData.copyWith(
+            isPhraseAvailable: null,
+            isPhraseValidating: false,
+          ),
+        );
         return;
       }
 
@@ -368,8 +382,9 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
         await validateOfferPhrase(phrase);
       } else {
         state = state.copyWith(
-            formData: state.formData
-                .copyWith(isPhraseAvailable: null, isPhraseValidating: false));
+          formData: state.formData
+              .copyWith(isPhraseAvailable: null, isPhraseValidating: false),
+        );
       }
     });
   }
