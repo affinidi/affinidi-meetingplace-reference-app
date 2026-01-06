@@ -143,7 +143,6 @@ class _QrPermissionViewState extends ConsumerState<_QrPermissionView> {
     // Always attempt to (re)request permission on retry.
     var status = await service.requestCameraPermission();
     if (!status.isGranted) {
-      // If still not granted (e.g. permanently denied), reflect latest status.
       status = await service.getCameraPermissionStatus();
     }
     setState(() {

@@ -133,7 +133,6 @@ class MediaScreen extends HookConsumerWidget {
             );
           }
 
-          // Show loading indicator while toggling or initializing camera
           if (state.cameraController == null || !state.isCameraAvailable) {
             return const Center(child: CircularProgressIndicator.adaptive());
           }
