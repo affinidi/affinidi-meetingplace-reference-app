@@ -9,11 +9,18 @@ import '../../presentation/widgets/images/default_profile_image.dart';
 import 'string_list_extensions.dart';
 
 enum ContactCardType {
-  human('human'),
-  contactCard('contactCard');
+  individual('individual'),
+  aiAgent('ai-agent');
 
   const ContactCardType(this.value);
   final String value;
+
+  static ContactCardType? fromString(String value) {
+    for (final type in ContactCardType.values) {
+      if (type.value == value) return type;
+    }
+    return null;
+  }
 }
 
 enum ContactCardPaths {
