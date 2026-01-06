@@ -194,45 +194,6 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     );
   }
 
-  /// Checks if the device has camera hardware available.
-  ///
-  /// Returns `true` if the platform supports cameras and at least one camera
-  /// is available. Does NOT request permission.
-  ///
-  /// Use this to show/hide camera features in the UI without prompting.
-  Future<bool> isCameraAvailable() async {
-    if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
-      return false;
-    }
-
-    try {
-      final getCameras = ref.read(availableCamerasProvider);
-      final cameras = await getCameras();
-      return cameras.isNotEmpty;
-    } catch (error) {
-      _logger.warning(
-        'Error checking camera availability: $error',
-        name: _logKey,
-      );
-      return false;
-    }
-  }
-
-  /// Gets the current camera permission status without prompting.
-  ///
-  /// Returns [PermissionStatus] indicating whether permission is:
-  /// - granted
-  /// - denied
-  /// - restricted
-  /// - permanentlyDenied
-  /// - limited
-  ///
-  /// Use this to check permission state before showing camera UI.
-  Future<PermissionStatus> getCameraPermissionStatus() async {
-    final permissionService = ref.read(permissionServiceProvider);
-    return permissionService.getCameraPermissionStatus();
-  }
-
   /// Ensures camera is ready by checking permission and initializing if needed.
   ///
   /// Call this when user initiates a camera action (e.g., taps "Scan QR").
