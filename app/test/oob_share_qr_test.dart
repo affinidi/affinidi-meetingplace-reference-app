@@ -180,8 +180,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(fakeShareService.sharedParams.length, equals(1));
-        expect(fakeShareService.sharedParams.first.title,
-            equals(l10n.meetingPlaceInvitationTitle));
+        expect(
+          fakeShareService.sharedParams.first.title,
+          equals(l10n.meetingPlaceInvitationTitle),
+        );
       });
     });
 
@@ -213,7 +215,9 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(
-            fakeSdk.createOobFlowCalls.length, greaterThan(initialCallCount));
+          fakeSdk.createOobFlowCalls.length,
+          greaterThan(initialCallCount),
+        );
       });
     });
 

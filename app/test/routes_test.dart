@@ -375,7 +375,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-          find.byKey(const Key('oob_scan_qr_screen_scaffold')), findsOneWidget);
+        find.byKey(const Key('oob_scan_qr_screen_scaffold')),
+        findsOneWidget,
+      );
     });
   });
 }

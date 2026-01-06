@@ -31,8 +31,10 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('oob_scan_qr_screen_scaffold')),
-            findsOneWidget);
+        expect(
+          find.byKey(const Key('oob_scan_qr_screen_scaffold')),
+          findsOneWidget,
+        );
       });
     });
 
@@ -63,7 +65,9 @@ void main() {
 
           expect(fakeSdk.acceptOobFlowCalls.length, equals(1));
           expect(
-              fakeSdk.acceptOobFlowCalls.first['offerLink'], equals(testQrUrl));
+            fakeSdk.acceptOobFlowCalls.first['offerLink'],
+            equals(testQrUrl),
+          );
           expect(fakeSdk.acceptOobFlowCalls.first['contactCard'], isNotNull);
 
           final channel =
@@ -71,8 +75,10 @@ void main() {
           fakeSdk.simulateOobAcceptConnectionEstablished(channel);
           await tester.pumpAndSettle();
 
-          expect(find.byKey(const Key('oob_scan_qr_screen_scaffold')),
-              findsNothing);
+          expect(
+            find.byKey(const Key('oob_scan_qr_screen_scaffold')),
+            findsNothing,
+          );
         });
       });
 
@@ -100,8 +106,10 @@ void main() {
           await tester.pumpAndSettle();
           final l10n = await getL10n();
           expect(find.text(l10n.error('oobFlowFailed')), findsOneWidget);
-          expect(find.byKey(const Key('oob_scan_qr_screen_scaffold')),
-              findsOneWidget);
+          expect(
+            find.byKey(const Key('oob_scan_qr_screen_scaffold')),
+            findsOneWidget,
+          );
         });
       });
 
@@ -132,8 +140,10 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(fakeSdk.acceptOobFlowCalls.length, equals(1));
-          expect(fakeSdk.acceptOobFlowCalls.first['offerLink'],
-              equals(firstQrUrl));
+          expect(
+            fakeSdk.acceptOobFlowCalls.first['offerLink'],
+            equals(firstQrUrl),
+          );
 
           // Scan second QR code
           pickerWidget.onDetectCode!(secondQrUrl);
@@ -141,8 +151,10 @@ void main() {
 
           // Should have called acceptOobFlow twice
           expect(fakeSdk.acceptOobFlowCalls.length, equals(2));
-          expect(fakeSdk.acceptOobFlowCalls.last['offerLink'],
-              equals(secondQrUrl));
+          expect(
+            fakeSdk.acceptOobFlowCalls.last['offerLink'],
+            equals(secondQrUrl),
+          );
 
           // Should have disposed the first subscription
           expect(fakeSdk.acceptOobStreamDisposals.length, equals(1));

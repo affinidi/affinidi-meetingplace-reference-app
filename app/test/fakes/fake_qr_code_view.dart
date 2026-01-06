@@ -21,8 +21,11 @@ class FakeQrCodeView extends StatelessWidget {
     final file = File(filePath);
     await file.writeAsBytes([0, 1, 2, 3]);
 
-    return XFile(filePath,
-        mimeType: 'image/png', name: 'Meeting Place Invitation.png');
+    return XFile(
+      filePath,
+      mimeType: 'image/png',
+      name: 'Meeting Place Invitation.png',
+    );
   }
 
   @override

@@ -196,31 +196,35 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   /// Simulates a successful OOB connection by emitting channel data
   /// through the create OOB flow stream
   void simulateOobConnectionEstablished(Channel channel) {
-    _createOobStreamController?.add(OobStreamData(
-      eventType: EventType.connectionSetup,
-      message: PlainTextMessage.fromJson({
-        'id': 'fake-message-id',
-        'type': 'fake-type',
-        'from': channel.publishOfferDid,
-        'to': [channel.acceptOfferDid],
-      }),
-      channel: channel,
-    ));
+    _createOobStreamController?.add(
+      OobStreamData(
+        eventType: EventType.connectionSetup,
+        message: PlainTextMessage.fromJson({
+          'id': 'fake-message-id',
+          'type': 'fake-type',
+          'from': channel.publishOfferDid,
+          'to': [channel.acceptOfferDid],
+        }),
+        channel: channel,
+      ),
+    );
   }
 
   /// Simulates a successful OOB connection by emitting channel data
   /// through the accept OOB flow stream
   void simulateOobAcceptConnectionEstablished(Channel channel) {
-    _acceptOobStreamController?.add(OobStreamData(
-      eventType: EventType.connectionAccepted,
-      message: PlainTextMessage.fromJson({
-        'id': 'fake-message-id',
-        'type': 'fake-type',
-        'from': channel.acceptOfferDid,
-        'to': [channel.publishOfferDid],
-      }),
-      channel: channel,
-    ));
+    _acceptOobStreamController?.add(
+      OobStreamData(
+        eventType: EventType.connectionAccepted,
+        message: PlainTextMessage.fromJson({
+          'id': 'fake-message-id',
+          'type': 'fake-type',
+          'from': channel.acceptOfferDid,
+          'to': [channel.publishOfferDid],
+        }),
+        channel: channel,
+      ),
+    );
   }
 
   /// Simulates a QR code scan by calling acceptOobFlow with test data
@@ -442,7 +446,9 @@ class _FakeOobStream implements OobStream {
 
   @override
   StreamSubscription<OobStreamData> timeout(
-      Duration duration, void Function()? onTimeout) {
+    Duration duration,
+    void Function()? onTimeout,
+  ) {
     _timeoutCallback = onTimeout;
     if (shouldTimeout && onTimeout != null) {
       // Trigger timeout immediately in test
