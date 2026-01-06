@@ -33,15 +33,18 @@ class SettingsScreen extends HookConsumerWidget {
     final provider = settingsScreenControllerProvider;
     final controller = ref.read(provider.notifier);
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await controller.ensureInitialized();
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await controller.ensureInitialized();
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     return SafeArea(
       child: SingleChildScrollView(

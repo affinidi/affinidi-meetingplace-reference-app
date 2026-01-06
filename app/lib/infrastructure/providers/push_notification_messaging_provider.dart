@@ -10,5 +10,6 @@ import '../firebase_messaging/push_notification_messaging.dart';
 FutureProvider<PushNotificationMessaging> pushNotificationMessagingProvider =
     FutureProvider<PushNotificationMessaging>((ref) async {
   throw UnimplementedError(
-      'Make sure to override pushNotificationMessagingProvider');
+    'Make sure to override pushNotificationMessagingProvider',
+  );
 });

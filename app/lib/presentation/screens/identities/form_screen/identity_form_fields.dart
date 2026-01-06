@@ -64,7 +64,11 @@ class IdentityFormFields extends ConsumerWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(
-                        top: 16.0, bottom: 16.0, left: 20.0, right: 0.0),
+                      top: 16.0,
+                      bottom: 16.0,
+                      left: 20.0,
+                      right: 0.0,
+                    ),
                     child: ProfilePicture(
                       image: identity.profileImage(cacheManager: cacheManager),
                       size: 90,

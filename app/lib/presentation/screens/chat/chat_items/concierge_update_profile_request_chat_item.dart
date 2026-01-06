@@ -1,9 +1,10 @@
 part of '../chat_screen.dart';
 
 class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
-  _ConciergeUpdateProfileRequestChatItem(
-      {required chat.ConciergeMessage chatItem, required String contactId})
-      : _chatItem = chatItem,
+  _ConciergeUpdateProfileRequestChatItem({
+    required chat.ConciergeMessage chatItem,
+    required String contactId,
+  })  : _chatItem = chatItem,
         _contactId = contactId;
 
   final chat.ConciergeMessage _chatItem;
@@ -26,19 +27,25 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
     final cancelLoadingController =
         controller.conciergeCancelSendProfileLoadingController(_chatItem);
 
-    final chatItem = ref.watch(provider.select((state) => state.messages
-        .whereType<chat.ConciergeMessage>()
-        .firstWhereOrNull((cm) =>
-            cm.messageId == _chatItem.messageId &&
-            cm.status == chat.ChatItemStatus.userInput)));
+    final chatItem = ref.watch(
+      provider.select(
+        (state) =>
+            state.messages.whereType<chat.ConciergeMessage>().firstWhereOrNull(
+                  (cm) =>
+                      cm.messageId == _chatItem.messageId &&
+                      cm.status == chat.ChatItemStatus.userInput,
+                ),
+      ),
+    );
 
     Future<void> updateContactDetails() async {
       if (!context.mounted) return;
       if (chatItem == null) return;
 
       logger.info(
-          '''Pressed yes button to send updated profile for messageId: ${_chatItem.messageId}''',
-          name: _logKey);
+        '''Pressed yes button to send updated profile for messageId: ${_chatItem.messageId}''',
+        name: _logKey,
+      );
       await controller.sendContactDetailsUpdate(chatItem);
     }
 
@@ -47,8 +54,9 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
       if (chatItem == null) return;
 
       logger.info(
-          '''Pressed ask me later button for messageId: ${_chatItem.messageId}''',
-          name: _logKey);
+        '''Pressed ask me later button for messageId: ${_chatItem.messageId}''',
+        name: _logKey,
+      );
       await controller.askMeLaterToSendContactDetailsUpdate(chatItem);
     }
 
@@ -57,8 +65,9 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
       if (chatItem == null) return;
 
       logger.info(
-          '''Pressed cancel button for messageId: ${_chatItem.messageId}''',
-          name: _logKey);
+        '''Pressed cancel button for messageId: ${_chatItem.messageId}''',
+        name: _logKey,
+      );
       await controller.cancelUpdatingContactDetails(chatItem);
     }
 
@@ -89,7 +98,7 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
                     radius: 2,
                     colors: [
                       Color.fromARGB(255, 76, 76, 76),
-                      Color.fromARGB(255, 31, 31, 31)
+                      Color.fromARGB(255, 31, 31, 31),
                     ],
                   ),
                 ),
@@ -185,7 +194,7 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
                           ),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),

@@ -8,5 +8,6 @@ part 'mediators_repository_provider.g.dart';
 @Riverpod(keepAlive: true)
 Future<MediatorsRepository> mediatorsRepository(Ref ref) async {
   throw UnimplementedError(
-      '''Please configure the application by providing a MediatorsRepository implementation in ProviderScope overrides.''');
+    '''Please configure the application by providing a MediatorsRepository implementation in ProviderScope overrides.''',
+  );
 }

@@ -57,7 +57,11 @@ class Navigator {
   /// [error] - The caught error object.
   /// [stackTrace] - The stack trace of the error.
   void _handleNavigationError(
-      String method, String path, Object error, StackTrace stackTrace) {
+    String method,
+    String path,
+    Object error,
+    StackTrace stackTrace,
+  ) {
     log('Error using $method to "$path": $error', name: _logKey);
     log('$stackTrace', name: _logKey);
   }

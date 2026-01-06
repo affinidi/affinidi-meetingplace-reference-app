@@ -41,7 +41,7 @@ class _MediatorSection extends ConsumerWidget {
             helperText: context.l10n.mediatorHelperText,
             buttonText: context.l10n.changeButton,
             onPressed: selectMediator,
-          )
+          ),
         ],
       ),
     );

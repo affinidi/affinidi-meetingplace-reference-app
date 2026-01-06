@@ -69,7 +69,8 @@ class ConnectionsScreen extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     final currentIdentity = ref.read(
-        connectionsScreenControllerProvider.select((state) => state.identity));
+      connectionsScreenControllerProvider.select((state) => state.identity),
+    );
 
     await NewConnectionsMenu.onSelectOption(
       context: context,

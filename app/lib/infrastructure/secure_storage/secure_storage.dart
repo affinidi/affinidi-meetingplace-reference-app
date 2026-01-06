@@ -142,7 +142,9 @@ class SecureStorage implements KeyRepository, KeyStore {
   /// Sets the debug mode flag.
   Future<void> saveDebugMode(bool debugMode) {
     return _secureStorage.write(
-        key: _Key.debugMode.name, value: debugMode.toString());
+      key: _Key.debugMode.name,
+      value: debugMode.toString(),
+    );
   }
 
   /// Gets the meeting place QR code display preference.
@@ -157,7 +159,9 @@ class SecureStorage implements KeyRepository, KeyStore {
   /// Sets the meeting place QR code display preference.
   Future<void> saveShouldShowMeetingPlaceQR(bool showQr) {
     return _secureStorage.write(
-        key: _Key.showMeetingPlaceQr.name, value: showQr.toString());
+      key: _Key.showMeetingPlaceQr.name,
+      value: showQr.toString(),
+    );
   }
 
   /// Provides a database passphrase, creating one if needed.
@@ -221,11 +225,12 @@ class SecureStorage implements KeyRepository, KeyStore {
     required String did,
   }) {
     return _secureStorage.write(
-        key: '$_keyPairIndex$did',
-        value: jsonEncode({
-          'privateKeyBytes': privateKeyBytes,
-          'publicKeyBytes': publicKeyBytes,
-        }));
+      key: '$_keyPairIndex$did',
+      value: jsonEncode({
+        'privateKeyBytes': privateKeyBytes,
+        'publicKeyBytes': publicKeyBytes,
+      }),
+    );
   }
 
   /// Gets the stored push notification token.
@@ -238,7 +243,9 @@ class SecureStorage implements KeyRepository, KeyStore {
   /// Saves the push notification token to secure storage.
   Future<void> savePushNotificationToken(String pushNotificationToken) async {
     await _secureStorage.write(
-        key: _Key.pushNotificationToken.name, value: pushNotificationToken);
+      key: _Key.pushNotificationToken.name,
+      value: pushNotificationToken,
+    );
   }
 
   /// Gets all unsent messages stored in secure storage.
@@ -281,21 +288,24 @@ class SecureStorage implements KeyRepository, KeyStore {
 /// On fresh installs (detected via SharedPreferences), clears any existing
 /// keychain data to ensure a clean state. Marks the app as installed to
 /// prevent future clearing.
-final secureStorageProvider = FutureProvider<SecureStorage>((ref) async {
-  final storage = SecureStorage();
-  const logKey = 'secureStorageProvider';
+final secureStorageProvider = FutureProvider<SecureStorage>(
+  (ref) async {
+    final storage = SecureStorage();
+    const logKey = 'secureStorageProvider';
 
-  final prefs = ref.read(sharedPreferencesProvider);
-  if (prefs.getBool(SharedPreferencesKeys.alreadyInstalled.name) != true) {
-    final logger = ref.read(appLoggerProvider);
-    logger.info(
-      'Fresh install: clearing Keychain',
-      name: logKey,
-    );
+    final prefs = ref.read(sharedPreferencesProvider);
+    if (prefs.getBool(SharedPreferencesKeys.alreadyInstalled.name) != true) {
+      final logger = ref.read(appLoggerProvider);
+      logger.info(
+        'Fresh install: clearing Keychain',
+        name: logKey,
+      );
 
-    await storage.clear();
-    await prefs.setBool(SharedPreferencesKeys.alreadyInstalled.name, true);
-  }
+      await storage.clear();
+      await prefs.setBool(SharedPreferencesKeys.alreadyInstalled.name, true);
+    }
 
-  return storage;
-}, name: 'secureStorageProvider');
+    return storage;
+  },
+  name: 'secureStorageProvider',
+);

@@ -6,7 +6,9 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 
 mixin AsyncLoadingStatusErrorLocalizer {
   String _extractErrorCode(
-      BuildContext context, MeetingPlaceCoreSDKException exception) {
+    BuildContext context,
+    MeetingPlaceCoreSDKException exception,
+  ) {
     final innerException = exception.innerException;
     return switch (innerException) {
       MissingDeviceException _ => 'missingDeviceToken',

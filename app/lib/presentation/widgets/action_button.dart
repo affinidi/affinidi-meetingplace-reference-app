@@ -25,7 +25,8 @@ class ActionButton extends StatelessWidget {
     if (isDefaultAction) {
       buttonStyle = buttonStyle.copyWith(
         textStyle: WidgetStateProperty.all(
-            const TextStyle(fontWeight: FontWeight.bold)),
+          const TextStyle(fontWeight: FontWeight.bold),
+        ),
       );
     }
 

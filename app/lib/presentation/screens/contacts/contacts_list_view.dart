@@ -15,7 +15,8 @@ class _ContactsListView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final contacts = ref.watch(
-        contactsScreenControllerProvider.select((state) => state.contacts));
+      contactsScreenControllerProvider.select((state) => state.contacts),
+    );
 
     return ListView.builder(
       // TODO(MA): Remove shrink wrap to enable lazy loading
@@ -187,7 +188,7 @@ class _ContactListItem extends ConsumerWidget {
                       context.l10n.contactAdded(dateAdded),
                       style: context.textTheme.labelSmall,
                       maxLines: 1,
-                    )
+                    ),
                   ],
                 ),
               ),

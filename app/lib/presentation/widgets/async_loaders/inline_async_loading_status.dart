@@ -112,16 +112,17 @@ class InlineAsyncLoadingStatus extends HookConsumerWidget
     return isShowingProgress.value
         ? Center(
             child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 16,
-              children: [
-                const CircularProgressIndicator.adaptive(),
-                if (_hasLoadingMessage) Text(_loadingMessage!),
-              ],
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: 16,
+                children: [
+                  const CircularProgressIndicator.adaptive(),
+                  if (_hasLoadingMessage) Text(_loadingMessage!),
+                ],
+              ),
             ),
-          ))
+          )
         : errorText.value != null
             ? Center(
                 child: Padding(

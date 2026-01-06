@@ -8,8 +8,10 @@ class _MeetingPlaceControlPlaneSection extends ConsumerWidget {
     final controller = ref.read(settingsScreenControllerProvider.notifier);
     final isDebugMode = ref
         .watch(settingsScreenControllerProvider.select((s) => s.isDebugMode));
-    final shouldShowMeetingPlaceQR = ref.watch(settingsScreenControllerProvider
-        .select((s) => s.shouldShowMeetingPlaceQR));
+    final shouldShowMeetingPlaceQR = ref.watch(
+      settingsScreenControllerProvider
+          .select((s) => s.shouldShowMeetingPlaceQR),
+    );
 
     if (!isDebugMode) {
       return const SizedBox.shrink();

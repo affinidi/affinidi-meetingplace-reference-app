@@ -73,18 +73,20 @@ class _ImageViewScreenState extends ConsumerState<ImageViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _backgroundColor,
-      bottomNavigationBar: BottomMediaBar(children: [
-        const Spacer(),
-        FloatingActionButton(
-          heroTag: 'close',
-          backgroundColor: Colors.red,
-          onPressed: () {
-            final navigator = ref.read(navigatorProvider);
-            navigator.pop();
-          },
-          child: const Icon(Icons.close, size: 35, color: Colors.white),
-        ),
-      ]),
+      bottomNavigationBar: BottomMediaBar(
+        children: [
+          const Spacer(),
+          FloatingActionButton(
+            heroTag: 'close',
+            backgroundColor: Colors.red,
+            onPressed: () {
+              final navigator = ref.read(navigatorProvider);
+              navigator.pop();
+            },
+            child: const Icon(Icons.close, size: 35, color: Colors.white),
+          ),
+        ],
+      ),
       body: ImagePreview(
         imageBytes: widget.imageBytes,
       ),

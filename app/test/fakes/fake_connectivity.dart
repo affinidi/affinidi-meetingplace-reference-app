@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class FakeConnectivity implements Connectivity {
-  FakeConnectivity(
-      {List<ConnectivityResult> initialConnectivityToReturn = const [
-        ConnectivityResult.none
-      ]})
-      : _initialConnectivityToReturn = initialConnectivityToReturn;
+  FakeConnectivity({
+    List<ConnectivityResult> initialConnectivityToReturn = const [
+      ConnectivityResult.none,
+    ],
+  }) : _initialConnectivityToReturn = initialConnectivityToReturn;
 
   final List<ConnectivityResult> _initialConnectivityToReturn;
 

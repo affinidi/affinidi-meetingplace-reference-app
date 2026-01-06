@@ -9,11 +9,13 @@ extension ContactsList on List<Contact> {
             .length;
 
     // Count contacts with Approved status and all seqNo/badgeCount == 0
-    final approvedZeroBadgeCount = where((contact) =>
-        (contact.status == ContactStatus.approved ||
-            contact.status == ContactStatus.active) &&
-        contact.badgeCount == 0 &&
-        contact.currentMessageSeqNo == 0).length;
+    final approvedZeroBadgeCount = where(
+      (contact) =>
+          (contact.status == ContactStatus.approved ||
+              contact.status == ContactStatus.active) &&
+          contact.badgeCount == 0 &&
+          contact.currentMessageSeqNo == 0,
+    ).length;
 
     // Sum all badgeCount values
     final totalBadgeCount =

@@ -1,9 +1,10 @@
 part of '../chat_screen.dart';
 
 class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
-  ConciergeJoinGroupRequestChatItem(
-      {required chat.ConciergeMessage chatItem, required String contactId})
-      : _chatItem = chatItem,
+  ConciergeJoinGroupRequestChatItem({
+    required chat.ConciergeMessage chatItem,
+    required String contactId,
+  })  : _chatItem = chatItem,
         _contactId = contactId,
         super(
           key: ValueKey('chat_concierge_join_${chatItem.messageId}'),
@@ -20,11 +21,16 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
     final l10n = context.l10n;
     final logger = ref.read(appLoggerProvider);
 
-    final chatItem = ref.watch(provider.select((state) => state.messages
-        .whereType<chat.ConciergeMessage>()
-        .firstWhereOrNull((cm) =>
-            cm.messageId == _chatItem.messageId &&
-            cm.status == chat.ChatItemStatus.userInput)));
+    final chatItem = ref.watch(
+      provider.select(
+        (state) =>
+            state.messages.whereType<chat.ConciergeMessage>().firstWhereOrNull(
+                  (cm) =>
+                      cm.messageId == _chatItem.messageId &&
+                      cm.status == chat.ChatItemStatus.userInput,
+                ),
+      ),
+    );
 
     final approveLoadingController =
         controller.conciergeApproveLoadingController(_chatItem);
@@ -37,8 +43,9 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
       if (!context.mounted) return;
 
       logger.info(
-          '''Pressed approve button for messageId: ${_chatItem.messageId}''',
-          name: _logKey);
+        '''Pressed approve button for messageId: ${_chatItem.messageId}''',
+        name: _logKey,
+      );
       await controller.approveMembership(_chatItem);
     }
 
@@ -46,8 +53,9 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
       if (!context.mounted) return;
 
       logger.info(
-          '''Pressed reject button for messageId: ${_chatItem.messageId}''',
-          name: _logKey);
+        '''Pressed reject button for messageId: ${_chatItem.messageId}''',
+        name: _logKey,
+      );
       await controller.rejectMembership(_chatItem);
     }
 
@@ -72,14 +80,16 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
                 constraints: const BoxConstraints(maxWidth: 600),
                 padding: const EdgeInsets.all(10),
                 decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    gradient: RadialGradient(
-                        center: Alignment.bottomCenter,
-                        radius: 2,
-                        colors: [
-                          Color.fromARGB(255, 76, 76, 76),
-                          Color.fromARGB(255, 31, 31, 31)
-                        ])),
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  gradient: RadialGradient(
+                    center: Alignment.bottomCenter,
+                    radius: 2,
+                    colors: [
+                      Color.fromARGB(255, 76, 76, 76),
+                      Color.fromARGB(255, 31, 31, 31),
+                    ],
+                  ),
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -110,34 +120,35 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
                           padding: const EdgeInsets.only(top: 10, right: 10),
                           child: TextButton(
                             style: TextButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                minimumSize: const Size(80, 25),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(8)),
-                                  side:
-                                      BorderSide(color: Colors.white, width: 1),
-                                )),
+                              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                              minimumSize: const Size(80, 25),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                                side: BorderSide(color: Colors.white, width: 1),
+                              ),
+                            ),
                             onPressed: () async {
                               await approveMembership();
                             },
-                            child: Text(context.l10n.generalApprove,
-                                style: const TextStyle(color: Colors.white)),
+                            child: Text(
+                              context.l10n.generalApprove,
+                              style: const TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
                           child: TextButton(
                             style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(80, 25),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(8)),
-                                  side:
-                                      BorderSide(color: Colors.white, width: 1),
-                                )),
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(80, 25),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                                side: BorderSide(color: Colors.white, width: 1),
+                              ),
+                            ),
                             onPressed: () async {
                               await rejectOffer();
                             },
@@ -148,7 +159,7 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
                           ),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),

@@ -72,5 +72,6 @@ Future<ChatRepository> chatRepositoryInMemoryDrift(Ref ref) async {
 @Riverpod(keepAlive: true)
 Future<ChatRepository> chatRepository(Ref ref) async {
   throw UnimplementedError(
-      '''Please configure the application by providing an ChatRepository implementation in ProviderScope overrides.''');
+    '''Please configure the application by providing an ChatRepository implementation in ProviderScope overrides.''',
+  );
 }

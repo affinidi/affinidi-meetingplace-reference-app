@@ -39,8 +39,10 @@ void main() async {
   final logger = AppLogger.instance;
   const logKey = 'Main';
 
-  logger.info('MeetingPlaceCoreSDK logger configured to use debug collector',
-      name: logKey);
+  logger.info(
+    'MeetingPlaceCoreSDK logger configured to use debug collector',
+    name: logKey,
+  );
 
   logger.info('Application starting up', name: logKey);
   logger.info(
@@ -74,9 +76,10 @@ void main() async {
         groupsRepositoryProvider.overrideWith(groupsRepositoryDrift),
         identitiesRepositoryProvider.overrideWith(identitiesRepositoryDrift),
         mediatorsRepositoryProvider.overrideWith(mediatorsRepositoryDrift),
-        pushNotificationMessagingProvider.overrideWith((ref) =>
-            FirebasePushNotificationMessaging(FirebaseMessaging.instance)
-              ..setBackgroundHandler(firebaseMessagingBackgroundHandler)),
+        pushNotificationMessagingProvider.overrideWith(
+          (ref) => FirebasePushNotificationMessaging(FirebaseMessaging.instance)
+            ..setBackgroundHandler(firebaseMessagingBackgroundHandler),
+        ),
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
       observers: [

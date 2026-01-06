@@ -17,8 +17,10 @@ class NavigationTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final count = ref.watch(notificationServiceProvider
-        .select((state) => state.counters[tab.serviceKey] ?? 0));
+    final count = ref.watch(
+      notificationServiceProvider
+          .select((state) => state.counters[tab.serviceKey] ?? 0),
+    );
 
     return BadgedIcon(
       label: l10n.tabsTitle(tab.name),

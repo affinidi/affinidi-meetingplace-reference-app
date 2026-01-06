@@ -46,15 +46,18 @@ class OnboardingScreen extends HookConsumerWidget {
     final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.initialize();
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.initialize();
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     if (state.isLoading || state.videoPlayerControllers.isEmpty) {
       return const Scaffold(
@@ -96,7 +99,10 @@ class OnboardingScreen extends HookConsumerWidget {
                       alignment: Alignment.bottomCenter,
                       child: Padding(
                         padding: const EdgeInsets.only(
-                            bottom: 160, left: 20, right: 20),
+                          bottom: 160,
+                          left: 20,
+                          right: 20,
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -106,9 +112,10 @@ class OnboardingScreen extends HookConsumerWidget {
                               style: const TextStyle(
                                 shadows: <Shadow>[
                                   Shadow(
-                                      offset: Offset(3, 3),
-                                      blurRadius: 15.0,
-                                      color: Colors.black)
+                                    offset: Offset(3, 3),
+                                    blurRadius: 15.0,
+                                    color: Colors.black,
+                                  ),
                                 ],
                                 color: Colors.white,
                                 fontSize: 28,
@@ -122,9 +129,10 @@ class OnboardingScreen extends HookConsumerWidget {
                               style: const TextStyle(
                                 shadows: <Shadow>[
                                   Shadow(
-                                      offset: Offset(3, 3),
-                                      blurRadius: 15.0,
-                                      color: Colors.black)
+                                    offset: Offset(3, 3),
+                                    blurRadius: 15.0,
+                                    color: Colors.black,
+                                  ),
                                 ],
                                 color: Colors.white,
                                 fontSize: 20,

@@ -8,5 +8,6 @@ part 'identities_repository_provider.g.dart';
 @Riverpod(keepAlive: true)
 Future<IdentitiesRepository> identitiesRepository(Ref ref) async {
   throw UnimplementedError(
-      '''Please configure the application by providing an IdentitiesRepository implementation in ProviderScope overrides.''');
+    '''Please configure the application by providing an IdentitiesRepository implementation in ProviderScope overrides.''',
+  );
 }

@@ -14,6 +14,7 @@ linter:
     - avoid_print
     - sort_constructors_first
     - unawaited_futures
+    - require_trailing_commas
 
 analyzer:
   errors:

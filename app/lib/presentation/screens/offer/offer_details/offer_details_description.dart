@@ -9,7 +9,8 @@ class _OfferDetailsDescription extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
     final offerDescription = ref.watch(
-        controllerProvider.select((state) => state.offer?.offerDescription));
+      controllerProvider.select((state) => state.offer?.offerDescription),
+    );
 
     if (offerDescription?.isEmpty ?? true) {
       return const SizedBox.shrink();

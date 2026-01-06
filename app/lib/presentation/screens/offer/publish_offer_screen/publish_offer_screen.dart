@@ -47,15 +47,18 @@ class PublishOfferScreen extends HookConsumerWidget {
     final width = MediaQuery.sizeOf(context).width;
     final inset = width > maxWidth ? (width - maxWidth) / 2 : 20.0;
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.initialize();
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.initialize();
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     return Scaffold(
       appBar: _OfferAppBar(_identityId),

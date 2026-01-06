@@ -79,12 +79,16 @@ class ConnectionDetailsScreenController
     final mediatorService = ref.read(mediatorServiceProvider.notifier);
 
     final mediator = mediatorService.findNearestMediatorBefore(
-        dateTime: contact.dateAdded, did: contact.mediatorDid);
+      dateTime: contact.dateAdded,
+      did: contact.mediatorDid,
+    );
 
     final channelDid = contact.channelDid;
     if (channelDid == null) {
-      throw AppException('Contact has not been associated to any channels',
-          code: AppExceptionType.missingChannel.name);
+      throw AppException(
+        'Contact has not been associated to any channels',
+        code: AppExceptionType.missingChannel.name,
+      );
     }
     _logger.info(
       'ChannelID: $channelDid',
@@ -96,8 +100,10 @@ class ConnectionDetailsScreenController
         await coreSdk.getChannelByOtherPartyPermanentDid(channelDid);
 
     if (channel == null) {
-      throw AppException('Contact has not been associated to any channels',
-          code: AppExceptionType.missingChannel.name);
+      throw AppException(
+        'Contact has not been associated to any channels',
+        code: AppExceptionType.missingChannel.name,
+      );
     }
 
     var group = (connection is GroupConnectionOffer)
@@ -121,7 +127,10 @@ class ConnectionDetailsScreenController
   }
 
   String _makeContactName(
-      Contact contact, Group? group, ConnectionOffer? connection) {
+    Contact contact,
+    Group? group,
+    ConnectionOffer? connection,
+  ) {
     var contactName = '';
     if (contact.displayName?.isNotEmpty == true) {
       contactName = contact.displayName!;
@@ -268,7 +277,8 @@ extension ConnectionDetailsScreenControllerProviderSelector
         final group = state.group;
         if (group == null) return null;
         final groupAdmin = group.members.firstWhereOrNull(
-            (member) => member.membershipType == GroupMembershipType.admin);
+          (member) => member.membershipType == GroupMembershipType.admin,
+        );
         return groupAdmin?.contactCard;
       });
 
@@ -296,20 +306,28 @@ extension ConnectionDetailsScreenControllerProviderSelector
         return true;
       });
 
-  ProviderListenable<List<GroupMember>> get members => select((state) =>
-      state.group?.members
-          .where((member) =>
-              state.showDeletedMembers ||
-              member.status != GroupMemberStatus.deleted)
-          .toList() ??
-      []);
+  ProviderListenable<List<GroupMember>> get members => select(
+        (state) =>
+            state.group?.members
+                .where(
+                  (member) =>
+                      state.showDeletedMembers ||
+                      member.status != GroupMemberStatus.deleted,
+                )
+                .toList() ??
+            [],
+      );
 
-  ProviderListenable<bool> get hasMembersAvailableToChat => select((state) =>
-      (state.group?.members
-              .where((member) => member.status != GroupMemberStatus.deleted)
-              .length ??
-          0) >
-      1);
+  ProviderListenable<bool> get hasMembersAvailableToChat => select(
+        (state) =>
+            (state.group?.members
+                    .where(
+                      (member) => member.status != GroupMemberStatus.deleted,
+                    )
+                    .length ??
+                0) >
+            1,
+      );
 
   ProviderListenable<bool> get isLoneMember =>
       select((state) => state.group?.members.length == 1);

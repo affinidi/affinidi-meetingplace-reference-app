@@ -100,18 +100,20 @@ class ControlPlaneService extends _$ControlPlaneService
     });
 
     ref.listen(
-        networkConnectivityServiceProvider.select((state) => state.isConnected),
-        (previous, next) {
-      if (previous != null && previous != next && next == true) {
-        if (_lastRegisteredDeviceToken != null) return;
+      networkConnectivityServiceProvider.select((state) => state.isConnected),
+      (previous, next) {
+        if (previous != null && previous != next && next == true) {
+          if (_lastRegisteredDeviceToken != null) return;
 
-        if (_lastAttemptedDeviceToken != null) {
-          Future(() => _registerDeviceToken(_lastAttemptedDeviceToken!));
-        } else {
-          Future(_askForTokenAgain);
+          if (_lastAttemptedDeviceToken != null) {
+            Future(() => _registerDeviceToken(_lastAttemptedDeviceToken!));
+          } else {
+            Future(_askForTokenAgain);
+          }
         }
-      }
-    }, fireImmediately: true);
+      },
+      fireImmediately: true,
+    );
 
     ref
         .read(pushNotificationsHandlerProvider.notifier)
@@ -165,8 +167,10 @@ class ControlPlaneService extends _$ControlPlaneService
 
       try {
         final sdk = await ref.read(meetingPlaceSdkProvider.future);
-        _logger.info('Registering device with MeetingPlaceCoreSDK',
-            name: _logKey);
+        _logger.info(
+          'Registering device with MeetingPlaceCoreSDK',
+          name: _logKey,
+        );
         await sdk.registerForPushNotifications(token);
         _lastRegisteredDeviceToken = token;
 

@@ -25,7 +25,9 @@ class _ChatTypingActivityIndicator extends ConsumerWidget {
           children: [
             Text(
               context.l10n.typingMessage(
-                  membersTyping.join(', '), membersTyping.length),
+                membersTyping.join(', '),
+                membersTyping.length,
+              ),
               style: const TextStyle(
                 color: Colors.blueGrey,
                 fontSize: 14,
@@ -49,11 +51,14 @@ class _TypingIndicator extends HookWidget {
       duration: const Duration(milliseconds: 900),
     );
 
-    useEffect(() {
-      if (!context.mounted) return;
-      controller.repeat();
-      return null;
-    }, [controller]);
+    useEffect(
+      () {
+        if (!context.mounted) return;
+        controller.repeat();
+        return null;
+      },
+      [controller],
+    );
 
     return Column(
       children: [

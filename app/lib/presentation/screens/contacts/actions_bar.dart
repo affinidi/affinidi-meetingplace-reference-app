@@ -10,15 +10,19 @@ class _ActionsBar extends ConsumerWidget {
     final controller = ref.read(contactsScreenControllerProvider.notifier);
 
     final isEditMode = ref.watch(
-        contactsScreenControllerProvider.select((state) => state.isEditMode));
+      contactsScreenControllerProvider.select((state) => state.isEditMode),
+    );
     final hasContacts = ref.watch(contactsScreenControllerProvider.hasContacts);
     final hasAnySelectedContacts =
         ref.watch(contactsScreenControllerProvider.hasAnySelectedContacts);
     final hasIdentity = ref.watch(contactsScreenControllerProvider.hasIdentity);
-    final shouldShowGrid = ref.watch(contactsScreenControllerProvider
-        .select((state) => state.shouldShowGrid));
-    final shouldShowFilter = ref.watch(contactsScreenControllerProvider
-        .select((state) => state.shouldShowFilter));
+    final shouldShowGrid = ref.watch(
+      contactsScreenControllerProvider.select((state) => state.shouldShowGrid),
+    );
+    final shouldShowFilter = ref.watch(
+      contactsScreenControllerProvider
+          .select((state) => state.shouldShowFilter),
+    );
     final selectedContactsCount =
         ref.watch(contactsScreenControllerProvider).selectedContacts.length;
 

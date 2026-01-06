@@ -23,18 +23,19 @@ class FormCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _title,
-                  style: context.textTheme.titleMedium,
-                ),
-                if (_trailing != null) _trailing,
-              ],
-            )),
-        AppCard(child: _child)
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _title,
+                style: context.textTheme.titleMedium,
+              ),
+              if (_trailing != null) _trailing,
+            ],
+          ),
+        ),
+        AppCard(child: _child),
       ],
     );
   }

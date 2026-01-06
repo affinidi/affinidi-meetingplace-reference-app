@@ -68,7 +68,8 @@ class _ValidityVisibilitySection extends ConsumerWidget {
                 label: expiryDate != null
                     ? context.l10n.expiresAt(
                         DateFormat('MMMM d, y').format(expiryDate),
-                        DateFormat('h:mm a').format(expiryDate))
+                        DateFormat('h:mm a').format(expiryDate),
+                      )
                     : context.l10n.setExpiryDateTime,
                 helperText: context.l10n.selectExpiryHelperText,
                 buttonText: context.l10n.changeButton,

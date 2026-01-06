@@ -73,8 +73,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
         .firstOrNull;
 
     if (identity == null) {
-      throw AppException('missing identity',
-          code: AppExceptionType.missingIdentity.name);
+      throw AppException(
+        'missing identity',
+        code: AppExceptionType.missingIdentity.name,
+      );
     }
 
     displayNameController.text = identity.card.firstName;
@@ -108,8 +110,9 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   void updateFirstName(String firstName, GlobalKey<FormState> formKey) {
     final error = InputValidators.getValidator(
-            formKey.currentContext!, InputType.firstName)
-        .call(firstName);
+      formKey.currentContext!,
+      InputType.firstName,
+    ).call(firstName);
     if (error != null) return;
 
     final identity = state.identity;
@@ -117,10 +120,12 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     if (state.isAliasMirroringFirstName) {
       aliasController.text = firstName;
 
-      _updateIdentityCard(identity.card.copyWith(
-        firstName: firstName,
-        displayName: firstName,
-      ));
+      _updateIdentityCard(
+        identity.card.copyWith(
+          firstName: firstName,
+          displayName: firstName,
+        ),
+      );
     } else {
       _updateIdentityCard(identity.card.copyWith(firstName: firstName));
     }
@@ -133,20 +138,23 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     _updateIdentityCard(
       identity.card.copyWith(
-          profilePic: imageString?.isEmpty ?? true ? null : imageString),
+        profilePic: imageString?.isEmpty ?? true ? null : imageString,
+      ),
     );
   }
 
   void updateLastName(String lastName, GlobalKey<FormState> formKey) {
     final error = InputValidators.getValidator(
-            formKey.currentContext!, InputType.lastName)
-        .call(lastName);
+      formKey.currentContext!,
+      InputType.lastName,
+    ).call(lastName);
     if (error != null) return;
 
     final identity = state.identity;
 
     _updateIdentityCard(
-        identity.card.copyWith(lastName: lastName.isEmpty ? null : lastName));
+      identity.card.copyWith(lastName: lastName.isEmpty ? null : lastName),
+    );
     _updateHasEnteredAnyInfo();
   }
 
@@ -159,7 +167,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final identity = state.identity;
 
     _updateIdentityCard(
-        identity.card.copyWith(email: email.isEmpty ? null : email));
+      identity.card.copyWith(email: email.isEmpty ? null : email),
+    );
     _updateHasEnteredAnyInfo();
   }
 
@@ -172,7 +181,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final identity = state.identity;
 
     _updateIdentityCard(
-        identity.card.copyWith(mobile: mobile.isEmpty ? null : mobile));
+      identity.card.copyWith(mobile: mobile.isEmpty ? null : mobile),
+    );
     _updateHasEnteredAnyInfo();
   }
 
@@ -180,7 +190,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final identity = state.identity;
 
     _updateIdentityCard(
-        identity.card.copyWith(cardColor: color.toARGB32().toString()));
+      identity.card.copyWith(cardColor: color.toARGB32().toString()),
+    );
   }
 
   void updateAlias(String alias) {
@@ -212,15 +223,16 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     final existingIdentity = state.identity;
     final updatedIdenity = state.identity.copyWith(
-        card: existingIdentity.card.copyWith(
-      firstName: firstName,
-      lastName: lastName.isEmpty ? null : lastName,
-      email: email.isEmpty ? null : email,
-      mobile: mobile.isEmpty ? null : mobile,
-      displayName: displayName,
-      cardColor: cardColor,
-      profilePic: profilePic,
-    ));
+      card: existingIdentity.card.copyWith(
+        firstName: firstName,
+        lastName: lastName.isEmpty ? null : lastName,
+        email: email.isEmpty ? null : email,
+        mobile: mobile.isEmpty ? null : mobile,
+        displayName: displayName,
+        cardColor: cardColor,
+        profilePic: profilePic,
+      ),
+    );
 
     try {
       if (mode == IdentityFormMode.add) {

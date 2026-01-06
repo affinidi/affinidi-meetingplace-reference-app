@@ -190,8 +190,10 @@ class MediatorService extends _$MediatorService {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
       final value = await sdk.getMediatorDidFromUrl(url);
 
-      _logger.info('Resolved mediator DID: $value for URL: $url',
-          name: _logKey);
+      _logger.info(
+        'Resolved mediator DID: $value for URL: $url',
+        name: _logKey,
+      );
       return value;
     } catch (error, stackTrace) {
       _logger.error(
@@ -221,15 +223,19 @@ class MediatorService extends _$MediatorService {
     try {
       // Filter mediators by DID and created before dateTime
       final matchingMediators = state.mediators
-          .where((mediator) =>
-              mediator.mediatorDid == did &&
-              mediator.createdTime != null &&
-              mediator.createdTime!.isBefore(dateTime))
+          .where(
+            (mediator) =>
+                mediator.mediatorDid == did &&
+                mediator.createdTime != null &&
+                mediator.createdTime!.isBefore(dateTime),
+          )
           .toList();
 
       if (matchingMediators.isEmpty) {
-        _logger.info('No mediator found before $dateTime for DID: $did',
-            name: _logKey);
+        _logger.info(
+          'No mediator found before $dateTime for DID: $did',
+          name: _logKey,
+        );
         return null;
       }
 

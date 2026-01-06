@@ -4,9 +4,11 @@ import 'package:intl/intl.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 
 class ConciergeMessage extends StatelessWidget {
-  const ConciergeMessage(
-      {super.key, required DateTime dateCreated, required String message})
-      : _dateCreated = dateCreated,
+  const ConciergeMessage({
+    super.key,
+    required DateTime dateCreated,
+    required String message,
+  })  : _dateCreated = dateCreated,
         _message = message;
 
   final DateTime _dateCreated;

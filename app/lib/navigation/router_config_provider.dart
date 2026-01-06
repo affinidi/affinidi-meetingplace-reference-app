@@ -125,7 +125,9 @@ GoRouter routerConfig(Ref ref) {
     refreshListenable: GoRouterRefreshNotifier(ref),
     routes: [
       GoRoute(
-          path: RoutePaths.root, redirect: (context, state) => defaultRoute),
+        path: RoutePaths.root,
+        redirect: (context, state) => defaultRoute,
+      ),
       ...appRoutes,
       GoRoute(
         path: RoutePaths.authentication,

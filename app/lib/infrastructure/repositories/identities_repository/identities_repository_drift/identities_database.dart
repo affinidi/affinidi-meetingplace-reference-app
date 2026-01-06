@@ -26,12 +26,14 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
     required String passphrase,
     required bool inMemory,
     required Directory directory,
-  }) : super(openConnection(
-          databaseName: databaseName,
-          passphrase: passphrase,
-          inMemory: inMemory,
-          directory: directory,
-        ));
+  }) : super(
+          openConnection(
+            databaseName: databaseName,
+            passphrase: passphrase,
+            inMemory: inMemory,
+            directory: directory,
+          ),
+        );
 
   @override
   int get schemaVersion => 1;

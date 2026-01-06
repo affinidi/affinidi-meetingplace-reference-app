@@ -40,7 +40,7 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
   final _requiredPermissions = [
     _Permissions.alert,
     _Permissions.badge,
-    _Permissions.sound
+    _Permissions.sound,
   ];
 
   late final PushNotificationMessaging _pushNotificationMessaging;
@@ -111,45 +111,48 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
   Future<void> getToken() async {
     await _requestIOSAPNSToken();
     await _pushNotificationMessaging.getToken().then(
-        (String? newDeviceToken) async {
-      _logger.info(
-        'Initial PushToken: ${newDeviceToken ?? 'empty'}',
-        name: _logKey,
-      );
-
-      if (newDeviceToken == null) {
-        _logger.warning(
-          'No device token received during initialization',
+      (String? newDeviceToken) async {
+        _logger.info(
+          'Initial PushToken: ${newDeviceToken ?? 'empty'}',
           name: _logKey,
         );
-        return;
-      }
 
-      _logger.info(
-        'Device token received successfully, initiating registration',
-        name: _logKey,
-      );
-      await _handlePushNotificationToken(newDeviceToken);
-    }, onError: (dynamic error) {
-      _failedToGetDeviceTokenController.add(null);
+        if (newDeviceToken == null) {
+          _logger.warning(
+            'No device token received during initialization',
+            name: _logKey,
+          );
+          return;
+        }
 
-      if (_lastSavedPushNotificationToken != null) {
-        _logger.warning(
-          '''Unable to get device token, continuing with an FCM token from previous sessions''',
+        _logger.info(
+          'Device token received successfully, initiating registration',
           name: _logKey,
         );
-      } else {
-        _logger.error(
-          'Error while getting PushToken',
-          error: error,
-          name: _logKey,
-        );
-      }
-    });
+        await _handlePushNotificationToken(newDeviceToken);
+      },
+      onError: (dynamic error) {
+        _failedToGetDeviceTokenController.add(null);
+
+        if (_lastSavedPushNotificationToken != null) {
+          _logger.warning(
+            '''Unable to get device token, continuing with an FCM token from previous sessions''',
+            name: _logKey,
+          );
+        } else {
+          _logger.error(
+            'Error while getting PushToken',
+            error: error,
+            name: _logKey,
+          );
+        }
+      },
+    );
   }
 
   Future<void> _handlePushNotificationToken(
-      String pushNotificationToken) async {
+    String pushNotificationToken,
+  ) async {
     await _handlingTokenLock.synchronized(() async {
       if (_lastSavedPushNotificationToken != null &&
           _lastSavedPushNotificationToken != pushNotificationToken) {
@@ -169,17 +172,21 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
   }
 
   void _requestPermissions() {
-    unawaited(_pushNotificationMessaging
-        .requestPermission(
-      alert: _hasPermission(_Permissions.alert),
-      badge: _hasPermission(_Permissions.badge),
-      sound: _hasPermission(_Permissions.sound),
-    )
-        .then((settings) {
-      _logger.info('User granted permission: ${settings.authorizationStatus}',
-          name: _logKey);
-      _enableiOSForegroundNotifications();
-    }));
+    unawaited(
+      _pushNotificationMessaging
+          .requestPermission(
+        alert: _hasPermission(_Permissions.alert),
+        badge: _hasPermission(_Permissions.badge),
+        sound: _hasPermission(_Permissions.sound),
+      )
+          .then((settings) {
+        _logger.info(
+          'User granted permission: ${settings.authorizationStatus}',
+          name: _logKey,
+        );
+        _enableiOSForegroundNotifications();
+      }),
+    );
   }
 
   Future<void> _requestIOSAPNSToken() async {

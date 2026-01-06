@@ -97,10 +97,14 @@ class _VersionInfoSectionState extends ConsumerState<_VersionInfoSection> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(l10n.versionInfoVersion(appVersion),
-                          style: context.textTheme.bodyMedium),
-                      Text(l10n.versionInfoBuild(buildNumber),
-                          style: context.textTheme.bodyMedium),
+                      Text(
+                        l10n.versionInfoVersion(appVersion),
+                        style: context.textTheme.bodyMedium,
+                      ),
+                      Text(
+                        l10n.versionInfoBuild(buildNumber),
+                        style: context.textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                 ],

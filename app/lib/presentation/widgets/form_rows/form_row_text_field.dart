@@ -111,7 +111,7 @@ class FormRowTextField extends StatelessWidget {
                 color: context.colorScheme.onSurfaceVariant,
               ),
             ),
-          )
+          ),
       ],
     );
 

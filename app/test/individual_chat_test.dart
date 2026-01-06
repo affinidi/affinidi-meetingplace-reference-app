@@ -420,8 +420,10 @@ void main() {
           await tester.tap(find.text(l10n.generalPhoto));
           await tester.pumpAndSettle();
 
-          expect(find.byKey(const Key('media_review_submit_button')),
-              findsOneWidget);
+          expect(
+            find.byKey(const Key('media_review_submit_button')),
+            findsOneWidget,
+          );
           expect(find.byIcon(Icons.cancel_sharp), findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
@@ -464,8 +466,10 @@ void main() {
           await tester.tap(captureButton);
           await tester.pumpAndSettle();
 
-          expect(find.byKey(const Key('media_review_submit_button')),
-              findsOneWidget);
+          expect(
+            find.byKey(const Key('media_review_submit_button')),
+            findsOneWidget,
+          );
 
           await submitMediaWithMessage(tester, message);
           await tester.pumpAndSettle();
@@ -499,8 +503,10 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(find.byKey(const Key('camera_capture_button')), findsNothing);
-          expect(find.byKey(const Key('media_review_submit_button')),
-              findsOneWidget);
+          expect(
+            find.byKey(const Key('media_review_submit_button')),
+            findsOneWidget,
+          );
 
           await submitMediaWithMessage(tester, message);
           await tester.pumpAndSettle();

@@ -83,12 +83,15 @@ void main() {
 
         group('and a primary identity already exists', () {
           testWidgets('it shows the channel screen', (tester) async {
-            await navigateToLocation(tester, '/',
-                isAuthenticated: isAuthenticated,
-                alreadyOnboarded: alreadyOnboarded,
-                identities: [
-                  FakeIdentities.primaryIdentity,
-                ]);
+            await navigateToLocation(
+              tester,
+              '/',
+              isAuthenticated: isAuthenticated,
+              alreadyOnboarded: alreadyOnboarded,
+              identities: [
+                FakeIdentities.primaryIdentity,
+              ],
+            );
             await tester.pumpAndSettle();
 
             final l10n = await getL10n();
@@ -105,12 +108,15 @@ void main() {
     final alreadyOnboarded = true;
 
     testWidgets('it shows the connections screen', (tester) async {
-      await navigateToLocation(tester, location,
-          isAuthenticated: isAuthenticated,
-          alreadyOnboarded: alreadyOnboarded,
-          identities: [
-            FakeIdentities.primaryIdentity,
-          ]);
+      await navigateToLocation(
+        tester,
+        location,
+        isAuthenticated: isAuthenticated,
+        alreadyOnboarded: alreadyOnboarded,
+        identities: [
+          FakeIdentities.primaryIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
@@ -124,12 +130,15 @@ void main() {
     final alreadyOnboarded = true;
 
     testWidgets('it shows the connections screen', (tester) async {
-      await navigateToLocation(tester, location,
-          isAuthenticated: isAuthenticated,
-          alreadyOnboarded: alreadyOnboarded,
-          identities: [
-            FakeIdentities.primaryIdentity,
-          ]);
+      await navigateToLocation(
+        tester,
+        location,
+        isAuthenticated: isAuthenticated,
+        alreadyOnboarded: alreadyOnboarded,
+        identities: [
+          FakeIdentities.primaryIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
@@ -141,12 +150,15 @@ void main() {
     final location = RoutePaths.contacts;
 
     testWidgets('it shows the channels screen', (tester) async {
-      await navigateToLocation(tester, location,
-          isAuthenticated: true,
-          alreadyOnboarded: true,
-          identities: [
-            FakeIdentities.primaryIdentity,
-          ]);
+      await navigateToLocation(
+        tester,
+        location,
+        isAuthenticated: true,
+        alreadyOnboarded: true,
+        identities: [
+          FakeIdentities.primaryIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
@@ -160,12 +172,15 @@ void main() {
     final alreadyOnboarded = true;
 
     testWidgets('it shows the connections screen', (tester) async {
-      await navigateToLocation(tester, location,
-          isAuthenticated: isAuthenticated,
-          alreadyOnboarded: alreadyOnboarded,
-          identities: [
-            FakeIdentities.primaryIdentity,
-          ]);
+      await navigateToLocation(
+        tester,
+        location,
+        isAuthenticated: isAuthenticated,
+        alreadyOnboarded: alreadyOnboarded,
+        identities: [
+          FakeIdentities.primaryIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
@@ -179,12 +194,15 @@ void main() {
     final alreadyOnboarded = true;
 
     testWidgets('it shows the identities screen', (tester) async {
-      await navigateToLocation(tester, location,
-          isAuthenticated: isAuthenticated,
-          alreadyOnboarded: alreadyOnboarded,
-          identities: [
-            FakeIdentities.primaryIdentity,
-          ]);
+      await navigateToLocation(
+        tester,
+        location,
+        isAuthenticated: isAuthenticated,
+        alreadyOnboarded: alreadyOnboarded,
+        identities: [
+          FakeIdentities.primaryIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
@@ -198,12 +216,15 @@ void main() {
     final alreadyOnboarded = true;
 
     testWidgets('it shows the settings screen', (tester) async {
-      await navigateToLocation(tester, location,
-          isAuthenticated: isAuthenticated,
-          alreadyOnboarded: alreadyOnboarded,
-          identities: [
-            FakeIdentities.primaryIdentity,
-          ]);
+      await navigateToLocation(
+        tester,
+        location,
+        isAuthenticated: isAuthenticated,
+        alreadyOnboarded: alreadyOnboarded,
+        identities: [
+          FakeIdentities.primaryIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
@@ -215,9 +236,13 @@ void main() {
     final location =
         '/connections/publish-offer?identity-id=primary-identity-id';
     testWidgets('it shows the publish offer screen', (tester) async {
-      await navigateToLocation(tester, location, identities: [
-        FakeIdentities.primaryIdentity,
-      ]);
+      await navigateToLocation(
+        tester,
+        location,
+        identities: [
+          FakeIdentities.primaryIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
@@ -229,9 +254,13 @@ void main() {
     final location =
         '/connections/find-offer?identity-id=${FakeIdentities.primaryIdentity.id}';
     testWidgets('it shows the find offer screen', (tester) async {
-      await navigateToLocation(tester, location, identities: [
-        FakeIdentities.primaryIdentity,
-      ]);
+      await navigateToLocation(
+        tester,
+        location,
+        identities: [
+          FakeIdentities.primaryIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();

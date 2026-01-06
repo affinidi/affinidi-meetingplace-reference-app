@@ -36,15 +36,23 @@ class MediaScreenController extends _$MediaScreenController {
     final cameraState = ref.read(cameraServiceProvider);
 
     if (cameraState.isAvailable != null) {
-      Future.microtask(() => _initializeMediaSource(
-          cameraState.isAvailable!, useCamera, cameraLensDirection));
+      Future.microtask(
+        () => _initializeMediaSource(
+          cameraState.isAvailable!,
+          useCamera,
+          cameraLensDirection,
+        ),
+      );
     } else {
       ref.listen<CameraServiceState>(
         cameraServiceProvider,
         (prev, next) {
           if (prev?.isAvailable == null && next.isAvailable != null) {
             _initializeMediaSource(
-                next.isAvailable!, useCamera, cameraLensDirection);
+              next.isAvailable!,
+              useCamera,
+              cameraLensDirection,
+            );
           }
         },
       );
@@ -93,10 +101,11 @@ class MediaScreenController extends _$MediaScreenController {
     final current = ref.read(cameraServiceProvider).controller;
     if (current != null) {
       state = state.copyWith(
-          cameraController: current,
-          isFrontCamera:
-              current.description.lensDirection == CameraLensDirection.front,
-          isCameraAvailable: true);
+        cameraController: current,
+        isFrontCamera:
+            current.description.lensDirection == CameraLensDirection.front,
+        isCameraAvailable: true,
+      );
     }
   }
 

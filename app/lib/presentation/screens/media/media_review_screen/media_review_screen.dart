@@ -99,8 +99,11 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                   heroTag: 2,
                   backgroundColor: Colors.red,
                   onPressed: () => _submitResult(success: false),
-                  child: const Icon(Icons.cancel_sharp,
-                      size: 35, color: Colors.white),
+                  child: const Icon(
+                    Icons.cancel_sharp,
+                    size: 35,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 if (_imageBytes != null)

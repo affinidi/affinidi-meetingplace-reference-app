@@ -38,15 +38,18 @@ class DebugPanel extends HookConsumerWidget {
     final controller = ref.read(debugPanelControllerProvider.notifier);
     final l10n = context.l10n;
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        controller.initialize();
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          controller.initialize();
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     return Scaffold(
       backgroundColor: context.colorScheme.surface,
@@ -65,14 +68,17 @@ class DebugPanel extends HookConsumerWidget {
             },
             itemBuilder: (_) => [
               PopupMenuItem(
-                  value: LogConstants.clearLogs,
-                  child: Text(l10n.debugPanelClearLogs)),
+                value: LogConstants.clearLogs,
+                child: Text(l10n.debugPanelClearLogs),
+              ),
               PopupMenuItem(
-                  value: LogConstants.copyLogs,
-                  child: Text(l10n.debugPanelCopyLogs)),
+                value: LogConstants.copyLogs,
+                child: Text(l10n.debugPanelCopyLogs),
+              ),
               PopupMenuItem(
-                  value: LogConstants.addTestLog,
-                  child: Text(l10n.debugPanelAddTestLog)),
+                value: LogConstants.addTestLog,
+                child: Text(l10n.debugPanelAddTestLog),
+              ),
             ],
           ),
         ],

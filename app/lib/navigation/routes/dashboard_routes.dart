@@ -59,14 +59,15 @@ part 'qr/qr_scanner_route.dart';
           name: RouteNames.connections,
           routes: [
             TypedGoRoute<FindOfferRoute>(
-                path: RoutePaths.findOffer,
-                name: RouteNames.findOffer,
-                routes: [
-                  TypedGoRoute<AcceptOfferRoute>(
-                    path: RoutePaths.acceptOffer,
-                    name: RouteNames.acceptOffer,
-                  ),
-                ]),
+              path: RoutePaths.findOffer,
+              name: RouteNames.findOffer,
+              routes: [
+                TypedGoRoute<AcceptOfferRoute>(
+                  path: RoutePaths.acceptOffer,
+                  name: RouteNames.acceptOffer,
+                ),
+              ],
+            ),
             TypedGoRoute<PublishOfferRoute>(
               path: RoutePaths.publishOffer,
               name: RouteNames.publishOffer,

@@ -123,21 +123,31 @@ void main() {
 
     testWidgets('it uses the correct title', (tester) async {
       final l10n = await getL10n();
-      await navigateToLocation(tester, location, identities: [
-        testIdentity,
-      ]);
+      await navigateToLocation(
+        tester,
+        location,
+        identities: [
+          testIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
       expect(find.text(l10n.publishOffer), findsOneWidget);
     });
 
     testWidgets('it shows the primary identity card', (tester) async {
-      await navigateToLocation(tester, location, identities: [
-        testIdentity,
-      ]);
+      await navigateToLocation(
+        tester,
+        location,
+        identities: [
+          testIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('publish_offer_identity_picker')),
-          findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('publish_offer_identity_picker')),
+        findsOneWidget,
+      );
 
       expect(find.text(testIdentity.card.firstName), findsOneWidget);
       expect(find.text(testIdentity.card.email!), findsOneWidget);
@@ -145,36 +155,56 @@ void main() {
     });
 
     testWidgets('it shows default invitation details settings', (tester) async {
-      await navigateToLocation(tester, location, identities: [
-        testIdentity,
-      ]);
+      await navigateToLocation(
+        tester,
+        location,
+        identities: [
+          testIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       verifyToggleSwitchStateByKey(
-          tester, switchKey('group_offer', testIdentity.id), false);
+        tester,
+        switchKey('group_offer', testIdentity.id),
+        false,
+      );
 
       verifyToggleSwitchStateByKey(
-          tester, switchKey('random_phrase', testIdentity.id), true);
+        tester,
+        switchKey('random_phrase', testIdentity.id),
+        true,
+      );
     });
 
     testWidgets('it shows default validity and visibility settings',
         (tester) async {
       final l10n = await getL10n();
 
-      await navigateToLocation(tester, location, identities: [
-        FakeIdentities.primaryIdentity,
-      ]);
+      await navigateToLocation(
+        tester,
+        location,
+        identities: [
+          FakeIdentities.primaryIdentity,
+        ],
+      );
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.setExpiry), findsOneWidget);
       expect(find.text(l10n.setExpiryHelperDisabled), findsOneWidget);
       verifyToggleSwitchStateByKey(
-          tester, switchKey('set_expiry', testIdentity.id), false);
+        tester,
+        switchKey('set_expiry', testIdentity.id),
+        false,
+      );
 
       expect(find.text(l10n.limitNumberOfUses), findsOneWidget);
       expect(find.text(l10n.limitUsesHelperDisabled), findsOneWidget);
       verifyToggleSwitchStateByKey(
-          tester, switchKey('limit_uses', testIdentity.id), false);
+        tester,
+        switchKey('limit_uses', testIdentity.id),
+        false,
+      );
     });
 
     testWidgets('it shows message server settings', (tester) async {
@@ -192,8 +222,10 @@ void main() {
       expect(find.text(l10n.mediator), findsOneWidget);
       expect(find.text(l10n.mediatorHelperText), findsOneWidget);
 
-      expect(find.text(FakeMediators.defaultMediator.mediatorName),
-          findsOneWidget);
+      expect(
+        find.text(FakeMediators.defaultMediator.mediatorName),
+        findsOneWidget,
+      );
 
       expect(find.text(l10n.publishToMeetingPlace), findsOneWidget);
     });
@@ -210,23 +242,30 @@ void main() {
         fakeSdk: fakeMeetingPlaceCoreSDK,
       );
 
-      verifyPublishButtonState(tester, l10n.publishToMeetingPlace,
-          isEnabled: true);
+      verifyPublishButtonState(
+        tester,
+        l10n.publishToMeetingPlace,
+        isEnabled: true,
+      );
 
       await tapPublishButton(tester, l10n.publishToMeetingPlace);
 
       expect(fakeMeetingPlaceCoreSDK.publishOfferCalls, hasLength(1));
       final publishCall = fakeMeetingPlaceCoreSDK.publishOfferCalls.first;
 
-      expect(publishCall['offerName'],
-          l10n.connectWithFirstName(testIdentity.card.firstName));
+      expect(
+        publishCall['offerName'],
+        l10n.connectWithFirstName(testIdentity.card.firstName),
+      );
       expect(publishCall['type'], SDKConnectionOfferType.invitation);
       expect(publishCall['offerDescription'], l10n.passphraseDescription);
       expect(publishCall['customPhrase'], isNull); // Random phrase enabled
       expect(publishCall['validUntil'], isNull); // No expiry set
       expect(publishCall['maximumUsage'], isNull); // No usage limit
-      expect(publishCall['mediatorDid'],
-          FakeMediators.defaultMediator.mediatorDid);
+      expect(
+        publishCall['mediatorDid'],
+        FakeMediators.defaultMediator.mediatorDid,
+      );
       expect(publishCall['externalRef'], testIdentity.id);
     });
 
@@ -245,9 +284,14 @@ void main() {
         expect(find.text(l10n.publishOffer), findsOneWidget);
 
         verifyToggleSwitchStateByKey(
-            tester, switchKey('group_offer', testIdentity.id), false);
+          tester,
+          switchKey('group_offer', testIdentity.id),
+          false,
+        );
         await tapToggleSwitchByKey(
-            tester, switchKey('group_offer', testIdentity.id));
+          tester,
+          switchKey('group_offer', testIdentity.id),
+        );
 
         expect(find.text(l10n.publishGroupOffer), findsOneWidget);
         expect(find.text(l10n.publishOffer), findsNothing);
@@ -289,15 +333,23 @@ void main() {
         expect(find.text(l10n.publishOffer), findsOneWidget);
 
         verifyToggleSwitchStateByKey(
-            tester, 'random_phrase_switch_${testIdentity.id}', true);
+          tester,
+          'random_phrase_switch_${testIdentity.id}',
+          true,
+        );
         await tapToggleSwitchByKey(
-            tester, 'random_phrase_switch_${testIdentity.id}',
-            ensureVisible: true);
+          tester,
+          'random_phrase_switch_${testIdentity.id}',
+          ensureVisible: true,
+        );
 
         expect(find.text(l10n.customPhrase), findsOneWidget);
 
-        verifyPublishButtonState(tester, l10n.publishToMeetingPlace,
-            isEnabled: false);
+        verifyPublishButtonState(
+          tester,
+          l10n.publishToMeetingPlace,
+          isEnabled: false,
+        );
       });
 
       group('and enter a custom phrase', () {
@@ -317,13 +369,16 @@ void main() {
           );
 
           await tapToggleSwitchByKey(
-              tester, 'random_phrase_switch_${testIdentity.id}',
-              ensureVisible: true);
+            tester,
+            'random_phrase_switch_${testIdentity.id}',
+            ensureVisible: true,
+          );
 
           expect(find.text(l10n.customPhrase), findsOneWidget);
 
           final customPhraseField = findTextFieldByKey(
-              textFieldKey('custom_phrase', testIdentity.id));
+            textFieldKey('custom_phrase', testIdentity.id),
+          );
           await tester.ensureVisible(customPhraseField);
           await tester.enterText(customPhraseField, customPhrase);
 
@@ -333,22 +388,29 @@ void main() {
           await tester.pumpAndSettle();
           await tester.pump(Durations.extralong1);
 
-          verifyPublishButtonState(tester, l10n.publishToMeetingPlace,
-              isEnabled: true);
+          verifyPublishButtonState(
+            tester,
+            l10n.publishToMeetingPlace,
+            isEnabled: true,
+          );
           await tapPublishButton(tester, l10n.publishToMeetingPlace);
 
           expect(fakeMeetingPlaceCoreSDK.publishOfferCalls, hasLength(1));
           final publishCall = fakeMeetingPlaceCoreSDK.publishOfferCalls.first;
 
-          expect(publishCall['offerName'],
-              l10n.connectWithFirstName(testIdentity.card.firstName));
+          expect(
+            publishCall['offerName'],
+            l10n.connectWithFirstName(testIdentity.card.firstName),
+          );
           expect(publishCall['type'], SDKConnectionOfferType.invitation);
           expect(publishCall['offerDescription'], l10n.passphraseDescription);
           expect(publishCall['customPhrase'], customPhrase);
           expect(publishCall['validUntil'], isNull);
           expect(publishCall['maximumUsage'], isNull);
-          expect(publishCall['mediatorDid'],
-              FakeMediators.defaultMediator.mediatorDid);
+          expect(
+            publishCall['mediatorDid'],
+            FakeMediators.defaultMediator.mediatorDid,
+          );
           expect(publishCall['externalRef'], testIdentity.id);
         });
 
@@ -369,18 +431,23 @@ void main() {
             );
 
             await tapToggleSwitchByKey(
-                tester, 'random_phrase_switch_${testIdentity.id}',
-                ensureVisible: true);
+              tester,
+              'random_phrase_switch_${testIdentity.id}',
+              ensureVisible: true,
+            );
 
             final customPhraseField = findTextFieldByKey(
-                textFieldKey('custom_phrase', testIdentity.id));
+              textFieldKey('custom_phrase', testIdentity.id),
+            );
             await tester.ensureVisible(customPhraseField);
             await tester.enterText(customPhraseField, customPhrase);
             await tester.pumpAndSettle();
 
             await tapToggleSwitchByKey(
-                tester, 'random_phrase_switch_${testIdentity.id}',
-                ensureVisible: true);
+              tester,
+              'random_phrase_switch_${testIdentity.id}',
+              ensureVisible: true,
+            );
 
             expect(find.text(l10n.customPhrase), findsNothing);
 
@@ -421,13 +488,16 @@ void main() {
             );
 
             await tapToggleSwitchByKey(
-                tester, 'random_phrase_switch_${testIdentity.id}',
-                ensureVisible: true);
+              tester,
+              'random_phrase_switch_${testIdentity.id}',
+              ensureVisible: true,
+            );
 
             expect(find.text(l10n.customPhrase), findsOneWidget);
 
             final customPhraseField = findTextFieldByKey(
-                textFieldKey('custom_phrase', testIdentity.id));
+              textFieldKey('custom_phrase', testIdentity.id),
+            );
             await tester.ensureVisible(customPhraseField);
             await tester.enterText(customPhraseField, customPhrase);
 
@@ -436,8 +506,11 @@ void main() {
 
             expect(find.byIcon(Icons.cancel), findsOneWidget);
 
-            verifyPublishButtonState(tester, l10n.publishToMeetingPlace,
-                isEnabled: false);
+            verifyPublishButtonState(
+              tester,
+              l10n.publishToMeetingPlace,
+              isEnabled: false,
+            );
           });
         });
 
@@ -459,13 +532,16 @@ void main() {
             );
 
             await tapToggleSwitchByKey(
-                tester, 'random_phrase_switch_${testIdentity.id}',
-                ensureVisible: true);
+              tester,
+              'random_phrase_switch_${testIdentity.id}',
+              ensureVisible: true,
+            );
 
             expect(find.text(l10n.customPhrase), findsOneWidget);
 
             final customPhraseField = findTextFieldByKey(
-                textFieldKey('custom_phrase', testIdentity.id));
+              textFieldKey('custom_phrase', testIdentity.id),
+            );
             await tester.ensureVisible(customPhraseField);
 
             await tester.enterText(customPhraseField, customPhrase);
@@ -474,8 +550,11 @@ void main() {
 
             expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-            verifyPublishButtonState(tester, l10n.publishToMeetingPlace,
-                isEnabled: false);
+            verifyPublishButtonState(
+              tester,
+              l10n.publishToMeetingPlace,
+              isEnabled: false,
+            );
           });
         });
       });
@@ -501,14 +580,20 @@ void main() {
         await tester.enterText(headlineTextField, '');
         await tester.pumpAndSettle();
 
-        verifyPublishButtonState(tester, l10n.publishToMeetingPlace,
-            isEnabled: false);
+        verifyPublishButtonState(
+          tester,
+          l10n.publishToMeetingPlace,
+          isEnabled: false,
+        );
 
         await tester.enterText(headlineTextField, 'New Custom Headline');
         await tester.pumpAndSettle();
 
-        verifyPublishButtonState(tester, l10n.publishToMeetingPlace,
-            isEnabled: true);
+        verifyPublishButtonState(
+          tester,
+          l10n.publishToMeetingPlace,
+          isEnabled: true,
+        );
         await tapPublishButton(tester, l10n.publishToMeetingPlace);
 
         expect(fakeMeetingPlaceCoreSDK.publishOfferCalls, hasLength(1));
@@ -549,15 +634,23 @@ void main() {
         await tester.enterText(descriptionTextField, '');
         await tester.pumpAndSettle();
 
-        verifyPublishButtonState(tester, l10n.publishToMeetingPlace,
-            isEnabled: false);
+        verifyPublishButtonState(
+          tester,
+          l10n.publishToMeetingPlace,
+          isEnabled: false,
+        );
 
         await tester.enterText(
-            descriptionTextField, 'This is a custom description for my offer');
+          descriptionTextField,
+          'This is a custom description for my offer',
+        );
         await tester.pumpAndSettle();
 
-        verifyPublishButtonState(tester, l10n.publishToMeetingPlace,
-            isEnabled: true);
+        verifyPublishButtonState(
+          tester,
+          l10n.publishToMeetingPlace,
+          isEnabled: true,
+        );
         await tapPublishButton(tester, l10n.publishToMeetingPlace);
 
         expect(fakeMeetingPlaceCoreSDK.publishOfferCalls, hasLength(1));
@@ -593,18 +686,25 @@ void main() {
         );
 
         verifyToggleSwitchStateByKey(
-            tester, 'set_expiry_switch_${testIdentity.id}', false);
+          tester,
+          'set_expiry_switch_${testIdentity.id}',
+          false,
+        );
         await tapToggleSwitchByKey(
-            tester, 'set_expiry_switch_${testIdentity.id}',
-            ensureVisible: true);
+          tester,
+          'set_expiry_switch_${testIdentity.id}',
+          ensureVisible: true,
+        );
 
         await tapPublishButton(tester, l10n.publishToMeetingPlace);
 
         expect(fakeMeetingPlaceCoreSDK.publishOfferCalls, hasLength(1));
         final publishCall = fakeMeetingPlaceCoreSDK.publishOfferCalls.first;
 
-        expect(publishCall['offerName'],
-            l10n.connectWithFirstName(testIdentity.card.firstName));
+        expect(
+          publishCall['offerName'],
+          l10n.connectWithFirstName(testIdentity.card.firstName),
+        );
         expect(publishCall['type'], SDKConnectionOfferType.invitation);
         expect(publishCall['offerDescription'], l10n.passphraseDescription);
         expect(publishCall['customPhrase'], isNull);
@@ -616,8 +716,10 @@ void main() {
         expect(difference.inDays == 0, true);
 
         expect(publishCall['maximumUsage'], isNull);
-        expect(publishCall['mediatorDid'],
-            FakeMediators.defaultMediator.mediatorDid);
+        expect(
+          publishCall['mediatorDid'],
+          FakeMediators.defaultMediator.mediatorDid,
+        );
         expect(publishCall['externalRef'], testIdentity.id);
       });
 
@@ -636,8 +738,10 @@ void main() {
             );
 
             await tapToggleSwitchByKey(
-                tester, 'set_expiry_switch_${testIdentity.id}',
-                ensureVisible: true);
+              tester,
+              'set_expiry_switch_${testIdentity.id}',
+              ensureVisible: true,
+            );
 
             final changeButtons = find.text(l10n.changeButton);
 
@@ -667,8 +771,10 @@ void main() {
             expect(fakeMeetingPlaceCoreSDK.publishOfferCalls, hasLength(1));
             final publishCall = fakeMeetingPlaceCoreSDK.publishOfferCalls.first;
 
-            expect(publishCall['offerName'],
-                l10n.connectWithFirstName(testIdentity.card.firstName));
+            expect(
+              publishCall['offerName'],
+              l10n.connectWithFirstName(testIdentity.card.firstName),
+            );
             expect(publishCall['type'], SDKConnectionOfferType.invitation);
             expect(publishCall['offerDescription'], l10n.passphraseDescription);
             expect(publishCall['customPhrase'], isNull);
@@ -680,8 +786,10 @@ void main() {
             expect(difference.inDays == 0, true);
 
             expect(publishCall['maximumUsage'], isNull);
-            expect(publishCall['mediatorDid'],
-                FakeMediators.defaultMediator.mediatorDid);
+            expect(
+              publishCall['mediatorDid'],
+              FakeMediators.defaultMediator.mediatorDid,
+            );
             expect(publishCall['externalRef'], testIdentity.id);
           });
         });
@@ -702,8 +810,10 @@ void main() {
               );
 
               await tapToggleSwitchByKey(
-                  tester, 'set_expiry_switch_${testIdentity.id}',
-                  ensureVisible: true);
+                tester,
+                'set_expiry_switch_${testIdentity.id}',
+                ensureVisible: true,
+              );
 
               final changeButtons = find.text(l10n.changeButton);
               await tester.tap(changeButtons.first);
@@ -720,8 +830,10 @@ void main() {
               await tester.pumpAndSettle();
 
               await tapToggleSwitchByKey(
-                  tester, 'set_expiry_switch_${testIdentity.id}',
-                  ensureVisible: true);
+                tester,
+                'set_expiry_switch_${testIdentity.id}',
+                ensureVisible: true,
+              );
 
               expect(find.text(l10n.setExpiryHelperDisabled), findsOneWidget);
 
@@ -764,10 +876,15 @@ void main() {
         );
 
         verifyToggleSwitchStateByKey(
-            tester, 'limit_uses_switch_${testIdentity.id}', false);
+          tester,
+          'limit_uses_switch_${testIdentity.id}',
+          false,
+        );
         await tapToggleSwitchByKey(
-            tester, 'limit_uses_switch_${testIdentity.id}',
-            ensureVisible: true);
+          tester,
+          'limit_uses_switch_${testIdentity.id}',
+          ensureVisible: true,
+        );
 
         await tapPublishButton(tester, l10n.publishToMeetingPlace);
 
@@ -802,8 +919,10 @@ void main() {
           );
 
           await tapToggleSwitchByKey(
-              tester, 'limit_uses_switch_${testIdentity.id}',
-              ensureVisible: true);
+            tester,
+            'limit_uses_switch_${testIdentity.id}',
+            ensureVisible: true,
+          );
 
           final usageLabel = find.text(l10n.canBeUsedTimes(3));
           expect(usageLabel, findsOneWidget);
@@ -855,8 +974,10 @@ void main() {
             );
 
             await tapToggleSwitchByKey(
-                tester, 'limit_uses_switch_${testIdentity.id}',
-                ensureVisible: true);
+              tester,
+              'limit_uses_switch_${testIdentity.id}',
+              ensureVisible: true,
+            );
 
             final usageLabel = find.text(l10n.canBeUsedTimes(3));
             expect(usageLabel, findsOneWidget);
@@ -877,8 +998,10 @@ void main() {
             expect(find.text(l10n.canBeUsedTimes(5)), findsOneWidget);
 
             await tapToggleSwitchByKey(
-                tester, 'limit_uses_switch_${testIdentity.id}',
-                ensureVisible: true);
+              tester,
+              'limit_uses_switch_${testIdentity.id}',
+              ensureVisible: true,
+            );
 
             expect(find.text(l10n.limitUsesHelperDisabled), findsOneWidget);
 
@@ -916,8 +1039,10 @@ void main() {
           fakeSdk: fakeMeetingPlaceCoreSDK,
         );
 
-        expect(find.text(FakeMediators.defaultMediator.mediatorName),
-            findsOneWidget);
+        expect(
+          find.text(FakeMediators.defaultMediator.mediatorName),
+          findsOneWidget,
+        );
 
         final changeButton = find.text(l10n.changeButton);
         expect(changeButton, findsOneWidget);
@@ -930,8 +1055,10 @@ void main() {
         await tester.tap(customMediatorOption);
         await tester.pumpAndSettle();
 
-        expect(find.text(FakeMediators.customMediator.mediatorName),
-            findsOneWidget);
+        expect(
+          find.text(FakeMediators.customMediator.mediatorName),
+          findsOneWidget,
+        );
 
         await tapPublishButton(tester, l10n.publishToMeetingPlace);
 

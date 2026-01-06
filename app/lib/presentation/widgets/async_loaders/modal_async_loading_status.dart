@@ -9,8 +9,10 @@ import 'async_loading_controller.dart';
 import 'async_loading_status_error_localizer.dart';
 
 class LoadingMessageStyleTheme {
-  LoadingMessageStyleTheme(
-      {required this.color, required this.backgroundColor});
+  LoadingMessageStyleTheme({
+    required this.color,
+    required this.backgroundColor,
+  });
 
   final Color color;
   final Color backgroundColor;

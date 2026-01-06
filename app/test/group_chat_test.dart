@@ -408,8 +408,10 @@ void main() {
           await tester.tap(find.text(l10n.generalPhoto));
           await tester.pumpAndSettle();
 
-          expect(find.byKey(const Key('media_review_submit_button')),
-              findsOneWidget);
+          expect(
+            find.byKey(const Key('media_review_submit_button')),
+            findsOneWidget,
+          );
           expect(find.byIcon(Icons.cancel_sharp), findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
@@ -452,8 +454,10 @@ void main() {
           await tester.tap(captureButton);
           await tester.pumpAndSettle();
 
-          expect(find.byKey(const Key('media_review_submit_button')),
-              findsOneWidget);
+          expect(
+            find.byKey(const Key('media_review_submit_button')),
+            findsOneWidget,
+          );
 
           await submitMediaWithMessage(tester, message);
           await tester.pumpAndSettle();
@@ -559,7 +563,9 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-              meetingPlaceChatSDK.approveConnectionRequestCalls, hasLength(1));
+            meetingPlaceChatSDK.approveConnectionRequestCalls,
+            hasLength(1),
+          );
           final approveCall =
               meetingPlaceChatSDK.approveConnectionRequestCalls.first;
           final calledWithMessage = approveCall['message'] as ConciergeMessage;
@@ -591,7 +597,9 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-              meetingPlaceChatSDK.rejectConnectionRequestCalls, hasLength(1));
+            meetingPlaceChatSDK.rejectConnectionRequestCalls,
+            hasLength(1),
+          );
           final rejectCall =
               meetingPlaceChatSDK.rejectConnectionRequestCalls.first;
           final calledWithMessage = rejectCall['message'] as ConciergeMessage;
@@ -619,8 +627,10 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          expect(find.text(l10n.chatRequestPermissionToUpdateProfileGroup),
-              findsOneWidget);
+          expect(
+            find.text(l10n.chatRequestPermissionToUpdateProfileGroup),
+            findsOneWidget,
+          );
         });
 
         testWidgets('shows Yes, Later, No buttons',
@@ -670,7 +680,9 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(
-              meetingPlaceChatSDK.sendContactDetailsUpdateCalls, hasLength(1));
+            meetingPlaceChatSDK.sendContactDetailsUpdateCalls,
+            hasLength(1),
+          );
           final updateCall =
               meetingPlaceChatSDK.sendContactDetailsUpdateCalls.first;
           final calledWithMessage = updateCall['message'] as ConciergeMessage;
@@ -696,14 +708,18 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          expect(find.text(l10n.chatRequestPermissionToUpdateProfileGroup),
-              findsOneWidget);
+          expect(
+            find.text(l10n.chatRequestPermissionToUpdateProfileGroup),
+            findsOneWidget,
+          );
 
           await tester.tap(find.text(l10n.genWordLater));
           await tester.pumpAndSettle();
 
-          expect(find.text(l10n.chatRequestPermissionToUpdateProfileGroup),
-              findsNothing);
+          expect(
+            find.text(l10n.chatRequestPermissionToUpdateProfileGroup),
+            findsNothing,
+          );
         });
 
         testWidgets(
@@ -729,8 +745,10 @@ void main() {
           await tester.tap(find.text(l10n.genWordNo));
           await tester.pumpAndSettle();
 
-          expect(meetingPlaceChatSDK.cancelUpdatingContactDetailsCalls,
-              hasLength(1));
+          expect(
+            meetingPlaceChatSDK.cancelUpdatingContactDetailsCalls,
+            hasLength(1),
+          );
           final cancelCall =
               meetingPlaceChatSDK.cancelUpdatingContactDetailsCalls.first;
           final calledWithMessage = cancelCall['message'] as ConciergeMessage;

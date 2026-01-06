@@ -8,13 +8,16 @@ import '../configuration/environment.dart';
 ///
 /// Combines environment settings with platform-specific package info
 /// to build an [AppInfo] object.
-final appInfoProvider = FutureProvider<AppInfo>((ref) async {
-  final packageInfo = await PackageInfo.fromPlatform();
-  final env = ref.read(environmentProvider);
+final appInfoProvider = FutureProvider<AppInfo>(
+  (ref) async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final env = ref.read(environmentProvider);
 
-  return AppInfo(
-    versionName: env.appVersionName,
-    version: packageInfo.version,
-    buildNumber: packageInfo.buildNumber,
-  );
-}, name: 'appInfoProvider');
+    return AppInfo(
+      versionName: env.appVersionName,
+      version: packageInfo.version,
+      buildNumber: packageInfo.buildNumber,
+    );
+  },
+  name: 'appInfoProvider',
+);

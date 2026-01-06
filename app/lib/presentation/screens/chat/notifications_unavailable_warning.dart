@@ -10,10 +10,14 @@ class _NotificationsUnavailableWarning extends ConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final notificationToken =
         ref.watch(provider.select((state) => state.notificationToken));
-    final isIndividual = ref.watch(provider
-        .select((state) => state.contact?.type == ContactType.individual));
-    final isDirectInteractive = ref.watch(provider.select(
-        (state) => state.contact?.origin == ContactOrigin.directInteractive));
+    final isIndividual = ref.watch(
+      provider.select((state) => state.contact?.type == ContactType.individual),
+    );
+    final isDirectInteractive = ref.watch(
+      provider.select(
+        (state) => state.contact?.origin == ContactOrigin.directInteractive,
+      ),
+    );
 
     if (!isIndividual) {
       return const SizedBox.shrink();

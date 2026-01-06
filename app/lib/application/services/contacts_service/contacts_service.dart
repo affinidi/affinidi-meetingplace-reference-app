@@ -65,7 +65,8 @@ class ContactsService extends _$ContactsService {
 
     controlPlaneNotifier.onGroupInvitationAccepted.listen((channel) {
       Future.microtask(
-          () => _updateContactFromGroupInvitationAccepted(channel));
+        () => _updateContactFromGroupInvitationAccepted(channel),
+      );
     });
 
     controlPlaneNotifier.onConnectionOfferApproved.listen((channel) {
@@ -114,8 +115,10 @@ class ContactsService extends _$ContactsService {
       final contact =
           await _makeContactFromChannel(channel, ContactStatus.active);
       if (contact == null) {
-        throw AppException('Unable to extract a contact from the channel',
-            code: AppExceptionType.missingContactCard.name);
+        throw AppException(
+          'Unable to extract a contact from the channel',
+          code: AppExceptionType.missingContactCard.name,
+        );
       }
       _logger.info(
         'Creating contact with contact: ${contact.card.displayName}',
@@ -294,8 +297,10 @@ class ContactsService extends _$ContactsService {
     final channel =
         await coreSdk.getChannelByOtherPartyPermanentDid(contact.channelDid!);
     if (channel == null) {
-      throw AppException('Should have received a channel',
-          code: AppExceptionType.missingChannel.name);
+      throw AppException(
+        'Should have received a channel',
+        code: AppExceptionType.missingChannel.name,
+      );
     }
 
     await coreSdk.leaveChannel(channel);

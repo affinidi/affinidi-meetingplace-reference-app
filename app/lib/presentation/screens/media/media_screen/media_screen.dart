@@ -62,7 +62,10 @@ class MediaScreen extends HookConsumerWidget {
   }
 
   void _reviewImage(
-      Uint8List imageBytes, WidgetRef ref, BuildContext context) async {
+    Uint8List imageBytes,
+    WidgetRef ref,
+    BuildContext context,
+  ) async {
     final navigator = ref.read(navigatorProvider);
     final result = await Navigator.of(
       context,
@@ -93,15 +96,18 @@ class MediaScreen extends HookConsumerWidget {
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
 
-    useEffect(() {
-      if (state.pickedImageBytes != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!context.mounted) return;
-          _reviewImage(state.pickedImageBytes!, ref, context);
-        });
-      }
-      return null;
-    }, [state.pickedImageBytes]);
+    useEffect(
+      () {
+        if (state.pickedImageBytes != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+            _reviewImage(state.pickedImageBytes!, ref, context);
+          });
+        }
+        return null;
+      },
+      [state.pickedImageBytes],
+    );
 
     return Scaffold(
       body: Builder(
@@ -146,8 +152,11 @@ class MediaScreen extends HookConsumerWidget {
                   heroTag: 1,
                   backgroundColor: Colors.purple,
                   onPressed: () => _pickImage(ref, context),
-                  child: const Icon(Icons.photo_library,
-                      size: 40, color: Colors.white),
+                  child: const Icon(
+                    Icons.photo_library,
+                    size: 40,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 // Capture
@@ -156,8 +165,11 @@ class MediaScreen extends HookConsumerWidget {
                   heroTag: 2,
                   backgroundColor: Colors.green,
                   onPressed: () => _captureImage(controller, context, ref),
-                  child: const Icon(Icons.camera_alt,
-                      size: 40, color: Colors.white),
+                  child: const Icon(
+                    Icons.camera_alt,
+                    size: 40,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 20),
 
@@ -166,8 +178,11 @@ class MediaScreen extends HookConsumerWidget {
                   heroTag: 3,
                   backgroundColor: Colors.blue,
                   onPressed: () async => controller.toggleCamera(),
-                  child: const Icon(CupertinoIcons.switch_camera,
-                      size: 40, color: Colors.white),
+                  child: const Icon(
+                    CupertinoIcons.switch_camera,
+                    size: 40,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 20),
 

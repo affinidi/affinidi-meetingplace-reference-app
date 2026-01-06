@@ -36,15 +36,18 @@ class FindOfferScreen extends HookConsumerWidget {
     final selectedIdentity =
         ref.watch(provider.select((state) => state.selectedIdentity));
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.initialize();
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.initialize();
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     void findOffer(String mnemonic) async {
       if (!context.mounted) return;
@@ -144,7 +147,8 @@ class FindOfferScreen extends HookConsumerWidget {
                         autocorrect: false,
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(
-                              RegExp(r'[0-9!\-_a-zA-Z\s]')),
+                            RegExp(r'[0-9!\-_a-zA-Z\s]'),
+                          ),
                         ],
                         textCapitalization: TextCapitalization.none,
                         textAlign: TextAlign.center,
@@ -181,7 +185,7 @@ class FindOfferScreen extends HookConsumerWidget {
                     if (!context.mounted) return;
                     findOffer(mnemonicWordTextController.text);
                   },
-                )
+                ),
               ],
             ),
           ),
@@ -201,7 +205,8 @@ class _QrButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isCameraAvailable = ref.watch(
-        cameraServiceProvider.select((state) => state.isAvailable ?? false));
+      cameraServiceProvider.select((state) => state.isAvailable ?? false),
+    );
 
     return SizedBox(
       width: 40,

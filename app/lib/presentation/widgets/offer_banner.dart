@@ -22,7 +22,8 @@ class OfferBanner extends StatelessWidget {
         ),
       ),
       constraints: BoxConstraints(
-          maxHeight: ScreensizeHelper.getConstrainedWidth(context) * 0.25),
+        maxHeight: ScreensizeHelper.getConstrainedWidth(context) * 0.25,
+      ),
       child: Row(
         children: [
           Expanded(

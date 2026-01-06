@@ -57,9 +57,11 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
           ),
           ElevatedLoadingButton(
             onPressed: handleSave,
-            child: Text(hasEnteredAnyInfo
-                ? l10n.primaryIdentityComplete
-                : l10n.keepMeAnonymous),
+            child: Text(
+              hasEnteredAnyInfo
+                  ? l10n.primaryIdentityComplete
+                  : l10n.keepMeAnonymous,
+            ),
           ),
         ],
       ),

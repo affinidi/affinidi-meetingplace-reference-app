@@ -67,20 +67,25 @@ Future<void> startApp(
     overrides: [
       cacheManagerProvider.overrideWith((ref) => cacheManager),
       appBadgeServiceProvider.overrideWithValue(FakeAppBadgeService()),
-      appInfoProvider.overrideWith((ref) =>
-          AppInfo(versionName: 'Test', buildNumber: '1', version: '0.0.0')),
+      appInfoProvider.overrideWith(
+        (ref) =>
+            AppInfo(versionName: 'Test', buildNumber: '1', version: '0.0.0'),
+      ),
       applicationDocumentsDirectoryProvider
           .overrideWith((ref) async => Directory('/tmp')),
-      availableAttachmentPluginsProvider.overrideWith((ref) => [
-            CameraAttachmentsPlugin(
-              cacheManager: ref.read(cacheManagerProvider),
-            ),
-            GalleryAttachmentsPlugin(
-              cacheManager: ref.read(cacheManagerProvider),
-            ),
-          ]),
+      availableAttachmentPluginsProvider.overrideWith(
+        (ref) => [
+          CameraAttachmentsPlugin(
+            cacheManager: ref.read(cacheManagerProvider),
+          ),
+          GalleryAttachmentsPlugin(
+            cacheManager: ref.read(cacheManagerProvider),
+          ),
+        ],
+      ),
       localAuthProvider.overrideWith(
-          (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated)),
+        (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated),
+      ),
       chatRepositoryProvider.overrideWith(chatRepositoryInMemoryDrift),
       environmentProvider.overrideWithValue(FakeEnvironment()),
       channelRepositoryProvider.overrideWith(channelRepositoryInMemoryDrift),
@@ -96,8 +101,9 @@ Future<void> startApp(
         return repo;
       }),
       environmentProvider.overrideWith((ref) => FakeEnvironment()),
-      pushNotificationMessagingProvider.overrideWith((ref) =>
-          pushNotificationMessaging ?? FakePushNotificationMessaging()),
+      pushNotificationMessagingProvider.overrideWith(
+        (ref) => pushNotificationMessaging ?? FakePushNotificationMessaging(),
+      ),
       groupsRepositoryProvider.overrideWith(groupsRepositoryInMemoryDrift),
       identitiesRepositoryProvider.overrideWith((ref) async {
         final repo = await identitiesRepositoryInMemoryDrift(ref);
@@ -116,11 +122,13 @@ Future<void> startApp(
         }
         return repo;
       }),
-      meetingPlaceSdkProvider.overrideWith((ref) =>
-          meetingPlaceCoreSDK ??
-          FakeMeetingPlaceSDK(
-            channels: contacts.isNotEmpty ? FakeChannels.allChannels : null,
-          )),
+      meetingPlaceSdkProvider.overrideWith(
+        (ref) =>
+            meetingPlaceCoreSDK ??
+            FakeMeetingPlaceSDK(
+              channels: contacts.isNotEmpty ? FakeChannels.allChannels : null,
+            ),
+      ),
       if (meetingPlaceChatSDK != null)
         chatSdkProvider
             .overrideWith((ref, channel) async => meetingPlaceChatSDK),

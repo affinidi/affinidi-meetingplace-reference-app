@@ -76,7 +76,8 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   ///
   /// Returns an initialized [CameraController].
   Future<CameraController> initializeCamera(
-      CameraLensDirection cameraLensDirection) async {
+    CameraLensDirection cameraLensDirection,
+  ) async {
     final getCameras = ref.read(availableCamerasProvider);
     final cameras = await getCameras();
     final description = cameras.firstWhere(

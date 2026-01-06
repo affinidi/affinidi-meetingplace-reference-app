@@ -429,19 +429,22 @@ class _ActionButton extends HookWidget {
       vsync: vsync,
     );
 
-    useEffect(() {
-      Timer? timer;
+    useEffect(
+      () {
+        Timer? timer;
 
-      timer = Timer.periodic(const Duration(seconds: 2), (_) {
-        if (controller.isCompleted || controller.isDismissed) {
-          controller.forward(from: 0.0);
-        }
-      });
+        timer = Timer.periodic(const Duration(seconds: 2), (_) {
+          if (controller.isCompleted || controller.isDismissed) {
+            controller.forward(from: 0.0);
+          }
+        });
 
-      controller.forward();
+        controller.forward();
 
-      return timer.cancel;
-    }, []);
+        return timer.cancel;
+      },
+      [],
+    );
 
     final animations = _makeRippleAnimation(controller);
     final actions = _buildActions(context);

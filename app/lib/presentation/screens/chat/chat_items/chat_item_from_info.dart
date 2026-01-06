@@ -1,9 +1,10 @@
 part of '../chat_screen.dart';
 
 class _ChatItemFromInfo extends ConsumerWidget {
-  const _ChatItemFromInfo(
-      {required chat.ChatItem chatItem, required String contactId})
-      : _chatItem = chatItem,
+  const _ChatItemFromInfo({
+    required chat.ChatItem chatItem,
+    required String contactId,
+  })  : _chatItem = chatItem,
         _contactId = contactId;
 
   final chat.ChatItem _chatItem;
@@ -13,9 +14,12 @@ class _ChatItemFromInfo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final isGroupChat = ref.watch(provider.isGroupChat);
-    final groupMember = ref.watch(provider.select((state) => state
-        .group?.members
-        .firstWhereOrNull((gm) => gm.did == _chatItem.senderDid)));
+    final groupMember = ref.watch(
+      provider.select(
+        (state) => state.group?.members
+            .firstWhereOrNull((gm) => gm.did == _chatItem.senderDid),
+      ),
+    );
 
     // AL: Refactored to one statement, and returns a spacer
     // to prevent layout shift

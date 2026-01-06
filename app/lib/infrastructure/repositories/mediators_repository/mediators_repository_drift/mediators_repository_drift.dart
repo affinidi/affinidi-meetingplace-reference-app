@@ -18,7 +18,8 @@ Future<MediatorsRepositoryDrift> mediatorsRepositoryDrift(Ref ref) async {
 /// Provides a [MediatorsRepositoryDrift] instance backed by an in-memory
 /// Drift database.
 Future<MediatorsRepositoryDrift> mediatorsRepositoryInMemoryDrift(
-    Ref ref) async {
+  Ref ref,
+) async {
   final database = await ref.read(db.mediatorsInMemoryDatabaseProvider.future);
   return MediatorsRepositoryDrift(database: database);
 }
@@ -63,13 +64,17 @@ class MediatorsRepositoryDrift implements MediatorsRepository {
   /// [name] - Human-friendly label for the mediator.
   /// [did]  - Unique DID identifier of the mediator.
   @override
-  Future<void> addCustomMediator(
-      {required String name, required String did}) async {
+  Future<void> addCustomMediator({
+    required String name,
+    required String did,
+  }) async {
     // Check for existing mediator with same DID and isDeleted == false
     final isMediatorExists = await (_database.select(_database.mediators)
-          ..where((table) =>
-              table.mediatorDid.equals(did) &
-              table.status.equals(MediatorStatus.active.value)))
+          ..where(
+            (table) =>
+                table.mediatorDid.equals(did) &
+                table.status.equals(MediatorStatus.active.value),
+          ))
         .getSingleOrNull();
 
     if (isMediatorExists != null) {
@@ -98,10 +103,12 @@ class MediatorsRepositoryDrift implements MediatorsRepository {
   @override
   Future<void> removeMediator(String did) async {
     await (_database.update(_database.mediators)
-          ..where((table) => Expression.and([
-                table.mediatorDid.equals(did),
-                table.type.equals(MediatorType.custom.value),
-              ])))
+          ..where(
+            (table) => Expression.and([
+              table.mediatorDid.equals(did),
+              table.type.equals(MediatorType.custom.value),
+            ]),
+          ))
         .write(
       const db.MediatorsCompanion(status: Value(MediatorStatus.deleted)),
     );
@@ -120,11 +127,13 @@ class MediatorsRepositoryDrift implements MediatorsRepository {
     required String newName,
   }) async {
     await (_database.update(_database.mediators)
-          ..where((table) => Expression.and([
-                table.mediatorDid.equals(did),
-                table.status.equals(MediatorStatus.active.value),
-                table.type.equals(MediatorType.custom.value),
-              ])))
+          ..where(
+            (table) => Expression.and([
+              table.mediatorDid.equals(did),
+              table.status.equals(MediatorStatus.active.value),
+              table.type.equals(MediatorType.custom.value),
+            ]),
+          ))
         .write(
       db.MediatorsCompanion(
         mediatorName: Value(newName),

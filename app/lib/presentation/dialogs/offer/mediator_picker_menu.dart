@@ -45,10 +45,14 @@ class MediatorPickerMenu extends HookConsumerWidget {
         final isSelected = did == currentId;
         return ListTile(
           leading: isSelected
-              ? Icon(Icons.check_circle,
-                  color: context.listTileTheme.selectedColor)
-              : Icon(Icons.circle_outlined,
-                  color: context.listTileTheme.iconColor),
+              ? Icon(
+                  Icons.check_circle,
+                  color: context.listTileTheme.selectedColor,
+                )
+              : Icon(
+                  Icons.circle_outlined,
+                  color: context.listTileTheme.iconColor,
+                ),
           title: Text(
             friendlyName,
           ),

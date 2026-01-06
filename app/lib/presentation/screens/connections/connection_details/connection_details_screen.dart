@@ -55,21 +55,26 @@ class ConnectionDetailsScreen extends HookConsumerWidget {
     final isGroupChat = ref.watch(provider.isGroupChat);
     final l10n = context.l10n;
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        await controller.initialize();
-      });
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await controller.initialize();
+        });
 
-      return null;
-    }, const []);
+        return null;
+      },
+      const [],
+    );
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isGroupChat
-            ? context.l10n.groupDetails
-            : context.l10n.connectionDetails),
+        title: Text(
+          isGroupChat
+              ? context.l10n.groupDetails
+              : context.l10n.connectionDetails,
+        ),
       ),
       body: SafeArea(
         child: Column(

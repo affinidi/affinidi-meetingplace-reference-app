@@ -23,49 +23,50 @@ class ContactCardView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ListView.separated(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              final field = fields.entries.elementAt(index);
-              return ListTile(
-                iconColor: context.colorScheme.onPrimary,
-                dense: true,
-                visualDensity: VisualDensity.compact,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                leading: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: field.key.iconColor,
-                    borderRadius: BorderRadius.circular(6.0),
-                  ),
-                  child: Icon(field.key.icon, size: 18),
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemBuilder: (context, index) {
+            final field = fields.entries.elementAt(index);
+            return ListTile(
+              iconColor: context.colorScheme.onPrimary,
+              dense: true,
+              visualDensity: VisualDensity.compact,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              leading: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: field.key.iconColor,
+                  borderRadius: BorderRadius.circular(6.0),
                 ),
-                title: Row(
-                  spacing: 12,
-                  children: [
-                    Text(
-                      context.l10n.contactCardFieldName(field.key.name),
+                child: Icon(field.key.icon, size: 18),
+              ),
+              title: Row(
+                spacing: 12,
+                children: [
+                  Text(
+                    context.l10n.contactCardFieldName(field.key.name),
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      field.value,
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    Expanded(
-                      child: Text(
-                        field.value,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            separatorBuilder: (context, index) => const Divider(),
-            itemCount: fields.entries.length),
+                  ),
+                ],
+              ),
+            );
+          },
+          separatorBuilder: (context, index) => const Divider(),
+          itemCount: fields.entries.length,
+        ),
       ],
     );
   }
@@ -89,49 +90,50 @@ class SdkContactCardView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ListView.separated(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              final field = fields.entries.elementAt(index);
-              return ListTile(
-                iconColor: context.colorScheme.onPrimary,
-                dense: true,
-                visualDensity: VisualDensity.compact,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                leading: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: field.key.iconColor,
-                    borderRadius: BorderRadius.circular(6.0),
-                  ),
-                  child: Icon(field.key.icon, size: 18),
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemBuilder: (context, index) {
+            final field = fields.entries.elementAt(index);
+            return ListTile(
+              iconColor: context.colorScheme.onPrimary,
+              dense: true,
+              visualDensity: VisualDensity.compact,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              leading: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: field.key.iconColor,
+                  borderRadius: BorderRadius.circular(6.0),
                 ),
-                title: Row(
-                  spacing: 12,
-                  children: [
-                    Text(
-                      context.l10n.contactCardFieldName(field.key.name),
+                child: Icon(field.key.icon, size: 18),
+              ),
+              title: Row(
+                spacing: 12,
+                children: [
+                  Text(
+                    context.l10n.contactCardFieldName(field.key.name),
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      field.value,
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w900,
                       ),
                     ),
-                    Expanded(
-                      child: Text(
-                        field.value,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            separatorBuilder: (context, index) => const Divider(),
-            itemCount: fields.entries.length),
+                  ),
+                ],
+              ),
+            );
+          },
+          separatorBuilder: (context, index) => const Divider(),
+          itemCount: fields.entries.length,
+        ),
       ],
     );
   }

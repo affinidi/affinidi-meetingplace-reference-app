@@ -34,8 +34,9 @@ class AppTheme {
           ),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
-                color: darkColorScheme.onSurface.withValues(alpha: 0.48),
-                width: 0.5),
+              color: darkColorScheme.onSurface.withValues(alpha: 0.48),
+              width: 0.5,
+            ),
             borderRadius: BorderRadius.circular(32.0),
           ),
           focusedBorder: OutlineInputBorder(
@@ -44,14 +45,16 @@ class AppTheme {
           ),
           disabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
-                color: darkColorScheme.onSurface.withValues(alpha: 0.48),
-                width: 0.5),
+              color: darkColorScheme.onSurface.withValues(alpha: 0.48),
+              width: 0.5,
+            ),
             borderRadius: BorderRadius.circular(32.0),
           ),
           border: OutlineInputBorder(
             borderSide: BorderSide(
-                color: darkColorScheme.onSurface.withValues(alpha: 0.48),
-                width: 0.5),
+              color: darkColorScheme.onSurface.withValues(alpha: 0.48),
+              width: 0.5,
+            ),
             borderRadius: BorderRadius.circular(32.0),
           ),
           contentPadding:
@@ -86,12 +89,14 @@ class AppTheme {
               fontSize: 16,
             ),
           ),
-          padding: WidgetStateProperty.all(const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 4,
-          )),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 4,
+            ),
+          ),
         ),
-      )
+      ),
     ],
     textTheme: const TextTheme(
       bodyLarge: TextStyle(fontSize: 16),
@@ -220,10 +225,12 @@ class AppTheme {
             fontSize: 16,
           ),
         ),
-        padding: WidgetStateProperty.all(const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 4,
-        )),
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 4,
+          ),
+        ),
         minimumSize: const WidgetStatePropertyAll(Size(100, 40)),
       ),
     ),

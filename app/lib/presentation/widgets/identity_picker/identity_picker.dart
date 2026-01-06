@@ -22,7 +22,9 @@ class IdentityPicker extends HookWidget {
     required this.onSelectedIdentity,
     this.displayMode = false,
     this.swipeDirection = const AllowedSwipeDirection.symmetric(
-        horizontal: true, vertical: false),
+      horizontal: true,
+      vertical: false,
+    ),
     this.initialCardIndex = -1,
     required this.cacheManager,
   });
@@ -43,17 +45,20 @@ class IdentityPicker extends HookWidget {
   Widget build(BuildContext context) {
     final cardSwiperController = CardSwiperController();
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      if (initialCardIndex != -1) {
-        Future.microtask(() {
-          cardSwiperController.moveTo(initialCardIndex);
-        });
-      }
+        if (initialCardIndex != -1) {
+          Future.microtask(() {
+            cardSwiperController.moveTo(initialCardIndex);
+          });
+        }
 
-      return null;
-    }, [initialCardIndex]);
+        return null;
+      },
+      [initialCardIndex],
+    );
 
     if (identities.isEmpty) {
       return Padding(

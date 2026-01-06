@@ -37,8 +37,9 @@ class DatabasePlatform {
   }
 
   /// Creates an in-memory database for native platform using SQLite
-  static Future<QueryExecutor> createInMemoryDatabase(
-      {required String passphrase}) async {
+  static Future<QueryExecutor> createInMemoryDatabase({
+    required String passphrase,
+  }) async {
     final sqliteDb = sqlite3.openInMemory();
     sqliteDb.execute("PRAGMA key = '$passphrase';");
 

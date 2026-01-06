@@ -62,68 +62,70 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
 
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
-        return Stack(children: [
-          Container(
-            height: 180,
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(10)),
-              gradient: RadialGradient(
-                center: Alignment.bottomCenter,
-                radius: 1.3,
-                colors: [
-                  Color.fromARGB(249, 3, 104, 192),
-                  Color.fromARGB(120, 5, 19, 94)
-                ],
+        return Stack(
+          children: [
+            Container(
+              height: 180,
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+                gradient: RadialGradient(
+                  center: Alignment.bottomCenter,
+                  radius: 1.3,
+                  colors: [
+                    Color.fromARGB(249, 3, 104, 192),
+                    Color.fromARGB(120, 5, 19, 94),
+                  ],
+                ),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: CircleAvatar(
-                      maxRadius: 40,
-                      backgroundImage: profilePic as ImageProvider<Object>,
-                    ),
-                  ),
-                  if (card != null)
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        width: 180,
-                        child: Text(
-                          l10n.oobConnectedTo(card.firstName),
-                          maxLines: 3,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.white,
+                      padding: const EdgeInsets.all(5.0),
+                      child: CircleAvatar(
+                        maxRadius: 40,
+                        backgroundImage: profilePic as ImageProvider<Object>,
+                      ),
+                    ),
+                    if (card != null)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          width: 180,
+                          child: Text(
+                            l10n.oobConnectedTo(card.firstName),
+                            maxLines: 3,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          Positioned(
-            bottom: 36,
-            right: 25,
-            child: ElevatedButton(
-              onPressed: startChatting,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(249, 3, 104, 192),
-              ),
-              child: Text(
-                l10n.oobChatTo,
-                style: const TextStyle(color: Colors.white),
+            Positioned(
+              bottom: 36,
+              right: 25,
+              child: ElevatedButton(
+                onPressed: startChatting,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(249, 3, 104, 192),
+                ),
+                child: Text(
+                  l10n.oobChatTo,
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
             ),
-          ),
-        ]);
+          ],
+        );
       },
     );
   }

@@ -4,11 +4,14 @@ class _ContactsLayout extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final contacts = ref.watch(
-        contactsScreenControllerProvider.select((state) => state.contacts));
-    final shouldShowGrid = ref.watch(contactsScreenControllerProvider
-        .select((state) => state.shouldShowGrid));
+      contactsScreenControllerProvider.select((state) => state.contacts),
+    );
+    final shouldShowGrid = ref.watch(
+      contactsScreenControllerProvider.select((state) => state.shouldShowGrid),
+    );
     final isEditMode = ref.watch(
-        contactsScreenControllerProvider.select((state) => state.isEditMode));
+      contactsScreenControllerProvider.select((state) => state.isEditMode),
+    );
     final controller = ref.read(contactsScreenControllerProvider.notifier);
 
     Future<void> onContactTap({
@@ -24,8 +27,10 @@ class _ContactsLayout extends ConsumerWidget {
         return;
       }
 
-      final isChatAvailable = ref.read(contactsScreenControllerProvider
-          .select((state) => state.isChatAvailable(contact)));
+      final isChatAvailable = ref.read(
+        contactsScreenControllerProvider
+            .select((state) => state.isChatAvailable(contact)),
+      );
       if (isChatAvailable) {
         final container = ProviderScope.containerOf(context);
         final provider = chatScreenControllerProvider(contact.id);

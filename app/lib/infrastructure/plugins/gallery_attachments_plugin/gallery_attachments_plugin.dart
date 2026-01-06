@@ -34,16 +34,21 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   /// and optional text, or `null` if cancelled or failed.
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     if (!context.mounted) return null;
 
-    final result = await Navigator.push<MediaReviewResult>(context,
-        MaterialPageRoute(builder: (context) {
-      return const MediaScreen(
-        useCamera: false,
-        useChatSemantics: true,
-      );
-    }));
+    final result = await Navigator.push<MediaReviewResult>(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return const MediaScreen(
+            useCamera: false,
+            useChatSemantics: true,
+          );
+        },
+      ),
+    );
 
     if (result == null) {
       return null;
@@ -75,7 +80,9 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     Color? chatItemColor,
   }) =>
       _GalleryAttachmentWidget(
-          attachment: attachment, cacheManager: _cacheManager);
+        attachment: attachment,
+        cacheManager: _cacheManager,
+      );
 
   /// Renders multiple image attachments as a scrollable list.
   ///
@@ -88,7 +95,9 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     Color? chatItemColor,
   }) =>
       _ListGalleryAttachmentsWidget(
-          attachments: attachments, cacheManager: _cacheManager);
+        attachments: attachments,
+        cacheManager: _cacheManager,
+      );
 
   /// Checks if this plugin supports the given attachment format.
   ///

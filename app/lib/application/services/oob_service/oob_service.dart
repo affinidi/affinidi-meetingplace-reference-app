@@ -134,10 +134,12 @@ class OOBService extends _$OOBService {
       const Duration(seconds: 60),
       () {
         _logger.info('acceptOobFlow timeout', name: _logKey);
-        acceptedOfferCompleter.completeError(AppException(
-          'Unable to process OOB offer',
-          code: AppExceptionType.oobFlowFailed.name,
-        ));
+        acceptedOfferCompleter.completeError(
+          AppException(
+            'Unable to process OOB offer',
+            code: AppExceptionType.oobFlowFailed.name,
+          ),
+        );
       },
     );
 

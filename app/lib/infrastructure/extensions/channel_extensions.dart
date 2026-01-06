@@ -38,8 +38,10 @@ extension ChannelImageExtensions on Channel {
   /// Returns my (local user's) image provider from the channel.
   /// Returns [defaultProfileImage] if card is null or has no profile pic.
   ImageProvider<Object> myImage({required BaseCacheManager cacheManager}) {
-    return _getImageProvider(contactCard?.profilePic,
-        cacheManager: cacheManager);
+    return _getImageProvider(
+      contactCard?.profilePic,
+      cacheManager: cacheManager,
+    );
   }
 
   /// Returns true if the other party has a profile picture.

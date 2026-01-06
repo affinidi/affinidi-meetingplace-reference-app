@@ -15,7 +15,8 @@ class _OfferDetailsDidInfoPanel extends ConsumerWidget {
     }
 
     final did = ref.watch(
-        controllerProvider.select((state) => state.offer?.publishOfferDid));
+      controllerProvider.select((state) => state.offer?.publishOfferDid),
+    );
     if (did == null || did.isEmpty) {
       return const SizedBox.shrink();
     }

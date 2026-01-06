@@ -26,19 +26,22 @@ class _ChatMessageList extends HookConsumerWidget {
       controller.clearSelectedReaction();
     }
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      scrollController.addListener(() {
-        if (scrollController.position.userScrollDirection ==
-            ScrollDirection.reverse) {
-          FocusManager.instance.primaryFocus?.unfocus();
-          hideReactionPicker();
-        }
-      });
+        scrollController.addListener(() {
+          if (scrollController.position.userScrollDirection ==
+              ScrollDirection.reverse) {
+            FocusManager.instance.primaryFocus?.unfocus();
+            hideReactionPicker();
+          }
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     return GestureDetector(
       onTap: hideReactionPicker,
@@ -87,7 +90,8 @@ class _ChatMessageList extends HookConsumerWidget {
                       if (consolidateChatItemStatus(chatItem) !=
                           lastUsedChatItemStatus) {
                         thisItemStatus = context.l10n.chatItemStatus(
-                            chatItemNextFromMe.status.toString());
+                          chatItemNextFromMe.status.toString(),
+                        );
                         lastUsedChatItemStatus =
                             consolidateChatItemStatus(chatItemNextFromMe);
                       }
@@ -103,60 +107,65 @@ class _ChatMessageList extends HookConsumerWidget {
                   child: Column(
                     children: [
                       Align(
-                          alignment: (chatItem is EncryptionNotice ||
-                                  chatItem is chat.ConciergeMessage ||
-                                  chatItem.status ==
-                                      chat.ChatItemStatus.userInput)
-                              ? Alignment.center
-                              : (chatItem.isFromMe)
-                                  ? Alignment.centerRight
-                                  : Alignment.centerLeft,
-                          child: Column(
-                            crossAxisAlignment: (chatItem is EncryptionNotice ||
-                                    chatItem is chat.ConciergeMessage)
-                                ? CrossAxisAlignment.center
-                                : chatItem.isFromMe
-                                    ? CrossAxisAlignment.end
-                                    : CrossAxisAlignment.start,
-                            children: [
-                              if (!nextItemFromSameDid)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  child: _ChatItemFromInfo(
-                                    chatItem: chatItem,
-                                    contactId: _contactId,
-                                  ),
-                                ),
-                              Container(
-                                margin: chatItem is EncryptionNotice ||
-                                        chatItem is chat.ConciergeMessage ||
-                                        chatItem is chat.EventMessage
-                                    ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
-                                    : EdgeInsets.fromLTRB(
-                                        (chatItem.isFromMe) ? 60 : 0,
-                                        8,
-                                        (chatItem.isFromMe) ? 0 : 60,
-                                        (selectedReactionIndex == index ||
-                                                chatItem is chat.Message &&
-                                                    chatItem
-                                                        .reactions.isNotEmpty)
-                                            ? 0
-                                            : 8),
-                                decoration: BoxDecoration(
-                                  color: getChatItemColor(
-                                      context.colorScheme, chatItem),
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                child: ChatItem(
+                        alignment: (chatItem is EncryptionNotice ||
+                                chatItem is chat.ConciergeMessage ||
+                                chatItem.status ==
+                                    chat.ChatItemStatus.userInput)
+                            ? Alignment.center
+                            : (chatItem.isFromMe)
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: (chatItem is EncryptionNotice ||
+                                  chatItem is chat.ConciergeMessage)
+                              ? CrossAxisAlignment.center
+                              : chatItem.isFromMe
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
+                          children: [
+                            if (!nextItemFromSameDid)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: _ChatItemFromInfo(
                                   chatItem: chatItem,
-                                  index: index,
                                   contactId: _contactId,
-                                  chatItemColor: getChatItemColor(
-                                      context.colorScheme, chatItem),
                                 ),
                               ),
-                            ],
-                          )),
+                            Container(
+                              margin: chatItem is EncryptionNotice ||
+                                      chatItem is chat.ConciergeMessage ||
+                                      chatItem is chat.EventMessage
+                                  ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
+                                  : EdgeInsets.fromLTRB(
+                                      (chatItem.isFromMe) ? 60 : 0,
+                                      8,
+                                      (chatItem.isFromMe) ? 0 : 60,
+                                      (selectedReactionIndex == index ||
+                                              chatItem is chat.Message &&
+                                                  chatItem.reactions.isNotEmpty)
+                                          ? 0
+                                          : 8,
+                                    ),
+                              decoration: BoxDecoration(
+                                color: getChatItemColor(
+                                  context.colorScheme,
+                                  chatItem,
+                                ),
+                                borderRadius: BorderRadius.circular(16.0),
+                              ),
+                              child: ChatItem(
+                                chatItem: chatItem,
+                                index: index,
+                                contactId: _contactId,
+                                chatItemColor: getChatItemColor(
+                                  context.colorScheme,
+                                  chatItem,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       if (chatItem is chat.Message) ...[
                         chatItem.reactions.isNotEmpty
                             ? Align(

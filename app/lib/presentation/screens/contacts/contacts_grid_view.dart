@@ -15,7 +15,8 @@ class _ContactGridView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final contacts = ref.watch(
-        contactsScreenControllerProvider.select((state) => state.contacts));
+      contactsScreenControllerProvider.select((state) => state.contacts),
+    );
 
     final isLandscapeOrTablet = ScreensizeHelper().isLandscape(context) ||
         ScreensizeHelper().isBigScreen(context);

@@ -23,12 +23,18 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(pushNotificationMessaging.permissionsRequested, isFalse);
-        expect(pushNotificationMessaging.foregroundPresentationAlertRequested,
-            isFalse);
-        expect(pushNotificationMessaging.foregroundPresentationBadgeRequested,
-            isFalse);
-        expect(pushNotificationMessaging.foregroundPresentationSoundRequested,
-            isFalse);
+        expect(
+          pushNotificationMessaging.foregroundPresentationAlertRequested,
+          isFalse,
+        );
+        expect(
+          pushNotificationMessaging.foregroundPresentationBadgeRequested,
+          isFalse,
+        );
+        expect(
+          pushNotificationMessaging.foregroundPresentationSoundRequested,
+          isFalse,
+        );
       });
     });
 
@@ -47,12 +53,18 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(pushNotificationMessaging.permissionsRequested, isTrue);
-        expect(pushNotificationMessaging.foregroundPresentationAlertRequested,
-            isFalse);
-        expect(pushNotificationMessaging.foregroundPresentationBadgeRequested,
-            isFalse);
-        expect(pushNotificationMessaging.foregroundPresentationSoundRequested,
-            isFalse);
+        expect(
+          pushNotificationMessaging.foregroundPresentationAlertRequested,
+          isFalse,
+        );
+        expect(
+          pushNotificationMessaging.foregroundPresentationBadgeRequested,
+          isFalse,
+        );
+        expect(
+          pushNotificationMessaging.foregroundPresentationSoundRequested,
+          isFalse,
+        );
       });
     });
   });

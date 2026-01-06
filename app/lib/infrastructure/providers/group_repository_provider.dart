@@ -77,5 +77,6 @@ Future<model.GroupRepository> groupsRepositoryInMemoryDrift(Ref ref) async {
 @Riverpod(keepAlive: true)
 Future<model.GroupRepository> groupsRepository(Ref ref) async {
   throw UnimplementedError(
-      '''Please configure the application by providing an GroupRepository implementation in ProviderScope overrides.''');
+    '''Please configure the application by providing an GroupRepository implementation in ProviderScope overrides.''',
+  );
 }

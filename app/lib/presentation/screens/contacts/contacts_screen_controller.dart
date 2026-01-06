@@ -22,7 +22,8 @@ class ContactsScreenController extends _$ContactsScreenController {
       AsyncLoadingController.provider('deleteContactLoadingController');
   late final deleteMultipleContactsLoadingController =
       AsyncLoadingController.provider(
-          'deleteMultipleContactsLoadingController');
+    'deleteMultipleContactsLoadingController',
+  );
 
   bool _isDisposed = false;
 
@@ -69,15 +70,19 @@ class ContactsScreenController extends _$ContactsScreenController {
 
     // Listen to mediator service to update connection mediators when
     // mediators load
-    ref.listen(mediatorServiceProvider, (prev, next) {
-      if (prev == next) return;
+    ref.listen(
+      mediatorServiceProvider,
+      (prev, next) {
+        if (prev == next) return;
 
-      Future.microtask(() {
-        if (_isDisposed) return;
+        Future.microtask(() {
+          if (_isDisposed) return;
 
-        _updateContactMediators();
-      });
-    }, fireImmediately: true);
+          _updateContactMediators();
+        });
+      },
+      fireImmediately: true,
+    );
 
     return ContactsScreenState();
   }
@@ -150,7 +155,8 @@ class ContactsScreenController extends _$ContactsScreenController {
 
   void deselectContact(Contact contact) {
     state = state.copyWith(
-        selectedContacts: List.of(state.selectedContacts)..remove(contact));
+      selectedContacts: List.of(state.selectedContacts)..remove(contact),
+    );
   }
 
   void selectContact(Contact contact) {

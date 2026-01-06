@@ -17,12 +17,13 @@ class _Status extends ConsumerWidget {
 
     return Chip(
       label: Text(
-          isGroupChat
-              ? context.l10n.groupContactStatus(contact?.status.name ?? '')
-              : context.l10n.contactStatus(contact?.status.name ?? ''),
-          style: context.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          )),
+        isGroupChat
+            ? context.l10n.groupContactStatus(contact?.status.name ?? '')
+            : context.l10n.contactStatus(contact?.status.name ?? ''),
+        style: context.textTheme.bodyLarge?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       backgroundColor: contact?.getStatusColor(context),
     );
   }

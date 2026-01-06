@@ -7,14 +7,17 @@ class ChatInputDecoration extends ThemeExtension<ChatInputDecoration> {
   final InputDecoration inputDecoration;
 
   @override
-  ThemeExtension<ChatInputDecoration> copyWith(
-      {InputDecoration? inputDecoration}) {
+  ThemeExtension<ChatInputDecoration> copyWith({
+    InputDecoration? inputDecoration,
+  }) {
     return ChatInputDecoration(inputDecoration ?? this.inputDecoration);
   }
 
   @override
   ThemeExtension<ChatInputDecoration> lerp(
-      covariant ThemeExtension<ChatInputDecoration>? other, double t) {
+    covariant ThemeExtension<ChatInputDecoration>? other,
+    double t,
+  ) {
     return this;
   }
 }

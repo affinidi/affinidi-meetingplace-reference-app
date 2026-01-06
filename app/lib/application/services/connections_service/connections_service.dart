@@ -111,7 +111,8 @@ class ConnectionsService extends _$ConnectionsService {
   /// - `Future<void>` completes when the delete operation and subsequent
   ///   refresh finish.
   Future<void> markConnectionOfferAsDeleted(
-      ConnectionOffer connectionOffer) async {
+    ConnectionOffer connectionOffer,
+  ) async {
     _logger.info(
       'Starting deletion of connection offer: ${connectionOffer.mnemonic}',
       name: _logKey,
@@ -180,8 +181,10 @@ class ConnectionsService extends _$ConnectionsService {
           'Connection offer not found for link: $offerLink',
           name: _logKey,
         );
-        throw AppException('Unable to find connection offer via offer link',
-            code: AppExceptionType.missingConnectionOffer.name);
+        throw AppException(
+          'Unable to find connection offer via offer link',
+          code: AppExceptionType.missingConnectionOffer.name,
+        );
       }
 
       _logger.info(
@@ -376,7 +379,8 @@ class ConnectionsService extends _$ConnectionsService {
   /// - The group offer has no owner.
   /// - The channel for the owner cannot be retrieved.
   Future<void> _announceGroupChannelIsReady(
-      PublishOfferResult<ConnectionOffer> result) async {
+    PublishOfferResult<ConnectionOffer> result,
+  ) async {
     final groupConnectionOffer =
         result.connectionOffer as GroupConnectionOffer?;
 

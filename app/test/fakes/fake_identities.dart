@@ -21,11 +21,12 @@ class FakeIdentities {
     id: 'secondary-identity-id',
     did: '',
     card: ContactCard(
-        id: 'secondary-identity-id',
-        did: 'did:key:secondary-identity',
-        type: 'individual',
-        firstName: 'Jane',
-        displayName: 'Jane Doe'),
+      id: 'secondary-identity-id',
+      did: 'did:key:secondary-identity',
+      type: 'individual',
+      firstName: 'Jane',
+      displayName: 'Jane Doe',
+    ),
     isPrimary: false,
   );
 }

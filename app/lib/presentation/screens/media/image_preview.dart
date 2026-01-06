@@ -24,7 +24,7 @@ class ImagePreview extends StatelessWidget {
             imageBytes!,
             fit: BoxFit.contain,
           ),
-        )
+        ),
       ],
     );
   }

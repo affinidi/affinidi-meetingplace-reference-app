@@ -18,7 +18,10 @@ class _AwaitingMembersWarning extends ConsumerWidget {
 
     final namesCount = awaitingMemberNames.length;
     final message = context.l10n.awaitingMembersToJoin(
-        awaitingMemberNames.last, namesCount, math.max(0, namesCount - 1));
+      awaitingMemberNames.last,
+      namesCount,
+      math.max(0, namesCount - 1),
+    );
 
     return Container(
       width: MediaQuery.of(context).size.width,
