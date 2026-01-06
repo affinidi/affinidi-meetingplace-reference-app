@@ -243,7 +243,10 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     CameraLensDirection direction = CameraLensDirection.back,
   }) async {
     if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
-      _logger.warning('Camera not available on this platform', name: _logKey);
+      _logger.warning(
+        'Camera not available on this platform',
+        name: _logKey,
+      );
       return false;
     }
 
@@ -255,7 +258,10 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     }
 
     if (!status.isGranted) {
-      _logger.warning('Camera permission not granted', name: _logKey);
+      _logger.warning(
+        'Camera permission not granted',
+        name: _logKey,
+      );
       state = state.copyWith(
         permissionGranted: false,
       );
@@ -283,14 +289,20 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   Future<void> checkCameraAvailability() async {
     // Camera plugin does not support macOS: assume camera is unavailable
     if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
-      _logger.warning('Camera not available on this platform', name: _logKey);
+      _logger.warning(
+        'Camera not available on this platform',
+        name: _logKey,
+      );
       state = state.copyWith(
         isAvailable: false,
       );
       return;
     }
 
-    _logger.info('checkCameraAvailability', name: _logKey);
+    _logger.info(
+      'checkCameraAvailability',
+      name: _logKey,
+    );
 
     try {
       final getCameras = ref.read(availableCamerasProvider);
@@ -300,7 +312,10 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
         cameras: cameras,
       );
 
-      _logger.info('${cameras.length} camera(s) found', name: _logKey);
+      _logger.info(
+        '${cameras.length} camera(s) found',
+        name: _logKey,
+      );
     } catch (error, stackTrace) {
       _logger.error(
         'Error while detecting cameras',
