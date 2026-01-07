@@ -51,8 +51,6 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        await tester.pumpAndSettle();
-
         expect(find.text(l10n.shareSheetCTA_QRCode), findsOneWidget);
       });
     });
