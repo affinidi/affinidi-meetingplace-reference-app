@@ -202,7 +202,7 @@ Future<void> navigateToLocation(
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
-  PermissionStatus? cameraPermissionStatus,
+  PermissionStatus? cameraPermissionStatus = PermissionStatus.granted,
   SecureStorage? secureStorage,
   ShareService? shareService,
   QrCodeViewFactory? qrCodeViewFactory,
