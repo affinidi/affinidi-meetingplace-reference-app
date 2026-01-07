@@ -4,6 +4,7 @@ import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_categor
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_origin.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_status.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_type.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 class FakeContacts {
   static final individualContact = Contact(
@@ -11,19 +12,19 @@ class FakeContacts {
     channelDid: 'did:key:individual-channel',
     channelDidSha256: 'individual-channel-sha256',
     offerLink: 'individual-offer-link',
-    card: const ContactCard(
+    card: ContactCard(
       id: 'contact-card-id',
       did: 'did:key:individual-channel',
-      type: 'individual',
+      type: ContactCardType.individual.value,
       firstName: 'Alice',
       displayName: 'Alice Smith',
       email: 'alice@example.com',
       mobile: '+1234567891',
     ),
-    otherPartyCard: const ContactCard(
+    otherPartyCard: ContactCard(
       id: 'other-party-card-id',
       did: 'did:key:other-party',
-      type: 'individual',
+      type: ContactCardType.individual.value,
       firstName: 'Bob',
       displayName: 'Bob Johnson',
       email: 'bob@example.com',
@@ -44,18 +45,18 @@ class FakeContacts {
     channelDid: 'did:key:group-channel',
     channelDidSha256: 'group-channel-sha256',
     offerLink: 'group-offer-link',
-    card: const ContactCard(
+    card: ContactCard(
       id: 'group-contact-card-id',
       did: 'did:key:group-channel',
-      type: 'individual',
+      type: ContactCardType.individual.value,
       firstName: 'Project',
       lastName: 'Team',
       displayName: 'Project Team',
     ),
-    otherPartyCard: const ContactCard(
+    otherPartyCard: ContactCard(
       id: 'other-party-card-id',
       did: 'did:key:other-party',
-      type: 'individual',
+      type: ContactCardType.individual.value,
       firstName: 'Team',
       lastName: 'Admin',
       displayName: 'Team Admin',
@@ -77,10 +78,10 @@ class FakeContacts {
     channelDid: 'did:key:pending-channel',
     channelDidSha256: 'pending-channel-sha256',
     offerLink: 'pending-offer-link',
-    card: const ContactCard(
+    card: ContactCard(
       id: 'pending-contact-card-id',
       did: 'did:key:pending-channel',
-      type: 'individual',
+      type: ContactCardType.individual.value,
       firstName: 'Charlie',
       lastName: 'Brown',
       displayName: 'Charlie Brown',

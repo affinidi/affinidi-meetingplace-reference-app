@@ -61,7 +61,8 @@ class ContactsScreenController extends _$ContactsScreenController {
         Future.microtask(() {
           if (_isDisposed) return;
 
-          state = state.copyWith(contacts: _sortContacts(next));
+          final filteredContacts = _applyCurrentFilter(next);
+          state = state.copyWith(contacts: _sortContacts(filteredContacts));
           _updateContactMediators(newContacts);
         });
       },
@@ -150,7 +151,10 @@ class ContactsScreenController extends _$ContactsScreenController {
       return filter.categories.contains(contact.category);
     }).toList();
 
-    state = state.copyWith(contacts: _sortContacts(filteredContacts));
+    state = state.copyWith(
+      filter: filter,
+      contacts: _sortContacts(filteredContacts),
+    );
   }
 
   void deselectContact(Contact contact) {
@@ -217,6 +221,16 @@ class ContactsScreenController extends _$ContactsScreenController {
     }
 
     state = state.copyWith(contactMediators: contactMediators);
+  }
+
+  List<Contact> _applyCurrentFilter(List<Contact> contacts) {
+    if (state.filter == ContactsScreenFilter.any) {
+      return contacts;
+    }
+
+    return contacts
+        .where((contact) => state.filter.categories.contains(contact.category))
+        .toList();
   }
 }
 

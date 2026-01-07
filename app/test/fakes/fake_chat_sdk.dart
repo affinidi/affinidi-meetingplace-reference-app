@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_chat/src/sdk/chat.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 class FakeChatSdk implements MeetingPlaceChatSDK {
   int _chatSessionStartedCalls = 0;
@@ -72,7 +73,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       data: {
         'contactCard': {
           'did': 'did:key:identity-id',
-          'type': 'individual',
+          'type': ContactCardType.individual.value,
           'contactInfo': {
             'n': {
               'given': memberName,
@@ -163,7 +164,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
         'memberDid': memberDid,
         'contactCard': {
           'did': 'did:key:identity-id',
-          'type': 'individual',
+          'type': ContactCardType.individual.value,
           'contactInfo': {
             'n': {
               'given': memberName,
@@ -215,7 +216,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
         'memberDid': memberDid,
         'contactCard': {
           'did': 'did:key:identity-id',
-          'type': 'individual',
+          'type': ContactCardType.individual.value,
           'contactInfo': {
             'n': {
               'given': memberName,

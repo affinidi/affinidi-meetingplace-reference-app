@@ -180,7 +180,9 @@ class ContactsService extends _$ContactsService {
       type: ContactType.from(channel.type),
       status: status,
       origin: ContactOrigin.from(channel.type),
-      category: ContactCategory.from(channel.type),
+      category: ContactCategory.fromContactCardType(
+        channel.otherPartyContactCard?.type,
+      ),
     );
   }
 

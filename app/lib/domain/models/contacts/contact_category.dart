@@ -1,4 +1,4 @@
-import 'package:meeting_place_core/meeting_place_core.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 
 /// Represents the category of a contact.
 ///
@@ -15,14 +15,19 @@ enum ContactCategory {
   group(64);
 
   const ContactCategory(this.value);
-  factory ContactCategory.from(ChannelType type) {
-    switch (type) {
-      case ChannelType.individual:
+  factory ContactCategory.fromContactCardType(String? type) {
+    if (type == null) {
+      return unknown;
+    }
+
+    final cardType = ContactCardType.fromString(type);
+    switch (cardType) {
+      case ContactCardType.individual:
         return person;
-      case ChannelType.group:
-        return group;
-      case ChannelType.oob:
-        return person;
+      case ContactCardType.aiAgent:
+        return robot;
+      case null:
+        return unknown;
     }
   }
 

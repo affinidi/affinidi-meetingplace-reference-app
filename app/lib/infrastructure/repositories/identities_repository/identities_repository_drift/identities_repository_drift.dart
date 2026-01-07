@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../domain/repositories/identities_repository.dart';
+import '../../../extensions/contact_card_extensions.dart';
 import '../../../loggers/app_logger/app_logger.dart';
 import '../../../providers/app_logger_provider.dart';
 import 'identities_database.dart';
@@ -97,7 +98,7 @@ extension IdentityMapper on Identity {
         card: ContactCard(
           id: record.id,
           did: record.did,
-          type: 'individual',
+          type: ContactCardType.individual.value,
           displayName: record.displayName,
           firstName: record.firstName,
           lastName: record.lastName,
