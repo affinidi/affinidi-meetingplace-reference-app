@@ -5,8 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../infrastructure/services/camera_service/camera_service.dart';
+import '../../../infrastructure/services/permission_service/permission_service.dart';
+import '../../widgets/camera_permission_instruction.dart';
 import 'qr_code_picker_controller.dart';
 
 class QrCodePicker extends ConsumerWidget {
@@ -92,10 +95,94 @@ class QrCodePicker extends ConsumerWidget {
 
     log('Found a camera', name: 'QrCodePicker');
 
-    return _QRScannerScreen(
+    return _QrPermissionView(
       controller: controller,
       onDetectCode: onDetectCode,
       popOnDetect: popOnDetect,
+    );
+  }
+}
+
+class _QrPermissionView extends ConsumerStatefulWidget {
+  const _QrPermissionView({
+    required this.controller,
+    this.onDetectCode,
+    required this.popOnDetect,
+  });
+
+  final QrCodePickerController controller;
+  final void Function(String code)? onDetectCode;
+  final bool popOnDetect;
+
+  @override
+  ConsumerState<_QrPermissionView> createState() => _QrPermissionViewState();
+}
+
+class _QrPermissionViewState extends ConsumerState<_QrPermissionView> {
+  PermissionStatus? _status;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkPermission();
+  }
+
+  Future<void> _checkPermission() async {
+    final service = ref.read(permissionServiceProvider);
+    var status = await service.getCameraPermissionStatus();
+    if (status.isDenied) {
+      status = await service.requestCameraPermission();
+    }
+    setState(() {
+      _status = status;
+    });
+  }
+
+  Future<void> _retry() async {
+    final service = ref.read(permissionServiceProvider);
+    // Always attempt to (re)request permission on retry.
+    var status = await service.requestCameraPermission();
+    if (!status.isGranted) {
+      status = await service.getCameraPermissionStatus();
+    }
+    setState(() {
+      _status = status;
+    });
+  }
+
+  Future<void> _openSettings() async {
+    await openAppSettings();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_status == null) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: CupertinoActivityIndicator(
+            color: Colors.white,
+            radius: 20,
+          ),
+        ),
+      );
+    }
+
+    if (!_status!.isGranted) {
+      return CameraPermissionInstruction(
+        onOpenSettings: _openSettings,
+        onRetry: _retry,
+        onCancel: () {
+          if (!context.mounted) return;
+          Navigator.of(context).maybePop();
+        },
+      );
+    }
+
+    return _QRScannerScreen(
+      controller: widget.controller,
+      onDetectCode: widget.onDetectCode,
+      popOnDetect: widget.popOnDetect,
     );
   }
 }

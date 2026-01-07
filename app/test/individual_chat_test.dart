@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
@@ -32,6 +33,7 @@ Future<void> navigateToChatScreen(
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
   FakeSecureStorage? secureStorage,
+  PermissionStatus? cameraPermissionStatus,
 }) async {
   await navigateToLocation(
     tester,
@@ -44,6 +46,7 @@ Future<void> navigateToChatScreen(
     imagePicker: imagePicker,
     mockCameras: mockCameras,
     secureStorage: secureStorage,
+    cameraPermissionStatus: cameraPermissionStatus,
   );
   await tester.pumpAndSettle();
 }
@@ -451,6 +454,7 @@ void main() {
             imagePicker: FakeImagePicker.withDefaultImage(),
             mockCameras: _mockCameras,
             meetingPlaceChatSDK: meetingPlaceChatSDK,
+            cameraPermissionStatus: PermissionStatus.granted,
           );
 
           await tester.tap(findAddMediaButton());
@@ -482,18 +486,18 @@ void main() {
           );
         });
 
-        testWidgets('should fallback to gallery when camera is not available',
+        testWidgets('should show error when camera permission is denied',
             (tester) async {
           final l10n = await getL10n();
-          const message = 'Photo from gallery!';
           final meetingPlaceChatSDK = FakeChatSdk();
 
           await navigateToChatScreen(
             tester,
             contactId: contactId,
             imagePicker: FakeImagePicker.withDefaultImage(),
-            mockCameras: [],
+            mockCameras: _mockCameras,
             meetingPlaceChatSDK: meetingPlaceChatSDK,
+            cameraPermissionStatus: PermissionStatus.denied,
           );
 
           await tester.tap(findAddMediaButton());
@@ -502,20 +506,21 @@ void main() {
           await tester.tap(find.text(l10n.generalCamera));
           await tester.pumpAndSettle();
 
-          expect(find.byKey(const Key('camera_capture_button')), findsNothing);
           expect(
-            find.byKey(const Key('media_review_submit_button')),
+            find.byKey(const Key('camera_capture_button')),
+            findsNothing,
+          );
+          expect(
+            find.text(l10n.cameraAccessDenied),
             findsOneWidget,
           );
-
-          await submitMediaWithMessage(tester, message);
-          await tester.pumpAndSettle();
-
-          await verifyMessageWithAttachmentSent(
-            tester,
-            meetingPlaceChatSDK,
-            message,
-            contactName,
+          expect(
+            find.text(l10n.cameraOpenSettings),
+            findsOneWidget,
+          );
+          expect(
+            find.text(l10n.generalRetry),
+            findsOneWidget,
           );
         });
       });

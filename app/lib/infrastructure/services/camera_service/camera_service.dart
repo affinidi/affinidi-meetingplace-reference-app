@@ -2,10 +2,12 @@ import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../loggers/app_logger/app_logger.dart';
 import '../../providers/app_logger_provider.dart';
+import '../permission_service/permission_service.dart';
 import 'camera_service_state.dart';
 
 part 'camera_service.g.dart';
@@ -58,7 +60,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
       state.controller?.dispose();
     });
 
-    Future(_checkCameraAvailability);
+    Future(checkCameraAvailability);
 
     return CameraServiceState();
   }
@@ -66,7 +68,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      Future(_checkCameraAvailability);
+      Future(checkCameraAvailability);
     }
   }
 
@@ -100,6 +102,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
       controller: controller,
       cameras: cameras,
       isAvailable: cameras.isNotEmpty,
+      permissionGranted: true,
     );
 
     return controller;
@@ -109,7 +112,11 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   ///
   /// If no controller is active, the method does nothing.
   Future<void> toggleCamera() async {
-    if (state.controller == null) return;
+    if (state.cameras.isEmpty) {
+      await checkCameraAvailability();
+    }
+
+    if (state.controller == null || state.cameras.isEmpty) return;
 
     final lens = state.controller!.description.lensDirection;
     final cameras = state.cameras;
@@ -187,14 +194,69 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     );
   }
 
+  /// Ensures camera is ready by checking permission and initializing if needed.
+  ///
+  /// Call this when user initiates a camera action (e.g., taps "Scan QR").
+  /// Requests permission if not granted, then initializes the camera.
+  ///
+  /// Returns `true` if camera is ready, `false` if permission denied or error.
+  Future<bool> ensureCameraReady({
+    CameraLensDirection direction = CameraLensDirection.back,
+  }) async {
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
+      _logger.warning(
+        'Camera not available on this platform',
+        name: _logKey,
+      );
+      return false;
+    }
+
+    final permissionService = ref.read(permissionServiceProvider);
+    var status = await permissionService.getCameraPermissionStatus();
+
+    if (status.isDenied) {
+      status = await permissionService.requestCameraPermission();
+    }
+
+    if (!status.isGranted) {
+      _logger.warning(
+        'Camera permission not granted',
+        name: _logKey,
+      );
+      state = state.copyWith(
+        permissionGranted: false,
+      );
+      return false;
+    }
+
+    try {
+      await initializeCamera(direction);
+      return true;
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to initialize camera',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return false;
+    }
+  }
+
   /// Checks whether cameras are available on the device and updates the state.
   ///
-  /// On macOS, assumes a camera is always available as the plugin
-  ///  does not support it.
-  Future<void> _checkCameraAvailability() async {
+  /// Does NOT request permission. Only queries hardware availability.
+  /// On macOS/web, sets isAvailable to false.
+  Future<void> checkCameraAvailability() async {
     // Camera plugin does not support macOS: assume camera is unavailable
     if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
-      state = state.copyWith(isAvailable: false);
+      _logger.warning(
+        'Camera not available on this platform',
+        name: _logKey,
+      );
+      state = state.copyWith(
+        isAvailable: false,
+      );
       return;
     }
 
@@ -202,6 +264,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
       'checkCameraAvailability',
       name: _logKey,
     );
+
     try {
       final getCameras = ref.read(availableCamerasProvider);
       final cameras = await getCameras();
@@ -221,7 +284,10 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
         stackTrace: stackTrace,
         name: _logKey,
       );
-      state = state.copyWith(isAvailable: false, cameras: []);
+      state = state.copyWith(
+        isAvailable: false,
+        cameras: [],
+      );
     }
   }
 }

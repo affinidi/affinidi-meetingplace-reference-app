@@ -23,4 +23,5 @@ enum AppExceptionType {
   mediatorAlreadyExists,
   unableToFindMediator,
   offerNotFound,
+  cameraInitializationFailed,
 }

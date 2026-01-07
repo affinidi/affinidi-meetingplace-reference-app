@@ -17,6 +17,7 @@ mixin _$CameraServiceState {
   List<CameraDescription> get cameras;
   bool? get isAvailable;
   CameraController? get controller;
+  bool get permissionGranted;
 
   /// Create a copy of CameraServiceState
   /// with the given fields replaced by the non-null parameter values.
@@ -35,16 +36,22 @@ mixin _$CameraServiceState {
             (identical(other.isAvailable, isAvailable) ||
                 other.isAvailable == isAvailable) &&
             (identical(other.controller, controller) ||
-                other.controller == controller));
+                other.controller == controller) &&
+            (identical(other.permissionGranted, permissionGranted) ||
+                other.permissionGranted == permissionGranted));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType,
-      const DeepCollectionEquality().hash(cameras), isAvailable, controller);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(cameras),
+      isAvailable,
+      controller,
+      permissionGranted);
 
   @override
   String toString() {
-    return 'CameraServiceState(cameras: $cameras, isAvailable: $isAvailable, controller: $controller)';
+    return 'CameraServiceState(cameras: $cameras, isAvailable: $isAvailable, controller: $controller, permissionGranted: $permissionGranted)';
   }
 }
 
@@ -57,7 +64,8 @@ abstract mixin class $CameraServiceStateCopyWith<$Res> {
   $Res call(
       {List<CameraDescription> cameras,
       bool? isAvailable,
-      CameraController? controller});
+      CameraController? controller,
+      bool permissionGranted});
 }
 
 /// @nodoc
@@ -76,6 +84,7 @@ class _$CameraServiceStateCopyWithImpl<$Res>
     Object? cameras = null,
     Object? isAvailable = freezed,
     Object? controller = freezed,
+    Object? permissionGranted = null,
   }) {
     return _then(_self.copyWith(
       cameras: null == cameras
@@ -90,6 +99,10 @@ class _$CameraServiceStateCopyWithImpl<$Res>
           ? _self.controller
           : controller // ignore: cast_nullable_to_non_nullable
               as CameraController?,
+      permissionGranted: null == permissionGranted
+          ? _self.permissionGranted
+          : permissionGranted // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -188,14 +201,15 @@ extension CameraServiceStatePatterns on CameraServiceState {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(List<CameraDescription> cameras, bool? isAvailable,
-            CameraController? controller)?
+            CameraController? controller, bool permissionGranted)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _CameraServiceState() when $default != null:
-        return $default(_that.cameras, _that.isAvailable, _that.controller);
+        return $default(_that.cameras, _that.isAvailable, _that.controller,
+            _that.permissionGranted);
       case _:
         return orElse();
     }
@@ -217,13 +231,14 @@ extension CameraServiceStatePatterns on CameraServiceState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(List<CameraDescription> cameras, bool? isAvailable,
-            CameraController? controller)
+            CameraController? controller, bool permissionGranted)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _CameraServiceState():
-        return $default(_that.cameras, _that.isAvailable, _that.controller);
+        return $default(_that.cameras, _that.isAvailable, _that.controller,
+            _that.permissionGranted);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -244,13 +259,14 @@ extension CameraServiceStatePatterns on CameraServiceState {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(List<CameraDescription> cameras, bool? isAvailable,
-            CameraController? controller)?
+            CameraController? controller, bool permissionGranted)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _CameraServiceState() when $default != null:
-        return $default(_that.cameras, _that.isAvailable, _that.controller);
+        return $default(_that.cameras, _that.isAvailable, _that.controller,
+            _that.permissionGranted);
       case _:
         return null;
     }
@@ -263,7 +279,8 @@ class _CameraServiceState implements CameraServiceState {
   _CameraServiceState(
       {final List<CameraDescription> cameras = const [],
       this.isAvailable,
-      this.controller})
+      this.controller,
+      this.permissionGranted = true})
       : _cameras = cameras;
 
   final List<CameraDescription> _cameras;
@@ -279,6 +296,9 @@ class _CameraServiceState implements CameraServiceState {
   final bool? isAvailable;
   @override
   final CameraController? controller;
+  @override
+  @JsonKey()
+  final bool permissionGranted;
 
   /// Create a copy of CameraServiceState
   /// with the given fields replaced by the non-null parameter values.
@@ -297,16 +317,22 @@ class _CameraServiceState implements CameraServiceState {
             (identical(other.isAvailable, isAvailable) ||
                 other.isAvailable == isAvailable) &&
             (identical(other.controller, controller) ||
-                other.controller == controller));
+                other.controller == controller) &&
+            (identical(other.permissionGranted, permissionGranted) ||
+                other.permissionGranted == permissionGranted));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType,
-      const DeepCollectionEquality().hash(_cameras), isAvailable, controller);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_cameras),
+      isAvailable,
+      controller,
+      permissionGranted);
 
   @override
   String toString() {
-    return 'CameraServiceState(cameras: $cameras, isAvailable: $isAvailable, controller: $controller)';
+    return 'CameraServiceState(cameras: $cameras, isAvailable: $isAvailable, controller: $controller, permissionGranted: $permissionGranted)';
   }
 }
 
@@ -321,7 +347,8 @@ abstract mixin class _$CameraServiceStateCopyWith<$Res>
   $Res call(
       {List<CameraDescription> cameras,
       bool? isAvailable,
-      CameraController? controller});
+      CameraController? controller,
+      bool permissionGranted});
 }
 
 /// @nodoc
@@ -340,6 +367,7 @@ class __$CameraServiceStateCopyWithImpl<$Res>
     Object? cameras = null,
     Object? isAvailable = freezed,
     Object? controller = freezed,
+    Object? permissionGranted = null,
   }) {
     return _then(_CameraServiceState(
       cameras: null == cameras
@@ -354,6 +382,10 @@ class __$CameraServiceStateCopyWithImpl<$Res>
           ? _self.controller
           : controller // ignore: cast_nullable_to_non_nullable
               as CameraController?,
+      permissionGranted: null == permissionGranted
+          ? _self.permissionGranted
+          : permissionGranted // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }

@@ -1390,5 +1390,11 @@
     "type": "text"
   },
   "meetingPlaceInvitationTitle": "Meeting Place Invitation",
-  "shareSheetCTA_QRCode": "Send or save QR code"
+  "shareSheetCTA_QRCode": "Send or save QR code",
+  "cameraInstructionAndroid": "Tap \"Open Settings\" below to enable camera access. If that doesn't work, open Settings manually:\n\nSettings > Apps > Meeting Place > Permissions > Camera > Allow only while using the app.",
+  "cameraInstructionIos": "Tap \"Open Settings\" below to enable camera access. If that doesn't work, open Settings manually:\n\nSettings > Meeting Place > Camera and enable access for this app.",
+  "cameraInstructionMacos": "Go to System Settings > Privacy & Security > Camera and allow camera access for this app.",
+  "cameraAccessDenied": "Camera access denied or unavailable.",
+  "cameraOpenSettings": "Open Settings"
+
 }

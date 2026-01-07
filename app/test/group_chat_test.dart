@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
@@ -34,6 +35,7 @@ Future<void> navigateToGroupChatScreen(
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
   FakeSecureStorage? secureStorage,
+  PermissionStatus? cameraPermissionStatus,
 }) async {
   final connectivity = FakeConnectivity(
     initialConnectivityToReturn: [ConnectivityResult.wifi],
@@ -51,6 +53,7 @@ Future<void> navigateToGroupChatScreen(
     imagePicker: imagePicker,
     mockCameras: mockCameras,
     secureStorage: secureStorage,
+    cameraPermissionStatus: cameraPermissionStatus,
   );
   await tester.pumpAndSettle();
 }
@@ -439,6 +442,7 @@ void main() {
             imagePicker: FakeImagePicker.withDefaultImage(),
             mockCameras: _mockCameras,
             meetingPlaceChatSDK: meetingPlaceChatSDK,
+            cameraPermissionStatus: PermissionStatus.granted,
           );
 
           await tester.tap(findAddMediaButton());

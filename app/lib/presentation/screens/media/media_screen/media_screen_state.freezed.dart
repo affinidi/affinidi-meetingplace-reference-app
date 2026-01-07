@@ -18,6 +18,8 @@ mixin _$MediaScreenState {
   bool get isCameraAvailable;
   CameraController? get cameraController;
   bool get isFrontCamera;
+  bool get isLoading;
+  bool get permissionGranted;
 
   /// Create a copy of MediaScreenState
   /// with the given fields replaced by the non-null parameter values.
@@ -39,7 +41,11 @@ mixin _$MediaScreenState {
             (identical(other.cameraController, cameraController) ||
                 other.cameraController == cameraController) &&
             (identical(other.isFrontCamera, isFrontCamera) ||
-                other.isFrontCamera == isFrontCamera));
+                other.isFrontCamera == isFrontCamera) &&
+            (identical(other.isLoading, isLoading) ||
+                other.isLoading == isLoading) &&
+            (identical(other.permissionGranted, permissionGranted) ||
+                other.permissionGranted == permissionGranted));
   }
 
   @override
@@ -48,11 +54,13 @@ mixin _$MediaScreenState {
       const DeepCollectionEquality().hash(pickedImageBytes),
       isCameraAvailable,
       cameraController,
-      isFrontCamera);
+      isFrontCamera,
+      isLoading,
+      permissionGranted);
 
   @override
   String toString() {
-    return 'MediaScreenState(pickedImageBytes: $pickedImageBytes, isCameraAvailable: $isCameraAvailable, cameraController: $cameraController, isFrontCamera: $isFrontCamera)';
+    return 'MediaScreenState(pickedImageBytes: $pickedImageBytes, isCameraAvailable: $isCameraAvailable, cameraController: $cameraController, isFrontCamera: $isFrontCamera, isLoading: $isLoading, permissionGranted: $permissionGranted)';
   }
 }
 
@@ -66,7 +74,9 @@ abstract mixin class $MediaScreenStateCopyWith<$Res> {
       {Uint8List? pickedImageBytes,
       bool isCameraAvailable,
       CameraController? cameraController,
-      bool isFrontCamera});
+      bool isFrontCamera,
+      bool isLoading,
+      bool permissionGranted});
 }
 
 /// @nodoc
@@ -86,6 +96,8 @@ class _$MediaScreenStateCopyWithImpl<$Res>
     Object? isCameraAvailable = null,
     Object? cameraController = freezed,
     Object? isFrontCamera = null,
+    Object? isLoading = null,
+    Object? permissionGranted = null,
   }) {
     return _then(_self.copyWith(
       pickedImageBytes: freezed == pickedImageBytes
@@ -103,6 +115,14 @@ class _$MediaScreenStateCopyWithImpl<$Res>
       isFrontCamera: null == isFrontCamera
           ? _self.isFrontCamera
           : isFrontCamera // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isLoading: null == isLoading
+          ? _self.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      permissionGranted: null == permissionGranted
+          ? _self.permissionGranted
+          : permissionGranted // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }
@@ -201,16 +221,26 @@ extension MediaScreenStatePatterns on MediaScreenState {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(Uint8List? pickedImageBytes, bool isCameraAvailable,
-            CameraController? cameraController, bool isFrontCamera)?
+    TResult Function(
+            Uint8List? pickedImageBytes,
+            bool isCameraAvailable,
+            CameraController? cameraController,
+            bool isFrontCamera,
+            bool isLoading,
+            bool permissionGranted)?
         $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _MediaScreenState() when $default != null:
-        return $default(_that.pickedImageBytes, _that.isCameraAvailable,
-            _that.cameraController, _that.isFrontCamera);
+        return $default(
+            _that.pickedImageBytes,
+            _that.isCameraAvailable,
+            _that.cameraController,
+            _that.isFrontCamera,
+            _that.isLoading,
+            _that.permissionGranted);
       case _:
         return orElse();
     }
@@ -231,15 +261,25 @@ extension MediaScreenStatePatterns on MediaScreenState {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(Uint8List? pickedImageBytes, bool isCameraAvailable,
-            CameraController? cameraController, bool isFrontCamera)
+    TResult Function(
+            Uint8List? pickedImageBytes,
+            bool isCameraAvailable,
+            CameraController? cameraController,
+            bool isFrontCamera,
+            bool isLoading,
+            bool permissionGranted)
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MediaScreenState():
-        return $default(_that.pickedImageBytes, _that.isCameraAvailable,
-            _that.cameraController, _that.isFrontCamera);
+        return $default(
+            _that.pickedImageBytes,
+            _that.isCameraAvailable,
+            _that.cameraController,
+            _that.isFrontCamera,
+            _that.isLoading,
+            _that.permissionGranted);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -259,15 +299,25 @@ extension MediaScreenStatePatterns on MediaScreenState {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(Uint8List? pickedImageBytes, bool isCameraAvailable,
-            CameraController? cameraController, bool isFrontCamera)?
+    TResult? Function(
+            Uint8List? pickedImageBytes,
+            bool isCameraAvailable,
+            CameraController? cameraController,
+            bool isFrontCamera,
+            bool isLoading,
+            bool permissionGranted)?
         $default,
   ) {
     final _that = this;
     switch (_that) {
       case _MediaScreenState() when $default != null:
-        return $default(_that.pickedImageBytes, _that.isCameraAvailable,
-            _that.cameraController, _that.isFrontCamera);
+        return $default(
+            _that.pickedImageBytes,
+            _that.isCameraAvailable,
+            _that.cameraController,
+            _that.isFrontCamera,
+            _that.isLoading,
+            _that.permissionGranted);
       case _:
         return null;
     }
@@ -281,7 +331,9 @@ class _MediaScreenState extends MediaScreenState {
       {this.pickedImageBytes,
       this.isCameraAvailable = false,
       this.cameraController,
-      this.isFrontCamera = false})
+      this.isFrontCamera = false,
+      this.isLoading = false,
+      this.permissionGranted = true})
       : super._();
 
   @override
@@ -294,6 +346,12 @@ class _MediaScreenState extends MediaScreenState {
   @override
   @JsonKey()
   final bool isFrontCamera;
+  @override
+  @JsonKey()
+  final bool isLoading;
+  @override
+  @JsonKey()
+  final bool permissionGranted;
 
   /// Create a copy of MediaScreenState
   /// with the given fields replaced by the non-null parameter values.
@@ -315,7 +373,11 @@ class _MediaScreenState extends MediaScreenState {
             (identical(other.cameraController, cameraController) ||
                 other.cameraController == cameraController) &&
             (identical(other.isFrontCamera, isFrontCamera) ||
-                other.isFrontCamera == isFrontCamera));
+                other.isFrontCamera == isFrontCamera) &&
+            (identical(other.isLoading, isLoading) ||
+                other.isLoading == isLoading) &&
+            (identical(other.permissionGranted, permissionGranted) ||
+                other.permissionGranted == permissionGranted));
   }
 
   @override
@@ -324,11 +386,13 @@ class _MediaScreenState extends MediaScreenState {
       const DeepCollectionEquality().hash(pickedImageBytes),
       isCameraAvailable,
       cameraController,
-      isFrontCamera);
+      isFrontCamera,
+      isLoading,
+      permissionGranted);
 
   @override
   String toString() {
-    return 'MediaScreenState(pickedImageBytes: $pickedImageBytes, isCameraAvailable: $isCameraAvailable, cameraController: $cameraController, isFrontCamera: $isFrontCamera)';
+    return 'MediaScreenState(pickedImageBytes: $pickedImageBytes, isCameraAvailable: $isCameraAvailable, cameraController: $cameraController, isFrontCamera: $isFrontCamera, isLoading: $isLoading, permissionGranted: $permissionGranted)';
   }
 }
 
@@ -344,7 +408,9 @@ abstract mixin class _$MediaScreenStateCopyWith<$Res>
       {Uint8List? pickedImageBytes,
       bool isCameraAvailable,
       CameraController? cameraController,
-      bool isFrontCamera});
+      bool isFrontCamera,
+      bool isLoading,
+      bool permissionGranted});
 }
 
 /// @nodoc
@@ -364,6 +430,8 @@ class __$MediaScreenStateCopyWithImpl<$Res>
     Object? isCameraAvailable = null,
     Object? cameraController = freezed,
     Object? isFrontCamera = null,
+    Object? isLoading = null,
+    Object? permissionGranted = null,
   }) {
     return _then(_MediaScreenState(
       pickedImageBytes: freezed == pickedImageBytes
@@ -381,6 +449,14 @@ class __$MediaScreenStateCopyWithImpl<$Res>
       isFrontCamera: null == isFrontCamera
           ? _self.isFrontCamera
           : isFrontCamera // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isLoading: null == isLoading
+          ? _self.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      permissionGranted: null == permissionGranted
+          ? _self.permissionGranted
+          : permissionGranted // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }

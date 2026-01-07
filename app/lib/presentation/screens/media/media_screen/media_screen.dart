@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
@@ -10,6 +8,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../navigation/navigator.dart' hide Navigator;
+import '../../../widgets/camera_permission_instruction.dart';
 import '../../../widgets/images/compressed_image.dart';
 import '../media_review_screen/media_review_screen.dart';
 import 'media_screen_controller.dart';
@@ -112,12 +111,30 @@ class MediaScreen extends HookConsumerWidget {
     return Scaffold(
       body: Builder(
         builder: (context) {
-          final isCameraReady = state.isCameraAvailable &&
-              state.cameraController != null &&
-              state.cameraController!.value.isInitialized;
+          // Show loading indicator while initializing camera
+          if (state.isLoading || !useCamera) {
+            return const Center(child: CircularProgressIndicator.adaptive());
+          }
 
-          if (!useCamera || !isCameraReady) {
-            return const Center(child: CircularProgressIndicator());
+          if (!state.permissionGranted && !state.isLoading) {
+            final controller = ref.read(
+              mediaScreenControllerProvider(
+                cameraLensDirection: cameraLensDirection,
+                useCamera: true,
+              ).notifier,
+            );
+            return CameraPermissionInstruction(
+              onOpenSettings: controller.openSettings,
+              onRetry: () => controller.retryInitCamera(cameraLensDirection),
+              onCancel: () {
+                navigator.pop(MediaReviewResult.empty());
+                Future(controller.closeCamera);
+              },
+            );
+          }
+
+          if (state.cameraController == null || !state.isCameraAvailable) {
+            return const Center(child: CircularProgressIndicator.adaptive());
           }
 
           final camController = state.cameraController!;
@@ -143,7 +160,9 @@ class MediaScreen extends HookConsumerWidget {
           );
         },
       ),
-      floatingActionButton: useCamera && state.isCameraAvailable
+      floatingActionButton: useCamera &&
+              state.isCameraAvailable &&
+              state.cameraController != null
           ? Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -190,9 +209,9 @@ class MediaScreen extends HookConsumerWidget {
                 FloatingActionButton(
                   heroTag: 4,
                   backgroundColor: Colors.red,
-                  onPressed: () async {
-                    await controller.closeCamera();
+                  onPressed: () {
                     navigator.pop(MediaReviewResult.empty());
+                    Future(controller.closeCamera);
                   },
                   child:
                       const Icon(Icons.cancel, size: 50, color: Colors.white),

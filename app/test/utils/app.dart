@@ -24,8 +24,10 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
 import 'package:mpx_flutter_reference_app/mpx_flutter_reference_app.dart';
 import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../fakes/fake_app_badge_service.dart';
 import '../fakes/fake_cache_manager.dart';
@@ -35,6 +37,7 @@ import '../fakes/fake_connectivity.dart';
 import '../fakes/fake_environment.dart';
 import '../fakes/fake_local_authentication.dart';
 import '../fakes/fake_meeting_place_sdk.dart';
+import '../fakes/fake_permission_service.dart';
 import '../fakes/fake_push_notification_messaging.dart';
 import '../fakes/fake_secure_storage.dart';
 
@@ -51,6 +54,7 @@ Future<void> startApp(
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
+  PermissionStatus? cameraPermissionStatus,
   required List<Identity> identities,
   required List<Mediator> mediators,
   List<Contact> contacts = const [],
@@ -151,6 +155,12 @@ Future<void> startApp(
               ),
         ),
       ],
+      if (cameraPermissionStatus != null)
+        permissionServiceProvider.overrideWith(
+          (ref) => FakePermissionService(
+            cameraPermissionStatus: cameraPermissionStatus,
+          ),
+        ),
       secureStorageProvider
           .overrideWith((ref) async => secureStorage ?? FakeSecureStorage()),
       sharedPreferencesProvider.overrideWithValue(sharedPreferences),
@@ -178,6 +188,7 @@ Future<void> navigateToLocation(
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
+  PermissionStatus? cameraPermissionStatus,
   SecureStorage? secureStorage,
 }) async {
   await startApp(
@@ -191,6 +202,7 @@ Future<void> navigateToLocation(
     meetingPlaceChatSDK: meetingPlaceChatSDK,
     imagePicker: imagePicker,
     mockCameras: mockCameras,
+    cameraPermissionStatus: cameraPermissionStatus,
     secureStorage: secureStorage,
     mediators: mediators,
     contacts: contacts,
