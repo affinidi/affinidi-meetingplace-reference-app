@@ -147,17 +147,16 @@ Future<void> startApp(
         imagePickerProvider.overrideWith((ref) => imagePicker),
       if (mockCameras != null) ...[
         availableCamerasProvider.overrideWith(
-          (ref) =>
-              () async => mockCameras,
+          (ref) => () async => mockCameras,
         ),
         cameraControllerFactoryProvider.overrideWith(
-          (ref) =>
-              (
-                description,
-                resolutionPreset, {
-                enableAudio = true,
-                imageFormatGroup,
-              }) => FakeCameraController(
+          (ref) => (
+            description,
+            resolutionPreset, {
+            enableAudio = true,
+            imageFormatGroup,
+          }) =>
+              FakeCameraController(
                 description,
                 resolutionPreset,
                 enableAudio: enableAudio,
