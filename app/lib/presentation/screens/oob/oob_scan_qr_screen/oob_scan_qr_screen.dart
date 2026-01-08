@@ -12,12 +12,14 @@ class OOBScanQrScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = oobScanQrControllerProvider;
     final controller = ref.read(oobScanQrControllerProvider.notifier);
-    final state = ref.watch(provider);
+    final isProcessing = ref.watch(
+      oobScanQrControllerProvider.select((state) => state.isProcessing),
+    );
     final l10n = context.l10n;
 
     return Scaffold(
+      key: const Key('oob_scan_qr_screen_scaffold'),
       body: SafeArea(
         child: Column(
           children: [
@@ -26,11 +28,11 @@ class OOBScanQrScreen extends ConsumerWidget {
               loadingMessage: l10n.processing,
             ),
             Expanded(
-              child: !state.isProcessing
+              child: !isProcessing
                   ? QrCodePicker(
                       popOnDetect: false,
                       onDetectCode: (code) async {
-                        if (state.isProcessing) return;
+                        if (isProcessing) return;
                         await controller.processScannedQRCode(code);
                       },
                     )

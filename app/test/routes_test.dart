@@ -1,9 +1,13 @@
+import 'package:camera/camera.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/navigation/routes/route_paths.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/authentication/authentication_screen/authentication_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/onboarding/onboarding_screen/onboarding_screen.dart';
 
 import 'fakes/fake_chat_sdk.dart';
+import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
@@ -314,6 +318,66 @@ void main() {
 
         expect(meetingPlaceChatSDK.startChatSessionCallCount, 1);
       });
+    });
+  });
+
+  group('When opening the app on OOB share QR screen', () {
+    final isAuthenticated = true;
+    final alreadyOnboarded = true;
+    final location = '/connections/${RoutePaths.oobShareQr}';
+
+    testWidgets('it shows the OOB share QR screen with loading state',
+        (tester) async {
+      final connectivity = FakeConnectivity(
+        initialConnectivityToReturn: [ConnectivityResult.wifi],
+      );
+
+      await navigateToLocation(
+        tester,
+        location,
+        isAuthenticated: isAuthenticated,
+        alreadyOnboarded: alreadyOnboarded,
+        identities: [FakeIdentities.primaryIdentity],
+        connectivity: connectivity,
+      );
+
+      await tester.pumpAndSettle();
+
+      final l10n = await getL10n();
+
+      final textWidgets = find.byType(Text);
+      for (final element in textWidgets.evaluate()) {
+        final widget = element.widget as Text;
+        final textData = widget.data ?? widget.textSpan?.toPlainText();
+        debugPrint('Text: "$textData"');
+      }
+
+      expect(find.text(l10n.oobQrPresentInvitationMessage), findsOneWidget);
+    });
+  });
+
+  group('When navigating to OOB Scan QR screen', () {
+    testWidgets('should display the QR scanner screen', (tester) async {
+      final location = '/connections/${RoutePaths.oobScanQr}';
+      await navigateToLocation(
+        tester,
+        location,
+        identities: [FakeIdentities.primaryIdentity],
+        mockCameras: [
+          const CameraDescription(
+            name: 'fake_camera',
+            lensDirection: CameraLensDirection.back,
+            sensorOrientation: 0,
+          ),
+        ],
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('oob_scan_qr_screen_scaffold')),
+        findsOneWidget,
+      );
     });
   });
 }

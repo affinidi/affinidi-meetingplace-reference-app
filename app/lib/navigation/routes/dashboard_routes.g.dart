@@ -82,7 +82,7 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
                   factory: _$OOBShareQrRoute._fromState,
                 ),
                 GoRouteData.$route(
-                  path: 'oob-scann-qr',
+                  path: 'oob-scan-qr',
                   name: 'qrScanner',
                   parentNavigatorKey: OOBScanQrRoute.$parentNavigatorKey,
                   factory: _$OOBScanQrRoute._fromState,
@@ -373,7 +373,7 @@ mixin _$OOBScanQrRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location(
-        '/connections/oob-scann-qr',
+        '/connections/oob-scan-qr',
       );
 
   @override

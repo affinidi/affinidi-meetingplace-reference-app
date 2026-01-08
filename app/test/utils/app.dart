@@ -22,9 +22,12 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/applications_
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/qr_code_view_factory_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/share_service_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/services/share_plus_service/share_plus_service.dart';
 import 'package:mpx_flutter_reference_app/mpx_flutter_reference_app.dart';
 import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -59,6 +62,8 @@ Future<void> startApp(
   required List<Mediator> mediators,
   List<Contact> contacts = const [],
   SecureStorage? secureStorage,
+  ShareService? shareService,
+  QrCodeViewFactory? qrCodeViewFactory,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.setMockInitialValues({
@@ -75,13 +80,12 @@ Future<void> startApp(
         (ref) =>
             AppInfo(versionName: 'Test', buildNumber: '1', version: '0.0.0'),
       ),
-      applicationDocumentsDirectoryProvider
-          .overrideWith((ref) async => Directory('/tmp')),
+      applicationDocumentsDirectoryProvider.overrideWith(
+        (ref) async => Directory('/tmp'),
+      ),
       availableAttachmentPluginsProvider.overrideWith(
         (ref) => [
-          CameraAttachmentsPlugin(
-            cacheManager: ref.read(cacheManagerProvider),
-          ),
+          CameraAttachmentsPlugin(cacheManager: ref.read(cacheManagerProvider)),
           GalleryAttachmentsPlugin(
             cacheManager: ref.read(cacheManagerProvider),
           ),
@@ -93,10 +97,12 @@ Future<void> startApp(
       chatRepositoryProvider.overrideWith(chatRepositoryInMemoryDrift),
       environmentProvider.overrideWithValue(FakeEnvironment()),
       channelRepositoryProvider.overrideWith(channelRepositoryInMemoryDrift),
-      connectionOfferRepositoryProvider
-          .overrideWith(connectionOfferRepositoryInMemoryDrift),
-      connectivityProvider
-          .overrideWith((ref) => connectivity ?? FakeConnectivity()),
+      connectionOfferRepositoryProvider.overrideWith(
+        connectionOfferRepositoryInMemoryDrift,
+      ),
+      connectivityProvider.overrideWith(
+        (ref) => connectivity ?? FakeConnectivity(),
+      ),
       contactsRepositoryProvider.overrideWith((ref) async {
         final repo = await contactsRepositoryInMemoryDrift(ref);
         for (final contact in contacts) {
@@ -134,12 +140,15 @@ Future<void> startApp(
             ),
       ),
       if (meetingPlaceChatSDK != null)
-        chatSdkProvider
-            .overrideWith((ref, channel) async => meetingPlaceChatSDK),
+        chatSdkProvider.overrideWith(
+          (ref, channel) async => meetingPlaceChatSDK,
+        ),
       if (imagePicker != null)
         imagePickerProvider.overrideWith((ref) => imagePicker),
       if (mockCameras != null) ...[
-        availableCamerasProvider.overrideWith((ref) => () async => mockCameras),
+        availableCamerasProvider.overrideWith(
+          (ref) => () async => mockCameras,
+        ),
         cameraControllerFactoryProvider.overrideWith(
           (ref) => (
             description,
@@ -161,9 +170,14 @@ Future<void> startApp(
             cameraPermissionStatus: cameraPermissionStatus,
           ),
         ),
-      secureStorageProvider
-          .overrideWith((ref) async => secureStorage ?? FakeSecureStorage()),
+      secureStorageProvider.overrideWith(
+        (ref) async => secureStorage ?? FakeSecureStorage(),
+      ),
       sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+      if (shareService != null)
+        shareServiceProvider.overrideWith((ref) => shareService),
+      if (qrCodeViewFactory != null)
+        qrCodeViewFactoryProvider.overrideWith((ref) => qrCodeViewFactory),
     ],
     child: MediaQuery(
       data: data,
@@ -188,8 +202,10 @@ Future<void> navigateToLocation(
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
-  PermissionStatus? cameraPermissionStatus,
+  PermissionStatus? cameraPermissionStatus = PermissionStatus.granted,
   SecureStorage? secureStorage,
+  ShareService? shareService,
+  QrCodeViewFactory? qrCodeViewFactory,
 }) async {
   await startApp(
     tester,
@@ -206,13 +222,13 @@ Future<void> navigateToLocation(
     secureStorage: secureStorage,
     mediators: mediators,
     contacts: contacts,
+    shareService: shareService,
+    qrCodeViewFactory: qrCodeViewFactory,
   );
 
   await tester.pumpAndSettle();
 
-  final testRouteInformation = <String, dynamic>{
-    'location': location,
-  };
+  final testRouteInformation = <String, dynamic>{'location': location};
   final message = const JSONMethodCodec().encodeMethodCall(
     MethodCall('pushRouteInformation', testRouteInformation),
   );
