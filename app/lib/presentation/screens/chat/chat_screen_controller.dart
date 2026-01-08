@@ -538,13 +538,6 @@ class ChatScreenController extends _$ChatScreenController {
               : ContactPresenceStatus.offline,
         );
       },
-      onCancel: () {
-        Future.microtask(() {
-          state = state.copyWith(
-            contactPresenceStatus: ContactPresenceStatus.offline,
-          );
-        });
-      },
       onComplete: () {
         Future.microtask(() {
           state = state.copyWith(
