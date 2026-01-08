@@ -50,6 +50,8 @@ class ChatScreenController extends _$ChatScreenController {
       ref.read(environmentProvider).chatPresenceIntervalInSeconds;
   // Maximum typing indicators to prevent UI overflow on small screens
   static const int _maxNumberOfTypingMembersVisible = 4;
+  // Grace period to avoid blinking of presence indicator
+  static const int _presenceIndicatorGracePeriodSeconds = 1;
   static const _logKey = 'UXCHAT';
 
   late final messageTextController = TextEditingController();
@@ -538,13 +540,6 @@ class ChatScreenController extends _$ChatScreenController {
               : ContactPresenceStatus.offline,
         );
       },
-      onCancel: () {
-        Future.microtask(() {
-          state = state.copyWith(
-            contactPresenceStatus: ContactPresenceStatus.offline,
-          );
-        });
-      },
       onComplete: () {
         Future.microtask(() {
           state = state.copyWith(
@@ -552,8 +547,12 @@ class ChatScreenController extends _$ChatScreenController {
           );
         });
       },
-      duration: Duration(seconds: chatPresenceIntervalInSeconds),
+      duration: Duration(
+        seconds: chatPresenceIntervalInSeconds +
+            _presenceIndicatorGracePeriodSeconds,
+      ),
     );
+
     _updateContactPresenceStatusTimedAction?.start(args: [datePresence]);
   }
 

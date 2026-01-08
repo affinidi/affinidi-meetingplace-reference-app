@@ -48,6 +48,8 @@ final chatSdkProvider =
               Duration(seconds: environment.chatActivityExpiresInSeconds),
           chatPresenceSendInterval:
               Duration(seconds: environment.chatPresenceIntervalInSeconds),
+          chatPresenceExpiry:
+              Duration(seconds: environment.chatPresenceIntervalInSeconds),
         ),
         card: sdkContactCard,
         logger: logger,
