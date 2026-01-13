@@ -155,6 +155,20 @@ class MediaScreenController extends _$MediaScreenController {
           'Camera not ready - permission denied or unavailable',
           name: _logKey,
         );
+        // If on iOS Simulator (permission granted but camera unavailable),
+        // switch to picking from photo gallery as camera is not supported.
+        final camState = ref.read(cameraServiceProvider);
+        final isIosPlatform = defaultTargetPlatform == TargetPlatform.iOS;
+        final permissionGranted = camState.permissionGranted == true;
+        final cameraUnavailable = camState.isAvailable == false;
+
+        if (isIosPlatform && permissionGranted && cameraUnavailable) {
+          unawaited(
+            pickFromGallery(
+              useChatSemantics: false,
+            ),
+          );
+        }
         state = state.copyWith(
           isCameraAvailable: false,
           isLoading: false,
