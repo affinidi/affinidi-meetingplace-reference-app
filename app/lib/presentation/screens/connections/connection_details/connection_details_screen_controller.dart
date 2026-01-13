@@ -16,6 +16,7 @@ import '../../../../domain/models/contacts/contact.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../navigation/navigator.dart';
@@ -268,9 +269,7 @@ extension ConnectionDetailsScreenControllerProviderSelector
           return state.connection?.offerName ?? '';
         }
 
-        return state.channel?.otherPartyContactCard?.contactInfo['firstName']
-                as String? ??
-            '';
+        return state.channel?.otherPartyContactCard?.firstName ?? '';
       });
 
   ProviderListenable<ContactCard?> get groupAdminCard => select((state) {
