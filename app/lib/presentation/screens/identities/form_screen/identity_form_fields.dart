@@ -10,7 +10,6 @@ import '../../../validators/input_validators.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
 import '../../../widgets/profile_picture.dart';
-
 import '../../media/media_screen/media_screen.dart';
 import 'identity_form_screen_controller.dart';
 
@@ -148,14 +147,23 @@ class IdentityFormFields extends ConsumerWidget {
               color: context.customColors.warning,
               controller: controller.emailController,
               placeholder: context.l10n.enterEmail,
+              focusNode: controller.emailFocusNode,
               singleLine: true,
               keyboardType: TextInputType.emailAddress,
               onChanged: (value) {
                 controller.updateEmail(value, formKey);
-                controller.validateForm(formKey);
+                controller.handleFieldChange('email', formKey);
               },
-              validator:
-                  InputValidators.getValidator(context, InputType.email).call,
+              onFieldSubmitted: (_) {
+                controller.updateErrorVisibilityOnBlur('email', formKey);
+              },
+              validator: (value) {
+                if (!controller.shouldShowValidation('email')) {
+                  return null;
+                }
+                return InputValidators.getValidator(context, InputType.email)
+                    .call(value);
+              },
               textInputAction: TextInputAction.next,
               traversalOrder: 3.0,
             ),
@@ -168,14 +176,6 @@ class IdentityFormFields extends ConsumerWidget {
               placeholder: context.l10n.enterMobile,
               singleLine: true,
               keyboardType: TextInputType.phone,
-              onChanged: (value) {
-                controller.updateMobile(value, formKey);
-                controller.validateForm(formKey);
-              },
-              validator:
-                  InputValidators.getValidator(context, InputType.phone).call,
-              textInputAction: TextInputAction.next,
-              traversalOrder: 4.0,
             ),
           ],
         ),

@@ -23,8 +23,22 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   late final mobileController = TextEditingController();
   late final aliasController = TextEditingController();
 
+  late final emailFocusNode = FocusNode();
+
+  GlobalKey<FormState>? _formKey;
+
+  void initializeFocusListeners(GlobalKey<FormState> formKey) {
+    _formKey = formKey;
+  }
+
   @override
   IdentityFormScreenState build(String? identityId) {
+    emailFocusNode.addListener(() {
+      if (!emailFocusNode.hasFocus && _formKey != null) {
+        updateErrorVisibilityOnBlur('email', _formKey!);
+      }
+    });
+
     ref.onDispose(() {
       scrollController.dispose();
       displayNameController.dispose();
@@ -32,6 +46,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       emailController.dispose();
       mobileController.dispose();
       aliasController.dispose();
+      emailFocusNode.dispose();
     });
 
     final identity = _loadIdentity(identityId);
@@ -104,8 +119,71 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void validateForm(GlobalKey<FormState> formKey) {
-    final isValid = formKey.currentState?.validate() ?? false;
-    state = state.copyWith(canSave: isValid);
+    // Compute save eligibility without triggering UI validation
+    final ctx = formKey.currentContext!;
+    final emailError = InputValidators.getValidator(ctx, InputType.email)
+        .call(emailController.text);
+
+    final isValidForSave = emailError == null;
+
+    state = state.copyWith(canSave: isValidForSave);
+  }
+
+  bool shouldShowValidation(String fieldName) {
+    return state.showingErrorFields.contains(fieldName);
+  }
+
+  void _setErrorVisibility(String fieldName, bool visible) {
+    final current = {...state.showingErrorFields};
+    if (visible) {
+      current.add(fieldName);
+    } else {
+      current.remove(fieldName);
+    }
+    state = state.copyWith(showingErrorFields: current);
+  }
+
+  InputType _typeFor(String fieldName) {
+    switch (fieldName) {
+      case 'email':
+        return InputType.email;
+      default:
+        return InputType.alias;
+    }
+  }
+
+  String _textFor(String fieldName) {
+    switch (fieldName) {
+      case 'email':
+        return emailController.text;
+      default:
+        return '';
+    }
+  }
+
+  void updateErrorVisibilityOnBlur(
+    String fieldName,
+    GlobalKey<FormState> formKey,
+  ) {
+    final ctx = formKey.currentContext!;
+    final validator = InputValidators.getValidator(ctx, _typeFor(fieldName));
+    final error = validator.call(_textFor(fieldName));
+    _setErrorVisibility(fieldName, error != null);
+    formKey.currentState?.validate();
+    validateForm(formKey);
+  }
+
+  void handleFieldChange(String fieldName, GlobalKey<FormState> formKey) {
+    if (state.showingErrorFields.contains(fieldName)) {
+      final ctx = formKey.currentContext!;
+      final validator = InputValidators.getValidator(ctx, _typeFor(fieldName));
+      final error = validator.call(_textFor(fieldName));
+      if (error == null) {
+        _setErrorVisibility(fieldName, false);
+        formKey.currentState?.validate();
+      }
+    }
+    validateForm(formKey);
   }
 
   void updateFirstName(String firstName, GlobalKey<FormState> formKey) {

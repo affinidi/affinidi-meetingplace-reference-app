@@ -11,6 +11,7 @@ class _IdentityFormSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = identityFormScreenControllerProvider(identityId);
     final controller = ref.read(provider.notifier);
+    controller.initializeFocusListeners(editIdentityScreenFormKey);
 
     return IdentityFormFields(
       identityId,
