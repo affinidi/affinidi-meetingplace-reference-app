@@ -14,8 +14,15 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
     final canDelete = ref.watch(provider.select((state) => state.canDelete));
 
     Future<void> handleSave() async {
+      controller.updateErrorVisibilityOnBlur(
+        'email',
+        editIdentityScreenFormKey,
+      );
+
       final isValid =
           editIdentityScreenFormKey.currentState?.validate() ?? false;
+      controller.validateForm(editIdentityScreenFormKey);
+
       if (!isValid) {
         return;
       }

@@ -14,5 +14,6 @@ abstract class IdentityFormScreenState with _$IdentityFormScreenState {
     @Default(false) bool hasSaved,
     @Default(false) bool hasDeleted,
     @Default(true) bool isAliasMirroringFirstName,
+    @Default({}) Set<String> showingErrorFields,
   }) = _IdentityFormScreenState;
 }

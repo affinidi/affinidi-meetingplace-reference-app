@@ -12,12 +12,18 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = identityFormScreenControllerProvider(identityId);
     final controller = ref.read(provider.notifier);
+    controller.initializeFocusListeners(formKey);
     final hasEnteredAnyInfo =
         ref.watch(provider.select((s) => s.hasEnteredAnyInfo));
+    final canSave = ref.watch(provider.select((s) => s.canSave));
     final l10n = context.l10n;
 
     Future<void> handleSave() async {
+      controller.updateErrorVisibilityOnBlur('email', formKey);
+
       final isValid = formKey.currentState?.validate() ?? false;
+      controller.validateForm(formKey);
+
       if (!isValid) return;
 
       final success = await controller.saveIdentity(
@@ -56,7 +62,7 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
             ),
           ),
           ElevatedLoadingButton(
-            onPressed: handleSave,
+            onPressed: canSave ? handleSave : null,
             child: Text(
               hasEnteredAnyInfo
                   ? l10n.primaryIdentityComplete

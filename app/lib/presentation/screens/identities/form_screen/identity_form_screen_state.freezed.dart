@@ -21,6 +21,7 @@ mixin _$IdentityFormScreenState {
   bool get hasSaved;
   bool get hasDeleted;
   bool get isAliasMirroringFirstName;
+  Set<String> get showingErrorFields;
 
   /// Create a copy of IdentityFormScreenState
   /// with the given fields replaced by the non-null parameter values.
@@ -48,16 +49,26 @@ mixin _$IdentityFormScreenState {
                 other.hasDeleted == hasDeleted) &&
             (identical(other.isAliasMirroringFirstName,
                     isAliasMirroringFirstName) ||
-                other.isAliasMirroringFirstName == isAliasMirroringFirstName));
+                other.isAliasMirroringFirstName == isAliasMirroringFirstName) &&
+            const DeepCollectionEquality()
+                .equals(other.showingErrorFields, showingErrorFields));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, identity, canSave, canDelete,
-      hasEnteredAnyInfo, hasSaved, hasDeleted, isAliasMirroringFirstName);
+  int get hashCode => Object.hash(
+      runtimeType,
+      identity,
+      canSave,
+      canDelete,
+      hasEnteredAnyInfo,
+      hasSaved,
+      hasDeleted,
+      isAliasMirroringFirstName,
+      const DeepCollectionEquality().hash(showingErrorFields));
 
   @override
   String toString() {
-    return 'IdentityFormScreenState(identity: $identity, canSave: $canSave, canDelete: $canDelete, hasEnteredAnyInfo: $hasEnteredAnyInfo, hasSaved: $hasSaved, hasDeleted: $hasDeleted, isAliasMirroringFirstName: $isAliasMirroringFirstName)';
+    return 'IdentityFormScreenState(identity: $identity, canSave: $canSave, canDelete: $canDelete, hasEnteredAnyInfo: $hasEnteredAnyInfo, hasSaved: $hasSaved, hasDeleted: $hasDeleted, isAliasMirroringFirstName: $isAliasMirroringFirstName, showingErrorFields: $showingErrorFields)';
   }
 }
 
@@ -74,7 +85,8 @@ abstract mixin class $IdentityFormScreenStateCopyWith<$Res> {
       bool hasEnteredAnyInfo,
       bool hasSaved,
       bool hasDeleted,
-      bool isAliasMirroringFirstName});
+      bool isAliasMirroringFirstName,
+      Set<String> showingErrorFields});
 
   $IdentityCopyWith<$Res> get identity;
 }
@@ -99,6 +111,7 @@ class _$IdentityFormScreenStateCopyWithImpl<$Res>
     Object? hasSaved = null,
     Object? hasDeleted = null,
     Object? isAliasMirroringFirstName = null,
+    Object? showingErrorFields = null,
   }) {
     return _then(_self.copyWith(
       identity: null == identity
@@ -129,6 +142,10 @@ class _$IdentityFormScreenStateCopyWithImpl<$Res>
           ? _self.isAliasMirroringFirstName
           : isAliasMirroringFirstName // ignore: cast_nullable_to_non_nullable
               as bool,
+      showingErrorFields: null == showingErrorFields
+          ? _self.showingErrorFields
+          : showingErrorFields // ignore: cast_nullable_to_non_nullable
+              as Set<String>,
     ));
   }
 
@@ -243,7 +260,8 @@ extension IdentityFormScreenStatePatterns on IdentityFormScreenState {
             bool hasEnteredAnyInfo,
             bool hasSaved,
             bool hasDeleted,
-            bool isAliasMirroringFirstName)?
+            bool isAliasMirroringFirstName,
+            Set<String> showingErrorFields)?
         $default, {
     required TResult orElse(),
   }) {
@@ -257,7 +275,8 @@ extension IdentityFormScreenStatePatterns on IdentityFormScreenState {
             _that.hasEnteredAnyInfo,
             _that.hasSaved,
             _that.hasDeleted,
-            _that.isAliasMirroringFirstName);
+            _that.isAliasMirroringFirstName,
+            _that.showingErrorFields);
       case _:
         return orElse();
     }
@@ -285,7 +304,8 @@ extension IdentityFormScreenStatePatterns on IdentityFormScreenState {
             bool hasEnteredAnyInfo,
             bool hasSaved,
             bool hasDeleted,
-            bool isAliasMirroringFirstName)
+            bool isAliasMirroringFirstName,
+            Set<String> showingErrorFields)
         $default,
   ) {
     final _that = this;
@@ -298,7 +318,8 @@ extension IdentityFormScreenStatePatterns on IdentityFormScreenState {
             _that.hasEnteredAnyInfo,
             _that.hasSaved,
             _that.hasDeleted,
-            _that.isAliasMirroringFirstName);
+            _that.isAliasMirroringFirstName,
+            _that.showingErrorFields);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -325,7 +346,8 @@ extension IdentityFormScreenStatePatterns on IdentityFormScreenState {
             bool hasEnteredAnyInfo,
             bool hasSaved,
             bool hasDeleted,
-            bool isAliasMirroringFirstName)?
+            bool isAliasMirroringFirstName,
+            Set<String> showingErrorFields)?
         $default,
   ) {
     final _that = this;
@@ -338,7 +360,8 @@ extension IdentityFormScreenStatePatterns on IdentityFormScreenState {
             _that.hasEnteredAnyInfo,
             _that.hasSaved,
             _that.hasDeleted,
-            _that.isAliasMirroringFirstName);
+            _that.isAliasMirroringFirstName,
+            _that.showingErrorFields);
       case _:
         return null;
     }
@@ -355,7 +378,9 @@ class _IdentityFormScreenState implements IdentityFormScreenState {
       this.hasEnteredAnyInfo = false,
       this.hasSaved = false,
       this.hasDeleted = false,
-      this.isAliasMirroringFirstName = true});
+      this.isAliasMirroringFirstName = true,
+      final Set<String> showingErrorFields = const {}})
+      : _showingErrorFields = showingErrorFields;
 
   @override
   final Identity identity;
@@ -377,6 +402,15 @@ class _IdentityFormScreenState implements IdentityFormScreenState {
   @override
   @JsonKey()
   final bool isAliasMirroringFirstName;
+  final Set<String> _showingErrorFields;
+  @override
+  @JsonKey()
+  Set<String> get showingErrorFields {
+    if (_showingErrorFields is EqualUnmodifiableSetView)
+      return _showingErrorFields;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableSetView(_showingErrorFields);
+  }
 
   /// Create a copy of IdentityFormScreenState
   /// with the given fields replaced by the non-null parameter values.
@@ -405,16 +439,26 @@ class _IdentityFormScreenState implements IdentityFormScreenState {
                 other.hasDeleted == hasDeleted) &&
             (identical(other.isAliasMirroringFirstName,
                     isAliasMirroringFirstName) ||
-                other.isAliasMirroringFirstName == isAliasMirroringFirstName));
+                other.isAliasMirroringFirstName == isAliasMirroringFirstName) &&
+            const DeepCollectionEquality()
+                .equals(other._showingErrorFields, _showingErrorFields));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, identity, canSave, canDelete,
-      hasEnteredAnyInfo, hasSaved, hasDeleted, isAliasMirroringFirstName);
+  int get hashCode => Object.hash(
+      runtimeType,
+      identity,
+      canSave,
+      canDelete,
+      hasEnteredAnyInfo,
+      hasSaved,
+      hasDeleted,
+      isAliasMirroringFirstName,
+      const DeepCollectionEquality().hash(_showingErrorFields));
 
   @override
   String toString() {
-    return 'IdentityFormScreenState(identity: $identity, canSave: $canSave, canDelete: $canDelete, hasEnteredAnyInfo: $hasEnteredAnyInfo, hasSaved: $hasSaved, hasDeleted: $hasDeleted, isAliasMirroringFirstName: $isAliasMirroringFirstName)';
+    return 'IdentityFormScreenState(identity: $identity, canSave: $canSave, canDelete: $canDelete, hasEnteredAnyInfo: $hasEnteredAnyInfo, hasSaved: $hasSaved, hasDeleted: $hasDeleted, isAliasMirroringFirstName: $isAliasMirroringFirstName, showingErrorFields: $showingErrorFields)';
   }
 }
 
@@ -433,7 +477,8 @@ abstract mixin class _$IdentityFormScreenStateCopyWith<$Res>
       bool hasEnteredAnyInfo,
       bool hasSaved,
       bool hasDeleted,
-      bool isAliasMirroringFirstName});
+      bool isAliasMirroringFirstName,
+      Set<String> showingErrorFields});
 
   @override
   $IdentityCopyWith<$Res> get identity;
@@ -459,6 +504,7 @@ class __$IdentityFormScreenStateCopyWithImpl<$Res>
     Object? hasSaved = null,
     Object? hasDeleted = null,
     Object? isAliasMirroringFirstName = null,
+    Object? showingErrorFields = null,
   }) {
     return _then(_IdentityFormScreenState(
       identity: null == identity
@@ -489,6 +535,10 @@ class __$IdentityFormScreenStateCopyWithImpl<$Res>
           ? _self.isAliasMirroringFirstName
           : isAliasMirroringFirstName // ignore: cast_nullable_to_non_nullable
               as bool,
+      showingErrorFields: null == showingErrorFields
+          ? _self._showingErrorFields
+          : showingErrorFields // ignore: cast_nullable_to_non_nullable
+              as Set<String>,
     ));
   }
 

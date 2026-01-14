@@ -54,16 +54,8 @@ class InputValidators {
           ),
         ]);
       case InputType.phone:
-        return MultiValidator([
-          PatternValidator(
-            r'^\+?[0-9]{7,15}$',
-            errorText: context.l10n.invalidMobileNumber,
-          ),
-          MaxLengthValidator(
-            MaxLengthValidatorType.medium.value,
-            errorText: context.l10n.mobileTooLong,
-          ),
-        ]);
+        // TODO: Use Intl Phone Number Input for validation
+        return MultiValidator([]);
       case InputType.alias:
         return MultiValidator([
           ZalgoTextValidator(errorText: context.l10n.zalgoTextDetectedError),
