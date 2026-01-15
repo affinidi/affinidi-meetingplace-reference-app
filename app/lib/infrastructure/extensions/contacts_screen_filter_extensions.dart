@@ -10,6 +10,9 @@ extension ContactsScreenFilterExtensions on ContactsScreenFilter {
         return {
           ContactCategory.person,
           ContactCategory.adult,
+        };
+      case ContactsScreenFilter.group:
+        return {
           ContactCategory.group,
         };
       case ContactsScreenFilter.service:

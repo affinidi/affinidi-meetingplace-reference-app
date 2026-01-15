@@ -470,6 +470,7 @@ class AppLocalizationsEn extends AppLocalizations {
       {
         'any': 'Any',
         'person': 'Person',
+        'group': 'Group',
         'service': 'AI Agent',
         'business': 'Business',
         'other': '',

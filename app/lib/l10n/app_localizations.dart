@@ -667,7 +667,7 @@ abstract class AppLocalizations {
   /// No description provided for @contactsFilterLabel.
   ///
   /// In en, this message translates to:
-  /// **'{filter, select, any{Any} person{Person} service{AI Agent} business{Business} other{}}'**
+  /// **'{filter, select, any{Any} person{Person} group{Group} service{AI Agent} business{Business} other{}}'**
   String contactsFilterLabel(String filter);
 
   /// No description provided for @noContactsYet.
