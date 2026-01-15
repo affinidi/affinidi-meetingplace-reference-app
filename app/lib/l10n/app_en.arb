@@ -424,7 +424,7 @@
   "aliasProfileDescription": "Your alias profile helps you keep your identity private and in your control.",
   "generalOk": "Ok",
   "contactsPanelSubtitle": "Tap a channel to chat, double-tap to view details, tap and hold to delete.",
-  "contactsFilterLabel": "{filter, select, any{Any} person{Person} service{AI Agent} business{Business} other{}}",
+  "contactsFilterLabel": "{filter, select, any{Any} person{Person} group{Group} service{AI Agent} business{Business} other{}}",
   "@contactsFilterLabel": {
     "type": "text",
     "placeholders": {

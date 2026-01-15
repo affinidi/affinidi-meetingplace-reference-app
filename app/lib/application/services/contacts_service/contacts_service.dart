@@ -167,6 +167,11 @@ class ContactsService extends _$ContactsService {
 
     final displayName = await _getGroupOfferNameFromChannel(channel);
     final domainCard = ContactCardUtils.fromSdkContactCard(sourceCard);
+    final category = channel.isGroup
+        ? ContactCategory.group
+        : ContactCategory.fromContactCardType(
+            channel.otherPartyContactCard?.type,
+          );
 
     return Contact(
       id: const Uuid().v4(),
@@ -180,9 +185,7 @@ class ContactsService extends _$ContactsService {
       type: ContactType.from(channel.type),
       status: status,
       origin: ContactOrigin.from(channel.type),
-      category: ContactCategory.fromContactCardType(
-        channel.otherPartyContactCard?.type,
-      ),
+      category: category,
     );
   }
 
