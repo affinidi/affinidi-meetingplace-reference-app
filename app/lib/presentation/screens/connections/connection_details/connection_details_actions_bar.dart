@@ -9,11 +9,7 @@ class _ActionBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(contactId);
     final controller = ref.read(provider.notifier);
-    final contactStatus = ref.watch(
-      provider.select((state) => state.contact?.status),
-    );
-    final canApprove = ref.watch(provider.canApprove) &&
-        contactStatus == ContactStatus.pendingApproval;
+    final canApprove = ref.watch(provider.canApprove);
 
     void approveContact() {
       controller.approveContact();

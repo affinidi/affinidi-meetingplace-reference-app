@@ -299,6 +299,11 @@ extension ConnectionDetailsScreenControllerProviderSelector
           return false;
         }
 
+        if (state.contact != null &&
+            state.contact!.status != ContactStatus.pendingApproval) {
+          return false;
+        }
+
         final channelStatus = state.channel?.status;
         if (channelStatus == ChannelStatus.inaugurated) return false;
 
