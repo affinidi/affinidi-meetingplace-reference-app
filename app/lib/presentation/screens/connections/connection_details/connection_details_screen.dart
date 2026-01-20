@@ -29,13 +29,13 @@ import 'connection_details_screen_controller.dart';
 
 part 'connection_details_actions_bar.dart';
 part 'connection_details_display_name.dart';
+part 'connection_details_group_details.dart';
 part 'connection_details_names.dart';
 part 'connection_details_panel.dart';
 part 'connection_details_profile_pictures.dart';
 part 'connection_details_shared_identity.dart';
 part 'connection_details_status.dart';
 part 'connection_details_their_details.dart';
-part 'connection_details_group_details.dart';
 part 'connection_mnemonic.dart';
 part 'connection_qr_code_view.dart';
 part 'group_members_panel.dart';

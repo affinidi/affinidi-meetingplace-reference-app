@@ -288,7 +288,8 @@ extension ConnectionDetailsScreenControllerProviderSelector
       select((state) => state.isGroupChat ? state.connection?.offerName : null);
 
   ProviderListenable<bool> get canApprove => select((state) {
-        if (state.contact == null) return false;
+        final contact = state.contact;
+        if (contact == null) return false;
 
         final ownedByMe = state.connection?.ownedByMe ?? false;
         if (!ownedByMe) return false;
@@ -296,6 +297,10 @@ extension ConnectionDetailsScreenControllerProviderSelector
         final connectionStatus = state.connection?.status;
         if (![ConnectionOfferStatus.published, ConnectionOfferStatus.deleted]
             .contains(connectionStatus)) {
+          return false;
+        }
+
+        if (contact.status != ContactStatus.pendingApproval) {
           return false;
         }
 
