@@ -7,7 +7,7 @@ part of 'media_screen_controller.dart';
 // **************************************************************************
 
 String _$mediaScreenControllerHash() =>
-    r'a382f32f8ddab0e42be7d38d73b3a6f2a9972ee0';
+    r'fccd69cc35d25a4ede82aff613ae145793ac5f77';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -34,10 +34,12 @@ abstract class _$MediaScreenController
     extends BuildlessAutoDisposeNotifier<MediaScreenState> {
   late final CameraLensDirection cameraLensDirection;
   late final bool useCamera;
+  late final bool useChatSemantics;
 
   MediaScreenState build({
     required CameraLensDirection cameraLensDirection,
     required bool useCamera,
+    required bool useChatSemantics,
   });
 }
 
@@ -54,10 +56,12 @@ class MediaScreenControllerFamily extends Family<MediaScreenState> {
   MediaScreenControllerProvider call({
     required CameraLensDirection cameraLensDirection,
     required bool useCamera,
+    required bool useChatSemantics,
   }) {
     return MediaScreenControllerProvider(
       cameraLensDirection: cameraLensDirection,
       useCamera: useCamera,
+      useChatSemantics: useChatSemantics,
     );
   }
 
@@ -68,6 +72,7 @@ class MediaScreenControllerFamily extends Family<MediaScreenState> {
     return call(
       cameraLensDirection: provider.cameraLensDirection,
       useCamera: provider.useCamera,
+      useChatSemantics: provider.useChatSemantics,
     );
   }
 
@@ -93,10 +98,12 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
   MediaScreenControllerProvider({
     required CameraLensDirection cameraLensDirection,
     required bool useCamera,
+    required bool useChatSemantics,
   }) : this._internal(
           () => MediaScreenController()
             ..cameraLensDirection = cameraLensDirection
-            ..useCamera = useCamera,
+            ..useCamera = useCamera
+            ..useChatSemantics = useChatSemantics,
           from: mediaScreenControllerProvider,
           name: r'mediaScreenControllerProvider',
           debugGetCreateSourceHash:
@@ -108,6 +115,7 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
               MediaScreenControllerFamily._allTransitiveDependencies,
           cameraLensDirection: cameraLensDirection,
           useCamera: useCamera,
+          useChatSemantics: useChatSemantics,
         );
 
   MediaScreenControllerProvider._internal(
@@ -119,10 +127,12 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
     required super.from,
     required this.cameraLensDirection,
     required this.useCamera,
+    required this.useChatSemantics,
   }) : super.internal();
 
   final CameraLensDirection cameraLensDirection;
   final bool useCamera;
+  final bool useChatSemantics;
 
   @override
   MediaScreenState runNotifierBuild(
@@ -131,6 +141,7 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
     return notifier.build(
       cameraLensDirection: cameraLensDirection,
       useCamera: useCamera,
+      useChatSemantics: useChatSemantics,
     );
   }
 
@@ -141,7 +152,8 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
       override: MediaScreenControllerProvider._internal(
         () => create()
           ..cameraLensDirection = cameraLensDirection
-          ..useCamera = useCamera,
+          ..useCamera = useCamera
+          ..useChatSemantics = useChatSemantics,
         from: from,
         name: null,
         dependencies: null,
@@ -149,6 +161,7 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
         debugGetCreateSourceHash: null,
         cameraLensDirection: cameraLensDirection,
         useCamera: useCamera,
+        useChatSemantics: useChatSemantics,
       ),
     );
   }
@@ -163,7 +176,8 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
   bool operator ==(Object other) {
     return other is MediaScreenControllerProvider &&
         other.cameraLensDirection == cameraLensDirection &&
-        other.useCamera == useCamera;
+        other.useCamera == useCamera &&
+        other.useChatSemantics == useChatSemantics;
   }
 
   @override
@@ -171,6 +185,7 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, cameraLensDirection.hashCode);
     hash = _SystemHash.combine(hash, useCamera.hashCode);
+    hash = _SystemHash.combine(hash, useChatSemantics.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -185,6 +200,9 @@ mixin MediaScreenControllerRef
 
   /// The parameter `useCamera` of this provider.
   bool get useCamera;
+
+  /// The parameter `useChatSemantics` of this provider.
+  bool get useChatSemantics;
 }
 
 class _MediaScreenControllerProviderElement
@@ -197,6 +215,9 @@ class _MediaScreenControllerProviderElement
       (origin as MediaScreenControllerProvider).cameraLensDirection;
   @override
   bool get useCamera => (origin as MediaScreenControllerProvider).useCamera;
+  @override
+  bool get useChatSemantics =>
+      (origin as MediaScreenControllerProvider).useChatSemantics;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

@@ -28,9 +28,10 @@ class MediaScreenController extends _$MediaScreenController {
   MediaScreenState build({
     required CameraLensDirection cameraLensDirection,
     required bool useCamera,
+    required bool useChatSemantics,
   }) {
     if (!useCamera) {
-      Future(() => pickFromGallery(useChatSemantics: false));
+      Future(pickFromGallery);
       return MediaScreenState(isLoading: true);
     }
 
@@ -66,9 +67,7 @@ class MediaScreenController extends _$MediaScreenController {
     return MediaScreenState(isLoading: true);
   }
 
-  Future<void> pickFromGallery({
-    required bool useChatSemantics,
-  }) async {
+  Future<void> pickFromGallery() async {
     state = state.copyWith(isLoading: true);
     final picker = ref.read(imagePickerProvider);
 
@@ -137,9 +136,7 @@ class MediaScreenController extends _$MediaScreenController {
       unawaited(_initCamera(cameraLensDirection));
     } else {
       unawaited(
-        pickFromGallery(
-          useChatSemantics: false,
-        ),
+        pickFromGallery(),
       );
     }
   }
@@ -164,9 +161,7 @@ class MediaScreenController extends _$MediaScreenController {
 
         if (isIosPlatform && permissionGranted && cameraUnavailable) {
           unawaited(
-            pickFromGallery(
-              useChatSemantics: false,
-            ),
+            pickFromGallery(),
           );
         }
         state = state.copyWith(
