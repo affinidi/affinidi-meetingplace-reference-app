@@ -1491,6 +1491,23 @@ class AppLocalizationsDe extends AppLocalizations {
       'Benachrichtigungen für diesen Chat-Kanal sind nicht verfügbar';
 
   @override
+  String get chatNotificationsWhyTitle => 'Why no push notifications?';
+
+  @override
+  String get chatNotificationsWhyDescription =>
+      'When you establish a connection by direct scanning or sharing a QR code, your devices connect directly without exchanging notification tokens with our servers. This means push notifications can\'t be sent when the chat is closed.';
+
+  @override
+  String get chatNotificationsWhyNote =>
+      'You\'ll only see new messages when you\'re in the chat. There will be no badge updates or notifications informing you that new messages have arrived, even if the app is open.';
+
+  @override
+  String get chatNotificationsWhyButton => 'Got it';
+
+  @override
+  String get chatNotificationsWhyLink => 'Why?';
+
+  @override
   String get meetingPlaceInvitationTitle => 'Einladung zum Treffpunkt';
 
   @override

@@ -39,6 +39,8 @@ abstract class _$ContactCWProxy {
 
   Contact lastKeepAliveMessage(DateTime? lastKeepAliveMessage);
 
+  Contact notificationBannerDismissed(bool notificationBannerDismissed);
+
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Contact(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -62,6 +64,7 @@ abstract class _$ContactCWProxy {
     int currentMessageSeqNo,
     bool hasBeenOpened,
     DateTime? lastKeepAliveMessage,
+    bool notificationBannerDismissed,
   });
 }
 
@@ -126,6 +129,10 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       this(lastKeepAliveMessage: lastKeepAliveMessage);
 
   @override
+  Contact notificationBannerDismissed(bool notificationBannerDismissed) =>
+      this(notificationBannerDismissed: notificationBannerDismissed);
+
+  @override
 
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Contact(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -150,6 +157,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? currentMessageSeqNo = const $CopyWithPlaceholder(),
     Object? hasBeenOpened = const $CopyWithPlaceholder(),
     Object? lastKeepAliveMessage = const $CopyWithPlaceholder(),
+    Object? notificationBannerDismissed = const $CopyWithPlaceholder(),
   }) {
     return Contact(
       id: _value.id,
@@ -219,6 +227,11 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.lastKeepAliveMessage
           // ignore: cast_nullable_to_non_nullable
           : lastKeepAliveMessage as DateTime?,
+      notificationBannerDismissed:
+          notificationBannerDismissed == const $CopyWithPlaceholder()
+              ? _value.notificationBannerDismissed
+              // ignore: cast_nullable_to_non_nullable
+              : notificationBannerDismissed as bool,
     );
   }
 }

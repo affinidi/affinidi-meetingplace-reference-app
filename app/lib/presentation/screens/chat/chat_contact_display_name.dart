@@ -122,24 +122,55 @@ class _ChatContactImage extends ConsumerWidget {
     if (contact == null) return const SizedBox.shrink();
 
     final displayImage = contact.image(cacheManager: cacheManager);
+    final showBadge = contact.origin == ContactOrigin.directInteractive;
 
-    return SizedBox(
-      height: 55,
-      width: 55,
-      child: Card(
-        key: const Key('chat_contact_avatar'),
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(100.0),
-        ),
-        elevation: 5,
-        child: AvatarGradientContainer(
-          child: Image(
-            fit: BoxFit.cover,
-            image: displayImage,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        SizedBox(
+          height: 55,
+          width: 55,
+          child: Card(
+            key: const Key('chat_c ontact_avatar'),
+            clipBehavior: Clip.hardEdge,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(100.0),
+            ),
+            elevation: 5,
+            child: AvatarGradientContainer(
+              child: Image(
+                fit: BoxFit.cover,
+                image: displayImage,
+              ),
+            ),
           ),
         ),
-      ),
+        if (showBadge)
+          Positioned(
+            bottom: 1,
+            right: -2,
+            child: Container(
+              constraints: const BoxConstraints(
+                minWidth: 20,
+                minHeight: 20,
+              ),
+              decoration: BoxDecoration(
+                color: context.colorScheme.surfaceContainerHigh,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: context.colorScheme.primary,
+                  width: 1,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(
+                Icons.notifications_off_outlined,
+                color: Colors.white,
+                size: 10,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

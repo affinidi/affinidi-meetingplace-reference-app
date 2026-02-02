@@ -115,6 +115,16 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
   late final GeneratedColumn<DateTime> lastKeepAliveMessage =
       GeneratedColumn<DateTime>('last_keep_alive_message', aliasedName, true,
           type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _notificationBannerDismissedMeta =
+      const VerificationMeta('notificationBannerDismissed');
+  @override
+  late final GeneratedColumn<bool> notificationBannerDismissed =
+      GeneratedColumn<bool>('notification_banner_dismissed', aliasedName, false,
+          type: DriftSqlType.bool,
+          requiredDuringInsert: false,
+          defaultConstraints: GeneratedColumn.constraintIsAlways(
+              'CHECK ("notification_banner_dismissed" IN (0, 1))'),
+          clientDefault: () => false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -132,7 +142,8 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         badgeCount,
         currentMessageSeqNo,
         hasBeenOpened,
-        lastKeepAliveMessage
+        lastKeepAliveMessage,
+        notificationBannerDismissed
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -213,6 +224,13 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
           lastKeepAliveMessage.isAcceptableOrUnknown(
               data['last_keep_alive_message']!, _lastKeepAliveMessageMeta));
     }
+    if (data.containsKey('notification_banner_dismissed')) {
+      context.handle(
+          _notificationBannerDismissedMeta,
+          notificationBannerDismissed.isAcceptableOrUnknown(
+              data['notification_banner_dismissed']!,
+              _notificationBannerDismissedMeta));
+    }
     return context;
   }
 
@@ -259,6 +277,9 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
       lastKeepAliveMessage: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime,
           data['${effectivePrefix}last_keep_alive_message']),
+      notificationBannerDismissed: attachedDatabase.typeMapping.read(
+          DriftSqlType.bool,
+          data['${effectivePrefix}notification_banner_dismissed'])!,
     );
   }
 
@@ -294,6 +315,7 @@ class Contact extends DataClass implements Insertable<Contact> {
   final int currentMessageSeqNo;
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;
+  final bool notificationBannerDismissed;
   const Contact(
       {required this.id,
       this.channelDid,
@@ -310,7 +332,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       required this.badgeCount,
       required this.currentMessageSeqNo,
       required this.hasBeenOpened,
-      this.lastKeepAliveMessage});
+      this.lastKeepAliveMessage,
+      required this.notificationBannerDismissed});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -349,6 +372,8 @@ class Contact extends DataClass implements Insertable<Contact> {
     if (!nullToAbsent || lastKeepAliveMessage != null) {
       map['last_keep_alive_message'] = Variable<DateTime>(lastKeepAliveMessage);
     }
+    map['notification_banner_dismissed'] =
+        Variable<bool>(notificationBannerDismissed);
     return map;
   }
 
@@ -378,6 +403,7 @@ class Contact extends DataClass implements Insertable<Contact> {
       lastKeepAliveMessage: lastKeepAliveMessage == null && nullToAbsent
           ? const Value.absent()
           : Value(lastKeepAliveMessage),
+      notificationBannerDismissed: Value(notificationBannerDismissed),
     );
   }
 
@@ -404,6 +430,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       hasBeenOpened: serializer.fromJson<bool>(json['hasBeenOpened']),
       lastKeepAliveMessage:
           serializer.fromJson<DateTime?>(json['lastKeepAliveMessage']),
+      notificationBannerDismissed:
+          serializer.fromJson<bool>(json['notificationBannerDismissed']),
     );
   }
   @override
@@ -427,6 +455,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       'hasBeenOpened': serializer.toJson<bool>(hasBeenOpened),
       'lastKeepAliveMessage':
           serializer.toJson<DateTime?>(lastKeepAliveMessage),
+      'notificationBannerDismissed':
+          serializer.toJson<bool>(notificationBannerDismissed),
     };
   }
 
@@ -446,7 +476,8 @@ class Contact extends DataClass implements Insertable<Contact> {
           int? badgeCount,
           int? currentMessageSeqNo,
           bool? hasBeenOpened,
-          Value<DateTime?> lastKeepAliveMessage = const Value.absent()}) =>
+          Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
+          bool? notificationBannerDismissed}) =>
       Contact(
         id: id ?? this.id,
         channelDid: channelDid.present ? channelDid.value : this.channelDid,
@@ -469,6 +500,8 @@ class Contact extends DataClass implements Insertable<Contact> {
         lastKeepAliveMessage: lastKeepAliveMessage.present
             ? lastKeepAliveMessage.value
             : this.lastKeepAliveMessage,
+        notificationBannerDismissed:
+            notificationBannerDismissed ?? this.notificationBannerDismissed,
       );
   Contact copyWithCompanion(ContactsCompanion data) {
     return Contact(
@@ -502,6 +535,9 @@ class Contact extends DataClass implements Insertable<Contact> {
       lastKeepAliveMessage: data.lastKeepAliveMessage.present
           ? data.lastKeepAliveMessage.value
           : this.lastKeepAliveMessage,
+      notificationBannerDismissed: data.notificationBannerDismissed.present
+          ? data.notificationBannerDismissed.value
+          : this.notificationBannerDismissed,
     );
   }
 
@@ -523,7 +559,8 @@ class Contact extends DataClass implements Insertable<Contact> {
           ..write('badgeCount: $badgeCount, ')
           ..write('currentMessageSeqNo: $currentMessageSeqNo, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
-          ..write('lastKeepAliveMessage: $lastKeepAliveMessage')
+          ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
+          ..write('notificationBannerDismissed: $notificationBannerDismissed')
           ..write(')'))
         .toString();
   }
@@ -545,7 +582,8 @@ class Contact extends DataClass implements Insertable<Contact> {
       badgeCount,
       currentMessageSeqNo,
       hasBeenOpened,
-      lastKeepAliveMessage);
+      lastKeepAliveMessage,
+      notificationBannerDismissed);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -565,7 +603,9 @@ class Contact extends DataClass implements Insertable<Contact> {
           other.badgeCount == this.badgeCount &&
           other.currentMessageSeqNo == this.currentMessageSeqNo &&
           other.hasBeenOpened == this.hasBeenOpened &&
-          other.lastKeepAliveMessage == this.lastKeepAliveMessage);
+          other.lastKeepAliveMessage == this.lastKeepAliveMessage &&
+          other.notificationBannerDismissed ==
+              this.notificationBannerDismissed);
 }
 
 class ContactsCompanion extends UpdateCompanion<Contact> {
@@ -585,6 +625,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
   final Value<int> currentMessageSeqNo;
   final Value<bool> hasBeenOpened;
   final Value<DateTime?> lastKeepAliveMessage;
+  final Value<bool> notificationBannerDismissed;
   final Value<int> rowid;
   const ContactsCompanion({
     this.id = const Value.absent(),
@@ -603,6 +644,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.currentMessageSeqNo = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
+    this.notificationBannerDismissed = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ContactsCompanion.insert({
@@ -622,6 +664,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.currentMessageSeqNo = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
+    this.notificationBannerDismissed = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : offerLink = Value(offerLink),
         mediatorDid = Value(mediatorDid),
@@ -646,6 +689,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Expression<int>? currentMessageSeqNo,
     Expression<bool>? hasBeenOpened,
     Expression<DateTime>? lastKeepAliveMessage,
+    Expression<bool>? notificationBannerDismissed,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -668,6 +712,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       if (hasBeenOpened != null) 'has_been_opened': hasBeenOpened,
       if (lastKeepAliveMessage != null)
         'last_keep_alive_message': lastKeepAliveMessage,
+      if (notificationBannerDismissed != null)
+        'notification_banner_dismissed': notificationBannerDismissed,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -689,6 +735,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       Value<int>? currentMessageSeqNo,
       Value<bool>? hasBeenOpened,
       Value<DateTime?>? lastKeepAliveMessage,
+      Value<bool>? notificationBannerDismissed,
       Value<int>? rowid}) {
     return ContactsCompanion(
       id: id ?? this.id,
@@ -708,6 +755,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       currentMessageSeqNo: currentMessageSeqNo ?? this.currentMessageSeqNo,
       hasBeenOpened: hasBeenOpened ?? this.hasBeenOpened,
       lastKeepAliveMessage: lastKeepAliveMessage ?? this.lastKeepAliveMessage,
+      notificationBannerDismissed:
+          notificationBannerDismissed ?? this.notificationBannerDismissed,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -769,6 +818,10 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       map['last_keep_alive_message'] =
           Variable<DateTime>(lastKeepAliveMessage.value);
     }
+    if (notificationBannerDismissed.present) {
+      map['notification_banner_dismissed'] =
+          Variable<bool>(notificationBannerDismissed.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -794,6 +847,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
           ..write('currentMessageSeqNo: $currentMessageSeqNo, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
+          ..write('notificationBannerDismissed: $notificationBannerDismissed, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1355,6 +1409,7 @@ typedef $$ContactsTableCreateCompanionBuilder = ContactsCompanion Function({
   Value<int> currentMessageSeqNo,
   Value<bool> hasBeenOpened,
   Value<DateTime?> lastKeepAliveMessage,
+  Value<bool> notificationBannerDismissed,
   Value<int> rowid,
 });
 typedef $$ContactsTableUpdateCompanionBuilder = ContactsCompanion Function({
@@ -1374,6 +1429,7 @@ typedef $$ContactsTableUpdateCompanionBuilder = ContactsCompanion Function({
   Value<int> currentMessageSeqNo,
   Value<bool> hasBeenOpened,
   Value<DateTime?> lastKeepAliveMessage,
+  Value<bool> notificationBannerDismissed,
   Value<int> rowid,
 });
 
@@ -1466,6 +1522,10 @@ class $$ContactsTableFilterComposer
       column: $table.lastKeepAliveMessage,
       builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<bool> get notificationBannerDismissed => $composableBuilder(
+      column: $table.notificationBannerDismissed,
+      builder: (column) => ColumnFilters(column));
+
   Expression<bool> contactCardsRefs(
       Expression<bool> Function($$ContactCardsTableFilterComposer f) f) {
     final $$ContactCardsTableFilterComposer composer = $composerBuilder(
@@ -1549,6 +1609,10 @@ class $$ContactsTableOrderingComposer
   ColumnOrderings<DateTime> get lastKeepAliveMessage => $composableBuilder(
       column: $table.lastKeepAliveMessage,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get notificationBannerDismissed => $composableBuilder(
+      column: $table.notificationBannerDismissed,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$ContactsTableAnnotationComposer
@@ -1607,6 +1671,9 @@ class $$ContactsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastKeepAliveMessage => $composableBuilder(
       column: $table.lastKeepAliveMessage, builder: (column) => column);
+
+  GeneratedColumn<bool> get notificationBannerDismissed => $composableBuilder(
+      column: $table.notificationBannerDismissed, builder: (column) => column);
 
   Expression<T> contactCardsRefs<T extends Object>(
       Expression<T> Function($$ContactCardsTableAnnotationComposer a) f) {
@@ -1669,6 +1736,7 @@ class $$ContactsTableTableManager extends RootTableManager<
             Value<int> currentMessageSeqNo = const Value.absent(),
             Value<bool> hasBeenOpened = const Value.absent(),
             Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
+            Value<bool> notificationBannerDismissed = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ContactsCompanion(
@@ -1688,6 +1756,7 @@ class $$ContactsTableTableManager extends RootTableManager<
             currentMessageSeqNo: currentMessageSeqNo,
             hasBeenOpened: hasBeenOpened,
             lastKeepAliveMessage: lastKeepAliveMessage,
+            notificationBannerDismissed: notificationBannerDismissed,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -1707,6 +1776,7 @@ class $$ContactsTableTableManager extends RootTableManager<
             Value<int> currentMessageSeqNo = const Value.absent(),
             Value<bool> hasBeenOpened = const Value.absent(),
             Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
+            Value<bool> notificationBannerDismissed = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               ContactsCompanion.insert(
@@ -1726,6 +1796,7 @@ class $$ContactsTableTableManager extends RootTableManager<
             currentMessageSeqNo: currentMessageSeqNo,
             hasBeenOpened: hasBeenOpened,
             lastKeepAliveMessage: lastKeepAliveMessage,
+            notificationBannerDismissed: notificationBannerDismissed,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

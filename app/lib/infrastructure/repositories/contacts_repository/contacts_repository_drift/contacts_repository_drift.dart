@@ -58,6 +58,8 @@ class ContactsRepositoryDrift implements ContactsRepository {
               currentMessageSeqNo: Value(contact.currentMessageSeqNo),
               hasBeenOpened: Value(contact.hasBeenOpened),
               lastKeepAliveMessage: Value(contact.lastKeepAliveMessage),
+              notificationBannerDismissed:
+                  Value(contact.notificationBannerDismissed),
             ),
           );
 
@@ -163,6 +165,8 @@ class ContactsRepositoryDrift implements ContactsRepository {
           currentMessageSeqNo: Value(contact.currentMessageSeqNo),
           hasBeenOpened: Value(contact.hasBeenOpened),
           lastKeepAliveMessage: Value(contact.lastKeepAliveMessage),
+          notificationBannerDismissed:
+              Value(contact.notificationBannerDismissed),
         ),
       );
 
@@ -226,6 +230,7 @@ class _ContactMapper {
       channelDidSha256: contact.channelDidSha256,
       displayName: contact.displayName,
       lastKeepAliveMessage: contact.lastKeepAliveMessage,
+      notificationBannerDismissed: contact.notificationBannerDismissed,
     );
   }
 }

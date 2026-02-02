@@ -46,7 +46,7 @@ class ContactsDatabase extends _$ContactsDatabase {
         );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -95,6 +95,27 @@ class ContactsDatabase extends _$ContactsDatabase {
               ),
             );
           }
+          if (from < 4) {
+            final result =
+                await customSelect('PRAGMA table_info(contacts)').get();
+
+            final notificationBannerDismissedExists = result.any(
+              (row) => row.data['name'] == 'notification_banner_dismissed',
+            );
+
+            if (!notificationBannerDismissedExists) {
+              await customStatement(
+                'ALTER TABLE contacts ADD COLUMN notification_banner_dismissed'
+                ' INTEGER NOT NULL DEFAULT 0 CHECK'
+                ' (notification_banner_dismissed IN (0, 1))',
+              );
+
+              await customStatement(
+                'UPDATE contacts SET notification_banner_dismissed = 1'
+                ' WHERE origin != 1',
+              );
+            }
+          }
         },
       );
 }
@@ -119,6 +140,8 @@ class Contacts extends Table {
   IntColumn get currentMessageSeqNo => integer().clientDefault(() => 0)();
   BoolColumn get hasBeenOpened => boolean().clientDefault(() => false)();
   DateTimeColumn get lastKeepAliveMessage => dateTime().nullable()();
+  BoolColumn get notificationBannerDismissed =>
+      boolean().clientDefault(() => false)();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +36,7 @@ import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/bottom_sheet_menu.dart';
 import '../../widgets/containers/avatar_gradient_container.dart';
+import '../../widgets/info_banner.dart';
 import 'chat_activity_progress_indicator.dart';
 import 'chat_items/chat_encryption_notice.dart';
 import 'chat_items/group_deleted_chat_item.dart';
