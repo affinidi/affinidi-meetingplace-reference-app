@@ -131,7 +131,7 @@ class _ChatContactImage extends ConsumerWidget {
           height: 55,
           width: 55,
           child: Card(
-            key: const Key('chat_c ontact_avatar'),
+            key: const Key('chat_contact_avatar'),
             clipBehavior: Clip.hardEdge,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(100.0),
