@@ -44,12 +44,11 @@ class MediaScreen extends HookConsumerWidget {
     final mediaScreenProvider = mediaScreenControllerProvider(
       cameraLensDirection: cameraLensDirection,
       useCamera: useCamera,
+      useChatSemantics: useChatSemantics,
     );
     final controller = ref.read(mediaScreenProvider.notifier);
 
-    await controller.pickFromGallery(
-      useChatSemantics: useChatSemantics,
-    );
+    await controller.pickFromGallery();
   }
 
   void _captureImage(
@@ -91,6 +90,7 @@ class MediaScreen extends HookConsumerWidget {
     final provider = mediaScreenControllerProvider(
       cameraLensDirection: cameraLensDirection,
       useCamera: useCamera,
+      useChatSemantics: useChatSemantics,
     );
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
@@ -121,6 +121,7 @@ class MediaScreen extends HookConsumerWidget {
               mediaScreenControllerProvider(
                 cameraLensDirection: cameraLensDirection,
                 useCamera: true,
+                useChatSemantics: useChatSemantics,
               ).notifier,
             );
             return CameraPermissionInstruction(
