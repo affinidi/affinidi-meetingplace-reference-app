@@ -64,8 +64,8 @@ class _NotificationsUnavailableWarning extends ConsumerWidget {
     final contactType = ref.watch(
       provider.select((state) => state.contact?.type),
     );
-    final contactOrigin = ref.watch(
-      provider.select((state) => state.contact?.origin),
+    final isOobContact = ref.watch(
+      provider.select((state) => state.contact?.isOobContact ?? false),
     );
     final notificationBannerDismissed = ref.watch(
       provider.select((state) => state.contact?.notificationBannerDismissed),
@@ -80,9 +80,6 @@ class _NotificationsUnavailableWarning extends ConsumerWidget {
     if (notificationToken?.isNotEmpty ?? false) {
       return const SizedBox.shrink();
     }
-
-    final isDirectInteractive =
-        contactOrigin == ContactOrigin.directInteractive;
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),
@@ -101,7 +98,7 @@ class _NotificationsUnavailableWarning extends ConsumerWidget {
                   ),
                   children: [
                     TextSpan(
-                      text: isDirectInteractive
+                      text: isOobContact
                           ? context.l10n.chatNotificationsUnavailable
                           : context.l10n.chatNotificationsUnavailableNotShared,
                     ),
