@@ -403,7 +403,7 @@ class _ControlPlaneEventsProcessor {
       final completer = Completer<void>();
       try {
         await _sdk.processControlPlaneEvents(
-          onDone: () {
+          onDone: (_) {
             completer.complete();
           },
         );

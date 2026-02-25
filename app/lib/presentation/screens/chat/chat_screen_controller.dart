@@ -11,6 +11,7 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/network_connectivity_service/network_connectivity_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -85,6 +86,20 @@ class ChatScreenController extends _$ChatScreenController {
         Future.microtask(() {
           state = state.copyWith(contact: next);
         });
+      },
+      fireImmediately: true,
+    );
+
+    ref.listen(
+      networkConnectivityServiceProvider,
+      (previous, next) {
+        if (previous?.isConnected == false && next.isConnected) {
+          _logger.info(
+            'Network reconnected - resuming chat presence updates',
+            name: _logKey,
+          );
+          _chatSDK?.startChatPresenceUpdates();
+        }
       },
       fireImmediately: true,
     );

@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +8,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
+import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_image_picker.dart';
@@ -34,6 +36,7 @@ Future<void> navigateToChatScreen(
   List<CameraDescription>? mockCameras,
   FakeSecureStorage? secureStorage,
   PermissionStatus? cameraPermissionStatus,
+  Connectivity? connectivity,
 }) async {
   await navigateToLocation(
     tester,
@@ -47,6 +50,10 @@ Future<void> navigateToChatScreen(
     mockCameras: mockCameras,
     secureStorage: secureStorage,
     cameraPermissionStatus: cameraPermissionStatus,
+    connectivity: connectivity ??
+        FakeConnectivity(
+          initialConnectivityToReturn: [ConnectivityResult.wifi],
+        ),
   );
   await tester.pumpAndSettle();
 }
@@ -523,6 +530,30 @@ void main() {
             findsOneWidget,
           );
         });
+      });
+    });
+
+    group('and network connectivity changes from offline to online', () {
+      testWidgets('should start chat presence updates', (tester) async {
+        final meetingPlaceChatSDK = FakeChatSdk();
+        final fakeConnectivity = FakeConnectivity(
+          initialConnectivityToReturn: [ConnectivityResult.none],
+        );
+
+        await navigateToChatScreen(
+          tester,
+          contactId: contactId,
+          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          cameraPermissionStatus: PermissionStatus.granted,
+          connectivity: fakeConnectivity,
+        );
+
+        expect(meetingPlaceChatSDK.startedChatPresenceUpdatesCount, 0);
+
+        fakeConnectivity.emitConnectivityChange([ConnectivityResult.wifi]);
+        await tester.pumpAndSettle();
+
+        expect(meetingPlaceChatSDK.startedChatPresenceUpdatesCount, 1);
       });
     });
 
