@@ -583,6 +583,42 @@ void main() {
         );
       });
 
+      group('and press dismiss button', () {
+        testWidgets('it should dismiss the banner', (tester) async {
+          final oobChatSDK = FakeChatSdk();
+
+          await navigateToLocation(
+            tester,
+            '/contacts/${FakeContacts.oobContact.id}/chat',
+            isAuthenticated: true,
+            alreadyOnboarded: true,
+            identities: [FakeIdentities.primaryIdentity],
+            contacts: [FakeContacts.oobContact],
+            meetingPlaceChatSDK: oobChatSDK,
+          );
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byKey(const Key('notifications_unavailable_banner')),
+            findsOneWidget,
+          );
+
+          final closeButton = find.descendant(
+            of: find.byKey(const Key('notifications_unavailable_banner')),
+            matching: find.byIcon(Icons.close),
+          );
+          expect(closeButton, findsOneWidget);
+
+          await tester.tap(closeButton);
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byKey(const Key('notifications_unavailable_banner')),
+            findsNothing,
+          );
+        });
+      });
+
       testWidgets(
           'it should not show notification banner when it has been dismissed',
           (tester) async {
