@@ -77,8 +77,9 @@ class ChatScreen extends HookConsumerWidget {
       () {
         if (!context.mounted) return;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.initialize();
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await controller.initialize();
+          await controller.onScreenOpened();
         });
 
         return null;

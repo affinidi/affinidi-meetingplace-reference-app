@@ -146,6 +146,12 @@ class ChatScreenController extends _$ChatScreenController {
     await initializing;
   }
 
+  Future<void> onScreenOpened() async {
+    if (!state.isInitialized) return;
+
+    await _restoreUnsentMessage();
+  }
+
   void _onMessageTextChanged() {
     _saveUnsentMessageDebouncer?.cancel();
 
@@ -315,7 +321,6 @@ class ChatScreenController extends _$ChatScreenController {
       name: _logKey,
     );
     await _startChatSession(contact);
-    await _restoreUnsentMessage();
 
     // TODO(MA): Remove sorting when it's added to sdk
     state = state.copyWith(
