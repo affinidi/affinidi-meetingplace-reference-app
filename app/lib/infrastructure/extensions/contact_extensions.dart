@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../../domain/models/contacts/contact.dart';
+import '../../domain/models/contacts/contact_origin.dart';
 import '../../domain/models/contacts/contact_status.dart';
 import '../../presentation/painting/cached_base64_image.dart';
 import '../../presentation/widgets/images/default_profile_image.dart';
@@ -62,4 +63,6 @@ extension ContactExtensions on Contact {
               cacheManager: cacheManager,
             )
           : defaultProfileImage;
+
+  bool get isOobContact => origin == ContactOrigin.directInteractive;
 }

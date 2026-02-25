@@ -97,8 +97,7 @@ class _ContactGridItem extends ConsumerWidget {
                     ),
                     child: _ContactAvatar(contact: contact),
                   ),
-                  if (contact.badgeCount > 0 ||
-                      contact.origin == ContactOrigin.directInteractive)
+                  if (contact.badgeCount > 0 || contact.isOobContact)
                     Positioned(
                       bottom: -5,
                       right: -15,

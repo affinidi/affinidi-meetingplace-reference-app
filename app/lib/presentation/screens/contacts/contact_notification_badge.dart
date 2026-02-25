@@ -56,8 +56,9 @@ class _ContactNotificationBadge extends StatelessWidget {
           : Text(
               badgeCount > 99 ? '99+' : '$badgeCount',
               style: textStyle,
-              textScaler:
-                  MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling,
+              textScaler: (MediaQuery.maybeTextScalerOf(context) ??
+                      TextScaler.noScaling)
+                  .clamp(maxScaleFactor: 0.8),
             ),
     );
   }

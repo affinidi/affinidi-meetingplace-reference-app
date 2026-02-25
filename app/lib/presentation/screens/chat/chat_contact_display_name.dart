@@ -122,7 +122,7 @@ class _ChatContactImage extends ConsumerWidget {
     if (contact == null) return const SizedBox.shrink();
 
     final displayImage = contact.image(cacheManager: cacheManager);
-    final showBadge = contact.origin == ContactOrigin.directInteractive;
+    final showBadge = contact.isOobContact;
 
     return Stack(
       clipBehavior: Clip.none,

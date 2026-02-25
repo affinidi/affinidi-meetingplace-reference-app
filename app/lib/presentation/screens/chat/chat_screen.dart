@@ -21,6 +21,7 @@ import '../../../domain/models/contacts/contact_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/concierge_message_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extentions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
