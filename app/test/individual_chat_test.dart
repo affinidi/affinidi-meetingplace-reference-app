@@ -553,7 +553,12 @@ void main() {
           findsWidgets,
         );
 
-        await tester.tap(find.text(l10n.chatNotificationsWhyLink));
+        expect(
+          find.byKey(const Key('notifications_why_link')),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.byKey(const Key('notifications_why_link')));
         await tester.pumpAndSettle();
 
         expect(

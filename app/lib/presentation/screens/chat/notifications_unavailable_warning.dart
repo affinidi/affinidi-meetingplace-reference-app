@@ -103,16 +103,20 @@ class _NotificationsUnavailableWarning extends ConsumerWidget {
                           : context.l10n.chatNotificationsUnavailableNotShared,
                     ),
                     const TextSpan(text: ' '),
-                    TextSpan(
-                      text: context.l10n.chatNotificationsWhyLink,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.primary,
-                        fontWeight: FontWeight.w900,
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.baseline,
+                      baseline: TextBaseline.alphabetic,
+                      child: GestureDetector(
+                        key: const Key('notifications_why_link'),
+                        onTap: () => _showNotificationInfoBottomSheet(context),
+                        child: Text(
+                          context.l10n.chatNotificationsWhyLink,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.primary,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
                       ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          _showNotificationInfoBottomSheet(context);
-                        },
                     ),
                   ],
                 ),
