@@ -315,6 +315,7 @@ class ChatScreenController extends _$ChatScreenController {
       name: _logKey,
     );
     await _startChatSession(contact);
+    await _restoreUnsentMessage();
 
     // TODO(MA): Remove sorting when it's added to sdk
     state = state.copyWith(
@@ -984,16 +985,20 @@ class ChatScreenController extends _$ChatScreenController {
         .updateContactSequenceNumber(channelDid, channel.seqNo);
   }
 
-  Future<void> _startChatSession(Contact contact) async {
+  Future<void> _restoreUnsentMessage() async {
+    final contact = state.contact;
+    if (contact == null) return;
+
     final unsentMessagesService =
         ref.read(unsentMessagesServiceProvider.notifier);
     await unsentMessagesService.ensureInitialized();
-
     final unsentMessage = unsentMessagesService.getUnsentMessage(contact.id);
     if (unsentMessage != null) {
       messageTextController.text = unsentMessage;
     }
+  }
 
+  Future<void> _startChatSession(Contact contact) async {
     state = state.copyWith(isInitialized: true);
 
     final channelDid = contact.channelDid;
@@ -1008,7 +1013,7 @@ class ChatScreenController extends _$ChatScreenController {
         .read(contactsServiceProvider.notifier)
         .resetContactBadgeCount(channelDid);
 
-    await ref.read(appBadgeServiceProvider).clearBadge();
+    unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
     _logger.info(
       'Chat session started',
