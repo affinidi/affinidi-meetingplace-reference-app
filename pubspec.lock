@@ -461,10 +461,10 @@ packages:
     dependency: transitive
     description:
       name: didcomm
-      sha256: "8a6de5c8e2406603071b866b2e478028e16062596f68805f196a40ef58d31d62"
+      sha256: "8fd4c7b14dc53bc125d788db16cc8a9381820f73c7526932bfd2b9a2a48eb629"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0"
+    version: "2.3.3"
   dio:
     dependency: transitive
     description:
@@ -1089,42 +1089,42 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_chat
-      sha256: b8f779601f1851dee8e498b0e9a47fa8120e0c8a6e5be2ee5645f467a7924205
+      sha256: "5ec933256d34ab8cdddf18a970a09eb103d5491b9f7e0048cd6cfa327b995b8e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.20"
+    version: "0.0.1-dev.29"
   meeting_place_control_plane:
     dependency: transitive
     description:
       name: meeting_place_control_plane
-      sha256: "73139ae964cfcf467d1092e484b538c48bd090e253622c00f14d3baf22205bae"
+      sha256: ad6295f7f31ed9381fb15d9620c656d0809fbce68462c06211053a276172ff9a
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.11"
+    version: "0.0.1-dev.14"
   meeting_place_core:
     dependency: transitive
     description:
       name: meeting_place_core
-      sha256: fa08f5f869cbf75eb24a703c18612eeae032d08568ccc9ba5be2393a877d8f65
+      sha256: ea542b73679b9d96bde31f2a20539efb4478b4f7763055fcf3cb05f384f77df1
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.19"
+    version: "0.0.1-dev.27"
   meeting_place_drift_repository:
     dependency: transitive
     description:
       name: meeting_place_drift_repository
-      sha256: bf565c4b447b9acefb718f14e5197bb69d5a12a01618dee69cef4dccb03bfefe
+      sha256: cf37b52a5bfe27e2578f817f11afb750394895927616e344f6edc3f72a7d885f
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.21"
+    version: "0.0.1-dev.30"
   meeting_place_mediator:
     dependency: transitive
     description:
       name: meeting_place_mediator
-      sha256: "1e18f235202cf35197ddd9b273cef5ec8a4802f1aea5039fcb90d3c50d70ee91"
+      sha256: "9b8f47c90cfdeee984f55c32f5343ed063be44313806b1abb649904159aaf2e7"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.11"
+    version: "0.0.1-dev.13"
   melos:
     dependency: "direct dev"
     description:
@@ -1774,10 +1774,10 @@ packages:
     dependency: transitive
     description:
       name: ssi
-      sha256: "056d36059a7510f57b2b1088cfcd6f7db45743a79875c62905c489b4b4cdbe07"
+      sha256: "66161ec58198f800d3a054f1d481a7167f1bab96a722e8f5ccd65c5e326f5e6a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.20.0"
+    version: "3.5.0"
   stack_trace:
     dependency: transitive
     description:
@@ -1838,26 +1838,26 @@ packages:
     dependency: "direct dev"
     description:
       name: test
-      sha256: "75906bf273541b676716d1ca7627a17e4c4070a3a16272b7a3dc7da3b9f3f6b7"
+      sha256: "65e29d831719be0591f7b3b1a32a3cda258ec98c58c7b25f7b84241bc31215bb"
       url: "https://pub.dev"
     source: hosted
-    version: "1.26.3"
+    version: "1.26.2"
   test_api:
     dependency: transitive
     description:
       name: test_api
-      sha256: ab2726c1a94d3176a45960b6234466ec367179b87dd74f1611adb1f3b5fb9d55
+      sha256: "522f00f556e73044315fa4585ec3270f1808a4b186c936e612cab0b565ff1e00"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.7"
+    version: "0.7.6"
   test_core:
     dependency: transitive
     description:
       name: test_core
-      sha256: "0cc24b5ff94b38d2ae73e1eb43cc302b77964fbf67abad1e296025b78deb53d0"
+      sha256: "80bf5a02b60af04b09e14f6fe68b921aad119493e26e490deaca5993fef1b05a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.12"
+    version: "0.6.11"
   timing:
     dependency: transitive
     description:

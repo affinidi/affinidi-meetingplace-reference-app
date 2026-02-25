@@ -52,6 +52,7 @@ app/android/build
 # iOS
 app/ios/build/
 app/ios/Podfile.lock
+app/ios/Gemfile.lock
 
 # MacOS
 app/macos/Podfile.lock
