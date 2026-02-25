@@ -50,6 +50,7 @@ class IdentitiesScreen extends ConsumerWidget {
       ),
       child: SafeArea(
         child: SingleChildScrollView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
