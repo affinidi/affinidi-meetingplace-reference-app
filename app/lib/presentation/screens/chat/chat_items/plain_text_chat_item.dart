@@ -90,7 +90,6 @@ class _PlainTextChatItem extends ConsumerWidget {
               padding: EdgeInsets.all(attachments.isEmpty ? 0 : 8),
               child: _TextMessage(
                 text: chatItem.value,
-                isFromMe: chatItem.isFromMe,
                 shouldScaleEmojis: shouldScaleEmojis,
               ),
             ),
@@ -103,14 +102,11 @@ class _PlainTextChatItem extends ConsumerWidget {
 class _TextMessage extends StatelessWidget {
   const _TextMessage({
     required String text,
-    required bool isFromMe,
     required bool shouldScaleEmojis,
   })  : _text = text,
-        _isFromMe = isFromMe,
         _shouldScaleEmojis = shouldScaleEmojis;
 
   final String _text;
-  final bool _isFromMe;
   final bool _shouldScaleEmojis;
 
   @override
@@ -121,11 +117,7 @@ class _TextMessage extends StatelessWidget {
         constraints: const BoxConstraints(minWidth: 25),
         child: Text(
           _text,
-          textAlign: _text.length < 6
-              ? TextAlign.center
-              : _isFromMe
-                  ? TextAlign.end
-                  : TextAlign.start,
+          textAlign: _text.length < 6 ? TextAlign.center : TextAlign.start,
           style: TextStyle(
             color: Colors.white,
             fontSize: _shouldScaleEmojis
