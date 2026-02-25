@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -5,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../infrastructure/biometrics/local_auth_provider.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/providers/chat_repository_provider.dart';
 import '../../../presentation/screens/connections/connections_screen_controller.dart';
 import '../../../presentation/screens/contacts/contacts_screen_controller.dart';
 import '../../../presentation/screens/identities/identities_screen_controller.dart';
@@ -39,6 +42,8 @@ class AuthenticationService extends _$AuthenticationService {
   /// Initializes controllers of all screens used in tabbar for them to be ready
   /// as soon as authentication is successful.
   Future<void> _warmup() async {
+    unawaited(ref.read(chatRepositoryProvider.future));
+
     await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
     ref.read(identitiesScreenControllerProvider);
 
