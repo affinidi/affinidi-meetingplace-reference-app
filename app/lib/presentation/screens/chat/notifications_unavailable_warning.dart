@@ -90,6 +90,7 @@ class _NotificationsUnavailableWarning extends ConsumerWidget {
       child: (notificationBannerDismissed == true)
           ? const SizedBox.shrink()
           : InfoBanner(
+              key: const Key('notifications_unavailable_banner'),
               icon: Icons.notifications_off_outlined,
               onDismiss: controller.dismissNotificationBanner,
               child: RichText(

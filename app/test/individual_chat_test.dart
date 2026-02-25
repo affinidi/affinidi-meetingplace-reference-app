@@ -525,5 +525,85 @@ void main() {
         });
       });
     });
+
+    group('and contact is an OOB contact', () {
+      testWidgets('it should show notification unavailable banner',
+          (tester) async {
+        final l10n = await getL10n();
+        final oobChatSDK = FakeChatSdk();
+
+        await navigateToLocation(
+          tester,
+          '/contacts/${FakeContacts.oobContact.id}/chat',
+          isAuthenticated: true,
+          alreadyOnboarded: true,
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [FakeContacts.oobContact],
+          meetingPlaceChatSDK: oobChatSDK,
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('notifications_unavailable_banner')),
+          findsOneWidget,
+        );
+
+        expect(
+          find.byIcon(Icons.notifications_off_outlined),
+          findsWidgets,
+        );
+
+        await tester.tap(find.text(l10n.chatNotificationsWhyLink));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(l10n.chatNotificationsWhyTitle),
+          findsOneWidget,
+        );
+        expect(
+          find.text(l10n.chatNotificationsWhyDescription),
+          findsOneWidget,
+        );
+        expect(
+          find.text(l10n.chatNotificationsWhyButton),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.text(l10n.chatNotificationsWhyButton));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(l10n.chatNotificationsWhyTitle),
+          findsNothing,
+        );
+      });
+
+      testWidgets(
+          'it should not show notification banner when it has been dismissed',
+          (tester) async {
+        final oobChatSDK = FakeChatSdk();
+
+        await navigateToLocation(
+          tester,
+          '/contacts/${FakeContacts.oobContactDismissed.id}/chat',
+          isAuthenticated: true,
+          alreadyOnboarded: true,
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [FakeContacts.oobContactDismissed],
+          meetingPlaceChatSDK: oobChatSDK,
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('notifications_unavailable_banner')),
+          findsNothing,
+        );
+
+        expect(
+          find.byIcon(Icons.notifications_off_outlined),
+          findsOneWidget,
+        );
+      });
+    });
   });
 }
