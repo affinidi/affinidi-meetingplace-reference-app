@@ -68,6 +68,8 @@ class IdentityFormScreen extends HookConsumerWidget {
             children: [
               Expanded(
                 child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   controller: controller.scrollController,
                   padding: EdgeInsets.fromLTRB(inset, 0, inset, 20),
                   child: Column(

@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -48,6 +49,8 @@ class App extends ConsumerWidget {
       locale: locale,
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
+
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
 
         return MediaQuery.withNoTextScaling(
           child: Stack(

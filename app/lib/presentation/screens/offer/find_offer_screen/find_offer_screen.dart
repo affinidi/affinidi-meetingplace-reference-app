@@ -101,6 +101,7 @@ class FindOfferScreen extends HookConsumerWidget {
         appBar: AppBar(title: Text(context.l10n.claimOfferTitle)),
         body: SafeArea(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: EdgeInsets.fromLTRB(inset, 0, inset, 20),
             child: Column(
               spacing: 20,

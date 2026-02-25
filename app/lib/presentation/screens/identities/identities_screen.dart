@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -26,7 +27,8 @@ import 'identities_screen_filter.dart';
 
 part 'delete_identity_dialog.dart';
 part 'filters_bar.dart';
-part 'primary_identity_setup.dart';
+part 'primary_identity/primary_identity_setup.dart';
+part 'primary_identity/primary_identity_bottom_container.dart';
 
 final identitiesScreenFormKey = GlobalKey<FormState>();
 
@@ -41,14 +43,30 @@ class IdentitiesScreen extends ConsumerWidget {
     final colorScheme = context.colorScheme;
     ref.keepAround(identitiesScreenControllerProvider);
 
-    return PieCanvas(
-      theme: const PieTheme(
-        customAngleDiff: 90,
-        customAngle: 45,
-        customAngleAnchor: PieAnchor.center,
-        radius: iconPieButtonsRadius,
-      ),
-      child: SafeArea(
+    final provider = identitiesScreenControllerProvider;
+    final shouldSetupPrimaryIdentity =
+        ref.watch(provider.select((state) => state.shouldSetupPrimaryIdentity));
+
+    if (shouldSetupPrimaryIdentity) {
+      final identities = ref.read(provider).identities;
+      final primaryIdentityId = identities
+          .firstWhereOrNull((identity) => !identity.isPlaceholder)
+          ?.id;
+
+      return _PrimaryIdentitySetup(
+        formKey: identitiesScreenFormKey,
+        identityId: primaryIdentityId,
+      );
+    }
+
+    return SafeArea(
+      child: PieCanvas(
+        theme: const PieTheme(
+          customAngleDiff: 90,
+          customAngle: 45,
+          customAngleAnchor: PieAnchor.center,
+          radius: iconPieButtonsRadius,
+        ),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -59,7 +77,6 @@ class IdentitiesScreen extends ConsumerWidget {
                 icon: Icon(
                   Icons.fingerprint,
                   color: colorScheme.onSurfaceVariant,
-                  size: 24,
                 ),
               ),
               _IdentitiesPanel(),
@@ -85,7 +102,16 @@ class _IdentitiesPanel extends ConsumerWidget {
     }
 
     if (shouldSetupPrimaryIdentity) {
-      return _PrimaryIdentitySetup(formKey: identitiesScreenFormKey);
+      final identities =
+          ref.read(identitiesScreenControllerProvider).identities;
+      final primaryIdentityId = identities
+          .firstWhereOrNull((identity) => !identity.isPlaceholder)
+          ?.id;
+
+      return _PrimaryIdentitySetup(
+        formKey: identitiesScreenFormKey,
+        identityId: primaryIdentityId,
+      );
     }
 
     return Column(
