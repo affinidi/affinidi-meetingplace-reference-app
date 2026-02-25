@@ -12,6 +12,10 @@ class _ChatTextEntry extends HookConsumerWidget {
     final otherPartyName = ref.watch(provider.otherPartyName);
     final isGroupChat = ref.watch(provider.isGroupChat);
     final shouldDisable = ref.watch(provider.shouldDisable);
+    final inputDecoration = context.chatInputDecoration;
+    final borderRadius = inputDecoration.border is OutlineInputBorder
+        ? (inputDecoration.border as OutlineInputBorder).borderRadius
+        : BorderRadius.circular(8.0);
 
     void sendChatActivity() {
       if (!context.mounted) return;
@@ -53,41 +57,45 @@ class _ChatTextEntry extends HookConsumerWidget {
               ),
             ),
             Expanded(
-              child: TextFormField(
-                key: const Key('chat_message_input'),
-                enabled: !shouldDisable,
-                onChanged: shouldDisable ? null : (text) => sendChatActivity(),
-                textInputAction: TextInputAction.send,
-                onFieldSubmitted:
-                    shouldDisable ? null : (value) => sendMessage(),
-                onEditingComplete: () {}, // prevent closing keyboard
-                keyboardType: TextInputType.text,
-                textCapitalization: TextCapitalization.sentences,
-                cursorHeight: 16,
-                style: const TextStyle(
-                  overflow: TextOverflow.ellipsis,
-                  fontSize: 14,
-                  color: Colors.white,
-                ),
-                controller: controller.messageTextController,
-                maxLines: 3,
-                minLines: 1,
-                decoration: context.chatInputDecoration.copyWith(
-                  hintText: isGroupChat
-                      ? context.l10n.chatTypeMessagePromptGroup
-                      : context.l10n
-                          .chatTypeMessagePrompt(otherPartyName ?? ''),
-                ),
-                validator: MultiValidator([
-                  ZalgoTextValidator(
-                    errorText: context.l10n.zalgoTextDetectedError,
+              child: ClipRRect(
+                borderRadius: borderRadius,
+                child: TextFormField(
+                  key: const Key('chat_message_input'),
+                  enabled: !shouldDisable,
+                  onChanged:
+                      shouldDisable ? null : (text) => sendChatActivity(),
+                  textInputAction: TextInputAction.send,
+                  onFieldSubmitted:
+                      shouldDisable ? null : (value) => sendMessage(),
+                  onEditingComplete: () {}, // prevent closing keyboard
+                  keyboardType: TextInputType.text,
+                  textCapitalization: TextCapitalization.sentences,
+                  cursorHeight: 16,
+                  style: const TextStyle(
+                    overflow: TextOverflow.ellipsis,
+                    fontSize: 14,
+                    color: Colors.white,
                   ),
-                  MaxLengthValidator(
-                    MaxLengthValidatorType.extraLong.value,
-                    errorText: context.l10n.chatTooLong,
+                  controller: controller.messageTextController,
+                  maxLines: 3,
+                  minLines: 1,
+                  decoration: context.chatInputDecoration.copyWith(
+                    hintText: isGroupChat
+                        ? context.l10n.chatTypeMessagePromptGroup
+                        : context.l10n
+                            .chatTypeMessagePrompt(otherPartyName ?? ''),
                   ),
-                ]).call,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: MultiValidator([
+                    ZalgoTextValidator(
+                      errorText: context.l10n.zalgoTextDetectedError,
+                    ),
+                    MaxLengthValidator(
+                      MaxLengthValidatorType.extraLong.value,
+                      errorText: context.l10n.chatTooLong,
+                    ),
+                  ]).call,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                ),
               ),
             ),
             Container(
