@@ -1007,8 +1007,6 @@ class ChatScreenController extends _$ChatScreenController {
     await ref.read(contactsServiceProvider.notifier).updateContact(
           updatedContact,
         );
-
-    state = state.copyWith(notificationBannerDismissed: true);
   }
 }
 

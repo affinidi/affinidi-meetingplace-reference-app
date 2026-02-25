@@ -27,7 +27,6 @@ mixin _$ChatScreenState {
   ScreenEffect? get effect;
   Map<String, Uint8List> get attachmentsDataCache;
   String? get notificationToken;
-  bool get notificationBannerDismissed;
 
   /// Create a copy of ChatScreenState
   /// with the given fields replaced by the non-null parameter values.
@@ -63,11 +62,7 @@ mixin _$ChatScreenState {
             const DeepCollectionEquality()
                 .equals(other.attachmentsDataCache, attachmentsDataCache) &&
             (identical(other.notificationToken, notificationToken) ||
-                other.notificationToken == notificationToken) &&
-            (identical(other.notificationBannerDismissed,
-                    notificationBannerDismissed) ||
-                other.notificationBannerDismissed ==
-                    notificationBannerDismissed));
+                other.notificationToken == notificationToken));
   }
 
   @override
@@ -85,12 +80,11 @@ mixin _$ChatScreenState {
       contactPresenceStatus,
       effect,
       const DeepCollectionEquality().hash(attachmentsDataCache),
-      notificationToken,
-      notificationBannerDismissed);
+      notificationToken);
 
   @override
   String toString() {
-    return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken, notificationBannerDismissed: $notificationBannerDismissed)';
+    return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
   }
 }
 
@@ -113,8 +107,7 @@ abstract mixin class $ChatScreenStateCopyWith<$Res> {
       ContactPresenceStatus contactPresenceStatus,
       ScreenEffect? effect,
       Map<String, Uint8List> attachmentsDataCache,
-      String? notificationToken,
-      bool notificationBannerDismissed});
+      String? notificationToken});
 
   $ContactCardCopyWith<$Res>? get otherPartyCard;
 }
@@ -145,7 +138,6 @@ class _$ChatScreenStateCopyWithImpl<$Res>
     Object? effect = freezed,
     Object? attachmentsDataCache = null,
     Object? notificationToken = freezed,
-    Object? notificationBannerDismissed = null,
   }) {
     return _then(_self.copyWith(
       contact: freezed == contact
@@ -200,10 +192,6 @@ class _$ChatScreenStateCopyWithImpl<$Res>
           ? _self.notificationToken
           : notificationToken // ignore: cast_nullable_to_non_nullable
               as String?,
-      notificationBannerDismissed: null == notificationBannerDismissed
-          ? _self.notificationBannerDismissed
-          : notificationBannerDismissed // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 
@@ -328,8 +316,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             ContactPresenceStatus contactPresenceStatus,
             ScreenEffect? effect,
             Map<String, Uint8List> attachmentsDataCache,
-            String? notificationToken,
-            bool notificationBannerDismissed)?
+            String? notificationToken)?
         $default, {
     required TResult orElse(),
   }) {
@@ -349,8 +336,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             _that.contactPresenceStatus,
             _that.effect,
             _that.attachmentsDataCache,
-            _that.notificationToken,
-            _that.notificationBannerDismissed);
+            _that.notificationToken);
       case _:
         return orElse();
     }
@@ -384,8 +370,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             ContactPresenceStatus contactPresenceStatus,
             ScreenEffect? effect,
             Map<String, Uint8List> attachmentsDataCache,
-            String? notificationToken,
-            bool notificationBannerDismissed)
+            String? notificationToken)
         $default,
   ) {
     final _that = this;
@@ -404,8 +389,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             _that.contactPresenceStatus,
             _that.effect,
             _that.attachmentsDataCache,
-            _that.notificationToken,
-            _that.notificationBannerDismissed);
+            _that.notificationToken);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -438,8 +422,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             ContactPresenceStatus contactPresenceStatus,
             ScreenEffect? effect,
             Map<String, Uint8List> attachmentsDataCache,
-            String? notificationToken,
-            bool notificationBannerDismissed)?
+            String? notificationToken)?
         $default,
   ) {
     final _that = this;
@@ -458,8 +441,7 @@ extension ChatScreenStatePatterns on ChatScreenState {
             _that.contactPresenceStatus,
             _that.effect,
             _that.attachmentsDataCache,
-            _that.notificationToken,
-            _that.notificationBannerDismissed);
+            _that.notificationToken);
       case _:
         return null;
     }
@@ -482,8 +464,7 @@ class _ChatScreenState extends ChatScreenState {
       this.contactPresenceStatus = ContactPresenceStatus.unknown,
       this.effect,
       final Map<String, Uint8List> attachmentsDataCache = const {},
-      this.notificationToken,
-      this.notificationBannerDismissed = false})
+      this.notificationToken})
       : _messages = messages,
         _membersTyping = membersTyping,
         _attachmentsDataCache = attachmentsDataCache,
@@ -541,9 +522,6 @@ class _ChatScreenState extends ChatScreenState {
 
   @override
   final String? notificationToken;
-  @override
-  @JsonKey()
-  final bool notificationBannerDismissed;
 
   /// Create a copy of ChatScreenState
   /// with the given fields replaced by the non-null parameter values.
@@ -579,11 +557,7 @@ class _ChatScreenState extends ChatScreenState {
             const DeepCollectionEquality()
                 .equals(other._attachmentsDataCache, _attachmentsDataCache) &&
             (identical(other.notificationToken, notificationToken) ||
-                other.notificationToken == notificationToken) &&
-            (identical(other.notificationBannerDismissed,
-                    notificationBannerDismissed) ||
-                other.notificationBannerDismissed ==
-                    notificationBannerDismissed));
+                other.notificationToken == notificationToken));
   }
 
   @override
@@ -601,12 +575,11 @@ class _ChatScreenState extends ChatScreenState {
       contactPresenceStatus,
       effect,
       const DeepCollectionEquality().hash(_attachmentsDataCache),
-      notificationToken,
-      notificationBannerDismissed);
+      notificationToken);
 
   @override
   String toString() {
-    return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken, notificationBannerDismissed: $notificationBannerDismissed)';
+    return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
   }
 }
 
@@ -631,8 +604,7 @@ abstract mixin class _$ChatScreenStateCopyWith<$Res>
       ContactPresenceStatus contactPresenceStatus,
       ScreenEffect? effect,
       Map<String, Uint8List> attachmentsDataCache,
-      String? notificationToken,
-      bool notificationBannerDismissed});
+      String? notificationToken});
 
   @override
   $ContactCardCopyWith<$Res>? get otherPartyCard;
@@ -664,7 +636,6 @@ class __$ChatScreenStateCopyWithImpl<$Res>
     Object? effect = freezed,
     Object? attachmentsDataCache = null,
     Object? notificationToken = freezed,
-    Object? notificationBannerDismissed = null,
   }) {
     return _then(_ChatScreenState(
       contact: freezed == contact
@@ -719,10 +690,6 @@ class __$ChatScreenStateCopyWithImpl<$Res>
           ? _self.notificationToken
           : notificationToken // ignore: cast_nullable_to_non_nullable
               as String?,
-      notificationBannerDismissed: null == notificationBannerDismissed
-          ? _self.notificationBannerDismissed
-          : notificationBannerDismissed // ignore: cast_nullable_to_non_nullable
-              as bool,
     ));
   }
 

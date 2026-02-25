@@ -31,7 +31,6 @@ abstract class ChatScreenState with _$ChatScreenState {
     ScreenEffect? effect,
     @Default({}) Map<String, Uint8List> attachmentsDataCache,
     String? notificationToken,
-    @Default(false) bool notificationBannerDismissed,
   }) = _ChatScreenState;
 
   int getIndexOfNextMessageFromMe(int startingFrom) {
