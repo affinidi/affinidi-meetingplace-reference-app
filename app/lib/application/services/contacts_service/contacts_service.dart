@@ -380,12 +380,12 @@ class ContactsService extends _$ContactsService {
 
   /// Reset the badge count for a contact.
   ///
-  /// [did] - The channel DID of the contact to reset.
+  /// [channelDid] - The channel DID of the contact to reset.
   ///
   /// Returns:
   /// - `Future<void>` completes when the update and refresh finish.
-  Future<void> resetContactBadgeCount(String did) async {
-    final contact = state.getContactByChannelDid(did);
+  Future<void> resetContactBadgeCount(String channelDid) async {
+    final contact = state.getContactByChannelDid(channelDid);
     if (contact == null) {
       return;
     }
