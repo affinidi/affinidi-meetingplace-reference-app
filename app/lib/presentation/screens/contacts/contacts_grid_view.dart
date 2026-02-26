@@ -150,7 +150,7 @@ class _ContactGridItem extends ConsumerWidget {
                 ),
               Text(
                 displayName ?? fullName,
-                style: contact.type == ContactType.individual
+                style: contact.isIndividual
                     ? (hasDisplayName
                         ? context.textTheme.labelSmall
                         : context.textTheme.titleSmall)
