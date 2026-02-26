@@ -216,11 +216,17 @@ class _IdentityContentSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
-        top: identityCardSize.isSmall ? 4 : 48,
-        left: identityCardSize.isSmall ? 20 : 24,
-        right: identityCardSize.isSmall ? 20 : 24,
-      ),
+      padding: identityCardSize.isSmall
+          ? const EdgeInsets.only(
+              top: 4,
+              left: 20,
+              right: 20,
+            )
+          : const EdgeInsets.only(
+              top: 48,
+              left: 24,
+              right: 24,
+            ),
       child: _IdentityContent(
         identity: identity,
         identityCardSize: identityCardSize,
