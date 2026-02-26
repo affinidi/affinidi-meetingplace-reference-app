@@ -72,8 +72,10 @@ class OOBService extends _$OOBService {
 
     final contactCard = _currentIdentity!.card.toSdkContactCard();
 
-    final createOobFlowResult =
-        await sdk.createOobFlow(contactCard: contactCard);
+    final createOobFlowResult = await sdk.createOobFlow(
+      contactCard: contactCard,
+      externalRef: _currentIdentity!.id,
+    );
 
     if (_publishOfferStreamSubscription != null) {
       await _publishOfferStreamSubscription?.dispose();

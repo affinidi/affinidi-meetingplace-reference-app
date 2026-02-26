@@ -86,6 +86,7 @@ void main() {
         final calls = fakeSdk.createOobFlowCalls;
         expect(calls.isNotEmpty, true);
         expect(calls.first['contactCard'], isNotNull);
+        expect(calls.first['externalRef'], testIdentity.id);
       });
 
       testWidgets('should display QR code after successful OOB creation',
