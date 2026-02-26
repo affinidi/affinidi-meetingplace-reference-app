@@ -24,17 +24,13 @@ class _Names extends ConsumerWidget {
       children: [
         if (otherPartyDisplayName.isNotEmpty)
           Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                otherPartyDisplayName,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.right,
-                style: context.textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            child: Text(
+              otherPartyDisplayName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.right,
+              style: context.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -49,17 +45,13 @@ class _Names extends ConsumerWidget {
           ),
         if (myDisplayName.isNotEmpty)
           Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                myDisplayName,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.left,
-                style: context.textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            child: Text(
+              myDisplayName,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.left,
+              style: context.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

@@ -147,7 +147,7 @@ class ConnectionDetailsScreenController
     final currentContact = state.contact;
     if (currentContact == null) return;
 
-    final newDisplayName = displayNameController.text;
+    final newDisplayName = displayNameController.text.trim();
     final updatedContact = currentContact.copyWith(
       displayName: newDisplayName.isEmpty ? null : newDisplayName,
     );
