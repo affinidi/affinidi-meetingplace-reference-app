@@ -58,7 +58,8 @@ class _ContactGridItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fullName = contact.card.displayName;
-    final hasDisplayName = contact.displayName?.isNotEmpty ?? false;
+    final displayName = contact.displayName?.trim();
+    final hasDisplayName = displayName != null && displayName.isNotEmpty;
 
     final isEditMode = ref.watch(
       contactsScreenControllerProvider.select((state) => state.isEditMode),
@@ -130,21 +131,15 @@ class _ContactGridItem extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 6),
-              if (hasDisplayName)
+              if (hasDisplayName && contact.isIndividual)
                 Column(
                   children: [
                     Text(
                       contact.displayName!,
-                      style: contact.type == ContactType.individual
-                          ? context.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: context.colorScheme.primary,
-                            )
-                          : context.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  context.colorScheme.onSurface.withAlpha(179),
-                            ),
+                      style: context.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: context.colorScheme.primary,
+                      ),
                       textAlign: TextAlign.center,
                       softWrap: true,
                       overflow: TextOverflow.ellipsis,
@@ -153,17 +148,21 @@ class _ContactGridItem extends ConsumerWidget {
                     const SizedBox(height: 2),
                   ],
                 ),
-              if (contact.type == ContactType.individual)
-                Text(
-                  fullName,
-                  style: hasDisplayName
-                      ? context.textTheme.labelSmall
-                      : context.textTheme.titleSmall,
-                  textAlign: TextAlign.center,
-                  softWrap: true,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
+              Text(
+                displayName ?? fullName,
+                style: contact.isIndividual
+                    ? (hasDisplayName
+                        ? context.textTheme.labelSmall
+                        : context.textTheme.titleSmall)
+                    : context.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: context.colorScheme.onSurface.withAlpha(179),
+                      ),
+                textAlign: TextAlign.center,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
             ],
           ),
         ),

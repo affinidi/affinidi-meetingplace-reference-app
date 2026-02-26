@@ -41,7 +41,7 @@ class FormRowIconTitle extends StatelessWidget {
       children: [
         ListTile(
           dense: true,
-          onTap: () => isCopiable ? _copyToClipboard(context, label) : null,
+          onTap: isCopiable ? () => _copyToClipboard(context, label) : null,
           leading: LabelIcon(
             icon: icon,
             iconColor: iconColor,

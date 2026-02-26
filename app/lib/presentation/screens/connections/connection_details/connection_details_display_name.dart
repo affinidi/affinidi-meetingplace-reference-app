@@ -22,6 +22,7 @@ class _DisplayNamePanel extends ConsumerWidget {
             controller: controller.displayNameController,
             textCapitalization: TextCapitalization.sentences,
             autocorrect: true,
+            singleLine: true,
           ),
         ),
         Padding(
