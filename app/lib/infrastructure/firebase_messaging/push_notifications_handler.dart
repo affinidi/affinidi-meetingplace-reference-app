@@ -50,7 +50,11 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
   late final _handlingTokenLock = Lock();
 
   @override
-  Future<void> build() async {
+  Future<void> build() async {}
+
+  Future<void> ensureInitialized() async {
+    _pushNotificationMessaging =
+        await ref.read(pushNotificationMessagingProvider.future);
     final secureStorage = await ref.read(secureStorageProvider.future);
     final pushNotificationToken =
         await secureStorage.getPushNotificationToken();
@@ -62,9 +66,6 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
       );
       await _handlePushNotificationToken(pushNotificationToken);
     }
-
-    _pushNotificationMessaging =
-        await ref.read(pushNotificationMessagingProvider.future);
 
     // Subscribe to push notification token changes
     _pushNotificationMessaging.onTokenRefresh
@@ -97,15 +98,9 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
       _pushNotificationReceivedController.add(null);
     });
 
-    unawaited(
-      Future(
-        () async {
-          _requestPermissions();
-          await getToken();
-          await _setupInteractedMessage();
-        },
-      ),
-    );
+    _requestPermissions();
+    await getToken();
+    await _setupInteractedMessage();
   }
 
   Future<void> getToken() async {
@@ -193,7 +188,7 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
     if (kIsWeb) return;
     if (!Platform.isIOS && !Platform.isMacOS) return;
 
-    final maxAttempts = 5;
+    final maxAttempts = 10;
     var attempt = 0;
     var delayMs = 500;
 
