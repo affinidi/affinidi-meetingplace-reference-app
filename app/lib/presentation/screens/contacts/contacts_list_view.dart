@@ -128,7 +128,7 @@ class _ContactListItem extends ConsumerWidget {
                       contact: contact,
                       isList: true,
                     ),
-                    if (contact.badgeCount > 0) ...[
+                    if (contact.badgeCount > 0 || contact.isOobContact) ...[
                       Positioned(
                         bottom: -5,
                         right: -10,

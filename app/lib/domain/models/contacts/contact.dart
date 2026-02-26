@@ -1,6 +1,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import '../contact_card/contact_card.dart';
 
+import '../contact_card/contact_card.dart';
 import 'contact_category.dart';
 import 'contact_origin.dart';
 import 'contact_status.dart';
@@ -58,6 +58,7 @@ class Contact {
     this.currentMessageSeqNo = 0,
     this.hasBeenOpened = false,
     this.lastKeepAliveMessage,
+    this.notificationBannerDismissed = false,
   });
 
   @CopyWithField(immutable: true)
@@ -80,6 +81,7 @@ class Contact {
   final int currentMessageSeqNo;
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;
+  final bool notificationBannerDismissed;
 
   bool get isGroup => type == ContactType.group;
   bool get isIndividual => type == ContactType.individual;

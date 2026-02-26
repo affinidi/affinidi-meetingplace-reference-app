@@ -38,10 +38,46 @@ class FakeChannels {
     );
   }
 
+  static Channel get oobChannel {
+    final contact = FakeContacts.oobContact;
+    return Channel(
+      permanentChannelDid: contact.channelDid!,
+      otherPartyPermanentChannelDid: contact.channelDid!,
+      offerLink: contact.offerLink,
+      contactCard: contact.card.toSdkContactCard(),
+      otherPartyContactCard: contact.otherPartyCard?.toSdkContactCard(),
+      otherPartyNotificationToken: null,
+      seqNo: 0,
+      type: ChannelType.oob,
+      publishOfferDid: 'did:key:oob-offer',
+      mediatorDid: contact.mediatorDid,
+      status: ChannelStatus.inaugurated,
+    );
+  }
+
+  static Channel get oobChannelDismissed {
+    final contact = FakeContacts.oobContactDismissed;
+    return Channel(
+      permanentChannelDid: contact.channelDid!,
+      otherPartyPermanentChannelDid: contact.channelDid!,
+      offerLink: contact.offerLink,
+      contactCard: contact.card.toSdkContactCard(),
+      otherPartyContactCard: contact.otherPartyCard?.toSdkContactCard(),
+      otherPartyNotificationToken: null,
+      seqNo: 0,
+      type: ChannelType.oob,
+      publishOfferDid: 'did:key:oob-dismissed-offer',
+      mediatorDid: contact.mediatorDid,
+      status: ChannelStatus.inaugurated,
+    );
+  }
+
   static Map<String, Channel> get allChannels {
     return {
       FakeContacts.individualContact.channelDid!: individualChannel,
       FakeContacts.groupContact.channelDid!: groupChannel,
+      FakeContacts.oobContact.channelDid!: oobChannel,
+      FakeContacts.oobContactDismissed.channelDid!: oobChannelDismissed,
     };
   }
 }

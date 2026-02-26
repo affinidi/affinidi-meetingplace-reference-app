@@ -996,6 +996,18 @@ class ChatScreenController extends _$ChatScreenController {
       name: _logKey,
     );
   }
+
+  Future<void> dismissNotificationBanner() async {
+    final contact = state.contact;
+    if (contact == null) return;
+
+    final updatedContact = contact.copyWith(
+      notificationBannerDismissed: true,
+    );
+    await ref.read(contactsServiceProvider.notifier).updateContact(
+          updatedContact,
+        );
+  }
 }
 
 extension ChatScreenControllerProviderSelectors

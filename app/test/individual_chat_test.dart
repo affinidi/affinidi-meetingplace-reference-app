@@ -525,5 +525,126 @@ void main() {
         });
       });
     });
+
+    group('and contact is an OOB contact', () {
+      testWidgets('it should show notification unavailable banner',
+          (tester) async {
+        final l10n = await getL10n();
+        final oobChatSDK = FakeChatSdk();
+
+        await navigateToLocation(
+          tester,
+          '/contacts/${FakeContacts.oobContact.id}/chat',
+          isAuthenticated: true,
+          alreadyOnboarded: true,
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [FakeContacts.oobContact],
+          meetingPlaceChatSDK: oobChatSDK,
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('notifications_unavailable_banner')),
+          findsOneWidget,
+        );
+
+        expect(
+          find.byIcon(Icons.notifications_off_outlined),
+          findsWidgets,
+        );
+
+        expect(
+          find.byKey(const Key('notifications_why_link')),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.byKey(const Key('notifications_why_link')));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(l10n.chatNotificationsWhyTitle),
+          findsOneWidget,
+        );
+        expect(
+          find.text(l10n.chatNotificationsWhyDescription),
+          findsOneWidget,
+        );
+        expect(
+          find.text(l10n.chatNotificationsWhyButton),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.text(l10n.chatNotificationsWhyButton));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(l10n.chatNotificationsWhyTitle),
+          findsNothing,
+        );
+      });
+
+      group('and press dismiss button', () {
+        testWidgets('it should dismiss the banner', (tester) async {
+          final oobChatSDK = FakeChatSdk();
+
+          await navigateToLocation(
+            tester,
+            '/contacts/${FakeContacts.oobContact.id}/chat',
+            isAuthenticated: true,
+            alreadyOnboarded: true,
+            identities: [FakeIdentities.primaryIdentity],
+            contacts: [FakeContacts.oobContact],
+            meetingPlaceChatSDK: oobChatSDK,
+          );
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byKey(const Key('notifications_unavailable_banner')),
+            findsOneWidget,
+          );
+
+          final closeButton = find.descendant(
+            of: find.byKey(const Key('notifications_unavailable_banner')),
+            matching: find.byIcon(Icons.close),
+          );
+          expect(closeButton, findsOneWidget);
+
+          await tester.tap(closeButton);
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byKey(const Key('notifications_unavailable_banner')),
+            findsNothing,
+          );
+        });
+      });
+
+      testWidgets(
+          'it should not show notification banner when it has been dismissed',
+          (tester) async {
+        final oobChatSDK = FakeChatSdk();
+
+        await navigateToLocation(
+          tester,
+          '/contacts/${FakeContacts.oobContactDismissed.id}/chat',
+          isAuthenticated: true,
+          alreadyOnboarded: true,
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [FakeContacts.oobContactDismissed],
+          meetingPlaceChatSDK: oobChatSDK,
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byKey(const Key('notifications_unavailable_banner')),
+          findsNothing,
+        );
+
+        expect(
+          find.byIcon(Icons.notifications_off_outlined),
+          findsOneWidget,
+        );
+      });
+    });
   });
 }

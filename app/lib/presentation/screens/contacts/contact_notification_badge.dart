@@ -27,6 +27,10 @@ class _ContactNotificationBadge extends StatelessWidget {
             color: context.colorScheme.onPrimary,
             fontWeight: FontWeight.bold,
           );
+    final isOobContact = origin == ContactOrigin.directInteractive;
+    final badgeColor = isOobContact
+        ? context.colorScheme.surfaceContainerHigh
+        : origin.color(context);
 
     return Container(
       constraints: BoxConstraints(
@@ -34,7 +38,7 @@ class _ContactNotificationBadge extends StatelessWidget {
         minHeight: size,
       ),
       decoration: BoxDecoration(
-        color: origin.color(context),
+        color: badgeColor,
         shape: BoxShape.circle,
         border: Border.all(
           color: context.colorScheme.surface,
@@ -42,14 +46,20 @@ class _ContactNotificationBadge extends StatelessWidget {
         ),
       ),
       alignment: Alignment.center,
-      padding: padding,
-      child: Text(
-        badgeCount > 99 ? '99+' : '$badgeCount',
-        style: textStyle,
-        textScaler:
-            (MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling)
-                .clamp(maxScaleFactor: 0.8),
-      ),
+      padding: isOobContact ? null : padding,
+      child: isOobContact
+          ? const Icon(
+              Icons.notifications_off_outlined,
+              color: Colors.white,
+              size: 14,
+            )
+          : Text(
+              badgeCount > 99 ? '99+' : '$badgeCount',
+              style: textStyle,
+              textScaler: (MediaQuery.maybeTextScalerOf(context) ??
+                      TextScaler.noScaling)
+                  .clamp(maxScaleFactor: 0.8),
+            ),
     );
   }
 }

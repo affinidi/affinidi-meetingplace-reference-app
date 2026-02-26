@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/presentation/dialogs/qr_code_picker/qr_code_picker.dart';
 
+import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_meeting_place_sdk.dart';
 import 'utils/app.dart';
@@ -160,6 +161,29 @@ void main() {
           expect(fakeSdk.acceptOobStreamDisposals.length, equals(1));
           expect(fakeSdk.acceptOobStreamDisposals.first, equals(firstQrUrl));
         });
+      });
+    });
+
+    group('and OOB contact exists in contacts list', () {
+      testWidgets(
+          'should show notification off badge icon instead of count badge',
+          (tester) async {
+        await navigateToLocation(
+          tester,
+          '/contacts',
+          isAuthenticated: true,
+          alreadyOnboarded: true,
+          identities: [testIdentity],
+          contacts: [FakeContacts.oobContact],
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.byIcon(Icons.notifications_off_outlined),
+          findsOneWidget,
+        );
+
+        expect(find.text('0'), findsNothing);
       });
     });
   });

@@ -2095,7 +2095,7 @@ abstract class AppLocalizations {
   /// No description provided for @chatNotificationsUnavailable.
   ///
   /// In en, this message translates to:
-  /// **'Chat notifications are not available for direct connections'**
+  /// **'Push notifications aren\'t supported for chats started by scanning or sharing a QR code.'**
   String get chatNotificationsUnavailable;
 
   /// No description provided for @chatNotificationsUnavailableNotShared.
@@ -2103,6 +2103,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications for this chat channel are not available'**
   String get chatNotificationsUnavailableNotShared;
+
+  /// No description provided for @chatNotificationsWhyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why no push notifications?'**
+  String get chatNotificationsWhyTitle;
+
+  /// No description provided for @chatNotificationsWhyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When you establish a connection by direct scanning or sharing a QR code, your devices connect directly without exchanging notification tokens with our servers. This means push notifications can\'t be sent when the chat is closed.'**
+  String get chatNotificationsWhyDescription;
+
+  /// No description provided for @chatNotificationsWhyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll only see new messages when you\'re in the chat. There will be no badge updates or notifications informing you that new messages have arrived, even if the app is open.'**
+  String get chatNotificationsWhyNote;
+
+  /// No description provided for @chatNotificationsWhyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get chatNotificationsWhyButton;
+
+  /// No description provided for @chatNotificationsWhyLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Why?'**
+  String get chatNotificationsWhyLink;
 
   /// No description provided for @meetingPlaceInvitationTitle.
   ///

@@ -1381,12 +1381,32 @@
   "@networkDisconnected": {
     "type": "text"
   },
-  "chatNotificationsUnavailable": "Chat notifications are not available for direct connections",
+  "chatNotificationsUnavailable": "Push notifications aren't supported for chats started by scanning or sharing a QR code.",
   "@chatNotificationsUnavailable": {
     "type": "text"
   },
   "chatNotificationsUnavailableNotShared": "Notifications for this chat channel are not available",
   "@chatNotificationsUnavailableNotShared": {
+    "type": "text"
+  },
+   "chatNotificationsWhyTitle": "Why no push notifications?",
+  "@chatNotificationsWhyTitle": {
+    "type": "text"
+  },
+  "chatNotificationsWhyDescription": "When you establish a connection by direct scanning or sharing a QR code, your devices connect directly without exchanging notification tokens with our servers. This means push notifications can't be sent when the chat is closed.",
+  "@chatNotificationsWhyDescription": {
+    "type": "text"
+  },
+  "chatNotificationsWhyNote": "You'll only see new messages when you're in the chat. There will be no badge updates or notifications informing you that new messages have arrived, even if the app is open.",
+  "@chatNotificationsWhyNote": {
+    "type": "text"
+  },
+  "chatNotificationsWhyButton": "Got it",
+  "@chatNotificationsWhyButton": {
+    "type": "text"
+  },
+  "chatNotificationsWhyLink": "Why?",
+  "@chatNotificationsWhyLink": {
     "type": "text"
   },
   "meetingPlaceInvitationTitle": "Meeting Place Invitation",
