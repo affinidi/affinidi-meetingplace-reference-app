@@ -52,7 +52,7 @@ class _SharedIdentityPanel extends ConsumerWidget {
                 child: identity != null
                     ? IdentityCard(
                         identity: identity,
-                        displayMode: true,
+                        identityCardSize: IdentityCardSize.small,
                         cacheManager: cacheManager,
                       )
                     : const SizedBox.shrink(),

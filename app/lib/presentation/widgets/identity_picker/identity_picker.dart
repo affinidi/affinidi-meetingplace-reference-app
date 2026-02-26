@@ -89,7 +89,9 @@ class IdentityPicker extends HookWidget {
               ? IdentityPlaceholderCard(onCreateIdentity)
               : IdentityCard(
                   identity: identity,
-                  displayMode: displayMode,
+                  identityCardSize: displayMode
+                      ? IdentityCardSize.small
+                      : IdentityCardSize.normal,
                   onDeleteIdentity: onDeleteIdentity,
                   onFindOfferForIdentity: onFindOfferForIdentity,
                   onEditIdentity: onEditIdentity,

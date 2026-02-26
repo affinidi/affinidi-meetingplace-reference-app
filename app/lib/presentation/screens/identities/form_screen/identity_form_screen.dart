@@ -125,7 +125,7 @@ class _IdentitySection extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: IdentityCard(
             identity: identity,
-            displayMode: true,
+            identityCardSize: IdentityCardSize.small,
             cacheManager: cacheManager,
           ),
         ),
