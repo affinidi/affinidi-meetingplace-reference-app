@@ -75,20 +75,18 @@ class IdentityCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            Container(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _IdentityHeader(
-                    identity: identity,
-                    identityCardSize: identityCardSize,
-                  ),
-                  _IdentityContentSection(
-                    identity: identity,
-                    identityCardSize: identityCardSize,
-                  ),
-                ],
-              ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _IdentityHeader(
+                  identity: identity,
+                  identityCardSize: identityCardSize,
+                ),
+                _IdentityContentSection(
+                  identity: identity,
+                  identityCardSize: identityCardSize,
+                ),
+              ],
             ),
             _IdentityProfilePicture(
               identity: identity,
