@@ -18,6 +18,7 @@ import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
+import '../../../infrastructure/extensions/chat_items_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/event_message_extentions.dart';
 import '../../../infrastructure/extensions/list_extensions.dart';
@@ -635,7 +636,7 @@ class ChatScreenController extends _$ChatScreenController {
         existingMessages.indexWhere((m) => m.messageId == item.messageId);
 
     final messages = (existingItemIndex == -1)
-        ? [item, ...existingMessages]
+        ? existingMessages.insertSorted(item)
         : existingMessages.replaceItemAtIndex(existingItemIndex, item);
     state = state.copyWith(messages: messages);
   }
