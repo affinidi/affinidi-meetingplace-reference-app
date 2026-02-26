@@ -129,6 +129,10 @@ class ControlPlaneService extends _$ControlPlaneService
       _controlPlaneEventsStream?.listen(_handleControlPlaneEvent);
     });
 
+    Future(
+      ref.read(pushNotificationsHandlerProvider.notifier).ensureInitialized,
+    );
+
     return const ControlPlaneServiceState();
   }
 
