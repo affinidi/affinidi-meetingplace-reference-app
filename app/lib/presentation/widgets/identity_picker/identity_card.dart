@@ -64,15 +64,22 @@ class IdentityCard extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            _IdentityHeader(identity: identity, displayMode: displayMode),
+            Container(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _IdentityHeader(identity: identity, displayMode: displayMode),
+                  _IdentityContentSection(
+                    identity: identity,
+                    displayMode: displayMode,
+                  ),
+                ],
+              ),
+            ),
             _IdentityProfilePicture(
               identity: identity,
               size: displayMode ? 110 : 130,
               cacheManager: cacheManager,
-            ),
-            _IdentityContentSection(
-              identity: identity,
-              displayMode: displayMode,
             ),
             if (!displayMode)
               _IdentityActionButton(
@@ -104,6 +111,8 @@ class _IdentityHeader extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final l10n = context.l10n;
 
+    final rightInset = displayMode ? 130.0 : 150.0;
+
     return Container(
       constraints: BoxConstraints(minHeight: displayMode ? 45 : 90),
       decoration: BoxDecoration(
@@ -113,7 +122,7 @@ class _IdentityHeader extends StatelessWidget {
         ),
         gradient: identity.getLinearGradient(colorScheme),
       ),
-      padding: const EdgeInsets.all(14.0),
+      padding: EdgeInsets.fromLTRB(14, 14, rightInset, 14),
       child: Row(
         children: [
           Expanded(
@@ -124,13 +133,14 @@ class _IdentityHeader extends StatelessWidget {
               spacing: 4,
               children: [
                 Text(
-                  identity.getDisplayName(l10n: l10n),
+                  identity.isPrimary || identity.isPlaceholder
+                      ? identity.getDisplayName(l10n: l10n)
+                      : identity.card.fullName,
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onPrimary,
                   ),
-                  maxLines: 2,
-                  softWrap: true,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
@@ -138,10 +148,12 @@ class _IdentityHeader extends StatelessWidget {
                   style: (displayMode
                           ? textTheme.labelMedium
                           : textTheme.bodyMedium)
-                      ?.copyWith(color: colorScheme.onPrimary.withAlpha(180)),
-                  softWrap: true,
+                      ?.copyWith(
+                    color: colorScheme.onPrimary.withAlpha(180),
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  softWrap: true,
                 ),
               ],
             ),
@@ -187,11 +199,12 @@ class _IdentityContentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: displayMode ? 60 : 120,
-      left: 0,
-      right: 0,
-      bottom: displayMode ? 0 : 80,
+    return Padding(
+      padding: EdgeInsets.only(
+        top: displayMode ? 4 : 48,
+        left: displayMode ? 20 : 24,
+        right: displayMode ? 20 : 24,
+      ),
       child: _IdentityContent(
         identity: identity,
         displayMode: displayMode,
@@ -221,34 +234,42 @@ class _IdentityContent extends StatelessWidget {
         ? identity.card.mobilePhone
         : l10n.notShared;
 
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            identity.card.fullName.isNotEmpty == true
-                ? identity.card.fullName
-                : '',
-            style: displayMode ? textTheme.bodyMedium : textTheme.titleMedium,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            softWrap: true,
+    final name =
+        identity.card.fullName.isNotEmpty == true ? identity.card.fullName : '';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (name.isNotEmpty)
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  name,
+                  style: displayMode
+                      ? textTheme.bodyMedium
+                      : textTheme.titleMedium,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
+                ),
+              ),
+              if (displayMode) const Spacer(),
+            ],
           ),
-          const SizedBox(height: 16),
-          _ContactInfoRow(
-            icon: Icons.email,
-            text: email,
-            displayMode: displayMode,
-          ),
-          const SizedBox(height: 8),
-          _ContactInfoRow(
-            icon: Icons.phone,
-            text: phone,
-            displayMode: displayMode,
-          ),
-        ],
-      ),
+        SizedBox(height: displayMode ? 12 : 16),
+        _ContactInfoRow(
+          icon: Icons.email,
+          text: email,
+          displayMode: displayMode,
+        ),
+        SizedBox(height: displayMode ? 6 : 8),
+        _ContactInfoRow(
+          icon: Icons.phone,
+          text: phone,
+          displayMode: displayMode,
+        ),
+      ],
     );
   }
 }
