@@ -251,7 +251,7 @@ class ChatScreenController extends _$ChatScreenController {
       _updateContactPresenceStatus(lastKeepAliveMessage);
     }
 
-    unawaited(_updateContactSequenceNumber(channelDid));
+    await _updateContactSequenceNumber(channelDid);
 
     final chatSDK = _chatSDK;
     if (chatSDK == null) {
@@ -964,11 +964,9 @@ class ChatScreenController extends _$ChatScreenController {
       return;
     }
 
-    unawaited(
-      ref
-          .read(contactsServiceProvider.notifier)
-          .updateContactSequenceNumber(channelDid, channel.seqNo),
-    );
+    await ref
+        .read(contactsServiceProvider.notifier)
+        .updateContactSequenceNumber(channelDid, channel.seqNo);
   }
 
   Future<void> _startChatSession(Contact contact) async {
@@ -983,12 +981,17 @@ class ChatScreenController extends _$ChatScreenController {
 
     state = state.copyWith(isInitialized: true);
 
-    await ref.read(contactsServiceProvider.notifier).updateContact(
-          contact.copyWith(
-            badgeCount: 0,
-            hasBeenOpened: true,
-          ),
-        );
+    final channelDid = contact.channelDid;
+    if (channelDid == null) {
+      throw AppException(
+        'Contact has not been associated to any channels',
+        code: AppExceptionType.missingChannel.name,
+      );
+    }
+
+    await ref
+        .read(contactsServiceProvider.notifier)
+        .resetContactBadgeCount(channelDid);
 
     await ref.read(appBadgeServiceProvider).clearBadge();
 
