@@ -17,7 +17,7 @@ enum IdentityCardSize {
   normal;
 }
 
-extension IdentityCardSizeExtension on IdentityCardSize {
+extension _IdentityCardSizeExtension on IdentityCardSize {
   bool get isSmall => this == IdentityCardSize.small;
 }
 
