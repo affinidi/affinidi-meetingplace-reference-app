@@ -12,6 +12,15 @@ import '../../../infrastructure/extensions/identities_extensions.dart';
 import '../animated_menu.dart';
 import '../profile_picture.dart';
 
+enum IdentityCardSize {
+  small,
+  normal;
+}
+
+extension IdentityCardSizeExtension on IdentityCardSize {
+  bool get isSmall => this == IdentityCardSize.small;
+}
+
 class IdentityCard extends StatelessWidget {
   const IdentityCard({
     super.key,
@@ -20,12 +29,12 @@ class IdentityCard extends StatelessWidget {
     this.onFindOfferForIdentity,
     this.onEditIdentity,
     this.onPublishOfferForIdentity,
-    this.displayMode = false,
+    this.identityCardSize = IdentityCardSize.normal,
     required this.cacheManager,
   });
 
   final Identity identity;
-  final bool displayMode;
+  final IdentityCardSize identityCardSize;
   final BaseCacheManager cacheManager;
   final void Function(Identity identity)? onDeleteIdentity;
   final void Function(Identity identity)? onFindOfferForIdentity;
@@ -39,8 +48,10 @@ class IdentityCard extends StatelessWidget {
     return Center(
       child: Container(
         margin: const EdgeInsets.all(8),
-        constraints:
-            BoxConstraints(minHeight: displayMode ? 200 : 400, maxWidth: 650),
+        constraints: BoxConstraints(
+          minHeight: identityCardSize.isSmall ? 200 : 400,
+          maxWidth: 650,
+        ),
         decoration: BoxDecoration(
           gradient: RadialGradient(
             radius: 0.5,
@@ -68,20 +79,23 @@ class IdentityCard extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _IdentityHeader(identity: identity, displayMode: displayMode),
+                  _IdentityHeader(
+                    identity: identity,
+                    identityCardSize: identityCardSize,
+                  ),
                   _IdentityContentSection(
                     identity: identity,
-                    displayMode: displayMode,
+                    identityCardSize: identityCardSize,
                   ),
                 ],
               ),
             ),
             _IdentityProfilePicture(
               identity: identity,
-              size: displayMode ? 110 : 130,
+              size: identityCardSize.isSmall ? 110 : 130,
               cacheManager: cacheManager,
             ),
-            if (!displayMode)
+            if (!identityCardSize.isSmall)
               _IdentityActionButton(
                 identity: identity,
                 onDeleteIdentity: onDeleteIdentity,
@@ -99,11 +113,11 @@ class IdentityCard extends StatelessWidget {
 class _IdentityHeader extends StatelessWidget {
   const _IdentityHeader({
     required this.identity,
-    this.displayMode = false,
+    required this.identityCardSize,
   });
 
   final Identity identity;
-  final bool displayMode;
+  final IdentityCardSize identityCardSize;
 
   @override
   Widget build(BuildContext context) {
@@ -111,10 +125,12 @@ class _IdentityHeader extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final l10n = context.l10n;
 
-    final rightInset = displayMode ? 130.0 : 150.0;
+    final rightInset = identityCardSize.isSmall ? 130.0 : 150.0;
 
     return Container(
-      constraints: BoxConstraints(minHeight: displayMode ? 45 : 90),
+      constraints: BoxConstraints(
+        minHeight: identityCardSize.isSmall ? 45 : 90,
+      ),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0),
@@ -145,7 +161,7 @@ class _IdentityHeader extends StatelessWidget {
                 ),
                 Text(
                   identity.getSubtitle(l10n: l10n),
-                  style: (displayMode
+                  style: (identityCardSize.isSmall
                           ? textTheme.labelMedium
                           : textTheme.bodyMedium)
                       ?.copyWith(
@@ -190,24 +206,24 @@ class _IdentityProfilePicture extends StatelessWidget {
 
 class _IdentityContentSection extends StatelessWidget {
   const _IdentityContentSection({
-    required this.displayMode,
     required this.identity,
+    required this.identityCardSize,
   });
 
   final Identity identity;
-  final bool displayMode;
+  final IdentityCardSize identityCardSize;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        top: displayMode ? 4 : 48,
-        left: displayMode ? 20 : 24,
-        right: displayMode ? 20 : 24,
+        top: identityCardSize.isSmall ? 4 : 48,
+        left: identityCardSize.isSmall ? 20 : 24,
+        right: identityCardSize.isSmall ? 20 : 24,
       ),
       child: _IdentityContent(
         identity: identity,
-        displayMode: displayMode,
+        identityCardSize: identityCardSize,
       ),
     );
   }
@@ -215,12 +231,12 @@ class _IdentityContentSection extends StatelessWidget {
 
 class _IdentityContent extends StatelessWidget {
   const _IdentityContent({
-    required this.displayMode,
+    required this.identityCardSize,
     required this.identity,
   });
 
   final Identity identity;
-  final bool displayMode;
+  final IdentityCardSize identityCardSize;
 
   @override
   Widget build(BuildContext context) {
@@ -246,7 +262,7 @@ class _IdentityContent extends StatelessWidget {
               Expanded(
                 child: Text(
                   name,
-                  style: displayMode
+                  style: identityCardSize.isSmall
                       ? textTheme.bodyMedium
                       : textTheme.titleMedium,
                   maxLines: 2,
@@ -254,20 +270,20 @@ class _IdentityContent extends StatelessWidget {
                   softWrap: true,
                 ),
               ),
-              if (displayMode) const Spacer(),
+              if (identityCardSize.isSmall) const Spacer(),
             ],
           ),
-        SizedBox(height: displayMode ? 12 : 16),
+        SizedBox(height: identityCardSize.isSmall ? 12 : 16),
         _ContactInfoRow(
           icon: Icons.email,
           text: email,
-          displayMode: displayMode,
+          identityCardSize: identityCardSize,
         ),
-        SizedBox(height: displayMode ? 6 : 8),
+        SizedBox(height: identityCardSize.isSmall ? 6 : 8),
         _ContactInfoRow(
           icon: Icons.phone,
           text: phone,
-          displayMode: displayMode,
+          identityCardSize: identityCardSize,
         ),
       ],
     );
@@ -278,12 +294,12 @@ class _ContactInfoRow extends StatelessWidget {
   const _ContactInfoRow({
     required this.icon,
     required this.text,
-    required this.displayMode,
+    required this.identityCardSize,
   });
 
   final IconData icon;
   final String text;
-  final bool displayMode;
+  final IdentityCardSize identityCardSize;
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +313,9 @@ class _ContactInfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: displayMode ? textTheme.labelMedium : textTheme.titleMedium,
+            style: identityCardSize.isSmall
+                ? textTheme.labelMedium
+                : textTheme.titleMedium,
             overflow: TextOverflow.ellipsis,
           ),
         ),
