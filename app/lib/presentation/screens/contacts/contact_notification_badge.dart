@@ -63,3 +63,32 @@ class _ContactNotificationBadge extends StatelessWidget {
     );
   }
 }
+
+class _ContactNewChannelDotBadge extends StatelessWidget {
+  const _ContactNewChannelDotBadge({
+    required this.origin,
+    this.isList = false,
+  });
+
+  final ContactOrigin origin;
+  final bool isList;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = isList ? 14.0 : 16.0;
+    final borderWidth = isList ? 3.0 : 4.0;
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: origin.color(context),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: context.colorScheme.surface,
+          width: borderWidth,
+        ),
+      ),
+    );
+  }
+}

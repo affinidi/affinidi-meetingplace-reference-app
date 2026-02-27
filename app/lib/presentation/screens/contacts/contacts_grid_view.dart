@@ -114,6 +114,14 @@ class _ContactGridItem extends ConsumerWidget {
                               origin: contact.origin,
                               badgeCount: contact.badgeCount,
                             ),
+                    )
+                  else if (contact.isNewUnopenedChannel)
+                    Positioned(
+                      bottom: -2,
+                      right: -2,
+                      child: _ContactNewChannelDotBadge(
+                        origin: contact.origin,
+                      ),
                     ),
                   if (isEditMode)
                     Positioned(

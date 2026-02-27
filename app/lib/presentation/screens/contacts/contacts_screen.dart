@@ -11,6 +11,7 @@ import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../infrastructure/extensions/contact_image_extensions.dart';
+import '../../../infrastructure/extensions/contact_newness_extensions.dart';
 import '../../../infrastructure/extensions/contact_origin_extensions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
