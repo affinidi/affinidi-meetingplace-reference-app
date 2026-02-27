@@ -21,14 +21,15 @@ dependency_overrides:
 melos:
   scripts:
     analyze:
+      run: melos run _analyze --no-select
+    _analyze:
       exec: dart analyze --fatal-infos .
       concurrency: 4
       failFast: true
-      noSelect: true
       packageFilters:
-        flutter: true
-        includePrivatePackages: false
-        #diff: 'origin/main'
+        scope:
+          - mpx_app_core
+          - mpx_flutter_reference_app
 
     test:
       run: |
