@@ -14,7 +14,8 @@ extension ContactsList on List<Contact> {
           (contact.status == ContactStatus.approved ||
               contact.status == ContactStatus.active) &&
           contact.badgeCount == 0 &&
-          contact.currentMessageSeqNo == 0,
+          contact.currentMessageSeqNo == 0 &&
+          !contact.hasBeenOpened,
     ).length;
 
     // Sum all badgeCount values
