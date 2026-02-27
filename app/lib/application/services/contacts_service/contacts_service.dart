@@ -378,6 +378,25 @@ class ContactsService extends _$ContactsService {
     await updateContact(amendedContact);
   }
 
+  /// Reset the badge count for a contact.
+  ///
+  /// [channelDid] - The channel DID of the contact to reset.
+  ///
+  /// Returns:
+  /// - `Future<void>` completes when the update and refresh finish.
+  Future<void> resetContactBadgeCount(String channelDid) async {
+    final contact = state.getContactByChannelDid(channelDid);
+    if (contact == null) {
+      return;
+    }
+
+    final amendedContact = contact.copyWith(
+      badgeCount: 0,
+      hasBeenOpened: true,
+    );
+    await updateContact(amendedContact);
+  }
+
   /// Update an existing contact when a group invitation is accepted.
   ///
   /// Sets the contact status to pending approval and updates card/profile
