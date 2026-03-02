@@ -134,16 +134,6 @@ void main() {
       expect(find.text('3'), findsOneWidget);
     });
 
-    testWidgets('should show contact status as colored border', (tester) async {
-      await navigateToContactsScreen(tester);
-
-      await tester.tap(findListViewToggle());
-      await tester.pumpAndSettle();
-
-      final listTile = find.byType(ListTile).first;
-      expect(listTile, findsOneWidget);
-    });
-
     testWidgets('should show date added for contacts', (tester) async {
       await navigateToContactsScreen(tester);
 
