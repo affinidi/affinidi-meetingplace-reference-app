@@ -9,6 +9,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/network_connectivity_service/network_connectivity_service.dart';
@@ -43,7 +44,8 @@ part 'chat_screen_controller.g.dart';
 /// Extends [_$ChatScreenController] to provide reactive state management
 /// and business logic for chat-related features, such as handling messages,
 /// user interactions, and UI updates within the chat screen.
-class ChatScreenController extends _$ChatScreenController {
+class ChatScreenController extends _$ChatScreenController
+    with WidgetsBindingObserver {
   ChatScreenController() : super();
 
   late final int _secondsToShowChatActivityIndicator =
@@ -65,6 +67,8 @@ class ChatScreenController extends _$ChatScreenController {
   TimedAction? _membersTypingTimedAction;
   TimedAction? _updateContactPresenceStatusTimedAction;
   Timer? _saveUnsentMessageDebouncer;
+  bool _isPaused = false;
+  late final _chatResumingLock = Lock();
 
   late final Map<String, ProviderSubscription<void>>
       _conciergeLoadingControllersSubscriptions = {};
@@ -74,6 +78,8 @@ class ChatScreenController extends _$ChatScreenController {
 
   @override
   ChatScreenState build(String contactId) {
+    WidgetsBinding.instance.addObserver(this);
+
     ref.listen(
       contactsServiceProvider.select(
         (state) => state.getContactById(contactId),
@@ -123,6 +129,8 @@ class ChatScreenController extends _$ChatScreenController {
         'Chat session ended',
         name: _logKey,
       );
+
+      WidgetsBinding.instance.removeObserver(this);
     });
 
     return ChatScreenState(
@@ -150,6 +158,55 @@ class ChatScreenController extends _$ChatScreenController {
     if (!state.isInitialized) return;
 
     await _restoreUnsentMessage();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _logger.info(
+      'didChangeAppLifecycleState: $state',
+      name: _logKey,
+    );
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _chatResumingLock.synchronized(() async {
+          _resumeChatSession();
+        });
+        break;
+      case AppLifecycleState.paused:
+        _chatResumingLock.synchronized(() async {
+          _pauseChatSession();
+        });
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _resumeChatSession() async {
+    if (!_isPaused) return;
+
+    _isPaused = false;
+    _logger.info(
+      'Resuming chat session',
+      name: _logKey,
+    );
+    final contact = state.contact;
+    if (contact == null) return;
+
+    await _startChatSession(contact);
+  }
+
+  void _pauseChatSession() {
+    if (_isPaused) return;
+
+    _logger.info(
+      'Pausing chat session',
+      name: _logKey,
+    );
+    _isPaused = true;
+    _chatSDK?.endChatSession();
+    messagesSubscription?.dispose();
+    messagesSubscription = null;
   }
 
   void _onMessageTextChanged() {
@@ -274,58 +331,7 @@ class ChatScreenController extends _$ChatScreenController {
 
     await _updateContactSequenceNumber(channelDid);
 
-    final chatSDK = _chatSDK;
-    if (chatSDK == null) {
-      throw AppException(
-        'Unable to find initialized chat sdk',
-        code: AppExceptionType.other.name,
-      );
-    }
-
-    final chat = await chatSDK.startChatSession();
-    _logger.info(
-      'Chat SDK started and ready for messaging',
-      name: _logKey,
-    );
-
-    unawaited(
-      chatSDK.chatStreamSubscription.then(
-        (stream) {
-          if (stream == null) return;
-          messagesSubscription = stream.listen(
-            (data) => _onChannelMessagesData(data, channelDid),
-            onError: (Object error, StackTrace stackTrace) {
-              _logger.error(
-                'Error in message stream',
-                error: error,
-                stackTrace: stackTrace,
-                name: _logKey,
-              );
-            },
-          );
-        },
-        onError: (Object error, StackTrace stackTrace) {
-          _logger.error(
-            'Failed to get chat stream subscription',
-            error: error,
-            stackTrace: stackTrace,
-            name: _logKey,
-          );
-        },
-      ),
-    );
-
-    final messages = [EncryptionNotice(), ...chat.messages];
-    _logger.info(
-      'Existing messages: ${messages.length}',
-      name: _logKey,
-    );
     await _startChatSession(contact);
-
-    // TODO(MA): Remove sorting when it's added to sdk
-    state = state.copyWith(
-      messages: messages.sortedBy((item) => item.dateCreated).reversed.toList(),
-    );
 
     if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
@@ -1004,6 +1010,22 @@ class ChatScreenController extends _$ChatScreenController {
   }
 
   Future<void> _startChatSession(Contact contact) async {
+    final chatSDK = _chatSDK;
+    if (chatSDK == null) {
+      throw AppException(
+        'Unable to find initialized chat sdk',
+        code: AppExceptionType.other.name,
+      );
+    }
+
+    final chatSession = await chatSDK.startChatSession();
+    _logger.info(
+      'Chat SDK started and ready for messaging',
+      name: _logKey,
+    );
+
+    final messages = [EncryptionNotice(), ...chatSession.messages];
+
     state = state.copyWith(isInitialized: true);
 
     final channelDid = contact.channelDid;
@@ -1019,6 +1041,38 @@ class ChatScreenController extends _$ChatScreenController {
         .resetContactBadgeCount(channelDid);
 
     unawaited(ref.read(appBadgeServiceProvider).clearBadge());
+
+    unawaited(
+      chatSDK.chatStreamSubscription.then(
+        (stream) {
+          if (stream == null) return;
+          messagesSubscription = stream.listen(
+            (data) => _onChannelMessagesData(data, channelDid),
+            onError: (Object error, StackTrace stackTrace) {
+              _logger.error(
+                'Error in message stream',
+                error: error,
+                stackTrace: stackTrace,
+                name: _logKey,
+              );
+            },
+          );
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          _logger.error(
+            'Failed to get chat stream subscription',
+            error: error,
+            stackTrace: stackTrace,
+            name: _logKey,
+          );
+        },
+      ),
+    );
+
+    // TODO(MA): Remove sorting when it's added to sdk
+    final sorted =
+        messages.sortedBy((item) => item.dateCreated).reversed.toList();
+    state = state.copyWith(messages: sorted);
 
     _logger.info(
       'Chat session started',
