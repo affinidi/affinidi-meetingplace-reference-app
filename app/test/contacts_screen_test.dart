@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_status.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_extensions.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_contacts.dart';
@@ -96,24 +97,6 @@ void main() {
       await navigateToContactsScreen(tester);
 
       expect(find.text('3'), findsOneWidget);
-    });
-
-    testWidgets('should adjust grid columns based on screen size',
-        (tester) async {
-      await navigateToLocation(
-        tester,
-        '/contacts',
-        isAuthenticated: true,
-        alreadyOnboarded: true,
-        identities: [FakeIdentities.primaryIdentity],
-        contacts: [
-          FakeContacts.individualContact,
-          FakeContacts.groupContact,
-        ],
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(GridView), findsOneWidget);
     });
   });
 
@@ -380,8 +363,8 @@ void main() {
     });
 
     testWidgets(
-        'should reset badge count to 0 after clicking contact with new messages',
-        (tester) async {
+        'should reset badge count to 0 after clicking contact with new '
+        'messages', (tester) async {
       await navigateToLocation(
         tester,
         '/contacts',
@@ -504,13 +487,129 @@ void main() {
       final pendingContact = FakeContacts.pendingContact;
       expect(pendingContact.status, equals(ContactStatus.pendingApproval));
     });
+  });
 
-    testWidgets('should display appropriate border color based on status',
-        (tester) async {
+  group('When displaying contact borders', () {
+    testWidgets(
+        'should display appropriate border color in list view for pending '
+        'contact', (tester) async {
       await navigateToContactsScreen(tester);
 
-      final container = find.byType(Container);
-      expect(container, findsWidgets);
+      final listViewToggle = findListViewToggle();
+      if (listViewToggle.evaluate().isNotEmpty) {
+        await tester.tap(listViewToggle);
+        await tester.pumpAndSettle();
+      }
+
+      final pendingContactTile = find.ancestor(
+        of: find.text('Display Charlie'),
+        matching: find.byType(ListTile),
+      );
+      expect(pendingContactTile, findsOneWidget);
+
+      final listTile = tester.widget<ListTile>(pendingContactTile);
+      final shape = listTile.shape as RoundedRectangleBorder;
+
+      final context = tester.element(pendingContactTile);
+      final expectedColor = FakeContacts.pendingContact.getStatusColor(
+        context,
+        asAvatar: true,
+      );
+
+      expect(shape.side.color, expectedColor);
+      expect(shape.side.width, 2);
+    });
+
+    testWidgets(
+        'should display transparent border in list view for active contact '
+        'that has been opened', (tester) async {
+      await navigateToContactsScreen(tester);
+
+      final listViewToggle = findListViewToggle();
+      if (listViewToggle.evaluate().isNotEmpty) {
+        await tester.tap(listViewToggle);
+        await tester.pumpAndSettle();
+      }
+
+      final activeContactTile = find.ancestor(
+        of: find.text('Display Alice'),
+        matching: find.byType(ListTile),
+      );
+      expect(activeContactTile, findsOneWidget);
+
+      final listTile = tester.widget<ListTile>(activeContactTile);
+      final shape = listTile.shape as RoundedRectangleBorder;
+
+      expect(shape.side.color, Colors.transparent);
+    });
+
+    testWidgets(
+        'should display appropriate border color in grid view for pending '
+        'contact', (tester) async {
+      await navigateToContactsScreen(tester);
+
+      final gridViewToggle = findGridViewToggle();
+      if (gridViewToggle.evaluate().isNotEmpty) {
+        await tester.tap(gridViewToggle);
+        await tester.pumpAndSettle();
+      }
+
+      final allContainers = find.byType(Container);
+      final containers = tester.widgetList<Container>(allContainers);
+
+      final borderedContainers = containers.where((container) {
+        final decoration = container.decoration;
+        return decoration is BoxDecoration &&
+            decoration.border != null &&
+            decoration.shape == BoxShape.circle;
+      }).toList();
+
+      expect(borderedContainers.isNotEmpty, isTrue);
+
+      final pendingIndex = borderedContainers.indexWhere((container) {
+        final decoration = container.decoration as BoxDecoration;
+        final border = decoration.border as Border;
+        final element = find.byWidget(container).evaluate().first;
+        final color = FakeContacts.pendingContact.getStatusColor(
+          element,
+          asAvatar: true,
+        );
+        return border.top.color == color && border.top.width == 2;
+      });
+
+      expect(pendingIndex, greaterThanOrEqualTo(0));
+    });
+
+    testWidgets(
+        'should display transparent border in grid view for active contact '
+        'that has been opened', (tester) async {
+      await navigateToContactsScreen(tester);
+
+      final gridViewToggle = findGridViewToggle();
+      if (gridViewToggle.evaluate().isNotEmpty) {
+        await tester.tap(gridViewToggle);
+        await tester.pumpAndSettle();
+      }
+
+      final allContainers = find.byType(Container);
+      final containers = tester.widgetList<Container>(allContainers);
+
+      final borderedContainers = containers.where((container) {
+        final decoration = container.decoration;
+        return decoration is BoxDecoration &&
+            decoration.border != null &&
+            decoration.shape == BoxShape.circle;
+      }).toList();
+
+      expect(borderedContainers.isNotEmpty, isTrue);
+
+      final transparentIndex = borderedContainers.indexWhere((container) {
+        final decoration = container.decoration as BoxDecoration;
+        final border = decoration.border as Border;
+        return border.top.color == Colors.transparent;
+      });
+
+      expect(transparentIndex, greaterThanOrEqualTo(0));
     });
   });
 
