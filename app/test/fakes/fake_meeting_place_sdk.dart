@@ -152,9 +152,11 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   }
 
   @override
-  Future<void> processControlPlaneEvents({Function? onDone}) async {
+  Future<void> processControlPlaneEvents({
+    void Function(List<Object> errors)? onDone,
+  }) async {
     // ignore: avoid_dynamic_calls
-    onDone?.call();
+    onDone?.call([]);
   }
 
   @override

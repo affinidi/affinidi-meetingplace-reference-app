@@ -36,11 +36,8 @@ Future<void> navigateToGroupChatScreen(
   List<CameraDescription>? mockCameras,
   FakeSecureStorage? secureStorage,
   PermissionStatus? cameraPermissionStatus,
+  Connectivity? connectivity,
 }) async {
-  final connectivity = FakeConnectivity(
-    initialConnectivityToReturn: [ConnectivityResult.wifi],
-  );
-
   await navigateToLocation(
     tester,
     '/contacts/$contactId/chat',
@@ -48,7 +45,10 @@ Future<void> navigateToGroupChatScreen(
     alreadyOnboarded: true,
     identities: [FakeIdentities.primaryIdentity],
     contacts: [FakeContacts.groupContact],
-    connectivity: connectivity,
+    connectivity: connectivity ??
+        FakeConnectivity(
+          initialConnectivityToReturn: [ConnectivityResult.wifi],
+        ),
     meetingPlaceChatSDK: meetingPlaceChatSDK,
     imagePicker: imagePicker,
     mockCameras: mockCameras,

@@ -6,6 +6,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card
 
 class FakeChatSdk implements MeetingPlaceChatSDK {
   int _chatSessionStartedCalls = 0;
+  int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =
       StreamController<StreamData>.broadcast();
 
@@ -18,6 +19,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
 
   int get startChatSessionCallCount => _chatSessionStartedCalls;
+  int get startedChatPresenceUpdatesCount => _startedChatPresenceUpdates;
 
   /// Simulates an incoming text message by emitting it through the stream
   void simulateIncomingTextMessage({
@@ -373,6 +375,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   Future<Chat> startChatSession() async {
     _chatSessionStartedCalls = 1;
     return FakeChat();
+  }
+
+  @override
+  Future<void> startChatPresenceUpdates() async {
+    _startedChatPresenceUpdates += 1;
   }
 
   @override
