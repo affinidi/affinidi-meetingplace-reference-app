@@ -403,7 +403,16 @@ class _ControlPlaneEventsProcessor {
       final completer = Completer<void>();
       try {
         await _sdk.processControlPlaneEvents(
-          onDone: (_) {
+          onDone: (List<Object> errors) {
+            if (errors.isNotEmpty) {
+              for (final error in errors) {
+                _logger.error(
+                  'Control plane event processing error',
+                  error: error,
+                  name: _logKey,
+                );
+              }
+            }
             completer.complete();
           },
         );
