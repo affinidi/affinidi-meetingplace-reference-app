@@ -324,6 +324,15 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
   }
+
+  void simulateChannelActivity(Channel channel) {
+    _controlPlaneEventStreamManager.add(
+      ControlPlaneStreamEvent(
+        type: ControlPlaneEventType.ChannelActivity,
+        channel: channel,
+      ),
+    );
+  }
 }
 
 class _FakeAcceptOfferResult<T extends ConnectionOffer>

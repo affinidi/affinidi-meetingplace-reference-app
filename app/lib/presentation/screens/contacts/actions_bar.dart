@@ -44,6 +44,7 @@ class _ActionsBar extends ConsumerWidget {
         Row(
           children: [
             IconButton(
+              key: const Key('toggle_grid_view_button'),
               icon: Icon(
                 Icons.grid_view,
                 color: shouldShowGrid
@@ -55,6 +56,7 @@ class _ActionsBar extends ConsumerWidget {
               },
             ),
             IconButton(
+              key: const Key('toggle_list_view_button'),
               icon: Icon(
                 Icons.list,
                 color: !shouldShowGrid
@@ -66,6 +68,7 @@ class _ActionsBar extends ConsumerWidget {
               },
             ),
             IconButton(
+              key: const Key('toggle_filter_button'),
               icon: Icon(
                 Icons.filter_list_alt,
                 color: shouldShowFilter
@@ -112,6 +115,7 @@ class _ActionsBar extends ConsumerWidget {
                   : null,
             ),
             IconButton(
+              key: const Key('new_connection_button'),
               icon: const Icon(Icons.add),
               onPressed: hasIdentity ? onSelectNewConnectionsOption : null,
             ),

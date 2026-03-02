@@ -96,6 +96,40 @@ class FakeContacts {
     hasBeenOpened: false,
   );
 
+  static final newContactWithMessage = Contact(
+    id: 'new-contact-with-message-id',
+    channelDid: 'did:key:new-contact-channel',
+    channelDidSha256: 'new-contact-channel-sha256',
+    offerLink: 'new-contact-offer-link',
+    card: ContactCard(
+      id: 'new-contact-card-id',
+      did: 'did:key:new-contact-channel',
+      type: ContactCardType.individual.value,
+      firstName: 'Emma',
+      lastName: 'Wilson',
+      displayName: 'Emma Wilson',
+      email: 'emma@example.com',
+    ),
+    otherPartyCard: ContactCard(
+      id: 'new-contact-other-party-card-id',
+      did: 'did:key:new-contact-other-party',
+      type: ContactCardType.individual.value,
+      firstName: 'Emma',
+      lastName: 'Wilson',
+      displayName: 'Emma Wilson',
+      email: 'emma@example.com',
+    ),
+    dateAdded: DateTime(2025, 2, 20),
+    type: ContactType.individual,
+    status: ContactStatus.active,
+    mediatorDid: 'did:key:mediator',
+    origin: ContactOrigin.individualOfferPublished,
+    category: ContactCategory.person,
+    displayName: 'Emma Wilson',
+    hasBeenOpened: false,
+    badgeCount: 1,
+  );
+
   static final oobContact = Contact(
     id: 'oob-contact-id',
     channelDid: 'did:key:oob-channel',
