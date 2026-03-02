@@ -14,6 +14,7 @@ part 'chat_repository_provider.g.dart';
 /// - Creates a secure, encrypted database using a passphrase
 ///  from secure storage.
 /// - Stores the database in the application documents directory.
+/// - Opens the database eagerly (non-lazy) to avoid first-query latency.
 /// - Closes the database when the provider is disposed.
 final _chatDatabaseProvider = FutureProvider<ChatItemsDatabase>((ref) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
@@ -27,6 +28,7 @@ final _chatDatabaseProvider = FutureProvider<ChatItemsDatabase>((ref) async {
     passphrase: passphrase,
     directory: directory,
     logStatements: logStatements,
+    lazy: false,
   );
 
   ref.onDispose(database.close);
@@ -48,6 +50,7 @@ final _chatInMemoryDatabaseProvider =
     directory: directory,
     logStatements: logStatements,
     inMemory: true,
+    lazy: false,
   );
 
   ref.onDispose(database.close);
