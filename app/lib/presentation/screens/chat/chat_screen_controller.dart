@@ -50,7 +50,7 @@ class ChatScreenController extends _$ChatScreenController
 
   late final int _secondsToShowChatActivityIndicator =
       ref.read(environmentProvider).chatActivityExpiresInSeconds;
-  late final int chatPresenceIntervalInSeconds =
+  late final int _chatPresenceIntervalInSeconds =
       ref.read(environmentProvider).chatPresenceIntervalInSeconds;
   // Maximum typing indicators to prevent UI overflow on small screens
   static const int _maxNumberOfTypingMembersVisible = 4;
@@ -169,7 +169,7 @@ class ChatScreenController extends _$ChatScreenController
     switch (state) {
       case AppLifecycleState.resumed:
         _chatResumingLock.synchronized(() async {
-          _resumeChatSession();
+          await _resumeChatSession();
         });
         break;
       case AppLifecycleState.paused:
@@ -182,10 +182,9 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  void _resumeChatSession() async {
+  Future<void> _resumeChatSession() async {
     if (!_isPaused) return;
 
-    _isPaused = false;
     _logger.info(
       'Resuming chat session',
       name: _logKey,
@@ -193,7 +192,17 @@ class ChatScreenController extends _$ChatScreenController
     final contact = state.contact;
     if (contact == null) return;
 
-    await _startChatSession(contact);
+    try {
+      await _startChatSession(contact);
+      _isPaused = false;
+    } catch (e, st) {
+      _logger.error(
+        'Failed to resume chat session',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+    }
   }
 
   void _pauseChatSession() {
@@ -559,7 +568,7 @@ class ChatScreenController extends _$ChatScreenController
         final now = clock.now();
         final datePresence = args?[0] as DateTime? ?? now;
         final hasReceivedAnyActivity = datePresence.toLocal().isAfter(
-              now.subtract(Duration(seconds: chatPresenceIntervalInSeconds)),
+              now.subtract(Duration(seconds: _chatPresenceIntervalInSeconds)),
             );
 
         state = state.copyWith(
@@ -576,7 +585,7 @@ class ChatScreenController extends _$ChatScreenController
         });
       },
       duration: Duration(
-        seconds: chatPresenceIntervalInSeconds +
+        seconds: _chatPresenceIntervalInSeconds +
             _presenceIndicatorGracePeriodSeconds,
       ),
     );
@@ -1010,6 +1019,9 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   Future<void> _startChatSession(Contact contact) async {
+    messagesSubscription?.dispose();
+    messagesSubscription = null;
+
     final chatSDK = _chatSDK;
     if (chatSDK == null) {
       throw AppException(
@@ -1024,10 +1036,6 @@ class ChatScreenController extends _$ChatScreenController
       name: _logKey,
     );
 
-    final messages = [EncryptionNotice(), ...chatSession.messages];
-
-    state = state.copyWith(isInitialized: true);
-
     final channelDid = contact.channelDid;
     if (channelDid == null) {
       throw AppException(
@@ -1035,12 +1043,6 @@ class ChatScreenController extends _$ChatScreenController
         code: AppExceptionType.missingChannel.name,
       );
     }
-
-    await ref
-        .read(contactsServiceProvider.notifier)
-        .resetContactBadgeCount(channelDid);
-
-    unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
     unawaited(
       chatSDK.chatStreamSubscription.then(
@@ -1069,10 +1071,18 @@ class ChatScreenController extends _$ChatScreenController
       ),
     );
 
+    final messages = [EncryptionNotice(), ...chatSession.messages];
     // TODO(MA): Remove sorting when it's added to sdk
-    final sorted =
-        messages.sortedBy((item) => item.dateCreated).reversed.toList();
-    state = state.copyWith(messages: sorted);
+    state = state.copyWith(
+      isInitialized: true,
+      messages: messages.sortedBy((item) => item.dateCreated).reversed.toList(),
+    );
+
+    await ref
+        .read(contactsServiceProvider.notifier)
+        .resetContactBadgeCount(channelDid);
+
+    unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
     _logger.info(
       'Chat session started',
