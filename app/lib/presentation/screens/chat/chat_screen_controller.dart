@@ -22,7 +22,7 @@ import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/chat_items_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
-import '../../../infrastructure/extensions/event_message_extentions.dart';
+import '../../../infrastructure/extensions/event_message_extensions.dart';
 import '../../../infrastructure/extensions/list_extensions.dart';
 import '../../../infrastructure/extensions/plain_text_message_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
