@@ -215,7 +215,6 @@
 	"publishGroupOffer": "Publicar invitación de grupo",
 	"publishOffer": "Publicar invitación",
 	"publishToMeetingPlace": "Publicar en el lugar de reunión",
-	"qrScannerCameraNotAvailable": "Cámara no disponible",
 	"qrScannerCameraPermissionHelp": "Verifique los permisos de la cámara e inténtelo de nuevo",
 	"qrScannerConnectionFailed": "Error de conexión",
 	"qrScannerConnectionFailedMessage": "No se pudo establecer la conexión: {error}",
@@ -345,5 +344,6 @@
 	"unnamedMediator": "Usuario desconocido",
 	"usesIdentity": "Usa tu identidad {identity} para conectar",
 	"meetingPlaceInvitationTitle": "Invitación al lugar de encuentro",
-	"shareSheetCTA_QRCode": "Enviar o guardar código QR"
+	"shareSheetCTA_QRCode": "Enviar o guardar código QR",
+	"cameraNotAvailable": "Cámara no disponible"
 }

@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../contact_card/contact_card.dart';
 
 part 'identity.freezed.dart';
@@ -24,4 +26,8 @@ abstract class Identity with _$Identity {
     required ContactCard card,
     @Default(false) bool isPrimary,
   }) = _Identity;
+}
+
+extension IdentityExtensions on Identity {
+  sdk.ContactCard toSdkContactCard() => card.toSdkContactCard();
 }

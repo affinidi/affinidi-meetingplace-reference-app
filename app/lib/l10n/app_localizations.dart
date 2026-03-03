@@ -565,7 +565,7 @@ abstract class AppLocalizations {
   /// No description provided for @error.
   ///
   /// In en, this message translates to:
-  /// **'{errorCode, select, connection_offer_owned_by_claiming_party{You cannot accept this invitation because you are the inviter!} connection_offer_already_claimed_by_claiming_party{You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress} missingMnemonic{Please enter an invitation passphrase to search} connection_offer_not_found_error{The details you provided did not match any active invitations.} discovery_register_offer_group_generic{Failed to publish invitation.} missingDeviceToken{Unable to find device notification token} offerOwnedByClaimingParty{You cannot claim this invitation because you are the owner} offerAlreadyClaimedByParty{You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress} offerNotFound{The details you provided did not match any active invitations.} mediatorAlreadyExists{Message server with the same DID already exists.} mediator_get_did_error{No message server found at the provided URL} unableToFindMediator{No message server found at the provided URL} oobFlowFailed{Unable to establish a connection with other party, QR code was likely already used} connection_offer_expired{This invitation has expired} connection_offer_limit_exceeded{This invitation has reached its maximum number of uses} register_offer_mnemonic_in_use{This phrase is already in use, please choose another one} other{{errorCode}}}'**
+  /// **'{errorCode, select, connection_offer_owned_by_claiming_party{You cannot accept this invitation because you are the inviter!} connection_offer_already_claimed_by_claiming_party{You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress} missingMnemonic{Please enter an invitation passphrase to search} connection_offer_not_found_error{The details you provided did not match any active invitations.} discovery_register_offer_group_generic{Failed to publish invitation.} missingDeviceToken{Unable to find device notification token} offerOwnedByClaimingParty{You cannot claim this invitation because you are the owner} offerAlreadyClaimedByParty{You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress} offerNotFound{The details you provided did not match any active invitations.} mediatorAlreadyExists{Message server with the same DID already exists.} mediator_get_did_error{No message server found at the provided URL} unableToFindMediator{No message server found at the provided URL} oobFlowFailed{Unable to establish a connection with other party, QR code was likely already used} connection_offer_expired{This invitation has expired} connection_offer_limit_exceeded{This invitation has reached its maximum number of uses} register_offer_mnemonic_in_use{This phrase is already in use, please choose another one} invalidQrCode{QR-Code is not valid} other{{errorCode}}}'**
   String error(String errorCode);
 
   /// No description provided for @offerCreated.
@@ -1372,12 +1372,6 @@ abstract class AppLocalizations {
   /// **'Choose from gallery'**
   String get chooseFromGallery;
 
-  /// No description provided for @qrScannerCameraNotAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Camera not available'**
-  String get qrScannerCameraNotAvailable;
-
   /// No description provided for @qrScannerCameraPermissionHelp.
   ///
   /// In en, this message translates to:
@@ -2175,6 +2169,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open Settings'**
   String get cameraOpenSettings;
+
+  /// No description provided for @cameraNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera not available'**
+  String get cameraNotAvailable;
+
+  /// No description provided for @goBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back'**
+  String get goBack;
 }
 
 class _AppLocalizationsDelegate

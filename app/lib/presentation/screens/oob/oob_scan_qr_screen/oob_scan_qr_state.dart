@@ -6,5 +6,7 @@ part 'oob_scan_qr_state.freezed.dart';
 abstract class OobScanQrState with _$OobScanQrState {
   factory OobScanQrState({
     @Default(false) bool isProcessing,
+    String? errorMessage,
+    String? scannedCode,
   }) = _OobScanQrState;
 }

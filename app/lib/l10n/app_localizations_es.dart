@@ -977,9 +977,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chooseFromGallery => 'Elige de la galería';
 
   @override
-  String get qrScannerCameraNotAvailable => 'Cámara no disponible';
-
-  @override
   String get qrScannerCameraPermissionHelp =>
       'Verifique los permisos de la cámara e inténtelo de nuevo';
 
@@ -1522,4 +1519,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cameraOpenSettings => 'Open Settings';
+
+  @override
+  String get cameraNotAvailable => 'Cámara no disponible';
+
+  @override
+  String get goBack => 'Go Back';
 }

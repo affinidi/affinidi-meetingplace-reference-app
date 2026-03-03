@@ -1,5 +1,6 @@
 enum AppExceptionType {
   invalidFirebaseMessagingConfiguration,
+  invalidQrCode,
   missingChannel,
   missingChannelForPublishedGroupOffer,
   missingContactCard,
