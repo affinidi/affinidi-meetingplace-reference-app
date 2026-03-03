@@ -74,6 +74,7 @@ class _ContactListItem extends ConsumerWidget {
       key: ValueKey(contact.channelDidSha256),
       direction: DismissDirection.endToStart,
       background: Container(
+        key: const Key('dismissible_delete_background'),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
@@ -86,6 +87,7 @@ class _ContactListItem extends ConsumerWidget {
             Icon(Icons.delete, color: context.colorScheme.onError),
             Text(
               context.l10n.generalDelete,
+              key: const Key('dismissible_delete_text'),
               style: context.textTheme.bodySmall?.copyWith(
                 color: context.colorScheme.onError,
               ),
@@ -128,7 +130,7 @@ class _ContactListItem extends ConsumerWidget {
                       contact: contact,
                       isList: true,
                     ),
-                    if (contact.badgeCount > 0 || contact.isOobContact) ...[
+                    if (contact.badgeCount > 0 || contact.isOobContact)
                       Positioned(
                         bottom: -5,
                         right: -10,
@@ -145,8 +147,16 @@ class _ContactListItem extends ConsumerWidget {
                                 badgeCount: contact.badgeCount,
                                 isList: true,
                               ),
+                      )
+                    else if (contact.isNewUnopenedChannel)
+                      Positioned(
+                        bottom: -2,
+                        right: -2,
+                        child: _ContactNewChannelDotBadge(
+                          origin: contact.origin,
+                          isList: true,
+                        ),
                       ),
-                    ],
                   ],
                 ),
               ),
