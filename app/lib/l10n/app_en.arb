@@ -1,1417 +1,1417 @@
 {
-  "appName": "Meeting Place",
-  "@appName": {
-    "type": "text"
-  },
-  "tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} settings{Settings} other{Invalid}}",
-  "@tabsTitle": {
-    "type": "text",
-    "placeholders": {
-      "tabName": {
-        "type": "String"
-      }
-    }
-  },
-  "publishOffer": "Publish Invitation",
-  "@publishOffer": {
-    "type": "text"
-  },
-  "publishGroupOffer": "Publish Group Invitation",
-  "@publishGroupOffer": {
-    "type": "text"
-  },
-  "meetingPlaceBannerText": "Meeting Place allows you to anonymously and privately publish an invitation to connect to you. Provide a headline and description, as well as validity details to limit how long the offer is available.",
-  "@meetingPlaceBannerText": {
-    "type": "text"
-  },
-  "connectionOfferDetails": "Invitation Details",
-  "@connectionOfferDetails": {
-    "type": "text"
-  },
-  "createGroupChatOffer": "Group chat",
-  "@createGroupChatOffer": {
-    "type": "text"
-  },
-  "groupOfferHelperText": "The invitation will represent a group chat for multiple contacts to join and chat. You still have control over who can join the group chat.",
-  "@groupOfferHelperText": {
-    "type": "text"
-  },
-  "generateRandomPhraseHelperEnabled": "Generate a random phrase",
-  "@generateRandomPhraseHelperEnabled": {
-    "type": "text"
-  },
-  "generateRandomPhraseHelperDisabled": "The custom phrase you enter will be used to uniquely identify this invitation to connect. It must be unique in the Meeting Place universe.",
-  "@generateRandomPhraseHelperDisabled": {
-    "type": "text"
-  },
-  "customPhrase": "Custom Phrase",
-  "@customPhrase": {
-    "type": "text"
-  },
-  "enterCustomPhrase": "Enter custom phrase",
-  "@enterCustomPhrase": {
-    "type": "text"
-  },
-  "customPhraseHelperText": "Enter a unique custom phrase. You may use as many words as you like, separated by spaces.",
-  "@customPhraseHelperText": {
-    "type": "text"
-  },
-  "chatGroupName": "Chat group name",
-  "@chatGroupName": {
-    "type": "text"
-  },
-  "headline": "Headline",
-  "@headline": {
-    "type": "text"
-  },
-  "description": "Description",
-  "@description": {
-    "type": "text"
-  },
-  "validityVisibilitySettings": "Validity & Visibility Settings",
-  "@validityVisibilitySettings": {
-    "type": "text"
-  },
-  "searchableAtMeetingPlace": "Searchable at meetingplace.world",
-  "@searchableAtMeetingPlace": {
-    "type": "text"
-  },
-  "searchableHelperText": "When selected, the details you share in this offer will be publicly searchable at meetingplace.world",
-  "@searchableHelperText": {
-    "type": "text"
-  },
-  "setExpiry": "Set Expiry",
-  "@setExpiry": {
-    "type": "text"
-  },
-  "setExpiryHelperEnabled": "The invitation will expire at the specified date and time",
-  "@setExpiryHelperEnabled": {
-    "type": "text"
-  },
-  "setExpiryHelperDisabled": "The invitation will remain valid until deleted and will not expire",
-  "@setExpiryHelperDisabled": {
-    "type": "text"
-  },
-  "expiresAt": "Expires: {date} at {time}",
-  "@expiresAt": {
-    "type": "text",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "scanCustomMediatorQrCode": "Scan custom message server QR code",
-  "@scanCustomMediatorQrCode": {
-    "type": "text"
-  },
-  "chooseMediatorHelper": "Choose which message server to use for your connections. You can add custom message servers by scanning their QR code.",
-  "@chooseMediatorHelper": {
-    "type": "text"
-  },
-  "setMediatorName": "Set message server name",
-  "@setMediatorName": {
-    "type": "text"
-  },
-  "newConnectionOptionTitle": "{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} other{}}",
-  "@newConnectionOptionTitle": {
-    "type": "text",
-    "placeholders": {
-      "option": {
-        "type": "String"
-      }
-    }
-  },
-  "setExpiryDateTime": "Set expiry date and time",
-  "@setExpiryDateTime": {
-    "type": "text"
-  },
-  "selectExpiryHelperText": "Select when this offer should expire",
-  "@selectExpiryHelperText": {
-    "type": "text"
-  },
-  "changeButton": "Change",
-  "@changeButton": {
-    "type": "text"
-  },
-  "limitNumberOfUses": "Limit number of uses",
-  "@limitNumberOfUses": {
-    "type": "text"
-  },
-  "limitUsesHelperEnabled": "The invitation can only be used this many times",
-  "@limitUsesHelperEnabled": {
-    "type": "text"
-  },
-  "limitUsesHelperDisabled": "The invitation can be used an unlimited number of times",
-  "@limitUsesHelperDisabled": {
-    "type": "text"
-  },
-  "canBeUsedTimes": "{amount, plural, =1{Can be used only once} other{Can be used {amount} times}}",
-  "@canBeUsedTimes": {
-    "placeholders": {
-      "amount": {
-        "type": "int"
-      }
-    }
-  },
-  "newConnectionOptionSubtitle": "{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} other{}}",
-  "@newConnectionOptionSubtitle": {
-    "type": "text",
-    "placeholders": {
-      "option": {
-        "type": "String"
-      }
-    }
-  },
-  "unableToDetectCamera": "Unable to detect a camera",
-  "@unableToDetectCamera": {
-    "type": "text"
-  },
-  "newConnectionsOptionsHeader": "Select an option to create a new connection",
-  "@newConnectionsOptionsHeader": {
-    "type": "text"
-  },
-  "oobQrPresentInvitationMessage": "Show this QR code with someone to establish a connection",
-  "@oobQrPresentInvitationMessage": {
-    "type": "text"
-  },
-  "connectionsNowConnected": "You are now connected with",
-  "@connectionsNowConnected": {
-    "type": "text"
-  },
-  "connectionsPanelOobFailedTitle": "Channel creation failed",
-  "@connectionsPanelOobFailedTitle": {
-    "type": "text"
-  },
-  "connectionsPanelOobFailedBody": "Unable to establish the connection. Please try again.",
-  "@connectionsPanelOobFailedBody": {
-    "type": "text"
-  },
-  "connectionsFilterLabel": "{filter, select, all{All} offers{Offers} claims{Claims} complete{Complete} other{}}",
-  "@connectionsFilterLabel": {
-    "type": "text",
-    "placeholders": {
-      "filter": {
-        "type": "String"
-      }
-    }
-  },
-  "noConnections": "No invitations in this view",
-  "@noConnections": {
-    "type": "text"
-  },
-  "connectionDeleteHeading": "{amount, plural, =1{Delete invitation} other{Delete invitations}}",
-  "@connectionDeleteHeading": {
-    "placeholders": {
-      "amount": {
-        "type": "int"
-      }
-    }
-  },
-  "selectMaxUsagesHelperText": "Select how many times this offer can be used",
-  "@selectMaxUsagesHelperText": {
-    "type": "text"
-  },
-  "mediator": "Message Server",
-  "@mediator": {
-    "type": "text"
-  },
-  "mediatorHelperText": "This is the message server that will be used for communication with any contact that connects via this invitation",
-  "@mediatorHelperText": {
-    "type": "text"
-  },
-  "errorLoadingMediator": "Error loading message server",
-  "@errorLoadingMediator": {
-    "type": "text"
-  },
-  "publishToMeetingPlace": "Publish to Meeting Place",
-  "@publishToMeetingPlace": {
-    "type": "text"
-  },
-  "connectWithFirstName": "Connect with {firstName}!",
-  "@connectWithFirstName": {
-    "type": "text",
-    "placeholders": {
-      "firstName": {
-        "type": "String"
-      }
-    }
-  },
-  "firstNameChatGroup": "{firstName}'s chat group",
-  "@firstNameChatGroup": {
-    "type": "text",
-    "placeholders": {
-      "firstName": {
-        "type": "String"
-      }
-    }
-  },
-  "passphraseDescription": "Connect with me using Meeting Place!",
-  "@passphraseDescription": {
-    "type": "text"
-  },
-  "headlineRequired": "Headline is required",
-  "@headlineRequired": {
-    "type": "text"
-  },
-  "descriptionRequired": "Description is required",
-  "@descriptionRequired": {
-    "type": "text"
-  },
-  "customPhraseRequired": "Custom phrase is required when not using random phrase",
-  "@customPhraseRequired": {
-    "type": "text"
-  },
-  "expiryDateRequired": "Expiry date is required when expiry is enabled",
-  "@expiryDateRequired": {
-    "type": "text"
-  },
-  "expiryDateFuture": "Expiry date must be in the future",
-  "@expiryDateFuture": {
-    "type": "text"
-  },
-  "maxUsagesGreaterThanZero": "Max usages must be greater than 0",
-  "@maxUsagesGreaterThanZero": {
-    "type": "text"
-  },
-  "failedToPublishOffer": "Failed to publish invitation: {error}",
-  "@failedToPublishOffer": {
-    "type": "text",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "selectMediator": "Select Message Server",
-  "@selectMediator": {
-    "description": "Label for selecting a mediator"
-  },
-  "connectionDeletePrompt": "{amount, plural, =0{Are you sure you want to delete this invitation? You cannot undelete an invitation!} =1{Are you sure you want to delete this invitation? You cannot undelete an invitation!} other{Are you sure you want to delete {amount} selected invitations? You cannot undelete invitations!}}",
-  "@connectionDeletePrompt": {
-    "placeholders": {
-      "amount": {
-        "type": "int"
-      }
-    }
-  },
-  "generalCancel": "Cancel",
-  "@generalCancel": {
-    "type": "text"
-  },
-  "generalDelete": "Delete",
-  "@generalDelete": {
-    "type": "text"
-  },
-  "generalDone": "Done",
-  "@generalDone": {
-    "type": "text"
-  },
-  "connectionsPanelSubtitle": "Swipe and tap to manage your invitations.",
-  "@connectionsPanelSubtitle": {
-    "type": "text",
-    "description": "Byline for connections panel heading"
-  },
-  "findPersonAiBusinessDescription": "To connect with a person or AI Agent on Meeting Place, enter the connection phrase they have shared with you.",
-  "@findPersonAiBusinessDescription": {
-    "type": "text"
-  },
-  "enterPassphrase": "Enter passphrase",
-  "@enterPassphrase": {
-    "type": "text"
-  },
-  "claimOfferTitle": "Find an invitation on Meeting Place",
-  "@claimOfferTitle": {
-    "type": "text"
-  },
-  "generalSearch": "Search",
-  "@generalSearch": {
-    "type": "text"
-  },
-  "generalConnect": "Connect",
-  "@generalConnect": {
-    "type": "text"
-  },
-  "contactCardFieldName": "{field, select, firstName{First name} lastName{Last name} email{Email} mobile{Mobile} other{}}",
-  "@contactCardFieldName": {
-    "type": "text",
-    "placeholders": {
-      "field": {
-        "type": "String"
-      }
-    }
-  },
-  "offerDetailsHeader": "My Invitation Information",
-  "@offerDetailsHeader": {
-    "type": "text"
-  },
-  "acceptOfferTitle": "Invitation Request Details",
-  "@acceptOfferTitle": {
-    "type": "text"
-  },
-  "offerDetailsDescription": "Connect with me using Meeting Place!",
-  "@offerDetailsDescription": {
-    "type": "text"
-  },
-  "errorOwnerCannotClaimOffer": "You cannot claim this invitation because you are the owner",
-  "@errorOwnerCannotClaimOffer": {
-    "type": "text"
-  },
-  "aliasPickerTitle": "Connect using this selected identity",
-  "@aliasPickerTitle": {
-    "type": "text"
-  },
-  "aliasPickerDescription": "Identities help you keep your personal information private and in your control. You can choose to use the Primary Identity alias you have configured, or select one of your additional identity aliases for this invitation.",
-  "@aliasPickerDescription": {
-    "type": "text"
-  },
-  "error": "{errorCode, select, connection_offer_owned_by_claiming_party{You cannot accept this invitation because you are the inviter!} connection_offer_already_claimed_by_claiming_party{You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress} missingMnemonic{Please enter an invitation passphrase to search} connection_offer_not_found_error{The details you provided did not match any active invitations.} discovery_register_offer_group_generic{Failed to publish invitation.} missingDeviceToken{Unable to find device notification token} offerOwnedByClaimingParty{You cannot claim this invitation because you are the owner} offerAlreadyClaimedByParty{You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress} offerNotFound{The details you provided did not match any active invitations.} mediatorAlreadyExists{Message server with the same DID already exists.} mediator_get_did_error{No message server found at the provided URL} unableToFindMediator{No message server found at the provided URL} oobFlowFailed{Unable to establish a connection with other party, QR code was likely already used} connection_offer_expired{This invitation has expired} connection_offer_limit_exceeded{This invitation has reached its maximum number of uses} register_offer_mnemonic_in_use{This phrase is already in use, please choose another one} invalidQrCode{QR-Code is not valid} other{{errorCode}}}",
-  "@error": {
-    "type": "text",
-    "placeholders": {
-      "errorCode": {
-        "type": "String"
-      }
-    }
-  },
-  "offerCreated": "Invitation Created",
-  "offerExpiresAt": "Invitation expires at {formattedExpiry}",
-  "@offerExpiresAt": {
-    "type": "text",
-    "placeholders": {
-      "formattedExpiry": {
-        "type": "String"
-      }
-    }
-  },
-  "offerValidityNote": "The invitation is valid until the date and time above, unless a maximum number of accesses is reached",
-  "offerUnlimitedUsages": "This invitation can be used any number of times",
-  "offerMaxUsages": "{maxUsages, plural, =1{This invitation can be used 1 time} other{This invitation can be used {maxUsages} times}}",
-  "@offerMaxUsages": {
-    "type": "text",
-    "placeholders": {
-      "maxUsages": {
-        "type": "int"
-      }
-    }
-  },
-  "noExpirySetHelperText": "No expiry date was set, so this invitation to connect does not expire",
-  "validityVisibilityDetails": "Validity & visibility details",
-  "personalInformationShared": "Personal information shared",
-  "myAliasProfile": "My Alias Profile",
-  "didInformation": "DID Information",
-  "didSha256": "{didSha256} (SHA256)",
-  "@didSha256": {
-    "placeholders": {
-      "didSha256": {
-        "type": "String"
-      }
-    }
-  },
-  "offerUsesPrimaryIdentity": "This invitation uses your Primary Identity",
-  "offerUsesAliasIdentity": "This invitation uses the identity alias named \"{alias}\"",
-  "@offerUsesAliasIdentity": {
-    "type": "text",
-    "placeholders": {
-      "alias": {
-        "type": "String"
-      }
-    }
-  },
-  "aliasProfileDescription": "Your alias profile helps you keep your identity private and in your control.",
-  "generalOk": "Ok",
-  "contactsPanelSubtitle": "Tap a channel to chat, double-tap to view details, tap and hold to delete.",
-  "contactsFilterLabel": "{filter, select, any{Any} person{Person} group{Group} service{AI Agent} business{Business} other{}}",
-  "@contactsFilterLabel": {
-    "type": "text",
-    "placeholders": {
-      "filter": {
-        "type": "String"
-      }
-    }
-  },
-  "noContactsYet": "No channels in this view",
-  "contactDeleteHeading": "Delete channel",
-  "contactDeletePrompt": "{amount, plural, =0{Are you sure you want to delete this channel?} =1{Are you sure you want to delete this channel?} other{Are you sure you want to delete {amount} selected channels?}}",
-  "@contactDeletePrompt": {
-    "placeholders": {
-      "amount": {
-        "type": "int"
-      }
-    }
-  },
-  "connectedVia": "Connected via {mediatorName}",
-  "@connectedVia": {
-    "type": "text",
-    "placeholders": {
-      "mediatorName": {
-        "type": "String"
-      }
-    }
-  },
-  "contactAdded": "Added {dateAdded}",
-  "@contactAdded": {
-    "type": "text",
-    "placeholders": {
-      "dateAdded": {
-        "type": "String"
-      }
-    }
-  },
-  "filter": "Filter...",
-  "noContactsMatchFilter": "No channels match your filter",
-  "connectionPhrase": "Phrase: {phrase}",
-  "@connectionPhrase": {
-    "type": "text",
-    "placeholders": {
-      "phrase": {
-        "type": "String"
-      }
-    }
-  },
-  "usesIdentityViaMediator": "Uses your {identity} identity via {mediator}",
-  "@usesIdentityViaMediator": {
-    "type": "text",
-    "placeholders": {
-      "identity": {
-        "type": "String"
-      },
-      "mediator": {
-        "type": "String"
-      }
-    }
-  },
-  "usesIdentity": "Uses your {identity} identity to connect",
-  "@usesIdentity": {
-    "type": "text",
-    "placeholders": {
-      "identity": {
-        "type": "String"
-      }
-    }
-  },
-  "timeAgoJustNow": "just now",
-  "timeAgoMinute": "{minutes, plural, =1{1 minute ago} other{{minutes} minutes ago}}",
-  "timeAgoMinuteWorded": "a minute ago",
-  "timeAgoHourNumeric": "{hours, plural, =1{1 hour ago} other{{hours} hours ago}}",
-  "timeAgoHourWorded": "an hour ago",
-  "timeAgoDay": "{days, plural, =1{1 day ago} other{{days} days ago}}",
-  "timeAgoYesterday": "Yesterday",
-  "timeAgoWeek": "{weeks, plural, =1{1 week ago} other{{weeks} weeks ago}}",
-  "timeAgoLastWeek": "Last week",
-  "timeAgoSecond": "{seconds, plural, =1{1 second ago} other{{seconds} seconds ago}}",
-  "createdValidUntil": "Created {createdTimeAgo}, valid until {validUntilDate}",
-  "@createdValidUntil": {
-    "type": "text",
-    "placeholders": {
-      "createdTimeAgo": {
-        "type": "String"
-      },
-      "validUntilDate": {
-        "type": "String"
-      }
-    }
-  },
-  "createdValidWithoutExpiration": "Created {createdTimeAgo}, with no expiry date",
-  "@createdValidWithoutExpiration": {
-    "type": "text",
-    "placeholders": {
-      "createdTimeAgo": {
-        "type": "String"
-      }
-    }
-  },
-  "displayName": "Display Name",
-  "@displayName": {
-    "type": "text"
-  },
-  "generalName": "Name",
-  "@generalName": {
-    "type": "text"
-  },
-  "displayNameHelperText": "You can change the display name for this channel. The other party will not see what you call it.",
-  "@displayNameHelperText": {
-    "type": "text"
-  },
-  "generalEmail": "Email",
-  "@generalEmail": {
-    "type": "text"
-  },
-  "generalMobile": "Mobile",
-  "@generalMobile": {
-    "type": "text"
-  },
-  "generalDid": "DID",
-  "@generalDid": {
-    "type": "text"
-  },
-  "generalDidSha256": "DID (SHA256)",
-  "@generalDidSha256": {
-    "type": "text"
-  },
-  "connectionEstablished": "Channel established",
-  "@connectionEstablished": {
-    "type": "text"
-  },
-  "generalMediator": "Message Server",
-  "@generalMediator": {
-    "type": "text"
-  },
-  "connectionApproach": "Channel establishment approach",
-  "@connectionApproach": {
-    "type": "text"
-  },
-  "theirDetails": "Their Details",
-  "@theirDetails": {
-    "type": "text"
-  },
-  "mySharedIdentityDetails": "My shared identity details",
-  "@mySharedIdentityDetails": {
-    "type": "text"
-  },
-  "connectionDetails": "Channel connection details",
-  "@connectionDetails": {
-    "type": "text"
-  },
-  "myIdentity": "My identity",
-  "@myIdentity": {
-    "type": "text"
-  },
-  "identitiesPanelSubtitle": "Swipe left and right to review and add to your identities list, drag down to delete",
-  "@identitiesPanelSubtitle": {
-    "type": "text"
-  },
-  "identitiesFilterLabel": "{filter, select, all{All} primary{Primary} aliases{Aliases} other{}}",
-  "@identitiesFilterLabel": {
-    "type": "text",
-    "placeholders": {
-      "filter": {
-        "type": "String"
-      }
-    }
-  },
-  "identityDeleteHeading": "Delete identity",
-  "@identityDeleteHeading": {
-    "type": "text"
-  },
-  "identityDeletePrompt": "Are you sure you want to delete identity \"{identity}\"?\n\nYou cannot undelete an identity!",
-  "@identityDeletePrompt": {
-    "type": "text"
-  },
-  "displayNamePrimary": "Primary Identity",
-  "@displayNamePrimary": {
-    "type": "text"
-  },
-  "displayNameAddNew": "Add new identity",
-  "@displayNameAddNew": {
-    "type": "text"
-  },
-  "displayNameAlias": "Identity Alias",
-  "@displayNameAlias": {
-    "type": "text"
-  },
-  "subtitlePrimary": "Your Primary Identity",
-  "@subtitlePrimary": {
-    "type": "text"
-  },
-  "subtitleAddNew": "Create a new alias",
-  "@subtitleAddNew": {
-    "type": "text"
-  },
-  "subtitleAlias": "Alias identity",
-  "@subtitleAlias": {
-    "type": "text"
-  },
-  "notShared": "Not shared",
-  "@notShared": {
-    "type": "text"
-  },
-  "unknownUser": "Unknown user",
-  "@unknownUser": {
-    "type": "text"
-  },
-  "unnamed": "Unnnamed",
-  "@unnamed": {
-    "type": "text"
-  },
-  "unnamedMediator": "Unknown user",
-  "@unnamedMediator": {
-    "type": "text"
-  },
-  "addNewIdentityAlias": "Add new identity alias",
-  "@addNewIdentityAlias": {
-    "type": "text"
-  },
-  "identityAliasesDescription": "Take control of your privacy, by creating identity aliases to represent yourself to contacts you connect with",
-  "@identityAliasesDescription": {
-    "type": "text"
-  },
-  "generalReject": "Reject",
-  "@generalReject": {
-    "type": "text"
-  },
-  "generalApprove": "Approve",
-  "@generalApprove": {
-    "type": "text"
-  },
-  "zalgoTextDetectedError": "Unusual characters detected. Please remove them and try again.",
-  "@zalgoTextDetectedError": {
-    "type": "text"
-  },
-  "chatTooLong": "The chat message is too long",
-  "@chatTooLong": {
-    "type": "text"
-  },
-  "splashScreenTitle": "Meeting Place",
-  "toProtectData": "To protect your data, this application requires secure authentication to continue.",
-  "authInstructionAndroid": "Go to Settings > Security > Screen lock and enable a PIN, pattern, or fingerprint.",
-  "@authInstructionAndroid": {
-    "description": "Instruction for Android users on how to enable secure authentication"
-  },
-  "authInstructionIos": "Go to Settings > Face ID & Passcode (or Touch ID & Passcode) and set up Face ID, Touch ID, or a device passcode.",
-  "@authInstructionIos": {
-    "description": "Instruction for iOS users on how to enable secure authentication"
-  },
-  "authInstructionMacos": "Go to System Settings > Touch ID & Password (or Login Password) and set up Touch ID or a secure password.",
-  "@authInstructionMacos": {
-    "description": "Instruction for macOS users on how to enable secure authentication"
-  },
-  "authUnlockReason": "Please unlock your device to continue",
-  "chatTypeMessagePrompt": "Message to {name}",
-  "@chatTypeMessagePrompt": {
-    "type": "text",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "chatAddMessageToMediaPrompt": "Add a message",
-  "@chatAddMessageToMediaPrompt": {
-    "type": "text"
-  },
-  "chatTypeMessagePromptGroup": "Message to the channel",
-  "updatePrimaryIdentity": "Update Primary Identity",
-  "newIdentityAlias": "New identity alias",
-  "editIdentityTitle": "Edit identity: {identityName}",
-  "@editIdentityTitle": {
-    "type": "text",
-    "placeholders": {
-      "identityName": {
-        "type": "String"
-      }
-    }
-  },
-  "customiseIdentityCard": "Customise identity card",
-  "nameTooLong": "The name is too long",
-  "descriptionTooLong": "The description is too long",
-  "invalidEmail": "The email address is invalid",
-  "emailTooLong": "The email address is too long",
-  "invalidMobileNumber": "The mobile number is invalid",
-  "mobileTooLong": "The mobile number is too long",
-  "aliasTooLong": "The alias is too long",
-  "thisFieldIsRequired": "This field is required",
-  "identityAliasPersonalDetails": "Identity alias personal details",
-  "profilePictureChangePrompt": "Tap here to change your profile picture",
-  "firstName": "First Name",
-  "enterFirstName": "Enter first name",
-  "lastName": "Last Name",
-  "enterLastName": "Enter last name",
-  "email": "Email",
-  "enterEmail": "Enter email",
-  "mobile": "Mobile",
-  "enterMobile": "Enter mobile",
-  "anonymous": "Anonymous",
-  "aliasLabel": "Alias label",
-  "enterAliasLabel": "Enter alias label",
-  "aliasLabelHelperText": "The alias label is how you will refer to this alias when connecting. Use a descriptive name to make it easier to identify.",
-  "setupPrimaryIdentityTitle": "Let's setup your Primary Identity!",
-  "setupPrimaryIdentityDescription": "Your Primary Identity will be used by default when you connect with others.",
-  "primaryIdentityInformation": "Your Primary Identity information",
-  "primaryIdentityComplete": "My Primary Identity is complete",
-  "keepMeAnonymous": "Keep me anonymous",
-  "typingMessage": "{amount, plural, =1{{names} is typing} other{{names} are typing}}",
-  "@typingMessage": {
-    "type": "text",
-    "placeholders": {
-      "names": {
-        "type": "String"
-      },
-      "amount": {
-        "type": "int"
-      }
-    }
-  },
-  "awaitingMembersToJoin": "{namesCount, plural, =1{Awaiting {names} to join} other{Awaiting {names} and {othersCount, plural, =1{1 other} other{{othersCount} others}} to join}}",
-  "@awaitingMembersToJoin": {
-    "placeholders": {
-      "names": {
-        "type": "String"
-      },
-      "namesCount": {
-        "type": "int"
-      },
-      "othersCount": {
-        "type": "int"
-      }
-    }
-  },
-  "unknownType": "Unknown type",
-  "@unknownType": {
-    "type": "text"
-  },
-  "loadImageFailed": "Failed to load image",
-  "@loadImageFailed": {
-    "type": "text"
-  },
-  "chatRequestPermissionToJoinGroupFailed": "Failed to join group",
-  "@chatRequestPermissionToJoinGroupFailed": {
-    "type": "text"
-  },
-  "genWordConciergeMessage": "Concierge message",
-  "@genWordConciergeMessage": {
-    "description": "The wording for concierge message",
-    "type": "text"
-  },
-  "chatRequestPermissionToJoinGroup": "{memberName} wants to join the group",
-  "@chatRequestPermissionToJoinGroup": {
-    "type": "text",
-    "placeholders": {
-      "memberName": {
-        "type": "String"
-      }
-    }
-  },
-  "chatEncryptionNotice": "Messages and any data shared in this chat are end-to-end encrypted. Only people and agents in this chat can read them.",
-  "@chatEncryptionNotice": {
-    "description": "Encryption security notice displayed at the top of every chat",
-    "type": "text"
-  },
-  "genWordNo": "No",
-  "@genWordNo": {
-    "description": "The word for No",
-    "type": "text"
-  },
-  "genWordLater": "Later",
-  "@genWordLater": {
-    "description": "Phrase for later",
-    "type": "text"
-  },
-  "genWordYes": "Yes",
-  "@genWordYes": {
-    "description": "The word for Yes",
-    "type": "text"
-  },
-  "chatRequestPermissionToUpdateProfileGroup": "The profile details shared with this group have changed. Would you like to update all members?",
-  "@chatRequestPermissionToUpdateProfileGroup": {
-    "type": "text"
-  },
-  "chatRequestPermissionToUpdateProfile": "The profile details shared with this contact have changed. Would you like to send them an update?",
-  "@chatRequestPermissionToUpdateProfile": {
-    "type": "text"
-  },
-  "chatStartOfConversationInitiatedByMe": "You established this channel on {date} at {time}",
-  "@chatStartOfConversationInitiatedByMe": {
-    "type": "text",
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "messageCopiedClipboard": "Message copied to clipboard",
-  "@messageCopiedClipboard": {
-    "type": "text"
-  },
-  "chatItemStatus": "{status, select, queued{Queued} delivered{Delivered} sending{Sending} sent{Sent} error{Error} groupDeleted{Group deleted} other{}}",
-  "@chatItemStatus": {
-    "type": "text",
-    "placeholders": {
-      "status": {
-        "type": "String"
-      }
-    }
-  },
-  "qrScannerTitle": "Scan QR Code",
-  "@qrScannerTitle": {
-    "type": "text"
-  },
-  "qrScannerInstructions": "Position the QR code within the frame",
-  "@qrScannerInstructions": {
-    "type": "text"
-  },
-  "qrScannerStatus": "Scanner Status: {status}",
-  "@qrScannerStatus": {
-    "type": "text",
-    "placeholders": {
-      "status": {
-        "type": "String"
-      }
-    }
-  },
-  "useCamera": "Use Camera",
-  "@useCamera": {
-    "type": "text"
-  },
-  "chooseFromGallery": "Choose from gallery",
-  "@chooseFromGallery": {
-    "type": "text"
-  },
-  "qrScannerCameraPermissionHelp": "Please check camera permissions and try again",
-  "@qrScannerCameraPermissionHelp": {
-    "type": "text"
-  },
-  "qrScannerConnectionFailed": "Connection Failed",
-  "@qrScannerConnectionFailed": {
-    "type": "text"
-  },
-  "qrScannerConnectionFailedMessage": "Failed to establish connection: {error}",
-  "@qrScannerConnectionFailedMessage": {
-    "type": "text",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "qrScannerTryAgain": "Try Again",
-  "@qrScannerTryAgain": {
-    "type": "text"
-  },
-  "qrScannerTimeoutError": "OOB flow acceptance timed out after 30 seconds",
-  "@qrScannerTimeoutError": {
-    "type": "text"
-  },
-  "customMediators": "Custom Message Servers",
-  "@customMediators": {
-    "type": "text"
-  },
-  "addCustomMediator": "Add Custom Message Server",
-  "@addCustomMediator": {
-    "type": "text"
-  },
-  "manageCustomMediators": "Manage Custom Message Server",
-  "@manageCustomMediators": {
-    "type": "text"
-  },
-  "configureCustomMediatorEndpoint": "Configure your own message server endpoint",
-  "@configureCustomMediatorEndpoint": {
-    "type": "text"
-  },
-  "noCustomMediatorsConfigured": "No custom message servers configured yet",
-  "@noCustomMediatorsConfigured": {
-    "type": "text"
-  },
-  "customMediatorsCount": "{count, plural, =1{1 custom message server configured} other{{count} custom message servers configured}}",
-  "@customMediatorsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "addedMediatorSuccess": "Added message server \"{name}\"",
-  "@addedMediatorSuccess": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "failedToAddMediator": "Failed to add message server: {error}",
-  "@failedToAddMediator": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "mediatorName": "Message Server Name",
-  "@mediatorName": {
-    "type": "text"
-  },
-  "mediatorDid": "Message Server DID",
-  "@mediatorDid": {
-    "type": "text"
-  },
-  "myCustomMediator": "My Custom Message Server",
-  "@myCustomMediator": {
-    "type": "text"
-  },
-  "pleaseEnterName": "Please enter a name",
-  "@pleaseEnterName": {
-    "type": "text"
-  },
-  "pleaseEnterDid": "Please enter a DID",
-  "@pleaseEnterDid": {
-    "type": "text"
-  },
-  "didMustStartWith": "DID must start with \"did:\"",
-  "@didMustStartWith": {
-    "type": "text"
-  },
-  "deleteCustomMediator": "Delete Custom Message Server",
-  "@deleteCustomMediator": {
-    "type": "text"
-  },
-  "deleteCustomMediatorConfirm": "Are you sure you want to delete \"{name}\"?\n\nThis action cannot be undone.",
-  "@deleteCustomMediatorConfirm": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "deletedMediatorSuccess": "Deleted message server \"{name}\"",
-  "@deletedMediatorSuccess": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "renamedMediatorSuccess": "Renamed message server to \"{name}\"",
-  "@renamedMediatorSuccess": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "failedToDeleteMediator": "Failed to delete message server: {error}",
-  "@failedToDeleteMediator": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "failedToRenameMediator": "Failed to rename message server: {error}",
-  "@failedToRenameMediator": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "generalRetry": "Retry",
-  "@generalRetry": {
-    "type": "text"
-  },
-  "generalClose": "Close",
-  "@generalClose": {
-    "type": "text"
-  },
-  "generalAdd": "Add",
-  "@generalAdd": {
-    "type": "text"
-  },
-  "noIdentityDetected": "No identity detected, please create one to continue.",
-  "connectWithPersonAiServiceBusiness": "Connect with a Person or AI Agent",
-  "chatScreenTapForMemberDetails": "Tap for member details",
-  "@chatScreenTapForMemberDetails": {
-    "type": "text"
-  },
-  "debugPanelTitle": "Debug Panel",
-  "@debugPanelTitle": {
-    "type": "text"
-  },
-  "debugPanelSubtitle": "View application logs and debug information",
-  "@debugPanelSubtitle": {
-    "type": "text"
-  },
-  "debugPanelNoLogs": "No logs available",
-  "@debugPanelNoLogs": {
-    "type": "text"
-  },
-  "debugPanelLogsAppearMessage": "Logs will appear here as you use the app",
-  "@debugPanelLogsAppearMessage": {
-    "type": "text"
-  },
-  "debugPanelClearLogs": "Clear logs",
-  "@debugPanelClearLogs": {
-    "type": "text"
-  },
-  "debugPanelCopyLogs": "Copy logs to clipboard",
-  "@debugPanelCopyLogs": {
-    "type": "text"
-  },
-  "debugPanelAddTestLog": "Add test log",
-  "@debugPanelAddTestLog": {
-    "type": "text"
-  },
-  "debugPanelLogsCopied": "Logs copied to clipboard",
-  "@debugPanelLogsCopied": {
-    "type": "text"
-  },
-  "serverSettings": "Server Settings",
-  "@serverSettings": {
-    "type": "text"
-  },
-  "serverSettingsHelperText": "Select the default server for messaging communication",
-  "@serverSettingsHelperText": {
-    "type": "text"
-  },
-  "debugSettingsTitle": "Debug Settings",
-  "@debugSettingsTitle": {
-    "type": "text"
-  },
-  "debugModeLabel": "Debug Mode",
-  "@debugModeLabel": {
-    "type": "text"
-  },
-  "debugModeHelperText": "Debug mode is enabled. Tap version info {tapCount} times to toggle.",
-  "@debugModeHelperText": {
-    "type": "text",
-    "placeholders": {
-      "tapCount": {
-        "type": "int"
-      }
-    }
-  },
-  "settingsScreenSubtitle": "Configure your app settings and preferences",
-  "@settingsScreenSubtitle": {
-    "type": "text"
-  },
-  "versionInfoHeader": "Application Version Info",
-  "@versionInfoHeader": {
-    "type": "text"
-  },
-  "versionInfoVersion": "Version {version}",
-  "@versionInfoVersion": {
-    "type": "text",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
-  "versionInfoBuild": "Build: {buildNumber}",
-  "@versionInfoBuild": {
-    "type": "text",
-    "placeholders": {
-      "buildNumber": {
-        "type": "String"
-      }
-    }
-  },
-  "easterEggEnabled": "🎉 Easter egg unlocked! Debug mode enabled",
-  "@easterEggEnabled": {
-    "type": "text"
-  },
-  "debugModeDisabled": "Debug mode disabled",
-  "@debugModeDisabled": {
-    "type": "text"
-  },
-  "generalCamera": "Camera",
-  "@generalCamera": {
-    "type": "text"
-  },
-  "generalPhoto": "Photo",
-  "@generalPhoto": {
-    "type": "text"
-  },
-  "generalBalloons": "Balloons",
-  "@generalBalloons": {
-    "type": "text"
-  },
-  "generalConfetti": "Confetti",
-  "@generalConfetti": {
-    "type": "text"
-  },
-  "chatItemStatusError": "Error",
-  "@chatItemStatusError": {
-    "description": "Error",
-    "type": "text"
-  },
-  "formValidationHeadlineRequired": "Headline is required",
-  "formValidationDescriptionRequired": "Description is required",
-  "formValidationCustomPhraseRequired": "Custom phrase is required when not using random phrase",
-  "formValidationExpiryDateRequired": "Expiry date is required when expiry is enabled",
-  "formValidationExpiryDateFuture": "Expiry date must be in the future",
-  "formValidationMaxUsagesGreaterThanZero": "Max usages must be greater than 0",
-  "genericPublishError": "Failed to publish offer",
-  "groupDetails": "Group Channel Details",
-  "@groupDetails": {
-    "type": "text"
-  },
-  "groupMessageInfo": "{memberName} on {date} at {time}",
-  "@groupMessageInfo": {
-    "type": "text",
-    "placeholders": {
-      "memberName": {
-        "type": "String"
-      },
-      "date": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "contactStatus": "{status, select, pendingApproval{Pending Approval} pendingInauguration{Establishing Connection} approved{Active Contact} rejected{Rejected} error{Error} deleted{Deleted} active{Active Channel} unknown{Unknown} other{Unknown}}",
-  "@contactStatus": {
-    "type": "text",
-    "placeholders": {
-      "status": {
-        "type": "String"
-      }
-    }
-  },
-  "groupContactStatus": "{status, select, pendingApproval{Pending Approval} pendingInauguration{Establishing Channel} approved{Active Group Channel} rejected{Rejected} error{Error} deleted{Deleted} active{Active Group Channel} unknown{Unknown} other{Unknown}}",
-  "@groupContactStatus": {
-    "type": "text",
-    "placeholders": {
-      "status": {
-        "type": "String"
-      }
-    }
-  },
-  "contactOrigin": "{origin, select, directInteractive{Direct Interactive} individualOfferPublished{Meeting Place Invitation Offered} individualOfferRequested{Meeting Place Invitation Accepted} groupOfferPublished{Meeting Place Group invitation Offered} groupOfferRequested{Meeting Place Group Invitation Accepted} unknown{Unknown} other{Unknown}}",
-  "@contactOrigin": {
-    "type": "text",
-    "placeholders": {
-      "origin": {
-        "type": "String"
-      }
-    }
-  },
-  "groupMembers": "Group Members",
-  "@groupMembers": {
-    "type": "text"
-  },
-  "showExited": "Show exited",
-  "@showExited": {
-    "type": "text"
-  },
-  "groupMemberExited": "Exited from the group",
-  "@groupMemberExited": {
-    "type": "text"
-  },
-  "groupNoMembersToChat": "You are currently the only member of this group. You can start chatting when another member joins.",
-  "@groupNoMembersToChat": {
-    "type": "text"
-  },
-  "generalJoined": "Joined",
-  "@generalJoined": {
-    "type": "text"
-  },
-  "you": "You",
-  "@you": {
-    "type": "text"
-  },
-  "groupAdmin": "Group Admin",
-  "@groupAdmin": {
-    "type": "text"
-  },
-  "onboardingPage1Title": "Welcome to\nMeeting Place",
-  "@onboardingPage1Title": {
-    "type": "text"
-  },
-  "onboardingPage1Desc": "Powered by\nAffinidi Meeting Place SDK",
-  "@onboardingPage1Desc": {
-    "type": "text"
-  },
-  "onboardingPage2Title": "Private & Secure",
-  "@onboardingPage2Title": {
-    "type": "text"
-  },
-  "onboardingPage2Desc": "Connect with others securely and privately with end-to-end encryption",
-  "@onboardingPage2Desc": {
-    "type": "text"
-  },
-  "onboardingPage3Title": "Take control of your identity",
-  "@onboardingPage3Title": {
-    "type": "text"
-  },
-  "onboardingPage3Desc": "Protect your privacy with aliases. Prove your identity with verified credentials",
-  "@onboardingPage3Desc": {
-    "type": "text"
-  },
-  "onboardingPage4Title": "Ready to Begin",
-  "@onboardingPage4Title": {
-    "type": "text"
-  },
-  "onboardingPage4Desc": "Let's set up your identity\nand get you started!",
-  "@onboardingPage4Desc": {
-    "type": "text"
-  },
-  "setUpMyIdentity": "Setup my identity",
-  "@setUpMyIdentity": {
-    "type": "text"
-  },
-  "revealConnectionCode": "Reveal invitation passphrase",
-  "@revealConnectionCode": {
-    "type": "text"
-  },
-  "versionInfoAppName": "Meeting Place \"{appName}\"",
-  "@versionInfoAppName": {
-    "placeholders": {
-      "appName": {
-        "type": "String"
-      }
-    }
-  },
-  "platformNotSupported": "This plugin is not supported on your current platform",
-  "generalOfferInformation": "Invitation Information",
-  "generalOfferLink": "Invitation Link",
-  "generalMnemonic": "Mnemonic",
-  "generalConnectionType": "Connection type",
-  "generalExternalRef": "External Reference",
-  "generalGroupDid": "Group DID",
-  "generalGroupId": "Group Id",
-  "copiedToClipboard": "Copied to clipboard",
-  "connectionStatus": "{status, select, published{Created} finalised{Completed} accepted{Waiting} channelInaugurated{Active} deleted{Deleted} other{Unknown}}",
-  "@connectionStatus": {
-    "description": "Localized connection offer status",
-    "placeholders": {
-      "status": {
-        "type": "String"
-      }
-    }
-  },
-  "publishing": "Publishing",
-  "@publishing": {
-    "type": "text"
-  },
-  "loading": "Loading",
-  "@loading": {
-    "type": "text"
-  },
-  "deleting": "Deleting",
-  "@deleting": {
-    "type": "text"
-  },
-  "showQrScannerForOffers": "Show QR scanner for Invitations",
-  "meetingPlaceControlPlane": "Meeting Place Control Plane",
-  "searching": "Searching",
-  "@searching": {
-    "type": "text"
-  },
-  "connecting": "Connecting",
-  "@connecting": {
-    "type": "text"
-  },
-  "approving": "Approving",
-  "@approving": {
-    "type": "text"
-  },
-  "rejecting": "Rejecting",
-  "@rejecting": {
-    "type": "text"
-  },
-  "sending": "Sending",
-  "@sending": {
-    "type": "text"
-  },
-  "connectionRequestRejected": "The request to connect has been rejected",
-  "connectionRequestInProgress": "Invitation acceptance in progress. It may take a few moments for the other party to respond and finalise the channel.",
-  "requestToConnect": "Invitation acceptance has been sent {firstName}. It may take a few moments for them to respond to your request.",
-  "contactsDeleted": "{amount, plural, =1{Channel deleted} other{Channels deleted}}",
-  "@contactsDeleted": {
-    "placeholders": {
-      "amount": {
-        "type": "int"
-      }
-    }
-  },
-  "joiningGroup": "{memberName} has joined the group",
-  "@joiningGroup": {
-    "type": "text",
-    "placeholders": {
-      "memberName": {
-        "type": "String"
-      }
-    }
-  },
-  "leavingGroup": "{memberName} has left the group",
-  "@leavingGroup": {
-    "type": "text",
-    "placeholders": {
-      "memberName": {
-        "type": "String"
-      }
-    }
-  },
-  "concierge": "Concierge",
-  "@concierge": {
-    "type": "text"
-  },
-  "groupDeleted": "This group has been deleted",
-  "@groupDeleted": {
-    "type": "text"
-  },
-  "creatingConnection": "Creating connection...",
-  "@creatingConnection": {
-    "type": "text"
-  },
-  "generatingQrCode": "Generating your QR code",
-  "@generatingQrCode": {
-    "type": "text"
-  },
-  "processing": "Processing...",
-  "@processing": {
-    "type": "text"
-  },
-  "oobConnectedTo": "You are now connected to {memberName}!",
-  "@oobConnectedTo": {
-    "type": "text",
-    "placeholders": {
-      "memberName": {
-        "type": "String"
-      }
-    }
-  },
-  "oobChatTo": "Chat",
-  "@oobChatTo": {
-    "type": "text"
-  },
-  "networkDisconnected": "You are not connected to the network",
-  "@networkDisconnected": {
-    "type": "text"
-  },
-  "chatNotificationsUnavailable": "Push notifications aren't supported for chats started by scanning or sharing a QR code.",
-  "@chatNotificationsUnavailable": {
-    "type": "text"
-  },
-  "chatNotificationsUnavailableNotShared": "Notifications for this chat channel are not available",
-  "@chatNotificationsUnavailableNotShared": {
-    "type": "text"
-  },
-  "chatNotificationsWhyTitle": "Why no push notifications?",
-  "@chatNotificationsWhyTitle": {
-    "type": "text"
-  },
-  "chatNotificationsWhyDescription": "When you establish a connection by direct scanning or sharing a QR code, your devices connect directly without exchanging notification tokens with our servers. This means push notifications can't be sent when the chat is closed.",
-  "@chatNotificationsWhyDescription": {
-    "type": "text"
-  },
-  "chatNotificationsWhyNote": "You'll only see new messages when you're in the chat. There will be no badge updates or notifications informing you that new messages have arrived, even if the app is open.",
-  "@chatNotificationsWhyNote": {
-    "type": "text"
-  },
-  "chatNotificationsWhyButton": "Got it",
-  "@chatNotificationsWhyButton": {
-    "type": "text"
-  },
-  "chatNotificationsWhyLink": "Why?",
-  "@chatNotificationsWhyLink": {
-    "type": "text"
-  },
-  "meetingPlaceInvitationTitle": "Meeting Place Invitation",
-  "shareSheetCTA_QRCode": "Send or save QR code",
-  "cameraInstructionAndroid": "Tap \"Open Settings\" below to enable camera access. If that doesn't work, open Settings manually:\n\nSettings > Apps > Meeting Place > Permissions > Camera > Allow only while using the app.",
-  "cameraInstructionIos": "Tap \"Open Settings\" below to enable camera access. If that doesn't work, open Settings manually:\n\nSettings > Meeting Place > Camera and enable access for this app.",
-  "cameraInstructionMacos": "Go to System Settings > Privacy & Security > Camera and allow camera access for this app.",
-  "cameraAccessDenied": "Camera access denied or unavailable.",
-  "cameraOpenSettings": "Open Settings",
-  "cameraNotAvailable": "Camera not available",
-  "goBack": "Go Back"
+	"appName": "Meeting Place",
+	"@appName": {
+		"type": "text"
+	},
+	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} settings{Settings} other{Invalid}}",
+	"@tabsTitle": {
+		"type": "text",
+		"placeholders": {
+			"tabName": {
+				"type": "String"
+			}
+		}
+	},
+	"publishOffer": "Publish Invitation",
+	"@publishOffer": {
+		"type": "text"
+	},
+	"publishGroupOffer": "Publish Group Invitation",
+	"@publishGroupOffer": {
+		"type": "text"
+	},
+	"meetingPlaceBannerText": "Meeting Place allows you to anonymously and privately publish an invitation to connect to you. Provide a headline and description, as well as validity details to limit how long the offer is available.",
+	"@meetingPlaceBannerText": {
+		"type": "text"
+	},
+	"connectionOfferDetails": "Invitation Details",
+	"@connectionOfferDetails": {
+		"type": "text"
+	},
+	"createGroupChatOffer": "Group chat",
+	"@createGroupChatOffer": {
+		"type": "text"
+	},
+	"groupOfferHelperText": "The invitation will represent a group chat for multiple contacts to join and chat. You still have control over who can join the group chat.",
+	"@groupOfferHelperText": {
+		"type": "text"
+	},
+	"generateRandomPhraseHelperEnabled": "Generate a random phrase",
+	"@generateRandomPhraseHelperEnabled": {
+		"type": "text"
+	},
+	"generateRandomPhraseHelperDisabled": "The custom phrase you enter will be used to uniquely identify this invitation to connect. It must be unique in the Meeting Place universe.",
+	"@generateRandomPhraseHelperDisabled": {
+		"type": "text"
+	},
+	"customPhrase": "Custom Phrase",
+	"@customPhrase": {
+		"type": "text"
+	},
+	"enterCustomPhrase": "Enter custom phrase",
+	"@enterCustomPhrase": {
+		"type": "text"
+	},
+	"customPhraseHelperText": "Enter a unique custom phrase. You may use as many words as you like, separated by spaces.",
+	"@customPhraseHelperText": {
+		"type": "text"
+	},
+	"chatGroupName": "Chat group name",
+	"@chatGroupName": {
+		"type": "text"
+	},
+	"headline": "Headline",
+	"@headline": {
+		"type": "text"
+	},
+	"description": "Description",
+	"@description": {
+		"type": "text"
+	},
+	"validityVisibilitySettings": "Validity & Visibility Settings",
+	"@validityVisibilitySettings": {
+		"type": "text"
+	},
+	"searchableAtMeetingPlace": "Searchable at meetingplace.world",
+	"@searchableAtMeetingPlace": {
+		"type": "text"
+	},
+	"searchableHelperText": "When selected, the details you share in this offer will be publicly searchable at meetingplace.world",
+	"@searchableHelperText": {
+		"type": "text"
+	},
+	"setExpiry": "Set Expiry",
+	"@setExpiry": {
+		"type": "text"
+	},
+	"setExpiryHelperEnabled": "The invitation will expire at the specified date and time",
+	"@setExpiryHelperEnabled": {
+		"type": "text"
+	},
+	"setExpiryHelperDisabled": "The invitation will remain valid until deleted and will not expire",
+	"@setExpiryHelperDisabled": {
+		"type": "text"
+	},
+	"expiresAt": "Expires: {date} at {time}",
+	"@expiresAt": {
+		"type": "text",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"scanCustomMediatorQrCode": "Scan custom message server QR code",
+	"@scanCustomMediatorQrCode": {
+		"type": "text"
+	},
+	"chooseMediatorHelper": "Choose which message server to use for your connections. You can add custom message servers by scanning their QR code.",
+	"@chooseMediatorHelper": {
+		"type": "text"
+	},
+	"setMediatorName": "Set message server name",
+	"@setMediatorName": {
+		"type": "text"
+	},
+	"newConnectionOptionTitle": "{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} other{}}",
+	"@newConnectionOptionTitle": {
+		"type": "text",
+		"placeholders": {
+			"option": {
+				"type": "String"
+			}
+		}
+	},
+	"setExpiryDateTime": "Set expiry date and time",
+	"@setExpiryDateTime": {
+		"type": "text"
+	},
+	"selectExpiryHelperText": "Select when this offer should expire",
+	"@selectExpiryHelperText": {
+		"type": "text"
+	},
+	"changeButton": "Change",
+	"@changeButton": {
+		"type": "text"
+	},
+	"limitNumberOfUses": "Limit number of uses",
+	"@limitNumberOfUses": {
+		"type": "text"
+	},
+	"limitUsesHelperEnabled": "The invitation can only be used this many times",
+	"@limitUsesHelperEnabled": {
+		"type": "text"
+	},
+	"limitUsesHelperDisabled": "The invitation can be used an unlimited number of times",
+	"@limitUsesHelperDisabled": {
+		"type": "text"
+	},
+	"canBeUsedTimes": "{amount, plural, =1{Can be used only once} other{Can be used {amount} times}}",
+	"@canBeUsedTimes": {
+		"placeholders": {
+			"amount": {
+				"type": "int"
+			}
+		}
+	},
+	"newConnectionOptionSubtitle": "{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} other{}}",
+	"@newConnectionOptionSubtitle": {
+		"type": "text",
+		"placeholders": {
+			"option": {
+				"type": "String"
+			}
+		}
+	},
+	"unableToDetectCamera": "Unable to detect a camera",
+	"@unableToDetectCamera": {
+		"type": "text"
+	},
+	"newConnectionsOptionsHeader": "Select an option to create a new connection",
+	"@newConnectionsOptionsHeader": {
+		"type": "text"
+	},
+	"oobQrPresentInvitationMessage": "Show this QR code with someone to establish a connection",
+	"@oobQrPresentInvitationMessage": {
+		"type": "text"
+	},
+	"connectionsNowConnected": "You are now connected with",
+	"@connectionsNowConnected": {
+		"type": "text"
+	},
+	"connectionsPanelOobFailedTitle": "Channel creation failed",
+	"@connectionsPanelOobFailedTitle": {
+		"type": "text"
+	},
+	"connectionsPanelOobFailedBody": "Unable to establish the connection. Please try again.",
+	"@connectionsPanelOobFailedBody": {
+		"type": "text"
+	},
+	"connectionsFilterLabel": "{filter, select, all{All} offers{Offers} claims{Claims} complete{Complete} other{}}",
+	"@connectionsFilterLabel": {
+		"type": "text",
+		"placeholders": {
+			"filter": {
+				"type": "String"
+			}
+		}
+	},
+	"noConnections": "No invitations in this view",
+	"@noConnections": {
+		"type": "text"
+	},
+	"connectionDeleteHeading": "{amount, plural, =1{Delete invitation} other{Delete invitations}}",
+	"@connectionDeleteHeading": {
+		"placeholders": {
+			"amount": {
+				"type": "int"
+			}
+		}
+	},
+	"selectMaxUsagesHelperText": "Select how many times this offer can be used",
+	"@selectMaxUsagesHelperText": {
+		"type": "text"
+	},
+	"mediator": "Message Server",
+	"@mediator": {
+		"type": "text"
+	},
+	"mediatorHelperText": "This is the message server that will be used for communication with any contact that connects via this invitation",
+	"@mediatorHelperText": {
+		"type": "text"
+	},
+	"errorLoadingMediator": "Error loading message server",
+	"@errorLoadingMediator": {
+		"type": "text"
+	},
+	"publishToMeetingPlace": "Publish to Meeting Place",
+	"@publishToMeetingPlace": {
+		"type": "text"
+	},
+	"connectWithFirstName": "Connect with {firstName}!",
+	"@connectWithFirstName": {
+		"type": "text",
+		"placeholders": {
+			"firstName": {
+				"type": "String"
+			}
+		}
+	},
+	"firstNameChatGroup": "{firstName}'s chat group",
+	"@firstNameChatGroup": {
+		"type": "text",
+		"placeholders": {
+			"firstName": {
+				"type": "String"
+			}
+		}
+	},
+	"passphraseDescription": "Connect with me using Meeting Place!",
+	"@passphraseDescription": {
+		"type": "text"
+	},
+	"headlineRequired": "Headline is required",
+	"@headlineRequired": {
+		"type": "text"
+	},
+	"descriptionRequired": "Description is required",
+	"@descriptionRequired": {
+		"type": "text"
+	},
+	"customPhraseRequired": "Custom phrase is required when not using random phrase",
+	"@customPhraseRequired": {
+		"type": "text"
+	},
+	"expiryDateRequired": "Expiry date is required when expiry is enabled",
+	"@expiryDateRequired": {
+		"type": "text"
+	},
+	"expiryDateFuture": "Expiry date must be in the future",
+	"@expiryDateFuture": {
+		"type": "text"
+	},
+	"maxUsagesGreaterThanZero": "Max usages must be greater than 0",
+	"@maxUsagesGreaterThanZero": {
+		"type": "text"
+	},
+	"failedToPublishOffer": "Failed to publish invitation: {error}",
+	"@failedToPublishOffer": {
+		"type": "text",
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"selectMediator": "Select Message Server",
+	"@selectMediator": {
+		"description": "Label for selecting a mediator"
+	},
+	"connectionDeletePrompt": "{amount, plural, =0{Are you sure you want to delete this invitation? You cannot undelete an invitation!} =1{Are you sure you want to delete this invitation? You cannot undelete an invitation!} other{Are you sure you want to delete {amount} selected invitations? You cannot undelete invitations!}}",
+	"@connectionDeletePrompt": {
+		"placeholders": {
+			"amount": {
+				"type": "int"
+			}
+		}
+	},
+	"generalCancel": "Cancel",
+	"@generalCancel": {
+		"type": "text"
+	},
+	"generalDelete": "Delete",
+	"@generalDelete": {
+		"type": "text"
+	},
+	"generalDone": "Done",
+	"@generalDone": {
+		"type": "text"
+	},
+	"connectionsPanelSubtitle": "Swipe and tap to manage your invitations.",
+	"@connectionsPanelSubtitle": {
+		"type": "text",
+		"description": "Byline for connections panel heading"
+	},
+	"findPersonAiBusinessDescription": "To connect with a person or AI Agent on Meeting Place, enter the connection phrase they have shared with you.",
+	"@findPersonAiBusinessDescription": {
+		"type": "text"
+	},
+	"enterPassphrase": "Enter passphrase",
+	"@enterPassphrase": {
+		"type": "text"
+	},
+	"claimOfferTitle": "Find an invitation on Meeting Place",
+	"@claimOfferTitle": {
+		"type": "text"
+	},
+	"generalSearch": "Search",
+	"@generalSearch": {
+		"type": "text"
+	},
+	"generalConnect": "Connect",
+	"@generalConnect": {
+		"type": "text"
+	},
+	"contactCardFieldName": "{field, select, firstName{First name} lastName{Last name} email{Email} mobile{Mobile} other{}}",
+	"@contactCardFieldName": {
+		"type": "text",
+		"placeholders": {
+			"field": {
+				"type": "String"
+			}
+		}
+	},
+	"offerDetailsHeader": "My Invitation Information",
+	"@offerDetailsHeader": {
+		"type": "text"
+	},
+	"acceptOfferTitle": "Invitation Request Details",
+	"@acceptOfferTitle": {
+		"type": "text"
+	},
+	"offerDetailsDescription": "Connect with me using Meeting Place!",
+	"@offerDetailsDescription": {
+		"type": "text"
+	},
+	"errorOwnerCannotClaimOffer": "You cannot claim this invitation because you are the owner",
+	"@errorOwnerCannotClaimOffer": {
+		"type": "text"
+	},
+	"aliasPickerTitle": "Connect using this selected identity",
+	"@aliasPickerTitle": {
+		"type": "text"
+	},
+	"aliasPickerDescription": "Identities help you keep your personal information private and in your control. You can choose to use the Primary Identity alias you have configured, or select one of your additional identity aliases for this invitation.",
+	"@aliasPickerDescription": {
+		"type": "text"
+	},
+	"error": "{errorCode, select, connection_offer_owned_by_claiming_party{You cannot accept this invitation because you are the inviter!} connection_offer_already_claimed_by_claiming_party{You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress} missingMnemonic{Please enter an invitation passphrase to search} connection_offer_not_found_error{The details you provided did not match any active invitations.} discovery_register_offer_group_generic{Failed to publish invitation.} missingDeviceToken{Unable to find device notification token} offerOwnedByClaimingParty{You cannot claim this invitation because you are the owner} offerAlreadyClaimedByParty{You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress} offerNotFound{The details you provided did not match any active invitations.} mediatorAlreadyExists{Message server with the same DID already exists.} mediator_get_did_error{No message server found at the provided URL} unableToFindMediator{No message server found at the provided URL} oobFlowFailed{Unable to establish a connection with other party, QR code was likely already used} connection_offer_expired{This invitation has expired} connection_offer_limit_exceeded{This invitation has reached its maximum number of uses} register_offer_mnemonic_in_use{This phrase is already in use, please choose another one} invalidQrCode{QR-Code is not valid} other{{errorCode}}}",
+	"@error": {
+		"type": "text",
+		"placeholders": {
+			"errorCode": {
+				"type": "String"
+			}
+		}
+	},
+	"offerCreated": "Invitation Created",
+	"offerExpiresAt": "Invitation expires at {formattedExpiry}",
+	"@offerExpiresAt": {
+		"type": "text",
+		"placeholders": {
+			"formattedExpiry": {
+				"type": "String"
+			}
+		}
+	},
+	"offerValidityNote": "The invitation is valid until the date and time above, unless a maximum number of accesses is reached",
+	"offerUnlimitedUsages": "This invitation can be used any number of times",
+	"offerMaxUsages": "{maxUsages, plural, =1{This invitation can be used 1 time} other{This invitation can be used {maxUsages} times}}",
+	"@offerMaxUsages": {
+		"type": "text",
+		"placeholders": {
+			"maxUsages": {
+				"type": "int"
+			}
+		}
+	},
+	"noExpirySetHelperText": "No expiry date was set, so this invitation to connect does not expire",
+	"validityVisibilityDetails": "Validity & visibility details",
+	"personalInformationShared": "Personal information shared",
+	"myAliasProfile": "My Alias Profile",
+	"didInformation": "DID Information",
+	"didSha256": "{didSha256} (SHA256)",
+	"@didSha256": {
+		"placeholders": {
+			"didSha256": {
+				"type": "String"
+			}
+		}
+	},
+	"offerUsesPrimaryIdentity": "This invitation uses your Primary Identity",
+	"offerUsesAliasIdentity": "This invitation uses the identity alias named \"{alias}\"",
+	"@offerUsesAliasIdentity": {
+		"type": "text",
+		"placeholders": {
+			"alias": {
+				"type": "String"
+			}
+		}
+	},
+	"aliasProfileDescription": "Your alias profile helps you keep your identity private and in your control.",
+	"generalOk": "Ok",
+	"contactsPanelSubtitle": "Tap a channel to chat, double-tap to view details, tap and hold to delete.",
+	"contactsFilterLabel": "{filter, select, any{Any} person{Person} group{Group} service{AI Agent} business{Business} other{}}",
+	"@contactsFilterLabel": {
+		"type": "text",
+		"placeholders": {
+			"filter": {
+				"type": "String"
+			}
+		}
+	},
+	"noContactsYet": "No channels in this view",
+	"contactDeleteHeading": "Delete channel",
+	"contactDeletePrompt": "{amount, plural, =0{Are you sure you want to delete this channel?} =1{Are you sure you want to delete this channel?} other{Are you sure you want to delete {amount} selected channels?}}",
+	"@contactDeletePrompt": {
+		"placeholders": {
+			"amount": {
+				"type": "int"
+			}
+		}
+	},
+	"connectedVia": "Connected via {mediatorName}",
+	"@connectedVia": {
+		"type": "text",
+		"placeholders": {
+			"mediatorName": {
+				"type": "String"
+			}
+		}
+	},
+	"contactAdded": "Added {dateAdded}",
+	"@contactAdded": {
+		"type": "text",
+		"placeholders": {
+			"dateAdded": {
+				"type": "String"
+			}
+		}
+	},
+	"filter": "Filter...",
+	"noContactsMatchFilter": "No channels match your filter",
+	"connectionPhrase": "Phrase: {phrase}",
+	"@connectionPhrase": {
+		"type": "text",
+		"placeholders": {
+			"phrase": {
+				"type": "String"
+			}
+		}
+	},
+	"usesIdentityViaMediator": "Uses your {identity} identity via {mediator}",
+	"@usesIdentityViaMediator": {
+		"type": "text",
+		"placeholders": {
+			"identity": {
+				"type": "String"
+			},
+			"mediator": {
+				"type": "String"
+			}
+		}
+	},
+	"usesIdentity": "Uses your {identity} identity to connect",
+	"@usesIdentity": {
+		"type": "text",
+		"placeholders": {
+			"identity": {
+				"type": "String"
+			}
+		}
+	},
+	"timeAgoJustNow": "just now",
+	"timeAgoMinute": "{minutes, plural, =1{1 minute ago} other{{minutes} minutes ago}}",
+	"timeAgoMinuteWorded": "a minute ago",
+	"timeAgoHourNumeric": "{hours, plural, =1{1 hour ago} other{{hours} hours ago}}",
+	"timeAgoHourWorded": "an hour ago",
+	"timeAgoDay": "{days, plural, =1{1 day ago} other{{days} days ago}}",
+	"timeAgoYesterday": "Yesterday",
+	"timeAgoWeek": "{weeks, plural, =1{1 week ago} other{{weeks} weeks ago}}",
+	"timeAgoLastWeek": "Last week",
+	"timeAgoSecond": "{seconds, plural, =1{1 second ago} other{{seconds} seconds ago}}",
+	"createdValidUntil": "Created {createdTimeAgo}, valid until {validUntilDate}",
+	"@createdValidUntil": {
+		"type": "text",
+		"placeholders": {
+			"createdTimeAgo": {
+				"type": "String"
+			},
+			"validUntilDate": {
+				"type": "String"
+			}
+		}
+	},
+	"createdValidWithoutExpiration": "Created {createdTimeAgo}, with no expiry date",
+	"@createdValidWithoutExpiration": {
+		"type": "text",
+		"placeholders": {
+			"createdTimeAgo": {
+				"type": "String"
+			}
+		}
+	},
+	"displayName": "Display Name",
+	"@displayName": {
+		"type": "text"
+	},
+	"generalName": "Name",
+	"@generalName": {
+		"type": "text"
+	},
+	"displayNameHelperText": "You can change the display name for this channel. The other party will not see what you call it.",
+	"@displayNameHelperText": {
+		"type": "text"
+	},
+	"generalEmail": "Email",
+	"@generalEmail": {
+		"type": "text"
+	},
+	"generalMobile": "Mobile",
+	"@generalMobile": {
+		"type": "text"
+	},
+	"generalDid": "DID",
+	"@generalDid": {
+		"type": "text"
+	},
+	"generalDidSha256": "DID (SHA256)",
+	"@generalDidSha256": {
+		"type": "text"
+	},
+	"connectionEstablished": "Channel established",
+	"@connectionEstablished": {
+		"type": "text"
+	},
+	"generalMediator": "Message Server",
+	"@generalMediator": {
+		"type": "text"
+	},
+	"connectionApproach": "Channel establishment approach",
+	"@connectionApproach": {
+		"type": "text"
+	},
+	"theirDetails": "Their Details",
+	"@theirDetails": {
+		"type": "text"
+	},
+	"mySharedIdentityDetails": "My shared identity details",
+	"@mySharedIdentityDetails": {
+		"type": "text"
+	},
+	"connectionDetails": "Channel connection details",
+	"@connectionDetails": {
+		"type": "text"
+	},
+	"myIdentity": "My identity",
+	"@myIdentity": {
+		"type": "text"
+	},
+	"identitiesPanelSubtitle": "Swipe left and right to review and add to your identities list, drag down to delete",
+	"@identitiesPanelSubtitle": {
+		"type": "text"
+	},
+	"identitiesFilterLabel": "{filter, select, all{All} primary{Primary} aliases{Aliases} other{}}",
+	"@identitiesFilterLabel": {
+		"type": "text",
+		"placeholders": {
+			"filter": {
+				"type": "String"
+			}
+		}
+	},
+	"identityDeleteHeading": "Delete identity",
+	"@identityDeleteHeading": {
+		"type": "text"
+	},
+	"identityDeletePrompt": "Are you sure you want to delete identity \"{identity}\"?\n\nYou cannot undelete an identity!",
+	"@identityDeletePrompt": {
+		"type": "text"
+	},
+	"displayNamePrimary": "Primary Identity",
+	"@displayNamePrimary": {
+		"type": "text"
+	},
+	"displayNameAddNew": "Add new identity",
+	"@displayNameAddNew": {
+		"type": "text"
+	},
+	"displayNameAlias": "Identity Alias",
+	"@displayNameAlias": {
+		"type": "text"
+	},
+	"subtitlePrimary": "Your Primary Identity",
+	"@subtitlePrimary": {
+		"type": "text"
+	},
+	"subtitleAddNew": "Create a new alias",
+	"@subtitleAddNew": {
+		"type": "text"
+	},
+	"subtitleAlias": "Alias identity",
+	"@subtitleAlias": {
+		"type": "text"
+	},
+	"notShared": "Not shared",
+	"@notShared": {
+		"type": "text"
+	},
+	"unknownUser": "Unknown user",
+	"@unknownUser": {
+		"type": "text"
+	},
+	"unnamed": "Unnnamed",
+	"@unnamed": {
+		"type": "text"
+	},
+	"unnamedMediator": "Unknown user",
+	"@unnamedMediator": {
+		"type": "text"
+	},
+	"addNewIdentityAlias": "Add new identity alias",
+	"@addNewIdentityAlias": {
+		"type": "text"
+	},
+	"identityAliasesDescription": "Take control of your privacy, by creating identity aliases to represent yourself to contacts you connect with",
+	"@identityAliasesDescription": {
+		"type": "text"
+	},
+	"generalReject": "Reject",
+	"@generalReject": {
+		"type": "text"
+	},
+	"generalApprove": "Approve",
+	"@generalApprove": {
+		"type": "text"
+	},
+	"zalgoTextDetectedError": "Unusual characters detected. Please remove them and try again.",
+	"@zalgoTextDetectedError": {
+		"type": "text"
+	},
+	"chatTooLong": "The chat message is too long",
+	"@chatTooLong": {
+		"type": "text"
+	},
+	"splashScreenTitle": "Meeting Place",
+	"toProtectData": "To protect your data, this application requires secure authentication to continue.",
+	"authInstructionAndroid": "Go to Settings > Security > Screen lock and enable a PIN, pattern, or fingerprint.",
+	"@authInstructionAndroid": {
+		"description": "Instruction for Android users on how to enable secure authentication"
+	},
+	"authInstructionIos": "Go to Settings > Face ID & Passcode (or Touch ID & Passcode) and set up Face ID, Touch ID, or a device passcode.",
+	"@authInstructionIos": {
+		"description": "Instruction for iOS users on how to enable secure authentication"
+	},
+	"authInstructionMacos": "Go to System Settings > Touch ID & Password (or Login Password) and set up Touch ID or a secure password.",
+	"@authInstructionMacos": {
+		"description": "Instruction for macOS users on how to enable secure authentication"
+	},
+	"authUnlockReason": "Please unlock your device to continue",
+	"chatTypeMessagePrompt": "Message to {name}",
+	"@chatTypeMessagePrompt": {
+		"type": "text",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"chatAddMessageToMediaPrompt": "Add a message",
+	"@chatAddMessageToMediaPrompt": {
+		"type": "text"
+	},
+	"chatTypeMessagePromptGroup": "Message to the channel",
+	"updatePrimaryIdentity": "Update Primary Identity",
+	"newIdentityAlias": "New identity alias",
+	"editIdentityTitle": "Edit identity: {identityName}",
+	"@editIdentityTitle": {
+		"type": "text",
+		"placeholders": {
+			"identityName": {
+				"type": "String"
+			}
+		}
+	},
+	"customiseIdentityCard": "Customise identity card",
+	"nameTooLong": "The name is too long",
+	"descriptionTooLong": "The description is too long",
+	"invalidEmail": "The email address is invalid",
+	"emailTooLong": "The email address is too long",
+	"invalidMobileNumber": "The mobile number is invalid",
+	"mobileTooLong": "The mobile number is too long",
+	"aliasTooLong": "The alias is too long",
+	"thisFieldIsRequired": "This field is required",
+	"identityAliasPersonalDetails": "Identity alias personal details",
+	"profilePictureChangePrompt": "Tap here to change your profile picture",
+	"firstName": "First Name",
+	"enterFirstName": "Enter first name",
+	"lastName": "Last Name",
+	"enterLastName": "Enter last name",
+	"email": "Email",
+	"enterEmail": "Enter email",
+	"mobile": "Mobile",
+	"enterMobile": "Enter mobile",
+	"anonymous": "Anonymous",
+	"aliasLabel": "Alias label",
+	"enterAliasLabel": "Enter alias label",
+	"aliasLabelHelperText": "The alias label is how you will refer to this alias when connecting. Use a descriptive name to make it easier to identify.",
+	"setupPrimaryIdentityTitle": "Let's setup your Primary Identity!",
+	"setupPrimaryIdentityDescription": "Your Primary Identity will be used by default when you connect with others.",
+	"primaryIdentityInformation": "Your Primary Identity information",
+	"primaryIdentityComplete": "My Primary Identity is complete",
+	"keepMeAnonymous": "Keep me anonymous",
+	"typingMessage": "{amount, plural, =1{{names} is typing} other{{names} are typing}}",
+	"@typingMessage": {
+		"type": "text",
+		"placeholders": {
+			"names": {
+				"type": "String"
+			},
+			"amount": {
+				"type": "int"
+			}
+		}
+	},
+	"awaitingMembersToJoin": "{namesCount, plural, =1{Awaiting {names} to join} other{Awaiting {names} and {othersCount, plural, =1{1 other} other{{othersCount} others}} to join}}",
+	"@awaitingMembersToJoin": {
+		"placeholders": {
+			"names": {
+				"type": "String"
+			},
+			"namesCount": {
+				"type": "int"
+			},
+			"othersCount": {
+				"type": "int"
+			}
+		}
+	},
+	"unknownType": "Unknown type",
+	"@unknownType": {
+		"type": "text"
+	},
+	"loadImageFailed": "Failed to load image",
+	"@loadImageFailed": {
+		"type": "text"
+	},
+	"chatRequestPermissionToJoinGroupFailed": "Failed to join group",
+	"@chatRequestPermissionToJoinGroupFailed": {
+		"type": "text"
+	},
+	"genWordConciergeMessage": "Concierge message",
+	"@genWordConciergeMessage": {
+		"description": "The wording for concierge message",
+		"type": "text"
+	},
+	"chatRequestPermissionToJoinGroup": "{memberName} wants to join the group",
+	"@chatRequestPermissionToJoinGroup": {
+		"type": "text",
+		"placeholders": {
+			"memberName": {
+				"type": "String"
+			}
+		}
+	},
+	"chatEncryptionNotice": "Messages and any data shared in this chat are end-to-end encrypted. Only people and agents in this chat can read them.",
+	"@chatEncryptionNotice": {
+		"description": "Encryption security notice displayed at the top of every chat",
+		"type": "text"
+	},
+	"genWordNo": "No",
+	"@genWordNo": {
+		"description": "The word for No",
+		"type": "text"
+	},
+	"genWordLater": "Later",
+	"@genWordLater": {
+		"description": "Phrase for later",
+		"type": "text"
+	},
+	"genWordYes": "Yes",
+	"@genWordYes": {
+		"description": "The word for Yes",
+		"type": "text"
+	},
+	"chatRequestPermissionToUpdateProfileGroup": "The profile details shared with this group have changed. Would you like to update all members?",
+	"@chatRequestPermissionToUpdateProfileGroup": {
+		"type": "text"
+	},
+	"chatRequestPermissionToUpdateProfile": "The profile details shared with this contact have changed. Would you like to send them an update?",
+	"@chatRequestPermissionToUpdateProfile": {
+		"type": "text"
+	},
+	"chatStartOfConversationInitiatedByMe": "You established this channel on {date} at {time}",
+	"@chatStartOfConversationInitiatedByMe": {
+		"type": "text",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"messageCopiedClipboard": "Message copied to clipboard",
+	"@messageCopiedClipboard": {
+		"type": "text"
+	},
+	"chatItemStatus": "{status, select, queued{Queued} delivered{Delivered} sending{Sending} sent{Sent} error{Error} groupDeleted{Group deleted} other{}}",
+	"@chatItemStatus": {
+		"type": "text",
+		"placeholders": {
+			"status": {
+				"type": "String"
+			}
+		}
+	},
+	"qrScannerTitle": "Scan QR Code",
+	"@qrScannerTitle": {
+		"type": "text"
+	},
+	"qrScannerInstructions": "Position the QR code within the frame",
+	"@qrScannerInstructions": {
+		"type": "text"
+	},
+	"qrScannerStatus": "Scanner Status: {status}",
+	"@qrScannerStatus": {
+		"type": "text",
+		"placeholders": {
+			"status": {
+				"type": "String"
+			}
+		}
+	},
+	"useCamera": "Use Camera",
+	"@useCamera": {
+		"type": "text"
+	},
+	"chooseFromGallery": "Choose from gallery",
+	"@chooseFromGallery": {
+		"type": "text"
+	},
+	"qrScannerCameraPermissionHelp": "Please check camera permissions and try again",
+	"@qrScannerCameraPermissionHelp": {
+		"type": "text"
+	},
+	"qrScannerConnectionFailed": "Connection Failed",
+	"@qrScannerConnectionFailed": {
+		"type": "text"
+	},
+	"qrScannerConnectionFailedMessage": "Failed to establish connection: {error}",
+	"@qrScannerConnectionFailedMessage": {
+		"type": "text",
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"qrScannerTryAgain": "Try Again",
+	"@qrScannerTryAgain": {
+		"type": "text"
+	},
+	"qrScannerTimeoutError": "OOB flow acceptance timed out after 30 seconds",
+	"@qrScannerTimeoutError": {
+		"type": "text"
+	},
+	"customMediators": "Custom Message Servers",
+	"@customMediators": {
+		"type": "text"
+	},
+	"addCustomMediator": "Add Custom Message Server",
+	"@addCustomMediator": {
+		"type": "text"
+	},
+	"manageCustomMediators": "Manage Custom Message Server",
+	"@manageCustomMediators": {
+		"type": "text"
+	},
+	"configureCustomMediatorEndpoint": "Configure your own message server endpoint",
+	"@configureCustomMediatorEndpoint": {
+		"type": "text"
+	},
+	"noCustomMediatorsConfigured": "No custom message servers configured yet",
+	"@noCustomMediatorsConfigured": {
+		"type": "text"
+	},
+	"customMediatorsCount": "{count, plural, =1{1 custom message server configured} other{{count} custom message servers configured}}",
+	"@customMediatorsCount": {
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"addedMediatorSuccess": "Added message server \"{name}\"",
+	"@addedMediatorSuccess": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"failedToAddMediator": "Failed to add message server: {error}",
+	"@failedToAddMediator": {
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"mediatorName": "Message Server Name",
+	"@mediatorName": {
+		"type": "text"
+	},
+	"mediatorDid": "Message Server DID",
+	"@mediatorDid": {
+		"type": "text"
+	},
+	"myCustomMediator": "My Custom Message Server",
+	"@myCustomMediator": {
+		"type": "text"
+	},
+	"pleaseEnterName": "Please enter a name",
+	"@pleaseEnterName": {
+		"type": "text"
+	},
+	"pleaseEnterDid": "Please enter a DID",
+	"@pleaseEnterDid": {
+		"type": "text"
+	},
+	"didMustStartWith": "DID must start with \"did:\"",
+	"@didMustStartWith": {
+		"type": "text"
+	},
+	"deleteCustomMediator": "Delete Custom Message Server",
+	"@deleteCustomMediator": {
+		"type": "text"
+	},
+	"deleteCustomMediatorConfirm": "Are you sure you want to delete \"{name}\"?\n\nThis action cannot be undone.",
+	"@deleteCustomMediatorConfirm": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"deletedMediatorSuccess": "Deleted message server \"{name}\"",
+	"@deletedMediatorSuccess": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"renamedMediatorSuccess": "Renamed message server to \"{name}\"",
+	"@renamedMediatorSuccess": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"failedToDeleteMediator": "Failed to delete message server: {error}",
+	"@failedToDeleteMediator": {
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"failedToRenameMediator": "Failed to rename message server: {error}",
+	"@failedToRenameMediator": {
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"generalRetry": "Retry",
+	"@generalRetry": {
+		"type": "text"
+	},
+	"generalClose": "Close",
+	"@generalClose": {
+		"type": "text"
+	},
+	"generalAdd": "Add",
+	"@generalAdd": {
+		"type": "text"
+	},
+	"noIdentityDetected": "No identity detected, please create one to continue.",
+	"connectWithPersonAiServiceBusiness": "Connect with a Person or AI Agent",
+	"chatScreenTapForMemberDetails": "Tap for member details",
+	"@chatScreenTapForMemberDetails": {
+		"type": "text"
+	},
+	"debugPanelTitle": "Debug Panel",
+	"@debugPanelTitle": {
+		"type": "text"
+	},
+	"debugPanelSubtitle": "View application logs and debug information",
+	"@debugPanelSubtitle": {
+		"type": "text"
+	},
+	"debugPanelNoLogs": "No logs available",
+	"@debugPanelNoLogs": {
+		"type": "text"
+	},
+	"debugPanelLogsAppearMessage": "Logs will appear here as you use the app",
+	"@debugPanelLogsAppearMessage": {
+		"type": "text"
+	},
+	"debugPanelClearLogs": "Clear logs",
+	"@debugPanelClearLogs": {
+		"type": "text"
+	},
+	"debugPanelCopyLogs": "Copy logs to clipboard",
+	"@debugPanelCopyLogs": {
+		"type": "text"
+	},
+	"debugPanelAddTestLog": "Add test log",
+	"@debugPanelAddTestLog": {
+		"type": "text"
+	},
+	"debugPanelLogsCopied": "Logs copied to clipboard",
+	"@debugPanelLogsCopied": {
+		"type": "text"
+	},
+	"serverSettings": "Server Settings",
+	"@serverSettings": {
+		"type": "text"
+	},
+	"serverSettingsHelperText": "Select the default server for messaging communication",
+	"@serverSettingsHelperText": {
+		"type": "text"
+	},
+	"debugSettingsTitle": "Debug Settings",
+	"@debugSettingsTitle": {
+		"type": "text"
+	},
+	"debugModeLabel": "Debug Mode",
+	"@debugModeLabel": {
+		"type": "text"
+	},
+	"debugModeHelperText": "Debug mode is enabled. Tap version info {tapCount} times to toggle.",
+	"@debugModeHelperText": {
+		"type": "text",
+		"placeholders": {
+			"tapCount": {
+				"type": "int"
+			}
+		}
+	},
+	"settingsScreenSubtitle": "Configure your app settings and preferences",
+	"@settingsScreenSubtitle": {
+		"type": "text"
+	},
+	"versionInfoHeader": "Application Version Info",
+	"@versionInfoHeader": {
+		"type": "text"
+	},
+	"versionInfoVersion": "Version {version}",
+	"@versionInfoVersion": {
+		"type": "text",
+		"placeholders": {
+			"version": {
+				"type": "String"
+			}
+		}
+	},
+	"versionInfoBuild": "Build: {buildNumber}",
+	"@versionInfoBuild": {
+		"type": "text",
+		"placeholders": {
+			"buildNumber": {
+				"type": "String"
+			}
+		}
+	},
+	"easterEggEnabled": "🎉 Easter egg unlocked! Debug mode enabled",
+	"@easterEggEnabled": {
+		"type": "text"
+	},
+	"debugModeDisabled": "Debug mode disabled",
+	"@debugModeDisabled": {
+		"type": "text"
+	},
+	"generalCamera": "Camera",
+	"@generalCamera": {
+		"type": "text"
+	},
+	"generalPhoto": "Photo",
+	"@generalPhoto": {
+		"type": "text"
+	},
+	"generalBalloons": "Balloons",
+	"@generalBalloons": {
+		"type": "text"
+	},
+	"generalConfetti": "Confetti",
+	"@generalConfetti": {
+		"type": "text"
+	},
+	"chatItemStatusError": "Error",
+	"@chatItemStatusError": {
+		"description": "Error",
+		"type": "text"
+	},
+	"formValidationHeadlineRequired": "Headline is required",
+	"formValidationDescriptionRequired": "Description is required",
+	"formValidationCustomPhraseRequired": "Custom phrase is required when not using random phrase",
+	"formValidationExpiryDateRequired": "Expiry date is required when expiry is enabled",
+	"formValidationExpiryDateFuture": "Expiry date must be in the future",
+	"formValidationMaxUsagesGreaterThanZero": "Max usages must be greater than 0",
+	"genericPublishError": "Failed to publish offer",
+	"groupDetails": "Group Channel Details",
+	"@groupDetails": {
+		"type": "text"
+	},
+	"groupMessageInfo": "{memberName} on {date} at {time}",
+	"@groupMessageInfo": {
+		"type": "text",
+		"placeholders": {
+			"memberName": {
+				"type": "String"
+			},
+			"date": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"contactStatus": "{status, select, pendingApproval{Pending Approval} pendingInauguration{Establishing Connection} approved{Active Contact} rejected{Rejected} error{Error} deleted{Deleted} active{Active Channel} unknown{Unknown} other{Unknown}}",
+	"@contactStatus": {
+		"type": "text",
+		"placeholders": {
+			"status": {
+				"type": "String"
+			}
+		}
+	},
+	"groupContactStatus": "{status, select, pendingApproval{Pending Approval} pendingInauguration{Establishing Channel} approved{Active Group Channel} rejected{Rejected} error{Error} deleted{Deleted} active{Active Group Channel} unknown{Unknown} other{Unknown}}",
+	"@groupContactStatus": {
+		"type": "text",
+		"placeholders": {
+			"status": {
+				"type": "String"
+			}
+		}
+	},
+	"contactOrigin": "{origin, select, directInteractive{Direct Interactive} individualOfferPublished{Meeting Place Invitation Offered} individualOfferRequested{Meeting Place Invitation Accepted} groupOfferPublished{Meeting Place Group invitation Offered} groupOfferRequested{Meeting Place Group Invitation Accepted} unknown{Unknown} other{Unknown}}",
+	"@contactOrigin": {
+		"type": "text",
+		"placeholders": {
+			"origin": {
+				"type": "String"
+			}
+		}
+	},
+	"groupMembers": "Group Members",
+	"@groupMembers": {
+		"type": "text"
+	},
+	"showExited": "Show exited",
+	"@showExited": {
+		"type": "text"
+	},
+	"groupMemberExited": "Exited from the group",
+	"@groupMemberExited": {
+		"type": "text"
+	},
+	"groupNoMembersToChat": "You are currently the only member of this group. You can start chatting when another member joins.",
+	"@groupNoMembersToChat": {
+		"type": "text"
+	},
+	"generalJoined": "Joined",
+	"@generalJoined": {
+		"type": "text"
+	},
+	"you": "You",
+	"@you": {
+		"type": "text"
+	},
+	"groupAdmin": "Group Admin",
+	"@groupAdmin": {
+		"type": "text"
+	},
+	"onboardingPage1Title": "Welcome to\nMeeting Place",
+	"@onboardingPage1Title": {
+		"type": "text"
+	},
+	"onboardingPage1Desc": "Powered by\nAffinidi Meeting Place SDK",
+	"@onboardingPage1Desc": {
+		"type": "text"
+	},
+	"onboardingPage2Title": "Private & Secure",
+	"@onboardingPage2Title": {
+		"type": "text"
+	},
+	"onboardingPage2Desc": "Connect with others securely and privately with end-to-end encryption",
+	"@onboardingPage2Desc": {
+		"type": "text"
+	},
+	"onboardingPage3Title": "Take control of your identity",
+	"@onboardingPage3Title": {
+		"type": "text"
+	},
+	"onboardingPage3Desc": "Protect your privacy with aliases. Prove your identity with verified credentials",
+	"@onboardingPage3Desc": {
+		"type": "text"
+	},
+	"onboardingPage4Title": "Ready to Begin",
+	"@onboardingPage4Title": {
+		"type": "text"
+	},
+	"onboardingPage4Desc": "Let's set up your identity\nand get you started!",
+	"@onboardingPage4Desc": {
+		"type": "text"
+	},
+	"setUpMyIdentity": "Setup my identity",
+	"@setUpMyIdentity": {
+		"type": "text"
+	},
+	"revealConnectionCode": "Reveal invitation passphrase",
+	"@revealConnectionCode": {
+		"type": "text"
+	},
+	"versionInfoAppName": "Meeting Place \"{appName}\"",
+	"@versionInfoAppName": {
+		"placeholders": {
+			"appName": {
+				"type": "String"
+			}
+		}
+	},
+	"platformNotSupported": "This plugin is not supported on your current platform",
+	"generalOfferInformation": "Invitation Information",
+	"generalOfferLink": "Invitation Link",
+	"generalMnemonic": "Mnemonic",
+	"generalConnectionType": "Connection type",
+	"generalExternalRef": "External Reference",
+	"generalGroupDid": "Group DID",
+	"generalGroupId": "Group Id",
+	"copiedToClipboard": "Copied to clipboard",
+	"connectionStatus": "{status, select, published{Created} finalised{Completed} accepted{Waiting} channelInaugurated{Active} deleted{Deleted} other{Unknown}}",
+	"@connectionStatus": {
+		"description": "Localized connection offer status",
+		"placeholders": {
+			"status": {
+				"type": "String"
+			}
+		}
+	},
+	"publishing": "Publishing",
+	"@publishing": {
+		"type": "text"
+	},
+	"loading": "Loading",
+	"@loading": {
+		"type": "text"
+	},
+	"deleting": "Deleting",
+	"@deleting": {
+		"type": "text"
+	},
+	"showQrScannerForOffers": "Show QR scanner for Invitations",
+	"meetingPlaceControlPlane": "Meeting Place Control Plane",
+	"searching": "Searching",
+	"@searching": {
+		"type": "text"
+	},
+	"connecting": "Connecting",
+	"@connecting": {
+		"type": "text"
+	},
+	"approving": "Approving",
+	"@approving": {
+		"type": "text"
+	},
+	"rejecting": "Rejecting",
+	"@rejecting": {
+		"type": "text"
+	},
+	"sending": "Sending",
+	"@sending": {
+		"type": "text"
+	},
+	"connectionRequestRejected": "The request to connect has been rejected",
+	"connectionRequestInProgress": "Invitation acceptance in progress. It may take a few moments for the other party to respond and finalise the channel.",
+	"requestToConnect": "Invitation acceptance has been sent {firstName}. It may take a few moments for them to respond to your request.",
+	"contactsDeleted": "{amount, plural, =1{Channel deleted} other{Channels deleted}}",
+	"@contactsDeleted": {
+		"placeholders": {
+			"amount": {
+				"type": "int"
+			}
+		}
+	},
+	"joiningGroup": "{memberName} has joined the group",
+	"@joiningGroup": {
+		"type": "text",
+		"placeholders": {
+			"memberName": {
+				"type": "String"
+			}
+		}
+	},
+	"leavingGroup": "{memberName} has left the group",
+	"@leavingGroup": {
+		"type": "text",
+		"placeholders": {
+			"memberName": {
+				"type": "String"
+			}
+		}
+	},
+	"concierge": "Concierge",
+	"@concierge": {
+		"type": "text"
+	},
+	"groupDeleted": "This group has been deleted",
+	"@groupDeleted": {
+		"type": "text"
+	},
+	"creatingConnection": "Creating connection...",
+	"@creatingConnection": {
+		"type": "text"
+	},
+	"generatingQrCode": "Generating your QR code",
+	"@generatingQrCode": {
+		"type": "text"
+	},
+	"processing": "Processing...",
+	"@processing": {
+		"type": "text"
+	},
+	"oobConnectedTo": "You are now connected to {memberName}!",
+	"@oobConnectedTo": {
+		"type": "text",
+		"placeholders": {
+			"memberName": {
+				"type": "String"
+			}
+		}
+	},
+	"oobChatTo": "Chat",
+	"@oobChatTo": {
+		"type": "text"
+	},
+	"networkDisconnected": "You are not connected to the network",
+	"@networkDisconnected": {
+		"type": "text"
+	},
+	"chatNotificationsUnavailable": "Push notifications aren't supported for chats started by scanning or sharing a QR code.",
+	"@chatNotificationsUnavailable": {
+		"type": "text"
+	},
+	"chatNotificationsUnavailableNotShared": "Notifications for this chat channel are not available",
+	"@chatNotificationsUnavailableNotShared": {
+		"type": "text"
+	},
+	"chatNotificationsWhyTitle": "Why no push notifications?",
+	"@chatNotificationsWhyTitle": {
+		"type": "text"
+	},
+	"chatNotificationsWhyDescription": "When you establish a connection by direct scanning or sharing a QR code, your devices connect directly without exchanging notification tokens with our servers. This means push notifications can't be sent when the chat is closed.",
+	"@chatNotificationsWhyDescription": {
+		"type": "text"
+	},
+	"chatNotificationsWhyNote": "You'll only see new messages when you're in the chat. There will be no badge updates or notifications informing you that new messages have arrived, even if the app is open.",
+	"@chatNotificationsWhyNote": {
+		"type": "text"
+	},
+	"chatNotificationsWhyButton": "Got it",
+	"@chatNotificationsWhyButton": {
+		"type": "text"
+	},
+	"chatNotificationsWhyLink": "Why?",
+	"@chatNotificationsWhyLink": {
+		"type": "text"
+	},
+	"meetingPlaceInvitationTitle": "Meeting Place Invitation",
+	"shareSheetCTA_QRCode": "Send or save QR code",
+	"cameraInstructionAndroid": "Tap \"Open Settings\" below to enable camera access. If that doesn't work, open Settings manually:\n\nSettings > Apps > Meeting Place > Permissions > Camera > Allow only while using the app.",
+	"cameraInstructionIos": "Tap \"Open Settings\" below to enable camera access. If that doesn't work, open Settings manually:\n\nSettings > Meeting Place > Camera and enable access for this app.",
+	"cameraInstructionMacos": "Go to System Settings > Privacy & Security > Camera and allow camera access for this app.",
+	"cameraAccessDenied": "Camera access denied or unavailable.",
+	"cameraOpenSettings": "Open Settings",
+	"cameraNotAvailable": "Camera not available",
+	"goBack": "Go Back"
 }
