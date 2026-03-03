@@ -3,7 +3,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart'
     hide ConciergeMessage;
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../../infrastructure/extensions/event_message_extentions.dart';
+import '../../../../infrastructure/extensions/event_message_extensions.dart';
 import 'concierge_message.dart';
 
 class LeavingGroupChatItem extends StatelessWidget {
