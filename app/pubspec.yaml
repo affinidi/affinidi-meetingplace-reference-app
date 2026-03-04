@@ -20,7 +20,6 @@ version: 1.5.7+2
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
-  flutter: ">=3.38.0"
 
 dependencies:
   app_badge_plus: ^1.2.3
