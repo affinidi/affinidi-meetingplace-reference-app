@@ -6,7 +6,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
-import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -70,7 +69,8 @@ class OOBService extends _$OOBService {
 
     _logger.info('createOobFlow', name: _logKey);
 
-    final contactCard = _currentIdentity!.card.toSdkContactCard();
+    state = state.copyWith(lastConnectionChannel: null);
+    final contactCard = _currentIdentity!.toSdkContactCard();
 
     final createOobFlowResult = await sdk.createOobFlow(
       contactCard: contactCard,
@@ -108,7 +108,14 @@ class OOBService extends _$OOBService {
   Future<void> acceptOobFlow(String oobUrl) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
 
-    final oobUri = Uri.parse(oobUrl);
+    final oobUri = Uri.tryParse(oobUrl);
+    if (oobUri == null) {
+      throw AppException(
+        'Invalid OOB URL',
+        code: AppExceptionType.invalidQrCode.name,
+      );
+    }
+
     if (_currentIdentity == null) {
       throw AppException(
         'You need to select an identity first',
@@ -116,11 +123,11 @@ class OOBService extends _$OOBService {
       );
     }
 
-    _logger.info('acceptOobFlow', name: _logKey);
+    _logger.info('acceptOobFlow $oobUrl', name: _logKey);
 
     final result = await sdk.acceptOobFlow(
       oobUri,
-      contactCard: _currentIdentity!.card.toSdkContactCard(),
+      contactCard: _currentIdentity!.toSdkContactCard(),
       externalRef: _currentIdentity!.id,
     );
     final acceptedOfferCompleter = Completer<void>();

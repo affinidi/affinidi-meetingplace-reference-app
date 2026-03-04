@@ -15,6 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OobScanQrState {
   bool get isProcessing;
+  String? get errorMessage;
+  String? get scannedCode;
 
   /// Create a copy of OobScanQrState
   /// with the given fields replaced by the non-null parameter values.
@@ -30,15 +32,20 @@ mixin _$OobScanQrState {
         (other.runtimeType == runtimeType &&
             other is OobScanQrState &&
             (identical(other.isProcessing, isProcessing) ||
-                other.isProcessing == isProcessing));
+                other.isProcessing == isProcessing) &&
+            (identical(other.errorMessage, errorMessage) ||
+                other.errorMessage == errorMessage) &&
+            (identical(other.scannedCode, scannedCode) ||
+                other.scannedCode == scannedCode));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, isProcessing);
+  int get hashCode =>
+      Object.hash(runtimeType, isProcessing, errorMessage, scannedCode);
 
   @override
   String toString() {
-    return 'OobScanQrState(isProcessing: $isProcessing)';
+    return 'OobScanQrState(isProcessing: $isProcessing, errorMessage: $errorMessage, scannedCode: $scannedCode)';
   }
 }
 
@@ -48,7 +55,7 @@ abstract mixin class $OobScanQrStateCopyWith<$Res> {
           OobScanQrState value, $Res Function(OobScanQrState) _then) =
       _$OobScanQrStateCopyWithImpl;
   @useResult
-  $Res call({bool isProcessing});
+  $Res call({bool isProcessing, String? errorMessage, String? scannedCode});
 }
 
 /// @nodoc
@@ -65,12 +72,22 @@ class _$OobScanQrStateCopyWithImpl<$Res>
   @override
   $Res call({
     Object? isProcessing = null,
+    Object? errorMessage = freezed,
+    Object? scannedCode = freezed,
   }) {
     return _then(_self.copyWith(
       isProcessing: null == isProcessing
           ? _self.isProcessing
           : isProcessing // ignore: cast_nullable_to_non_nullable
               as bool,
+      errorMessage: freezed == errorMessage
+          ? _self.errorMessage
+          : errorMessage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      scannedCode: freezed == scannedCode
+          ? _self.scannedCode
+          : scannedCode // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -168,13 +185,16 @@ extension OobScanQrStatePatterns on OobScanQrState {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(bool isProcessing)? $default, {
+    TResult Function(
+            bool isProcessing, String? errorMessage, String? scannedCode)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _OobScanQrState() when $default != null:
-        return $default(_that.isProcessing);
+        return $default(
+            _that.isProcessing, _that.errorMessage, _that.scannedCode);
       case _:
         return orElse();
     }
@@ -195,12 +215,15 @@ extension OobScanQrStatePatterns on OobScanQrState {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(bool isProcessing) $default,
+    TResult Function(
+            bool isProcessing, String? errorMessage, String? scannedCode)
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _OobScanQrState():
-        return $default(_that.isProcessing);
+        return $default(
+            _that.isProcessing, _that.errorMessage, _that.scannedCode);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -220,12 +243,15 @@ extension OobScanQrStatePatterns on OobScanQrState {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(bool isProcessing)? $default,
+    TResult? Function(
+            bool isProcessing, String? errorMessage, String? scannedCode)?
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _OobScanQrState() when $default != null:
-        return $default(_that.isProcessing);
+        return $default(
+            _that.isProcessing, _that.errorMessage, _that.scannedCode);
       case _:
         return null;
     }
@@ -235,11 +261,16 @@ extension OobScanQrStatePatterns on OobScanQrState {
 /// @nodoc
 
 class _OobScanQrState implements OobScanQrState {
-  _OobScanQrState({this.isProcessing = false});
+  _OobScanQrState(
+      {this.isProcessing = false, this.errorMessage, this.scannedCode});
 
   @override
   @JsonKey()
   final bool isProcessing;
+  @override
+  final String? errorMessage;
+  @override
+  final String? scannedCode;
 
   /// Create a copy of OobScanQrState
   /// with the given fields replaced by the non-null parameter values.
@@ -255,15 +286,20 @@ class _OobScanQrState implements OobScanQrState {
         (other.runtimeType == runtimeType &&
             other is _OobScanQrState &&
             (identical(other.isProcessing, isProcessing) ||
-                other.isProcessing == isProcessing));
+                other.isProcessing == isProcessing) &&
+            (identical(other.errorMessage, errorMessage) ||
+                other.errorMessage == errorMessage) &&
+            (identical(other.scannedCode, scannedCode) ||
+                other.scannedCode == scannedCode));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, isProcessing);
+  int get hashCode =>
+      Object.hash(runtimeType, isProcessing, errorMessage, scannedCode);
 
   @override
   String toString() {
-    return 'OobScanQrState(isProcessing: $isProcessing)';
+    return 'OobScanQrState(isProcessing: $isProcessing, errorMessage: $errorMessage, scannedCode: $scannedCode)';
   }
 }
 
@@ -275,7 +311,7 @@ abstract mixin class _$OobScanQrStateCopyWith<$Res>
       __$OobScanQrStateCopyWithImpl;
   @override
   @useResult
-  $Res call({bool isProcessing});
+  $Res call({bool isProcessing, String? errorMessage, String? scannedCode});
 }
 
 /// @nodoc
@@ -292,12 +328,22 @@ class __$OobScanQrStateCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   $Res call({
     Object? isProcessing = null,
+    Object? errorMessage = freezed,
+    Object? scannedCode = freezed,
   }) {
     return _then(_OobScanQrState(
       isProcessing: null == isProcessing
           ? _self.isProcessing
           : isProcessing // ignore: cast_nullable_to_non_nullable
               as bool,
+      errorMessage: freezed == errorMessage
+          ? _self.errorMessage
+          : errorMessage // ignore: cast_nullable_to_non_nullable
+              as String?,
+      scannedCode: freezed == scannedCode
+          ? _self.scannedCode
+          : scannedCode // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }

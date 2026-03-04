@@ -373,8 +373,10 @@ class AppLocalizationsEs extends AppLocalizations {
             '¡No puedes aceptar esta invitación porque eres el invitador!',
         'connection_offer_already_claimed_by_claiming_party':
             'No puedes aceptar esta invitación porque ya solicitaste conectarte y tienes una reclamación pendiente en curso',
+        'missingMnemonic':
+            'Por favor, introduce una frase de invitación para buscar',
         'connection_offer_not_found_error':
-            'Los detalles que proporcionaste no coincidieron con ninguna invitación activa.',
+            'Los detalles que proporcionaste no coinciden con ninguna invitación activa.',
         'discovery_register_offer_group_generic':
             'Error al publicar la invitación.',
         'missingDeviceToken':
@@ -384,7 +386,7 @@ class AppLocalizationsEs extends AppLocalizations {
         'offerAlreadyClaimedByParty':
             'No puedes reclamar esta oferta porque ya aceptaste la invitación y tienes una solicitud pendiente en curso',
         'offerNotFound':
-            'Los detalles que proporcionaste no coincidieron con ninguna invitación activa.',
+            'Los detalles que proporcionaste no coinciden con ninguna invitación activa.',
         'mediatorAlreadyExists':
             'Ya existe un servidor de mensajes con el mismo DID.',
         'mediator_get_did_error':
@@ -393,6 +395,12 @@ class AppLocalizationsEs extends AppLocalizations {
             'No se encontró un servidor de mensajes en la URL proporcionada',
         'oobFlowFailed':
             'No se pudo establecer una conexión con la otra parte, probablemente el código QR ya fue usado',
+        'connection_offer_expired': 'Esta invitación ha expirado',
+        'connection_offer_limit_exceeded':
+            'Esta invitación ha alcanzado su número máximo de usos',
+        'register_offer_mnemonic_in_use':
+            'Esta frase ya está en uso, por favor elige otra',
+        'invalidQrCode': 'El código QR no es válido',
         'other': '$errorCode',
       },
     );
@@ -977,9 +985,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chooseFromGallery => 'Elige de la galería';
 
   @override
-  String get qrScannerCameraNotAvailable => 'Cámara no disponible';
-
-  @override
   String get qrScannerCameraPermissionHelp =>
       'Verifique los permisos de la cámara e inténtelo de nuevo';
 
@@ -1483,21 +1488,22 @@ class AppLocalizationsEs extends AppLocalizations {
       'Las notificaciones para este canal de chat no están disponibles';
 
   @override
-  String get chatNotificationsWhyTitle => 'Why no push notifications?';
+  String get chatNotificationsWhyTitle =>
+      '¿Por qué no hay notificaciones push?';
 
   @override
   String get chatNotificationsWhyDescription =>
-      'When you establish a connection by direct scanning or sharing a QR code, your devices connect directly without exchanging notification tokens with our servers. This means push notifications can\'t be sent when the chat is closed.';
+      'Cuando estableces una conexión mediante escaneo directo o compartiendo un código QR, tus dispositivos se conectan directamente sin intercambiar tokens de notificación con nuestros servidores. Esto significa que no se pueden enviar notificaciones push cuando el chat está cerrado.';
 
   @override
   String get chatNotificationsWhyNote =>
-      'You\'ll only see new messages when you\'re in the chat. There will be no badge updates or notifications informing you that new messages have arrived, even if the app is open.';
+      'Solo verás mensajes nuevos cuando estés en el chat. No habrá actualizaciones de insignias ni notificaciones que te informen que han llegado mensajes nuevos, incluso si la aplicación está abierta.';
 
   @override
-  String get chatNotificationsWhyButton => 'Got it';
+  String get chatNotificationsWhyButton => 'Entendido';
 
   @override
-  String get chatNotificationsWhyLink => 'Why?';
+  String get chatNotificationsWhyLink => '¿Por qué?';
 
   @override
   String get meetingPlaceInvitationTitle => 'Invitación al lugar de encuentro';
@@ -1507,19 +1513,26 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cameraInstructionAndroid =>
-      'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Apps > Meeting Place > Permissions > Camera > Allow only while using the app.';
+      'Toca \"Abrir configuración\" abajo para habilitar el acceso a la cámara. Si eso no funciona, abre Configuración manualmente:\n\nConfiguración > Aplicaciones > Meeting Place > Permisos > Cámara > Permitir solo mientras se usa la aplicación.';
 
   @override
   String get cameraInstructionIos =>
-      'Tap \"Open Settings\" below to enable camera access. If that doesn\'t work, open Settings manually:\n\nSettings > Meeting Place > Camera and enable access for this app.';
+      'Toca \"Abrir Configuración\" abajo para habilitar el acceso a la cámara. Si eso no funciona, abre Configuración manualmente:\n\nConfiguración > Meeting Place > Cámara y habilita el acceso para esta aplicación.';
 
   @override
   String get cameraInstructionMacos =>
-      'Go to System Settings > Privacy & Security > Camera and allow camera access for this app.';
+      'Ve a Configuración del sistema > Privacidad y seguridad > Cámara y permite el acceso a la cámara para esta aplicación.';
 
   @override
-  String get cameraAccessDenied => 'Camera access denied or unavailable.';
+  String get cameraAccessDenied =>
+      'Acceso a la cámara denegado o no disponible.';
 
   @override
-  String get cameraOpenSettings => 'Open Settings';
+  String get cameraOpenSettings => 'Abrir configuración';
+
+  @override
+  String get cameraNotAvailable => 'Cámara no disponible';
+
+  @override
+  String get goBack => 'Volver';
 }

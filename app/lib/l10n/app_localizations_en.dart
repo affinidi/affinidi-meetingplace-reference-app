@@ -389,6 +389,7 @@ class AppLocalizationsEn extends AppLocalizations {
             'This invitation has reached its maximum number of uses',
         'register_offer_mnemonic_in_use':
             'This phrase is already in use, please choose another one',
+        'invalidQrCode': 'QR-Code is not valid',
         'other': '$errorCode',
       },
     );
@@ -967,9 +968,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseFromGallery => 'Choose from gallery';
 
   @override
-  String get qrScannerCameraNotAvailable => 'Camera not available';
-
-  @override
   String get qrScannerCameraPermissionHelp =>
       'Please check camera permissions and try again';
 
@@ -1504,4 +1502,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cameraOpenSettings => 'Open Settings';
+
+  @override
+  String get cameraNotAvailable => 'Camera not available';
+
+  @override
+  String get goBack => 'Go Back';
 }

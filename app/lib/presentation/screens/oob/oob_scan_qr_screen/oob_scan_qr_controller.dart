@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/oob_service/oob_service.dart';
+import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../navigation/navigator.dart';
@@ -47,12 +48,31 @@ class OobScanQrController extends _$OobScanQrController {
 
   Future<void> processScannedQRCode(String qrData) async {
     try {
-      state = state.copyWith(isProcessing: true);
+      state = state.copyWith(isProcessing: true, scannedCode: qrData);
       await ref.read(processOobQrLoadingController.notifier).start(() async {
-        await ref.read(oOBServiceProvider.notifier).acceptOobFlow(qrData);
+        try {
+          await ref.read(oOBServiceProvider.notifier).acceptOobFlow(qrData);
+        } on AppException catch (e) {
+          state = state.copyWith(errorMessage: e.code);
+        } catch (e) {
+          final logger = ref.read(appLoggerProvider);
+          logger.error(
+            '''Error processing OOB QR code: ${e.toString()}''',
+            name: logKey,
+          );
+          state = state.copyWith(errorMessage: e.toString());
+        }
       });
     } finally {
       state = state.copyWith(isProcessing: false);
     }
+  }
+
+  void reset() {
+    state = state.copyWith(
+      isProcessing: false,
+      errorMessage: null,
+      scannedCode: null,
+    );
   }
 }

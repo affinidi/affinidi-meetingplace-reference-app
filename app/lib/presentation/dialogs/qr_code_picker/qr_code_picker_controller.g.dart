@@ -7,7 +7,7 @@ part of 'qr_code_picker_controller.dart';
 // **************************************************************************
 
 String _$qrCodePickerControllerHash() =>
-    r'33e43d5a0c80a974cd895a5f4e4514381c36b615';
+    r'0696f6439dd0255af4cfab54a10311a3983d6001';
 
 /// See also [QrCodePickerController].
 @ProviderFor(QrCodePickerController)

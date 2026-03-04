@@ -14,7 +14,9 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$QrCodePickerState {
-  bool? get cameraAvailable;
+  bool? get isCameraAvailable;
+  double get baseScaleFactor;
+  double get scaleFactor;
 
   /// Create a copy of QrCodePickerState
   /// with the given fields replaced by the non-null parameter values.
@@ -29,16 +31,21 @@ mixin _$QrCodePickerState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is QrCodePickerState &&
-            (identical(other.cameraAvailable, cameraAvailable) ||
-                other.cameraAvailable == cameraAvailable));
+            (identical(other.isCameraAvailable, isCameraAvailable) ||
+                other.isCameraAvailable == isCameraAvailable) &&
+            (identical(other.baseScaleFactor, baseScaleFactor) ||
+                other.baseScaleFactor == baseScaleFactor) &&
+            (identical(other.scaleFactor, scaleFactor) ||
+                other.scaleFactor == scaleFactor));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, cameraAvailable);
+  int get hashCode =>
+      Object.hash(runtimeType, isCameraAvailable, baseScaleFactor, scaleFactor);
 
   @override
   String toString() {
-    return 'QrCodePickerState(cameraAvailable: $cameraAvailable)';
+    return 'QrCodePickerState(isCameraAvailable: $isCameraAvailable, baseScaleFactor: $baseScaleFactor, scaleFactor: $scaleFactor)';
   }
 }
 
@@ -48,7 +55,8 @@ abstract mixin class $QrCodePickerStateCopyWith<$Res> {
           QrCodePickerState value, $Res Function(QrCodePickerState) _then) =
       _$QrCodePickerStateCopyWithImpl;
   @useResult
-  $Res call({bool? cameraAvailable});
+  $Res call(
+      {bool? isCameraAvailable, double baseScaleFactor, double scaleFactor});
 }
 
 /// @nodoc
@@ -64,13 +72,23 @@ class _$QrCodePickerStateCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? cameraAvailable = freezed,
+    Object? isCameraAvailable = freezed,
+    Object? baseScaleFactor = null,
+    Object? scaleFactor = null,
   }) {
     return _then(_self.copyWith(
-      cameraAvailable: freezed == cameraAvailable
-          ? _self.cameraAvailable
-          : cameraAvailable // ignore: cast_nullable_to_non_nullable
+      isCameraAvailable: freezed == isCameraAvailable
+          ? _self.isCameraAvailable
+          : isCameraAvailable // ignore: cast_nullable_to_non_nullable
               as bool?,
+      baseScaleFactor: null == baseScaleFactor
+          ? _self.baseScaleFactor
+          : baseScaleFactor // ignore: cast_nullable_to_non_nullable
+              as double,
+      scaleFactor: null == scaleFactor
+          ? _self.scaleFactor
+          : scaleFactor // ignore: cast_nullable_to_non_nullable
+              as double,
     ));
   }
 }
@@ -168,13 +186,16 @@ extension QrCodePickerStatePatterns on QrCodePickerState {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(bool? cameraAvailable)? $default, {
+    TResult Function(bool? isCameraAvailable, double baseScaleFactor,
+            double scaleFactor)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _QrCodePickerState() when $default != null:
-        return $default(_that.cameraAvailable);
+        return $default(
+            _that.isCameraAvailable, _that.baseScaleFactor, _that.scaleFactor);
       case _:
         return orElse();
     }
@@ -195,12 +216,15 @@ extension QrCodePickerStatePatterns on QrCodePickerState {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(bool? cameraAvailable) $default,
+    TResult Function(
+            bool? isCameraAvailable, double baseScaleFactor, double scaleFactor)
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _QrCodePickerState():
-        return $default(_that.cameraAvailable);
+        return $default(
+            _that.isCameraAvailable, _that.baseScaleFactor, _that.scaleFactor);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -220,12 +244,15 @@ extension QrCodePickerStatePatterns on QrCodePickerState {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(bool? cameraAvailable)? $default,
+    TResult? Function(bool? isCameraAvailable, double baseScaleFactor,
+            double scaleFactor)?
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _QrCodePickerState() when $default != null:
-        return $default(_that.cameraAvailable);
+        return $default(
+            _that.isCameraAvailable, _that.baseScaleFactor, _that.scaleFactor);
       case _:
         return null;
     }
@@ -235,10 +262,19 @@ extension QrCodePickerStatePatterns on QrCodePickerState {
 /// @nodoc
 
 class _QrCodePickerState implements QrCodePickerState {
-  _QrCodePickerState({this.cameraAvailable});
+  _QrCodePickerState(
+      {this.isCameraAvailable,
+      this.baseScaleFactor = 1.0,
+      this.scaleFactor = 1.0});
 
   @override
-  final bool? cameraAvailable;
+  final bool? isCameraAvailable;
+  @override
+  @JsonKey()
+  final double baseScaleFactor;
+  @override
+  @JsonKey()
+  final double scaleFactor;
 
   /// Create a copy of QrCodePickerState
   /// with the given fields replaced by the non-null parameter values.
@@ -253,16 +289,21 @@ class _QrCodePickerState implements QrCodePickerState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _QrCodePickerState &&
-            (identical(other.cameraAvailable, cameraAvailable) ||
-                other.cameraAvailable == cameraAvailable));
+            (identical(other.isCameraAvailable, isCameraAvailable) ||
+                other.isCameraAvailable == isCameraAvailable) &&
+            (identical(other.baseScaleFactor, baseScaleFactor) ||
+                other.baseScaleFactor == baseScaleFactor) &&
+            (identical(other.scaleFactor, scaleFactor) ||
+                other.scaleFactor == scaleFactor));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, cameraAvailable);
+  int get hashCode =>
+      Object.hash(runtimeType, isCameraAvailable, baseScaleFactor, scaleFactor);
 
   @override
   String toString() {
-    return 'QrCodePickerState(cameraAvailable: $cameraAvailable)';
+    return 'QrCodePickerState(isCameraAvailable: $isCameraAvailable, baseScaleFactor: $baseScaleFactor, scaleFactor: $scaleFactor)';
   }
 }
 
@@ -274,7 +315,8 @@ abstract mixin class _$QrCodePickerStateCopyWith<$Res>
       __$QrCodePickerStateCopyWithImpl;
   @override
   @useResult
-  $Res call({bool? cameraAvailable});
+  $Res call(
+      {bool? isCameraAvailable, double baseScaleFactor, double scaleFactor});
 }
 
 /// @nodoc
@@ -290,13 +332,23 @@ class __$QrCodePickerStateCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
-    Object? cameraAvailable = freezed,
+    Object? isCameraAvailable = freezed,
+    Object? baseScaleFactor = null,
+    Object? scaleFactor = null,
   }) {
     return _then(_QrCodePickerState(
-      cameraAvailable: freezed == cameraAvailable
-          ? _self.cameraAvailable
-          : cameraAvailable // ignore: cast_nullable_to_non_nullable
+      isCameraAvailable: freezed == isCameraAvailable
+          ? _self.isCameraAvailable
+          : isCameraAvailable // ignore: cast_nullable_to_non_nullable
               as bool?,
+      baseScaleFactor: null == baseScaleFactor
+          ? _self.baseScaleFactor
+          : baseScaleFactor // ignore: cast_nullable_to_non_nullable
+              as double,
+      scaleFactor: null == scaleFactor
+          ? _self.scaleFactor
+          : scaleFactor // ignore: cast_nullable_to_non_nullable
+              as double,
     ));
   }
 }
