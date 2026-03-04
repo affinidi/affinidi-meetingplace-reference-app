@@ -18,6 +18,7 @@ class FakeChannels {
       publishOfferDid: 'did:key:individual-offer',
       mediatorDid: contact.mediatorDid,
       status: ChannelStatus.inaugurated,
+      isConnectionInitiator: true,
     );
   }
 
@@ -35,6 +36,7 @@ class FakeChannels {
       publishOfferDid: 'did:key:group-offer',
       mediatorDid: contact.mediatorDid,
       status: ChannelStatus.inaugurated,
+      isConnectionInitiator: true,
     );
   }
 
@@ -52,6 +54,7 @@ class FakeChannels {
       publishOfferDid: 'did:key:oob-offer',
       mediatorDid: contact.mediatorDid,
       status: ChannelStatus.inaugurated,
+      isConnectionInitiator: true,
     );
   }
 
@@ -69,6 +72,7 @@ class FakeChannels {
       publishOfferDid: 'did:key:oob-dismissed-offer',
       mediatorDid: contact.mediatorDid,
       status: ChannelStatus.inaugurated,
+      isConnectionInitiator: true,
     );
   }
 

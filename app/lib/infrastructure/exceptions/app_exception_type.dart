@@ -17,7 +17,7 @@ enum AppExceptionType {
   missingOtherPartyChannelDid,
   missingOtherPartyCard,
   missingPermanentChannelDid,
-  oobFlowFailed,
+  oobFlowTimedOut,
   other,
   wrongChannelTypeForConnectionOffer,
   cannotRemoveDefaultMediator,

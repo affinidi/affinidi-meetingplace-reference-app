@@ -382,7 +382,7 @@ class AppLocalizationsEn extends AppLocalizations {
             'Message server with the same DID already exists.',
         'mediator_get_did_error': 'No message server found at the provided URL',
         'unableToFindMediator': 'No message server found at the provided URL',
-        'oobFlowFailed':
+        'oobFlowTimedOut':
             'Unable to establish a connection with other party, QR code was likely already used',
         'connection_offer_expired': 'This invitation has expired',
         'connection_offer_limit_exceeded':
@@ -390,6 +390,11 @@ class AppLocalizationsEn extends AppLocalizations {
         'register_offer_mnemonic_in_use':
             'This phrase is already in use, please choose another one',
         'invalidQrCode': 'QR-Code is not valid',
+        'oob_invalid_data': 'QR-Code data is not valid',
+        'oob_not_found': 'QR-Code data does not match any active invitation',
+        'oob_invalid_type': 'QR-Code data not supported',
+        'network_error':
+            'Could not connect. Check your internet connection and try again.',
         'other': '$errorCode',
       },
     );

@@ -414,6 +414,7 @@ void main() {
         publishOfferDid: FakeChannels.individualChannel.publishOfferDid,
         mediatorDid: FakeChannels.individualChannel.mediatorDid,
         status: ChannelStatus.inaugurated,
+        isConnectionInitiator: true,
       );
 
       fakeSdk.simulateChannelActivity(updatedChannel);

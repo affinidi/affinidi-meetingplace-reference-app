@@ -379,9 +379,9 @@ class AppLocalizationsDe extends AppLocalizations {
         'missingMnemonic':
             'Bitte geben Sie ein Einladungspasswort ein, um zu suchen',
         'connection_offer_not_found_error':
-            'Die von Ihnen angegebenen Daten stimmen mit keiner aktiven Einladung überein.',
+            'Die von Ihnen angegebenen Details stimmen mit keiner aktiven Einladung überein.',
         'discovery_register_offer_group_generic':
-            'Einladung konnte nicht veröffentlicht werden.',
+            'Fehler beim Veröffentlichen der Einladung.',
         'missingDeviceToken':
             'Benachrichtigungstoken für das Gerät konnte nicht gefunden werden',
         'offerOwnedByClaimingParty':
@@ -389,14 +389,14 @@ class AppLocalizationsDe extends AppLocalizations {
         'offerAlreadyClaimedByParty':
             'Sie können dieses Angebot nicht beanspruchen, da Sie die Einladung bereits angenommen haben und eine ausstehende Anfrage in Bearbeitung ist',
         'offerNotFound':
-            'Die von Ihnen angegebenen Daten stimmen mit keiner aktiven Einladung überein.',
+            'Die von Ihnen angegebenen Details stimmen mit keiner aktiven Einladung überein.',
         'mediatorAlreadyExists':
             'Nachrichtendienst mit derselben DID existiert bereits.',
         'mediator_get_did_error':
             'Kein Nachrichtendienst unter der angegebenen URL gefunden',
         'unableToFindMediator':
             'Kein Nachrichtendienst unter der angegebenen URL gefunden',
-        'oobFlowFailed':
+        'oobFlowTimedOut':
             'Verbindung mit der anderen Partei konnte nicht hergestellt werden, der QR-Code wurde wahrscheinlich bereits verwendet',
         'connection_offer_expired': 'Diese Einladung ist abgelaufen',
         'connection_offer_limit_exceeded':
@@ -404,6 +404,12 @@ class AppLocalizationsDe extends AppLocalizations {
         'register_offer_mnemonic_in_use':
             'Dieser Satz wird bereits verwendet, bitte wählen Sie einen anderen',
         'invalidQrCode': 'QR-Code ist ungültig',
+        'oob_invalid_data': 'QR-Code-Daten sind ungültig',
+        'oob_not_found':
+            'QR-Code-Daten stimmen mit keiner aktiven Einladung überein',
+        'oob_invalid_type': 'QR-Code-Daten werden nicht unterstützt',
+        'network_error':
+            'Verbindung fehlgeschlagen. Bitte Internetverbindung prüfen und erneut versuchen.',
         'other': '$errorCode',
       },
     );

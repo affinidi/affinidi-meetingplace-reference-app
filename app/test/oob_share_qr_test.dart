@@ -121,6 +121,7 @@ void main() {
           permanentChannelDid: 'test-permanent-did',
           type: ChannelType.oob,
           contactCard: ContactCard(did: '', type: '', contactInfo: {}),
+          isConnectionInitiator: true,
         );
 
         await navigateToLocation(
@@ -265,6 +266,7 @@ void main() {
           permanentChannelDid: 'test-permanent-did',
           type: ChannelType.oob,
           contactCard: ContactCard(did: '', type: '', contactInfo: {}),
+          isConnectionInitiator: true,
         );
 
         fakeSdk.simulateOobConnectionEstablished(fakeChannel);

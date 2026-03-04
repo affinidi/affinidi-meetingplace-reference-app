@@ -1,9 +1,7 @@
 import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_core/src/sdk/results/accept_oob_flow_result.dart';
-import 'package:meeting_place_core/src/sdk/results/create_oob_flow_result.dart';
-import 'package:meeting_place_core/src/service/oob/oob_stream.dart';
+import 'package:ssi/src/did/did_document/did_document.dart';
 
 import 'fake_publish_offer_result.dart';
 
@@ -180,8 +178,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     return null;
   }
 
-  StreamController<OobStreamData>? _createOobStreamController;
-  StreamController<OobStreamData>? _acceptOobStreamController;
+  OobStream? _createOobStream;
+  OobStream? _acceptOobStream;
 
   final List<Map<String, dynamic>> _createOobFlowCalls = [];
   List<Map<String, dynamic>> get createOobFlowCalls => _createOobFlowCalls;
@@ -198,7 +196,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   /// Simulates a successful OOB connection by emitting channel data
   /// through the create OOB flow stream
   void simulateOobConnectionEstablished(Channel channel) {
-    _createOobStreamController?.add(
+    _createOobStream?.pushEvent(
       OobStreamData(
         eventType: EventType.connectionSetup,
         message: PlainTextMessage.fromJson({
@@ -215,7 +213,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   /// Simulates a successful OOB connection by emitting channel data
   /// through the accept OOB flow stream
   void simulateOobAcceptConnectionEstablished(Channel channel) {
-    _acceptOobStreamController?.add(
+    _acceptOobStream?.pushEvent(
       OobStreamData(
         eventType: EventType.connectionAccepted,
         message: PlainTextMessage.fromJson({
@@ -237,45 +235,47 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   }
 
   @override
-  Future<CreateOobFlowResult> createOobFlow({
+  Future<OobOfferSession> createOobFlow({
     String? did,
     required ContactCard contactCard,
     String? mediatorDid,
     String? externalRef,
+    String? type,
   }) async {
     _createOobFlowCalls.add({
       'did': did,
       'contactCard': contactCard,
       'mediatorDid': mediatorDid,
       'externalRef': externalRef,
+      'type': type,
     });
 
     if (_createOobFlowException != null) {
       throw _createOobFlowException;
     }
 
-    final oobUrl = Uri.parse('https://example.com/oob?_oob=fake-oob-token');
-    _createOobStreamController = StreamController<OobStreamData>.broadcast();
+    final oobUri = Uri.parse('https://example.com/oob?_oob=fake-oob-token');
+    _createOobStream = _FakeOobStream(
+      onDispose: () async {
+        _createOobStreamDisposals.add(oobUri.toString());
+      },
+      shouldTimeout: _shouldTimeout,
+    );
 
-    return _FakeCreateOobFlowResult(
-      oobUrl: oobUrl,
-      streamSubscription: _FakeCoreSDKStreamSubscription(
-        stream: _createOobStreamController!.stream,
-        onDispose: () async {
-          _createOobStreamDisposals.add(oobUrl.toString());
-          await _createOobStreamController?.close();
-          _createOobStreamController = null;
-        },
-      ),
+    return _FakeOobOfferSession(
+      oobUrl: oobUri,
+      stream: _createOobStream!,
     );
   }
 
   @override
-  Future<AcceptOobFlowResult> acceptOobFlow(
+  Future<OobAcceptanceSession> acceptOobFlow(
     Uri oobUri, {
+    List<Attachment>? attachments,
     required ContactCard contactCard,
     String? did,
     String? externalRef,
+    String? type,
   }) async {
     _acceptOobFlowCalls.add({
       'offerLink': oobUri.toString(),
@@ -289,7 +289,12 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       throw _acceptOobFlowException;
     }
 
-    _acceptOobStreamController = StreamController<OobStreamData>.broadcast();
+    _acceptOobStream = _FakeOobStream(
+      onDispose: () async {
+        _acceptOobStreamDisposals.add(oobUri.toString());
+      },
+      shouldTimeout: _shouldTimeout,
+    );
 
     final fakeChannel = Channel(
       offerLink: 'fake-offer-link',
@@ -302,20 +307,13 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       type: ChannelType.oob,
       contactCard: contactCard,
       externalRef: externalRef,
+      isConnectionInitiator: false,
     );
 
     _acceptOobFlowCalls.last['channel'] = fakeChannel;
 
-    return _FakeAcceptOobFlowResult(
-      streamSubscription: _FakeOobStream(
-        stream: _acceptOobStreamController!.stream,
-        onDispose: () async {
-          _acceptOobStreamDisposals.add(oobUri.toString());
-          await _acceptOobStreamController?.close();
-          _acceptOobStreamController = null;
-        },
-        shouldTimeout: _shouldTimeout,
-      ),
+    return _FakeOobAcceptanceSession(
+      stream: _acceptOobStream!,
       channel: fakeChannel,
     );
   }
@@ -348,95 +346,79 @@ class _FakeAcceptOfferResult<T extends ConnectionOffer>
   }
 }
 
-class _FakeCreateOobFlowResult implements CreateOobFlowResult {
-  _FakeCreateOobFlowResult({
+class _FakeOobOfferSession implements OobOfferSession {
+  _FakeOobOfferSession({
     required this.oobUrl,
-    required this.streamSubscription,
+    required this.stream,
   });
 
   @override
   final Uri oobUrl;
 
   @override
-  final CoreSDKStreamSubscription<OobStreamData> streamSubscription;
+  final OobStream stream;
+
+  @override
+  ContactCard get contactCard => throw UnimplementedError();
+
+  @override
+  DidDocument get didDocument => throw UnimplementedError();
+
+  @override
+  DidManager get didManager => throw UnimplementedError();
+
+  @override
+  String get mediatorDid => throw UnimplementedError();
+
+  @override
+  OobInvitationMessage get oobInvitationMessage => throw UnimplementedError();
 }
 
-class _FakeAcceptOobFlowResult implements AcceptOobFlowResult {
-  _FakeAcceptOobFlowResult({
+class _FakeOobAcceptanceSession implements OobAcceptanceSession {
+  _FakeOobAcceptanceSession({
     required this.channel,
-    required this.streamSubscription,
+    required this.stream,
   });
 
   @override
   final Channel channel;
 
   @override
-  final OobStream streamSubscription;
-}
-
-class _FakeCoreSDKStreamSubscription<T>
-    implements CoreSDKStreamSubscription<T> {
-  _FakeCoreSDKStreamSubscription({
-    required this.stream,
-    required this.onDispose,
-  });
+  final OobStream stream;
 
   @override
-  final Stream<T> stream;
-
-  final Future<void> Function() onDispose;
-
-  bool _isClosed = false;
+  String get mediatorDid => throw UnimplementedError();
 
   @override
-  bool get isClosed => _isClosed;
+  DidDocument get permanentChannelDidDocument => throw UnimplementedError();
 
   @override
-  Future<void> dispose() async {
-    _isClosed = true;
-    await onDispose();
-  }
-
-  @override
-  StreamSubscription<T> listen(
-    void Function(T data) onData, {
-    bool? cancelOnError,
-    void Function()? onDone,
-    Function? onError,
-  }) {
-    return stream.listen(
-      onData,
-      cancelOnError: cancelOnError,
-      onDone: onDone,
-      onError: onError,
-    );
-  }
-
-  @override
-  StreamSubscription<T> timeout(Duration duration, void Function()? onTimeout) {
-    // No-op for fake - just return a no-op subscription
-    return stream.listen((_) {});
-  }
+  DidManager get permanentChannelDidManager => throw UnimplementedError();
 }
 
 class _FakeOobStream implements OobStream {
   _FakeOobStream({
-    required this.stream,
     required this.onDispose,
     this.shouldTimeout = false,
   });
 
+  final StreamController<OobStreamData> _streamController =
+      StreamController<OobStreamData>.broadcast();
+
   @override
-  final Stream<OobStreamData> stream;
+  Stream<OobStreamData> get stream => _streamController.stream;
+
   final Future<void> Function() onDispose;
   final bool shouldTimeout;
   void Function()? _timeoutCallback;
 
   @override
-  bool get isClosed => false;
+  bool get isClosed => _streamController.isClosed;
 
   @override
   Future<void> dispose() async {
+    await _streamController.close();
+
     await onDispose();
   }
 
@@ -470,7 +452,7 @@ class _FakeOobStream implements OobStream {
 
   @override
   void pushEvent(OobStreamData event) {
-    // No-op for fake
+    _streamController.add(event);
   }
 
   void triggerTimeout() {
