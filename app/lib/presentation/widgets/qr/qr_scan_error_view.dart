@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../infrastructure/extensions/box_constraints_extensions.dart';
@@ -38,11 +40,7 @@ class QrScanErrorView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: 24,
               children: [
-                SvgPicture.asset(
-                  'assets/images/qr_scan_error.svg',
-                  width: 120,
-                  height: 120,
-                ),
+                _ErrorIcon(),
                 Text(
                   message,
                   textAlign: TextAlign.center,
@@ -86,6 +84,37 @@ class QrScanErrorView extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ErrorIcon extends HookWidget {
+  @override
+  Widget build(BuildContext context) {
+    final animationController = useAnimationController(
+      duration: const Duration(milliseconds: 500),
+    );
+
+    useEffect(
+      () {
+        animationController.forward();
+        HapticFeedback.heavyImpact();
+
+        return;
+      },
+      [],
+    );
+
+    return ScaleTransition(
+      scale: CurvedAnimation(
+        parent: animationController,
+        curve: Curves.elasticOut,
+      ),
+      child: SvgPicture.asset(
+        'assets/images/qr_scan_error.svg',
+        width: 120,
+        height: 120,
       ),
     );
   }
