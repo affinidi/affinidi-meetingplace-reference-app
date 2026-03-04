@@ -10,6 +10,7 @@ import '../../infrastructure/providers/cache_manager_provider.dart';
 import '../../navigation/routes/dashboard_routes.dart';
 import '../painting/cached_base64_image.dart';
 import '../widgets/images/default_profile_image.dart';
+import 'profile_circle_avatar.dart';
 
 class ConnectionSuccessBottomSheet extends ConsumerWidget {
   const ConnectionSuccessBottomSheet({
@@ -85,9 +86,9 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(5.0),
-                      child: CircleAvatar(
-                        maxRadius: 40,
-                        backgroundImage: profilePic as ImageProvider<Object>,
+                      child: ProfileCircleAvatar(
+                        radius: 40,
+                        image: profilePic as ImageProvider<Object>,
                       ),
                     ),
                     if (card != null)
