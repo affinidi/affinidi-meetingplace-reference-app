@@ -185,12 +185,9 @@ class _ConnectionCard extends ConsumerWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  AvatarGradientContainer(
-                    child: CircleAvatar(
-                      backgroundColor: Colors.transparent,
-                      foregroundImage: _connection.contactCard
-                          .image(cacheManager: cacheManager),
-                    ),
+                  ProfileCircleAvatar(
+                    image: _connection.contactCard
+                        .image(cacheManager: cacheManager),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

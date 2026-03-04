@@ -30,12 +30,9 @@ class _ContactAvatar extends ConsumerWidget {
               size: isList ? 20 : 24,
             ),
           ),
-        AvatarGradientContainer(
-          child: CircleAvatar(
-            radius: iconSize / 2,
-            backgroundColor: Colors.transparent,
-            foregroundImage: displayImage,
-          ),
+        ProfileCircleAvatar(
+          radius: iconSize / 2,
+          image: displayImage,
         ),
       ],
     );

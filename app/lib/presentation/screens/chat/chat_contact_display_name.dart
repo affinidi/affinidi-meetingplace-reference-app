@@ -137,11 +137,8 @@ class _ChatContactImage extends ConsumerWidget {
               borderRadius: BorderRadius.circular(100.0),
             ),
             elevation: 5,
-            child: AvatarGradientContainer(
-              child: Image(
-                fit: BoxFit.cover,
-                image: displayImage,
-              ),
+            child: ProfileCircleAvatar(
+              image: displayImage,
             ),
           ),
         ),

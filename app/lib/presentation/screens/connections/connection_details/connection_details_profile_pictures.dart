@@ -131,13 +131,10 @@ class _TranslatedPicture extends StatelessWidget {
         ),
         child: GestureDetector(
           onTap: onPressed,
-          child: AvatarGradientContainer(
-            child: CircleAvatar(
-              radius: size / 2,
-              backgroundColor: Colors.transparent,
-              foregroundImage: foregroundImage,
-              child: child,
-            ),
+          child: ProfileCircleAvatar(
+            radius: size / 2,
+            image: foregroundImage,
+            child: child,
           ),
         ),
       ),
