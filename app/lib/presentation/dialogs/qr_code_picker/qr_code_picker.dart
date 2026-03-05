@@ -14,13 +14,12 @@ import '../../widgets/camera_permission_instruction.dart';
 import 'qr_code_picker_controller.dart';
 
 class QrCodePicker extends ConsumerWidget {
-  const QrCodePicker({super.key, this.onDetectCode, this.popOnDetect = true});
+  const QrCodePicker({super.key, this.onDetectCode});
 
-  /// Optional callback to receive detected code without popping the route
+  /// When provided, the picker will not pop automatically on code detection,
+  /// allowing the caller to handle it as needed.
   final void Function(String code)? onDetectCode;
 
-  /// If true (default), the picker will pop with the detected code
-  final bool popOnDetect;
   static const _logKey = 'QrCodePicker';
 
   /// Show as full screen scanner
@@ -103,7 +102,6 @@ class QrCodePicker extends ConsumerWidget {
 
     return _QrPermissionView(
       onDetectCode: onDetectCode,
-      popOnDetect: popOnDetect,
     );
   }
 }
@@ -111,11 +109,9 @@ class QrCodePicker extends ConsumerWidget {
 class _QrPermissionView extends ConsumerStatefulWidget {
   const _QrPermissionView({
     this.onDetectCode,
-    required this.popOnDetect,
   });
 
   final void Function(String code)? onDetectCode;
-  final bool popOnDetect;
 
   @override
   ConsumerState<_QrPermissionView> createState() => _QrPermissionViewState();
@@ -181,7 +177,6 @@ class _QrPermissionViewState extends ConsumerState<_QrPermissionView> {
 
     return _QRScannerScreen(
       onDetectCode: widget.onDetectCode,
-      popOnDetect: widget.popOnDetect,
     );
   }
 }
@@ -189,11 +184,9 @@ class _QrPermissionViewState extends ConsumerState<_QrPermissionView> {
 class _QRScannerScreen extends HookConsumerWidget {
   _QRScannerScreen({
     this.onDetectCode,
-    required this.popOnDetect,
   });
 
   final void Function(String code)? onDetectCode;
-  final bool popOnDetect;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -214,16 +207,15 @@ class _QRScannerScreen extends HookConsumerWidget {
       hasScanned.value = true;
 
       await controller.stopScanner();
-      if (!context.mounted) return;
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final code = barcode!.rawValue!;
-        if (onDetectCode != null && !popOnDetect) {
-          onDetectCode!.call(code);
-        } else {
-          Navigator.of(context).pop(code);
-        }
-      });
+      final code = barcode!.rawValue!;
+      if (onDetectCode != null) {
+        onDetectCode!.call(code);
+        return;
+      }
+
+      if (!context.mounted) return;
+      Navigator.of(context).pop(code);
     }
 
     return Scaffold(
