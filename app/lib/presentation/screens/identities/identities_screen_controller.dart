@@ -5,6 +5,7 @@ import '../../../application/services/identities_service/identities_service.dart
 import '../../../domain/models/contact_card/contact_card.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/identities_screen_filter_extensions.dart';
+import '../../config/persona_field_config.dart';
 import 'identities_screen_filter.dart';
 import 'identities_screen_state.dart';
 
@@ -68,12 +69,10 @@ class IdentitiesScreenController extends _$IdentitiesScreenController {
       final lowerQuery = _lastSearchQuery.toLowerCase();
       searchFiltered = allIdentities.where((identity) {
         final card = identity.card;
-        final searchableText = [
-          card.firstName,
-          card.lastName ?? '',
-          card.email ?? '',
-          card.mobile ?? '',
-        ].join(' ').toLowerCase();
+        final searchableText = PersonaField.values
+            .map((f) => f.valueFrom(card))
+            .join(' ')
+            .toLowerCase();
         return searchableText.contains(lowerQuery);
       }).toList();
     }

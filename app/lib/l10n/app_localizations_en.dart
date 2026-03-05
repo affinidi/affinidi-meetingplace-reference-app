@@ -602,12 +602,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can change the display name for this channel. The other party will not see what you call it.';
 
   @override
-  String get generalEmail => 'Email';
-
-  @override
-  String get generalMobile => 'Mobile';
-
-  @override
   String get generalDid => 'DID';
 
   @override
@@ -786,25 +780,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap here to change your profile picture';
 
   @override
-  String get firstName => 'First Name';
-
-  @override
   String get enterFirstName => 'Enter first name';
-
-  @override
-  String get lastName => 'Last Name';
 
   @override
   String get enterLastName => 'Enter last name';
 
   @override
-  String get email => 'Email';
-
-  @override
   String get enterEmail => 'Enter email';
-
-  @override
-  String get mobile => 'Mobile';
 
   @override
   String get enterMobile => 'Enter mobile';

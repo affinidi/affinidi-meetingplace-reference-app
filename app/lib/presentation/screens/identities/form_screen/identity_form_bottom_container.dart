@@ -15,7 +15,7 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
 
     Future<void> handleSave() async {
       controller.updateErrorVisibilityOnBlur(
-        'email',
+        PersonaField.email,
         editIdentityScreenFormKey,
       );
 

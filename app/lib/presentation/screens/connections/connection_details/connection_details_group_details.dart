@@ -45,9 +45,12 @@ class _GroupDetailsPanel extends ConsumerWidget {
     if (email != null && email.isNotEmpty) {
       items.add(
         FormRowIconTitle(
-          icon: Icons.email,
-          iconColor: context.customColors.purple,
-          label: context.l10n.generalEmail,
+          icon: PersonaField.email.icon,
+          iconColor: PersonaField.email.iconColor(
+            context.customColors,
+            context.colorScheme,
+          ),
+          label: PersonaField.email.label(context.l10n),
           value: email,
         ),
       );
@@ -56,9 +59,12 @@ class _GroupDetailsPanel extends ConsumerWidget {
     if (mobile != null && mobile.isNotEmpty) {
       items.add(
         FormRowIconTitle(
-          icon: Icons.cell_tower,
-          iconColor: context.customColors.brown,
-          label: context.l10n.generalMobile,
+          icon: PersonaField.mobile.icon,
+          iconColor: PersonaField.mobile.iconColor(
+            context.customColors,
+            context.colorScheme,
+          ),
+          label: PersonaField.mobile.label(context.l10n),
           value: mobile,
         ),
       );

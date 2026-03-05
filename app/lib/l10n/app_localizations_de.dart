@@ -620,12 +620,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Sie können den Anzeigenamen für diesen Kontakt ändern. Der anderen Partei wird dieser Name nicht angezeigt.';
 
   @override
-  String get generalEmail => 'E-Mail';
-
-  @override
-  String get generalMobile => 'Mobil';
-
-  @override
   String get generalDid => 'TAT';
 
   @override
@@ -807,25 +801,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Tippen Sie hier, um Ihr Profilbild zu ändern';
 
   @override
-  String get firstName => 'Vorname';
-
-  @override
   String get enterFirstName => 'Geben Sie den Vornamen ein';
-
-  @override
-  String get lastName => 'Nachname';
 
   @override
   String get enterLastName => 'Nachname eingeben';
 
   @override
-  String get email => 'E-Mail';
-
-  @override
   String get enterEmail => 'E-Mail-Adresse eingeben';
-
-  @override
-  String get mobile => 'Mobil';
 
   @override
   String get enterMobile => 'Hier kommt das Handy ins Spiel';

@@ -617,12 +617,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Puede cambiar el nombre para mostrar de este contacto. La otra parte no verá este nombre.';
 
   @override
-  String get generalEmail => 'Correo electrónico';
-
-  @override
-  String get generalMobile => 'Móvil';
-
-  @override
   String get generalDid => '¿LO HUDÓ?';
 
   @override
@@ -803,25 +797,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Pulsa aquí para cambiar tu foto de perfil';
 
   @override
-  String get firstName => 'Nombre';
-
-  @override
   String get enterFirstName => 'Ingrese el nombre';
-
-  @override
-  String get lastName => 'Apellido';
 
   @override
   String get enterLastName => 'Ingrese el apellido';
 
   @override
-  String get email => 'Correo electrónico';
-
-  @override
   String get enterEmail => 'Ingrese el correo electrónico';
-
-  @override
-  String get mobile => 'Móvil';
 
   @override
   String get enterMobile => 'Ingrese al móvil';
