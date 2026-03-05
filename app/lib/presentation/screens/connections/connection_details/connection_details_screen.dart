@@ -13,6 +13,7 @@ import '../../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../../infrastructure/extensions/date_time_extensions.dart';
 import '../../../../infrastructure/extensions/did_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../config/persona_field_config.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/buttons/elevated_loading_button.dart';
 import '../../../widgets/form_rows/form_card.dart';

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$IdentityFormScreenState {
 
- Identity get identity; bool get canSave; bool get canDelete; bool get hasEnteredAnyInfo; bool get hasSaved; bool get hasDeleted; bool get isAliasMirroringFirstName; Set<String> get showingErrorFields;
+ Identity get identity; bool get canSave; bool get canDelete; bool get hasEnteredAnyInfo; bool get hasSaved; bool get hasDeleted; bool get isAliasMirroringFirstName; Set<PersonaField> get showingErrorFields;
 /// Create a copy of IdentityFormScreenState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +45,7 @@ abstract mixin class $IdentityFormScreenStateCopyWith<$Res>  {
   factory $IdentityFormScreenStateCopyWith(IdentityFormScreenState value, $Res Function(IdentityFormScreenState) _then) = _$IdentityFormScreenStateCopyWithImpl;
 @useResult
 $Res call({
- Identity identity, bool canSave, bool canDelete, bool hasEnteredAnyInfo, bool hasSaved, bool hasDeleted, bool isAliasMirroringFirstName, Set<String> showingErrorFields
+ Identity identity, bool canSave, bool canDelete, bool hasEnteredAnyInfo, bool hasSaved, bool hasDeleted, bool isAliasMirroringFirstName, Set<PersonaField> showingErrorFields
 });
 
 
@@ -72,7 +72,7 @@ as bool,hasSaved: null == hasSaved ? _self.hasSaved : hasSaved // ignore: cast_n
 as bool,hasDeleted: null == hasDeleted ? _self.hasDeleted : hasDeleted // ignore: cast_nullable_to_non_nullable
 as bool,isAliasMirroringFirstName: null == isAliasMirroringFirstName ? _self.isAliasMirroringFirstName : isAliasMirroringFirstName // ignore: cast_nullable_to_non_nullable
 as bool,showingErrorFields: null == showingErrorFields ? _self.showingErrorFields : showingErrorFields // ignore: cast_nullable_to_non_nullable
-as Set<String>,
+as Set<PersonaField>,
   ));
 }
 /// Create a copy of IdentityFormScreenState
@@ -166,7 +166,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isAliasMirroringFirstName,  Set<String> showingErrorFields)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isAliasMirroringFirstName,  Set<PersonaField> showingErrorFields)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _IdentityFormScreenState() when $default != null:
 return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAnyInfo,_that.hasSaved,_that.hasDeleted,_that.isAliasMirroringFirstName,_that.showingErrorFields);case _:
@@ -187,7 +187,7 @@ return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAny
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isAliasMirroringFirstName,  Set<String> showingErrorFields)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isAliasMirroringFirstName,  Set<PersonaField> showingErrorFields)  $default,) {final _that = this;
 switch (_that) {
 case _IdentityFormScreenState():
 return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAnyInfo,_that.hasSaved,_that.hasDeleted,_that.isAliasMirroringFirstName,_that.showingErrorFields);case _:
@@ -207,7 +207,7 @@ return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAny
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isAliasMirroringFirstName,  Set<String> showingErrorFields)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isAliasMirroringFirstName,  Set<PersonaField> showingErrorFields)?  $default,) {final _that = this;
 switch (_that) {
 case _IdentityFormScreenState() when $default != null:
 return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAnyInfo,_that.hasSaved,_that.hasDeleted,_that.isAliasMirroringFirstName,_that.showingErrorFields);case _:
@@ -222,7 +222,7 @@ return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAny
 
 
 class _IdentityFormScreenState implements IdentityFormScreenState {
-   _IdentityFormScreenState({required this.identity, this.canSave = true, this.canDelete = true, this.hasEnteredAnyInfo = false, this.hasSaved = false, this.hasDeleted = false, this.isAliasMirroringFirstName = true, final  Set<String> showingErrorFields = const {}}): _showingErrorFields = showingErrorFields;
+   _IdentityFormScreenState({required this.identity, this.canSave = true, this.canDelete = true, this.hasEnteredAnyInfo = false, this.hasSaved = false, this.hasDeleted = false, this.isAliasMirroringFirstName = true, final  Set<PersonaField> showingErrorFields = const {}}): _showingErrorFields = showingErrorFields;
   
 
 @override final  Identity identity;
@@ -232,8 +232,8 @@ class _IdentityFormScreenState implements IdentityFormScreenState {
 @override@JsonKey() final  bool hasSaved;
 @override@JsonKey() final  bool hasDeleted;
 @override@JsonKey() final  bool isAliasMirroringFirstName;
- final  Set<String> _showingErrorFields;
-@override@JsonKey() Set<String> get showingErrorFields {
+ final  Set<PersonaField> _showingErrorFields;
+@override@JsonKey() Set<PersonaField> get showingErrorFields {
   if (_showingErrorFields is EqualUnmodifiableSetView) return _showingErrorFields;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableSetView(_showingErrorFields);
@@ -270,7 +270,7 @@ abstract mixin class _$IdentityFormScreenStateCopyWith<$Res> implements $Identit
   factory _$IdentityFormScreenStateCopyWith(_IdentityFormScreenState value, $Res Function(_IdentityFormScreenState) _then) = __$IdentityFormScreenStateCopyWithImpl;
 @override @useResult
 $Res call({
- Identity identity, bool canSave, bool canDelete, bool hasEnteredAnyInfo, bool hasSaved, bool hasDeleted, bool isAliasMirroringFirstName, Set<String> showingErrorFields
+ Identity identity, bool canSave, bool canDelete, bool hasEnteredAnyInfo, bool hasSaved, bool hasDeleted, bool isAliasMirroringFirstName, Set<PersonaField> showingErrorFields
 });
 
 
@@ -297,7 +297,7 @@ as bool,hasSaved: null == hasSaved ? _self.hasSaved : hasSaved // ignore: cast_n
 as bool,hasDeleted: null == hasDeleted ? _self.hasDeleted : hasDeleted // ignore: cast_nullable_to_non_nullable
 as bool,isAliasMirroringFirstName: null == isAliasMirroringFirstName ? _self.isAliasMirroringFirstName : isAliasMirroringFirstName // ignore: cast_nullable_to_non_nullable
 as bool,showingErrorFields: null == showingErrorFields ? _self._showingErrorFields : showingErrorFields // ignore: cast_nullable_to_non_nullable
-as Set<String>,
+as Set<PersonaField>,
   ));
 }
 

@@ -12,6 +12,7 @@ import '../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
+import '../../config/persona_field_config.dart';
 import '../../helpers/screensize_helper.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/buttons/elevated_loading_button.dart';

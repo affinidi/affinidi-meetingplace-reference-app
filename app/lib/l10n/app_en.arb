@@ -536,14 +536,6 @@
 	"@displayNameHelperText": {
 		"type": "text"
 	},
-	"generalEmail": "Email",
-	"@generalEmail": {
-		"type": "text"
-	},
-	"generalMobile": "Mobile",
-	"@generalMobile": {
-		"type": "text"
-	},
 	"generalDid": "DID",
 	"@generalDid": {
 		"type": "text"
@@ -716,13 +708,9 @@
 	"thisFieldIsRequired": "This field is required",
 	"identityAliasPersonalDetails": "Identity alias personal details",
 	"profilePictureChangePrompt": "Tap here to change your profile picture",
-	"firstName": "First Name",
 	"enterFirstName": "Enter first name",
-	"lastName": "Last Name",
 	"enterLastName": "Enter last name",
-	"email": "Email",
 	"enterEmail": "Enter email",
-	"mobile": "Mobile",
 	"enterMobile": "Enter mobile",
 	"anonymous": "Anonymous",
 	"aliasLabel": "Alias label",

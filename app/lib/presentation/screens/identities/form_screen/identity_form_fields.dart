@@ -6,6 +6,7 @@ import '../../../../../infrastructure/extensions/identities_extensions.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../config/persona_field_config.dart';
 import '../../../validators/input_validators.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
@@ -100,9 +101,12 @@ class IdentityFormFields extends ConsumerWidget {
             ),
             const Divider(),
             FormRowTextField(
-              icon: Icons.person,
-              label: context.l10n.firstName,
-              color: context.customColors.success,
+              icon: PersonaField.firstName.icon,
+              label: PersonaField.firstName.label(context.l10n),
+              color: PersonaField.firstName.iconColor(
+                context.customColors,
+                context.colorScheme,
+              ),
               controller: controller.displayNameController,
               placeholder: context.l10n.enterFirstName,
               textCapitalization: TextCapitalization.sentences,
@@ -114,7 +118,7 @@ class IdentityFormFields extends ConsumerWidget {
               },
               validator: InputValidators.getValidator(
                 context,
-                InputType.firstName,
+                PersonaField.firstName.inputType,
               ).call,
               textInputAction: TextInputAction.next,
               traversalOrder: 1.0,
@@ -122,9 +126,12 @@ class IdentityFormFields extends ConsumerWidget {
             ),
             const Divider(),
             FormRowTextField(
-              icon: Icons.badge,
-              label: context.l10n.lastName,
-              color: context.customColors.purple,
+              icon: PersonaField.lastName.icon,
+              label: PersonaField.lastName.label(context.l10n),
+              color: PersonaField.lastName.iconColor(
+                context.customColors,
+                context.colorScheme,
+              ),
               controller: controller.lastNameController,
               placeholder: context.l10n.enterLastName,
               textCapitalization: TextCapitalization.sentences,
@@ -136,16 +143,19 @@ class IdentityFormFields extends ConsumerWidget {
               },
               validator: InputValidators.getValidator(
                 context,
-                InputType.lastName,
+                PersonaField.lastName.inputType,
               ).call,
               textInputAction: TextInputAction.next,
               traversalOrder: 2.0,
             ),
             const Divider(),
             FormRowTextField(
-              icon: Icons.email,
-              label: context.l10n.email,
-              color: context.customColors.warning,
+              icon: PersonaField.email.icon,
+              label: PersonaField.email.label(context.l10n),
+              color: PersonaField.email.iconColor(
+                context.customColors,
+                context.colorScheme,
+              ),
               controller: controller.emailController,
               placeholder: context.l10n.enterEmail,
               focusNode: controller.emailFocusNode,
@@ -153,18 +163,21 @@ class IdentityFormFields extends ConsumerWidget {
               keyboardType: TextInputType.emailAddress,
               onChanged: (value) {
                 controller.updateEmail(value, formKey);
-                controller.handleFieldChange('email', formKey);
+                controller.handleFieldChange(PersonaField.email, formKey);
               },
               onFieldSubmitted: (_) {
-                controller.updateErrorVisibilityOnBlur('email', formKey);
+                controller.updateErrorVisibilityOnBlur(
+                  PersonaField.email,
+                  formKey,
+                );
               },
               validator: (value) {
-                if (!controller.shouldShowValidation('email')) {
+                if (!controller.shouldShowValidation(PersonaField.email)) {
                   return null;
                 }
                 return InputValidators.getValidator(
                   context,
-                  InputType.email,
+                  PersonaField.email.inputType,
                 ).call(value);
               },
               textInputAction: TextInputAction.next,
@@ -172,9 +185,12 @@ class IdentityFormFields extends ConsumerWidget {
             ),
             const Divider(),
             FormRowTextField(
-              icon: Icons.phone,
-              label: context.l10n.mobile,
-              color: context.colorScheme.primary,
+              icon: PersonaField.mobile.icon,
+              label: PersonaField.mobile.label(context.l10n),
+              color: PersonaField.mobile.iconColor(
+                context.customColors,
+                context.colorScheme,
+              ),
               controller: controller.mobileController,
               placeholder: context.l10n.enterMobile,
               singleLine: true,

@@ -820,18 +820,6 @@ abstract class AppLocalizations {
   /// **'You can change the display name for this channel. The other party will not see what you call it.'**
   String get displayNameHelperText;
 
-  /// No description provided for @generalEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get generalEmail;
-
-  /// No description provided for @generalMobile.
-  ///
-  /// In en, this message translates to:
-  /// **'Mobile'**
-  String get generalMobile;
-
   /// No description provided for @generalDid.
   ///
   /// In en, this message translates to:
@@ -1144,23 +1132,11 @@ abstract class AppLocalizations {
   /// **'Tap here to change your profile picture'**
   String get profilePictureChangePrompt;
 
-  /// No description provided for @firstName.
-  ///
-  /// In en, this message translates to:
-  /// **'First Name'**
-  String get firstName;
-
   /// No description provided for @enterFirstName.
   ///
   /// In en, this message translates to:
   /// **'Enter first name'**
   String get enterFirstName;
-
-  /// No description provided for @lastName.
-  ///
-  /// In en, this message translates to:
-  /// **'Last Name'**
-  String get lastName;
 
   /// No description provided for @enterLastName.
   ///
@@ -1168,23 +1144,11 @@ abstract class AppLocalizations {
   /// **'Enter last name'**
   String get enterLastName;
 
-  /// No description provided for @email.
-  ///
-  /// In en, this message translates to:
-  /// **'Email'**
-  String get email;
-
   /// No description provided for @enterEmail.
   ///
   /// In en, this message translates to:
   /// **'Enter email'**
   String get enterEmail;
-
-  /// No description provided for @mobile.
-  ///
-  /// In en, this message translates to:
-  /// **'Mobile'**
-  String get mobile;
 
   /// No description provided for @enterMobile.
   ///

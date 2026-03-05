@@ -9,6 +9,7 @@ import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/identities_extensions.dart';
+import '../../config/persona_field_config.dart';
 import '../animated_menu.dart';
 import '../profile_picture.dart';
 
@@ -235,14 +236,12 @@ class _IdentityContent extends StatelessWidget {
     final textTheme = context.textTheme;
     final l10n = context.l10n;
 
-    final email = identity.card.emailAddress.isNotEmpty == true
-        ? identity.card.emailAddress
-        : l10n.notShared;
-    final phone = identity.card.mobilePhone.isNotEmpty == true
-        ? identity.card.mobilePhone
-        : l10n.notShared;
+    final emailValue = PersonaField.email.valueFrom(identity.card);
+    final email = emailValue.isNotEmpty ? emailValue : l10n.notShared;
+    final phoneValue = PersonaField.mobile.valueFrom(identity.card);
+    final phone = phoneValue.isNotEmpty ? phoneValue : l10n.notShared;
 
-    final name = identity.card.fullName.isNotEmpty == true
+    final name = identity.card.fullName.isNotEmpty
         ? identity.card.fullName
         : '';
 
@@ -268,13 +267,13 @@ class _IdentityContent extends StatelessWidget {
           ),
         SizedBox(height: identityCardSize.isSmall ? 12 : 16),
         _ContactInfoRow(
-          icon: Icons.email,
+          icon: PersonaField.email.icon,
           text: email,
           identityCardSize: identityCardSize,
         ),
         SizedBox(height: identityCardSize.isSmall ? 6 : 8),
         _ContactInfoRow(
-          icon: Icons.phone,
+          icon: PersonaField.mobile.icon,
           text: phone,
           identityCardSize: identityCardSize,
         ),

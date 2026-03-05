@@ -7,6 +7,7 @@ import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
+import '../../../config/persona_field_config.dart';
 import '../../../validators/input_validators.dart';
 import 'identity_form_mode.dart';
 import 'identity_form_screen_state.dart';
@@ -35,7 +36,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   IdentityFormScreenState build(String? identityId) {
     emailFocusNode.addListener(() {
       if (!emailFocusNode.hasFocus && _formKey != null) {
-        updateErrorVisibilityOnBlur('email', _formKey!);
+        updateErrorVisibilityOnBlur(PersonaField.email, _formKey!);
       }
     });
 
@@ -120,7 +121,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final ctx = formKey.currentContext!;
     final emailError = InputValidators.getValidator(
       ctx,
-      InputType.email,
+      PersonaField.email.inputType,
     ).call(emailController.text);
 
     final isValidForSave = emailError == null;
@@ -128,57 +129,52 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     state = state.copyWith(canSave: isValidForSave);
   }
 
-  bool shouldShowValidation(String fieldName) {
-    return state.showingErrorFields.contains(fieldName);
+  bool shouldShowValidation(PersonaField field) {
+    return state.showingErrorFields.contains(field);
   }
 
-  void _setErrorVisibility(String fieldName, bool visible) {
+  void _setErrorVisibility(PersonaField field, bool visible) {
     final current = {...state.showingErrorFields};
     if (visible) {
-      current.add(fieldName);
+      current.add(field);
     } else {
-      current.remove(fieldName);
+      current.remove(field);
     }
     state = state.copyWith(showingErrorFields: current);
   }
 
-  InputType _typeFor(String fieldName) {
-    switch (fieldName) {
-      case 'email':
-        return InputType.email;
-      default:
-        return InputType.alias;
-    }
-  }
-
-  String _textFor(String fieldName) {
-    switch (fieldName) {
-      case 'email':
+  String _textFor(PersonaField field) {
+    switch (field) {
+      case PersonaField.firstName:
+        return displayNameController.text;
+      case PersonaField.lastName:
+        return lastNameController.text;
+      case PersonaField.email:
         return emailController.text;
-      default:
-        return '';
+      case PersonaField.mobile:
+        return mobileController.text;
     }
   }
 
   void updateErrorVisibilityOnBlur(
-    String fieldName,
+    PersonaField field,
     GlobalKey<FormState> formKey,
   ) {
     final ctx = formKey.currentContext!;
-    final validator = InputValidators.getValidator(ctx, _typeFor(fieldName));
-    final error = validator.call(_textFor(fieldName));
-    _setErrorVisibility(fieldName, error != null);
+    final validator = InputValidators.getValidator(ctx, field.inputType);
+    final error = validator.call(_textFor(field));
+    _setErrorVisibility(field, error != null);
     formKey.currentState?.validate();
     validateForm(formKey);
   }
 
-  void handleFieldChange(String fieldName, GlobalKey<FormState> formKey) {
-    if (state.showingErrorFields.contains(fieldName)) {
+  void handleFieldChange(PersonaField field, GlobalKey<FormState> formKey) {
+    if (state.showingErrorFields.contains(field)) {
       final ctx = formKey.currentContext!;
-      final validator = InputValidators.getValidator(ctx, _typeFor(fieldName));
-      final error = validator.call(_textFor(fieldName));
+      final validator = InputValidators.getValidator(ctx, field.inputType);
+      final error = validator.call(_textFor(field));
       if (error == null) {
-        _setErrorVisibility(fieldName, false);
+        _setErrorVisibility(field, false);
         formKey.currentState?.validate();
       }
     }
@@ -188,7 +184,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   void updateFirstName(String firstName, GlobalKey<FormState> formKey) {
     final error = InputValidators.getValidator(
       formKey.currentContext!,
-      InputType.firstName,
+      PersonaField.firstName.inputType,
     ).call(firstName);
     if (error != null) return;
 
@@ -220,7 +216,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   void updateLastName(String lastName, GlobalKey<FormState> formKey) {
     final error = InputValidators.getValidator(
       formKey.currentContext!,
-      InputType.lastName,
+      PersonaField.lastName.inputType,
     ).call(lastName);
     if (error != null) return;
 
@@ -235,7 +231,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   void updateEmail(String email, GlobalKey<FormState> formKey) {
     final error = InputValidators.getValidator(
       formKey.currentContext!,
-      InputType.email,
+      PersonaField.email.inputType,
     ).call(email);
     if (error != null) return;
 
@@ -250,7 +246,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   void updateMobile(String mobile, GlobalKey<FormState> formKey) {
     final error = InputValidators.getValidator(
       formKey.currentContext!,
-      InputType.phone,
+      PersonaField.mobile.inputType,
     ).call(mobile);
     if (error != null) return;
 
