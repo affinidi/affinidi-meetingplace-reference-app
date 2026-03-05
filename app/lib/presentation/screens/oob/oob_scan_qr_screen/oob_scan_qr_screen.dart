@@ -50,7 +50,6 @@ class OOBScanQrScreen extends ConsumerWidget {
                     )
                   : errorMessage == null && !isProcessing && scannedCode == null
                       ? QrCodePicker(
-                          popOnDetect: false,
                           onDetectCode: (code) async {
                             if (isProcessing) return;
                             await controller.processScannedQRCode(code);
