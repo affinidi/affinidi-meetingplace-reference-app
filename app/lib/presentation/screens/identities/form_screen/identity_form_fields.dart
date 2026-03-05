@@ -160,7 +160,7 @@ class IdentityFormFields extends ConsumerWidget {
               placeholder: context.l10n.enterEmail,
               focusNode: controller.emailFocusNode,
               singleLine: true,
-              keyboardType: TextInputType.emailAddress,
+              keyboardType: PersonaField.email.keyboardType,
               onChanged: (value) {
                 controller.updateEmail(value, formKey);
                 controller.handleFieldChange(PersonaField.email, formKey);
@@ -194,7 +194,7 @@ class IdentityFormFields extends ConsumerWidget {
               controller: controller.mobileController,
               placeholder: context.l10n.enterMobile,
               singleLine: true,
-              keyboardType: TextInputType.phone,
+              keyboardType: PersonaField.mobile.keyboardType,
             ),
           ],
         ),
