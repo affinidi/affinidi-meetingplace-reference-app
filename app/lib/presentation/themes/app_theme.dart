@@ -19,7 +19,6 @@ class AppTheme {
 
   static final dark = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Figtree',
     colorScheme: darkColorScheme,
     extensions: <ThemeExtension<dynamic>>[
       _customColors,

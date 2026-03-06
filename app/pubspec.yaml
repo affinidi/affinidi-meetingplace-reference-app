@@ -99,8 +99,3 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/videos/
-
-  fonts:
-    - family: Figtree
-      fonts:
-        - asset: assets/fonts/Figtree-Light.ttf
