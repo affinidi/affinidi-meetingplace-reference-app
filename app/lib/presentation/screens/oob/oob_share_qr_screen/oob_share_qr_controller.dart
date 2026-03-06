@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../application/services/oob_service/oob_service.dart';
+import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/qr_code_view_factory_provider.dart';
@@ -52,7 +53,9 @@ class OobShareQrController extends _$OobShareQrController {
     await ref.read(createOobLoadingController.notifier).start(() async {
       state = state.copyWith(qrData: null);
       final oobService = ref.read(oOBServiceProvider.notifier);
-      final offerLink = await oobService.createOobFlow();
+      final offerLink = await oobService.createOobFlow(
+        type: ref.read(environmentProvider).directInteractiveOobType,
+      );
       state = state.copyWith(qrData: offerLink);
     });
   }

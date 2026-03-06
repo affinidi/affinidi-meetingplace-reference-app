@@ -311,6 +311,9 @@ PROFILE_IMAGE_QUALITY_PERCENT="80"               # Default: 80
 
 # Marketplace
 MARKETPLACE_QR_PREFIX=""                         # Default: ""
+
+# OOB Flow
+DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: ""
 ```
 
 > **NOTE:** You can find all available configuration options and their default values in `lib/infrastructure/configuration/environment.dart`.

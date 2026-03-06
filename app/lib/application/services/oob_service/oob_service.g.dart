@@ -6,7 +6,7 @@ part of 'oob_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$oOBServiceHash() => r'ecbe65ee3a5f62b6166cca96ea943acbeda56eb6';
+String _$oOBServiceHash() => r'aed2221c2ba5b5b0767d55cef845097c851530d0';
 
 /// Service responsible for creating and accepting out-of-band (OOB) flows.
 ///

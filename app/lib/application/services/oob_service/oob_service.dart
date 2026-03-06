@@ -60,7 +60,7 @@ class OOBService extends _$OOBService {
   /// Returns:
   /// - `Future<String>` the created connection offer link
   ///
-  Future<String> createOobFlow() async {
+  Future<String> createOobFlow({String? type}) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
     if (_currentIdentity == null) {
       throw AppException(
@@ -77,6 +77,7 @@ class OOBService extends _$OOBService {
     final oobOfferSession = await sdk.createOobFlow(
       contactCard: contactCard,
       externalRef: _currentIdentity!.id,
+      type: type,
     );
 
     if (_publishOfferStreamSubscription != null) {
@@ -107,7 +108,7 @@ class OOBService extends _$OOBService {
   /// Throws [AppException] if:
   /// - The acceptance fails unexpectedly; an AppException wrapping the error
   /// is thrown.
-  Future<void> acceptOobFlow(String oobUrl) async {
+  Future<void> acceptOobFlow(String oobUrl, {String? type}) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
 
     final oobUri = Uri.tryParse(oobUrl);
@@ -134,6 +135,7 @@ class OOBService extends _$OOBService {
         oobUri,
         contactCard: _currentIdentity!.toSdkContactCard(),
         externalRef: _currentIdentity!.id,
+        type: type,
       );
 
       if (_acceptOfferStreamSubscription != null) {
