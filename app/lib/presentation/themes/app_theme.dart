@@ -19,7 +19,7 @@ class AppTheme {
 
   static final dark = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Figtree',
+    fontFamily: 'Roboto',
     colorScheme: darkColorScheme,
     extensions: <ThemeExtension<dynamic>>[
       _customColors,

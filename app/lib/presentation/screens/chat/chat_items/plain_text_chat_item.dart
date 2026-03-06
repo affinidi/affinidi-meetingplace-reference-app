@@ -123,7 +123,7 @@ class _TextMessage extends StatelessWidget {
             fontSize: _shouldScaleEmojis
                 ? 42.0
                 : 14.0, // 3x size for emoji-only messages
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.normal,
           ),
         ),
       ),
