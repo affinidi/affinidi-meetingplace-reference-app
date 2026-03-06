@@ -163,26 +163,28 @@ class OnboardingScreen extends HookConsumerWidget {
           if (state.currentPage == state.videoPlayerControllers.length - 1)
             Align(
               alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 40),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.colorScheme.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 40),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.colorScheme.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
                     ),
-                  ),
-                  onPressed: controller.onFinishOnboarding,
-                  child: SizedBox(
-                    width: 200,
-                    child: Text(
-                      context.l10n.setUpMyIdentity,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    onPressed: controller.onFinishOnboarding,
+                    child: SizedBox(
+                      width: 200,
+                      child: Text(
+                        context.l10n.setUpMyIdentity,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
