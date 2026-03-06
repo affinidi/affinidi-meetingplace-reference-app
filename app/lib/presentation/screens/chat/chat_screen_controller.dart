@@ -712,12 +712,20 @@ class ChatScreenController extends _$ChatScreenController
   /// The message text is trimmed and validated before sending.
   /// Clears the input field upon successful send.
   Future<void> sendMessage() async {
-    final trimmedMessage = messageTextController.text.trimRight();
+    final originalText = messageTextController.text;
+    final trimmedMessage = originalText.trimRight();
     if (trimmedMessage.isEmpty) return;
 
     unawaited(_chatSDK?.sendTextMessage(trimmedMessage));
     _sendChatActivityTimedAction?.cancel();
-    messageTextController.text = '';
+
+    unawaited(
+      Future.microtask(() {
+        if (messageTextController.text == originalText) {
+          messageTextController.clear();
+        }
+      }),
+    );
   }
 
   Future<void> sendChatActivity() async {

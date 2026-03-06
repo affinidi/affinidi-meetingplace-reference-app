@@ -12,6 +12,7 @@ class _ChatTextEntry extends HookConsumerWidget {
     final otherPartyName = ref.watch(provider.otherPartyName);
     final isGroupChat = ref.watch(provider.isGroupChat);
     final shouldDisable = ref.watch(provider.shouldDisable);
+    final focusNode = useFocusNode();
     final inputDecoration = context.chatInputDecoration;
     final borderRadius = inputDecoration.border is OutlineInputBorder
         ? (inputDecoration.border as OutlineInputBorder).borderRadius
@@ -22,9 +23,16 @@ class _ChatTextEntry extends HookConsumerWidget {
       controller.sendChatActivity();
     }
 
+    void showKeyboard() {
+      if (!context.mounted) return;
+      FocusScope.of(context).requestFocus(focusNode);
+      SystemChannels.textInput.invokeMethod('TextInput.show');
+    }
+
     void sendMessage() {
       if (!context.mounted) return;
       controller.sendMessage();
+      showKeyboard();
     }
 
     void handleMediaSelection() =>
@@ -65,9 +73,8 @@ class _ChatTextEntry extends HookConsumerWidget {
                   onChanged:
                       shouldDisable ? null : (text) => sendChatActivity(),
                   textInputAction: TextInputAction.send,
-                  onFieldSubmitted:
-                      shouldDisable ? null : (value) => sendMessage(),
-                  onEditingComplete: () {}, // prevent closing keyboard
+                  focusNode: focusNode,
+                  onEditingComplete: shouldDisable ? null : sendMessage,
                   keyboardType: TextInputType.text,
                   textCapitalization: TextCapitalization.sentences,
                   cursorHeight: 16,
