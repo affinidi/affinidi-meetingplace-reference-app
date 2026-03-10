@@ -6,10 +6,9 @@ part of 'permission_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$permissionServiceHash() => r'19b92322798ea7fd375e96ef01c7cc2626892ad5';
+String _$permissionServiceHash() => r'8944118369fdc2dd355a221dd4f8a487b7f3372c';
 
 /// A service for checking and requesting permissions.
-/// This abstraction allows for easier testing by providing a mockable interface.
 ///
 /// Copied from [permissionService].
 @ProviderFor(permissionService)

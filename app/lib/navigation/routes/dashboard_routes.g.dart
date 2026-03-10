@@ -15,22 +15,28 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       navigatorKey: ContactsBranchData.$navigatorKey,
       restorationScopeId: ContactsBranchData.$restorationScopeId,
+
       routes: [
         GoRouteData.$route(
           path: '/contacts',
           name: 'contacts',
+
           factory: _$ContactsRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: ':contactId/connection-details',
               name: 'connectionDetails',
+
               parentNavigatorKey: ConnectionDetailsRoute.$parentNavigatorKey,
+
               factory: _$ConnectionDetailsRoute._fromState,
             ),
             GoRouteData.$route(
               path: ':contactId/chat',
               name: 'chat',
+
               parentNavigatorKey: ChatRoute.$parentNavigatorKey,
+
               factory: _$ChatRoute._fromState,
             ),
           ],
@@ -40,22 +46,28 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       navigatorKey: ConnectionsBranchData.$navigatorKey,
       restorationScopeId: ConnectionsBranchData.$restorationScopeId,
+
       routes: [
         GoRouteData.$route(
           path: '/connections',
           name: 'connections',
+
           factory: _$ConnectionsRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'find-offer',
               name: 'findOffer',
+
               parentNavigatorKey: FindOfferRoute.$parentNavigatorKey,
+
               factory: _$FindOfferRoute._fromState,
               routes: [
                 GoRouteData.$route(
                   path: ':mnemonic/accept',
                   name: 'acceptOffer',
+
                   parentNavigatorKey: AcceptOfferRoute.$parentNavigatorKey,
+
                   factory: _$AcceptOfferRoute._fromState,
                 ),
               ],
@@ -63,25 +75,33 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
             GoRouteData.$route(
               path: 'publish-offer',
               name: 'publishOffer',
+
               parentNavigatorKey: PublishOfferRoute.$parentNavigatorKey,
+
               factory: _$PublishOfferRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'offer-details',
               name: 'offerDetails',
+
               parentNavigatorKey: OfferDetailsRoute.$parentNavigatorKey,
+
               factory: _$OfferDetailsRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'oob-share-qr',
               name: 'oobQr',
+
               parentNavigatorKey: OOBShareQrRoute.$parentNavigatorKey,
+
               factory: _$OOBShareQrRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'oob-scan-qr',
               name: 'qrScanner',
+
               parentNavigatorKey: OOBScanQrRoute.$parentNavigatorKey,
+
               factory: _$OOBScanQrRoute._fromState,
             ),
           ],
@@ -91,16 +111,20 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       navigatorKey: IdentitiesBranchData.$navigatorKey,
       restorationScopeId: IdentitiesBranchData.$restorationScopeId,
+
       routes: [
         GoRouteData.$route(
           path: '/identities',
           name: 'identities',
+
           factory: _$IdentitiesRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'identity-form',
               name: 'identityForm',
+
               parentNavigatorKey: IdentityFormRoute.$parentNavigatorKey,
+
               factory: _$IdentityFormRoute._fromState,
             ),
           ],
@@ -110,10 +134,12 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       navigatorKey: SettingsBranchData.$navigatorKey,
       restorationScopeId: SettingsBranchData.$restorationScopeId,
+
       routes: [
         GoRouteData.$route(
           path: '/settings',
           name: 'settings',
+
           factory: _$SettingsRoute._fromState,
         ),
       ],
