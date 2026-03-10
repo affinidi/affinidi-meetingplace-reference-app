@@ -63,6 +63,43 @@ class ContactsDatabase extends _$ContactsDatabase {
           );
         }
       }
+
+      if (from < 3) {
+        await customStatement(
+          'CREATE TABLE contacts_new ('
+          '"id" TEXT NOT NULL PRIMARY KEY,'
+          '"channel_did" TEXT,'
+          '"channel_did_sha256" TEXT,'
+          '"date_added" INTEGER NOT NULL,'
+          '"offer_link" TEXT NOT NULL,'
+          '"mediator_did" TEXT NOT NULL,'
+          '"type" INTEGER NOT NULL,'
+          '"status" INTEGER NOT NULL,'
+          '"origin" INTEGER NOT NULL,'
+          '"category" INTEGER NOT NULL,'
+          '"display_name" TEXT,'
+          '"badge_update_in_progress" INTEGER NOT NULL'
+          ' CHECK ("badge_update_in_progress" IN (0, 1)),'
+          '"badge_count" INTEGER NOT NULL,'
+          '"current_message_seq_no" INTEGER NOT NULL,'
+          '"has_been_opened" INTEGER NOT NULL'
+          ' CHECK ("has_been_opened" IN (0, 1)),'
+          '"last_keep_alive_message" INTEGER'
+          ')',
+        );
+
+        await customStatement(
+          'INSERT INTO contacts_new SELECT '
+          'id, channel_did, channel_did_sha256, date_added, offer_link, '
+          'mediator_did, type, status, origin, category, display_name, '
+          'badge_update_in_progress, badge_count, current_message_seq_no, '
+          'has_been_opened, last_keep_alive_message '
+          'FROM contacts',
+        );
+
+        await customStatement('DROP TABLE contacts');
+        await customStatement('ALTER TABLE contacts_new RENAME TO contacts');
+      }
       if (from < 4) {
         final result = await customSelect('PRAGMA table_info(contacts)').get();
 
