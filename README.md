@@ -311,6 +311,11 @@ PROFILE_IMAGE_QUALITY_PERCENT="80"               # Default: 80
 
 # Marketplace
 MARKETPLACE_QR_PREFIX=""                         # Default: ""
+
+# Out-of-Band (OOB) Flow Configuration
+# Set this value to distinguish between multiple OOB flows and prevent QR code validation from one flow interfering with another.
+# Values are not predefined and can be any string. For example: `oss-app-main-oob-flow`.
+DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: ""
 ```
 
 > **NOTE:** You can find all available configuration options and their default values in `lib/infrastructure/configuration/environment.dart`.

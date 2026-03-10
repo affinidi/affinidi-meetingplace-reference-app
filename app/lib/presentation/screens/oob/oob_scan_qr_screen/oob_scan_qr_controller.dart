@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/oob_service/oob_service.dart';
+import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
@@ -51,7 +52,10 @@ class OobScanQrController extends _$OobScanQrController {
       state = state.copyWith(isProcessing: true, scannedCode: qrData);
       await ref.read(processOobQrLoadingController.notifier).start(() async {
         try {
-          await ref.read(oOBServiceProvider.notifier).acceptOobFlow(qrData);
+          await ref.read(oOBServiceProvider.notifier).acceptOobFlow(
+                qrData,
+                type: ref.read(environmentProvider).directInteractiveOobType,
+              );
         } on AppException catch (e) {
           state = state.copyWith(errorMessage: e.code);
         } catch (e) {

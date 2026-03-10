@@ -98,6 +98,17 @@ class Environment {
     ) as Map<String, dynamic>,
   );
   Map<String, String> get defaultMediators => _defaultMediators;
+
+  /// The type to use for direct interactive OOB flows, sourced from the
+  /// `DIRECT_INTERACTIVE_OOB_TYPE` compile-time environment variable. If the
+  /// variable is not set or is empty, this will return `null`.
+  String? get directInteractiveOobType {
+    final value = const String.fromEnvironment(
+      'DIRECT_INTERACTIVE_OOB_TYPE',
+      defaultValue: '',
+    );
+    return value.isEmpty ? null : value;
+  }
 }
 
 Provider<Environment> environmentProvider = Provider<Environment>(

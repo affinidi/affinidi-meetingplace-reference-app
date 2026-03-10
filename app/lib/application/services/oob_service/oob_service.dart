@@ -25,8 +25,10 @@ part 'oob_service.g.dart';
 @riverpod
 class OOBService extends _$OOBService {
   Identity? _currentIdentity;
-  CoreSDKStreamSubscription<OobStreamData>? _acceptOfferStreamSubscription;
-  CoreSDKStreamSubscription<OobStreamData>? _publishOfferStreamSubscription;
+  CoreSDKStreamSubscription<OobStreamData, void>?
+      _acceptOfferStreamSubscription;
+  CoreSDKStreamSubscription<OobStreamData, void>?
+      _publishOfferStreamSubscription;
   static const _logKey = 'OOBSVC';
   late final AppLogger _logger = ref.read(appLoggerProvider);
 
@@ -58,7 +60,7 @@ class OOBService extends _$OOBService {
   /// Returns:
   /// - `Future<String>` the created connection offer link
   ///
-  Future<String> createOobFlow() async {
+  Future<String> createOobFlow({String? type}) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
     if (_currentIdentity == null) {
       throw AppException(
@@ -72,9 +74,10 @@ class OOBService extends _$OOBService {
     state = state.copyWith(lastConnectionChannel: null);
     final contactCard = _currentIdentity!.toSdkContactCard();
 
-    final createOobFlowResult = await sdk.createOobFlow(
+    final oobOfferSession = await sdk.createOobFlow(
       contactCard: contactCard,
       externalRef: _currentIdentity!.id,
+      type: type,
     );
 
     if (_publishOfferStreamSubscription != null) {
@@ -82,7 +85,7 @@ class OOBService extends _$OOBService {
       _publishOfferStreamSubscription = null;
     }
 
-    _publishOfferStreamSubscription = createOobFlowResult.streamSubscription;
+    _publishOfferStreamSubscription = oobOfferSession.stream;
 
     _publishOfferStreamSubscription?.listen((data) async {
       final channel = data.channel;
@@ -90,7 +93,7 @@ class OOBService extends _$OOBService {
       _logger.info('createOobFlow connection established', name: _logKey);
     });
 
-    return createOobFlowResult.oobUrl.toString();
+    return oobOfferSession.oobUrl.toString();
   }
 
   /// Accept an OOB flow given its URL and return the created Contact if
@@ -105,7 +108,7 @@ class OOBService extends _$OOBService {
   /// Throws [AppException] if:
   /// - The acceptance fails unexpectedly; an AppException wrapping the error
   /// is thrown.
-  Future<void> acceptOobFlow(String oobUrl) async {
+  Future<void> acceptOobFlow(String oobUrl, {String? type}) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
 
     final oobUri = Uri.tryParse(oobUrl);
@@ -125,39 +128,75 @@ class OOBService extends _$OOBService {
 
     _logger.info('acceptOobFlow $oobUrl', name: _logKey);
 
-    final result = await sdk.acceptOobFlow(
-      oobUri,
-      contactCard: _currentIdentity!.toSdkContactCard(),
-      externalRef: _currentIdentity!.id,
-    );
     final acceptedOfferCompleter = Completer<void>();
 
-    if (_acceptOfferStreamSubscription != null) {
-      await _acceptOfferStreamSubscription?.dispose();
-      _acceptOfferStreamSubscription = null;
+    try {
+      final result = await sdk.acceptOobFlow(
+        oobUri,
+        contactCard: _currentIdentity!.toSdkContactCard(),
+        externalRef: _currentIdentity!.id,
+        type: type,
+      );
+
+      if (_acceptOfferStreamSubscription != null) {
+        await _acceptOfferStreamSubscription?.dispose();
+        _acceptOfferStreamSubscription = null;
+      }
+
+      _acceptOfferStreamSubscription = result.stream;
+
+      _acceptOfferStreamSubscription?.timeout(
+        const Duration(seconds: 60),
+        () {
+          _logger.info('acceptOobFlow timeout', name: _logKey);
+          if (acceptedOfferCompleter.isCompleted) return;
+
+          acceptedOfferCompleter.completeError(
+            AppException(
+              'Unable to process OOB offer - timed out',
+              code: AppExceptionType.oobFlowTimedOut.name,
+            ),
+          );
+        },
+      );
+
+      _acceptOfferStreamSubscription?.listen((data) async {
+        final channel = data.channel;
+        _handleConnectionEstablished(channel);
+        _logger.info('acceptOobFlow connection established', name: _logKey);
+        if (acceptedOfferCompleter.isCompleted) return;
+
+        acceptedOfferCompleter.complete();
+      });
+    } on MeetingPlaceCoreSDKException catch (e, stackTrace) {
+      _logger.error(
+        '''Unable to process OOB offer - MeetingPlaceCoreSDKException: ${e.message}''',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+
+      acceptedOfferCompleter.completeError(
+        AppException(
+          'Unable to process OOB offer - SDK error: ${e.message}',
+          code: e.code,
+        ),
+      );
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Unable to process OOB offer',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+
+      acceptedOfferCompleter.completeError(
+        AppException(
+          'Unable to process OOB offer - unexpected error: $e',
+          code: AppExceptionType.other.name,
+        ),
+      );
     }
-
-    _acceptOfferStreamSubscription = result.streamSubscription;
-
-    _acceptOfferStreamSubscription?.timeout(
-      const Duration(seconds: 60),
-      () {
-        _logger.info('acceptOobFlow timeout', name: _logKey);
-        acceptedOfferCompleter.completeError(
-          AppException(
-            'Unable to process OOB offer',
-            code: AppExceptionType.oobFlowFailed.name,
-          ),
-        );
-      },
-    );
-
-    _acceptOfferStreamSubscription?.listen((data) async {
-      final channel = data.channel;
-      _handleConnectionEstablished(channel);
-      _logger.info('acceptOobFlow connection established', name: _logKey);
-      acceptedOfferCompleter.complete();
-    });
 
     await acceptedOfferCompleter.future;
   }

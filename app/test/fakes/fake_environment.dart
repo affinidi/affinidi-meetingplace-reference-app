@@ -83,4 +83,7 @@ class FakeEnvironment implements Environment {
 
   @override
   int get extraDelayAtLaunchInMilliseconds => 0;
+
+  @override
+  String? get directInteractiveOobType => null;
 }
