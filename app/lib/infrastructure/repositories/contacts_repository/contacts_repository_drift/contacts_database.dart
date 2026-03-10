@@ -63,10 +63,6 @@ class ContactsDatabase extends _$ContactsDatabase {
           );
         }
       }
-
-      if (from < 3) {
-        await migrator.addColumn(contacts, contacts.hasBeenOpened);
-      }
       if (from < 4) {
         final result = await customSelect('PRAGMA table_info(contacts)').get();
 
