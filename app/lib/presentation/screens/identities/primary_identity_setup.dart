@@ -56,7 +56,6 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
             ),
             child: IdentityFormFields(
               identityId,
-              controller: controller,
               formKey: formKey,
               title: l10n.primaryIdentityInformation,
             ),
