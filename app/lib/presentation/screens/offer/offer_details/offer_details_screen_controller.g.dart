@@ -83,9 +83,8 @@ class OfferDetailsScreenControllerProvider
           OfferDetailsScreenState
         > {
   /// See also [OfferDetailsScreenController].
-  OfferDetailsScreenControllerProvider(
-    String offerLink,
-  ) : this._internal(
+  OfferDetailsScreenControllerProvider(String offerLink)
+    : this._internal(
         () => OfferDetailsScreenController()..offerLink = offerLink,
         from: offerDetailsScreenControllerProvider,
         name: r'offerDetailsScreenControllerProvider',

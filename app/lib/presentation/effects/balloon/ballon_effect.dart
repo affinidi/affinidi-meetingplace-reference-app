@@ -103,16 +103,10 @@ class _BalloonController {
 
     animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
-    _wiggleAnimation =
-        Tween<double>(
-          begin: -wiggleOffset,
-          end: wiggleOffset,
-        ).animate(
-          CurvedAnimation(
-            parent: _controller,
-            curve: Curves.easeInOut,
-          ),
-        );
+    _wiggleAnimation = Tween<double>(
+      begin: -wiggleOffset,
+      end: wiggleOffset,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
   final TickerProvider vsync;
   final Duration duration;

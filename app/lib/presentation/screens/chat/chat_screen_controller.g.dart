@@ -114,9 +114,8 @@ class ChatScreenControllerProvider
   /// user interactions, and UI updates within the chat screen.
   ///
   /// Copied from [ChatScreenController].
-  ChatScreenControllerProvider(
-    String contactId,
-  ) : this._internal(
+  ChatScreenControllerProvider(String contactId)
+    : this._internal(
         () => ChatScreenController()..contactId = contactId,
         from: chatScreenControllerProvider,
         name: r'chatScreenControllerProvider',

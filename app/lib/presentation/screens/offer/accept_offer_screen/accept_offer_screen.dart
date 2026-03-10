@@ -247,11 +247,9 @@ class _ContactCardView extends ConsumerWidget {
 }
 
 class _AliasPicker extends HookConsumerWidget {
-  _AliasPicker({
-    required String mnemonic,
-    required String identityId,
-  }) : _mnemonic = mnemonic,
-       _identityId = identityId;
+  _AliasPicker({required String mnemonic, required String identityId})
+    : _mnemonic = mnemonic,
+      _identityId = identityId;
 
   final String _mnemonic;
   final String _identityId;

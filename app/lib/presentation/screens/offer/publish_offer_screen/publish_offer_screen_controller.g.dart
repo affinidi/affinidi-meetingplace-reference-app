@@ -87,10 +87,8 @@ class PublishOfferScreenControllerProvider
           PublishOfferScreenState
         > {
   /// See also [PublishOfferScreenController].
-  PublishOfferScreenControllerProvider(
-    String identityId,
-    AppLocalizations l10n,
-  ) : this._internal(
+  PublishOfferScreenControllerProvider(String identityId, AppLocalizations l10n)
+    : this._internal(
         () => PublishOfferScreenController()
           ..identityId = identityId
           ..l10n = l10n,

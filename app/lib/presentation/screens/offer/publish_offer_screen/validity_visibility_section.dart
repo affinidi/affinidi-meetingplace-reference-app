@@ -106,10 +106,7 @@ class _ValidityVisibilitySection extends ConsumerWidget {
                 ref
                     .read(provider)
                     .formData
-                    .copyWith(
-                      hasMaxUsages: value,
-                      maxUsages: value ? 3 : null,
-                    ),
+                    .copyWith(hasMaxUsages: value, maxUsages: value ? 3 : null),
               );
             },
           ),

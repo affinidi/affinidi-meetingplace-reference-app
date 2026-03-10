@@ -1,6 +1,1 @@
-enum ConnectionsScreenFilter {
-  all,
-  offers,
-  claims,
-  complete,
-}
+enum ConnectionsScreenFilter { all, offers, claims, complete }

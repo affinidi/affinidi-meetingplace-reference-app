@@ -134,11 +134,7 @@ class MediatorsRepositoryDrift implements MediatorsRepository {
             table.type.equals(MediatorType.custom.value),
           ]),
         ))
-        .write(
-          db.MediatorsCompanion(
-            mediatorName: Value(newName),
-          ),
-        );
+        .write(db.MediatorsCompanion(mediatorName: Value(newName)));
   }
 }
 

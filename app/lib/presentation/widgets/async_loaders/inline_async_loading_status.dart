@@ -136,10 +136,7 @@ class InlineAsyncLoadingStatus extends HookConsumerWidget
                     textAlign: TextAlign.center,
                   ),
                   if (shouldShowRetryButton.value)
-                    _RetryButton(
-                      onPressed: _retry!,
-                      text: l10n.generalRetry,
-                    ),
+                    _RetryButton(onPressed: _retry!, text: l10n.generalRetry),
                 ],
               ),
             ),

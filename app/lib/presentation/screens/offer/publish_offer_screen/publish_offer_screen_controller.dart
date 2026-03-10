@@ -337,10 +337,7 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
           : formData.copyWith(expiryDate: null);
       await ref
           .read(connectionsServiceProvider.notifier)
-          .publishOffer(
-            updatedFormData,
-            identity: selectedIdentity,
-          );
+          .publishOffer(updatedFormData, identity: selectedIdentity);
     });
   }
 

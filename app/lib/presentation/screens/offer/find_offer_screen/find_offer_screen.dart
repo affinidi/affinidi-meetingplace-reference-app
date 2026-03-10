@@ -34,18 +34,15 @@ class FindOfferScreen extends HookConsumerWidget {
       provider.select((state) => state.selectedIdentity),
     );
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.initialize();
-        });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.initialize();
+      });
 
-        return null;
-      },
-      [],
-    );
+      return null;
+    }, []);
 
     useEffect(() {
       if (!context.mounted) return;

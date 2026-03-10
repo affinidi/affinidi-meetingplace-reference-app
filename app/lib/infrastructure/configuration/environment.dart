@@ -93,10 +93,7 @@ class Environment {
 
   late final Map<String, String> _defaultMediators = Map<String, String>.from(
     jsonDecode(
-          const String.fromEnvironment(
-            'DEFAULT_MEDIATORS',
-            defaultValue: '{}',
-          ),
+          const String.fromEnvironment('DEFAULT_MEDIATORS', defaultValue: '{}'),
         )
         as Map<String, dynamic>,
   );

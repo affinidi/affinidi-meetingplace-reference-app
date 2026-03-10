@@ -253,10 +253,7 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
 
   /// Handles notifications opened by the user.
   Future<void> _handleOpeningNotification(RemoteMessage message) async {
-    _logger.info(
-      'Opened a notification with message $message',
-      name: _logKey,
-    );
+    _logger.info('Opened a notification with message $message', name: _logKey);
     _pushNotificationReceivedController.add(null);
   }
 
@@ -265,8 +262,4 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
       _requiredPermissions.contains(permission);
 }
 
-enum _Permissions {
-  alert,
-  badge,
-  sound,
-}
+enum _Permissions { alert, badge, sound }

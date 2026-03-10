@@ -83,9 +83,8 @@ class IdentityFormScreenControllerProvider
           IdentityFormScreenState
         > {
   /// See also [IdentityFormScreenController].
-  IdentityFormScreenControllerProvider(
-    String? identityId,
-  ) : this._internal(
+  IdentityFormScreenControllerProvider(String? identityId)
+    : this._internal(
         () => IdentityFormScreenController()..identityId = identityId,
         from: identityFormScreenControllerProvider,
         name: r'identityFormScreenControllerProvider',

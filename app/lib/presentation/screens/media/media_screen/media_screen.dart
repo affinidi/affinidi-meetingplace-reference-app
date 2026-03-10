@@ -65,11 +65,8 @@ class MediaScreen extends HookConsumerWidget {
     BuildContext context,
   ) async {
     final navigator = ref.read(navigatorProvider);
-    final result =
-        await Navigator.of(
-          context,
-          rootNavigator: true,
-        ).push<MediaReviewResult>(
+    final result = await Navigator.of(context, rootNavigator: true)
+        .push<MediaReviewResult>(
           MaterialPageRoute(
             builder: (context) => MediaReviewScreen(
               useChatSemantics: useChatSemantics,

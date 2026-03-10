@@ -104,11 +104,9 @@ class _PlainTextChatItem extends ConsumerWidget {
 }
 
 class _TextMessage extends StatelessWidget {
-  const _TextMessage({
-    required String text,
-    required bool shouldScaleEmojis,
-  }) : _text = text,
-       _shouldScaleEmojis = shouldScaleEmojis;
+  const _TextMessage({required String text, required bool shouldScaleEmojis})
+    : _text = text,
+      _shouldScaleEmojis = shouldScaleEmojis;
 
   final String _text;
   final bool _shouldScaleEmojis;

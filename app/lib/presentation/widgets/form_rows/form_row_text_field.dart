@@ -72,7 +72,11 @@ class FormRowTextField extends StatelessWidget {
                   key: textFieldKey,
                   autofocus: autofocus,
                   readOnly: !enabled,
-                  keyboardType: keyboardType ?? TextInputType.multiline,
+                  keyboardType:
+                      keyboardType ??
+                      (singleLine
+                          ? TextInputType.text
+                          : TextInputType.multiline),
                   controller: controller,
                   maxLines: singleLine ? 1 : 3,
                   minLines: 1,

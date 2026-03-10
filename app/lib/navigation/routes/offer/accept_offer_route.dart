@@ -1,11 +1,9 @@
 part of '../dashboard_routes.dart';
 
 class AcceptOfferRoute extends GoRouteData with _$AcceptOfferRoute {
-  AcceptOfferRoute({
-    required String mnemonic,
-    required String identityId,
-  }) : _mnemonic = mnemonic,
-       _identityId = identityId;
+  AcceptOfferRoute({required String mnemonic, required String identityId})
+    : _mnemonic = mnemonic,
+      _identityId = identityId;
 
   static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;
 
@@ -16,8 +14,6 @@ class AcceptOfferRoute extends GoRouteData with _$AcceptOfferRoute {
   String get identityId => _identityId;
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => AcceptOfferScreen(
-    mnemonic: _mnemonic,
-    identityId: _identityId,
-  );
+  Widget build(BuildContext context, GoRouterState state) =>
+      AcceptOfferScreen(mnemonic: _mnemonic, identityId: _identityId);
 }

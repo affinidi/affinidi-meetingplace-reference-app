@@ -41,11 +41,8 @@ class IdentityFormFields extends ConsumerWidget {
           children: [
             GestureDetector(
               onTap: () async {
-                final result =
-                    await Navigator.of(
-                      context,
-                      rootNavigator: true,
-                    ).push<MediaReviewResult>(
+                final result = await Navigator.of(context, rootNavigator: true)
+                    .push<MediaReviewResult>(
                       MaterialPageRoute(
                         builder: (context) => const MediaScreen(
                           cameraLensDirection: CameraLensDirection.front,
