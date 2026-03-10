@@ -812,15 +812,17 @@ class ChatScreenController extends _$ChatScreenController
   /// [message]: The concierge message containing the contact details to be
   /// updated.
   Future<void> sendContactDetailsUpdate(chat.ConciergeMessage message) async {
-    await ref.read(conciergeSendProfileLoadingController(message).notifier).start(
-      () async {
-        _logger.info(
-          '''Sending contact details update for messageId: ${message.messageId}''',
-          name: _logKey,
-        );
-        await _chatSDK?.sendChatContactDetailsUpdate(message);
-      },
+    final profileLoadingController = ref.read(
+      conciergeSendProfileLoadingController(message).notifier,
     );
+
+    await profileLoadingController.start(() async {
+      _logger.info(
+        '''Sending contact details update for messageId: ${message.messageId}''',
+        name: _logKey,
+      );
+      await _chatSDK?.sendChatContactDetailsUpdate(message);
+    });
   }
 
   /// Prompts the user at a later time to send updated contact details.
