@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProfileCircleAvatar extends StatelessWidget {
-  const ProfileCircleAvatar({
-    super.key,
-    this.image,
-    this.radius,
-    this.child,
-  });
+  const ProfileCircleAvatar({super.key, this.image, this.radius, this.child});
 
   final ImageProvider<Object>? image;
   final double? radius;
@@ -26,9 +21,7 @@ class ProfileCircleAvatar extends StatelessWidget {
 }
 
 class _AvatarGradientContainer extends StatelessWidget {
-  const _AvatarGradientContainer({
-    this.child,
-  });
+  const _AvatarGradientContainer({this.child});
 
   final Widget? child;
 

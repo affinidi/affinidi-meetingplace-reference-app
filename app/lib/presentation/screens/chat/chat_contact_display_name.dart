@@ -18,8 +18,9 @@ class _ChatContactDisplayName extends ConsumerWidget {
 
     final navigationBarTitle = ref.watch(provider.navigationBarTitle);
     final hasDisplayName = ref.read(
-      provider
-          .select((state) => state.contact?.displayName?.isNotEmpty ?? false),
+      provider.select(
+        (state) => state.contact?.displayName?.isNotEmpty ?? false,
+      ),
     );
     final isGroupChat = ref.read(provider.isGroupChat);
 
@@ -75,8 +76,9 @@ class _ChatContactDisplayName extends ConsumerWidget {
                     context.l10n.chatScreenTapForMemberDetails,
                     key: const Key('group_member_details_hint'),
                     style: context.textTheme.labelMedium?.copyWith(
-                      color: context.theme.colorScheme.onPrimary
-                          .withValues(alpha: 0.8),
+                      color: context.theme.colorScheme.onPrimary.withValues(
+                        alpha: 0.8,
+                      ),
                       fontSize: 12,
                     ),
                   ),
@@ -137,9 +139,7 @@ class _ChatContactImage extends ConsumerWidget {
               borderRadius: BorderRadius.circular(100.0),
             ),
             elevation: 5,
-            child: ProfileCircleAvatar(
-              image: displayImage,
-            ),
+            child: ProfileCircleAvatar(image: displayImage),
           ),
         ),
         if (showBadge)
@@ -147,10 +147,7 @@ class _ChatContactImage extends ConsumerWidget {
             bottom: 1,
             right: -2,
             child: Container(
-              constraints: const BoxConstraints(
-                minWidth: 20,
-                minHeight: 20,
-              ),
+              constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
               decoration: BoxDecoration(
                 color: context.colorScheme.surfaceContainerHigh,
                 shape: BoxShape.circle,

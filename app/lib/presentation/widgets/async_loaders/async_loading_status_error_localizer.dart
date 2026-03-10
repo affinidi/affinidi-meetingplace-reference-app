@@ -24,8 +24,10 @@ mixin AsyncLoadingStatusErrorLocalizer {
   String getErrorMessage(BuildContext context, Object exception) {
     final errorCode = switch (exception) {
       AppException appException => appException.code,
-      MeetingPlaceCoreSDKException mpxSdkException =>
-        _extractErrorCode(context, mpxSdkException),
+      MeetingPlaceCoreSDKException mpxSdkException => _extractErrorCode(
+        context,
+        mpxSdkException,
+      ),
       _ => exception.toString(),
     };
 

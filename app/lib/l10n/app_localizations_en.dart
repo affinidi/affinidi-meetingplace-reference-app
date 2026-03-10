@@ -13,16 +13,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String tabsTitle(String tabName) {
-    String _temp0 = intl.Intl.selectLogic(
-      tabName,
-      {
-        'connections': 'Invitations',
-        'contacts': 'Channels',
-        'identities': 'Identities',
-        'settings': 'Settings',
-        'other': 'Invalid',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(tabName, {
+      'connections': 'Invitations',
+      'contacts': 'Channels',
+      'identities': 'Identities',
+      'settings': 'Settings',
+      'other': 'Invalid',
+    });
     return '$_temp0';
   }
 
@@ -110,16 +107,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String newConnectionOptionTitle(String option) {
-    String _temp0 = intl.Intl.selectLogic(
-      option,
-      {
-        'shareQRCode': 'Direct share QR Code',
-        'scanQRCode': 'Direct scan a QR Code',
-        'claimAnOffer': 'Accept Meeting Place Invitation',
-        'publishAnOffer': 'Publish Meeting Place Invitation',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(option, {
+      'shareQRCode': 'Direct share QR Code',
+      'scanQRCode': 'Direct scan a QR Code',
+      'claimAnOffer': 'Accept Meeting Place Invitation',
+      'publishAnOffer': 'Publish Meeting Place Invitation',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -156,17 +150,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String newConnectionOptionSubtitle(String option) {
-    String _temp0 = intl.Intl.selectLogic(
-      option,
-      {
-        'shareQRCode': 'Gives you complete privacy and confidentiality',
-        'scanQRCode': 'Scan a QR Code with your camera',
-        'claimAnOffer': 'Connect with someone through Meeting Place',
-        'publishAnOffer':
-            'Advertise your invitation to connect on Meeting Place',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(option, {
+      'shareQRCode': 'Gives you complete privacy and confidentiality',
+      'scanQRCode': 'Scan a QR Code with your camera',
+      'claimAnOffer': 'Connect with someone through Meeting Place',
+      'publishAnOffer': 'Advertise your invitation to connect on Meeting Place',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -193,16 +183,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String connectionsFilterLabel(String filter) {
-    String _temp0 = intl.Intl.selectLogic(
-      filter,
-      {
-        'all': 'All',
-        'offers': 'Offers',
-        'claims': 'Claims',
-        'complete': 'Complete',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'all': 'All',
+      'offers': 'Offers',
+      'claims': 'Claims',
+      'complete': 'Complete',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -324,16 +311,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String contactCardFieldName(String field) {
-    String _temp0 = intl.Intl.selectLogic(
-      field,
-      {
-        'firstName': 'First name',
-        'lastName': 'Last name',
-        'email': 'Email',
-        'mobile': 'Mobile',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'firstName': 'First name',
+      'lastName': 'Last name',
+      'email': 'Email',
+      'mobile': 'Mobile',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -359,45 +343,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String error(String errorCode) {
-    String _temp0 = intl.Intl.selectLogic(
-      errorCode,
-      {
-        'connection_offer_owned_by_claiming_party':
-            'You cannot accept this invitation because you are the inviter!',
-        'connection_offer_already_claimed_by_claiming_party':
-            'You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress',
-        'missingMnemonic': 'Please enter an invitation passphrase to search',
-        'connection_offer_not_found_error':
-            'The details you provided did not match any active invitations.',
-        'discovery_register_offer_group_generic':
-            'Failed to publish invitation.',
-        'missingDeviceToken': 'Unable to find device notification token',
-        'offerOwnedByClaimingParty':
-            'You cannot claim this invitation because you are the owner',
-        'offerAlreadyClaimedByParty':
-            'You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress',
-        'offerNotFound':
-            'The details you provided did not match any active invitations.',
-        'mediatorAlreadyExists':
-            'Message server with the same DID already exists.',
-        'mediator_get_did_error': 'No message server found at the provided URL',
-        'unableToFindMediator': 'No message server found at the provided URL',
-        'oobFlowTimedOut':
-            'Unable to establish a connection with other party, QR code was likely already used',
-        'connection_offer_expired': 'This invitation has expired',
-        'connection_offer_limit_exceeded':
-            'This invitation has reached its maximum number of uses',
-        'register_offer_mnemonic_in_use':
-            'This phrase is already in use, please choose another one',
-        'invalidQrCode': 'QR-Code is not valid',
-        'oob_invalid_data': 'QR-Code data is not valid',
-        'oob_not_found': 'QR-Code data does not match any active invitation',
-        'oob_invalid_type': 'QR-Code data not supported',
-        'network_error':
-            'Could not connect. Check your internet connection and try again.',
-        'other': '$errorCode',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(errorCode, {
+      'connection_offer_owned_by_claiming_party':
+          'You cannot accept this invitation because you are the inviter!',
+      'connection_offer_already_claimed_by_claiming_party':
+          'You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress',
+      'missingMnemonic': 'Please enter an invitation passphrase to search',
+      'connection_offer_not_found_error':
+          'The details you provided did not match any active invitations.',
+      'discovery_register_offer_group_generic': 'Failed to publish invitation.',
+      'missingDeviceToken': 'Unable to find device notification token',
+      'offerOwnedByClaimingParty':
+          'You cannot claim this invitation because you are the owner',
+      'offerAlreadyClaimedByParty':
+          'You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress',
+      'offerNotFound':
+          'The details you provided did not match any active invitations.',
+      'mediatorAlreadyExists':
+          'Message server with the same DID already exists.',
+      'mediator_get_did_error': 'No message server found at the provided URL',
+      'unableToFindMediator': 'No message server found at the provided URL',
+      'oobFlowTimedOut':
+          'Unable to establish a connection with other party, QR code was likely already used',
+      'connection_offer_expired': 'This invitation has expired',
+      'connection_offer_limit_exceeded':
+          'This invitation has reached its maximum number of uses',
+      'register_offer_mnemonic_in_use':
+          'This phrase is already in use, please choose another one',
+      'invalidQrCode': 'QR-Code is not valid',
+      'oob_invalid_data': 'QR-Code data is not valid',
+      'oob_not_found': 'QR-Code data does not match any active invitation',
+      'oob_invalid_type': 'QR-Code data not supported',
+      'network_error':
+          'Could not connect. Check your internet connection and try again.',
+      'other': '$errorCode',
+    });
     return '$_temp0';
   }
 
@@ -471,17 +451,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String contactsFilterLabel(String filter) {
-    String _temp0 = intl.Intl.selectLogic(
-      filter,
-      {
-        'any': 'Any',
-        'person': 'Person',
-        'group': 'Group',
-        'service': 'AI Agent',
-        'business': 'Business',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'any': 'Any',
+      'person': 'Person',
+      'group': 'Group',
+      'service': 'AI Agent',
+      'business': 'Business',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -663,15 +640,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String identitiesFilterLabel(String filter) {
-    String _temp0 = intl.Intl.selectLogic(
-      filter,
-      {
-        'all': 'All',
-        'primary': 'Primary',
-        'aliases': 'Aliases',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'all': 'All',
+      'primary': 'Primary',
+      'aliases': 'Aliases',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -940,18 +914,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String chatItemStatus(String status) {
-    String _temp0 = intl.Intl.selectLogic(
-      status,
-      {
-        'queued': 'Queued',
-        'delivered': 'Delivered',
-        'sending': 'Sending',
-        'sent': 'Sent',
-        'error': 'Error',
-        'groupDeleted': 'Group deleted',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'queued': 'Queued',
+      'delivered': 'Delivered',
+      'sending': 'Sending',
+      'sent': 'Sent',
+      'error': 'Error',
+      'groupDeleted': 'Group deleted',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -1212,56 +1183,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String contactStatus(String status) {
-    String _temp0 = intl.Intl.selectLogic(
-      status,
-      {
-        'pendingApproval': 'Pending Approval',
-        'pendingInauguration': 'Establishing Connection',
-        'approved': 'Active Contact',
-        'rejected': 'Rejected',
-        'error': 'Error',
-        'deleted': 'Deleted',
-        'active': 'Active Channel',
-        'unknown': 'Unknown',
-        'other': 'Unknown',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'pendingApproval': 'Pending Approval',
+      'pendingInauguration': 'Establishing Connection',
+      'approved': 'Active Contact',
+      'rejected': 'Rejected',
+      'error': 'Error',
+      'deleted': 'Deleted',
+      'active': 'Active Channel',
+      'unknown': 'Unknown',
+      'other': 'Unknown',
+    });
     return '$_temp0';
   }
 
   @override
   String groupContactStatus(String status) {
-    String _temp0 = intl.Intl.selectLogic(
-      status,
-      {
-        'pendingApproval': 'Pending Approval',
-        'pendingInauguration': 'Establishing Channel',
-        'approved': 'Active Group Channel',
-        'rejected': 'Rejected',
-        'error': 'Error',
-        'deleted': 'Deleted',
-        'active': 'Active Group Channel',
-        'unknown': 'Unknown',
-        'other': 'Unknown',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'pendingApproval': 'Pending Approval',
+      'pendingInauguration': 'Establishing Channel',
+      'approved': 'Active Group Channel',
+      'rejected': 'Rejected',
+      'error': 'Error',
+      'deleted': 'Deleted',
+      'active': 'Active Group Channel',
+      'unknown': 'Unknown',
+      'other': 'Unknown',
+    });
     return '$_temp0';
   }
 
   @override
   String contactOrigin(String origin) {
-    String _temp0 = intl.Intl.selectLogic(
-      origin,
-      {
-        'directInteractive': 'Direct Interactive',
-        'individualOfferPublished': 'Meeting Place Invitation Offered',
-        'individualOfferRequested': 'Meeting Place Invitation Accepted',
-        'groupOfferPublished': 'Meeting Place Group invitation Offered',
-        'groupOfferRequested': 'Meeting Place Group Invitation Accepted',
-        'unknown': 'Unknown',
-        'other': 'Unknown',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(origin, {
+      'directInteractive': 'Direct Interactive',
+      'individualOfferPublished': 'Meeting Place Invitation Offered',
+      'individualOfferRequested': 'Meeting Place Invitation Accepted',
+      'groupOfferPublished': 'Meeting Place Group invitation Offered',
+      'groupOfferRequested': 'Meeting Place Group Invitation Accepted',
+      'unknown': 'Unknown',
+      'other': 'Unknown',
+    });
     return '$_temp0';
   }
 
@@ -1355,17 +1317,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String connectionStatus(String status) {
-    String _temp0 = intl.Intl.selectLogic(
-      status,
-      {
-        'published': 'Created',
-        'finalised': 'Completed',
-        'accepted': 'Waiting',
-        'channelInaugurated': 'Active',
-        'deleted': 'Deleted',
-        'other': 'Unknown',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'published': 'Created',
+      'finalised': 'Completed',
+      'accepted': 'Waiting',
+      'channelInaugurated': 'Active',
+      'deleted': 'Deleted',
+      'other': 'Unknown',
+    });
     return '$_temp0';
   }
 

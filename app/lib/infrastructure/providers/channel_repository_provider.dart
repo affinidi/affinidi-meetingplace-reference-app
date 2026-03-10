@@ -18,8 +18,9 @@ part 'channel_repository_provider.g.dart';
 final _channelDatabaseProvider = FutureProvider<ChannelDatabase>((ref) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
   final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
 
   final database = ChannelDatabase(
@@ -34,12 +35,14 @@ final _channelDatabaseProvider = FutureProvider<ChannelDatabase>((ref) async {
   return database;
 });
 
-final _channelInMemoryDatabaseProvider =
-    FutureProvider<ChannelDatabase>((ref) async {
+final _channelInMemoryDatabaseProvider = FutureProvider<ChannelDatabase>((
+  ref,
+) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
   final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
 
   final database = ChannelDatabase(

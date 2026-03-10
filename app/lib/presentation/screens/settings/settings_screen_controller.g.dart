@@ -13,14 +13,14 @@ String _$settingsScreenControllerHash() =>
 @ProviderFor(SettingsScreenController)
 final settingsScreenControllerProvider =
     NotifierProvider<SettingsScreenController, SettingsScreenState>.internal(
-  SettingsScreenController.new,
-  name: r'settingsScreenControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$settingsScreenControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      SettingsScreenController.new,
+      name: r'settingsScreenControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$settingsScreenControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$SettingsScreenController = Notifier<SettingsScreenState>;
 // ignore_for_file: type=lint

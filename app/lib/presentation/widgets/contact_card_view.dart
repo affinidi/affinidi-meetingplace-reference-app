@@ -31,8 +31,10 @@ class ContactCardView extends StatelessWidget {
               iconColor: context.colorScheme.onPrimary,
               dense: true,
               visualDensity: VisualDensity.compact,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               leading: Container(
                 width: 24,
                 height: 24,
@@ -98,8 +100,10 @@ class SdkContactCardView extends StatelessWidget {
               iconColor: context.colorScheme.onPrimary,
               dense: true,
               visualDensity: VisualDensity.compact,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               leading: Container(
                 width: 24,
                 height: 24,
@@ -143,8 +147,7 @@ enum _ContactCardFieldKey {
   firstName,
   lastName,
   email,
-  mobile,
-  ;
+  mobile;
 
   Color get iconColor {
     switch (this) {

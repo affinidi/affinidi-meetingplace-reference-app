@@ -22,10 +22,7 @@ part 'identity_form_bottom_container.dart';
 part 'identity_form_section.dart';
 
 class IdentityFormScreen extends HookConsumerWidget {
-  IdentityFormScreen({
-    super.key,
-    this.identityId,
-  });
+  IdentityFormScreen({super.key, this.identityId});
 
   final String? identityId;
 
@@ -44,20 +41,17 @@ class IdentityFormScreen extends HookConsumerWidget {
 
     ref.keepAround(provider);
 
-    useEffect(
-      () {
-        // Save identity on screen exit
-        return () {
-          Future(() async {
-            await controller.saveIdentity(
-              anonymousLabel: anonymousLabel,
-              mode: mode,
-            );
-          });
-        };
-      },
-      [identityId],
-    );
+    useEffect(() {
+      // Save identity on screen exit
+      return () {
+        Future(() async {
+          await controller.saveIdentity(
+            anonymousLabel: anonymousLabel,
+            mode: mode,
+          );
+        });
+      };
+    }, [identityId]);
 
     return Scaffold(
       appBar: _IdentityFormAppBar(identityId, mode: mode),

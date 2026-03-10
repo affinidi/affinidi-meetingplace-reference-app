@@ -2,7 +2,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_pro
 
 class FakeAppBadgeService implements AppBadgeService {
   FakeAppBadgeService({int initialBadgeCount = 0})
-      : _lastBadgeCount = initialBadgeCount;
+    : _lastBadgeCount = initialBadgeCount;
 
   int _lastBadgeCount;
   int get lastBadgeCount => _lastBadgeCount;

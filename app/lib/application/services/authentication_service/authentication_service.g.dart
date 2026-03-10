@@ -22,14 +22,14 @@ String _$authenticationServiceHash() =>
 @ProviderFor(AuthenticationService)
 final authenticationServiceProvider =
     NotifierProvider<AuthenticationService, AuthenticationState>.internal(
-  AuthenticationService.new,
-  name: r'authenticationServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$authenticationServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      AuthenticationService.new,
+      name: r'authenticationServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$authenticationServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$AuthenticationService = Notifier<AuthenticationState>;
 // ignore_for_file: type=lint

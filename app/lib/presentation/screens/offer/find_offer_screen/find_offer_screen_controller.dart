@@ -10,8 +10,9 @@ part 'find_offer_screen_controller.g.dart';
 
 @riverpod
 class FindOfferScreenController extends _$FindOfferScreenController {
-  late final findOfferLoadingController =
-      AsyncLoadingController.provider('findOfferLoadingController');
+  late final findOfferLoadingController = AsyncLoadingController.provider(
+    'findOfferLoadingController',
+  );
 
   @override
   FindOfferScreenState build() {
@@ -20,8 +21,9 @@ class FindOfferScreenController extends _$FindOfferScreenController {
 
   void initialize() {
     final identities = ref.read(identitiesServiceProvider).identities;
-    final preselectedIdentity =
-        ref.read(identitiesServiceProvider.currentIdentityOrPrimary);
+    final preselectedIdentity = ref.read(
+      identitiesServiceProvider.currentIdentityOrPrimary,
+    );
 
     state = state.copyWith(
       identities: identities,

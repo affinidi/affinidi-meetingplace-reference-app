@@ -4,8 +4,8 @@ class _ReactionPickerChatItem extends StatelessWidget {
   const _ReactionPickerChatItem({
     required chat.Message chatItem,
     required String contactId,
-  })  : _chatItem = chatItem,
-        _contactId = contactId;
+  }) : _chatItem = chatItem,
+       _contactId = contactId;
 
   final chat.Message _chatItem;
   final String _contactId;
@@ -55,11 +55,8 @@ class _ReactionPickerChatItem extends StatelessWidget {
 }
 
 class _TappableReaction extends ConsumerWidget {
-  const _TappableReaction(
-    this.reaction,
-    this.messageId,
-    String contactId,
-  ) : _contactId = contactId;
+  const _TappableReaction(this.reaction, this.messageId, String contactId)
+    : _contactId = contactId;
 
   final String reaction;
   final String messageId;
@@ -82,10 +79,7 @@ class _TappableReaction extends ConsumerWidget {
       },
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 0, 18, 0),
-        child: Text(
-          reaction,
-          style: const TextStyle(fontSize: 22),
-        ),
+        child: Text(reaction, style: const TextStyle(fontSize: 22)),
       ),
     );
   }

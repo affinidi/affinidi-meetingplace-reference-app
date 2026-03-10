@@ -36,19 +36,13 @@ abstract class ChatScreenState with _$ChatScreenState {
   int getIndexOfNextMessageFromMe(int startingFrom) {
     if (startingFrom >= messages.length) return -1;
 
-    return messages.indexWhere(
-      (message) => message.isFromMe,
-      startingFrom,
-    );
+    return messages.indexWhere((message) => message.isFromMe, startingFrom);
   }
 
   int getIndexOfNextMessageFromThem(int startingFrom) {
     if (startingFrom >= messages.length) return -1;
 
-    return messages.indexWhere(
-      (message) => !message.isFromMe,
-      startingFrom,
-    );
+    return messages.indexWhere((message) => !message.isFromMe, startingFrom);
   }
 
   GroupMember? getGroupMemberByDid(String did) =>

@@ -53,11 +53,12 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
   Future<void> build() async {}
 
   Future<void> ensureInitialized() async {
-    _pushNotificationMessaging =
-        await ref.read(pushNotificationMessagingProvider.future);
+    _pushNotificationMessaging = await ref.read(
+      pushNotificationMessagingProvider.future,
+    );
     final secureStorage = await ref.read(secureStorageProvider.future);
-    final pushNotificationToken =
-        await secureStorage.getPushNotificationToken();
+    final pushNotificationToken = await secureStorage
+        .getPushNotificationToken();
     if (pushNotificationToken != null) {
       _logger.info(
         'Existing PushToken found during initialization: '
@@ -68,8 +69,9 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
     }
 
     // Subscribe to push notification token changes
-    _pushNotificationMessaging.onTokenRefresh
-        .listen((String newDeviceToken) async {
+    _pushNotificationMessaging.onTokenRefresh.listen((
+      String newDeviceToken,
+    ) async {
       _logger.info(
         'Device token refreshed: '
         '$newDeviceToken',
@@ -84,14 +86,8 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
 
     // Subscribe to new messages
     _pushNotificationMessaging.onMessage.listen((RemoteMessage message) async {
-      _logger.info(
-        'Push notification received in foreground',
-        name: _logKey,
-      );
-      _logger.debug(
-        'Push notification data: ${message.data}',
-        name: _logKey,
-      );
+      _logger.info('Push notification received in foreground', name: _logKey);
+      _logger.debug('Push notification data: ${message.data}', name: _logKey);
 
       await ref.read(appBadgeServiceProvider).setBadgeFromMessage(message);
 
@@ -170,17 +166,17 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
     unawaited(
       _pushNotificationMessaging
           .requestPermission(
-        alert: _hasPermission(_Permissions.alert),
-        badge: _hasPermission(_Permissions.badge),
-        sound: _hasPermission(_Permissions.sound),
-      )
+            alert: _hasPermission(_Permissions.alert),
+            badge: _hasPermission(_Permissions.badge),
+            sound: _hasPermission(_Permissions.sound),
+          )
           .then((settings) {
-        _logger.info(
-          'User granted permission: ${settings.authorizationStatus}',
-          name: _logKey,
-        );
-        _enableiOSForegroundNotifications();
-      }),
+            _logger.info(
+              'User granted permission: ${settings.authorizationStatus}',
+              name: _logKey,
+            );
+            _enableiOSForegroundNotifications();
+          }),
     );
   }
 
@@ -220,17 +216,21 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
     if (kIsWeb) return;
     if (!Platform.isIOS && !Platform.isMacOS) return;
 
-    final isForegroundNotificationsEnabled =
-        ref.read(environmentProvider).isForegroundNotificationsEnabled;
+    final isForegroundNotificationsEnabled = ref
+        .read(environmentProvider)
+        .isForegroundNotificationsEnabled;
     await _pushNotificationMessaging
         .setForegroundNotificationPresentationOptions(
-      alert: isForegroundNotificationsEnabled &&
-          _hasPermission(_Permissions.alert),
-      badge: isForegroundNotificationsEnabled &&
-          _hasPermission(_Permissions.badge),
-      sound: isForegroundNotificationsEnabled &&
-          _hasPermission(_Permissions.sound),
-    );
+          alert:
+              isForegroundNotificationsEnabled &&
+              _hasPermission(_Permissions.alert),
+          badge:
+              isForegroundNotificationsEnabled &&
+              _hasPermission(_Permissions.badge),
+          sound:
+              isForegroundNotificationsEnabled &&
+              _hasPermission(_Permissions.sound),
+        );
   }
 
   /// Sets up handling for push notifications opened
@@ -246,16 +246,14 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
 
     // Also handle any interaction when the app is in the background via a
     // Stream listener
-    _pushNotificationMessaging.onMessageOpenedApp
-        .listen(_handleOpeningNotification);
+    _pushNotificationMessaging.onMessageOpenedApp.listen(
+      _handleOpeningNotification,
+    );
   }
 
   /// Handles notifications opened by the user.
   Future<void> _handleOpeningNotification(RemoteMessage message) async {
-    _logger.info(
-      'Opened a notification with message $message',
-      name: _logKey,
-    );
+    _logger.info('Opened a notification with message $message', name: _logKey);
     _pushNotificationReceivedController.add(null);
   }
 
@@ -264,9 +262,4 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
       _requiredPermissions.contains(permission);
 }
 
-enum _Permissions {
-  alert,
-  badge,
-  sound,
-  ;
-}
+enum _Permissions { alert, badge, sound }

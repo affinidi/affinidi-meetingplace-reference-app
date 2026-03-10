@@ -18,12 +18,13 @@ part 'contacts_screen_controller.g.dart';
 @Riverpod(keepAlive: true)
 class ContactsScreenController extends _$ContactsScreenController {
   ContactsScreenController() : super();
-  late final deleteContactLoadingController =
-      AsyncLoadingController.provider('deleteContactLoadingController');
+  late final deleteContactLoadingController = AsyncLoadingController.provider(
+    'deleteContactLoadingController',
+  );
   late final deleteMultipleContactsLoadingController =
       AsyncLoadingController.provider(
-    'deleteMultipleContactsLoadingController',
-  );
+        'deleteMultipleContactsLoadingController',
+      );
 
   bool _isDisposed = false;
 
@@ -33,19 +34,18 @@ class ContactsScreenController extends _$ContactsScreenController {
       _isDisposed = true;
     });
 
-    ref.listen(
-      identitiesServiceProvider.currentIdentityOrPrimary,
-      (prev, next) {
-        if (prev == next) return;
+    ref.listen(identitiesServiceProvider.currentIdentityOrPrimary, (
+      prev,
+      next,
+    ) {
+      if (prev == next) return;
 
-        Future.microtask(() {
-          if (_isDisposed) return;
+      Future.microtask(() {
+        if (_isDisposed) return;
 
-          state = state.copyWith(identity: next);
-        });
-      },
-      fireImmediately: true,
-    );
+        state = state.copyWith(identity: next);
+      });
+    }, fireImmediately: true);
 
     ref.listen(
       contactsServiceProvider.select((state) => state.contacts),
@@ -71,19 +71,15 @@ class ContactsScreenController extends _$ContactsScreenController {
 
     // Listen to mediator service to update connection mediators when
     // mediators load
-    ref.listen(
-      mediatorServiceProvider,
-      (prev, next) {
-        if (prev == next) return;
+    ref.listen(mediatorServiceProvider, (prev, next) {
+      if (prev == next) return;
 
-        Future.microtask(() {
-          if (_isDisposed) return;
+      Future.microtask(() {
+        if (_isDisposed) return;
 
-          _updateContactMediators();
-        });
-      },
-      fireImmediately: true,
-    );
+        _updateContactMediators();
+      });
+    }, fireImmediately: true);
 
     return ContactsScreenState();
   }
@@ -99,14 +95,14 @@ class ContactsScreenController extends _$ContactsScreenController {
   Future<void> deleteSelectedContacts() async {
     if (!state.isEditMode) return;
 
-    await ref
-        .read(deleteMultipleContactsLoadingController.notifier)
-        .start(() async {
-      await ref
-          .read(contactsServiceProvider.notifier)
-          .deleteContacts(state.selectedContacts);
-      state = state.copyWith(isEditMode: false, selectedContacts: []);
-    });
+    await ref.read(deleteMultipleContactsLoadingController.notifier).start(
+      () async {
+        await ref
+            .read(contactsServiceProvider.notifier)
+            .deleteContacts(state.selectedContacts);
+        state = state.copyWith(isEditMode: false, selectedContacts: []);
+      },
+    );
   }
 
   void toggleGridView(bool shouldShowGrid) {
@@ -171,9 +167,9 @@ class ContactsScreenController extends _$ContactsScreenController {
 
   Future<void> deleteContact(Contact contact) async {
     await ref.read(deleteContactLoadingController.notifier).start(() async {
-      await ref
-          .read(contactsServiceProvider.notifier)
-          .deleteContacts([contact]);
+      await ref.read(contactsServiceProvider.notifier).deleteContacts([
+        contact,
+      ]);
     });
   }
 
@@ -189,8 +185,7 @@ class ContactsScreenController extends _$ContactsScreenController {
         ContactStatus.pendingInauguration => 4,
         ContactStatus.deleted ||
         ContactStatus.error ||
-        ContactStatus.rejected =>
-          5,
+        ContactStatus.rejected => 5,
         ContactStatus.unknown => 6,
       };
     }

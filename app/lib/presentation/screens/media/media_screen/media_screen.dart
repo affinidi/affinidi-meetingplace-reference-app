@@ -15,9 +15,9 @@ import 'media_screen_controller.dart';
 
 class MediaReviewResult {
   MediaReviewResult.empty()
-      : compressedImage = CompressedImage.empty(),
-        textMessage = '',
-        succeeded = false;
+    : compressedImage = CompressedImage.empty(),
+      textMessage = '',
+      succeeded = false;
 
   MediaReviewResult(this.succeeded, this.textMessage, this.compressedImage);
 
@@ -65,18 +65,16 @@ class MediaScreen extends HookConsumerWidget {
     BuildContext context,
   ) async {
     final navigator = ref.read(navigatorProvider);
-    final result = await Navigator.of(
-      context,
-      rootNavigator: true,
-    ).push<MediaReviewResult>(
-      MaterialPageRoute(
-        builder: (context) => MediaReviewScreen(
-          useChatSemantics: useChatSemantics,
-          imageBytes: imageBytes,
-          messageText: messageText,
-        ),
-      ),
-    );
+    final result = await Navigator.of(context, rootNavigator: true)
+        .push<MediaReviewResult>(
+          MaterialPageRoute(
+            builder: (context) => MediaReviewScreen(
+              useChatSemantics: useChatSemantics,
+              imageBytes: imageBytes,
+              messageText: messageText,
+            ),
+          ),
+        );
 
     if (!context.mounted) return;
 
@@ -95,18 +93,15 @@ class MediaScreen extends HookConsumerWidget {
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
 
-    useEffect(
-      () {
-        if (state.pickedImageBytes != null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!context.mounted) return;
-            _reviewImage(state.pickedImageBytes!, ref, context);
-          });
-        }
-        return null;
-      },
-      [state.pickedImageBytes],
-    );
+    useEffect(() {
+      if (state.pickedImageBytes != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          _reviewImage(state.pickedImageBytes!, ref, context);
+        });
+      }
+      return null;
+    }, [state.pickedImageBytes]);
 
     return Scaffold(
       body: Builder(
@@ -148,7 +143,8 @@ class MediaScreen extends HookConsumerWidget {
               fit: BoxFit.cover,
               child: SizedBox(
                 width: 100,
-                child: defaultTargetPlatform == TargetPlatform.android &&
+                child:
+                    defaultTargetPlatform == TargetPlatform.android &&
                         state.isFrontCamera
                     ? Transform(
                         alignment: Alignment.center,
@@ -161,9 +157,8 @@ class MediaScreen extends HookConsumerWidget {
           );
         },
       ),
-      floatingActionButton: useCamera &&
-              state.isCameraAvailable &&
-              state.cameraController != null
+      floatingActionButton:
+          useCamera && state.isCameraAvailable && state.cameraController != null
           ? Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -214,8 +209,11 @@ class MediaScreen extends HookConsumerWidget {
                     navigator.pop(MediaReviewResult.empty());
                     Future(controller.closeCamera);
                   },
-                  child:
-                      const Icon(Icons.cancel, size: 50, color: Colors.white),
+                  child: const Icon(
+                    Icons.cancel,
+                    size: 50,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             )

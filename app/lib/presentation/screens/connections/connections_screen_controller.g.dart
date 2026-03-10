@@ -11,16 +11,19 @@ String _$connectionsScreenControllerHash() =>
 
 /// See also [ConnectionsScreenController].
 @ProviderFor(ConnectionsScreenController)
-final connectionsScreenControllerProvider = NotifierProvider<
-    ConnectionsScreenController, ConnectionsScreenState>.internal(
-  ConnectionsScreenController.new,
-  name: r'connectionsScreenControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$connectionsScreenControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final connectionsScreenControllerProvider =
+    NotifierProvider<
+      ConnectionsScreenController,
+      ConnectionsScreenState
+    >.internal(
+      ConnectionsScreenController.new,
+      name: r'connectionsScreenControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$connectionsScreenControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ConnectionsScreenController = Notifier<ConnectionsScreenState>;
 // ignore_for_file: type=lint

@@ -4,11 +4,9 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
   ConciergeJoinGroupRequestChatItem({
     required chat.ConciergeMessage chatItem,
     required String contactId,
-  })  : _chatItem = chatItem,
-        _contactId = contactId,
-        super(
-          key: ValueKey('chat_concierge_join_${chatItem.messageId}'),
-        );
+  }) : _chatItem = chatItem,
+       _contactId = contactId,
+       super(key: ValueKey('chat_concierge_join_${chatItem.messageId}'));
 
   final chat.ConciergeMessage _chatItem;
   final String _contactId;
@@ -25,17 +23,18 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
       provider.select(
         (state) =>
             state.messages.whereType<chat.ConciergeMessage>().firstWhereOrNull(
-                  (cm) =>
-                      cm.messageId == _chatItem.messageId &&
-                      cm.status == chat.ChatItemStatus.userInput,
-                ),
+              (cm) =>
+                  cm.messageId == _chatItem.messageId &&
+                  cm.status == chat.ChatItemStatus.userInput,
+            ),
       ),
     );
 
-    final approveLoadingController =
-        controller.conciergeApproveLoadingController(_chatItem);
-    final rejectLoadingController =
-        controller.conciergeRejectLoadingController(_chatItem);
+    final approveLoadingController = controller
+        .conciergeApproveLoadingController(_chatItem);
+    final rejectLoadingController = controller.conciergeRejectLoadingController(
+      _chatItem,
+    );
 
     final memberName = chatItem?.memeberName ?? '';
 
@@ -104,14 +103,12 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
                     ),
                     Text(
                       memberName.isNotEmpty
-                          ? context.l10n
-                              .chatRequestPermissionToJoinGroup(memberName)
+                          ? context.l10n.chatRequestPermissionToJoinGroup(
+                              memberName,
+                            )
                           : '',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -123,8 +120,9 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
                               padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                               minimumSize: const Size(80, 25),
                               shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(8)),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(8),
+                                ),
                                 side: BorderSide(color: Colors.white, width: 1),
                               ),
                             ),
@@ -144,8 +142,9 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(80, 25),
                               shape: const RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(8)),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(8),
+                                ),
                                 side: BorderSide(color: Colors.white, width: 1),
                               ),
                             ),

@@ -17,14 +17,14 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     this.offerToFind,
     this.findOfferHasError = false,
     bool shouldTimeout = false,
-  })  : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
-        _offerToReturn = offerToReturn,
-        _publishOfferException = publishOfferException,
-        _createOobFlowException = createOobFlowException,
-        _acceptOobFlowException = acceptOobFlowException,
-        _isPhraseAvailable = isPhraseAvailable,
-        _shouldTimeout = shouldTimeout,
-        _channels = channels ?? {};
+  }) : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
+       _offerToReturn = offerToReturn,
+       _publishOfferException = publishOfferException,
+       _createOobFlowException = createOobFlowException,
+       _acceptOobFlowException = acceptOobFlowException,
+       _isPhraseAvailable = isPhraseAvailable,
+       _shouldTimeout = shouldTimeout,
+       _channels = channels ?? {};
 
   final bool _shouldFailToRegisterPushToken;
   final PublishOfferResult? _offerToReturn;
@@ -123,10 +123,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Future<FindOfferResult> findOffer({required String mnemonic}) async {
     _findOfferCalls.add(mnemonic);
 
-    return FindOfferResult(
-      connectionOffer: offerToFind,
-      errorCode: null,
-    );
+    return FindOfferResult(connectionOffer: offerToFind, errorCode: null);
   }
 
   final List<Map<String, dynamic>> _acceptOfferCalls = [];
@@ -262,10 +259,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       shouldTimeout: _shouldTimeout,
     );
 
-    return _FakeOobOfferSession(
-      oobUrl: oobUri,
-      stream: _createOobStream!,
-    );
+    return _FakeOobOfferSession(oobUrl: oobUri, stream: _createOobStream!);
   }
 
   @override
@@ -347,10 +341,7 @@ class _FakeAcceptOfferResult<T extends ConnectionOffer>
 }
 
 class _FakeOobOfferSession implements OobOfferSession {
-  _FakeOobOfferSession({
-    required this.oobUrl,
-    required this.stream,
-  });
+  _FakeOobOfferSession({required this.oobUrl, required this.stream});
 
   @override
   final Uri oobUrl;
@@ -375,10 +366,7 @@ class _FakeOobOfferSession implements OobOfferSession {
 }
 
 class _FakeOobAcceptanceSession implements OobAcceptanceSession {
-  _FakeOobAcceptanceSession({
-    required this.channel,
-    required this.stream,
-  });
+  _FakeOobAcceptanceSession({required this.channel, required this.stream});
 
   @override
   final Channel channel;
@@ -397,10 +385,7 @@ class _FakeOobAcceptanceSession implements OobAcceptanceSession {
 }
 
 class _FakeOobStream implements OobStream {
-  _FakeOobStream({
-    required this.onDispose,
-    this.shouldTimeout = false,
-  });
+  _FakeOobStream({required this.onDispose, this.shouldTimeout = false});
 
   final StreamController<OobStreamData> _streamController =
       StreamController<OobStreamData>.broadcast();

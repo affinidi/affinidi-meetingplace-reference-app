@@ -13,9 +13,7 @@ class _ChatMediaOptionItem {
 }
 
 class _ChatMediaOption extends StatelessWidget {
-  const _ChatMediaOption({
-    required _ChatMediaOptionItem item,
-  }) : _item = item;
+  const _ChatMediaOption({required _ChatMediaOptionItem item}) : _item = item;
 
   final _ChatMediaOptionItem _item;
 
@@ -51,15 +49,14 @@ class _ChatMediaOptions extends ConsumerWidget {
   static Future<void> show({
     required BuildContext context,
     required String contactId,
-  }) async =>
-      await showModalBottomSheet(
-        context: context,
-        useRootNavigator: true,
-        isScrollControlled: true,
-        useSafeArea: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => _ChatMediaOptions(contactId: contactId),
-      );
+  }) async => await showModalBottomSheet(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => _ChatMediaOptions(contactId: contactId),
+  );
 
   final String _contactId;
 
@@ -67,8 +64,9 @@ class _ChatMediaOptions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final availableAttachmentPlugins =
-        ref.read(availableAttachmentPluginsProvider);
+    final availableAttachmentPlugins = ref.read(
+      availableAttachmentPluginsProvider,
+    );
 
     void sendEffect(ScreenEffect effect) {
       if (!context.mounted) return;
@@ -102,7 +100,7 @@ class _ChatMediaOptions extends ConsumerWidget {
         final label = supported
             ? plugin.localizedName(context)
             : '${plugin.localizedName(context)}\n'
-                '(${context.l10n.platformNotSupported})';
+                  '(${context.l10n.platformNotSupported})';
 
         return _ChatMediaOptionItem(
           textCharacterIcon: plugin.icon,
@@ -128,10 +126,7 @@ class _ChatMediaOptions extends ConsumerWidget {
     ];
 
     return BackdropFilter(
-      filter: ImageFilter.blur(
-        sigmaX: 5,
-        sigmaY: 5,
-      ),
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
       child: BottomSheetMenu(
         showHandle: true,
         itemCount: items.length,

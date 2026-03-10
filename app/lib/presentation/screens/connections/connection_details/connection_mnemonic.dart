@@ -10,10 +10,12 @@ class _ConnectionMnenomicPanel extends ConsumerWidget {
     final provider = connectionDetailsScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     final canRevealMnemonic = ref.watch(provider.canRevealMnemonic);
-    final showMnemonic =
-        ref.watch(provider.select((state) => state.showMnemonic));
-    final mnemonic =
-        ref.watch(provider.select((state) => state.connection?.mnemonic ?? ''));
+    final showMnemonic = ref.watch(
+      provider.select((state) => state.showMnemonic),
+    );
+    final mnemonic = ref.watch(
+      provider.select((state) => state.connection?.mnemonic ?? ''),
+    );
     final showQrIcon = ref.watch(provider.select((state) => state.showQrIcon));
 
     if (!canRevealMnemonic) return const SizedBox.shrink();
@@ -53,10 +55,7 @@ class _ConnectionMnenomicPanel extends ConsumerWidget {
                     )
                   : null,
             ),
-            _ConnectionQrCodeView(
-              contactId: _contactId,
-              mnemonic: mnemonic,
-            ),
+            _ConnectionQrCodeView(contactId: _contactId, mnemonic: mnemonic),
           ],
         ],
       ),

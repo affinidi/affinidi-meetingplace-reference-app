@@ -16,9 +16,6 @@ class _OfferDetailsDescription extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return Text(
-      offerDescription!,
-      textAlign: TextAlign.center,
-    );
+    return Text(offerDescription!, textAlign: TextAlign.center);
   }
 }

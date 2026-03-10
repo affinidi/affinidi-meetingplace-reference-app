@@ -6,11 +6,13 @@ class _MeetingPlaceControlPlaneSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(settingsScreenControllerProvider.notifier);
-    final isDebugMode = ref
-        .watch(settingsScreenControllerProvider.select((s) => s.isDebugMode));
+    final isDebugMode = ref.watch(
+      settingsScreenControllerProvider.select((s) => s.isDebugMode),
+    );
     final shouldShowMeetingPlaceQR = ref.watch(
-      settingsScreenControllerProvider
-          .select((s) => s.shouldShowMeetingPlaceQR),
+      settingsScreenControllerProvider.select(
+        (s) => s.shouldShowMeetingPlaceQR,
+      ),
     );
 
     if (!isDebugMode) {

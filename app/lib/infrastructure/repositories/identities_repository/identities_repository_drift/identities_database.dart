@@ -27,25 +27,25 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
     required bool inMemory,
     required Directory directory,
   }) : super(
-          openConnection(
-            databaseName: databaseName,
-            passphrase: passphrase,
-            inMemory: inMemory,
-            directory: directory,
-          ),
-        );
+         openConnection(
+           databaseName: databaseName,
+           passphrase: passphrase,
+           inMemory: inMemory,
+           directory: directory,
+         ),
+       );
 
   @override
   int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onUpgrade: (migrator, from, to) async {
-          if (from < 2) {
-            await migrator.addColumn(identitiesTable, identitiesTable.did);
-          }
-        },
-      );
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        await migrator.addColumn(identitiesTable, identitiesTable.did);
+      }
+    },
+  );
 }
 
 /// A provider that initializes and supplies the [IdentitiesDatabase].
@@ -53,12 +53,14 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
 /// - Retrieves an encryption passphrase from [secureStorageProvider].
 /// - Creates and opens the encrypted identities database.
 /// - Closes the database when the provider is disposed.
-final identitiesDatabaseProvider =
-    FutureProvider<IdentitiesDatabase>((ref) async {
+final identitiesDatabaseProvider = FutureProvider<IdentitiesDatabase>((
+  ref,
+) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
 
   final database = IdentitiesDatabase(
     databaseName: 'mpx_identities_db',
@@ -77,12 +79,14 @@ final identitiesDatabaseProvider =
 /// - Retrieves an encryption passphrase from [secureStorageProvider].
 /// - Creates and opens the encrypted identities database.
 /// - Closes the database when the provider is disposed.
-final identitiesInMemoryDatabaseProvider =
-    FutureProvider<IdentitiesDatabase>((ref) async {
+final identitiesInMemoryDatabaseProvider = FutureProvider<IdentitiesDatabase>((
+  ref,
+) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
 
   final database = IdentitiesDatabase(
     databaseName: 'mpx_identities_db',

@@ -19,8 +19,9 @@ part 'chat_repository_provider.g.dart';
 final _chatDatabaseProvider = FutureProvider<ChatItemsDatabase>((ref) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
   final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
 
   final database = ChatItemsDatabase(
@@ -36,12 +37,14 @@ final _chatDatabaseProvider = FutureProvider<ChatItemsDatabase>((ref) async {
   return database;
 });
 
-final _chatInMemoryDatabaseProvider =
-    FutureProvider<ChatItemsDatabase>((ref) async {
+final _chatInMemoryDatabaseProvider = FutureProvider<ChatItemsDatabase>((
+  ref,
+) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
   final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
 
   final database = ChatItemsDatabase(

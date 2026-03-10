@@ -92,31 +92,34 @@ class MediaScreenControllerFamily extends Family<MediaScreenState> {
 }
 
 /// See also [MediaScreenController].
-class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
-    MediaScreenController, MediaScreenState> {
+class MediaScreenControllerProvider
+    extends
+        AutoDisposeNotifierProviderImpl<
+          MediaScreenController,
+          MediaScreenState
+        > {
   /// See also [MediaScreenController].
   MediaScreenControllerProvider({
     required CameraLensDirection cameraLensDirection,
     required bool useCamera,
     required bool useChatSemantics,
   }) : this._internal(
-          () => MediaScreenController()
-            ..cameraLensDirection = cameraLensDirection
-            ..useCamera = useCamera
-            ..useChatSemantics = useChatSemantics,
-          from: mediaScreenControllerProvider,
-          name: r'mediaScreenControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$mediaScreenControllerHash,
-          dependencies: MediaScreenControllerFamily._dependencies,
-          allTransitiveDependencies:
-              MediaScreenControllerFamily._allTransitiveDependencies,
-          cameraLensDirection: cameraLensDirection,
-          useCamera: useCamera,
-          useChatSemantics: useChatSemantics,
-        );
+         () => MediaScreenController()
+           ..cameraLensDirection = cameraLensDirection
+           ..useCamera = useCamera
+           ..useChatSemantics = useChatSemantics,
+         from: mediaScreenControllerProvider,
+         name: r'mediaScreenControllerProvider',
+         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+             ? null
+             : _$mediaScreenControllerHash,
+         dependencies: MediaScreenControllerFamily._dependencies,
+         allTransitiveDependencies:
+             MediaScreenControllerFamily._allTransitiveDependencies,
+         cameraLensDirection: cameraLensDirection,
+         useCamera: useCamera,
+         useChatSemantics: useChatSemantics,
+       );
 
   MediaScreenControllerProvider._internal(
     super._createNotifier, {
@@ -135,9 +138,7 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
   final bool useChatSemantics;
 
   @override
-  MediaScreenState runNotifierBuild(
-    covariant MediaScreenController notifier,
-  ) {
+  MediaScreenState runNotifierBuild(covariant MediaScreenController notifier) {
     return notifier.build(
       cameraLensDirection: cameraLensDirection,
       useCamera: useCamera,
@@ -168,7 +169,7 @@ class MediaScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
 
   @override
   AutoDisposeNotifierProviderElement<MediaScreenController, MediaScreenState>
-      createElement() {
+  createElement() {
     return _MediaScreenControllerProviderElement(this);
   }
 
@@ -206,8 +207,12 @@ mixin MediaScreenControllerRef
 }
 
 class _MediaScreenControllerProviderElement
-    extends AutoDisposeNotifierProviderElement<MediaScreenController,
-        MediaScreenState> with MediaScreenControllerRef {
+    extends
+        AutoDisposeNotifierProviderElement<
+          MediaScreenController,
+          MediaScreenState
+        >
+    with MediaScreenControllerRef {
   _MediaScreenControllerProviderElement(super.provider);
 
   @override
@@ -219,5 +224,6 @@ class _MediaScreenControllerProviderElement
   bool get useChatSemantics =>
       (origin as MediaScreenControllerProvider).useChatSemantics;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

@@ -8,8 +8,8 @@ class ConciergeMessage extends StatelessWidget {
     super.key,
     required DateTime dateCreated,
     required String message,
-  })  : _dateCreated = dateCreated,
-        _message = message;
+  }) : _dateCreated = dateCreated,
+       _message = message;
 
   final DateTime _dateCreated;
   final String _message;
@@ -31,10 +31,7 @@ class ConciergeMessage extends StatelessWidget {
           style: const TextStyle(color: Colors.grey, fontSize: 12),
           textAlign: TextAlign.center,
         ),
-        Text(
-          _message,
-          textAlign: TextAlign.center,
-        ),
+        Text(_message, textAlign: TextAlign.center),
       ],
     );
   }

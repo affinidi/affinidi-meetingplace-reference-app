@@ -20,10 +20,7 @@ class ImagePreview extends StatelessWidget {
         InteractiveViewer(
           minScale: 0.5,
           maxScale: 4.0,
-          child: Image.memory(
-            imageBytes!,
-            fit: BoxFit.contain,
-          ),
+          child: Image.memory(imageBytes!, fit: BoxFit.contain),
         ),
       ],
     );

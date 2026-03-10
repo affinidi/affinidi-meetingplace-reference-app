@@ -13,14 +13,14 @@ String _$oobShareQrControllerHash() =>
 @ProviderFor(OobShareQrController)
 final oobShareQrControllerProvider =
     AutoDisposeNotifierProvider<OobShareQrController, OobShareQrState>.internal(
-  OobShareQrController.new,
-  name: r'oobShareQrControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$oobShareQrControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      OobShareQrController.new,
+      name: r'oobShareQrControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$oobShareQrControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$OobShareQrController = AutoDisposeNotifier<OobShareQrState>;
 // ignore_for_file: type=lint

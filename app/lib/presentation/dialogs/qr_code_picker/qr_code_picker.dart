@@ -29,13 +29,9 @@ class QrCodePicker extends ConsumerWidget {
   /// ```
   /// final code = await QrCodePicker.show(context: context);
   /// ```
-  static Future<String?> show({
-    required BuildContext context,
-  }) =>
+  static Future<String?> show({required BuildContext context}) =>
       Navigator.of(context, rootNavigator: true).push<String>(
-        MaterialPageRoute<String>(
-          builder: (context) => const QrCodePicker(),
-        ),
+        MaterialPageRoute<String>(builder: (context) => const QrCodePicker()),
       );
 
   @override
@@ -52,10 +48,7 @@ class QrCodePicker extends ConsumerWidget {
       logger.info('Detecting camera', name: _logKey);
       return const Scaffold(
         body: Center(
-          child: CupertinoActivityIndicator(
-            color: Colors.white,
-            radius: 20,
-          ),
+          child: CupertinoActivityIndicator(color: Colors.white, radius: 20),
         ),
       );
     }
@@ -67,11 +60,7 @@ class QrCodePicker extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-                size: 64,
-              ),
+              const Icon(Icons.camera_alt, color: Colors.white, size: 64),
               const SizedBox(height: 16),
               Text(
                 l10n.cameraNotAvailable,
@@ -100,16 +89,12 @@ class QrCodePicker extends ConsumerWidget {
 
     logger.info('Found a camera', name: _logKey);
 
-    return _QrPermissionView(
-      onDetectCode: onDetectCode,
-    );
+    return _QrPermissionView(onDetectCode: onDetectCode);
   }
 }
 
 class _QrPermissionView extends ConsumerStatefulWidget {
-  const _QrPermissionView({
-    this.onDetectCode,
-  });
+  const _QrPermissionView({this.onDetectCode});
 
   final void Function(String code)? onDetectCode;
 
@@ -158,9 +143,7 @@ class _QrPermissionViewState extends ConsumerState<_QrPermissionView> {
     if (_status == null) {
       return const Scaffold(
         backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator.adaptive(),
-        ),
+        body: Center(child: CircularProgressIndicator.adaptive()),
       );
     }
 
@@ -175,16 +158,12 @@ class _QrPermissionViewState extends ConsumerState<_QrPermissionView> {
       );
     }
 
-    return _QRScannerScreen(
-      onDetectCode: widget.onDetectCode,
-    );
+    return _QRScannerScreen(onDetectCode: widget.onDetectCode);
   }
 }
 
 class _QRScannerScreen extends HookConsumerWidget {
-  _QRScannerScreen({
-    this.onDetectCode,
-  });
+  _QRScannerScreen({this.onDetectCode});
 
   final void Function(String code)? onDetectCode;
 
@@ -192,8 +171,9 @@ class _QRScannerScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = qrCodePickerControllerProvider;
     final controller = ref.read(provider.notifier);
-    final scaleFactor =
-        ref.watch(provider.select((state) => state.scaleFactor));
+    final scaleFactor = ref.watch(
+      provider.select((state) => state.scaleFactor),
+    );
     final hasScanned = useRef(false);
 
     void onCodeDetected(BarcodeCapture capture) async {

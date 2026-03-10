@@ -41,22 +41,21 @@ class IdentityFormFields extends ConsumerWidget {
           children: [
             GestureDetector(
               onTap: () async {
-                final result = await Navigator.of(
-                  context,
-                  rootNavigator: true,
-                ).push<MediaReviewResult>(
-                  MaterialPageRoute(
-                    builder: (context) => const MediaScreen(
-                      cameraLensDirection: CameraLensDirection.front,
-                      useCamera: true,
-                      messageText: '',
-                    ),
-                  ),
-                );
+                final result = await Navigator.of(context, rootNavigator: true)
+                    .push<MediaReviewResult>(
+                      MaterialPageRoute(
+                        builder: (context) => const MediaScreen(
+                          cameraLensDirection: CameraLensDirection.front,
+                          useCamera: true,
+                          messageText: '',
+                        ),
+                      ),
+                    );
 
                 if (result != null && result.succeeded) {
-                  await controller
-                      .updateProfilePic(result.compressedImage.base64);
+                  await controller.updateProfilePic(
+                    result.compressedImage.base64,
+                  );
                 }
               },
               child: Row(
@@ -113,9 +112,10 @@ class IdentityFormFields extends ConsumerWidget {
                 controller.updateFirstName(value, formKey);
                 controller.validateForm(formKey);
               },
-              validator:
-                  InputValidators.getValidator(context, InputType.firstName)
-                      .call,
+              validator: InputValidators.getValidator(
+                context,
+                InputType.firstName,
+              ).call,
               textInputAction: TextInputAction.next,
               traversalOrder: 1.0,
               autofocus: true,
@@ -134,9 +134,10 @@ class IdentityFormFields extends ConsumerWidget {
                 controller.updateLastName(value, formKey);
                 controller.validateForm(formKey);
               },
-              validator:
-                  InputValidators.getValidator(context, InputType.lastName)
-                      .call,
+              validator: InputValidators.getValidator(
+                context,
+                InputType.lastName,
+              ).call,
               textInputAction: TextInputAction.next,
               traversalOrder: 2.0,
             ),
@@ -161,8 +162,10 @@ class IdentityFormFields extends ConsumerWidget {
                 if (!controller.shouldShowValidation('email')) {
                   return null;
                 }
-                return InputValidators.getValidator(context, InputType.email)
-                    .call(value);
+                return InputValidators.getValidator(
+                  context,
+                  InputType.email,
+                ).call(value);
               },
               textInputAction: TextInputAction.next,
               traversalOrder: 3.0,

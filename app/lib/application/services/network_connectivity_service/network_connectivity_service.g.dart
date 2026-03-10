@@ -13,18 +13,21 @@ String _$networkConnectivityServiceHash() =>
 ///
 /// Copied from [NetworkConnectivityService].
 @ProviderFor(NetworkConnectivityService)
-final networkConnectivityServiceProvider = NotifierProvider<
-    NetworkConnectivityService, NetworkConnectivityServiceState>.internal(
-  NetworkConnectivityService.new,
-  name: r'networkConnectivityServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$networkConnectivityServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final networkConnectivityServiceProvider =
+    NotifierProvider<
+      NetworkConnectivityService,
+      NetworkConnectivityServiceState
+    >.internal(
+      NetworkConnectivityService.new,
+      name: r'networkConnectivityServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$networkConnectivityServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
-typedef _$NetworkConnectivityService
-    = Notifier<NetworkConnectivityServiceState>;
+typedef _$NetworkConnectivityService =
+    Notifier<NetworkConnectivityServiceState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

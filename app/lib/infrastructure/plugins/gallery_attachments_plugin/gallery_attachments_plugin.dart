@@ -19,7 +19,7 @@ import 'gallery_image_attachment.dart';
 /// - Support full-screen image viewing
 class GalleryAttachmentsPlugin implements AttachmentPlugin {
   GalleryAttachmentsPlugin({required BaseCacheManager cacheManager})
-      : _cacheManager = cacheManager;
+    : _cacheManager = cacheManager;
 
   static const _pluginName = 'mpx_gallery_attachment_plugin';
 
@@ -42,10 +42,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
       context,
       MaterialPageRoute(
         builder: (context) {
-          return const MediaScreen(
-            useCamera: false,
-            useChatSemantics: true,
-          );
+          return const MediaScreen(useCamera: false, useChatSemantics: true);
         },
       ),
     );
@@ -78,11 +75,10 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     required Attachment attachment,
     required bool isFromMe,
     Color? chatItemColor,
-  }) =>
-      _GalleryAttachmentWidget(
-        attachment: attachment,
-        cacheManager: _cacheManager,
-      );
+  }) => _GalleryAttachmentWidget(
+    attachment: attachment,
+    cacheManager: _cacheManager,
+  );
 
   /// Renders multiple image attachments as a scrollable list.
   ///
@@ -93,11 +89,10 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     required List<Attachment> attachments,
     required bool isFromMe,
     Color? chatItemColor,
-  }) =>
-      _ListGalleryAttachmentsWidget(
-        attachments: attachments,
-        cacheManager: _cacheManager,
-      );
+  }) => _ListGalleryAttachmentsWidget(
+    attachments: attachments,
+    cacheManager: _cacheManager,
+  );
 
   /// Checks if this plugin supports the given attachment format.
   ///
@@ -128,8 +123,8 @@ class _ListGalleryAttachmentsWidget extends StatelessWidget {
   const _ListGalleryAttachmentsWidget({
     required List<Attachment> attachments,
     required BaseCacheManager cacheManager,
-  })  : _attachments = attachments,
-        _cacheManager = cacheManager;
+  }) : _attachments = attachments,
+       _cacheManager = cacheManager;
 
   final List<Attachment> _attachments;
   final BaseCacheManager _cacheManager;
@@ -161,8 +156,8 @@ class _GalleryAttachmentWidget extends StatelessWidget {
   _GalleryAttachmentWidget({
     required Attachment attachment,
     required BaseCacheManager cacheManager,
-  })  : _attachment = attachment,
-        _cacheManager = cacheManager;
+  }) : _attachment = attachment,
+       _cacheManager = cacheManager;
 
   final Attachment _attachment;
   final BaseCacheManager _cacheManager;
@@ -178,14 +173,10 @@ class _GalleryAttachmentWidget extends StatelessWidget {
       width: 200,
       child: GestureDetector(
         onTap: () {
-          Navigator.of(
-            context,
-            rootNavigator: true,
-          ).push<ImageViewScreen>(
+          Navigator.of(context, rootNavigator: true).push<ImageViewScreen>(
             MaterialPageRoute(
-              builder: (context) => ImageViewScreen(
-                imageBytes: base64.decode(imageDataBase64),
-              ),
+              builder: (context) =>
+                  ImageViewScreen(imageBytes: base64.decode(imageDataBase64)),
             ),
           );
         },

@@ -6,8 +6,10 @@ class _OfferAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String _identityId;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
 
     final isGroupOffer = ref.watch(
       provider.select((state) => state.formData.isGroupOffer),
@@ -17,9 +19,7 @@ class _OfferAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ? context.l10n.publishGroupOffer
         : context.l10n.publishOffer;
 
-    return AppBar(
-      title: Text(title),
-    );
+    return AppBar(title: Text(title));
   }
 
   @override

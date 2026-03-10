@@ -70,8 +70,9 @@ class _NotificationsUnavailableWarning extends ConsumerWidget {
     final notificationBannerDismissed = ref.watch(
       provider.select((state) => state.contact?.notificationBannerDismissed),
     );
-    final notificationToken =
-        ref.watch(provider.select((state) => state.notificationToken));
+    final notificationToken = ref.watch(
+      provider.select((state) => state.notificationToken),
+    );
 
     if (contactType != ContactType.individual) {
       return const SizedBox.shrink();

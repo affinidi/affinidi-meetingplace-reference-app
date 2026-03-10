@@ -27,10 +27,7 @@ class AppTheme {
       ChatInputDecoration(
         InputDecoration(
           hintMaxLines: 1,
-          hintStyle: const TextStyle(
-            fontSize: 14,
-            color: Colors.grey,
-          ),
+          hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
               color: darkColorScheme.onSurface.withValues(alpha: 0.48),
@@ -56,8 +53,10 @@ class AppTheme {
             ),
             borderRadius: BorderRadius.circular(32.0),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 0,
+          ),
         ),
       ),
       RoundedInputDecoration(
@@ -83,16 +82,9 @@ class AppTheme {
                 ? darkColorScheme.onSurface.withValues(alpha: 0.60)
                 : darkColorScheme.onErrorContainer,
           ),
-          textStyle: WidgetStateProperty.all(
-            const TextStyle(
-              fontSize: 16,
-            ),
-          ),
+          textStyle: WidgetStateProperty.all(const TextStyle(fontSize: 16)),
           padding: WidgetStateProperty.all(
-            const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 4,
-            ),
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           ),
         ),
       ),
@@ -104,9 +96,7 @@ class AppTheme {
       headlineMedium: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
       headlineSmall: TextStyle(fontSize: 12),
     ),
-    appBarTheme: const AppBarTheme(
-      titleTextStyle: TextStyle(fontSize: 16),
-    ),
+    appBarTheme: const AppBarTheme(titleTextStyle: TextStyle(fontSize: 16)),
     navigationBarTheme: NavigationBarThemeData(
       labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
         return TextStyle(
@@ -156,8 +146,10 @@ class AppTheme {
       iconColor: darkColorScheme.primary,
       textColor: darkColorScheme.onSurface,
       subtitleTextStyle: const TextStyle(fontSize: 12),
-      leadingAndTrailingTextStyle:
-          const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      leadingAndTrailingTextStyle: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
     ),
     datePickerTheme: DatePickerThemeData(
       backgroundColor: _customColors.grey900,
@@ -219,16 +211,9 @@ class AppTheme {
               ? darkColorScheme.onSurface.withValues(alpha: 0.60)
               : darkColorScheme.onPrimary,
         ),
-        textStyle: WidgetStateProperty.all(
-          const TextStyle(
-            fontSize: 16,
-          ),
-        ),
+        textStyle: WidgetStateProperty.all(const TextStyle(fontSize: 16)),
         padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 4,
-          ),
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         ),
         minimumSize: const WidgetStatePropertyAll(Size(100, 40)),
       ),
@@ -240,24 +225,16 @@ class AppTheme {
     disabledColor: darkColorScheme.onSurface.withValues(alpha: 1 - 0.38),
     chipTheme: ChipThemeData(
       backgroundColor: _customColors.success,
-      labelStyle: const TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 12,
-      ),
+      labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       brightness: Brightness.dark,
       side: BorderSide.none,
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: darkColorScheme.primary,
-        textStyle: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-        ),
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
       ),
     ),
     dividerTheme: DividerThemeData(

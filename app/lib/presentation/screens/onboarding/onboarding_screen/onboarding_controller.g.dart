@@ -13,14 +13,14 @@ String _$onboardingControllerHash() =>
 @ProviderFor(OnboardingController)
 final onboardingControllerProvider =
     AutoDisposeNotifierProvider<OnboardingController, OnboardingState>.internal(
-  OnboardingController.new,
-  name: r'onboardingControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$onboardingControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      OnboardingController.new,
+      name: r'onboardingControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$onboardingControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$OnboardingController = AutoDisposeNotifier<OnboardingState>;
 // ignore_for_file: type=lint

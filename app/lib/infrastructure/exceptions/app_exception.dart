@@ -5,10 +5,7 @@
 /// - [message] - Human readable error message.
 /// - [code] - Code classifying the error (used for mapping to UI/handling).
 class AppException implements Exception {
-  AppException(
-    this.message, {
-    required this.code,
-  });
+  AppException(this.message, {required this.code});
 
   final String message;
   final String code;

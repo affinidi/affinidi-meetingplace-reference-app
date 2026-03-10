@@ -93,8 +93,9 @@ class MediatorService extends _$MediatorService {
       final customMediators = await _repository?.listCustomMediators() ?? [];
 
       // Auto-generate a unique "{unnamedPrefix} X" label
-      final existingNames =
-          customMediators.map((mediator) => mediator.mediatorName).toSet();
+      final existingNames = customMediators
+          .map((mediator) => mediator.mediatorName)
+          .toSet();
       var counter = 1;
       String name;
       do {
@@ -240,8 +241,9 @@ class MediatorService extends _$MediatorService {
       }
 
       // Sort by createdTime descending to get the nearest one
-      matchingMediators
-          .sort((a, b) => b.createdTime!.compareTo(a.createdTime!));
+      matchingMediators.sort(
+        (a, b) => b.createdTime!.compareTo(a.createdTime!),
+      );
       final mediator = matchingMediators.first;
       return mediator;
     } catch (error, stackTrace) {
@@ -263,8 +265,8 @@ class MediatorService extends _$MediatorService {
 extension MediatorServiceProviderSelectors
     on NotifierProvider<MediatorService, MediatorServiceState> {
   ProviderListenable<List<Mediator>> get filteredMediators => select((state) {
-        return state.mediators
-            .where((mediator) => mediator.status != MediatorStatus.deleted)
-            .toList();
-      });
+    return state.mediators
+        .where((mediator) => mediator.status != MediatorStatus.deleted)
+        .toList();
+  });
 }

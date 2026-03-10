@@ -11,16 +11,19 @@ String _$findOfferScreenControllerHash() =>
 
 /// See also [FindOfferScreenController].
 @ProviderFor(FindOfferScreenController)
-final findOfferScreenControllerProvider = AutoDisposeNotifierProvider<
-    FindOfferScreenController, FindOfferScreenState>.internal(
-  FindOfferScreenController.new,
-  name: r'findOfferScreenControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$findOfferScreenControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final findOfferScreenControllerProvider =
+    AutoDisposeNotifierProvider<
+      FindOfferScreenController,
+      FindOfferScreenState
+    >.internal(
+      FindOfferScreenController.new,
+      name: r'findOfferScreenControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$findOfferScreenControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$FindOfferScreenController = AutoDisposeNotifier<FindOfferScreenState>;
 // ignore_for_file: type=lint

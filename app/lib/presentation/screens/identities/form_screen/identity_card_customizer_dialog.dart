@@ -58,9 +58,7 @@ class _IdentityCardCustomizerDialogState
       backgroundColor: customColors.grey900,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
-        side: BorderSide(
-          color: customColors.grey700,
-        ),
+        side: BorderSide(color: customColors.grey700),
       ),
       title: Text(
         context.l10n.customiseIdentityCard,
@@ -74,7 +72,7 @@ class _IdentityCardCustomizerDialogState
             children: [
               ValueListenableBuilder<Color>(
                 valueListenable: _colorNotifier,
-                builder: (_, color, __) {
+                builder: (_, color, _) {
                   return ColorPicker(
                     color: color,
                     onChanged: (Color value) {
@@ -93,9 +91,7 @@ class _IdentityCardCustomizerDialogState
           onPressed: () {
             Navigator.of(context).pop();
           },
-          child: Center(
-            child: Text(context.l10n.generalDone),
-          ),
+          child: Center(child: Text(context.l10n.generalDone)),
         ),
       ],
     );

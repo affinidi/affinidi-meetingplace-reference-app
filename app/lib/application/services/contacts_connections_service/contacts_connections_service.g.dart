@@ -24,14 +24,14 @@ String _$contactsConnectionsServiceHash() =>
 @ProviderFor(contactsConnectionsService)
 final contactsConnectionsServiceProvider =
     Provider<ContactsConnectionsService>.internal(
-  contactsConnectionsService,
-  name: r'contactsConnectionsServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$contactsConnectionsServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      contactsConnectionsService,
+      name: r'contactsConnectionsServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$contactsConnectionsServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element

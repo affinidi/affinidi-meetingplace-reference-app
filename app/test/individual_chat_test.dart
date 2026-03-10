@@ -50,7 +50,8 @@ Future<void> navigateToChatScreen(
     mockCameras: mockCameras,
     secureStorage: secureStorage,
     cameraPermissionStatus: cameraPermissionStatus,
-    connectivity: connectivity ??
+    connectivity:
+        connectivity ??
         FakeConnectivity(
           initialConnectivityToReturn: [ConnectivityResult.wifi],
         ),
@@ -83,10 +84,7 @@ Future<void> simulateIncomingMessage(
   await tester.pumpAndSettle();
 }
 
-Future<void> submitMediaWithMessage(
-  WidgetTester tester,
-  String message,
-) async {
+Future<void> submitMediaWithMessage(WidgetTester tester, String message) async {
   final textInput = find.byKey(const Key('media_review_text_input'));
   await tester.enterText(textInput, message);
   await tester.pumpAndSettle();
@@ -208,8 +206,9 @@ void main() {
     });
 
     group('and there is an unsent message', () {
-      testWidgets('it shows the unsent message in the text field',
-          (tester) async {
+      testWidgets('it shows the unsent message in the text field', (
+        tester,
+      ) async {
         const unsentMessage = 'Draft message';
         final secureStorage = FakeSecureStorage();
         await secureStorage.saveUnsentMessages({contactId: unsentMessage});
@@ -361,8 +360,9 @@ void main() {
     });
 
     group('and clicking the add media button', () {
-      testWidgets('should show a menu with media and effects options',
-          (tester) async {
+      testWidgets('should show a menu with media and effects options', (
+        tester,
+      ) async {
         final l10n = await getL10n();
 
         await navigateToChatScreen(
@@ -384,8 +384,9 @@ void main() {
 
       for (final effect in [Effect.balloons, Effect.confetti]) {
         group('and pressing on ${effect.name}', () {
-          testWidgets('should call sendEffect with ${effect.name} effect',
-              (tester) async {
+          testWidgets('should call sendEffect with ${effect.name} effect', (
+            tester,
+          ) async {
             final l10n = await getL10n();
             final effectLabel = effect == Effect.balloons
                 ? l10n.generalBalloons
@@ -411,8 +412,9 @@ void main() {
       }
 
       group('and pressing on photo', () {
-        testWidgets('should send photo and return to chat screen',
-            (tester) async {
+        testWidgets('should send photo and return to chat screen', (
+          tester,
+        ) async {
           final l10n = await getL10n();
           const message = 'Check out this photo!';
           final meetingPlaceChatSDK = FakeChatSdk();
@@ -449,8 +451,9 @@ void main() {
       });
 
       group('and pressing on camera', () {
-        testWidgets('should send photo and return to chat screen',
-            (tester) async {
+        testWidgets('should send photo and return to chat screen', (
+          tester,
+        ) async {
           final l10n = await getL10n();
           const message = 'Check out this photo!';
           final meetingPlaceChatSDK = FakeChatSdk();
@@ -493,8 +496,9 @@ void main() {
           );
         });
 
-        testWidgets('should show error when camera permission is denied',
-            (tester) async {
+        testWidgets('should show error when camera permission is denied', (
+          tester,
+        ) async {
           final l10n = await getL10n();
           final meetingPlaceChatSDK = FakeChatSdk();
 
@@ -513,22 +517,10 @@ void main() {
           await tester.tap(find.text(l10n.generalCamera));
           await tester.pumpAndSettle();
 
-          expect(
-            find.byKey(const Key('camera_capture_button')),
-            findsNothing,
-          );
-          expect(
-            find.text(l10n.cameraAccessDenied),
-            findsOneWidget,
-          );
-          expect(
-            find.text(l10n.cameraOpenSettings),
-            findsOneWidget,
-          );
-          expect(
-            find.text(l10n.generalRetry),
-            findsOneWidget,
-          );
+          expect(find.byKey(const Key('camera_capture_button')), findsNothing);
+          expect(find.text(l10n.cameraAccessDenied), findsOneWidget);
+          expect(find.text(l10n.cameraOpenSettings), findsOneWidget);
+          expect(find.text(l10n.generalRetry), findsOneWidget);
         });
       });
     });
@@ -558,8 +550,9 @@ void main() {
     });
 
     group('and contact is an OOB contact', () {
-      testWidgets('it should show notification unavailable banner',
-          (tester) async {
+      testWidgets('it should show notification unavailable banner', (
+        tester,
+      ) async {
         final l10n = await getL10n();
         final oobChatSDK = FakeChatSdk();
 
@@ -579,39 +572,21 @@ void main() {
           findsOneWidget,
         );
 
-        expect(
-          find.byIcon(Icons.notifications_off_outlined),
-          findsWidgets,
-        );
+        expect(find.byIcon(Icons.notifications_off_outlined), findsWidgets);
 
-        expect(
-          find.byKey(const Key('notifications_why_link')),
-          findsOneWidget,
-        );
+        expect(find.byKey(const Key('notifications_why_link')), findsOneWidget);
 
         await tester.tap(find.byKey(const Key('notifications_why_link')));
         await tester.pumpAndSettle();
 
-        expect(
-          find.text(l10n.chatNotificationsWhyTitle),
-          findsOneWidget,
-        );
-        expect(
-          find.text(l10n.chatNotificationsWhyDescription),
-          findsOneWidget,
-        );
-        expect(
-          find.text(l10n.chatNotificationsWhyButton),
-          findsOneWidget,
-        );
+        expect(find.text(l10n.chatNotificationsWhyTitle), findsOneWidget);
+        expect(find.text(l10n.chatNotificationsWhyDescription), findsOneWidget);
+        expect(find.text(l10n.chatNotificationsWhyButton), findsOneWidget);
 
         await tester.tap(find.text(l10n.chatNotificationsWhyButton));
         await tester.pumpAndSettle();
 
-        expect(
-          find.text(l10n.chatNotificationsWhyTitle),
-          findsNothing,
-        );
+        expect(find.text(l10n.chatNotificationsWhyTitle), findsNothing);
       });
 
       group('and press dismiss button', () {
@@ -651,31 +626,29 @@ void main() {
       });
 
       testWidgets(
-          'it should not show notification banner when it has been dismissed',
-          (tester) async {
-        final oobChatSDK = FakeChatSdk();
+        'it should not show notification banner when it has been dismissed',
+        (tester) async {
+          final oobChatSDK = FakeChatSdk();
 
-        await navigateToLocation(
-          tester,
-          '/contacts/${FakeContacts.oobContactDismissed.id}/chat',
-          isAuthenticated: true,
-          alreadyOnboarded: true,
-          identities: [FakeIdentities.primaryIdentity],
-          contacts: [FakeContacts.oobContactDismissed],
-          meetingPlaceChatSDK: oobChatSDK,
-        );
-        await tester.pumpAndSettle();
+          await navigateToLocation(
+            tester,
+            '/contacts/${FakeContacts.oobContactDismissed.id}/chat',
+            isAuthenticated: true,
+            alreadyOnboarded: true,
+            identities: [FakeIdentities.primaryIdentity],
+            contacts: [FakeContacts.oobContactDismissed],
+            meetingPlaceChatSDK: oobChatSDK,
+          );
+          await tester.pumpAndSettle();
 
-        expect(
-          find.byKey(const Key('notifications_unavailable_banner')),
-          findsNothing,
-        );
+          expect(
+            find.byKey(const Key('notifications_unavailable_banner')),
+            findsNothing,
+          );
 
-        expect(
-          find.byIcon(Icons.notifications_off_outlined),
-          findsOneWidget,
-        );
-      });
+          expect(find.byIcon(Icons.notifications_off_outlined), findsOneWidget);
+        },
+      );
     });
   });
 }

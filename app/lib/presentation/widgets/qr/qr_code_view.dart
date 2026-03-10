@@ -10,11 +10,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 
 class QrCodeView extends StatelessWidget {
-  QrCodeView({
-    super.key,
-    required this.data,
-    this.size,
-  });
+  QrCodeView({super.key, required this.data, this.size});
 
   final String data;
   final double? size;

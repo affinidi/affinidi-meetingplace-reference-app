@@ -104,8 +104,10 @@ class ContactCardUtils {
   }
 
   static String getFullName(Map<dynamic, dynamic> contactInfo) {
-    final firstName =
-        getPathValue(contactInfo, ContactCardPaths.firstName.paths);
+    final firstName = getPathValue(
+      contactInfo,
+      ContactCardPaths.firstName.paths,
+    );
     final lastName = getPathValue(contactInfo, ContactCardPaths.lastName.paths);
     return [firstName, lastName].nonEmpty.join(' ');
   }
@@ -168,19 +170,12 @@ extension ContactCardExtensions on ContactCard {
       did: did,
       type: type,
       contactInfo: {
-        'n': {
-          'given': firstName,
-          'surname': (lastName ?? ''),
-        },
+        'n': {'given': firstName, 'surname': (lastName ?? '')},
         'email': {
-          'type': {
-            'work': (email ?? ''),
-          },
+          'type': {'work': (email ?? '')},
         },
         'tel': {
-          'type': {
-            'cell': (mobile ?? ''),
-          },
+          'type': {'cell': (mobile ?? '')},
         },
         'photo': (profilePic ?? ''),
         'x-meetingplace-identity-card-color': (cardColor ?? ''),
@@ -192,60 +187,56 @@ extension ContactCardExtensions on ContactCard {
 /// Extension methods on SDK ContactCard for convenient access to fields.
 extension SdkContactCardFields on sdk.ContactCard {
   String get firstName => ContactCardUtils.getPathValue(
-        contactInfo,
-        ContactCardPaths.firstName.paths,
-      );
+    contactInfo,
+    ContactCardPaths.firstName.paths,
+  );
   set firstName(String value) => ContactCardUtils.setPathValue(
-        contactInfo,
-        ContactCardPaths.firstName.paths,
-        value,
-      );
+    contactInfo,
+    ContactCardPaths.firstName.paths,
+    value,
+  );
 
   String get lastName => ContactCardUtils.getPathValue(
-        contactInfo,
-        ContactCardPaths.lastName.paths,
-      );
+    contactInfo,
+    ContactCardPaths.lastName.paths,
+  );
   set lastName(String value) => ContactCardUtils.setPathValue(
-        contactInfo,
-        ContactCardPaths.lastName.paths,
-        value,
-      );
+    contactInfo,
+    ContactCardPaths.lastName.paths,
+    value,
+  );
 
-  String get email => ContactCardUtils.getPathValue(
-        contactInfo,
-        ContactCardPaths.email.paths,
-      );
+  String get email =>
+      ContactCardUtils.getPathValue(contactInfo, ContactCardPaths.email.paths);
   set email(String value) => ContactCardUtils.setPathValue(
-        contactInfo,
-        ContactCardPaths.email.paths,
-        value,
-      );
+    contactInfo,
+    ContactCardPaths.email.paths,
+    value,
+  );
 
-  String get mobile => ContactCardUtils.getPathValue(
-        contactInfo,
-        ContactCardPaths.mobile.paths,
-      );
+  String get mobile =>
+      ContactCardUtils.getPathValue(contactInfo, ContactCardPaths.mobile.paths);
   set mobile(String value) => ContactCardUtils.setPathValue(
-        contactInfo,
-        ContactCardPaths.mobile.paths,
-        value,
-      );
+    contactInfo,
+    ContactCardPaths.mobile.paths,
+    value,
+  );
 
   String get profilePic => ContactCardUtils.getPathValue(
-        contactInfo,
-        ContactCardPaths.profilePic.paths,
-        defaultValue: '',
-      );
+    contactInfo,
+    ContactCardPaths.profilePic.paths,
+    defaultValue: '',
+  );
   set profilePic(String value) => ContactCardUtils.setPathValue(
-        contactInfo,
-        ContactCardPaths.profilePic.paths,
-        value,
-      );
+    contactInfo,
+    ContactCardPaths.profilePic.paths,
+    value,
+  );
 
   String get meetingplaceIdentityCardColor => ContactCardUtils.getPathValue(
-        contactInfo,
-        ContactCardPaths.meetingplaceIdentityCardColor.paths,
-      );
+    contactInfo,
+    ContactCardPaths.meetingplaceIdentityCardColor.paths,
+  );
   set meetingplaceIdentityCardColor(String value) =>
       ContactCardUtils.setPathValue(
         contactInfo,

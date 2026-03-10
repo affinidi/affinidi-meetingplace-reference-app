@@ -47,8 +47,9 @@ Future<String?> _guard(
   String defaultRoute,
 ) async {
   final alreadyOnboarded = ref.read(settingsServiceProvider).alreadyOnboarded;
-  final isAuthenticated =
-      ref.read(authenticationServiceProvider).isAuthenticated;
+  final isAuthenticated = ref
+      .read(authenticationServiceProvider)
+      .isAuthenticated;
 
   if (!isAuthenticated) {
     return RoutePaths.authentication;
@@ -131,15 +132,13 @@ GoRouter routerConfig(Ref ref) {
       ...appRoutes,
       GoRoute(
         path: RoutePaths.authentication,
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: AuthenticationScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: AuthenticationScreen()),
       ),
       GoRoute(
         path: RoutePaths.onboarding,
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: OnboardingScreen(),
-        ),
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: OnboardingScreen()),
       ),
     ],
   );

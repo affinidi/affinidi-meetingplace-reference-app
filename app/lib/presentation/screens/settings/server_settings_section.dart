@@ -11,8 +11,9 @@ class _ServerSettingsSection extends ConsumerWidget {
     final scanMediatorQRLoadingController =
         controller.scanMediatorQRLoadingController;
 
-    final selectedMediatorDid =
-        ref.watch(provider.select((state) => state.selectedMediatorDid));
+    final selectedMediatorDid = ref.watch(
+      provider.select((state) => state.selectedMediatorDid),
+    );
     final mediators = ref.watch(provider.select((state) => state.mediators));
 
     return Column(
@@ -35,8 +36,10 @@ class _ServerSettingsSection extends ConsumerWidget {
                     final name = mediator.mediatorName;
 
                     return RadioListTile(
-                      radioSide:
-                          BorderSide(width: 0.8, color: Colors.grey.shade600),
+                      radioSide: BorderSide(
+                        width: 0.8,
+                        color: Colors.grey.shade600,
+                      ),
                       value: did,
                       title: Row(
                         children: [
@@ -73,11 +76,11 @@ class _ServerSettingsSection extends ConsumerWidget {
                   await ref
                       .read(scanMediatorQRLoadingController.notifier)
                       .start(() async {
-                    await controller.scanMediatorQr(
-                      url: url,
-                      unnamedPrefix: context.l10n.unnamedMediator,
-                    );
-                  });
+                        await controller.scanMediatorQr(
+                          url: url,
+                          unnamedPrefix: context.l10n.unnamedMediator,
+                        );
+                      });
                 },
               ),
             ],
@@ -100,10 +103,7 @@ class _ServerSettingsSection extends ConsumerWidget {
     String did,
     String name,
   ) async {
-    final newName = await RenameMediatorDialog.show(
-      context,
-      currentName: name,
-    );
+    final newName = await RenameMediatorDialog.show(context, currentName: name);
 
     if (newName != null) {
       final controller = ref.read(settingsScreenControllerProvider.notifier);
@@ -136,10 +136,7 @@ class _ServerSettingsSection extends ConsumerWidget {
     String did,
     String name,
   ) async {
-    final confirmed = await DeleteMediatorDialog.show(
-      context,
-      name: name,
-    );
+    final confirmed = await DeleteMediatorDialog.show(context, name: name);
 
     if (confirmed == true) {
       final controller = ref.read(settingsScreenControllerProvider.notifier);

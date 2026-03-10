@@ -1,10 +1,7 @@
 part of 'contacts_screen.dart';
 
 class _ContactAvatar extends ConsumerWidget {
-  const _ContactAvatar({
-    required this.contact,
-    this.isList = false,
-  });
+  const _ContactAvatar({required this.contact, this.isList = false});
 
   final Contact contact;
   final bool isList;
@@ -24,16 +21,9 @@ class _ContactAvatar extends ConsumerWidget {
           Positioned(
             top: isList ? -5 : -5,
             right: isList ? -10 : -15,
-            child: Icon(
-              Icons.star,
-              color: statusColor,
-              size: isList ? 20 : 24,
-            ),
+            child: Icon(Icons.star, color: statusColor, size: isList ? 20 : 24),
           ),
-        ProfileCircleAvatar(
-          radius: iconSize / 2,
-          image: displayImage,
-        ),
+        ProfileCircleAvatar(radius: iconSize / 2, image: displayImage),
       ],
     );
   }

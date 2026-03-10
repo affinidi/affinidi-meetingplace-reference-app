@@ -9,8 +9,9 @@ class _DebugSettingsSection extends ConsumerWidget {
       settingsScreenControllerProvider.select((state) => state.isDebugMode),
     );
     final numberOfTapsToUnlockDebug = ref.read(
-      settingsScreenControllerProvider
-          .select((state) => state.numberOfTapsToUnlockDebug),
+      settingsScreenControllerProvider.select(
+        (state) => state.numberOfTapsToUnlockDebug,
+      ),
     );
 
     if (!isDebugMode) {
@@ -29,9 +30,8 @@ class _DebugSettingsSection extends ConsumerWidget {
             onTap: () {
               showDialog<void>(
                 context: context,
-                builder: (context) => const Dialog.fullscreen(
-                  child: DebugPanel(),
-                ),
+                builder: (context) =>
+                    const Dialog.fullscreen(child: DebugPanel()),
               );
             },
           ),

@@ -29,9 +29,6 @@ class DatabasePlatform {
 
   /// Gets the current platform info
   static Map<String, String> get info {
-    return {
-      'platform': 'web',
-      'database': 'IndexedDB',
-    };
+    return {'platform': 'web', 'database': 'IndexedDB'};
   }
 }

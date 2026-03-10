@@ -13,14 +13,14 @@ String _$debugPanelControllerHash() =>
 @ProviderFor(DebugPanelController)
 final debugPanelControllerProvider =
     AutoDisposeNotifierProvider<DebugPanelController, DebugPanelState>.internal(
-  DebugPanelController.new,
-  name: r'debugPanelControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$debugPanelControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      DebugPanelController.new,
+      name: r'debugPanelControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$debugPanelControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$DebugPanelController = AutoDisposeNotifier<DebugPanelState>;
 // ignore_for_file: type=lint

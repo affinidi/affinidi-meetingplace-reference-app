@@ -8,20 +8,25 @@ class _OfferDetailsInfoPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
-    final isDebugMode =
-        ref.watch(controllerProvider.select((state) => state.isDebugMode));
+    final isDebugMode = ref.watch(
+      controllerProvider.select((state) => state.isDebugMode),
+    );
     if (!isDebugMode) {
       return const SizedBox.shrink();
     }
 
-    final mnemonic =
-        ref.watch(controllerProvider.select((state) => state.offer?.mnemonic));
-    final type =
-        ref.watch(controllerProvider.select((state) => state.offer?.type));
-    final externalRef = ref
-        .watch(controllerProvider.select((state) => state.offer?.externalRef));
-    final groupDid =
-        ref.watch(controllerProvider.select((state) => state.groupDid));
+    final mnemonic = ref.watch(
+      controllerProvider.select((state) => state.offer?.mnemonic),
+    );
+    final type = ref.watch(
+      controllerProvider.select((state) => state.offer?.type),
+    );
+    final externalRef = ref.watch(
+      controllerProvider.select((state) => state.offer?.externalRef),
+    );
+    final groupDid = ref.watch(
+      controllerProvider.select((state) => state.groupDid),
+    );
 
     return FormCard(
       title: context.l10n.generalOfferInformation,

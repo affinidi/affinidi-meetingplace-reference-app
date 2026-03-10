@@ -96,15 +96,12 @@ class _ErrorIcon extends HookWidget {
       duration: const Duration(milliseconds: 500),
     );
 
-    useEffect(
-      () {
-        animationController.forward();
-        HapticFeedback.heavyImpact();
+    useEffect(() {
+      animationController.forward();
+      HapticFeedback.heavyImpact();
 
-        return;
-      },
-      [],
-    );
+      return;
+    }, []);
 
     return ScaleTransition(
       scale: CurvedAnimation(

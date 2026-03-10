@@ -28,16 +28,17 @@ class _ContactsLayout extends ConsumerWidget {
       }
 
       final isChatAvailable = ref.read(
-        contactsScreenControllerProvider
-            .select((state) => state.isChatAvailable(contact)),
+        contactsScreenControllerProvider.select(
+          (state) => state.isChatAvailable(contact),
+        ),
       );
       if (isChatAvailable) {
         final container = ProviderScope.containerOf(context);
         final provider = chatScreenControllerProvider(contact.id);
         final element = container.readProviderElement(provider);
 
-        final link =
-            (element as AutoDisposeNotifierProviderElement).keepAlive();
+        final link = (element as AutoDisposeNotifierProviderElement)
+            .keepAlive();
         await ref.read(provider.notifier).initialize();
         await ChatRoute(contactId: contact.id).push<void>(context);
         link.close();
@@ -55,16 +56,12 @@ class _ContactsLayout extends ConsumerWidget {
       }
     }
 
-    Future<void> onContactDoubleTap({
-      required Contact contact,
-    }) async {
+    Future<void> onContactDoubleTap({required Contact contact}) async {
       if (!context.mounted) return;
       await ConnectionDetailsRoute(contactId: contact.id).push<void>(context);
     }
 
-    void onContactLongPress({
-      required Contact contact,
-    }) async {
+    void onContactLongPress({required Contact contact}) async {
       if (!context.mounted) return;
 
       final shouldDelete = await DeleteContactDialog.show(context);
@@ -75,8 +72,9 @@ class _ContactsLayout extends ConsumerWidget {
 
     if (contacts.isEmpty) {
       final shouldShowFilter = ref.watch(
-        contactsScreenControllerProvider
-            .select((state) => state.shouldShowFilter),
+        contactsScreenControllerProvider.select(
+          (state) => state.shouldShowFilter,
+        ),
       );
 
       return SizedBox(

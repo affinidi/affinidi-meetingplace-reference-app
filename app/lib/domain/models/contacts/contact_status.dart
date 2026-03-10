@@ -11,8 +11,7 @@ enum ContactStatus {
   error(5),
   deleted(6),
   unknown(0),
-  active(7),
-  ;
+  active(7);
 
   const ContactStatus(this.value);
 

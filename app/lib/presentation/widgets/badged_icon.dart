@@ -21,9 +21,10 @@ class BadgedIcon extends StatelessWidget {
             offset: const Offset(15, 0),
             label: Text(
               '$count',
-              textScaler: (MediaQuery.maybeTextScalerOf(context) ??
-                      TextScaler.noScaling)
-                  .clamp(maxScaleFactor: _badgeMaxScaleFactor),
+              textScaler:
+                  (MediaQuery.maybeTextScalerOf(context) ??
+                          TextScaler.noScaling)
+                      .clamp(maxScaleFactor: _badgeMaxScaleFactor),
             ),
             child: icon,
           )

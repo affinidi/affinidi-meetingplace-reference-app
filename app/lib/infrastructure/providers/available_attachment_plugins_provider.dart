@@ -5,5 +5,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 ///
 /// Can be overridden to register custom attachment plugins for the app.
 /// By default, returns an empty list.
-final availableAttachmentPluginsProvider =
-    Provider<List<AttachmentPlugin>>((ref) => []);
+final availableAttachmentPluginsProvider = Provider<List<AttachmentPlugin>>(
+  (ref) => [],
+);

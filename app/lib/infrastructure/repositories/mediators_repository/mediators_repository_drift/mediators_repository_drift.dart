@@ -27,7 +27,7 @@ Future<MediatorsRepositoryDrift> mediatorsRepositoryInMemoryDrift(
 /// Drift implementation of [MediatorsRepository].
 class MediatorsRepositoryDrift implements MediatorsRepository {
   MediatorsRepositoryDrift({required db.MediatorsDatabase database})
-      : _database = database;
+    : _database = database;
 
   final db.MediatorsDatabase _database;
 
@@ -37,9 +37,9 @@ class MediatorsRepositoryDrift implements MediatorsRepository {
   /// (with type [MediatorType.custom]).
   @override
   Future<List<model.Mediator>> listCustomMediators() async {
-    final results = await (_database.select(_database.mediators)
-          ..where((table) => table.type.equalsValue(MediatorType.custom)))
-        .get();
+    final results = await (_database.select(
+      _database.mediators,
+    )..where((table) => table.type.equalsValue(MediatorType.custom))).get();
     return results.map(_MediatorMapper.fromDatabaseRecord).toList();
   }
 
@@ -69,13 +69,13 @@ class MediatorsRepositoryDrift implements MediatorsRepository {
     required String did,
   }) async {
     // Check for existing mediator with same DID and isDeleted == false
-    final isMediatorExists = await (_database.select(_database.mediators)
-          ..where(
-            (table) =>
-                table.mediatorDid.equals(did) &
-                table.status.equals(MediatorStatus.active.value),
-          ))
-        .getSingleOrNull();
+    final isMediatorExists =
+        await (_database.select(_database.mediators)..where(
+              (table) =>
+                  table.mediatorDid.equals(did) &
+                  table.status.equals(MediatorStatus.active.value),
+            ))
+            .getSingleOrNull();
 
     if (isMediatorExists != null) {
       throw AppException(
@@ -84,7 +84,9 @@ class MediatorsRepositoryDrift implements MediatorsRepository {
       );
     }
 
-    await _database.into(_database.mediators).insert(
+    await _database
+        .into(_database.mediators)
+        .insert(
           db.MediatorsCompanion.insert(
             mediatorDid: did,
             mediatorName: name,
@@ -102,16 +104,15 @@ class MediatorsRepositoryDrift implements MediatorsRepository {
   /// - Default mediators ([MediatorType.local]) remain untouched.
   @override
   Future<void> removeMediator(String did) async {
-    await (_database.update(_database.mediators)
-          ..where(
-            (table) => Expression.and([
-              table.mediatorDid.equals(did),
-              table.type.equals(MediatorType.custom.value),
-            ]),
-          ))
+    await (_database.update(_database.mediators)..where(
+          (table) => Expression.and([
+            table.mediatorDid.equals(did),
+            table.type.equals(MediatorType.custom.value),
+          ]),
+        ))
         .write(
-      const db.MediatorsCompanion(status: Value(MediatorStatus.deleted)),
-    );
+          const db.MediatorsCompanion(status: Value(MediatorStatus.deleted)),
+        );
   }
 
   /// Rename a custom mediator identified by its DID.
@@ -126,19 +127,14 @@ class MediatorsRepositoryDrift implements MediatorsRepository {
     required String did,
     required String newName,
   }) async {
-    await (_database.update(_database.mediators)
-          ..where(
-            (table) => Expression.and([
-              table.mediatorDid.equals(did),
-              table.status.equals(MediatorStatus.active.value),
-              table.type.equals(MediatorType.custom.value),
-            ]),
-          ))
-        .write(
-      db.MediatorsCompanion(
-        mediatorName: Value(newName),
-      ),
-    );
+    await (_database.update(_database.mediators)..where(
+          (table) => Expression.and([
+            table.mediatorDid.equals(did),
+            table.status.equals(MediatorStatus.active.value),
+            table.type.equals(MediatorType.custom.value),
+          ]),
+        ))
+        .write(db.MediatorsCompanion(mediatorName: Value(newName)));
   }
 }
 

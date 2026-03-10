@@ -20,20 +20,16 @@ class DebugPanelController extends _$DebugPanelController {
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
 
-    ref.listen(
-      appLoggerProvider.select((logger) => logger.logs),
-      (prev, next) {
-        final wasAtBottom = _isAtBottom;
-        Future.microtask(() {
-          state = state.copyWith(logs: next);
-        });
+    ref.listen(appLoggerProvider.select((logger) => logger.logs), (prev, next) {
+      final wasAtBottom = _isAtBottom;
+      Future.microtask(() {
+        state = state.copyWith(logs: next);
+      });
 
-        if (prev != null && next.length > prev.length && wasAtBottom) {
-          Future.microtask(scrollToBottom);
-        }
-      },
-      fireImmediately: true,
-    );
+      if (prev != null && next.length > prev.length && wasAtBottom) {
+        Future.microtask(scrollToBottom);
+      }
+    }, fireImmediately: true);
 
     ref.onDispose(() {
       _scrollController.dispose();
@@ -100,7 +96,9 @@ class DebugPanelController extends _$DebugPanelController {
   }
 
   void addTestLog() {
-    ref.read(appLoggerProvider).info(
+    ref
+        .read(appLoggerProvider)
+        .info(
           'Test log message ${DateTime.now().millisecondsSinceEpoch}',
           name: _logKey,
         );

@@ -8,20 +8,23 @@ class _OfferDetailsValidityVisibilityPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
-    final expiryDate =
-        ref.watch(controllerProvider.select((state) => state.offer?.expiresAt));
-    final maxUsages = ref
-        .watch(controllerProvider.select((state) => state.offer?.maximumUsage));
+    final expiryDate = ref.watch(
+      controllerProvider.select((state) => state.offer?.expiresAt),
+    );
+    final maxUsages = ref.watch(
+      controllerProvider.select((state) => state.offer?.maximumUsage),
+    );
 
     final label = expiryDate == null
         ? context.l10n.noExpirySetHelperText
         : context.l10n.offerExpiresAt(
-            DateFormat.yMMMMEEEEd(Localizations.localeOf(context).toString())
-                .add_Hm()
-                .format(expiryDate),
+            DateFormat.yMMMMEEEEd(
+              Localizations.localeOf(context).toString(),
+            ).add_Hm().format(expiryDate),
           );
-    final helperText =
-        expiryDate == null ? null : context.l10n.offerValidityNote;
+    final helperText = expiryDate == null
+        ? null
+        : context.l10n.offerValidityNote;
 
     return FormCard(
       title: context.l10n.validityVisibilityDetails,

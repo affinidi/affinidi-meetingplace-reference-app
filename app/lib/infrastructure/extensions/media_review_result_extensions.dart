@@ -14,9 +14,7 @@ extension MediaReviewResultAttachment on MediaReviewResult {
       mediaType: AttachmentMediaType.imageJpeg.value,
       format: AttachmentMediaType.imageJpeg.value,
       lastModifiedTime: clock.now(),
-      data: AttachmentData(
-        base64: compressedImage.base64,
-      ),
+      data: AttachmentData(base64: compressedImage.base64),
     );
   }
 }

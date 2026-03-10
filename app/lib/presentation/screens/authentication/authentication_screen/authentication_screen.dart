@@ -34,23 +34,21 @@ class AuthenticationScreen extends HookConsumerWidget {
       }
     }
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await controller.initialize(l10n.authUnlockReason);
-        });
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await controller.initialize(l10n.authUnlockReason);
+      });
 
-        return null;
-      },
-      [],
-    );
+      return null;
+    }, []);
 
     // AL: Calculate width to constrain for large screen size
     final screenWidth = MediaQuery.of(context).size.width;
     final radius = screenWidth > 1024 ? 6.0 : 2.0;
-    final isSmallScreenLandscape = ScreensizeHelper().isSmallScreen(context) &&
+    final isSmallScreenLandscape =
+        ScreensizeHelper().isSmallScreen(context) &&
         ScreensizeHelper().isLandscape(context);
 
     return Scaffold(
@@ -84,10 +82,7 @@ class AuthenticationScreen extends HookConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 5),
-                        Text(
-                          l10n.appName,
-                          style: textTheme.bodyLarge,
-                        ),
+                        Text(l10n.appName, style: textTheme.bodyLarge),
                       ],
                     ),
                   ),
@@ -118,8 +113,9 @@ class AuthenticationScreen extends HookConsumerWidget {
                                 Text(
                                   platformInstruction(context),
                                   textAlign: TextAlign.center,
-                                  style: context.textTheme.bodyMedium
-                                      ?.copyWith(color: Colors.white70),
+                                  style: context.textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white70,
+                                  ),
                                 ),
                               ],
                             ),
@@ -158,14 +154,13 @@ class AuthenticationScreen extends HookConsumerWidget {
               ),
             ),
             Padding(
-              padding:
-                  EdgeInsets.only(bottom: isSmallScreenLandscape ? 20.0 : 40.0),
+              padding: EdgeInsets.only(
+                bottom: isSmallScreenLandscape ? 20.0 : 40.0,
+              ),
               child: Center(
                 child: SizedBox(
                   height: 40,
-                  child: Image.asset(
-                    'assets/images/powered_by_mpx.png',
-                  ),
+                  child: Image.asset('assets/images/powered_by_mpx.png'),
                 ),
               ),
             ),

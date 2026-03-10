@@ -17,10 +17,7 @@ Future<IdentitiesRepository> identitiesRepositoryDrift(Ref ref) async {
   final database = await ref.read(identitiesDatabaseProvider.future);
 
   final logger = ref.read(appLoggerProvider);
-  return IdentitiesRepositoryDrift(
-    db: database,
-    logger: logger,
-  );
+  return IdentitiesRepositoryDrift(db: database, logger: logger);
 }
 
 /// A provider that initializes and supplies the [IdentitiesRepositoryDrift]
@@ -33,10 +30,7 @@ Future<IdentitiesRepository> identitiesRepositoryInMemoryDrift(Ref ref) async {
   final database = await ref.read(identitiesInMemoryDatabaseProvider.future);
 
   final logger = ref.read(appLoggerProvider);
-  return IdentitiesRepositoryDrift(
-    db: database,
-    logger: logger,
-  );
+  return IdentitiesRepositoryDrift(db: database, logger: logger);
 }
 
 /// Drift implementation of [IdentitiesRepository].
@@ -68,8 +62,9 @@ class IdentitiesRepositoryDrift implements IdentitiesRepository {
 
   @override
   Future<void> deleteIdentity(String id) async {
-    await (db.delete(db.identitiesTable)..where((tbl) => tbl.id.equals(id)))
-        .go();
+    await (db.delete(
+      db.identitiesTable,
+    )..where((tbl) => tbl.id.equals(id))).go();
   }
 }
 
@@ -78,34 +73,34 @@ class IdentitiesRepositoryDrift implements IdentitiesRepository {
 extension IdentityMapper on Identity {
   /// Converts an [Identity] into an [IdentityRecord] for persistence.
   IdentityRecord toRecord() => IdentityRecord(
-        id: id,
-        did: did,
-        isPrimary: isPrimary,
-        displayName: card.displayName,
-        firstName: card.firstName,
-        lastName: card.lastName,
-        email: card.email,
-        mobile: card.mobile,
-        profilePic: card.profilePic,
-        cardColor: card.cardColor,
-      );
+    id: id,
+    did: did,
+    isPrimary: isPrimary,
+    displayName: card.displayName,
+    firstName: card.firstName,
+    lastName: card.lastName,
+    email: card.email,
+    mobile: card.mobile,
+    profilePic: card.profilePic,
+    cardColor: card.cardColor,
+  );
 
   /// Creates an [Identity] domain model from a [IdentityRecord].
   static Identity fromRecord(IdentityRecord record) => Identity(
-        id: record.id,
-        did: record.did,
-        isPrimary: record.isPrimary,
-        card: ContactCard(
-          id: record.id,
-          did: record.did,
-          type: ContactCardType.individual.value,
-          displayName: record.displayName,
-          firstName: record.firstName,
-          lastName: record.lastName,
-          email: record.email,
-          mobile: record.mobile,
-          profilePic: record.profilePic,
-          cardColor: record.cardColor,
-        ),
-      );
+    id: record.id,
+    did: record.did,
+    isPrimary: record.isPrimary,
+    card: ContactCard(
+      id: record.id,
+      did: record.did,
+      type: ContactCardType.individual.value,
+      displayName: record.displayName,
+      firstName: record.firstName,
+      lastName: record.lastName,
+      email: record.email,
+      mobile: record.mobile,
+      profilePic: record.profilePic,
+      cardColor: record.cardColor,
+    ),
+  );
 }

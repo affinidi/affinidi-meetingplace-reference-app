@@ -12,51 +12,84 @@ class $MediatorsTable extends Mediators
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      clientDefault: const Uuid().v4);
-  static const VerificationMeta _mediatorNameMeta =
-      const VerificationMeta('mediatorName');
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: const Uuid().v4,
+  );
+  static const VerificationMeta _mediatorNameMeta = const VerificationMeta(
+    'mediatorName',
+  );
   @override
   late final GeneratedColumn<String> mediatorName = GeneratedColumn<String>(
-      'mediator_name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _mediatorDidMeta =
-      const VerificationMeta('mediatorDid');
+    'mediator_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _mediatorDidMeta = const VerificationMeta(
+    'mediatorDid',
+  );
   @override
   late final GeneratedColumn<String> mediatorDid = GeneratedColumn<String>(
-      'mediator_did', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'mediator_did',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   late final GeneratedColumnWithTypeConverter<MediatorType, int> type =
-      GeneratedColumn<int>('type', aliasedName, false,
-              type: DriftSqlType.int, requiredDuringInsert: true)
-          .withConverter<MediatorType>($MediatorsTable.$convertertype);
+      GeneratedColumn<int>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<MediatorType>($MediatorsTable.$convertertype);
   @override
   late final GeneratedColumnWithTypeConverter<MediatorStatus, int> status =
-      GeneratedColumn<int>('status', aliasedName, false,
-              type: DriftSqlType.int, requiredDuringInsert: true)
-          .withConverter<MediatorStatus>($MediatorsTable.$converterstatus);
-  static const VerificationMeta _createdTimeMeta =
-      const VerificationMeta('createdTime');
+      GeneratedColumn<int>(
+        'status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<MediatorStatus>($MediatorsTable.$converterstatus);
+  static const VerificationMeta _createdTimeMeta = const VerificationMeta(
+    'createdTime',
+  );
   @override
   late final GeneratedColumn<String> createdTime = GeneratedColumn<String>(
-      'created_time', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      clientDefault: () => DateTime.now().toIso8601String());
+    'created_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now().toIso8601String(),
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, mediatorName, mediatorDid, type, status, createdTime];
+  List<GeneratedColumn> get $columns => [
+    id,
+    mediatorName,
+    mediatorDid,
+    type,
+    status,
+    createdTime,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'mediators';
   @override
-  VerificationContext validateIntegrity(Insertable<Mediator> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Mediator> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -64,25 +97,34 @@ class $MediatorsTable extends Mediators
     }
     if (data.containsKey('mediator_name')) {
       context.handle(
+        _mediatorNameMeta,
+        mediatorName.isAcceptableOrUnknown(
+          data['mediator_name']!,
           _mediatorNameMeta,
-          mediatorName.isAcceptableOrUnknown(
-              data['mediator_name']!, _mediatorNameMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_mediatorNameMeta);
     }
     if (data.containsKey('mediator_did')) {
       context.handle(
+        _mediatorDidMeta,
+        mediatorDid.isAcceptableOrUnknown(
+          data['mediator_did']!,
           _mediatorDidMeta,
-          mediatorDid.isAcceptableOrUnknown(
-              data['mediator_did']!, _mediatorDidMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_mediatorDidMeta);
     }
     if (data.containsKey('created_time')) {
       context.handle(
+        _createdTimeMeta,
+        createdTime.isAcceptableOrUnknown(
+          data['created_time']!,
           _createdTimeMeta,
-          createdTime.isAcceptableOrUnknown(
-              data['created_time']!, _createdTimeMeta));
+        ),
+      );
     }
     return context;
   }
@@ -93,19 +135,34 @@ class $MediatorsTable extends Mediators
   Mediator map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Mediator(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      mediatorName: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}mediator_name'])!,
-      mediatorDid: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}mediator_did'])!,
-      type: $MediatorsTable.$convertertype.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
-      status: $MediatorsTable.$converterstatus.fromSql(attachedDatabase
-          .typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}status'])!),
-      createdTime: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}created_time'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      mediatorName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mediator_name'],
+      )!,
+      mediatorDid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mediator_did'],
+      )!,
+      type: $MediatorsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      status: $MediatorsTable.$converterstatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}status'],
+        )!,
+      ),
+      createdTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_time'],
+      )!,
     );
   }
 
@@ -127,13 +184,14 @@ class Mediator extends DataClass implements Insertable<Mediator> {
   final MediatorType type;
   final MediatorStatus status;
   final String createdTime;
-  const Mediator(
-      {required this.id,
-      required this.mediatorName,
-      required this.mediatorDid,
-      required this.type,
-      required this.status,
-      required this.createdTime});
+  const Mediator({
+    required this.id,
+    required this.mediatorName,
+    required this.mediatorDid,
+    required this.type,
+    required this.status,
+    required this.createdTime,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -144,8 +202,9 @@ class Mediator extends DataClass implements Insertable<Mediator> {
       map['type'] = Variable<int>($MediatorsTable.$convertertype.toSql(type));
     }
     {
-      map['status'] =
-          Variable<int>($MediatorsTable.$converterstatus.toSql(status));
+      map['status'] = Variable<int>(
+        $MediatorsTable.$converterstatus.toSql(status),
+      );
     }
     map['created_time'] = Variable<String>(createdTime);
     return map;
@@ -162,8 +221,10 @@ class Mediator extends DataClass implements Insertable<Mediator> {
     );
   }
 
-  factory Mediator.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Mediator.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Mediator(
       id: serializer.fromJson<String>(json['id']),
@@ -187,33 +248,35 @@ class Mediator extends DataClass implements Insertable<Mediator> {
     };
   }
 
-  Mediator copyWith(
-          {String? id,
-          String? mediatorName,
-          String? mediatorDid,
-          MediatorType? type,
-          MediatorStatus? status,
-          String? createdTime}) =>
-      Mediator(
-        id: id ?? this.id,
-        mediatorName: mediatorName ?? this.mediatorName,
-        mediatorDid: mediatorDid ?? this.mediatorDid,
-        type: type ?? this.type,
-        status: status ?? this.status,
-        createdTime: createdTime ?? this.createdTime,
-      );
+  Mediator copyWith({
+    String? id,
+    String? mediatorName,
+    String? mediatorDid,
+    MediatorType? type,
+    MediatorStatus? status,
+    String? createdTime,
+  }) => Mediator(
+    id: id ?? this.id,
+    mediatorName: mediatorName ?? this.mediatorName,
+    mediatorDid: mediatorDid ?? this.mediatorDid,
+    type: type ?? this.type,
+    status: status ?? this.status,
+    createdTime: createdTime ?? this.createdTime,
+  );
   Mediator copyWithCompanion(MediatorsCompanion data) {
     return Mediator(
       id: data.id.present ? data.id.value : this.id,
       mediatorName: data.mediatorName.present
           ? data.mediatorName.value
           : this.mediatorName,
-      mediatorDid:
-          data.mediatorDid.present ? data.mediatorDid.value : this.mediatorDid,
+      mediatorDid: data.mediatorDid.present
+          ? data.mediatorDid.value
+          : this.mediatorDid,
       type: data.type.present ? data.type.value : this.type,
       status: data.status.present ? data.status.value : this.status,
-      createdTime:
-          data.createdTime.present ? data.createdTime.value : this.createdTime,
+      createdTime: data.createdTime.present
+          ? data.createdTime.value
+          : this.createdTime,
     );
   }
 
@@ -270,10 +333,10 @@ class MediatorsCompanion extends UpdateCompanion<Mediator> {
     required MediatorStatus status,
     this.createdTime = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : mediatorName = Value(mediatorName),
-        mediatorDid = Value(mediatorDid),
-        type = Value(type),
-        status = Value(status);
+  }) : mediatorName = Value(mediatorName),
+       mediatorDid = Value(mediatorDid),
+       type = Value(type),
+       status = Value(status);
   static Insertable<Mediator> custom({
     Expression<String>? id,
     Expression<String>? mediatorName,
@@ -294,14 +357,15 @@ class MediatorsCompanion extends UpdateCompanion<Mediator> {
     });
   }
 
-  MediatorsCompanion copyWith(
-      {Value<String>? id,
-      Value<String>? mediatorName,
-      Value<String>? mediatorDid,
-      Value<MediatorType>? type,
-      Value<MediatorStatus>? status,
-      Value<String>? createdTime,
-      Value<int>? rowid}) {
+  MediatorsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? mediatorName,
+    Value<String>? mediatorDid,
+    Value<MediatorType>? type,
+    Value<MediatorStatus>? status,
+    Value<String>? createdTime,
+    Value<int>? rowid,
+  }) {
     return MediatorsCompanion(
       id: id ?? this.id,
       mediatorName: mediatorName ?? this.mediatorName,
@@ -326,12 +390,14 @@ class MediatorsCompanion extends UpdateCompanion<Mediator> {
       map['mediator_did'] = Variable<String>(mediatorDid.value);
     }
     if (type.present) {
-      map['type'] =
-          Variable<int>($MediatorsTable.$convertertype.toSql(type.value));
+      map['type'] = Variable<int>(
+        $MediatorsTable.$convertertype.toSql(type.value),
+      );
     }
     if (status.present) {
-      map['status'] =
-          Variable<int>($MediatorsTable.$converterstatus.toSql(status.value));
+      map['status'] = Variable<int>(
+        $MediatorsTable.$converterstatus.toSql(status.value),
+      );
     }
     if (createdTime.present) {
       map['created_time'] = Variable<String>(createdTime.value);
@@ -368,24 +434,26 @@ abstract class _$MediatorsDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [mediators];
 }
 
-typedef $$MediatorsTableCreateCompanionBuilder = MediatorsCompanion Function({
-  Value<String> id,
-  required String mediatorName,
-  required String mediatorDid,
-  required MediatorType type,
-  required MediatorStatus status,
-  Value<String> createdTime,
-  Value<int> rowid,
-});
-typedef $$MediatorsTableUpdateCompanionBuilder = MediatorsCompanion Function({
-  Value<String> id,
-  Value<String> mediatorName,
-  Value<String> mediatorDid,
-  Value<MediatorType> type,
-  Value<MediatorStatus> status,
-  Value<String> createdTime,
-  Value<int> rowid,
-});
+typedef $$MediatorsTableCreateCompanionBuilder =
+    MediatorsCompanion Function({
+      Value<String> id,
+      required String mediatorName,
+      required String mediatorDid,
+      required MediatorType type,
+      required MediatorStatus status,
+      Value<String> createdTime,
+      Value<int> rowid,
+    });
+typedef $$MediatorsTableUpdateCompanionBuilder =
+    MediatorsCompanion Function({
+      Value<String> id,
+      Value<String> mediatorName,
+      Value<String> mediatorDid,
+      Value<MediatorType> type,
+      Value<MediatorStatus> status,
+      Value<String> createdTime,
+      Value<int> rowid,
+    });
 
 class $$MediatorsTableFilterComposer
     extends Composer<_$MediatorsDatabase, $MediatorsTable> {
@@ -397,26 +465,36 @@ class $$MediatorsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get mediatorName => $composableBuilder(
-      column: $table.mediatorName, builder: (column) => ColumnFilters(column));
+    column: $table.mediatorName,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get mediatorDid => $composableBuilder(
-      column: $table.mediatorDid, builder: (column) => ColumnFilters(column));
+    column: $table.mediatorDid,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnWithTypeConverterFilters<MediatorType, MediatorType, int> get type =>
       $composableBuilder(
-          column: $table.type,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnWithTypeConverterFilters<MediatorStatus, MediatorStatus, int>
-      get status => $composableBuilder(
-          column: $table.status,
-          builder: (column) => ColumnWithTypeConverterFilters(column));
+  get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 
   ColumnFilters<String> get createdTime => $composableBuilder(
-      column: $table.createdTime, builder: (column) => ColumnFilters(column));
+    column: $table.createdTime,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$MediatorsTableOrderingComposer
@@ -429,23 +507,34 @@ class $$MediatorsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get mediatorName => $composableBuilder(
-      column: $table.mediatorName,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.mediatorName,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get mediatorDid => $composableBuilder(
-      column: $table.mediatorDid, builder: (column) => ColumnOrderings(column));
+    column: $table.mediatorDid,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get type => $composableBuilder(
-      column: $table.type, builder: (column) => ColumnOrderings(column));
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get status => $composableBuilder(
-      column: $table.status, builder: (column) => ColumnOrderings(column));
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get createdTime => $composableBuilder(
-      column: $table.createdTime, builder: (column) => ColumnOrderings(column));
+    column: $table.createdTime,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$MediatorsTableAnnotationComposer
@@ -461,10 +550,14 @@ class $$MediatorsTableAnnotationComposer
       $composableBuilder(column: $table.id, builder: (column) => column);
 
   GeneratedColumn<String> get mediatorName => $composableBuilder(
-      column: $table.mediatorName, builder: (column) => column);
+    column: $table.mediatorName,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get mediatorDid => $composableBuilder(
-      column: $table.mediatorDid, builder: (column) => column);
+    column: $table.mediatorDid,
+    builder: (column) => column,
+  );
 
   GeneratedColumnWithTypeConverter<MediatorType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
@@ -473,23 +566,32 @@ class $$MediatorsTableAnnotationComposer
       $composableBuilder(column: $table.status, builder: (column) => column);
 
   GeneratedColumn<String> get createdTime => $composableBuilder(
-      column: $table.createdTime, builder: (column) => column);
+    column: $table.createdTime,
+    builder: (column) => column,
+  );
 }
 
-class $$MediatorsTableTableManager extends RootTableManager<
-    _$MediatorsDatabase,
-    $MediatorsTable,
-    Mediator,
-    $$MediatorsTableFilterComposer,
-    $$MediatorsTableOrderingComposer,
-    $$MediatorsTableAnnotationComposer,
-    $$MediatorsTableCreateCompanionBuilder,
-    $$MediatorsTableUpdateCompanionBuilder,
-    (Mediator, BaseReferences<_$MediatorsDatabase, $MediatorsTable, Mediator>),
-    Mediator,
-    PrefetchHooks Function()> {
+class $$MediatorsTableTableManager
+    extends
+        RootTableManager<
+          _$MediatorsDatabase,
+          $MediatorsTable,
+          Mediator,
+          $$MediatorsTableFilterComposer,
+          $$MediatorsTableOrderingComposer,
+          $$MediatorsTableAnnotationComposer,
+          $$MediatorsTableCreateCompanionBuilder,
+          $$MediatorsTableUpdateCompanionBuilder,
+          (
+            Mediator,
+            BaseReferences<_$MediatorsDatabase, $MediatorsTable, Mediator>,
+          ),
+          Mediator,
+          PrefetchHooks Function()
+        > {
   $$MediatorsTableTableManager(_$MediatorsDatabase db, $MediatorsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -498,61 +600,67 @@ class $$MediatorsTableTableManager extends RootTableManager<
               $$MediatorsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$MediatorsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> id = const Value.absent(),
-            Value<String> mediatorName = const Value.absent(),
-            Value<String> mediatorDid = const Value.absent(),
-            Value<MediatorType> type = const Value.absent(),
-            Value<MediatorStatus> status = const Value.absent(),
-            Value<String> createdTime = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              MediatorsCompanion(
-            id: id,
-            mediatorName: mediatorName,
-            mediatorDid: mediatorDid,
-            type: type,
-            status: status,
-            createdTime: createdTime,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            Value<String> id = const Value.absent(),
-            required String mediatorName,
-            required String mediatorDid,
-            required MediatorType type,
-            required MediatorStatus status,
-            Value<String> createdTime = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              MediatorsCompanion.insert(
-            id: id,
-            mediatorName: mediatorName,
-            mediatorDid: mediatorDid,
-            type: type,
-            status: status,
-            createdTime: createdTime,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> mediatorName = const Value.absent(),
+                Value<String> mediatorDid = const Value.absent(),
+                Value<MediatorType> type = const Value.absent(),
+                Value<MediatorStatus> status = const Value.absent(),
+                Value<String> createdTime = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MediatorsCompanion(
+                id: id,
+                mediatorName: mediatorName,
+                mediatorDid: mediatorDid,
+                type: type,
+                status: status,
+                createdTime: createdTime,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                required String mediatorName,
+                required String mediatorDid,
+                required MediatorType type,
+                required MediatorStatus status,
+                Value<String> createdTime = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => MediatorsCompanion.insert(
+                id: id,
+                mediatorName: mediatorName,
+                mediatorDid: mediatorDid,
+                type: type,
+                status: status,
+                createdTime: createdTime,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$MediatorsTableProcessedTableManager = ProcessedTableManager<
-    _$MediatorsDatabase,
-    $MediatorsTable,
-    Mediator,
-    $$MediatorsTableFilterComposer,
-    $$MediatorsTableOrderingComposer,
-    $$MediatorsTableAnnotationComposer,
-    $$MediatorsTableCreateCompanionBuilder,
-    $$MediatorsTableUpdateCompanionBuilder,
-    (Mediator, BaseReferences<_$MediatorsDatabase, $MediatorsTable, Mediator>),
-    Mediator,
-    PrefetchHooks Function()>;
+typedef $$MediatorsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$MediatorsDatabase,
+      $MediatorsTable,
+      Mediator,
+      $$MediatorsTableFilterComposer,
+      $$MediatorsTableOrderingComposer,
+      $$MediatorsTableAnnotationComposer,
+      $$MediatorsTableCreateCompanionBuilder,
+      $$MediatorsTableUpdateCompanionBuilder,
+      (
+        Mediator,
+        BaseReferences<_$MediatorsDatabase, $MediatorsTable, Mediator>,
+      ),
+      Mediator,
+      PrefetchHooks Function()
+    >;
 
 class $MediatorsDatabaseManager {
   final _$MediatorsDatabase _db;

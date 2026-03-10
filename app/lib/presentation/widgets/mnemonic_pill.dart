@@ -47,7 +47,9 @@ class MnemonicPill extends StatelessWidget {
             spacing: 8,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              ...mnemonic.split(' ').map(
+              ...mnemonic
+                  .split(' ')
+                  .map(
                     (word) => Chip(
                       label: Text(
                         word,
@@ -58,7 +60,7 @@ class MnemonicPill extends StatelessWidget {
                       backgroundColor: context.colorScheme.secondary,
                     ),
                   ),
-              if (suffix != null) suffix!,
+              ?suffix,
             ],
           ),
         ),

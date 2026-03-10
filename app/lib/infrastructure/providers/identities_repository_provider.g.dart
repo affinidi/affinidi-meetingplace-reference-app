@@ -13,14 +13,14 @@ String _$identitiesRepositoryHash() =>
 @ProviderFor(identitiesRepository)
 final identitiesRepositoryProvider =
     FutureProvider<IdentitiesRepository>.internal(
-  identitiesRepository,
-  name: r'identitiesRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$identitiesRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      identitiesRepository,
+      name: r'identitiesRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$identitiesRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element

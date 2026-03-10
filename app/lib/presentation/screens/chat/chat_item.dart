@@ -7,10 +7,10 @@ class ChatItem extends StatelessWidget {
     required int index,
     required String contactId,
     required Color chatItemColor,
-  })  : _index = index,
-        _chatItem = chatItem,
-        _contactId = contactId,
-        _chatItemColor = chatItemColor;
+  }) : _index = index,
+       _chatItem = chatItem,
+       _contactId = contactId,
+       _chatItemColor = chatItemColor;
 
   final chat.ChatItem _chatItem;
   final int _index;
@@ -18,9 +18,7 @@ class ChatItem extends StatelessWidget {
   final Color _chatItemColor;
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     if (_chatItem is EncryptionNotice) {
       return const ChatEncryptionNotice();
     }

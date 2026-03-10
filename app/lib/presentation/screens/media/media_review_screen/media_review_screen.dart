@@ -77,9 +77,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          Positioned.fill(
-            child: ImagePreview(imageBytes: widget.imageBytes),
-          ),
+          Positioned.fill(child: ImagePreview(imageBytes: widget.imageBytes)),
           Align(
             alignment: Alignment.bottomCenter,
             child: BottomMediaBar(
@@ -111,8 +109,9 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                     key: const Key('media_review_submit_button'),
                     heroTag: 1,
                     backgroundColor: Colors.green,
-                    onPressed:
-                        _isSending ? null : () => _submitResult(success: true),
+                    onPressed: _isSending
+                        ? null
+                        : () => _submitResult(success: true),
                     child: Icon(
                       widget.useChatSemantics ? Icons.send : Icons.done,
                       size: 35,
@@ -155,8 +154,10 @@ class _MessageInput extends StatelessWidget {
         textInputAction: TextInputAction.send,
         onSubmitted: isSending ? null : (_) => onSend(),
         decoration: InputDecoration(
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 8,
+          ),
           hintMaxLines: 1,
           hintText: context.l10n.chatAddMessageToMediaPrompt,
           hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),

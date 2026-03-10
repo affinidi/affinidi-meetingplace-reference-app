@@ -50,10 +50,7 @@ class IdentitiesService extends _$IdentitiesService {
       return;
     }
     state = state.copyWith(currentIdentity: identity);
-    _logger.info(
-      'Current identity set to id: $id',
-      name: _logKey,
-    );
+    _logger.info('Current identity set to id: $id', name: _logKey);
   }
 
   /// Reset the current identity to an empty identity based on environment.
@@ -62,10 +59,7 @@ class IdentitiesService extends _$IdentitiesService {
   /// identity was deleted.
   void _resetCurrentIdentity() {
     state = state.copyWith(currentIdentity: null);
-    _logger.info(
-      'Current identity reset to empty',
-      name: _logKey,
-    );
+    _logger.info('Current identity reset to empty', name: _logKey);
   }
 
   /// Persist a new identity and refresh the identities list.
@@ -95,10 +89,7 @@ class IdentitiesService extends _$IdentitiesService {
     state = state.copyWith(currentIdentity: identityToAdd);
 
     await _fetchIdentities();
-    _logger.info(
-      'Identity added',
-      name: _logKey,
-    );
+    _logger.info('Identity added', name: _logKey);
   }
 
   /// Update an existing identity and refresh the identities list.
@@ -108,10 +99,7 @@ class IdentitiesService extends _$IdentitiesService {
     _repository ??= await _ensureRepositoryInitialized();
     await _repository!.updateIdentity(identity);
     await _fetchIdentities();
-    _logger.info(
-      'Identity updated',
-      name: _logKey,
-    );
+    _logger.info('Identity updated', name: _logKey);
   }
 
   /// Delete an identity by id and refresh the identities list.
@@ -124,10 +112,7 @@ class IdentitiesService extends _$IdentitiesService {
     _repository ??= await _ensureRepositoryInitialized();
     await _repository!.deleteIdentity(id);
     await _fetchIdentities();
-    _logger.info(
-      'Identity deleted',
-      name: _logKey,
-    );
+    _logger.info('Identity deleted', name: _logKey);
 
     if (state.currentIdentity?.id == id) {
       _resetCurrentIdentity();
@@ -138,9 +123,7 @@ class IdentitiesService extends _$IdentitiesService {
   Future<void> _fetchIdentities() async {
     _repository ??= await _ensureRepositoryInitialized();
     final identities = await _repository!.listIdentities();
-    state = state.copyWith(
-      identities: identities,
-    );
+    state = state.copyWith(identities: identities);
   }
 
   /// Ensure the identities repository is initialized and return it.

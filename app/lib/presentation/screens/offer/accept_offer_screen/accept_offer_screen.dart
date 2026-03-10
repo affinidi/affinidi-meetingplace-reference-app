@@ -20,8 +20,8 @@ class AcceptOfferScreen extends ConsumerWidget {
     super.key,
     required String mnemonic,
     required String identityId,
-  })  : _mnemonic = mnemonic,
-        _identityId = identityId;
+  }) : _mnemonic = mnemonic,
+       _identityId = identityId;
 
   final String _mnemonic;
   final String _identityId;
@@ -33,9 +33,7 @@ class AcceptOfferScreen extends ConsumerWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.acceptOfferTitle),
-      ),
+      appBar: AppBar(title: Text(l10n.acceptOfferTitle)),
       body: SafeArea(
         child: Column(
           children: [
@@ -64,10 +62,7 @@ class AcceptOfferScreen extends ConsumerWidget {
                     _ErrorSection(mnemonic: _mnemonic),
                     _ContactDetailsPanel(mnemonic: _mnemonic),
                     const SizedBox(height: 20),
-                    _AliasPicker(
-                      mnemonic: _mnemonic,
-                      identityId: _identityId,
-                    ),
+                    _AliasPicker(mnemonic: _mnemonic, identityId: _identityId),
                   ],
                 ),
               ),
@@ -91,8 +86,9 @@ class _Loader extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final l10n = context.l10n;
 
-    final alias = ref
-        .watch(provider.select((state) => state.offer?.contactCard.firstName));
+    final alias = ref.watch(
+      provider.select((state) => state.offer?.contactCard.firstName),
+    );
 
     return ModalAsyncLoadingStatus(
       controller.acceptOfferLoadingController,
@@ -113,18 +109,8 @@ class _Header extends StatelessWidget {
     return Stack(
       alignment: AlignmentDirectional.center,
       children: [
-        const Column(
-          children: [
-            OfferBanner(),
-            SizedBox(
-              height: 110,
-            ),
-          ],
-        ),
-        Positioned(
-          bottom: 0,
-          child: _ProfilePicture(mnemonic: _mnemonic),
-        ),
+        const Column(children: [OfferBanner(), SizedBox(height: 110)]),
+        Positioned(bottom: 0, child: _ProfilePicture(mnemonic: _mnemonic)),
       ],
     );
   }
@@ -157,8 +143,9 @@ class _PublisherAlias extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
-    final alias = ref
-        .watch(provider.select((state) => state.offer?.contactCard.firstName));
+    final alias = ref.watch(
+      provider.select((state) => state.offer?.contactCard.firstName),
+    );
 
     if (alias?.isEmpty ?? true) {
       return const SizedBox.shrink();
@@ -180,8 +167,9 @@ class _OfferName extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
-    final offerName =
-        ref.watch(provider.select((state) => state.offer?.offerName));
+    final offerName = ref.watch(
+      provider.select((state) => state.offer?.offerName),
+    );
 
     if (offerName?.isEmpty ?? true) {
       return const SizedBox.shrink();
@@ -189,8 +177,9 @@ class _OfferName extends ConsumerWidget {
 
     return Text(
       offerName!,
-      style:
-          context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+      style: context.textTheme.bodyMedium?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
       textAlign: TextAlign.center,
     );
   }
@@ -216,10 +205,7 @@ class _ErrorSection extends ConsumerWidget {
         color: context.colorScheme.errorContainer,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(
-            context.l10n.error(error),
-            textAlign: TextAlign.center,
-          ),
+          child: Text(context.l10n.error(error), textAlign: TextAlign.center),
         ),
       ),
     );
@@ -248,8 +234,9 @@ class _ContactCardView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
-    final card =
-        ref.watch(provider.select((state) => state.offer?.contactCard));
+    final card = ref.watch(
+      provider.select((state) => state.offer?.contactCard),
+    );
 
     if (card == null) {
       return const SizedBox.shrink();
@@ -260,11 +247,9 @@ class _ContactCardView extends ConsumerWidget {
 }
 
 class _AliasPicker extends HookConsumerWidget {
-  _AliasPicker({
-    required String mnemonic,
-    required String identityId,
-  })  : _mnemonic = mnemonic,
-        _identityId = identityId;
+  _AliasPicker({required String mnemonic, required String identityId})
+    : _mnemonic = mnemonic,
+      _identityId = identityId;
 
   final String _mnemonic;
   final String _identityId;
@@ -274,22 +259,20 @@ class _AliasPicker extends HookConsumerWidget {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
     final controller = ref.read(provider.notifier);
     final identities = ref.watch(provider.select((state) => state.identities));
-    final initialCardIndex =
-        identities.indexWhere((element) => element.id == _identityId);
+    final initialCardIndex = identities.indexWhere(
+      (element) => element.id == _identityId,
+    );
     final cacheManager = ref.read(cacheManagerProvider);
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.initialize(_identityId);
-        });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.initialize(_identityId);
+      });
 
-        return null;
-      },
-      [],
-    );
+      return null;
+    }, []);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -329,8 +312,9 @@ class _ActionBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
     final controller = ref.read(provider.notifier);
-    final hasErrors =
-        ref.watch(provider.select((state) => state.error != null));
+    final hasErrors = ref.watch(
+      provider.select((state) => state.error != null),
+    );
 
     void clearSelectedOffer() async {
       if (!context.mounted) return;

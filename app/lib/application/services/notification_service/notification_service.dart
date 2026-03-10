@@ -34,10 +34,7 @@ class NotificationService extends _$NotificationService {
         Future.microtask(() {
           if (_isDisposed) return;
 
-          _updateCounter(
-            NotificationCounterType.contacts,
-            next.badgeCount,
-          );
+          _updateCounter(NotificationCounterType.contacts, next.badgeCount);
         });
       },
       fireImmediately: true,
@@ -49,10 +46,7 @@ class NotificationService extends _$NotificationService {
         Future.microtask(() {
           if (_isDisposed) return;
 
-          _updateCounter(
-            NotificationCounterType.connections,
-            next.badgeCount,
-          );
+          _updateCounter(NotificationCounterType.connections, next.badgeCount);
         });
       },
       fireImmediately: true,

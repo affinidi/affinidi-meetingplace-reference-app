@@ -15,8 +15,9 @@ class ScanQRCodeOption extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
 
-    final isCameraAvailable =
-        ref.watch(cameraServiceProvider.select((state) => state.isAvailable));
+    final isCameraAvailable = ref.watch(
+      cameraServiceProvider.select((state) => state.isAvailable),
+    );
     log('CameraAvailable: $isCameraAvailable', name: 'ScanQRCodeOption');
 
     return MenuOptionTile(

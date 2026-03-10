@@ -5,15 +5,7 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../presentation/validators/max_length_validator_type.dart';
 import '../../presentation/validators/zalgo_text_validator.dart';
 
-enum InputType {
-  firstName,
-  lastName,
-  description,
-  email,
-  phone,
-  alias,
-  chat,
-}
+enum InputType { firstName, lastName, description, email, phone, alias, chat }
 
 class InputValidators {
   static MultiValidator getValidator(

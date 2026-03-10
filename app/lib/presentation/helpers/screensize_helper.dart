@@ -26,8 +26,9 @@ class ScreensizeHelper {
   bool isSmallScreen(BuildContext context) {
     final screenWidth = context.mediaQuery.size.width;
     final screenHeight = context.mediaQuery.size.height;
-    final shortestSide =
-        screenWidth < screenHeight ? screenWidth : screenHeight;
+    final shortestSide = screenWidth < screenHeight
+        ? screenWidth
+        : screenHeight;
 
     return shortestSide < 600;
   }

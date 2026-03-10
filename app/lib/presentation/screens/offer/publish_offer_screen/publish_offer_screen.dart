@@ -29,17 +29,17 @@ part 'phrase_validation_icon.dart';
 part 'validity_visibility_section.dart';
 
 class PublishOfferScreen extends HookConsumerWidget {
-  const PublishOfferScreen({
-    super.key,
-    required String identityId,
-  }) : _identityId = identityId;
+  const PublishOfferScreen({super.key, required String identityId})
+    : _identityId = identityId;
 
   final String _identityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
     final controller = ref.read(provider.notifier);
     ref.keepAround(provider);
 
@@ -47,18 +47,15 @@ class PublishOfferScreen extends HookConsumerWidget {
     final width = MediaQuery.sizeOf(context).width;
     final inset = width > maxWidth ? (width - maxWidth) / 2 : 20.0;
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.initialize();
-        });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.initialize();
+      });
 
-        return null;
-      },
-      [],
-    );
+      return null;
+    }, []);
 
     return Scaffold(
       appBar: _OfferAppBar(_identityId),
@@ -111,15 +108,19 @@ class _IdentitiesCardDeck extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
     final controller = ref.read(provider.notifier);
 
-    final selectedIdentity =
-        ref.watch(provider.select((state) => state.selectedIdentity));
+    final selectedIdentity = ref.watch(
+      provider.select((state) => state.selectedIdentity),
+    );
     final identities = ref.watch(provider.select((state) => state.identities));
-    final identityIndex =
-        identities.indexWhere((identity) => identity == selectedIdentity);
+    final identityIndex = identities.indexWhere(
+      (identity) => identity == selectedIdentity,
+    );
     final cacheManager = ref.read(cacheManagerProvider);
 
     return IdentityPicker(

@@ -1,4 +1,1 @@
-enum IdentityFormMode {
-  add,
-  edit,
-}
+enum IdentityFormMode { add, edit }

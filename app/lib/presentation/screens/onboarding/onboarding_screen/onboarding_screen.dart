@@ -46,24 +46,18 @@ class OnboardingScreen extends HookConsumerWidget {
     final state = ref.watch(onboardingControllerProvider);
     final controller = ref.read(onboardingControllerProvider.notifier);
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.initialize();
-        });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.initialize();
+      });
 
-        return null;
-      },
-      [],
-    );
+      return null;
+    }, []);
 
     if (state.isLoading || state.videoPlayerControllers.isEmpty) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: SizedBox(),
-      );
+      return const Scaffold(backgroundColor: Colors.black, body: SizedBox());
     }
 
     final pages = _buildPages(context);

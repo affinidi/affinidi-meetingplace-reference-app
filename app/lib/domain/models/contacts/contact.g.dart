@@ -133,7 +133,6 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       this(notificationBannerDismissed: notificationBannerDismissed);
 
   @override
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Contact(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
@@ -208,9 +207,9 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           : displayName as String?,
       badgeUpdateInProgress:
           badgeUpdateInProgress == const $CopyWithPlaceholder()
-              ? _value.badgeUpdateInProgress
-              // ignore: cast_nullable_to_non_nullable
-              : badgeUpdateInProgress as bool,
+          ? _value.badgeUpdateInProgress
+          // ignore: cast_nullable_to_non_nullable
+          : badgeUpdateInProgress as bool,
       badgeCount: badgeCount == const $CopyWithPlaceholder()
           ? _value.badgeCount
           // ignore: cast_nullable_to_non_nullable
@@ -229,9 +228,9 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           : lastKeepAliveMessage as DateTime?,
       notificationBannerDismissed:
           notificationBannerDismissed == const $CopyWithPlaceholder()
-              ? _value.notificationBannerDismissed
-              // ignore: cast_nullable_to_non_nullable
-              : notificationBannerDismissed as bool,
+          ? _value.notificationBannerDismissed
+          // ignore: cast_nullable_to_non_nullable
+          : notificationBannerDismissed as bool,
     );
   }
 }

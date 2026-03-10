@@ -8,10 +8,7 @@ import '../bottom_media_bar.dart';
 import '../image_preview.dart';
 
 class ImageViewScreen extends ConsumerStatefulWidget {
-  const ImageViewScreen({
-    super.key,
-    required this.imageBytes,
-  });
+  const ImageViewScreen({super.key, required this.imageBytes});
 
   final Uint8List? imageBytes;
 
@@ -37,8 +34,9 @@ class _ImageViewScreenState extends ConsumerState<ImageViewScreen> {
       final image = frame.image;
 
       // Sample the image at a lower resolution for performance
-      final byteData =
-          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      final byteData = await image.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      );
       if (byteData == null) return;
 
       final pixels = byteData.buffer.asUint8List();
@@ -87,9 +85,7 @@ class _ImageViewScreenState extends ConsumerState<ImageViewScreen> {
           ),
         ],
       ),
-      body: ImagePreview(
-        imageBytes: widget.imageBytes,
-      ),
+      body: ImagePreview(imageBytes: widget.imageBytes),
     );
   }
 }

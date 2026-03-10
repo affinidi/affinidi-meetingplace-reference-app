@@ -45,21 +45,9 @@ class FormRowIconText extends StatelessWidget {
       children: [
         ListTile(
           onTap: isCopiable ? () => _copyToClipboard(context, label) : null,
-          leading: LabelIcon(
-            icon: icon,
-            iconColor: iconColor,
-            label: label,
-          ),
-          title: Text(
-            label,
-            style: labelStyle,
-          ),
-          trailing: value != null
-              ? Text(
-                  value!,
-                  style: valueStyle,
-                )
-              : null,
+          leading: LabelIcon(icon: icon, iconColor: iconColor, label: label),
+          title: Text(label, style: labelStyle),
+          trailing: value != null ? Text(value!, style: valueStyle) : null,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
         ),
         if (helperText != null && helperText!.isNotEmpty)

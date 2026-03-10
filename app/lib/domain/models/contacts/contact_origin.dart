@@ -11,8 +11,7 @@ enum ContactOrigin {
   individualOfferRequested(3),
   groupOfferPublished(4),
   groupOfferRequested(5),
-  unknown(0),
-  ;
+  unknown(0);
 
   const ContactOrigin(this.value);
 

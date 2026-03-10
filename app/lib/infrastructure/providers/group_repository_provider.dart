@@ -19,8 +19,9 @@ part 'group_repository_provider.g.dart';
 final _groupsDatabaseProvider = FutureProvider<GroupsDatabase>((ref) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
   final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
 
   final database = GroupsDatabase(
@@ -35,12 +36,14 @@ final _groupsDatabaseProvider = FutureProvider<GroupsDatabase>((ref) async {
   return database;
 });
 
-final _groupsInMemoryDatabaseProvider =
-    FutureProvider<GroupsDatabase>((ref) async {
+final _groupsInMemoryDatabaseProvider = FutureProvider<GroupsDatabase>((
+  ref,
+) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
   final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
 
   final database = GroupsDatabase(
@@ -62,16 +65,12 @@ final _groupsInMemoryDatabaseProvider =
 /// - Keeps the repository alive across the app lifecycle.
 Future<model.GroupRepository> groupsRepositoryDrift(Ref ref) async {
   final database = await ref.read(_groupsDatabaseProvider.future);
-  return GroupsRepositoryDrift(
-    database: database,
-  );
+  return GroupsRepositoryDrift(database: database);
 }
 
 Future<model.GroupRepository> groupsRepositoryInMemoryDrift(Ref ref) async {
   final database = await ref.read(_groupsInMemoryDatabaseProvider.future);
-  return GroupsRepositoryDrift(
-    database: database,
-  );
+  return GroupsRepositoryDrift(database: database);
 }
 
 @Riverpod(keepAlive: true)

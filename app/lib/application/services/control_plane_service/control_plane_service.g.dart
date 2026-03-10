@@ -36,14 +36,14 @@ String _$controlPlaneServiceHash() =>
 @ProviderFor(ControlPlaneService)
 final controlPlaneServiceProvider =
     NotifierProvider<ControlPlaneService, ControlPlaneServiceState>.internal(
-  ControlPlaneService.new,
-  name: r'controlPlaneServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$controlPlaneServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ControlPlaneService.new,
+      name: r'controlPlaneServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$controlPlaneServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ControlPlaneService = Notifier<ControlPlaneServiceState>;
 // ignore_for_file: type=lint

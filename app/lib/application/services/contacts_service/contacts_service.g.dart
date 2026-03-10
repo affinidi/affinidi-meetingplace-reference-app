@@ -23,14 +23,14 @@ String _$contactsServiceHash() => r'67fbd49210ad48266581c20f56f997f8fdea6888';
 @ProviderFor(ContactsService)
 final contactsServiceProvider =
     NotifierProvider<ContactsService, ContactsServiceState>.internal(
-  ContactsService.new,
-  name: r'contactsServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$contactsServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ContactsService.new,
+      name: r'contactsServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$contactsServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ContactsService = Notifier<ContactsServiceState>;
 // ignore_for_file: type=lint

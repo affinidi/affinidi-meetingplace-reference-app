@@ -34,9 +34,7 @@ abstract class _$IdentityFormScreenController
     extends BuildlessAutoDisposeNotifier<IdentityFormScreenState> {
   late final String? identityId;
 
-  IdentityFormScreenState build(
-    String? identityId,
-  );
+  IdentityFormScreenState build(String? identityId);
 }
 
 /// See also [IdentityFormScreenController].
@@ -51,21 +49,15 @@ class IdentityFormScreenControllerFamily
   const IdentityFormScreenControllerFamily();
 
   /// See also [IdentityFormScreenController].
-  IdentityFormScreenControllerProvider call(
-    String? identityId,
-  ) {
-    return IdentityFormScreenControllerProvider(
-      identityId,
-    );
+  IdentityFormScreenControllerProvider call(String? identityId) {
+    return IdentityFormScreenControllerProvider(identityId);
   }
 
   @override
   IdentityFormScreenControllerProvider getProviderOverride(
     covariant IdentityFormScreenControllerProvider provider,
   ) {
-    return call(
-      provider.identityId,
-    );
+    return call(provider.identityId);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -85,24 +77,25 @@ class IdentityFormScreenControllerFamily
 
 /// See also [IdentityFormScreenController].
 class IdentityFormScreenControllerProvider
-    extends AutoDisposeNotifierProviderImpl<IdentityFormScreenController,
-        IdentityFormScreenState> {
+    extends
+        AutoDisposeNotifierProviderImpl<
+          IdentityFormScreenController,
+          IdentityFormScreenState
+        > {
   /// See also [IdentityFormScreenController].
-  IdentityFormScreenControllerProvider(
-    String? identityId,
-  ) : this._internal(
-          () => IdentityFormScreenController()..identityId = identityId,
-          from: identityFormScreenControllerProvider,
-          name: r'identityFormScreenControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$identityFormScreenControllerHash,
-          dependencies: IdentityFormScreenControllerFamily._dependencies,
-          allTransitiveDependencies:
-              IdentityFormScreenControllerFamily._allTransitiveDependencies,
-          identityId: identityId,
-        );
+  IdentityFormScreenControllerProvider(String? identityId)
+    : this._internal(
+        () => IdentityFormScreenController()..identityId = identityId,
+        from: identityFormScreenControllerProvider,
+        name: r'identityFormScreenControllerProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$identityFormScreenControllerHash,
+        dependencies: IdentityFormScreenControllerFamily._dependencies,
+        allTransitiveDependencies:
+            IdentityFormScreenControllerFamily._allTransitiveDependencies,
+        identityId: identityId,
+      );
 
   IdentityFormScreenControllerProvider._internal(
     super._createNotifier, {
@@ -120,9 +113,7 @@ class IdentityFormScreenControllerProvider
   IdentityFormScreenState runNotifierBuild(
     covariant IdentityFormScreenController notifier,
   ) {
-    return notifier.build(
-      identityId,
-    );
+    return notifier.build(identityId);
   }
 
   @override
@@ -142,8 +133,11 @@ class IdentityFormScreenControllerProvider
   }
 
   @override
-  AutoDisposeNotifierProviderElement<IdentityFormScreenController,
-      IdentityFormScreenState> createElement() {
+  AutoDisposeNotifierProviderElement<
+    IdentityFormScreenController,
+    IdentityFormScreenState
+  >
+  createElement() {
     return _IdentityFormScreenControllerProviderElement(this);
   }
 
@@ -171,13 +165,18 @@ mixin IdentityFormScreenControllerRef
 }
 
 class _IdentityFormScreenControllerProviderElement
-    extends AutoDisposeNotifierProviderElement<IdentityFormScreenController,
-        IdentityFormScreenState> with IdentityFormScreenControllerRef {
+    extends
+        AutoDisposeNotifierProviderElement<
+          IdentityFormScreenController,
+          IdentityFormScreenState
+        >
+    with IdentityFormScreenControllerRef {
   _IdentityFormScreenControllerProviderElement(super.provider);
 
   @override
   String? get identityId =>
       (origin as IdentityFormScreenControllerProvider).identityId;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

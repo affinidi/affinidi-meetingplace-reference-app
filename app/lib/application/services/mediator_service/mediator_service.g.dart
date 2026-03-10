@@ -23,14 +23,14 @@ String _$mediatorServiceHash() => r'59ab60881a851487557792f56781515f633037c4';
 @ProviderFor(MediatorService)
 final mediatorServiceProvider =
     NotifierProvider<MediatorService, MediatorServiceState>.internal(
-  MediatorService.new,
-  name: r'mediatorServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$mediatorServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      MediatorService.new,
+      name: r'mediatorServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$mediatorServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$MediatorService = Notifier<MediatorServiceState>;
 // ignore_for_file: type=lint

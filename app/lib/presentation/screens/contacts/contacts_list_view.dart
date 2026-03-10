@@ -8,7 +8,7 @@ class _ContactsListView extends ConsumerWidget {
   });
 
   final void Function({required Contact contact, required bool isSelected})
-      onContactTap;
+  onContactTap;
   final void Function({required Contact contact}) onContactDoubleTap;
   final void Function({required Contact contact}) onContactLongPress;
 
@@ -44,7 +44,7 @@ class _ContactListItem extends ConsumerWidget {
   final Contact contact;
 
   final void Function({required Contact contact, required bool isSelected})
-      onTap;
+  onTap;
   final void Function({required Contact contact}) onDoubleTap;
   final void Function({required Contact contact}) onLongPress;
 
@@ -65,9 +65,9 @@ class _ContactListItem extends ConsumerWidget {
     );
     final fullName = contact.card.displayName;
     final hasDisplayName = contact.displayName?.isNotEmpty ?? false;
-    final dateAdded =
-        DateFormat.yMMMd(Localizations.localeOf(context).toString())
-            .format(contact.dateAdded);
+    final dateAdded = DateFormat.yMMMd(
+      Localizations.localeOf(context).toString(),
+    ).format(contact.dateAdded);
     final statusColor = contact.getStatusColor(context, asAvatar: true);
 
     return Dismissible(
@@ -110,10 +110,7 @@ class _ContactListItem extends ConsumerWidget {
           borderRadius: BorderRadius.circular(15),
           child: InkWell(
             borderRadius: BorderRadius.circular(15),
-            onTap: () => onTap(
-              contact: contact,
-              isSelected: isSelected,
-            ),
+            onTap: () => onTap(contact: contact, isSelected: isSelected),
             onDoubleTap: () => onDoubleTap(contact: contact),
             onLongPress: () => onLongPress(contact: contact),
             child: ListTile(
@@ -126,10 +123,7 @@ class _ContactListItem extends ConsumerWidget {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    _ContactAvatar(
-                      contact: contact,
-                      isList: true,
-                    ),
+                    _ContactAvatar(contact: contact, isList: true),
                     if (contact.badgeCount > 0 || contact.isOobContact)
                       Positioned(
                         bottom: -5,
@@ -206,10 +200,8 @@ class _ContactListItem extends ConsumerWidget {
                   ? Checkbox(
                       value: isSelected,
                       visualDensity: VisualDensity.adaptivePlatformDensity,
-                      onChanged: (checked) => onTap(
-                        contact: contact,
-                        isSelected: isSelected,
-                      ),
+                      onChanged: (checked) =>
+                          onTap(contact: contact, isSelected: isSelected),
                     )
                   : null,
             ),

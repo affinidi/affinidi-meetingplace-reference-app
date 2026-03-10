@@ -125,9 +125,7 @@ class DashboardShellRouteData extends StatefulShellRouteData {
     StatefulNavigationShell navigationShell,
   ) {
     return NoTransitionPage(
-      child: ScaffoldWithNavBar(
-        navigationShell: navigationShell,
-      ),
+      child: ScaffoldWithNavBar(navigationShell: navigationShell),
     );
   }
 }

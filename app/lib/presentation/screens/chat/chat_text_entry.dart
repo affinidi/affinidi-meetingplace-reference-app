@@ -56,11 +56,7 @@ class _ChatTextEntry extends HookConsumerWidget {
               child: InkWell(
                 key: const Key('chat_add_media_button'),
                 radius: 60,
-                child: const Icon(
-                  Icons.add,
-                  size: 25,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.add, size: 25, color: Colors.white),
                 onTap: shouldDisable ? null : handleMediaSelection,
               ),
             ),
@@ -70,8 +66,9 @@ class _ChatTextEntry extends HookConsumerWidget {
                 child: TextFormField(
                   key: const Key('chat_message_input'),
                   enabled: !shouldDisable,
-                  onChanged:
-                      shouldDisable ? null : (text) => sendChatActivity(),
+                  onChanged: shouldDisable
+                      ? null
+                      : (text) => sendChatActivity(),
                   textInputAction: TextInputAction.send,
                   focusNode: focusNode,
                   onEditingComplete: shouldDisable ? null : sendMessage,
@@ -89,8 +86,9 @@ class _ChatTextEntry extends HookConsumerWidget {
                   decoration: context.chatInputDecoration.copyWith(
                     hintText: isGroupChat
                         ? context.l10n.chatTypeMessagePromptGroup
-                        : context.l10n
-                            .chatTypeMessagePrompt(otherPartyName ?? ''),
+                        : context.l10n.chatTypeMessagePrompt(
+                            otherPartyName ?? '',
+                          ),
                   ),
                   validator: MultiValidator([
                     ZalgoTextValidator(
@@ -117,11 +115,7 @@ class _ChatTextEntry extends HookConsumerWidget {
                 key: const Key('chat_send_button'),
                 radius: 60,
                 onTap: shouldDisable ? null : sendMessage,
-                child: const Icon(
-                  Icons.send,
-                  size: 25,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.send, size: 25, color: Colors.white),
               ),
             ),
           ],

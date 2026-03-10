@@ -35,10 +35,7 @@ abstract class _$PublishOfferScreenController
   late final String identityId;
   late final AppLocalizations l10n;
 
-  PublishOfferScreenState build(
-    String identityId,
-    AppLocalizations l10n,
-  );
+  PublishOfferScreenState build(String identityId, AppLocalizations l10n);
 }
 
 /// See also [PublishOfferScreenController].
@@ -57,20 +54,14 @@ class PublishOfferScreenControllerFamily
     String identityId,
     AppLocalizations l10n,
   ) {
-    return PublishOfferScreenControllerProvider(
-      identityId,
-      l10n,
-    );
+    return PublishOfferScreenControllerProvider(identityId, l10n);
   }
 
   @override
   PublishOfferScreenControllerProvider getProviderOverride(
     covariant PublishOfferScreenControllerProvider provider,
   ) {
-    return call(
-      provider.identityId,
-      provider.l10n,
-    );
+    return call(provider.identityId, provider.l10n);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -90,28 +81,28 @@ class PublishOfferScreenControllerFamily
 
 /// See also [PublishOfferScreenController].
 class PublishOfferScreenControllerProvider
-    extends AutoDisposeNotifierProviderImpl<PublishOfferScreenController,
-        PublishOfferScreenState> {
+    extends
+        AutoDisposeNotifierProviderImpl<
+          PublishOfferScreenController,
+          PublishOfferScreenState
+        > {
   /// See also [PublishOfferScreenController].
-  PublishOfferScreenControllerProvider(
-    String identityId,
-    AppLocalizations l10n,
-  ) : this._internal(
-          () => PublishOfferScreenController()
-            ..identityId = identityId
-            ..l10n = l10n,
-          from: publishOfferScreenControllerProvider,
-          name: r'publishOfferScreenControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$publishOfferScreenControllerHash,
-          dependencies: PublishOfferScreenControllerFamily._dependencies,
-          allTransitiveDependencies:
-              PublishOfferScreenControllerFamily._allTransitiveDependencies,
-          identityId: identityId,
-          l10n: l10n,
-        );
+  PublishOfferScreenControllerProvider(String identityId, AppLocalizations l10n)
+    : this._internal(
+        () => PublishOfferScreenController()
+          ..identityId = identityId
+          ..l10n = l10n,
+        from: publishOfferScreenControllerProvider,
+        name: r'publishOfferScreenControllerProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$publishOfferScreenControllerHash,
+        dependencies: PublishOfferScreenControllerFamily._dependencies,
+        allTransitiveDependencies:
+            PublishOfferScreenControllerFamily._allTransitiveDependencies,
+        identityId: identityId,
+        l10n: l10n,
+      );
 
   PublishOfferScreenControllerProvider._internal(
     super._createNotifier, {
@@ -131,10 +122,7 @@ class PublishOfferScreenControllerProvider
   PublishOfferScreenState runNotifierBuild(
     covariant PublishOfferScreenController notifier,
   ) {
-    return notifier.build(
-      identityId,
-      l10n,
-    );
+    return notifier.build(identityId, l10n);
   }
 
   @override
@@ -157,8 +145,11 @@ class PublishOfferScreenControllerProvider
   }
 
   @override
-  AutoDisposeNotifierProviderElement<PublishOfferScreenController,
-      PublishOfferScreenState> createElement() {
+  AutoDisposeNotifierProviderElement<
+    PublishOfferScreenController,
+    PublishOfferScreenState
+  >
+  createElement() {
     return _PublishOfferScreenControllerProviderElement(this);
   }
 
@@ -191,8 +182,12 @@ mixin PublishOfferScreenControllerRef
 }
 
 class _PublishOfferScreenControllerProviderElement
-    extends AutoDisposeNotifierProviderElement<PublishOfferScreenController,
-        PublishOfferScreenState> with PublishOfferScreenControllerRef {
+    extends
+        AutoDisposeNotifierProviderElement<
+          PublishOfferScreenController,
+          PublishOfferScreenState
+        >
+    with PublishOfferScreenControllerRef {
   _PublishOfferScreenControllerProviderElement(super.provider);
 
   @override
@@ -202,5 +197,6 @@ class _PublishOfferScreenControllerProviderElement
   AppLocalizations get l10n =>
       (origin as PublishOfferScreenControllerProvider).l10n;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

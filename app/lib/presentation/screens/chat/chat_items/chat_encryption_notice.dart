@@ -19,10 +19,9 @@ class _ChatEncryptionNoticeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textStyle = Theme.of(context)
-        .textTheme
-        .bodyMedium
-        ?.copyWith(color: colorScheme.onSurface);
+    final textStyle = Theme.of(
+      context,
+    ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

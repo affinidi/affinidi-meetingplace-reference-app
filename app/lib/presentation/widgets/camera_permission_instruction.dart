@@ -73,8 +73,9 @@ class CameraPermissionInstruction extends StatelessWidget {
                     style: TextStyle(color: colorScheme.onSurface),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side:
-                        BorderSide(color: colorScheme.onSurface.withAlpha(180)),
+                    side: BorderSide(
+                      color: colorScheme.onSurface.withAlpha(180),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: onOpenSettings,

@@ -6,7 +6,7 @@ import 'chat_screen_controller.dart';
 
 class ChatActivityProgressIndicator extends ConsumerWidget {
   ChatActivityProgressIndicator({super.key, required String contactId})
-      : _contactId = contactId;
+    : _contactId = contactId;
 
   final String _contactId;
   @override

@@ -7,13 +7,9 @@ extension ConnectionsScreenFilterExtensions on ConnectionsScreenFilter {
   Set<ConnectionOfferStatus> get statuses {
     switch (this) {
       case ConnectionsScreenFilter.offers:
-        return {
-          ConnectionOfferStatus.published,
-        };
+        return {ConnectionOfferStatus.published};
       case ConnectionsScreenFilter.claims:
-        return {
-          ConnectionOfferStatus.accepted,
-        };
+        return {ConnectionOfferStatus.accepted};
       case ConnectionsScreenFilter.complete:
         return {
           ConnectionOfferStatus.channelInaugurated,

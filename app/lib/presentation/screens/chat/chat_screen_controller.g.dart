@@ -34,9 +34,7 @@ abstract class _$ChatScreenController
     extends BuildlessAutoDisposeNotifier<ChatScreenState> {
   late final String contactId;
 
-  ChatScreenState build(
-    String contactId,
-  );
+  ChatScreenState build(String contactId);
 }
 
 /// Controller class for managing the state and logic of the chat screen.
@@ -73,21 +71,15 @@ class ChatScreenControllerFamily extends Family<ChatScreenState> {
   /// user interactions, and UI updates within the chat screen.
   ///
   /// Copied from [ChatScreenController].
-  ChatScreenControllerProvider call(
-    String contactId,
-  ) {
-    return ChatScreenControllerProvider(
-      contactId,
-    );
+  ChatScreenControllerProvider call(String contactId) {
+    return ChatScreenControllerProvider(contactId);
   }
 
   @override
   ChatScreenControllerProvider getProviderOverride(
     covariant ChatScreenControllerProvider provider,
   ) {
-    return call(
-      provider.contactId,
-    );
+    return call(provider.contactId);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -112,8 +104,9 @@ class ChatScreenControllerFamily extends Family<ChatScreenState> {
 /// user interactions, and UI updates within the chat screen.
 ///
 /// Copied from [ChatScreenController].
-class ChatScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
-    ChatScreenController, ChatScreenState> {
+class ChatScreenControllerProvider
+    extends
+        AutoDisposeNotifierProviderImpl<ChatScreenController, ChatScreenState> {
   /// Controller class for managing the state and logic of the chat screen.
   ///
   /// Extends [_$ChatScreenController] to provide reactive state management
@@ -121,21 +114,19 @@ class ChatScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
   /// user interactions, and UI updates within the chat screen.
   ///
   /// Copied from [ChatScreenController].
-  ChatScreenControllerProvider(
-    String contactId,
-  ) : this._internal(
-          () => ChatScreenController()..contactId = contactId,
-          from: chatScreenControllerProvider,
-          name: r'chatScreenControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$chatScreenControllerHash,
-          dependencies: ChatScreenControllerFamily._dependencies,
-          allTransitiveDependencies:
-              ChatScreenControllerFamily._allTransitiveDependencies,
-          contactId: contactId,
-        );
+  ChatScreenControllerProvider(String contactId)
+    : this._internal(
+        () => ChatScreenController()..contactId = contactId,
+        from: chatScreenControllerProvider,
+        name: r'chatScreenControllerProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$chatScreenControllerHash,
+        dependencies: ChatScreenControllerFamily._dependencies,
+        allTransitiveDependencies:
+            ChatScreenControllerFamily._allTransitiveDependencies,
+        contactId: contactId,
+      );
 
   ChatScreenControllerProvider._internal(
     super._createNotifier, {
@@ -150,12 +141,8 @@ class ChatScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
   final String contactId;
 
   @override
-  ChatScreenState runNotifierBuild(
-    covariant ChatScreenController notifier,
-  ) {
-    return notifier.build(
-      contactId,
-    );
+  ChatScreenState runNotifierBuild(covariant ChatScreenController notifier) {
+    return notifier.build(contactId);
   }
 
   @override
@@ -176,7 +163,7 @@ class ChatScreenControllerProvider extends AutoDisposeNotifierProviderImpl<
 
   @override
   AutoDisposeNotifierProviderElement<ChatScreenController, ChatScreenState>
-      createElement() {
+  createElement() {
     return _ChatScreenControllerProviderElement(this);
   }
 
@@ -204,12 +191,17 @@ mixin ChatScreenControllerRef
 }
 
 class _ChatScreenControllerProviderElement
-    extends AutoDisposeNotifierProviderElement<ChatScreenController,
-        ChatScreenState> with ChatScreenControllerRef {
+    extends
+        AutoDisposeNotifierProviderElement<
+          ChatScreenController,
+          ChatScreenState
+        >
+    with ChatScreenControllerRef {
   _ChatScreenControllerProviderElement(super.provider);
 
   @override
   String get contactId => (origin as ChatScreenControllerProvider).contactId;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

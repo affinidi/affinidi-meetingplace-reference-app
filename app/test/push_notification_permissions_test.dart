@@ -10,8 +10,9 @@ void main() {
     group('and app is locked', () {
       final isAuthenticated = false;
 
-      testWidgets('it does not request push notifications permissions',
-          (tester) async {
+      testWidgets('it does not request push notifications permissions', (
+        tester,
+      ) async {
         final pushNotificationMessaging = FakePushNotificationMessaging();
 
         await navigateToLocation(

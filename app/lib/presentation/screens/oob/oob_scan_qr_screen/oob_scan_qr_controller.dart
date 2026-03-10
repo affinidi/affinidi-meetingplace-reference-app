@@ -17,8 +17,9 @@ part 'oob_scan_qr_controller.g.dart';
 class OobScanQrController extends _$OobScanQrController {
   OobScanQrController() : super();
 
-  late final processOobQrLoadingController =
-      AsyncLoadingController.provider('processOobQrLoadingController');
+  late final processOobQrLoadingController = AsyncLoadingController.provider(
+    'processOobQrLoadingController',
+  );
   final logKey = 'OOBSCANQR';
 
   @override
@@ -36,10 +37,7 @@ class OobScanQrController extends _$OobScanQrController {
             ref.read(navigatorProvider).pop(next);
           });
         } else {
-          logger.info(
-            'User canceled OOB flow',
-            name: logKey,
-          );
+          logger.info('User canceled OOB flow', name: logKey);
         }
       },
       fireImmediately: true,
@@ -52,7 +50,9 @@ class OobScanQrController extends _$OobScanQrController {
       state = state.copyWith(isProcessing: true, scannedCode: qrData);
       await ref.read(processOobQrLoadingController.notifier).start(() async {
         try {
-          await ref.read(oOBServiceProvider.notifier).acceptOobFlow(
+          await ref
+              .read(oOBServiceProvider.notifier)
+              .acceptOobFlow(
                 qrData,
                 type: ref.read(environmentProvider).directInteractiveOobType,
               );

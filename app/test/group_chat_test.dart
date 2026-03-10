@@ -45,7 +45,8 @@ Future<void> navigateToGroupChatScreen(
     alreadyOnboarded: true,
     identities: [FakeIdentities.primaryIdentity],
     contacts: [FakeContacts.groupContact],
-    connectivity: connectivity ??
+    connectivity:
+        connectivity ??
         FakeConnectivity(
           initialConnectivityToReturn: [ConnectivityResult.wifi],
         ),
@@ -83,10 +84,7 @@ Future<void> simulateIncomingMessage(
   await tester.pumpAndSettle();
 }
 
-Future<void> submitMediaWithMessage(
-  WidgetTester tester,
-  String message,
-) async {
+Future<void> submitMediaWithMessage(WidgetTester tester, String message) async {
   final textInput = find.byKey(const Key('media_review_text_input'));
   await tester.enterText(textInput, message);
   await tester.pumpAndSettle();
@@ -342,8 +340,9 @@ void main() {
     });
 
     group('and clicking the add media button', () {
-      testWidgets('should show a menu with media and effects options',
-          (tester) async {
+      testWidgets('should show a menu with media and effects options', (
+        tester,
+      ) async {
         final l10n = await getL10n();
 
         await navigateToGroupChatScreen(
@@ -365,8 +364,9 @@ void main() {
 
       for (final effect in [Effect.balloons, Effect.confetti]) {
         group('and pressing on ${effect.name}', () {
-          testWidgets('should call sendEffect with ${effect.name} effect',
-              (tester) async {
+          testWidgets('should call sendEffect with ${effect.name} effect', (
+            tester,
+          ) async {
             final l10n = await getL10n();
             final effectLabel = effect == Effect.balloons
                 ? l10n.generalBalloons
@@ -392,8 +392,9 @@ void main() {
       }
 
       group('and pressing on photo', () {
-        testWidgets('should send photo and return to chat screen',
-            (tester) async {
+        testWidgets('should send photo and return to chat screen', (
+          tester,
+        ) async {
           final l10n = await getL10n();
           const message = 'Check out this photo!';
           final meetingPlaceChatSDK = FakeChatSdk();
@@ -430,8 +431,9 @@ void main() {
       });
 
       group('and pressing on camera', () {
-        testWidgets('should send photo and return to chat screen',
-            (tester) async {
+        testWidgets('should send photo and return to chat screen', (
+          tester,
+        ) async {
           final l10n = await getL10n();
           const message = 'Check out this photo!';
           final meetingPlaceChatSDK = FakeChatSdk();
@@ -478,8 +480,9 @@ void main() {
 
     group('and user is group admin', () {
       group('and a member requests to join', () {
-        testWidgets('it shows a concierge message for approval',
-            (tester) async {
+        testWidgets('it shows a concierge message for approval', (
+          tester,
+        ) async {
           final l10n = await getL10n();
           const memberName = 'Khoa Vo';
 
@@ -499,8 +502,9 @@ void main() {
           expect(find.text(l10n.genWordConciergeMessage), findsOneWidget);
         });
 
-        testWidgets('it shows the join request message with member name',
-            (tester) async {
+        testWidgets('it shows the join request message with member name', (
+          tester,
+        ) async {
           final l10n = await getL10n();
           const memberName = 'Khoa Vo';
 
@@ -517,8 +521,9 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          final expectedText =
-              l10n.chatRequestPermissionToJoinGroup(memberName);
+          final expectedText = l10n.chatRequestPermissionToJoinGroup(
+            memberName,
+          );
           expect(find.text(expectedText), findsOneWidget);
         });
 
@@ -544,77 +549,85 @@ void main() {
         });
 
         testWidgets(
-            'when approve button is pressed, it calls approveConnectionRequest',
-            (tester) async {
-          final l10n = await getL10n();
-          const memberName = 'Khoa Vo';
-          final meetingPlaceChatSDK = FakeChatSdk();
+          'when approve button is pressed, it calls approveConnectionRequest',
+          (tester) async {
+            final l10n = await getL10n();
+            const memberName = 'Khoa Vo';
+            final meetingPlaceChatSDK = FakeChatSdk();
 
-          await navigateToGroupChatScreen(
-            tester,
-            contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
-          );
+            await navigateToGroupChatScreen(
+              tester,
+              contactId: contactId,
+              meetingPlaceChatSDK: meetingPlaceChatSDK,
+            );
 
-          final simulatedMessage = meetingPlaceChatSDK.simulateJoinGroupRequest(
-            memberName: memberName,
-            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-          );
-          await tester.pumpAndSettle();
+            final simulatedMessage = meetingPlaceChatSDK
+                .simulateJoinGroupRequest(
+                  memberName: memberName,
+                  senderDid:
+                      FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+                  recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+                );
+            await tester.pumpAndSettle();
 
-          await tester.tap(find.text(l10n.generalApprove));
-          await tester.pumpAndSettle();
+            await tester.tap(find.text(l10n.generalApprove));
+            await tester.pumpAndSettle();
 
-          expect(
-            meetingPlaceChatSDK.approveConnectionRequestCalls,
-            hasLength(1),
-          );
-          final approveCall =
-              meetingPlaceChatSDK.approveConnectionRequestCalls.first;
-          final calledWithMessage = approveCall['message'] as ConciergeMessage;
-          expect(calledWithMessage.messageId, simulatedMessage.messageId);
-          expect(calledWithMessage.chatId, simulatedMessage.chatId);
-        });
+            expect(
+              meetingPlaceChatSDK.approveConnectionRequestCalls,
+              hasLength(1),
+            );
+            final approveCall =
+                meetingPlaceChatSDK.approveConnectionRequestCalls.first;
+            final calledWithMessage =
+                approveCall['message'] as ConciergeMessage;
+            expect(calledWithMessage.messageId, simulatedMessage.messageId);
+            expect(calledWithMessage.chatId, simulatedMessage.chatId);
+          },
+        );
 
         testWidgets(
-            'when reject button is pressed, it calls rejectConnectionRequest',
-            (tester) async {
-          final l10n = await getL10n();
-          const memberName = 'Khoa Vo';
-          final meetingPlaceChatSDK = FakeChatSdk();
+          'when reject button is pressed, it calls rejectConnectionRequest',
+          (tester) async {
+            final l10n = await getL10n();
+            const memberName = 'Khoa Vo';
+            final meetingPlaceChatSDK = FakeChatSdk();
 
-          await navigateToGroupChatScreen(
-            tester,
-            contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
-          );
+            await navigateToGroupChatScreen(
+              tester,
+              contactId: contactId,
+              meetingPlaceChatSDK: meetingPlaceChatSDK,
+            );
 
-          final simulatedMessage = meetingPlaceChatSDK.simulateJoinGroupRequest(
-            memberName: memberName,
-            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-          );
-          await tester.pumpAndSettle();
+            final simulatedMessage = meetingPlaceChatSDK
+                .simulateJoinGroupRequest(
+                  memberName: memberName,
+                  senderDid:
+                      FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+                  recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+                );
+            await tester.pumpAndSettle();
 
-          await tester.tap(find.text(l10n.generalReject));
-          await tester.pumpAndSettle();
+            await tester.tap(find.text(l10n.generalReject));
+            await tester.pumpAndSettle();
 
-          expect(
-            meetingPlaceChatSDK.rejectConnectionRequestCalls,
-            hasLength(1),
-          );
-          final rejectCall =
-              meetingPlaceChatSDK.rejectConnectionRequestCalls.first;
-          final calledWithMessage = rejectCall['message'] as ConciergeMessage;
-          expect(calledWithMessage.messageId, simulatedMessage.messageId);
-          expect(calledWithMessage.chatId, simulatedMessage.chatId);
-        });
+            expect(
+              meetingPlaceChatSDK.rejectConnectionRequestCalls,
+              hasLength(1),
+            );
+            final rejectCall =
+                meetingPlaceChatSDK.rejectConnectionRequestCalls.first;
+            final calledWithMessage = rejectCall['message'] as ConciergeMessage;
+            expect(calledWithMessage.messageId, simulatedMessage.messageId);
+            expect(calledWithMessage.chatId, simulatedMessage.chatId);
+          },
+        );
       });
 
       group('and profile update is requested', () {
-        testWidgets('shows concierge message with update prompt',
-            (WidgetTester tester) async {
+        testWidgets('shows concierge message with update prompt', (
+          WidgetTester tester,
+        ) async {
           final contactId = FakeContacts.groupContact.id;
           final meetingPlaceChatSDK = FakeChatSdk();
           final l10n = await getL10n();
@@ -637,8 +650,9 @@ void main() {
           );
         });
 
-        testWidgets('shows Yes, Later, No buttons',
-            (WidgetTester tester) async {
+        testWidgets('shows Yes, Later, No buttons', (
+          WidgetTester tester,
+        ) async {
           final contactId = FakeContacts.groupContact.id;
           final meetingPlaceChatSDK = FakeChatSdk();
           final l10n = await getL10n();
@@ -661,41 +675,44 @@ void main() {
         });
 
         testWidgets(
-            'Yes button calls sendContactDetailsUpdate with correct message',
-            (WidgetTester tester) async {
-          final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
-          final l10n = await getL10n();
+          'Yes button calls sendContactDetailsUpdate with correct message',
+          (WidgetTester tester) async {
+            final contactId = FakeContacts.groupContact.id;
+            final meetingPlaceChatSDK = FakeChatSdk();
+            final l10n = await getL10n();
 
-          await navigateToGroupChatScreen(
-            tester,
-            contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
-          );
+            await navigateToGroupChatScreen(
+              tester,
+              contactId: contactId,
+              meetingPlaceChatSDK: meetingPlaceChatSDK,
+            );
 
-          final simulatedMessage =
-              meetingPlaceChatSDK.simulateProfileUpdateRequest(
-            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-          );
-          await tester.pumpAndSettle();
+            final simulatedMessage = meetingPlaceChatSDK
+                .simulateProfileUpdateRequest(
+                  senderDid:
+                      FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+                  recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+                );
+            await tester.pumpAndSettle();
 
-          await tester.tap(find.text(l10n.genWordYes));
-          await tester.pumpAndSettle();
+            await tester.tap(find.text(l10n.genWordYes));
+            await tester.pumpAndSettle();
 
-          expect(
-            meetingPlaceChatSDK.sendContactDetailsUpdateCalls,
-            hasLength(1),
-          );
-          final updateCall =
-              meetingPlaceChatSDK.sendContactDetailsUpdateCalls.first;
-          final calledWithMessage = updateCall['message'] as ConciergeMessage;
-          expect(calledWithMessage.messageId, simulatedMessage.messageId);
-          expect(calledWithMessage.chatId, simulatedMessage.chatId);
-        });
+            expect(
+              meetingPlaceChatSDK.sendContactDetailsUpdateCalls,
+              hasLength(1),
+            );
+            final updateCall =
+                meetingPlaceChatSDK.sendContactDetailsUpdateCalls.first;
+            final calledWithMessage = updateCall['message'] as ConciergeMessage;
+            expect(calledWithMessage.messageId, simulatedMessage.messageId);
+            expect(calledWithMessage.chatId, simulatedMessage.chatId);
+          },
+        );
 
-        testWidgets('Later button removes the profile update message from UI',
-            (WidgetTester tester) async {
+        testWidgets('Later button removes the profile update message from UI', (
+          WidgetTester tester,
+        ) async {
           final contactId = FakeContacts.groupContact.id;
           final meetingPlaceChatSDK = FakeChatSdk();
           final l10n = await getL10n();
@@ -727,38 +744,40 @@ void main() {
         });
 
         testWidgets(
-            'No button calls cancelUpdatingContactDetails with correct message',
-            (WidgetTester tester) async {
-          final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
-          final l10n = await getL10n();
+          'No button calls cancelUpdatingContactDetails with correct message',
+          (WidgetTester tester) async {
+            final contactId = FakeContacts.groupContact.id;
+            final meetingPlaceChatSDK = FakeChatSdk();
+            final l10n = await getL10n();
 
-          await navigateToGroupChatScreen(
-            tester,
-            contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
-          );
+            await navigateToGroupChatScreen(
+              tester,
+              contactId: contactId,
+              meetingPlaceChatSDK: meetingPlaceChatSDK,
+            );
 
-          final simulatedMessage =
-              meetingPlaceChatSDK.simulateProfileUpdateRequest(
-            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-          );
-          await tester.pumpAndSettle();
+            final simulatedMessage = meetingPlaceChatSDK
+                .simulateProfileUpdateRequest(
+                  senderDid:
+                      FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+                  recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+                );
+            await tester.pumpAndSettle();
 
-          await tester.tap(find.text(l10n.genWordNo));
-          await tester.pumpAndSettle();
+            await tester.tap(find.text(l10n.genWordNo));
+            await tester.pumpAndSettle();
 
-          expect(
-            meetingPlaceChatSDK.cancelUpdatingContactDetailsCalls,
-            hasLength(1),
-          );
-          final cancelCall =
-              meetingPlaceChatSDK.cancelUpdatingContactDetailsCalls.first;
-          final calledWithMessage = cancelCall['message'] as ConciergeMessage;
-          expect(calledWithMessage.messageId, simulatedMessage.messageId);
-          expect(calledWithMessage.chatId, simulatedMessage.chatId);
-        });
+            expect(
+              meetingPlaceChatSDK.cancelUpdatingContactDetailsCalls,
+              hasLength(1),
+            );
+            final cancelCall =
+                meetingPlaceChatSDK.cancelUpdatingContactDetailsCalls.first;
+            final calledWithMessage = cancelCall['message'] as ConciergeMessage;
+            expect(calledWithMessage.messageId, simulatedMessage.messageId);
+            expect(calledWithMessage.chatId, simulatedMessage.chatId);
+          },
+        );
       });
 
       group('and member joins the group', () {

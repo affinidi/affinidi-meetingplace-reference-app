@@ -7,15 +7,19 @@ class _MediatorSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
-    final availableMediators =
-        ref.watch(provider.select((state) => state.availableMediators));
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
+    final availableMediators = ref.watch(
+      provider.select((state) => state.availableMediators),
+    );
 
     final controller = ref.read(provider.notifier);
 
-    final selectedMediatorName = ref
-        .watch(provider.select((state) => state.formData.selectedMediatorName));
+    final selectedMediatorName = ref.watch(
+      provider.select((state) => state.formData.selectedMediatorName),
+    );
 
     Future<void> selectMediator() async {
       if (!context.mounted) return;

@@ -16,14 +16,14 @@ String _$pushNotificationsHandlerHash() =>
 @ProviderFor(PushNotificationsHandler)
 final pushNotificationsHandlerProvider =
     AsyncNotifierProvider<PushNotificationsHandler, void>.internal(
-  PushNotificationsHandler.new,
-  name: r'pushNotificationsHandlerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$pushNotificationsHandlerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      PushNotificationsHandler.new,
+      name: r'pushNotificationsHandlerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$pushNotificationsHandlerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$PushNotificationsHandler = AsyncNotifier<void>;
 // ignore_for_file: type=lint

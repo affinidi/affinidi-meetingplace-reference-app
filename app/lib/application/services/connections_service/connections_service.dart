@@ -73,10 +73,7 @@ class ConnectionsService extends _$ConnectionsService {
   /// - `Future<void>` completes when the connections have been fetched and
   ///   state has been updated.
   Future<void> fetchConnections() async {
-    _logger.info(
-      'Calling SDK listConnectionOffers',
-      name: _logKey,
-    );
+    _logger.info('Calling SDK listConnectionOffers', name: _logKey);
 
     try {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
@@ -211,10 +208,7 @@ class ConnectionsService extends _$ConnectionsService {
 
       await sdk.approveConnectionRequest(channel: channel);
 
-      _logger.info(
-        'Connection request approved successfully',
-        name: _logKey,
-      );
+      _logger.info('Connection request approved successfully', name: _logKey);
     } catch (error, stackTrace) {
       _logger.error(
         'Failed to approve connection offer',
@@ -276,10 +270,7 @@ class ConnectionsService extends _$ConnectionsService {
   /// Returns:
   /// - `Future<void>` completes when validation finishes and state is updated.
   Future<void> validateOfferPhrase(String phrase) async {
-    _logger.info(
-      'Validating offer phrase: $phrase',
-      name: _logKey,
-    );
+    _logger.info('Validating offer phrase: $phrase', name: _logKey);
 
     try {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
@@ -321,10 +312,7 @@ class ConnectionsService extends _$ConnectionsService {
     PublishOfferFormData data, {
     required Identity identity,
   }) async {
-    _logger.info(
-      'Submitting offer: ${data.headline}',
-      name: _logKey,
-    );
+    _logger.info('Submitting offer: ${data.headline}', name: _logKey);
 
     try {
       final isGroupOffer = data.isGroupOffer;
@@ -343,14 +331,9 @@ class ConnectionsService extends _$ConnectionsService {
         externalRef: identity.id,
       );
 
-      _logger.info(
-        'Offer registered successfully',
-        name: _logKey,
-      );
+      _logger.info('Offer registered successfully', name: _logKey);
       await fetchConnections();
-      state = state.copyWith(
-        publishedOffer: result.connectionOffer,
-      );
+      state = state.copyWith(publishedOffer: result.connectionOffer);
 
       if (isGroupOffer) {
         await _announceGroupChannelIsReady(result);
@@ -446,10 +429,7 @@ class ConnectionsService extends _$ConnectionsService {
     final result = await sdk.findOffer(mnemonic: mnemonic);
 
     if (result.errorCode != null) {
-      throw AppException(
-        'Unable to find offer',
-        code: result.errorCode!.name,
-      );
+      throw AppException('Unable to find offer', code: result.errorCode!.name);
     }
 
     if (result.connectionOffer == null) {
@@ -482,10 +462,7 @@ class ConnectionsService extends _$ConnectionsService {
     final result = await sdk.findOffer(mnemonic: mnemonic);
 
     if (result.errorCode != null) {
-      throw AppException(
-        'Unable to find offer',
-        code: result.errorCode!.name,
-      );
+      throw AppException('Unable to find offer', code: result.errorCode!.name);
     }
 
     if (result.connectionOffer == null) {

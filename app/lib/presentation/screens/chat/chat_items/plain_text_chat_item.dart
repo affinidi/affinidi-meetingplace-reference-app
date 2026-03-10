@@ -6,11 +6,11 @@ class _PlainTextChatItem extends ConsumerWidget {
     required String contactId,
     required int index,
     required Color chatItemColor,
-  })  : _chatItem = chatItem,
-        _contactId = contactId,
-        _index = index,
-        _chatItemColor = chatItemColor,
-        super(key: ValueKey('chat_message_${chatItem.messageId}'));
+  }) : _chatItem = chatItem,
+       _contactId = contactId,
+       _index = index,
+       _chatItemColor = chatItemColor,
+       super(key: ValueKey('chat_message_${chatItem.messageId}'));
 
   final chat.Message _chatItem;
   final String _contactId;
@@ -24,9 +24,12 @@ class _PlainTextChatItem extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final chatItem = ref.watch(
       provider.select(
-        (state) => (state.messages
-                .firstWhereOrNull((m) => m.messageId == _chatItem.messageId) ??
-            _chatItem) as chat.Message,
+        (state) =>
+            (state.messages.firstWhereOrNull(
+                      (m) => m.messageId == _chatItem.messageId,
+                    ) ??
+                    _chatItem)
+                as chat.Message,
       ),
     );
 
@@ -57,7 +60,8 @@ class _PlainTextChatItem extends ConsumerWidget {
 
     final emojiCount = chatItem.value.countEmojis;
     final isOnlyEmojiMessage = chatItem.value.isOnlyEmojis;
-    final shouldScaleEmojis = isOnlyEmojiMessage &&
+    final shouldScaleEmojis =
+        isOnlyEmojiMessage &&
         emojiCount > 0 &&
         emojiCount <= _maximumEmojisForLargeScale;
     final attachments = chatItem.attachments;
@@ -100,11 +104,9 @@ class _PlainTextChatItem extends ConsumerWidget {
 }
 
 class _TextMessage extends StatelessWidget {
-  const _TextMessage({
-    required String text,
-    required bool shouldScaleEmojis,
-  })  : _text = text,
-        _shouldScaleEmojis = shouldScaleEmojis;
+  const _TextMessage({required String text, required bool shouldScaleEmojis})
+    : _text = text,
+      _shouldScaleEmojis = shouldScaleEmojis;
 
   final String _text;
   final bool _shouldScaleEmojis;
@@ -137,10 +139,10 @@ class _AttachmentWidget extends HookConsumerWidget {
     required chat.Attachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
-  })  : _attachment = attachment,
-        _isFromMe = isFromMe,
-        _chatItemColor = chatItemColor,
-        super(key: ValueKey('chat_attachment_${attachment.id!}'));
+  }) : _attachment = attachment,
+       _isFromMe = isFromMe,
+       _chatItemColor = chatItemColor,
+       super(key: ValueKey('chat_attachment_${attachment.id!}'));
 
   final chat.Attachment _attachment;
   final bool _isFromMe;

@@ -55,11 +55,7 @@ class FormRowTextField extends StatelessWidget {
       children: [
         ListTile(
           leading: (icon != null)
-              ? LabelIcon(
-                  icon: icon,
-                  iconColor: color,
-                  label: label,
-                )
+              ? LabelIcon(icon: icon, iconColor: color, label: label)
               : null,
           title: Row(
             children: [

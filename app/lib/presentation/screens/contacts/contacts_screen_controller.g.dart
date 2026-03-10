@@ -13,14 +13,14 @@ String _$contactsScreenControllerHash() =>
 @ProviderFor(ContactsScreenController)
 final contactsScreenControllerProvider =
     NotifierProvider<ContactsScreenController, ContactsScreenState>.internal(
-  ContactsScreenController.new,
-  name: r'contactsScreenControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$contactsScreenControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ContactsScreenController.new,
+      name: r'contactsScreenControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$contactsScreenControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ContactsScreenController = Notifier<ContactsScreenState>;
 // ignore_for_file: type=lint

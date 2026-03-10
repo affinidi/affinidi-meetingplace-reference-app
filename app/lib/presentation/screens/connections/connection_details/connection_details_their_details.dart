@@ -19,12 +19,15 @@ class _TheirDetailsPanel extends ConsumerWidget {
     );
     final theirDidSha256 = theirDid?.toDidSha256;
 
-    final isDebugMode =
-        ref.watch(provider.select((state) => state.isDebugMode));
-    final offerLink = ref
-        .watch(provider.select((state) => state.connection?.offerLink ?? ''));
-    final groupId =
-        ref.watch(provider.select((state) => state.group?.id ?? ''));
+    final isDebugMode = ref.watch(
+      provider.select((state) => state.isDebugMode),
+    );
+    final offerLink = ref.watch(
+      provider.select((state) => state.connection?.offerLink ?? ''),
+    );
+    final groupId = ref.watch(
+      provider.select((state) => state.group?.id ?? ''),
+    );
 
     return FormCard(
       title: context.l10n.theirDetails,

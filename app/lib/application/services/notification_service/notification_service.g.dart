@@ -21,14 +21,14 @@ String _$notificationServiceHash() =>
 @ProviderFor(NotificationService)
 final notificationServiceProvider =
     NotifierProvider<NotificationService, NotificationServiceState>.internal(
-  NotificationService.new,
-  name: r'notificationServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$notificationServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      NotificationService.new,
+      name: r'notificationServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$notificationServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$NotificationService = Notifier<NotificationServiceState>;
 // ignore_for_file: type=lint

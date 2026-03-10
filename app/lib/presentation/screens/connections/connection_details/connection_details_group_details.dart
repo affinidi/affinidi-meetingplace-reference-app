@@ -14,16 +14,20 @@ class _GroupDetailsPanel extends ConsumerWidget {
     final email = groupAdminCard?.email;
     final mobile = groupAdminCard?.mobile;
 
-    final adminDid =
-        ref.watch(provider.select((state) => state.group?.ownerDid));
+    final adminDid = ref.watch(
+      provider.select((state) => state.group?.ownerDid),
+    );
     final adminDidSha256 = adminDid?.toDidSha256;
 
-    final isDebugMode =
-        ref.watch(provider.select((state) => state.isDebugMode));
-    final offerLink = ref
-        .watch(provider.select((state) => state.connection?.offerLink ?? ''));
-    final groupId =
-        ref.watch(provider.select((state) => state.group?.id ?? ''));
+    final isDebugMode = ref.watch(
+      provider.select((state) => state.isDebugMode),
+    );
+    final offerLink = ref.watch(
+      provider.select((state) => state.connection?.offerLink ?? ''),
+    );
+    final groupId = ref.watch(
+      provider.select((state) => state.group?.id ?? ''),
+    );
 
     final items = <Widget>[];
 

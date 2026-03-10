@@ -13,8 +13,9 @@ String _$imagePickerHash() => r'7877699a862be48e962306635347623c45e91971';
 final imagePickerProvider = AutoDisposeProvider<ImagePicker>.internal(
   imagePicker,
   name: r'imagePickerProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$imagePickerHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$imagePickerHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

@@ -10,17 +10,13 @@ part 'authentication_screen_controller.g.dart';
 class AuthenticationScreenController extends _$AuthenticationScreenController {
   @override
   AuthenticationScreenState build() {
-    ref.listen(
-      authenticationServiceProvider,
-      (previous, next) {
-        if (previous != null && !next.isAuthenticated && !next.isLoading) {
-          Future.microtask(() {
-            state = state.copyWith(isError: true);
-          });
-        }
-      },
-      fireImmediately: true,
-    );
+    ref.listen(authenticationServiceProvider, (previous, next) {
+      if (previous != null && !next.isAuthenticated && !next.isLoading) {
+        Future.microtask(() {
+          state = state.copyWith(isError: true);
+        });
+      }
+    }, fireImmediately: true);
     return const AuthenticationScreenState();
   }
 
@@ -28,8 +24,9 @@ class AuthenticationScreenController extends _$AuthenticationScreenController {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true);
     try {
-      final extraDelayAtLaunch =
-          ref.read(environmentProvider).extraDelayAtLaunchInMilliseconds;
+      final extraDelayAtLaunch = ref
+          .read(environmentProvider)
+          .extraDelayAtLaunchInMilliseconds;
       if (extraDelayAtLaunch > 0) {
         await Future<void>.delayed(Duration(milliseconds: extraDelayAtLaunch));
       }

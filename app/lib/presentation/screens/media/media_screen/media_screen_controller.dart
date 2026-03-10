@@ -37,32 +37,30 @@ class MediaScreenController extends _$MediaScreenController {
 
     Future(() => _initCamera(cameraLensDirection));
 
-    ref.listen(
-      cameraServiceProvider,
-      (prev, next) {
-        final becameAvailable =
-            prev?.isAvailable != true && next.isAvailable == true;
-        final permissionJustGranted =
-            prev?.permissionGranted != true && next.permissionGranted == true;
+    ref.listen(cameraServiceProvider, (prev, next) {
+      final becameAvailable =
+          prev?.isAvailable != true && next.isAvailable == true;
+      final permissionJustGranted =
+          prev?.permissionGranted != true && next.permissionGranted == true;
 
-        if (becameAvailable || permissionJustGranted) {
-          _initializeMediaSource(
-            isCameraAvailable: next.isAvailable ?? false,
-            useCamera: useCamera,
-            cameraLensDirection: cameraLensDirection,
-          );
-        }
-
-        state = state.copyWith(
-          cameraController: next.controller,
+      if (becameAvailable || permissionJustGranted) {
+        _initializeMediaSource(
           isCameraAvailable: next.isAvailable ?? false,
-          isFrontCamera: next.controller?.description.lensDirection ==
-              CameraLensDirection.front,
-          isLoading: false,
-          permissionGranted: next.permissionGranted,
+          useCamera: useCamera,
+          cameraLensDirection: cameraLensDirection,
         );
-      },
-    );
+      }
+
+      state = state.copyWith(
+        cameraController: next.controller,
+        isCameraAvailable: next.isAvailable ?? false,
+        isFrontCamera:
+            next.controller?.description.lensDirection ==
+            CameraLensDirection.front,
+        isLoading: false,
+        permissionGranted: next.permissionGranted,
+      );
+    });
 
     return MediaScreenState(isLoading: true);
   }
@@ -116,9 +114,7 @@ class MediaScreenController extends _$MediaScreenController {
         isLoading: false,
       );
     } else {
-      state = state.copyWith(
-        isLoading: false,
-      );
+      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -135,9 +131,7 @@ class MediaScreenController extends _$MediaScreenController {
     if (isCameraAvailable && useCamera) {
       unawaited(_initCamera(cameraLensDirection));
     } else {
-      unawaited(
-        pickFromGallery(),
-      );
+      unawaited(pickFromGallery());
     }
   }
 
@@ -160,14 +154,9 @@ class MediaScreenController extends _$MediaScreenController {
         final cameraUnavailable = camState.isAvailable == false;
 
         if (isIosPlatform && permissionGranted && cameraUnavailable) {
-          unawaited(
-            pickFromGallery(),
-          );
+          unawaited(pickFromGallery());
         }
-        state = state.copyWith(
-          isCameraAvailable: false,
-          isLoading: false,
-        );
+        state = state.copyWith(isCameraAvailable: false, isLoading: false);
         return;
       }
 
@@ -194,10 +183,7 @@ class MediaScreenController extends _$MediaScreenController {
         stackTrace: stackTrace,
         name: _logKey,
       );
-      state = state.copyWith(
-        isCameraAvailable: false,
-        isLoading: false,
-      );
+      state = state.copyWith(isCameraAvailable: false, isLoading: false);
     }
   }
 

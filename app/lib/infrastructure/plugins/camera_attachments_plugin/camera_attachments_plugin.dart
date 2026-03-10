@@ -20,7 +20,7 @@ import 'camera_image_attachment.dart';
 /// - Supports full-screen image viewing via [ImageViewScreen]
 class CameraAttachmentsPlugin implements AttachmentPlugin {
   CameraAttachmentsPlugin({required BaseCacheManager cacheManager})
-      : _cacheManager = cacheManager;
+    : _cacheManager = cacheManager;
 
   static const _pluginName = 'mpx_camera_attachment_plugin';
 
@@ -80,11 +80,10 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
     required Attachment attachment,
     required bool isFromMe,
     Color? chatItemColor,
-  }) =>
-      _CameraAttachmentWidget(
-        attachment: attachment,
-        cacheManager: _cacheManager,
-      );
+  }) => _CameraAttachmentWidget(
+    attachment: attachment,
+    cacheManager: _cacheManager,
+  );
 
   /// Renders multiple camera attachments in a scrollable list.
   ///
@@ -95,11 +94,10 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
     required List<Attachment> attachments,
     required bool isFromMe,
     Color? chatItemColor,
-  }) =>
-      _ListCameraAttachmentsWidget(
-        attachments: attachments,
-        cacheManager: _cacheManager,
-      );
+  }) => _ListCameraAttachmentsWidget(
+    attachments: attachments,
+    cacheManager: _cacheManager,
+  );
 
   /// Returns `true` if the attachment format matches this plugin.
   @override
@@ -125,8 +123,8 @@ class _ListCameraAttachmentsWidget extends StatelessWidget {
   const _ListCameraAttachmentsWidget({
     required List<Attachment> attachments,
     required BaseCacheManager cacheManager,
-  })  : _attachments = attachments,
-        _cacheManager = cacheManager;
+  }) : _attachments = attachments,
+       _cacheManager = cacheManager;
 
   final List<Attachment> _attachments;
   final BaseCacheManager _cacheManager;
@@ -157,8 +155,8 @@ class _CameraAttachmentWidget extends StatelessWidget {
   _CameraAttachmentWidget({
     required Attachment attachment,
     required BaseCacheManager cacheManager,
-  })  : _attachment = attachment,
-        _cacheManager = cacheManager;
+  }) : _attachment = attachment,
+       _cacheManager = cacheManager;
 
   final Attachment _attachment;
   final BaseCacheManager _cacheManager;
@@ -174,14 +172,10 @@ class _CameraAttachmentWidget extends StatelessWidget {
       width: 200,
       child: GestureDetector(
         onTap: () {
-          Navigator.of(
-            context,
-            rootNavigator: true,
-          ).push<ImageViewScreen>(
+          Navigator.of(context, rootNavigator: true).push<ImageViewScreen>(
             MaterialPageRoute(
-              builder: (context) => ImageViewScreen(
-                imageBytes: base64.decode(imageDataBase64),
-              ),
+              builder: (context) =>
+                  ImageViewScreen(imageBytes: base64.decode(imageDataBase64)),
             ),
           );
         },

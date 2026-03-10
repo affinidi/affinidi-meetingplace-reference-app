@@ -15,14 +15,14 @@ String _$permissionServiceHash() => r'19b92322798ea7fd375e96ef01c7cc2626892ad5';
 @ProviderFor(permissionService)
 final permissionServiceProvider =
     AutoDisposeProvider<PermissionService>.internal(
-  permissionService,
-  name: r'permissionServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$permissionServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      permissionService,
+      name: r'permissionServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$permissionServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element

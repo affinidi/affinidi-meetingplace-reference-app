@@ -29,10 +29,10 @@ class InlineAsyncLoadingStatus extends HookConsumerWidget
     required Widget child,
     void Function()? retry,
     String? loadingMessage,
-  })  : _retry = retry,
-        _child = child,
-        _initialLoading = initialLoading,
-        _loadingMessage = loadingMessage;
+  }) : _retry = retry,
+       _child = child,
+       _initialLoading = initialLoading,
+       _loadingMessage = loadingMessage;
 
   final ProviderListenable<AsyncValue<void>> _provider;
   final String? _loadingMessage;
@@ -124,44 +124,35 @@ class InlineAsyncLoadingStatus extends HookConsumerWidget
             ),
           )
         : errorText.value != null
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    spacing: 24,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        errorText.value ?? l10n.error('other'),
-                        textAlign: TextAlign.center,
-                      ),
-                      if (shouldShowRetryButton.value)
-                        _RetryButton(
-                          onPressed: _retry!,
-                          text: l10n.generalRetry,
-                        ),
-                    ],
+        ? Center(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                spacing: 24,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    errorText.value ?? l10n.error('other'),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              )
-            : _child;
+                  if (shouldShowRetryButton.value)
+                    _RetryButton(onPressed: _retry!, text: l10n.generalRetry),
+                ],
+              ),
+            ),
+          )
+        : _child;
   }
 }
 
 class _RetryButton extends StatelessWidget {
-  const _RetryButton({
-    required this.onPressed,
-    required this.text,
-  });
+  const _RetryButton({required this.onPressed, required this.text});
 
   final void Function() onPressed;
   final String text;
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: onPressed,
-      child: Text(text),
-    );
+    return FilledButton(onPressed: onPressed, child: Text(text));
   }
 }

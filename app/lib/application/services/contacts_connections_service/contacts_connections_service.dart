@@ -22,8 +22,9 @@ part 'contacts_connections_service.g.dart';
 class ContactsConnectionsService {
   ContactsConnectionsService(Ref ref) {
     final contactsServiceNotifier = ref.read(contactsServiceProvider.notifier);
-    final connectionsServiceNotifier =
-        ref.read(connectionsServiceProvider.notifier);
+    final connectionsServiceNotifier = ref.read(
+      connectionsServiceProvider.notifier,
+    );
 
     connectionsServiceNotifier.onGroupOfferChannelInaugurated.listen((channel) {
       Future(() {

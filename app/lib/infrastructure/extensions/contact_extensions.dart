@@ -58,11 +58,11 @@ extension ContactExtensions on Contact {
     required BaseCacheManager cacheManager,
   }) =>
       (otherPartyCard != null && (otherPartyCard!.profilePic ?? '').isNotEmpty)
-          ? CachedBase64Image(
-              otherPartyCard!.profilePic!,
-              cacheManager: cacheManager,
-            )
-          : defaultProfileImage;
+      ? CachedBase64Image(
+          otherPartyCard!.profilePic!,
+          cacheManager: cacheManager,
+        )
+      : defaultProfileImage;
 
   bool get isOobContact => origin == ContactOrigin.directInteractive;
 }

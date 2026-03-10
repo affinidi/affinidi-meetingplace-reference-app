@@ -21,8 +21,7 @@ class LoadingMessageStyleTheme {
 enum LoadingMessageStyle {
   complete,
   progress,
-  error,
-  ;
+  error;
 
   LoadingMessageStyleTheme theme(BuildContext context) {
     switch (this) {
@@ -71,9 +70,9 @@ class ModalAsyncLoadingStatus extends HookConsumerWidget
     String? loadingMessage,
     String? successMessage,
     LoadingMessageStyle successMessageStyle = LoadingMessageStyle.complete,
-  })  : _successMessageStyle = successMessageStyle,
-        _successMessage = successMessage,
-        _loadingMessage = loadingMessage;
+  }) : _successMessageStyle = successMessageStyle,
+       _successMessage = successMessage,
+       _loadingMessage = loadingMessage;
 
   final ProviderListenable<AsyncValue<void>> _provider;
   final String? _loadingMessage;
@@ -133,8 +132,9 @@ class ModalAsyncLoadingStatus extends HookConsumerWidget
       SnackBar(
         content: Text(
           errorMessage,
-          style:
-              context.textTheme.bodyMedium?.copyWith(color: errorTheme.color),
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: errorTheme.color,
+          ),
         ),
         backgroundColor: errorTheme.backgroundColor,
       ),

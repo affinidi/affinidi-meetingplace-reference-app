@@ -7,8 +7,10 @@ class _OfferBottomContainer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
     final controller = ref.read(provider.notifier);
     final canPublish = ref.watch(provider.canPublish);
 

@@ -18,17 +18,16 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
 
   @override
   ConnectionsScreenState build() {
-    ref.listen(
-      identitiesServiceProvider.currentIdentityOrPrimary,
-      (prev, next) {
-        if (prev == next) return;
+    ref.listen(identitiesServiceProvider.currentIdentityOrPrimary, (
+      prev,
+      next,
+    ) {
+      if (prev == next) return;
 
-        Future.microtask(() {
-          state = state.copyWith(identity: next);
-        });
-      },
-      fireImmediately: true,
-    );
+      Future.microtask(() {
+        state = state.copyWith(identity: next);
+      });
+    }, fireImmediately: true);
 
     ref.listen(
       connectionsServiceProvider.select((state) => state.connections),
@@ -40,8 +39,9 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
         final nextIds = next.map((c) => c.publishOfferDid).toSet();
         final newIds = nextIds.difference(prevIds);
 
-        final newConnections =
-            next.where((c) => newIds.contains(c.publishOfferDid));
+        final newConnections = next.where(
+          (c) => newIds.contains(c.publishOfferDid),
+        );
 
         Future.microtask(() {
           state = state.copyWith(connections: next);
@@ -51,15 +51,11 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
       fireImmediately: true,
     );
 
-    ref.listen(
-      mediatorServiceProvider,
-      (prev, next) {
-        if (prev == next) return;
+    ref.listen(mediatorServiceProvider, (prev, next) {
+      if (prev == next) return;
 
-        Future.microtask(_updateConnectionMediators);
-      },
-      fireImmediately: true,
-    );
+      Future.microtask(_updateConnectionMediators);
+    }, fireImmediately: true);
 
     return ConnectionsScreenState(isEditMode: false);
   }
@@ -75,8 +71,10 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
   }
 
   void toggleEditMode() {
-    state =
-        state.copyWith(isEditMode: !state.isEditMode, selectedConnections: []);
+    state = state.copyWith(
+      isEditMode: !state.isEditMode,
+      selectedConnections: [],
+    );
   }
 
   Future<void> deleteConnection(ConnectionOffer connection) async {
@@ -104,8 +102,9 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
     Iterable<ConnectionOffer>? connectionsToProcess,
   ]) {
     final mediatorService = ref.read(mediatorServiceProvider.notifier);
-    final connectionMediators =
-        Map<String, Mediator>.from(state.connectionMediators);
+    final connectionMediators = Map<String, Mediator>.from(
+      state.connectionMediators,
+    );
 
     final connections = connectionsToProcess ?? state.connections;
 
@@ -126,10 +125,10 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
 extension ConnectionsScreenControllerProviderSelectors
     on NotifierProvider<ConnectionsScreenController, ConnectionsScreenState> {
   ProviderListenable<bool> get hasConnections => select(
-        (state) => state.connections.any(
-          (connection) => connection.status != ConnectionOfferStatus.deleted,
-        ),
-      );
+    (state) => state.connections.any(
+      (connection) => connection.status != ConnectionOfferStatus.deleted,
+    ),
+  );
   ProviderListenable<bool> get hasAnySelectedConnections =>
       select((state) => state.selectedConnections.isNotEmpty);
   ProviderListenable<bool> get hasIdentity =>

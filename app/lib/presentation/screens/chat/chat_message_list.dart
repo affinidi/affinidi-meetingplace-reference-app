@@ -9,12 +9,15 @@ class _ChatMessageList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final sortedMessages =
-        ref.watch(provider.select((state) => state.messages));
-    final indexOfLastMessageFromMe =
-        ref.watch(provider.indexOfLastMessageFromMe);
-    final selectedReactionIndex =
-        ref.watch(provider.select((state) => state.selectedReactionIndex));
+    final sortedMessages = ref.watch(
+      provider.select((state) => state.messages),
+    );
+    final indexOfLastMessageFromMe = ref.watch(
+      provider.indexOfLastMessageFromMe,
+    );
+    final selectedReactionIndex = ref.watch(
+      provider.select((state) => state.selectedReactionIndex),
+    );
 
     var lastUsedChatItemStatus = chat.ChatItemStatus.error;
 
@@ -26,22 +29,19 @@ class _ChatMessageList extends HookConsumerWidget {
       controller.clearSelectedReaction();
     }
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        scrollController.addListener(() {
-          if (scrollController.position.userScrollDirection ==
-              ScrollDirection.reverse) {
-            FocusManager.instance.primaryFocus?.unfocus();
-            hideReactionPicker();
-          }
-        });
+      scrollController.addListener(() {
+        if (scrollController.position.userScrollDirection ==
+            ScrollDirection.reverse) {
+          FocusManager.instance.primaryFocus?.unfocus();
+          hideReactionPicker();
+        }
+      });
 
-        return null;
-      },
-      [],
-    );
+      return null;
+    }, []);
 
     return GestureDetector(
       onTap: hideReactionPicker,
@@ -68,10 +68,12 @@ class _ChatMessageList extends HookConsumerWidget {
                 if (chatItem.isFromMe) {
                   if (index == indexOfLastMessageFromMe) {
                     // this is the last one from me, show status regardless
-                    thisItemStatus =
-                        context.l10n.chatItemStatus(chatItem.status.toString());
-                    lastUsedChatItemStatus =
-                        consolidateChatItemStatus(chatItem);
+                    thisItemStatus = context.l10n.chatItemStatus(
+                      chatItem.status.toString(),
+                    );
+                    lastUsedChatItemStatus = consolidateChatItemStatus(
+                      chatItem,
+                    );
                   } else {
                     //
                     // if the previous item in the visual list
@@ -82,8 +84,9 @@ class _ChatMessageList extends HookConsumerWidget {
                     // the next item - this
                     // will propagate all the way down
                     //
-                    var indexOfNextMessageFromMe =
-                        ref.read(provider).getIndexOfNextMessageFromMe(index);
+                    var indexOfNextMessageFromMe = ref
+                        .read(provider)
+                        .getIndexOfNextMessageFromMe(index);
                     if (indexOfNextMessageFromMe != -1) {
                       var chatItemNextFromMe =
                           sortedMessages[indexOfNextMessageFromMe];
@@ -92,8 +95,9 @@ class _ChatMessageList extends HookConsumerWidget {
                         thisItemStatus = context.l10n.chatItemStatus(
                           chatItemNextFromMe.status.toString(),
                         );
-                        lastUsedChatItemStatus =
-                            consolidateChatItemStatus(chatItemNextFromMe);
+                        lastUsedChatItemStatus = consolidateChatItemStatus(
+                          chatItemNextFromMe,
+                        );
                       }
                       if (chatItem.status == chat.ChatItemStatus.error) {
                         thisItemStatus = context.l10n.chatItemStatusError;
@@ -107,21 +111,23 @@ class _ChatMessageList extends HookConsumerWidget {
                   child: Column(
                     children: [
                       Align(
-                        alignment: (chatItem is EncryptionNotice ||
+                        alignment:
+                            (chatItem is EncryptionNotice ||
                                 chatItem is chat.ConciergeMessage ||
                                 chatItem.status ==
                                     chat.ChatItemStatus.userInput)
                             ? Alignment.center
                             : (chatItem.isFromMe)
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
                         child: Column(
-                          crossAxisAlignment: (chatItem is EncryptionNotice ||
+                          crossAxisAlignment:
+                              (chatItem is EncryptionNotice ||
                                   chatItem is chat.ConciergeMessage)
                               ? CrossAxisAlignment.center
                               : chatItem.isFromMe
-                                  ? CrossAxisAlignment.end
-                                  : CrossAxisAlignment.start,
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
                           children: [
                             if (!nextItemFromSameDid)
                               Padding(
@@ -132,7 +138,8 @@ class _ChatMessageList extends HookConsumerWidget {
                                 ),
                               ),
                             Container(
-                              margin: chatItem is EncryptionNotice ||
+                              margin:
+                                  chatItem is EncryptionNotice ||
                                       chatItem is chat.ConciergeMessage ||
                                       chatItem is chat.EventMessage
                                   ? const EdgeInsets.fromLTRB(20, 8, 20, 8)

@@ -11,11 +11,13 @@ class _ConnectionsListView extends ConsumerWidget {
   final void Function({
     required ConnectionOffer connection,
     required bool isSelected,
-  }) onConnectionPress;
+  })
+  onConnectionPress;
   final void Function({
     required ConnectionOffer connection,
     required BuildContext context,
-  }) onConnectionLongPress;
+  })
+  onConnectionLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,17 +46,20 @@ class _ConnectionListItem extends ConsumerWidget {
   final void Function({
     required ConnectionOffer connection,
     required bool isSelected,
-  }) onConnectionPress;
+  })
+  onConnectionPress;
   final void Function({
     required ConnectionOffer connection,
     required BuildContext context,
-  }) onConnectionLongPress;
+  })
+  onConnectionLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedConnectionsCount = ref.watch(
-      connectionsScreenControllerProvider
-          .select((state) => state.selectedConnections.length),
+      connectionsScreenControllerProvider.select(
+        (state) => state.selectedConnections.length,
+      ),
     );
 
     if (connection.isDeleted) {
@@ -82,8 +87,9 @@ class _ConnectionListItem extends ConsumerWidget {
             Icon(Icons.delete, color: context.colorScheme.onError),
             Text(
               context.l10n.generalDelete,
-              style: context.textTheme.bodySmall
-                  ?.copyWith(color: context.colorScheme.onError),
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onError,
+              ),
             ),
           ],
         ),
@@ -115,24 +121,28 @@ class _ConnectionCard extends ConsumerWidget {
     required void Function({
       required ConnectionOffer connection,
       required bool isSelected,
-    }) onConnectionPress,
+    })
+    onConnectionPress,
     required void Function({
       required ConnectionOffer connection,
       required BuildContext context,
-    }) onConnectionLongPress,
-  })  : _onConnectionLongPress = onConnectionLongPress,
-        _onConnectionPress = onConnectionPress,
-        _connection = connection;
+    })
+    onConnectionLongPress,
+  }) : _onConnectionLongPress = onConnectionLongPress,
+       _onConnectionPress = onConnectionPress,
+       _connection = connection;
 
   final ConnectionOffer _connection;
   final void Function({
     required ConnectionOffer connection,
     required bool isSelected,
-  }) _onConnectionPress;
+  })
+  _onConnectionPress;
   final void Function({
     required ConnectionOffer connection,
     required BuildContext context,
-  }) _onConnectionLongPress;
+  })
+  _onConnectionLongPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -155,29 +165,20 @@ class _ConnectionCard extends ConsumerWidget {
             _connection.contactCard.firstName,
             mediatorName,
           )
-        : context.l10n.usesIdentity(
-            _connection.contactCard.firstName,
-          );
+        : context.l10n.usesIdentity(_connection.contactCard.firstName);
 
     return Card.outlined(
       color: context.customColors.whiteOverlay30,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: BorderSide(
-          color: _connection.getStatusColor(context),
-          width: 2,
-        ),
+        side: BorderSide(color: _connection.getStatusColor(context), width: 2),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () => _onConnectionPress(
-          connection: _connection,
-          isSelected: isSelected,
-        ),
-        onLongPress: () => _onConnectionLongPress(
-          context: context,
-          connection: _connection,
-        ),
+        onTap: () =>
+            _onConnectionPress(connection: _connection, isSelected: isSelected),
+        onLongPress: () =>
+            _onConnectionLongPress(context: context, connection: _connection),
         child: Stack(
           children: [
             Padding(
@@ -186,8 +187,9 @@ class _ConnectionCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   ProfileCircleAvatar(
-                    image: _connection.contactCard
-                        .image(cacheManager: cacheManager),
+                    image: _connection.contactCard.image(
+                      cacheManager: cacheManager,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -219,15 +221,18 @@ class _ConnectionCard extends ConsumerWidget {
                             Text(
                               _connection.expiresAt == null
                                   ? context.l10n.createdValidWithoutExpiration(
-                                      _connection.createdAt
-                                          .timeAgo(context.l10n),
+                                      _connection.createdAt.timeAgo(
+                                        context.l10n,
+                                      ),
                                     )
                                   : context.l10n.createdValidUntil(
-                                      _connection.createdAt
-                                          .timeAgo(context.l10n),
+                                      _connection.createdAt.timeAgo(
+                                        context.l10n,
+                                      ),
                                       DateFormat.yMMMd(
-                                        Localizations.localeOf(context)
-                                            .toString(),
+                                        Localizations.localeOf(
+                                          context,
+                                        ).toString(),
                                       ).format(_connection.expiresAt!),
                                     ),
                               style: context.textTheme.bodySmall,
@@ -278,7 +283,8 @@ class _ConnectionTrailingWidget extends ConsumerWidget {
   final void Function({
     required ConnectionOffer connection,
     required bool isSelected,
-  }) onConnectionPress;
+  })
+  onConnectionPress;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -309,18 +315,18 @@ class _ConnectionTrailingWidget extends ConsumerWidget {
               ),
             )
           : isOwnedByMe
-              ? IconButton(
-                  onPressed: () => onConnectionPress(
-                    connection: connection,
-                    isSelected: isSelected,
-                  ),
-                  icon: Icon(
-                    Icons.chevron_right,
-                    size: 24,
-                    color: context.colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
-                )
-              : const SizedBox.shrink(),
+          ? IconButton(
+              onPressed: () => onConnectionPress(
+                connection: connection,
+                isSelected: isSelected,
+              ),
+              icon: Icon(
+                Icons.chevron_right,
+                size: 24,
+                color: context.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }

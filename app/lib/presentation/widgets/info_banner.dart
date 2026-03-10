@@ -36,11 +36,7 @@ class InfoBanner extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                color: colorScheme.primary,
-                size: 40,
-              ),
+              Icon(icon, color: colorScheme.primary, size: 40),
               const SizedBox(width: 12),
               Expanded(
                 child: Padding(
