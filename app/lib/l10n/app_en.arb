@@ -1050,6 +1050,10 @@
 	"@debugPanelLogsCopied": {
 		"type": "text"
 	},
+  "debugPanelShareLogs": "Share logs",
+	"@debugPanelShareLogs": {
+		"type": "text"
+	},
 	"serverSettings": "Server Settings",
 	"@serverSettings": {
 		"type": "text"

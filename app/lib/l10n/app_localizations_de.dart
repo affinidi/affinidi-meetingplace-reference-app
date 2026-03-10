@@ -1126,6 +1126,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Protokolle, die in die Zwischenablage kopiert werden';
 
   @override
+  String get debugPanelShareLogs => 'Share logs';
+
+  @override
   String get serverSettings => 'Server-Einstellungen';
 
   @override

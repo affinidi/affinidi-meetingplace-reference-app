@@ -21,6 +21,15 @@ class DebugLogCollectorTarget implements LoggerTarget {
     return !isAppLog;
   }
 
+  /// Prepends [entries] (from a previous session) before any current-run logs.
+  void prependHistoricalLogs(List<AppLogEntry> entries) {
+    if (entries.isEmpty) return;
+    _logs.insertAll(0, entries);
+    if (_logs.length > 1000) {
+      _logs.removeRange(0, _logs.length - 1000);
+    }
+  }
+
   void _addLog(String loggerName, String message, String level) {
     final formattedLoggerName = _isSdkLog(loggerName)
         ? loggerName

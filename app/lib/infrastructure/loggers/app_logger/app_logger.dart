@@ -4,19 +4,36 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'app_log_entry.dart';
 import 'console_logger_target.dart';
 import 'debug_log_collector_target.dart';
+import 'file_log_collector_target.dart';
 import 'logger_target.dart';
 
 class AppLogger
     implements MeetingPlaceChatSDKLogger, MeetingPlaceCoreSDKLogger {
-  AppLogger._();
+  AppLogger._() {
+    _debugCollector = DebugLogCollectorTarget();
+    _loggers = <LoggerTarget>[
+      ConsoleLoggerTarget(),
+      _debugCollector,
+      _fileLogger,
+    ];
+  }
 
   static final AppLogger _instance = AppLogger._();
   static final AppLogger instance = _instance;
 
-  final List<LoggerTarget> _loggers = <LoggerTarget>[
-    ConsoleLoggerTarget(),
-    DebugLogCollectorTarget(),
-  ];
+  final FileLogCollectorTarget _fileLogger = FileLogCollectorTarget();
+  late final DebugLogCollectorTarget _debugCollector;
+  late final List<LoggerTarget> _loggers;
+
+  /// Initializes persistent file logging. Call once from [main] after
+  /// [WidgetsFlutterBinding.ensureInitialized].
+  Future<void> initialize() async {
+    await _fileLogger.initialize();
+    _debugCollector.prependHistoricalLogs(_fileLogger.historicalLogs);
+  }
+
+  /// Path to the persisted log file, or null until [initialize] completes.
+  String? get logFilePath => _fileLogger.logFilePath;
 
   List<AppLogEntry> get logs =>
       List.unmodifiable(_loggers.expand((l) => l.logs).toList());

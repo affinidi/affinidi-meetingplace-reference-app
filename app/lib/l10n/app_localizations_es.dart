@@ -1116,6 +1116,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get debugPanelLogsCopied => 'Registros copiados en el portapapeles';
 
   @override
+  String get debugPanelShareLogs => 'Share logs';
+
+  @override
   String get serverSettings => 'Configuración del servidor';
 
   @override
