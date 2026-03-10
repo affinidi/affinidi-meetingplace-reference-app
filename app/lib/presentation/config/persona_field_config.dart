@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:form_field_validator/form_field_validator.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
 import '../../domain/models/contact_card/contact_card.dart';
@@ -41,6 +42,19 @@ enum PersonaField {
 
   String label(AppLocalizations l10n) => l10n.contactCardFieldName(name);
 
+  String placeholder(AppLocalizations l10n) {
+    switch (this) {
+      case PersonaField.firstName:
+        return l10n.enterFirstName;
+      case PersonaField.lastName:
+        return l10n.enterLastName;
+      case PersonaField.email:
+        return l10n.enterEmail;
+      case PersonaField.mobile:
+        return l10n.enterMobile;
+    }
+  }
+
   InputType get inputType {
     switch (this) {
       case PersonaField.firstName:
@@ -52,6 +66,10 @@ enum PersonaField {
       case PersonaField.mobile:
         return InputType.phone;
     }
+  }
+
+  MultiValidator validator(BuildContext context) {
+    return InputValidators.getValidator(context, inputType);
   }
 
   TextInputType? get keyboardType {
@@ -66,6 +84,34 @@ enum PersonaField {
         return TextInputType.phone;
     }
   }
+
+  TextCapitalization get textCapitalization {
+    switch (this) {
+      case PersonaField.firstName:
+      case PersonaField.lastName:
+        return TextCapitalization.sentences;
+      case PersonaField.email:
+      case PersonaField.mobile:
+        return TextCapitalization.none;
+    }
+  }
+
+  bool get autocorrect {
+    switch (this) {
+      case PersonaField.firstName:
+      case PersonaField.lastName:
+        return true;
+      case PersonaField.email:
+      case PersonaField.mobile:
+        return false;
+    }
+  }
+
+  bool get autofocus => this == PersonaField.firstName;
+
+  bool get shouldValidateOnBlur => this == PersonaField.email;
+
+  TextInputAction get textInputAction => TextInputAction.next;
 
   String valueFrom(ContactCard card) {
     switch (this) {
@@ -90,6 +136,19 @@ enum PersonaField {
         return card.email;
       case PersonaField.mobile:
         return card.mobile;
+    }
+  }
+
+  ContactCard updateContactCard(ContactCard card, String value) {
+    switch (this) {
+      case PersonaField.firstName:
+        return card.copyWith(firstName: value);
+      case PersonaField.lastName:
+        return card.copyWith(lastName: value.isEmpty ? null : value);
+      case PersonaField.email:
+        return card.copyWith(email: value.isEmpty ? null : value);
+      case PersonaField.mobile:
+        return card.copyWith(mobile: value.isEmpty ? null : value);
     }
   }
 }

@@ -7,7 +7,6 @@ import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../config/persona_field_config.dart';
-import '../../../validators/input_validators.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
 import '../../../widgets/profile_picture.dart';
@@ -17,13 +16,11 @@ import 'identity_form_screen_controller.dart';
 class IdentityFormFields extends ConsumerWidget {
   IdentityFormFields(
     this.identityId, {
-    required this.controller,
     required this.formKey,
     required this.title,
   });
 
   final String? identityId;
-  final IdentityFormScreenController controller;
   final GlobalKey<FormState> formKey;
   final String title;
 
@@ -33,6 +30,39 @@ class IdentityFormFields extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
+    final personaFields = PersonaField.values;
+
+    String? validateField(PersonaField field, String? value) {
+      if (field.shouldValidateOnBlur &&
+          !controller.shouldShowValidation(field)) {
+        return null;
+      }
+
+      return field.validator(context).call(value);
+    }
+
+    Widget buildPersonaField(PersonaField field, double traversalOrder) {
+      return FormRowTextField(
+        icon: field.icon,
+        label: field.label(context.l10n),
+        color: field.iconColor(context.customColors, context.colorScheme),
+        controller: controller.controllerFor(field),
+        placeholder: field.placeholder(context.l10n),
+        textCapitalization: field.textCapitalization,
+        autocorrect: field.autocorrect,
+        singleLine: true,
+        focusNode: controller.focusNodeFor(field),
+        keyboardType: field.keyboardType,
+        onChanged: (value) => controller.updateField(field, value, formKey),
+        onFieldSubmitted: field.shouldValidateOnBlur
+            ? (_) => controller.updateErrorVisibilityOnBlur(field, formKey)
+            : null,
+        validator: (value) => validateField(field, value),
+        textInputAction: field.textInputAction,
+        traversalOrder: traversalOrder,
+        autofocus: field.autofocus,
+      );
+    }
 
     return Form(
       key: formKey,
@@ -99,103 +129,10 @@ class IdentityFormFields extends ConsumerWidget {
                 ],
               ),
             ),
-            const Divider(),
-            FormRowTextField(
-              icon: PersonaField.firstName.icon,
-              label: PersonaField.firstName.label(context.l10n),
-              color: PersonaField.firstName.iconColor(
-                context.customColors,
-                context.colorScheme,
-              ),
-              controller: controller.displayNameController,
-              placeholder: context.l10n.enterFirstName,
-              textCapitalization: TextCapitalization.sentences,
-              autocorrect: true,
-              singleLine: true,
-              onChanged: (value) {
-                controller.updateFirstName(value, formKey);
-                controller.validateForm(formKey);
-              },
-              validator: InputValidators.getValidator(
-                context,
-                PersonaField.firstName.inputType,
-              ).call,
-              textInputAction: TextInputAction.next,
-              traversalOrder: 1.0,
-              autofocus: true,
-            ),
-            const Divider(),
-            FormRowTextField(
-              icon: PersonaField.lastName.icon,
-              label: PersonaField.lastName.label(context.l10n),
-              color: PersonaField.lastName.iconColor(
-                context.customColors,
-                context.colorScheme,
-              ),
-              controller: controller.lastNameController,
-              placeholder: context.l10n.enterLastName,
-              textCapitalization: TextCapitalization.sentences,
-              autocorrect: true,
-              singleLine: true,
-              onChanged: (value) {
-                controller.updateLastName(value, formKey);
-                controller.validateForm(formKey);
-              },
-              validator: InputValidators.getValidator(
-                context,
-                PersonaField.lastName.inputType,
-              ).call,
-              textInputAction: TextInputAction.next,
-              traversalOrder: 2.0,
-            ),
-            const Divider(),
-            FormRowTextField(
-              icon: PersonaField.email.icon,
-              label: PersonaField.email.label(context.l10n),
-              color: PersonaField.email.iconColor(
-                context.customColors,
-                context.colorScheme,
-              ),
-              controller: controller.emailController,
-              placeholder: context.l10n.enterEmail,
-              focusNode: controller.emailFocusNode,
-              singleLine: true,
-              keyboardType: PersonaField.email.keyboardType,
-              onChanged: (value) {
-                controller.updateEmail(value, formKey);
-                controller.handleFieldChange(PersonaField.email, formKey);
-              },
-              onFieldSubmitted: (_) {
-                controller.updateErrorVisibilityOnBlur(
-                  PersonaField.email,
-                  formKey,
-                );
-              },
-              validator: (value) {
-                if (!controller.shouldShowValidation(PersonaField.email)) {
-                  return null;
-                }
-                return InputValidators.getValidator(
-                  context,
-                  PersonaField.email.inputType,
-                ).call(value);
-              },
-              textInputAction: TextInputAction.next,
-              traversalOrder: 3.0,
-            ),
-            const Divider(),
-            FormRowTextField(
-              icon: PersonaField.mobile.icon,
-              label: PersonaField.mobile.label(context.l10n),
-              color: PersonaField.mobile.iconColor(
-                context.customColors,
-                context.colorScheme,
-              ),
-              controller: controller.mobileController,
-              placeholder: context.l10n.enterMobile,
-              singleLine: true,
-              keyboardType: PersonaField.mobile.keyboardType,
-            ),
+            for (var index = 0; index < personaFields.length; index++) ...[
+              const Divider(),
+              buildPersonaField(personaFields[index], (index + 1).toDouble()),
+            ],
           ],
         ),
       ),

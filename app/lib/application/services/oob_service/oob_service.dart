@@ -87,9 +87,18 @@ class OOBService extends _$OOBService {
     _publishOfferStreamSubscription = oobOfferSession.stream;
 
     _publishOfferStreamSubscription?.listen((data) async {
-      final channel = data.channel;
-      _handleConnectionEstablished(channel);
-      _logger.info('createOobFlow connection established', name: _logKey);
+      try {
+        final channel = data.channel;
+        _handleConnectionEstablished(channel);
+        _logger.info('createOobFlow connection established', name: _logKey);
+      } catch (error, stackTrace) {
+        _logger.error(
+          'Unable to handle established OOB publish connection',
+          error: error,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
     });
 
     return oobOfferSession.oobUrl.toString();
@@ -157,12 +166,30 @@ class OOBService extends _$OOBService {
       });
 
       _acceptOfferStreamSubscription?.listen((data) async {
-        final channel = data.channel;
-        _handleConnectionEstablished(channel);
-        _logger.info('acceptOobFlow connection established', name: _logKey);
-        if (acceptedOfferCompleter.isCompleted) return;
+        try {
+          final channel = data.channel;
+          _handleConnectionEstablished(channel);
+          _logger.info('acceptOobFlow connection established', name: _logKey);
+          if (acceptedOfferCompleter.isCompleted) return;
 
-        acceptedOfferCompleter.complete();
+          acceptedOfferCompleter.complete();
+        } catch (error, stackTrace) {
+          _logger.error(
+            'Unable to handle established OOB accept connection',
+            error: error,
+            stackTrace: stackTrace,
+            name: _logKey,
+          );
+
+          if (acceptedOfferCompleter.isCompleted) return;
+
+          acceptedOfferCompleter.completeError(
+            AppException(
+              'Unable to process OOB offer - unexpected error: $error',
+              code: AppExceptionType.other.name,
+            ),
+          );
+        }
       });
     } on MeetingPlaceCoreSDKException catch (e, stackTrace) {
       _logger.error(

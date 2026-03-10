@@ -8,7 +8,6 @@ import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../config/persona_field_config.dart';
-import '../../../validators/input_validators.dart';
 import 'identity_form_mode.dart';
 import 'identity_form_screen_state.dart';
 
@@ -18,15 +17,26 @@ part 'identity_form_screen_controller.g.dart';
 class IdentityFormScreenController extends _$IdentityFormScreenController {
   late final scrollController = ScrollController();
 
-  late final displayNameController = TextEditingController();
-  late final lastNameController = TextEditingController();
-  late final emailController = TextEditingController();
-  late final mobileController = TextEditingController();
+  late final _fieldControllers = {
+    for (final field in PersonaField.values) field: TextEditingController(),
+  };
+  late final _fieldFocusNodes = {
+    for (final field in PersonaField.values.where(
+      (field) => field.shouldValidateOnBlur,
+    ))
+      field: FocusNode(),
+  };
   late final aliasController = TextEditingController();
 
-  late final emailFocusNode = FocusNode();
-
   GlobalKey<FormState>? _formKey;
+
+  TextEditingController controllerFor(PersonaField field) {
+    return _fieldControllers[field]!;
+  }
+
+  FocusNode? focusNodeFor(PersonaField field) {
+    return _fieldFocusNodes[field];
+  }
 
   void initializeFocusListeners(GlobalKey<FormState> formKey) {
     _formKey = formKey;
@@ -34,20 +44,25 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   @override
   IdentityFormScreenState build(String? identityId) {
-    emailFocusNode.addListener(() {
-      if (!emailFocusNode.hasFocus && _formKey != null) {
-        updateErrorVisibilityOnBlur(PersonaField.email, _formKey!);
-      }
-    });
+    for (final entry in _fieldFocusNodes.entries) {
+      final field = entry.key;
+      final focusNode = entry.value;
+      focusNode.addListener(() {
+        if (!focusNode.hasFocus && _formKey != null) {
+          updateErrorVisibilityOnBlur(field, _formKey!);
+        }
+      });
+    }
 
     ref.onDispose(() {
       scrollController.dispose();
-      displayNameController.dispose();
-      lastNameController.dispose();
-      emailController.dispose();
-      mobileController.dispose();
+      for (final controller in _fieldControllers.values) {
+        controller.dispose();
+      }
       aliasController.dispose();
-      emailFocusNode.dispose();
+      for (final focusNode in _fieldFocusNodes.values) {
+        focusNode.dispose();
+      }
     });
 
     final identity = _loadIdentity(identityId);
@@ -55,7 +70,9 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     return IdentityFormScreenState(
       identity: identity,
-      isAliasMirroringFirstName: identity.card.displayName.isEmpty,
+      isAliasMirroringFirstName:
+          identity.card.displayName.isEmpty ||
+          identity.card.displayName == identity.card.firstName,
       canDelete: canDelete,
     );
   }
@@ -91,24 +108,19 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       );
     }
 
-    displayNameController.text = identity.card.firstName;
-    lastNameController.text = identity.card.lastName ?? '';
-    emailController.text = identity.card.email ?? '';
-    mobileController.text = identity.card.mobile ?? '';
+    for (final field in PersonaField.values) {
+      controllerFor(field).text = field.valueFrom(identity.card);
+    }
     aliasController.text = identity.card.displayName;
 
     return identity;
   }
 
-  void _updateHasEnteredAnyInfo() {
-    final hasInfo =
-        (displayNameController.text.trim().isNotEmpty ||
-            lastNameController.text.trim().isNotEmpty ||
-            emailController.text.trim().isNotEmpty ||
-            mobileController.text.trim().isNotEmpty) &&
-        state.canSave;
-
-    state = state.copyWith(hasEnteredAnyInfo: hasInfo);
+  bool _hasEnteredAnyInfo(bool canSave) {
+    return PersonaField.values.any(
+          (field) => controllerFor(field).text.trim().isNotEmpty,
+        ) &&
+        canSave;
   }
 
   void _updateIdentityCard(ContactCard updatedCard) {
@@ -117,16 +129,15 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void validateForm(GlobalKey<FormState> formKey) {
-    // Compute save eligibility without triggering UI validation
     final ctx = formKey.currentContext!;
-    final emailError = InputValidators.getValidator(
-      ctx,
-      PersonaField.email.inputType,
-    ).call(emailController.text);
+    final isValidForSave = PersonaField.values.every((field) {
+      return field.validator(ctx).call(controllerFor(field).text) == null;
+    });
 
-    final isValidForSave = emailError == null;
-
-    state = state.copyWith(canSave: isValidForSave);
+    state = state.copyWith(
+      canSave: isValidForSave,
+      hasEnteredAnyInfo: _hasEnteredAnyInfo(isValidForSave),
+    );
   }
 
   bool shouldShowValidation(PersonaField field) {
@@ -144,16 +155,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   String _textFor(PersonaField field) {
-    switch (field) {
-      case PersonaField.firstName:
-        return displayNameController.text;
-      case PersonaField.lastName:
-        return lastNameController.text;
-      case PersonaField.email:
-        return emailController.text;
-      case PersonaField.mobile:
-        return mobileController.text;
-    }
+    return controllerFor(field).text;
   }
 
   void updateErrorVisibilityOnBlur(
@@ -161,8 +163,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     GlobalKey<FormState> formKey,
   ) {
     final ctx = formKey.currentContext!;
-    final validator = InputValidators.getValidator(ctx, field.inputType);
-    final error = validator.call(_textFor(field));
+    final error = field.validator(ctx).call(_textFor(field));
     _setErrorVisibility(field, error != null);
     formKey.currentState?.validate();
     validateForm(formKey);
@@ -171,36 +172,13 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   void handleFieldChange(PersonaField field, GlobalKey<FormState> formKey) {
     if (state.showingErrorFields.contains(field)) {
       final ctx = formKey.currentContext!;
-      final validator = InputValidators.getValidator(ctx, field.inputType);
-      final error = validator.call(_textFor(field));
+      final error = field.validator(ctx).call(_textFor(field));
       if (error == null) {
         _setErrorVisibility(field, false);
         formKey.currentState?.validate();
       }
     }
     validateForm(formKey);
-  }
-
-  void updateFirstName(String firstName, GlobalKey<FormState> formKey) {
-    final error = InputValidators.getValidator(
-      formKey.currentContext!,
-      PersonaField.firstName.inputType,
-    ).call(firstName);
-    if (error != null) return;
-
-    final identity = state.identity;
-
-    if (state.isAliasMirroringFirstName) {
-      aliasController.text = firstName;
-
-      _updateIdentityCard(
-        identity.card.copyWith(firstName: firstName, displayName: firstName),
-      );
-    } else {
-      _updateIdentityCard(identity.card.copyWith(firstName: firstName));
-    }
-
-    _updateHasEnteredAnyInfo();
   }
 
   Future<void> updateProfilePic(String? imageString) async {
@@ -213,49 +191,28 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     );
   }
 
-  void updateLastName(String lastName, GlobalKey<FormState> formKey) {
-    final error = InputValidators.getValidator(
-      formKey.currentContext!,
-      PersonaField.lastName.inputType,
-    ).call(lastName);
-    if (error != null) return;
+  void updateField(
+    PersonaField field,
+    String value,
+    GlobalKey<FormState> formKey,
+  ) {
+    final error = field.validator(formKey.currentContext!).call(value);
+    if (error == null) {
+      var updatedCard = field.updateContactCard(state.identity.card, value);
 
-    final identity = state.identity;
+      if (field == PersonaField.firstName && state.isAliasMirroringFirstName) {
+        aliasController.text = value;
+        updatedCard = updatedCard.copyWith(displayName: value);
+      }
 
-    _updateIdentityCard(
-      identity.card.copyWith(lastName: lastName.isEmpty ? null : lastName),
-    );
-    _updateHasEnteredAnyInfo();
-  }
+      _updateIdentityCard(updatedCard);
+    }
 
-  void updateEmail(String email, GlobalKey<FormState> formKey) {
-    final error = InputValidators.getValidator(
-      formKey.currentContext!,
-      PersonaField.email.inputType,
-    ).call(email);
-    if (error != null) return;
-
-    final identity = state.identity;
-
-    _updateIdentityCard(
-      identity.card.copyWith(email: email.isEmpty ? null : email),
-    );
-    _updateHasEnteredAnyInfo();
-  }
-
-  void updateMobile(String mobile, GlobalKey<FormState> formKey) {
-    final error = InputValidators.getValidator(
-      formKey.currentContext!,
-      PersonaField.mobile.inputType,
-    ).call(mobile);
-    if (error != null) return;
-
-    final identity = state.identity;
-
-    _updateIdentityCard(
-      identity.card.copyWith(mobile: mobile.isEmpty ? null : mobile),
-    );
-    _updateHasEnteredAnyInfo();
+    if (field.shouldValidateOnBlur) {
+      handleFieldChange(field, formKey);
+    } else {
+      validateForm(formKey);
+    }
   }
 
   void updateCardColor(Color color) {
@@ -281,38 +238,31 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     final identitiesService = ref.read(identitiesServiceProvider.notifier);
 
-    final firstName = displayNameController.text.trim().isEmpty
-        ? anonymousLabel
-        : displayNameController.text.trim();
-    final lastName = lastNameController.text.trim();
-    final email = emailController.text.trim();
-    final mobile = mobileController.text.trim();
-    final displayName = aliasController.text.trim().isEmpty
-        ? anonymousLabel
-        : aliasController.text.trim();
-    final cardColor = state.identity.card.cardColor;
-    final profilePic = state.identity.card.profilePic;
+    var updatedCard = state.identity.card;
 
-    final existingIdentity = state.identity;
-    final updatedIdenity = state.identity.copyWith(
-      card: existingIdentity.card.copyWith(
-        firstName: firstName,
-        lastName: lastName.isEmpty ? null : lastName,
-        email: email.isEmpty ? null : email,
-        mobile: mobile.isEmpty ? null : mobile,
-        displayName: displayName,
-        cardColor: cardColor,
-        profilePic: profilePic,
-      ),
-    );
+    for (final field in PersonaField.values) {
+      final controllerValue = controllerFor(field).text.trim();
+      final persistedValue =
+          field == PersonaField.firstName && controllerValue.isEmpty
+          ? anonymousLabel
+          : controllerValue;
+      updatedCard = field.updateContactCard(updatedCard, persistedValue);
+    }
+
+    final displayName = aliasController.text.trim().isEmpty
+        ? updatedCard.firstName
+        : aliasController.text.trim();
+    updatedCard = updatedCard.copyWith(displayName: displayName);
+
+    final updatedIdentity = state.identity.copyWith(card: updatedCard);
 
     try {
       if (mode == IdentityFormMode.add) {
-        await identitiesService.addIdentity(updatedIdenity);
+        await identitiesService.addIdentity(updatedIdentity);
       } else {
-        await identitiesService.updateIdentity(updatedIdenity);
+        await identitiesService.updateIdentity(updatedIdentity);
       }
-      state = state.copyWith(identity: updatedIdenity, hasSaved: true);
+      state = state.copyWith(identity: updatedIdentity, hasSaved: true);
       return true;
     } catch (error) {
       return false;
