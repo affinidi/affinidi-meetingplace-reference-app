@@ -123,7 +123,6 @@ class ChatScreen extends HookConsumerWidget {
                     _ChatTextEntry(
                       contactId: _contactId,
                     ),
-                    _ChatTextEntry(contactId: _contactId),
                   ],
                 ),
                 ChatEffect(contactId: _contactId),
