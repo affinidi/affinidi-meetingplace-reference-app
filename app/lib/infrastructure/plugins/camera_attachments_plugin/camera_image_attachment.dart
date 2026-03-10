@@ -7,9 +7,11 @@ import 'package:uuid/uuid.dart';
 /// Stores the base64-encoded image data and plugin name, and can be
 /// converted into a standard [Attachment] object with JPEG media type.
 class CameraImageAttachment implements MessageAttachment {
-  CameraImageAttachment({required String base64, required String pluginName})
-    : _base64 = base64,
-      _pluginName = pluginName;
+  CameraImageAttachment({
+    required String base64,
+    required String pluginName,
+  }) : _base64 = base64,
+       _pluginName = pluginName;
 
   final String _base64;
   final String _pluginName;
@@ -32,6 +34,8 @@ class CameraImageAttachment implements MessageAttachment {
     mediaType: _mediaType,
     format: _pluginName,
     lastModifiedTime: clock.now(),
-    data: AttachmentData(base64: _base64),
+    data: AttachmentData(
+      base64: _base64,
+    ),
   );
 }

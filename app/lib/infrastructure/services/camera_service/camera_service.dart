@@ -27,13 +27,17 @@ typedef CameraControllerFactory =
 
 final cameraControllerFactoryProvider = Provider<CameraControllerFactory>(
   (ref) =>
-      (description, resolutionPreset, {enableAudio = true, imageFormatGroup}) =>
-          CameraController(
-            description,
-            resolutionPreset,
-            enableAudio: enableAudio,
-            imageFormatGroup: imageFormatGroup,
-          ),
+      (
+        description,
+        resolutionPreset, {
+        enableAudio = true,
+        imageFormatGroup,
+      }) => CameraController(
+        description,
+        resolutionPreset,
+        enableAudio: enableAudio,
+        imageFormatGroup: imageFormatGroup,
+      ),
 );
 
 /// A service class for managing camera functionality in the app.

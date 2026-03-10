@@ -6,7 +6,9 @@ class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
     required String contactId,
   }) : _chatItem = chatItem,
        _contactId = contactId,
-       super(key: ValueKey('chat_concierge_join_${chatItem.messageId}'));
+       super(
+         key: ValueKey('chat_concierge_join_${chatItem.messageId}'),
+       );
 
   final chat.ConciergeMessage _chatItem;
   final String _contactId;

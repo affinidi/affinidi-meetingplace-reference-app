@@ -646,7 +646,10 @@ void main() {
             findsNothing,
           );
 
-          expect(find.byIcon(Icons.notifications_off_outlined), findsOneWidget);
+          expect(
+            find.byIcon(Icons.notifications_off_outlined),
+            findsOneWidget,
+          );
         },
       );
     });

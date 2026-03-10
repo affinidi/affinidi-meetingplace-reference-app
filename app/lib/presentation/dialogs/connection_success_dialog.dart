@@ -42,7 +42,9 @@ class ConnectionSuccessDialog extends ConsumerWidget {
                 Navigator.of(context, rootNavigator: true).pop();
                 ref
                     .read(app_navigator.navigatorProvider)
-                    .go(ChatRoute(contactId: contact.id).location);
+                    .go(
+                      ChatRoute(contactId: contact.id).location,
+                    );
               },
             );
           case 1:

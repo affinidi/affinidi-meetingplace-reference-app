@@ -1645,15 +1645,19 @@ abstract class _$ContactsDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [contacts, contactCards];
   @override
-  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
-    WritePropagation(
-      on: TableUpdateQuery.onTableName(
-        'contacts',
-        limitUpdateKind: UpdateKind.delete,
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+    [
+      WritePropagation(
+        on: TableUpdateQuery.onTableName(
+          'contacts',
+          limitUpdateKind: UpdateKind.delete,
+        ),
+        result: [
+          TableUpdate('contact_cards', kind: UpdateKind.delete),
+        ],
       ),
-      result: [TableUpdate('contact_cards', kind: UpdateKind.delete)],
-    ),
-  ]);
+    ],
+  );
 }
 
 typedef $$ContactsTableCreateCompanionBuilder =

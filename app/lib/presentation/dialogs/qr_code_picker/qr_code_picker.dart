@@ -29,10 +29,13 @@ class QrCodePicker extends ConsumerWidget {
   /// ```
   /// final code = await QrCodePicker.show(context: context);
   /// ```
-  static Future<String?> show({required BuildContext context}) =>
-      Navigator.of(context, rootNavigator: true).push<String>(
-        MaterialPageRoute<String>(builder: (context) => const QrCodePicker()),
-      );
+  static Future<String?> show({
+    required BuildContext context,
+  }) => Navigator.of(context, rootNavigator: true).push<String>(
+    MaterialPageRoute<String>(
+      builder: (context) => const QrCodePicker(),
+    ),
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

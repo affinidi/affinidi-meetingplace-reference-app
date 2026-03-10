@@ -81,8 +81,9 @@ class AcceptOfferScreenControllerProvider
           AcceptOfferScreenState
         > {
   /// See also [AcceptOfferScreenController].
-  AcceptOfferScreenControllerProvider(String mnemonic)
-    : this._internal(
+  AcceptOfferScreenControllerProvider(
+    String mnemonic,
+  ) : this._internal(
         () => AcceptOfferScreenController()..mnemonic = mnemonic,
         from: acceptOfferScreenControllerProvider,
         name: r'acceptOfferScreenControllerProvider',

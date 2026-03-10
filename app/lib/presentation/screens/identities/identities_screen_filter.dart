@@ -1,1 +1,5 @@
-enum IdentitiesScreenFilter { all, primary, aliases }
+enum IdentitiesScreenFilter {
+  all,
+  primary,
+  aliases,
+}

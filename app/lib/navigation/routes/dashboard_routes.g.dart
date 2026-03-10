@@ -6,7 +6,9 @@ part of 'dashboard_routes.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [$dashboardShellRouteData];
+List<RouteBase> get $appRoutes => [
+  $dashboardShellRouteData,
+];
 
 RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
   restorationScopeId: DashboardShellRouteData.$restorationScopeId,
@@ -130,7 +132,9 @@ mixin _$ContactsRoute on GoRouteData {
   static ContactsRoute _fromState(GoRouterState state) => const ContactsRoute();
 
   @override
-  String get location => GoRouteData.$location('/contacts');
+  String get location => GoRouteData.$location(
+    '/contacts',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -172,8 +176,9 @@ mixin _$ConnectionDetailsRoute on GoRouteData {
 }
 
 mixin _$ChatRoute on GoRouteData {
-  static ChatRoute _fromState(GoRouterState state) =>
-      ChatRoute(contactId: state.pathParameters['contactId']!);
+  static ChatRoute _fromState(GoRouterState state) => ChatRoute(
+    contactId: state.pathParameters['contactId']!,
+  );
 
   ChatRoute get _self => this as ChatRoute;
 
@@ -201,7 +206,9 @@ mixin _$ConnectionsRoute on GoRouteData {
       const ConnectionsRoute();
 
   @override
-  String get location => GoRouteData.$location('/connections');
+  String get location => GoRouteData.$location(
+    '/connections',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -218,8 +225,9 @@ mixin _$ConnectionsRoute on GoRouteData {
 }
 
 mixin _$FindOfferRoute on GoRouteData {
-  static FindOfferRoute _fromState(GoRouterState state) =>
-      FindOfferRoute(identityId: state.uri.queryParameters['identity-id']);
+  static FindOfferRoute _fromState(GoRouterState state) => FindOfferRoute(
+    identityId: state.uri.queryParameters['identity-id'],
+  );
 
   FindOfferRoute get _self => this as FindOfferRoute;
 
@@ -256,7 +264,9 @@ mixin _$AcceptOfferRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/connections/find-offer/${Uri.encodeComponent(_self.mnemonic)}/accept',
-    queryParams: {'identity-id': _self.identityId},
+    queryParams: {
+      'identity-id': _self.identityId,
+    },
   );
 
   @override
@@ -274,15 +284,18 @@ mixin _$AcceptOfferRoute on GoRouteData {
 }
 
 mixin _$PublishOfferRoute on GoRouteData {
-  static PublishOfferRoute _fromState(GoRouterState state) =>
-      PublishOfferRoute(identityId: state.uri.queryParameters['identity-id']!);
+  static PublishOfferRoute _fromState(GoRouterState state) => PublishOfferRoute(
+    identityId: state.uri.queryParameters['identity-id']!,
+  );
 
   PublishOfferRoute get _self => this as PublishOfferRoute;
 
   @override
   String get location => GoRouteData.$location(
     '/connections/publish-offer',
-    queryParams: {'identity-id': _self.identityId},
+    queryParams: {
+      'identity-id': _self.identityId,
+    },
   );
 
   @override
@@ -300,15 +313,18 @@ mixin _$PublishOfferRoute on GoRouteData {
 }
 
 mixin _$OfferDetailsRoute on GoRouteData {
-  static OfferDetailsRoute _fromState(GoRouterState state) =>
-      OfferDetailsRoute(state.uri.queryParameters['offer-link']!);
+  static OfferDetailsRoute _fromState(GoRouterState state) => OfferDetailsRoute(
+    state.uri.queryParameters['offer-link']!,
+  );
 
   OfferDetailsRoute get _self => this as OfferDetailsRoute;
 
   @override
   String get location => GoRouteData.$location(
     '/connections/offer-details',
-    queryParams: {'offer-link': _self.offerLink},
+    queryParams: {
+      'offer-link': _self.offerLink,
+    },
   );
 
   @override
@@ -330,7 +346,9 @@ mixin _$OOBShareQrRoute on GoRouteData {
       const OOBShareQrRoute();
 
   @override
-  String get location => GoRouteData.$location('/connections/oob-share-qr');
+  String get location => GoRouteData.$location(
+    '/connections/oob-share-qr',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -351,7 +369,9 @@ mixin _$OOBScanQrRoute on GoRouteData {
       const OOBScanQrRoute();
 
   @override
-  String get location => GoRouteData.$location('/connections/oob-scan-qr');
+  String get location => GoRouteData.$location(
+    '/connections/oob-scan-qr',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -372,7 +392,9 @@ mixin _$IdentitiesRoute on GoRouteData {
       const IdentitiesRoute();
 
   @override
-  String get location => GoRouteData.$location('/identities');
+  String get location => GoRouteData.$location(
+    '/identities',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -389,8 +411,9 @@ mixin _$IdentitiesRoute on GoRouteData {
 }
 
 mixin _$IdentityFormRoute on GoRouteData {
-  static IdentityFormRoute _fromState(GoRouterState state) =>
-      IdentityFormRoute(identityId: state.uri.queryParameters['identity-id']);
+  static IdentityFormRoute _fromState(GoRouterState state) => IdentityFormRoute(
+    identityId: state.uri.queryParameters['identity-id'],
+  );
 
   IdentityFormRoute get _self => this as IdentityFormRoute;
 
@@ -420,7 +443,9 @@ mixin _$SettingsRoute on GoRouteData {
   static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
 
   @override
-  String get location => GoRouteData.$location('/settings');
+  String get location => GoRouteData.$location(
+    '/settings',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

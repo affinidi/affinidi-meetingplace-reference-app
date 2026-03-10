@@ -24,7 +24,11 @@ class SwipeableCards<T> extends StatelessWidget {
   final List<T> items;
 
   /// Builder function to create each card based on the item data.
-  final Widget Function(BuildContext context, T item) cardBuilder;
+  final Widget Function(
+    BuildContext context,
+    T item,
+  )
+  cardBuilder;
 
   /// Called when the top card changes.
   final void Function(int newIndex)? onCardChange;

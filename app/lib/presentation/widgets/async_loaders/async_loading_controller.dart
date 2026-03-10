@@ -7,11 +7,12 @@ class AsyncLoadingController extends AutoDisposeNotifier<AsyncValue<void>> {
   AsyncLoadingController() : super();
 
   static AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  provider(String name) =>
-      NotifierProvider.autoDispose<AsyncLoadingController, AsyncValue<void>>(
-        AsyncLoadingController.new,
-        name: name,
-      );
+  provider(
+    String name,
+  ) => NotifierProvider.autoDispose<AsyncLoadingController, AsyncValue<void>>(
+    AsyncLoadingController.new,
+    name: name,
+  );
 
   @override
   AsyncValue<void> build() {

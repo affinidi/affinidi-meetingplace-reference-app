@@ -147,7 +147,10 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(find.text(l10n.error(errorCode)), findsOneWidget);
+          expect(
+            find.text(l10n.error(errorCode)),
+            findsOneWidget,
+          );
         });
       });
 
@@ -180,7 +183,10 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(find.text(l10n.error(errorCode)), findsOneWidget);
+          expect(
+            find.text(l10n.error(errorCode)),
+            findsOneWidget,
+          );
         });
       });
 
@@ -215,7 +221,10 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(find.text(l10n.error(errorCode)), findsOneWidget);
+          expect(
+            find.text(l10n.error(errorCode)),
+            findsOneWidget,
+          );
         });
       });
 
@@ -250,7 +259,10 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(find.text(l10n.error(errorCode)), findsOneWidget);
+          expect(
+            find.text(l10n.error(errorCode)),
+            findsOneWidget,
+          );
         });
       });
 
@@ -283,7 +295,10 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(find.text(l10n.error(errorCode)), findsOneWidget);
+          expect(
+            find.text(l10n.error(errorCode)),
+            findsOneWidget,
+          );
         });
 
         group('and connection times out', () {

@@ -63,8 +63,11 @@ class FirebasePushNotificationMessaging implements PushNotificationMessaging {
   Future<RemoteMessage?> getInitialMessage() => _instance.getInitialMessage();
 
   @override
-  Future<String?> getToken({String? vapidKey}) =>
-      _instance.getToken(vapidKey: vapidKey);
+  Future<String?> getToken({
+    String? vapidKey,
+  }) => _instance.getToken(
+    vapidKey: vapidKey,
+  );
 
   @override
   Stream<String> get onTokenRefresh => _instance.onTokenRefresh;

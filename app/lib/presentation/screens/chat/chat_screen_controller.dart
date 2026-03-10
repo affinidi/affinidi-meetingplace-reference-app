@@ -263,7 +263,9 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  conciergeCancelSendProfileLoadingController(chat.ConciergeMessage message) {
+  conciergeCancelSendProfileLoadingController(
+    chat.ConciergeMessage message,
+  ) {
     return _addConciergeSubscriptionIfNeeded(
       'cancel_send_profile_${message.messageId}',
     );
@@ -1083,10 +1085,14 @@ class ChatScreenController extends _$ChatScreenController
     final contact = state.contact;
     if (contact == null) return;
 
-    final updatedContact = contact.copyWith(notificationBannerDismissed: true);
+    final updatedContact = contact.copyWith(
+      notificationBannerDismissed: true,
+    );
     await ref
         .read(contactsServiceProvider.notifier)
-        .updateContact(updatedContact);
+        .updateContact(
+          updatedContact,
+        );
   }
 }
 

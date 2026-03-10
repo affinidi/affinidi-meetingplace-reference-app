@@ -4,4 +4,8 @@
 /// is currently online, offline, or in another availability state.
 /// Used to display visual indicators and manage communication features
 /// based on the contact's current presence.
-enum ContactPresenceStatus { unknown, online, offline }
+enum ContactPresenceStatus {
+  unknown,
+  online,
+  offline,
+}

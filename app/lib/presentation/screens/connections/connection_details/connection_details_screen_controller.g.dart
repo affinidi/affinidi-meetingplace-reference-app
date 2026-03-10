@@ -83,8 +83,9 @@ class ConnectionDetailsScreenControllerProvider
           ConnectionDetailsScreenState
         > {
   /// See also [ConnectionDetailsScreenController].
-  ConnectionDetailsScreenControllerProvider(String contactId)
-    : this._internal(
+  ConnectionDetailsScreenControllerProvider(
+    String contactId,
+  ) : this._internal(
         () => ConnectionDetailsScreenController()..contactId = contactId,
         from: connectionDetailsScreenControllerProvider,
         name: r'connectionDetailsScreenControllerProvider',

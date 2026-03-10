@@ -39,7 +39,9 @@ class SecureStorage implements KeyRepository, KeyStore {
     : _secureStorage =
           secureStorage ??
           const FlutterSecureStorage(
-            aOptions: AndroidOptions(encryptedSharedPreferences: true),
+            aOptions: AndroidOptions(
+              encryptedSharedPreferences: true,
+            ),
             iOptions: IOSOptions(
               accessibility: KeychainAccessibility.unlocked_this_device,
               synchronizable: false,

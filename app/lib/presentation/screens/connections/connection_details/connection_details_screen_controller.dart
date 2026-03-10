@@ -239,7 +239,9 @@ class ConnectionDetailsScreenController
 
     final bundle =
         assetImage.bundle ??
-        DefaultAssetBundle.of(WidgetsBinding.instance.rootElement!);
+        DefaultAssetBundle.of(
+          WidgetsBinding.instance.rootElement!,
+        );
 
     final bytes = await bundle
         .load(assetImage.keyName)
@@ -326,7 +328,9 @@ extension ConnectionDetailsScreenControllerProviderSelector
   ProviderListenable<bool> get hasMembersAvailableToChat => select(
     (state) =>
         (state.group?.members
-                .where((member) => member.status != GroupMemberStatus.deleted)
+                .where(
+                  (member) => member.status != GroupMemberStatus.deleted,
+                )
                 .length ??
             0) >
         1,

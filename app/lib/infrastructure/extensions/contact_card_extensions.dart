@@ -206,16 +206,20 @@ extension SdkContactCardFields on sdk.ContactCard {
     value,
   );
 
-  String get email =>
-      ContactCardUtils.getPathValue(contactInfo, ContactCardPaths.email.paths);
+  String get email => ContactCardUtils.getPathValue(
+    contactInfo,
+    ContactCardPaths.email.paths,
+  );
   set email(String value) => ContactCardUtils.setPathValue(
     contactInfo,
     ContactCardPaths.email.paths,
     value,
   );
 
-  String get mobile =>
-      ContactCardUtils.getPathValue(contactInfo, ContactCardPaths.mobile.paths);
+  String get mobile => ContactCardUtils.getPathValue(
+    contactInfo,
+    ContactCardPaths.mobile.paths,
+  );
   set mobile(String value) => ContactCardUtils.setPathValue(
     contactInfo,
     ContactCardPaths.mobile.paths,

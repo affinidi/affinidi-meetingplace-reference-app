@@ -81,7 +81,9 @@ Future<model.ConnectionOfferRepository> connectionOfferRepositoryInMemoryDrift(
   final database = await ref.read(
     _connectionOffersInMemoryDatabaseProvider.future,
   );
-  return ConnectionOfferRepositoryDrift(database: database);
+  return ConnectionOfferRepositoryDrift(
+    database: database,
+  );
 }
 
 @Riverpod(keepAlive: true)
