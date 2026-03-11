@@ -164,7 +164,8 @@ class OnboardingScreen extends HookConsumerWidget {
                     ),
                     const SizedBox(height: 24),
                     Visibility(
-                      visible: state.currentPage ==
+                      visible:
+                          state.currentPage ==
                           state.videoPlayerControllers.length - 1,
                       maintainSize: true,
                       maintainAnimation: true,
