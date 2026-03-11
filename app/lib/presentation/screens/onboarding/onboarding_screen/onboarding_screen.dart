@@ -79,12 +79,14 @@ class OnboardingScreen extends HookConsumerWidget {
               return Stack(
                 children: [
                   SizedBox.expand(
-                    child: FittedBox(
-                      fit: BoxFit.cover,
-                      child: SizedBox(
-                        width: videoPlayerController.value.size.width,
-                        height: videoPlayerController.value.size.height,
-                        child: VideoPlayer(videoPlayerController),
+                    child: ClipRect(
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: SizedBox(
+                          width: videoPlayerController.value.size.width,
+                          height: videoPlayerController.value.size.height,
+                          child: VideoPlayer(videoPlayerController),
+                        ),
                       ),
                     ),
                   ),
