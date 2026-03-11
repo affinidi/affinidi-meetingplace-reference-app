@@ -26,7 +26,6 @@ class _ChatTextEntry extends HookConsumerWidget {
     void showKeyboard() {
       if (!context.mounted) return;
       FocusScope.of(context).requestFocus(focusNode);
-      SystemChannels.textInput.invokeMethod('TextInput.show');
     }
 
     void sendMessage() {
@@ -71,7 +70,14 @@ class _ChatTextEntry extends HookConsumerWidget {
                       : (text) => sendChatActivity(),
                   textInputAction: TextInputAction.send,
                   focusNode: focusNode,
-                  onEditingComplete: shouldDisable ? null : sendMessage,
+                  onEditingComplete:
+                      (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
+                      ? (shouldDisable ? null : sendMessage)
+                      : null,
+                  onFieldSubmitted:
+                      (!kIsWeb && defaultTargetPlatform != TargetPlatform.iOS)
+                      ? (shouldDisable ? null : (_) => sendMessage())
+                      : null,
                   keyboardType: TextInputType.text,
                   textCapitalization: TextCapitalization.sentences,
                   cursorHeight: 16,

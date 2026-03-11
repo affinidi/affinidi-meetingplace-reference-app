@@ -700,14 +700,9 @@ class ChatScreenController extends _$ChatScreenController
 
     unawaited(_chatSDK?.sendTextMessage(trimmedMessage));
     _sendChatActivityTimedAction?.cancel();
-
-    unawaited(
-      Future.microtask(() {
-        if (messageTextController.text == originalText) {
-          messageTextController.clear();
-        }
-      }),
-    );
+    if (messageTextController.text == originalText) {
+      messageTextController.clear();
+    }
   }
 
   Future<void> sendChatActivity() async {
