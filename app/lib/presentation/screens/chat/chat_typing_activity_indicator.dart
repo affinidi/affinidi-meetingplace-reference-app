@@ -2,15 +2,16 @@ part of 'chat_screen.dart';
 
 class _ChatTypingActivityIndicator extends ConsumerWidget {
   const _ChatTypingActivityIndicator({required String contactId})
-      : _contactId = contactId;
+    : _contactId = contactId;
 
   final String _contactId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
-    final membersTyping =
-        ref.watch(provider.select((state) => state.membersTyping));
+    final membersTyping = ref.watch(
+      provider.select((state) => state.membersTyping),
+    );
 
     if (membersTyping.isEmpty) {
       return const SizedBox(height: 31);
@@ -28,10 +29,7 @@ class _ChatTypingActivityIndicator extends ConsumerWidget {
                 membersTyping.join(', '),
                 membersTyping.length,
               ),
-              style: const TextStyle(
-                color: Colors.blueGrey,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.blueGrey, fontSize: 14),
             ),
             const SizedBox(width: 4),
             const _TypingIndicator(),
@@ -51,14 +49,11 @@ class _TypingIndicator extends HookWidget {
       duration: const Duration(milliseconds: 900),
     );
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
-        controller.repeat();
-        return null;
-      },
-      [controller],
-    );
+    useEffect(() {
+      if (!context.mounted) return;
+      controller.repeat();
+      return null;
+    }, [controller]);
 
     return Column(
       children: [
@@ -81,11 +76,14 @@ class _TypingIndicator extends HookWidget {
                 return Container(
                   width: 10,
                   height: 10,
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 1, vertical: 2),
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 1,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.blueGrey
-                        .withAlpha((animation.value * 255).toInt()),
+                    color: Colors.blueGrey.withAlpha(
+                      (animation.value * 255).toInt(),
+                    ),
                     shape: BoxShape.circle,
                   ),
                 );

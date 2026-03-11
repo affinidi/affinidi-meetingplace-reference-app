@@ -41,10 +41,7 @@ class IdentitiesScreenController extends _$IdentitiesScreenController {
 
         Future.microtask(() {
           state = state.copyWith(
-            identities: [
-              ..._filteredIdentities,
-              createNewIdentityPlaceholder,
-            ],
+            identities: [..._filteredIdentities, createNewIdentityPlaceholder],
             shouldSetupPrimaryIdentity: next.isEmpty,
           );
         });
@@ -52,8 +49,9 @@ class IdentitiesScreenController extends _$IdentitiesScreenController {
       fireImmediately: true,
     );
 
-    final currentIdentity =
-        ref.read(identitiesServiceProvider.currentIdentityOrPrimary);
+    final currentIdentity = ref.read(
+      identitiesServiceProvider.currentIdentityOrPrimary,
+    );
 
     return IdentitiesScreenState(
       currentIdentity: currentIdentity,

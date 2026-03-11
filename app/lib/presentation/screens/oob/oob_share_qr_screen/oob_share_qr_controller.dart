@@ -18,8 +18,9 @@ part 'oob_share_qr_controller.g.dart';
 class OobShareQrController extends _$OobShareQrController {
   OobShareQrController() : super();
 
-  late final createOobLoadingController =
-      AsyncLoadingController.provider('createOobLoadingController');
+  late final createOobLoadingController = AsyncLoadingController.provider(
+    'createOobLoadingController',
+  );
   final logKey = 'OOBSHAREQR';
 
   @override
@@ -37,10 +38,7 @@ class OobShareQrController extends _$OobShareQrController {
             ref.read(navigatorProvider).pop(next);
           });
         } else {
-          logger.info(
-            'User canceled OOB flow',
-            name: logKey,
-          );
+          logger.info('User canceled OOB flow', name: logKey);
         }
       },
       fireImmediately: true,

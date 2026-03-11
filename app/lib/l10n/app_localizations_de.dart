@@ -13,16 +13,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String tabsTitle(String tabName) {
-    String _temp0 = intl.Intl.selectLogic(
-      tabName,
-      {
-        'connections': 'Einladungen',
-        'contacts': 'Kanäle',
-        'identities': 'Identitäten',
-        'settings': 'Einstellungen',
-        'other': 'Ungültig',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(tabName, {
+      'connections': 'Einladungen',
+      'contacts': 'Kanäle',
+      'identities': 'Identitäten',
+      'settings': 'Einstellungen',
+      'other': 'Ungültig',
+    });
     return '$_temp0';
   }
 
@@ -113,16 +110,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String newConnectionOptionTitle(String option) {
-    String _temp0 = intl.Intl.selectLogic(
-      option,
-      {
-        'shareQRCode': 'Direktes Teilen des QR-Codes',
-        'scanQRCode': 'Direktes Scannen eines QR-Codes',
-        'claimAnOffer': 'Einladung zum Treffpunkt annehmen',
-        'publishAnOffer': 'Einladung zum Treffpunkt veröffentlichen',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(option, {
+      'shareQRCode': 'Direktes Teilen des QR-Codes',
+      'scanQRCode': 'Direktes Scannen eines QR-Codes',
+      'claimAnOffer': 'Einladung zum Treffpunkt annehmen',
+      'publishAnOffer': 'Einladung zum Treffpunkt veröffentlichen',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -161,18 +155,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String newConnectionOptionSubtitle(String option) {
-    String _temp0 = intl.Intl.selectLogic(
-      option,
-      {
-        'shareQRCode':
-            'Bietet Ihnen vollständige Privatsphäre und Vertraulichkeit',
-        'scanQRCode': 'Scannen Sie einen QR-Code mit Ihrer Kamera',
-        'claimAnOffer': 'Verbinden Sie sich mit jemandem über Meeting Place',
-        'publishAnOffer':
-            'Werben Sie für Ihre Einladung zur Verbindung auf Meeting Place',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(option, {
+      'shareQRCode':
+          'Bietet Ihnen vollständige Privatsphäre und Vertraulichkeit',
+      'scanQRCode': 'Scannen Sie einen QR-Code mit Ihrer Kamera',
+      'claimAnOffer': 'Verbinden Sie sich mit jemandem über Meeting Place',
+      'publishAnOffer':
+          'Werben Sie für Ihre Einladung zur Verbindung auf Meeting Place',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -199,16 +190,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String connectionsFilterLabel(String filter) {
-    String _temp0 = intl.Intl.selectLogic(
-      filter,
-      {
-        'all': 'Alle',
-        'offers': 'Angebote',
-        'claims': 'Ansprüche',
-        'complete': 'Abgeschlossen',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'all': 'Alle',
+      'offers': 'Angebote',
+      'claims': 'Ansprüche',
+      'complete': 'Abgeschlossen',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -332,16 +320,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String contactCardFieldName(String field) {
-    String _temp0 = intl.Intl.selectLogic(
-      field,
-      {
-        'firstName': 'Vorname',
-        'lastName': 'Nachname',
-        'email': 'E-Mail',
-        'mobile': 'Mobil',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(field, {
+      'firstName': 'Vorname',
+      'lastName': 'Nachname',
+      'email': 'E-Mail',
+      'mobile': 'Mobil',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -369,50 +354,47 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String error(String errorCode) {
-    String _temp0 = intl.Intl.selectLogic(
-      errorCode,
-      {
-        'connection_offer_owned_by_claiming_party':
-            'Sie können diese Einladung nicht annehmen, da Sie der Einladende sind!',
-        'connection_offer_already_claimed_by_claiming_party':
-            'Sie können diese Einladung nicht annehmen, da Sie bereits eine Verbindungsanfrage gestellt haben und eine ausstehende Forderung in Bearbeitung ist',
-        'missingMnemonic':
-            'Bitte geben Sie ein Einladungspasswort ein, um zu suchen',
-        'connection_offer_not_found_error':
-            'Die von Ihnen angegebenen Details stimmen mit keiner aktiven Einladung überein.',
-        'discovery_register_offer_group_generic':
-            'Fehler beim Veröffentlichen der Einladung.',
-        'missingDeviceToken':
-            'Benachrichtigungstoken für das Gerät konnte nicht gefunden werden',
-        'offerOwnedByClaimingParty':
-            'Sie können diese Einladung nicht beanspruchen, da Sie der Eigentümer sind',
-        'offerAlreadyClaimedByParty':
-            'Sie können dieses Angebot nicht beanspruchen, da Sie die Einladung bereits angenommen haben und eine ausstehende Anfrage in Bearbeitung ist',
-        'offerNotFound':
-            'Die von Ihnen angegebenen Details stimmen mit keiner aktiven Einladung überein.',
-        'mediatorAlreadyExists':
-            'Nachrichtendienst mit derselben DID existiert bereits.',
-        'mediator_get_did_error':
-            'Kein Nachrichtendienst unter der angegebenen URL gefunden',
-        'unableToFindMediator':
-            'Kein Nachrichtendienst unter der angegebenen URL gefunden',
-        'oobFlowTimedOut':
-            'Verbindung mit der anderen Partei konnte nicht hergestellt werden, der QR-Code wurde wahrscheinlich bereits verwendet',
-        'connection_offer_expired': 'Diese Einladung ist abgelaufen',
-        'connection_offer_limit_exceeded':
-            'Diese Einladung hat die maximale Anzahl von Verwendungen erreicht',
-        'register_offer_mnemonic_in_use':
-            'Dieser Satz wird bereits verwendet, bitte wählen Sie einen anderen',
-        'invalidQrCode': 'QR-Code ist ungültig',
-        'oob_invalid_data': 'QR-Code-Daten sind ungültig',
-        'oob_not_found':
-            'QR-Code-Daten stimmen mit keiner aktiven Einladung überein',
-        'oob_invalid_type': 'QR-Code-Daten werden nicht unterstützt',
-        'network_error':
-            'Verbindung fehlgeschlagen. Bitte Internetverbindung prüfen und erneut versuchen.',
-        'other': '$errorCode',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(errorCode, {
+      'connection_offer_owned_by_claiming_party':
+          'Sie können diese Einladung nicht annehmen, da Sie der Einladende sind!',
+      'connection_offer_already_claimed_by_claiming_party':
+          'Sie können diese Einladung nicht annehmen, da Sie bereits eine Verbindungsanfrage gestellt haben und eine ausstehende Forderung in Bearbeitung ist',
+      'missingMnemonic':
+          'Bitte geben Sie ein Einladungspasswort ein, um zu suchen',
+      'connection_offer_not_found_error':
+          'Die von Ihnen angegebenen Details stimmen mit keiner aktiven Einladung überein.',
+      'discovery_register_offer_group_generic':
+          'Fehler beim Veröffentlichen der Einladung.',
+      'missingDeviceToken':
+          'Benachrichtigungstoken für das Gerät konnte nicht gefunden werden',
+      'offerOwnedByClaimingParty':
+          'Sie können diese Einladung nicht beanspruchen, da Sie der Eigentümer sind',
+      'offerAlreadyClaimedByParty':
+          'Sie können dieses Angebot nicht beanspruchen, da Sie die Einladung bereits angenommen haben und eine ausstehende Anfrage in Bearbeitung ist',
+      'offerNotFound':
+          'Die von Ihnen angegebenen Details stimmen mit keiner aktiven Einladung überein.',
+      'mediatorAlreadyExists':
+          'Nachrichtendienst mit derselben DID existiert bereits.',
+      'mediator_get_did_error':
+          'Kein Nachrichtendienst unter der angegebenen URL gefunden',
+      'unableToFindMediator':
+          'Kein Nachrichtendienst unter der angegebenen URL gefunden',
+      'oobFlowTimedOut':
+          'Verbindung mit der anderen Partei konnte nicht hergestellt werden, der QR-Code wurde wahrscheinlich bereits verwendet',
+      'connection_offer_expired': 'Diese Einladung ist abgelaufen',
+      'connection_offer_limit_exceeded':
+          'Diese Einladung hat die maximale Anzahl von Verwendungen erreicht',
+      'register_offer_mnemonic_in_use':
+          'Dieser Satz wird bereits verwendet, bitte wählen Sie einen anderen',
+      'invalidQrCode': 'QR-Code ist ungültig',
+      'oob_invalid_data': 'QR-Code-Daten sind ungültig',
+      'oob_not_found':
+          'QR-Code-Daten stimmen mit keiner aktiven Einladung überein',
+      'oob_invalid_type': 'QR-Code-Daten werden nicht unterstützt',
+      'network_error':
+          'Verbindung fehlgeschlagen. Bitte Internetverbindung prüfen und erneut versuchen.',
+      'other': '$errorCode',
+    });
     return '$_temp0';
   }
 
@@ -487,16 +469,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String contactsFilterLabel(String filter) {
-    String _temp0 = intl.Intl.selectLogic(
-      filter,
-      {
-        'any': 'Any',
-        'person': 'Person',
-        'service': 'AI Agent',
-        'business': 'Business',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'any': 'Any',
+      'person': 'Person',
+      'service': 'AI Agent',
+      'business': 'Business',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -680,15 +659,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String identitiesFilterLabel(String filter) {
-    String _temp0 = intl.Intl.selectLogic(
-      filter,
-      {
-        'all': 'Alle',
-        'primary': 'Primär',
-        'aliases': 'Aliase',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'all': 'Alle',
+      'primary': 'Primär',
+      'aliases': 'Aliase',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -964,18 +940,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String chatItemStatus(String status) {
-    String _temp0 = intl.Intl.selectLogic(
-      status,
-      {
-        'queued': 'In Warteschlange',
-        'delivered': 'Zugestellt',
-        'sending': 'Senden',
-        'sent': 'Gesendet',
-        'error': 'Fehler',
-        'groupDeleted': 'Gruppe gelöscht',
-        'other': '',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'queued': 'In Warteschlange',
+      'delivered': 'Zugestellt',
+      'sending': 'Senden',
+      'sent': 'Gesendet',
+      'error': 'Fehler',
+      'groupDeleted': 'Gruppe gelöscht',
+      'other': '',
+    });
     return '$_temp0';
   }
 
@@ -1245,56 +1218,47 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String contactStatus(String status) {
-    String _temp0 = intl.Intl.selectLogic(
-      status,
-      {
-        'pendingApproval': 'Ausstehende Genehmigung',
-        'pendingInauguration': 'Verbindung wird hergestellt',
-        'approved': 'Aktiver Kontakt',
-        'rejected': 'Abgelehnt',
-        'error': 'Fehler',
-        'deleted': 'Gelöscht',
-        'active': 'Aktiver Kanal',
-        'unknown': 'Unbekannt',
-        'other': 'Unbekannt',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'pendingApproval': 'Ausstehende Genehmigung',
+      'pendingInauguration': 'Verbindung wird hergestellt',
+      'approved': 'Aktiver Kontakt',
+      'rejected': 'Abgelehnt',
+      'error': 'Fehler',
+      'deleted': 'Gelöscht',
+      'active': 'Aktiver Kanal',
+      'unknown': 'Unbekannt',
+      'other': 'Unbekannt',
+    });
     return '$_temp0';
   }
 
   @override
   String groupContactStatus(String status) {
-    String _temp0 = intl.Intl.selectLogic(
-      status,
-      {
-        'pendingApproval': 'Ausstehende Genehmigung',
-        'pendingInauguration': 'Kanal wird eingerichtet',
-        'approved': 'Aktiver Gruppenkanal',
-        'rejected': 'Abgelehnt',
-        'error': 'Fehler',
-        'deleted': 'Gelöscht',
-        'active': 'Aktiver Gruppenkanal',
-        'unknown': 'Unbekannt',
-        'other': 'Unbekannt',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'pendingApproval': 'Ausstehende Genehmigung',
+      'pendingInauguration': 'Kanal wird eingerichtet',
+      'approved': 'Aktiver Gruppenkanal',
+      'rejected': 'Abgelehnt',
+      'error': 'Fehler',
+      'deleted': 'Gelöscht',
+      'active': 'Aktiver Gruppenkanal',
+      'unknown': 'Unbekannt',
+      'other': 'Unbekannt',
+    });
     return '$_temp0';
   }
 
   @override
   String contactOrigin(String origin) {
-    String _temp0 = intl.Intl.selectLogic(
-      origin,
-      {
-        'directInteractive': 'Direkt Interaktiv',
-        'individualOfferPublished': 'Einladung zum Treffpunkt angeboten',
-        'individualOfferRequested': 'Einladung zum Treffpunkt akzeptiert',
-        'groupOfferPublished': 'Gruppeneinladung zum Treffpunkt angeboten',
-        'groupOfferRequested': 'Gruppeneinladung zum Treffpunkt akzeptiert',
-        'unknown': 'Unbekannt',
-        'other': 'Unbekannt',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(origin, {
+      'directInteractive': 'Direkt Interaktiv',
+      'individualOfferPublished': 'Einladung zum Treffpunkt angeboten',
+      'individualOfferRequested': 'Einladung zum Treffpunkt akzeptiert',
+      'groupOfferPublished': 'Gruppeneinladung zum Treffpunkt angeboten',
+      'groupOfferRequested': 'Gruppeneinladung zum Treffpunkt akzeptiert',
+      'unknown': 'Unbekannt',
+      'other': 'Unbekannt',
+    });
     return '$_temp0';
   }
 
@@ -1389,17 +1353,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String connectionStatus(String status) {
-    String _temp0 = intl.Intl.selectLogic(
-      status,
-      {
-        'published': 'Erstellt',
-        'finalised': 'Abgeschlossen',
-        'accepted': 'Wartend',
-        'channelInaugurated': 'Aktiv',
-        'deleted': 'Gelöscht',
-        'other': 'Unbekannt',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'published': 'Erstellt',
+      'finalised': 'Abgeschlossen',
+      'accepted': 'Wartend',
+      'channelInaugurated': 'Aktiv',
+      'deleted': 'Gelöscht',
+      'other': 'Unbekannt',
+    });
     return '$_temp0';
   }
 

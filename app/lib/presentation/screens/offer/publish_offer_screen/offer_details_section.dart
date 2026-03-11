@@ -31,11 +31,14 @@ class _HeadLine extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
     final controller = ref.read(provider.notifier);
-    final isGroupOffer =
-        ref.watch(provider.select((state) => state.formData.isGroupOffer));
+    final isGroupOffer = ref.watch(
+      provider.select((state) => state.formData.isGroupOffer),
+    );
 
     return FormRowTextField(
       color: context.customColors.cyan,
@@ -56,14 +59,17 @@ class _GroupOffer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
     final controller = ref.read(provider.notifier);
     final name = ref.watch(
       provider.select((state) => state.selectedIdentity?.card.firstName),
     );
-    final isGroupOffer =
-        ref.watch(provider.select((state) => state.formData.isGroupOffer));
+    final isGroupOffer = ref.watch(
+      provider.select((state) => state.formData.isGroupOffer),
+    );
 
     return FormRowToggle(
       switchKey: ValueKey('group_offer_switch_$_identityId'),
@@ -76,10 +82,12 @@ class _GroupOffer extends ConsumerWidget {
       value: isGroupOffer,
       onChanged: (value) => controller.toggleGroupOffer(
         value,
-        connectMessage:
-            name != null ? context.l10n.connectWithFirstName(name) : '',
-        chatGroupName:
-            name != null ? context.l10n.firstNameChatGroup(name) : '',
+        connectMessage: name != null
+            ? context.l10n.connectWithFirstName(name)
+            : '',
+        chatGroupName: name != null
+            ? context.l10n.firstNameChatGroup(name)
+            : '',
       ),
     );
   }
@@ -92,8 +100,10 @@ class _OfferPhrase extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
     final controller = ref.read(provider.notifier);
 
     final randomPhraseEnabled = ref.watch(
@@ -139,8 +149,10 @@ class _Description extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
     final controller = ref.read(provider.notifier);
 
     return FormRowTextField(

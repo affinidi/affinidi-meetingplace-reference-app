@@ -7,19 +7,11 @@ extension ContactsScreenFilterExtensions on ContactsScreenFilter {
   Set<ContactCategory> get categories {
     switch (this) {
       case ContactsScreenFilter.person:
-        return {
-          ContactCategory.person,
-          ContactCategory.adult,
-        };
+        return {ContactCategory.person, ContactCategory.adult};
       case ContactsScreenFilter.group:
-        return {
-          ContactCategory.group,
-        };
+        return {ContactCategory.group};
       case ContactsScreenFilter.service:
-        return {
-          ContactCategory.service,
-          ContactCategory.robot,
-        };
+        return {ContactCategory.service, ContactCategory.robot};
       // case ContactsScreenFilter.business:
       //   return {
       //     ContactCategory.organization,

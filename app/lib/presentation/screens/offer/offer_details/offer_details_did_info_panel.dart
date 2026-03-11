@@ -8,8 +8,9 @@ class _OfferDetailsDidInfoPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
-    final isDebugMode =
-        ref.watch(controllerProvider.select((state) => state.isDebugMode));
+    final isDebugMode = ref.watch(
+      controllerProvider.select((state) => state.isDebugMode),
+    );
     if (!isDebugMode) {
       return const SizedBox.shrink();
     }

@@ -11,10 +11,12 @@ part 'offer_details_screen_controller.g.dart';
 
 @riverpod
 class OfferDetailsScreenController extends _$OfferDetailsScreenController {
-  late final offerLoadingController =
-      AsyncLoadingController.provider('offerLoadingController');
-  late final deleteOfferLoadingController =
-      AsyncLoadingController.provider('deleteOfferLoadingController');
+  late final offerLoadingController = AsyncLoadingController.provider(
+    'offerLoadingController',
+  );
+  late final deleteOfferLoadingController = AsyncLoadingController.provider(
+    'deleteOfferLoadingController',
+  );
 
   @override
   OfferDetailsScreenState build(String offerLink) {
@@ -25,8 +27,9 @@ class OfferDetailsScreenController extends _$OfferDetailsScreenController {
     final offer = ref
         .read(connectionsServiceProvider)
         .getConnectionByOfferLink(offerLink);
-    final publisher =
-        ref.read(identitiesServiceProvider).getIdentityById(offer?.externalRef);
+    final publisher = ref
+        .read(identitiesServiceProvider)
+        .getIdentityById(offer?.externalRef);
     final isPrimary = publisher?.isPrimary ?? false;
     final settings = ref.read(settingsServiceProvider);
 

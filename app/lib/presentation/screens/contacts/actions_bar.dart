@@ -13,18 +13,22 @@ class _ActionsBar extends ConsumerWidget {
       contactsScreenControllerProvider.select((state) => state.isEditMode),
     );
     final hasContacts = ref.watch(contactsScreenControllerProvider.hasContacts);
-    final hasAnySelectedContacts =
-        ref.watch(contactsScreenControllerProvider.hasAnySelectedContacts);
+    final hasAnySelectedContacts = ref.watch(
+      contactsScreenControllerProvider.hasAnySelectedContacts,
+    );
     final hasIdentity = ref.watch(contactsScreenControllerProvider.hasIdentity);
     final shouldShowGrid = ref.watch(
       contactsScreenControllerProvider.select((state) => state.shouldShowGrid),
     );
     final shouldShowFilter = ref.watch(
-      contactsScreenControllerProvider
-          .select((state) => state.shouldShowFilter),
+      contactsScreenControllerProvider.select(
+        (state) => state.shouldShowFilter,
+      ),
     );
-    final selectedContactsCount =
-        ref.watch(contactsScreenControllerProvider).selectedContacts.length;
+    final selectedContactsCount = ref
+        .watch(contactsScreenControllerProvider)
+        .selectedContacts
+        .length;
 
     final colorScheme = context.colorScheme;
     final l10n = context.l10n;
@@ -79,9 +83,7 @@ class _ActionsBar extends ConsumerWidget {
             ),
           ],
         ),
-        const Expanded(
-          child: _ContactsSearchField(),
-        ),
+        const Expanded(child: _ContactsSearchField()),
         Row(
           children: [
             if (isEditMode)

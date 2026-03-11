@@ -45,20 +45,17 @@ class IdentityPicker extends HookWidget {
   Widget build(BuildContext context) {
     final cardSwiperController = CardSwiperController();
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        if (initialCardIndex != -1) {
-          Future.microtask(() {
-            cardSwiperController.moveTo(initialCardIndex);
-          });
-        }
+      if (initialCardIndex != -1) {
+        Future.microtask(() {
+          cardSwiperController.moveTo(initialCardIndex);
+        });
+      }
 
-        return null;
-      },
-      [initialCardIndex],
-    );
+      return null;
+    }, [initialCardIndex]);
 
     if (identities.isEmpty) {
       return Padding(

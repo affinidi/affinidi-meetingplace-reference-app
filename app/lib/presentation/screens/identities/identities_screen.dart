@@ -76,8 +76,9 @@ class _IdentitiesPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = identitiesScreenControllerProvider;
-    final shouldSetupPrimaryIdentity =
-        ref.watch(provider.select((state) => state.shouldSetupPrimaryIdentity));
+    final shouldSetupPrimaryIdentity = ref.watch(
+      provider.select((state) => state.shouldSetupPrimaryIdentity),
+    );
 
     Future<void> onAddIdentity() async {
       if (!context.mounted) return;
@@ -111,10 +112,12 @@ class _IdentityPicker extends ConsumerWidget {
     final cacheManager = ref.read(cacheManagerProvider);
 
     final identities = ref.watch(provider.select((state) => state.identities));
-    final currentIdentity =
-        ref.watch(provider.select((state) => state.currentIdentity));
-    final initialCardIndex =
-        identities.indexWhere((identity) => identity.id == currentIdentity?.id);
+    final currentIdentity = ref.watch(
+      provider.select((state) => state.currentIdentity),
+    );
+    final initialCardIndex = identities.indexWhere(
+      (identity) => identity.id == currentIdentity?.id,
+    );
 
     return IdentityPicker(
       key: ValueKey('identities_picker_${identities.length}'),
@@ -158,12 +161,14 @@ class _ActionsBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(identitiesScreenControllerProvider.notifier);
     final shouldShowFilter = ref.watch(
-      identitiesScreenControllerProvider
-          .select((state) => state.shouldShowFilter),
+      identitiesScreenControllerProvider.select(
+        (state) => state.shouldShowFilter,
+      ),
     );
     final currentIdentity = ref.watch(
-      identitiesScreenControllerProvider
-          .select((state) => state.currentIdentity),
+      identitiesScreenControllerProvider.select(
+        (state) => state.currentIdentity,
+      ),
     );
 
     final isDefault = currentIdentity?.isPrimary ?? false;
@@ -186,9 +191,7 @@ class _ActionsBar extends ConsumerWidget {
             ),
           ],
         ),
-        const Expanded(
-          child: _SearchField(),
-        ),
+        const Expanded(child: _SearchField()),
         Row(
           children: [
             IconButton(
@@ -207,10 +210,7 @@ class _ActionsBar extends ConsumerWidget {
                     }
                   : null,
             ),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: onAddIdentity,
-            ),
+            IconButton(icon: const Icon(Icons.add), onPressed: onAddIdentity),
           ],
         ),
       ],
@@ -228,19 +228,17 @@ class _SearchField extends HookConsumerWidget {
     final text = useListenable(searchTextController).text;
     final colorScheme = context.colorScheme;
     final shouldShowFilter = ref.watch(
-      identitiesScreenControllerProvider
-          .select((state) => state.shouldShowFilter),
+      identitiesScreenControllerProvider.select(
+        (state) => state.shouldShowFilter,
+      ),
     );
 
-    useEffect(
-      () {
-        if (!shouldShowFilter) {
-          searchTextController.clear();
-        }
-        return null;
-      },
-      [shouldShowFilter],
-    );
+    useEffect(() {
+      if (!shouldShowFilter) {
+        searchTextController.clear();
+      }
+      return null;
+    }, [shouldShowFilter]);
 
     if (!shouldShowFilter) return const SizedBox.shrink();
 
@@ -249,10 +247,7 @@ class _SearchField extends HookConsumerWidget {
       child: Container(
         height: 35,
         decoration: BoxDecoration(
-          border: Border.all(
-            color: colorScheme.outline,
-            width: 0.8,
-          ),
+          border: Border.all(color: colorScheme.outline, width: 0.8),
           borderRadius: BorderRadius.circular(20.0),
           color: colorScheme.surface,
         ),
@@ -280,11 +275,7 @@ class _SearchField extends HookConsumerWidget {
             ),
             if (text.isNotEmpty)
               IconButton(
-                icon: Icon(
-                  Icons.clear,
-                  color: colorScheme.onSurface,
-                  size: 20,
-                ),
+                icon: Icon(Icons.clear, color: colorScheme.onSurface, size: 20),
                 onPressed: () {
                   searchTextController.clear();
                   controller.clearSearch();

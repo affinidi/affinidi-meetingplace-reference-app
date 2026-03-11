@@ -11,16 +11,19 @@ String _$qrCodePickerControllerHash() =>
 
 /// See also [QrCodePickerController].
 @ProviderFor(QrCodePickerController)
-final qrCodePickerControllerProvider = AutoDisposeNotifierProvider<
-    QrCodePickerController, QrCodePickerState>.internal(
-  QrCodePickerController.new,
-  name: r'qrCodePickerControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$qrCodePickerControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final qrCodePickerControllerProvider =
+    AutoDisposeNotifierProvider<
+      QrCodePickerController,
+      QrCodePickerState
+    >.internal(
+      QrCodePickerController.new,
+      name: r'qrCodePickerControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$qrCodePickerControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$QrCodePickerController = AutoDisposeNotifier<QrCodePickerState>;
 // ignore_for_file: type=lint

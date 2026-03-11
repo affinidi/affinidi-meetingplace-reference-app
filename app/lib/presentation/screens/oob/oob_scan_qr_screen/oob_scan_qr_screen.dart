@@ -14,9 +14,7 @@ class OOBScanQrScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = oobScanQrControllerProvider;
     final controller = ref.read(provider.notifier);
-    final state = ref.watch(
-      provider,
-    );
+    final state = ref.watch(provider);
     final isProcessing = state.isProcessing;
     final scannedCode = state.scannedCode;
     final errorMessage = state.errorMessage;
@@ -49,13 +47,13 @@ class OOBScanQrScreen extends ConsumerWidget {
                       onCancel: onCancel,
                     )
                   : errorMessage == null && !isProcessing && scannedCode == null
-                      ? QrCodePicker(
-                          onDetectCode: (code) async {
-                            if (isProcessing) return;
-                            await controller.processScannedQRCode(code);
-                          },
-                        )
-                      : const SizedBox.shrink(),
+                  ? QrCodePicker(
+                      onDetectCode: (code) async {
+                        if (isProcessing) return;
+                        await controller.processScannedQRCode(code);
+                      },
+                    )
+                  : const SizedBox.shrink(),
             ),
           ],
         ),

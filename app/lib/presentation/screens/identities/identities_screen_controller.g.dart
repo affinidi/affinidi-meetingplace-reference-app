@@ -11,16 +11,19 @@ String _$identitiesScreenControllerHash() =>
 
 /// See also [IdentitiesScreenController].
 @ProviderFor(IdentitiesScreenController)
-final identitiesScreenControllerProvider = NotifierProvider<
-    IdentitiesScreenController, IdentitiesScreenState>.internal(
-  IdentitiesScreenController.new,
-  name: r'identitiesScreenControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$identitiesScreenControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final identitiesScreenControllerProvider =
+    NotifierProvider<
+      IdentitiesScreenController,
+      IdentitiesScreenState
+    >.internal(
+      IdentitiesScreenController.new,
+      name: r'identitiesScreenControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$identitiesScreenControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$IdentitiesScreenController = Notifier<IdentitiesScreenState>;
 // ignore_for_file: type=lint

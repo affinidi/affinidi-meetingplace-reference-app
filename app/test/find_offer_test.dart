@@ -63,8 +63,9 @@ void main() {
     });
 
     group('and enter a passphrase', () {
-      testWidgets('it clears the passphrase when cancel button is pressed',
-          (tester) async {
+      testWidgets('it clears the passphrase when cancel button is pressed', (
+        tester,
+      ) async {
         await setupFindOfferTest(tester, location, testIdentity);
 
         final passphraseField = find.byType(TextField);
@@ -99,8 +100,9 @@ void main() {
     });
 
     group('and SDK cannot find the offer', () {
-      testWidgets('it shows error snackbar when offer not found',
-          (tester) async {
+      testWidgets('it shows error snackbar when offer not found', (
+        tester,
+      ) async {
         final l10n = await getL10n();
 
         await navigateToLocation(
@@ -108,9 +110,7 @@ void main() {
           location,
           identities: [testIdentity],
           mediators: FakeMediators.all,
-          meetingPlaceCoreSDK: FakeMeetingPlaceSDK(
-            offerToFind: null,
-          ),
+          meetingPlaceCoreSDK: FakeMeetingPlaceSDK(offerToFind: null),
         );
         await tester.pumpAndSettle();
 
@@ -129,8 +129,9 @@ void main() {
     });
 
     group('and SDK successfully finds the offer', () {
-      testWidgets('it navigates to accept offer screen and shows all details',
-          (tester) async {
+      testWidgets('it navigates to accept offer screen and shows all details', (
+        tester,
+      ) async {
         final offer = FakeConnectionOffers.testOffer;
         final offererIdentity = FakeIdentities.secondaryIdentity;
         final l10n = await getL10n();
@@ -140,9 +141,7 @@ void main() {
           location,
           identities: [testIdentity],
           mediators: FakeMediators.all,
-          meetingPlaceCoreSDK: FakeMeetingPlaceSDK(
-            offerToFind: offer,
-          ),
+          meetingPlaceCoreSDK: FakeMeetingPlaceSDK(offerToFind: offer),
         );
         await tester.pumpAndSettle();
 
@@ -177,46 +176,48 @@ void main() {
       });
 
       testWidgets(
-          'it calls acceptOffer with correct parameters when Connect is '
-          'pressed', (tester) async {
-        final offer = FakeConnectionOffers.testOffer;
-        final fakeSdk = FakeMeetingPlaceSDK(offerToFind: offer);
-        final l10n = await getL10n();
+        'it calls acceptOffer with correct parameters when Connect is '
+        'pressed',
+        (tester) async {
+          final offer = FakeConnectionOffers.testOffer;
+          final fakeSdk = FakeMeetingPlaceSDK(offerToFind: offer);
+          final l10n = await getL10n();
 
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-          mediators: FakeMediators.all,
-          meetingPlaceCoreSDK: fakeSdk,
-        );
-        await tester.pumpAndSettle();
+          await navigateToLocation(
+            tester,
+            location,
+            identities: [testIdentity],
+            mediators: FakeMediators.all,
+            meetingPlaceCoreSDK: fakeSdk,
+          );
+          await tester.pumpAndSettle();
 
-        final passphraseField = find.byType(TextField);
-        await tester.enterText(passphraseField, offer.mnemonic);
-        await tester.pumpAndSettle();
+          final passphraseField = find.byType(TextField);
+          await tester.enterText(passphraseField, offer.mnemonic);
+          await tester.pumpAndSettle();
 
-        final searchButton = find.text(l10n.generalSearch);
-        await tester.tap(searchButton);
-        await tester.pumpAndSettle();
+          final searchButton = find.text(l10n.generalSearch);
+          await tester.tap(searchButton);
+          await tester.pumpAndSettle();
 
-        expect(find.text(l10n.acceptOfferTitle), findsOneWidget);
+          expect(find.text(l10n.acceptOfferTitle), findsOneWidget);
 
-        final connectButton = find.text(l10n.generalConnect);
-        await tester.tap(connectButton);
-        await tester.pumpAndSettle();
+          final connectButton = find.text(l10n.generalConnect);
+          await tester.tap(connectButton);
+          await tester.pumpAndSettle();
 
-        expect(fakeSdk.acceptOfferCalls.length, 1);
+          expect(fakeSdk.acceptOfferCalls.length, 1);
 
-        final acceptCall = fakeSdk.acceptOfferCalls.first;
-        final calledOffer = acceptCall['connectionOffer'] as ConnectionOffer;
-        final calledExternalRef = acceptCall['externalRef'] as String?;
+          final acceptCall = fakeSdk.acceptOfferCalls.first;
+          final calledOffer = acceptCall['connectionOffer'] as ConnectionOffer;
+          final calledExternalRef = acceptCall['externalRef'] as String?;
 
-        expect(calledOffer.mnemonic, offer.mnemonic);
-        expect(calledOffer.offerName, offer.offerName);
+          expect(calledOffer.mnemonic, offer.mnemonic);
+          expect(calledOffer.offerName, offer.offerName);
 
-        expect(calledExternalRef, testIdentity.id);
-      });
+          expect(calledExternalRef, testIdentity.id);
+        },
+      );
     });
   });
 }

@@ -1,9 +1,7 @@
 part of 'identities_screen.dart';
 
 class _PrimaryIdentitySetup extends ConsumerWidget {
-  const _PrimaryIdentitySetup({
-    required this.formKey,
-  });
+  const _PrimaryIdentitySetup({required this.formKey});
 
   final String? identityId = null;
   final GlobalKey<FormState> formKey;
@@ -13,8 +11,9 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
     final provider = identityFormScreenControllerProvider(identityId);
     final controller = ref.read(provider.notifier);
     controller.initializeFocusListeners(formKey);
-    final hasEnteredAnyInfo =
-        ref.watch(provider.select((s) => s.hasEnteredAnyInfo));
+    final hasEnteredAnyInfo = ref.watch(
+      provider.select((s) => s.hasEnteredAnyInfo),
+    );
     final canSave = ref.watch(provider.select((s) => s.canSave));
     final l10n = context.l10n;
 
@@ -50,8 +49,9 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
             width: ScreensizeHelper.getConstrainedWidth(context),
             padding: const EdgeInsets.all(0),
             decoration: BoxDecoration(
-              color: context.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.3),
+              color: context.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IdentityFormFields(

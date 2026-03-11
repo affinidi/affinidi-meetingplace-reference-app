@@ -8,7 +8,7 @@ class _ContactGridView extends ConsumerWidget {
   });
 
   final void Function({required Contact contact, required bool isSelected})
-      onContactTap;
+  onContactTap;
   final void Function({required Contact contact}) onContactDoubleTap;
   final void Function({required Contact contact}) onContactLongPress;
 
@@ -18,7 +18,8 @@ class _ContactGridView extends ConsumerWidget {
       contactsScreenControllerProvider.select((state) => state.contacts),
     );
 
-    final isLandscapeOrTablet = ScreensizeHelper().isLandscape(context) ||
+    final isLandscapeOrTablet =
+        ScreensizeHelper().isLandscape(context) ||
         ScreensizeHelper().isBigScreen(context);
 
     return GridView.builder(
@@ -51,7 +52,7 @@ class _ContactGridItem extends ConsumerWidget {
   final Contact contact;
 
   final void Function({required Contact contact, required bool isSelected})
-      onTap;
+  onTap;
   final void Function({required Contact contact}) onDoubleTap;
   final void Function({required Contact contact}) onLongPress;
 
@@ -76,10 +77,7 @@ class _ContactGridItem extends ConsumerWidget {
         alignment: Alignment.topCenter,
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () => onTap(
-            contact: contact,
-            isSelected: isSelected,
-          ),
+          onTap: () => onTap(contact: contact, isSelected: isSelected),
           onDoubleTap: () => onDoubleTap(contact: contact),
           onLongPress: () => onLongPress(contact: contact),
           child: Column(
@@ -119,9 +117,7 @@ class _ContactGridItem extends ConsumerWidget {
                     Positioned(
                       bottom: -2,
                       right: -2,
-                      child: _ContactNewChannelDotBadge(
-                        origin: contact.origin,
-                      ),
+                      child: _ContactNewChannelDotBadge(origin: contact.origin),
                     ),
                   if (isEditMode)
                     Positioned(
@@ -130,10 +126,8 @@ class _ContactGridItem extends ConsumerWidget {
                       child: Checkbox(
                         value: isSelected,
                         visualDensity: VisualDensity.adaptivePlatformDensity,
-                        onChanged: (_) => onTap(
-                          contact: contact,
-                          isSelected: isSelected,
-                        ),
+                        onChanged: (_) =>
+                            onTap(contact: contact, isSelected: isSelected),
                       ),
                     ),
                 ],
@@ -160,8 +154,8 @@ class _ContactGridItem extends ConsumerWidget {
                 displayName ?? fullName,
                 style: contact.isIndividual
                     ? (hasDisplayName
-                        ? context.textTheme.labelSmall
-                        : context.textTheme.titleSmall)
+                          ? context.textTheme.labelSmall
+                          : context.textTheme.titleSmall)
                     : context.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: context.colorScheme.onSurface.withAlpha(179),

@@ -29,15 +29,12 @@ class BottomSheetMenu extends HookWidget {
       isScrollable.value = scrollController.isScrollable;
     }
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
-        Future.microtask(updateScrollable);
+    useEffect(() {
+      if (!context.mounted) return;
+      Future.microtask(updateScrollable);
 
-        return null;
-      },
-      [scrollController.isScrollable, scaler],
-    );
+      return null;
+    }, [scrollController.isScrollable, scaler]);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -60,10 +57,7 @@ class BottomSheetMenu extends HookWidget {
             color: colors.inverseSurface,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Text(
-                header!,
-                textAlign: TextAlign.center,
-              ),
+              child: Text(header!, textAlign: TextAlign.center),
             ),
           ),
         Flexible(

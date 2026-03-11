@@ -40,14 +40,17 @@ void main() {
 
       final result = original.insertSorted(_message('m4', t4));
 
-      expect(
-        original.map((e) => (e as Message).messageId).toList(),
-        ['m3', 'm2', 'm1'],
-      );
-      expect(
-        result.map((e) => (e as Message).messageId).toList(),
-        ['m4', 'm3', 'm2', 'm1'],
-      );
+      expect(original.map((e) => (e as Message).messageId).toList(), [
+        'm3',
+        'm2',
+        'm1',
+      ]);
+      expect(result.map((e) => (e as Message).messageId).toList(), [
+        'm4',
+        'm3',
+        'm2',
+        'm1',
+      ]);
     });
 
     test('inserts oldest item at the end (newest -> oldest)', () {
@@ -64,10 +67,12 @@ void main() {
 
       final result = original.insertSorted(_message('m0', t0));
 
-      expect(
-        result.map((e) => (e as Message).messageId).toList(),
-        ['m3', 'm2', 'm1', 'm0'],
-      );
+      expect(result.map((e) => (e as Message).messageId).toList(), [
+        'm3',
+        'm2',
+        'm1',
+        'm0',
+      ]);
     });
 
     test('inserts item into the middle (newest -> oldest)', () {
@@ -84,10 +89,12 @@ void main() {
 
       final result = original.insertSorted(_message('m25', t25));
 
-      expect(
-        result.map((e) => (e as Message).messageId).toList(),
-        ['m3', 'm25', 'm2', 'm1'],
-      );
+      expect(result.map((e) => (e as Message).messageId).toList(), [
+        'm3',
+        'm25',
+        'm2',
+        'm1',
+      ]);
     });
 
     test('inserts item after all items with same timestamp', () {
@@ -104,10 +111,13 @@ void main() {
 
       final result = original.insertSorted(_message('m2new', t2));
 
-      expect(
-        result.map((e) => (e as Message).messageId).toList(),
-        ['m3', 'm2a', 'm2b', 'm2new', 'm1'],
-      );
+      expect(result.map((e) => (e as Message).messageId).toList(), [
+        'm3',
+        'm2a',
+        'm2b',
+        'm2new',
+        'm1',
+      ]);
     });
   });
 }

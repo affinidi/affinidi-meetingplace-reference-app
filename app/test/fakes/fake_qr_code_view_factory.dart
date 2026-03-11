@@ -11,9 +11,7 @@ class FakeQrCodeViewFactory implements QrCodeViewFactory {
       width: 200,
       height: 200,
       color: Colors.grey,
-      child: const Center(
-        child: Text('Fake QR Code'),
-      ),
+      child: const Center(child: Text('Fake QR Code')),
     );
   }
 

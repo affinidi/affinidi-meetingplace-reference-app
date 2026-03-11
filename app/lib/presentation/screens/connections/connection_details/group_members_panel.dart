@@ -34,8 +34,9 @@ class _ShowDeletedMembersSwitch extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final showDeletedMembers =
-        ref.watch(provider.select((state) => state.showDeletedMembers));
+    final showDeletedMembers = ref.watch(
+      provider.select((state) => state.showDeletedMembers),
+    );
     final isLoneMember = ref.watch(provider.isLoneMember);
 
     if (isLoneMember) return const SizedBox.shrink();
@@ -60,8 +61,9 @@ class _GroupMembersEmptyRoom extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(_contactId);
-    final hasMembersAvailableToChat =
-        ref.watch(provider.hasMembersAvailableToChat);
+    final hasMembersAvailableToChat = ref.watch(
+      provider.hasMembersAvailableToChat,
+    );
 
     if (hasMembersAvailableToChat) return const SizedBox.shrink();
 
@@ -71,10 +73,7 @@ class _GroupMembersEmptyRoom extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Text(
         context.l10n.groupNoMembersToChat,
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 12,
-        ),
+        style: const TextStyle(color: Colors.black, fontSize: 12),
         textAlign: TextAlign.center,
       ),
     );
@@ -91,8 +90,9 @@ class _GroupMembersList extends ConsumerWidget {
     final provider = connectionDetailsScreenControllerProvider(_contactId);
     final contact = ref.watch(provider.select((state) => state.contact));
     final members = ref.watch(provider.members);
-    final isDebugMode =
-        ref.watch(provider.select((state) => state.isDebugMode));
+    final isDebugMode = ref.watch(
+      provider.select((state) => state.isDebugMode),
+    );
 
     String getMemberText(GroupMember member) {
       final isYou = (member.did == contact?.channelDid);
@@ -133,10 +133,7 @@ class _GroupMembersList extends ConsumerWidget {
           ),
           title: Text(
             getMemberText(member),
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,9 +171,9 @@ class _GroupMemberIcon extends StatelessWidget {
     required String memberDid,
     required String? myDid,
     required bool isAdmin,
-  })  : _memberDid = memberDid,
-        _myDid = myDid,
-        _isAdmin = isAdmin;
+  }) : _memberDid = memberDid,
+       _myDid = myDid,
+       _isAdmin = isAdmin;
 
   final String _memberDid;
   final String? _myDid;
@@ -193,16 +190,8 @@ class _GroupMemberIcon extends StatelessWidget {
     }
 
     if (_memberDid == _myDid) {
-      return const Icon(
-        Icons.person,
-        color: Colors.white,
-        size: 18,
-      );
+      return const Icon(Icons.person, color: Colors.white, size: 18);
     }
-    return const Icon(
-      Icons.person,
-      color: Colors.white,
-      size: 18,
-    );
+    return const Icon(Icons.person, color: Colors.white, size: 18);
   }
 }

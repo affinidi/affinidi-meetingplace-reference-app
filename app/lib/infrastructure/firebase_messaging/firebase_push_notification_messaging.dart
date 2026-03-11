@@ -40,17 +40,16 @@ class FirebasePushNotificationMessaging implements PushNotificationMessaging {
     bool provisional = false,
     bool sound = true,
     bool providesAppNotificationSettings = false,
-  }) =>
-      _instance.requestPermission(
-        alert: alert,
-        announcement: announcement,
-        badge: badge,
-        carPlay: carPlay,
-        criticalAlert: criticalAlert,
-        provisional: provisional,
-        sound: sound,
-        providesAppNotificationSettings: providesAppNotificationSettings,
-      );
+  }) => _instance.requestPermission(
+    alert: alert,
+    announcement: announcement,
+    badge: badge,
+    carPlay: carPlay,
+    criticalAlert: criticalAlert,
+    provisional: provisional,
+    sound: sound,
+    providesAppNotificationSettings: providesAppNotificationSettings,
+  );
 
   @override
   void setBackgroundHandler(BackgroundMessageHandler handler) {
@@ -64,12 +63,8 @@ class FirebasePushNotificationMessaging implements PushNotificationMessaging {
   Future<RemoteMessage?> getInitialMessage() => _instance.getInitialMessage();
 
   @override
-  Future<String?> getToken({
-    String? vapidKey,
-  }) =>
-      _instance.getToken(
-        vapidKey: vapidKey,
-      );
+  Future<String?> getToken({String? vapidKey}) =>
+      _instance.getToken(vapidKey: vapidKey);
 
   @override
   Stream<String> get onTokenRefresh => _instance.onTokenRefresh;
@@ -79,12 +74,11 @@ class FirebasePushNotificationMessaging implements PushNotificationMessaging {
     bool alert = false,
     bool badge = false,
     bool sound = false,
-  }) =>
-      _instance.setForegroundNotificationPresentationOptions(
-        alert: alert,
-        badge: badge,
-        sound: sound,
-      );
+  }) => _instance.setForegroundNotificationPresentationOptions(
+    alert: alert,
+    badge: badge,
+    sound: sound,
+  );
 
   @override
   Stream<RemoteMessage> get onMessageOpenedApp =>

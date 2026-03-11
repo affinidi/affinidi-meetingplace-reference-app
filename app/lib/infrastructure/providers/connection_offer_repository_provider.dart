@@ -18,44 +18,50 @@ part 'connection_offer_repository_provider.g.dart';
 /// - Enables logging based on environment configuration.
 final _connectionOffersDatabaseProvider =
     FutureProvider<ConnectionOfferDatabase>((ref) async {
-  final secureStorage = await ref.read(secureStorageProvider.future);
-  final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
-  final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
+      final secureStorage = await ref.read(secureStorageProvider.future);
+      final passphrase = await secureStorage.provideDatabasePassphrase();
+      final directory = await ref.read(
+        applicationDocumentsDirectoryProvider.future,
+      );
+      final logStatements = ref
+          .read(environmentProvider)
+          .isDatabaseLoggingEnabled;
 
-  final database = ConnectionOfferDatabase(
-    databaseName: 'mpx_connections_db',
-    passphrase: passphrase,
-    directory: directory,
-    logStatements: logStatements,
-  );
+      final database = ConnectionOfferDatabase(
+        databaseName: 'mpx_connections_db',
+        passphrase: passphrase,
+        directory: directory,
+        logStatements: logStatements,
+      );
 
-  ref.onDispose(database.close);
+      ref.onDispose(database.close);
 
-  return database;
-});
+      return database;
+    });
 
 final _connectionOffersInMemoryDatabaseProvider =
     FutureProvider<ConnectionOfferDatabase>((ref) async {
-  final secureStorage = await ref.read(secureStorageProvider.future);
-  final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
-  final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
+      final secureStorage = await ref.read(secureStorageProvider.future);
+      final passphrase = await secureStorage.provideDatabasePassphrase();
+      final directory = await ref.read(
+        applicationDocumentsDirectoryProvider.future,
+      );
+      final logStatements = ref
+          .read(environmentProvider)
+          .isDatabaseLoggingEnabled;
 
-  final database = ConnectionOfferDatabase(
-    databaseName: 'mpx_connections_db',
-    passphrase: passphrase,
-    directory: directory,
-    logStatements: logStatements,
-    inMemory: true,
-  );
+      final database = ConnectionOfferDatabase(
+        databaseName: 'mpx_connections_db',
+        passphrase: passphrase,
+        directory: directory,
+        logStatements: logStatements,
+        inMemory: true,
+      );
 
-  ref.onDispose(database.close);
+      ref.onDispose(database.close);
 
-  return database;
-});
+      return database;
+    });
 
 /// A provider that supplies the [ConnectionOfferRepositoryDrift] instance.
 ///
@@ -66,19 +72,16 @@ Future<model.ConnectionOfferRepository> connectionOfferRepositoryDrift(
   Ref ref,
 ) async {
   final database = await ref.read(_connectionOffersDatabaseProvider.future);
-  return ConnectionOfferRepositoryDrift(
-    database: database,
-  );
+  return ConnectionOfferRepositoryDrift(database: database);
 }
 
 Future<model.ConnectionOfferRepository> connectionOfferRepositoryInMemoryDrift(
   Ref ref,
 ) async {
-  final database =
-      await ref.read(_connectionOffersInMemoryDatabaseProvider.future);
-  return ConnectionOfferRepositoryDrift(
-    database: database,
+  final database = await ref.read(
+    _connectionOffersInMemoryDatabaseProvider.future,
   );
+  return ConnectionOfferRepositoryDrift(database: database);
 }
 
 @Riverpod(keepAlive: true)

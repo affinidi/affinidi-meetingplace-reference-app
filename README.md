@@ -167,7 +167,7 @@ This architecture ensures that the Affinidi SDK integration is properly abstract
 
 ## Requirements
 
-- Flutter 3.35.3
+- Flutter 3.41.4
 - Dart SDK ^3.9.2
 
 ## Getting started

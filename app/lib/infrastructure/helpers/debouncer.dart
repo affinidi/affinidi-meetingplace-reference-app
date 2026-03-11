@@ -6,7 +6,7 @@ import '../configuration/environment.dart';
 /// Utility to debounce function calls
 class Debouncer {
   Debouncer({Duration? duration})
-      : _duration = duration ?? Environment.instance.inputDebounceDuration;
+    : _duration = duration ?? Environment.instance.inputDebounceDuration;
 
   final Duration _duration;
   Timer? _timer;

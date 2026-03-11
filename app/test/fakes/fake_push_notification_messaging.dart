@@ -10,10 +10,10 @@ class FakePushNotificationMessaging implements PushNotificationMessaging {
     int attemptsToFailGettingToken = 0,
     int attemptsToFailGettingApnsToken = 0,
     String? apnsTokenToReturn,
-  })  : _initialMessageToReturn = initialMessageToReturn,
-        _tokenToReturn = tokenToReturn,
-        _attemptsToFailGettingToken = attemptsToFailGettingToken,
-        _attemptsToFailGettingApnsToken = attemptsToFailGettingApnsToken;
+  }) : _initialMessageToReturn = initialMessageToReturn,
+       _tokenToReturn = tokenToReturn,
+       _attemptsToFailGettingToken = attemptsToFailGettingToken,
+       _attemptsToFailGettingApnsToken = attemptsToFailGettingApnsToken;
 
   final String? _tokenToReturn;
   final RemoteMessage? _initialMessageToReturn;

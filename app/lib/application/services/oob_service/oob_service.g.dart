@@ -21,13 +21,14 @@ String _$oOBServiceHash() => r'aed2221c2ba5b5b0767d55cef845097c851530d0';
 @ProviderFor(OOBService)
 final oOBServiceProvider =
     AutoDisposeNotifierProvider<OOBService, OOBServiceState>.internal(
-  OOBService.new,
-  name: r'oOBServiceProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$oOBServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      OOBService.new,
+      name: r'oOBServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$oOBServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$OOBService = AutoDisposeNotifier<OOBServiceState>;
 // ignore_for_file: type=lint

@@ -23,14 +23,14 @@ String _$identitiesServiceHash() => r'db4e472f39c31f60ff38243990f714c6776bb23b';
 @ProviderFor(IdentitiesService)
 final identitiesServiceProvider =
     NotifierProvider<IdentitiesService, IdentitiesServiceState>.internal(
-  IdentitiesService.new,
-  name: r'identitiesServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$identitiesServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      IdentitiesService.new,
+      name: r'identitiesServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$identitiesServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$IdentitiesService = Notifier<IdentitiesServiceState>;
 // ignore_for_file: type=lint

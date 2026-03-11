@@ -57,10 +57,7 @@ class ContactsScreen extends ConsumerWidget {
             SectionBanner(
               title: l10n.tabsTitle(Tabs.contacts.name),
               subtitle: context.l10n.contactsPanelSubtitle,
-              icon: Icon(
-                Icons.chat,
-                color: colorScheme.onSurfaceVariant,
-              ),
+              icon: Icon(Icons.chat, color: colorScheme.onSurfaceVariant),
               onTap: () => _showNewConnectionsMenu(context, ref),
             ),
             _FiltersBar(),

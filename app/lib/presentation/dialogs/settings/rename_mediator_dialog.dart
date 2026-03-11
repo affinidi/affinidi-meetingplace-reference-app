@@ -4,10 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 
 class RenameMediatorDialog extends ConsumerStatefulWidget {
-  const RenameMediatorDialog({
-    super.key,
-    required this.currentName,
-  });
+  const RenameMediatorDialog({super.key, required this.currentName});
 
   final String currentName;
 

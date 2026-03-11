@@ -4,5 +4,4 @@ enum ContactsScreenFilter {
   service,
   group,
   //business,
-  ;
 }

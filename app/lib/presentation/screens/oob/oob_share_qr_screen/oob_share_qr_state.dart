@@ -5,8 +5,6 @@ part 'oob_share_qr_state.freezed.dart';
 
 @Freezed(fromJson: false, toJson: false)
 abstract class OobShareQrState with _$OobShareQrState {
-  factory OobShareQrState({
-    String? qrData,
-    Channel? latestChannel,
-  }) = _OobShareQrState;
+  factory OobShareQrState({String? qrData, Channel? latestChannel}) =
+      _OobShareQrState;
 }

@@ -4,8 +4,8 @@ class _ChatItemFromInfo extends ConsumerWidget {
   const _ChatItemFromInfo({
     required chat.ChatItem chatItem,
     required String contactId,
-  })  : _chatItem = chatItem,
-        _contactId = contactId;
+  }) : _chatItem = chatItem,
+       _contactId = contactId;
 
   final chat.ChatItem _chatItem;
   final String _contactId;
@@ -16,8 +16,9 @@ class _ChatItemFromInfo extends ConsumerWidget {
     final isGroupChat = ref.watch(provider.isGroupChat);
     final groupMember = ref.watch(
       provider.select(
-        (state) => state.group?.members
-            .firstWhereOrNull((gm) => gm.did == _chatItem.senderDid),
+        (state) => state.group?.members.firstWhereOrNull(
+          (gm) => gm.did == _chatItem.senderDid,
+        ),
       ),
     );
 
@@ -27,9 +28,7 @@ class _ChatItemFromInfo extends ConsumerWidget {
         _chatItem is chat.ConciergeMessage ||
         _chatItem.senderDid.isEmpty ||
         groupMember == null) {
-      return const SizedBox(
-        height: 17,
-      );
+      return const SizedBox(height: 17);
     }
 
     final dateCreated = _chatItem.dateCreated.toLocal();

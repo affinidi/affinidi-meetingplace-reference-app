@@ -13,24 +13,16 @@ import '../widgets/images/default_profile_image.dart';
 import 'profile_circle_avatar.dart';
 
 class ConnectionSuccessBottomSheet extends ConsumerWidget {
-  const ConnectionSuccessBottomSheet({
-    super.key,
-    required this.channel,
-  });
+  const ConnectionSuccessBottomSheet({super.key, required this.channel});
 
   final Channel channel;
 
-  static void show({
-    required BuildContext context,
-    required Channel channel,
-  }) {
+  static void show({required BuildContext context, required Channel channel}) {
     showModalBottomSheet<void>(
       backgroundColor: Colors.black,
       context: context,
       isDismissible: true,
-      builder: (context) => ConnectionSuccessBottomSheet(
-        channel: channel,
-      ),
+      builder: (context) => ConnectionSuccessBottomSheet(channel: channel),
       useRootNavigator: true,
     );
   }
@@ -40,10 +32,7 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
     final card = channel.otherPartyContactCard;
     final cacheManager = ref.read(cacheManagerProvider);
     final profilePic = card?.hasProfilePic ?? false
-        ? CachedBase64Image(
-            card!.profilePic,
-            cacheManager: cacheManager,
-          )
+        ? CachedBase64Image(card!.profilePic, cacheManager: cacheManager)
         : defaultProfileImage;
     final l10n = context.l10n;
 
@@ -51,8 +40,9 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
       final channelDid = channel.otherPartyPermanentChannelDid;
       if (channelDid == null) return;
 
-      final contact =
-          ref.read(contactsServiceProvider).getContactByChannelDid(channelDid);
+      final contact = ref
+          .read(contactsServiceProvider)
+          .getContactByChannelDid(channelDid);
       if (contact == null) return;
 
       context.pop();

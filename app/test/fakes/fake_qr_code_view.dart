@@ -5,11 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 class FakeQrCodeView extends StatelessWidget {
-  const FakeQrCodeView({
-    super.key,
-    required this.data,
-    this.size,
-  });
+  const FakeQrCodeView({super.key, required this.data, this.size});
 
   final String data;
   final double? size;
@@ -34,9 +30,7 @@ class FakeQrCodeView extends StatelessWidget {
       width: size ?? 200,
       height: size ?? 200,
       color: Colors.grey,
-      child: const Center(
-        child: Text('Fake QR Code'),
-      ),
+      child: const Center(child: Text('Fake QR Code')),
     );
   }
 }

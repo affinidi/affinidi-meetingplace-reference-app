@@ -4,8 +4,8 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
   _ConciergeUpdateProfileRequestChatItem({
     required chat.ConciergeMessage chatItem,
     required String contactId,
-  })  : _chatItem = chatItem,
-        _contactId = contactId;
+  }) : _chatItem = chatItem,
+       _contactId = contactId;
 
   final chat.ConciergeMessage _chatItem;
   final String _contactId;
@@ -20,21 +20,21 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
 
     final isGroupChat = ref.watch(provider.isGroupChat);
 
-    final sendLoadingController =
-        controller.conciergeSendProfileLoadingController(_chatItem);
-    final askMeLaterLoadingController =
-        controller.conciergeAskLaterToSendProfileLoadingController(_chatItem);
-    final cancelLoadingController =
-        controller.conciergeCancelSendProfileLoadingController(_chatItem);
+    final sendLoadingController = controller
+        .conciergeSendProfileLoadingController(_chatItem);
+    final askMeLaterLoadingController = controller
+        .conciergeAskLaterToSendProfileLoadingController(_chatItem);
+    final cancelLoadingController = controller
+        .conciergeCancelSendProfileLoadingController(_chatItem);
 
     final chatItem = ref.watch(
       provider.select(
         (state) =>
             state.messages.whereType<chat.ConciergeMessage>().firstWhereOrNull(
-                  (cm) =>
-                      cm.messageId == _chatItem.messageId &&
-                      cm.status == chat.ChatItemStatus.userInput,
-                ),
+              (cm) =>
+                  cm.messageId == _chatItem.messageId &&
+                  cm.status == chat.ChatItemStatus.userInput,
+            ),
       ),
     );
 
@@ -119,10 +119,7 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
                           ? l10n.chatRequestPermissionToUpdateProfileGroup
                           : l10n.chatRequestPermissionToUpdateProfile,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

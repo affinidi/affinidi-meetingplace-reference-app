@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 extension WidgetRefExtensions on WidgetRef {
   /// Maintains the state of the provider alive for the scope of the widget.
   void keepAround<T>(ProviderListenable<T> provider) {
-    listen<T>(provider, (_, __) {
+    listen<T>(provider, (_, _) {
       // no-ops
     });
   }

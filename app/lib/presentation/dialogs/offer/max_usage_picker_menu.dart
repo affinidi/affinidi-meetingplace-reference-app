@@ -38,9 +38,7 @@ class MaxUsagePickerMenu extends StatelessWidget {
         final value = index + 1;
         final isSelected = value == currentValue;
         return ListTile(
-          title: Center(
-            child: Text('$value'),
-          ),
+          title: Center(child: Text('$value')),
           selected: isSelected,
           onTap: () => Navigator.pop(context, value),
         );

@@ -11,9 +11,8 @@ environment:
 dev_dependencies:
   coverage: ^1.11.1
   dart_flutter_team_lints: ^3.2.1
-  drift_dev: ^2.27.0
+  drift_dev: ^2.28.0
   melos: ^7.1.1
-  test: ^1.24.0
 
 dependency_overrides:
   meta: 1.17.0

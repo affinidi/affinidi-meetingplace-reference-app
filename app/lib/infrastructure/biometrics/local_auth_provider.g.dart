@@ -18,8 +18,9 @@ String _$localAuthHash() => r'352b04d375edb7326ce1ca3fb7835db923b866eb';
 final localAuthProvider = Provider<LocalAuthentication>.internal(
   localAuth,
   name: r'localAuthProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$localAuthHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$localAuthHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

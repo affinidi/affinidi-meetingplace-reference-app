@@ -2,8 +2,7 @@ enum NotificationCounterType {
   contacts,
   connections,
   identities,
-  settings,
-  ;
+  settings;
 
   const NotificationCounterType();
 }

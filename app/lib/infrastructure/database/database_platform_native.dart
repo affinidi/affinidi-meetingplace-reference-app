@@ -51,10 +51,7 @@ class DatabasePlatform {
 
   /// Gets the current platform info
   static Map<String, String> get info {
-    return {
-      'platform': 'native',
-      'database': 'SQLite',
-    };
+    return {'platform': 'native', 'database': 'SQLite'};
   }
 }
 

@@ -2,31 +2,27 @@ part of 'publish_offer_screen.dart';
 
 class _ValidityVisibilitySection extends ConsumerWidget {
   const _ValidityVisibilitySection(String identityId)
-      : _identityId = identityId;
+    : _identityId = identityId;
 
   final String _identityId;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
     final controller = ref.read(provider.notifier);
     final environment = ref.read(environmentProvider);
 
     // final isSearchable = ref.watch(
     //   provider.select((s) => s.formData.isSearchable),
     // );
-    final hasExpiry = ref.watch(
-      provider.select((s) => s.formData.hasExpiry),
-    );
-    final expiryDate = ref.watch(
-      provider.select((s) => s.formData.expiryDate),
-    );
+    final hasExpiry = ref.watch(provider.select((s) => s.formData.hasExpiry));
+    final expiryDate = ref.watch(provider.select((s) => s.formData.expiryDate));
     final hasMaxUsages = ref.watch(
       provider.select((s) => s.formData.hasMaxUsages),
     );
-    final maxUsages = ref.watch(
-      provider.select((s) => s.formData.maxUsages),
-    );
+    final maxUsages = ref.watch(provider.select((s) => s.formData.maxUsages));
 
     return FormCard(
       title: context.l10n.validityVisibilitySettings,
@@ -77,7 +73,8 @@ class _ValidityVisibilitySection extends ConsumerWidget {
                   final selectedDate = await ExpiryDatePickerMenu.show(
                     context: context,
                     ref: ref,
-                    initialDate: expiryDate ??
+                    initialDate:
+                        expiryDate ??
                         clock.now().add(environment.defaultExpiryOffset),
                     minDate: clock.now().add(environment.minimumExpiryOffset),
                     maxDate: clock.now().add(environment.maximumExpiryOffset),
@@ -106,10 +103,10 @@ class _ValidityVisibilitySection extends ConsumerWidget {
             switchKey: ValueKey('limit_uses_switch_$_identityId'),
             onChanged: (value) {
               controller.updateFormData(
-                ref.read(provider).formData.copyWith(
-                      hasMaxUsages: value,
-                      maxUsages: value ? 3 : null,
-                    ),
+                ref
+                    .read(provider)
+                    .formData
+                    .copyWith(hasMaxUsages: value, maxUsages: value ? 3 : null),
               );
             },
           ),

@@ -26,9 +26,7 @@ class _ProfilePictures extends ConsumerWidget {
     final cacheManager = ref.read(cacheManagerProvider);
     final controller = ref.read(provider.notifier);
 
-    final contact = ref.watch(
-      provider.select((state) => state.contact),
-    );
+    final contact = ref.watch(provider.select((state) => state.contact));
     final isGroupChat = contact?.isGroup ?? false;
 
     // For group chats, display only the group image
@@ -49,16 +47,14 @@ class _ProfilePictures extends ConsumerWidget {
       );
     }
 
-    final channel = ref.watch(
-      provider.select((state) => state.channel),
-    );
+    final channel = ref.watch(provider.select((state) => state.channel));
 
     final hasOtherPartyPic = channel?.hasOtherPartyProfilePic ?? false;
     final hasMyPic = channel?.hasMyProfilePic ?? false;
 
     final otherPartyImage =
         channel?.otherPartyImage(cacheManager: cacheManager) ??
-            defaultProfileImage;
+        defaultProfileImage;
     final myImage =
         channel?.myImage(cacheManager: cacheManager) ?? defaultProfileImage;
 
@@ -68,8 +64,9 @@ class _ProfilePictures extends ConsumerWidget {
         _TranslatedPicture(
           offset: const Offset(30, 0),
           foregroundImage: hasOtherPartyPic ? otherPartyImage : null,
-          child:
-              hasOtherPartyPic ? null : _DefaultImage(image: otherPartyImage),
+          child: hasOtherPartyPic
+              ? null
+              : _DefaultImage(image: otherPartyImage),
           size: _picSize,
           onPressed: () => (
             _navigateToImageView(
@@ -124,10 +121,7 @@ class _TranslatedPicture extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(
-            color: context.colorScheme.surface,
-            width: 8.0,
-          ),
+          border: Border.all(color: context.colorScheme.surface, width: 8.0),
         ),
         child: GestureDetector(
           onTap: onPressed,
@@ -149,9 +143,6 @@ class _DefaultImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image(
-      image: image,
-      fit: BoxFit.cover,
-    );
+    return Image(image: image, fit: BoxFit.cover);
   }
 }

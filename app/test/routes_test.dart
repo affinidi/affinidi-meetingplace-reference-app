@@ -70,8 +70,9 @@ void main() {
         final alreadyOnboarded = true;
 
         group('and no primary identity exists', () {
-          testWidgets('it shows the primary identity creation screen',
-              (tester) async {
+          testWidgets('it shows the primary identity creation screen', (
+            tester,
+          ) async {
             await navigateToLocation(
               tester,
               '/',
@@ -92,9 +93,7 @@ void main() {
               '/',
               isAuthenticated: isAuthenticated,
               alreadyOnboarded: alreadyOnboarded,
-              identities: [
-                FakeIdentities.primaryIdentity,
-              ],
+              identities: [FakeIdentities.primaryIdentity],
             );
             await tester.pumpAndSettle();
 
@@ -117,9 +116,7 @@ void main() {
         location,
         isAuthenticated: isAuthenticated,
         alreadyOnboarded: alreadyOnboarded,
-        identities: [
-          FakeIdentities.primaryIdentity,
-        ],
+        identities: [FakeIdentities.primaryIdentity],
       );
       await tester.pumpAndSettle();
 
@@ -139,9 +136,7 @@ void main() {
         location,
         isAuthenticated: isAuthenticated,
         alreadyOnboarded: alreadyOnboarded,
-        identities: [
-          FakeIdentities.primaryIdentity,
-        ],
+        identities: [FakeIdentities.primaryIdentity],
       );
       await tester.pumpAndSettle();
 
@@ -159,9 +154,7 @@ void main() {
         location,
         isAuthenticated: true,
         alreadyOnboarded: true,
-        identities: [
-          FakeIdentities.primaryIdentity,
-        ],
+        identities: [FakeIdentities.primaryIdentity],
       );
       await tester.pumpAndSettle();
 
@@ -181,9 +174,7 @@ void main() {
         location,
         isAuthenticated: isAuthenticated,
         alreadyOnboarded: alreadyOnboarded,
-        identities: [
-          FakeIdentities.primaryIdentity,
-        ],
+        identities: [FakeIdentities.primaryIdentity],
       );
       await tester.pumpAndSettle();
 
@@ -203,9 +194,7 @@ void main() {
         location,
         isAuthenticated: isAuthenticated,
         alreadyOnboarded: alreadyOnboarded,
-        identities: [
-          FakeIdentities.primaryIdentity,
-        ],
+        identities: [FakeIdentities.primaryIdentity],
       );
       await tester.pumpAndSettle();
 
@@ -225,9 +214,7 @@ void main() {
         location,
         isAuthenticated: isAuthenticated,
         alreadyOnboarded: alreadyOnboarded,
-        identities: [
-          FakeIdentities.primaryIdentity,
-        ],
+        identities: [FakeIdentities.primaryIdentity],
       );
       await tester.pumpAndSettle();
 
@@ -243,9 +230,7 @@ void main() {
       await navigateToLocation(
         tester,
         location,
-        identities: [
-          FakeIdentities.primaryIdentity,
-        ],
+        identities: [FakeIdentities.primaryIdentity],
       );
       await tester.pumpAndSettle();
 
@@ -261,9 +246,7 @@ void main() {
       await navigateToLocation(
         tester,
         location,
-        identities: [
-          FakeIdentities.primaryIdentity,
-        ],
+        identities: [FakeIdentities.primaryIdentity],
       );
       await tester.pumpAndSettle();
 
@@ -326,8 +309,9 @@ void main() {
     final alreadyOnboarded = true;
     final location = '/connections/${RoutePaths.oobShareQr}';
 
-    testWidgets('it shows the OOB share QR screen with loading state',
-        (tester) async {
+    testWidgets('it shows the OOB share QR screen with loading state', (
+      tester,
+    ) async {
       final connectivity = FakeConnectivity(
         initialConnectivityToReturn: [ConnectivityResult.wifi],
       );

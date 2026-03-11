@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide LinearProgressIndicator;
-import 'package:flutter/material.dart' as indicator
+import 'package:flutter/material.dart'
+    as indicator
     show LinearProgressIndicator;
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';

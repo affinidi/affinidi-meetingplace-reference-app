@@ -69,11 +69,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       displayName: '',
     );
 
-    return Identity(
-      id: uuid.v4(),
-      did: '',
-      card: newCard,
-    );
+    return Identity(id: uuid.v4(), did: '', card: newCard);
   }
 
   Identity _loadIdentity(String? identityId) {
@@ -104,7 +100,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void _updateHasEnteredAnyInfo() {
-    final hasInfo = (displayNameController.text.trim().isNotEmpty ||
+    final hasInfo =
+        (displayNameController.text.trim().isNotEmpty ||
             lastNameController.text.trim().isNotEmpty ||
             emailController.text.trim().isNotEmpty ||
             mobileController.text.trim().isNotEmpty) &&
@@ -121,8 +118,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   void validateForm(GlobalKey<FormState> formKey) {
     // Compute save eligibility without triggering UI validation
     final ctx = formKey.currentContext!;
-    final emailError = InputValidators.getValidator(ctx, InputType.email)
-        .call(emailController.text);
+    final emailError = InputValidators.getValidator(
+      ctx,
+      InputType.email,
+    ).call(emailController.text);
 
     final isValidForSave = emailError == null;
 
@@ -199,10 +198,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       aliasController.text = firstName;
 
       _updateIdentityCard(
-        identity.card.copyWith(
-          firstName: firstName,
-          displayName: firstName,
-        ),
+        identity.card.copyWith(firstName: firstName, displayName: firstName),
       );
     } else {
       _updateIdentityCard(identity.card.copyWith(firstName: firstName));
@@ -237,9 +233,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void updateEmail(String email, GlobalKey<FormState> formKey) {
-    final error =
-        InputValidators.getValidator(formKey.currentContext!, InputType.email)
-            .call(email);
+    final error = InputValidators.getValidator(
+      formKey.currentContext!,
+      InputType.email,
+    ).call(email);
     if (error != null) return;
 
     final identity = state.identity;
@@ -251,9 +248,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void updateMobile(String mobile, GlobalKey<FormState> formKey) {
-    final error =
-        InputValidators.getValidator(formKey.currentContext!, InputType.phone)
-            .call(mobile);
+    final error = InputValidators.getValidator(
+      formKey.currentContext!,
+      InputType.phone,
+    ).call(mobile);
     if (error != null) return;
 
     final identity = state.identity;

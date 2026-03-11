@@ -28,16 +28,13 @@ class FormRowPicker extends StatelessWidget {
       children: [
         ListTile(
           leading: icon != null
-              ? LabelIcon(
-                  icon: icon,
-                  iconColor: iconColor,
-                  label: label,
-                )
+              ? LabelIcon(icon: icon, iconColor: iconColor, label: label)
               : null,
           title: Text(
             label,
-            style: context.listTileTheme.titleTextStyle
-                ?.copyWith(fontWeight: FontWeight.w900),
+            style: context.listTileTheme.titleTextStyle?.copyWith(
+              fontWeight: FontWeight.w900,
+            ),
           ),
           trailing: TextButton(
             onPressed: onPressed,

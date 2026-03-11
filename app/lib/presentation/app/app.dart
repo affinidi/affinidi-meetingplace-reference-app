@@ -13,18 +13,12 @@ import '../widgets/banners/no_connection_banner.dart';
 import 'app_controller.dart';
 
 class App extends ConsumerWidget {
-  const App({
-    super.key,
-    this.locale,
-  });
+  const App({super.key, this.locale});
 
   final Locale? locale;
 
   @override
-  Widget build(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final routerConfig = ref.watch(routerConfigProvider);
     ref.read(appControllerProvider);
 
@@ -42,9 +36,7 @@ class App extends ConsumerWidget {
       title: 'Meeting Place',
       routerConfig: routerConfig,
       theme: AppTheme.dark,
-      localizationsDelegates: [
-        ...AppLocalizations.localizationsDelegates,
-      ],
+      localizationsDelegates: [...AppLocalizations.localizationsDelegates],
       supportedLocales: AppLocalizations.supportedLocales,
       locale: locale,
       builder: (context, child) {

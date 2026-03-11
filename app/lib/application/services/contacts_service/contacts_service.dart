@@ -105,15 +105,18 @@ class ContactsService extends _$ContactsService {
       name: _logKey,
     );
 
-    final existingContact =
-        state.getContactByChannelDid(channel.otherPartyPermanentChannelDid!);
+    final existingContact = state.getContactByChannelDid(
+      channel.otherPartyPermanentChannelDid!,
+    );
     if (existingContact == null) {
       _logger.info(
         'Contact does not exist - creating new contact',
         name: _logKey,
       );
-      final contact =
-          await _makeContactFromChannel(channel, ContactStatus.active);
+      final contact = await _makeContactFromChannel(
+        channel,
+        ContactStatus.active,
+      );
       if (contact == null) {
         throw AppException(
           'Unable to extract a contact from the channel',
@@ -299,8 +302,9 @@ class ContactsService extends _$ContactsService {
 
   Future<void> _leaveChat(Contact contact) async {
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel =
-        await coreSdk.getChannelByOtherPartyPermanentDid(contact.channelDid!);
+    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      contact.channelDid!,
+    );
     if (channel == null) {
       throw AppException(
         'Should have received a channel',
@@ -331,10 +335,7 @@ class ContactsService extends _$ContactsService {
   ///
   /// [did] - Channel DID identifying the contact to update.
   /// [card] - New ContactCard to set on the contact.
-  void updateContactCard(
-    String did,
-    ContactCard card,
-  ) async {
+  void updateContactCard(String did, ContactCard card) async {
     final contact = state.getContactByChannelDid(did);
     if (contact == null) {
       return;
@@ -365,10 +366,7 @@ class ContactsService extends _$ContactsService {
     await updateContact(amendedContact);
   }
 
-  Future<void> updateContactSequenceNumber(
-    String did,
-    int seqNo,
-  ) async {
+  Future<void> updateContactSequenceNumber(String did, int seqNo) async {
     final contact = state.getContactByChannelDid(did);
     if (contact == null) {
       return;
@@ -390,10 +388,7 @@ class ContactsService extends _$ContactsService {
       return;
     }
 
-    final amendedContact = contact.copyWith(
-      badgeCount: 0,
-      hasBeenOpened: true,
-    );
+    final amendedContact = contact.copyWith(badgeCount: 0, hasBeenOpened: true);
     await updateContact(amendedContact);
   }
 
@@ -422,10 +417,7 @@ class ContactsService extends _$ContactsService {
         ? null
         : state.getContactByChannelDid(channel.otherPartyPermanentChannelDid!);
     if (existingContact == null) {
-      _logger.warning(
-        'No existing contact found',
-        name: _logKey,
-      );
+      _logger.warning('No existing contact found', name: _logKey);
       return;
     }
 
@@ -469,10 +461,7 @@ class ContactsService extends _$ContactsService {
   /// - The channel does not include the other party permanent channel DID.
   /// - The channel does not include the other party contact card.
   Future<void> _createContactFromInvitationAccepted(sdk.Channel channel) async {
-    _logger.info(
-      'Creating new contact with channel $channel',
-      name: _logKey,
-    );
+    _logger.info('Creating new contact with channel $channel', name: _logKey);
 
     if (channel.otherPartyPermanentChannelDid == null) {
       throw AppException(
@@ -488,8 +477,10 @@ class ContactsService extends _$ContactsService {
       );
     }
 
-    final contact =
-        await _makeContactFromChannel(channel, ContactStatus.pendingApproval);
+    final contact = await _makeContactFromChannel(
+      channel,
+      ContactStatus.pendingApproval,
+    );
 
     if (contact == null) {
       throw AppException(
@@ -533,8 +524,10 @@ class ContactsService extends _$ContactsService {
       );
     }
 
-    final contact =
-        await _makeContactFromChannel(channel, ContactStatus.active);
+    final contact = await _makeContactFromChannel(
+      channel,
+      ContactStatus.active,
+    );
 
     if (contact == null) {
       throw AppException(

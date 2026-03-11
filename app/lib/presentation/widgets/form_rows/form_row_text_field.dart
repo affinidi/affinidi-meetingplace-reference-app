@@ -55,11 +55,7 @@ class FormRowTextField extends StatelessWidget {
       children: [
         ListTile(
           leading: (icon != null)
-              ? LabelIcon(
-                  icon: icon,
-                  iconColor: color,
-                  label: label,
-                )
+              ? LabelIcon(icon: icon, iconColor: color, label: label)
               : null,
           title: Row(
             children: [
@@ -76,7 +72,11 @@ class FormRowTextField extends StatelessWidget {
                   key: textFieldKey,
                   autofocus: autofocus,
                   readOnly: !enabled,
-                  keyboardType: keyboardType ?? TextInputType.multiline,
+                  keyboardType:
+                      keyboardType ??
+                      (singleLine
+                          ? TextInputType.text
+                          : TextInputType.multiline),
                   controller: controller,
                   maxLines: singleLine ? 1 : 3,
                   minLines: 1,

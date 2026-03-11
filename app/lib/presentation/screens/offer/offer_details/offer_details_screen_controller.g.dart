@@ -34,9 +34,7 @@ abstract class _$OfferDetailsScreenController
     extends BuildlessAutoDisposeNotifier<OfferDetailsScreenState> {
   late final String offerLink;
 
-  OfferDetailsScreenState build(
-    String offerLink,
-  );
+  OfferDetailsScreenState build(String offerLink);
 }
 
 /// See also [OfferDetailsScreenController].
@@ -51,21 +49,15 @@ class OfferDetailsScreenControllerFamily
   const OfferDetailsScreenControllerFamily();
 
   /// See also [OfferDetailsScreenController].
-  OfferDetailsScreenControllerProvider call(
-    String offerLink,
-  ) {
-    return OfferDetailsScreenControllerProvider(
-      offerLink,
-    );
+  OfferDetailsScreenControllerProvider call(String offerLink) {
+    return OfferDetailsScreenControllerProvider(offerLink);
   }
 
   @override
   OfferDetailsScreenControllerProvider getProviderOverride(
     covariant OfferDetailsScreenControllerProvider provider,
   ) {
-    return call(
-      provider.offerLink,
-    );
+    return call(provider.offerLink);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -85,24 +77,25 @@ class OfferDetailsScreenControllerFamily
 
 /// See also [OfferDetailsScreenController].
 class OfferDetailsScreenControllerProvider
-    extends AutoDisposeNotifierProviderImpl<OfferDetailsScreenController,
-        OfferDetailsScreenState> {
+    extends
+        AutoDisposeNotifierProviderImpl<
+          OfferDetailsScreenController,
+          OfferDetailsScreenState
+        > {
   /// See also [OfferDetailsScreenController].
-  OfferDetailsScreenControllerProvider(
-    String offerLink,
-  ) : this._internal(
-          () => OfferDetailsScreenController()..offerLink = offerLink,
-          from: offerDetailsScreenControllerProvider,
-          name: r'offerDetailsScreenControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$offerDetailsScreenControllerHash,
-          dependencies: OfferDetailsScreenControllerFamily._dependencies,
-          allTransitiveDependencies:
-              OfferDetailsScreenControllerFamily._allTransitiveDependencies,
-          offerLink: offerLink,
-        );
+  OfferDetailsScreenControllerProvider(String offerLink)
+    : this._internal(
+        () => OfferDetailsScreenController()..offerLink = offerLink,
+        from: offerDetailsScreenControllerProvider,
+        name: r'offerDetailsScreenControllerProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$offerDetailsScreenControllerHash,
+        dependencies: OfferDetailsScreenControllerFamily._dependencies,
+        allTransitiveDependencies:
+            OfferDetailsScreenControllerFamily._allTransitiveDependencies,
+        offerLink: offerLink,
+      );
 
   OfferDetailsScreenControllerProvider._internal(
     super._createNotifier, {
@@ -120,9 +113,7 @@ class OfferDetailsScreenControllerProvider
   OfferDetailsScreenState runNotifierBuild(
     covariant OfferDetailsScreenController notifier,
   ) {
-    return notifier.build(
-      offerLink,
-    );
+    return notifier.build(offerLink);
   }
 
   @override
@@ -142,8 +133,11 @@ class OfferDetailsScreenControllerProvider
   }
 
   @override
-  AutoDisposeNotifierProviderElement<OfferDetailsScreenController,
-      OfferDetailsScreenState> createElement() {
+  AutoDisposeNotifierProviderElement<
+    OfferDetailsScreenController,
+    OfferDetailsScreenState
+  >
+  createElement() {
     return _OfferDetailsScreenControllerProviderElement(this);
   }
 
@@ -171,13 +165,18 @@ mixin OfferDetailsScreenControllerRef
 }
 
 class _OfferDetailsScreenControllerProviderElement
-    extends AutoDisposeNotifierProviderElement<OfferDetailsScreenController,
-        OfferDetailsScreenState> with OfferDetailsScreenControllerRef {
+    extends
+        AutoDisposeNotifierProviderElement<
+          OfferDetailsScreenController,
+          OfferDetailsScreenState
+        >
+    with OfferDetailsScreenControllerRef {
   _OfferDetailsScreenControllerProviderElement(super.provider);
 
   @override
   String get offerLink =>
       (origin as OfferDetailsScreenControllerProvider).offerLink;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

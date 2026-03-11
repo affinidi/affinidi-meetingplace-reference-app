@@ -17,16 +17,19 @@ String _$unsentMessagesServiceHash() =>
 ///
 /// Copied from [UnsentMessagesService].
 @ProviderFor(UnsentMessagesService)
-final unsentMessagesServiceProvider = NotifierProvider<UnsentMessagesService,
-    UnsentMessagesServiceState>.internal(
-  UnsentMessagesService.new,
-  name: r'unsentMessagesServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$unsentMessagesServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final unsentMessagesServiceProvider =
+    NotifierProvider<
+      UnsentMessagesService,
+      UnsentMessagesServiceState
+    >.internal(
+      UnsentMessagesService.new,
+      name: r'unsentMessagesServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$unsentMessagesServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$UnsentMessagesService = Notifier<UnsentMessagesServiceState>;
 // ignore_for_file: type=lint

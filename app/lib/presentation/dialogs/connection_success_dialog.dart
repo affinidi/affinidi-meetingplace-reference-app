@@ -8,10 +8,7 @@ import '../../navigation/routes/dashboard_routes.dart';
 import '../widgets/bottom_sheet_menu.dart';
 
 class ConnectionSuccessDialog extends ConsumerWidget {
-  const ConnectionSuccessDialog({
-    super.key,
-    required this.contact,
-  });
+  const ConnectionSuccessDialog({super.key, required this.contact});
 
   final Contact contact;
 
@@ -43,9 +40,9 @@ class ConnectionSuccessDialog extends ConsumerWidget {
               title: Text('Chat with ${contact.displayName}'),
               onTap: () {
                 Navigator.of(context, rootNavigator: true).pop();
-                ref.read(app_navigator.navigatorProvider).go(
-                      ChatRoute(contactId: contact.id).location,
-                    );
+                ref
+                    .read(app_navigator.navigatorProvider)
+                    .go(ChatRoute(contactId: contact.id).location);
               },
             );
           case 1:

@@ -6,7 +6,7 @@ part of 'contacts_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$contactsServiceHash() => r'67fbd49210ad48266581c20f56f997f8fdea6888';
+String _$contactsServiceHash() => r'9166b1cbc5b1d0534aaf34eddd13e258760766d9';
 
 /// Service responsible for managing contacts derived from channels and offers.
 ///
@@ -23,14 +23,14 @@ String _$contactsServiceHash() => r'67fbd49210ad48266581c20f56f997f8fdea6888';
 @ProviderFor(ContactsService)
 final contactsServiceProvider =
     NotifierProvider<ContactsService, ContactsServiceState>.internal(
-  ContactsService.new,
-  name: r'contactsServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$contactsServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ContactsService.new,
+      name: r'contactsServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$contactsServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ContactsService = Notifier<ContactsServiceState>;
 // ignore_for_file: type=lint

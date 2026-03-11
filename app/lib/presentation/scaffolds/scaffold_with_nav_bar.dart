@@ -7,10 +7,7 @@ import '../../navigation/tabs/tabs.dart';
 import '../widgets/loaders/control_plane_events_progress_indicator.dart';
 
 class ScaffoldWithNavBar extends StatelessWidget {
-  const ScaffoldWithNavBar({
-    super.key,
-    required this.navigationShell,
-  });
+  const ScaffoldWithNavBar({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 

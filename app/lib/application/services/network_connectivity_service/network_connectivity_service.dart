@@ -32,15 +32,13 @@ class NetworkConnectivityService extends _$NetworkConnectivityService {
   }
 
   void _initializeConnectivityMonitoring() {
-    _logger.info(
-      'Initializing network connectivity monitoring',
-      name: _logKey,
-    );
+    _logger.info('Initializing network connectivity monitoring', name: _logKey);
 
     _checkInitialConnectivity();
 
-    _connectivitySubscription =
-        _connectivity.onConnectivityChanged.listen(_handleConnectivityChange);
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
+      _handleConnectivityChange,
+    );
   }
 
   Future<void> _checkInitialConnectivity() async {

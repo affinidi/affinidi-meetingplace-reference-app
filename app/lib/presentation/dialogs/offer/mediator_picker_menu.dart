@@ -26,10 +26,8 @@ class MediatorPickerMenu extends HookConsumerWidget {
       showDragHandle: true,
       useSafeArea: true,
       context: context,
-      builder: (context) => MediatorPickerMenu(
-        currentId: currentId,
-        mediators: mediators,
-      ),
+      builder: (context) =>
+          MediatorPickerMenu(currentId: currentId, mediators: mediators),
     );
   }
 
@@ -53,9 +51,7 @@ class MediatorPickerMenu extends HookConsumerWidget {
                   Icons.circle_outlined,
                   color: context.listTileTheme.iconColor,
                 ),
-          title: Text(
-            friendlyName,
-          ),
+          title: Text(friendlyName),
           onTap: () {
             if (!context.mounted) return;
             Navigator.of(context, rootNavigator: true).pop(did);

@@ -29,8 +29,10 @@ class _OfferDetailsActionBar extends ConsumerWidget {
             onPressed: () async {
               if (!context.mounted) return;
 
-              final confirmed =
-                  await DeleteConnectionDialog.show(context: context, count: 1);
+              final confirmed = await DeleteConnectionDialog.show(
+                context: context,
+                count: 1,
+              );
               if (!confirmed) return;
 
               await controller.deleteConnection();

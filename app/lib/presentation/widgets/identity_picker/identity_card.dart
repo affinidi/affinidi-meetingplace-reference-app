@@ -12,10 +12,7 @@ import '../../../infrastructure/extensions/identities_extensions.dart';
 import '../animated_menu.dart';
 import '../profile_picture.dart';
 
-enum IdentityCardSize {
-  small,
-  normal;
-}
+enum IdentityCardSize { small, normal }
 
 extension _IdentityCardSizeExtension on IdentityCardSize {
   bool get isSmall => this == IdentityCardSize.small;
@@ -62,9 +59,7 @@ class IdentityCard extends StatelessWidget {
             ],
           ),
           borderRadius: BorderRadius.circular(25.0),
-          border: Border.all(
-            color: identity.getCardColor(colorScheme),
-          ),
+          border: Border.all(color: identity.getCardColor(colorScheme)),
           boxShadow: [
             BoxShadow(
               color: colorScheme.shadow.withValues(alpha: 0.1),
@@ -159,12 +154,13 @@ class _IdentityHeader extends StatelessWidget {
                 ),
                 Text(
                   identity.getSubtitle(l10n: l10n),
-                  style: (identityCardSize.isSmall
-                          ? textTheme.labelMedium
-                          : textTheme.bodyMedium)
-                      ?.copyWith(
-                    color: colorScheme.onPrimary.withAlpha(180),
-                  ),
+                  style:
+                      (identityCardSize.isSmall
+                              ? textTheme.labelMedium
+                              : textTheme.bodyMedium)
+                          ?.copyWith(
+                            color: colorScheme.onPrimary.withAlpha(180),
+                          ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   softWrap: true,
@@ -215,16 +211,8 @@ class _IdentityContentSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: identityCardSize.isSmall
-          ? const EdgeInsets.only(
-              top: 4,
-              left: 20,
-              right: 20,
-            )
-          : const EdgeInsets.only(
-              top: 48,
-              left: 24,
-              right: 24,
-            ),
+          ? const EdgeInsets.only(top: 4, left: 20, right: 20)
+          : const EdgeInsets.only(top: 48, left: 24, right: 24),
       child: _IdentityContent(
         identity: identity,
         identityCardSize: identityCardSize,
@@ -254,8 +242,9 @@ class _IdentityContent extends StatelessWidget {
         ? identity.card.mobilePhone
         : l10n.notShared;
 
-    final name =
-        identity.card.fullName.isNotEmpty == true ? identity.card.fullName : '';
+    final name = identity.card.fullName.isNotEmpty == true
+        ? identity.card.fullName
+        : '';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -387,12 +376,14 @@ class _ActionButton extends HookWidget {
   final void Function(Identity identity)? onPublishOfferForIdentity;
 
   _RippleAnimations _makeRippleAnimation(AnimationController controller) {
-    final scale = Tween<double>(begin: 1.0, end: 1.9).animate(
-      CurvedAnimation(parent: controller, curve: Curves.easeOut),
-    );
-    final fade = Tween<double>(begin: 0.4, end: 0.0).animate(
-      CurvedAnimation(parent: controller, curve: Curves.easeOut),
-    );
+    final scale = Tween<double>(
+      begin: 1.0,
+      end: 1.9,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
+    final fade = Tween<double>(
+      begin: 0.4,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
 
     return _RippleAnimations(scale: scale, fade: fade);
   }
@@ -472,22 +463,19 @@ class _ActionButton extends HookWidget {
       vsync: vsync,
     );
 
-    useEffect(
-      () {
-        Timer? timer;
+    useEffect(() {
+      Timer? timer;
 
-        timer = Timer.periodic(const Duration(seconds: 2), (_) {
-          if (controller.isCompleted || controller.isDismissed) {
-            controller.forward(from: 0.0);
-          }
-        });
+      timer = Timer.periodic(const Duration(seconds: 2), (_) {
+        if (controller.isCompleted || controller.isDismissed) {
+          controller.forward(from: 0.0);
+        }
+      });
 
-        controller.forward();
+      controller.forward();
 
-        return timer.cancel;
-      },
-      [],
-    );
+      return timer.cancel;
+    }, []);
 
     final animations = _makeRippleAnimation(controller);
     final actions = _buildActions(context);
@@ -511,20 +499,14 @@ class _ActionButton extends HookWidget {
 }
 
 class _RippleAnimations {
-  const _RippleAnimations({
-    required this.scale,
-    required this.fade,
-  });
+  const _RippleAnimations({required this.scale, required this.fade});
 
   final Animation<double> scale;
   final Animation<double> fade;
 }
 
 class _RippleButton extends StatelessWidget {
-  const _RippleButton({
-    required this.animations,
-    required this.onTap,
-  });
+  const _RippleButton({required this.animations, required this.onTap});
 
   final _RippleAnimations animations;
   final VoidCallback onTap;

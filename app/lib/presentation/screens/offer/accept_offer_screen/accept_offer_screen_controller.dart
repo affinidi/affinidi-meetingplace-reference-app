@@ -14,8 +14,9 @@ part 'accept_offer_screen_controller.g.dart';
 
 @riverpod
 class AcceptOfferScreenController extends _$AcceptOfferScreenController {
-  late final acceptOfferLoadingController =
-      AsyncLoadingController.provider('acceptOfferLoadingController');
+  late final acceptOfferLoadingController = AsyncLoadingController.provider(
+    'acceptOfferLoadingController',
+  );
 
   @override
   AcceptOfferScreenState build(String mnemonic) {

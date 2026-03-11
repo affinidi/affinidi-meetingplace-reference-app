@@ -5,11 +5,7 @@ import 'package:flutter/material.dart';
 import '../screen_effect.dart';
 
 class BalloonEffect extends StatefulWidget {
-  const BalloonEffect({
-    super.key,
-    required this.size,
-    this.onComplete,
-  });
+  const BalloonEffect({super.key, required this.size, this.onComplete});
 
   final Size size;
   final VoidCallback? onComplete;
@@ -82,17 +78,12 @@ class _BalloonEffectState extends State<BalloonEffect>
             return Positioned(
               left: position.dx + wiggle,
               top: position.dy - 50,
-              child: Transform.rotate(
-                angle: wiggle / 50,
-                child: child!,
-              ),
+              child: Transform.rotate(angle: wiggle / 50, child: child!),
             );
           },
           child: Text(
             '🎈',
-            style: TextStyle(
-              fontSize: 40 + random.nextDouble() * 20,
-            ),
+            style: TextStyle(fontSize: 40 + random.nextDouble() * 20),
           ),
         );
       }).toList(),
@@ -108,25 +99,14 @@ class _BalloonController {
     required this.endPosition,
     required this.wiggleOffset,
   }) {
-    _controller = AnimationController(
-      duration: duration,
-      vsync: vsync,
-    );
+    _controller = AnimationController(duration: duration, vsync: vsync);
 
-    animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    );
+    animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
     _wiggleAnimation = Tween<double>(
       begin: -wiggleOffset,
       end: wiggleOffset,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
   final TickerProvider vsync;
   final Duration duration;

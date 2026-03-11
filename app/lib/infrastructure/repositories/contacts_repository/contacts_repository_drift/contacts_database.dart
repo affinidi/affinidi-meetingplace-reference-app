@@ -20,12 +20,7 @@ part 'contacts_database.g.dart';
 /// Includes [Contacts] (main contact records) and [ContactCards]
 ///  (profile info).
 /// Enforces foreign key constraints and supports encrypted storage.
-@DriftDatabase(
-  tables: [
-    Contacts,
-    ContactCards,
-  ],
-)
+@DriftDatabase(tables: [Contacts, ContactCards])
 class ContactsDatabase extends _$ContactsDatabase {
   /// Creates a new encrypted contacts database.
   ///
@@ -37,87 +32,87 @@ class ContactsDatabase extends _$ContactsDatabase {
     required bool inMemory,
     required Directory directory,
   }) : super(
-          openConnection(
-            databaseName: databaseName,
-            passphrase: passphrase,
-            inMemory: inMemory,
-            directory: directory,
-          ),
-        );
+         openConnection(
+           databaseName: databaseName,
+           passphrase: passphrase,
+           inMemory: inMemory,
+           directory: directory,
+         ),
+       );
 
   @override
   int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        beforeOpen: (details) async {
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
-        onUpgrade: (migrator, from, to) async {
-          if (from < 2) {
-            final result =
-                await customSelect('PRAGMA table_info(contacts)').get();
+    beforeOpen: (details) async {
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
 
-            final hasBeenOpenedExists =
-                result.any((row) => row.data['name'] == 'has_been_opened');
+        final hasBeenOpenedExists = result.any(
+          (row) => row.data['name'] == 'has_been_opened',
+        );
 
-            if (!hasBeenOpenedExists) {
-              await customStatement(
-                'ALTER TABLE contacts ADD COLUMN has_been_opened INTEGER NOT '
-                'NULL DEFAULT 0 CHECK (has_been_opened IN (0, 1))',
-              );
-            }
-          }
+        if (!hasBeenOpenedExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN has_been_opened INTEGER NOT '
+            'NULL DEFAULT 0 CHECK (has_been_opened IN (0, 1))',
+          );
+        }
+      }
 
-          if (from < 3) {
-            await migrator.alterTable(
-              TableMigration(
-                contacts,
-                columnTransformer: {
-                  contacts.id: contacts.id,
-                  contacts.channelDid: contacts.channelDid,
-                  contacts.channelDidSha256: contacts.channelDidSha256,
-                  contacts.dateAdded: contacts.dateAdded,
-                  contacts.offerLink: contacts.offerLink,
-                  contacts.mediatorDid: contacts.mediatorDid,
-                  contacts.type: contacts.type,
-                  contacts.status: contacts.status,
-                  contacts.origin: contacts.origin,
-                  contacts.category: contacts.category,
-                  contacts.displayName: contacts.displayName,
-                  contacts.badgeUpdateInProgress:
-                      contacts.badgeUpdateInProgress,
-                  contacts.badgeCount: contacts.badgeCount,
-                  contacts.currentMessageSeqNo: contacts.currentMessageSeqNo,
-                  contacts.hasBeenOpened: contacts.hasBeenOpened,
-                  contacts.lastKeepAliveMessage: contacts.lastKeepAliveMessage,
-                },
-              ),
-            );
-          }
-          if (from < 4) {
-            final result =
-                await customSelect('PRAGMA table_info(contacts)').get();
+      //this migration removes the column unsentMessage and chatInProgress
+      if (from < 3) {
+        await migrator.alterTable(
+          // ignore: experimental_member_use
+          TableMigration(
+            contacts,
+            columnTransformer: {
+              contacts.id: contacts.id,
+              contacts.channelDid: contacts.channelDid,
+              contacts.channelDidSha256: contacts.channelDidSha256,
+              contacts.dateAdded: contacts.dateAdded,
+              contacts.offerLink: contacts.offerLink,
+              contacts.mediatorDid: contacts.mediatorDid,
+              contacts.type: contacts.type,
+              contacts.status: contacts.status,
+              contacts.origin: contacts.origin,
+              contacts.category: contacts.category,
+              contacts.displayName: contacts.displayName,
+              contacts.badgeUpdateInProgress: contacts.badgeUpdateInProgress,
+              contacts.badgeCount: contacts.badgeCount,
+              contacts.currentMessageSeqNo: contacts.currentMessageSeqNo,
+              contacts.hasBeenOpened: contacts.hasBeenOpened,
+              contacts.lastKeepAliveMessage: contacts.lastKeepAliveMessage,
+            },
+          ),
+        );
+      }
+      if (from < 4) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
 
-            final notificationBannerDismissedExists = result.any(
-              (row) => row.data['name'] == 'notification_banner_dismissed',
-            );
+        final notificationBannerDismissedExists = result.any(
+          (row) => row.data['name'] == 'notification_banner_dismissed',
+        );
 
-            if (!notificationBannerDismissedExists) {
-              await customStatement(
-                'ALTER TABLE contacts ADD COLUMN notification_banner_dismissed'
-                ' INTEGER NOT NULL DEFAULT 0 CHECK'
-                ' (notification_banner_dismissed IN (0, 1))',
-              );
+        if (!notificationBannerDismissedExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN notification_banner_dismissed'
+            ' INTEGER NOT NULL DEFAULT 0 CHECK'
+            ' (notification_banner_dismissed IN (0, 1))',
+          );
 
-              await customStatement(
-                'UPDATE contacts SET notification_banner_dismissed = 1'
-                ' WHERE origin != 1',
-              );
-            }
-          }
-        },
-      );
+          await customStatement(
+            'UPDATE contacts SET notification_banner_dismissed = 1'
+            ' WHERE origin != 1',
+          );
+        }
+      }
+    },
+  );
 }
 
 /// Main contacts table.
@@ -155,8 +150,8 @@ class Contacts extends Table {
 class ContactCards extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get contactId => text().customConstraint(
-        'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL',
-      )();
+    'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL',
+  )();
   TextColumn get did => text()();
   TextColumn get type => text()();
   TextColumn get firstName => text()();
@@ -235,8 +230,9 @@ class _ContactCategoryConverter extends TypeConverter<ContactCategory, int> {
 final contactsDatabaseProvider = FutureProvider<ContactsDatabase>((ref) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
 
   final database = ContactsDatabase(
     databaseName: 'mpx_contacts_db',
@@ -255,12 +251,14 @@ final contactsDatabaseProvider = FutureProvider<ContactsDatabase>((ref) async {
 /// - Retrieves an encryption passphrase from [secureStorageProvider].
 /// - Creates and opens the encrypted database in memory.
 /// - Closes the database when the provider is disposed.
-final contactsInMemoryDatabaseProvider =
-    FutureProvider<ContactsDatabase>((ref) async {
+final contactsInMemoryDatabaseProvider = FutureProvider<ContactsDatabase>((
+  ref,
+) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
-  final directory =
-      await ref.read(applicationDocumentsDirectoryProvider.future);
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
 
   final database = ContactsDatabase(
     databaseName: 'mpx_contacts_db',

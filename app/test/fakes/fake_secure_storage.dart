@@ -13,11 +13,11 @@ class FakeSecureStorage extends SecureStorage {
     String? preferredMediatorDid,
     bool? shouldShowMeetingPlaceQR,
     int? savingPushTokenDuration,
-  })  : _debugMode = debugMode,
-        _passphrase = passphrase,
-        _preferredMediatorDid = preferredMediatorDid,
-        _shouldShowMeetingPlaceQR = shouldShowMeetingPlaceQR,
-        _savingPushTokenDuration = savingPushTokenDuration;
+  }) : _debugMode = debugMode,
+       _passphrase = passphrase,
+       _preferredMediatorDid = preferredMediatorDid,
+       _shouldShowMeetingPlaceQR = shouldShowMeetingPlaceQR,
+       _savingPushTokenDuration = savingPushTokenDuration;
 
   final bool? _debugMode;
   final String _passphrase;

@@ -41,10 +41,7 @@ part 'connection_qr_code_view.dart';
 part 'group_members_panel.dart';
 
 class ConnectionDetailsScreen extends HookConsumerWidget {
-  const ConnectionDetailsScreen({
-    super.key,
-    required this.contactId,
-  });
+  const ConnectionDetailsScreen({super.key, required this.contactId});
 
   final String contactId;
 
@@ -55,18 +52,15 @@ class ConnectionDetailsScreen extends HookConsumerWidget {
     final isGroupChat = ref.watch(provider.isGroupChat);
     final l10n = context.l10n;
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await controller.initialize();
-        });
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await controller.initialize();
+      });
 
-        return null;
-      },
-      const [],
-    );
+      return null;
+    }, const []);
 
     return Scaffold(
       appBar: AppBar(

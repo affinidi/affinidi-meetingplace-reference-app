@@ -56,10 +56,7 @@ class SectionBanner extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       //mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          title,
-                          style: context.textTheme.headlineMedium,
-                        ),
+                        Text(title, style: context.textTheme.headlineMedium),
                         Text(
                           subtitle,
                           maxLines: 3,

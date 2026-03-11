@@ -8,14 +8,14 @@ class SlideUpTransitionPage<T> extends CustomTransitionPage<T> {
     super.transitionDuration,
     super.reverseTransitionDuration,
   }) : super(
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, 1),
-                end: Offset.zero,
-              ).animate(animation),
-              child: child,
-            );
-          },
-        );
+         transitionsBuilder: (context, animation, secondaryAnimation, child) {
+           return SlideTransition(
+             position: Tween<Offset>(
+               begin: const Offset(0, 1),
+               end: Offset.zero,
+             ).animate(animation),
+             child: child,
+           );
+         },
+       );
 }

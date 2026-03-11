@@ -25,14 +25,14 @@ String _$connectionsServiceHash() =>
 @ProviderFor(ConnectionsService)
 final connectionsServiceProvider =
     NotifierProvider<ConnectionsService, ConnectionsServiceState>.internal(
-  ConnectionsService.new,
-  name: r'connectionsServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$connectionsServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ConnectionsService.new,
+      name: r'connectionsServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$connectionsServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ConnectionsService = Notifier<ConnectionsServiceState>;
 // ignore_for_file: type=lint

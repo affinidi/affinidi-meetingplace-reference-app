@@ -15,10 +15,10 @@ class TimedAction {
     VoidCallback? onCancel,
     VoidCallback? onComplete,
     required Duration duration,
-  })  : _duration = duration,
-        _onCancel = onCancel,
-        _onComplete = onComplete,
-        _execute = onRun;
+  }) : _duration = duration,
+       _onCancel = onCancel,
+       _onComplete = onComplete,
+       _execute = onRun;
 
   Timer? _timer;
   final void Function(List<dynamic>? args) _execute;

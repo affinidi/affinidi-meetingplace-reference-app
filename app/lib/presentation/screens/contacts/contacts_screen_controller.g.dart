@@ -7,20 +7,20 @@ part of 'contacts_screen_controller.dart';
 // **************************************************************************
 
 String _$contactsScreenControllerHash() =>
-    r'83e4395066fded8356bbf56b14e3509a3e18a632';
+    r'82d7c83f3436033871cbfff6279889e3976c4d5c';
 
 /// See also [ContactsScreenController].
 @ProviderFor(ContactsScreenController)
 final contactsScreenControllerProvider =
     NotifierProvider<ContactsScreenController, ContactsScreenState>.internal(
-  ContactsScreenController.new,
-  name: r'contactsScreenControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$contactsScreenControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      ContactsScreenController.new,
+      name: r'contactsScreenControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$contactsScreenControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$ContactsScreenController = Notifier<ContactsScreenState>;
 // ignore_for_file: type=lint

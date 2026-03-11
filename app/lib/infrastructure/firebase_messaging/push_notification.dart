@@ -30,9 +30,8 @@ enum PushNotificationType {
 /// Contains additional information like [pendingCount].
 @freezed
 abstract class PushNotificationData with _$PushNotificationData {
-  const factory PushNotificationData({
-    int? pendingCount,
-  }) = _PushNotificationData;
+  const factory PushNotificationData({int? pendingCount}) =
+      _PushNotificationData;
 
   /// Creates a [PushNotificationData] from a JSON map.
   ///

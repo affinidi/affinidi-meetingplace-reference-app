@@ -56,8 +56,9 @@ void main() {
       expect(findNewConnectionButton(), findsOneWidget);
     });
 
-    testWidgets('should show the grid/list view toggle buttons',
-        (tester) async {
+    testWidgets('should show the grid/list view toggle buttons', (
+      tester,
+    ) async {
       await navigateToContactsScreen(tester);
 
       expect(findGridViewToggle(), findsOneWidget);
@@ -101,8 +102,9 @@ void main() {
   });
 
   group('When displaying contacts in list view', () {
-    testWidgets('should switch to list view when list toggle is tapped',
-        (tester) async {
+    testWidgets('should switch to list view when list toggle is tapped', (
+      tester,
+    ) async {
       await navigateToContactsScreen(tester);
 
       await tester.tap(findListViewToggle());
@@ -188,14 +190,16 @@ void main() {
     });
 
     testWidgets(
-        'should navigate to connection details when tapping pending contact',
-        (tester) async {
-      await navigateToContactsScreen(tester);
+      'should navigate to connection details when tapping pending contact',
+      (tester) async {
+        await navigateToContactsScreen(tester);
 
-      final contactName = FakeContacts.pendingContact.displayName ?? 'Pending';
-      await tester.tap(findContactByName(contactName).first);
-      await tester.pumpAndSettle();
-    });
+        final contactName =
+            FakeContacts.pendingContact.displayName ?? 'Pending';
+        await tester.tap(findContactByName(contactName).first);
+        await tester.pumpAndSettle();
+      },
+    );
 
     testWidgets('should show contact avatar when tapped', (tester) async {
       await navigateToContactsScreen(tester);
@@ -221,8 +225,9 @@ void main() {
       expect(find.text(l10n.noContactsYet), findsOneWidget);
     });
 
-    testWidgets('should show different message when no contacts match filter',
-        (tester) async {
+    testWidgets('should show different message when no contacts match filter', (
+      tester,
+    ) async {
       final l10n = await getL10n();
       await navigateToContactsScreen(tester);
 
@@ -238,8 +243,9 @@ void main() {
   });
 
   group('When searching contacts', () {
-    testWidgets('should open search field when search icon is tapped',
-        (tester) async {
+    testWidgets('should open search field when search icon is tapped', (
+      tester,
+    ) async {
       await navigateToContactsScreen(tester);
 
       await tester.tap(findSearchIcon());
@@ -295,8 +301,9 @@ void main() {
       expect(findContactByName(contactName), findsWidgets);
     });
 
-    testWidgets('should show all contacts when search is cleared',
-        (tester) async {
+    testWidgets('should show all contacts when search is cleared', (
+      tester,
+    ) async {
       await navigateToContactsScreen(tester);
 
       await tester.tap(findSearchIcon());
@@ -320,8 +327,9 @@ void main() {
   });
 
   group('When displaying contact badges', () {
-    testWidgets('should show badge count when messages are unread',
-        (tester) async {
+    testWidgets('should show badge count when messages are unread', (
+      tester,
+    ) async {
       await navigateToContactsScreen(tester);
 
       expect(find.text('3'), findsOneWidget);
@@ -334,17 +342,16 @@ void main() {
       expect(contactWithNoBadge.badgeCount, equals(0));
     });
 
-    testWidgets('should show badge count of 1 when contact is first created',
-        (tester) async {
+    testWidgets('should show badge count of 1 when contact is first created', (
+      tester,
+    ) async {
       await navigateToLocation(
         tester,
         '/contacts',
         isAuthenticated: true,
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],
-        contacts: [
-          FakeContacts.newContactWithMessage,
-        ],
+        contacts: [FakeContacts.newContactWithMessage],
       );
       await tester.pumpAndSettle();
 
@@ -352,8 +359,7 @@ void main() {
       expect(FakeContacts.newContactWithMessage.badgeCount, equals(1));
     });
 
-    testWidgets(
-        'should reset badge count to 0 after clicking contact with new '
+    testWidgets('should reset badge count to 0 after clicking contact with new '
         'messages', (tester) async {
       await navigateToLocation(
         tester,
@@ -361,9 +367,7 @@ void main() {
         isAuthenticated: true,
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],
-        contacts: [
-          FakeContacts.newContactWithMessage,
-        ],
+        contacts: [FakeContacts.newContactWithMessage],
       );
       await tester.pumpAndSettle();
 
@@ -375,8 +379,9 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('should update badge count when new message is received',
-        (tester) async {
+    testWidgets('should update badge count when new message is received', (
+      tester,
+    ) async {
       final fakeSdk = FakeMeetingPlaceSDK(
         channels: {
           FakeChannels.individualChannel.otherPartyPermanentChannelDid!:
@@ -424,14 +429,16 @@ void main() {
     });
 
     testWidgets(
-        'should show OOB notification off icon for direct interactive contacts',
-        (tester) async {
-      await navigateToContactsScreen(tester);
-      expect(find.byIcon(Icons.notifications_off_outlined), findsOneWidget);
-    });
+      'should show OOB notification off icon for direct interactive contacts',
+      (tester) async {
+        await navigateToContactsScreen(tester);
+        expect(find.byIcon(Icons.notifications_off_outlined), findsOneWidget);
+      },
+    );
 
-    testWidgets('should show new channel dot badge for unopened channels',
-        (tester) async {
+    testWidgets('should show new channel dot badge for unopened channels', (
+      tester,
+    ) async {
       await navigateToContactsScreen(tester);
 
       final pendingContact = FakeContacts.pendingContact;
@@ -440,8 +447,9 @@ void main() {
   });
 
   group('When handling swipe to delete in list view', () {
-    testWidgets('should show delete option when swiping contact',
-        (tester) async {
+    testWidgets('should show delete option when swiping contact', (
+      tester,
+    ) async {
       await navigateToContactsScreen(tester);
 
       await tester.tap(findListViewToggle());
@@ -455,24 +463,23 @@ void main() {
         find.byKey(const Key('dismissible_delete_background')),
         findsOneWidget,
       );
-      expect(
-        find.byKey(const Key('dismissible_delete_text')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const Key('dismissible_delete_text')), findsOneWidget);
     });
   });
 
   group('When handling contact status', () {
-    testWidgets('should show active status for active contacts',
-        (tester) async {
+    testWidgets('should show active status for active contacts', (
+      tester,
+    ) async {
       await navigateToContactsScreen(tester);
 
       final activeContact = FakeContacts.individualContact;
       expect(activeContact.status, equals(ContactStatus.active));
     });
 
-    testWidgets('should show pending status for pending contacts',
-        (tester) async {
+    testWidgets('should show pending status for pending contacts', (
+      tester,
+    ) async {
       await navigateToContactsScreen(tester);
 
       final pendingContact = FakeContacts.pendingContact;
@@ -482,126 +489,134 @@ void main() {
 
   group('When displaying contact borders', () {
     testWidgets(
-        'should display appropriate border color in list view for pending '
-        'contact', (tester) async {
-      await navigateToContactsScreen(tester);
+      'should display appropriate border color in list view for pending '
+      'contact',
+      (tester) async {
+        await navigateToContactsScreen(tester);
 
-      final listViewToggle = findListViewToggle();
-      if (listViewToggle.evaluate().isNotEmpty) {
-        await tester.tap(listViewToggle);
-        await tester.pumpAndSettle();
-      }
+        final listViewToggle = findListViewToggle();
+        if (listViewToggle.evaluate().isNotEmpty) {
+          await tester.tap(listViewToggle);
+          await tester.pumpAndSettle();
+        }
 
-      final pendingContactTile = find.ancestor(
-        of: find.text('Display Charlie'),
-        matching: find.byType(ListTile),
-      );
-      expect(pendingContactTile, findsOneWidget);
+        final pendingContactTile = find.ancestor(
+          of: find.text('Display Charlie'),
+          matching: find.byType(ListTile),
+        );
+        expect(pendingContactTile, findsOneWidget);
 
-      final listTile = tester.widget<ListTile>(pendingContactTile);
-      final shape = listTile.shape as RoundedRectangleBorder;
+        final listTile = tester.widget<ListTile>(pendingContactTile);
+        final shape = listTile.shape as RoundedRectangleBorder;
 
-      final context = tester.element(pendingContactTile);
-      final expectedColor = FakeContacts.pendingContact.getStatusColor(
-        context,
-        asAvatar: true,
-      );
-
-      expect(shape.side.color, expectedColor);
-      expect(shape.side.width, 2);
-    });
-
-    testWidgets(
-        'should display transparent border in list view for active contact '
-        'that has been opened', (tester) async {
-      await navigateToContactsScreen(tester);
-
-      final listViewToggle = findListViewToggle();
-      if (listViewToggle.evaluate().isNotEmpty) {
-        await tester.tap(listViewToggle);
-        await tester.pumpAndSettle();
-      }
-
-      final activeContactTile = find.ancestor(
-        of: find.text('Display Alice'),
-        matching: find.byType(ListTile),
-      );
-      expect(activeContactTile, findsOneWidget);
-
-      final listTile = tester.widget<ListTile>(activeContactTile);
-      final shape = listTile.shape as RoundedRectangleBorder;
-
-      expect(shape.side.color, Colors.transparent);
-    });
-
-    testWidgets(
-        'should display appropriate border color in grid view for pending '
-        'contact', (tester) async {
-      await navigateToContactsScreen(tester);
-
-      final gridViewToggle = findGridViewToggle();
-      if (gridViewToggle.evaluate().isNotEmpty) {
-        await tester.tap(gridViewToggle);
-        await tester.pumpAndSettle();
-      }
-
-      final allContainers = find.byType(Container);
-      final containers = tester.widgetList<Container>(allContainers);
-
-      final borderedContainers = containers.where((container) {
-        final decoration = container.decoration;
-        return decoration is BoxDecoration &&
-            decoration.border != null &&
-            decoration.shape == BoxShape.circle;
-      }).toList();
-
-      expect(borderedContainers.isNotEmpty, isTrue);
-
-      final pendingIndex = borderedContainers.indexWhere((container) {
-        final decoration = container.decoration as BoxDecoration;
-        final border = decoration.border as Border;
-        final element = find.byWidget(container).evaluate().first;
-        final color = FakeContacts.pendingContact.getStatusColor(
-          element,
+        final context = tester.element(pendingContactTile);
+        final expectedColor = FakeContacts.pendingContact.getStatusColor(
+          context,
           asAvatar: true,
         );
-        return border.top.color == color && border.top.width == 2;
-      });
 
-      expect(pendingIndex, greaterThanOrEqualTo(0));
-    });
+        expect(shape.side.color, expectedColor);
+        expect(shape.side.width, 2);
+      },
+    );
 
     testWidgets(
-        'should display transparent border in grid view for active contact '
-        'that has been opened', (tester) async {
-      await navigateToContactsScreen(tester);
+      'should display transparent border in list view for active contact '
+      'that has been opened',
+      (tester) async {
+        await navigateToContactsScreen(tester);
 
-      final gridViewToggle = findGridViewToggle();
-      if (gridViewToggle.evaluate().isNotEmpty) {
-        await tester.tap(gridViewToggle);
-        await tester.pumpAndSettle();
-      }
+        final listViewToggle = findListViewToggle();
+        if (listViewToggle.evaluate().isNotEmpty) {
+          await tester.tap(listViewToggle);
+          await tester.pumpAndSettle();
+        }
 
-      final allContainers = find.byType(Container);
-      final containers = tester.widgetList<Container>(allContainers);
+        final activeContactTile = find.ancestor(
+          of: find.text('Display Alice'),
+          matching: find.byType(ListTile),
+        );
+        expect(activeContactTile, findsOneWidget);
 
-      final borderedContainers = containers.where((container) {
-        final decoration = container.decoration;
-        return decoration is BoxDecoration &&
-            decoration.border != null &&
-            decoration.shape == BoxShape.circle;
-      }).toList();
+        final listTile = tester.widget<ListTile>(activeContactTile);
+        final shape = listTile.shape as RoundedRectangleBorder;
 
-      expect(borderedContainers.isNotEmpty, isTrue);
+        expect(shape.side.color, Colors.transparent);
+      },
+    );
 
-      final transparentIndex = borderedContainers.indexWhere((container) {
-        final decoration = container.decoration as BoxDecoration;
-        final border = decoration.border as Border;
-        return border.top.color == Colors.transparent;
-      });
+    testWidgets(
+      'should display appropriate border color in grid view for pending '
+      'contact',
+      (tester) async {
+        await navigateToContactsScreen(tester);
 
-      expect(transparentIndex, greaterThanOrEqualTo(0));
-    });
+        final gridViewToggle = findGridViewToggle();
+        if (gridViewToggle.evaluate().isNotEmpty) {
+          await tester.tap(gridViewToggle);
+          await tester.pumpAndSettle();
+        }
+
+        final allContainers = find.byType(Container);
+        final containers = tester.widgetList<Container>(allContainers);
+
+        final borderedContainers = containers.where((container) {
+          final decoration = container.decoration;
+          return decoration is BoxDecoration &&
+              decoration.border != null &&
+              decoration.shape == BoxShape.circle;
+        }).toList();
+
+        expect(borderedContainers.isNotEmpty, isTrue);
+
+        final pendingIndex = borderedContainers.indexWhere((container) {
+          final decoration = container.decoration as BoxDecoration;
+          final border = decoration.border as Border;
+          final element = find.byWidget(container).evaluate().first;
+          final color = FakeContacts.pendingContact.getStatusColor(
+            element,
+            asAvatar: true,
+          );
+          return border.top.color == color && border.top.width == 2;
+        });
+
+        expect(pendingIndex, greaterThanOrEqualTo(0));
+      },
+    );
+
+    testWidgets(
+      'should display transparent border in grid view for active contact '
+      'that has been opened',
+      (tester) async {
+        await navigateToContactsScreen(tester);
+
+        final gridViewToggle = findGridViewToggle();
+        if (gridViewToggle.evaluate().isNotEmpty) {
+          await tester.tap(gridViewToggle);
+          await tester.pumpAndSettle();
+        }
+
+        final allContainers = find.byType(Container);
+        final containers = tester.widgetList<Container>(allContainers);
+
+        final borderedContainers = containers.where((container) {
+          final decoration = container.decoration;
+          return decoration is BoxDecoration &&
+              decoration.border != null &&
+              decoration.shape == BoxShape.circle;
+        }).toList();
+
+        expect(borderedContainers.isNotEmpty, isTrue);
+
+        final transparentIndex = borderedContainers.indexWhere((container) {
+          final decoration = container.decoration as BoxDecoration;
+          final border = decoration.border as Border;
+          return border.top.color == Colors.transparent;
+        });
+
+        expect(transparentIndex, greaterThanOrEqualTo(0));
+      },
+    );
   });
 
   group('When displaying contact types', () {

@@ -8,10 +8,12 @@ class _OfferDetailsPhrase extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
-    final mnemonic =
-        ref.watch(controllerProvider.select((state) => state.offer?.mnemonic));
-    final showQrIcon =
-        ref.watch(controllerProvider.select((state) => state.showQrIcon));
+    final mnemonic = ref.watch(
+      controllerProvider.select((state) => state.offer?.mnemonic),
+    );
+    final showQrIcon = ref.watch(
+      controllerProvider.select((state) => state.showQrIcon),
+    );
 
     if (mnemonic == null || mnemonic.isEmpty) {
       return const SizedBox.shrink();
@@ -26,8 +28,9 @@ class _OfferDetailsPhrase extends ConsumerWidget {
               ? Padding(
                   padding: const EdgeInsets.fromLTRB(2, 2, 14, 4),
                   child: IconButton(
-                    onPressed:
-                        ref.read(controllerProvider.notifier).toggleShowQrView,
+                    onPressed: ref
+                        .read(controllerProvider.notifier)
+                        .toggleShowQrView,
                     icon: CircleAvatar(
                       backgroundColor: context.customColors.darkGrey,
                       radius: 18,
@@ -41,10 +44,7 @@ class _OfferDetailsPhrase extends ConsumerWidget {
                 )
               : null,
         ),
-        _OfferQrCodeView(
-          offerLink: offerLink,
-          mnemonic: mnemonic,
-        ),
+        _OfferQrCodeView(offerLink: offerLink, mnemonic: mnemonic),
       ],
     );
   }

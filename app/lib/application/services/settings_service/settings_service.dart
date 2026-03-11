@@ -59,17 +59,11 @@ class SettingsService extends _$SettingsService {
   ///
   /// [mediatorDid] - The DID of the mediator to select.
   Future<void> selectMediatorConfig(String mediatorDid) async {
-    _logger.info(
-      'Started updating mediator',
-      name: _logKey,
-    );
+    _logger.info('Started updating mediator', name: _logKey);
     final provider = await ref.read(secureStorageProvider.future);
     await provider.setPreferredMediatorDid(mediatorDid);
     state = state.copyWith(selectedMediatorDid: mediatorDid);
-    _logger.info(
-      'Completed updating mediator',
-      name: _logKey,
-    );
+    _logger.info('Completed updating mediator', name: _logKey);
   }
 
   /// Toggle the debug mode for the application and persist the setting.

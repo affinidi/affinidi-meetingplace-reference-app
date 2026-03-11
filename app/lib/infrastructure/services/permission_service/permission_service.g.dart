@@ -6,23 +6,22 @@ part of 'permission_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$permissionServiceHash() => r'19b92322798ea7fd375e96ef01c7cc2626892ad5';
+String _$permissionServiceHash() => r'8944118369fdc2dd355a221dd4f8a487b7f3372c';
 
 /// A service for checking and requesting permissions.
-/// This abstraction allows for easier testing by providing a mockable interface.
 ///
 /// Copied from [permissionService].
 @ProviderFor(permissionService)
 final permissionServiceProvider =
     AutoDisposeProvider<PermissionService>.internal(
-  permissionService,
-  name: r'permissionServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$permissionServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      permissionService,
+      name: r'permissionServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$permissionServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element

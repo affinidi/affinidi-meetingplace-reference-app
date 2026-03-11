@@ -23,14 +23,14 @@ String _$settingsServiceHash() => r'b38a9046f8af9f60707320bfd11ff7b6a2d233e3';
 @ProviderFor(SettingsService)
 final settingsServiceProvider =
     NotifierProvider<SettingsService, SettingsServiceState>.internal(
-  SettingsService.new,
-  name: r'settingsServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$settingsServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      SettingsService.new,
+      name: r'settingsServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$settingsServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$SettingsService = Notifier<SettingsServiceState>;
 // ignore_for_file: type=lint

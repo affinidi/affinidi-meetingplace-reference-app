@@ -6,10 +6,7 @@ import 'package:flutter/material.dart';
 import '../screen_effect.dart';
 
 class ConfettiEffect extends StatefulWidget {
-  const ConfettiEffect({
-    super.key,
-    this.onComplete,
-  });
+  const ConfettiEffect({super.key, this.onComplete});
 
   final VoidCallback? onComplete;
 
@@ -26,9 +23,7 @@ class _ConfettiEffectState extends State<ConfettiEffect>
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(
-      duration: effect.duration,
-    );
+    _confettiController = ConfettiController(duration: effect.duration);
 
     _isPlaying = true;
     _confettiController.play();

@@ -12,6 +12,7 @@ class _ChatTextEntry extends HookConsumerWidget {
     final otherPartyName = ref.watch(provider.otherPartyName);
     final isGroupChat = ref.watch(provider.isGroupChat);
     final shouldDisable = ref.watch(provider.shouldDisable);
+    final focusNode = useFocusNode();
     final inputDecoration = context.chatInputDecoration;
     final borderRadius = inputDecoration.border is OutlineInputBorder
         ? (inputDecoration.border as OutlineInputBorder).borderRadius
@@ -22,9 +23,15 @@ class _ChatTextEntry extends HookConsumerWidget {
       controller.sendChatActivity();
     }
 
+    void showKeyboard() {
+      if (!context.mounted) return;
+      FocusScope.of(context).requestFocus(focusNode);
+    }
+
     void sendMessage() {
       if (!context.mounted) return;
       controller.sendMessage();
+      showKeyboard();
     }
 
     void handleMediaSelection() =>
@@ -48,11 +55,7 @@ class _ChatTextEntry extends HookConsumerWidget {
               child: InkWell(
                 key: const Key('chat_add_media_button'),
                 radius: 60,
-                child: const Icon(
-                  Icons.add,
-                  size: 25,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.add, size: 25, color: Colors.white),
                 onTap: shouldDisable ? null : handleMediaSelection,
               ),
             ),
@@ -62,12 +65,19 @@ class _ChatTextEntry extends HookConsumerWidget {
                 child: TextFormField(
                   key: const Key('chat_message_input'),
                   enabled: !shouldDisable,
-                  onChanged:
-                      shouldDisable ? null : (text) => sendChatActivity(),
+                  onChanged: shouldDisable
+                      ? null
+                      : (text) => sendChatActivity(),
                   textInputAction: TextInputAction.send,
+                  focusNode: focusNode,
+                  onEditingComplete:
+                      (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
+                      ? (shouldDisable ? null : sendMessage)
+                      : null,
                   onFieldSubmitted:
-                      shouldDisable ? null : (value) => sendMessage(),
-                  onEditingComplete: () {}, // prevent closing keyboard
+                      (!kIsWeb && defaultTargetPlatform != TargetPlatform.iOS)
+                      ? (shouldDisable ? null : (_) => sendMessage())
+                      : null,
                   keyboardType: TextInputType.text,
                   textCapitalization: TextCapitalization.sentences,
                   cursorHeight: 16,
@@ -82,8 +92,9 @@ class _ChatTextEntry extends HookConsumerWidget {
                   decoration: context.chatInputDecoration.copyWith(
                     hintText: isGroupChat
                         ? context.l10n.chatTypeMessagePromptGroup
-                        : context.l10n
-                            .chatTypeMessagePrompt(otherPartyName ?? ''),
+                        : context.l10n.chatTypeMessagePrompt(
+                            otherPartyName ?? '',
+                          ),
                   ),
                   validator: MultiValidator([
                     ZalgoTextValidator(
@@ -110,11 +121,7 @@ class _ChatTextEntry extends HookConsumerWidget {
                 key: const Key('chat_send_button'),
                 radius: 60,
                 onTap: shouldDisable ? null : sendMessage,
-                child: const Icon(
-                  Icons.send,
-                  size: 25,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.send, size: 25, color: Colors.white),
               ),
             ),
           ],

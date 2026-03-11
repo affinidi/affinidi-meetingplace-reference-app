@@ -26,21 +26,20 @@ part 'oob_service.g.dart';
 class OOBService extends _$OOBService {
   Identity? _currentIdentity;
   CoreSDKStreamSubscription<OobStreamData, void>?
-      _acceptOfferStreamSubscription;
+  _acceptOfferStreamSubscription;
   CoreSDKStreamSubscription<OobStreamData, void>?
-      _publishOfferStreamSubscription;
+  _publishOfferStreamSubscription;
   static const _logKey = 'OOBSVC';
   late final AppLogger _logger = ref.read(appLoggerProvider);
 
   @override
   OOBServiceState build() {
-    ref.listen(
-      identitiesServiceProvider.currentIdentityOrPrimary,
-      (prev, next) {
-        _currentIdentity = next;
-      },
-      fireImmediately: true,
-    );
+    ref.listen(identitiesServiceProvider.currentIdentityOrPrimary, (
+      prev,
+      next,
+    ) {
+      _currentIdentity = next;
+    }, fireImmediately: true);
 
     ref.onDispose(() {
       _acceptOfferStreamSubscription?.dispose();
@@ -145,20 +144,17 @@ class OOBService extends _$OOBService {
 
       _acceptOfferStreamSubscription = result.stream;
 
-      _acceptOfferStreamSubscription?.timeout(
-        const Duration(seconds: 60),
-        () {
-          _logger.info('acceptOobFlow timeout', name: _logKey);
-          if (acceptedOfferCompleter.isCompleted) return;
+      _acceptOfferStreamSubscription?.timeout(const Duration(seconds: 60), () {
+        _logger.info('acceptOobFlow timeout', name: _logKey);
+        if (acceptedOfferCompleter.isCompleted) return;
 
-          acceptedOfferCompleter.completeError(
-            AppException(
-              'Unable to process OOB offer - timed out',
-              code: AppExceptionType.oobFlowTimedOut.name,
-            ),
-          );
-        },
-      );
+        acceptedOfferCompleter.completeError(
+          AppException(
+            'Unable to process OOB offer - timed out',
+            code: AppExceptionType.oobFlowTimedOut.name,
+          ),
+        );
+      });
 
       _acceptOfferStreamSubscription?.listen((data) async {
         final channel = data.channel;
@@ -206,8 +202,6 @@ class OOBService extends _$OOBService {
   ///
   /// [channel] - The channel associated with the newly established connection.
   void _handleConnectionEstablished(Channel channel) {
-    state = state.copyWith(
-      lastConnectionChannel: channel,
-    );
+    state = state.copyWith(lastConnectionChannel: channel);
   }
 }

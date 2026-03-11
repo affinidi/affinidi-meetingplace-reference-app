@@ -14,8 +14,9 @@ part 'settings_screen_controller.g.dart';
 
 @Riverpod(keepAlive: true)
 class SettingsScreenController extends _$SettingsScreenController {
-  late final scanMediatorQRLoadingController =
-      AsyncLoadingController.provider('scanMediatorQRLoadingController');
+  late final scanMediatorQRLoadingController = AsyncLoadingController.provider(
+    'scanMediatorQRLoadingController',
+  );
 
   @override
   SettingsScreenState build() {
@@ -23,8 +24,9 @@ class SettingsScreenController extends _$SettingsScreenController {
       mediatorServiceProvider.select((state) => state.mediators),
       (prev, next) {
         Future.microtask(() {
-          final mediatorProvider =
-              ref.read(mediatorServiceProvider.filteredMediators);
+          final mediatorProvider = ref.read(
+            mediatorServiceProvider.filteredMediators,
+          );
           state = state.copyWith(mediators: mediatorProvider);
         });
       },
@@ -57,8 +59,9 @@ class SettingsScreenController extends _$SettingsScreenController {
       fireImmediately: true,
     );
 
-    final numberOfTapsToUnlockDebug =
-        ref.read(environmentProvider).numberOfTapsToUnlockDebug;
+    final numberOfTapsToUnlockDebug = ref
+        .read(environmentProvider)
+        .numberOfTapsToUnlockDebug;
 
     final currentSettingsState = ref.read(settingsServiceProvider);
 

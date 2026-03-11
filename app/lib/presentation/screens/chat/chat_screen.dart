@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -63,7 +64,7 @@ part 'reactions.dart';
 
 class ChatScreen extends HookConsumerWidget {
   const ChatScreen({super.key, required String contactId})
-      : _contactId = contactId;
+    : _contactId = contactId;
 
   final String _contactId;
 
@@ -73,20 +74,17 @@ class ChatScreen extends HookConsumerWidget {
     final controller = ref.read(provider.notifier);
     ref.keepAround(provider);
 
-    useEffect(
-      () {
+    useEffect(() {
+      if (!context.mounted) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await controller.initialize();
         if (!context.mounted) return;
+        await controller.onScreenOpened();
+      });
 
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await controller.initialize();
-          if (!context.mounted) return;
-          await controller.onScreenOpened();
-        });
-
-        return null;
-      },
-      [],
-    );
+      return null;
+    }, []);
 
     return Scaffold(
       appBar: AppBar(
@@ -116,17 +114,14 @@ class ChatScreen extends HookConsumerWidget {
                   children: [
                     ChatActivityProgressIndicator(contactId: _contactId),
                     _NotificationsUnavailableWarning(_contactId),
-                    Expanded(
-                      child: _ChatMessageList(_contactId),
-                    ),
+                    Expanded(child: _ChatMessageList(_contactId)),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                      child:
-                          _ChatTypingActivityIndicator(contactId: _contactId),
+                      child: _ChatTypingActivityIndicator(
+                        contactId: _contactId,
+                      ),
                     ),
-                    _ChatTextEntry(
-                      contactId: _contactId,
-                    ),
+                    _ChatTextEntry(contactId: _contactId),
                   ],
                 ),
                 ChatEffect(contactId: _contactId),

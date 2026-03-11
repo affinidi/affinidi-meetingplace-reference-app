@@ -70,21 +70,21 @@ void main() async {
         ),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),
         chatRepositoryProvider.overrideWith(chatRepositoryDrift),
-        connectionOfferRepositoryProvider
-            .overrideWith(connectionOfferRepositoryDrift),
+        connectionOfferRepositoryProvider.overrideWith(
+          connectionOfferRepositoryDrift,
+        ),
         contactsRepositoryProvider.overrideWith(contactsRepositoryDrift),
         groupsRepositoryProvider.overrideWith(groupsRepositoryDrift),
         identitiesRepositoryProvider.overrideWith(identitiesRepositoryDrift),
         mediatorsRepositoryProvider.overrideWith(mediatorsRepositoryDrift),
         pushNotificationMessagingProvider.overrideWith(
-          (ref) => FirebasePushNotificationMessaging(FirebaseMessaging.instance)
-            ..setBackgroundHandler(firebaseMessagingBackgroundHandler),
+          (ref) =>
+              FirebasePushNotificationMessaging(FirebaseMessaging.instance)
+                ..setBackgroundHandler(firebaseMessagingBackgroundHandler),
         ),
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
-      observers: [
-        ProviderDebugLogger(),
-      ],
+      observers: [ProviderDebugLogger()],
       child: const App(),
     ),
   );

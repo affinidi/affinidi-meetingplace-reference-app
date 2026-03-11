@@ -110,8 +110,9 @@ void main() {
           await navigateToLocation(
             tester,
             location,
-            pushNotificationMessaging:
-                FakePushNotificationMessaging(attemptsToFailGettingToken: 1),
+            pushNotificationMessaging: FakePushNotificationMessaging(
+              attemptsToFailGettingToken: 1,
+            ),
             connectivity: fakeConnectivity,
           );
           await tester.pumpAndSettle();
@@ -125,15 +126,18 @@ void main() {
         final deviceToken = 'a_device_token';
 
         group('and successfully registers it', () {
-          final fakeMeetingPlaceCoreSDK =
-              FakeMeetingPlaceSDK(shouldFailToRegisterPushToken: false);
-          testWidgets('it does not show a network error banner',
-              (tester) async {
+          final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+            shouldFailToRegisterPushToken: false,
+          );
+          testWidgets('it does not show a network error banner', (
+            tester,
+          ) async {
             await navigateToLocation(
               tester,
               location,
-              pushNotificationMessaging:
-                  FakePushNotificationMessaging(tokenToReturn: deviceToken),
+              pushNotificationMessaging: FakePushNotificationMessaging(
+                tokenToReturn: deviceToken,
+              ),
               connectivity: fakeConnectivity,
               meetingPlaceCoreSDK: fakeMeetingPlaceCoreSDK,
             );
@@ -146,28 +150,33 @@ void main() {
           });
 
           group('and connectivity is lost and retrieved again', () {
-            testWidgets('it does not try to register the same token again',
-                (tester) async {
-              final fakeMeetingPlaceCoreSDK =
-                  FakeMeetingPlaceSDK(shouldFailToRegisterPushToken: false);
+            testWidgets('it does not try to register the same token again', (
+              tester,
+            ) async {
+              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+                shouldFailToRegisterPushToken: false,
+              );
 
               await navigateToLocation(
                 tester,
                 location,
-                pushNotificationMessaging:
-                    FakePushNotificationMessaging(tokenToReturn: deviceToken),
+                pushNotificationMessaging: FakePushNotificationMessaging(
+                  tokenToReturn: deviceToken,
+                ),
                 connectivity: fakeConnectivity,
                 meetingPlaceCoreSDK: fakeMeetingPlaceCoreSDK,
               );
 
               await tester.pumpAndSettle();
 
-              fakeConnectivity
-                  .emitConnectivityChange([ConnectivityResult.none]);
+              fakeConnectivity.emitConnectivityChange([
+                ConnectivityResult.none,
+              ]);
               await tester.pumpAndSettle();
 
-              fakeConnectivity
-                  .emitConnectivityChange([ConnectivityResult.wifi]);
+              fakeConnectivity.emitConnectivityChange([
+                ConnectivityResult.wifi,
+              ]);
               await tester.pumpAndSettle();
 
               expect(fakeMeetingPlaceCoreSDK.tokenRegistrationsAttempts, 1);
@@ -186,8 +195,9 @@ void main() {
             await navigateToLocation(
               tester,
               location,
-              pushNotificationMessaging:
-                  FakePushNotificationMessaging(tokenToReturn: deviceToken),
+              pushNotificationMessaging: FakePushNotificationMessaging(
+                tokenToReturn: deviceToken,
+              ),
               connectivity: fakeConnectivity,
               meetingPlaceCoreSDK: fakeMeetingPlaceCoreSDK,
             );
@@ -200,8 +210,9 @@ void main() {
           });
 
           group('and user changes connectivity status', () {
-            testWidgets('it attempts to register the token again',
-                (tester) async {
+            testWidgets('it attempts to register the token again', (
+              tester,
+            ) async {
               final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
                 shouldFailToRegisterPushToken: shouldFailToRegisterPushToken,
               );
@@ -209,8 +220,9 @@ void main() {
               await navigateToLocation(
                 tester,
                 location,
-                pushNotificationMessaging:
-                    FakePushNotificationMessaging(tokenToReturn: deviceToken),
+                pushNotificationMessaging: FakePushNotificationMessaging(
+                  tokenToReturn: deviceToken,
+                ),
                 connectivity: fakeConnectivity,
                 meetingPlaceCoreSDK: fakeMeetingPlaceCoreSDK,
               );
@@ -218,13 +230,15 @@ void main() {
               await tester.pumpAndSettle();
               expect(fakeMeetingPlaceCoreSDK.tokenRegistrationsAttempts, 1);
 
-              fakeConnectivity
-                  .emitConnectivityChange([ConnectivityResult.none]);
+              fakeConnectivity.emitConnectivityChange([
+                ConnectivityResult.none,
+              ]);
 
               await tester.pumpAndSettle();
 
-              fakeConnectivity
-                  .emitConnectivityChange([ConnectivityResult.wifi]);
+              fakeConnectivity.emitConnectivityChange([
+                ConnectivityResult.wifi,
+              ]);
               await tester.pumpAndSettle();
 
               expect(fakeMeetingPlaceCoreSDK.tokenRegistrationsAttempts, 2);
@@ -234,8 +248,9 @@ void main() {
 
           group('and multiple tokens arrive in a short period', () {
             testWidgets('it handles them synchronously', (tester) async {
-              final fakeMeetingPlaceCoreSDK =
-                  FakeMeetingPlaceSDK(shouldFailToRegisterPushToken: false);
+              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+                shouldFailToRegisterPushToken: false,
+              );
               final savingPushTokenDuration = 100;
               final fakeSecureStorage = FakeSecureStorage(
                 savingPushTokenDuration: savingPushTokenDuration,
@@ -255,8 +270,9 @@ void main() {
                 await tester.pumpAndSettle();
 
                 final tokenList = ['token 1', 'token 2'];
-                await fakePushNotificationMessaging
-                    .emitRefreshTokens(tokenList);
+                await fakePushNotificationMessaging.emitRefreshTokens(
+                  tokenList,
+                );
                 await tester.binding.delayed(
                   Duration(
                     milliseconds: tokenList.length * savingPushTokenDuration,

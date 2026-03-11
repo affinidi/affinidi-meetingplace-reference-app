@@ -7,8 +7,9 @@ class _DisplayNamePanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller =
-        ref.read(connectionDetailsScreenControllerProvider(contactId).notifier);
+    final controller = ref.read(
+      connectionDetailsScreenControllerProvider(contactId).notifier,
+    );
 
     return Column(
       spacing: 10,

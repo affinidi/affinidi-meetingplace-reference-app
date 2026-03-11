@@ -15,9 +15,7 @@ class _IdentityFormAppBar extends ConsumerWidget
         ? context.l10n.editIdentityTitle(card.displayName)
         : context.l10n.newIdentityAlias;
 
-    return AppBar(
-      title: Text(title),
-    );
+    return AppBar(title: Text(title));
   }
 
   @override

@@ -33,10 +33,7 @@ class _ContactNotificationBadge extends StatelessWidget {
         : origin.color(context);
 
     return Container(
-      constraints: BoxConstraints(
-        minWidth: size,
-        minHeight: size,
-      ),
+      constraints: BoxConstraints(minWidth: size, minHeight: size),
       decoration: BoxDecoration(
         color: badgeColor,
         shape: BoxShape.circle,
@@ -56,19 +53,17 @@ class _ContactNotificationBadge extends StatelessWidget {
           : Text(
               badgeCount > 99 ? '99+' : '$badgeCount',
               style: textStyle,
-              textScaler: (MediaQuery.maybeTextScalerOf(context) ??
-                      TextScaler.noScaling)
-                  .clamp(maxScaleFactor: 0.8),
+              textScaler:
+                  (MediaQuery.maybeTextScalerOf(context) ??
+                          TextScaler.noScaling)
+                      .clamp(maxScaleFactor: 0.8),
             ),
     );
   }
 }
 
 class _ContactNewChannelDotBadge extends StatelessWidget {
-  const _ContactNewChannelDotBadge({
-    required this.origin,
-    this.isList = false,
-  });
+  const _ContactNewChannelDotBadge({required this.origin, this.isList = false});
 
   final ContactOrigin origin;
   final bool isList;

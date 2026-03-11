@@ -5,9 +5,9 @@ class _Reactions extends ConsumerWidget {
     required String contactId,
     required chat.Message chatItem,
     required int index,
-  })  : _contactId = contactId,
-        _chatItem = chatItem,
-        _index = index;
+  }) : _contactId = contactId,
+       _chatItem = chatItem,
+       _index = index;
 
   final String _contactId;
   final chat.Message _chatItem;

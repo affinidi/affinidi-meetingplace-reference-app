@@ -4,17 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 
 class DeleteMediatorDialog extends ConsumerWidget {
-  const DeleteMediatorDialog({
-    super.key,
-    required this.name,
-  });
+  const DeleteMediatorDialog({super.key, required this.name});
 
   final String name;
 
-  static Future<bool?> show(
-    BuildContext context, {
-    required String name,
-  }) {
+  static Future<bool?> show(BuildContext context, {required String name}) {
     return showDialog<bool>(
       context: context,
       builder: (ctx) => DeleteMediatorDialog(name: name),

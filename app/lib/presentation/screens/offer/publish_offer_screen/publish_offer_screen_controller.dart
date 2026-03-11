@@ -32,8 +32,9 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
   late final headlineController = TextEditingController();
   late final descriptionController = TextEditingController();
   late final customPhraseController = TextEditingController();
-  late final publishOfferLoadingController =
-      AsyncLoadingController.provider('publishOfferLoadingController');
+  late final publishOfferLoadingController = AsyncLoadingController.provider(
+    'publishOfferLoadingController',
+  );
 
   late final _debouncer = Debouncer();
   late final scrollController = ScrollController();
@@ -65,16 +66,18 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
       fireImmediately: true,
     );
 
-    final selectedMediatorDid =
-        ref.read(settingsServiceProvider).selectedMediatorDid;
+    final selectedMediatorDid = ref
+        .read(settingsServiceProvider)
+        .selectedMediatorDid;
 
     ref.listen(
       mediatorServiceProvider.select((state) => state.mediators),
       (previous, next) {
         if (next != previous) {
           Future.microtask(() {
-            final activeMediators =
-                ref.read(mediatorServiceProvider.filteredMediators);
+            final activeMediators = ref.read(
+              mediatorServiceProvider.filteredMediators,
+            );
             final selectedMediatorName = activeMediators
                 .firstWhereOrNull(
                   (mediator) => mediator.mediatorDid == selectedMediatorDid,
@@ -123,8 +126,9 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
       _debouncer.cancel();
     });
 
-    final selectedIdentity =
-        ref.read(identitiesServiceProvider.currentIdentityOrPrimary);
+    final selectedIdentity = ref.read(
+      identitiesServiceProvider.currentIdentityOrPrimary,
+    );
 
     return PublishOfferScreenState(
       formData: initialFormData,
@@ -156,7 +160,8 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
   }
 
   void loadIdentity(String identityId) {
-    final identity = ref
+    final identity =
+        ref
             .read(identitiesServiceProvider)
             .identities
             .where((i) => i.id == identityId)
@@ -164,15 +169,15 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
         state.selectedIdentity;
 
     if (identity != null) {
-      state = state.copyWith(
-        selectedIdentity: identity,
-      );
+      state = state.copyWith(selectedIdentity: identity);
 
       _prefill(
-        connectMessage:
-            l10n.connectWithFirstName(state.selectedIdentity!.card.firstName),
-        chatGroupName:
-            l10n.firstNameChatGroup(state.selectedIdentity!.card.firstName),
+        connectMessage: l10n.connectWithFirstName(
+          state.selectedIdentity!.card.firstName,
+        ),
+        chatGroupName: l10n.firstNameChatGroup(
+          state.selectedIdentity!.card.firstName,
+        ),
         defaultDescription: l10n.passphraseDescription,
       );
     }
@@ -191,9 +196,7 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
     headlineController.text = updatedFormData.headline;
     descriptionController.text = updatedFormData.description;
 
-    state = state.copyWith(
-      formData: updatedFormData,
-    );
+    state = state.copyWith(formData: updatedFormData);
   }
 
   void _updateHeadline({
@@ -209,9 +212,7 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
 
       final updatedFormData = formData.copyWith(headline: headline);
 
-      state = state.copyWith(
-        formData: updatedFormData,
-      );
+      state = state.copyWith(formData: updatedFormData);
     } else {
       state = state.copyWith(formData: formData);
     }
@@ -331,12 +332,12 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
       }
 
       // Reset expiryDate to null if not set
-      final updatedFormData =
-          formData.hasExpiry ? formData : formData.copyWith(expiryDate: null);
-      await ref.read(connectionsServiceProvider.notifier).publishOffer(
-            updatedFormData,
-            identity: selectedIdentity,
-          );
+      final updatedFormData = formData.hasExpiry
+          ? formData
+          : formData.copyWith(expiryDate: null);
+      await ref
+          .read(connectionsServiceProvider.notifier)
+          .publishOffer(updatedFormData, identity: selectedIdentity);
     });
   }
 
@@ -382,17 +383,17 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
         await validateOfferPhrase(phrase);
       } else {
         state = state.copyWith(
-          formData: state.formData
-              .copyWith(isPhraseAvailable: null, isPhraseValidating: false),
+          formData: state.formData.copyWith(
+            isPhraseAvailable: null,
+            isPhraseValidating: false,
+          ),
         );
       }
     });
   }
 
   void selectIdentity(Identity identity) {
-    state = state.copyWith(
-      selectedIdentity: identity,
-    );
+    state = state.copyWith(selectedIdentity: identity);
 
     _updateHeadline(
       connectMessage: l10n.connectWithFirstName(identity.card.firstName),

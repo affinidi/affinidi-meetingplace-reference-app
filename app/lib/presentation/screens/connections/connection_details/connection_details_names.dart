@@ -10,9 +10,7 @@ class _Names extends ConsumerWidget {
     final provider = connectionDetailsScreenControllerProvider(contactId);
     final otherPartyDisplayName = ref.watch(provider.otherPartyDisplayName);
     final myDisplayName = ref.watch(
-      provider.select(
-        (state) => state.identity?.card.firstName ?? '',
-      ),
+      provider.select((state) => state.identity?.card.firstName ?? ''),
     );
 
     if (otherPartyDisplayName.isEmpty && myDisplayName.isEmpty) {

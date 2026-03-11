@@ -13,14 +13,14 @@ String _$mediaReviewControllerHash() =>
 @ProviderFor(MediaReviewController)
 final mediaReviewControllerProvider =
     AutoDisposeNotifierProvider<MediaReviewController, void>.internal(
-  MediaReviewController.new,
-  name: r'mediaReviewControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$mediaReviewControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      MediaReviewController.new,
+      name: r'mediaReviewControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$mediaReviewControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$MediaReviewController = AutoDisposeNotifier<void>;
 // ignore_for_file: type=lint

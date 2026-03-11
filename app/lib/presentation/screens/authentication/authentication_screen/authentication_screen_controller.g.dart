@@ -11,18 +11,21 @@ String _$authenticationScreenControllerHash() =>
 
 /// See also [AuthenticationScreenController].
 @ProviderFor(AuthenticationScreenController)
-final authenticationScreenControllerProvider = AutoDisposeNotifierProvider<
-    AuthenticationScreenController, AuthenticationScreenState>.internal(
-  AuthenticationScreenController.new,
-  name: r'authenticationScreenControllerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$authenticationScreenControllerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final authenticationScreenControllerProvider =
+    AutoDisposeNotifierProvider<
+      AuthenticationScreenController,
+      AuthenticationScreenState
+    >.internal(
+      AuthenticationScreenController.new,
+      name: r'authenticationScreenControllerProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$authenticationScreenControllerHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
-typedef _$AuthenticationScreenController
-    = AutoDisposeNotifier<AuthenticationScreenState>;
+typedef _$AuthenticationScreenController =
+    AutoDisposeNotifier<AuthenticationScreenState>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

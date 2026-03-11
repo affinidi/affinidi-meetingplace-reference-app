@@ -7,8 +7,10 @@ class _PhraseValidationIcon extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider =
-        publishOfferScreenControllerProvider(_identityId, context.l10n);
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
 
     final isPhraseAvailable = ref.watch(
       provider.select((state) => state.formData.isPhraseAvailable),
@@ -46,11 +48,7 @@ class _PhraseValidationIcon extends ConsumerWidget {
     }
 
     if (isPhraseAvailable == false) {
-      return Icon(
-        Icons.cancel,
-        color: context.colorScheme.error,
-        size: 20,
-      );
+      return Icon(Icons.cancel, color: context.colorScheme.error, size: 20);
     }
 
     return const SizedBox.shrink();

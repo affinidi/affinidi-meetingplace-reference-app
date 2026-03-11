@@ -17,7 +17,6 @@ enum _Key {
   databasePassphrase,
   pushNotificationToken,
   showMeetingPlaceQr,
-  ;
 }
 
 /// Secure storage wrapper implementing [KeyRepository] and [KeyStore].
@@ -37,16 +36,15 @@ class SecureStorage implements KeyRepository, KeyStore {
   /// [secureStorage] - Custom [FlutterSecureStorage] instance.
   /// If null, uses platform-configured defaults.
   SecureStorage([FlutterSecureStorage? secureStorage])
-      : _secureStorage = secureStorage ??
-            const FlutterSecureStorage(
-              aOptions: AndroidOptions(
-                encryptedSharedPreferences: true,
-              ),
-              iOptions: IOSOptions(
-                accessibility: KeychainAccessibility.unlocked_this_device,
-                synchronizable: false,
-              ),
-            );
+    : _secureStorage =
+          secureStorage ??
+          const FlutterSecureStorage(
+            aOptions: AndroidOptions(encryptedSharedPreferences: true),
+            iOptions: IOSOptions(
+              accessibility: KeychainAccessibility.unlocked_this_device,
+              synchronizable: false,
+            ),
+          );
 
   Future<String>? _passphraseFuture;
 
@@ -179,8 +177,9 @@ class SecureStorage implements KeyRepository, KeyStore {
 
   /// Loads existing passphrase or creates a new 32-byte random one.
   Future<String> _loadOrCreatePassphrase() async {
-    var passphrase =
-        await _secureStorage.read(key: _Key.databasePassphrase.name);
+    var passphrase = await _secureStorage.read(
+      key: _Key.databasePassphrase.name,
+    );
     if (passphrase?.isNotEmpty == true) return passphrase!;
 
     passphrase = _generateRandomPassphrase();
@@ -288,24 +287,18 @@ class SecureStorage implements KeyRepository, KeyStore {
 /// On fresh installs (detected via SharedPreferences), clears any existing
 /// keychain data to ensure a clean state. Marks the app as installed to
 /// prevent future clearing.
-final secureStorageProvider = FutureProvider<SecureStorage>(
-  (ref) async {
-    final storage = SecureStorage();
-    const logKey = 'secureStorageProvider';
+final secureStorageProvider = FutureProvider<SecureStorage>((ref) async {
+  final storage = SecureStorage();
+  const logKey = 'secureStorageProvider';
 
-    final prefs = ref.read(sharedPreferencesProvider);
-    if (prefs.getBool(SharedPreferencesKeys.alreadyInstalled.name) != true) {
-      final logger = ref.read(appLoggerProvider);
-      logger.info(
-        'Fresh install: clearing Keychain',
-        name: logKey,
-      );
+  final prefs = ref.read(sharedPreferencesProvider);
+  if (prefs.getBool(SharedPreferencesKeys.alreadyInstalled.name) != true) {
+    final logger = ref.read(appLoggerProvider);
+    logger.info('Fresh install: clearing Keychain', name: logKey);
 
-      await storage.clear();
-      await prefs.setBool(SharedPreferencesKeys.alreadyInstalled.name, true);
-    }
+    await storage.clear();
+    await prefs.setBool(SharedPreferencesKeys.alreadyInstalled.name, true);
+  }
 
-    return storage;
-  },
-  name: 'secureStorageProvider',
-);
+  return storage;
+}, name: 'secureStorageProvider');

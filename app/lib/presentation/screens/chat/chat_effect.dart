@@ -8,8 +8,9 @@ class ChatEffect extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final currentScreenEffect =
-        ref.watch(provider.select((state) => state.effect));
+    final currentScreenEffect = ref.watch(
+      provider.select((state) => state.effect),
+    );
 
     if (currentScreenEffect == null) {
       return const SizedBox.shrink();
@@ -23,10 +24,7 @@ class ChatEffect extends ConsumerWidget {
 }
 
 class _ScreenEffectOverlay extends StatefulWidget {
-  const _ScreenEffectOverlay({
-    required this.effect,
-    this.onComplete,
-  });
+  const _ScreenEffectOverlay({required this.effect, this.onComplete});
 
   final ScreenEffect effect;
   final VoidCallback? onComplete;

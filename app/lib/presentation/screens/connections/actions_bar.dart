@@ -11,16 +11,20 @@ class _ActionsBar extends ConsumerWidget {
     final isEditMode = ref.watch(
       connectionsScreenControllerProvider.select((state) => state.isEditMode),
     );
-    final hasConnections =
-        ref.watch(connectionsScreenControllerProvider.hasConnections);
-    final hasIdentity =
-        ref.watch(connectionsScreenControllerProvider.hasIdentity);
+    final hasConnections = ref.watch(
+      connectionsScreenControllerProvider.hasConnections,
+    );
+    final hasIdentity = ref.watch(
+      connectionsScreenControllerProvider.hasIdentity,
+    );
 
-    final hasAnySelectedConnections = ref
-        .watch(connectionsScreenControllerProvider.hasAnySelectedConnections);
+    final hasAnySelectedConnections = ref.watch(
+      connectionsScreenControllerProvider.hasAnySelectedConnections,
+    );
     final selectedConnections = ref.watch(
-      connectionsScreenControllerProvider
-          .select((state) => state.selectedConnections),
+      connectionsScreenControllerProvider.select(
+        (state) => state.selectedConnections,
+      ),
     );
 
     return Row(

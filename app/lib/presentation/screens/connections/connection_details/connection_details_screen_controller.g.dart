@@ -7,7 +7,7 @@ part of 'connection_details_screen_controller.dart';
 // **************************************************************************
 
 String _$connectionDetailsScreenControllerHash() =>
-    r'3daeaf2aac89936233b856e624e8985fc432b439';
+    r'14c8fa6c54285a23601467aee887353521ce3386';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -34,9 +34,7 @@ abstract class _$ConnectionDetailsScreenController
     extends BuildlessAutoDisposeNotifier<ConnectionDetailsScreenState> {
   late final String contactId;
 
-  ConnectionDetailsScreenState build(
-    String contactId,
-  );
+  ConnectionDetailsScreenState build(String contactId);
 }
 
 /// See also [ConnectionDetailsScreenController].
@@ -51,21 +49,15 @@ class ConnectionDetailsScreenControllerFamily
   const ConnectionDetailsScreenControllerFamily();
 
   /// See also [ConnectionDetailsScreenController].
-  ConnectionDetailsScreenControllerProvider call(
-    String contactId,
-  ) {
-    return ConnectionDetailsScreenControllerProvider(
-      contactId,
-    );
+  ConnectionDetailsScreenControllerProvider call(String contactId) {
+    return ConnectionDetailsScreenControllerProvider(contactId);
   }
 
   @override
   ConnectionDetailsScreenControllerProvider getProviderOverride(
     covariant ConnectionDetailsScreenControllerProvider provider,
   ) {
-    return call(
-      provider.contactId,
-    );
+    return call(provider.contactId);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -85,24 +77,25 @@ class ConnectionDetailsScreenControllerFamily
 
 /// See also [ConnectionDetailsScreenController].
 class ConnectionDetailsScreenControllerProvider
-    extends AutoDisposeNotifierProviderImpl<ConnectionDetailsScreenController,
-        ConnectionDetailsScreenState> {
+    extends
+        AutoDisposeNotifierProviderImpl<
+          ConnectionDetailsScreenController,
+          ConnectionDetailsScreenState
+        > {
   /// See also [ConnectionDetailsScreenController].
-  ConnectionDetailsScreenControllerProvider(
-    String contactId,
-  ) : this._internal(
-          () => ConnectionDetailsScreenController()..contactId = contactId,
-          from: connectionDetailsScreenControllerProvider,
-          name: r'connectionDetailsScreenControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$connectionDetailsScreenControllerHash,
-          dependencies: ConnectionDetailsScreenControllerFamily._dependencies,
-          allTransitiveDependencies: ConnectionDetailsScreenControllerFamily
-              ._allTransitiveDependencies,
-          contactId: contactId,
-        );
+  ConnectionDetailsScreenControllerProvider(String contactId)
+    : this._internal(
+        () => ConnectionDetailsScreenController()..contactId = contactId,
+        from: connectionDetailsScreenControllerProvider,
+        name: r'connectionDetailsScreenControllerProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$connectionDetailsScreenControllerHash,
+        dependencies: ConnectionDetailsScreenControllerFamily._dependencies,
+        allTransitiveDependencies:
+            ConnectionDetailsScreenControllerFamily._allTransitiveDependencies,
+        contactId: contactId,
+      );
 
   ConnectionDetailsScreenControllerProvider._internal(
     super._createNotifier, {
@@ -120,9 +113,7 @@ class ConnectionDetailsScreenControllerProvider
   ConnectionDetailsScreenState runNotifierBuild(
     covariant ConnectionDetailsScreenController notifier,
   ) {
-    return notifier.build(
-      contactId,
-    );
+    return notifier.build(contactId);
   }
 
   @override
@@ -142,8 +133,11 @@ class ConnectionDetailsScreenControllerProvider
   }
 
   @override
-  AutoDisposeNotifierProviderElement<ConnectionDetailsScreenController,
-      ConnectionDetailsScreenState> createElement() {
+  AutoDisposeNotifierProviderElement<
+    ConnectionDetailsScreenController,
+    ConnectionDetailsScreenState
+  >
+  createElement() {
     return _ConnectionDetailsScreenControllerProviderElement(this);
   }
 
@@ -171,8 +165,11 @@ mixin ConnectionDetailsScreenControllerRef
 }
 
 class _ConnectionDetailsScreenControllerProviderElement
-    extends AutoDisposeNotifierProviderElement<
-        ConnectionDetailsScreenController, ConnectionDetailsScreenState>
+    extends
+        AutoDisposeNotifierProviderElement<
+          ConnectionDetailsScreenController,
+          ConnectionDetailsScreenState
+        >
     with ConnectionDetailsScreenControllerRef {
   _ConnectionDetailsScreenControllerProviderElement(super.provider);
 
@@ -180,5 +177,6 @@ class _ConnectionDetailsScreenControllerProviderElement
   String get contactId =>
       (origin as ConnectionDetailsScreenControllerProvider).contactId;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

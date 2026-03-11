@@ -43,50 +43,52 @@ void main() {
     group('and scan a QR code', () {
       group('and QR code is valid', () {
         testWidgets(
-            'should call acceptOobFlow with correct params when QR is detected',
-            (tester) async {
-          final fakeSdk = FakeMeetingPlaceSDK();
-          final testQrUrl = 'https://example.com/oob?_oob=test-token';
+          'should call acceptOobFlow with correct params when QR is detected',
+          (tester) async {
+            final fakeSdk = FakeMeetingPlaceSDK();
+            final testQrUrl = 'https://example.com/oob?_oob=test-token';
 
-          await navigateToLocation(
-            tester,
-            location,
-            identities: [testIdentity],
-            meetingPlaceCoreSDK: fakeSdk,
-            mockCameras: _mockCameras,
-          );
-          await tester.pumpAndSettle();
+            await navigateToLocation(
+              tester,
+              location,
+              identities: [testIdentity],
+              meetingPlaceCoreSDK: fakeSdk,
+              mockCameras: _mockCameras,
+            );
+            await tester.pumpAndSettle();
 
-          final qrCodePicker = find.byType(QrCodePicker);
-          expect(qrCodePicker, findsOneWidget);
+            final qrCodePicker = find.byType(QrCodePicker);
+            expect(qrCodePicker, findsOneWidget);
 
-          final pickerWidget = tester.widget<QrCodePicker>(qrCodePicker);
+            final pickerWidget = tester.widget<QrCodePicker>(qrCodePicker);
 
-          pickerWidget.onDetectCode!(testQrUrl);
-          await tester.pump();
+            pickerWidget.onDetectCode!(testQrUrl);
+            await tester.pump();
 
-          expect(fakeSdk.acceptOobFlowCalls.length, equals(1));
-          expect(
-            fakeSdk.acceptOobFlowCalls.first['offerLink'],
-            equals(testQrUrl),
-          );
-          expect(fakeSdk.acceptOobFlowCalls.first['contactCard'], isNotNull);
+            expect(fakeSdk.acceptOobFlowCalls.length, equals(1));
+            expect(
+              fakeSdk.acceptOobFlowCalls.first['offerLink'],
+              equals(testQrUrl),
+            );
+            expect(fakeSdk.acceptOobFlowCalls.first['contactCard'], isNotNull);
 
-          final channel =
-              fakeSdk.acceptOobFlowCalls.first['channel'] as Channel;
-          fakeSdk.simulateOobAcceptConnectionEstablished(channel);
-          await tester.pumpAndSettle();
+            final channel =
+                fakeSdk.acceptOobFlowCalls.first['channel'] as Channel;
+            fakeSdk.simulateOobAcceptConnectionEstablished(channel);
+            await tester.pumpAndSettle();
 
-          expect(
-            find.byKey(const Key('oob_scan_qr_screen_scaffold')),
-            findsNothing,
-          );
-        });
+            expect(
+              find.byKey(const Key('oob_scan_qr_screen_scaffold')),
+              findsNothing,
+            );
+          },
+        );
       });
 
       group('and QR code is not a url', () {
-        testWidgets('should show invalid QR-Code error message',
-            (tester) async {
+        testWidgets('should show invalid QR-Code error message', (
+          tester,
+        ) async {
           final fakeSdk = FakeMeetingPlaceSDK();
           final testQrUrl = '{"key": "This is not a url"}';
 
@@ -115,8 +117,9 @@ void main() {
       });
 
       group('and type is not supported', () {
-        testWidgets('should show type is not supported error message',
-            (tester) async {
+        testWidgets('should show type is not supported error message', (
+          tester,
+        ) async {
           final errorCode = 'oob_invalid_type';
           final fakeSdk = FakeMeetingPlaceSDK(
             acceptOobFlowException: MeetingPlaceCoreSDKException(
@@ -144,10 +147,7 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(
-            find.text(l10n.error(errorCode)),
-            findsOneWidget,
-          );
+          expect(find.text(l10n.error(errorCode)), findsOneWidget);
         });
       });
 
@@ -180,16 +180,14 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(
-            find.text(l10n.error(errorCode)),
-            findsOneWidget,
-          );
+          expect(find.text(l10n.error(errorCode)), findsOneWidget);
         });
       });
 
       group('and data is not valid', () {
-        testWidgets('should show invalid QR-Code error message',
-            (tester) async {
+        testWidgets('should show invalid QR-Code error message', (
+          tester,
+        ) async {
           final errorCode = 'oob_invalid_data';
           final fakeSdk = FakeMeetingPlaceSDK(
             acceptOobFlowException: MeetingPlaceCoreSDKException(
@@ -217,16 +215,14 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(
-            find.text(l10n.error(errorCode)),
-            findsOneWidget,
-          );
+          expect(find.text(l10n.error(errorCode)), findsOneWidget);
         });
       });
 
       group('and data is not found', () {
-        testWidgets('should show not found QR-Code error message',
-            (tester) async {
+        testWidgets('should show not found QR-Code error message', (
+          tester,
+        ) async {
           final errorCode = 'oob_not_found';
           final fakeSdk = FakeMeetingPlaceSDK(
             acceptOobFlowException: MeetingPlaceCoreSDKException(
@@ -254,10 +250,7 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(
-            find.text(l10n.error(errorCode)),
-            findsOneWidget,
-          );
+          expect(find.text(l10n.error(errorCode)), findsOneWidget);
         });
       });
 
@@ -290,15 +283,13 @@ void main() {
           pickerWidget.onDetectCode!(testQrUrl);
           await tester.pumpAndSettle();
           final l10n = await getL10n();
-          expect(
-            find.text(l10n.error(errorCode)),
-            findsOneWidget,
-          );
+          expect(find.text(l10n.error(errorCode)), findsOneWidget);
         });
 
         group('and connection times out', () {
-          testWidgets('should show timeout error message and stay on screen',
-              (tester) async {
+          testWidgets('should show timeout error message and stay on screen', (
+            tester,
+          ) async {
             final fakeSdk = FakeMeetingPlaceSDK(shouldTimeout: true);
             final testQrUrl = 'https://example.com/oob?_oob=test-token';
 
@@ -328,75 +319,80 @@ void main() {
 
         group('and scanning multiple QR codes in sequence', () {
           testWidgets(
-              '''should dispose previous subscription before accepting new QR code''',
-              (tester) async {
-            final fakeSdk = FakeMeetingPlaceSDK(shouldTimeout: true);
-            final firstQrUrl = 'https://example.com/oob?_oob=first-token';
-            final secondQrUrl = 'https://example.com/oob?_oob=second-token';
+            '''should dispose previous subscription before accepting new QR code''',
+            (tester) async {
+              final fakeSdk = FakeMeetingPlaceSDK(shouldTimeout: true);
+              final firstQrUrl = 'https://example.com/oob?_oob=first-token';
+              final secondQrUrl = 'https://example.com/oob?_oob=second-token';
 
-            await navigateToLocation(
-              tester,
-              location,
-              identities: [testIdentity],
-              meetingPlaceCoreSDK: fakeSdk,
-              mockCameras: _mockCameras,
-            );
-            await tester.pumpAndSettle();
+              await navigateToLocation(
+                tester,
+                location,
+                identities: [testIdentity],
+                meetingPlaceCoreSDK: fakeSdk,
+                mockCameras: _mockCameras,
+              );
+              await tester.pumpAndSettle();
 
-            final qrCodePicker = find.byType(QrCodePicker);
-            expect(qrCodePicker, findsOneWidget);
+              final qrCodePicker = find.byType(QrCodePicker);
+              expect(qrCodePicker, findsOneWidget);
 
-            final pickerWidget = tester.widget<QrCodePicker>(qrCodePicker);
+              final pickerWidget = tester.widget<QrCodePicker>(qrCodePicker);
 
-            // Scan first QR code
-            pickerWidget.onDetectCode!(firstQrUrl);
-            await tester.pumpAndSettle();
+              // Scan first QR code
+              pickerWidget.onDetectCode!(firstQrUrl);
+              await tester.pumpAndSettle();
 
-            expect(fakeSdk.acceptOobFlowCalls.length, equals(1));
-            expect(
-              fakeSdk.acceptOobFlowCalls.first['offerLink'],
-              equals(firstQrUrl),
-            );
+              expect(fakeSdk.acceptOobFlowCalls.length, equals(1));
+              expect(
+                fakeSdk.acceptOobFlowCalls.first['offerLink'],
+                equals(firstQrUrl),
+              );
 
-            // Scan second QR code
-            pickerWidget.onDetectCode!(secondQrUrl);
-            await tester.pumpAndSettle();
+              // Scan second QR code
+              pickerWidget.onDetectCode!(secondQrUrl);
+              await tester.pumpAndSettle();
 
-            // Should have called acceptOobFlow twice
-            expect(fakeSdk.acceptOobFlowCalls.length, equals(2));
-            expect(
-              fakeSdk.acceptOobFlowCalls.last['offerLink'],
-              equals(secondQrUrl),
-            );
+              // Should have called acceptOobFlow twice
+              expect(fakeSdk.acceptOobFlowCalls.length, equals(2));
+              expect(
+                fakeSdk.acceptOobFlowCalls.last['offerLink'],
+                equals(secondQrUrl),
+              );
 
-            // Should have disposed the first subscription
-            expect(fakeSdk.acceptOobStreamDisposals.length, equals(1));
-            expect(fakeSdk.acceptOobStreamDisposals.first, equals(firstQrUrl));
-          });
+              // Should have disposed the first subscription
+              expect(fakeSdk.acceptOobStreamDisposals.length, equals(1));
+              expect(
+                fakeSdk.acceptOobStreamDisposals.first,
+                equals(firstQrUrl),
+              );
+            },
+          );
         });
       });
 
       group('and OOB contact exists in contacts list', () {
         testWidgets(
-            'should show notification off badge icon instead of count badge',
-            (tester) async {
-          await navigateToLocation(
-            tester,
-            '/contacts',
-            isAuthenticated: true,
-            alreadyOnboarded: true,
-            identities: [testIdentity],
-            contacts: [FakeContacts.oobContact],
-          );
-          await tester.pumpAndSettle();
+          'should show notification off badge icon instead of count badge',
+          (tester) async {
+            await navigateToLocation(
+              tester,
+              '/contacts',
+              isAuthenticated: true,
+              alreadyOnboarded: true,
+              identities: [testIdentity],
+              contacts: [FakeContacts.oobContact],
+            );
+            await tester.pumpAndSettle();
 
-          expect(
-            find.byIcon(Icons.notifications_off_outlined),
-            findsOneWidget,
-          );
+            expect(
+              find.byIcon(Icons.notifications_off_outlined),
+              findsOneWidget,
+            );
 
-          expect(find.text('0'), findsNothing);
-        });
+            expect(find.text('0'), findsNothing);
+          },
+        );
       });
     });
   });

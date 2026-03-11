@@ -9,9 +9,9 @@ class FormCard extends StatelessWidget {
     required String title,
     required Widget child,
     Widget? trailing,
-  })  : _title = title,
-        _child = child,
-        _trailing = trailing;
+  }) : _title = title,
+       _child = child,
+       _trailing = trailing;
 
   final Widget _child;
   final String _title;
@@ -27,10 +27,7 @@ class FormCard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                _title,
-                style: context.textTheme.titleMedium,
-              ),
+              Text(_title, style: context.textTheme.titleMedium),
               if (_trailing != null) _trailing,
             ],
           ),

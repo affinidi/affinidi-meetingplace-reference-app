@@ -6,7 +6,7 @@ part of 'camera_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$cameraServiceHash() => r'9f07aaf0729c13960a19481b38a13dc173fac7ca';
+String _$cameraServiceHash() => r'daa9c3fe6186b55ae60f76d425361d26d21a8359';
 
 /// A service class for managing camera functionality in the app.
 ///
@@ -19,14 +19,14 @@ String _$cameraServiceHash() => r'9f07aaf0729c13960a19481b38a13dc173fac7ca';
 @ProviderFor(CameraService)
 final cameraServiceProvider =
     NotifierProvider<CameraService, CameraServiceState>.internal(
-  CameraService.new,
-  name: r'cameraServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$cameraServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      CameraService.new,
+      name: r'cameraServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$cameraServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$CameraService = Notifier<CameraServiceState>;
 // ignore_for_file: type=lint

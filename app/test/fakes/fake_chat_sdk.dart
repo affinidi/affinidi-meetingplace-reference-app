@@ -41,20 +41,14 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     final plainTextMessage = PlainTextMessage(
       id: message.messageId,
       type: Uri.parse('https://affinidi.com/chat/1.0/message'),
-      body: {
-        'text': text,
-        'timestamp': message.dateCreated.toIso8601String(),
-      },
+      body: {'text': text, 'timestamp': message.dateCreated.toIso8601String()},
       from: 'fake-sender-did',
       to: [recipientDid],
       createdTime: message.dateCreated,
     );
 
     _streamController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: message,
-      ),
+      StreamData(plainTextMessage: plainTextMessage, chatItem: message),
     );
   }
 
@@ -77,9 +71,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
           'did': 'did:key:identity-id',
           'type': ContactCardType.individual.value,
           'contactInfo': {
-            'n': {
-              'given': memberName,
-            },
+            'n': {'given': memberName},
           },
         },
       },
@@ -168,9 +160,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
           'did': 'did:key:identity-id',
           'type': ContactCardType.individual.value,
           'contactInfo': {
-            'n': {
-              'given': memberName,
-            },
+            'n': {'given': memberName},
           },
         },
       },
@@ -190,10 +180,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     );
 
     _streamController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: eventMessage,
-      ),
+      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
     );
 
     return eventMessage;
@@ -220,9 +207,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
           'did': 'did:key:identity-id',
           'type': ContactCardType.individual.value,
           'contactInfo': {
-            'n': {
-              'given': memberName,
-            },
+            'n': {'given': memberName},
           },
         },
       },
@@ -242,10 +227,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     );
 
     _streamController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: eventMessage,
-      ),
+      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
     );
 
     return eventMessage;
@@ -280,10 +262,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     );
 
     _streamController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: eventMessage,
-      ),
+      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
     );
 
     return eventMessage;
@@ -302,10 +281,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     Message message, {
     required String reaction,
   }) async {
-    reactOnMessageCalls.add({
-      'message': message,
-      'reaction': reaction,
-    });
+    reactOnMessageCalls.add({'message': message, 'reaction': reaction});
   }
 
   @override
@@ -315,16 +291,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
-    sendContactDetailsUpdateCalls.add({
-      'message': message,
-    });
+    sendContactDetailsUpdateCalls.add({'message': message});
   }
 
   @override
   Future<void> rejectChatContactDetailsUpdate(ConciergeMessage message) async {
-    cancelUpdatingContactDetailsCalls.add({
-      'message': message,
-    });
+    cancelUpdatingContactDetailsCalls.add({'message': message});
   }
 
   @override
@@ -334,16 +306,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   @override
   Future<void> approveConnectionRequest(ConciergeMessage message) async {
-    approveConnectionRequestCalls.add({
-      'message': message,
-    });
+    approveConnectionRequestCalls.add({'message': message});
   }
 
   @override
   Future<void> rejectConnectionRequest(ConciergeMessage message) async {
-    rejectConnectionRequestCalls.add({
-      'message': message,
-    });
+    rejectConnectionRequestCalls.add({'message': message});
   }
 
   @override
@@ -352,10 +320,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     List<Attachment>? attachments,
   }) async {
     // Track the call
-    sendTextMessageCalls.add({
-      'text': text,
-      'attachments': attachments,
-    });
+    sendTextMessageCalls.add({'text': text, 'attachments': attachments});
 
     final message = Message(
       chatId: 'fake-chat-id',
@@ -396,16 +361,16 @@ class FakeChat implements Chat {
 
   @override
   List<ChatItem> get messages => [
-        ChatItem(
-          chatId: 'chatId',
-          messageId: 'messageId',
-          senderDid: 'senderDid',
-          isFromMe: true,
-          dateCreated: DateTime.now(),
-          status: ChatItemStatus.confirmed,
-          type: ChatItemType.message,
-        ),
-      ];
+    ChatItem(
+      chatId: 'chatId',
+      messageId: 'messageId',
+      senderDid: 'senderDid',
+      isFromMe: true,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      type: ChatItemType.message,
+    ),
+  ];
 
   @override
   dynamic noSuchMethod(Invocation invocation) {

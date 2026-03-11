@@ -13,14 +13,14 @@ String _$mediatorsRepositoryHash() =>
 @ProviderFor(mediatorsRepository)
 final mediatorsRepositoryProvider =
     FutureProvider<MediatorsRepository>.internal(
-  mediatorsRepository,
-  name: r'mediatorsRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$mediatorsRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      mediatorsRepository,
+      name: r'mediatorsRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$mediatorsRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element

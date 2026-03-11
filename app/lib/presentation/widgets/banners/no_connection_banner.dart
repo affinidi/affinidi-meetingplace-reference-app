@@ -31,8 +31,9 @@ class NoConnectionBanner extends ConsumerWidget {
     }
 
     final hasFailedToRegisterDeviceToken = ref.watch(
-      controlPlaneServiceProvider
-          .select((state) => state.isDeviceTokenRegistered == false),
+      controlPlaneServiceProvider.select(
+        (state) => state.isDeviceTokenRegistered == false,
+      ),
     );
 
     // Show banner only when user is not connected to network

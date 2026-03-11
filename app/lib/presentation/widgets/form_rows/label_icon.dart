@@ -3,12 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 
 class LabelIcon extends StatelessWidget {
-  const LabelIcon({
-    super.key,
-    required this.label,
-    this.icon,
-    this.iconColor,
-  });
+  const LabelIcon({super.key, required this.label, this.icon, this.iconColor});
 
   final String label;
   final IconData? icon;
@@ -23,11 +18,7 @@ class LabelIcon extends StatelessWidget {
           width: 24,
           height: 24,
           color: iconColor,
-          child: Icon(
-            icon,
-            size: 16,
-            color: context.colorScheme.onPrimary,
-          ),
+          child: Icon(icon, size: 16, color: context.colorScheme.onPrimary),
         ),
       );
     } else {

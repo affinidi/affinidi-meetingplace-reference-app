@@ -12,10 +12,7 @@ class CompressedImage {
     required this.base64,
     required this.bytes,
   });
-  CompressedImage.empty()
-      : path = '',
-        bytes = Uint8List(0),
-        base64 = '';
+  CompressedImage.empty() : path = '', bytes = Uint8List(0), base64 = '';
   String path;
   String base64;
   Uint8List bytes;
@@ -44,8 +41,10 @@ Future<CompressedImage> compressAndResizeImageFromFileAsBase64({
   final compressedFile = XFile.fromData(
     Uint8List.fromList(compressedBytes),
     mimeType: 'image/jpeg',
-    name: image.name
-        .replaceFirst(RegExp(r'\.(jpg|jpeg|png)$'), '_compressed.jpg'),
+    name: image.name.replaceFirst(
+      RegExp(r'\.(jpg|jpeg|png)$'),
+      '_compressed.jpg',
+    ),
   );
 
   return CompressedImage(
@@ -73,7 +72,5 @@ Uint8List _compressAndResize({
 
   var resized = img.copyResize(image, width: width, height: height);
 
-  return Uint8List.fromList(
-    img.encodeJpg(resized, quality: qualityPercent),
-  );
+  return Uint8List.fromList(img.encodeJpg(resized, quality: qualityPercent));
 }

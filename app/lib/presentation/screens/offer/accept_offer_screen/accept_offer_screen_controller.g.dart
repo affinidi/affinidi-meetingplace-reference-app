@@ -7,7 +7,7 @@ part of 'accept_offer_screen_controller.dart';
 // **************************************************************************
 
 String _$acceptOfferScreenControllerHash() =>
-    r'90c9518d311761d7a04a4e2c4daa2767e40b013d';
+    r'190cfd5d51825ca24a494778f673b29bae5ea7a4';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -34,9 +34,7 @@ abstract class _$AcceptOfferScreenController
     extends BuildlessAutoDisposeNotifier<AcceptOfferScreenState> {
   late final String mnemonic;
 
-  AcceptOfferScreenState build(
-    String mnemonic,
-  );
+  AcceptOfferScreenState build(String mnemonic);
 }
 
 /// See also [AcceptOfferScreenController].
@@ -49,21 +47,15 @@ class AcceptOfferScreenControllerFamily extends Family<AcceptOfferScreenState> {
   const AcceptOfferScreenControllerFamily();
 
   /// See also [AcceptOfferScreenController].
-  AcceptOfferScreenControllerProvider call(
-    String mnemonic,
-  ) {
-    return AcceptOfferScreenControllerProvider(
-      mnemonic,
-    );
+  AcceptOfferScreenControllerProvider call(String mnemonic) {
+    return AcceptOfferScreenControllerProvider(mnemonic);
   }
 
   @override
   AcceptOfferScreenControllerProvider getProviderOverride(
     covariant AcceptOfferScreenControllerProvider provider,
   ) {
-    return call(
-      provider.mnemonic,
-    );
+    return call(provider.mnemonic);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -83,24 +75,25 @@ class AcceptOfferScreenControllerFamily extends Family<AcceptOfferScreenState> {
 
 /// See also [AcceptOfferScreenController].
 class AcceptOfferScreenControllerProvider
-    extends AutoDisposeNotifierProviderImpl<AcceptOfferScreenController,
-        AcceptOfferScreenState> {
+    extends
+        AutoDisposeNotifierProviderImpl<
+          AcceptOfferScreenController,
+          AcceptOfferScreenState
+        > {
   /// See also [AcceptOfferScreenController].
-  AcceptOfferScreenControllerProvider(
-    String mnemonic,
-  ) : this._internal(
-          () => AcceptOfferScreenController()..mnemonic = mnemonic,
-          from: acceptOfferScreenControllerProvider,
-          name: r'acceptOfferScreenControllerProvider',
-          debugGetCreateSourceHash:
-              const bool.fromEnvironment('dart.vm.product')
-                  ? null
-                  : _$acceptOfferScreenControllerHash,
-          dependencies: AcceptOfferScreenControllerFamily._dependencies,
-          allTransitiveDependencies:
-              AcceptOfferScreenControllerFamily._allTransitiveDependencies,
-          mnemonic: mnemonic,
-        );
+  AcceptOfferScreenControllerProvider(String mnemonic)
+    : this._internal(
+        () => AcceptOfferScreenController()..mnemonic = mnemonic,
+        from: acceptOfferScreenControllerProvider,
+        name: r'acceptOfferScreenControllerProvider',
+        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+            ? null
+            : _$acceptOfferScreenControllerHash,
+        dependencies: AcceptOfferScreenControllerFamily._dependencies,
+        allTransitiveDependencies:
+            AcceptOfferScreenControllerFamily._allTransitiveDependencies,
+        mnemonic: mnemonic,
+      );
 
   AcceptOfferScreenControllerProvider._internal(
     super._createNotifier, {
@@ -118,9 +111,7 @@ class AcceptOfferScreenControllerProvider
   AcceptOfferScreenState runNotifierBuild(
     covariant AcceptOfferScreenController notifier,
   ) {
-    return notifier.build(
-      mnemonic,
-    );
+    return notifier.build(mnemonic);
   }
 
   @override
@@ -140,8 +131,11 @@ class AcceptOfferScreenControllerProvider
   }
 
   @override
-  AutoDisposeNotifierProviderElement<AcceptOfferScreenController,
-      AcceptOfferScreenState> createElement() {
+  AutoDisposeNotifierProviderElement<
+    AcceptOfferScreenController,
+    AcceptOfferScreenState
+  >
+  createElement() {
     return _AcceptOfferScreenControllerProviderElement(this);
   }
 
@@ -169,13 +163,18 @@ mixin AcceptOfferScreenControllerRef
 }
 
 class _AcceptOfferScreenControllerProviderElement
-    extends AutoDisposeNotifierProviderElement<AcceptOfferScreenController,
-        AcceptOfferScreenState> with AcceptOfferScreenControllerRef {
+    extends
+        AutoDisposeNotifierProviderElement<
+          AcceptOfferScreenController,
+          AcceptOfferScreenState
+        >
+    with AcceptOfferScreenControllerRef {
   _AcceptOfferScreenControllerProviderElement(super.provider);
 
   @override
   String get mnemonic =>
       (origin as AcceptOfferScreenControllerProvider).mnemonic;
 }
+
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

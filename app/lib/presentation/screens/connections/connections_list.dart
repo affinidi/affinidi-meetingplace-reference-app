@@ -3,14 +3,16 @@ part of 'connections_screen.dart';
 class _ConnectionsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final connections =
-        ref.watch(connectionsScreenControllerProvider.filteredConnections);
+    final connections = ref.watch(
+      connectionsScreenControllerProvider.filteredConnections,
+    );
     final l10n = context.l10n;
 
     void toggleSelection(ConnectionOffer connection, bool isSelected) {
       final controller = ref.read(connectionsScreenControllerProvider.notifier);
-      final selectedConnections =
-          ref.read(connectionsScreenControllerProvider).selectedConnections;
+      final selectedConnections = ref
+          .read(connectionsScreenControllerProvider)
+          .selectedConnections;
 
       if (isSelected) {
         controller.setSelectedConnections(
@@ -70,9 +72,7 @@ class _ConnectionsList extends ConsumerWidget {
     if (connections.isEmpty) {
       return SizedBox(
         height: context.mediaQuery.size.height * 0.5,
-        child: Center(
-          child: Text(l10n.noConnections),
-        ),
+        child: Center(child: Text(l10n.noConnections)),
       );
     }
 

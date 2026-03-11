@@ -7,7 +7,7 @@ part of 'authentication_service.dart';
 // **************************************************************************
 
 String _$authenticationServiceHash() =>
-    r'426a847f8e51d5a750682960ce41e55ee21f74af';
+    r'24fdca7b6c4ca87e55903090ddad6b62645c578a';
 
 /// Service responsible for managing authentication state and biometric flows.
 ///
@@ -22,14 +22,14 @@ String _$authenticationServiceHash() =>
 @ProviderFor(AuthenticationService)
 final authenticationServiceProvider =
     NotifierProvider<AuthenticationService, AuthenticationState>.internal(
-  AuthenticationService.new,
-  name: r'authenticationServiceProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$authenticationServiceHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      AuthenticationService.new,
+      name: r'authenticationServiceProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$authenticationServiceHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 typedef _$AuthenticationService = Notifier<AuthenticationState>;
 // ignore_for_file: type=lint

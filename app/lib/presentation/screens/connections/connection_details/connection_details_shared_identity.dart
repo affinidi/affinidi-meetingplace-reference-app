@@ -12,8 +12,9 @@ class _SharedIdentityPanel extends ConsumerWidget {
       provider.select((state) => state.channel?.publishOfferDid.toDidSha256),
     );
     final myDidSha256 = myDid?.toDidSha256;
-    final isDebugMode =
-        ref.watch(provider.select((state) => state.isDebugMode));
+    final isDebugMode = ref.watch(
+      provider.select((state) => state.isDebugMode),
+    );
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
 
@@ -47,8 +48,10 @@ class _SharedIdentityPanel extends ConsumerWidget {
                 const Divider(),
               ],
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 8.0,
+                ),
                 child: identity != null
                     ? IdentityCard(
                         identity: identity,

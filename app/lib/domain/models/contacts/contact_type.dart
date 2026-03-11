@@ -8,8 +8,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 enum ContactType {
   individual(1),
   group(2),
-  unknown(0),
-  ;
+  unknown(0);
 
   const ContactType(this.value);
   factory ContactType.from(ChannelType type) {

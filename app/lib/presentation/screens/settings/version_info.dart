@@ -27,10 +27,12 @@ class _VersionInfoSectionState extends ConsumerState<_VersionInfoSection> {
     final appVersion = appInfo?.version ?? '';
     final appVersionName = appInfo?.versionName ?? '';
     final buildNumber = appInfo?.buildNumber ?? '';
-    final numberOfTapsToUnlockDebug =
-        ref.watch(provider.select((state) => state.numberOfTapsToUnlockDebug));
-    final isDebugMode =
-        ref.watch(provider.select((state) => state.isDebugMode));
+    final numberOfTapsToUnlockDebug = ref.watch(
+      provider.select((state) => state.numberOfTapsToUnlockDebug),
+    );
+    final isDebugMode = ref.watch(
+      provider.select((state) => state.isDebugMode),
+    );
 
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;

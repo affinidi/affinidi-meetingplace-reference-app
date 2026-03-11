@@ -85,19 +85,19 @@ class ControlPlaneService extends _$ControlPlaneService
         .read(pushNotificationsHandlerProvider.notifier)
         .onReceivedDeviceToken
         .listen((token) {
-      Future(() => _registerDeviceToken(token));
-    });
+          Future(() => _registerDeviceToken(token));
+        });
 
     ref
         .read(pushNotificationsHandlerProvider.notifier)
         .onFailedToGetDeviceToken
         .listen((_) {
-      Future(() {
-        if (state.isDeviceTokenRegistered == null) {
-          state = state.copyWith(isDeviceTokenRegistered: false);
-        }
-      });
-    });
+          Future(() {
+            if (state.isDeviceTokenRegistered == null) {
+              state = state.copyWith(isDeviceTokenRegistered: false);
+            }
+          });
+        });
 
     ref.listen(
       networkConnectivityServiceProvider.select((state) => state.isConnected),
@@ -119,8 +119,8 @@ class ControlPlaneService extends _$ControlPlaneService
         .read(pushNotificationsHandlerProvider.notifier)
         .onPushNotificationReceived
         .listen((_) {
-      Future(_processEvents);
-    });
+          Future(_processEvents);
+        });
 
     ref.read(meetingPlaceSdkProvider.future).then((sdk) {
       if (_sdk != null) return;
@@ -164,10 +164,7 @@ class ControlPlaneService extends _$ControlPlaneService
 
       _lastAttemptedDeviceToken = token;
 
-      _logger.info(
-        'Device token received: $token',
-        name: _logKey,
-      );
+      _logger.info('Device token received: $token', name: _logKey);
 
       try {
         final sdk = await ref.read(meetingPlaceSdkProvider.future);
@@ -347,10 +344,10 @@ class _ControlPlaneEventsProcessor {
     required AppLogger logger,
     required VoidCallback onDidStart,
     required VoidCallback onDidEnd,
-  })  : _sdk = sdk,
-        _logger = logger,
-        _onDidStart = onDidStart,
-        _onDidEnd = onDidEnd;
+  }) : _sdk = sdk,
+       _logger = logger,
+       _onDidStart = onDidStart,
+       _onDidEnd = onDidEnd;
 
   static const _logKey = 'CTLPLNEVTPROC';
   final MeetingPlaceCoreSDK _sdk;
@@ -391,10 +388,7 @@ class _ControlPlaneEventsProcessor {
   /// event processing.
   Future<void> _runProcess() async {
     _isProcessing = true;
-    _logger.info(
-      'Processing events started ...',
-      name: _logKey,
-    );
+    _logger.info('Processing events started ...', name: _logKey);
     _onDidStart.call();
 
     do {
@@ -428,10 +422,7 @@ class _ControlPlaneEventsProcessor {
       }
       await completer.future;
     } while (_shouldRunAgain);
-    _logger.info(
-      'Processing ended.',
-      name: _logKey,
-    );
+    _logger.info('Processing ended.', name: _logKey);
     _isProcessing = false;
     _onDidEnd.call();
   }

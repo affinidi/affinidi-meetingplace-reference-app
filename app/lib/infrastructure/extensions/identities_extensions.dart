@@ -9,10 +9,7 @@ import 'contact_card_extensions.dart';
 /// colors, gradients, images, and identity-specific information.
 extension IdentityExtensions on Identity {
   /// Returns the card color for the identity.
-  Color getCardColor(
-    ColorScheme colorScheme, {
-    double intensity = 1.0,
-  }) {
+  Color getCardColor(ColorScheme colorScheme, {double intensity = 1.0}) {
     if (card.cardColor != null && card.cardColor!.isNotEmpty) {
       final colorValue = int.parse(card.cardColor!);
       final customColor = Color(colorValue);
@@ -62,10 +59,7 @@ extension IdentityExtensions on Identity {
     return LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [
-        getCardColor(colorScheme),
-        colorScheme.surface,
-      ],
+      colors: [getCardColor(colorScheme), colorScheme.surface],
     );
   }
 
@@ -73,18 +67,14 @@ extension IdentityExtensions on Identity {
   bool get isPlaceholder => id == placeholderIdentityId;
 
   /// Returns a display name for the identity.
-  String getDisplayName({
-    required AppLocalizations l10n,
-  }) {
+  String getDisplayName({required AppLocalizations l10n}) {
     if (isPrimary) return l10n.displayNamePrimary;
     if (isPlaceholder) return l10n.displayNameAddNew;
     return card.displayName.isNotEmpty == true ? card.displayName : '';
   }
 
   /// Returns a subtitle for the identity.
-  String getSubtitle({
-    required AppLocalizations l10n,
-  }) {
+  String getSubtitle({required AppLocalizations l10n}) {
     if (isPrimary) return l10n.subtitlePrimary;
     if (isPlaceholder) return l10n.subtitleAddNew;
     return l10n.subtitleAlias;

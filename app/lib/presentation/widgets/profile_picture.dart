@@ -36,10 +36,7 @@ class ProfilePicture extends StatelessWidget {
               )
             : null,
       ),
-      child: ProfileCircleAvatar(
-        radius: (size - border) / 2,
-        image: image,
-      ),
+      child: ProfileCircleAvatar(radius: (size - border) / 2, image: image),
     );
   }
 }

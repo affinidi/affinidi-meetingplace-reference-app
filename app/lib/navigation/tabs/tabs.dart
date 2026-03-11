@@ -6,8 +6,7 @@ enum Tabs {
   contacts(serviceKey: NotificationCounterType.contacts),
   connections(serviceKey: NotificationCounterType.connections),
   identities(serviceKey: NotificationCounterType.identities),
-  settings(serviceKey: NotificationCounterType.settings),
-  ;
+  settings(serviceKey: NotificationCounterType.settings);
 
   const Tabs({required this.serviceKey});
 
@@ -16,22 +15,13 @@ enum Tabs {
   Widget get icon {
     switch (this) {
       case Tabs.connections:
-        return const Icon(
-          Icons.compare_arrows,
-          size: 32,
-        );
+        return const Icon(Icons.compare_arrows, size: 32);
       case Tabs.contacts:
-        return const Icon(
-          Icons.chat,
-        );
+        return const Icon(Icons.chat);
       case Tabs.identities:
-        return const Icon(
-          Icons.fingerprint,
-        );
+        return const Icon(Icons.fingerprint);
       case Tabs.settings:
-        return const Icon(
-          Icons.settings,
-        );
+        return const Icon(Icons.settings);
     }
   }
 }

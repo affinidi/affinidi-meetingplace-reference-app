@@ -14,29 +14,26 @@ part 'camera_service.g.dart';
 
 final availableCamerasProvider =
     Provider<Future<List<CameraDescription>> Function()>(
-  (ref) => availableCameras,
-);
+      (ref) => availableCameras,
+    );
 
-typedef CameraControllerFactory = CameraController Function(
-  CameraDescription description,
-  ResolutionPreset resolutionPreset, {
-  bool enableAudio,
-  ImageFormatGroup? imageFormatGroup,
-});
+typedef CameraControllerFactory =
+    CameraController Function(
+      CameraDescription description,
+      ResolutionPreset resolutionPreset, {
+      bool enableAudio,
+      ImageFormatGroup? imageFormatGroup,
+    });
 
 final cameraControllerFactoryProvider = Provider<CameraControllerFactory>(
-  (ref) => (
-    description,
-    resolutionPreset, {
-    enableAudio = true,
-    imageFormatGroup,
-  }) =>
-      CameraController(
-        description,
-        resolutionPreset,
-        enableAudio: enableAudio,
-        imageFormatGroup: imageFormatGroup,
-      ),
+  (ref) =>
+      (description, resolutionPreset, {enableAudio = true, imageFormatGroup}) =>
+          CameraController(
+            description,
+            resolutionPreset,
+            enableAudio: enableAudio,
+            imageFormatGroup: imageFormatGroup,
+          ),
 );
 
 /// A service class for managing camera functionality in the app.
@@ -204,10 +201,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     CameraLensDirection direction = CameraLensDirection.back,
   }) async {
     if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
-      _logger.warning(
-        'Camera not available on this platform',
-        name: _logKey,
-      );
+      _logger.warning('Camera not available on this platform', name: _logKey);
       return false;
     }
 
@@ -219,13 +213,8 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     }
 
     if (!status.isGranted) {
-      _logger.warning(
-        'Camera permission not granted',
-        name: _logKey,
-      );
-      state = state.copyWith(
-        permissionGranted: false,
-      );
+      _logger.warning('Camera permission not granted', name: _logKey);
+      state = state.copyWith(permissionGranted: false);
       return false;
     }
 
@@ -250,33 +239,19 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   Future<void> checkCameraAvailability() async {
     // Camera plugin does not support macOS: assume camera is unavailable
     if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
-      _logger.warning(
-        'Camera not available on this platform',
-        name: _logKey,
-      );
-      state = state.copyWith(
-        isAvailable: false,
-      );
+      _logger.warning('Camera not available on this platform', name: _logKey);
+      state = state.copyWith(isAvailable: false);
       return;
     }
 
-    _logger.info(
-      'checkCameraAvailability',
-      name: _logKey,
-    );
+    _logger.info('checkCameraAvailability', name: _logKey);
 
     try {
       final getCameras = ref.read(availableCamerasProvider);
       final cameras = await getCameras();
-      state = state.copyWith(
-        isAvailable: cameras.isNotEmpty,
-        cameras: cameras,
-      );
+      state = state.copyWith(isAvailable: cameras.isNotEmpty, cameras: cameras);
 
-      _logger.info(
-        '${cameras.length} camera(s) found',
-        name: _logKey,
-      );
+      _logger.info('${cameras.length} camera(s) found', name: _logKey);
     } catch (error, stackTrace) {
       _logger.error(
         'Error while detecting cameras',
@@ -284,10 +259,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
         stackTrace: stackTrace,
         name: _logKey,
       );
-      state = state.copyWith(
-        isAvailable: false,
-        cameras: [],
-      );
+      state = state.copyWith(isAvailable: false, cameras: []);
     }
   }
 }

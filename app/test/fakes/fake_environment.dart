@@ -10,9 +10,9 @@ class FakeEnvironment implements Environment {
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
     Map<String, String> defaultMediators = const {},
-  })  : _defaultMediators = defaultMediators,
-        defaultMediatorDid =
-            defaultMediatorDid ?? FakeMediators.defaultMediator.mediatorDid;
+  }) : _defaultMediators = defaultMediators,
+       defaultMediatorDid =
+           defaultMediatorDid ?? FakeMediators.defaultMediator.mediatorDid;
 
   final Map<String, String> _defaultMediators;
   @override
@@ -58,16 +58,12 @@ class FakeEnvironment implements Environment {
   String get marketplaceQrPrefix => 'test-marketplace-qr';
 
   @override
-  ImageConfig get chatImageConfig => ImageConfig(
-        qualityPercentage: 80,
-        imageMaxSize: 800,
-      );
+  ImageConfig get chatImageConfig =>
+      ImageConfig(qualityPercentage: 80, imageMaxSize: 800);
 
   @override
-  ImageConfig get profileImageConfig => ImageConfig(
-        qualityPercentage: 80,
-        imageMaxSize: 100,
-      );
+  ImageConfig get profileImageConfig =>
+      ImageConfig(qualityPercentage: 80, imageMaxSize: 100);
 
   @override
   bool get isBiometricsEnabled => true;

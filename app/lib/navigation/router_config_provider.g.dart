@@ -19,8 +19,9 @@ String _$routerConfigHash() => r'5a9a9f5ba431282818b7fb4c59dc44e397958ee3';
 final routerConfigProvider = Provider<GoRouter>.internal(
   routerConfig,
   name: r'routerConfigProvider',
-  debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : _$routerConfigHash,
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$routerConfigHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );

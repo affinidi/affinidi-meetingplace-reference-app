@@ -29,7 +29,7 @@ Future<ContactsRepository> contactsRepositoryInMemoryDrift(Ref ref) async {
 
 class ContactsRepositoryDrift implements ContactsRepository {
   ContactsRepositoryDrift({required db.ContactsDatabase database})
-      : _database = database;
+    : _database = database;
 
   final db.ContactsDatabase _database;
 
@@ -40,7 +40,9 @@ class ContactsRepositoryDrift implements ContactsRepository {
     await _database.transaction(() async {
       final contactId = contact.id.isEmpty ? const Uuid().v4() : contact.id;
 
-      await _database.into(_database.contacts).insert(
+      await _database
+          .into(_database.contacts)
+          .insert(
             db.ContactsCompanion(
               id: Value(contactId),
               channelDid: Value(contact.channelDid),
@@ -58,13 +60,16 @@ class ContactsRepositoryDrift implements ContactsRepository {
               currentMessageSeqNo: Value(contact.currentMessageSeqNo),
               hasBeenOpened: Value(contact.hasBeenOpened),
               lastKeepAliveMessage: Value(contact.lastKeepAliveMessage),
-              notificationBannerDismissed:
-                  Value(contact.notificationBannerDismissed),
+              notificationBannerDismissed: Value(
+                contact.notificationBannerDismissed,
+              ),
             ),
           );
 
       final card = contact.card;
-      await _database.into(_database.contactCards).insert(
+      await _database
+          .into(_database.contactCards)
+          .insert(
             db.ContactCardsCompanion(
               contactId: Value(contactId),
               did: Value(card.did),
@@ -94,9 +99,9 @@ class ContactsRepositoryDrift implements ContactsRepository {
 
   Future<model.Contact?> _getContactById(String contactId) async {
     final results = await Future.wait([
-      (_database.select(_database.contacts)
-            ..where((filter) => filter.id.equals(contactId)))
-          .getSingleOrNull(),
+      (_database.select(
+        _database.contacts,
+      )..where((filter) => filter.id.equals(contactId))).getSingleOrNull(),
       (_database.select(_database.contactCards)
             ..where((filter) => filter.contactId.equals(contactId)))
           .getSingleOrNull(),
@@ -113,17 +118,14 @@ class ContactsRepositoryDrift implements ContactsRepository {
       );
     }
 
-    return _ContactMapper.fromDatabaseRecords(
-      contact,
-      contactCard,
-    );
+    return _ContactMapper.fromDatabaseRecords(contact, contactCard);
   }
 
   @override
   Future<void> deleteContact(model.Contact contact) async {
-    await (_database.delete(_database.contacts)
-          ..where((filter) => filter.id.equals(contact.id)))
-        .go();
+    await (_database.delete(
+      _database.contacts,
+    )..where((filter) => filter.id.equals(contact.id))).go();
   }
 
   @override
@@ -146,9 +148,9 @@ class ContactsRepositoryDrift implements ContactsRepository {
   @override
   Future<void> updateContact(model.Contact contact) async {
     await _database.transaction(() async {
-      await (_database.update(_database.contacts)
-            ..where((c) => c.id.equals(contact.id)))
-          .write(
+      await (_database.update(
+        _database.contacts,
+      )..where((c) => c.id.equals(contact.id))).write(
         db.ContactsCompanion(
           channelDid: Value(contact.channelDid),
           channelDidSha256: Value(contact.channelDidSha256),
@@ -165,15 +167,16 @@ class ContactsRepositoryDrift implements ContactsRepository {
           currentMessageSeqNo: Value(contact.currentMessageSeqNo),
           hasBeenOpened: Value(contact.hasBeenOpened),
           lastKeepAliveMessage: Value(contact.lastKeepAliveMessage),
-          notificationBannerDismissed:
-              Value(contact.notificationBannerDismissed),
+          notificationBannerDismissed: Value(
+            contact.notificationBannerDismissed,
+          ),
         ),
       );
 
       final card = contact.card;
-      await (_database.update(_database.contactCards)
-            ..where((c) => c.contactId.equals(contact.id)))
-          .write(
+      await (_database.update(
+        _database.contactCards,
+      )..where((c) => c.contactId.equals(contact.id))).write(
         db.ContactCardsCompanion(
           did: Value(card.did),
           type: Value(card.type),
@@ -199,14 +202,16 @@ class _ContactMapper {
       did: contactCard.did,
       type: contactCard.type,
       firstName: contactCard.firstName,
-      displayName: [contactCard.firstName, contactCard.lastName]
-          .where((s) => s.isNotEmpty)
-          .join(' '),
+      displayName: [
+        contactCard.firstName,
+        contactCard.lastName,
+      ].where((s) => s.isNotEmpty).join(' '),
       lastName: contactCard.lastName.isEmpty ? null : contactCard.lastName,
       email: contactCard.email.isEmpty ? null : contactCard.email,
       mobile: contactCard.mobile.isEmpty ? null : contactCard.mobile,
-      profilePic:
-          contactCard.profilePic.isEmpty ? null : contactCard.profilePic,
+      profilePic: contactCard.profilePic.isEmpty
+          ? null
+          : contactCard.profilePic,
       cardColor: contactCard.meetingplaceIdentityCardColor.isEmpty
           ? null
           : contactCard.meetingplaceIdentityCardColor,

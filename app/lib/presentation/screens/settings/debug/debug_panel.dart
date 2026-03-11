@@ -18,8 +18,10 @@ class DebugPanel extends HookConsumerWidget {
     final timeFormatter = DateFormat.Hms();
 
     for (final log in logs) {
-      buffer.writeln('[${timeFormatter.format(log.timestamp)}] '
-          '[${log.level}] ${log.loggerName} ${log.message}');
+      buffer.writeln(
+        '[${timeFormatter.format(log.timestamp)}] '
+        '[${log.level}] ${log.loggerName} ${log.message}',
+      );
     }
 
     Clipboard.setData(ClipboardData(text: buffer.toString()));
@@ -38,18 +40,15 @@ class DebugPanel extends HookConsumerWidget {
     final controller = ref.read(debugPanelControllerProvider.notifier);
     final l10n = context.l10n;
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          controller.initialize();
-        });
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        controller.initialize();
+      });
 
-        return null;
-      },
-      [],
-    );
+      return null;
+    }, []);
 
     return Scaffold(
       backgroundColor: context.colorScheme.surface,

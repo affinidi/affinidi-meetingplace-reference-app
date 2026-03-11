@@ -10,19 +10,17 @@ class _ContactsSearchField extends HookConsumerWidget {
     final text = useListenable(searchTextController).text;
     final colorScheme = context.colorScheme;
     final shouldShowFilter = ref.watch(
-      contactsScreenControllerProvider
-          .select((state) => state.shouldShowFilter),
+      contactsScreenControllerProvider.select(
+        (state) => state.shouldShowFilter,
+      ),
     );
 
-    useEffect(
-      () {
-        if (!shouldShowFilter) {
-          searchTextController.clear();
-        }
-        return null;
-      },
-      [shouldShowFilter],
-    );
+    useEffect(() {
+      if (!shouldShowFilter) {
+        searchTextController.clear();
+      }
+      return null;
+    }, [shouldShowFilter]);
 
     if (!shouldShowFilter) return const SizedBox.shrink();
 
@@ -31,10 +29,7 @@ class _ContactsSearchField extends HookConsumerWidget {
       child: Container(
         height: 35,
         decoration: BoxDecoration(
-          border: Border.all(
-            color: colorScheme.outline,
-            width: 0.8,
-          ),
+          border: Border.all(color: colorScheme.outline, width: 0.8),
           borderRadius: BorderRadius.circular(20.0),
           color: colorScheme.surface,
         ),
@@ -62,11 +57,7 @@ class _ContactsSearchField extends HookConsumerWidget {
             ),
             if (text.isNotEmpty)
               IconButton(
-                icon: Icon(
-                  Icons.clear,
-                  color: colorScheme.onSurface,
-                  size: 20,
-                ),
+                icon: Icon(Icons.clear, color: colorScheme.onSurface, size: 20),
                 onPressed: () {
                   searchTextController.clear();
                   controller.clearSearch();

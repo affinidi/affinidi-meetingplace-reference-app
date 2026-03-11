@@ -29,11 +29,7 @@ class FormRowToggle extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: LabelIcon(
-            icon: icon,
-            iconColor: iconColor,
-            label: label,
-          ),
+          leading: LabelIcon(icon: icon, iconColor: iconColor, label: label),
           title: Text(
             label,
             style: context.textTheme.bodyMedium?.copyWith(

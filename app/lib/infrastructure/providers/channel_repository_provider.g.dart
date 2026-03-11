@@ -12,14 +12,14 @@ String _$channelRepositoryHash() => r'af56608bd27c22c8d4bcd44f9e2a5fcce88451eb';
 @ProviderFor(channelRepository)
 final channelRepositoryProvider =
     FutureProvider<model.ChannelRepository>.internal(
-  channelRepository,
-  name: r'channelRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$channelRepositoryHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+      channelRepository,
+      name: r'channelRepositoryProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$channelRepositoryHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element

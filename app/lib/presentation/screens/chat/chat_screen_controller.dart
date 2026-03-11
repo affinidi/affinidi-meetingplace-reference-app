@@ -38,7 +38,6 @@ import 'chat_screen_state.dart';
 part 'chat_screen_controller.g.dart';
 
 @riverpod
-
 /// Controller class for managing the state and logic of the chat screen.
 ///
 /// Extends [_$ChatScreenController] to provide reactive state management
@@ -48,10 +47,12 @@ class ChatScreenController extends _$ChatScreenController
     with WidgetsBindingObserver {
   ChatScreenController() : super();
 
-  late final int _secondsToShowChatActivityIndicator =
-      ref.read(environmentProvider).chatActivityExpiresInSeconds;
-  late final int _chatPresenceIntervalInSeconds =
-      ref.read(environmentProvider).chatPresenceIntervalInSeconds;
+  late final int _secondsToShowChatActivityIndicator = ref
+      .read(environmentProvider)
+      .chatActivityExpiresInSeconds;
+  late final int _chatPresenceIntervalInSeconds = ref
+      .read(environmentProvider)
+      .chatPresenceIntervalInSeconds;
   // Maximum typing indicators to prevent UI overflow on small screens
   static const int _maxNumberOfTypingMembersVisible = 4;
   // Grace period to avoid blinking of presence indicator
@@ -71,10 +72,12 @@ class ChatScreenController extends _$ChatScreenController
   late final _chatResumingLock = Lock();
 
   late final Map<String, ProviderSubscription<void>>
-      _conciergeLoadingControllersSubscriptions = {};
-  late final Map<String,
-          AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>>
-      _conciergeLoadingControllers = {};
+  _conciergeLoadingControllersSubscriptions = {};
+  late final Map<
+    String,
+    AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
+  >
+  _conciergeLoadingControllers = {};
 
   @override
   ChatScreenState build(String contactId) {
@@ -96,19 +99,15 @@ class ChatScreenController extends _$ChatScreenController
       fireImmediately: true,
     );
 
-    ref.listen(
-      networkConnectivityServiceProvider,
-      (previous, next) {
-        if (previous?.isConnected == false && next.isConnected) {
-          _logger.info(
-            'Network reconnected - resuming chat presence updates',
-            name: _logKey,
-          );
-          _chatSDK?.startChatPresenceUpdates();
-        }
-      },
-      fireImmediately: true,
-    );
+    ref.listen(networkConnectivityServiceProvider, (previous, next) {
+      if (previous?.isConnected == false && next.isConnected) {
+        _logger.info(
+          'Network reconnected - resuming chat presence updates',
+          name: _logKey,
+        );
+        _chatSDK?.startChatPresenceUpdates();
+      }
+    }, fireImmediately: true);
 
     messageTextController.addListener(_onMessageTextChanged);
 
@@ -125,18 +124,12 @@ class ChatScreenController extends _$ChatScreenController
 
       _disposeConciergeLoadingControllers();
 
-      _logger.info(
-        'Chat session ended',
-        name: _logKey,
-      );
+      _logger.info('Chat session ended', name: _logKey);
 
       WidgetsBinding.instance.removeObserver(this);
     });
 
-    return ChatScreenState(
-      isActive: true,
-      isInitialized: false,
-    );
+    return ChatScreenState(isActive: true, isInitialized: false);
   }
 
   Future<void>? initializing;
@@ -162,10 +155,7 @@ class ChatScreenController extends _$ChatScreenController
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    _logger.info(
-      'didChangeAppLifecycleState: $state',
-      name: _logKey,
-    );
+    _logger.info('didChangeAppLifecycleState: $state', name: _logKey);
     switch (state) {
       case AppLifecycleState.resumed:
         _chatResumingLock.synchronized(() async {
@@ -185,10 +175,7 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> _resumeChatSession() async {
     if (!_isPaused) return;
 
-    _logger.info(
-      'Resuming chat session',
-      name: _logKey,
-    );
+    _logger.info('Resuming chat session', name: _logKey);
     final contact = state.contact;
     if (contact == null) return;
 
@@ -208,10 +195,7 @@ class ChatScreenController extends _$ChatScreenController
   void _pauseChatSession() {
     if (_isPaused) return;
 
-    _logger.info(
-      'Pausing chat session',
-      name: _logKey,
-    );
+    _logger.info('Pausing chat session', name: _logKey);
     _isPaused = true;
     _chatSDK?.endChatSession();
     messagesSubscription?.dispose();
@@ -239,36 +223,38 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      _addConciergeSubscriptionIfNeeded(String id) {
+  _addConciergeSubscriptionIfNeeded(String id) {
     var existing = _conciergeLoadingControllers[id];
     if (existing == null) {
       existing = AsyncLoadingController.provider(id);
       _conciergeLoadingControllers[id] = existing;
-      _conciergeLoadingControllersSubscriptions[id] =
-          ref.listen(existing, (prev, next) {});
+      _conciergeLoadingControllersSubscriptions[id] = ref.listen(
+        existing,
+        (prev, next) {},
+      );
     }
     return existing;
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeApproveLoadingController(chat.ConciergeMessage message) {
+  conciergeApproveLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded('approve_${message.messageId}');
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeRejectLoadingController(chat.ConciergeMessage message) {
+  conciergeRejectLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded('reject_${message.messageId}');
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeSendProfileLoadingController(chat.ConciergeMessage message) {
+  conciergeSendProfileLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded(
       'send_profile_${message.messageId}',
     );
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeAskLaterToSendProfileLoadingController(
+  conciergeAskLaterToSendProfileLoadingController(
     chat.ConciergeMessage message,
   ) {
     return _addConciergeSubscriptionIfNeeded(
@@ -277,9 +263,7 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeCancelSendProfileLoadingController(
-    chat.ConciergeMessage message,
-  ) {
+  conciergeCancelSendProfileLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded(
       'cancel_send_profile_${message.messageId}',
     );
@@ -310,14 +294,12 @@ class ChatScreenController extends _$ChatScreenController
         code: AppExceptionType.missingChannel.name,
       );
     }
-    _logger.info(
-      'ChannelID: $channelDid',
-      name: _logKey,
-    );
+    _logger.info('ChannelID: $channelDid', name: _logKey);
 
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel =
-        await coreSdk.getChannelByOtherPartyPermanentDid(channelDid);
+    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      channelDid,
+    );
     if (channel == null) {
       throw AppException(
         'Unable to find channel associated to contact',
@@ -326,8 +308,9 @@ class ChatScreenController extends _$ChatScreenController
     }
     final srcCard = channel.otherPartyContactCard;
     state = state.copyWith(
-      otherPartyCard:
-          srcCard == null ? null : ContactCardUtils.fromSdkContactCard(srcCard),
+      otherPartyCard: srcCard == null
+          ? null
+          : ContactCardUtils.fromSdkContactCard(srcCard),
       notificationToken: channel.otherPartyNotificationToken,
     );
 
@@ -378,8 +361,9 @@ class ChatScreenController extends _$ChatScreenController
 
       if (plainTextMessage.type.toString() ==
           chat.ChatProtocol.chatActivity.value) {
-        final groupMessageSenderName =
-            _getGroupMemberNameFromMessage(plainTextMessage);
+        final groupMessageSenderName = _getGroupMemberNameFromMessage(
+          plainTextMessage,
+        );
         final contactName = state.contact?.card.firstName;
 
         _updateMembersTypingActivityIfNeeded(
@@ -448,8 +432,9 @@ class ChatScreenController extends _$ChatScreenController
     final effectName = plainTextMessage.effectName;
     if (effectName == null) return;
 
-    final effect =
-        chat.Effect.values.firstWhereOrNull((item) => item.name == effectName);
+    final effect = chat.Effect.values.firstWhereOrNull(
+      (item) => item.name == effectName,
+    );
     if (effect == null) return;
 
     switch (effect) {
@@ -482,10 +467,7 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   void _updateGroupDetails(chat.StreamData data, String channelDid) {
-    _logger.info(
-      'Updating group details',
-      name: _logKey,
-    );
+    _logger.info('Updating group details', name: _logKey);
     unawaited(_refreshGroup());
   }
 
@@ -531,10 +513,7 @@ class ChatScreenController extends _$ChatScreenController
       return;
     }
 
-    _logger.info(
-      'Updating Contact Card',
-      name: _logKey,
-    );
+    _logger.info('Updating Contact Card', name: _logKey);
 
     final sdkCard = sdk.ContactCard(
       did: body['did'] as String,
@@ -568,8 +547,8 @@ class ChatScreenController extends _$ChatScreenController
         final now = clock.now();
         final datePresence = args?[0] as DateTime? ?? now;
         final hasReceivedAnyActivity = datePresence.toLocal().isAfter(
-              now.subtract(Duration(seconds: _chatPresenceIntervalInSeconds)),
-            );
+          now.subtract(Duration(seconds: _chatPresenceIntervalInSeconds)),
+        );
 
         state = state.copyWith(
           contactPresenceStatus: hasReceivedAnyActivity
@@ -585,7 +564,8 @@ class ChatScreenController extends _$ChatScreenController
         });
       },
       duration: Duration(
-        seconds: _chatPresenceIntervalInSeconds +
+        seconds:
+            _chatPresenceIntervalInSeconds +
             _presenceIndicatorGracePeriodSeconds,
       ),
     );
@@ -597,10 +577,7 @@ class ChatScreenController extends _$ChatScreenController
     required String? groupMessageSenderName,
     required String? contactName,
   }) {
-    _logger.info(
-      '_clearMembersTypingActivity',
-      name: _logKey,
-    );
+    _logger.info('_clearMembersTypingActivity', name: _logKey);
     final memberNames = [...state.membersTyping];
     if (memberNames.isEmpty) {
       return;
@@ -620,16 +597,15 @@ class ChatScreenController extends _$ChatScreenController
     final messageCreatedTime = plainTextMessage.createdTime;
     if (messageCreatedTime == null) return;
 
-    final differenceInSeconds =
-        clock.now().difference(messageCreatedTime).inSeconds;
+    final differenceInSeconds = clock
+        .now()
+        .difference(messageCreatedTime)
+        .inSeconds;
     final isChatActivityExpired =
         (_secondsToShowChatActivityIndicator - differenceInSeconds) < 0;
     if (isChatActivityExpired) return;
 
-    _logger.info(
-      '_updateUserTypingActivity',
-      name: _logKey,
-    );
+    _logger.info('_updateUserTypingActivity', name: _logKey);
     _membersTypingTimedAction?.cancel();
     _membersTypingTimedAction ??= TimedAction(
       onRun: (args) {
@@ -668,8 +644,9 @@ class ChatScreenController extends _$ChatScreenController
 
   void _upsertChatItem(chat.ChatItem item) {
     final existingMessages = state.messages;
-    final existingItemIndex =
-        existingMessages.indexWhere((m) => m.messageId == item.messageId);
+    final existingItemIndex = existingMessages.indexWhere(
+      (m) => m.messageId == item.messageId,
+    );
 
     final messages = (existingItemIndex == -1)
         ? existingMessages.insertSorted(item)
@@ -679,8 +656,9 @@ class ChatScreenController extends _$ChatScreenController
 
   void _removeChatItem(chat.ChatItem item) {
     final existingMessages = state.messages;
-    final existingItemIndex =
-        existingMessages.indexWhere((m) => m.messageId == item.messageId);
+    final existingItemIndex = existingMessages.indexWhere(
+      (m) => m.messageId == item.messageId,
+    );
 
     if (existingItemIndex == -1) return;
 
@@ -695,10 +673,14 @@ class ChatScreenController extends _$ChatScreenController
     final contact = state.contact;
     if (contact == null) return;
 
-    final moreMembersPendingApproval = state.group?.members
-            .any((m) => m.status == sdk.GroupMemberStatus.pendingApproval) ??
+    final moreMembersPendingApproval =
+        state.group?.members.any(
+          (m) => m.status == sdk.GroupMemberStatus.pendingApproval,
+        ) ??
         false;
-    await ref.read(contactsServiceProvider.notifier).updateContact(
+    await ref
+        .read(contactsServiceProvider.notifier)
+        .updateContact(
           contact.copyWith(
             status: moreMembersPendingApproval
                 ? ContactStatus.pendingApproval
@@ -712,12 +694,15 @@ class ChatScreenController extends _$ChatScreenController
   /// The message text is trimmed and validated before sending.
   /// Clears the input field upon successful send.
   Future<void> sendMessage() async {
-    final trimmedMessage = messageTextController.text.trimRight();
+    final originalText = messageTextController.text;
+    final trimmedMessage = originalText.trimRight();
     if (trimmedMessage.isEmpty) return;
 
     unawaited(_chatSDK?.sendTextMessage(trimmedMessage));
     _sendChatActivityTimedAction?.cancel();
-    messageTextController.text = '';
+    if (messageTextController.text == originalText) {
+      messageTextController.clear();
+    }
   }
 
   Future<void> sendChatActivity() async {
@@ -765,17 +750,17 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> rejectMembership(chat.ConciergeMessage chatItem) async {
     try {
       _showActivity();
-      await ref
-          .read(conciergeRejectLoadingController(chatItem).notifier)
-          .start(() async {
-        _logger.info(
-          '''Rejecting membership for messageId: ${chatItem.messageId}''',
-          name: _logKey,
-        );
-        await _chatSDK?.rejectConnectionRequest(chatItem);
-        await _refreshGroup();
-        await _updateGroupContactPendingStatus();
-      });
+      await ref.read(conciergeRejectLoadingController(chatItem).notifier).start(
+        () async {
+          _logger.info(
+            '''Rejecting membership for messageId: ${chatItem.messageId}''',
+            name: _logKey,
+          );
+          await _chatSDK?.rejectConnectionRequest(chatItem);
+          await _refreshGroup();
+          await _updateGroupContactPendingStatus();
+        },
+      );
     } finally {
       _hideActivity();
     }
@@ -799,14 +784,14 @@ class ChatScreenController extends _$ChatScreenController
       await ref
           .read(conciergeApproveLoadingController(chatItem).notifier)
           .start(() async {
-        _logger.info(
-          '''Approving membership for messageId: ${chatItem.messageId}''',
-          name: _logKey,
-        );
-        await _chatSDK?.approveConnectionRequest(chatItem);
-        await _refreshGroup();
-        await _updateGroupContactPendingStatus();
-      });
+            _logger.info(
+              '''Approving membership for messageId: ${chatItem.messageId}''',
+              name: _logKey,
+            );
+            await _chatSDK?.approveConnectionRequest(chatItem);
+            await _refreshGroup();
+            await _updateGroupContactPendingStatus();
+          });
     } finally {
       _hideActivity();
     }
@@ -822,9 +807,11 @@ class ChatScreenController extends _$ChatScreenController
   /// [message]: The concierge message containing the contact details to be
   /// updated.
   Future<void> sendContactDetailsUpdate(chat.ConciergeMessage message) async {
-    await ref
-        .read(conciergeSendProfileLoadingController(message).notifier)
-        .start(() async {
+    final profileLoadingController = ref.read(
+      conciergeSendProfileLoadingController(message).notifier,
+    );
+
+    await profileLoadingController.start(() async {
       _logger.info(
         '''Sending contact details update for messageId: ${message.messageId}''',
         name: _logKey,
@@ -845,12 +832,12 @@ class ChatScreenController extends _$ChatScreenController
     await ref
         .read(conciergeAskLaterToSendProfileLoadingController(message).notifier)
         .start(() async {
-      _logger.info(
-        '''Hiding profile update message till later for messageId: ${message.messageId}''',
-        name: _logKey,
-      );
-      _removeChatItem(message);
-    });
+          _logger.info(
+            '''Hiding profile update message till later for messageId: ${message.messageId}''',
+            name: _logKey,
+          );
+          _removeChatItem(message);
+        });
   }
 
   /// Cancels the ongoing process of updating contact details.
@@ -865,12 +852,12 @@ class ChatScreenController extends _$ChatScreenController
     await ref
         .read(conciergeCancelSendProfileLoadingController(message).notifier)
         .start(() async {
-      _logger.info(
-        '''Decided to not send profile update message for messageId: ${message.messageId}''',
-        name: _logKey,
-      );
-      await _chatSDK?.rejectChatContactDetailsUpdate(message);
-    });
+          _logger.info(
+            '''Decided to not send profile update message for messageId: ${message.messageId}''',
+            name: _logKey,
+          );
+          await _chatSDK?.rejectChatContactDetailsUpdate(message);
+        });
   }
 
   /// Sets a reaction for a specific message.
@@ -882,8 +869,9 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> setMessageReaction(String messageId, String reaction) async {
     try {
       _showActivity();
-      final message = state.messages
-          .firstWhereOrNull((m) => m.messageId == messageId) as chat.Message?;
+      final message =
+          state.messages.firstWhereOrNull((m) => m.messageId == messageId)
+              as chat.Message?;
 
       if (message == null) {
         throw AppException(
@@ -990,8 +978,9 @@ class ChatScreenController extends _$ChatScreenController
 
   Future<void> _updateContactSequenceNumber(String channelDid) async {
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel =
-        await coreSdk.getChannelByOtherPartyPermanentDid(channelDid);
+    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      channelDid,
+    );
     if (channel == null) {
       _logger.warning(
         'Cannot update contact sequence number: channel cannot be found',
@@ -1009,8 +998,9 @@ class ChatScreenController extends _$ChatScreenController
     final contact = state.contact;
     if (contact == null) return;
 
-    final unsentMessagesService =
-        ref.read(unsentMessagesServiceProvider.notifier);
+    final unsentMessagesService = ref.read(
+      unsentMessagesServiceProvider.notifier,
+    );
     await unsentMessagesService.ensureInitialized();
     final unsentMessage = unsentMessagesService.getUnsentMessage(contact.id);
     if (unsentMessage != null) {
@@ -1031,10 +1021,7 @@ class ChatScreenController extends _$ChatScreenController
     }
 
     final chatSession = await chatSDK.startChatSession();
-    _logger.info(
-      'Chat SDK started and ready for messaging',
-      name: _logKey,
-    );
+    _logger.info('Chat SDK started and ready for messaging', name: _logKey);
 
     final channelDid = contact.channelDid;
     if (channelDid == null) {
@@ -1084,22 +1071,17 @@ class ChatScreenController extends _$ChatScreenController
 
     unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
-    _logger.info(
-      'Chat session started',
-      name: _logKey,
-    );
+    _logger.info('Chat session started', name: _logKey);
   }
 
   Future<void> dismissNotificationBanner() async {
     final contact = state.contact;
     if (contact == null) return;
 
-    final updatedContact = contact.copyWith(
-      notificationBannerDismissed: true,
-    );
-    await ref.read(contactsServiceProvider.notifier).updateContact(
-          updatedContact,
-        );
+    final updatedContact = contact.copyWith(notificationBannerDismissed: true);
+    await ref
+        .read(contactsServiceProvider.notifier)
+        .updateContact(updatedContact);
   }
 }
 
@@ -1140,13 +1122,14 @@ extension ChatScreenControllerProviderSelectors
 
   ProviderListenable<List<String>> get awaitingMemberNames {
     return select((state) {
-      final awaitingMembers =
-          state.messages.whereType<chat.EventMessage>().where(
-                (message) =>
-                    message.eventType ==
-                        chat.EventMessageType.awaitingGroupMemberToJoin &&
-                    message.status == chat.ChatItemStatus.received,
-              );
+      final awaitingMembers = state.messages
+          .whereType<chat.EventMessage>()
+          .where(
+            (message) =>
+                message.eventType ==
+                    chat.EventMessageType.awaitingGroupMemberToJoin &&
+                message.status == chat.ChatItemStatus.received,
+          );
 
       final memberDidsWhoLeft = state.messages
           .whereType<chat.EventMessage>()
@@ -1176,8 +1159,9 @@ extension ChatScreenControllerProviderSelectors
     return select(
       (state) =>
           state.isActive ||
-          state.messages
-              .any((message) => message.status == chat.ChatItemStatus.queued),
+          state.messages.any(
+            (message) => message.status == chat.ChatItemStatus.queued,
+          ),
     );
   }
 

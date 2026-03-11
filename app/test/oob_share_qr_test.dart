@@ -14,32 +14,26 @@ void main() {
     final location = '/connections/oob-share-qr';
 
     group('and rendering the screen', () {
-      testWidgets('should display the screen title and QR instructions',
-          (tester) async {
+      testWidgets('should display the screen title and QR instructions', (
+        tester,
+      ) async {
         final l10n = await getL10n();
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-        );
+        await navigateToLocation(tester, location, identities: [testIdentity]);
         await tester.pumpAndSettle();
 
         expect(find.text(l10n.oobQrPresentInvitationMessage), findsOneWidget);
       });
 
       testWidgets('should display cancel button', (tester) async {
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-        );
+        await navigateToLocation(tester, location, identities: [testIdentity]);
         await tester.pumpAndSettle();
 
         expect(find.byIcon(Icons.cancel_outlined), findsOneWidget);
       });
 
-      testWidgets('should display share CTA when QR is generated',
-          (tester) async {
+      testWidgets('should display share CTA when QR is generated', (
+        tester,
+      ) async {
         final l10n = await getL10n();
         final fakeSdk = FakeMeetingPlaceSDK();
 
@@ -56,8 +50,9 @@ void main() {
     });
 
     group('and is initialized', () {
-      testWidgets('should call createOobFlow on initialization',
-          (tester) async {
+      testWidgets('should call createOobFlow on initialization', (
+        tester,
+      ) async {
         final fakeSdk = FakeMeetingPlaceSDK();
 
         await navigateToLocation(
@@ -71,8 +66,9 @@ void main() {
         expect(fakeSdk.createOobFlowCalls.length, greaterThan(0));
       });
 
-      testWidgets('should pass correct contactCard to createOobFlow',
-          (tester) async {
+      testWidgets('should pass correct contactCard to createOobFlow', (
+        tester,
+      ) async {
         final fakeSdk = FakeMeetingPlaceSDK();
 
         await navigateToLocation(
@@ -89,8 +85,9 @@ void main() {
         expect(calls.first['externalRef'], testIdentity.id);
       });
 
-      testWidgets('should display QR code after successful OOB creation',
-          (tester) async {
+      testWidgets('should display QR code after successful OOB creation', (
+        tester,
+      ) async {
         final fakeSdk = FakeMeetingPlaceSDK();
 
         await navigateToLocation(
@@ -108,38 +105,40 @@ void main() {
 
     group('and handling connection flow', () {
       testWidgets(
-          'should navigate back with channel when connection established',
-          (tester) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
-        final fakeChannel = Channel(
-          offerLink: 'test-offer-link',
-          publishOfferDid: 'test-publish-did',
-          mediatorDid: 'test-mediator-did',
-          status: ChannelStatus.inaugurated,
-          outboundMessageId: 'test-message-id',
-          acceptOfferDid: 'test-accept-did',
-          permanentChannelDid: 'test-permanent-did',
-          type: ChannelType.oob,
-          contactCard: ContactCard(did: '', type: '', contactInfo: {}),
-          isConnectionInitiator: true,
-        );
+        'should navigate back with channel when connection established',
+        (tester) async {
+          final fakeSdk = FakeMeetingPlaceSDK();
+          final fakeChannel = Channel(
+            offerLink: 'test-offer-link',
+            publishOfferDid: 'test-publish-did',
+            mediatorDid: 'test-mediator-did',
+            status: ChannelStatus.inaugurated,
+            outboundMessageId: 'test-message-id',
+            acceptOfferDid: 'test-accept-did',
+            permanentChannelDid: 'test-permanent-did',
+            type: ChannelType.oob,
+            contactCard: ContactCard(did: '', type: '', contactInfo: {}),
+            isConnectionInitiator: true,
+          );
 
-        await navigateToLocation(
-          tester,
-          location,
-          identities: [testIdentity],
-          meetingPlaceCoreSDK: fakeSdk,
-        );
-        await tester.pumpAndSettle();
+          await navigateToLocation(
+            tester,
+            location,
+            identities: [testIdentity],
+            meetingPlaceCoreSDK: fakeSdk,
+          );
+          await tester.pumpAndSettle();
 
-        fakeSdk.simulateOobConnectionEstablished(fakeChannel);
-        await tester.pumpAndSettle();
-      });
+          fakeSdk.simulateOobConnectionEstablished(fakeChannel);
+          await tester.pumpAndSettle();
+        },
+      );
     });
 
     group('and user interacts with the screen', () {
-      testWidgets('should cancel flow when cancel button tapped',
-          (tester) async {
+      testWidgets('should cancel flow when cancel button tapped', (
+        tester,
+      ) async {
         final fakeSdk = FakeMeetingPlaceSDK();
 
         await navigateToLocation(
@@ -155,8 +154,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgets(
-          'should call ShareService with correct params when share'
+      testWidgets('should call ShareService with correct params when share'
           ' CTA is tapped', (tester) async {
         final l10n = await getL10n();
         final fakeSdk = FakeMeetingPlaceSDK();
@@ -188,8 +186,9 @@ void main() {
     });
 
     group('and handling errors', () {
-      testWidgets('should call retry method when retry button is tapped',
-          (tester) async {
+      testWidgets('should call retry method when retry button is tapped', (
+        tester,
+      ) async {
         final l10n = await getL10n();
         final fakeSdk = FakeMeetingPlaceSDK(
           createOobFlowException: Exception('Failed to create OOB flow'),
@@ -207,8 +206,10 @@ void main() {
 
         final initialCallCount = fakeSdk.createOobFlowCalls.length;
 
-        final retryButton =
-            find.widgetWithText(FilledButton, l10n.generalRetry);
+        final retryButton = find.widgetWithText(
+          FilledButton,
+          l10n.generalRetry,
+        );
         expect(retryButton, findsOneWidget);
 
         await tester.tap(retryButton);
@@ -222,8 +223,9 @@ void main() {
     });
 
     group('and showing loading states', () {
-      testWidgets('should hide loading indicator after QR generation',
-          (tester) async {
+      testWidgets('should hide loading indicator after QR generation', (
+        tester,
+      ) async {
         final l10n = await getL10n();
         final fakeSdk = FakeMeetingPlaceSDK();
 
@@ -240,8 +242,9 @@ void main() {
     });
 
     group('and handling edge cases', () {
-      testWidgets('should handle connection established after cancellation',
-          (tester) async {
+      testWidgets('should handle connection established after cancellation', (
+        tester,
+      ) async {
         final fakeSdk = FakeMeetingPlaceSDK();
 
         await navigateToLocation(

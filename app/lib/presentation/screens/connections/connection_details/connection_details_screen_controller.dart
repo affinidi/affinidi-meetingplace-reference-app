@@ -33,10 +33,12 @@ class ConnectionDetailsScreenController
   late final displayNameController = TextEditingController();
   static const _logKey = 'CONNX';
   late final _logger = ref.read(appLoggerProvider);
-  late final approveOfferLoadingController =
-      AsyncLoadingController.provider('approveOfferLoadingController');
-  late final rejectOfferLoadingController =
-      AsyncLoadingController.provider('rejectOfferLoadingController');
+  late final approveOfferLoadingController = AsyncLoadingController.provider(
+    'approveOfferLoadingController',
+  );
+  late final rejectOfferLoadingController = AsyncLoadingController.provider(
+    'rejectOfferLoadingController',
+  );
 
   @override
   ConnectionDetailsScreenState build(String contactId) {
@@ -91,14 +93,12 @@ class ConnectionDetailsScreenController
         code: AppExceptionType.missingChannel.name,
       );
     }
-    _logger.info(
-      'ChannelID: $channelDid',
-      name: _logKey,
-    );
+    _logger.info('ChannelID: $channelDid', name: _logKey);
 
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel =
-        await coreSdk.getChannelByOtherPartyPermanentDid(channelDid);
+    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      channelDid,
+    );
 
     if (channel == null) {
       throw AppException(
@@ -204,9 +204,9 @@ class ConnectionDetailsScreenController
     await ref.read(rejectOfferLoadingController.notifier).start(() async {
       final currentContact = state.contact;
       if (currentContact != null) {
-        await ref
-            .read(contactsServiceProvider.notifier)
-            .deleteContacts([currentContact]);
+        await ref.read(contactsServiceProvider.notifier).deleteContacts([
+          currentContact,
+        ]);
         await Future(() {
           ref.read(navigatorProvider).pop();
         });
@@ -237,10 +237,9 @@ class ConnectionDetailsScreenController
 
     final assetImage = state.isGroupChat ? groupImage : defaultProfileImage;
 
-    final bundle = assetImage.bundle ??
-        DefaultAssetBundle.of(
-          WidgetsBinding.instance.rootElement!,
-        );
+    final bundle =
+        assetImage.bundle ??
+        DefaultAssetBundle.of(WidgetsBinding.instance.rootElement!);
 
     final bytes = await bundle
         .load(assetImage.keyName)
@@ -260,26 +259,26 @@ extension ConnectionDetailsScreenControllerProviderSelector
       select((state) => state.channel?.otherPartyContactCard);
 
   ProviderListenable<String> get otherPartyDisplayName => select((state) {
-        final displayName = state.contact?.displayName;
-        if (displayName != null && displayName.isNotEmpty) {
-          return displayName;
-        }
+    final displayName = state.contact?.displayName;
+    if (displayName != null && displayName.isNotEmpty) {
+      return displayName;
+    }
 
-        if (state.group != null) {
-          return state.connection?.offerName ?? '';
-        }
+    if (state.group != null) {
+      return state.connection?.offerName ?? '';
+    }
 
-        return state.channel?.otherPartyContactCard?.firstName ?? '';
-      });
+    return state.channel?.otherPartyContactCard?.firstName ?? '';
+  });
 
   ProviderListenable<ContactCard?> get groupAdminCard => select((state) {
-        final group = state.group;
-        if (group == null) return null;
-        final groupAdmin = group.members.firstWhereOrNull(
-          (member) => member.membershipType == GroupMembershipType.admin,
-        );
-        return groupAdmin?.contactCard;
-      });
+    final group = state.group;
+    if (group == null) return null;
+    final groupAdmin = group.members.firstWhereOrNull(
+      (member) => member.membershipType == GroupMembershipType.admin,
+    );
+    return groupAdmin?.contactCard;
+  });
 
   ProviderListenable<bool> get isGroupChat =>
       select((state) => state.isGroupChat);
@@ -288,50 +287,50 @@ extension ConnectionDetailsScreenControllerProviderSelector
       select((state) => state.isGroupChat ? state.connection?.offerName : null);
 
   ProviderListenable<bool> get canApprove => select((state) {
-        final contact = state.contact;
-        if (contact == null) return false;
+    final contact = state.contact;
+    if (contact == null) return false;
 
-        final ownedByMe = state.connection?.ownedByMe ?? false;
-        if (!ownedByMe) return false;
+    final ownedByMe = state.connection?.ownedByMe ?? false;
+    if (!ownedByMe) return false;
 
-        final connectionStatus = state.connection?.status;
-        if (![ConnectionOfferStatus.published, ConnectionOfferStatus.deleted]
-            .contains(connectionStatus)) {
-          return false;
-        }
+    final connectionStatus = state.connection?.status;
+    if (![
+      ConnectionOfferStatus.published,
+      ConnectionOfferStatus.deleted,
+    ].contains(connectionStatus)) {
+      return false;
+    }
 
-        if (contact.status != ContactStatus.pendingApproval) {
-          return false;
-        }
+    if (contact.status != ContactStatus.pendingApproval) {
+      return false;
+    }
 
-        final channelStatus = state.channel?.status;
-        if (channelStatus == ChannelStatus.inaugurated) return false;
+    final channelStatus = state.channel?.status;
+    if (channelStatus == ChannelStatus.inaugurated) return false;
 
-        return true;
-      });
+    return true;
+  });
 
   ProviderListenable<List<GroupMember>> get members => select(
-        (state) =>
-            state.group?.members
-                .where(
-                  (member) =>
-                      state.showDeletedMembers ||
-                      member.status != GroupMemberStatus.deleted,
-                )
-                .toList() ??
-            [],
-      );
+    (state) =>
+        state.group?.members
+            .where(
+              (member) =>
+                  state.showDeletedMembers ||
+                  member.status != GroupMemberStatus.deleted,
+            )
+            .toList() ??
+        [],
+  );
 
   ProviderListenable<bool> get hasMembersAvailableToChat => select(
-        (state) =>
-            (state.group?.members
-                    .where(
-                      (member) => member.status != GroupMemberStatus.deleted,
-                    )
-                    .length ??
-                0) >
-            1,
-      );
+    (state) =>
+        (state.group?.members
+                .where((member) => member.status != GroupMemberStatus.deleted)
+                .length ??
+            0) >
+        1,
+  );
 
   ProviderListenable<bool> get isLoneMember =>
       select((state) => state.group?.members.length == 1);

@@ -9,14 +9,18 @@ class _ConnectionDetailsPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(contactId);
 
-    final dateAdded =
-        ref.watch(provider.select((state) => state.contact?.dateAdded));
-    final mediatorName =
-        ref.watch(provider.select((state) => state.mediatorName));
-    final contactOrigin =
-        ref.watch(provider.select((state) => state.contact?.origin));
-    final isDebugMode =
-        ref.watch(provider.select((state) => state.isDebugMode));
+    final dateAdded = ref.watch(
+      provider.select((state) => state.contact?.dateAdded),
+    );
+    final mediatorName = ref.watch(
+      provider.select((state) => state.mediatorName),
+    );
+    final contactOrigin = ref.watch(
+      provider.select((state) => state.contact?.origin),
+    );
+    final isDebugMode = ref.watch(
+      provider.select((state) => state.isDebugMode),
+    );
 
     final items = [
       if (dateAdded != null)

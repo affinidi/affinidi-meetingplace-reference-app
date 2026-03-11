@@ -17,10 +17,7 @@ import '../../../widgets/offer_banner.dart';
 import 'find_offer_screen_controller.dart';
 
 class FindOfferScreen extends HookConsumerWidget {
-  const FindOfferScreen({
-    super.key,
-    this.identityId,
-  });
+  const FindOfferScreen({super.key, this.identityId});
 
   final String? identityId;
 
@@ -33,21 +30,29 @@ class FindOfferScreen extends HookConsumerWidget {
 
     final env = ref.read(environmentProvider);
     final identities = ref.watch(provider.select((state) => state.identities));
-    final selectedIdentity =
-        ref.watch(provider.select((state) => state.selectedIdentity));
-
-    useEffect(
-      () {
-        if (!context.mounted) return;
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.initialize();
-        });
-
-        return null;
-      },
-      [],
+    final selectedIdentity = ref.watch(
+      provider.select((state) => state.selectedIdentity),
     );
+
+    useEffect(() {
+      if (!context.mounted) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.initialize();
+      });
+
+      return null;
+    }, []);
+
+    useEffect(() {
+      if (!context.mounted) return;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.initialize();
+      });
+
+      return null;
+    }, []);
 
     void findOffer(String mnemonic) async {
       if (!context.mounted) return;
@@ -56,16 +61,18 @@ class FindOfferScreen extends HookConsumerWidget {
 
       final trimmed = mnemonic.trim();
       var success = false;
-      await ref
-          .read(controller.findOfferLoadingController.notifier)
-          .start(() async {
-        await controller.findOffer(trimmed);
-        success = true;
-      });
+      await ref.read(controller.findOfferLoadingController.notifier).start(
+        () async {
+          await controller.findOffer(trimmed);
+          success = true;
+        },
+      );
 
       if (!context.mounted) return;
       if (success) {
-        await ref.read(navigatorProvider).push(
+        await ref
+            .read(navigatorProvider)
+            .push(
               AcceptOfferRoute(
                 mnemonic: trimmed,
                 identityId: selectedIdentity!.id,
@@ -113,8 +120,9 @@ class FindOfferScreen extends HookConsumerWidget {
                 const OfferBanner(),
                 Text(
                   context.l10n.connectWithPersonAiServiceBusiness,
-                  style: context.textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: context.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 if (identities.isNotEmpty)
@@ -179,9 +187,7 @@ class FindOfferScreen extends HookConsumerWidget {
                   ],
                 ),
                 ElevatedButton(
-                  child: Text(
-                    context.l10n.generalSearch,
-                  ),
+                  child: Text(context.l10n.generalSearch),
                   onPressed: () {
                     if (!context.mounted) return;
                     findOffer(mnemonicWordTextController.text);
@@ -197,9 +203,8 @@ class FindOfferScreen extends HookConsumerWidget {
 }
 
 class _QrButton extends ConsumerWidget {
-  _QrButton({
-    required void Function(String? data) onDidReceiveQrData,
-  }) : _onDidReceiveQrData = onDidReceiveQrData;
+  _QrButton({required void Function(String? data) onDidReceiveQrData})
+    : _onDidReceiveQrData = onDidReceiveQrData;
 
   final void Function(String? data) _onDidReceiveQrData;
 

@@ -16,19 +16,19 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? orange,
     Color? disabledGrey,
     Color? darkGrey,
-  })  : _cyan = cyan,
-        _purple = purple,
-        _rose = rose,
-        _violet = violet,
-        _success = success,
-        _warning = warning,
-        _grey900 = grey900,
-        _grey700 = grey700,
-        _whiteOverlay30 = whiteOverlay30,
-        _brown = brown,
-        _orange = orange,
-        _disabledGrey = disabledGrey,
-        _darkGrey = darkGrey;
+  }) : _cyan = cyan,
+       _purple = purple,
+       _rose = rose,
+       _violet = violet,
+       _success = success,
+       _warning = warning,
+       _grey900 = grey900,
+       _grey700 = grey700,
+       _whiteOverlay30 = whiteOverlay30,
+       _brown = brown,
+       _orange = orange,
+       _disabledGrey = disabledGrey,
+       _darkGrey = darkGrey;
 
   final Color? _cyan;
   final Color? _purple;

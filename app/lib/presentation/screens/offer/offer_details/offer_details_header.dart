@@ -10,18 +10,8 @@ class _OfferDetailsHeader extends StatelessWidget {
     return Stack(
       alignment: AlignmentDirectional.center,
       children: [
-        const Column(
-          children: [
-            OfferBanner(),
-            SizedBox(
-              height: 110,
-            ),
-          ],
-        ),
-        Positioned(
-          bottom: 0,
-          child: _ProfilePicture(offerLink),
-        ),
+        const Column(children: [OfferBanner(), SizedBox(height: 110)]),
+        Positioned(bottom: 0, child: _ProfilePicture(offerLink)),
       ],
     );
   }
