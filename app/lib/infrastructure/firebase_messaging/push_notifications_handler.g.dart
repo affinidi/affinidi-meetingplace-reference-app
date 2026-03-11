@@ -7,7 +7,7 @@ part of 'push_notifications_handler.dart';
 // **************************************************************************
 
 String _$pushNotificationsHandlerHash() =>
-    r'12f34766da679befe13c7f42ad0426bd6f5fbd7d';
+    r'ad2b8e95d8e3087d696a7c831c85f93b5429e918';
 
 /// A Riverpod provider class that handles push notifications lifecycle,
 /// device token updates, and notification streams.

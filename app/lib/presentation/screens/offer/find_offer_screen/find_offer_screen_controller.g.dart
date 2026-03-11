@@ -7,7 +7,7 @@ part of 'find_offer_screen_controller.dart';
 // **************************************************************************
 
 String _$findOfferScreenControllerHash() =>
-    r'9004147c0dd79c813c1c84dd9984b13e6b4db350';
+    r'289a6658b078c6fdf3723fa05b9794efbc01ebba';
 
 /// See also [FindOfferScreenController].
 @ProviderFor(FindOfferScreenController)
