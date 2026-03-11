@@ -64,7 +64,7 @@ class ContactsDatabase extends _$ContactsDatabase {
         }
       }
 
-      //this migration removes the column unsentMessage
+      //this migration removes the column unsentMessage and chatInProgress
       if (from < 3) {
         await migrator.alterTable(
           // ignore: experimental_member_use
