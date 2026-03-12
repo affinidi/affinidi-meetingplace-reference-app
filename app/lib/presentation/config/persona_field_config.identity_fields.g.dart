@@ -19,9 +19,7 @@ mixin GeneratedContactCardPersonaColumns on Table {
   TextColumn get mobile => text()();
 }
 
-Map<String, Expression> buildIdentityPersonaFieldExpressions(
-  ContactCard card,
-) {
+Map<String, Expression> buildIdentityPersonaFieldExpressions(ContactCard card) {
   return <String, Expression>{
     'first_name': Variable<String>(firstNameField.valueFrom(card)),
     'last_name': Variable<String>(lastNameField.valueFrom(card)),
@@ -41,9 +39,7 @@ Map<String, Expression> buildContactCardPersonaFieldExpressions(
   };
 }
 
-Map<String, String> readPersonaFieldValuesFromRow(
-  Map<String, Object?> data,
-) {
+Map<String, String> readPersonaFieldValuesFromRow(Map<String, Object?> data) {
   final values = <String, String>{};
   final firstNameValue = data['first_name'] as String?;
   if (firstNameValue != null && firstNameValue.isNotEmpty) {

@@ -40,10 +40,7 @@ class IdentitiesRepositoryDrift implements IdentitiesRepository {
   Future<Identity> addIdentity(Identity identity) async {
     final values = _identityValues(identity);
     await db.customInsert(
-      buildInsertSql(
-        tableName: 'identities_table',
-        columnNames: values.keys,
-      ),
+      buildInsertSql(tableName: 'identities_table', columnNames: values.keys),
       variables: variablesFromExpressions(values),
       updates: {db.identitiesTable},
     );

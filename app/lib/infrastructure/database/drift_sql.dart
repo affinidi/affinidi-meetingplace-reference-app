@@ -23,15 +23,17 @@ String buildUpdateSql({
 }
 
 List<Variable> variablesFromExpressions(Map<String, Expression> values) {
-  return values.entries.map((entry) {
-    final expression = entry.value;
-    if (expression is Variable) {
-      return expression;
-    }
+  return values.entries
+      .map((entry) {
+        final expression = entry.value;
+        if (expression is Variable) {
+          return expression;
+        }
 
-    throw StateError(
-      'Expected a Variable expression for "${entry.key}", '
-      'got ${expression.runtimeType}.',
-    );
-  }).toList(growable: false);
+        throw StateError(
+          'Expected a Variable expression for "${entry.key}", '
+          'got ${expression.runtimeType}.',
+        );
+      })
+      .toList(growable: false);
 }
