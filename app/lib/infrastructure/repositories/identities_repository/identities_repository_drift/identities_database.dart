@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../domain/models/contact_card/identity_field.dart';
 import '../../../database/database_platform.dart';
 import '../../../providers/applications_documents_directory_provider.dart';
 import '../../../secure_storage/secure_storage.dart';
@@ -36,16 +37,53 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
        );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (migrator) async {
+      await migrator.createAll();
+      await _syncIdentityColumns();
+    },
     onUpgrade: (migrator, from, to) async {
-      if (from < 2) {
-        await migrator.addColumn(identitiesTable, identitiesTable.did);
-      }
+      await _syncIdentityColumns();
     },
   );
+
+  Future<void> _syncIdentityColumns() async {
+    await _addColumnIfMissing(
+      tableName: 'identities_table',
+      columnName: 'did',
+      alterTableSql: "did TEXT NOT NULL DEFAULT ''",
+    );
+
+    for (final field in identityFields) {
+      await _addColumnIfMissing(
+        tableName: 'identities_table',
+        columnName: field.columnName,
+        alterTableSql: field.identityAlterTableSql,
+      );
+    }
+  }
+
+  Future<void> _addColumnIfMissing({
+    required String tableName,
+    required String columnName,
+    required String alterTableSql,
+  }) async {
+    final existingColumns = await customSelect(
+      'PRAGMA table_info($tableName)',
+    ).get();
+    final hasColumn = existingColumns.any(
+      (row) => row.data['name'] == columnName,
+    );
+
+    if (hasColumn) {
+      return;
+    }
+
+    await customStatement('ALTER TABLE $tableName ADD COLUMN $alterTableSql');
+  }
 }
 
 /// A provider that initializes and supplies the [IdentitiesDatabase].

@@ -5,23 +5,18 @@ import 'package:uuid/uuid.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../domain/models/contacts/contact.dart' as model;
 import '../../../../domain/repositories/contacts_repository.dart';
+import '../../../../presentation/config/persona_field_config.identity_fields.g.dart';
+import '../../../database/drift_sql.dart';
 import '../../../exceptions/app_exception.dart';
 import '../../../exceptions/app_exception_type.dart';
+import '../../../extensions/contact_card_extensions.dart';
 import 'contacts_database.dart' as db;
 
-/// Drift implementation of [ContactsRepository].
-///
-/// - Persists contacts and their cards in the local [db.ContactsDatabase].
-/// - Ensures operations like add and update run inside transactions.
 Future<ContactsRepository> contactsRepositoryDrift(Ref ref) async {
   final database = await ref.read(db.contactsDatabaseProvider.future);
   return ContactsRepositoryDrift(database: database);
 }
 
-/// Creates an in-memory ContactsRepository using Drift.
-///
-/// Returns a [ContactsRepositoryDrift] instance backed by an in-memory
-/// database for testing purposes.
 Future<ContactsRepository> contactsRepositoryInMemoryDrift(Ref ref) async {
   final database = await ref.read(db.contactsInMemoryDatabaseProvider.future);
   return ContactsRepositoryDrift(database: database);
@@ -66,22 +61,18 @@ class ContactsRepositoryDrift implements ContactsRepository {
             ),
           );
 
-      final card = contact.card;
-      await _database
-          .into(_database.contactCards)
-          .insert(
-            db.ContactCardsCompanion(
-              contactId: Value(contactId),
-              did: Value(card.did),
-              type: Value(card.type),
-              firstName: Value(card.firstName),
-              lastName: Value(card.lastName ?? ''),
-              email: Value(card.email ?? ''),
-              mobile: Value(card.mobile ?? ''),
-              profilePic: Value(card.profilePic ?? ''),
-              meetingplaceIdentityCardColor: Value(card.cardColor ?? ''),
-            ),
-          );
+      final cardValues = _contactCardValues(
+        card: contact.card,
+        contactId: contactId,
+      );
+      await _database.customInsert(
+        buildInsertSql(
+          tableName: 'contact_cards',
+          columnNames: cardValues.keys,
+        ),
+        variables: variablesFromExpressions(cardValues),
+        updates: {_database.contactCards},
+      );
 
       final newContact = await _getContactById(contactId);
       if (newContact == null) {
@@ -98,27 +89,25 @@ class ContactsRepositoryDrift implements ContactsRepository {
   }
 
   Future<model.Contact?> _getContactById(String contactId) async {
-    final results = await Future.wait([
-      (_database.select(
-        _database.contacts,
-      )..where((filter) => filter.id.equals(contactId))).getSingleOrNull(),
-      (_database.select(_database.contactCards)
-            ..where((filter) => filter.contactId.equals(contactId)))
-          .getSingleOrNull(),
-    ]);
-
-    final contact = results[0] as db.Contact?;
+    final contact = await (_database.select(
+      _database.contacts,
+    )..where((filter) => filter.id.equals(contactId))).getSingleOrNull();
     if (contact == null) return null;
 
-    final contactCard = results[1] as db.ContactCard?;
-    if (contactCard == null) {
+    final cardRow = await _database
+        .customSelect(
+          'SELECT * FROM contact_cards WHERE contact_id = ?',
+          variables: [Variable<String>(contactId)],
+        )
+        .getSingleOrNull();
+    if (cardRow == null) {
       throw AppException(
         'Contact card not found',
         code: AppExceptionType.missingContactCard.name,
       );
     }
 
-    return _ContactMapper.fromDatabaseRecords(contact, contactCard);
+    return _ContactMapper.fromDatabaseRecords(contact, cardRow);
   }
 
   @override
@@ -130,18 +119,24 @@ class ContactsRepositoryDrift implements ContactsRepository {
 
   @override
   Future<List<model.Contact>> listContacts() async {
-    final results = await _database.select(_database.contacts).join([
-      leftOuterJoin(
-        _database.contactCards,
-        _database.contactCards.contactId.equalsExp(_database.contacts.id),
-      ),
-    ]).get();
+    final contacts = await _database.select(_database.contacts).get();
+    final contactCardRows = await _database
+        .customSelect('SELECT * FROM contact_cards')
+        .get();
+    final cardsByContactId = {
+      for (final row in contactCardRows) row.read<String>('contact_id'): row,
+    };
 
-    return results.map((result) {
-      return _ContactMapper.fromDatabaseRecords(
-        result.readTable(_database.contacts),
-        result.readTable(_database.contactCards),
-      );
+    return contacts.map((contact) {
+      final cardRow = cardsByContactId[contact.id];
+      if (cardRow == null) {
+        throw AppException(
+          'Contact card not found',
+          code: AppExceptionType.missingContactCard.name,
+        );
+      }
+
+      return _ContactMapper.fromDatabaseRecords(contact, cardRow);
     }).toList();
   }
 
@@ -173,48 +168,69 @@ class ContactsRepositoryDrift implements ContactsRepository {
         ),
       );
 
-      final card = contact.card;
-      await (_database.update(
-        _database.contactCards,
-      )..where((c) => c.contactId.equals(contact.id))).write(
-        db.ContactCardsCompanion(
-          did: Value(card.did),
-          type: Value(card.type),
-          firstName: Value(card.firstName),
-          lastName: Value(card.lastName ?? ''),
-          email: Value(card.email ?? ''),
-          mobile: Value(card.mobile ?? ''),
-          profilePic: Value(card.profilePic ?? ''),
-          meetingplaceIdentityCardColor: Value(card.cardColor ?? ''),
+      final cardValues = _contactCardValues(
+        card: contact.card,
+        contactId: contact.id,
+        includeContactId: false,
+      );
+      await _database.customUpdate(
+        buildUpdateSql(
+          tableName: 'contact_cards',
+          columnNames: cardValues.keys,
+          whereClause: 'contact_id = ?',
         ),
+        variables: [
+          ...variablesFromExpressions(cardValues),
+          Variable<String>(contact.id),
+        ],
+        updates: {_database.contactCards},
+        updateKind: UpdateKind.update,
       );
     });
+  }
+
+  Map<String, Expression> _contactCardValues({
+    required ContactCard card,
+    required String contactId,
+    bool includeContactId = true,
+  }) {
+    final values = <String, Expression>{
+      'did': Variable<String>(card.did),
+      'type': Variable<String>(card.type),
+      'profile_pic': Variable<String>(card.profilePic ?? ''),
+      'meetingplace_identity_card_color': Variable<String>(
+        card.cardColor ?? '',
+      ),
+      ...buildContactCardPersonaFieldExpressions(card),
+    };
+
+    if (includeContactId) {
+      values['contact_id'] = Variable<String>(contactId);
+    }
+
+    return values;
   }
 }
 
 class _ContactMapper {
   static model.Contact fromDatabaseRecords(
     db.Contact contact,
-    db.ContactCard contactCard,
+    QueryRow cardRow,
   ) {
+    final personaFields = readPersonaFieldValuesFromRow(cardRow.data);
+    final profilePic = _emptyToNull(cardRow.read<String>('profile_pic'));
+    final cardColor = _emptyToNull(
+      cardRow.read<String>('meetingplace_identity_card_color'),
+    );
+
     final domainCard = ContactCard(
-      id: const Uuid().v4(),
-      did: contactCard.did,
-      type: contactCard.type,
-      firstName: contactCard.firstName,
-      displayName: [
-        contactCard.firstName,
-        contactCard.lastName,
-      ].where((s) => s.isNotEmpty).join(' '),
-      lastName: contactCard.lastName.isEmpty ? null : contactCard.lastName,
-      email: contactCard.email.isEmpty ? null : contactCard.email,
-      mobile: contactCard.mobile.isEmpty ? null : contactCard.mobile,
-      profilePic: contactCard.profilePic.isEmpty
-          ? null
-          : contactCard.profilePic,
-      cardColor: contactCard.meetingplaceIdentityCardColor.isEmpty
-          ? null
-          : contactCard.meetingplaceIdentityCardColor,
+      id: cardRow.read<int>('id').toString(),
+      did: cardRow.read<String>('did'),
+      type: cardRow.read<String>('type'),
+      displayName: ContactCardUtils.fullNameFromPersonaFields(personaFields),
+      personaFields: personaFields,
+      profilePic: profilePic,
+      cardColor: cardColor,
     );
 
     return model.Contact(
@@ -238,4 +254,12 @@ class _ContactMapper {
       notificationBannerDismissed: contact.notificationBannerDismissed,
     );
   }
+}
+
+String? _emptyToNull(String? value) {
+  if (value == null || value.isEmpty) {
+    return null;
+  }
+
+  return value;
 }

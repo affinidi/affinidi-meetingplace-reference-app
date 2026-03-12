@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ContactCard {
 
- String get id; String get did; String get type; String get firstName; String get displayName; String? get lastName; String? get email; String? get mobile; String? get profilePic; String? get cardColor;
+ String get id; String get did; String get type; String get displayName; Map<String, String> get personaFields; String? get profilePic; String? get cardColor;
 /// Create a copy of ContactCard
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ContactCardCopyWith<ContactCard> get copyWith => _$ContactCardCopyWithImpl<Cont
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ContactCard&&(identical(other.id, id) || other.id == id)&&(identical(other.did, did) || other.did == did)&&(identical(other.type, type) || other.type == type)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.mobile, mobile) || other.mobile == mobile)&&(identical(other.profilePic, profilePic) || other.profilePic == profilePic)&&(identical(other.cardColor, cardColor) || other.cardColor == cardColor));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ContactCard&&(identical(other.id, id) || other.id == id)&&(identical(other.did, did) || other.did == did)&&(identical(other.type, type) || other.type == type)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other.personaFields, personaFields)&&(identical(other.profilePic, profilePic) || other.profilePic == profilePic)&&(identical(other.cardColor, cardColor) || other.cardColor == cardColor));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,did,type,firstName,displayName,lastName,email,mobile,profilePic,cardColor);
+int get hashCode => Object.hash(runtimeType,id,did,type,displayName,const DeepCollectionEquality().hash(personaFields),profilePic,cardColor);
 
 @override
 String toString() {
-  return 'ContactCard(id: $id, did: $did, type: $type, firstName: $firstName, displayName: $displayName, lastName: $lastName, email: $email, mobile: $mobile, profilePic: $profilePic, cardColor: $cardColor)';
+  return 'ContactCard(id: $id, did: $did, type: $type, displayName: $displayName, personaFields: $personaFields, profilePic: $profilePic, cardColor: $cardColor)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ContactCardCopyWith<$Res>  {
   factory $ContactCardCopyWith(ContactCard value, $Res Function(ContactCard) _then) = _$ContactCardCopyWithImpl;
 @useResult
 $Res call({
- String id, String did, String type, String firstName, String displayName, String? lastName, String? email, String? mobile, String? profilePic, String? cardColor
+ String id, String did, String type, String displayName, Map<String, String> personaFields, String? profilePic, String? cardColor
 });
 
 
@@ -62,17 +62,14 @@ class _$ContactCardCopyWithImpl<$Res>
 
 /// Create a copy of ContactCard
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? did = null,Object? type = null,Object? firstName = null,Object? displayName = null,Object? lastName = freezed,Object? email = freezed,Object? mobile = freezed,Object? profilePic = freezed,Object? cardColor = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? did = null,Object? type = null,Object? displayName = null,Object? personaFields = null,Object? profilePic = freezed,Object? cardColor = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,did: null == did ? _self.did : did // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
-as String,lastName: freezed == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
-as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String?,mobile: freezed == mobile ? _self.mobile : mobile // ignore: cast_nullable_to_non_nullable
-as String?,profilePic: freezed == profilePic ? _self.profilePic : profilePic // ignore: cast_nullable_to_non_nullable
+as String,personaFields: null == personaFields ? _self.personaFields : personaFields // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,profilePic: freezed == profilePic ? _self.profilePic : profilePic // ignore: cast_nullable_to_non_nullable
 as String?,cardColor: freezed == cardColor ? _self.cardColor : cardColor // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -159,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String did,  String type,  String firstName,  String displayName,  String? lastName,  String? email,  String? mobile,  String? profilePic,  String? cardColor)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String did,  String type,  String displayName,  Map<String, String> personaFields,  String? profilePic,  String? cardColor)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ContactCard() when $default != null:
-return $default(_that.id,_that.did,_that.type,_that.firstName,_that.displayName,_that.lastName,_that.email,_that.mobile,_that.profilePic,_that.cardColor);case _:
+return $default(_that.id,_that.did,_that.type,_that.displayName,_that.personaFields,_that.profilePic,_that.cardColor);case _:
   return orElse();
 
 }
@@ -180,10 +177,10 @@ return $default(_that.id,_that.did,_that.type,_that.firstName,_that.displayName,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String did,  String type,  String firstName,  String displayName,  String? lastName,  String? email,  String? mobile,  String? profilePic,  String? cardColor)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String did,  String type,  String displayName,  Map<String, String> personaFields,  String? profilePic,  String? cardColor)  $default,) {final _that = this;
 switch (_that) {
 case _ContactCard():
-return $default(_that.id,_that.did,_that.type,_that.firstName,_that.displayName,_that.lastName,_that.email,_that.mobile,_that.profilePic,_that.cardColor);case _:
+return $default(_that.id,_that.did,_that.type,_that.displayName,_that.personaFields,_that.profilePic,_that.cardColor);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +197,10 @@ return $default(_that.id,_that.did,_that.type,_that.firstName,_that.displayName,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String did,  String type,  String firstName,  String displayName,  String? lastName,  String? email,  String? mobile,  String? profilePic,  String? cardColor)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String did,  String type,  String displayName,  Map<String, String> personaFields,  String? profilePic,  String? cardColor)?  $default,) {final _that = this;
 switch (_that) {
 case _ContactCard() when $default != null:
-return $default(_that.id,_that.did,_that.type,_that.firstName,_that.displayName,_that.lastName,_that.email,_that.mobile,_that.profilePic,_that.cardColor);case _:
+return $default(_that.id,_that.did,_that.type,_that.displayName,_that.personaFields,_that.profilePic,_that.cardColor);case _:
   return null;
 
 }
@@ -215,17 +212,20 @@ return $default(_that.id,_that.did,_that.type,_that.firstName,_that.displayName,
 
 
 class _ContactCard implements ContactCard {
-  const _ContactCard({required this.id, required this.did, required this.type, required this.firstName, required this.displayName, this.lastName, this.email, this.mobile, this.profilePic, this.cardColor});
+  const _ContactCard({required this.id, required this.did, required this.type, required this.displayName, final  Map<String, String> personaFields = const <String, String>{}, this.profilePic, this.cardColor}): _personaFields = personaFields;
   
 
 @override final  String id;
 @override final  String did;
 @override final  String type;
-@override final  String firstName;
 @override final  String displayName;
-@override final  String? lastName;
-@override final  String? email;
-@override final  String? mobile;
+ final  Map<String, String> _personaFields;
+@override@JsonKey() Map<String, String> get personaFields {
+  if (_personaFields is EqualUnmodifiableMapView) return _personaFields;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_personaFields);
+}
+
 @override final  String? profilePic;
 @override final  String? cardColor;
 
@@ -239,16 +239,16 @@ _$ContactCardCopyWith<_ContactCard> get copyWith => __$ContactCardCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ContactCard&&(identical(other.id, id) || other.id == id)&&(identical(other.did, did) || other.did == did)&&(identical(other.type, type) || other.type == type)&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.email, email) || other.email == email)&&(identical(other.mobile, mobile) || other.mobile == mobile)&&(identical(other.profilePic, profilePic) || other.profilePic == profilePic)&&(identical(other.cardColor, cardColor) || other.cardColor == cardColor));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ContactCard&&(identical(other.id, id) || other.id == id)&&(identical(other.did, did) || other.did == did)&&(identical(other.type, type) || other.type == type)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other._personaFields, _personaFields)&&(identical(other.profilePic, profilePic) || other.profilePic == profilePic)&&(identical(other.cardColor, cardColor) || other.cardColor == cardColor));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,did,type,firstName,displayName,lastName,email,mobile,profilePic,cardColor);
+int get hashCode => Object.hash(runtimeType,id,did,type,displayName,const DeepCollectionEquality().hash(_personaFields),profilePic,cardColor);
 
 @override
 String toString() {
-  return 'ContactCard(id: $id, did: $did, type: $type, firstName: $firstName, displayName: $displayName, lastName: $lastName, email: $email, mobile: $mobile, profilePic: $profilePic, cardColor: $cardColor)';
+  return 'ContactCard(id: $id, did: $did, type: $type, displayName: $displayName, personaFields: $personaFields, profilePic: $profilePic, cardColor: $cardColor)';
 }
 
 
@@ -259,7 +259,7 @@ abstract mixin class _$ContactCardCopyWith<$Res> implements $ContactCardCopyWith
   factory _$ContactCardCopyWith(_ContactCard value, $Res Function(_ContactCard) _then) = __$ContactCardCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String did, String type, String firstName, String displayName, String? lastName, String? email, String? mobile, String? profilePic, String? cardColor
+ String id, String did, String type, String displayName, Map<String, String> personaFields, String? profilePic, String? cardColor
 });
 
 
@@ -276,17 +276,14 @@ class __$ContactCardCopyWithImpl<$Res>
 
 /// Create a copy of ContactCard
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? did = null,Object? type = null,Object? firstName = null,Object? displayName = null,Object? lastName = freezed,Object? email = freezed,Object? mobile = freezed,Object? profilePic = freezed,Object? cardColor = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? did = null,Object? type = null,Object? displayName = null,Object? personaFields = null,Object? profilePic = freezed,Object? cardColor = freezed,}) {
   return _then(_ContactCard(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,did: null == did ? _self.did : did // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
-as String,firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
 as String,displayName: null == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
-as String,lastName: freezed == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
-as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
-as String?,mobile: freezed == mobile ? _self.mobile : mobile // ignore: cast_nullable_to_non_nullable
-as String?,profilePic: freezed == profilePic ? _self.profilePic : profilePic // ignore: cast_nullable_to_non_nullable
+as String,personaFields: null == personaFields ? _self._personaFields : personaFields // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,profilePic: freezed == profilePic ? _self.profilePic : profilePic // ignore: cast_nullable_to_non_nullable
 as String?,cardColor: freezed == cardColor ? _self.cardColor : cardColor // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

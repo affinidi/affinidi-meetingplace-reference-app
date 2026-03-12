@@ -4,11 +4,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/mediator_service/mediator_service.dart';
+import '../../../domain/models/contact_card/identity_field.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/mediator/mediator.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/contacts_screen_filter_extensions.dart';
-import '../../config/persona_field_config.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'contacts_screen_filter.dart';
 import 'contacts_screen_state.dart';
@@ -120,7 +121,7 @@ class ContactsScreenController extends _$ContactsScreenController {
     final lowerQuery = query.toLowerCase();
     final allContacts = ref.read(contactsServiceProvider).contacts;
     final filteredContacts = allContacts.where((contact) {
-      final searchableText = PersonaField.values
+      final searchableText = identityFields
           .map((f) => f.valueFrom(contact.card))
           .join(' ')
           .toLowerCase();

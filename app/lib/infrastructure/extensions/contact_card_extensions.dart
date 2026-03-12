@@ -4,6 +4,7 @@ import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:uuid/uuid.dart' as uuid;
 
 import '../../domain/models/contact_card/contact_card.dart';
+import '../../domain/models/contact_card/identity_field.dart';
 import '../../presentation/painting/cached_base64_image.dart';
 import '../../presentation/widgets/images/default_profile_image.dart';
 import 'string_list_extensions.dart';
@@ -23,16 +24,37 @@ enum ContactCardType {
   }
 }
 
-enum ContactCardPaths {
-  firstName(['n', 'given']),
-  lastName(['n', 'surname']),
-  email(['email', 'type', 'work']),
-  mobile(['tel', 'type', 'cell']),
-  profilePic(['photo']),
-  meetingplaceIdentityCardColor(['x-meetingplace-identity-card-color']);
+class ContactCardMetadataPaths {
+  static const profilePic = ['photo'];
+  static const meetingplaceIdentityCardColor = [
+    'x-meetingplace-identity-card-color',
+  ];
+}
 
-  const ContactCardPaths(this.paths);
-  final List<String> paths;
+extension IdentityFieldContactCardValue on IdentityField {
+  String valueFrom(ContactCard card) => card.personaFields[key] ?? '';
+
+  String? nullableValueFrom(ContactCard card) {
+    final value = valueFrom(card).trim();
+    if (!requiredValue && value.isEmpty) {
+      return null;
+    }
+
+    return value;
+  }
+
+  ContactCard updateContactCard(ContactCard card, String value) {
+    final nextValues = <String, String>{...card.personaFields};
+    final trimmedValue = value.trim();
+
+    if (requiredValue || trimmedValue.isNotEmpty) {
+      nextValues[key] = trimmedValue;
+    } else {
+      nextValues.remove(key);
+    }
+
+    return card.copyWith(personaFields: nextValues);
+  }
 }
 
 class ContactCardUtils {
@@ -75,7 +97,7 @@ class ContactCardUtils {
 
       final elementAtPath = parentElement[pathKey];
       if (elementAtPath == null) {
-        var newNode = <dynamic, dynamic>{};
+        final newNode = <dynamic, dynamic>{};
         parentElement[pathKey] = newNode;
         parentElement = newNode;
       } else if (elementAtPath is Map<dynamic, dynamic>) {
@@ -87,7 +109,7 @@ class ContactCardUtils {
   }
 
   static bool hasProfilePic(Map<dynamic, dynamic> contactInfo) {
-    final pic = getPathValue(contactInfo, ContactCardPaths.profilePic.paths);
+    final pic = getPathValue(contactInfo, ContactCardMetadataPaths.profilePic);
     return pic.isNotEmpty;
   }
 
@@ -97,58 +119,77 @@ class ContactCardUtils {
   }) {
     return hasProfilePic(contactInfo)
         ? CachedBase64Image(
-            getPathValue(contactInfo, ContactCardPaths.profilePic.paths),
+            getPathValue(contactInfo, ContactCardMetadataPaths.profilePic),
             cacheManager: cacheManager,
           )
         : defaultProfileImage;
   }
 
   static String getFullName(Map<dynamic, dynamic> contactInfo) {
-    final firstName = getPathValue(
-      contactInfo,
-      ContactCardPaths.firstName.paths,
-    );
-    final lastName = getPathValue(contactInfo, ContactCardPaths.lastName.paths);
+    final firstName = getPathValue(contactInfo, firstNameField.contactInfoPath);
+    final lastName = getPathValue(contactInfo, lastNameField.contactInfoPath);
     return [firstName, lastName].nonEmpty.join(' ');
   }
 
-  /// Creates a domain ContactCard from an SDK ContactCard
+  static String fullNameFromPersonaFields(Map<String, String> personaFields) {
+    final firstName = personaFields[firstNameField.key] ?? '';
+    final lastName = personaFields[lastNameField.key] ?? '';
+    return [firstName, lastName].nonEmpty.join(' ');
+  }
+
+  static Map<String, String> personaFieldsFromContactInfo(
+    Map<dynamic, dynamic> contactInfo,
+  ) {
+    final values = <String, String>{};
+
+    for (final field in identityFields) {
+      final value = getPathValue(contactInfo, field.contactInfoPath);
+      if (value.isNotEmpty) {
+        values[field.key] = value;
+      }
+    }
+
+    return values;
+  }
+
   static ContactCard fromSdkContactCard(sdk.ContactCard sdkCard) {
     final values = sdkCard.contactInfo;
-    final firstName = getPathValue(values, ContactCardPaths.firstName.paths);
-    final lastName = getPathValue(values, ContactCardPaths.lastName.paths);
-    final email = getPathValue(values, ContactCardPaths.email.paths);
-    final mobile = getPathValue(values, ContactCardPaths.mobile.paths);
-    final profilePic = getPathValue(values, ContactCardPaths.profilePic.paths);
+    final personaFields = personaFieldsFromContactInfo(values);
+    final profilePic = getPathValue(
+      values,
+      ContactCardMetadataPaths.profilePic,
+    );
     final color = getPathValue(
       values,
-      ContactCardPaths.meetingplaceIdentityCardColor.paths,
+      ContactCardMetadataPaths.meetingplaceIdentityCardColor,
     );
 
     return ContactCard(
       id: const uuid.Uuid().v4(),
       did: sdkCard.did,
       type: sdkCard.type,
-      firstName: firstName,
-      displayName: getFullName(values),
-      lastName: lastName.isEmpty ? null : lastName,
-      email: email.isEmpty ? null : email,
-      mobile: mobile.isEmpty ? null : mobile,
+      displayName: fullNameFromPersonaFields(personaFields),
+      personaFields: personaFields,
       profilePic: profilePic.isEmpty ? null : profilePic,
       cardColor: color.isEmpty ? null : color,
     );
   }
 }
 
-/// Convenience helpers on ContactCard:
 extension ContactCardExtensions on ContactCard {
-  /// True when the contact card contains a non-empty profile picture.
   bool get hasProfilePic => profilePic != null && profilePic!.trim().isNotEmpty;
 
-  /// Full display name composed from first and last name.
-  String get fullName => '$firstName ${lastName ?? ''}'.trim();
+  String get firstName => firstNameField.valueFrom(this);
 
-  /// ImageProvider for the contact's profile picture or default placeholder
+  String? get lastName => lastNameField.nullableValueFrom(this);
+
+  String? get email => emailField.nullableValueFrom(this);
+
+  String? get mobile => mobileField.nullableValueFrom(this);
+
+  String get fullName =>
+      ContactCardUtils.fullNameFromPersonaFields(personaFields);
+
   ImageProvider<Object> image({required BaseCacheManager cacheManager}) {
     if (!hasProfilePic) {
       return defaultProfileImage;
@@ -156,91 +197,86 @@ extension ContactCardExtensions on ContactCard {
     return CachedBase64Image(profilePic!, cacheManager: cacheManager);
   }
 
-  /// Primary mobile phone or empty string.
   String get mobilePhone => mobile ?? '';
 
-  /// Primary email or empty string.
   String get emailAddress => email ?? '';
 
-  /// Last name or empty string for fallback.
   String get lastNameOrEmpty => lastName ?? '';
 
+  String valueFor(IdentityField field) => field.valueFrom(this);
+
   sdk.ContactCard toSdkContactCard() {
-    return sdk.ContactCard(
-      did: did,
-      type: type,
-      contactInfo: {
-        'n': {'given': firstName, 'surname': (lastName ?? '')},
-        'email': {
-          'type': {'work': (email ?? '')},
-        },
-        'tel': {
-          'type': {'cell': (mobile ?? '')},
-        },
-        'photo': (profilePic ?? ''),
-        'x-meetingplace-identity-card-color': (cardColor ?? ''),
-      },
-    );
+    final contactInfo = <String, dynamic>{
+      'photo': (profilePic ?? ''),
+      'x-meetingplace-identity-card-color': (cardColor ?? ''),
+    };
+
+    for (final field in identityFields) {
+      ContactCardUtils.setPathValue(
+        contactInfo,
+        field.contactInfoPath,
+        field.valueFrom(this),
+      );
+    }
+
+    return sdk.ContactCard(did: did, type: type, contactInfo: contactInfo);
   }
 }
 
-/// Extension methods on SDK ContactCard for convenient access to fields.
 extension SdkContactCardFields on sdk.ContactCard {
   String get firstName => ContactCardUtils.getPathValue(
     contactInfo,
-    ContactCardPaths.firstName.paths,
+    firstNameField.contactInfoPath,
   );
   set firstName(String value) => ContactCardUtils.setPathValue(
     contactInfo,
-    ContactCardPaths.firstName.paths,
+    firstNameField.contactInfoPath,
     value,
   );
 
-  String get lastName => ContactCardUtils.getPathValue(
-    contactInfo,
-    ContactCardPaths.lastName.paths,
-  );
+  String get lastName =>
+      ContactCardUtils.getPathValue(contactInfo, lastNameField.contactInfoPath);
   set lastName(String value) => ContactCardUtils.setPathValue(
     contactInfo,
-    ContactCardPaths.lastName.paths,
+    lastNameField.contactInfoPath,
     value,
   );
 
   String get email =>
-      ContactCardUtils.getPathValue(contactInfo, ContactCardPaths.email.paths);
+      ContactCardUtils.getPathValue(contactInfo, emailField.contactInfoPath);
   set email(String value) => ContactCardUtils.setPathValue(
     contactInfo,
-    ContactCardPaths.email.paths,
+    emailField.contactInfoPath,
     value,
   );
 
   String get mobile =>
-      ContactCardUtils.getPathValue(contactInfo, ContactCardPaths.mobile.paths);
+      ContactCardUtils.getPathValue(contactInfo, mobileField.contactInfoPath);
   set mobile(String value) => ContactCardUtils.setPathValue(
     contactInfo,
-    ContactCardPaths.mobile.paths,
+    mobileField.contactInfoPath,
     value,
   );
 
   String get profilePic => ContactCardUtils.getPathValue(
     contactInfo,
-    ContactCardPaths.profilePic.paths,
+    ContactCardMetadataPaths.profilePic,
     defaultValue: '',
   );
   set profilePic(String value) => ContactCardUtils.setPathValue(
     contactInfo,
-    ContactCardPaths.profilePic.paths,
+    ContactCardMetadataPaths.profilePic,
     value,
   );
 
   String get meetingplaceIdentityCardColor => ContactCardUtils.getPathValue(
     contactInfo,
-    ContactCardPaths.meetingplaceIdentityCardColor.paths,
+    ContactCardMetadataPaths.meetingplaceIdentityCardColor,
   );
   set meetingplaceIdentityCardColor(String value) =>
       ContactCardUtils.setPathValue(
         contactInfo,
-        ContactCardPaths.meetingplaceIdentityCardColor.paths,
+        ContactCardMetadataPaths.meetingplaceIdentityCardColor,
         value,
       );
 
@@ -250,4 +286,7 @@ extension SdkContactCardFields on sdk.ContactCard {
       ContactCardUtils.getImage(contactInfo, cacheManager: cacheManager);
 
   String get fullName => ContactCardUtils.getFullName(contactInfo);
+
+  String valueFor(IdentityField field) =>
+      ContactCardUtils.getPathValue(contactInfo, field.contactInfoPath);
 }

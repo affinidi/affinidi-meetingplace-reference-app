@@ -1069,46 +1069,6 @@ class $ContactCardsTable extends ContactCards
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _firstNameMeta = const VerificationMeta(
-    'firstName',
-  );
-  @override
-  late final GeneratedColumn<String> firstName = GeneratedColumn<String>(
-    'first_name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _lastNameMeta = const VerificationMeta(
-    'lastName',
-  );
-  @override
-  late final GeneratedColumn<String> lastName = GeneratedColumn<String>(
-    'last_name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _emailMeta = const VerificationMeta('email');
-  @override
-  late final GeneratedColumn<String> email = GeneratedColumn<String>(
-    'email',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _mobileMeta = const VerificationMeta('mobile');
-  @override
-  late final GeneratedColumn<String> mobile = GeneratedColumn<String>(
-    'mobile',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _profilePicMeta = const VerificationMeta(
     'profilePic',
   );
@@ -1137,10 +1097,6 @@ class $ContactCardsTable extends ContactCards
     contactId,
     did,
     type,
-    firstName,
-    lastName,
-    email,
-    mobile,
     profilePic,
     meetingplaceIdentityCardColor,
   ];
@@ -1182,38 +1138,6 @@ class $ContactCardsTable extends ContactCards
       );
     } else if (isInserting) {
       context.missing(_typeMeta);
-    }
-    if (data.containsKey('first_name')) {
-      context.handle(
-        _firstNameMeta,
-        firstName.isAcceptableOrUnknown(data['first_name']!, _firstNameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_firstNameMeta);
-    }
-    if (data.containsKey('last_name')) {
-      context.handle(
-        _lastNameMeta,
-        lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_lastNameMeta);
-    }
-    if (data.containsKey('email')) {
-      context.handle(
-        _emailMeta,
-        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_emailMeta);
-    }
-    if (data.containsKey('mobile')) {
-      context.handle(
-        _mobileMeta,
-        mobile.isAcceptableOrUnknown(data['mobile']!, _mobileMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_mobileMeta);
     }
     if (data.containsKey('profile_pic')) {
       context.handle(
@@ -1259,22 +1183,6 @@ class $ContactCardsTable extends ContactCards
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
-      firstName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}first_name'],
-      )!,
-      lastName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}last_name'],
-      )!,
-      email: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}email'],
-      )!,
-      mobile: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}mobile'],
-      )!,
       profilePic: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}profile_pic'],
@@ -1297,10 +1205,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
   final String contactId;
   final String did;
   final String type;
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String mobile;
   final String profilePic;
   final String meetingplaceIdentityCardColor;
   const ContactCard({
@@ -1308,10 +1212,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     required this.contactId,
     required this.did,
     required this.type,
-    required this.firstName,
-    required this.lastName,
-    required this.email,
-    required this.mobile,
     required this.profilePic,
     required this.meetingplaceIdentityCardColor,
   });
@@ -1322,10 +1222,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     map['contact_id'] = Variable<String>(contactId);
     map['did'] = Variable<String>(did);
     map['type'] = Variable<String>(type);
-    map['first_name'] = Variable<String>(firstName);
-    map['last_name'] = Variable<String>(lastName);
-    map['email'] = Variable<String>(email);
-    map['mobile'] = Variable<String>(mobile);
     map['profile_pic'] = Variable<String>(profilePic);
     map['meetingplace_identity_card_color'] = Variable<String>(
       meetingplaceIdentityCardColor,
@@ -1339,10 +1235,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       contactId: Value(contactId),
       did: Value(did),
       type: Value(type),
-      firstName: Value(firstName),
-      lastName: Value(lastName),
-      email: Value(email),
-      mobile: Value(mobile),
       profilePic: Value(profilePic),
       meetingplaceIdentityCardColor: Value(meetingplaceIdentityCardColor),
     );
@@ -1358,10 +1250,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       contactId: serializer.fromJson<String>(json['contactId']),
       did: serializer.fromJson<String>(json['did']),
       type: serializer.fromJson<String>(json['type']),
-      firstName: serializer.fromJson<String>(json['firstName']),
-      lastName: serializer.fromJson<String>(json['lastName']),
-      email: serializer.fromJson<String>(json['email']),
-      mobile: serializer.fromJson<String>(json['mobile']),
       profilePic: serializer.fromJson<String>(json['profilePic']),
       meetingplaceIdentityCardColor: serializer.fromJson<String>(
         json['meetingplaceIdentityCardColor'],
@@ -1376,10 +1264,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       'contactId': serializer.toJson<String>(contactId),
       'did': serializer.toJson<String>(did),
       'type': serializer.toJson<String>(type),
-      'firstName': serializer.toJson<String>(firstName),
-      'lastName': serializer.toJson<String>(lastName),
-      'email': serializer.toJson<String>(email),
-      'mobile': serializer.toJson<String>(mobile),
       'profilePic': serializer.toJson<String>(profilePic),
       'meetingplaceIdentityCardColor': serializer.toJson<String>(
         meetingplaceIdentityCardColor,
@@ -1392,10 +1276,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     String? contactId,
     String? did,
     String? type,
-    String? firstName,
-    String? lastName,
-    String? email,
-    String? mobile,
     String? profilePic,
     String? meetingplaceIdentityCardColor,
   }) => ContactCard(
@@ -1403,10 +1283,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     contactId: contactId ?? this.contactId,
     did: did ?? this.did,
     type: type ?? this.type,
-    firstName: firstName ?? this.firstName,
-    lastName: lastName ?? this.lastName,
-    email: email ?? this.email,
-    mobile: mobile ?? this.mobile,
     profilePic: profilePic ?? this.profilePic,
     meetingplaceIdentityCardColor:
         meetingplaceIdentityCardColor ?? this.meetingplaceIdentityCardColor,
@@ -1417,10 +1293,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       contactId: data.contactId.present ? data.contactId.value : this.contactId,
       did: data.did.present ? data.did.value : this.did,
       type: data.type.present ? data.type.value : this.type,
-      firstName: data.firstName.present ? data.firstName.value : this.firstName,
-      lastName: data.lastName.present ? data.lastName.value : this.lastName,
-      email: data.email.present ? data.email.value : this.email,
-      mobile: data.mobile.present ? data.mobile.value : this.mobile,
       profilePic: data.profilePic.present
           ? data.profilePic.value
           : this.profilePic,
@@ -1437,10 +1309,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           ..write('contactId: $contactId, ')
           ..write('did: $did, ')
           ..write('type: $type, ')
-          ..write('firstName: $firstName, ')
-          ..write('lastName: $lastName, ')
-          ..write('email: $email, ')
-          ..write('mobile: $mobile, ')
           ..write('profilePic: $profilePic, ')
           ..write(
             'meetingplaceIdentityCardColor: $meetingplaceIdentityCardColor',
@@ -1455,10 +1323,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     contactId,
     did,
     type,
-    firstName,
-    lastName,
-    email,
-    mobile,
     profilePic,
     meetingplaceIdentityCardColor,
   );
@@ -1470,10 +1334,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           other.contactId == this.contactId &&
           other.did == this.did &&
           other.type == this.type &&
-          other.firstName == this.firstName &&
-          other.lastName == this.lastName &&
-          other.email == this.email &&
-          other.mobile == this.mobile &&
           other.profilePic == this.profilePic &&
           other.meetingplaceIdentityCardColor ==
               this.meetingplaceIdentityCardColor);
@@ -1484,10 +1344,6 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   final Value<String> contactId;
   final Value<String> did;
   final Value<String> type;
-  final Value<String> firstName;
-  final Value<String> lastName;
-  final Value<String> email;
-  final Value<String> mobile;
   final Value<String> profilePic;
   final Value<String> meetingplaceIdentityCardColor;
   const ContactCardsCompanion({
@@ -1495,10 +1351,6 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     this.contactId = const Value.absent(),
     this.did = const Value.absent(),
     this.type = const Value.absent(),
-    this.firstName = const Value.absent(),
-    this.lastName = const Value.absent(),
-    this.email = const Value.absent(),
-    this.mobile = const Value.absent(),
     this.profilePic = const Value.absent(),
     this.meetingplaceIdentityCardColor = const Value.absent(),
   });
@@ -1507,19 +1359,11 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     required String contactId,
     required String did,
     required String type,
-    required String firstName,
-    required String lastName,
-    required String email,
-    required String mobile,
     required String profilePic,
     required String meetingplaceIdentityCardColor,
   }) : contactId = Value(contactId),
        did = Value(did),
        type = Value(type),
-       firstName = Value(firstName),
-       lastName = Value(lastName),
-       email = Value(email),
-       mobile = Value(mobile),
        profilePic = Value(profilePic),
        meetingplaceIdentityCardColor = Value(meetingplaceIdentityCardColor);
   static Insertable<ContactCard> custom({
@@ -1527,10 +1371,6 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     Expression<String>? contactId,
     Expression<String>? did,
     Expression<String>? type,
-    Expression<String>? firstName,
-    Expression<String>? lastName,
-    Expression<String>? email,
-    Expression<String>? mobile,
     Expression<String>? profilePic,
     Expression<String>? meetingplaceIdentityCardColor,
   }) {
@@ -1539,10 +1379,6 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
       if (contactId != null) 'contact_id': contactId,
       if (did != null) 'did': did,
       if (type != null) 'type': type,
-      if (firstName != null) 'first_name': firstName,
-      if (lastName != null) 'last_name': lastName,
-      if (email != null) 'email': email,
-      if (mobile != null) 'mobile': mobile,
       if (profilePic != null) 'profile_pic': profilePic,
       if (meetingplaceIdentityCardColor != null)
         'meetingplace_identity_card_color': meetingplaceIdentityCardColor,
@@ -1554,10 +1390,6 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     Value<String>? contactId,
     Value<String>? did,
     Value<String>? type,
-    Value<String>? firstName,
-    Value<String>? lastName,
-    Value<String>? email,
-    Value<String>? mobile,
     Value<String>? profilePic,
     Value<String>? meetingplaceIdentityCardColor,
   }) {
@@ -1566,10 +1398,6 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
       contactId: contactId ?? this.contactId,
       did: did ?? this.did,
       type: type ?? this.type,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      email: email ?? this.email,
-      mobile: mobile ?? this.mobile,
       profilePic: profilePic ?? this.profilePic,
       meetingplaceIdentityCardColor:
           meetingplaceIdentityCardColor ?? this.meetingplaceIdentityCardColor,
@@ -1591,18 +1419,6 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
-    if (firstName.present) {
-      map['first_name'] = Variable<String>(firstName.value);
-    }
-    if (lastName.present) {
-      map['last_name'] = Variable<String>(lastName.value);
-    }
-    if (email.present) {
-      map['email'] = Variable<String>(email.value);
-    }
-    if (mobile.present) {
-      map['mobile'] = Variable<String>(mobile.value);
-    }
     if (profilePic.present) {
       map['profile_pic'] = Variable<String>(profilePic.value);
     }
@@ -1621,10 +1437,6 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
           ..write('contactId: $contactId, ')
           ..write('did: $did, ')
           ..write('type: $type, ')
-          ..write('firstName: $firstName, ')
-          ..write('lastName: $lastName, ')
-          ..write('email: $email, ')
-          ..write('mobile: $mobile, ')
           ..write('profilePic: $profilePic, ')
           ..write(
             'meetingplaceIdentityCardColor: $meetingplaceIdentityCardColor',
@@ -2218,10 +2030,6 @@ typedef $$ContactCardsTableCreateCompanionBuilder =
       required String contactId,
       required String did,
       required String type,
-      required String firstName,
-      required String lastName,
-      required String email,
-      required String mobile,
       required String profilePic,
       required String meetingplaceIdentityCardColor,
     });
@@ -2231,10 +2039,6 @@ typedef $$ContactCardsTableUpdateCompanionBuilder =
       Value<String> contactId,
       Value<String> did,
       Value<String> type,
-      Value<String> firstName,
-      Value<String> lastName,
-      Value<String> email,
-      Value<String> mobile,
       Value<String> profilePic,
       Value<String> meetingplaceIdentityCardColor,
     });
@@ -2285,26 +2089,6 @@ class $$ContactCardsTableFilterComposer
 
   ColumnFilters<String> get type => $composableBuilder(
     column: $table.type,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get firstName => $composableBuilder(
-    column: $table.firstName,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get lastName => $composableBuilder(
-    column: $table.lastName,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get email => $composableBuilder(
-    column: $table.email,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get mobile => $composableBuilder(
-    column: $table.mobile,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2366,26 +2150,6 @@ class $$ContactCardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get firstName => $composableBuilder(
-    column: $table.firstName,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get lastName => $composableBuilder(
-    column: $table.lastName,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get email => $composableBuilder(
-    column: $table.email,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get mobile => $composableBuilder(
-    column: $table.mobile,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get profilePic => $composableBuilder(
     column: $table.profilePic,
     builder: (column) => ColumnOrderings(column),
@@ -2438,18 +2202,6 @@ class $$ContactCardsTableAnnotationComposer
 
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
-
-  GeneratedColumn<String> get firstName =>
-      $composableBuilder(column: $table.firstName, builder: (column) => column);
-
-  GeneratedColumn<String> get lastName =>
-      $composableBuilder(column: $table.lastName, builder: (column) => column);
-
-  GeneratedColumn<String> get email =>
-      $composableBuilder(column: $table.email, builder: (column) => column);
-
-  GeneratedColumn<String> get mobile =>
-      $composableBuilder(column: $table.mobile, builder: (column) => column);
 
   GeneratedColumn<String> get profilePic => $composableBuilder(
     column: $table.profilePic,
@@ -2520,10 +2272,6 @@ class $$ContactCardsTableTableManager
                 Value<String> contactId = const Value.absent(),
                 Value<String> did = const Value.absent(),
                 Value<String> type = const Value.absent(),
-                Value<String> firstName = const Value.absent(),
-                Value<String> lastName = const Value.absent(),
-                Value<String> email = const Value.absent(),
-                Value<String> mobile = const Value.absent(),
                 Value<String> profilePic = const Value.absent(),
                 Value<String> meetingplaceIdentityCardColor =
                     const Value.absent(),
@@ -2532,10 +2280,6 @@ class $$ContactCardsTableTableManager
                 contactId: contactId,
                 did: did,
                 type: type,
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                mobile: mobile,
                 profilePic: profilePic,
                 meetingplaceIdentityCardColor: meetingplaceIdentityCardColor,
               ),
@@ -2545,10 +2289,6 @@ class $$ContactCardsTableTableManager
                 required String contactId,
                 required String did,
                 required String type,
-                required String firstName,
-                required String lastName,
-                required String email,
-                required String mobile,
                 required String profilePic,
                 required String meetingplaceIdentityCardColor,
               }) => ContactCardsCompanion.insert(
@@ -2556,10 +2296,6 @@ class $$ContactCardsTableTableManager
                 contactId: contactId,
                 did: did,
                 type: type,
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                mobile: mobile,
                 profilePic: profilePic,
                 meetingplaceIdentityCardColor: meetingplaceIdentityCardColor,
               ),

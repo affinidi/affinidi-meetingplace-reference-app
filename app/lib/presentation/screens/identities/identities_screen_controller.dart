@@ -3,9 +3,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../domain/models/contact_card/contact_card.dart';
+import '../../../domain/models/contact_card/identity_field.dart';
 import '../../../domain/models/identity/identity.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/identities_screen_filter_extensions.dart';
-import '../../config/persona_field_config.dart';
 import 'identities_screen_filter.dart';
 import 'identities_screen_state.dart';
 
@@ -69,7 +70,7 @@ class IdentitiesScreenController extends _$IdentitiesScreenController {
       final lowerQuery = _lastSearchQuery.toLowerCase();
       searchFiltered = allIdentities.where((identity) {
         final card = identity.card;
-        final searchableText = PersonaField.values
+        final searchableText = identityFields
             .map((f) => f.valueFrom(card))
             .join(' ')
             .toLowerCase();

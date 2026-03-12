@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../dialogs/offer/expiry_date_picker_menu.dart';

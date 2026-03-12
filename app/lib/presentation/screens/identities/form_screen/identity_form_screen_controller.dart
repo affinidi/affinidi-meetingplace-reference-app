@@ -1,12 +1,15 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
+import '../../../../domain/models/contact_card/identity_field.dart';
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../config/persona_field_config.dart';
 import 'identity_form_mode.dart';
 import 'identity_form_screen_state.dart';
@@ -18,10 +21,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   late final scrollController = ScrollController();
 
   late final _fieldControllers = {
-    for (final field in PersonaField.values) field: TextEditingController(),
+    for (final field in identityFields) field: TextEditingController(),
   };
   late final _fieldFocusNodes = {
-    for (final field in PersonaField.values.where(
+    for (final field in identityFields.where(
       (field) => field.shouldValidateOnBlur,
     ))
       field: FocusNode(),
@@ -30,11 +33,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   GlobalKey<FormState>? _formKey;
 
-  TextEditingController controllerFor(PersonaField field) {
+  TextEditingController controllerFor(IdentityField field) {
     return _fieldControllers[field]!;
   }
 
-  FocusNode? focusNodeFor(PersonaField field) {
+  FocusNode? focusNodeFor(IdentityField field) {
     return _fieldFocusNodes[field];
   }
 
@@ -70,7 +73,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     return IdentityFormScreenState(
       identity: identity,
-      isAliasMirroringFirstName: identity.card.displayName.isEmpty ||
+      isAliasMirroringFirstName:
+          identity.card.displayName.isEmpty ||
           identity.card.displayName == identity.card.firstName,
       canDelete: canDelete,
     );
@@ -82,15 +86,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       id: uuid.v4(),
       did: '',
       type: '',
-      firstName: '',
       displayName: '',
+      personaFields: const <String, String>{},
     );
 
-    return Identity(
-      id: uuid.v4(),
-      did: '',
-      card: newCard,
-    );
+    return Identity(id: uuid.v4(), did: '', card: newCard);
   }
 
   Identity _loadIdentity(String? identityId) {
@@ -111,7 +111,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       );
     }
 
-    for (final field in PersonaField.values) {
+    for (final field in identityFields) {
       controllerFor(field).text = field.valueFrom(identity.card);
     }
     aliasController.text = identity.card.displayName;
@@ -120,7 +120,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   bool _hasEnteredAnyInfo(bool canSave) {
-    return PersonaField.values.any(
+    return identityFields.any(
           (field) => controllerFor(field).text.trim().isNotEmpty,
         ) &&
         canSave;
@@ -133,7 +133,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   void validateForm(GlobalKey<FormState> formKey) {
     final ctx = formKey.currentContext!;
-    final isValidForSave = PersonaField.values.every((field) {
+    final isValidForSave = identityFields.every((field) {
       return field.validator(ctx).call(controllerFor(field).text) == null;
     });
 
@@ -143,11 +143,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     );
   }
 
-  bool shouldShowValidation(PersonaField field) {
+  bool shouldShowValidation(IdentityField field) {
     return state.showingErrorFields.contains(field);
   }
 
-  void _setErrorVisibility(PersonaField field, bool visible) {
+  void _setErrorVisibility(IdentityField field, bool visible) {
     final current = {...state.showingErrorFields};
     if (visible) {
       current.add(field);
@@ -157,12 +157,12 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     state = state.copyWith(showingErrorFields: current);
   }
 
-  String _textFor(PersonaField field) {
+  String _textFor(IdentityField field) {
     return controllerFor(field).text;
   }
 
   void updateErrorVisibilityOnBlur(
-    PersonaField field,
+    IdentityField field,
     GlobalKey<FormState> formKey,
   ) {
     final ctx = formKey.currentContext!;
@@ -172,7 +172,26 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     validateForm(formKey);
   }
 
-  void handleFieldChange(PersonaField field, GlobalKey<FormState> formKey) {
+  void revealBlurValidationErrors(GlobalKey<FormState> formKey) {
+    final ctx = formKey.currentContext!;
+    final errorFields = {...state.showingErrorFields}
+      ..removeWhere((field) => field.shouldValidateOnBlur);
+
+    for (final field in identityFields.where(
+      (field) => field.shouldValidateOnBlur,
+    )) {
+      final hasError = field.validator(ctx).call(_textFor(field)) != null;
+      if (hasError) {
+        errorFields.add(field);
+      }
+    }
+
+    state = state.copyWith(showingErrorFields: errorFields);
+    formKey.currentState?.validate();
+    validateForm(formKey);
+  }
+
+  void handleFieldChange(IdentityField field, GlobalKey<FormState> formKey) {
     if (state.showingErrorFields.contains(field)) {
       final ctx = formKey.currentContext!;
       final error = field.validator(ctx).call(_textFor(field));
@@ -195,7 +214,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void updateField(
-    PersonaField field,
+    IdentityField field,
     String value,
     GlobalKey<FormState> formKey,
   ) {
@@ -203,7 +222,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     if (error == null) {
       var updatedCard = field.updateContactCard(state.identity.card, value);
 
-      if (field == PersonaField.firstName && state.isAliasMirroringFirstName) {
+      if (field == firstNameField && state.isAliasMirroringFirstName) {
         aliasController.text = value;
         updatedCard = updatedCard.copyWith(displayName: value);
       }
@@ -243,12 +262,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     var updatedCard = state.identity.card;
 
-    for (final field in PersonaField.values) {
+    for (final field in identityFields) {
       final controllerValue = controllerFor(field).text.trim();
-      final persistedValue =
-          field == PersonaField.firstName && controllerValue.isEmpty
-              ? anonymousLabel
-              : controllerValue;
+      final persistedValue = field == firstNameField && controllerValue.isEmpty
+          ? anonymousLabel
+          : controllerValue;
       updatedCard = field.updateContactCard(updatedCard, persistedValue);
     }
 

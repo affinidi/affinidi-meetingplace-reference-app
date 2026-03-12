@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
 import '../../domain/models/contact_card/contact_card.dart';
+import '../../domain/models/contact_card/identity_field.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
+import '../../infrastructure/extensions/contact_card_extensions.dart';
 import '../config/persona_field_config.dart';
 
 class ContactCardView extends StatelessWidget {
@@ -34,11 +36,11 @@ class SdkContactCardView extends StatelessWidget {
 class _PersonaFieldListView extends StatelessWidget {
   const _PersonaFieldListView({required this.valueResolver});
 
-  final String Function(PersonaField) valueResolver;
+  final String Function(IdentityField) valueResolver;
 
   @override
   Widget build(BuildContext context) {
-    final fields = PersonaField.values
+    final fields = identityFields
         .where((field) => valueResolver(field).isNotEmpty)
         .toList();
 
@@ -51,16 +53,15 @@ class _PersonaFieldListView extends StatelessWidget {
           iconColor: context.colorScheme.onPrimary,
           dense: true,
           visualDensity: VisualDensity.compact,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 8.0,
+          ),
           leading: Container(
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: field.iconColor(
-                context.customColors,
-                context.colorScheme,
-              ),
+              color: field.iconColor(context.customColors, context.colorScheme),
               borderRadius: BorderRadius.circular(6.0),
             ),
             child: Icon(field.icon, size: 18),

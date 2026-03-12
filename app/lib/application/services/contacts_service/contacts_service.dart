@@ -430,20 +430,7 @@ class ContactsService extends _$ContactsService {
       status: ContactStatus.pendingApproval,
       otherPartyCard: src == null
           ? null
-          : ContactCard(
-              id: const Uuid().v4(),
-              did: src.did,
-              type: src.type,
-              firstName: src.firstName,
-              displayName: src.fullName,
-              lastName: src.lastName.isEmpty ? null : src.lastName,
-              email: src.email.isEmpty ? null : src.email,
-              mobile: src.mobile.isEmpty ? null : src.mobile,
-              profilePic: src.profilePic.isEmpty ? null : src.profilePic,
-              cardColor: src.meetingplaceIdentityCardColor.isEmpty
-                  ? null
-                  : src.meetingplaceIdentityCardColor,
-            ),
+          : ContactCardUtils.fromSdkContactCard(src),
     );
     await updateContact(updatedContact);
   }

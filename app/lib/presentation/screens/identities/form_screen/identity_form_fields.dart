@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../infrastructure/extensions/identities_extensions.dart';
+import '../../../../domain/models/contact_card/identity_field.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
@@ -30,9 +31,8 @@ class IdentityFormFields extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
-    final personaFields = PersonaField.values;
 
-    String? validateField(PersonaField field, String? value) {
+    String? validateField(IdentityField field, String? value) {
       if (field.shouldValidateOnBlur &&
           !controller.shouldShowValidation(field)) {
         return null;
@@ -41,14 +41,11 @@ class IdentityFormFields extends ConsumerWidget {
       return field.validator(context).call(value);
     }
 
-    Widget buildPersonaField(PersonaField field, double traversalOrder) {
+    Widget buildIdentityField(IdentityField field, double traversalOrder) {
       return FormRowTextField(
         icon: field.icon,
         label: field.label(context.l10n),
-        color: field.iconColor(
-          context.customColors,
-          context.colorScheme,
-        ),
+        color: field.iconColor(context.customColors, context.colorScheme),
         controller: controller.controllerFor(field),
         placeholder: field.placeholder(context.l10n),
         textCapitalization: field.textCapitalization,
@@ -75,22 +72,21 @@ class IdentityFormFields extends ConsumerWidget {
           children: [
             GestureDetector(
               onTap: () async {
-                final result = await Navigator.of(
-                  context,
-                  rootNavigator: true,
-                ).push<MediaReviewResult>(
-                  MaterialPageRoute(
-                    builder: (context) => const MediaScreen(
-                      cameraLensDirection: CameraLensDirection.front,
-                      useCamera: true,
-                      messageText: '',
-                    ),
-                  ),
-                );
+                final result = await Navigator.of(context, rootNavigator: true)
+                    .push<MediaReviewResult>(
+                      MaterialPageRoute(
+                        builder: (context) => const MediaScreen(
+                          cameraLensDirection: CameraLensDirection.front,
+                          useCamera: true,
+                          messageText: '',
+                        ),
+                      ),
+                    );
 
                 if (result != null && result.succeeded) {
-                  await controller
-                      .updateProfilePic(result.compressedImage.base64);
+                  await controller.updateProfilePic(
+                    result.compressedImage.base64,
+                  );
                 }
               },
               child: Row(
@@ -133,12 +129,9 @@ class IdentityFormFields extends ConsumerWidget {
                 ],
               ),
             ),
-            for (var index = 0; index < personaFields.length; index++) ...[
+            for (var index = 0; index < identityFields.length; index++) ...[
               const Divider(),
-              buildPersonaField(
-                personaFields[index],
-                (index + 1).toDouble(),
-              ),
+              buildIdentityField(identityFields[index], (index + 1).toDouble()),
             ],
           ],
         ),

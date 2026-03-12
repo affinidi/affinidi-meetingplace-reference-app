@@ -5,10 +5,12 @@ import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../domain/models/contact_card/identity_field.dart';
 import '../../../../domain/models/contacts/contact_category.dart';
 import '../../../../domain/models/contacts/contact_origin.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
 import '../../../../domain/models/contacts/contact_type.dart';
+import '../../../../presentation/config/persona_field_config.identity_fields.g.dart';
 import '../../../database/database_platform.dart';
 import '../../../providers/applications_documents_directory_provider.dart';
 import '../../../secure_storage/secure_storage.dart';
@@ -41,12 +43,16 @@ class ContactsDatabase extends _$ContactsDatabase {
        );
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
+    },
+    onCreate: (migrator) async {
+      await migrator.createAll();
+      await _syncContactCardPersonaColumns();
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -111,8 +117,41 @@ class ContactsDatabase extends _$ContactsDatabase {
           );
         }
       }
+
+      if (from < 5) {
+        await _syncContactCardPersonaColumns();
+      }
     },
   );
+
+  Future<void> _syncContactCardPersonaColumns() async {
+    for (final field in identityFields) {
+      await _addColumnIfMissing(
+        tableName: 'contact_cards',
+        columnName: field.columnName,
+        alterTableSql: field.contactCardAlterTableSql,
+      );
+    }
+  }
+
+  Future<void> _addColumnIfMissing({
+    required String tableName,
+    required String columnName,
+    required String alterTableSql,
+  }) async {
+    final existingColumns = await customSelect(
+      'PRAGMA table_info($tableName)',
+    ).get();
+    final hasColumn = existingColumns.any(
+      (row) => row.data['name'] == columnName,
+    );
+
+    if (hasColumn) {
+      return;
+    }
+
+    await customStatement('ALTER TABLE $tableName ADD COLUMN $alterTableSql');
+  }
 }
 
 /// Main contacts table.
@@ -147,17 +186,13 @@ class Contacts extends Table {
 /// Stores additional profile details such as first/last name, email,
 /// mobile number, and profile picture.
 @DataClassName('ContactCard')
-class ContactCards extends Table {
+class ContactCards extends Table with GeneratedContactCardPersonaColumns {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get contactId => text().customConstraint(
     'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL',
   )();
   TextColumn get did => text()();
   TextColumn get type => text()();
-  TextColumn get firstName => text()();
-  TextColumn get lastName => text()();
-  TextColumn get email => text()();
-  TextColumn get mobile => text()();
   TextColumn get profilePic => text()();
   TextColumn get meetingplaceIdentityCardColor => text()();
 }

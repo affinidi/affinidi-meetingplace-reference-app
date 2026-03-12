@@ -8,11 +8,9 @@ part 'contact_card.freezed.dart';
 ///
 /// Factory parameters:
 /// - [id] - Unique identifier for the contact card.
-/// - [firstName] - Given name.
 /// - [displayName] - Full display name shown in UI.
-/// - [lastName] - Optional family name.
-/// - [email] - Optional primary email address.
-/// - [mobile] - Optional primary mobile number.
+/// - [personaFields] - Centralized identity/persona field values keyed by
+/// field id.
 /// - [profilePic] - Optional profile picture reference (base64).
 /// - [cardColor] - Optional UI color hint for the card.
 @freezed
@@ -21,11 +19,8 @@ abstract class ContactCard with _$ContactCard {
     required String id,
     required String did,
     required String type,
-    required String firstName,
     required String displayName,
-    String? lastName,
-    String? email,
-    String? mobile,
+    @Default(<String, String>{}) Map<String, String> personaFields,
     String? profilePic,
     String? cardColor,
   }) = _ContactCard;
@@ -35,11 +30,8 @@ abstract class ContactCard with _$ContactCard {
       id: '0',
       did: '',
       type: '',
-      firstName: '',
       displayName: '',
-      lastName: null,
-      email: null,
-      mobile: null,
+      personaFields: <String, String>{},
       profilePic: null,
       cardColor: null,
     );

@@ -14,6 +14,7 @@ import '../../../../domain/models/identity/identity.dart';
 import '../../../../domain/models/mediator/mediator_status.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/helpers/debouncer.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../l10n/app_localizations.dart';

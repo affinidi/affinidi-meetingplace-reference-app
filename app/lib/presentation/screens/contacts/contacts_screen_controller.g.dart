@@ -7,7 +7,7 @@ part of 'contacts_screen_controller.dart';
 // **************************************************************************
 
 String _$contactsScreenControllerHash() =>
-    r'def90c4c16a519a9b9fd1e5015243c021066cb01';
+    r'fffd7b256539f38368cdbd98199e3b270eb35221';
 
 /// See also [ContactsScreenController].
 @ProviderFor(ContactsScreenController)

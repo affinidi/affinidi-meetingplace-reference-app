@@ -1,4 +1,5 @@
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contact_card/identity_field.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_category.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_origin.dart';
@@ -12,19 +13,17 @@ class FakeContacts {
     channelDid: 'did:key:individual-channel',
     channelDidSha256: 'individual-channel-sha256',
     offerLink: 'individual-offer-link',
-    card: ContactCard(
+    card: _contactCard(
       id: 'contact-card-id',
       did: 'did:key:individual-channel',
-      type: ContactCardType.individual.value,
       firstName: 'Alice',
       displayName: 'Display Alice',
       email: 'alice@example.com',
       mobile: '+1234567891',
     ),
-    otherPartyCard: ContactCard(
+    otherPartyCard: _contactCard(
       id: 'other-party-card-id',
       did: 'did:key:other-party',
-      type: ContactCardType.individual.value,
       firstName: 'Bob',
       displayName: 'Display Bob',
       email: 'bob@example.com',
@@ -45,18 +44,16 @@ class FakeContacts {
     channelDid: 'did:key:group-channel',
     channelDidSha256: 'group-channel-sha256',
     offerLink: 'group-offer-link',
-    card: ContactCard(
+    card: _contactCard(
       id: 'group-contact-card-id',
       did: 'did:key:group-channel',
-      type: ContactCardType.individual.value,
       firstName: 'Project',
       lastName: 'Team',
       displayName: 'Display Project',
     ),
-    otherPartyCard: ContactCard(
+    otherPartyCard: _contactCard(
       id: 'other-party-card-id',
       did: 'did:key:other-party',
-      type: ContactCardType.individual.value,
       firstName: 'Team',
       lastName: 'Admin',
       displayName: 'Display Team',
@@ -78,10 +75,9 @@ class FakeContacts {
     channelDid: 'did:key:pending-channel',
     channelDidSha256: 'pending-channel-sha256',
     offerLink: 'pending-offer-link',
-    card: ContactCard(
+    card: _contactCard(
       id: 'pending-contact-card-id',
       did: 'did:key:pending-channel',
-      type: ContactCardType.individual.value,
       firstName: 'Charlie',
       lastName: 'Brown',
       displayName: 'Display Charlie',
@@ -101,19 +97,17 @@ class FakeContacts {
     channelDid: 'did:key:new-contact-channel',
     channelDidSha256: 'new-contact-channel-sha256',
     offerLink: 'new-contact-offer-link',
-    card: ContactCard(
+    card: _contactCard(
       id: 'new-contact-card-id',
       did: 'did:key:new-contact-channel',
-      type: ContactCardType.individual.value,
       firstName: 'Emma',
       lastName: 'Wilson',
       displayName: 'Display Emma',
       email: 'emma@example.com',
     ),
-    otherPartyCard: ContactCard(
+    otherPartyCard: _contactCard(
       id: 'new-contact-other-party-card-id',
       did: 'did:key:new-contact-other-party',
-      type: ContactCardType.individual.value,
       firstName: 'Emma',
       lastName: 'Wilson',
       displayName: 'Display Emma',
@@ -135,19 +129,17 @@ class FakeContacts {
     channelDid: 'did:key:oob-channel',
     channelDidSha256: 'oob-channel-sha256',
     offerLink: 'oob-offer-link',
-    card: ContactCard(
+    card: _contactCard(
       id: 'oob-contact-card-id',
       did: 'did:key:oob-channel',
-      type: ContactCardType.individual.value,
       firstName: 'Diana',
       lastName: 'Prince',
       displayName: 'Display Diana',
       email: 'diana@example.com',
     ),
-    otherPartyCard: ContactCard(
+    otherPartyCard: _contactCard(
       id: 'oob-other-party-card-id',
       did: 'did:key:oob-other-party',
-      type: ContactCardType.individual.value,
       firstName: 'Diana',
       lastName: 'Prince',
       displayName: 'Display Diana',
@@ -169,19 +161,17 @@ class FakeContacts {
     channelDid: 'did:key:oob-channel-dismissed',
     channelDidSha256: 'oob-channel-dismissed-sha256',
     offerLink: 'oob-offer-dismissed-link',
-    card: ContactCard(
+    card: _contactCard(
       id: 'oob-contact-dismissed-card-id',
       did: 'did:key:oob-channel-dismissed',
-      type: ContactCardType.individual.value,
       firstName: 'Steve',
       lastName: 'Rogers',
       displayName: 'Display Steve',
       email: 'steve@example.com',
     ),
-    otherPartyCard: ContactCard(
+    otherPartyCard: _contactCard(
       id: 'oob-dismissed-other-party-card-id',
       did: 'did:key:oob-dismissed-other-party',
-      type: ContactCardType.individual.value,
       firstName: 'Steve',
       lastName: 'Rogers',
       displayName: 'Display Steve',
@@ -197,5 +187,35 @@ class FakeContacts {
     hasBeenOpened: true,
     badgeCount: 0,
     notificationBannerDismissed: true,
+  );
+}
+
+ContactCard _contactCard({
+  required String id,
+  required String did,
+  required String firstName,
+  required String displayName,
+  String? lastName,
+  String? email,
+  String? mobile,
+}) {
+  final personaFields = <String, String>{firstNameField.key: firstName};
+
+  if (lastName != null) {
+    personaFields[lastNameField.key] = lastName;
+  }
+  if (email != null) {
+    personaFields[emailField.key] = email;
+  }
+  if (mobile != null) {
+    personaFields[mobileField.key] = mobile;
+  }
+
+  return ContactCard(
+    id: id,
+    did: did,
+    type: ContactCardType.individual.value,
+    displayName: displayName,
+    personaFields: personaFields,
   );
 }

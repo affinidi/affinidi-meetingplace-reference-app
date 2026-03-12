@@ -23,6 +23,7 @@ environment:
 
 dependencies:
   app_badge_plus: ^1.2.3
+  build: ^2.5.4
   camera: ^0.11.2
   clear_all_notifications: ^1.0.0
   clock: any
@@ -82,7 +83,7 @@ dependencies:
   video_player: ^2.10.0
 
 dev_dependencies:
-  build_runner: ^2.4.8
+  build_runner: ^2.5.4
   copy_with_extension_gen: any
   dart_flutter_team_lints: ^3.5.2
   drift_dev: ^2.28.0

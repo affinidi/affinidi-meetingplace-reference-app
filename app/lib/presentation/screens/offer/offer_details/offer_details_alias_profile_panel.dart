@@ -15,7 +15,7 @@ class _OfferDetailsAliasProfilePanel extends ConsumerWidget {
           return null;
         }
 
-        return PersonaField.firstName.sdkValueFrom(card);
+        return firstNameField.sdkValueFrom(card);
       }),
     );
     final isUsingPrimaryIdentity = ref.watch(

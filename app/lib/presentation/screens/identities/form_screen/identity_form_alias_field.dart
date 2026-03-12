@@ -22,7 +22,7 @@ class _IdentityFormAliasField extends ConsumerWidget {
         textCapitalization: TextCapitalization.sentences,
         autocorrect: true,
         textInputAction: TextInputAction.done,
-        traversalOrder: 5.0,
+        traversalOrder: identityFields.length + 1.0,
       ),
     );
   }

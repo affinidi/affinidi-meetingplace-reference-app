@@ -1,0 +1,14 @@
+targets:
+  $default:
+    builders:
+      mpx_flutter_reference_app|identity_field_builder:
+        generate_for:
+          - lib/presentation/config/persona_field_config.dart
+
+builders:
+  identity_field_builder:
+    import: "package:mpx_flutter_reference_app/build/identity_field_builder.dart"
+    builder_factories: ["identityFieldBuilder"]
+    build_extensions: {".dart": [".identity_fields.g.dart"]}
+    auto_apply: root_package
+    build_to: source

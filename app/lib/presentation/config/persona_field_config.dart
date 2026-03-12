@@ -2,68 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
-import '../../domain/models/contact_card/contact_card.dart';
+import '../../domain/models/contact_card/identity_field.dart';
 import '../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../l10n/app_localizations.dart';
 import '../themes/app_custom_colors.dart';
 import '../validators/input_validators.dart';
 
-enum PersonaField {
-  firstName,
-  lastName,
-  email,
-  mobile;
-
+extension IdentityFieldPresentation on IdentityField {
   IconData get icon {
-    switch (this) {
-      case PersonaField.firstName:
+    switch (iconKey) {
+      case IdentityFieldIconKey.person:
         return Icons.person;
-      case PersonaField.lastName:
+      case IdentityFieldIconKey.badge:
         return Icons.badge;
-      case PersonaField.email:
+      case IdentityFieldIconKey.email:
         return Icons.email;
-      case PersonaField.mobile:
+      case IdentityFieldIconKey.phone:
         return Icons.phone;
     }
   }
 
   Color iconColor(AppCustomColors customColors, ColorScheme colorScheme) {
-    switch (this) {
-      case PersonaField.firstName:
+    switch (colorKey) {
+      case IdentityFieldColorKey.success:
         return customColors.success;
-      case PersonaField.lastName:
+      case IdentityFieldColorKey.purple:
         return customColors.purple;
-      case PersonaField.email:
+      case IdentityFieldColorKey.warning:
         return customColors.warning;
-      case PersonaField.mobile:
+      case IdentityFieldColorKey.primary:
         return colorScheme.primary;
     }
   }
 
-  String label(AppLocalizations l10n) => l10n.contactCardFieldName(name);
+  String label(AppLocalizations l10n) => l10n.contactCardFieldName(key);
 
-  String placeholder(AppLocalizations l10n) {
-    switch (this) {
-      case PersonaField.firstName:
-        return l10n.enterFirstName;
-      case PersonaField.lastName:
-        return l10n.enterLastName;
-      case PersonaField.email:
-        return l10n.enterEmail;
-      case PersonaField.mobile:
-        return l10n.enterMobile;
-    }
-  }
+  String placeholder(AppLocalizations l10n) => label(l10n);
 
   InputType get inputType {
-    switch (this) {
-      case PersonaField.firstName:
+    switch (inputKind) {
+      case IdentityFieldInputKind.firstName:
         return InputType.firstName;
-      case PersonaField.lastName:
+      case IdentityFieldInputKind.lastName:
         return InputType.lastName;
-      case PersonaField.email:
+      case IdentityFieldInputKind.email:
         return InputType.email;
-      case PersonaField.mobile:
+      case IdentityFieldInputKind.phone:
         return InputType.phone;
     }
   }
@@ -73,82 +57,42 @@ enum PersonaField {
   }
 
   TextInputType? get keyboardType {
-    switch (this) {
-      case PersonaField.firstName:
+    switch (inputKind) {
+      case IdentityFieldInputKind.firstName:
+      case IdentityFieldInputKind.lastName:
         return null;
-      case PersonaField.lastName:
-        return null;
-      case PersonaField.email:
+      case IdentityFieldInputKind.email:
         return TextInputType.emailAddress;
-      case PersonaField.mobile:
+      case IdentityFieldInputKind.phone:
         return TextInputType.phone;
     }
   }
 
   TextCapitalization get textCapitalization {
-    switch (this) {
-      case PersonaField.firstName:
-      case PersonaField.lastName:
+    switch (inputKind) {
+      case IdentityFieldInputKind.firstName:
+      case IdentityFieldInputKind.lastName:
         return TextCapitalization.sentences;
-      case PersonaField.email:
-      case PersonaField.mobile:
+      case IdentityFieldInputKind.email:
+      case IdentityFieldInputKind.phone:
         return TextCapitalization.none;
     }
   }
 
   bool get autocorrect {
-    switch (this) {
-      case PersonaField.firstName:
-      case PersonaField.lastName:
+    switch (inputKind) {
+      case IdentityFieldInputKind.firstName:
+      case IdentityFieldInputKind.lastName:
         return true;
-      case PersonaField.email:
-      case PersonaField.mobile:
+      case IdentityFieldInputKind.email:
+      case IdentityFieldInputKind.phone:
         return false;
     }
   }
 
-  bool get autofocus => this == PersonaField.firstName;
-
-  bool get shouldValidateOnBlur => this == PersonaField.email;
-
   TextInputAction get textInputAction => TextInputAction.next;
 
-  String valueFrom(ContactCard card) {
-    switch (this) {
-      case PersonaField.firstName:
-        return card.firstName;
-      case PersonaField.lastName:
-        return card.lastName ?? '';
-      case PersonaField.email:
-        return card.email ?? '';
-      case PersonaField.mobile:
-        return card.mobile ?? '';
-    }
-  }
-
   String sdkValueFrom(sdk.ContactCard card) {
-    switch (this) {
-      case PersonaField.firstName:
-        return card.firstName;
-      case PersonaField.lastName:
-        return card.lastName;
-      case PersonaField.email:
-        return card.email;
-      case PersonaField.mobile:
-        return card.mobile;
-    }
-  }
-
-  ContactCard updateContactCard(ContactCard card, String value) {
-    switch (this) {
-      case PersonaField.firstName:
-        return card.copyWith(firstName: value);
-      case PersonaField.lastName:
-        return card.copyWith(lastName: value.isEmpty ? null : value);
-      case PersonaField.email:
-        return card.copyWith(email: value.isEmpty ? null : value);
-      case PersonaField.mobile:
-        return card.copyWith(mobile: value.isEmpty ? null : value);
-    }
+    return ContactCardUtils.getPathValue(card.contactInfo, contactInfoPath);
   }
 }

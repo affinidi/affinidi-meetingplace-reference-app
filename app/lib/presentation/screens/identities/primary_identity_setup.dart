@@ -18,7 +18,7 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
     final l10n = context.l10n;
 
     Future<void> handleSave() async {
-      controller.updateErrorVisibilityOnBlur(PersonaField.email, formKey);
+      controller.revealBlurValidationErrors(formKey);
 
       final isValid = formKey.currentState?.validate() ?? false;
       controller.validateForm(formKey);
