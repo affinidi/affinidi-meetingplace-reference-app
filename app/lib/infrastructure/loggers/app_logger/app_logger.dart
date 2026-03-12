@@ -21,12 +21,6 @@ class AppLogger
   final FileLogCollectorTarget _fileLogger = FileLogCollectorTarget();
   late final List<LoggerTarget> _loggers;
 
-  /// Initializes persistent file logging. Call once from [main] after
-  /// [WidgetsFlutterBinding.ensureInitialized].
-  Future<void> initialize() async {
-    await _fileLogger.initialize();
-  }
-
   /// Path to the persisted log file, or null until [initialize] completes.
   String? get logFilePath => _fileLogger.logFilePath;
 

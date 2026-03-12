@@ -13,7 +13,9 @@ import 'logger_target.dart';
 /// parsed into [logs] and trimmed to [_maxFileLines] to prevent unbounded
 /// growth.
 class FileLogCollectorTarget implements LoggerTarget {
-  FileLogCollectorTarget();
+  FileLogCollectorTarget() {
+    initialize();
+  }
 
   File? _logFile;
   final List<AppLogEntry> _pendingBuffer = [];
@@ -21,7 +23,9 @@ class FileLogCollectorTarget implements LoggerTarget {
   final StreamController<AppLogEntry> _logController =
       StreamController<AppLogEntry>.broadcast();
 
-  static const int _maxFileLines = 5000;
+  /// Completes when historical logs have been loaded from disk.
+  late final Future<void> initialized;
+
   static const int _maxMemoryEntries = 2000;
   static final RegExp _lineRegex = RegExp(r'^\[(.+?)\] \[(.+?)\] (.+)$');
 
@@ -29,31 +33,29 @@ class FileLogCollectorTarget implements LoggerTarget {
     final dir = await getApplicationDocumentsDirectory();
     _logFile = File('${dir.path}/app_debug.log');
 
-    // Parse existing log file into the in-memory list.
+    if (_pendingBuffer.isNotEmpty) {
+      final buffer = StringBuffer();
+      for (final entry in _pendingBuffer) {
+        buffer.write('${_formatEntry(entry)}\n');
+      }
+      _logFile!.writeAsStringSync(buffer.toString(), mode: FileMode.append);
+      _pendingBuffer.clear();
+    }
+
     if (await _logFile!.exists()) {
       final lines = await _logFile!.readAsLines();
       final nonEmptyLines = lines.where((l) => l.trim().isNotEmpty).toList();
 
       // Trim file on disk if it exceeds the max line cap.
-      if (nonEmptyLines.length > _maxFileLines) {
+      if (nonEmptyLines.length > _maxMemoryEntries) {
         final trimmed = nonEmptyLines.sublist(
-          nonEmptyLines.length - _maxFileLines,
+          nonEmptyLines.length - _maxMemoryEntries,
         );
-        await _logFile!.writeAsString('${trimmed.join('\n')}\n');
+        _logFile!.writeAsStringSync('${trimmed.join('\n')}\n');
         _loadEntries(trimmed);
       } else {
         _loadEntries(nonEmptyLines);
       }
-    }
-
-    if (_pendingBuffer.isNotEmpty) {
-      final sink = _logFile!.openWrite(mode: FileMode.append);
-      for (final entry in _pendingBuffer) {
-        sink.writeln(_formatEntry(entry));
-      }
-      await sink.flush();
-      await sink.close();
-      _pendingBuffer.clear();
     }
   }
 
@@ -62,7 +64,9 @@ class FileLogCollectorTarget implements LoggerTarget {
     final capped = entries.length > _maxMemoryEntries
         ? entries.sublist(entries.length - _maxMemoryEntries)
         : entries;
-    _logs.addAll(capped);
+    _logs
+      ..clear()
+      ..addAll(capped);
   }
 
   /// Stream of new log entries as they are added during this session.
@@ -147,7 +151,7 @@ class FileLogCollectorTarget implements LoggerTarget {
     if (file == null) {
       _pendingBuffer.add(entry);
     } else {
-      file.writeAsString('${_formatEntry(entry)}\n', mode: FileMode.append);
+      file.writeAsStringSync('${_formatEntry(entry)}\n', mode: FileMode.append);
     }
   }
 
