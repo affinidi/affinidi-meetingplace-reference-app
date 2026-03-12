@@ -7,28 +7,21 @@ import '../../../../domain/repositories/identities_repository.dart';
 import '../../../../presentation/config/persona_field_config.identity_fields.g.dart';
 import '../../../database/drift_sql.dart';
 import '../../../extensions/contact_card_extensions.dart';
-import '../../../loggers/app_logger/app_logger.dart';
-import '../../../providers/app_logger_provider.dart';
 import 'identities_database.dart';
 
 Future<IdentitiesRepository> identitiesRepositoryDrift(Ref ref) async {
   final database = await ref.read(identitiesDatabaseProvider.future);
-
-  final logger = ref.read(appLoggerProvider);
-  return IdentitiesRepositoryDrift(db: database, logger: logger);
+  return IdentitiesRepositoryDrift(db: database);
 }
 
 Future<IdentitiesRepository> identitiesRepositoryInMemoryDrift(Ref ref) async {
   final database = await ref.read(identitiesInMemoryDatabaseProvider.future);
-
-  final logger = ref.read(appLoggerProvider);
-  return IdentitiesRepositoryDrift(db: database, logger: logger);
+  return IdentitiesRepositoryDrift(db: database);
 }
 
 class IdentitiesRepositoryDrift implements IdentitiesRepository {
-  IdentitiesRepositoryDrift({required this.db, required this.logger});
+  IdentitiesRepositoryDrift({required this.db});
   final IdentitiesDatabase db;
-  final AppLogger logger;
 
   @override
   Future<List<Identity>> listIdentities() async {
@@ -100,8 +93,8 @@ extension IdentityMapper on Identity {
     final did = row.read<String>('did');
     final displayName = row.read<String>('display_name');
     final isPrimary = row.read<bool>('is_primary');
-    final profilePic = _emptyToNull(row.read<String?>('profile_pic'));
-    final cardColor = _emptyToNull(row.read<String?>('card_color'));
+    final profilePic = emptyToNull(row.read<String?>('profile_pic'));
+    final cardColor = emptyToNull(row.read<String?>('card_color'));
 
     return Identity(
       id: id,
@@ -118,12 +111,4 @@ extension IdentityMapper on Identity {
       ),
     );
   }
-}
-
-String? _emptyToNull(String? value) {
-  if (value == null || value.isEmpty) {
-    return null;
-  }
-
-  return value;
 }

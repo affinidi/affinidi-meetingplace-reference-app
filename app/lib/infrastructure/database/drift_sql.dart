@@ -37,3 +37,11 @@ List<Variable> variablesFromExpressions(Map<String, Expression> values) {
       })
       .toList(growable: false);
 }
+
+String? emptyToNull(String? value) {
+  if (value == null || value.isEmpty) {
+    return null;
+  }
+
+  return value;
+}

@@ -58,6 +58,23 @@ extension IdentityFieldContactCardValue on IdentityField {
 }
 
 class ContactCardUtils {
+  static Iterable<IdentityField> populatedFields(
+    String Function(IdentityField) valueFor, {
+    bool includeDisplayNameFields = true,
+  }) sync* {
+    for (final field in identityFields) {
+      if (!includeDisplayNameFields && field.usesInDisplayName) {
+        continue;
+      }
+
+      if (valueFor(field).isEmpty) {
+        continue;
+      }
+
+      yield field;
+    }
+  }
+
   static String getPathValue(
     Map<dynamic, dynamic> contactInfo,
     List<String> pathKeys, {
@@ -209,19 +226,10 @@ extension ContactCardExtensions on ContactCard {
 
   Iterable<IdentityField> populatedFields({
     bool includeDisplayNameFields = true,
-  }) sync* {
-    for (final field in identityFields) {
-      if (!includeDisplayNameFields && field.usesInDisplayName) {
-        continue;
-      }
-
-      if (valueFor(field).isEmpty) {
-        continue;
-      }
-
-      yield field;
-    }
-  }
+  }) => ContactCardUtils.populatedFields(
+    valueFor,
+    includeDisplayNameFields: includeDisplayNameFields,
+  );
 
   sdk.ContactCard toSdkContactCard() {
     final contactInfo = <String, dynamic>{
@@ -310,17 +318,8 @@ extension SdkContactCardFields on sdk.ContactCard {
 
   Iterable<IdentityField> populatedFields({
     bool includeDisplayNameFields = true,
-  }) sync* {
-    for (final field in identityFields) {
-      if (!includeDisplayNameFields && field.usesInDisplayName) {
-        continue;
-      }
-
-      if (valueFor(field).isEmpty) {
-        continue;
-      }
-
-      yield field;
-    }
-  }
+  }) => ContactCardUtils.populatedFields(
+    valueFor,
+    includeDisplayNameFields: includeDisplayNameFields,
+  );
 }

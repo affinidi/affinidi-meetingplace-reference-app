@@ -218,8 +218,8 @@ class _ContactMapper {
     QueryRow cardRow,
   ) {
     final personaFields = readPersonaFieldValuesFromRow(cardRow.data);
-    final profilePic = _emptyToNull(cardRow.read<String>('profile_pic'));
-    final cardColor = _emptyToNull(
+    final profilePic = emptyToNull(cardRow.read<String>('profile_pic'));
+    final cardColor = emptyToNull(
       cardRow.read<String>('meetingplace_identity_card_color'),
     );
 
@@ -254,12 +254,4 @@ class _ContactMapper {
       notificationBannerDismissed: contact.notificationBannerDismissed,
     );
   }
-}
-
-String? _emptyToNull(String? value) {
-  if (value == null || value.isEmpty) {
-    return null;
-  }
-
-  return value;
 }
