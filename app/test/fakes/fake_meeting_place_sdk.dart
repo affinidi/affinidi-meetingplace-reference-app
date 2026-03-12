@@ -51,6 +51,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   int _tokenRegistrationsAttempts = 0;
   int get tokenRegistrationsAttempts => _tokenRegistrationsAttempts;
 
+  Group? _mockGroup;
+
   @override
   Future<Device> registerForPushNotifications(String deviceToken) async {
     _tokenRegistrationsAttempts += 1;
@@ -172,6 +174,9 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
 
   @override
   Future<Group?> getGroupById(String groupId) async {
+    if (_mockGroup != null && _mockGroup!.id == groupId) {
+      return _mockGroup;
+    }
     return null;
   }
 
@@ -324,6 +329,10 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
         channel: channel,
       ),
     );
+  }
+
+  void setMockGroup(Group group) {
+    _mockGroup = group;
   }
 }
 
