@@ -90,7 +90,7 @@ class FileLogCollectorTarget implements LoggerTarget {
         final afterBracket = rest.substring(closingBracket + 2);
         final nextSpace = afterBracket.indexOf(' ');
         if (nextSpace != -1) {
-           loggerName =
+          loggerName =
               '${rest.substring(0, closingBracket + 1)} '
               '${afterBracket.substring(0, nextSpace)}';
           message = afterBracket.substring(nextSpace + 1);
