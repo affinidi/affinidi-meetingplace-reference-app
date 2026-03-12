@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_chat/src/sdk/chat.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 class FakeChatSdk implements MeetingPlaceChatSDK {
@@ -401,6 +400,9 @@ class _FakeChatStream implements ChatStream {
     );
     return this;
   }
+
+  @override
+  Stream<StreamData> get stream => _stream;
 
   @override
   Future<void> dispose() async {
