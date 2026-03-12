@@ -8,13 +8,13 @@ import 'app_log_entry.dart';
 import 'log_constants.dart';
 import 'logger_target.dart';
 
-/// A log target that persists every entry to [_logFile] on disk and maintains
-/// an in-memory list with a live stream. On [initialize], the existing file is
+/// A log target that persists every entry to a file on disk and maintains
+/// an in-memory list with a live stream. On startup, the existing file is
 /// parsed into [logs] and trimmed to [_maxFileLines] to prevent unbounded
 /// growth.
-class FileLogCollectorTarget implements LoggerTarget {
-  FileLogCollectorTarget() {
-    initialize();
+class DebugLogCollectorTarget implements LoggerTarget {
+  DebugLogCollectorTarget() {
+    _initialize();
   }
 
   File? _logFile;
@@ -23,16 +23,15 @@ class FileLogCollectorTarget implements LoggerTarget {
   final StreamController<AppLogEntry> _logController =
       StreamController<AppLogEntry>.broadcast();
 
-  /// Completes when historical logs have been loaded from disk.
-  late final Future<void> initialized;
-
+  static const int _maxFileLines = 5000;
   static const int _maxMemoryEntries = 2000;
   static final RegExp _lineRegex = RegExp(r'^\[(.+?)\] \[(.+?)\] (.+)$');
 
-  Future<void> initialize() async {
+  Future<void> _initialize() async {
     final dir = await getApplicationDocumentsDirectory();
     _logFile = File('${dir.path}/app_debug.log');
 
+    // Flush any buffered entries synchronously now that we have a path.
     if (_pendingBuffer.isNotEmpty) {
       final buffer = StringBuffer();
       for (final entry in _pendingBuffer) {
@@ -42,14 +41,15 @@ class FileLogCollectorTarget implements LoggerTarget {
       _pendingBuffer.clear();
     }
 
+    // Parse existing log file into the in-memory list.
     if (await _logFile!.exists()) {
       final lines = await _logFile!.readAsLines();
       final nonEmptyLines = lines.where((l) => l.trim().isNotEmpty).toList();
 
       // Trim file on disk if it exceeds the max line cap.
-      if (nonEmptyLines.length > _maxMemoryEntries) {
+      if (nonEmptyLines.length > _maxFileLines) {
         final trimmed = nonEmptyLines.sublist(
-          nonEmptyLines.length - _maxMemoryEntries,
+          nonEmptyLines.length - _maxFileLines,
         );
         _logFile!.writeAsStringSync('${trimmed.join('\n')}\n');
         _loadEntries(trimmed);
@@ -88,7 +88,6 @@ class FileLogCollectorTarget implements LoggerTarget {
     String loggerName;
     String message;
     if (rest.startsWith('[')) {
-      // e.g. "[APP] UXDBG some message with spaces"
       final closingBracket = rest.indexOf(']');
       if (closingBracket != -1 && rest.length > closingBracket + 2) {
         final afterBracket = rest.substring(closingBracket + 2);

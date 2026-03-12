@@ -3,7 +3,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 
 import 'app_log_entry.dart';
 import 'console_logger_target.dart';
-import 'file_log_collector_target.dart';
+import 'debug_log_collector_target.dart';
 import 'logger_target.dart';
 
 class AppLogger
@@ -11,20 +11,20 @@ class AppLogger
   AppLogger._() {
     _loggers = <LoggerTarget>[
       ConsoleLoggerTarget(),
-      _fileLogger,
+      _debugCollector,
     ];
   }
 
   static final AppLogger _instance = AppLogger._();
   static final AppLogger instance = _instance;
 
-  final FileLogCollectorTarget _fileLogger = FileLogCollectorTarget();
+  final DebugLogCollectorTarget _debugCollector = DebugLogCollectorTarget();
   late final List<LoggerTarget> _loggers;
 
   /// Path to the persisted log file, or null until [initialize] completes.
-  String? get logFilePath => _fileLogger.logFilePath;
+  String? get logFilePath => _debugCollector.logFilePath;
 
-  Stream<AppLogEntry> get logStream => _fileLogger.logStream;
+  Stream<AppLogEntry> get logStream => _debugCollector.logStream;
 
   List<AppLogEntry> get logs =>
       List.unmodifiable(_loggers.expand((l) => l.logs).toList());
