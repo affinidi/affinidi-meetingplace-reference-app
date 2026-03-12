@@ -18,12 +18,9 @@ class FileLogCollectorTarget implements LoggerTarget {
   final List<AppLogEntry> _pendingBuffer = [];
   List<AppLogEntry> _historicalLogs = [];
 
-
   static const int _maxFileLines = 5000;
   static const int _maxHistoricalEntries = 2000;
-  static final RegExp _lineRegex = RegExp(
-    r'^\[(.+?)\] \[(.+?)\] (.+)$',
-  );
+  static final RegExp _lineRegex = RegExp(r'^\[(.+?)\] \[(.+?)\] (.+)$');
 
   Future<void> initialize() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -36,14 +33,22 @@ class FileLogCollectorTarget implements LoggerTarget {
 
       // Trim file on disk if it exceeds the max line cap.
       if (nonEmptyLines.length > _maxFileLines) {
-        final trimmed = nonEmptyLines.sublist(nonEmptyLines.length - _maxFileLines);
+        final trimmed = nonEmptyLines.sublist(
+          nonEmptyLines.length - _maxFileLines,
+        );
         await _logFile!.writeAsString('${trimmed.join('\n')}\n');
-        final entries = trimmed.map(_parseLine).whereType<AppLogEntry>().toList();
+        final entries = trimmed
+            .map(_parseLine)
+            .whereType<AppLogEntry>()
+            .toList();
         _historicalLogs = entries.length > _maxHistoricalEntries
             ? entries.sublist(entries.length - _maxHistoricalEntries)
             : entries;
       } else {
-        final entries = nonEmptyLines.map(_parseLine).whereType<AppLogEntry>().toList();
+        final entries = nonEmptyLines
+            .map(_parseLine)
+            .whereType<AppLogEntry>()
+            .toList();
         // Keep only the last N entries to avoid unbounded memory use.
         _historicalLogs = entries.length > _maxHistoricalEntries
             ? entries.sublist(entries.length - _maxHistoricalEntries)
@@ -85,7 +90,9 @@ class FileLogCollectorTarget implements LoggerTarget {
         final afterBracket = rest.substring(closingBracket + 2);
         final nextSpace = afterBracket.indexOf(' ');
         if (nextSpace != -1) {
-          loggerName = '${rest.substring(0, closingBracket + 1)} ${afterBracket.substring(0, nextSpace)}';
+           loggerName =
+              '${rest.substring(0, closingBracket + 1)} '
+              '${afterBracket.substring(0, nextSpace)}';
           message = afterBracket.substring(nextSpace + 1);
         } else {
           loggerName = rest;
@@ -120,8 +127,9 @@ class FileLogCollectorTarget implements LoggerTarget {
 
   void _addLog(String loggerName, String message, String level) {
     final isAppLog = loggerName.contains(LogConstants.logName);
-    final formattedName =
-        isAppLog ? '[${LogConstants.logName}] $loggerName' : loggerName;
+    final formattedName = isAppLog
+        ? '[${LogConstants.logName}] $loggerName'
+        : loggerName;
     final entry = AppLogEntry(
       timestamp: clock.now(),
       message: message,
@@ -133,10 +141,7 @@ class FileLogCollectorTarget implements LoggerTarget {
     if (file == null) {
       _pendingBuffer.add(entry);
     } else {
-      file.writeAsString(
-        '${_formatEntry(entry)}\n',
-        mode: FileMode.append,
-      );
+      file.writeAsString('${_formatEntry(entry)}\n', mode: FileMode.append);
     }
   }
 
