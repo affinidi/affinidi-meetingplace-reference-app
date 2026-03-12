@@ -35,9 +35,7 @@ void main() {
     setUp(() async {
       testContact = FakeContacts.individualContact;
       fakeCoreSdk = FakeMeetingPlaceSDK(
-        channels: {
-          testContact.channelDid!: FakeChannels.individualChannel,
-        },
+        channels: {testContact.channelDid!: FakeChannels.individualChannel},
       );
       fakeChatSdk = FakeChatSdk();
       fakeChatSdk.chatActivitySent = false;
@@ -146,21 +144,26 @@ void main() {
     });
 
     test('skips badge reset when channel is missing on start', () async {
-      final missingContact = FakeContacts.individualContact
-          .copyWith(channelDid: 'did:key:missing');
+      final missingContact = FakeContacts.individualContact.copyWith(
+        channelDid: 'did:key:missing',
+      );
       await chatService.startChatSession(contact: missingContact);
       await Future<void>.delayed(const Duration(milliseconds: 10));
       expect(fakeContactsService.resetBadgeCalledWith, isNull);
     });
 
-    test('skips badge reset when channelDid is null on resetBadgeCount',
-        () async {
-      final contact = FakeContacts.individualContact.copyWith(channelDid: null);
-      await chatService.startChatSession(contact: contact);
-      await chatService.resetBadgeCount();
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-      expect(fakeContactsService.resetBadgeCalledWith, isNull);
-    });
+    test(
+      'skips badge reset when channelDid is null on resetBadgeCount',
+      () async {
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: null,
+        );
+        await chatService.startChatSession(contact: contact);
+        await chatService.resetBadgeCount();
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        expect(fakeContactsService.resetBadgeCalledWith, isNull);
+      },
+    );
 
     test('logs error and skips badge reset when SDK throws on start', () async {
       fakeChatSdk.shouldThrowOnStartSession = true;
@@ -179,8 +182,10 @@ void main() {
 
     test('delegates sendTextMessage with attachments to SDK', () async {
       await chatService.startChatSession(contact: testContact);
-      await chatService
-          .sendTextMessage('hello', attachments: [Attachment(id: '1')]);
+      await chatService.sendTextMessage(
+        'hello',
+        attachments: [Attachment(id: '1')],
+      );
       expect(fakeChatSdk.sendTextMessageCalls.last['attachments'], isNotEmpty);
     });
 
@@ -194,15 +199,17 @@ void main() {
     test('restores unsent message for contact when message exists', () async {
       await chatService.startChatSession(contact: testContact);
 
-      final unsentMessagesService =
-          container.read(unsentMessagesServiceProvider.notifier);
+      final unsentMessagesService = container.read(
+        unsentMessagesServiceProvider.notifier,
+      );
       await unsentMessagesService.saveUnsentMessage(
         testContact.id,
         'draft message',
       );
 
-      final unsentMessage =
-          await chatService.restoreUnsentMessage(testContact.id);
+      final unsentMessage = await chatService.restoreUnsentMessage(
+        testContact.id,
+      );
       expect(unsentMessage, 'draft message');
     });
 
@@ -264,9 +271,7 @@ void main() {
     setUp(() async {
       testContact = FakeContacts.individualContact;
       fakeCoreSdk = FakeMeetingPlaceSDK(
-        channels: {
-          testContact.channelDid!: FakeChannels.individualChannel,
-        },
+        channels: {testContact.channelDid!: FakeChannels.individualChannel},
       );
       fakeChatSdk = FakeChatSdk();
       fakeChatSdk.chatActivitySent = false;
@@ -376,8 +381,9 @@ void main() {
       await chatService.startChatSession(contact: testContact);
 
       final receivedGroupDetails = <StreamData>[];
-      final subscription =
-          chatService.groupDetails.listen(receivedGroupDetails.add);
+      final subscription = chatService.groupDetails.listen(
+        receivedGroupDetails.add,
+      );
 
       fakeChatSdk.simulateIncomingGroupDetailsUpdate(
         recipientDid: testContact.channelDid!,
@@ -404,14 +410,14 @@ void main() {
       }
     });
 
-    test(
-        'emits otherPartyContactCardUpdate stream'
+    test('emits otherPartyContactCardUpdate stream'
         ' when receiving contact card update', () async {
       await chatService.startChatSession(contact: testContact);
 
       final receivedCards = <ContactCard>[];
-      final subscription =
-          chatService.otherPartyContactCardUpdate.listen(receivedCards.add);
+      final subscription = chatService.otherPartyContactCardUpdate.listen(
+        receivedCards.add,
+      );
 
       final updatedCard = FakeContacts.individualContact.card.copyWith(
         firstName: 'Updated Alice',

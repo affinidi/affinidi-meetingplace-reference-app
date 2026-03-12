@@ -203,29 +203,27 @@ class FakeContacts {
   static Contact newIndividualContact({
     required String id,
     required String channelDid,
-  }) =>
-      Contact(
-        id: id,
-        channelDid: channelDid,
-        channelDidSha256: individualContact.channelDidSha256,
-        offerLink: individualContact.offerLink,
-        card: individualContact.card,
-        dateAdded: individualContact.dateAdded,
-        type: individualContact.type,
-        status: individualContact.status,
-        mediatorDid: individualContact.mediatorDid,
-        origin: individualContact.origin,
-        category: individualContact.category,
-        otherPartyCard: individualContact.otherPartyCard,
-        displayName: individualContact.displayName,
-        badgeUpdateInProgress: individualContact.badgeUpdateInProgress,
-        badgeCount: individualContact.badgeCount,
-        currentMessageSeqNo: individualContact.currentMessageSeqNo,
-        hasBeenOpened: individualContact.hasBeenOpened,
-        lastKeepAliveMessage: individualContact.lastKeepAliveMessage,
-        notificationBannerDismissed:
-            individualContact.notificationBannerDismissed,
-      );
+  }) => Contact(
+    id: id,
+    channelDid: channelDid,
+    channelDidSha256: individualContact.channelDidSha256,
+    offerLink: individualContact.offerLink,
+    card: individualContact.card,
+    dateAdded: individualContact.dateAdded,
+    type: individualContact.type,
+    status: individualContact.status,
+    mediatorDid: individualContact.mediatorDid,
+    origin: individualContact.origin,
+    category: individualContact.category,
+    otherPartyCard: individualContact.otherPartyCard,
+    displayName: individualContact.displayName,
+    badgeUpdateInProgress: individualContact.badgeUpdateInProgress,
+    badgeCount: individualContact.badgeCount,
+    currentMessageSeqNo: individualContact.currentMessageSeqNo,
+    hasBeenOpened: individualContact.hasBeenOpened,
+    lastKeepAliveMessage: individualContact.lastKeepAliveMessage,
+    notificationBannerDismissed: individualContact.notificationBannerDismissed,
+  );
 
   static sdk.ContactCard get sdkContactCard {
     final card = individualContact.card;
@@ -239,14 +237,10 @@ class FakeContacts {
           'displayName': card.displayName,
         },
         'email': {
-          'type': {
-            'work': card.email ?? '',
-          },
+          'type': {'work': card.email ?? ''},
         },
         'tel': {
-          'type': {
-            'cell': card.mobile ?? '',
-          },
+          'type': {'cell': card.mobile ?? ''},
         },
         'photo': card.profilePic ?? '',
         'x-meetingplace-identity-card-color': card.cardColor ?? '',
