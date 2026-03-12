@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:clock/clock.dart';
@@ -7,26 +8,28 @@ import 'app_log_entry.dart';
 import 'log_constants.dart';
 import 'logger_target.dart';
 
-/// A log target that persists every entry to [_logFile] on disk so logs
-/// survive app restarts and crashes. On [initialize], the existing file is
-/// parsed back into [historicalLogs] and trimmed to [_maxFileLines] to prevent
-/// unbounded growth.
+/// A log target that persists every entry to [_logFile] on disk and maintains
+/// an in-memory list with a live stream. On [initialize], the existing file is
+/// parsed into [logs] and trimmed to [_maxFileLines] to prevent unbounded
+/// growth.
 class FileLogCollectorTarget implements LoggerTarget {
   FileLogCollectorTarget();
 
   File? _logFile;
   final List<AppLogEntry> _pendingBuffer = [];
-  List<AppLogEntry> _historicalLogs = [];
+  final List<AppLogEntry> _logs = [];
+  final StreamController<AppLogEntry> _logController =
+      StreamController<AppLogEntry>.broadcast();
 
   static const int _maxFileLines = 5000;
-  static const int _maxHistoricalEntries = 2000;
+  static const int _maxMemoryEntries = 2000;
   static final RegExp _lineRegex = RegExp(r'^\[(.+?)\] \[(.+?)\] (.+)$');
 
   Future<void> initialize() async {
     final dir = await getApplicationDocumentsDirectory();
     _logFile = File('${dir.path}/app_debug.log');
 
-    // Parse existing log file into historical entries.
+    // Parse existing log file into the in-memory list.
     if (await _logFile!.exists()) {
       final lines = await _logFile!.readAsLines();
       final nonEmptyLines = lines.where((l) => l.trim().isNotEmpty).toList();
@@ -37,22 +40,9 @@ class FileLogCollectorTarget implements LoggerTarget {
           nonEmptyLines.length - _maxFileLines,
         );
         await _logFile!.writeAsString('${trimmed.join('\n')}\n');
-        final entries = trimmed
-            .map(_parseLine)
-            .whereType<AppLogEntry>()
-            .toList();
-        _historicalLogs = entries.length > _maxHistoricalEntries
-            ? entries.sublist(entries.length - _maxHistoricalEntries)
-            : entries;
+        _loadEntries(trimmed);
       } else {
-        final entries = nonEmptyLines
-            .map(_parseLine)
-            .whereType<AppLogEntry>()
-            .toList();
-        // Keep only the last N entries to avoid unbounded memory use.
-        _historicalLogs = entries.length > _maxHistoricalEntries
-            ? entries.sublist(entries.length - _maxHistoricalEntries)
-            : entries;
+        _loadEntries(nonEmptyLines);
       }
     }
 
@@ -67,10 +57,20 @@ class FileLogCollectorTarget implements LoggerTarget {
     }
   }
 
-  /// Log entries parsed from the file written during previous app runs.
-  List<AppLogEntry> get historicalLogs => List.unmodifiable(_historicalLogs);
+  void _loadEntries(List<String> lines) {
+    final entries = lines.map(_parseLine).whereType<AppLogEntry>().toList();
+    final capped = entries.length > _maxMemoryEntries
+        ? entries.sublist(entries.length - _maxMemoryEntries)
+        : entries;
+    _logs.addAll(capped);
+  }
+
+  /// Stream of new log entries as they are added during this session.
+  Stream<AppLogEntry> get logStream => _logController.stream;
 
   String? get logFilePath => _logFile?.path;
+
+  void dispose() => _logController.close();
 
   AppLogEntry? _parseLine(String line) {
     final match = _lineRegex.firstMatch(line);
@@ -137,6 +137,12 @@ class FileLogCollectorTarget implements LoggerTarget {
       loggerName: formattedName,
     );
 
+    _logs.add(entry);
+    if (_logs.length > _maxMemoryEntries) {
+      _logs.removeAt(0);
+    }
+    _logController.add(entry);
+
     final file = _logFile;
     if (file == null) {
       _pendingBuffer.add(entry);
@@ -146,7 +152,7 @@ class FileLogCollectorTarget implements LoggerTarget {
   }
 
   @override
-  List<AppLogEntry> get logs => const [];
+  List<AppLogEntry> get logs => List.unmodifiable(_logs);
 
   @override
   void logInfo(String loggerName, String message) =>
@@ -165,5 +171,8 @@ class FileLogCollectorTarget implements LoggerTarget {
       _addLog(loggerName, message, 'DEBUG');
 
   @override
-  void clearLogs() => _logFile?.writeAsStringSync('');
+  void clearLogs() {
+    _logs.clear();
+    _logFile?.writeAsStringSync('');
+  }
 }
