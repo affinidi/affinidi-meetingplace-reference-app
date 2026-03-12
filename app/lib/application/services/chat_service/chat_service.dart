@@ -38,5 +38,8 @@ abstract class ChatService {
   Future<void> reactOnMessage(Message message, {required String reaction});
   Future<void> sendEffect(Effect effectType);
 
+  Future<void> updateContactSequenceNumber(String channelDid);
+  Future<void> resetBadgeCount();
+
   void disposeChat();
 }

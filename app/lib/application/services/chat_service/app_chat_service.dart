@@ -278,6 +278,7 @@ class AppChatService extends _$AppChatService implements ChatService {
     await _chatSDK?.sendEffect(effectType);
   }
 
+  @override
   Future<void> updateContactSequenceNumber(String channelDid) async {
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
     final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
@@ -294,6 +295,15 @@ class AppChatService extends _$AppChatService implements ChatService {
     await ref
         .read(contactsServiceProvider.notifier)
         .updateContactSequenceNumber(channelDid, channel.seqNo);
+  }
+
+  @override
+  Future<void> resetBadgeCount() async {
+    if (_channelDid == null) return;
+
+    await ref
+        .read(contactsServiceProvider.notifier)
+        .resetContactBadgeCount(_channelDid!);
   }
 
   Future<void> _onChannelMessagesData(
@@ -359,7 +369,6 @@ class AppChatService extends _$AppChatService implements ChatService {
       if (chatItem is Message ||
           chatItem is ConciergeMessage ||
           chatItem is EventMessage) {
-        // await _upsertChatItem(chatItem);
         _chatItemController.add(chatItem);
       }
 
@@ -471,13 +480,5 @@ class AppChatService extends _$AppChatService implements ChatService {
       name: _logKey,
     );
     _groupDetailsController.add(data);
-  }
-
-  Future<void> resetBadgeCount() async {
-    if (_channelDid == null) return;
-
-    await ref
-        .read(contactsServiceProvider.notifier)
-        .resetContactBadgeCount(_channelDid!);
   }
 }
