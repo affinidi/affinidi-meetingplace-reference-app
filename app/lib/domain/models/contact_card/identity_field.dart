@@ -10,6 +10,8 @@ abstract base class IdentityField {
     required this.columnName,
     required this.contactInfoPath,
     required this.requiredValue,
+    this.usesInDisplayName = false,
+    this.showsInIdentityCardSummary = false,
     required this.iconKey,
     required this.colorKey,
     required this.inputKind,
@@ -21,6 +23,8 @@ abstract base class IdentityField {
   final String columnName;
   final List<String> contactInfoPath;
   final bool requiredValue;
+  final bool usesInDisplayName;
+  final bool showsInIdentityCardSummary;
   final IdentityFieldIconKey iconKey;
   final IdentityFieldColorKey colorKey;
   final IdentityFieldInputKind inputKind;
@@ -41,6 +45,7 @@ final class FirstNameIdentityField extends IdentityField {
         columnName: 'first_name',
         contactInfoPath: const ['n', 'given'],
         requiredValue: true,
+        usesInDisplayName: true,
         iconKey: IdentityFieldIconKey.person,
         colorKey: IdentityFieldColorKey.success,
         inputKind: IdentityFieldInputKind.firstName,
@@ -55,6 +60,7 @@ final class LastNameIdentityField extends IdentityField {
         columnName: 'last_name',
         contactInfoPath: const ['n', 'surname'],
         requiredValue: false,
+        usesInDisplayName: true,
         iconKey: IdentityFieldIconKey.badge,
         colorKey: IdentityFieldColorKey.purple,
         inputKind: IdentityFieldInputKind.lastName,
@@ -68,6 +74,7 @@ final class EmailIdentityField extends IdentityField {
         columnName: 'email',
         contactInfoPath: const ['email', 'type', 'work'],
         requiredValue: false,
+        showsInIdentityCardSummary: true,
         iconKey: IdentityFieldIconKey.email,
         colorKey: IdentityFieldColorKey.warning,
         inputKind: IdentityFieldInputKind.email,
@@ -82,6 +89,7 @@ final class MobileIdentityField extends IdentityField {
         columnName: 'mobile',
         contactInfoPath: const ['tel', 'type', 'cell'],
         requiredValue: false,
+        showsInIdentityCardSummary: true,
         iconKey: IdentityFieldIconKey.phone,
         colorKey: IdentityFieldColorKey.primary,
         inputKind: IdentityFieldInputKind.phone,

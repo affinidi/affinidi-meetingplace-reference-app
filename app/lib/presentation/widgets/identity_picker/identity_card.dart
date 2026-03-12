@@ -236,11 +236,9 @@ class _IdentityContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
     final l10n = context.l10n;
-
-    final emailValue = emailField.valueFrom(identity.card);
-    final email = emailValue.isNotEmpty ? emailValue : l10n.notShared;
-    final phoneValue = mobileField.valueFrom(identity.card);
-    final phone = phoneValue.isNotEmpty ? phoneValue : l10n.notShared;
+    final summaryFields = identityFields
+        .where((IdentityField field) => field.showsInIdentityCardSummary)
+        .toList(growable: false);
 
     final name = identity.card.fullName.isNotEmpty
         ? identity.card.fullName
@@ -266,18 +264,16 @@ class _IdentityContent extends StatelessWidget {
               if (identityCardSize.isSmall) const Spacer(),
             ],
           ),
-        SizedBox(height: identityCardSize.isSmall ? 12 : 16),
-        _ContactInfoRow(
-          icon: emailField.icon,
-          text: email,
-          identityCardSize: identityCardSize,
-        ),
-        SizedBox(height: identityCardSize.isSmall ? 6 : 8),
-        _ContactInfoRow(
-          icon: mobileField.icon,
-          text: phone,
-          identityCardSize: identityCardSize,
-        ),
+        for (final field in summaryFields) ...[
+          SizedBox(height: identityCardSize.isSmall ? 12 : 16),
+          _ContactInfoRow(
+            icon: field.icon,
+            text: identity.card.valueFor(field).isNotEmpty
+                ? identity.card.valueFor(field)
+                : l10n.notShared,
+            identityCardSize: identityCardSize,
+          ),
+        ],
       ],
     );
   }

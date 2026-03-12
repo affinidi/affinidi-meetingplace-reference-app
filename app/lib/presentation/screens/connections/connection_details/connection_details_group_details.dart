@@ -10,9 +10,7 @@ class _GroupDetailsPanel extends ConsumerWidget {
     final provider = connectionDetailsScreenControllerProvider(contactId);
     final groupAdminCard = ref.read(provider.groupAdminCard);
     final groupName = ref.watch(provider.groupName);
-
-    final email = groupAdminCard?.email;
-    final mobile = groupAdminCard?.mobile;
+    final personaRows = _buildPersonaFieldRows(context, groupAdminCard);
 
     final adminDid = ref.watch(
       provider.select((state) => state.group?.ownerDid),
@@ -42,33 +40,7 @@ class _GroupDetailsPanel extends ConsumerWidget {
       );
     }
 
-    if (email != null && email.isNotEmpty) {
-      items.add(
-        FormRowIconTitle(
-          icon: emailField.icon,
-          iconColor: emailField.iconColor(
-            context.customColors,
-            context.colorScheme,
-          ),
-          label: emailField.label(context.l10n),
-          value: email,
-        ),
-      );
-    }
-
-    if (mobile != null && mobile.isNotEmpty) {
-      items.add(
-        FormRowIconTitle(
-          icon: mobileField.icon,
-          iconColor: mobileField.iconColor(
-            context.customColors,
-            context.colorScheme,
-          ),
-          label: mobileField.label(context.l10n),
-          value: mobile,
-        ),
-      );
-    }
+    items.addAll(personaRows);
 
     if (isDebugMode && adminDid != null && adminDid.isNotEmpty) {
       items.add(

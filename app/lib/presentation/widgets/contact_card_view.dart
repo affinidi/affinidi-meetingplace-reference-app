@@ -15,7 +15,8 @@ class ContactCardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _PersonaFieldListView(
-      valueResolver: (field) => field.valueFrom(card),
+      fields: card.populatedFields().toList(),
+      valueResolver: card.valueFor,
     );
   }
 }
@@ -28,22 +29,23 @@ class SdkContactCardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _PersonaFieldListView(
-      valueResolver: (field) => field.sdkValueFrom(card),
+      fields: card.populatedFields().toList(),
+      valueResolver: card.valueFor,
     );
   }
 }
 
 class _PersonaFieldListView extends StatelessWidget {
-  const _PersonaFieldListView({required this.valueResolver});
+  const _PersonaFieldListView({
+    required this.fields,
+    required this.valueResolver,
+  });
 
+  final List<IdentityField> fields;
   final String Function(IdentityField) valueResolver;
 
   @override
   Widget build(BuildContext context) {
-    final fields = identityFields
-        .where((field) => valueResolver(field).isNotEmpty)
-        .toList();
-
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,

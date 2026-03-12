@@ -11,8 +11,7 @@ class _TheirDetailsPanel extends ConsumerWidget {
     final otherPartyCard = ref.watch(provider.otherPartyCard);
 
     final contactName = otherPartyCard?.fullName;
-    final email = otherPartyCard?.email;
-    final mobile = otherPartyCard?.mobile;
+    final personaRows = _buildPersonaFieldRows(context, otherPartyCard);
 
     final theirDid = ref.watch(
       provider.select((state) => state.channel?.otherPartyPermanentChannelDid),
@@ -41,30 +40,7 @@ class _TheirDetailsPanel extends ConsumerWidget {
               label: context.l10n.generalName,
               value: contactName,
             ),
-          if (email != null && email.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: emailField.icon,
-              iconColor: emailField.iconColor(
-                context.customColors,
-                context.colorScheme,
-              ),
-              label: emailField.label(context.l10n),
-              value: email,
-            ),
-          ],
-          if (mobile != null && mobile.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: mobileField.icon,
-              iconColor: mobileField.iconColor(
-                context.customColors,
-                context.colorScheme,
-              ),
-              label: mobileField.label(context.l10n),
-              value: mobile,
-            ),
-          ],
+          for (final row in personaRows) ...[const Divider(), row],
           if (isDebugMode && theirDid != null && theirDid.isNotEmpty) ...[
             const Divider(),
             FormRowIconTitle(

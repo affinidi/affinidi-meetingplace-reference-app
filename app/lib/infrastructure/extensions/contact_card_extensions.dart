@@ -126,15 +126,17 @@ class ContactCardUtils {
   }
 
   static String getFullName(Map<dynamic, dynamic> contactInfo) {
-    final firstName = getPathValue(contactInfo, firstNameField.contactInfoPath);
-    final lastName = getPathValue(contactInfo, lastNameField.contactInfoPath);
-    return [firstName, lastName].nonEmpty.join(' ');
+    final values = identityFields
+        .where((field) => field.usesInDisplayName)
+        .map((field) => getPathValue(contactInfo, field.contactInfoPath));
+    return values.nonEmpty.join(' ');
   }
 
   static String fullNameFromPersonaFields(Map<String, String> personaFields) {
-    final firstName = personaFields[firstNameField.key] ?? '';
-    final lastName = personaFields[lastNameField.key] ?? '';
-    return [firstName, lastName].nonEmpty.join(' ');
+    final values = identityFields
+        .where((field) => field.usesInDisplayName)
+        .map((field) => personaFields[field.key] ?? '');
+    return values.nonEmpty.join(' ');
   }
 
   static Map<String, String> personaFieldsFromContactInfo(
@@ -204,6 +206,22 @@ extension ContactCardExtensions on ContactCard {
   String get lastNameOrEmpty => lastName ?? '';
 
   String valueFor(IdentityField field) => field.valueFrom(this);
+
+  Iterable<IdentityField> populatedFields({
+    bool includeDisplayNameFields = true,
+  }) sync* {
+    for (final field in identityFields) {
+      if (!includeDisplayNameFields && field.usesInDisplayName) {
+        continue;
+      }
+
+      if (valueFor(field).isEmpty) {
+        continue;
+      }
+
+      yield field;
+    }
+  }
 
   sdk.ContactCard toSdkContactCard() {
     final contactInfo = <String, dynamic>{
@@ -289,4 +307,20 @@ extension SdkContactCardFields on sdk.ContactCard {
 
   String valueFor(IdentityField field) =>
       ContactCardUtils.getPathValue(contactInfo, field.contactInfoPath);
+
+  Iterable<IdentityField> populatedFields({
+    bool includeDisplayNameFields = true,
+  }) sync* {
+    for (final field in identityFields) {
+      if (!includeDisplayNameFields && field.usesInDisplayName) {
+        continue;
+      }
+
+      if (valueFor(field).isEmpty) {
+        continue;
+      }
+
+      yield field;
+    }
+  }
 }
