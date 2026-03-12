@@ -10,7 +10,7 @@ import 'logger_target.dart';
 
 /// A log target that persists every entry to a file on disk and maintains
 /// an in-memory list with a live stream. On startup, the existing file is
-/// parsed into [logs] and trimmed to [_maxFileLines] to prevent unbounded
+/// parsed into [logs] and trimmed to [_maxMemoryEntries] to prevent unbounded
 /// growth.
 class DebugLogCollectorTarget implements LoggerTarget {
   DebugLogCollectorTarget() {
@@ -23,9 +23,13 @@ class DebugLogCollectorTarget implements LoggerTarget {
   final StreamController<AppLogEntry> _logController =
       StreamController<AppLogEntry>.broadcast();
 
-  static const int _maxFileLines = 5000;
-  static const int _maxMemoryEntries = 2000;
+  static const int _maxMemoryEntries = 1000;
   static final RegExp _lineRegex = RegExp(r'^\[(.+?)\] \[(.+?)\] (.+)$');
+
+  bool _isSdkLog(String loggerName) {
+    final isAppLog = loggerName.contains(LogConstants.logName);
+    return !isAppLog;
+  }
 
   Future<void> _initialize() async {
     final dir = await getApplicationDocumentsDirectory();
@@ -47,9 +51,9 @@ class DebugLogCollectorTarget implements LoggerTarget {
       final nonEmptyLines = lines.where((l) => l.trim().isNotEmpty).toList();
 
       // Trim file on disk if it exceeds the max line cap.
-      if (nonEmptyLines.length > _maxFileLines) {
+      if (nonEmptyLines.length > _maxMemoryEntries) {
         final trimmed = nonEmptyLines.sublist(
-          nonEmptyLines.length - _maxFileLines,
+          nonEmptyLines.length - _maxMemoryEntries,
         );
         _logFile!.writeAsStringSync('${trimmed.join('\n')}\n');
         _loadEntries(trimmed);
@@ -83,8 +87,6 @@ class DebugLogCollectorTarget implements LoggerTarget {
     if (timestamp == null) return null;
     final level = match.group(2)!;
     final rest = match.group(3)!;
-    // rest = "loggerName message" — loggerName is either "[APP] name" or a
-    // single word without spaces.
     String loggerName;
     String message;
     if (rest.startsWith('[')) {
@@ -129,15 +131,14 @@ class DebugLogCollectorTarget implements LoggerTarget {
   }
 
   void _addLog(String loggerName, String message, String level) {
-    final isAppLog = loggerName.contains(LogConstants.logName);
-    final formattedName = isAppLog
-        ? '[${LogConstants.logName}] $loggerName'
-        : loggerName;
+    final formattedLoggerName = _isSdkLog(loggerName)
+        ? loggerName
+        : '[${LogConstants.logName}] $loggerName';
     final entry = AppLogEntry(
       timestamp: clock.now(),
       message: message,
       level: level,
-      loggerName: formattedName,
+      loggerName: formattedLoggerName,
     );
 
     _logs.add(entry);

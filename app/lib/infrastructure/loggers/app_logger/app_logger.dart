@@ -9,10 +9,7 @@ import 'logger_target.dart';
 class AppLogger
     implements MeetingPlaceChatSDKLogger, MeetingPlaceCoreSDKLogger {
   AppLogger._() {
-    _loggers = <LoggerTarget>[
-      ConsoleLoggerTarget(),
-      _debugCollector,
-    ];
+    _loggers = <LoggerTarget>[ConsoleLoggerTarget(), _debugCollector];
   }
 
   static final AppLogger _instance = AppLogger._();
