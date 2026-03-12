@@ -153,14 +153,17 @@ class AuthenticationScreen extends HookConsumerWidget {
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: isSmallScreenLandscape ? 20.0 : 40.0,
-              ),
-              child: Center(
-                child: SizedBox(
-                  height: 40,
-                  child: Image.asset('assets/images/powered_by_mpx.png'),
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: isSmallScreenLandscape ? 20.0 : 40.0,
+                ),
+                child: Center(
+                  child: SizedBox(
+                    height: 40,
+                    child: Image.asset('assets/images/powered_by_mpx.png'),
+                  ),
                 ),
               ),
             ),

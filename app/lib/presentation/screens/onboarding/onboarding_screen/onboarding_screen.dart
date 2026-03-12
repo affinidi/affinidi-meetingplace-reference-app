@@ -146,49 +146,58 @@ class OnboardingScreen extends HookConsumerWidget {
           ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 120),
-              child: SmoothPageIndicator(
-                controller: controller.pageController,
-                count: state.videoPlayerControllers.length,
-                effect: const WormEffect(
-                  dotColor: Colors.white30,
-                  activeDotColor: Colors.white,
-                  dotHeight: 10,
-                  dotWidth: 10,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SmoothPageIndicator(
+                      controller: controller.pageController,
+                      count: state.videoPlayerControllers.length,
+                      effect: const WormEffect(
+                        dotColor: Colors.white30,
+                        activeDotColor: Colors.white,
+                        dotHeight: 10,
+                        dotWidth: 10,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Visibility(
+                      visible:
+                          state.currentPage ==
+                          state.videoPlayerControllers.length - 1,
+                      maintainSize: true,
+                      maintainAnimation: true,
+                      maintainState: true,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.colorScheme.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: controller.onFinishOnboarding,
+                        child: SizedBox(
+                          width: 200,
+                          child: Text(
+                            context.l10n.setUpMyIdentity,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-          if (state.currentPage == state.videoPlayerControllers.length - 1)
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 40),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.colorScheme.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: controller.onFinishOnboarding,
-                  child: SizedBox(
-                    width: 200,
-                    child: Text(
-                      context.l10n.setUpMyIdentity,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );

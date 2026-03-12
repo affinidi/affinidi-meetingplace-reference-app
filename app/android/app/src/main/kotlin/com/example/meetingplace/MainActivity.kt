@@ -4,10 +4,12 @@ import android.os.Build
 import android.os.Bundle
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import androidx.activity.enableEdgeToEdge
 import io.flutter.embedding.android.FlutterFragmentActivity;
 
 class MainActivity: FlutterFragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = getString(R.string.channel_default_name)
