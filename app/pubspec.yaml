@@ -57,6 +57,7 @@ dependencies:
   image_picker: ^1.2.0
   intl: any
   local_auth: ^2.3.0
+  matrix: ^6.1.1
   meeting_place_chat: ^0.0.1-dev.31
   meeting_place_core: ^0.0.1-dev.29
   meeting_place_drift_repository: ^0.0.1-dev.32
@@ -73,6 +74,7 @@ dependencies:
   share_plus: ^12.0.1
   shared_preferences: ^2.5.3
   smooth_page_indicator: ^1.2.1
+  sqflite: ^2.4.2
   sqlcipher_flutter_libs: ^0.6.8
   sqlite3: ^2.9.0
   ssi: ^3.3.0

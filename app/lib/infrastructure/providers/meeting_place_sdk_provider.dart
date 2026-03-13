@@ -1,5 +1,7 @@
+import 'package:matrix/matrix.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:sqflite/sqflite.dart' as sqlite;
 import 'package:ssi/ssi.dart';
 
 import '../../application/services/settings_service/settings_service.dart';
@@ -39,6 +41,14 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
     );
     logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
+    final database = await MatrixSdkDatabase.init(
+      'matrix_client',
+      database: await sqlite.openDatabase('./data/database.sqlite'),
+    );
+
+    final matrixClient = Client('myapp', database: database);
+    matrixClient.homeserver = Uri.parse('http://localhost:9000');
+
     final sdk = await MeetingPlaceCoreSDK.create(
       wallet: wallet,
       repositoryConfig: RepositoryConfig(
@@ -51,6 +61,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
       ),
       mediatorDid: initialMediatorDid,
       controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
+      matrixClient: matrixClient,
       logger: logger,
     );
 
