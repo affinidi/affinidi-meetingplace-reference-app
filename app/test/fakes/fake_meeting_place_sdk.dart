@@ -164,7 +164,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
 
   @override
   Future<Group?> getGroupByOfferLink(String offerLink) async {
-    return null;
+    return _mockGroup;
   }
 
   @override

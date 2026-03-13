@@ -1,33 +1,33 @@
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
-import '../../../domain/models/contact_card/contact_card.dart' as domain;
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 
+/// Service that manages chat sessions, including message handling,
+/// presence updates, and group interactions.
+///
+/// Owns the chat session state `ChatServiceState` and provides
+/// methods for starting, updating, and ending chat sessions. Handles
+/// all Meeting Place SDK interactions related to chats, such as sending
+/// messages, updating contact presence, and managing group details.
+/// Delegates specific operations to `GroupDelegate` and `ConciergeDelegate`
+///  to keep responsibilities focused.
 abstract class ChatService {
   int get secondsToShowChatActivityIndicator;
   int get chatPresenceIntervalInSeconds;
 
-  Stream<bool> get loadingActivity;
-  Stream<DateTime> get presence;
-  Stream<String?> get typingMembers;
-  Stream<String?> get effect;
-  Stream<StreamData> get groupDetails;
-  Stream<domain.ContactCard> get otherPartyContactCardUpdate;
-  Stream<String> get clearTyping;
-  Stream<ChatItem> get chatItem;
-  Stream<Chat> get session;
-
-  Future<void> startChatSession({required Contact contact});
+  Future<void> startChatSession();
+  void disposeChat();
 
   Future<String?> restoreUnsentMessage(String contactId);
-  Future<Group?> refreshGroup(String groupId);
   Future<ContactPresenceStatus> calculateContactPresenceStatus(
     DateTime datePresence,
     int presenceIntervalInSeconds,
   );
   Future<void> updateGroupContactPendingStatus(Contact contact, Group? group);
+
+  void onPresenceUpdated(DateTime datePresence);
 
   Future<void> sendTextMessage(String message, {List<Attachment>? attachments});
   Future<void> sendChatActivity();
@@ -40,6 +40,5 @@ abstract class ChatService {
 
   Future<void> updateContactSequenceNumber(String channelDid);
   Future<void> resetBadgeCount();
-
-  void disposeChat();
+  void clearEffect();
 }
