@@ -18,6 +18,10 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
         'email',
         editIdentityScreenFormKey,
       );
+      controller.updateErrorVisibilityOnBlur(
+        'mobile',
+        editIdentityScreenFormKey,
+      );
 
       final isValid =
           editIdentityScreenFormKey.currentState?.validate() ?? false;

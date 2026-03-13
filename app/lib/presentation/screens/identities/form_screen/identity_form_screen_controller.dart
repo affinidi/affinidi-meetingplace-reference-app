@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -24,11 +27,89 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   late final aliasController = TextEditingController();
 
   late final emailFocusNode = FocusNode();
+  late final mobileFocusNode = FocusNode();
+
+  PhoneNumber? _initialMobilePhoneNumber;
+  String? _latestNormalizedMobile;
+  String? _selectedPhoneIsoCode;
+  bool _isPhoneNumberValid = true;
+  bool _isPhoneNumberValidationPending = false;
+  bool _isDisposed = false;
+  int _phoneValidationRevision = 0;
+  String? _scheduledLoadedMobileValidation;
 
   GlobalKey<FormState>? _formKey;
 
   void initializeFocusListeners(GlobalKey<FormState> formKey) {
     _formKey = formKey;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isDisposed || _formKey != formKey) return;
+
+      validateForm(formKey);
+      _scheduleLoadedMobileValidation();
+    });
+  }
+
+  PhoneNumber initialMobilePhoneNumber(String isoCode) {
+    _selectedPhoneIsoCode ??= isoCode;
+
+    return _initialMobilePhoneNumber ??= PhoneNumber(
+      phoneNumber: mobileController.text.trim().isEmpty
+          ? null
+          : mobileController.text.trim(),
+      isoCode: _selectedPhoneIsoCode,
+    );
+  }
+
+  void _scheduleLoadedMobileValidation() {
+    final formKey = _formKey;
+    final currentContext = formKey?.currentContext;
+    final mobile = mobileController.text.trim();
+
+    if (formKey == null ||
+        currentContext == null ||
+        mobile.isEmpty ||
+        !_isPhoneNumberValidationPending ||
+        _scheduledLoadedMobileValidation == mobile) {
+      return;
+    }
+
+    _scheduledLoadedMobileValidation = mobile;
+
+    final validationRevision = ++_phoneValidationRevision;
+    final isoCode =
+        _selectedPhoneIsoCode ??
+        InputValidators.defaultPhoneIsoCode(currentContext);
+
+    unawaited(
+      _validateLoadedMobile(
+        mobile: mobile,
+        isoCode: isoCode,
+        validationRevision: validationRevision,
+        formKey: formKey,
+      ),
+    );
+  }
+
+  Future<void> _validateLoadedMobile({
+    required String mobile,
+    required String isoCode,
+    required int validationRevision,
+    required GlobalKey<FormState> formKey,
+  }) async {
+    final normalizedPhoneNumber = await InputValidators.normalizePhoneNumber(
+      mobile,
+      isoCode: isoCode,
+    );
+
+    if (_isDisposed ||
+        validationRevision != _phoneValidationRevision ||
+        mobileController.text.trim() != mobile) {
+      return;
+    }
+
+    _latestNormalizedMobile = normalizedPhoneNumber;
+    updatePhoneValidation(normalizedPhoneNumber != null, formKey);
   }
 
   @override
@@ -38,8 +119,14 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
         updateErrorVisibilityOnBlur('email', _formKey!);
       }
     });
+    mobileFocusNode.addListener(() {
+      if (!mobileFocusNode.hasFocus && _formKey != null) {
+        updateErrorVisibilityOnBlur('mobile', _formKey!);
+      }
+    });
 
     ref.onDispose(() {
+      _isDisposed = true;
       scrollController.dispose();
       displayNameController.dispose();
       lastNameController.dispose();
@@ -47,6 +134,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       mobileController.dispose();
       aliasController.dispose();
       emailFocusNode.dispose();
+      mobileFocusNode.dispose();
     });
 
     final identity = _loadIdentity(identityId);
@@ -73,28 +161,40 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   Identity _loadIdentity(String? identityId) {
-    if (identityId == null) {
-      return _makeNewIdentity();
-    }
-
-    final identity = ref
-        .read(identitiesServiceProvider)
-        .identities
-        .where((i) => i.id == identityId)
-        .firstOrNull;
-
-    if (identity == null) {
-      throw AppException(
-        'missing identity',
-        code: AppExceptionType.missingIdentity.name,
-      );
-    }
+    final identity = switch (identityId) {
+      null => _makeNewIdentity(),
+      _ =>
+        ref
+                .read(identitiesServiceProvider)
+                .identities
+                .where((i) => i.id == identityId)
+                .firstOrNull ??
+            (throw AppException(
+              'missing identity',
+              code: AppExceptionType.missingIdentity.name,
+            )),
+    };
 
     displayNameController.text = identity.card.firstName;
     lastNameController.text = identity.card.lastName ?? '';
     emailController.text = identity.card.email ?? '';
     mobileController.text = identity.card.mobile ?? '';
     aliasController.text = identity.card.displayName;
+    _initialMobilePhoneNumber = null;
+    _scheduledLoadedMobileValidation = null;
+    _selectedPhoneIsoCode = null;
+    _phoneValidationRevision++;
+
+    final mobile = identity.card.mobile?.trim();
+    if (mobile == null || mobile.isEmpty) {
+      _latestNormalizedMobile = null;
+      _isPhoneNumberValid = true;
+      _isPhoneNumberValidationPending = false;
+    } else {
+      _latestNormalizedMobile = null;
+      _isPhoneNumberValid = false;
+      _isPhoneNumberValidationPending = true;
+    }
 
     return identity;
   }
@@ -116,16 +216,26 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void validateForm(GlobalKey<FormState> formKey) {
-    // Compute save eligibility without triggering UI validation
     final ctx = formKey.currentContext!;
     final emailError = InputValidators.getValidator(
       ctx,
       InputType.email,
     ).call(emailController.text);
+    final mobileError = phoneValidationError(ctx);
 
-    final isValidForSave = emailError == null;
+    final isValidForSave = emailError == null && mobileError == null;
 
     state = state.copyWith(canSave: isValidForSave);
+    _updateHasEnteredAnyInfo();
+  }
+
+  String? phoneValidationError(BuildContext context) {
+    return InputValidators.phoneValidationError(
+      context,
+      value: mobileController.text,
+      isPhoneNumberValid: _isPhoneNumberValid,
+      isValidationPending: _isPhoneNumberValidationPending,
+    );
   }
 
   bool shouldShowValidation(String fieldName) {
@@ -146,6 +256,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     switch (fieldName) {
       case 'email':
         return InputType.email;
+      case 'mobile':
+        return InputType.phone;
       default:
         return InputType.alias;
     }
@@ -155,6 +267,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     switch (fieldName) {
       case 'email':
         return emailController.text;
+      case 'mobile':
+        return mobileController.text;
       default:
         return '';
     }
@@ -165,8 +279,13 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     GlobalKey<FormState> formKey,
   ) {
     final ctx = formKey.currentContext!;
-    final validator = InputValidators.getValidator(ctx, _typeFor(fieldName));
-    final error = validator.call(_textFor(fieldName));
+    final error = switch (fieldName) {
+      'mobile' => phoneValidationError(ctx),
+      _ => InputValidators.getValidator(
+        ctx,
+        _typeFor(fieldName),
+      ).call(_textFor(fieldName)),
+    };
     _setErrorVisibility(fieldName, error != null);
     formKey.currentState?.validate();
     validateForm(formKey);
@@ -175,8 +294,13 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   void handleFieldChange(String fieldName, GlobalKey<FormState> formKey) {
     if (state.showingErrorFields.contains(fieldName)) {
       final ctx = formKey.currentContext!;
-      final validator = InputValidators.getValidator(ctx, _typeFor(fieldName));
-      final error = validator.call(_textFor(fieldName));
+      final error = switch (fieldName) {
+        'mobile' => phoneValidationError(ctx),
+        _ => InputValidators.getValidator(
+          ctx,
+          _typeFor(fieldName),
+        ).call(_textFor(fieldName)),
+      };
       if (error == null) {
         _setErrorVisibility(fieldName, false);
         formKey.currentState?.validate();
@@ -247,12 +371,12 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     _updateHasEnteredAnyInfo();
   }
 
-  void updateMobile(String mobile, GlobalKey<FormState> formKey) {
+  bool updateMobile(String mobile, GlobalKey<FormState> formKey) {
     final error = InputValidators.getValidator(
       formKey.currentContext!,
       InputType.phone,
     ).call(mobile);
-    if (error != null) return;
+    if (error != null) return false;
 
     final identity = state.identity;
 
@@ -260,6 +384,53 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       identity.card.copyWith(mobile: mobile.isEmpty ? null : mobile),
     );
     _updateHasEnteredAnyInfo();
+    return true;
+  }
+
+  void handlePhoneInputChanged(
+    PhoneNumber phoneNumber,
+    GlobalKey<FormState> formKey,
+  ) {
+    _phoneValidationRevision++;
+    _scheduledLoadedMobileValidation = null;
+    _selectedPhoneIsoCode = phoneNumber.isoCode ?? _selectedPhoneIsoCode;
+
+    final hasValue = mobileController.text.trim().isNotEmpty;
+    _latestNormalizedMobile = hasValue ? phoneNumber.phoneNumber : null;
+
+    if (!hasValue) {
+      _isPhoneNumberValidationPending = false;
+      _isPhoneNumberValid = true;
+      updateMobile('', formKey);
+    } else {
+      _isPhoneNumberValidationPending = true;
+    }
+
+    if (state.showingErrorFields.contains('mobile')) {
+      formKey.currentState?.validate();
+    }
+
+    validateForm(formKey);
+  }
+
+  void updatePhoneValidation(bool isValid, GlobalKey<FormState> formKey) {
+    final hasValue = mobileController.text.trim().isNotEmpty;
+    _scheduledLoadedMobileValidation = null;
+    _isPhoneNumberValidationPending = false;
+
+    if (!hasValue) {
+      _isPhoneNumberValid = updateMobile('', formKey);
+    } else if (isValid) {
+      final normalizedPhoneNumber = _latestNormalizedMobile;
+      _isPhoneNumberValid =
+          normalizedPhoneNumber != null &&
+          normalizedPhoneNumber.isNotEmpty &&
+          updateMobile(normalizedPhoneNumber, formKey);
+    } else {
+      _isPhoneNumberValid = false;
+    }
+
+    handleFieldChange('mobile', formKey);
   }
 
   void updateCardColor(Color color) {
@@ -282,41 +453,39 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     required IdentityFormMode mode,
   }) async {
     if ((state.hasDeleted) || (state.hasSaved)) return true;
+    if (mobileController.text.trim().isNotEmpty &&
+        (_isPhoneNumberValidationPending || !_isPhoneNumberValid)) {
+      return false;
+    }
 
     final identitiesService = ref.read(identitiesServiceProvider.notifier);
-
-    final firstName = displayNameController.text.trim().isEmpty
+    final firstName = state.identity.card.firstName.trim().isEmpty
         ? anonymousLabel
-        : displayNameController.text.trim();
-    final lastName = lastNameController.text.trim();
-    final email = emailController.text.trim();
-    final mobile = mobileController.text.trim();
-    final displayName = aliasController.text.trim().isEmpty
+        : state.identity.card.firstName.trim();
+    final lastName = state.identity.card.lastName?.trim();
+    final email = state.identity.card.email?.trim();
+    final mobile = state.identity.card.mobile?.trim();
+    final displayName = state.identity.card.displayName.trim().isEmpty
         ? anonymousLabel
-        : aliasController.text.trim();
-    final cardColor = state.identity.card.cardColor;
-    final profilePic = state.identity.card.profilePic;
-
-    final existingIdentity = state.identity;
-    final updatedIdenity = state.identity.copyWith(
-      card: existingIdentity.card.copyWith(
-        firstName: firstName,
-        lastName: lastName.isEmpty ? null : lastName,
-        email: email.isEmpty ? null : email,
-        mobile: mobile.isEmpty ? null : mobile,
-        displayName: displayName,
-        cardColor: cardColor,
-        profilePic: profilePic,
-      ),
-    );
+        : state.identity.card.displayName.trim();
 
     try {
+      final updatedIdentity = state.identity.copyWith(
+        card: state.identity.card.copyWith(
+          firstName: firstName,
+          lastName: lastName?.isEmpty ?? true ? null : lastName,
+          email: email?.isEmpty ?? true ? null : email,
+          mobile: mobile?.isEmpty ?? true ? null : mobile,
+          displayName: displayName,
+        ),
+      );
+
       if (mode == IdentityFormMode.add) {
-        await identitiesService.addIdentity(updatedIdenity);
+        await identitiesService.addIdentity(updatedIdentity);
       } else {
-        await identitiesService.updateIdentity(updatedIdenity);
+        await identitiesService.updateIdentity(updatedIdentity);
       }
-      state = state.copyWith(identity: updatedIdenity, hasSaved: true);
+      state = state.copyWith(identity: updatedIdentity, hasSaved: true);
       return true;
     } catch (error) {
       return false;

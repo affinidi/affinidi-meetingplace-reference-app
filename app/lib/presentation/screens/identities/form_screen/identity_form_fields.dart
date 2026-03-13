@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 import '../../../../../infrastructure/extensions/identities_extensions.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
@@ -9,6 +10,7 @@ import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../validators/input_validators.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
+import '../../../widgets/form_rows/label_icon.dart';
 import '../../../widgets/profile_picture.dart';
 import '../../media/media_screen/media_screen.dart';
 import 'identity_form_screen_controller.dart';
@@ -171,14 +173,78 @@ class IdentityFormFields extends ConsumerWidget {
               traversalOrder: 3.0,
             ),
             const Divider(),
-            FormRowTextField(
-              icon: Icons.phone,
-              label: context.l10n.mobile,
-              color: context.colorScheme.primary,
-              controller: controller.mobileController,
-              placeholder: context.l10n.enterMobile,
-              singleLine: true,
-              keyboardType: TextInputType.phone,
+            FocusTraversalOrder(
+              order: const NumericFocusOrder(4.0),
+              child: ListTile(
+                leading: LabelIcon(
+                  icon: Icons.phone,
+                  iconColor: context.colorScheme.primary,
+                  label: context.l10n.mobile,
+                ),
+                title: Row(
+                  children: [
+                    Text(
+                      context.l10n.mobile,
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: InternationalPhoneNumberInput(
+                        onInputChanged: (phoneNumber) {
+                          controller.handlePhoneInputChanged(
+                            phoneNumber,
+                            formKey,
+                          );
+                        },
+                        onInputValidated: (isValid) {
+                          controller.updatePhoneValidation(isValid, formKey);
+                        },
+                        selectorConfig: const SelectorConfig(
+                          selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                          setSelectorButtonAsPrefixIcon: true,
+                          leadingPadding: 8,
+                          trailingSpace: false,
+                        ),
+                        ignoreBlank: true,
+                        locale: Localizations.localeOf(context).languageCode,
+                        textFieldController: controller.mobileController,
+                        focusNode: controller.mobileFocusNode,
+                        keyboardAction: TextInputAction.next,
+                        initialValue: controller.initialMobilePhoneNumber(
+                          InputValidators.defaultPhoneIsoCode(context),
+                        ),
+                        textStyle: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
+                        selectorTextStyle: context.textTheme.bodyMedium
+                            ?.copyWith(
+                              color: context.colorScheme.onSurfaceVariant,
+                            ),
+                        inputDecoration: InputDecoration(
+                          hintText: context.l10n.enterMobile,
+                        ),
+                        onFieldSubmitted: (_) {
+                          controller.updateErrorVisibilityOnBlur(
+                            'mobile',
+                            formKey,
+                          );
+                        },
+                        validator: (_) {
+                          if (!controller.shouldShowValidation('mobile')) {
+                            return null;
+                          }
+
+                          return controller.phoneValidationError(context);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+              ),
             ),
           ],
         ),

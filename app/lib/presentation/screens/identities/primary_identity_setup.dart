@@ -19,6 +19,7 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
 
     Future<void> handleSave() async {
       controller.updateErrorVisibilityOnBlur('email', formKey);
+      controller.updateErrorVisibilityOnBlur('mobile', formKey);
 
       final isValid = formKey.currentState?.validate() ?? false;
       controller.validateForm(formKey);
