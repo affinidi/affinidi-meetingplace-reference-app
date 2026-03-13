@@ -2,9 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/app_chat_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
-import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
-import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
@@ -29,17 +28,17 @@ void main() {
     late AppChatService chatService;
     late FakeMeetingPlaceSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
-    late Contact testContact;
     late FakeContactsService fakeContactsService;
 
+    final testContact = FakeContacts.individualContact;
+    final channelDid = testContact.channelDid!;
+
     setUp(() async {
-      testContact = FakeContacts.individualContact;
       fakeCoreSdk = FakeMeetingPlaceSDK(
-        channels: {testContact.channelDid!: FakeChannels.individualChannel},
+        channels: {channelDid: FakeChannels.individualChannel},
       );
       fakeChatSdk = FakeChatSdk();
       fakeChatSdk.chatActivitySent = false;
-
       fakeContactsService = FakeContactsService();
 
       container = ProviderContainer(
@@ -52,18 +51,18 @@ void main() {
         ],
       );
       container.listen(
-        appChatServiceProvider.notifier,
+        appChatServiceProvider(channelDid),
         (previous, value) {},
         fireImmediately: true,
       );
-      chatService = container.read(appChatServiceProvider.notifier);
+      chatService = container.read(appChatServiceProvider(channelDid).notifier);
 
       final knownGroup = FakeGroups.approvedGroup();
       fakeCoreSdk.setMockGroup(knownGroup);
     });
 
     test('sets session state and delegates to SDK on start', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
 
       expect(fakeChatSdk.startChatSessionCallCount, equals(1));
       expect(
@@ -78,47 +77,47 @@ void main() {
     });
 
     test('delegates sendTextMessage to SDK', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       await chatService.sendTextMessage('hello');
       expect(fakeChatSdk.sendTextMessageCalls.last['text'], 'hello');
     });
 
     test('delegates sendChatActivity to SDK', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       await chatService.sendChatActivity();
       expect(fakeChatSdk.chatActivitySent, true);
     });
 
     test('delegates rejectConnectionRequest to SDK', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       final fakeMessage = fakeChatSdk.fakeConciergeMessage();
       await chatService.rejectConnectionRequest(fakeMessage);
       expect(fakeChatSdk.lastRejectedConnection, fakeMessage);
     });
 
     test('delegates approveConnectionRequest to SDK', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       final fakeMessage = fakeChatSdk.fakeConciergeMessage();
       await chatService.approveConnectionRequest(fakeMessage);
       expect(fakeChatSdk.lastApprovedConnection, fakeMessage);
     });
 
     test('delegates sendChatContactDetailsUpdate to SDK', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       final fakeMessage = fakeChatSdk.fakeConciergeMessage();
       await chatService.sendChatContactDetailsUpdate(fakeMessage);
       expect(fakeChatSdk.lastContactDetailsUpdateSent, fakeMessage);
     });
 
     test('delegates rejectChatContactDetailsUpdate to SDK', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       final fakeMessage = fakeChatSdk.fakeConciergeMessage();
       await chatService.rejectChatContactDetailsUpdate(fakeMessage);
       expect(fakeChatSdk.lastContactDetailsUpdateRejected, fakeMessage);
     });
 
     test('delegates reactOnMessage to SDK', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       final fakeMessage = fakeChatSdk.fakeMessage();
       await chatService.reactOnMessage(fakeMessage, reaction: '👍');
       expect(fakeChatSdk.lastReactionMessage, fakeMessage);
@@ -126,48 +125,40 @@ void main() {
     });
 
     test('delegates sendEffect to SDK', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       await chatService.sendEffect(Effect.confetti);
       expect(fakeChatSdk.lastEffectSent, Effect.confetti.name);
     });
 
     test('ends session and cancels subscription on disposeChat', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       chatService.disposeChat();
       expect(fakeChatSdk.sessionEnded, true);
     });
 
     test('resets badge count on resetBadgeCount', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       await chatService.resetBadgeCount();
       expect(fakeContactsService.resetBadgeCalledWith, testContact.channelDid);
     });
 
     test('skips badge reset when channel is missing on start', () async {
-      final missingContact = FakeContacts.individualContact.copyWith(
-        channelDid: 'did:key:missing',
+      final missingChannelDid = 'did:key:missing';
+      container.listen(
+        appChatServiceProvider(missingChannelDid),
+        (previous, value) {},
+        fireImmediately: true,
       );
-      await chatService.startChatSession(contact: missingContact);
-      await Future<void>.delayed(const Duration(milliseconds: 10));
+      final missingService = container.read(
+        appChatServiceProvider(missingChannelDid).notifier,
+      );
+      await missingService.startChatSession();
       expect(fakeContactsService.resetBadgeCalledWith, isNull);
     });
 
-    test(
-      'skips badge reset when channelDid is null on resetBadgeCount',
-      () async {
-        final contact = FakeContacts.individualContact.copyWith(
-          channelDid: null,
-        );
-        await chatService.startChatSession(contact: contact);
-        await chatService.resetBadgeCount();
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-        expect(fakeContactsService.resetBadgeCalledWith, isNull);
-      },
-    );
-
     test('logs error and skips badge reset when SDK throws on start', () async {
       fakeChatSdk.shouldThrowOnStartSession = true;
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       expect(fakeContactsService.resetBadgeCalledWith, isNull);
       expect(fakeChatSdk.startChatSessionCallCount, equals(1));
       expect(fakeChatSdk.sessionEnded, isFalse);
@@ -175,13 +166,13 @@ void main() {
     });
 
     test('updates contact sequence number', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       await chatService.updateContactSequenceNumber(testContact.channelDid!);
       expect(fakeContactsService.updateContactCalls, isNotEmpty);
     });
 
     test('delegates sendTextMessage with attachments to SDK', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       await chatService.sendTextMessage(
         'hello',
         attachments: [Attachment(id: '1')],
@@ -190,14 +181,14 @@ void main() {
     });
 
     test('disposeChat can be called multiple times safely', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
       chatService.disposeChat();
       chatService.disposeChat();
       expect(fakeChatSdk.sessionEnded, true);
     });
 
     test('restores unsent message for contact when message exists', () async {
-      await chatService.startChatSession(contact: testContact);
+      await chatService.startChatSession();
 
       final unsentMessagesService = container.read(
         unsentMessagesServiceProvider.notifier,
@@ -211,21 +202,6 @@ void main() {
         testContact.id,
       );
       expect(unsentMessage, 'draft message');
-    });
-
-    test('refreshes group returns valid group for known group', () async {
-      await chatService.startChatSession(contact: testContact);
-      final knownGroup = FakeGroups.approvedGroup();
-
-      final group = await chatService.refreshGroup(knownGroup.id);
-      expect(group, isNotNull);
-      expect(group!.id, knownGroup.id);
-    });
-
-    test('refreshes group returns null for unknown group', () async {
-      await chatService.startChatSession(contact: testContact);
-      final group = await chatService.refreshGroup('unknown-group-id');
-      expect(group, isNull);
     });
 
     test('calculates contact presence status correctly', () async {
@@ -246,36 +222,33 @@ void main() {
     });
 
     test('updates group contact pending status', () async {
-      await chatService.startChatSession(
-        contact: FakeContacts.individualContact,
-      );
+      await chatService.startChatSession();
 
       final group = FakeGroups.approvedGroup();
-
-      await chatService.updateGroupContactPendingStatus(
-        FakeContacts.individualContact,
-        group,
-      );
+      await chatService.updateGroupContactPendingStatus(testContact, group);
       expect(true, isTrue);
     });
   });
 
-  group('AppChatService - Stream Emissions', () {
+  group('AppChatService - State Emissions', () {
     late ProviderContainer container;
     late AppChatService chatService;
     late FakeMeetingPlaceSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
-    late Contact testContact;
     late FakeContactsService fakeContactsService;
 
+    final testContact = FakeContacts.individualContact;
+    final channelDid = testContact.channelDid!;
+
+    ChatServiceState serviceState() =>
+        container.read(appChatServiceProvider(channelDid));
+
     setUp(() async {
-      testContact = FakeContacts.individualContact;
       fakeCoreSdk = FakeMeetingPlaceSDK(
-        channels: {testContact.channelDid!: FakeChannels.individualChannel},
+        channels: {channelDid: FakeChannels.individualChannel},
       );
       fakeChatSdk = FakeChatSdk();
       fakeChatSdk.chatActivitySent = false;
-
       fakeContactsService = FakeContactsService();
 
       container = ProviderContainer(
@@ -288,153 +261,169 @@ void main() {
         ],
       );
       container.listen(
-        appChatServiceProvider.notifier,
+        appChatServiceProvider(channelDid),
         (previous, value) {},
         fireImmediately: true,
       );
-      chatService = container.read(appChatServiceProvider.notifier);
+      chatService = container.read(appChatServiceProvider(channelDid).notifier);
     });
 
-    test('emits chatItem stream when receiving message', () async {
-      final receivedMessages = <Message>[];
-      final subscription = chatService.chatItem.listen((item) {
-        if (item is Message) {
-          receivedMessages.add(item);
-        }
-      });
-
-      await chatService.startChatSession(contact: testContact);
+    test('adds chatItem to state when receiving message', () async {
+      await chatService.startChatSession();
 
       fakeChatSdk.simulateIncomingTextMessage(
         text: 'test message',
-        recipientDid: testContact.channelDid!,
+        recipientDid: channelDid,
         attachments: [],
       );
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      await subscription.cancel();
-
+      await Future<void>.delayed(const Duration(milliseconds: 1));
       expect(
-        receivedMessages.any((Message m) => m.value == 'test message'),
+        serviceState().messages.whereType<Message>().any(
+          (m) => m.value == 'test message',
+        ),
         isTrue,
       );
     });
 
-    test('emits presence stream when receiving presence', () async {
-      await chatService.startChatSession(contact: testContact);
+    test(
+      'updates contactPresenceStatus in state when receiving presence',
+      () async {
+        await chatService.startChatSession();
 
-      final receivedPresence = <DateTime>[];
-      final subscription = chatService.presence.listen(receivedPresence.add);
+        fakeChatSdk.simulateIncomingPresenceMessage(
+          timestamp: DateTime.now().toIso8601String(),
+          recipientDid: channelDid,
+        );
 
-      fakeChatSdk.simulateIncomingPresenceMessage(
-        timestamp: DateTime.now().toIso8601String(),
-        recipientDid: testContact.channelDid!,
-      );
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(
+          serviceState().contactPresenceStatus,
+          ContactPresenceStatus.online,
+        );
+      },
+    );
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      await subscription.cancel();
+    test(
+      'updates membersTyping in state when receiving typing activity',
+      () async {
+        await chatService.startChatSession();
 
-      expect(receivedPresence, isNotEmpty);
-    });
+        // Simulate contact card update to set otherPartyCard in state
+        fakeChatSdk.simulateIncomingContactCardUpdate(
+          contactDid: 'did:key:other-party', // Bob's DID
+          card: FakeContacts.individualContact.otherPartyCard!,
+          recipientDid: channelDid,
+        );
 
-    test('emits typing stream when receiving typing activity', () async {
-      await chatService.startChatSession(contact: testContact);
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(serviceState().otherPartyCard?.firstName, isNotNull);
 
-      final receivedTyping = <String?>[];
-      final subscription = chatService.typingMembers.listen(receivedTyping.add);
+        fakeChatSdk.simulateIncomingTypingActivity(
+          senderDid: 'did:key:other-party',
+          createdTime: DateTime.now(),
+          recipientDid: channelDid,
+        );
 
-      fakeChatSdk.simulateIncomingTypingActivity(
-        senderDid: testContact.channelDid!,
-        createdTime: DateTime.now(),
-        recipientDid: testContact.channelDid!,
-      );
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(serviceState().membersTyping, isNotEmpty);
+      },
+    );
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      await subscription.cancel();
-
-      expect(receivedTyping, contains(testContact.channelDid));
-    });
-
-    test('emits effect stream when receiving effect', () async {
-      await chatService.startChatSession(contact: testContact);
-
-      final receivedEffects = <String?>[];
-      final subscription = chatService.effect.listen((effect) {
-        if (effect != null) {
-          receivedEffects.add(effect);
-        }
-      });
+    test('updates effect in state when receiving effect', () async {
+      await chatService.startChatSession();
 
       fakeChatSdk.simulateIncomingEffectMessage(
         effectName: Effect.confetti.name,
-        recipientDid: testContact.channelDid!,
+        recipientDid: channelDid,
       );
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      await subscription.cancel();
-
-      expect(receivedEffects, isNotEmpty);
-      expect(receivedEffects, contains(Effect.confetti.name));
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      expect(serviceState().effect, Effect.confetti);
     });
 
-    test('emits groupDetails stream when receiving group update', () async {
-      await chatService.startChatSession(contact: testContact);
+    test('clearEffect resets effect in state', () async {
+      await chatService.startChatSession();
 
-      final receivedGroupDetails = <StreamData>[];
-      final subscription = chatService.groupDetails.listen(
-        receivedGroupDetails.add,
+      fakeChatSdk.simulateIncomingEffectMessage(
+        effectName: Effect.confetti.name,
+        recipientDid: channelDid,
       );
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      expect(serviceState().effect, Effect.confetti);
 
-      fakeChatSdk.simulateIncomingGroupDetailsUpdate(
-        recipientDid: testContact.channelDid!,
+      chatService.clearEffect();
+      expect(serviceState().effect, isNull);
+    });
+
+    test('refreshes group in state when receiving group update', () async {
+      final groupContact = FakeContacts.groupContact;
+      final groupChannelDid = groupContact.channelDid!;
+      final knownGroup = FakeGroups.approvedGroup();
+
+      final groupCoreSdk = FakeMeetingPlaceSDK(
+        channels: {groupChannelDid: FakeChannels.groupChannel},
       );
+      groupCoreSdk.setMockGroup(knownGroup);
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      await subscription.cancel();
+      final groupFakeChatSdk = FakeChatSdk();
+      final groupContainer = ProviderContainer(
+        overrides: [
+          meetingPlaceSdkProvider.overrideWith((ref) async => groupCoreSdk),
+          chatSdkProvider.overrideWith(
+            (ref, channel) async => groupFakeChatSdk,
+          ),
+          contactsServiceProvider.overrideWith(FakeContactsService.new),
+          environmentProvider.overrideWithValue(FakeEnvironment()),
+          appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+        ],
+      );
+      addTearDown(groupContainer.dispose);
 
-      expect(receivedGroupDetails, isNotEmpty);
+      groupContainer.listen(
+        appChatServiceProvider(groupChannelDid),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      final groupService = groupContainer.read(
+        appChatServiceProvider(groupChannelDid).notifier,
+      );
+      await groupService.startChatSession();
 
-      final groupUpdateMessage = receivedGroupDetails.first.plainTextMessage;
-      expect(groupUpdateMessage, isNotNull);
+      groupService.state = groupService.state.copyWith(group: knownGroup);
+
       expect(
-        groupUpdateMessage!.type.toString(),
-        ChatProtocol.chatGroupDetailsUpdate.value,
+        groupContainer.read(appChatServiceProvider(groupChannelDid)).group,
+        isNotNull,
       );
 
-      if (groupUpdateMessage.body != null) {
-        expect(groupUpdateMessage.body!['groupDid'], testContact.channelDid);
-        expect(
-          groupUpdateMessage.body!['adminDids'],
-          contains(testContact.channelDid),
+      groupFakeChatSdk.simulateIncomingGroupDetailsUpdate(
+        recipientDid: groupChannelDid,
+      );
+
+      expect(
+        groupContainer.read(appChatServiceProvider(groupChannelDid)).group,
+        isNotNull,
+      );
+    });
+
+    test(
+      'updates otherPartyCard in state when receiving contact card update',
+      () async {
+        await chatService.startChatSession();
+
+        final updatedCard = FakeContacts.individualContact.card.copyWith(
+          firstName: 'Updated Alice',
         );
-      }
-    });
+        fakeChatSdk.simulateIncomingContactCardUpdate(
+          contactDid: channelDid,
+          card: updatedCard,
+          recipientDid: channelDid,
+        );
 
-    test('emits otherPartyContactCardUpdate stream'
-        ' when receiving contact card update', () async {
-      await chatService.startChatSession(contact: testContact);
-
-      final receivedCards = <ContactCard>[];
-      final subscription = chatService.otherPartyContactCardUpdate.listen(
-        receivedCards.add,
-      );
-
-      final updatedCard = FakeContacts.individualContact.card.copyWith(
-        firstName: 'Updated Alice',
-      );
-      fakeChatSdk.simulateIncomingContactCardUpdate(
-        contactDid: testContact.channelDid!,
-        card: updatedCard,
-        recipientDid: testContact.channelDid!,
-      );
-
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      await subscription.cancel();
-
-      expect(
-        receivedCards.any((card) => card.firstName == 'Updated Alice'),
-        isTrue,
-      );
-    });
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(serviceState().otherPartyCard?.firstName, 'Updated Alice');
+      },
+    );
   });
 }
