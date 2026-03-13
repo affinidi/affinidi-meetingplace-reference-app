@@ -90,6 +90,7 @@ class _ContactListItem extends ConsumerWidget {
       key: ValueKey(contact.channelDidSha256),
       direction: DismissDirection.endToStart,
       background: Container(
+        key: const Key('dismissible_delete_background'),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
@@ -101,6 +102,7 @@ class _ContactListItem extends ConsumerWidget {
           children: [
             Icon(Icons.delete, color: context.colorScheme.onError),
             Text(
+              key: const Key('dismissible_delete_text'),
               context.l10n.generalDelete,
               style: context.textTheme.bodySmall?.copyWith(
                 color: context.colorScheme.onError,
