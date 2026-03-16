@@ -185,13 +185,13 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     _selectedPhoneIsoCode = null;
     _phoneValidationRevision++;
 
-    final mobile = identity.card.mobile?.trim();
-    if (mobile == null || mobile.isEmpty) {
-      _latestNormalizedMobile = null;
+    final mobile = mobileController.text.trim();
+    _latestNormalizedMobile = null;
+
+    if (mobile.isEmpty) {
       _isPhoneNumberValid = true;
       _isPhoneNumberValidationPending = false;
     } else {
-      _latestNormalizedMobile = null;
       _isPhoneNumberValid = false;
       _isPhoneNumberValidationPending = true;
     }
@@ -215,8 +215,38 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     state = state.copyWith(identity: updatedIdentity);
   }
 
+  BuildContext? _formContext(GlobalKey<FormState> formKey) {
+    final context = formKey.currentContext;
+
+    if (_isDisposed || context == null || !context.mounted) {
+      return null;
+    }
+
+    return context;
+  }
+
+  ({InputType type, String text}) _fieldInfo(String fieldName) {
+    return switch (fieldName) {
+      'email' => (type: InputType.email, text: emailController.text),
+      'mobile' => (type: InputType.phone, text: mobileController.text),
+      _ => (type: InputType.alias, text: ''),
+    };
+  }
+
+  String? _fieldValidationError(String fieldName, BuildContext context) {
+    if (fieldName == 'mobile') {
+      return phoneValidationError(context);
+    }
+
+    final field = _fieldInfo(fieldName);
+
+    return InputValidators.getValidator(context, field.type).call(field.text);
+  }
+
   void validateForm(GlobalKey<FormState> formKey) {
-    final ctx = formKey.currentContext!;
+    final ctx = _formContext(formKey);
+    if (ctx == null) return;
+
     final emailError = InputValidators.getValidator(
       ctx,
       InputType.email,
@@ -252,55 +282,25 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     state = state.copyWith(showingErrorFields: current);
   }
 
-  InputType _typeFor(String fieldName) {
-    switch (fieldName) {
-      case 'email':
-        return InputType.email;
-      case 'mobile':
-        return InputType.phone;
-      default:
-        return InputType.alias;
-    }
-  }
-
-  String _textFor(String fieldName) {
-    switch (fieldName) {
-      case 'email':
-        return emailController.text;
-      case 'mobile':
-        return mobileController.text;
-      default:
-        return '';
-    }
-  }
-
   void updateErrorVisibilityOnBlur(
     String fieldName,
     GlobalKey<FormState> formKey,
   ) {
-    final ctx = formKey.currentContext!;
-    final error = switch (fieldName) {
-      'mobile' => phoneValidationError(ctx),
-      _ => InputValidators.getValidator(
-        ctx,
-        _typeFor(fieldName),
-      ).call(_textFor(fieldName)),
-    };
+    final ctx = _formContext(formKey);
+    if (ctx == null) return;
+
+    final error = _fieldValidationError(fieldName, ctx);
     _setErrorVisibility(fieldName, error != null);
     formKey.currentState?.validate();
     validateForm(formKey);
   }
 
   void handleFieldChange(String fieldName, GlobalKey<FormState> formKey) {
+    final ctx = _formContext(formKey);
+    if (ctx == null) return;
+
     if (state.showingErrorFields.contains(fieldName)) {
-      final ctx = formKey.currentContext!;
-      final error = switch (fieldName) {
-        'mobile' => phoneValidationError(ctx),
-        _ => InputValidators.getValidator(
-          ctx,
-          _typeFor(fieldName),
-        ).call(_textFor(fieldName)),
-      };
+      final error = _fieldValidationError(fieldName, ctx);
       if (error == null) {
         _setErrorVisibility(fieldName, false);
         formKey.currentState?.validate();
@@ -310,8 +310,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void updateFirstName(String firstName, GlobalKey<FormState> formKey) {
+    final context = _formContext(formKey);
+    if (context == null) return;
+
     final error = InputValidators.getValidator(
-      formKey.currentContext!,
+      context,
       InputType.firstName,
     ).call(firstName);
     if (error != null) return;
@@ -342,8 +345,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void updateLastName(String lastName, GlobalKey<FormState> formKey) {
+    final context = _formContext(formKey);
+    if (context == null) return;
+
     final error = InputValidators.getValidator(
-      formKey.currentContext!,
+      context,
       InputType.lastName,
     ).call(lastName);
     if (error != null) return;
@@ -357,8 +363,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void updateEmail(String email, GlobalKey<FormState> formKey) {
+    final context = _formContext(formKey);
+    if (context == null) return;
+
     final error = InputValidators.getValidator(
-      formKey.currentContext!,
+      context,
       InputType.email,
     ).call(email);
     if (error != null) return;
@@ -372,8 +381,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   bool updateMobile(String mobile, GlobalKey<FormState> formKey) {
+    final context = _formContext(formKey);
+    if (context == null) return false;
+
     final error = InputValidators.getValidator(
-      formKey.currentContext!,
+      context,
       InputType.phone,
     ).call(mobile);
     if (error != null) return false;
@@ -414,6 +426,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void updatePhoneValidation(bool isValid, GlobalKey<FormState> formKey) {
+    if (_formContext(formKey) == null) return;
+
     final hasValue = mobileController.text.trim().isNotEmpty;
     _scheduledLoadedMobileValidation = null;
     _isPhoneNumberValidationPending = false;
