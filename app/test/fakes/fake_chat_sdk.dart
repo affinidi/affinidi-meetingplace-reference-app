@@ -495,7 +495,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   @override
   Future<Chat> startChatSession() async {
     _chatSessionStartedCalls++;
-    await Future<void>.delayed(const Duration(milliseconds: 10));
+    // await Future<void>.delayed(const Duration(milliseconds: 10));
     if (shouldThrowOnStartSession) {
       throw Exception('Simulated SDK error');
     }
