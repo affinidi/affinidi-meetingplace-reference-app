@@ -34,6 +34,17 @@ class IdentityFormFields extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
+    final phoneSelectorTheme = context.theme.copyWith(
+      canvasColor: context.colorScheme.inverseSurface,
+    );
+    final phoneCountrySearchDecoration = context.roundedInputDecoration
+        .copyWith(
+          hintText: context.l10n.generalSearch,
+          prefixIcon: Icon(
+            Icons.search,
+            color: context.colorScheme.onSurfaceVariant,
+          ),
+        );
 
     return Form(
       key: formKey,
@@ -192,53 +203,58 @@ class IdentityFormFields extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: InternationalPhoneNumberInput(
-                        onInputChanged: (phoneNumber) {
-                          controller.handlePhoneInputChanged(
-                            phoneNumber,
-                            formKey,
-                          );
-                        },
-                        onInputValidated: (isValid) {
-                          controller.updatePhoneValidation(isValid, formKey);
-                        },
-                        selectorConfig: const SelectorConfig(
-                          selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-                          setSelectorButtonAsPrefixIcon: true,
-                          leadingPadding: 8,
-                          trailingSpace: false,
-                        ),
-                        ignoreBlank: true,
-                        locale: Localizations.localeOf(context).languageCode,
-                        textFieldController: controller.mobileController,
-                        focusNode: controller.mobileFocusNode,
-                        keyboardAction: TextInputAction.next,
-                        initialValue: controller.initialMobilePhoneNumber(
-                          InputValidators.defaultPhoneIsoCode(context),
-                        ),
-                        textStyle: context.textTheme.bodyMedium?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
-                        ),
-                        selectorTextStyle: context.textTheme.bodyMedium
-                            ?.copyWith(
-                              color: context.colorScheme.onSurfaceVariant,
-                            ),
-                        inputDecoration: InputDecoration(
-                          hintText: context.l10n.enterMobile,
-                        ),
-                        onFieldSubmitted: (_) {
-                          controller.updateErrorVisibilityOnBlur(
-                            'mobile',
-                            formKey,
-                          );
-                        },
-                        validator: (_) {
-                          if (!controller.shouldShowValidation('mobile')) {
-                            return null;
-                          }
+                      child: Theme(
+                        data: phoneSelectorTheme,
+                        child: InternationalPhoneNumberInput(
+                          onInputChanged: (phoneNumber) {
+                            controller.handlePhoneInputChanged(
+                              phoneNumber,
+                              formKey,
+                            );
+                          },
+                          onInputValidated: (isValid) {
+                            controller.updatePhoneValidation(isValid, formKey);
+                          },
+                          selectorConfig: const SelectorConfig(
+                            selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                            setSelectorButtonAsPrefixIcon: true,
+                            leadingPadding: 8,
+                            trailingSpace: false,
+                            useBottomSheetSafeArea: true,
+                          ),
+                          searchBoxDecoration: phoneCountrySearchDecoration,
+                          ignoreBlank: true,
+                          locale: Localizations.localeOf(context).languageCode,
+                          textFieldController: controller.mobileController,
+                          focusNode: controller.mobileFocusNode,
+                          keyboardAction: TextInputAction.next,
+                          initialValue: controller.initialMobilePhoneNumber(
+                            InputValidators.defaultPhoneIsoCode(context),
+                          ),
+                          textStyle: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                          selectorTextStyle: context.textTheme.bodyMedium
+                              ?.copyWith(
+                                color: context.colorScheme.onSurfaceVariant,
+                              ),
+                          inputDecoration: InputDecoration(
+                            hintText: context.l10n.enterMobile,
+                          ),
+                          onFieldSubmitted: (_) {
+                            controller.updateErrorVisibilityOnBlur(
+                              'mobile',
+                              formKey,
+                            );
+                          },
+                          validator: (_) {
+                            if (!controller.shouldShowValidation('mobile')) {
+                              return null;
+                            }
 
-                          return controller.phoneValidationError(context);
-                        },
+                            return controller.phoneValidationError(context);
+                          },
+                        ),
                       ),
                     ),
                   ],
