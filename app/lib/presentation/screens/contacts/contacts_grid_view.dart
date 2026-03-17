@@ -131,9 +131,7 @@ class _ContactGridItem extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  if (hasDisplayName &&
-                      shouldShowDisplayName &&
-                      contact.type == ContactType.individual)
+                  if (hasDisplayName && shouldShowDisplayName)
                     Column(
                       children: [
                         Text(
