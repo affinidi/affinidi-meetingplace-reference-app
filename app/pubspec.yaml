@@ -23,6 +23,7 @@ environment:
 
 dependencies:
   app_badge_plus: ^1.2.3
+  audio_waveforms: ^2.0.2
   camera: ^0.11.2
   clear_all_notifications: ^1.0.0
   clock: any

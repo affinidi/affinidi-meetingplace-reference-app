@@ -58,6 +58,7 @@ Future<void> startApp(
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
   PermissionStatus? cameraPermissionStatus,
+  PermissionStatus? microphonePermissionStatus,
   required List<Identity> identities,
   required List<Mediator> mediators,
   List<Contact> contacts = const [],
@@ -165,10 +166,13 @@ Future<void> startApp(
               ),
         ),
       ],
-      if (cameraPermissionStatus != null)
+      if (cameraPermissionStatus != null || microphonePermissionStatus != null)
         permissionServiceProvider.overrideWith(
           (ref) => FakePermissionService(
-            cameraPermissionStatus: cameraPermissionStatus,
+            cameraPermissionStatus:
+                cameraPermissionStatus ?? PermissionStatus.granted,
+            microphonePermissionStatus:
+                microphonePermissionStatus ?? PermissionStatus.granted,
           ),
         ),
       secureStorageProvider.overrideWith(
@@ -204,6 +208,7 @@ Future<void> navigateToLocation(
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
   PermissionStatus? cameraPermissionStatus = PermissionStatus.granted,
+  PermissionStatus? microphonePermissionStatus = PermissionStatus.granted,
   SecureStorage? secureStorage,
   ShareService? shareService,
   QrCodeViewFactory? qrCodeViewFactory,
@@ -220,6 +225,7 @@ Future<void> navigateToLocation(
     imagePicker: imagePicker,
     mockCameras: mockCameras,
     cameraPermissionStatus: cameraPermissionStatus,
+    microphonePermissionStatus: microphonePermissionStatus,
     secureStorage: secureStorage,
     mediators: mediators,
     contacts: contacts,
