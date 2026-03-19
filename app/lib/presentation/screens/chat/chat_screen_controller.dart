@@ -13,6 +13,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/network_connectivity_service/network_connectivity_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact.dart';
@@ -896,6 +897,41 @@ class ChatScreenController extends _$ChatScreenController
   /// [effect] - The effect to be sent to the chat screen.
   ///
   /// Returns a [Future] that completes when the effect has been processed.
+  Future<void> sendAgentOutreachInvitation(String agentMnemonic) async {
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+
+    final agentOfferResult = await coreSdk.findOffer(mnemonic: agentMnemonic);
+    final outreachOffer = agentOfferResult.connectionOffer;
+    if (outreachOffer == null) return;
+
+    final contact = state.contact;
+    if (contact == null) return;
+
+    final channelDid = contact.channelDid;
+    if (channelDid == null) return;
+
+    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      channelDid,
+    );
+    if (channel == null) return;
+
+    final inviteToOffer = await coreSdk.getConnectionOffer(channel.offerLink);
+    if (inviteToOffer == null) return;
+
+    final identity = ref.read(
+      identitiesServiceProvider.currentIdentityOrPrimary,
+    );
+    if (identity == null) return;
+
+    await coreSdk.sendOutreachInvitation(
+      outreachConnectionOffer: outreachOffer,
+      inviteToConnectionOffer: inviteToOffer,
+      messageToInclude:
+          'You have been invited to a conversation by ${identity.card.firstName}',
+      senderInfo: identity.card.firstName,
+    );
+  }
+
   Future<void> sendEffect(ScreenEffect effect) async {
     try {
       _showActivity();

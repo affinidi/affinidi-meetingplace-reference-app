@@ -261,10 +261,10 @@ packages:
     dependency: transitive
     description:
       name: characters
-      sha256: faf38497bda5ead2a8c7615f4f7939df04333478bf32e4173fcb06d428b5716b
+      sha256: f71061c654a3380576a52b451dd5532377954cf9dbd272a78fc8479606670803
       url: "https://pub.dev"
     source: hosted
-    version: "1.4.1"
+    version: "1.4.0"
   charcode:
     dependency: transitive
     description:
@@ -301,10 +301,10 @@ packages:
     dependency: transitive
     description:
       name: cli_launcher
-      sha256: "17d2744fb9a254c49ec8eda582536abe714ea0131533e24389843a4256f82eac"
+      sha256: "35cf15a3ffaeb9c11849eaa0afba761bb76dceb42d050532bfd3e1299c9748cd"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.2+1"
+    version: "0.3.3+1"
   cli_util:
     dependency: transitive
     description:
@@ -493,10 +493,10 @@ packages:
     dependency: transitive
     description:
       name: dart_webrtc
-      sha256: "4ed7b9fa9924e5a81eb39271e2c2356739dd1039d60a13b86ba6c5f448625086"
+      sha256: "63a3ed6b958b5ba32d95ddba484c0dcf1cad4fd55eb551bb23c815b6f1e5d844"
       url: "https://pub.dev"
     source: hosted
-    version: "1.7.0"
+    version: "1.8.0"
   dbus:
     dependency: transitive
     description:
@@ -1193,40 +1193,40 @@ packages:
     dependency: transitive
     description:
       name: markdown
-      sha256: "935e23e1ff3bc02d390bad4d4be001208ee92cc217cb5b5a6c19bc14aaa318c1"
+      sha256: ee85086ad7698b42522c6ad42fe195f1b9898e4d974a1af4576c1a3a176cada9
       url: "https://pub.dev"
     source: hosted
-    version: "7.3.0"
+    version: "7.3.1"
   matcher:
     dependency: transitive
     description:
       name: matcher
-      sha256: dc0b7dc7651697ea4ff3e69ef44b0407ea32c487a39fff6a4004fa585e901861
+      sha256: dc58c723c3c24bf8d3e2d3ad3f2f9d7bd9cf43ec6feaa64181775e60190153f2
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.19"
+    version: "0.12.17"
   material_color_utilities:
     dependency: transitive
     description:
       name: material_color_utilities
-      sha256: "9c337007e82b1889149c82ed242ed1cb24a66044e30979c44912381e9be4c48b"
+      sha256: f7142bb1154231d7ea5f96bc7bde4bda2a0945d2806bb11670e30b850d56bdec
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.0"
+    version: "0.11.1"
   matrix:
     dependency: transitive
     description:
       name: matrix
-      sha256: c0214ee99a73957d3c02d54a60afcf9acee577b0924749085d6fdf556e8eba42
+      sha256: "5bb38e98212bc4c3244c762a1af787f7239a38d2cfdf44488258283ff899f77c"
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.1"
+    version: "6.2.0"
   meeting_place_chat:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_chat"
-      ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
-      resolved-ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
+      ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
+      resolved-ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart"
     source: git
     version: "0.0.1-dev.32"
@@ -1234,8 +1234,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_control_plane"
-      ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
-      resolved-ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
+      ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
+      resolved-ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart"
     source: git
     version: "0.0.1-dev.16"
@@ -1243,8 +1243,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_core"
-      ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
-      resolved-ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
+      ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
+      resolved-ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart"
     source: git
     version: "0.0.1-dev.30"
@@ -1252,8 +1252,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_drift_repository"
-      ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
-      resolved-ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
+      ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
+      resolved-ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart"
     source: git
     version: "0.0.1-dev.33"
@@ -1261,8 +1261,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_mediator"
-      ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
-      resolved-ref: "9d7bfb1e09f12044068dfe8bc9ee318b15a76c9c"
+      ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
+      resolved-ref: "21b4532eb6d349de1f14991cb5cb942e0f6f97eb"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart"
     source: git
     version: "0.0.1-dev.15"
@@ -1270,10 +1270,10 @@ packages:
     dependency: "direct dev"
     description:
       name: melos
-      sha256: "7dcc4444d79b538ab8353bb38308f97e90b032984f75e8fd516fedfe8160b35e"
+      sha256: e3379a08af92a719a76d4cce9644c98dc87554e0fa3f2a93eb9a04bb295d4a03
       url: "https://pub.dev"
     source: hosted
-    version: "7.4.0"
+    version: "7.4.1"
   meta:
     dependency: "direct overridden"
     description:
@@ -2011,10 +2011,10 @@ packages:
     dependency: transitive
     description:
       name: test_core
-      sha256: "80bf5a02b60af04b09e14f6fe68b921aad119493e26e490deaca5993fef1b05a"
+      sha256: "0cc24b5ff94b38d2ae73e1eb43cc302b77964fbf67abad1e296025b78deb53d0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.11"
+    version: "0.6.12"
   timing:
     dependency: transitive
     description:

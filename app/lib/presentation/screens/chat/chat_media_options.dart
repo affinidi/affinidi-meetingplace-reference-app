@@ -1,5 +1,107 @@
 part of 'chat_screen.dart';
 
+// ---------------------------------------------------------------------------
+// AI Agent picker
+// ---------------------------------------------------------------------------
+
+class _AiAgentItem {
+  const _AiAgentItem({
+    required this.icon,
+    required this.name,
+    required this.description,
+    this.mnemonic,
+  });
+
+  final String icon;
+  final String name;
+  final String description;
+  final String? mnemonic;
+}
+
+const _hardcodedAgents = [
+  _AiAgentItem(
+    icon: '🧑‍💼',
+    name: 'Concierge',
+    description: 'Your personal meeting assistant',
+    mnemonic: 'agent-affinidi-1006',
+  ),
+  _AiAgentItem(
+    icon: '📊',
+    name: 'Analyst',
+    description: 'Insights, summaries and data help',
+  ),
+  _AiAgentItem(
+    icon: '🗓️',
+    name: 'Scheduler',
+    description: 'Booking, reminders and calendar tasks',
+  ),
+];
+
+class _AiAgentPicker extends ConsumerWidget {
+  const _AiAgentPicker({required String contactId}) : _contactId = contactId;
+
+  final String _contactId;
+
+  static Future<void> show(
+    BuildContext context, {
+    required String contactId,
+  }) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _AiAgentPicker(contactId: contactId),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(
+      chatScreenControllerProvider(_contactId).notifier,
+    );
+
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+      child: BottomSheetMenu(
+        showHandle: true,
+        header: 'Invite AI Agent',
+        itemCount: _hardcodedAgents.length,
+        itemBuilder: (context, index) {
+          final agent = _hardcodedAgents[index];
+          final hasMnemonic = agent.mnemonic != null;
+          return ListTile(
+            enabled: hasMnemonic,
+            leading: Text(agent.icon, style: const TextStyle(fontSize: 30)),
+            title: Text(
+              agent.name,
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            subtitle: Text(
+              agent.description,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontSize: 13,
+              ),
+            ),
+            onTap: !hasMnemonic
+                ? null
+                : () {
+                    Navigator.of(context).pop();
+                    controller.sendAgentOutreachInvitation(agent.mnemonic!);
+                  },
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Media / actions options
+// ---------------------------------------------------------------------------
+
 class _ChatMediaOptionItem {
   const _ChatMediaOptionItem({
     required this.textCharacterIcon,
@@ -121,6 +223,14 @@ class _ChatMediaOptions extends ConsumerWidget {
         label: context.l10n.generalConfetti,
         onTap: () {
           sendEffect(ScreenEffect.confetti());
+        },
+      ),
+      _ChatMediaOptionItem(
+        textCharacterIcon: '🤖',
+        label: 'Invite AI Agent',
+        onTap: () {
+          Navigator.of(context).pop();
+          _AiAgentPicker.show(context, contactId: _contactId);
         },
       ),
     ];

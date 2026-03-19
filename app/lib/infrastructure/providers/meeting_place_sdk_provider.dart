@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/matrix.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
@@ -43,16 +46,6 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
     );
     logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
-    final database = await MatrixSdkDatabase.init(
-      'matrix_client',
-      database: await sqlite.openDatabase('./data/database.sqlite'),
-    );
-
-    final matrixClient = Client('myapp', database: database);
-    matrixClient.homeserver = Uri.parse(
-      ref.read(environmentProvider).matrixHomeserver,
-    );
-
     await vod.init();
 
     final sdk = await MeetingPlaceCoreSDK.create(
@@ -67,14 +60,24 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
       ),
       mediatorDid: initialMediatorDid,
       controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
-      matrixClient: matrixClient,
+      matrixClientFactory: (did) async {
+        // Each DID gets its own SQLite file so Olm identity keys are never
+        // shared or overwritten between users on the same device.
+        final key = md5.convert(utf8.encode(did)).toString();
+        final database = await MatrixSdkDatabase.init(
+          'matrix_$key',
+          database: await sqlite.openDatabase('./data/matrix_$key.sqlite'),
+        );
+        final client = Client('matrix_client_$key', database: database);
+        client.homeserver = Uri.parse('http://localhost:9000');
+        return client;
+      },
       logger: logger,
     );
 
     // Initialize MatrixRTC VoIP layer with a Flutter WebRTC delegate.
     // Must happen after SDK creation and before any group call is started.
-    final voip = VoIP(matrixClient, FlutterMatrixRTCDelegate());
-    sdk.initializeMatrixRTC(voip);
+    sdk.initializeMatrixRTC(FlutterMatrixRTCDelegate());
 
     logger.info('Completed initializing MeetingPlace SDK', name: logKey);
 
