@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:livekit_client/livekit_client.dart';
 
+import '../../loggers/app_logger/app_logger.dart';
+
 /// Encapsulates all LiveKit room interactions: connect, disconnect,
 /// media toggles, participant list, and room event streaming.
 ///
@@ -14,7 +16,7 @@ class LiveKitService {
     required String serverUrl,
     required String apiKey,
     required String apiSecret,
-    required dynamic logger,
+    required AppLogger logger,
   }) : _serverUrl = serverUrl,
        _apiKey = apiKey,
        _apiSecret = apiSecret,
@@ -25,7 +27,7 @@ class LiveKitService {
   final String _serverUrl;
   final String _apiKey;
   final String _apiSecret;
-  final dynamic _logger;
+  final AppLogger _logger;
 
   Room? _room;
   EventsListener<RoomEvent>? _listener;
@@ -34,8 +36,6 @@ class LiveKitService {
   String get serverUrl => _serverUrl;
 
   /// Connects to the LiveKit room using a dev-generated JWT.
-  ///
-  /// [participant] - caller's display name shown to other participants.
   Future<void> connect({
     required String roomId,
     required String participantId,

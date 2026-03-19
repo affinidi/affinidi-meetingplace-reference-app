@@ -82,4 +82,16 @@ class FakeEnvironment implements Environment {
 
   @override
   String? get directInteractiveOobType => null;
+
+  @override
+  String get livekitApiKey => throw UnimplementedError();
+
+  @override
+  String get livekitApiSecret => throw UnimplementedError();
+
+  @override
+  String get livekitUrl => throw UnimplementedError();
+
+  @override
+  String get matrixHomeserver => throw UnimplementedError();
 }

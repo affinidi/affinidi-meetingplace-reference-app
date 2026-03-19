@@ -42,8 +42,9 @@ class VideoCallScreenController extends _$VideoCallScreenController {
 
   Future<void> joinCall() async {
     if (state.status == VideoCallStatus.connected ||
-        state.status == VideoCallStatus.connecting)
+        state.status == VideoCallStatus.connecting) {
       return;
+    }
     state = state.copyWith(status: VideoCallStatus.connecting);
 
     try {

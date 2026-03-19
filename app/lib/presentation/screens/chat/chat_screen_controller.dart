@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
@@ -939,6 +940,16 @@ class ChatScreenController extends _$ChatScreenController
       ),
     );
     _sendChatActivityTimedAction?.cancel();
+  }
+
+  Future<void> onVoiceMessageRecorded({
+    required XFile file,
+    required Duration duration,
+  }) async {
+    _logger.info(
+      '''Voice message recorded: path=${file.path}, durationMs=${duration.inMilliseconds}''',
+      name: _logKey,
+    );
   }
 
   /// Loads an image attachment into the chat screen.

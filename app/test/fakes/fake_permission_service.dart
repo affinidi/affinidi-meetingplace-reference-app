@@ -4,9 +4,11 @@ import 'package:permission_handler/permission_handler.dart';
 class FakePermissionService extends PermissionService {
   FakePermissionService({
     this.cameraPermissionStatus = PermissionStatus.granted,
+    this.microphonePermissionStatus = PermissionStatus.granted,
   });
 
   final PermissionStatus cameraPermissionStatus;
+  final PermissionStatus microphonePermissionStatus;
 
   @override
   Future<PermissionStatus> getCameraPermissionStatus() async {
@@ -16,5 +18,15 @@ class FakePermissionService extends PermissionService {
   @override
   Future<PermissionStatus> requestCameraPermission() async {
     return cameraPermissionStatus;
+  }
+
+  @override
+  Future<PermissionStatus> getMicrophonePermissionStatus() async {
+    return microphonePermissionStatus;
+  }
+
+  @override
+  Future<PermissionStatus> requestMicrophonePermission() async {
+    return microphonePermissionStatus;
   }
 }
