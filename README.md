@@ -23,16 +23,12 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
   - [Optional Environment Variables](#optional-environment-variables)
 - [VSCode Configuration](#vscode-configuration)
 - [Run App on Simulator](#run-app-on-simulator)
+- [Video Call Local Setup](#video-call-local-setup)
 - [Troubleshooting](#troubleshooting)
 - [Support \& Feedback](#support--feedback)
   - [Reporting Technical Issues](#reporting-technical-issues)
-- [Contributing](#contributing)
-      - [Connect to Control Plane API](#connect-to-control-plane-api)
-      - [Connect to DIDComm Mediator](#connect-to-didcomm-mediator)
-      - [Enable Push Notifications](#enable-push-notifications)
-        - [Firebase iOS App](#firebase-ios-app)
-        - [Firebase Android App](#firebase-android-app)
-    - [Optional Environment Variables](#optional-environment-variables)
+- [Contributing](#contributing) - [Connect to Control Plane API](#connect-to-control-plane-api) - [Connect to DIDComm Mediator](#connect-to-didcomm-mediator) - [Enable Push Notifications](#enable-push-notifications) - [Firebase iOS App](#firebase-ios-app) - [Firebase Android App](#firebase-android-app)
+  - [Optional Environment Variables](#optional-environment-variables)
   - [VSCode Configuration](#vscode-configuration)
   - [Run App on Simulator](#run-app-on-simulator)
   - [Troubleshooting](#troubleshooting)
@@ -84,21 +80,25 @@ The architecture is organised into distinct layers, each with specific responsib
 ### Core Components
 
 #### 1. Presentation Layer (`/lib/presentation/`)
+
 - **Screens**: Individual page implementations for different app features.
 - **Widgets**: Reusable UI components and custom widgets.
 - **Themes**: App styling and theming configuration.
 - **Pure UI**: Contains only view logic, no business logic or state management.
 
 #### 2. Application Layer (`/lib/application/`)
+
 - **Services**: Business logic and use cases.
 - **Navigation**: App routing and navigation configuration.
 - **State Management**: Riverpod providers for managing application state.
 
 #### 3. Domain Layer (`/lib/domain/`)
+
 - **Models**: Core business entities and value objects.
 - **Repository Interfaces**: Contracts for data access.
 
 #### 4. Infrastructure Layer (`/lib/infrastructure/`)
+
 - **Database**: Local storage implementation using Drift.
 - **Repositories**: Concrete implementations of domain repository interfaces.
 - **Providers**: Riverpod providers for external packages and dependency injection.
@@ -110,22 +110,25 @@ The architecture is organised into distinct layers, each with specific responsib
 The architecture enforces strict access rules to maintain separation of concerns:
 
 #### Screens (Presentation Layer)
+
 - **Responsibility**: Display UI and handle user interactions only.
 - **Access**: Can only access **Controllers** for state changes.
 - **Restrictions**: No direct access to services or infrastructure.
 
 #### Controllers (State Management)
+
 - **Responsibility**: Manage application state and coordinate between UI and business logic.
 - **Access**: Can access **Services** and **Infrastructure Providers**.
 - **Pattern**: Implemented as Riverpod StateNotifiers/Providers.
 
 #### Services (Application Layer)
+
 - **Responsibility**: Implement business logic and use cases.
 - **Access**: Can access **Repository interfaces** from the Domain layer and **Infrastructure Providers**.
 
 ```mermaid
 graph LR
-    Screen["Screen<br/>(Display UI)"] 
+    Screen["Screen<br/>(Display UI)"]
     Controller["Controller(UI Logic)<br/>(UI State Management)"]
     Service["Service<br/>(App Business Logic)<br/>(App State Management)"]
     RepoInterface["Repository Interface<br/>(Domain Contract)"]
@@ -213,6 +216,7 @@ To prepare the env variable, copy the environment file from the template.
 ```bash
 mkdir -p configurations && cp templates/.example.env configurations/.env
 ```
+
 > **NOTE:** Execute the command inside the root folder of the reference app.
 
 Most environment variables have sensible defaults defined in the application. You only need to provide values specific to your setup or when you want to override the defaults.
@@ -348,7 +352,13 @@ This will automatically run `melos run analyze` before every commit and block th
 
 ## Troubleshooting
 
-### Firebase Configuration Issues
+## Video Call Local Setup
+
+The video call feature requires two local servers (Matrix/Synapse for signalling and LiveKit for media) plus optional ngrok tunnels for testing on a physical device.
+
+See the full guide: [docs/video-call-local-setup.md](assets/docs/video-call-local-setup.md)
+
+### Troubleshooting
 
 **Error:** `FirebaseException ([core/duplicate-app] A Firebase App named "[DEFAULT]" already exists)`
 

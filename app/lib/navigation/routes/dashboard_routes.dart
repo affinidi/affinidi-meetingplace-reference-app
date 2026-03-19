@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../presentation/page_transitions/slide_up_transition_page.dart';
 import '../../presentation/scaffolds/scaffold_with_nav_bar.dart';
 import '../../presentation/screens/chat/chat_screen.dart';
+import '../../presentation/screens/chat/video_call/video_call_screen.dart';
 import '../../presentation/screens/connections/connection_details/connection_details_screen.dart';
 import '../../presentation/screens/connections/connections_screen.dart';
 import '../../presentation/screens/contacts/contacts_screen.dart';
@@ -30,6 +31,7 @@ part 'offer/offer_details_route.dart';
 part 'offer/publish_offer_route.dart';
 part 'qr/oob_share_qr_route.dart';
 part 'qr/qr_scanner_route.dart';
+part 'contact/video_call_route.dart';
 
 // Dashboard shell route
 @TypedStatefulShellRoute<DashboardShellRouteData>(
@@ -47,6 +49,12 @@ part 'qr/qr_scanner_route.dart';
             TypedGoRoute<ChatRoute>(
               path: RoutePaths.chat,
               name: RouteNames.chat,
+              routes: [
+                TypedGoRoute<VideoCallRoute>(
+                  path: RoutePaths.videoCall,
+                  name: RouteNames.videoCall,
+                ),
+              ],
             ),
           ],
         ),

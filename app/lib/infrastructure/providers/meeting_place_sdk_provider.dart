@@ -7,6 +7,7 @@ import 'package:ssi/ssi.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
 import '../secure_storage/secure_storage.dart';
+import '../services/matrix/flutter_matrix_rtc_delegate.dart';
 import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
@@ -47,7 +48,9 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
     );
 
     final matrixClient = Client('myapp', database: database);
-    matrixClient.homeserver = Uri.parse('http://localhost:9000');
+    matrixClient.homeserver = Uri.parse(
+      ref.read(environmentProvider).matrixHomeserver,
+    );
 
     final sdk = await MeetingPlaceCoreSDK.create(
       wallet: wallet,
@@ -64,6 +67,11 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
       matrixClient: matrixClient,
       logger: logger,
     );
+
+    // Initialize MatrixRTC VoIP layer with a Flutter WebRTC delegate.
+    // Must happen after SDK creation and before any group call is started.
+    final voip = VoIP(matrixClient, FlutterMatrixRTCDelegate());
+    sdk.initializeMatrixRTC(voip);
 
     logger.info('Completed initializing MeetingPlace SDK', name: logKey);
 

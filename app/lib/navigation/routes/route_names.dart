@@ -10,6 +10,7 @@ class RouteNames {
 
   // Connections
   static const connectionDetails = 'connectionDetails';
+  static const videoCall = 'videoCall';
 
   // Offers
   static const publishOffer = 'publishOffer';

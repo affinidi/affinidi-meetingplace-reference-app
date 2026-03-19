@@ -38,6 +38,16 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
               parentNavigatorKey: ChatRoute.$parentNavigatorKey,
 
               factory: _$ChatRoute._fromState,
+              routes: [
+                GoRouteData.$route(
+                  path: ':matrixRoomId/video-call',
+                  name: 'videoCall',
+
+                  parentNavigatorKey: VideoCallRoute.$parentNavigatorKey,
+
+                  factory: _$VideoCallRoute._fromState,
+                ),
+              ],
             ),
           ],
         ),
@@ -206,6 +216,33 @@ mixin _$ChatRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/contacts/${Uri.encodeComponent(_self.contactId)}/chat',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin _$VideoCallRoute on GoRouteData {
+  static VideoCallRoute _fromState(GoRouterState state) => VideoCallRoute(
+    contactId: state.pathParameters['contactId']!,
+    matrixRoomId: state.pathParameters['matrixRoomId']!,
+  );
+
+  VideoCallRoute get _self => this as VideoCallRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/contacts/${Uri.encodeComponent(_self.contactId)}/chat/${Uri.encodeComponent(_self.matrixRoomId)}/video-call',
   );
 
   @override
