@@ -10,7 +10,7 @@ import '../../loggers/app_logger/app_logger.dart';
 /// media toggles, participant list, and room event streaming.
 ///
 /// Token generation here is dev-only. In production, replace
-/// `generateDevToken` with a call to your token server endpoint.
+/// `_generateDevToken` with a call to your token server endpoint.
 class LiveKitService {
   LiveKitService({
     required String serverUrl,
@@ -35,23 +35,28 @@ class LiveKitService {
   Room? get room => _room;
   String get serverUrl => _serverUrl;
 
-  /// Connects to the LiveKit room using a dev-generated JWT.
+  /// Connects to the LiveKit room.
   ///
-  /// - `participantId` - caller's display name shown to other participants.
-  /// - `e2eeKeyProvider` - when provided, the room is created with E2EE enabled
+  /// - `participantId` — caller's display name shown to other participants.
+  /// - `token` — when provided, used directly as the LiveKit JWT. When null,
+  ///   a dev-only JWT is generated in-app via [_generateDevToken]. Replace with
+  ///   a token server call once one is available.
+  /// - `e2eeKeyProvider` — when provided, the room is created with E2EE enabled
   ///   using `E2EEOptions`. Pass a `BaseKeyProvider` from
   ///   `MatrixLiveKitKeyProvider.liveKitKeyProvider` for shared-key encryption.
+  ///   When a token server is in place, pass the key via
+  ///   `MatrixLiveKitKeyProvider.fromKey` instead of deriving it in-app.
   Future<void> connect({
     required String roomId,
     required String participantId,
+    String? token,
     BaseKeyProvider? e2eeKeyProvider,
     void Function()? onParticipantsChanged,
     void Function()? onDisconnected,
   }) async {
-    final token = generateDevToken(
-      participantId: participantId,
-      roomId: roomId,
-    );
+    final jwt =
+        token ??
+        _generateDevToken(participantId: participantId, roomId: roomId);
 
     _room = e2eeKeyProvider != null
         ? Room(
@@ -92,7 +97,7 @@ class LiveKitService {
         }
       });
 
-    await _room!.connect(_serverUrl, token);
+    await _room!.connect(_serverUrl, jwt);
     _logger.info(
       'Connected to LiveKit room $roomId (e2ee=${e2eeKeyProvider != null})',
       name: _logKey,
@@ -128,7 +133,7 @@ class LiveKitService {
   // The server reads the secret from its own secure env variable and returns
   // a short-lived JWT. The secret must never be shipped in the app.
   // TODO (Earl): Replace with a call to the token server
-  String generateDevToken({
+  String _generateDevToken({
     required String participantId,
     required String roomId,
   }) {

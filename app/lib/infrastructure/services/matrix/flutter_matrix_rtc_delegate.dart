@@ -7,7 +7,12 @@ import 'package:webrtc_interface/webrtc_interface.dart' show MediaDevices;
 /// LiveKit handles audio/video media via livekit client directly, so
 /// peer-connection methods are no-ops. The delegate only satisfies the
 /// [VoIP] constructor and hooks into device-change events.
+///
+/// Call [setKeyProvider] before starting a call when full Matrix-coordinated
+/// E2EE is enabled, so the Matrix SDK can distribute per-participant keys via
+/// Olm-encrypted to-device messages.
 class FlutterMatrixRTCDelegate implements WebRTCDelegate {
+  EncryptionKeyProvider? _keyProvider;
   @override
   MediaDevices get mediaDevices => webrtc.navigator.mediaDevices;
 
@@ -38,5 +43,13 @@ class FlutterMatrixRTCDelegate implements WebRTCDelegate {
   @override
   bool get canHandleNewCall => true;
   @override
-  EncryptionKeyProvider? get keyProvider => null;
+  EncryptionKeyProvider? get keyProvider => _keyProvider;
+
+  /// Sets the [EncryptionKeyProvider] used for Matrix-coordinated E2EE key
+  /// distribution. Not required for the current shared-key LiveKit E2EE —
+  /// only needed when upgrading to full per-participant Matrix key exchange
+  /// (`LiveKitBackend.e2eeEnabled = true`).
+  void setKeyProvider(EncryptionKeyProvider provider) {
+    _keyProvider = provider;
+  }
 }

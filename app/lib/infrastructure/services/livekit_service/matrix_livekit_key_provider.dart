@@ -29,14 +29,30 @@ class MatrixLiveKitKeyProvider implements EncryptionKeyProvider {
   ///
   /// Both participants independently compute the same key — no key exchange
   /// over the network is required for this to work.
+  ///
+  /// Dev-only: [apiSecret] is used in-app to derive the key. Once a token
+  /// server is in place, use [fromKey] instead and pass the pre-derived key
+  /// returned by the server.
   static Future<MatrixLiveKitKeyProvider> create({
     required String roomId,
     required String apiSecret,
   }) async {
-    final provider = await BaseKeyProvider.create(sharedKey: true);
-    await provider.setSharedKey(
-      deriveSharedKey(apiSecret: apiSecret, roomId: roomId),
+    return fromKey(
+      e2eeKey: deriveSharedKey(apiSecret: apiSecret, roomId: roomId),
     );
+  }
+
+  /// Creates a `MatrixLiveKitKeyProvider` from a pre-derived key.
+  ///
+  /// Use this once a token server is available and the server returns the
+  /// E2EE key alongside the LiveKit JWT. The [e2eeKey] must be a 64-char
+  /// lowercase hex string (32 bytes) — the same format produced by
+  /// [deriveSharedKey].
+  static Future<MatrixLiveKitKeyProvider> fromKey({
+    required String e2eeKey,
+  }) async {
+    final provider = await BaseKeyProvider.create(sharedKey: true);
+    await provider.setSharedKey(e2eeKey);
     return MatrixLiveKitKeyProvider._(provider);
   }
 

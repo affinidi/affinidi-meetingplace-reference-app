@@ -7,6 +7,7 @@ import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../infrastructure/services/livekit_service/livekit_service.dart';
+import '../../../../infrastructure/services/livekit_service/livekit_token_service.dart';
 import '../../../../infrastructure/services/livekit_service/matrix_livekit_key_provider.dart';
 import '../../../widgets/async_loaders/async_loading_controller.dart';
 import 'video_call_screen_state.dart';
@@ -70,13 +71,36 @@ class VideoCallScreenController extends _$VideoCallScreenController {
       }
 
       // 3. Connect to LiveKit SFU for actual audio/video with E2EE.
-      final keyProvider = await MatrixLiveKitKeyProvider.create(
-        roomId: roomId,
-        apiSecret: ref.read(environmentProvider).livekitApiSecret,
-      );
+      //
+      // When a token server URL is configured, fetch the JWT and E2EE key
+      // from the server (apiSecret stays server-side). Otherwise fall back to
+      // dev-only in-app generation.
+      final env = ref.read(environmentProvider);
+      final tokenServerUrl = env.livekitTokenServerUrl;
+      final MatrixLiveKitKeyProvider keyProvider;
+      final String? livekitToken;
+      if (tokenServerUrl != null) {
+        final tokenService = LiveKitTokenService(serverUrl: tokenServerUrl);
+        final tokenResponse = await tokenService.fetchToken(
+          roomId: roomId,
+          participantId: contactId,
+        );
+        keyProvider = await MatrixLiveKitKeyProvider.fromKey(
+          e2eeKey: tokenResponse.e2eeKey,
+        );
+        livekitToken = tokenResponse.token;
+      } else {
+        keyProvider = await MatrixLiveKitKeyProvider.create(
+          roomId: roomId,
+          apiSecret: env.livekitApiSecret,
+        );
+        livekitToken = null; // generateDevToken() used inside LiveKitService
+      }
+
       await _livekitService.connect(
         roomId: roomId,
         participantId: contactId,
+        token: livekitToken,
         e2eeKeyProvider: keyProvider.liveKitKeyProvider,
         onParticipantsChanged: () => state = state.copyWith(
           participants: _livekitService.getParticipants(),
