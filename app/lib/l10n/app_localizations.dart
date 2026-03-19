@@ -2181,6 +2181,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Back'**
   String get goBack;
+
+  /// No description provided for @videoCallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group Call'**
+  String get videoCallTitle;
+
+  /// No description provided for @videoCallJoiningCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining call...'**
+  String get videoCallJoiningCall;
+
+  /// No description provided for @videoCallWaitingForParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for participants...'**
+  String get videoCallWaitingForParticipants;
+
+  /// No description provided for @videoCallFailedToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to join: {error}'**
+  String videoCallFailedToJoin(String error);
+
+  /// No description provided for @videoCallMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get videoCallMute;
+
+  /// No description provided for @videoCallUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get videoCallUnmute;
+
+  /// No description provided for @videoCallCameraOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Cam off'**
+  String get videoCallCameraOff;
+
+  /// No description provided for @videoCallCameraOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cam on'**
+  String get videoCallCameraOn;
+
+  /// No description provided for @videoCallEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get videoCallEnd;
+
+  /// No description provided for @videoCallParticipantJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} joined'**
+  String videoCallParticipantJoined(String names);
+
+  /// No description provided for @videoCallParticipantLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} left'**
+  String videoCallParticipantLeft(String names);
 }
 
 class _AppLocalizationsDelegate

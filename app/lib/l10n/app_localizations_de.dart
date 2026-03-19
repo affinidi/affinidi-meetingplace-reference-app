@@ -1510,4 +1510,43 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get goBack => 'Zurück gehen';
+
+  @override
+  String get videoCallTitle => 'Group Call';
+
+  @override
+  String get videoCallJoiningCall => 'Joining call...';
+
+  @override
+  String get videoCallWaitingForParticipants => 'Waiting for participants...';
+
+  @override
+  String videoCallFailedToJoin(String error) {
+    return 'Failed to join: $error';
+  }
+
+  @override
+  String get videoCallMute => 'Mute';
+
+  @override
+  String get videoCallUnmute => 'Unmute';
+
+  @override
+  String get videoCallCameraOff => 'Cam off';
+
+  @override
+  String get videoCallCameraOn => 'Cam on';
+
+  @override
+  String get videoCallEnd => 'End';
+
+  @override
+  String videoCallParticipantJoined(String names) {
+    return '$names joined';
+  }
+
+  @override
+  String videoCallParticipantLeft(String names) {
+    return '$names left';
+  }
 }

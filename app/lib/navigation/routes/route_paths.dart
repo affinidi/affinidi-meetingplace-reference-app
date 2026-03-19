@@ -10,6 +10,7 @@ class RoutePaths {
 
   // Contacts
   static const chat = ':contactId/chat';
+  static const videoCall = ':matrixRoomId/video-call';
 
   // Connections
   static const connectionDetails = ':contactId/connection-details';

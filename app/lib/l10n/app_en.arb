@@ -1413,5 +1413,64 @@
 	"cameraAccessDenied": "Camera access denied or unavailable.",
 	"cameraOpenSettings": "Open Settings",
 	"cameraNotAvailable": "Camera not available",
-	"goBack": "Go Back"
+	"goBack": "Go Back",
+	"videoCallTitle": "Group Call",
+	"@videoCallTitle": {
+		"type": "text"
+	},
+	"videoCallJoiningCall": "Joining call...",
+	"@videoCallJoiningCall": {
+		"type": "text"
+	},
+	"videoCallWaitingForParticipants": "Waiting for participants...",
+	"@videoCallWaitingForParticipants": {
+		"type": "text"
+	},
+	"videoCallFailedToJoin": "Failed to join: {error}",
+	"@videoCallFailedToJoin": {
+		"type": "text",
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"videoCallMute": "Mute",
+	"@videoCallMute": {
+		"type": "text"
+	},
+	"videoCallUnmute": "Unmute",
+	"@videoCallUnmute": {
+		"type": "text"
+	},
+	"videoCallCameraOff": "Cam off",
+	"@videoCallCameraOff": {
+		"type": "text"
+	},
+	"videoCallCameraOn": "Cam on",
+	"@videoCallCameraOn": {
+		"type": "text"
+	},
+	"videoCallEnd": "End",
+	"@videoCallEnd": {
+		"type": "text"
+	},
+	"videoCallParticipantJoined": "{names} joined",
+	"@videoCallParticipantJoined": {
+		"type": "text",
+		"placeholders": {
+			"names": {
+				"type": "String"
+			}
+		}
+	},
+	"videoCallParticipantLeft": "{names} left",
+	"@videoCallParticipantLeft": {
+		"type": "text",
+		"placeholders": {
+			"names": {
+				"type": "String"
+			}
+		}
+	}
 }

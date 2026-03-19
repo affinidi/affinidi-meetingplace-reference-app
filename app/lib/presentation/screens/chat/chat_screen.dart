@@ -104,6 +104,25 @@ class ChatScreen extends HookConsumerWidget {
         ),
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
+        actions: [
+          Consumer(
+            builder: (context, ref, _) {
+              final matrixRoomId = ref
+                  .read(chatScreenControllerProvider(_contactId))
+                  .group
+                  ?.matrixRoomId;
+              if (matrixRoomId == null) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.video_call_outlined),
+                tooltip: 'Start group call',
+                onPressed: () => VideoCallRoute(
+                  contactId: _contactId,
+                  matrixRoomId: matrixRoomId,
+                ).go(context),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

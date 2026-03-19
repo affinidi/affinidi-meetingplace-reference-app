@@ -109,6 +109,23 @@ class Environment {
     );
     return value.isEmpty ? null : value;
   }
+
+  String get matrixHomeserver => const String.fromEnvironment(
+    'MATRIX_HOMESERVER',
+    defaultValue: 'http://localhost:9000',
+  );
+
+  String get livekitUrl => const String.fromEnvironment(
+    'LIVEKIT_URL',
+    defaultValue: 'ws://localhost:7880',
+  );
+
+  // TODO (Earl): Replace with secure token generation from server
+  // Add default values
+  String get livekitApiKey =>
+      const String.fromEnvironment('LIVEKIT_API_KEY', defaultValue: '');
+  String get livekitApiSecret =>
+      const String.fromEnvironment('LIVEKIT_API_SECRET', defaultValue: '');
 }
 
 Provider<Environment> environmentProvider = Provider<Environment>((ref) {
