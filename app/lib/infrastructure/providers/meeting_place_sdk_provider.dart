@@ -12,6 +12,7 @@ import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
 import 'group_repository_provider.dart';
+import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 
 /// A provider that initializes and supplies the [MeetingPlaceCoreSDK]
 /// instance.
@@ -51,6 +52,8 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
     matrixClient.homeserver = Uri.parse(
       ref.read(environmentProvider).matrixHomeserver,
     );
+
+    await vod.init();
 
     final sdk = await MeetingPlaceCoreSDK.create(
       wallet: wallet,

@@ -110,3 +110,5 @@ melos:
         echo "------------------------------------------------------------------------"
         melos exec --scope=mpx_flutter_reference_app -- flutter gen-l10n
         dart format -l 80 .
+dependencies:
+  flutter_vodozemac: ^0.5.0
