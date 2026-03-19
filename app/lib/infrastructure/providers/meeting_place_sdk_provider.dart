@@ -1,3 +1,4 @@
+import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/matrix.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -12,7 +13,6 @@ import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
 import 'group_repository_provider.dart';
-import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 
 /// A provider that initializes and supplies the [MeetingPlaceCoreSDK]
 /// instance.
