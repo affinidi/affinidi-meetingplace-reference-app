@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../domain/models/mediator/mediator_type.dart';
+import '../../../features/agent/widgets/agent_status_widget.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
@@ -32,6 +34,9 @@ class SettingsScreen extends HookConsumerWidget {
     final colorScheme = context.colorScheme;
     final provider = settingsScreenControllerProvider;
     final controller = ref.read(provider.notifier);
+    final ownerDid = ref.watch(
+      identitiesServiceProvider.select((s) => s.currentIdentity?.did),
+    );
 
     useEffect(() {
       if (!context.mounted) return;
@@ -58,17 +63,19 @@ class SettingsScreen extends HookConsumerWidget {
               ),
               onTap: () {},
             ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _VersionInfoSection(),
-                  _MeetingPlaceControlPlaneSection(),
-                  SizedBox(height: 24),
-                  _ServerSettingsSection(),
-                  SizedBox(height: 24),
-                  _DebugSettingsSection(),
+                  const _VersionInfoSection(),
+                  const _MeetingPlaceControlPlaneSection(),
+                  const SizedBox(height: 24),
+                  AgentStatusWidget(ownerDid: ownerDid ?? ''),
+                  const SizedBox(height: 24),
+                  const _ServerSettingsSection(),
+                  const SizedBox(height: 24),
+                  const _DebugSettingsSection(),
                 ],
               ),
             ),

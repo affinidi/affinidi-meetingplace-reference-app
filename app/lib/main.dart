@@ -33,7 +33,11 @@ import 'presentation/app/app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   ErrorLoggingHandler.instance.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
   final sharedPreferences = await SharedPreferences.getInstance();
 
   final logger = AppLogger.instance;

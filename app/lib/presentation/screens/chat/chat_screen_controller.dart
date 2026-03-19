@@ -12,11 +12,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/network_connectivity_service/network_connectivity_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_status.dart';
+import '../../../features/agent/providers/agent_providers.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
@@ -703,6 +705,16 @@ class ChatScreenController extends _$ChatScreenController
     if (messageTextController.text == originalText) {
       messageTextController.clear();
     }
+
+    // Fire-and-forget: ship outbound message to the agent learning backend.
+    final ownerDid =
+        ref.read(identitiesServiceProvider).currentIdentity?.did ?? '';
+    ref.read(agentLearnServiceProvider).observeOutboundMessage(
+          ownerDid: ownerDid,
+          conversationId: state.contact?.channelDid ?? state.contact?.id ?? '',
+          recipientDid: state.contact?.card.did ?? '',
+          messageText: trimmedMessage,
+        );
   }
 
   Future<void> sendChatActivity() async {
