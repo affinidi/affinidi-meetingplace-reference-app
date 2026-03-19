@@ -10,7 +10,7 @@ import '../../loggers/app_logger/app_logger.dart';
 /// media toggles, participant list, and room event streaming.
 ///
 /// Token generation here is dev-only. In production, replace
-/// [generateDevToken] with a call to your token server endpoint.
+/// `generateDevToken` with a call to your token server endpoint.
 class LiveKitService {
   LiveKitService({
     required String serverUrl,
@@ -36,9 +36,15 @@ class LiveKitService {
   String get serverUrl => _serverUrl;
 
   /// Connects to the LiveKit room using a dev-generated JWT.
+  ///
+  /// - `participantId` - caller's display name shown to other participants.
+  /// - `e2eeKeyProvider` - when provided, the room is created with E2EE enabled
+  ///   using `E2EEOptions`. Pass a `BaseKeyProvider` from
+  ///   `MatrixLiveKitKeyProvider.liveKitKeyProvider` for shared-key encryption.
   Future<void> connect({
     required String roomId,
     required String participantId,
+    BaseKeyProvider? e2eeKeyProvider,
     void Function()? onParticipantsChanged,
     void Function()? onDisconnected,
   }) async {
@@ -47,16 +53,50 @@ class LiveKitService {
       roomId: roomId,
     );
 
-    _room = Room();
+    _room = e2eeKeyProvider != null
+        ? Room(
+            roomOptions: RoomOptions(
+              encryption: E2EEOptions(keyProvider: e2eeKeyProvider),
+            ),
+          )
+        : Room();
     _listener = _room!.createListener()
       ..on<RoomDisconnectedEvent>((_) => onDisconnected?.call())
       ..on<ParticipantEvent>((_) => onParticipantsChanged?.call())
       ..on<LocalTrackPublishedEvent>((_) => onParticipantsChanged?.call())
       ..on<TrackSubscribedEvent>((_) => onParticipantsChanged?.call())
-      ..on<TrackUnsubscribedEvent>((_) => onParticipantsChanged?.call());
+      ..on<TrackUnsubscribedEvent>((_) => onParticipantsChanged?.call())
+      ..on<TrackE2EEStateEvent>((event) {
+        final msg = switch (event.state) {
+          E2EEState.kNew => 'Media stream encryption initialising',
+          E2EEState.kOk => 'Media stream end-to-end encrypted',
+          E2EEState.kKeyRatcheted => 'Media stream encryption key rotated',
+          E2EEState.kMissingKey =>
+            'Media stream encryption key not yet available',
+          E2EEState.kEncryptionFailed =>
+            'Media stream failed to encrypt outbound frame',
+          E2EEState.kDecryptionFailed =>
+            'Media stream failed to decrypt inbound frame — key mismatch?',
+          E2EEState.kInternalError => 'Media stream encryption internal error',
+        };
+        final isError = switch (event.state) {
+          E2EEState.kEncryptionFailed ||
+          E2EEState.kDecryptionFailed ||
+          E2EEState.kInternalError => true,
+          _ => false,
+        };
+        if (isError) {
+          _logger.error(msg, name: _logKey);
+        } else {
+          _logger.info(msg, name: _logKey);
+        }
+      });
 
     await _room!.connect(_serverUrl, token);
-    _logger.info('Connected to LiveKit room $roomId', name: _logKey);
+    _logger.info(
+      'Connected to LiveKit room $roomId (e2ee=${e2eeKeyProvider != null})',
+      name: _logKey,
+    );
   }
 
   Future<void> disconnect() async {

@@ -7,6 +7,7 @@ import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../infrastructure/services/livekit_service/livekit_service.dart';
+import '../../../../infrastructure/services/livekit_service/matrix_livekit_key_provider.dart';
 import '../../../widgets/async_loaders/async_loading_controller.dart';
 import 'video_call_screen_state.dart';
 
@@ -68,10 +69,15 @@ class VideoCallScreenController extends _$VideoCallScreenController {
         _matrixRtcSubscription = matrixRtcStream.listen(_onMatrixRTCEvent);
       }
 
-      // 3. Connect to LiveKit SFU for actual audio/video.
+      // 3. Connect to LiveKit SFU for actual audio/video with E2EE.
+      final keyProvider = await MatrixLiveKitKeyProvider.create(
+        roomId: roomId,
+        apiSecret: ref.read(environmentProvider).livekitApiSecret,
+      );
       await _livekitService.connect(
         roomId: roomId,
         participantId: contactId,
+        e2eeKeyProvider: keyProvider.liveKitKeyProvider,
         onParticipantsChanged: () => state = state.copyWith(
           participants: _livekitService.getParticipants(),
         ),
