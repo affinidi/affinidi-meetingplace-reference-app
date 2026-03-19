@@ -4,7 +4,7 @@ import 'package:webrtc_interface/webrtc_interface.dart' show MediaDevices;
 
 /// Minimal [WebRTCDelegate] for MatrixRTC signalling via LiveKit backend.
 ///
-/// LiveKit handles audio/video media via [livekit_client] directly, so
+/// LiveKit handles audio/video media via livekit client directly, so
 /// peer-connection methods are no-ops. The delegate only satisfies the
 /// [VoIP] constructor and hooks into device-change events.
 class FlutterMatrixRTCDelegate implements WebRTCDelegate {
