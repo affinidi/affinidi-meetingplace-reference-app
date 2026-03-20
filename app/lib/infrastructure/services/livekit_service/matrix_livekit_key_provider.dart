@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:livekit_client/livekit_client.dart';
 import 'package:matrix/matrix.dart' show CallParticipant, EncryptionKeyProvider;
 
@@ -20,12 +21,16 @@ import '../../loggers/app_logger/app_logger.dart';
 class MatrixLiveKitKeyProvider implements EncryptionKeyProvider {
   MatrixLiveKitKeyProvider._(this._liveKitKeyProvider, this._logger);
 
-  final BaseKeyProvider _liveKitKeyProvider;
+  final KeyProvider _liveKitKeyProvider;
   final AppLogger _logger;
 
   static const _logKey = 'MTRXLVKKEYPROV';
 
-  BaseKeyProvider get liveKitKeyProvider => _liveKitKeyProvider;
+  /// The underlying `KeyProvider` passed to `LiveKitService.connect` via
+  /// `e2eeKeyProvider`. Only the `BaseKeyProvider` subtype exposes the
+  /// `rtc.KeyProvider` handle needed by the LiveKit room — callers must
+  /// cast when passing to LiveKit.
+  KeyProvider get liveKitKeyProvider => _liveKitKeyProvider;
 
   static Future<MatrixLiveKitKeyProvider> create({
     required AppLogger logger,
@@ -42,6 +47,15 @@ class MatrixLiveKitKeyProvider implements EncryptionKeyProvider {
     await provider.setSharedKey(e2eeKey);
     return MatrixLiveKitKeyProvider._(provider, logger);
   }
+
+  /// Constructs a `MatrixLiveKitKeyProvider` from an existing `KeyProvider`.
+  /// Use this in tests to inject a fake without triggering the
+  /// flutter-webrtc platform channel.
+  @visibleForTesting
+  static MatrixLiveKitKeyProvider fromProvider(
+    KeyProvider provider, {
+    required AppLogger logger,
+  }) => MatrixLiveKitKeyProvider._(provider, logger);
 
   @override
   Future<void> onSetEncryptionKey(

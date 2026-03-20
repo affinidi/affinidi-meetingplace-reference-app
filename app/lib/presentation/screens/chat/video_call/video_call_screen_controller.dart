@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:livekit_client/livekit_client.dart';
 import 'package:matrix/matrix.dart' as matrix;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -109,7 +110,7 @@ class VideoCallScreenController extends _$VideoCallScreenController {
         roomId: roomId,
         participantId: livekitParticipantId,
         token: livekitToken,
-        e2eeKeyProvider: keyProvider.liveKitKeyProvider,
+        e2eeKeyProvider: keyProvider.liveKitKeyProvider as BaseKeyProvider,
         onParticipantsChanged: () => state = state.copyWith(
           participants: _livekitService.getParticipants(),
         ),
