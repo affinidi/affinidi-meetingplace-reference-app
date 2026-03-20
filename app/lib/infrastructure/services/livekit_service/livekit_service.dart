@@ -41,11 +41,10 @@ class LiveKitService {
   /// - `token` — when provided, used directly as the LiveKit JWT. When null,
   ///   a dev-only JWT is generated in-app via [_generateDevToken]. Replace with
   ///   a token server call once one is available.
-  /// - `e2eeKeyProvider` — when provided, the room is created with E2EE enabled
-  ///   using `E2EEOptions`. Pass a `BaseKeyProvider` from
-  ///   `MatrixLiveKitKeyProvider.liveKitKeyProvider` for shared-key encryption.
-  ///   When a token server is in place, pass the key via
-  ///   `MatrixLiveKitKeyProvider.fromKey` instead of deriving it in-app.
+  /// - `e2eeKeyProvider` — when provided, the room is created with LiveKit
+  ///   FrameCryptor E2EE enabled. Pass `MatrixLiveKitKeyProvider.liveKitKeyProvider`.
+  ///   Shared-key mode (`fromKey`) is used when a token server supplies the
+  ///   key; per-participant mode (`create`) is used otherwise.
   Future<void> connect({
     required String roomId,
     required String participantId,
@@ -65,6 +64,7 @@ class LiveKitService {
             ),
           )
         : Room();
+
     _listener = _room!.createListener()
       ..on<RoomDisconnectedEvent>((_) => onDisconnected?.call())
       ..on<ParticipantEvent>((_) => onParticipantsChanged?.call())
@@ -84,12 +84,14 @@ class LiveKitService {
             'Media stream failed to decrypt inbound frame — key mismatch?',
           E2EEState.kInternalError => 'Media stream encryption internal error',
         };
+
         final isError = switch (event.state) {
           E2EEState.kEncryptionFailed ||
           E2EEState.kDecryptionFailed ||
           E2EEState.kInternalError => true,
           _ => false,
         };
+
         if (isError) {
           _logger.error(msg, name: _logKey);
         } else {

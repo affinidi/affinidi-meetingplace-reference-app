@@ -28,11 +28,9 @@ import 'livekit_token_response.dart';
 /// );
 /// ```
 class LiveKitTokenService {
-  LiveKitTokenService({
-    required String serverUrl,
-    http.Client? httpClient,
-  }) : _serverUrl = serverUrl,
-       _httpClient = httpClient ?? http.Client();
+  LiveKitTokenService({required String serverUrl, http.Client? httpClient})
+    : _serverUrl = serverUrl,
+      _httpClient = httpClient ?? http.Client();
 
   final String _serverUrl;
   final http.Client _httpClient;
@@ -48,10 +46,7 @@ class LiveKitTokenService {
   }) async {
     final uri = Uri.parse(_serverUrl).replace(
       path: '/livekit/token',
-      queryParameters: {
-        'roomId': roomId,
-        'participantId': participantId,
-      },
+      queryParameters: {'roomId': roomId, 'participantId': participantId},
     );
 
     final response = await _httpClient.get(
@@ -69,9 +64,7 @@ class LiveKitTokenService {
     try {
       json = jsonDecode(response.body) as Map<String, dynamic>;
     } catch (_) {
-      throw const LiveKitTokenException(
-        'Token server returned invalid JSON.',
-      );
+      throw const LiveKitTokenException('Token server returned invalid JSON.');
     }
 
     if (json['token'] is! String || json['e2eeKey'] is! String) {

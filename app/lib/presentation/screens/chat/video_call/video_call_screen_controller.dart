@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../../infrastructure/providers/matrix_rtc_delegate_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../infrastructure/services/livekit_service/livekit_service.dart';
 import '../../../../infrastructure/services/livekit_service/livekit_token_service.dart';
@@ -52,29 +53,11 @@ class VideoCallScreenController extends _$VideoCallScreenController {
     try {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
 
-      // 1. Signal call membership via MatrixRTC (publishes m.call.member).
-      await sdk.startVideoCall(
-        roomId: roomId,
-        livekitServiceUrl: _livekitService.serverUrl,
-        livekitAlias: roomId,
-        callId: roomId,
-      );
-
-      // 2. Subscribe to MatrixRTC membership events — useful for showing
-      // join/leave toasts before LiveKit participant events arrive.
-      final matrixRtcStream = sdk.watchVideoCall(
-        roomId: roomId,
-        callId: roomId,
-      );
-      if (matrixRtcStream != null) {
-        _matrixRtcSubscription = matrixRtcStream.listen(_onMatrixRTCEvent);
-      }
-
-      // 3. Connect to LiveKit SFU for actual audio/video with E2EE.
-      //
-      // When a token server URL is configured, fetch the JWT and E2EE key
-      // from the server (apiSecret stays server-side). Otherwise fall back to
-      // dev-only in-app generation.
+      // 1. Set up E2EE key provider BEFORE starting the Matrix call.
+      //    session.enter() inside startVideoCall immediately generates the
+      //    local sender key and calls onSetEncryptionKey — the delegate must
+      //    already have a key provider installed or that key is silently
+      //    dropped, causing FrameCryptorStateMissingKey on the LiveKit side.
       final env = ref.read(environmentProvider);
       final tokenServerUrl = env.livekitTokenServerUrl;
       final MatrixLiveKitKeyProvider keyProvider;
@@ -87,19 +70,44 @@ class VideoCallScreenController extends _$VideoCallScreenController {
         );
         keyProvider = await MatrixLiveKitKeyProvider.fromKey(
           e2eeKey: tokenResponse.e2eeKey,
+          logger: _logger,
         );
         livekitToken = tokenResponse.token;
       } else {
-        keyProvider = await MatrixLiveKitKeyProvider.create(
-          roomId: roomId,
-          apiSecret: env.livekitApiSecret,
-        );
+        keyProvider = await MatrixLiveKitKeyProvider.create(logger: _logger);
         livekitToken = null; // generateDevToken() used inside LiveKitService
       }
+      ref.read(matrixRtcDelegateProvider).setKeyProvider(keyProvider);
 
+      // 2. Signal call membership via MatrixRTC (publishes m.call.member).
+      //    session.enter() fires _makeNewSenderKey → onSetEncryptionKey,
+      //    which now correctly lands in the already-installed key provider.
+      await sdk.startVideoCall(
+        roomId: roomId,
+        livekitServiceUrl: _livekitService.serverUrl,
+        livekitAlias: roomId,
+        callId: roomId,
+      );
+
+      // 3. Subscribe to MatrixRTC membership events — useful for showing
+      // join/leave toasts before LiveKit participant events arrive.
+      final matrixRtcStream = sdk.watchVideoCall(
+        roomId: roomId,
+        callId: roomId,
+      );
+      if (matrixRtcStream != null) {
+        _matrixRtcSubscription = matrixRtcStream.listen(_onMatrixRTCEvent);
+      }
+
+      // 4. Connect to LiveKit SFU for actual audio/video with E2EE.
+      //    Frame cryptor already has the local key from step 1.
+      //    Use the Matrix identity (userId:deviceId) as the LiveKit participant
+      //    identity so LiveKit's key lookup matches keys stored by
+      //    onSetEncryptionKey.
+      final livekitParticipantId = sdk.matrixParticipantId ?? contactId;
       await _livekitService.connect(
         roomId: roomId,
-        participantId: contactId,
+        participantId: livekitParticipantId,
         token: livekitToken,
         e2eeKeyProvider: keyProvider.liveKitKeyProvider,
         onParticipantsChanged: () => state = state.copyWith(

@@ -1,95 +1,83 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:matrix/matrix.dart' show CallParticipant, EncryptionKeyProvider;
 
-/// Provides end-to-end encryption for LiveKit media streams.
+import '../../loggers/app_logger/app_logger.dart';
+
+/// Provides per-participant LiveKit FrameCryptor E2EE for audio/video frames.
 ///
-/// Uses a shared-key scheme: all participants in the same room derive an
-/// identical 32-byte key from `HMAC-SHA256(apiSecret, roomId)`. The LiveKit
-/// SFU forwards encrypted frames without being able to decrypt them.
-///
-/// Note: this does NOT use Matrix per-participant key distribution
-/// (LiveKitBackend.e2eeEnabled / EncryptionKeyProvider callbacks). That is a
-/// separate, more complex feature. This class satisfies the
-/// `EncryptionKeyProvider` interface so it can be set on
-/// `FlutterMatrixRTCDelegate` in the future when full Matrix-coordinated
-/// key exchange is needed.
+/// When `e2eeEnabled: true` is set on the `LiveKitBackend`, the Matrix SDK
+/// distributes unique per-participant keys via Olm-encrypted to-device
+/// messages. The three [EncryptionKeyProvider] callbacks bridge the Matrix SDK
+/// key distribution into the LiveKit FrameCryptor:
+/// - `onSetEncryptionKey` — forward a received remote participant key
+/// into LiveKit.
+/// - `onRatchetKey` — rotate the local participant's key and return
+/// the new value.
+/// - `onExportKey` — export the current local key for distribution to
+/// late joiners.
 class MatrixLiveKitKeyProvider implements EncryptionKeyProvider {
-  MatrixLiveKitKeyProvider._(this._liveKitKeyProvider);
+  MatrixLiveKitKeyProvider._(this._liveKitKeyProvider, this._logger);
 
   final BaseKeyProvider _liveKitKeyProvider;
+  final AppLogger _logger;
+
+  static const _logKey = 'MTRXLVKKEYPROV';
 
   BaseKeyProvider get liveKitKeyProvider => _liveKitKeyProvider;
 
-  /// Creates a `MatrixLiveKitKeyProvider` with a shared key derived from
-  /// `HMAC-SHA256(apiSecret, roomId)`.
-  ///
-  /// Both participants independently compute the same key — no key exchange
-  /// over the network is required for this to work.
-  ///
-  /// Dev-only: [apiSecret] is used in-app to derive the key. Once a token
-  /// server is in place, use [fromKey] instead and pass the pre-derived key
-  /// returned by the server.
   static Future<MatrixLiveKitKeyProvider> create({
-    required String roomId,
-    required String apiSecret,
+    required AppLogger logger,
   }) async {
-    return fromKey(
-      e2eeKey: deriveSharedKey(apiSecret: apiSecret, roomId: roomId),
-    );
+    final provider = await BaseKeyProvider.create(sharedKey: false);
+    return MatrixLiveKitKeyProvider._(provider, logger);
   }
 
-  /// Creates a `MatrixLiveKitKeyProvider` from a pre-derived key.
-  ///
-  /// Use this once a token server is available and the server returns the
-  /// E2EE key alongside the LiveKit JWT. The [e2eeKey] must be a 64-char
-  /// lowercase hex string (32 bytes) — the same format produced by
-  /// [deriveSharedKey].
   static Future<MatrixLiveKitKeyProvider> fromKey({
     required String e2eeKey,
+    required AppLogger logger,
   }) async {
     final provider = await BaseKeyProvider.create(sharedKey: true);
     await provider.setSharedKey(e2eeKey);
-    return MatrixLiveKitKeyProvider._(provider);
+    return MatrixLiveKitKeyProvider._(provider, logger);
   }
-
-  /// Derives the 64-char hex shared-key from [apiSecret] and [roomId].
-  ///
-  /// Exposed as a static method so it can be unit-tested without requiring
-  /// the LiveKit native platform channel.
-  static String deriveSharedKey({
-    required String apiSecret,
-    required String roomId,
-  }) {
-    final keyBytes = Hmac(
-      sha256,
-      utf8.encode(apiSecret),
-    ).convert(utf8.encode(roomId)).bytes;
-    return keyBytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-  }
-
-  // ── EncryptionKeyProvider interface ──────────────────────────────────────
-  // These callbacks are invoked by the Matrix SDK when per-participant key
-  // distribution is active (LiveKitBackend.e2eeEnabled = true). With the
-  // shared-key approach the Matrix SDK is not involved in key management,
-  // so these are no-ops. They are here for future upgrade to full
-  // Matrix-coordinated E2EE.
 
   @override
   Future<void> onSetEncryptionKey(
     CallParticipant participant,
     Uint8List key,
     int index,
-  ) async {}
+  ) async {
+    _logger.info(
+      'Stored remote key in FrameCryptor — '
+      'participant=${participant.userId} idx=$index',
+      name: _logKey,
+    );
+    await _liveKitKeyProvider.setRawKey(
+      key,
+      participantId: participant.id,
+      keyIndex: index,
+    );
+  }
 
   @override
-  Future<Uint8List> onRatchetKey(CallParticipant participant, int index) =>
-      _liveKitKeyProvider.ratchetSharedKey(keyIndex: index);
+  Future<Uint8List> onRatchetKey(CallParticipant participant, int index) {
+    _logger.info(
+      'Rotating local encryption key — '
+      'participant=${participant.userId} idx=$index',
+      name: _logKey,
+    );
+    return _liveKitKeyProvider.ratchetKey(participant.id, index);
+  }
 
   @override
-  Future<Uint8List> onExportKey(CallParticipant participant, int index) =>
-      _liveKitKeyProvider.exportSharedKey(keyIndex: index);
+  Future<Uint8List> onExportKey(CallParticipant participant, int index) {
+    _logger.info(
+      'Exporting local key for late joiner — '
+      'participant=${participant.userId} idx=$index',
+      name: _logKey,
+    );
+    return _liveKitKeyProvider.exportKey(participant.id, index);
+  }
 }
