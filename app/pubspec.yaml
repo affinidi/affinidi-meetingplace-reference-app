@@ -65,6 +65,7 @@ dependencies:
   meeting_place_chat: ^0.0.1-dev.31
   meeting_place_core: ^0.0.1-dev.29
   meeting_place_drift_repository: ^0.0.1-dev.32
+  meeting_place_matrix: ^0.0.1-dev.30
   mobile_scanner: ^7.1.3
   mpx_app_core:
     path: ../packages/app-core

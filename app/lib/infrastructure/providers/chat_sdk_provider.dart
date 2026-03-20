@@ -6,6 +6,7 @@ import '../../application/services/identities_service/identities_service.dart';
 import '../configuration/environment.dart';
 import '../extensions/contact_card_extensions.dart';
 import 'app_logger_provider.dart';
+import 'chat_matrix_content_repository_provider.dart';
 import 'chat_repository_provider.dart';
 import 'meeting_place_sdk_provider.dart';
 
@@ -58,6 +59,9 @@ final chatSdkProvider =
           ),
           card: sdkContactCard,
           logger: logger,
+          matrixContentRepository: await ref.read(
+            chatMatrixContentRepositoryProvider.future,
+          ),
         );
 
         logger.info('Completed initializing Chat SDK', name: logKey);
