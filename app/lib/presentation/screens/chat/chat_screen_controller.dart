@@ -888,15 +888,6 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  /// Sends a [ScreenEffect] to the chat screen.
-  ///
-  /// This method handles the logic for triggering a visual or interactive
-  /// effect on the chat screen, such as animations or notifications.
-  /// The specific behavior depends on the implementation of [ScreenEffect].
-  ///
-  /// [effect] - The effect to be sent to the chat screen.
-  ///
-  /// Returns a [Future] that completes when the effect has been processed.
   Future<void> sendAgentOutreachInvitation(String agentMnemonic) async {
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
 
@@ -927,11 +918,20 @@ class ChatScreenController extends _$ChatScreenController
       outreachConnectionOffer: outreachOffer,
       inviteToConnectionOffer: inviteToOffer,
       messageToInclude:
-          'You have been invited to a conversation by ${identity.card.firstName}',
+          '''You have been invited to a conversation by ${identity.card.firstName}''',
       senderInfo: identity.card.firstName,
     );
   }
 
+  /// Sends a [ScreenEffect] to the chat screen.
+  ///
+  /// This method handles the logic for triggering a visual or interactive
+  /// effect on the chat screen, such as animations or notifications.
+  /// The specific behavior depends on the implementation of [ScreenEffect].
+  ///
+  /// [effect] - The effect to be sent to the chat screen.
+  ///
+  /// Returns a [Future] that completes when the effect has been processed.
   Future<void> sendEffect(ScreenEffect effect) async {
     try {
       _showActivity();
