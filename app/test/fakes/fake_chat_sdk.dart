@@ -318,9 +318,14 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   Future<Message> sendTextMessage(
     String text, {
     List<Attachment>? attachments,
+    List<String>? mentionUserIds,
   }) async {
     // Track the call
-    sendTextMessageCalls.add({'text': text, 'attachments': attachments});
+    sendTextMessageCalls.add({
+      'text': text,
+      'attachments': attachments,
+      'mentionUserIds': mentionUserIds,
+    });
 
     final message = Message(
       chatId: 'fake-chat-id',

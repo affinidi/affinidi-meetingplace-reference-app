@@ -700,11 +700,163 @@ class ChatScreenController extends _$ChatScreenController
     final trimmedMessage = originalText.trimRight();
     if (trimmedMessage.isEmpty) return;
 
-    unawaited(_chatSDK?.sendTextMessage(trimmedMessage));
+    final mentionUserIds = await _resolveMentionUserIds(trimmedMessage);
+
+    unawaited(
+      _chatSDK?.sendTextMessage(trimmedMessage, mentionUserIds: mentionUserIds),
+    );
     _sendChatActivityTimedAction?.cancel();
     if (messageTextController.text == originalText) {
       messageTextController.clear();
     }
+  }
+
+  Future<List<String>?> _resolveMentionUserIds(String messageText) async {
+    final group = state.group;
+    if (group == null) return null;
+
+    final memberDids = _extractMentionedMemberDids(messageText, group);
+    if (memberDids.isEmpty) return null;
+
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    final mentionUserIds = <String>{};
+
+    for (final memberDid in memberDids) {
+      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+        memberDid,
+      );
+      final matrixUserId = channel?.otherPartyMatrixUserId;
+      if (matrixUserId != null && matrixUserId.isNotEmpty) {
+        mentionUserIds.add(matrixUserId);
+      }
+    }
+
+    if (mentionUserIds.isEmpty) return null;
+    return mentionUserIds.toList();
+  }
+
+  Set<String> _extractMentionedMemberDids(String messageText, sdk.Group group) {
+    final aliasesByDid = _buildMentionAliases(group.members);
+    final mentionedMemberDids = <String>{};
+
+    for (final entry in aliasesByDid.entries) {
+      final hasMention = entry.value.any(
+        (alias) => _containsMention(messageText, alias),
+      );
+      if (hasMention) {
+        mentionedMemberDids.add(entry.key);
+      }
+    }
+
+    return mentionedMemberDids;
+  }
+
+  Map<String, List<String>> _buildMentionAliases(
+    List<sdk.GroupMember> members,
+  ) {
+    final activeMembers = members.where(
+      (member) =>
+          member.status != sdk.GroupMemberStatus.deleted &&
+          member.status != sdk.GroupMemberStatus.rejected,
+    );
+
+    final fullNames = activeMembers
+        .map((member) => member.contactCard.fullName.trim())
+        .where((name) => name.isNotEmpty)
+        .toList();
+    final firstNameCounts = <String, int>{};
+
+    for (final member in activeMembers) {
+      final firstName = member.contactCard.firstName.trim().toLowerCase();
+      if (firstName.isEmpty) continue;
+      firstNameCounts.update(
+        firstName,
+        (count) => count + 1,
+        ifAbsent: () => 1,
+      );
+    }
+
+    final aliasesByDid = <String, List<String>>{};
+
+    for (final member in activeMembers) {
+      final aliases = <String>[];
+      final fullName = member.contactCard.fullName.trim();
+      final firstName = member.contactCard.firstName.trim();
+      final normalizedFirstName = firstName.toLowerCase();
+
+      if (fullName.isNotEmpty) {
+        aliases.add(fullName);
+      }
+
+      final hasPrefixConflict = fullNames.any(
+        (name) =>
+            name.toLowerCase() != normalizedFirstName &&
+            name.toLowerCase().startsWith('$normalizedFirstName '),
+      );
+      if (firstName.isNotEmpty &&
+          firstNameCounts[normalizedFirstName] == 1 &&
+          !hasPrefixConflict) {
+        aliases.add(firstName);
+      }
+
+      if (aliases.isEmpty) continue;
+      aliases.sort((left, right) => right.length.compareTo(left.length));
+      aliasesByDid[member.did] = aliases;
+    }
+
+    return aliasesByDid;
+  }
+
+  bool _containsMention(String messageText, String alias) {
+    return RegExp(
+      '(^|\\s)@${RegExp.escape(alias)}(?=\\s|[.,!?;:)]|\$)',
+      caseSensitive: false,
+    ).hasMatch(messageText);
+  }
+
+  /// Returns display names of group members whose names start with [query].
+  ///
+  /// Returns an empty list when not in a group chat or [query] matches nobody.
+  List<String> getMentionSuggestions(String query) {
+    final group = state.group;
+    if (group == null) return [];
+
+    final aliasesByDid = _buildMentionAliases(group.members);
+    final normalizedQuery = query.toLowerCase();
+    final matches = <String>[];
+
+    for (final aliases in aliasesByDid.values) {
+      // aliases are sorted longest-first (fullName before firstName)
+      final displayName = aliases.first;
+      final hasMatch = aliases.any(
+        (alias) => alias.toLowerCase().startsWith(normalizedQuery),
+      );
+      if (normalizedQuery.isEmpty || hasMatch) {
+        matches.add(displayName);
+      }
+    }
+
+    matches.sort();
+    return matches;
+  }
+
+  /// Replaces the partial @mention token immediately before the cursor
+  /// with `@fullName ` and repositions the cursor after the inserted text.
+  void insertMentionSuggestion(String fullName) {
+    final text = messageTextController.text;
+    final cursorPos = messageTextController.selection.baseOffset;
+    if (cursorPos < 0 || cursorPos > text.length) return;
+
+    final textBeforeCursor = text.substring(0, cursorPos);
+    final atIndex = textBeforeCursor.lastIndexOf('@');
+    if (atIndex < 0) return;
+
+    final replacement = '@$fullName ';
+    final newText = text.replaceRange(atIndex, cursorPos, replacement);
+    messageTextController.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: atIndex + replacement.length),
+    );
   }
 
   Future<void> sendChatActivity() async {
@@ -969,10 +1121,12 @@ class ChatScreenController extends _$ChatScreenController
     List<MessageAttachment> messageAttachment,
   ) async {
     messageTextController.clear();
+    final mentionUserIds = await _resolveMentionUserIds(text);
     unawaited(
       _chatSDK?.sendTextMessage(
         text,
         attachments: messageAttachment.map((a) => a.toAttachment()).toList(),
+        mentionUserIds: mentionUserIds,
       ),
     );
     _sendChatActivityTimedAction?.cancel();

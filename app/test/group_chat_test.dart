@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
@@ -12,6 +13,7 @@ import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_image_picker.dart';
+import 'fakes/fake_meeting_place_sdk.dart';
 import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
 
@@ -32,6 +34,7 @@ Future<void> navigateToGroupChatScreen(
   WidgetTester tester, {
   required String contactId,
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
+  sdk.MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
   FakeSecureStorage? secureStorage,
@@ -50,6 +53,7 @@ Future<void> navigateToGroupChatScreen(
         FakeConnectivity(
           initialConnectivityToReturn: [ConnectivityResult.wifi],
         ),
+    meetingPlaceCoreSDK: meetingPlaceCoreSDK,
     meetingPlaceChatSDK: meetingPlaceChatSDK,
     imagePicker: imagePicker,
     mockCameras: mockCameras,
@@ -62,6 +66,61 @@ Future<void> navigateToGroupChatScreen(
 Finder findChatMessageInput() => find.byKey(const Key('chat_message_input'));
 Finder findSendButton() => find.byKey(const Key('chat_send_button'));
 Finder findAddMediaButton() => find.byKey(const Key('chat_add_media_button'));
+
+sdk.ContactCard _memberCard(
+  String firstName, {
+  String? lastName,
+  required String did,
+}) {
+  return sdk.ContactCard(
+    did: did,
+    type: 'individual',
+    contactInfo: {
+      'n': {'given': firstName, 'surname': lastName ?? ''},
+    },
+  );
+}
+
+sdk.Group _groupWithMembers() {
+  return sdk.Group(
+    id: 'group-id',
+    did: FakeContacts.groupContact.channelDid!,
+    offerLink: FakeContacts.groupContact.offerLink,
+    created: DateTime(2025, 1, 15),
+    matrixRoomId: '!group-room:example.org',
+    members: [
+      sdk.GroupMember.admin(
+        did: 'did:key:group-admin',
+        publicKey: 'admin-public-key',
+        contactCard: _memberCard(
+          'Team',
+          lastName: 'Admin',
+          did: 'did:key:group-admin',
+        ),
+      ),
+      sdk.GroupMember(
+        did: 'did:key:member-alice',
+        dateAdded: DateTime(2025, 1, 16),
+        status: sdk.GroupMemberStatus.approved,
+        membershipType: sdk.GroupMembershipType.member,
+        contactCard: _memberCard('Alice', did: 'did:key:member-alice'),
+        publicKey: 'alice-public-key',
+      ),
+      sdk.GroupMember(
+        did: 'did:key:member-bob',
+        dateAdded: DateTime(2025, 1, 17),
+        status: sdk.GroupMemberStatus.approved,
+        membershipType: sdk.GroupMembershipType.member,
+        contactCard: _memberCard(
+          'Bob',
+          lastName: 'Builder',
+          did: 'did:key:member-bob',
+        ),
+        publicKey: 'bob-public-key',
+      ),
+    ],
+  );
+}
 
 Future<void> enterChatMessage(WidgetTester tester, String message) async {
   await tester.enterText(findChatMessageInput(), message);
@@ -275,6 +334,69 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text(testMessage), findsOneWidget);
+      });
+
+      testWidgets('it forwards mentioned Matrix user IDs', (tester) async {
+        final meetingPlaceChatSDK = FakeChatSdk();
+        final group = _groupWithMembers();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+          groupsByOfferLink: {group.offerLink: group},
+          groupsById: {group.id: group},
+          channels: {
+            ...FakeChannels.allChannels,
+            'did:key:member-alice': sdk.Channel(
+              offerLink: 'alice-offer-link',
+              publishOfferDid: 'did:key:alice-offer',
+              mediatorDid: 'did:key:mediator',
+              status: sdk.ChannelStatus.inaugurated,
+              contactCard: _memberCard(
+                'Project',
+                lastName: 'Team',
+                did: 'did:key:group-channel',
+              ),
+              type: sdk.ChannelType.individual,
+              isConnectionInitiator: true,
+              otherPartyPermanentChannelDid: 'did:key:member-alice',
+              otherPartyMatrixUserId: '@alice:example.org',
+            ),
+            'did:key:member-bob': sdk.Channel(
+              offerLink: 'bob-offer-link',
+              publishOfferDid: 'did:key:bob-offer',
+              mediatorDid: 'did:key:mediator',
+              status: sdk.ChannelStatus.inaugurated,
+              contactCard: _memberCard(
+                'Project',
+                lastName: 'Team',
+                did: 'did:key:group-channel',
+              ),
+              type: sdk.ChannelType.individual,
+              isConnectionInitiator: true,
+              otherPartyPermanentChannelDid: 'did:key:member-bob',
+              otherPartyMatrixUserId: '@bob:example.org',
+            ),
+          },
+        );
+
+        await navigateToGroupChatScreen(
+          tester,
+          contactId: contactId,
+          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          meetingPlaceCoreSDK: fakeMeetingPlaceCoreSDK,
+        );
+
+        const testMessage = 'Hello @Alice and @Bob Builder';
+
+        await enterChatMessage(tester, testMessage);
+        await tapSendButton(tester);
+        await tester.pumpAndSettle();
+
+        expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
+        final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
+        expect(sendCall['text'], testMessage);
+        expect(
+          sendCall['mentionUserIds'],
+          unorderedEquals(['@alice:example.org', '@bob:example.org']),
+        );
       });
 
       testWidgets('the input field is cleared after sending', (tester) async {

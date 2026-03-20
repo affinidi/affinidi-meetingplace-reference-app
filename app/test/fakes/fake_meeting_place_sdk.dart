@@ -14,6 +14,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     Exception? acceptOobFlowException,
     bool isPhraseAvailable = true,
     Map<String, Channel>? channels,
+    Map<String, Group>? groupsByOfferLink,
+    Map<String, Group>? groupsById,
     this.offerToFind,
     this.findOfferHasError = false,
     bool shouldTimeout = false,
@@ -24,7 +26,9 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
        _acceptOobFlowException = acceptOobFlowException,
        _isPhraseAvailable = isPhraseAvailable,
        _shouldTimeout = shouldTimeout,
-       _channels = channels ?? {};
+       _channels = channels ?? {},
+       _groupsByOfferLink = groupsByOfferLink ?? {},
+       _groupsById = groupsById ?? {};
 
   final bool _shouldFailToRegisterPushToken;
   final PublishOfferResult? _offerToReturn;
@@ -34,6 +38,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final bool _isPhraseAvailable;
   final bool _shouldTimeout;
   final Map<String, Channel> _channels;
+  final Map<String, Group> _groupsByOfferLink;
+  final Map<String, Group> _groupsById;
 
   // Getter to check if subscriptions have been created (useful for debugging)
   final ConnectionOffer? offerToFind;
@@ -162,7 +168,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
 
   @override
   Future<Group?> getGroupByOfferLink(String offerLink) async {
-    return null;
+    return _groupsByOfferLink[offerLink];
   }
 
   @override
@@ -172,7 +178,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
 
   @override
   Future<Group?> getGroupById(String groupId) async {
-    return null;
+    return _groupsById[groupId];
   }
 
   OobStream? _createOobStream;

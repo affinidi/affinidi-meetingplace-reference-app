@@ -1,5 +1,30 @@
 part of 'chat_screen.dart';
 
+/// Extracts the partial mention query (text after `@`) if the cursor sits
+/// immediately after a `@word` token with no whitespace. Returns `null` when
+/// the cursor is not inside a mention token.
+String? _extractMentionQuery(TextEditingController tc) {
+  final text = tc.text;
+  final cursorPos = tc.selection.baseOffset;
+  if (cursorPos < 0 || cursorPos > text.length) return null;
+
+  final textBeforeCursor = text.substring(0, cursorPos);
+  final atIndex = textBeforeCursor.lastIndexOf('@');
+  if (atIndex < 0) return null;
+
+  // The @ must be at the start of the text or preceded by whitespace.
+  if (atIndex > 0 &&
+      textBeforeCursor[atIndex - 1] != ' ' &&
+      textBeforeCursor[atIndex - 1] != '\n') {
+    return null;
+  }
+
+  final query = textBeforeCursor.substring(atIndex + 1);
+  // No whitespace allowed inside the query segment.
+  if (query.contains(RegExp(r'\s'))) return null;
+  return query;
+}
+
 class _ChatTextEntry extends HookConsumerWidget {
   _ChatTextEntry({required String contactId}) : _contactId = contactId;
 
@@ -252,280 +277,367 @@ class _ChatTextEntry extends HookConsumerWidget {
         isVoiceRecordingSupported &&
         !isMicrophoneBlocked.value;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 220),
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          transitionBuilder: (child, animation) {
-            final slide = Tween<Offset>(
-              begin: const Offset(0, 0.12),
-              end: Offset.zero,
-            ).animate(animation);
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(position: slide, child: child),
-            );
-          },
-          child: isVoiceUiVisible.value
-              ? ClipRRect(
-                  key: const Key('chat_voice_overlay'),
-                  borderRadius: BorderRadius.circular(32),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                    child: Container(
-                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-                      decoration: BoxDecoration(
-                        color: context.colorScheme.surface.withValues(
-                          alpha: 0.22,
-                        ),
-                        borderRadius: BorderRadius.circular(32),
-                        border: Border.all(
-                          color: context.colorScheme.onSurface.withValues(
-                            alpha: 0.14,
-                          ),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                formatDuration(elapsedRecording.value),
-                                style: context.textTheme.bodySmall?.copyWith(
-                                  color: context.colorScheme.onSurface
-                                      .withValues(alpha: 0.78),
-                                ),
-                              ),
-                              const Spacer(),
-                              if (isStartingRecording.value)
-                                SizedBox(
-                                  height: 14,
-                                  width: 14,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: context.colorScheme.onSurface
-                                        .withValues(alpha: 0.78),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final recorder = recorderController.value;
-                              if (recorder == null) {
-                                return SizedBox(
-                                  height: 74,
-                                  width: constraints.maxWidth,
-                                );
-                              }
+    // Rebuild whenever the text changes so the suggestion list stays in sync.
+    useListenable(controller.messageTextController);
+    final mentionQuery = isGroupChat
+        ? _extractMentionQuery(controller.messageTextController)
+        : null;
+    final mentionSuggestions = mentionQuery != null
+        ? controller.getMentionSuggestions(mentionQuery)
+        : <String>[];
 
-                              return AudioWaveforms(
-                                size: Size(constraints.maxWidth, 74),
-                                recorderController: recorder,
-                                enableGesture: false,
-                                waveStyle: WaveStyle(
-                                  waveColor: context.colorScheme.onSurface
-                                      .withValues(alpha: 0.86),
-                                  middleLineColor: context.colorScheme.primary,
-                                  middleLineThickness: 2.0,
-                                  showMiddleLine: true,
-                                  waveThickness: 3.0,
-                                  spacing: 6.0,
-                                  showTop: true,
-                                  showBottom: true,
-                                  extendWaveform: true,
-                                  backgroundColor: Colors.transparent,
-                                ),
-                              );
-                            },
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (mentionSuggestions.isNotEmpty)
+          _MentionSuggestionList(
+            suggestions: mentionSuggestions,
+            onSuggestionTap: (name) {
+              controller.insertMentionSuggestion(name);
+              showKeyboard();
+            },
+          ),
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (child, animation) {
+                final slide = Tween<Offset>(
+                  begin: const Offset(0, 0.12),
+                  end: Offset.zero,
+                ).animate(animation);
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(position: slide, child: child),
+                );
+              },
+              child: isVoiceUiVisible.value
+                  ? ClipRRect(
+                      key: const Key('chat_voice_overlay'),
+                      borderRadius: BorderRadius.circular(32),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: Container(
+                          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                          decoration: BoxDecoration(
+                            color: context.colorScheme.surface.withValues(
+                              alpha: 0.22,
+                            ),
+                            borderRadius: BorderRadius.circular(32),
+                            border: Border.all(
+                              color: context.colorScheme.onSurface.withValues(
+                                alpha: 0.14,
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              _VoiceCircleButton(
-                                key: const Key('chat_voice_trash_button'),
-                                enabled: !shouldDisable,
-                                backgroundColor: context.colorScheme.primary,
-                                icon: Icons.delete_outline,
-                                onTap: shouldDisable ? null : trashVoiceMessage,
+                              Row(
+                                children: [
+                                  Text(
+                                    formatDuration(elapsedRecording.value),
+                                    style: context.textTheme.bodySmall
+                                        ?.copyWith(
+                                          color: context.colorScheme.onSurface
+                                              .withValues(alpha: 0.78),
+                                        ),
+                                  ),
+                                  const Spacer(),
+                                  if (isStartingRecording.value)
+                                    SizedBox(
+                                      height: 14,
+                                      width: 14,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: context.colorScheme.onSurface
+                                            .withValues(alpha: 0.78),
+                                      ),
+                                    ),
+                                ],
                               ),
-                              _VoiceCircleButton(
-                                enabled: !shouldDisable,
-                                backgroundColor: context.colorScheme.primary,
-                                icon:
-                                    (recorderController.value?.isRecording ??
-                                        false)
-                                    ? Icons.stop
-                                    : Icons.mic,
-                                size: 54,
-                                iconSize: 28,
-                                onTap: shouldDisable
-                                    ? null
-                                    : toggleStopOrRecord,
+                              const SizedBox(height: 10),
+                              LayoutBuilder(
+                                builder: (context, constraints) {
+                                  final recorder = recorderController.value;
+                                  if (recorder == null) {
+                                    return SizedBox(
+                                      height: 74,
+                                      width: constraints.maxWidth,
+                                    );
+                                  }
+
+                                  return AudioWaveforms(
+                                    size: Size(constraints.maxWidth, 74),
+                                    recorderController: recorder,
+                                    enableGesture: false,
+                                    waveStyle: WaveStyle(
+                                      waveColor: context.colorScheme.onSurface
+                                          .withValues(alpha: 0.86),
+                                      middleLineColor:
+                                          context.colorScheme.primary,
+                                      middleLineThickness: 2.0,
+                                      showMiddleLine: true,
+                                      waveThickness: 3.0,
+                                      spacing: 6.0,
+                                      showTop: true,
+                                      showBottom: true,
+                                      extendWaveform: true,
+                                      backgroundColor: Colors.transparent,
+                                    ),
+                                  );
+                                },
                               ),
-                              _VoiceCircleButton(
-                                key: const Key('chat_voice_send_button'),
-                                enabled:
-                                    !shouldDisable &&
-                                    (currentRecordingPath.value != null ||
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  _VoiceCircleButton(
+                                    key: const Key('chat_voice_trash_button'),
+                                    enabled: !shouldDisable,
+                                    backgroundColor:
+                                        context.colorScheme.primary,
+                                    icon: Icons.delete_outline,
+                                    onTap: shouldDisable
+                                        ? null
+                                        : trashVoiceMessage,
+                                  ),
+                                  _VoiceCircleButton(
+                                    enabled: !shouldDisable,
+                                    backgroundColor:
+                                        context.colorScheme.primary,
+                                    icon:
                                         (recorderController
                                                 .value
                                                 ?.isRecording ??
-                                            false)),
-                                backgroundColor: context.colorScheme.primary,
-                                icon: Icons.send,
-                                onTap: shouldDisable ? null : sendVoiceMessage,
+                                            false)
+                                        ? Icons.stop
+                                        : Icons.mic,
+                                    size: 54,
+                                    iconSize: 28,
+                                    onTap: shouldDisable
+                                        ? null
+                                        : toggleStopOrRecord,
+                                  ),
+                                  _VoiceCircleButton(
+                                    key: const Key('chat_voice_send_button'),
+                                    enabled:
+                                        !shouldDisable &&
+                                        (currentRecordingPath.value != null ||
+                                            (recorderController
+                                                    .value
+                                                    ?.isRecording ??
+                                                false)),
+                                    backgroundColor:
+                                        context.colorScheme.primary,
+                                    icon: Icons.send,
+                                    onTap: shouldDisable
+                                        ? null
+                                        : sendVoiceMessage,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              : Row(
-                  key: const ValueKey('chat_text_entry_row'),
-                  spacing: 10,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: shouldDisable
-                            ? context.theme.disabledColor
-                            : context.colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: InkWell(
-                        key: const Key('chat_add_media_button'),
-                        radius: 60,
-                        child: const Icon(
-                          Icons.add,
-                          size: 25,
-                          color: Colors.white,
                         ),
-                        onTap: shouldDisable ? null : handleMediaSelection,
                       ),
-                    ),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: borderRadius,
-                        child: TextFormField(
-                          key: const Key('chat_message_input'),
-                          enabled: !shouldDisable,
-                          onChanged: shouldDisable
-                              ? null
-                              : (text) => sendChatActivity(),
-                          textInputAction: TextInputAction.send,
-                          focusNode: focusNode,
-                          onEditingComplete:
-                              (!kIsWeb &&
-                                  defaultTargetPlatform == TargetPlatform.iOS)
-                              ? (shouldDisable ? null : sendMessage)
-                              : null,
-                          onFieldSubmitted:
-                              (!kIsWeb &&
-                                  defaultTargetPlatform != TargetPlatform.iOS)
-                              ? (shouldDisable ? null : (_) => sendMessage())
-                              : null,
-                          keyboardType: TextInputType.text,
-                          textCapitalization: TextCapitalization.sentences,
-                          cursorHeight: 16,
-                          style: const TextStyle(
-                            overflow: TextOverflow.ellipsis,
-                            fontSize: 14,
-                            color: Colors.white,
+                    )
+                  : Row(
+                      key: const ValueKey('chat_text_entry_row'),
+                      spacing: 10,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: shouldDisable
+                                ? context.theme.disabledColor
+                                : context.colorScheme.primary,
+                            shape: BoxShape.circle,
                           ),
-                          controller: controller.messageTextController,
-                          maxLines: 3,
-                          minLines: 1,
-                          decoration: context.chatInputDecoration.copyWith(
-                            hintText: isGroupChat
-                                ? context.l10n.chatTypeMessagePromptGroup
-                                : context.l10n.chatTypeMessagePrompt(
-                                    otherPartyName ?? '',
-                                  ),
-                          ),
-                          validator: MultiValidator([
-                            ZalgoTextValidator(
-                              errorText: context.l10n.zalgoTextDetectedError,
+                          child: InkWell(
+                            key: const Key('chat_add_media_button'),
+                            radius: 60,
+                            child: const Icon(
+                              Icons.add,
+                              size: 25,
+                              color: Colors.white,
                             ),
-                            MaxLengthValidator(
-                              MaxLengthValidatorType.extraLong.value,
-                              errorText: context.l10n.chatTooLong,
-                            ),
-                          ]).call,
-                          autovalidateMode: AutovalidateMode.onUserInteraction,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      key: const Key('chat_voice_button'),
-                      onVerticalDragStart: micEnabled
-                          ? (_) {
-                              verticalDragAccumulated.value = 0;
-                            }
-                          : null,
-                      onVerticalDragUpdate: micEnabled
-                          ? (details) {
-                              verticalDragAccumulated.value += details.delta.dy;
-                            }
-                          : null,
-                      onVerticalDragEnd: micEnabled
-                          ? (_) {
-                              if (verticalDragAccumulated.value < -24) {
-                                unawaited(openVoiceUiAndRecord());
-                              }
-                              verticalDragAccumulated.value = 0;
-                            }
-                          : null,
-                      child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: micEnabled
-                              ? context.colorScheme.primary
-                              : context.theme.disabledColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: InkWell(
-                          radius: 60,
-                          onTap: micEnabled ? openVoiceUiAndRecord : null,
-                          child: const Icon(
-                            Icons.mic,
-                            size: 25,
-                            color: Colors.white,
+                            onTap: shouldDisable ? null : handleMediaSelection,
                           ),
                         ),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: shouldDisable
-                            ? context.theme.disabledColor
-                            : context.colorScheme.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: InkWell(
-                        key: const Key('chat_send_button'),
-                        radius: 60,
-                        onTap: shouldDisable ? null : sendMessage,
-                        child: const Icon(
-                          Icons.send,
-                          size: 25,
-                          color: Colors.white,
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: borderRadius,
+                            child: TextFormField(
+                              key: const Key('chat_message_input'),
+                              enabled: !shouldDisable,
+                              onChanged: shouldDisable
+                                  ? null
+                                  : (text) => sendChatActivity(),
+                              textInputAction: TextInputAction.send,
+                              focusNode: focusNode,
+                              onEditingComplete:
+                                  (!kIsWeb &&
+                                      defaultTargetPlatform ==
+                                          TargetPlatform.iOS)
+                                  ? (shouldDisable ? null : sendMessage)
+                                  : null,
+                              onFieldSubmitted:
+                                  (!kIsWeb &&
+                                      defaultTargetPlatform !=
+                                          TargetPlatform.iOS)
+                                  ? (shouldDisable
+                                        ? null
+                                        : (_) => sendMessage())
+                                  : null,
+                              keyboardType: TextInputType.text,
+                              textCapitalization: TextCapitalization.sentences,
+                              cursorHeight: 16,
+                              style: const TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                              controller: controller.messageTextController,
+                              maxLines: 3,
+                              minLines: 1,
+                              decoration: context.chatInputDecoration.copyWith(
+                                hintText: isGroupChat
+                                    ? context.l10n.chatTypeMessagePromptGroup
+                                    : context.l10n.chatTypeMessagePrompt(
+                                        otherPartyName ?? '',
+                                      ),
+                              ),
+                              validator: MultiValidator([
+                                ZalgoTextValidator(
+                                  errorText:
+                                      context.l10n.zalgoTextDetectedError,
+                                ),
+                                MaxLengthValidator(
+                                  MaxLengthValidatorType.extraLong.value,
+                                  errorText: context.l10n.chatTooLong,
+                                ),
+                              ]).call,
+                              autovalidateMode:
+                                  AutovalidateMode.onUserInteraction,
+                            ),
+                          ),
                         ),
-                      ),
+                        GestureDetector(
+                          key: const Key('chat_voice_button'),
+                          onVerticalDragStart: micEnabled
+                              ? (_) {
+                                  verticalDragAccumulated.value = 0;
+                                }
+                              : null,
+                          onVerticalDragUpdate: micEnabled
+                              ? (details) {
+                                  verticalDragAccumulated.value +=
+                                      details.delta.dy;
+                                }
+                              : null,
+                          onVerticalDragEnd: micEnabled
+                              ? (_) {
+                                  if (verticalDragAccumulated.value < -24) {
+                                    unawaited(openVoiceUiAndRecord());
+                                  }
+                                  verticalDragAccumulated.value = 0;
+                                }
+                              : null,
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: micEnabled
+                                  ? context.colorScheme.primary
+                                  : context.theme.disabledColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: InkWell(
+                              radius: 60,
+                              onTap: micEnabled ? openVoiceUiAndRecord : null,
+                              child: const Icon(
+                                Icons.mic,
+                                size: 25,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: shouldDisable
+                                ? context.theme.disabledColor
+                                : context.colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: InkWell(
+                            key: const Key('chat_send_button'),
+                            radius: 60,
+                            onTap: shouldDisable ? null : sendMessage,
+                            child: const Icon(
+                              Icons.send,
+                              size: 25,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+            ),
+          ),
         ),
+      ],
+    );
+  }
+}
+
+class _MentionSuggestionList extends StatelessWidget {
+  const _MentionSuggestionList({
+    required this.suggestions,
+    required this.onSuggestionTap,
+  });
+
+  final List<String> suggestions;
+  final ValueChanged<String> onSuggestionTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 200),
+      decoration: BoxDecoration(
+        color: context.colorScheme.surfaceContainerHigh,
+        border: Border(
+          top: BorderSide(
+            color: context.colorScheme.outline.withValues(alpha: 0.3),
+          ),
+        ),
+      ),
+      child: ListView.builder(
+        shrinkWrap: true,
+        padding: EdgeInsets.zero,
+        itemCount: suggestions.length,
+        itemBuilder: (context, index) {
+          final name = suggestions[index];
+          return ListTile(
+            key: Key('mention_suggestion_$name'),
+            dense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+            leading: Icon(
+              Icons.alternate_email,
+              size: 16,
+              color: context.colorScheme.primary,
+            ),
+            title: Text(name, style: context.textTheme.bodyMedium),
+            onTap: () => onSuggestionTap(name),
+          );
+        },
       ),
     );
   }

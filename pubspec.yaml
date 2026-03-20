@@ -45,7 +45,6 @@ dependency_overrides:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart
       path: packages/meeting_place_mediator
       ref: d77b98f0d020f570e1f3e0011a484d46647f5dee
-
   meta: 1.17.0
   test_api: 0.7.5
 
