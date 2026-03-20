@@ -33,6 +33,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
   const logKey = 'meetingPlaceSdkProvider';
   final logger = ref.read(appLoggerProvider);
   final secureStorage = await ref.read(secureStorageProvider.future);
+  final environment = ref.read(environmentProvider);
 
   try {
     final wallet = PersistentWallet(secureStorage);
@@ -40,10 +41,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
     final initialMediatorDid = settingsState.selectedMediatorDid;
     logger.info('Starting MeetingPlace SDK initialization', name: logKey);
     logger.info('Selected mediator: $initialMediatorDid', name: logKey);
-    logger.info(
-      'Service DID: ${ref.read(environmentProvider).controlPlaneDid}',
-      name: logKey,
-    );
+    logger.info('Service DID: ${environment.controlPlaneDid}', name: logKey);
     logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
     await vod.init();
@@ -59,7 +57,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
         keyRepository: secureStorage,
       ),
       mediatorDid: initialMediatorDid,
-      controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
+      controlPlaneDid: environment.controlPlaneDid,
       matrixClientFactory: (did) async {
         // Each DID gets its own SQLite file so Olm identity keys are never
         // shared or overwritten between users on the same device.
@@ -69,7 +67,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
           database: await sqlite.openDatabase('./data/matrix_$key.sqlite'),
         );
         final client = Client('matrix_client_$key', database: database);
-        client.homeserver = Uri.parse('http://localhost:9000');
+        client.homeserver = Uri.parse(environment.matrixHomeserver);
         return client;
       },
       logger: logger,
