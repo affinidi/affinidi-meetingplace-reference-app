@@ -42,9 +42,10 @@ class LiveKitService {
   ///   a dev-only JWT is generated in-app via [_generateDevToken]. Replace with
   ///   a token server call once one is available.
   /// - `e2eeKeyProvider` — when provided, the room is created with LiveKit
-  ///   FrameCryptor E2EE enabled. Pass `MatrixLiveKitKeyProvider.liveKitKeyProvider`.
-  ///   Shared-key mode (`fromKey`) is used when a token server supplies the
-  ///   key; per-participant mode (`create`) is used otherwise.
+  ///   FrameCryptor E2EE enabled. Pass
+  ///   `MatrixLiveKitKeyProvider.liveKitKeyProvider`. Shared-key mode
+  ///   (`fromKey`) is used when a token server supplies the key;
+  ///   per-participant mode (`create`) is used otherwise.
   Future<void> connect({
     required String roomId,
     required String participantId,
