@@ -1472,5 +1472,10 @@
 				"type": "String"
 			}
 		}
+	},
+	"videoCallYou": "You",
+	"@videoCallYou": {
+		"type": "text",
+		"description": "Label shown on the local participant's video tile"
 	}
 }

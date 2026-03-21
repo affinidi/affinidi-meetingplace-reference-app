@@ -1541,4 +1541,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String videoCallParticipantLeft(String names) {
     return '$names left';
   }
+
+  @override
+  String get videoCallYou => 'You';
 }

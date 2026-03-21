@@ -109,18 +109,16 @@ sequenceDiagram
 
 ### With encryption
 
-Encrypting media frames prevents the LiveKit SFU and any network intermediary
-from reading audio or video content.
+Encrypting media frames prevents the LiveKit SFU and any network intermediary from reading audio or video content.
 
-Two deployment modes exist, selected at build time via the
-`LIVEKIT_TOKEN_SERVER_URL` environment variable:
+Both deployment modes use **shared-key** encryption — every participant in the same room uses the same symmetric key. The difference is where the key comes from, selected at build time via the `LIVEKIT_TOKEN_SERVER_URL` environment variable:
 
-- **Without token server** — shared-key mode. Active when
-  `LIVEKIT_TOKEN_SERVER_URL` is not set. Simpler setup, weaker security.
-- **With token server** — per-participant mode. Active when
-  `LIVEKIT_TOKEN_SERVER_URL` is set. Recommended for production.
+- **Without token server** — the app derives the key locally from `HMAC-SHA256(apiSecret, roomId)`. Active when `LIVEKIT_TOKEN_SERVER_URL` is not set. Suitable for local development only.
+- **With token server** — the server derives & issues the key alongside the LiveKit JWT. Active when `LIVEKIT_TOKEN_SERVER_URL` is set. The API secret never leaves the server. Recommended for any non-local deployment.
 
-#### 1. Without token server — shared key
+> **Note:** Per-participant key distribution via Olm-encrypted Matrix to-device messages is supported by the Matrix SDK (`LiveKitBackend`) and wired in via `MatrixLiveKitKeyProvider`, but is **not currently enabled**. The delegate's `keyProvider` is intentionally left `null`, so the SDK's per-participant key exchange is silently disabled. All encryption uses the shared-key `FrameCryptor`.
+
+#### 1. Without token server — in-app key derivation
 
 All participants independently derive the same key from
 `HMAC-SHA256(apiSecret, roomId)` — no key is transmitted.
@@ -144,70 +142,32 @@ Key derivation (same result on every device, zero network exchange):
 key = HMAC-SHA256(LIVEKIT_API_SECRET, roomId)   →   64-char hex (32 bytes)
 ```
 
-> **Limitation:** `LIVEKIT_API_SECRET` is in the app binary. The key can be
-> extracted from a reverse-engineered binary. Use the token server mode for
-> any non-local deployment.
+> **Limitation:** `LIVEKIT_API_SECRET` is in the app binary. The key can be extracted from a reverse-engineered binary. Use the token server mode for any non-local deployment.
 
-#### 2. With token server — per-participant keys
+#### 2. With token server — server-issued shared key
 
-The token server issues both the LiveKit JWT and an `e2eeKey`. Separately,
-the Matrix SDK generates a unique random key per participant and distributes
-it to others via **Olm-encrypted Matrix to-device messages**. The server
-never learns any key. A compromised participant only exposes their own stream,
-not others'.
+The token server issues both the LiveKit JWT **and** the shared `e2eeKey`. The API secret stays server-side. All participants still share the same symmetric key — only the derivation happens on the server instead of in-app.
 
 ```mermaid
 sequenceDiagram
     participant Alice as Alice's App
-    participant Synapse as Synapse<br/>(Matrix homeserver)
+    participant TS as Token Server
+    participant SFU as LiveKit SFU<br/>(no key)
     participant Bob as Bob's App
-    participant SFU as LiveKit SFU
 
-    note over Alice: generates random key A
-    Alice->>Synapse: send key A to Bob<br/>(Olm to-device message, encrypted)
-    Synapse-->>Bob: deliver Olm message
-    note over Bob: decrypts with Olm,<br/>loads key A into FrameCryptor
-    note over Bob: generates random key B
-    Bob->>Synapse: send key B to Alice<br/>(Olm to-device message, encrypted)
-    Synapse-->>Alice: deliver Olm message
-    note over Alice: loads key B into FrameCryptor
+    Alice->>TS: POST /token (roomId, participantId)
+    TS-->>Alice: { token: JWT, e2eeKey: "abc…" }
+    Bob->>TS: POST /token (roomId, participantId)
+    TS-->>Bob: { token: JWT, e2eeKey: "abc…" }
+    note over TS: Same e2eeKey for same room.<br/>API secret never sent to clients.
 
-    Alice->>SFU: frames encrypted with key A 🔒
-    SFU-->>Bob: forward 🔒 → Bob decrypts with key A
-    Bob->>SFU: frames encrypted with key B 🔒
-    SFU-->>Alice: forward 🔒 → Alice decrypts with key B
+    note over Alice: FrameCryptor encrypts with e2eeKey
+    Alice->>SFU: encrypted frames 🔒
+    SFU-->>Bob: forward 🔒
+    note over Bob: FrameCryptor decrypts with same e2eeKey
 ```
 
-Implemented via `LiveKitBackend(e2eeEnabled: true)` and
-`MatrixLiveKitKeyProvider` (`onSetEncryptionKey` / `onRatchetKey` /
-`onExportKey` callbacks).
-
-##### Key rotation on participant leave
-
-When any participant leaves, the Matrix SDK **automatically generates a new
-key** for the remaining participants and distributes it before the leaver can
-intercept it. This provides **post-compromise forward secrecy**: anyone who
-leaves cannot decrypt future frames, even if they recorded all past traffic.
-
-```mermaid
-sequenceDiagram
-    participant Alice as Alice's App
-    participant Synapse as Synapse
-    participant Bob as Bob's App
-    participant Eve as Eve's App (leaving)
-
-    Eve->>Synapse: leave call (m.call.member expires)
-    note over Alice: ParticipantsLeftEvent received
-    note over Alice: generates new key A' (idx+1)
-    Alice->>Synapse: send key A' to Bob only<br/>(Olm — Eve excluded)
-    Synapse-->>Bob: deliver key A'
-    note over Eve: ❌ never receives key A'<br/>cannot decrypt future frames
-    Alice->>Bob: future frames encrypted with A' 🔒
-```
-
-The `delayed setting key changed event` log confirms the Matrix SDK applies
-the new key after a short propagation delay (`useKeyDelay`) to avoid
-decryption failures for in-flight frames.
+Implemented via `MatrixLiveKitKeyProvider.fromKey(e2eeKey:)` using `BaseKeyProvider.create(sharedKey: true)`.
 
 ---
 

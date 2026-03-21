@@ -2247,6 +2247,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{names} left'**
   String videoCallParticipantLeft(String names);
+
+  /// Label shown on the local participant's video tile
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get videoCallYou;
 }
 
 class _AppLocalizationsDelegate
