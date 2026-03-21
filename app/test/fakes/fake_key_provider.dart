@@ -12,6 +12,9 @@ class FakeKeyProvider implements KeyProvider {
   final List<({String participantId, int keyIndex})> ratchetKeyCalls = [];
   final List<({String participantId, int keyIndex})> exportKeyCalls = [];
 
+  final List<({int keyIndex})> ratchetSharedKeyCalls = [];
+  final List<({int keyIndex})> exportSharedKeyCalls = [];
+
   static final stubKey = Uint8List.fromList(List.filled(32, 0xAB));
 
   @override
@@ -47,9 +50,15 @@ class FakeKeyProvider implements KeyProvider {
   @override
   Future<void> setSharedKey(String key, {int? keyIndex}) async {}
   @override
-  Future<Uint8List> ratchetSharedKey({int? keyIndex}) async => stubKey;
+  Future<Uint8List> ratchetSharedKey({int? keyIndex}) async {
+    ratchetSharedKeyCalls.add((keyIndex: keyIndex ?? 0));
+    return stubKey;
+  }
   @override
-  Future<Uint8List> exportSharedKey({int? keyIndex}) async => stubKey;
+  Future<Uint8List> exportSharedKey({int? keyIndex}) async {
+    exportSharedKeyCalls.add((keyIndex: keyIndex ?? 0));
+    return stubKey;
+  }
   @override
   Future<void> setKey(
     String key, {

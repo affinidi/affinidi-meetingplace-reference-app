@@ -39,7 +39,7 @@ class LiveKitService {
   ///
   /// - `participantId` — caller's display name shown to other participants.
   /// - `token` — when provided, used directly as the LiveKit JWT. When null,
-  ///   a dev-only JWT is generated in-app via [_generateDevToken]. Replace with
+  ///   a dev-only JWT is generated in-app via `_generateDevToken`. Replace with
   ///   a token server call once one is available.
   /// - `e2eeKeyProvider` — when provided, the room is created with LiveKit
   ///   FrameCryptor E2EE enabled. Pass
@@ -49,14 +49,20 @@ class LiveKitService {
   Future<void> connect({
     required String roomId,
     required String participantId,
+    String? displayName,
     String? token,
     BaseKeyProvider? e2eeKeyProvider,
     void Function()? onParticipantsChanged,
     void Function()? onDisconnected,
+    void Function(String participantIdentity)? onMissingKey,
   }) async {
     final jwt =
         token ??
-        _generateDevToken(participantId: participantId, roomId: roomId);
+        _generateDevToken(
+          participantId: participantId,
+          roomId: roomId,
+          displayName: displayName,
+        );
 
     _room = e2eeKeyProvider != null
         ? Room(
@@ -97,6 +103,12 @@ class LiveKitService {
           _logger.error(msg, name: _logKey);
         } else {
           _logger.info(msg, name: _logKey);
+        }
+
+        // When a remote track has no key, ask that participant to resend.
+        if (event.state == E2EEState.kMissingKey &&
+            event.participant is RemoteParticipant) {
+          onMissingKey?.call(event.participant.identity);
         }
       });
 
@@ -139,6 +151,7 @@ class LiveKitService {
   String _generateDevToken({
     required String participantId,
     required String roomId,
+    String? displayName,
   }) {
     final header = base64Url
         .encode(utf8.encode(jsonEncode({'alg': 'HS256', 'typ': 'JWT'})))
@@ -152,7 +165,7 @@ class LiveKitService {
               'sub': participantId,
               'iat': now,
               'exp': now + 3600,
-              'name': participantId,
+              'name': displayName ?? participantId,
               'video': {
                 'roomCreate': false,
                 'room': roomId,
