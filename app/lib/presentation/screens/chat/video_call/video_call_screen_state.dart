@@ -14,6 +14,7 @@ abstract class VideoCallScreenState with _$VideoCallScreenState {
     @Default([]) List<Participant> participants,
     @Default(false) bool isMicEnabled,
     @Default(false) bool isCameraEnabled,
+    @Default({}) Map<String, String> memberNames,
     Object? error,
     String? matrixEventMessage,
   }) = _VideoCallScreenState;

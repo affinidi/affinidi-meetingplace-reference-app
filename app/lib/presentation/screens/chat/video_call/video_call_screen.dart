@@ -37,13 +37,7 @@ class VideoCallScreen extends ConsumerWidget {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: Text(l10n.videoCallTitle),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () async {
-            await controller.leaveCall();
-            if (context.mounted) context.pop();
-          },
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
@@ -131,6 +125,13 @@ class _ParticipantGrid extends ConsumerWidget {
       );
     }
 
+    final memberNames = ref.watch(
+      videoCallScreenControllerProvider(
+        roomId,
+        contactId,
+      ).select((s) => s.memberNames),
+    );
+
     return GridView.builder(
       padding: const EdgeInsets.all(8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -139,15 +140,54 @@ class _ParticipantGrid extends ConsumerWidget {
         crossAxisSpacing: 8,
       ),
       itemCount: participants.length,
-      itemBuilder: (_, i) => _ParticipantTile(participant: participants[i]),
+      itemBuilder: (_, i) {
+        final participant = participants[i];
+        final String displayName;
+        if (participant is LocalParticipant) {
+          displayName = context.l10n.videoCallYou;
+        } else {
+          // participant.name is the Group member firstName broadcast via
+          // the LiveKit JWT `name` claim by the remote device.
+          final broadcastName = participant.name;
+          if (broadcastName.isNotEmpty &&
+              broadcastName != participant.identity) {
+            displayName = broadcastName;
+          } else {
+            // Fallback: look up from the memberNames map keyed by
+            // md5(DID). Extract the Matrix localpart from the identity if
+            // it looks like a Matrix user ID, otherwise try the raw value.
+            final localpart = _parseIdentity(participant.identity);
+            displayName = memberNames[localpart] ?? localpart;
+          }
+        }
+        return _ParticipantTile(
+          participant: participant,
+          displayName: displayName,
+        );
+      },
     );
+  }
+
+  /// Extracts the Matrix localpart from a LiveKit identity string.
+  /// `@alice:server.com:DEVICEID` → `alice`
+  String _parseIdentity(String identity) {
+    if (identity.startsWith('@')) {
+      final body = identity.substring(1);
+      final colon = body.indexOf(':');
+      if (colon > 0) return body.substring(0, colon);
+    }
+    return identity;
   }
 }
 
 class _ParticipantTile extends StatelessWidget {
-  const _ParticipantTile({required this.participant});
+  const _ParticipantTile({
+    required this.participant,
+    required this.displayName,
+  });
 
   final Participant participant;
+  final String displayName;
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +214,7 @@ class _ParticipantTile extends StatelessWidget {
               bottom: 8,
               left: 8,
               child: Text(
-                participant.identity,
+                displayName,
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -214,34 +254,37 @@ class _CallControls extends ConsumerWidget {
     );
     final l10n = context.l10n;
 
-    return Container(
-      color: Colors.black,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _ControlButton(
-            icon: isMicEnabled ? Icons.mic : Icons.mic_off,
-            label: isMicEnabled ? l10n.videoCallMute : l10n.videoCallUnmute,
-            onTap: controller.toggleMic,
-          ),
-          _ControlButton(
-            icon: isCameraEnabled ? Icons.videocam : Icons.videocam_off,
-            label: isCameraEnabled
-                ? l10n.videoCallCameraOff
-                : l10n.videoCallCameraOn,
-            onTap: controller.toggleCamera,
-          ),
-          _ControlButton(
-            icon: Icons.call_end,
-            label: l10n.videoCallEnd,
-            backgroundColor: Colors.red,
-            onTap: () async {
-              await controller.leaveCall();
-              if (context.mounted) context.pop();
-            },
-          ),
-        ],
+    return SafeArea(
+      top: false,
+      child: Container(
+        color: Colors.black,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _ControlButton(
+              icon: isMicEnabled ? Icons.mic : Icons.mic_off,
+              label: isMicEnabled ? l10n.videoCallMute : l10n.videoCallUnmute,
+              onTap: controller.toggleMic,
+            ),
+            _ControlButton(
+              icon: isCameraEnabled ? Icons.videocam : Icons.videocam_off,
+              label: isCameraEnabled
+                  ? l10n.videoCallCameraOff
+                  : l10n.videoCallCameraOn,
+              onTap: controller.toggleCamera,
+            ),
+            _ControlButton(
+              icon: Icons.call_end,
+              label: l10n.videoCallEnd,
+              backgroundColor: Colors.red,
+              onTap: () async {
+                await controller.leaveCall();
+                if (context.mounted) context.pop();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

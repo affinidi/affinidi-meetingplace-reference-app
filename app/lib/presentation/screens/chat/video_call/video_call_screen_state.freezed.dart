@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$VideoCallScreenState {
 
- VideoCallStatus get status; List<Participant> get participants; bool get isMicEnabled; bool get isCameraEnabled; Object? get error; String? get matrixEventMessage;
+ VideoCallStatus get status; List<Participant> get participants; bool get isMicEnabled; bool get isCameraEnabled; Map<String, String> get memberNames; Object? get error; String? get matrixEventMessage;
 /// Create a copy of VideoCallScreenState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $VideoCallScreenStateCopyWith<VideoCallScreenState> get copyWith => _$VideoCallS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VideoCallScreenState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.participants, participants)&&(identical(other.isMicEnabled, isMicEnabled) || other.isMicEnabled == isMicEnabled)&&(identical(other.isCameraEnabled, isCameraEnabled) || other.isCameraEnabled == isCameraEnabled)&&const DeepCollectionEquality().equals(other.error, error)&&(identical(other.matrixEventMessage, matrixEventMessage) || other.matrixEventMessage == matrixEventMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VideoCallScreenState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.participants, participants)&&(identical(other.isMicEnabled, isMicEnabled) || other.isMicEnabled == isMicEnabled)&&(identical(other.isCameraEnabled, isCameraEnabled) || other.isCameraEnabled == isCameraEnabled)&&const DeepCollectionEquality().equals(other.memberNames, memberNames)&&const DeepCollectionEquality().equals(other.error, error)&&(identical(other.matrixEventMessage, matrixEventMessage) || other.matrixEventMessage == matrixEventMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(participants),isMicEnabled,isCameraEnabled,const DeepCollectionEquality().hash(error),matrixEventMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(participants),isMicEnabled,isCameraEnabled,const DeepCollectionEquality().hash(memberNames),const DeepCollectionEquality().hash(error),matrixEventMessage);
 
 @override
 String toString() {
-  return 'VideoCallScreenState(status: $status, participants: $participants, isMicEnabled: $isMicEnabled, isCameraEnabled: $isCameraEnabled, error: $error, matrixEventMessage: $matrixEventMessage)';
+  return 'VideoCallScreenState(status: $status, participants: $participants, isMicEnabled: $isMicEnabled, isCameraEnabled: $isCameraEnabled, memberNames: $memberNames, error: $error, matrixEventMessage: $matrixEventMessage)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $VideoCallScreenStateCopyWith<$Res>  {
   factory $VideoCallScreenStateCopyWith(VideoCallScreenState value, $Res Function(VideoCallScreenState) _then) = _$VideoCallScreenStateCopyWithImpl;
 @useResult
 $Res call({
- VideoCallStatus status, List<Participant> participants, bool isMicEnabled, bool isCameraEnabled, Object? error, String? matrixEventMessage
+ VideoCallStatus status, List<Participant> participants, bool isMicEnabled, bool isCameraEnabled, Map<String, String> memberNames, Object? error, String? matrixEventMessage
 });
 
 
@@ -62,13 +62,14 @@ class _$VideoCallScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of VideoCallScreenState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? participants = null,Object? isMicEnabled = null,Object? isCameraEnabled = null,Object? error = freezed,Object? matrixEventMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? participants = null,Object? isMicEnabled = null,Object? isCameraEnabled = null,Object? memberNames = null,Object? error = freezed,Object? matrixEventMessage = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as VideoCallStatus,participants: null == participants ? _self.participants : participants // ignore: cast_nullable_to_non_nullable
 as List<Participant>,isMicEnabled: null == isMicEnabled ? _self.isMicEnabled : isMicEnabled // ignore: cast_nullable_to_non_nullable
 as bool,isCameraEnabled: null == isCameraEnabled ? _self.isCameraEnabled : isCameraEnabled // ignore: cast_nullable_to_non_nullable
-as bool,error: freezed == error ? _self.error : error ,matrixEventMessage: freezed == matrixEventMessage ? _self.matrixEventMessage : matrixEventMessage // ignore: cast_nullable_to_non_nullable
+as bool,memberNames: null == memberNames ? _self.memberNames : memberNames // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,error: freezed == error ? _self.error : error ,matrixEventMessage: freezed == matrixEventMessage ? _self.matrixEventMessage : matrixEventMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -154,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VideoCallStatus status,  List<Participant> participants,  bool isMicEnabled,  bool isCameraEnabled,  Object? error,  String? matrixEventMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VideoCallStatus status,  List<Participant> participants,  bool isMicEnabled,  bool isCameraEnabled,  Map<String, String> memberNames,  Object? error,  String? matrixEventMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VideoCallScreenState() when $default != null:
-return $default(_that.status,_that.participants,_that.isMicEnabled,_that.isCameraEnabled,_that.error,_that.matrixEventMessage);case _:
+return $default(_that.status,_that.participants,_that.isMicEnabled,_that.isCameraEnabled,_that.memberNames,_that.error,_that.matrixEventMessage);case _:
   return orElse();
 
 }
@@ -175,10 +176,10 @@ return $default(_that.status,_that.participants,_that.isMicEnabled,_that.isCamer
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VideoCallStatus status,  List<Participant> participants,  bool isMicEnabled,  bool isCameraEnabled,  Object? error,  String? matrixEventMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VideoCallStatus status,  List<Participant> participants,  bool isMicEnabled,  bool isCameraEnabled,  Map<String, String> memberNames,  Object? error,  String? matrixEventMessage)  $default,) {final _that = this;
 switch (_that) {
 case _VideoCallScreenState():
-return $default(_that.status,_that.participants,_that.isMicEnabled,_that.isCameraEnabled,_that.error,_that.matrixEventMessage);case _:
+return $default(_that.status,_that.participants,_that.isMicEnabled,_that.isCameraEnabled,_that.memberNames,_that.error,_that.matrixEventMessage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +196,10 @@ return $default(_that.status,_that.participants,_that.isMicEnabled,_that.isCamer
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VideoCallStatus status,  List<Participant> participants,  bool isMicEnabled,  bool isCameraEnabled,  Object? error,  String? matrixEventMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VideoCallStatus status,  List<Participant> participants,  bool isMicEnabled,  bool isCameraEnabled,  Map<String, String> memberNames,  Object? error,  String? matrixEventMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _VideoCallScreenState() when $default != null:
-return $default(_that.status,_that.participants,_that.isMicEnabled,_that.isCameraEnabled,_that.error,_that.matrixEventMessage);case _:
+return $default(_that.status,_that.participants,_that.isMicEnabled,_that.isCameraEnabled,_that.memberNames,_that.error,_that.matrixEventMessage);case _:
   return null;
 
 }
@@ -210,7 +211,7 @@ return $default(_that.status,_that.participants,_that.isMicEnabled,_that.isCamer
 
 
 class _VideoCallScreenState extends VideoCallScreenState {
-  const _VideoCallScreenState({this.status = VideoCallStatus.idle, final  List<Participant> participants = const [], this.isMicEnabled = false, this.isCameraEnabled = false, this.error, this.matrixEventMessage}): _participants = participants,super._();
+  const _VideoCallScreenState({this.status = VideoCallStatus.idle, final  List<Participant> participants = const [], this.isMicEnabled = false, this.isCameraEnabled = false, final  Map<String, String> memberNames = const {}, this.error, this.matrixEventMessage}): _participants = participants,_memberNames = memberNames,super._();
   
 
 @override@JsonKey() final  VideoCallStatus status;
@@ -223,6 +224,13 @@ class _VideoCallScreenState extends VideoCallScreenState {
 
 @override@JsonKey() final  bool isMicEnabled;
 @override@JsonKey() final  bool isCameraEnabled;
+ final  Map<String, String> _memberNames;
+@override@JsonKey() Map<String, String> get memberNames {
+  if (_memberNames is EqualUnmodifiableMapView) return _memberNames;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_memberNames);
+}
+
 @override final  Object? error;
 @override final  String? matrixEventMessage;
 
@@ -236,16 +244,16 @@ _$VideoCallScreenStateCopyWith<_VideoCallScreenState> get copyWith => __$VideoCa
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VideoCallScreenState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._participants, _participants)&&(identical(other.isMicEnabled, isMicEnabled) || other.isMicEnabled == isMicEnabled)&&(identical(other.isCameraEnabled, isCameraEnabled) || other.isCameraEnabled == isCameraEnabled)&&const DeepCollectionEquality().equals(other.error, error)&&(identical(other.matrixEventMessage, matrixEventMessage) || other.matrixEventMessage == matrixEventMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VideoCallScreenState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._participants, _participants)&&(identical(other.isMicEnabled, isMicEnabled) || other.isMicEnabled == isMicEnabled)&&(identical(other.isCameraEnabled, isCameraEnabled) || other.isCameraEnabled == isCameraEnabled)&&const DeepCollectionEquality().equals(other._memberNames, _memberNames)&&const DeepCollectionEquality().equals(other.error, error)&&(identical(other.matrixEventMessage, matrixEventMessage) || other.matrixEventMessage == matrixEventMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_participants),isMicEnabled,isCameraEnabled,const DeepCollectionEquality().hash(error),matrixEventMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_participants),isMicEnabled,isCameraEnabled,const DeepCollectionEquality().hash(_memberNames),const DeepCollectionEquality().hash(error),matrixEventMessage);
 
 @override
 String toString() {
-  return 'VideoCallScreenState(status: $status, participants: $participants, isMicEnabled: $isMicEnabled, isCameraEnabled: $isCameraEnabled, error: $error, matrixEventMessage: $matrixEventMessage)';
+  return 'VideoCallScreenState(status: $status, participants: $participants, isMicEnabled: $isMicEnabled, isCameraEnabled: $isCameraEnabled, memberNames: $memberNames, error: $error, matrixEventMessage: $matrixEventMessage)';
 }
 
 
@@ -256,7 +264,7 @@ abstract mixin class _$VideoCallScreenStateCopyWith<$Res> implements $VideoCallS
   factory _$VideoCallScreenStateCopyWith(_VideoCallScreenState value, $Res Function(_VideoCallScreenState) _then) = __$VideoCallScreenStateCopyWithImpl;
 @override @useResult
 $Res call({
- VideoCallStatus status, List<Participant> participants, bool isMicEnabled, bool isCameraEnabled, Object? error, String? matrixEventMessage
+ VideoCallStatus status, List<Participant> participants, bool isMicEnabled, bool isCameraEnabled, Map<String, String> memberNames, Object? error, String? matrixEventMessage
 });
 
 
@@ -273,13 +281,14 @@ class __$VideoCallScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of VideoCallScreenState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? participants = null,Object? isMicEnabled = null,Object? isCameraEnabled = null,Object? error = freezed,Object? matrixEventMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? participants = null,Object? isMicEnabled = null,Object? isCameraEnabled = null,Object? memberNames = null,Object? error = freezed,Object? matrixEventMessage = freezed,}) {
   return _then(_VideoCallScreenState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as VideoCallStatus,participants: null == participants ? _self._participants : participants // ignore: cast_nullable_to_non_nullable
 as List<Participant>,isMicEnabled: null == isMicEnabled ? _self.isMicEnabled : isMicEnabled // ignore: cast_nullable_to_non_nullable
 as bool,isCameraEnabled: null == isCameraEnabled ? _self.isCameraEnabled : isCameraEnabled // ignore: cast_nullable_to_non_nullable
-as bool,error: freezed == error ? _self.error : error ,matrixEventMessage: freezed == matrixEventMessage ? _self.matrixEventMessage : matrixEventMessage // ignore: cast_nullable_to_non_nullable
+as bool,memberNames: null == memberNames ? _self._memberNames : memberNames // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,error: freezed == error ? _self.error : error ,matrixEventMessage: freezed == matrixEventMessage ? _self.matrixEventMessage : matrixEventMessage // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
