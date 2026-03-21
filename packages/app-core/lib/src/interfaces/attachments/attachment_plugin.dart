@@ -12,12 +12,14 @@ abstract interface class AttachmentPlugin {
     required Attachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    Future<void> Function(Attachment attachment)? onDownloadAttachment,
   });
 
   Widget renderAttachments({
     required List<Attachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    Future<void> Function(Attachment attachment)? onDownloadAttachment,
   });
 
   bool supportsFormat(Attachment format);
