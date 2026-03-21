@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:livekit_client/livekit_client.dart';
+import 'package:crypto/crypto.dart';
 import 'package:matrix/matrix.dart' as matrix;
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/services/contacts_service/contacts_service.dart';
 import '../../../../infrastructure/configuration/environment.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../../infrastructure/providers/matrix_rtc_delegate_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../infrastructure/services/livekit_service/livekit_service.dart';
 import '../../../../infrastructure/services/livekit_service/livekit_token_service.dart';
@@ -32,6 +35,11 @@ class VideoCallScreenController extends _$VideoCallScreenController {
 
   StreamSubscription<matrix.MatrixRTCCallEvent>? _matrixRtcSubscription;
 
+  /// The local Matrix userId (e.g. `@alice:server.com`) extracted from
+  /// `matrixParticipantId` (`@alice:server.com:DEVICEID`). Used to filter
+  /// the local user out of join/leave notifications.
+  String? _localMatrixUserId;
+
   @override
   VideoCallScreenState build(String roomId, String contactId) {
     Future(() async {
@@ -54,81 +62,21 @@ class VideoCallScreenController extends _$VideoCallScreenController {
     try {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
 
-      // 1. Set up E2EE key provider BEFORE starting the Matrix call.
-      //    session.enter() inside startVideoCall immediately generates the
-      //    local sender key and calls onSetEncryptionKey — the delegate must
-      //    already have a key provider installed or that key is silently
-      //    dropped, causing FrameCryptorStateMissingKey on the LiveKit side.
-      final env = ref.read(environmentProvider);
-      final tokenServerUrl = env.livekitTokenServerUrl;
-      final MatrixLiveKitKeyProvider keyProvider;
-      final String? livekitToken;
-      if (tokenServerUrl != null) {
-        final tokenService = LiveKitTokenService(serverUrl: tokenServerUrl);
-        final tokenResponse = await tokenService.fetchToken(
-          roomId: roomId,
-          participantId: contactId,
-        );
-        keyProvider = await MatrixLiveKitKeyProvider.fromKey(
-          e2eeKey: tokenResponse.e2eeKey,
-          logger: _logger,
-        );
-        livekitToken = tokenResponse.token;
-      } else {
-        keyProvider = await MatrixLiveKitKeyProvider.create(logger: _logger);
-        livekitToken = null; // generateDevToken() used inside LiveKitService
-      }
-      ref.read(matrixRtcDelegateProvider).setKeyProvider(keyProvider);
+      await _signalMatrixRTC(sdk);
+      _subscribeToMatrixRTCEvents(sdk);
+      _cacheLocalMatrixUserId(sdk);
 
-      // 2. Signal call membership via MatrixRTC (publishes m.call.member).
-      //    session.enter() fires _makeNewSenderKey → onSetEncryptionKey,
-      //    which now correctly lands in the already-installed key provider.
-      await sdk.startVideoCall(
-        roomId: roomId,
-        livekitServiceUrl: _livekitService.serverUrl,
-        livekitAlias: roomId,
-        callId: roomId,
+      final myDisplayName = await _resolveMemberNames(sdk);
+
+      final (:keyProvider, :token) = await _prepareE2EECredentials();
+
+      await _connectToLiveKit(
+        displayName: myDisplayName,
+        token: token,
+        keyProvider: keyProvider,
       );
 
-      // 3. Subscribe to MatrixRTC membership events — useful for showing
-      // join/leave toasts before LiveKit participant events arrive.
-      final matrixRtcStream = sdk.watchVideoCall(
-        roomId: roomId,
-        callId: roomId,
-      );
-      if (matrixRtcStream != null) {
-        _matrixRtcSubscription = matrixRtcStream.listen(_onMatrixRTCEvent);
-      }
-
-      // 4. Connect to LiveKit SFU for actual audio/video with E2EE.
-      //    Frame cryptor already has the local key from step 1.
-      //    Use the Matrix identity (userId:deviceId) as the LiveKit participant
-      //    identity so LiveKit's key lookup matches keys stored by
-      //    onSetEncryptionKey.
-      final livekitParticipantId = sdk.matrixParticipantId ?? contactId;
-      await _livekitService.connect(
-        roomId: roomId,
-        participantId: livekitParticipantId,
-        token: livekitToken,
-        e2eeKeyProvider: keyProvider.liveKitKeyProvider as BaseKeyProvider,
-        onParticipantsChanged: () => state = state.copyWith(
-          participants: _livekitService.getParticipants(),
-        ),
-        onDisconnected: () {
-          // Only reset to idle on an intentional disconnect, not on a
-          // failed connect attempt — otherwise the screen re-triggers joinCall.
-          if (state.status == VideoCallStatus.connected) {
-            state = const VideoCallScreenState();
-          }
-        },
-      );
-      await _livekitService.setMicrophoneEnabled(true);
-
-      state = state.copyWith(
-        status: VideoCallStatus.connected,
-        participants: _livekitService.getParticipants(),
-        isMicEnabled: true,
-      );
+      await _enableLocalMedia();
 
       _logger.info('Joined video call for room $roomId', name: _logKey);
     } catch (error, stackTrace) {
@@ -161,6 +109,153 @@ class VideoCallScreenController extends _$VideoCallScreenController {
     state = state.copyWith(isCameraEnabled: next);
   }
 
+  /// Publishes `m.call.member` state event via MatrixRTC.
+  Future<void> _signalMatrixRTC(MeetingPlaceCoreSDK sdk) async {
+    await sdk.startVideoCall(
+      roomId: roomId,
+      livekitServiceUrl: _livekitService.serverUrl,
+      livekitAlias: roomId,
+      callId: roomId,
+    );
+  }
+
+  /// Subscribes to MatrixRTC membership events for join/leave toasts.
+  void _subscribeToMatrixRTCEvents(MeetingPlaceCoreSDK sdk) {
+    final matrixRtcStream = sdk.watchVideoCall(roomId: roomId, callId: roomId);
+    if (matrixRtcStream != null) {
+      _matrixRtcSubscription = matrixRtcStream.listen(_onMatrixRTCEvent);
+    }
+  }
+
+  /// Caches the local Matrix userId (strips trailing `:deviceId`) so we can
+  /// filter the local user out of join/leave event notifications.
+  void _cacheLocalMatrixUserId(MeetingPlaceCoreSDK sdk) {
+    final rawId = sdk.matrixParticipantId;
+    if (rawId != null) {
+      final lastColon = rawId.lastIndexOf(':');
+      if (lastColon > 0) _localMatrixUserId = rawId.substring(0, lastColon);
+    }
+  }
+
+  /// Resolves member names from the Group entity and populates
+  /// `state.memberNames`. Returns the local user's display name (if found)
+  /// so it can be broadcast via the LiveKit JWT `name` claim.
+  Future<String?> _resolveMemberNames(MeetingPlaceCoreSDK sdk) async {
+    String? myDisplayName;
+    final memberNameMap = <String, String>{};
+
+    final contact = ref.read(contactsServiceProvider).getContactById(contactId);
+    if (contact == null) return null;
+
+    final group = await sdk.getGroupByOfferLink(contact.offerLink);
+    if (group == null) return null;
+
+    final myLocalpart = _extractLocalpart(_localMatrixUserId);
+
+    for (final member in group.members) {
+      final memberHash = md5.convert(utf8.encode(member.did)).toString();
+      final name = member.contactCard.firstName;
+      if (name.isNotEmpty) {
+        memberNameMap[memberHash] = name;
+      }
+      if (memberHash == myLocalpart && name.isNotEmpty) {
+        myDisplayName = name;
+      }
+    }
+
+    state = state.copyWith(memberNames: memberNameMap);
+    return myDisplayName;
+  }
+
+  /// Prepares the E2EE key provider and LiveKit token.
+  ///
+  /// When a token server URL is configured, the JWT and E2EE key are fetched
+  /// from the server. Otherwise falls back to dev-only in-app generation.
+  ///
+  /// Shared-key mode: both participants derive the same key from
+  /// HMAC-SHA256(apiSecret, roomId). No network key exchange needed.
+  Future<({MatrixLiveKitKeyProvider keyProvider, String? token})>
+  _prepareE2EECredentials() async {
+    final env = ref.read(environmentProvider);
+    final tokenServerUrl = env.livekitTokenServerUrl;
+
+    if (tokenServerUrl != null) {
+      final tokenService = LiveKitTokenService(serverUrl: tokenServerUrl);
+      final tokenResponse = await tokenService.fetchToken(
+        roomId: roomId,
+        participantId: contactId,
+      );
+      final keyProvider = await MatrixLiveKitKeyProvider.fromKey(
+        e2eeKey: tokenResponse.e2eeKey,
+      );
+      return (keyProvider: keyProvider, token: tokenResponse.token);
+    }
+
+    final keyProvider = await MatrixLiveKitKeyProvider.create(
+      roomId: roomId,
+      apiSecret: env.livekitApiSecret,
+    );
+    return (keyProvider: keyProvider, token: null);
+  }
+
+  /// Connects to the LiveKit SFU with the given credentials.
+  Future<void> _connectToLiveKit({
+    String? displayName,
+    String? token,
+    required MatrixLiveKitKeyProvider keyProvider,
+  }) async {
+    await _livekitService.connect(
+      roomId: roomId,
+      participantId: contactId,
+      displayName: displayName,
+      token: token,
+      e2eeKeyProvider: keyProvider.liveKitKeyProvider,
+      onParticipantsChanged: () => state = state.copyWith(
+        participants: _livekitService.getParticipants(),
+      ),
+      onDisconnected: () {
+        if (state.status == VideoCallStatus.connected) {
+          state = const VideoCallScreenState();
+        }
+      },
+    );
+  }
+
+  /// Enables microphone and camera. Camera failures (e.g. on simulators)
+  /// are caught and logged rather than aborting the call.
+  Future<void> _enableLocalMedia() async {
+    await _livekitService.setMicrophoneEnabled(true);
+    var cameraEnabled = false;
+    try {
+      await _livekitService.setCameraEnabled(true);
+      cameraEnabled = true;
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Camera unavailable: $e',
+        name: _logKey,
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+
+    state = state.copyWith(
+      status: VideoCallStatus.connected,
+      participants: _livekitService.getParticipants(),
+      isMicEnabled: true,
+      isCameraEnabled: cameraEnabled,
+    );
+  }
+
+  /// Extracts the localpart from a Matrix userId (`@alice:server` → `alice`).
+  /// Returns `null` for invalid input.
+  String? _extractLocalpart(String? userId) {
+    if (userId == null || !userId.startsWith('@')) return null;
+    final body = userId.substring(1);
+    final colon = body.indexOf(':');
+    if (colon > 0) return body.substring(0, colon);
+    return null;
+  }
+
   void _onMatrixRTCEvent(matrix.MatrixRTCCallEvent event) {
     _logger.info('MatrixRTC event: $event', name: _logKey);
 
@@ -169,13 +264,38 @@ class VideoCallScreenController extends _$VideoCallScreenController {
     ref.read(participantEventLoadingController.notifier).start(() async {
       switch (event) {
         case matrix.ParticipantsJoinEvent(:final participants):
-          final names = participants.map((p) => p.userId).join(', ');
+          final others = _filterLocalParticipants(participants);
+          if (others.isEmpty) return;
+          final names = _resolveParticipantNames(others);
           state = state.copyWith(matrixEventMessage: '$names joined');
         case matrix.ParticipantsLeftEvent(:final participants):
-          final names = participants.map((p) => p.userId).join(', ');
+          final others = _filterLocalParticipants(participants);
+          if (others.isEmpty) return;
+          final names = _resolveParticipantNames(others);
           state = state.copyWith(matrixEventMessage: '$names left');
       }
     });
+  }
+
+  /// Removes the local participant from `participants` so we never show
+  /// "you joined/left" notifications.
+  List<matrix.CallParticipant> _filterLocalParticipants(
+    List<matrix.CallParticipant> participants,
+  ) {
+    final localId = _localMatrixUserId;
+    if (localId == null) return participants;
+    return participants.where((p) => p.userId != localId).toList();
+  }
+
+  /// Returns a human-readable name for `participants` by looking up
+  /// their Matrix localpart (md5 of DID) in the Group member names map.
+  String _resolveParticipantNames(List<matrix.CallParticipant> participants) {
+    return participants
+        .map((p) {
+          final localpart = _extractLocalpart(p.userId) ?? p.userId;
+          return state.memberNames[localpart] ?? localpart;
+        })
+        .join(', ');
   }
 
   Future<void> _cleanup() async {
