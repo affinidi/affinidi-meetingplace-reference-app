@@ -83,6 +83,7 @@ class _PlainTextChatItem extends ConsumerWidget {
                 final attachment = attachments[index];
                 return _AttachmentWidget(
                   contactId: _contactId,
+                  messageId: chatItem.messageId,
                   attachment: attachment,
                   isFromMe: chatItem.isFromMe,
                   chatItemColor: _chatItemColor,
@@ -136,21 +137,40 @@ class _TextMessage extends StatelessWidget {
 class _AttachmentWidget extends HookConsumerWidget {
   _AttachmentWidget({
     required String contactId,
+    required String messageId,
     required chat.Attachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
-  }) : _attachment = attachment,
+  }) : _contactId = contactId,
+       _attachment = attachment,
+       _messageId = messageId,
        _isFromMe = isFromMe,
        _chatItemColor = chatItemColor,
        super(key: ValueKey('chat_attachment_${attachment.id!}'));
 
+  final String _contactId;
   final chat.Attachment _attachment;
+  final String _messageId;
   final bool _isFromMe;
   final Color _chatItemColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final plugins = ref.read(availableAttachmentPluginsProvider);
+    final provider = chatScreenControllerProvider(_contactId);
+    final controller = ref.read(provider.notifier);
+
+    Future<void> onDownloadAttachment(chat.Attachment attachment) async {
+      final attachmentId = attachment.id;
+      if (attachmentId == null) {
+        throw StateError('Attachment id is missing.');
+      }
+
+      await controller.downloadAttachment(
+        messageId: _messageId,
+        attachmentId: attachmentId,
+      );
+    }
 
     for (final plugin in plugins) {
       if (plugin.supportsFormat(_attachment)) {
@@ -158,6 +178,7 @@ class _AttachmentWidget extends HookConsumerWidget {
           attachment: _attachment,
           isFromMe: _isFromMe,
           chatItemColor: _chatItemColor,
+          onDownloadAttachment: onDownloadAttachment,
         );
       }
     }

@@ -978,6 +978,21 @@ class ChatScreenController extends _$ChatScreenController
     _sendChatActivityTimedAction?.cancel();
   }
 
+  Future<void> downloadAttachment({
+    required String messageId,
+    required String attachmentId,
+  }) async {
+    final chatSdk = _chatSDK;
+    if (chatSdk == null) {
+      throw StateError('Chat SDK is not initialized.');
+    }
+
+    await chatSdk.downloadAttachment(
+      messageId: messageId,
+      attachmentId: attachmentId,
+    );
+  }
+
   Future<void> onVoiceMessageRecorded({
     required XFile file,
     required Duration duration,

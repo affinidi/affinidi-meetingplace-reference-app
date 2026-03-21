@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -9,6 +7,7 @@ import '../../../presentation/painting/cached_base64_image.dart';
 import '../../../presentation/screens/media/image_view_screen/image_view_screen.dart';
 import '../../../presentation/screens/media/media_screen/media_screen.dart';
 import '../../extensions/build_context_extensions.dart';
+import '../downloadable_image_attachment_card.dart';
 import 'camera_image_attachment.dart';
 
 /// A plugin for handling camera-based attachments.
@@ -80,9 +79,11 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
     required Attachment attachment,
     required bool isFromMe,
     Color? chatItemColor,
+    Future<void> Function(Attachment attachment)? onDownloadAttachment,
   }) => _CameraAttachmentWidget(
     attachment: attachment,
     cacheManager: _cacheManager,
+    onDownloadAttachment: onDownloadAttachment,
   );
 
   /// Renders multiple camera attachments in a scrollable list.
@@ -94,9 +95,11 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
     required List<Attachment> attachments,
     required bool isFromMe,
     Color? chatItemColor,
+    Future<void> Function(Attachment attachment)? onDownloadAttachment,
   }) => _ListCameraAttachmentsWidget(
     attachments: attachments,
     cacheManager: _cacheManager,
+    onDownloadAttachment: onDownloadAttachment,
   );
 
   /// Returns `true` if the attachment format matches this plugin.
@@ -123,11 +126,14 @@ class _ListCameraAttachmentsWidget extends StatelessWidget {
   const _ListCameraAttachmentsWidget({
     required List<Attachment> attachments,
     required BaseCacheManager cacheManager,
+    Future<void> Function(Attachment attachment)? onDownloadAttachment,
   }) : _attachments = attachments,
-       _cacheManager = cacheManager;
+       _cacheManager = cacheManager,
+       _onDownloadAttachment = onDownloadAttachment;
 
   final List<Attachment> _attachments;
   final BaseCacheManager _cacheManager;
+  final Future<void> Function(Attachment attachment)? _onDownloadAttachment;
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -138,6 +144,7 @@ class _ListCameraAttachmentsWidget extends StatelessWidget {
         return _CameraAttachmentWidget(
           attachment: _attachments[index],
           cacheManager: _cacheManager,
+          onDownloadAttachment: _onDownloadAttachment,
         );
       },
     );
@@ -155,46 +162,21 @@ class _CameraAttachmentWidget extends StatelessWidget {
   _CameraAttachmentWidget({
     required Attachment attachment,
     required BaseCacheManager cacheManager,
+    Future<void> Function(Attachment attachment)? onDownloadAttachment,
   }) : _attachment = attachment,
-       _cacheManager = cacheManager;
+       _cacheManager = cacheManager,
+       _onDownloadAttachment = onDownloadAttachment;
 
   final Attachment _attachment;
   final BaseCacheManager _cacheManager;
+  final Future<void> Function(Attachment attachment)? _onDownloadAttachment;
 
   @override
   Widget build(BuildContext context) {
-    final imageDataBase64 = _attachment.data?.base64;
-
-    if (imageDataBase64 == null) return const SizedBox.shrink();
-
-    return SizedBox(
-      height: 200,
-      width: 200,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context, rootNavigator: true).push<ImageViewScreen>(
-            MaterialPageRoute(
-              builder: (context) =>
-                  ImageViewScreen(imageBytes: base64.decode(imageDataBase64)),
-            ),
-          );
-        },
-        child: Card(
-          color: const Color.fromARGB(0, 10, 10, 10),
-          clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          elevation: 5,
-          child: Image(
-            fit: BoxFit.cover,
-            image: CachedBase64Image(
-              imageDataBase64,
-              cacheManager: _cacheManager,
-            ),
-          ),
-        ),
-      ),
+    return DownloadableImageAttachmentCard(
+      attachment: _attachment,
+      cacheManager: _cacheManager,
+      onDownloadAttachment: _onDownloadAttachment,
     );
   }
 }
