@@ -205,7 +205,10 @@ class _ParticipantTile extends StatelessWidget {
         child: Stack(
           children: [
             if (videoTrack != null)
-              VideoTrackRenderer(videoTrack.track! as VideoTrack)
+              VideoTrackRenderer(
+                videoTrack.track! as VideoTrack,
+                fit: VideoViewFit.cover,
+              )
             else
               const Center(
                 child: Icon(Icons.person, color: Colors.white54, size: 48),
