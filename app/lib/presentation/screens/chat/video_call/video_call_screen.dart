@@ -587,23 +587,52 @@ class _FocusedLayout extends ConsumerWidget {
               alignment: Alignment.topLeft,
               child: Padding(
                 padding: const EdgeInsets.only(top: 12, left: 12),
-                child: GestureDetector(
-                  onTap: () {
-                    showControls.value = true;
-                    focusedIndex.value = null;
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.black54,
-                      borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        showControls.value = true;
+                        focusedIndex.value = null;
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.grid_view_rounded,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.grid_view_rounded,
-                      color: Colors.white,
-                      size: 22,
+                    const SizedBox(width: 10),
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          controller.displayNameFor(
+                            participants[fi],
+                            youLabel,
+                          ),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -653,12 +682,23 @@ class _FocusedTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ParticipantTile(
-      participant: participants[focusedIndex],
-      displayName: controller.displayNameFor(
-        participants[focusedIndex],
-        youLabel,
-      ),
+    final participant = participants[focusedIndex];
+    final videoTrack = participant.videoTrackPublications
+        .where(
+          (TrackPublication<Track> pub) => pub.track != null && !pub.muted,
+        )
+        .firstOrNull;
+
+    return Container(
+      color: Colors.grey[900],
+      child: videoTrack != null
+          ? VideoTrackRenderer(
+              videoTrack.track! as VideoTrack,
+              fit: VideoViewFit.cover,
+            )
+          : const Center(
+              child: Icon(Icons.person, color: Colors.white54, size: 48),
+            ),
     );
   }
 }
