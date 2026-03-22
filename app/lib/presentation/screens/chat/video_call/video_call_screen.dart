@@ -440,7 +440,7 @@ class _MiniGridTileWrap extends StatelessWidget {
   }
 }
 
-class _GridLayout extends ConsumerWidget {
+class _GridLayout extends HookConsumerWidget {
   const _GridLayout({
     required this.roomId,
     required this.contactId,
@@ -463,6 +463,12 @@ class _GridLayout extends ConsumerWidget {
       videoCallScreenControllerProvider(roomId, contactId).notifier,
     );
     final youLabel = context.l10n.videoCallYou;
+    final lastScrollEnd = useRef(DateTime.fromMillisecondsSinceEpoch(0));
+
+    bool wasRecentlyScrolling() {
+      return DateTime.now().difference(lastScrollEnd.value).inMilliseconds <
+          100;
+    }
 
     return SafeArea(
       child: Stack(
@@ -472,6 +478,7 @@ class _GridLayout extends ConsumerWidget {
               if (notification is ScrollStartNotification) {
                 showControls.value = false;
               } else if (notification is ScrollEndNotification) {
+                lastScrollEnd.value = DateTime.now();
                 showControls.value = true;
               }
               return false;
@@ -492,7 +499,9 @@ class _GridLayout extends ConsumerWidget {
               itemBuilder: (_, i) {
                 final participant = participants[i];
                 return GestureDetector(
-                  onTap: () => focusedIndex.value = i,
+                  onTap: () {
+                    if (!wasRecentlyScrolling()) focusedIndex.value = i;
+                  },
                   child: _ParticipantTile(
                     participant: participant,
                     displayName: controller.displayNameFor(
