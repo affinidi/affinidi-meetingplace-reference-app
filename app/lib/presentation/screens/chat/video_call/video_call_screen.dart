@@ -247,6 +247,7 @@ class _DraggableMiniGrid extends HookWidget {
     return Align(
       alignment: alignment.value,
       child: GestureDetector(
+        onPanStart: isExpanded ? null : (_) => snapController.stop(),
         onPanUpdate: isExpanded
             ? null
             : (details) {
@@ -269,8 +270,8 @@ class _DraggableMiniGrid extends HookWidget {
                     SpringSimulation(
                       const SpringDescription(
                         mass: 1,
-                        stiffness: 300,
-                        damping: 22,
+                        stiffness: 150,
+                        damping: 18,
                       ),
                       0,
                       1,
