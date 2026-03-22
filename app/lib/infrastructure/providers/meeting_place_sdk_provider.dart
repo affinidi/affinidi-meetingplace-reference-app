@@ -11,11 +11,11 @@ import 'package:ssi/ssi.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
 import '../secure_storage/secure_storage.dart';
-import '../services/matrix/flutter_matrix_rtc_delegate.dart';
 import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
 import 'group_repository_provider.dart';
+import 'matrix_rtc_delegate_provider.dart';
 
 /// A provider that initializes and supplies the [MeetingPlaceCoreSDK]
 /// instance.
@@ -75,7 +75,8 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
 
     // Initialize MatrixRTC VoIP layer with a Flutter WebRTC delegate.
     // Must happen after SDK creation and before any group call is started.
-    sdk.initializeMatrixRTC(FlutterMatrixRTCDelegate());
+    // The SDK creates the VoIP instance lazily, bound to the active client.
+    sdk.initializeMatrixRTC(ref.read(matrixRtcDelegateProvider));
 
     logger.info('Completed initializing MeetingPlace SDK', name: logKey);
 

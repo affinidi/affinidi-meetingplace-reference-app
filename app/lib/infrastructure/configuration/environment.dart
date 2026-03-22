@@ -126,6 +126,14 @@ class Environment {
       const String.fromEnvironment('LIVEKIT_API_KEY', defaultValue: '');
   String get livekitApiSecret =>
       const String.fromEnvironment('LIVEKIT_API_SECRET', defaultValue: '');
+
+  String? get livekitTokenServerUrl {
+    const value = String.fromEnvironment(
+      'LIVEKIT_TOKEN_SERVER_URL',
+      defaultValue: '',
+    );
+    return value.isEmpty ? null : value;
+  }
 }
 
 Provider<Environment> environmentProvider = Provider<Environment>((ref) {

@@ -49,6 +49,9 @@ class FakeEnvironment implements Environment {
   int get numberOfTapsToUnlockDebug => 7;
 
   @override
+  String? get livekitTokenServerUrl => null;
+
+  @override
   bool get isDatabaseLoggingEnabled => false;
 
   @override

@@ -7,7 +7,7 @@ part of 'video_call_screen_controller.dart';
 // **************************************************************************
 
 String _$videoCallScreenControllerHash() =>
-    r'6893771547d8aaa1b7baa70e8c769bdf24316876';
+    r'e1894a6b6aa23fa522aa07c4c54c79a37d05eb16';
 
 /// Copied from Dart SDK
 class _SystemHash {

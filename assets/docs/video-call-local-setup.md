@@ -83,6 +83,94 @@ sequenceDiagram
 
 ---
 
+## Encryption layers
+
+There are **two independent encryption layers** in this feature. It is easy to confuse them because they both involve "E2EE", but they protect different things.
+
+| Layer                    | Protects                        | Protocol                              | Where             |
+| ------------------------ | ------------------------------- | ------------------------------------- | ----------------- |
+| **Matrix Megolm**        | Text messages and Matrix events | Megolm (AES-256-GCM)                  | Synapse ↔ App     |
+| **LiveKit FrameCryptor** | Audio / video media frames      | AES-GCM via WebRTC Insertable Streams | LiveKit SFU ↔ App |
+
+The LiveKit SFU is **blind to media content** — it forwards encrypted RTP frames it cannot read. Synapse never sees media at all.
+
+### Without encryption (baseline)
+
+```mermaid
+sequenceDiagram
+    participant Alice as Alice's App
+    participant SFU as LiveKit SFU
+    participant Bob as Bob's App
+
+    Alice->>SFU: publish audio/video frames (CLEARTEXT)
+    SFU-->>Bob: forward same frames (CLEARTEXT)
+    note over SFU: SFU can read all media
+```
+
+### With encryption
+
+Encrypting media frames prevents the LiveKit SFU and any network intermediary from reading audio or video content.
+
+Both deployment modes use **shared-key** encryption — every participant in the same room uses the same symmetric key. The difference is where the key comes from, selected at build time via the `LIVEKIT_TOKEN_SERVER_URL` environment variable:
+
+- **Without token server** — the app derives the key locally from `HMAC-SHA256(apiSecret, roomId)`. Active when `LIVEKIT_TOKEN_SERVER_URL` is not set. Suitable for local development only.
+- **With token server** — the server derives & issues the key alongside the LiveKit JWT. Active when `LIVEKIT_TOKEN_SERVER_URL` is set. The API secret never leaves the server. Recommended for any non-local deployment.
+
+> **Note:** Per-participant key distribution via Olm-encrypted Matrix to-device messages is supported by the Matrix SDK (`LiveKitBackend`) and wired in via `MatrixLiveKitKeyProvider`, but is **not currently enabled**. The delegate's `keyProvider` is intentionally left `null`, so the SDK's per-participant key exchange is silently disabled. All encryption uses the shared-key `FrameCryptor`.
+
+#### 1. Without token server — in-app key derivation
+
+All participants independently derive the same key from
+`HMAC-SHA256(apiSecret, roomId)` — no key is transmitted.
+
+```mermaid
+sequenceDiagram
+    participant Alice as Alice's App<br/>(key = HMAC(secret, roomId))
+    participant SFU as LiveKit SFU<br/>(no key)
+    participant Bob as Bob's App<br/>(key = HMAC(secret, roomId))
+
+    note over Alice: FrameCryptor encrypts<br/>each audio/video frame<br/>with AES-GCM
+    Alice->>SFU: publish encrypted frames 🔒
+    note over SFU: forwards bytes blindly<br/>cannot decrypt
+    SFU-->>Bob: forward encrypted frames 🔒
+    note over Bob: FrameCryptor decrypts<br/>using same derived key
+```
+
+Key derivation (same result on every device, zero network exchange):
+
+```
+key = HMAC-SHA256(LIVEKIT_API_SECRET, roomId)   →   64-char hex (32 bytes)
+```
+
+> **Limitation:** `LIVEKIT_API_SECRET` is in the app binary. The key can be extracted from a reverse-engineered binary. Use the token server mode for any non-local deployment.
+
+#### 2. With token server — server-issued shared key
+
+The token server issues both the LiveKit JWT **and** the shared `e2eeKey`. The API secret stays server-side. All participants still share the same symmetric key — only the derivation happens on the server instead of in-app.
+
+```mermaid
+sequenceDiagram
+    participant Alice as Alice's App
+    participant TS as Token Server
+    participant SFU as LiveKit SFU<br/>(no key)
+    participant Bob as Bob's App
+
+    Alice->>TS: POST /token (roomId, participantId)
+    TS-->>Alice: { token: JWT, e2eeKey: "abc…" }
+    Bob->>TS: POST /token (roomId, participantId)
+    TS-->>Bob: { token: JWT, e2eeKey: "abc…" }
+    note over TS: Same e2eeKey for same room.<br/>API secret never sent to clients.
+
+    note over Alice: FrameCryptor encrypts with e2eeKey
+    Alice->>SFU: encrypted frames 🔒
+    SFU-->>Bob: forward 🔒
+    note over Bob: FrameCryptor decrypts with same e2eeKey
+```
+
+Implemented via `MatrixLiveKitKeyProvider.fromKey(e2eeKey:)` using `BaseKeyProvider.create(sharedKey: true)`.
+
+---
+
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) — to run Synapse and LiveKit
