@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:livekit_client/livekit_client.dart';
 import 'package:matrix/matrix.dart' as matrix;
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -244,6 +245,29 @@ class VideoCallScreenController extends _$VideoCallScreenController {
       isMicEnabled: true,
       isCameraEnabled: cameraEnabled,
     );
+  }
+
+  /// Returns a display name for a participant. Local participant returns
+  /// [youLabel], remote participants use their broadcast name, memberNames
+  /// map, or identity localpart as fallback.
+  String displayNameFor(Participant participant, String youLabel) {
+    if (participant is LocalParticipant) return youLabel;
+    final broadcastName = participant.name;
+    if (broadcastName.isNotEmpty && broadcastName != participant.identity) {
+      return broadcastName;
+    }
+    final localpart = _parseIdentityLocalpart(participant.identity);
+    return state.memberNames[localpart] ?? localpart;
+  }
+
+  /// Extracts the localpart from a participant identity string.
+  /// Handles both `@alice:server` and `alice:server` formats.
+  String _parseIdentityLocalpart(String identity) {
+    var body = identity;
+    if (body.startsWith('@')) body = body.substring(1);
+    final colon = body.indexOf(':');
+    if (colon > 0) return body.substring(0, colon);
+    return identity;
   }
 
   /// Extracts the localpart from a Matrix userId (`@alice:server` → `alice`).

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:livekit_client/livekit_client.dart';
@@ -48,14 +50,13 @@ class VideoCallScreen extends ConsumerWidget {
           Expanded(
             child: _ParticipantGrid(roomId: roomId, contactId: contactId),
           ),
-          _CallControls(roomId: roomId, contactId: contactId),
         ],
       ),
     );
   }
 }
 
-class _ParticipantGrid extends ConsumerWidget {
+class _ParticipantGrid extends HookConsumerWidget {
   const _ParticipantGrid({required this.roomId, required this.contactId});
 
   final String roomId;
@@ -125,58 +126,542 @@ class _ParticipantGrid extends ConsumerWidget {
       );
     }
 
-    final memberNames = ref.watch(
-      videoCallScreenControllerProvider(
-        roomId,
-        contactId,
-      ).select((s) => s.memberNames),
-    );
+    final totalCount = participants.length;
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-      ),
-      itemCount: participants.length,
-      itemBuilder: (_, i) {
-        final participant = participants[i];
-        final String displayName;
-        if (participant is LocalParticipant) {
-          displayName = context.l10n.videoCallYou;
-        } else {
-          // participant.name is the Group member firstName broadcast via
-          // the LiveKit JWT `name` claim by the remote device.
-          final broadcastName = participant.name;
-          if (broadcastName.isNotEmpty &&
-              broadcastName != participant.identity) {
-            displayName = broadcastName;
-          } else {
-            // Fallback: look up from the memberNames map keyed by
-            // md5(DID). Extract the Matrix localpart from the identity if
-            // it looks like a Matrix user ID, otherwise try the raw value.
-            final localpart = _parseIdentity(participant.identity);
-            displayName = memberNames[localpart] ?? localpart;
-          }
-        }
-        return _ParticipantTile(
-          participant: participant,
-          displayName: displayName,
-        );
-      },
+    final showControls = useState(true);
+    final focusedIndex = useState<int?>(null);
+
+    if (focusedIndex.value != null && focusedIndex.value! >= totalCount) {
+      focusedIndex.value = null;
+    }
+
+    if (focusedIndex.value == null) {
+      return _GridLayout(
+        roomId: roomId,
+        contactId: contactId,
+        participants: participants,
+        totalCount: totalCount,
+        showControls: showControls,
+        focusedIndex: focusedIndex,
+      );
+    }
+
+    return _FocusedLayout(
+      roomId: roomId,
+      contactId: contactId,
+      participants: participants,
+      totalCount: totalCount,
+      showControls: showControls,
+      focusedIndex: focusedIndex,
     );
   }
+}
 
-  /// Extracts the Matrix localpart from a LiveKit identity string.
-  /// `@alice:server.com:DEVICEID` → `alice`
-  String _parseIdentity(String identity) {
-    if (identity.startsWith('@')) {
-      final body = identity.substring(1);
-      final colon = body.indexOf(':');
-      if (colon > 0) return body.substring(0, colon);
+class _DraggableMiniGrid extends HookWidget {
+  const _DraggableMiniGrid({
+    required this.participants,
+    required this.displayNames,
+    required this.onTapParticipant,
+  });
+
+  final List<Participant?> participants;
+  final List<String> displayNames;
+  final void Function(int index) onTapParticipant;
+
+  static const double _tileSize = 64;
+  static const double _spacing = 4;
+  static const int _maxColumns = 2;
+  static const int _maxCollapsed = 4;
+
+  @override
+  Widget build(BuildContext context) {
+    final alignment = useState(const Alignment(1.0, -1.0));
+    final expanded = useState(false);
+
+    final hasOverflow = participants.length > _maxCollapsed;
+    final isExpanded = expanded.value && hasOverflow;
+    final visibleCount = isExpanded
+        ? participants.length
+        : participants.length.clamp(0, _maxCollapsed);
+    final overflow = participants.length - _maxCollapsed;
+
+    final columns = visibleCount == 1 ? 1 : _maxColumns;
+    final collapsedRows = (visibleCount / columns).ceil();
+    final width = columns * _tileSize + (columns - 1) * _spacing + 8;
+
+    const barHeight = 28.0;
+
+    // In expanded mode, cap height at 60% of screen.
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final maxExpandedHeight = screenHeight * 0.6;
+    final naturalTileHeight =
+        collapsedRows * _tileSize + (collapsedRows - 1) * _spacing + 8;
+    final totalNatural = naturalTileHeight + (hasOverflow ? barHeight : 0);
+    final height = isExpanded
+        ? totalNatural.clamp(0.0, maxExpandedHeight)
+        : naturalTileHeight + (hasOverflow ? barHeight : 0);
+    final tileAreaHeight = height - (hasOverflow ? barHeight : 0);
+    final needsScroll = isExpanded && naturalTileHeight > tileAreaHeight;
+
+    final snapController = useAnimationController();
+
+    // Capture the alignment at pan-end for the spring interpolation.
+    final startX = useRef(0.0);
+    final targetX = useRef(1.0);
+
+    useEffect(() {
+      void listener() {
+        final t = snapController.value;
+        alignment.value = Alignment(
+          startX.value + (targetX.value - startX.value) * t,
+          alignment.value.y,
+        );
+      }
+
+      snapController.addListener(listener);
+      return () => snapController.removeListener(listener);
+    }, [snapController]);
+
+    return Align(
+      alignment: alignment.value,
+      child: GestureDetector(
+        onPanUpdate: isExpanded
+            ? null
+            : (details) {
+                final size = MediaQuery.sizeOf(context);
+                final dx = details.delta.dx / (size.width / 4);
+                final dy = details.delta.dy / (size.height / 4);
+                alignment.value = Alignment(
+                  (alignment.value.x + dx).clamp(-1.0, 1.0),
+                  (alignment.value.y + dy).clamp(-1.0, 1.0),
+                );
+              },
+        onPanEnd: isExpanded
+            ? null
+            : (_) {
+                startX.value = alignment.value.x;
+                targetX.value = alignment.value.x >= 0 ? 1.0 : -1.0;
+                snapController
+                  ..reset()
+                  ..animateWith(
+                    SpringSimulation(
+                      const SpringDescription(
+                        mass: 1,
+                        stiffness: 300,
+                        damping: 22,
+                      ),
+                      0,
+                      1,
+                      0,
+                    ),
+                  );
+              },
+        onTapUp: isExpanded
+            ? null
+            : (details) {
+                final x = details.localPosition.dx - 4;
+                final y = details.localPosition.dy - 4;
+                final col = (x / (_tileSize + _spacing)).floor();
+                final row = (y / (_tileSize + _spacing)).floor();
+                final index = row * columns + col;
+                if (index >= 0 && index < visibleCount) {
+                  onTapParticipant(index);
+                }
+              },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          width: width,
+          height: height,
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.black87,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black54,
+                blurRadius: 8,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(4),
+          child: Column(
+            children: [
+              // Tile area.
+              Expanded(
+                child: !isExpanded
+                    ? _MiniGridTileWrap(
+                        count: visibleCount,
+                        isExpandedMode: false,
+                        participants: participants,
+                        displayNames: displayNames,
+                        onTapParticipant: onTapParticipant,
+                      )
+                    : needsScroll
+                    ? SingleChildScrollView(
+                        child: _MiniGridTileWrap(
+                          count: visibleCount,
+                          isExpandedMode: true,
+                          expandedNotifier: expanded,
+                          participants: participants,
+                          displayNames: displayNames,
+                          onTapParticipant: onTapParticipant,
+                        ),
+                      )
+                    : _MiniGridTileWrap(
+                        count: visibleCount,
+                        isExpandedMode: true,
+                        expandedNotifier: expanded,
+                        participants: participants,
+                        displayNames: displayNames,
+                        onTapParticipant: onTapParticipant,
+                      ),
+              ),
+
+              // Expand/collapse bar below the tiles.
+              if (hasOverflow)
+                GestureDetector(
+                  onTap: () => expanded.value = !expanded.value,
+                  child: Container(
+                    height: barHeight,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: Colors.black87,
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(8),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isExpanded
+                              ? Icons.keyboard_arrow_up
+                              : Icons.keyboard_arrow_down,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isExpanded
+                              ? context.l10n.videoCallShowLess
+                              : context.l10n.videoCallShowMore(overflow),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniGridTileWrap extends StatelessWidget {
+  const _MiniGridTileWrap({
+    required this.count,
+    required this.isExpandedMode,
+    required this.participants,
+    required this.displayNames,
+    required this.onTapParticipant,
+    this.expandedNotifier,
+  });
+
+  final int count;
+  final bool isExpandedMode;
+  final List<Participant?> participants;
+  final List<String> displayNames;
+  final void Function(int index) onTapParticipant;
+  final ValueNotifier<bool>? expandedNotifier;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: _DraggableMiniGrid._spacing,
+      runSpacing: _DraggableMiniGrid._spacing,
+      children: [
+        for (var i = 0; i < count; i++)
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: isExpandedMode
+                ? () {
+                    // Collapse and focus the tapped participant.
+                    expandedNotifier?.value = false;
+                    onTapParticipant(i);
+                  }
+                : null,
+            child: SizedBox(
+              width: _DraggableMiniGrid._tileSize,
+              height: _DraggableMiniGrid._tileSize,
+              child: IgnorePointer(
+                child: participants[i] != null
+                    ? _ParticipantTile(
+                        participant: participants[i]!,
+                        displayName: displayNames[i],
+                        borderRadius: 8,
+                      )
+                    : const SizedBox.shrink(),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _GridLayout extends ConsumerWidget {
+  const _GridLayout({
+    required this.roomId,
+    required this.contactId,
+    required this.participants,
+    required this.totalCount,
+    required this.showControls,
+    required this.focusedIndex,
+  });
+
+  final String roomId;
+  final String contactId;
+  final List<Participant> participants;
+  final int totalCount;
+  final ValueNotifier<bool> showControls;
+  final ValueNotifier<int?> focusedIndex;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(
+      videoCallScreenControllerProvider(roomId, contactId).notifier,
+    );
+    final youLabel = context.l10n.videoCallYou;
+
+    return SafeArea(
+      child: Stack(
+        children: [
+          NotificationListener<ScrollNotification>(
+            onNotification: (notification) {
+              if (notification is ScrollStartNotification) {
+                showControls.value = false;
+              } else if (notification is ScrollEndNotification) {
+                showControls.value = true;
+              }
+              return false;
+            },
+            child: GridView.builder(
+              padding: const EdgeInsets.only(
+                left: 8,
+                right: 8,
+                top: 8,
+                bottom: 80,
+              ),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+              ),
+              itemCount: totalCount,
+              itemBuilder: (_, i) {
+                final participant = participants[i];
+                return GestureDetector(
+                  onTap: () => focusedIndex.value = i,
+                  child: _ParticipantTile(
+                    participant: participant,
+                    displayName: controller.displayNameFor(
+                      participant,
+                      youLabel,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          _AnimatedControlsOverlay(
+            visible: showControls.value,
+            duration: const Duration(milliseconds: 100),
+            roomId: roomId,
+            contactId: contactId,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FocusedLayout extends ConsumerWidget {
+  const _FocusedLayout({
+    required this.roomId,
+    required this.contactId,
+    required this.participants,
+    required this.totalCount,
+    required this.showControls,
+    required this.focusedIndex,
+  });
+
+  final String roomId;
+  final String contactId;
+  final List<Participant> participants;
+  final int totalCount;
+  final ValueNotifier<bool> showControls;
+  final ValueNotifier<int?> focusedIndex;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(
+      videoCallScreenControllerProvider(roomId, contactId).notifier,
+    );
+    final youLabel = context.l10n.videoCallYou;
+
+    final fi = focusedIndex.value!;
+    final others = <int>[];
+    for (var i = 0; i < totalCount; i++) {
+      if (i != fi) others.add(i);
     }
-    return identity;
+
+    final otherDisplayNames = <String>[];
+    final otherParticipants = <Participant?>[];
+    for (final idx in others) {
+      otherParticipants.add(participants[idx]);
+      otherDisplayNames.add(
+        controller.displayNameFor(participants[idx], youLabel),
+      );
+    }
+
+    return SafeArea(
+      child: Stack(
+        children: [
+          // Full-screen focused participant.
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () => showControls.value = !showControls.value,
+              child: _FocusedTile(
+                focusedIndex: fi,
+                participants: participants,
+                controller: controller,
+                youLabel: youLabel,
+              ),
+            ),
+          ),
+
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 150),
+            opacity: showControls.value ? 1.0 : 0.0,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12, left: 12),
+                child: GestureDetector(
+                  onTap: () {
+                    showControls.value = true;
+                    focusedIndex.value = null;
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.grid_view_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          if (others.isNotEmpty)
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 150),
+              opacity: showControls.value ? 1.0 : 0.0,
+              child: IgnorePointer(
+                ignoring: !showControls.value,
+                child: _DraggableMiniGrid(
+                  participants: otherParticipants,
+                  displayNames: otherDisplayNames,
+                  onTapParticipant: (tappedIdx) {
+                    focusedIndex.value = others[tappedIdx];
+                  },
+                ),
+              ),
+            ),
+
+          _AnimatedControlsOverlay(
+            visible: showControls.value,
+            duration: const Duration(milliseconds: 150),
+            roomId: roomId,
+            contactId: contactId,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The full-screen tile for the focused participant.
+class _FocusedTile extends StatelessWidget {
+  const _FocusedTile({
+    required this.focusedIndex,
+    required this.participants,
+    required this.controller,
+    required this.youLabel,
+  });
+
+  final int focusedIndex;
+  final List<Participant> participants;
+  final VideoCallScreenController controller;
+  final String youLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ParticipantTile(
+      participant: participants[focusedIndex],
+      displayName: controller.displayNameFor(
+        participants[focusedIndex],
+        youLabel,
+      ),
+    );
+  }
+}
+
+/// Animated slide + fade overlay for call controls.
+class _AnimatedControlsOverlay extends StatelessWidget {
+  const _AnimatedControlsOverlay({
+    required this.visible,
+    required this.duration,
+    required this.roomId,
+    required this.contactId,
+  });
+
+  final bool visible;
+  final Duration duration;
+  final String roomId;
+  final String contactId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: AnimatedSlide(
+        duration: duration,
+        offset: visible ? Offset.zero : const Offset(0, 1),
+        child: AnimatedOpacity(
+          duration: duration,
+          opacity: visible ? 1.0 : 0.0,
+          child: _CallControls(roomId: roomId, contactId: contactId),
+        ),
+      ),
+    );
   }
 }
 
@@ -184,10 +669,12 @@ class _ParticipantTile extends StatelessWidget {
   const _ParticipantTile({
     required this.participant,
     required this.displayName,
+    this.borderRadius = 12,
   });
 
   final Participant participant;
   final String displayName;
+  final double borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -198,16 +685,18 @@ class _ParticipantTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(borderRadius),
         child: Stack(
           children: [
             if (videoTrack != null)
-              VideoTrackRenderer(
-                videoTrack.track! as VideoTrack,
-                fit: VideoViewFit.cover,
+              Positioned.fill(
+                child: VideoTrackRenderer(
+                  videoTrack.track! as VideoTrack,
+                  fit: VideoViewFit.cover,
+                ),
               )
             else
               const Center(
@@ -260,7 +749,13 @@ class _CallControls extends ConsumerWidget {
     return SafeArea(
       top: false,
       child: Container(
-        color: Colors.black,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [Colors.black87, Colors.transparent],
+          ),
+        ),
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

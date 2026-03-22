@@ -1544,4 +1544,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get videoCallYou => 'You';
+
+  @override
+  String get videoCallShowLess => 'Show less';
+
+  @override
+  String videoCallShowMore(int count) {
+    return '+$count more';
+  }
 }

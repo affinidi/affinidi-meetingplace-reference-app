@@ -1477,5 +1477,19 @@
 	"@videoCallYou": {
 		"type": "text",
 		"description": "Label shown on the local participant's video tile"
+	},
+	"videoCallShowLess": "Show less",
+	"@videoCallShowLess": {
+		"type": "text",
+		"description": "Label on the mini grid collapse bar"
+	},
+	"videoCallShowMore": "+{count} more",
+	"@videoCallShowMore": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
 	}
 }

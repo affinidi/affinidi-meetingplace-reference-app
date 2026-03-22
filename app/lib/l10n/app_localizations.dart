@@ -2253,6 +2253,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You'**
   String get videoCallYou;
+
+  /// Label on the mini grid collapse bar
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get videoCallShowLess;
+
+  /// No description provided for @videoCallShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String videoCallShowMore(int count);
 }
 
 class _AppLocalizationsDelegate
