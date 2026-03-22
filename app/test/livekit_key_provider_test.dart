@@ -34,33 +34,27 @@ void main() {
       expect(fake.setRawKeyCalls, isEmpty);
     });
 
-    test(
-      'onRatchetKey delegates to ratchetSharedKey',
-      () async {
-        final result = await keyProvider.onRatchetKey(
-          participant('@bob:localhost', 'DEVABC'),
-          1,
-        );
+    test('onRatchetKey delegates to ratchetSharedKey', () async {
+      final result = await keyProvider.onRatchetKey(
+        participant('@bob:localhost', 'DEVABC'),
+        1,
+      );
 
-        expect(fake.ratchetSharedKeyCalls, hasLength(1));
-        expect(fake.ratchetSharedKeyCalls.first.keyIndex, 1);
-        expect(result, FakeKeyProvider.stubKey);
-      },
-    );
+      expect(fake.ratchetSharedKeyCalls, hasLength(1));
+      expect(fake.ratchetSharedKeyCalls.first.keyIndex, 1);
+      expect(result, FakeKeyProvider.stubKey);
+    });
 
-    test(
-      'onExportKey delegates to exportSharedKey',
-      () async {
-        final result = await keyProvider.onExportKey(
-          participant('@charlie:localhost', 'DEVQRS'),
-          0,
-        );
+    test('onExportKey delegates to exportSharedKey', () async {
+      final result = await keyProvider.onExportKey(
+        participant('@charlie:localhost', 'DEVQRS'),
+        0,
+      );
 
-        expect(fake.exportSharedKeyCalls, hasLength(1));
-        expect(fake.exportSharedKeyCalls.first.keyIndex, 0);
-        expect(result, FakeKeyProvider.stubKey);
-      },
-    );
+      expect(fake.exportSharedKeyCalls, hasLength(1));
+      expect(fake.exportSharedKeyCalls.first.keyIndex, 0);
+      expect(result, FakeKeyProvider.stubKey);
+    });
 
     test('deriveSharedKey produces deterministic 64-char hex', () {
       final key = MatrixLiveKitKeyProvider.deriveSharedKey(

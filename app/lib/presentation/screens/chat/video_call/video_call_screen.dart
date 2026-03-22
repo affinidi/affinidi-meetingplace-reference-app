@@ -652,10 +652,7 @@ class _FocusedLayout extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          controller.displayNameFor(
-                            participants[fi],
-                            youLabel,
-                          ),
+                          controller.displayNameFor(participants[fi], youLabel),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -717,9 +714,7 @@ class _FocusedTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final participant = participants[focusedIndex];
     final videoTrack = participant.videoTrackPublications
-        .where(
-          (TrackPublication<Track> pub) => pub.track != null && !pub.muted,
-        )
+        .where((TrackPublication<Track> pub) => pub.track != null && !pub.muted)
         .firstOrNull;
 
     return Container(

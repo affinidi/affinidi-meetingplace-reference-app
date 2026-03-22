@@ -54,11 +54,13 @@ class FakeKeyProvider implements KeyProvider {
     ratchetSharedKeyCalls.add((keyIndex: keyIndex ?? 0));
     return stubKey;
   }
+
   @override
   Future<Uint8List> exportSharedKey({int? keyIndex}) async {
     exportSharedKeyCalls.add((keyIndex: keyIndex ?? 0));
     return stubKey;
   }
+
   @override
   Future<void> setKey(
     String key, {
