@@ -226,6 +226,8 @@ class _DraggableMiniGrid extends HookWidget {
     final needsScroll = isExpanded && naturalTileHeight > tileAreaHeight;
 
     final snapController = useAnimationController();
+    final miniScrollController = useScrollController();
+    final miniPointerDownPixels = useRef(0.0);
 
     // Capture the alignment at pan-end for the spring interpolation.
     final startX = useRef(0.0);
@@ -322,14 +324,32 @@ class _DraggableMiniGrid extends HookWidget {
                         onTapParticipant: onTapParticipant,
                       )
                     : needsScroll
-                    ? SingleChildScrollView(
-                        child: _MiniGridTileWrap(
-                          count: visibleCount,
-                          isExpandedMode: true,
-                          expandedNotifier: expanded,
-                          participants: participants,
-                          displayNames: displayNames,
-                          onTapParticipant: onTapParticipant,
+                    ? Listener(
+                        onPointerDown: (_) {
+                          miniPointerDownPixels.value =
+                              miniScrollController.hasClients
+                                  ? miniScrollController.position.pixels
+                                  : 0.0;
+                        },
+                        child: SingleChildScrollView(
+                          controller: miniScrollController,
+                          child: _MiniGridTileWrap(
+                            count: visibleCount,
+                            isExpandedMode: true,
+                            expandedNotifier: expanded,
+                            participants: participants,
+                            displayNames: displayNames,
+                            onTapParticipant: (i) {
+                              if (miniScrollController.hasClients &&
+                                  (miniScrollController.position.pixels -
+                                              miniPointerDownPixels.value)
+                                          .abs() >
+                                      1.0) {
+                                return;
+                              }
+                              onTapParticipant(i);
+                            },
+                          ),
                         ),
                       )
                     : _MiniGridTileWrap(
@@ -464,54 +484,65 @@ class _GridLayout extends HookConsumerWidget {
       videoCallScreenControllerProvider(roomId, contactId).notifier,
     );
     final youLabel = context.l10n.videoCallYou;
-    final lastScrollEnd = useRef(DateTime.fromMillisecondsSinceEpoch(0));
+    final scrollController = useScrollController();
+    final pointerDownPixels = useRef(0.0);
 
-    bool wasRecentlyScrolling() {
-      return DateTime.now().difference(lastScrollEnd.value).inMilliseconds <
-          100;
+    bool scrolledSincePointerDown() {
+      if (!scrollController.hasClients) return false;
+      return (scrollController.position.pixels - pointerDownPixels.value).abs() >
+          1.0;
     }
 
     return SafeArea(
       child: Stack(
         children: [
-          NotificationListener<ScrollNotification>(
-            onNotification: (notification) {
-              if (notification is ScrollStartNotification) {
-                showControls.value = false;
-              } else if (notification is ScrollEndNotification) {
-                lastScrollEnd.value = DateTime.now();
-                showControls.value = true;
-              }
-              return false;
+          Listener(
+            onPointerDown: (_) {
+              pointerDownPixels.value = scrollController.hasClients
+                  ? scrollController.position.pixels
+                  : 0.0;
             },
-            child: GridView.builder(
-              padding: const EdgeInsets.only(
-                left: 8,
-                right: 8,
-                top: 8,
-                bottom: 80,
-              ),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-              ),
-              itemCount: totalCount,
-              itemBuilder: (_, i) {
-                final participant = participants[i];
-                return GestureDetector(
-                  onTap: () {
-                    if (!wasRecentlyScrolling()) focusedIndex.value = i;
-                  },
-                  child: _ParticipantTile(
-                    participant: participant,
-                    displayName: controller.displayNameFor(
-                      participant,
-                      youLabel,
-                    ),
-                  ),
-                );
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification is ScrollStartNotification) {
+                  showControls.value = false;
+                } else if (notification is ScrollEndNotification) {
+                  showControls.value = true;
+                }
+                return false;
               },
+              child: GridView.builder(
+                controller: scrollController,
+                padding: const EdgeInsets.only(
+                  left: 8,
+                  right: 8,
+                  top: 8,
+                  bottom: 80,
+                ),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                ),
+                itemCount: totalCount,
+                itemBuilder: (_, i) {
+                  final participant = participants[i];
+                  return GestureDetector(
+                    onTap: () {
+                      if (!scrolledSincePointerDown()) {
+                        focusedIndex.value = i;
+                      }
+                    },
+                    child: _ParticipantTile(
+                      participant: participant,
+                      displayName: controller.displayNameFor(
+                        participant,
+                        youLabel,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           _AnimatedControlsOverlay(
