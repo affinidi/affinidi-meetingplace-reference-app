@@ -15,7 +15,6 @@ import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../infrastructure/services/livekit_service/livekit_service.dart';
 import '../../../../infrastructure/services/livekit_service/livekit_token_service.dart';
 import '../../../../infrastructure/services/livekit_service/matrix_livekit_key_provider.dart';
-import '../../../widgets/async_loaders/async_loading_controller.dart';
 import 'video_call_screen_state.dart';
 
 part 'video_call_screen_controller.g.dart';
@@ -25,8 +24,6 @@ class VideoCallScreenController extends _$VideoCallScreenController {
   static const _logKey = 'VideoCallScreen';
 
   late final _logger = ref.read(appLoggerProvider);
-  late final participantEventLoadingController =
-      AsyncLoadingController.provider('participantEventLoadingController');
   late final _livekitService = LiveKitService(
     serverUrl: ref.read(environmentProvider).livekitUrl,
     apiKey: ref.read(environmentProvider).livekitApiKey,
@@ -285,20 +282,27 @@ class VideoCallScreenController extends _$VideoCallScreenController {
 
     if (event is! matrix.ParticipantsChangeEvent) return;
 
-    ref.read(participantEventLoadingController.notifier).start(() async {
-      switch (event) {
-        case matrix.ParticipantsJoinEvent(:final participants):
-          final others = _filterLocalParticipants(participants);
-          if (others.isEmpty) return;
-          final names = _resolveParticipantNames(others);
-          state = state.copyWith(matrixEventMessage: '$names joined');
-        case matrix.ParticipantsLeftEvent(:final participants):
-          final others = _filterLocalParticipants(participants);
-          if (others.isEmpty) return;
-          final names = _resolveParticipantNames(others);
-          state = state.copyWith(matrixEventMessage: '$names left');
-      }
-    });
+    final String names;
+    final ParticipantEventType eventType;
+    switch (event) {
+      case matrix.ParticipantsJoinEvent(:final participants):
+        final others = _filterLocalParticipants(participants);
+        if (others.isEmpty) return;
+        names = _resolveParticipantNames(others);
+        eventType = ParticipantEventType.joined;
+      case matrix.ParticipantsLeftEvent(:final participants):
+        final others = _filterLocalParticipants(participants);
+        if (others.isEmpty) return;
+        names = _resolveParticipantNames(others);
+        eventType = ParticipantEventType.left;
+    }
+
+    state = state.copyWith(
+      participantEvent: VideoCallParticipantEvent(
+        names: names,
+        type: eventType,
+      ),
+    );
   }
 
   /// Removes the local participant from `participants` so we never show

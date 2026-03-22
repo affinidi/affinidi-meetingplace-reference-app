@@ -6,11 +6,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:livekit_client/livekit_client.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import 'video_call_screen_controller.dart';
 import 'video_call_screen_state.dart';
 
-class VideoCallScreen extends ConsumerWidget {
+class VideoCallScreen extends HookConsumerWidget {
   const VideoCallScreen({
     super.key,
     required this.roomId,
@@ -22,16 +21,43 @@ class VideoCallScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(
-      videoCallScreenControllerProvider(roomId, contactId).notifier,
-    );
-    final matrixEventMessage = ref.watch(
+    final l10n = context.l10n;
+
+    final participantEvent = ref.watch(
       videoCallScreenControllerProvider(
         roomId,
         contactId,
-      ).select((s) => s.matrixEventMessage),
+      ).select((s) => s.participantEvent),
     );
-    final l10n = context.l10n;
+
+    useEffect(() {
+      if (participantEvent == null) return null;
+
+      final message = switch (participantEvent.type) {
+        ParticipantEventType.joined => l10n.videoCallParticipantJoined(
+          participantEvent.names,
+        ),
+        ParticipantEventType.left => l10n.videoCallParticipantLeft(
+          participantEvent.names,
+        ),
+      };
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              message,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: context.colorScheme.onErrorContainer,
+              ),
+            ),
+            backgroundColor: context.customColors.success,
+          ),
+        );
+      });
+      return null;
+    }, [participantEvent]);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -43,10 +69,6 @@ class VideoCallScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          ModalAsyncLoadingStatus(
-            controller.participantEventLoadingController,
-            successMessage: matrixEventMessage,
-          ),
           Expanded(
             child: _ParticipantGrid(roomId: roomId, contactId: contactId),
           ),

@@ -5,6 +5,14 @@ part 'video_call_screen_state.freezed.dart';
 
 enum VideoCallStatus { idle, connecting, connected, error }
 
+enum ParticipantEventType { joined, left }
+
+class VideoCallParticipantEvent {
+  const VideoCallParticipantEvent({required this.names, required this.type});
+  final String names;
+  final ParticipantEventType type;
+}
+
 @Freezed(fromJson: false, toJson: false)
 abstract class VideoCallScreenState with _$VideoCallScreenState {
   const VideoCallScreenState._();
@@ -16,7 +24,7 @@ abstract class VideoCallScreenState with _$VideoCallScreenState {
     @Default(false) bool isCameraEnabled,
     @Default({}) Map<String, String> memberNames,
     Object? error,
-    String? matrixEventMessage,
+    VideoCallParticipantEvent? participantEvent,
   }) = _VideoCallScreenState;
 
   bool get isConnecting => status == VideoCallStatus.connecting;
