@@ -328,8 +328,8 @@ class _DraggableMiniGrid extends HookWidget {
                         onPointerDown: (_) {
                           miniPointerDownPixels.value =
                               miniScrollController.hasClients
-                                  ? miniScrollController.position.pixels
-                                  : 0.0;
+                              ? miniScrollController.position.pixels
+                              : 0.0;
                         },
                         child: SingleChildScrollView(
                           controller: miniScrollController,
@@ -489,7 +489,8 @@ class _GridLayout extends HookConsumerWidget {
 
     bool scrolledSincePointerDown() {
       if (!scrollController.hasClients) return false;
-      return (scrollController.position.pixels - pointerDownPixels.value).abs() >
+      return (scrollController.position.pixels - pointerDownPixels.value)
+              .abs() >
           1.0;
     }
 
@@ -724,9 +725,11 @@ class _FocusedTile extends StatelessWidget {
     return Container(
       color: Colors.grey[900],
       child: videoTrack != null
-          ? VideoTrackRenderer(
-              videoTrack.track! as VideoTrack,
-              fit: VideoViewFit.cover,
+          ? IgnorePointer(
+              child: VideoTrackRenderer(
+                videoTrack.track! as VideoTrack,
+                fit: VideoViewFit.cover,
+              ),
             )
           : const Center(
               child: Icon(Icons.person, color: Colors.white54, size: 48),
@@ -796,9 +799,11 @@ class _ParticipantTile extends StatelessWidget {
           children: [
             if (videoTrack != null)
               Positioned.fill(
-                child: VideoTrackRenderer(
-                  videoTrack.track! as VideoTrack,
-                  fit: VideoViewFit.cover,
+                child: IgnorePointer(
+                  child: VideoTrackRenderer(
+                    videoTrack.track! as VideoTrack,
+                    fit: VideoViewFit.cover,
+                  ),
                 ),
               )
             else
