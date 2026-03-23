@@ -70,7 +70,6 @@ class ChatScreenController extends _$ChatScreenController
   chat.MeetingPlaceChatSDK? _chatSDK;
   chat.ChatStream? messagesSubscription;
   TimedAction? _sendChatActivityTimedAction;
-  TimedAction? _membersTypingTimedAction;
   TimedAction? _updateContactPresenceStatusTimedAction;
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
@@ -118,7 +117,6 @@ class ChatScreenController extends _$ChatScreenController
 
     ref.onDispose(() {
       _sendChatActivityTimedAction?.cancel();
-      _membersTypingTimedAction?.cancel();
       _updateContactPresenceStatusTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
 
@@ -426,7 +424,12 @@ class ChatScreenController extends _$ChatScreenController
     final senderDid = plainTextMessage.from;
     if (senderDid == null) return null;
 
-    return state.getGroupMemberByDid(senderDid)?.contactCard.firstName;
+    final member = state.getGroupMemberByDid(senderDid);
+    if (member == null) return null;
+    final firstName = member.contactCard.firstName;
+    if (firstName.isNotEmpty) return firstName;
+    final fullName = member.contactCard.fullName;
+    return fullName.isNotEmpty ? fullName : null;
   }
 
   void _applyEffect(chat.StreamData data) {
@@ -583,15 +586,11 @@ class ChatScreenController extends _$ChatScreenController
     required String? contactName,
   }) {
     _logger.info('_clearMembersTypingActivity', name: _logKey);
-    final memberNames = [...state.membersTyping];
-    if (memberNames.isEmpty) {
-      return;
-    }
-
-    memberNames.removeWhere(
+    final members = [...state.membersTyping];
+    members.removeWhere(
       (name) => name == groupMessageSenderName || name == contactName,
     );
-    state = state.copyWith(membersTyping: memberNames);
+    state = state.copyWith(membersTyping: members);
   }
 
   void _updateMembersTypingActivityIfNeeded({
@@ -599,52 +598,20 @@ class ChatScreenController extends _$ChatScreenController
     required String? groupMessageSenderName,
     required String? contactName,
   }) {
-    final messageCreatedTime = plainTextMessage.createdTime;
-    if (messageCreatedTime == null) return;
-
-    final differenceInSeconds = clock
-        .now()
-        .difference(messageCreatedTime)
-        .inSeconds;
-    final isChatActivityExpired =
-        (_secondsToShowChatActivityIndicator - differenceInSeconds) < 0;
-    if (isChatActivityExpired) return;
-
     _logger.info('_updateUserTypingActivity', name: _logKey);
-    _membersTypingTimedAction?.cancel();
-    _membersTypingTimedAction ??= TimedAction(
-      onRun: (args) {
-        var memberNames = <String>[];
-        final groupMessageSenderName = args?[0] as String?;
-        if (groupMessageSenderName != null &&
-            groupMessageSenderName.isNotEmpty) {
-          memberNames = [...state.membersTyping];
-          if (memberNames.length < _maxNumberOfTypingMembersVisible &&
-              !memberNames.contains(groupMessageSenderName)) {
-            memberNames.add(groupMessageSenderName);
-          }
-        } else {
-          if (contactName != null && contactName.isNotEmpty) {
-            memberNames = [contactName];
-          }
-        }
-
-        if (memberNames.isEmpty) {
-          return;
-        }
-
-        state = state.copyWith(membersTyping: memberNames);
-      },
-      onCancel: () {
-        if (state.isGroupChat) return;
-        state = state.copyWith(membersTyping: []);
-      },
-      onComplete: () {
-        state = state.copyWith(membersTyping: []);
-      },
-      duration: Duration(seconds: _secondsToShowChatActivityIndicator),
-    );
-    _membersTypingTimedAction?.start(args: [groupMessageSenderName]);
+    // from == null means "stopped typing" — clear the indicator.
+    if (plainTextMessage.from == null) {
+      state = state.copyWith(membersTyping: []);
+      return;
+    }
+    final senderName = groupMessageSenderName ?? contactName;
+    if (senderName == null || senderName.isEmpty) return;
+    final members = [...state.membersTyping];
+    if (members.length < _maxNumberOfTypingMembersVisible &&
+        !members.contains(senderName)) {
+      members.add(senderName);
+    }
+    state = state.copyWith(membersTyping: members);
   }
 
   void _upsertChatItem(chat.ChatItem item) {
