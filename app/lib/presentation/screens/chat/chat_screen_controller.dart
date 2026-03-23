@@ -35,6 +35,7 @@ import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
+import 'chat_mentions_service.dart';
 import 'chat_screen_state.dart';
 
 part 'chat_screen_controller.g.dart';
@@ -700,11 +701,63 @@ class ChatScreenController extends _$ChatScreenController
     final trimmedMessage = originalText.trimRight();
     if (trimmedMessage.isEmpty) return;
 
-    unawaited(_chatSDK?.sendTextMessage(trimmedMessage));
+    final mentionUserIds = await _resolveMentionUserIds(trimmedMessage);
+
+    unawaited(
+      _chatSDK?.sendTextMessage(trimmedMessage, mentionUserIds: mentionUserIds),
+    );
     _sendChatActivityTimedAction?.cancel();
     if (messageTextController.text == originalText) {
       messageTextController.clear();
     }
+  }
+
+  static const _mentions = ChatMentionsService();
+
+  Future<List<String>?> _resolveMentionUserIds(String messageText) async {
+    final group = state.group;
+    if (group == null) return null;
+
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    return _mentions.resolveMentionUserIds(
+      messageText,
+      group,
+      coreSdk.getChannelByOtherPartyPermanentDid,
+    );
+  }
+
+  /// Returns display names of group members whose aliases start with [query].
+  ///
+  /// Returns an empty list when not in a group chat or [query] matches nobody.
+  List<String> getMentionSuggestions(String query) {
+    final group = state.group;
+    if (group == null) return [];
+    return _mentions.getMentionSuggestions(query, group);
+  }
+
+  /// Returns true if the current user is mentioned in [message],
+  /// using the Matrix `m.mentions.user_ids` data stored on the message.
+  bool isMentionedInMessage(chat.Message message) {
+    return _mentions.isMentionedInMessage(message, _chatSDK?.ownMatrixUserId);
+  }
+
+  /// Replaces the partial @mention token immediately before the cursor
+  /// with `@fullName ` and repositions the cursor after the inserted text.
+  void insertMentionSuggestion(String fullName) {
+    final text = messageTextController.text;
+    final cursorPos = messageTextController.selection.baseOffset;
+    if (cursorPos < 0 || cursorPos > text.length) return;
+
+    final textBeforeCursor = text.substring(0, cursorPos);
+    final atIndex = textBeforeCursor.lastIndexOf('@');
+    if (atIndex < 0) return;
+
+    final replacement = '@$fullName ';
+    final newText = text.replaceRange(atIndex, cursorPos, replacement);
+    messageTextController.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: atIndex + replacement.length),
+    );
   }
 
   Future<void> sendChatActivity() async {
@@ -969,10 +1022,12 @@ class ChatScreenController extends _$ChatScreenController
     List<MessageAttachment> messageAttachment,
   ) async {
     messageTextController.clear();
+    final mentionUserIds = await _resolveMentionUserIds(text);
     unawaited(
       _chatSDK?.sendTextMessage(
         text,
         attachments: messageAttachment.map((a) => a.toAttachment()).toList(),
+        mentionUserIds: mentionUserIds,
       ),
     );
     _sendChatActivityTimedAction?.cancel();
