@@ -9,5 +9,6 @@ abstract class SettingsServiceState with _$SettingsServiceState {
     @Default(false) bool isDebugMode,
     required bool alreadyOnboarded,
     @Default(false) bool shouldShowMeetingPlaceQR,
+    @Default(true) bool isAutomaticMediaDownloadEnabled,
   }) = _SettingsServiceState;
 }

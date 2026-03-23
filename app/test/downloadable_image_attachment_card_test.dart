@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/exceptions/app_exception.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/exceptions/app_exception_type.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/downloadable_image_attachment_card.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 
@@ -106,6 +104,10 @@ void main() {
       Completer<void>? firstAttemptCompleter;
       Completer<void>? secondAttemptCompleter;
       var attempt = 0;
+      const longErrorMessage =
+          '''download failed because the server returned an unexpectedly long error
+          message with repeated diagnostics and retry details that should never
+          be rendered directly inside the attachment card''';
 
       Future<void> onDownloadAttachment(Attachment attachment) async {
         attempt += 1;
@@ -135,26 +137,22 @@ void main() {
       await tester.pump();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text(l10n.error(AppExceptionType.other.name)), findsNothing);
+      expect(find.text(l10n.unableToDownload), findsNothing);
 
-      firstAttemptCompleter!.completeError(
-        AppException('download failed', code: AppExceptionType.other.name),
-      );
+      firstAttemptCompleter!.completeError(Exception(longErrorMessage));
       await tester.pump();
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.download_rounded), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(
-        find.text(l10n.error(AppExceptionType.other.name)),
-        findsOneWidget,
-      );
+      expect(find.text(l10n.unableToDownload), findsOneWidget);
+      expect(find.textContaining('download failed'), findsNothing);
       expect(find.text(l10n.generalRetry), findsOneWidget);
 
       await tester.tap(find.text(l10n.generalRetry));
       await tester.pump();
 
-      expect(find.text(l10n.error(AppExceptionType.other.name)), findsNothing);
+      expect(find.text(l10n.unableToDownload), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       harnessKey.currentState!.updateAttachment(_base64Attachment());
@@ -164,7 +162,7 @@ void main() {
 
       expect(find.byType(Image), findsOneWidget);
       expect(find.byIcon(Icons.download_rounded), findsNothing);
-      expect(find.text(l10n.error(AppExceptionType.other.name)), findsNothing);
+      expect(find.text(l10n.unableToDownload), findsNothing);
     });
   });
 }

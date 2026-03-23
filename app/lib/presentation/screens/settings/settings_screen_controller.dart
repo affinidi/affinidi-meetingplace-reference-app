@@ -45,14 +45,23 @@ class SettingsScreenController extends _$SettingsScreenController {
 
     ref.listen(
       settingsServiceProvider.select(
-        (state) => (state.isDebugMode, state.shouldShowMeetingPlaceQR),
+        (state) => (
+          state.isDebugMode,
+          state.shouldShowMeetingPlaceQR,
+          state.isAutomaticMediaDownloadEnabled,
+        ),
       ),
       (prev, next) {
         Future.microtask(() {
-          final (isDebugMode, shouldShowMeetingPlaceQR) = next;
+          final (
+            isDebugMode,
+            shouldShowMeetingPlaceQR,
+            isAutomaticMediaDownloadEnabled,
+          ) = next;
           state = state.copyWith(
             isDebugMode: isDebugMode,
             shouldShowMeetingPlaceQR: shouldShowMeetingPlaceQR,
+            isAutomaticMediaDownloadEnabled: isAutomaticMediaDownloadEnabled,
           );
         });
       },
@@ -68,6 +77,8 @@ class SettingsScreenController extends _$SettingsScreenController {
     return SettingsScreenState(
       numberOfTapsToUnlockDebug: numberOfTapsToUnlockDebug,
       selectedMediatorDid: currentSettingsState.selectedMediatorDid,
+      isAutomaticMediaDownloadEnabled:
+          currentSettingsState.isAutomaticMediaDownloadEnabled,
     );
   }
 
@@ -122,6 +133,11 @@ class SettingsScreenController extends _$SettingsScreenController {
   Future<void> toggleShouldShowMeetingPlaceQR() async {
     final settingsService = ref.read(settingsServiceProvider.notifier);
     await settingsService.toggleShouldShowMeetingPlaceQR();
+  }
+
+  Future<void> toggleAutomaticMediaDownload() async {
+    final settingsService = ref.read(settingsServiceProvider.notifier);
+    await settingsService.toggleAutomaticMediaDownload();
   }
 
   Future<void> _addCustomMediator({

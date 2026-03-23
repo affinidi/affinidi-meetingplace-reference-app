@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meeting_place_chat/meeting_place_chat.dart' as chat_sdk;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../infrastructure/configuration/environment.dart';
@@ -17,6 +18,7 @@ part 'settings_service.g.dart';
 /// - Restore and persist the preferred mediator DID
 /// - Load available default and custom mediators
 /// - Manage debug mode toggling and its persistence
+/// - Manage automatic media download preference and its persistence
 /// - Track onboarding completion flag
 ///
 /// It reads environment defaults and secure storage, exposes the combined list
@@ -29,6 +31,11 @@ class SettingsService extends _$SettingsService {
   @override
   SettingsServiceState build() {
     final defaultMediatorDid = ref.read(environmentProvider).defaultMediatorDid;
+    final isAutomaticMediaDownloadEnabled =
+        _getAutomaticMediaDownloadPreference();
+
+    _applyAutomaticMediaDownloadPreference(isAutomaticMediaDownloadEnabled);
+
     Future.microtask(() async {
       await _restorePreferredMediatorIdIfNeeded();
       await _restoreDebugMode();
@@ -39,6 +46,7 @@ class SettingsService extends _$SettingsService {
     return SettingsServiceState(
       selectedMediatorDid: defaultMediatorDid,
       alreadyOnboarded: alreadyOnboarded,
+      isAutomaticMediaDownloadEnabled: isAutomaticMediaDownloadEnabled,
     );
   }
 
@@ -100,6 +108,23 @@ class SettingsService extends _$SettingsService {
     );
   }
 
+  Future<void> toggleAutomaticMediaDownload() async {
+    final newValue = !state.isAutomaticMediaDownloadEnabled;
+    final prefs = ref.read(sharedPreferencesProvider);
+
+    state = state.copyWith(isAutomaticMediaDownloadEnabled: newValue);
+    _applyAutomaticMediaDownloadPreference(newValue);
+    await prefs.setBool(
+      SharedPreferencesKeys.automaticMediaDownload.name,
+      newValue,
+    );
+
+    _logger.info(
+      'Automatic media download ${newValue ? 'enabled' : 'disabled'}',
+      name: _logKey,
+    );
+  }
+
   /// Persist the onboarding completion flag in shared preferences.
   ///
   /// [value] - `true` when onboarding has completed, `false` otherwise.
@@ -119,6 +144,12 @@ class SettingsService extends _$SettingsService {
   bool _getFinishOnboarding() {
     final prefs = ref.read(sharedPreferencesProvider);
     return prefs.getBool(SharedPreferencesKeys.alreadyOnboarded.name) ?? false;
+  }
+
+  bool _getAutomaticMediaDownloadPreference() {
+    final prefs = ref.read(sharedPreferencesProvider);
+    return prefs.getBool(SharedPreferencesKeys.automaticMediaDownload.name) ??
+        _isAutomaticDownloadEnabled();
   }
 
   /// Restore the "show meeting place QR" setting from secure storage.
@@ -142,5 +173,26 @@ class SettingsService extends _$SettingsService {
     if (debugMode == null) return;
 
     state = state.copyWith(isDebugMode: debugMode);
+  }
+
+  void _applyAutomaticMediaDownloadPreference(bool isEnabled) {
+    if (isEnabled) {
+      _enableAutomaticDownload();
+      return;
+    }
+
+    _disableAutomaticDownload();
+  }
+
+  bool _isAutomaticDownloadEnabled() {
+    return chat_sdk.ChatSDK.isAutomaticDownloadEnabled();
+  }
+
+  void _enableAutomaticDownload() {
+    chat_sdk.ChatSDK.enableAutomaticDownload();
+  }
+
+  void _disableAutomaticDownload() {
+    chat_sdk.ChatSDK.disableAutomaticDownload();
   }
 }
