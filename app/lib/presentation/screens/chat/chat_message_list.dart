@@ -137,38 +137,48 @@ class _ChatMessageList extends HookConsumerWidget {
                                   contactId: _contactId,
                                 ),
                               ),
-                            Container(
-                              margin:
-                                  chatItem is EncryptionNotice ||
-                                      chatItem is chat.ConciergeMessage ||
-                                      chatItem is chat.EventMessage
-                                  ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
-                                  : EdgeInsets.fromLTRB(
-                                      (chatItem.isFromMe) ? 60 : 0,
-                                      8,
-                                      (chatItem.isFromMe) ? 0 : 60,
-                                      (selectedReactionIndex == index ||
-                                              chatItem is chat.Message &&
-                                                  chatItem.reactions.isNotEmpty)
-                                          ? 0
-                                          : 8,
-                                    ),
-                              decoration: BoxDecoration(
-                                color: getChatItemColor(
-                                  context.colorScheme,
-                                  chatItem,
-                                ),
-                                borderRadius: BorderRadius.circular(16.0),
-                              ),
-                              child: ChatItem(
-                                chatItem: chatItem,
-                                index: index,
-                                contactId: _contactId,
-                                chatItemColor: getChatItemColor(
-                                  context.colorScheme,
-                                  chatItem,
-                                ),
-                              ),
+                            Builder(
+                              builder: (context) {
+                                final isMentioned =
+                                    chatItem is chat.Message &&
+                                    !chatItem.isFromMe &&
+                                    controller.isMentionedInMessage(chatItem);
+                                final itemColor = isMentioned
+                                    ? Colors.green.shade800
+                                    : getChatItemColor(
+                                        context.colorScheme,
+                                        chatItem,
+                                      );
+                                return Container(
+                                  margin:
+                                      chatItem is EncryptionNotice ||
+                                          chatItem is chat.ConciergeMessage ||
+                                          chatItem is chat.EventMessage
+                                      ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
+                                      : EdgeInsets.fromLTRB(
+                                          (chatItem.isFromMe) ? 60 : 0,
+                                          8,
+                                          (chatItem.isFromMe) ? 0 : 60,
+                                          (selectedReactionIndex == index ||
+                                                  chatItem is chat.Message &&
+                                                      chatItem
+                                                          .reactions
+                                                          .isNotEmpty)
+                                              ? 0
+                                              : 8,
+                                        ),
+                                  decoration: BoxDecoration(
+                                    color: itemColor,
+                                    borderRadius: BorderRadius.circular(16.0),
+                                  ),
+                                  child: ChatItem(
+                                    chatItem: chatItem,
+                                    index: index,
+                                    contactId: _contactId,
+                                    chatItemColor: itemColor,
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
