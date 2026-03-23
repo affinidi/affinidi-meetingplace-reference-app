@@ -1096,6 +1096,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get serverSettings => 'Server Settings';
 
   @override
+  String get chatSettingsTitle => 'Chat';
+
+  @override
+  String get automaticMediaDownloadLabel => 'Automatic media download';
+
+  @override
+  String get automaticMediaDownloadHelperText =>
+      'Automatically download incoming media attachments in chat.';
+
+  @override
+  String get unableToDownload => 'Unable to download';
+
+  @override
   String get serverSettingsHelperText =>
       'Select the default server for messaging communication';
 

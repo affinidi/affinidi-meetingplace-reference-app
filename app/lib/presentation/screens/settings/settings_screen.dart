@@ -19,6 +19,7 @@ import 'debug/debug_panel.dart';
 import 'settings_screen_controller.dart';
 
 part 'debug_settings_section.dart';
+part 'chat_settings_section.dart';
 part 'meeting_place_control_plane_section.dart';
 part 'server_settings_section.dart';
 part 'version_info.dart';
@@ -67,6 +68,8 @@ class SettingsScreen extends HookConsumerWidget {
                   _MeetingPlaceControlPlaneSection(),
                   SizedBox(height: 24),
                   _ServerSettingsSection(),
+                  SizedBox(height: 24),
+                  _ChatSettingsSection(),
                   SizedBox(height: 24),
                   _DebugSettingsSection(),
                 ],

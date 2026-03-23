@@ -8,6 +8,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
+import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../presentation/painting/cached_base64_image.dart';
 import '../../presentation/screens/media/image_view_screen/image_view_screen.dart';
 import '../../presentation/widgets/async_loaders/async_loading_controller.dart';
@@ -73,6 +74,7 @@ class DownloadableImageAttachmentCard extends HookConsumerWidget {
             Padding(
               padding: const EdgeInsets.all(16),
               child: _AttachmentDownloadOverlay(
+                errorMessage: context.l10n.unableToDownload,
                 loadingControllerProvider: downloadControllerProvider,
                 onDownloadPressed: _onDownloadAttachment == null
                     ? null
@@ -131,10 +133,12 @@ class _Base64ImageAttachmentCard extends StatelessWidget {
 
 class _AttachmentDownloadOverlay extends StatelessWidget {
   const _AttachmentDownloadOverlay({
+    required this.errorMessage,
     required this.loadingControllerProvider,
     required this.onDownloadPressed,
   });
 
+  final String errorMessage;
   final AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
   loadingControllerProvider;
   final Future<void> Function()? onDownloadPressed;
@@ -152,6 +156,7 @@ class _AttachmentDownloadOverlay extends StatelessWidget {
 
     return InlineAsyncLoadingStatus(
       loadingControllerProvider,
+      errorMessage: errorMessage,
       retry: onDownloadPressed == null ? null : onRetryPressed,
       child: Center(
         child: IconButton.filledTonal(

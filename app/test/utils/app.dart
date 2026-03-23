@@ -51,6 +51,7 @@ Future<void> startApp(
   bool isAuthenticated = true,
   bool hasNetworkConnection = true,
   bool alreadyOnboarded = true,
+  bool? automaticMediaDownloadEnabled,
   PushNotificationMessaging? pushNotificationMessaging,
   Connectivity? connectivity,
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
@@ -69,6 +70,7 @@ Future<void> startApp(
   TestWidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.setMockInitialValues({
     'alreadyOnboarded': alreadyOnboarded,
+    'automaticMediaDownload': ?automaticMediaDownloadEnabled,
   });
   final sharedPreferences = await SharedPreferences.getInstance();
   final cacheManager = FakeCacheManager();
@@ -198,6 +200,7 @@ Future<void> navigateToLocation(
   String location, {
   bool isAuthenticated = true,
   bool alreadyOnboarded = true,
+  bool? automaticMediaDownloadEnabled,
   List<Identity> identities = const [],
   List<Mediator> mediators = const [],
   List<Contact> contacts = const [],
@@ -217,6 +220,7 @@ Future<void> navigateToLocation(
     tester,
     isAuthenticated: isAuthenticated,
     alreadyOnboarded: alreadyOnboarded,
+    automaticMediaDownloadEnabled: automaticMediaDownloadEnabled,
     identities: identities,
     pushNotificationMessaging: pushNotificationMessaging,
     connectivity: connectivity,

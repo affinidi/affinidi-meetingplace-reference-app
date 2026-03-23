@@ -34,7 +34,7 @@ class ChatMentionsService {
     return matrixUserIds.isEmpty ? null : matrixUserIds.toList();
   }
 
-  /// Returns true if [ownMatrixUserId] is listed in [message.mentionedUserIds].
+  /// Returns true if [ownMatrixUserId] is listed in message.mentionedUserIds.
   bool isMentionedInMessage(chat.Message message, String? ownMatrixUserId) {
     if (message.mentionedUserIds.isEmpty || ownMatrixUserId == null) {
       return false;

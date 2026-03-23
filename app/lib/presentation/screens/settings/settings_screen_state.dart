@@ -14,5 +14,6 @@ abstract class SettingsScreenState with _$SettingsScreenState {
     @Default('') String selectedMediatorDid,
     @Default(false) bool isDebugMode,
     @Default(false) bool shouldShowMeetingPlaceQR,
+    @Default(true) bool isAutomaticMediaDownloadEnabled,
   }) = _SettingsScreenState;
 }

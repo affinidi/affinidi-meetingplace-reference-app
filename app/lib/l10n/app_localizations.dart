@@ -1612,6 +1612,30 @@ abstract class AppLocalizations {
   /// **'Server Settings'**
   String get serverSettings;
 
+  /// No description provided for @chatSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get chatSettingsTitle;
+
+  /// No description provided for @automaticMediaDownloadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic media download'**
+  String get automaticMediaDownloadLabel;
+
+  /// No description provided for @automaticMediaDownloadHelperText.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically download incoming media attachments in chat.'**
+  String get automaticMediaDownloadHelperText;
+
+  /// No description provided for @unableToDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to download'**
+  String get unableToDownload;
+
   /// No description provided for @serverSettingsHelperText.
   ///
   /// In en, this message translates to:

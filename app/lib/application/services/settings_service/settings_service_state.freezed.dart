@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SettingsServiceState {
 
- String get selectedMediatorDid; bool get isDebugMode; bool get alreadyOnboarded; bool get shouldShowMeetingPlaceQR;
+ String get selectedMediatorDid; bool get isDebugMode; bool get alreadyOnboarded; bool get shouldShowMeetingPlaceQR; bool get isAutomaticMediaDownloadEnabled;
 /// Create a copy of SettingsServiceState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SettingsServiceStateCopyWith<SettingsServiceState> get copyWith => _$SettingsSe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsServiceState&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.alreadyOnboarded, alreadyOnboarded) || other.alreadyOnboarded == alreadyOnboarded)&&(identical(other.shouldShowMeetingPlaceQR, shouldShowMeetingPlaceQR) || other.shouldShowMeetingPlaceQR == shouldShowMeetingPlaceQR));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsServiceState&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.alreadyOnboarded, alreadyOnboarded) || other.alreadyOnboarded == alreadyOnboarded)&&(identical(other.shouldShowMeetingPlaceQR, shouldShowMeetingPlaceQR) || other.shouldShowMeetingPlaceQR == shouldShowMeetingPlaceQR)&&(identical(other.isAutomaticMediaDownloadEnabled, isAutomaticMediaDownloadEnabled) || other.isAutomaticMediaDownloadEnabled == isAutomaticMediaDownloadEnabled));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,selectedMediatorDid,isDebugMode,alreadyOnboarded,shouldShowMeetingPlaceQR);
+int get hashCode => Object.hash(runtimeType,selectedMediatorDid,isDebugMode,alreadyOnboarded,shouldShowMeetingPlaceQR,isAutomaticMediaDownloadEnabled);
 
 @override
 String toString() {
-  return 'SettingsServiceState(selectedMediatorDid: $selectedMediatorDid, isDebugMode: $isDebugMode, alreadyOnboarded: $alreadyOnboarded, shouldShowMeetingPlaceQR: $shouldShowMeetingPlaceQR)';
+  return 'SettingsServiceState(selectedMediatorDid: $selectedMediatorDid, isDebugMode: $isDebugMode, alreadyOnboarded: $alreadyOnboarded, shouldShowMeetingPlaceQR: $shouldShowMeetingPlaceQR, isAutomaticMediaDownloadEnabled: $isAutomaticMediaDownloadEnabled)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SettingsServiceStateCopyWith<$Res>  {
   factory $SettingsServiceStateCopyWith(SettingsServiceState value, $Res Function(SettingsServiceState) _then) = _$SettingsServiceStateCopyWithImpl;
 @useResult
 $Res call({
- String selectedMediatorDid, bool isDebugMode, bool alreadyOnboarded, bool shouldShowMeetingPlaceQR
+ String selectedMediatorDid, bool isDebugMode, bool alreadyOnboarded, bool shouldShowMeetingPlaceQR, bool isAutomaticMediaDownloadEnabled
 });
 
 
@@ -62,12 +62,13 @@ class _$SettingsServiceStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsServiceState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? selectedMediatorDid = null,Object? isDebugMode = null,Object? alreadyOnboarded = null,Object? shouldShowMeetingPlaceQR = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? selectedMediatorDid = null,Object? isDebugMode = null,Object? alreadyOnboarded = null,Object? shouldShowMeetingPlaceQR = null,Object? isAutomaticMediaDownloadEnabled = null,}) {
   return _then(_self.copyWith(
 selectedMediatorDid: null == selectedMediatorDid ? _self.selectedMediatorDid : selectedMediatorDid // ignore: cast_nullable_to_non_nullable
 as String,isDebugMode: null == isDebugMode ? _self.isDebugMode : isDebugMode // ignore: cast_nullable_to_non_nullable
 as bool,alreadyOnboarded: null == alreadyOnboarded ? _self.alreadyOnboarded : alreadyOnboarded // ignore: cast_nullable_to_non_nullable
 as bool,shouldShowMeetingPlaceQR: null == shouldShowMeetingPlaceQR ? _self.shouldShowMeetingPlaceQR : shouldShowMeetingPlaceQR // ignore: cast_nullable_to_non_nullable
+as bool,isAutomaticMediaDownloadEnabled: null == isAutomaticMediaDownloadEnabled ? _self.isAutomaticMediaDownloadEnabled : isAutomaticMediaDownloadEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String selectedMediatorDid,  bool isDebugMode,  bool alreadyOnboarded,  bool shouldShowMeetingPlaceQR)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String selectedMediatorDid,  bool isDebugMode,  bool alreadyOnboarded,  bool shouldShowMeetingPlaceQR,  bool isAutomaticMediaDownloadEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SettingsServiceState() when $default != null:
-return $default(_that.selectedMediatorDid,_that.isDebugMode,_that.alreadyOnboarded,_that.shouldShowMeetingPlaceQR);case _:
+return $default(_that.selectedMediatorDid,_that.isDebugMode,_that.alreadyOnboarded,_that.shouldShowMeetingPlaceQR,_that.isAutomaticMediaDownloadEnabled);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.selectedMediatorDid,_that.isDebugMode,_that.alreadyOnboard
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String selectedMediatorDid,  bool isDebugMode,  bool alreadyOnboarded,  bool shouldShowMeetingPlaceQR)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String selectedMediatorDid,  bool isDebugMode,  bool alreadyOnboarded,  bool shouldShowMeetingPlaceQR,  bool isAutomaticMediaDownloadEnabled)  $default,) {final _that = this;
 switch (_that) {
 case _SettingsServiceState():
-return $default(_that.selectedMediatorDid,_that.isDebugMode,_that.alreadyOnboarded,_that.shouldShowMeetingPlaceQR);case _:
+return $default(_that.selectedMediatorDid,_that.isDebugMode,_that.alreadyOnboarded,_that.shouldShowMeetingPlaceQR,_that.isAutomaticMediaDownloadEnabled);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +195,10 @@ return $default(_that.selectedMediatorDid,_that.isDebugMode,_that.alreadyOnboard
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String selectedMediatorDid,  bool isDebugMode,  bool alreadyOnboarded,  bool shouldShowMeetingPlaceQR)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String selectedMediatorDid,  bool isDebugMode,  bool alreadyOnboarded,  bool shouldShowMeetingPlaceQR,  bool isAutomaticMediaDownloadEnabled)?  $default,) {final _that = this;
 switch (_that) {
 case _SettingsServiceState() when $default != null:
-return $default(_that.selectedMediatorDid,_that.isDebugMode,_that.alreadyOnboarded,_that.shouldShowMeetingPlaceQR);case _:
+return $default(_that.selectedMediatorDid,_that.isDebugMode,_that.alreadyOnboarded,_that.shouldShowMeetingPlaceQR,_that.isAutomaticMediaDownloadEnabled);case _:
   return null;
 
 }
@@ -209,13 +210,14 @@ return $default(_that.selectedMediatorDid,_that.isDebugMode,_that.alreadyOnboard
 
 
 class _SettingsServiceState implements SettingsServiceState {
-   _SettingsServiceState({required this.selectedMediatorDid, this.isDebugMode = false, required this.alreadyOnboarded, this.shouldShowMeetingPlaceQR = false});
+   _SettingsServiceState({required this.selectedMediatorDid, this.isDebugMode = false, required this.alreadyOnboarded, this.shouldShowMeetingPlaceQR = false, this.isAutomaticMediaDownloadEnabled = true});
   
 
 @override final  String selectedMediatorDid;
 @override@JsonKey() final  bool isDebugMode;
 @override final  bool alreadyOnboarded;
 @override@JsonKey() final  bool shouldShowMeetingPlaceQR;
+@override@JsonKey() final  bool isAutomaticMediaDownloadEnabled;
 
 /// Create a copy of SettingsServiceState
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +229,16 @@ _$SettingsServiceStateCopyWith<_SettingsServiceState> get copyWith => __$Setting
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsServiceState&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.alreadyOnboarded, alreadyOnboarded) || other.alreadyOnboarded == alreadyOnboarded)&&(identical(other.shouldShowMeetingPlaceQR, shouldShowMeetingPlaceQR) || other.shouldShowMeetingPlaceQR == shouldShowMeetingPlaceQR));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsServiceState&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.alreadyOnboarded, alreadyOnboarded) || other.alreadyOnboarded == alreadyOnboarded)&&(identical(other.shouldShowMeetingPlaceQR, shouldShowMeetingPlaceQR) || other.shouldShowMeetingPlaceQR == shouldShowMeetingPlaceQR)&&(identical(other.isAutomaticMediaDownloadEnabled, isAutomaticMediaDownloadEnabled) || other.isAutomaticMediaDownloadEnabled == isAutomaticMediaDownloadEnabled));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,selectedMediatorDid,isDebugMode,alreadyOnboarded,shouldShowMeetingPlaceQR);
+int get hashCode => Object.hash(runtimeType,selectedMediatorDid,isDebugMode,alreadyOnboarded,shouldShowMeetingPlaceQR,isAutomaticMediaDownloadEnabled);
 
 @override
 String toString() {
-  return 'SettingsServiceState(selectedMediatorDid: $selectedMediatorDid, isDebugMode: $isDebugMode, alreadyOnboarded: $alreadyOnboarded, shouldShowMeetingPlaceQR: $shouldShowMeetingPlaceQR)';
+  return 'SettingsServiceState(selectedMediatorDid: $selectedMediatorDid, isDebugMode: $isDebugMode, alreadyOnboarded: $alreadyOnboarded, shouldShowMeetingPlaceQR: $shouldShowMeetingPlaceQR, isAutomaticMediaDownloadEnabled: $isAutomaticMediaDownloadEnabled)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$SettingsServiceStateCopyWith<$Res> implements $SettingsSe
   factory _$SettingsServiceStateCopyWith(_SettingsServiceState value, $Res Function(_SettingsServiceState) _then) = __$SettingsServiceStateCopyWithImpl;
 @override @useResult
 $Res call({
- String selectedMediatorDid, bool isDebugMode, bool alreadyOnboarded, bool shouldShowMeetingPlaceQR
+ String selectedMediatorDid, bool isDebugMode, bool alreadyOnboarded, bool shouldShowMeetingPlaceQR, bool isAutomaticMediaDownloadEnabled
 });
 
 
@@ -264,12 +266,13 @@ class __$SettingsServiceStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsServiceState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? selectedMediatorDid = null,Object? isDebugMode = null,Object? alreadyOnboarded = null,Object? shouldShowMeetingPlaceQR = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? selectedMediatorDid = null,Object? isDebugMode = null,Object? alreadyOnboarded = null,Object? shouldShowMeetingPlaceQR = null,Object? isAutomaticMediaDownloadEnabled = null,}) {
   return _then(_SettingsServiceState(
 selectedMediatorDid: null == selectedMediatorDid ? _self.selectedMediatorDid : selectedMediatorDid // ignore: cast_nullable_to_non_nullable
 as String,isDebugMode: null == isDebugMode ? _self.isDebugMode : isDebugMode // ignore: cast_nullable_to_non_nullable
 as bool,alreadyOnboarded: null == alreadyOnboarded ? _self.alreadyOnboarded : alreadyOnboarded // ignore: cast_nullable_to_non_nullable
 as bool,shouldShowMeetingPlaceQR: null == shouldShowMeetingPlaceQR ? _self.shouldShowMeetingPlaceQR : shouldShowMeetingPlaceQR // ignore: cast_nullable_to_non_nullable
+as bool,isAutomaticMediaDownloadEnabled: null == isAutomaticMediaDownloadEnabled ? _self.isAutomaticMediaDownloadEnabled : isAutomaticMediaDownloadEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

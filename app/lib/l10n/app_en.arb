@@ -1054,6 +1054,22 @@
 	"@serverSettings": {
 		"type": "text"
 	},
+	"chatSettingsTitle": "Chat",
+	"@chatSettingsTitle": {
+		"type": "text"
+	},
+	"automaticMediaDownloadLabel": "Automatic media download",
+	"@automaticMediaDownloadLabel": {
+		"type": "text"
+	},
+	"automaticMediaDownloadHelperText": "Automatically download incoming media attachments in chat.",
+	"@automaticMediaDownloadHelperText": {
+		"type": "text"
+	},
+	"unableToDownload": "Unable to download",
+	"@unableToDownload": {
+		"type": "text"
+	},
 	"serverSettingsHelperText": "Select the default server for messaging communication",
 	"@serverSettingsHelperText": {
 		"type": "text"

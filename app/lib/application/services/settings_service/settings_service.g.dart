@@ -6,7 +6,7 @@ part of 'settings_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$settingsServiceHash() => r'b38a9046f8af9f60707320bfd11ff7b6a2d233e3';
+String _$settingsServiceHash() => r'829e1120d13ece24f06b2420f23572466c31967d';
 
 /// Service responsible for application settings and mediator configuration.
 ///
@@ -14,6 +14,7 @@ String _$settingsServiceHash() => r'b38a9046f8af9f60707320bfd11ff7b6a2d233e3';
 /// - Restore and persist the preferred mediator DID
 /// - Load available default and custom mediators
 /// - Manage debug mode toggling and its persistence
+/// - Manage automatic media download preference and its persistence
 /// - Track onboarding completion flag
 ///
 /// It reads environment defaults and secure storage, exposes the combined list

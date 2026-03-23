@@ -29,13 +29,16 @@ class InlineAsyncLoadingStatus extends HookConsumerWidget
     required Widget child,
     void Function()? retry,
     String? loadingMessage,
+    String? errorMessage,
   }) : _retry = retry,
        _child = child,
        _initialLoading = initialLoading,
-       _loadingMessage = loadingMessage;
+       _loadingMessage = loadingMessage,
+       _errorMessage = errorMessage;
 
   final ProviderListenable<AsyncValue<void>> _provider;
   final String? _loadingMessage;
+  final String? _errorMessage;
   final bool _initialLoading;
   final Widget _child;
   final void Function()? _retry;
@@ -76,7 +79,8 @@ class InlineAsyncLoadingStatus extends HookConsumerWidget
     }
 
     void showErrorWidgetIfNeeded(Object exception, StackTrace stackTrace) {
-      final localizedErrorMessage = getErrorMessage(context, exception);
+      final localizedErrorMessage =
+          _errorMessage ?? getErrorMessage(context, exception);
 
       logger.error(
         localizedErrorMessage,
@@ -134,6 +138,9 @@ class InlineAsyncLoadingStatus extends HookConsumerWidget
                   Text(
                     errorText.value ?? l10n.error('other'),
                     textAlign: TextAlign.center,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.colorScheme.error,
+                    ),
                   ),
                   if (shouldShowRetryButton.value)
                     _RetryButton(onPressed: _retry!, text: l10n.generalRetry),

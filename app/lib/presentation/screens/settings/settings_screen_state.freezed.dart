@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SettingsScreenState {
 
- AppInfo? get appInfo; int get numberOfTapsToUnlockDebug; List<Mediator> get mediators; String get selectedMediatorDid; bool get isDebugMode; bool get shouldShowMeetingPlaceQR;
+ AppInfo? get appInfo; int get numberOfTapsToUnlockDebug; List<Mediator> get mediators; String get selectedMediatorDid; bool get isDebugMode; bool get shouldShowMeetingPlaceQR; bool get isAutomaticMediaDownloadEnabled;
 /// Create a copy of SettingsScreenState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $SettingsScreenStateCopyWith<SettingsScreenState> get copyWith => _$SettingsScre
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsScreenState&&(identical(other.appInfo, appInfo) || other.appInfo == appInfo)&&(identical(other.numberOfTapsToUnlockDebug, numberOfTapsToUnlockDebug) || other.numberOfTapsToUnlockDebug == numberOfTapsToUnlockDebug)&&const DeepCollectionEquality().equals(other.mediators, mediators)&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.shouldShowMeetingPlaceQR, shouldShowMeetingPlaceQR) || other.shouldShowMeetingPlaceQR == shouldShowMeetingPlaceQR));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsScreenState&&(identical(other.appInfo, appInfo) || other.appInfo == appInfo)&&(identical(other.numberOfTapsToUnlockDebug, numberOfTapsToUnlockDebug) || other.numberOfTapsToUnlockDebug == numberOfTapsToUnlockDebug)&&const DeepCollectionEquality().equals(other.mediators, mediators)&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.shouldShowMeetingPlaceQR, shouldShowMeetingPlaceQR) || other.shouldShowMeetingPlaceQR == shouldShowMeetingPlaceQR)&&(identical(other.isAutomaticMediaDownloadEnabled, isAutomaticMediaDownloadEnabled) || other.isAutomaticMediaDownloadEnabled == isAutomaticMediaDownloadEnabled));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,appInfo,numberOfTapsToUnlockDebug,const DeepCollectionEquality().hash(mediators),selectedMediatorDid,isDebugMode,shouldShowMeetingPlaceQR);
+int get hashCode => Object.hash(runtimeType,appInfo,numberOfTapsToUnlockDebug,const DeepCollectionEquality().hash(mediators),selectedMediatorDid,isDebugMode,shouldShowMeetingPlaceQR,isAutomaticMediaDownloadEnabled);
 
 @override
 String toString() {
-  return 'SettingsScreenState(appInfo: $appInfo, numberOfTapsToUnlockDebug: $numberOfTapsToUnlockDebug, mediators: $mediators, selectedMediatorDid: $selectedMediatorDid, isDebugMode: $isDebugMode, shouldShowMeetingPlaceQR: $shouldShowMeetingPlaceQR)';
+  return 'SettingsScreenState(appInfo: $appInfo, numberOfTapsToUnlockDebug: $numberOfTapsToUnlockDebug, mediators: $mediators, selectedMediatorDid: $selectedMediatorDid, isDebugMode: $isDebugMode, shouldShowMeetingPlaceQR: $shouldShowMeetingPlaceQR, isAutomaticMediaDownloadEnabled: $isAutomaticMediaDownloadEnabled)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $SettingsScreenStateCopyWith<$Res>  {
   factory $SettingsScreenStateCopyWith(SettingsScreenState value, $Res Function(SettingsScreenState) _then) = _$SettingsScreenStateCopyWithImpl;
 @useResult
 $Res call({
- AppInfo? appInfo, int numberOfTapsToUnlockDebug, List<Mediator> mediators, String selectedMediatorDid, bool isDebugMode, bool shouldShowMeetingPlaceQR
+ AppInfo? appInfo, int numberOfTapsToUnlockDebug, List<Mediator> mediators, String selectedMediatorDid, bool isDebugMode, bool shouldShowMeetingPlaceQR, bool isAutomaticMediaDownloadEnabled
 });
 
 
@@ -62,7 +62,7 @@ class _$SettingsScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsScreenState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? appInfo = freezed,Object? numberOfTapsToUnlockDebug = null,Object? mediators = null,Object? selectedMediatorDid = null,Object? isDebugMode = null,Object? shouldShowMeetingPlaceQR = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? appInfo = freezed,Object? numberOfTapsToUnlockDebug = null,Object? mediators = null,Object? selectedMediatorDid = null,Object? isDebugMode = null,Object? shouldShowMeetingPlaceQR = null,Object? isAutomaticMediaDownloadEnabled = null,}) {
   return _then(_self.copyWith(
 appInfo: freezed == appInfo ? _self.appInfo : appInfo // ignore: cast_nullable_to_non_nullable
 as AppInfo?,numberOfTapsToUnlockDebug: null == numberOfTapsToUnlockDebug ? _self.numberOfTapsToUnlockDebug : numberOfTapsToUnlockDebug // ignore: cast_nullable_to_non_nullable
@@ -70,6 +70,7 @@ as int,mediators: null == mediators ? _self.mediators : mediators // ignore: cas
 as List<Mediator>,selectedMediatorDid: null == selectedMediatorDid ? _self.selectedMediatorDid : selectedMediatorDid // ignore: cast_nullable_to_non_nullable
 as String,isDebugMode: null == isDebugMode ? _self.isDebugMode : isDebugMode // ignore: cast_nullable_to_non_nullable
 as bool,shouldShowMeetingPlaceQR: null == shouldShowMeetingPlaceQR ? _self.shouldShowMeetingPlaceQR : shouldShowMeetingPlaceQR // ignore: cast_nullable_to_non_nullable
+as bool,isAutomaticMediaDownloadEnabled: null == isAutomaticMediaDownloadEnabled ? _self.isAutomaticMediaDownloadEnabled : isAutomaticMediaDownloadEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppInfo? appInfo,  int numberOfTapsToUnlockDebug,  List<Mediator> mediators,  String selectedMediatorDid,  bool isDebugMode,  bool shouldShowMeetingPlaceQR)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppInfo? appInfo,  int numberOfTapsToUnlockDebug,  List<Mediator> mediators,  String selectedMediatorDid,  bool isDebugMode,  bool shouldShowMeetingPlaceQR,  bool isAutomaticMediaDownloadEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SettingsScreenState() when $default != null:
-return $default(_that.appInfo,_that.numberOfTapsToUnlockDebug,_that.mediators,_that.selectedMediatorDid,_that.isDebugMode,_that.shouldShowMeetingPlaceQR);case _:
+return $default(_that.appInfo,_that.numberOfTapsToUnlockDebug,_that.mediators,_that.selectedMediatorDid,_that.isDebugMode,_that.shouldShowMeetingPlaceQR,_that.isAutomaticMediaDownloadEnabled);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.appInfo,_that.numberOfTapsToUnlockDebug,_that.mediators,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppInfo? appInfo,  int numberOfTapsToUnlockDebug,  List<Mediator> mediators,  String selectedMediatorDid,  bool isDebugMode,  bool shouldShowMeetingPlaceQR)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppInfo? appInfo,  int numberOfTapsToUnlockDebug,  List<Mediator> mediators,  String selectedMediatorDid,  bool isDebugMode,  bool shouldShowMeetingPlaceQR,  bool isAutomaticMediaDownloadEnabled)  $default,) {final _that = this;
 switch (_that) {
 case _SettingsScreenState():
-return $default(_that.appInfo,_that.numberOfTapsToUnlockDebug,_that.mediators,_that.selectedMediatorDid,_that.isDebugMode,_that.shouldShowMeetingPlaceQR);case _:
+return $default(_that.appInfo,_that.numberOfTapsToUnlockDebug,_that.mediators,_that.selectedMediatorDid,_that.isDebugMode,_that.shouldShowMeetingPlaceQR,_that.isAutomaticMediaDownloadEnabled);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +197,10 @@ return $default(_that.appInfo,_that.numberOfTapsToUnlockDebug,_that.mediators,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppInfo? appInfo,  int numberOfTapsToUnlockDebug,  List<Mediator> mediators,  String selectedMediatorDid,  bool isDebugMode,  bool shouldShowMeetingPlaceQR)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppInfo? appInfo,  int numberOfTapsToUnlockDebug,  List<Mediator> mediators,  String selectedMediatorDid,  bool isDebugMode,  bool shouldShowMeetingPlaceQR,  bool isAutomaticMediaDownloadEnabled)?  $default,) {final _that = this;
 switch (_that) {
 case _SettingsScreenState() when $default != null:
-return $default(_that.appInfo,_that.numberOfTapsToUnlockDebug,_that.mediators,_that.selectedMediatorDid,_that.isDebugMode,_that.shouldShowMeetingPlaceQR);case _:
+return $default(_that.appInfo,_that.numberOfTapsToUnlockDebug,_that.mediators,_that.selectedMediatorDid,_that.isDebugMode,_that.shouldShowMeetingPlaceQR,_that.isAutomaticMediaDownloadEnabled);case _:
   return null;
 
 }
@@ -211,7 +212,7 @@ return $default(_that.appInfo,_that.numberOfTapsToUnlockDebug,_that.mediators,_t
 
 
 class _SettingsScreenState implements SettingsScreenState {
-   _SettingsScreenState({this.appInfo, required this.numberOfTapsToUnlockDebug, final  List<Mediator> mediators = const [], this.selectedMediatorDid = '', this.isDebugMode = false, this.shouldShowMeetingPlaceQR = false}): _mediators = mediators;
+   _SettingsScreenState({this.appInfo, required this.numberOfTapsToUnlockDebug, final  List<Mediator> mediators = const [], this.selectedMediatorDid = '', this.isDebugMode = false, this.shouldShowMeetingPlaceQR = false, this.isAutomaticMediaDownloadEnabled = true}): _mediators = mediators;
   
 
 @override final  AppInfo? appInfo;
@@ -226,6 +227,7 @@ class _SettingsScreenState implements SettingsScreenState {
 @override@JsonKey() final  String selectedMediatorDid;
 @override@JsonKey() final  bool isDebugMode;
 @override@JsonKey() final  bool shouldShowMeetingPlaceQR;
+@override@JsonKey() final  bool isAutomaticMediaDownloadEnabled;
 
 /// Create a copy of SettingsScreenState
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +239,16 @@ _$SettingsScreenStateCopyWith<_SettingsScreenState> get copyWith => __$SettingsS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsScreenState&&(identical(other.appInfo, appInfo) || other.appInfo == appInfo)&&(identical(other.numberOfTapsToUnlockDebug, numberOfTapsToUnlockDebug) || other.numberOfTapsToUnlockDebug == numberOfTapsToUnlockDebug)&&const DeepCollectionEquality().equals(other._mediators, _mediators)&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.shouldShowMeetingPlaceQR, shouldShowMeetingPlaceQR) || other.shouldShowMeetingPlaceQR == shouldShowMeetingPlaceQR));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsScreenState&&(identical(other.appInfo, appInfo) || other.appInfo == appInfo)&&(identical(other.numberOfTapsToUnlockDebug, numberOfTapsToUnlockDebug) || other.numberOfTapsToUnlockDebug == numberOfTapsToUnlockDebug)&&const DeepCollectionEquality().equals(other._mediators, _mediators)&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.shouldShowMeetingPlaceQR, shouldShowMeetingPlaceQR) || other.shouldShowMeetingPlaceQR == shouldShowMeetingPlaceQR)&&(identical(other.isAutomaticMediaDownloadEnabled, isAutomaticMediaDownloadEnabled) || other.isAutomaticMediaDownloadEnabled == isAutomaticMediaDownloadEnabled));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,appInfo,numberOfTapsToUnlockDebug,const DeepCollectionEquality().hash(_mediators),selectedMediatorDid,isDebugMode,shouldShowMeetingPlaceQR);
+int get hashCode => Object.hash(runtimeType,appInfo,numberOfTapsToUnlockDebug,const DeepCollectionEquality().hash(_mediators),selectedMediatorDid,isDebugMode,shouldShowMeetingPlaceQR,isAutomaticMediaDownloadEnabled);
 
 @override
 String toString() {
-  return 'SettingsScreenState(appInfo: $appInfo, numberOfTapsToUnlockDebug: $numberOfTapsToUnlockDebug, mediators: $mediators, selectedMediatorDid: $selectedMediatorDid, isDebugMode: $isDebugMode, shouldShowMeetingPlaceQR: $shouldShowMeetingPlaceQR)';
+  return 'SettingsScreenState(appInfo: $appInfo, numberOfTapsToUnlockDebug: $numberOfTapsToUnlockDebug, mediators: $mediators, selectedMediatorDid: $selectedMediatorDid, isDebugMode: $isDebugMode, shouldShowMeetingPlaceQR: $shouldShowMeetingPlaceQR, isAutomaticMediaDownloadEnabled: $isAutomaticMediaDownloadEnabled)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$SettingsScreenStateCopyWith<$Res> implements $SettingsScr
   factory _$SettingsScreenStateCopyWith(_SettingsScreenState value, $Res Function(_SettingsScreenState) _then) = __$SettingsScreenStateCopyWithImpl;
 @override @useResult
 $Res call({
- AppInfo? appInfo, int numberOfTapsToUnlockDebug, List<Mediator> mediators, String selectedMediatorDid, bool isDebugMode, bool shouldShowMeetingPlaceQR
+ AppInfo? appInfo, int numberOfTapsToUnlockDebug, List<Mediator> mediators, String selectedMediatorDid, bool isDebugMode, bool shouldShowMeetingPlaceQR, bool isAutomaticMediaDownloadEnabled
 });
 
 
@@ -274,7 +276,7 @@ class __$SettingsScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsScreenState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? appInfo = freezed,Object? numberOfTapsToUnlockDebug = null,Object? mediators = null,Object? selectedMediatorDid = null,Object? isDebugMode = null,Object? shouldShowMeetingPlaceQR = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? appInfo = freezed,Object? numberOfTapsToUnlockDebug = null,Object? mediators = null,Object? selectedMediatorDid = null,Object? isDebugMode = null,Object? shouldShowMeetingPlaceQR = null,Object? isAutomaticMediaDownloadEnabled = null,}) {
   return _then(_SettingsScreenState(
 appInfo: freezed == appInfo ? _self.appInfo : appInfo // ignore: cast_nullable_to_non_nullable
 as AppInfo?,numberOfTapsToUnlockDebug: null == numberOfTapsToUnlockDebug ? _self.numberOfTapsToUnlockDebug : numberOfTapsToUnlockDebug // ignore: cast_nullable_to_non_nullable
@@ -282,6 +284,7 @@ as int,mediators: null == mediators ? _self._mediators : mediators // ignore: ca
 as List<Mediator>,selectedMediatorDid: null == selectedMediatorDid ? _self.selectedMediatorDid : selectedMediatorDid // ignore: cast_nullable_to_non_nullable
 as String,isDebugMode: null == isDebugMode ? _self.isDebugMode : isDebugMode // ignore: cast_nullable_to_non_nullable
 as bool,shouldShowMeetingPlaceQR: null == shouldShowMeetingPlaceQR ? _self.shouldShowMeetingPlaceQR : shouldShowMeetingPlaceQR // ignore: cast_nullable_to_non_nullable
+as bool,isAutomaticMediaDownloadEnabled: null == isAutomaticMediaDownloadEnabled ? _self.isAutomaticMediaDownloadEnabled : isAutomaticMediaDownloadEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
