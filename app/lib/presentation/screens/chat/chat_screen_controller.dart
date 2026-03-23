@@ -28,6 +28,8 @@ import '../../../infrastructure/extensions/event_message_extensions.dart';
 import '../../../infrastructure/extensions/list_extensions.dart';
 import '../../../infrastructure/extensions/plain_text_message_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
+import '../../../infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
+import '../../../infrastructure/plugins/audio_attachments_plugin/recorded_audio_attachment.dart';
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
@@ -1052,10 +1054,19 @@ class ChatScreenController extends _$ChatScreenController
     required XFile file,
     required Duration duration,
   }) async {
+    final bytes = await file.readAsBytes();
+    final attachment = RecordedAudioAttachment(
+      base64: base64.encode(bytes),
+      pluginName: AudioAttachmentsPlugin.pluginName,
+      mediaType: 'audio/mp4',
+    );
+
     _logger.info(
       '''Voice message recorded: path=${file.path}, durationMs=${duration.inMilliseconds}''',
       name: _logKey,
     );
+
+    await sendAttachment('', [attachment]);
   }
 
   /// Loads an image attachment into the chat screen.

@@ -166,9 +166,10 @@ class _ChatMediaOptions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final availableAttachmentPlugins = ref.read(
-      availableAttachmentPluginsProvider,
-    );
+    final availableAttachmentPlugins = ref
+        .read(availableAttachmentPluginsProvider)
+        .where((plugin) => plugin is! AudioAttachmentsPlugin)
+        .toList();
 
     void sendEffect(ScreenEffect effect) {
       if (!context.mounted) return;

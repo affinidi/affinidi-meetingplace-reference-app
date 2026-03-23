@@ -5,6 +5,9 @@ import 'package:meeting_place_chat/src/sdk/chat.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 class FakeChatSdk implements MeetingPlaceChatSDK {
+  @override
+  String get ownMatrixUserId => '@fake-user:example.org';
+
   int _chatSessionStartedCalls = 0;
   int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =

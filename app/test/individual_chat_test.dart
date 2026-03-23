@@ -1,9 +1,14 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:camera/camera.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_screen_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
@@ -380,6 +385,44 @@ void main() {
         expect(find.text(l10n.generalPhoto), findsOneWidget);
         expect(find.text(l10n.generalBalloons), findsOneWidget);
         expect(find.text(l10n.generalConfetti), findsOneWidget);
+        expect(find.text('Audio'), findsNothing);
+      });
+
+      testWidgets('onVoiceMessageRecorded sends audio attachment', (
+        tester,
+      ) async {
+        final meetingPlaceChatSDK = FakeChatSdk();
+
+        await navigateToChatScreen(
+          tester,
+          contactId: contactId,
+          meetingPlaceChatSDK: meetingPlaceChatSDK,
+        );
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(Scaffold).first),
+        );
+        final controller = container.read(
+          chatScreenControllerProvider(contactId).notifier,
+        );
+        final voiceBytes = Uint8List.fromList(const [1, 2, 3, 4, 5]);
+
+        await controller.onVoiceMessageRecorded(
+          file: XFile.fromData(voiceBytes, path: 'voice-message.m4a'),
+          duration: const Duration(seconds: 2),
+        );
+        await tester.pump();
+
+        expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
+        final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
+        expect(sendCall['text'], '');
+        expect(sendCall['attachments'], isA<List<Attachment>>());
+
+        final attachments = sendCall['attachments'] as List<Attachment>;
+        expect(attachments, hasLength(1));
+        expect(attachments.first.format, 'mpx_audio_attachment_plugin');
+        expect(attachments.first.mediaType, 'audio/mp4');
+        expect(attachments.first.data?.base64, base64Encode(voiceBytes));
       });
 
       for (final effect in [Effect.balloons, Effect.confetti]) {
