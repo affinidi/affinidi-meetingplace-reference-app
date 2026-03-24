@@ -93,6 +93,11 @@ class _GroupMembersList extends ConsumerWidget {
     final isDebugMode = ref.watch(
       provider.select((state) => state.isDebugMode),
     );
+    final presences = ref.watch(
+      chatScreenControllerProvider(
+        _contactId,
+      ).select((state) => state.memberPresenceStatuses),
+    );
 
     String getMemberText(GroupMember member) {
       final isYou = (member.did == contact?.channelDid);
@@ -135,6 +140,7 @@ class _GroupMembersList extends ConsumerWidget {
             getMemberText(member),
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
           ),
+          trailing: !isDeleted ? _PresenceDot(presences[member.did]) : null,
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -193,5 +199,25 @@ class _GroupMemberIcon extends StatelessWidget {
       return const Icon(Icons.person, color: Colors.white, size: 18);
     }
     return const Icon(Icons.person, color: Colors.white, size: 18);
+  }
+}
+
+class _PresenceDot extends StatelessWidget {
+  const _PresenceDot(this.status);
+
+  final ContactPresenceStatus? status;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = switch (status) {
+      ContactPresenceStatus.online => Colors.green,
+      ContactPresenceStatus.offline => Colors.grey,
+      _ => Colors.grey.shade600,
+    };
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/widgets.dart';
@@ -38,6 +37,7 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_mentions_service.dart';
+import 'chat_presence_service.dart';
 import 'chat_screen_state.dart';
 
 part 'chat_screen_controller.g.dart';
@@ -55,22 +55,21 @@ class ChatScreenController extends _$ChatScreenController
   late final int _secondsToShowChatActivityIndicator = ref
       .read(environmentProvider)
       .chatActivityExpiresInSeconds;
-  late final int _chatPresenceIntervalInSeconds = ref
-      .read(environmentProvider)
-      .chatPresenceIntervalInSeconds;
   // Maximum typing indicators to prevent UI overflow on small screens
   static const int _maxNumberOfTypingMembersVisible = 4;
-  // Grace period to avoid blinking of presence indicator
-  static const int _presenceIndicatorGracePeriodSeconds = 1;
   static const _logKey = 'UXCHAT';
 
   late final messageTextController = TextEditingController();
   late final _logger = ref.read(appLoggerProvider);
+  late final _presence = ChatPresenceService(
+    presenceIntervalInSeconds: ref
+        .read(environmentProvider)
+        .chatPresenceIntervalInSeconds,
+  );
 
   chat.MeetingPlaceChatSDK? _chatSDK;
   chat.ChatStream? messagesSubscription;
   TimedAction? _sendChatActivityTimedAction;
-  TimedAction? _updateContactPresenceStatusTimedAction;
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
@@ -117,8 +116,8 @@ class ChatScreenController extends _$ChatScreenController
 
     ref.onDispose(() {
       _sendChatActivityTimedAction?.cancel();
-      _updateContactPresenceStatusTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
+      _presence.dispose();
 
       messagesSubscription?.dispose();
       messageTextController.removeListener(_onMessageTextChanged);
@@ -331,7 +330,19 @@ class ChatScreenController extends _$ChatScreenController
     if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
       final connection = await coreSdk.getConnectionOffer(channel.offerLink);
-      state = state.copyWith(group: group, offerName: connection?.offerName);
+      // Mark own presence as online immediately —
+      // self events are never received.
+      final selfDid = channel.permanentChannelDid;
+      state = state.copyWith(
+        group: group,
+        offerName: connection?.offerName,
+        memberPresenceStatuses: selfDid != null
+            ? {
+                ...state.memberPresenceStatuses,
+                selfDid: ContactPresenceStatus.online,
+              }
+            : state.memberPresenceStatuses,
+      );
     }
     _hideActivity();
   }
@@ -470,8 +481,23 @@ class ChatScreenController extends _$ChatScreenController
             .read(contactsServiceProvider.notifier)
             .updateContactLastKeepAliveMessage(channelDid, datePresence),
       );
-      _updateContactPresenceStatus(datePresence);
+
+      if (state.isGroupChat) {
+        _updateGroupMemberPresenceIfNeeded(plainTextMessage);
+      } else {
+        _updateContactPresenceStatus(datePresence);
+      }
     }
+  }
+
+  void _updateGroupMemberPresenceIfNeeded(chat.PlainTextMessage message) {
+    _presence.updateGroupMemberPresence(message, (did, status) {
+      final updated = Map<String, ContactPresenceStatus>.from(
+        state.memberPresenceStatuses,
+      );
+      updated[did] = status;
+      state = state.copyWith(memberPresenceStatuses: updated);
+    });
   }
 
   void _updateGroupDetails(chat.StreamData data, String channelDid) {
@@ -548,37 +574,9 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   void _updateContactPresenceStatus(DateTime datePresence) {
-    _updateContactPresenceStatusTimedAction?.cancel();
-
-    _updateContactPresenceStatusTimedAction ??= TimedAction(
-      onRun: (args) {
-        final now = clock.now();
-        final datePresence = args?[0] as DateTime? ?? now;
-        final hasReceivedAnyActivity = datePresence.toLocal().isAfter(
-          now.subtract(Duration(seconds: _chatPresenceIntervalInSeconds)),
-        );
-
-        state = state.copyWith(
-          contactPresenceStatus: hasReceivedAnyActivity
-              ? ContactPresenceStatus.online
-              : ContactPresenceStatus.offline,
-        );
-      },
-      onComplete: () {
-        Future.microtask(() {
-          state = state.copyWith(
-            contactPresenceStatus: ContactPresenceStatus.offline,
-          );
-        });
-      },
-      duration: Duration(
-        seconds:
-            _chatPresenceIntervalInSeconds +
-            _presenceIndicatorGracePeriodSeconds,
-      ),
-    );
-
-    _updateContactPresenceStatusTimedAction?.start(args: [datePresence]);
+    _presence.updateContactPresence(datePresence, (status) {
+      state = state.copyWith(contactPresenceStatus: status);
+    });
   }
 
   void _clearMembersTypingActivity({

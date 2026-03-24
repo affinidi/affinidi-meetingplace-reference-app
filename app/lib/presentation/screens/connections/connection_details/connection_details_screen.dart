@@ -26,6 +26,8 @@ import '../../../widgets/profile_circle_avatar.dart';
 import '../../../widgets/qr/qr_code_view.dart';
 import '../../media/image_view_screen/image_view_screen.dart';
 import 'connection_details_screen_controller.dart';
+import '../../chat/chat_screen_controller.dart';
+import '../../../../domain/models/contacts/contact_presence_status.dart';
 
 part 'connection_details_actions_bar.dart';
 part 'connection_details_display_name.dart';

@@ -28,6 +28,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     @Default(false) bool isInitialized,
     @Default(ContactPresenceStatus.unknown)
     ContactPresenceStatus contactPresenceStatus,
+    @Default({}) Map<String, ContactPresenceStatus> memberPresenceStatuses,
     ScreenEffect? effect,
     @Default({}) Map<String, Uint8List> attachmentsDataCache,
     String? notificationToken,
