@@ -2206,6 +2206,18 @@ abstract class AppLocalizations {
   /// **'Go Back'**
   String get goBack;
 
+  /// No description provided for @videoCallPermissionDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission Required'**
+  String get videoCallPermissionDeniedTitle;
+
+  /// No description provided for @videoCallPermissionDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current power level is {powerLevel}. A power level greater than 50 is required to join this video call. Please contact a group admin.'**
+  String videoCallPermissionDeniedMessage(int powerLevel);
+
   /// No description provided for @videoCallTitle.
   ///
   /// In en, this message translates to:

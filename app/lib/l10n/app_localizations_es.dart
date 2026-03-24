@@ -1517,6 +1517,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get goBack => 'Volver';
 
   @override
+  String get videoCallPermissionDeniedTitle => 'Permission Required';
+
+  @override
+  String videoCallPermissionDeniedMessage(int powerLevel) {
+    return 'Your current power level is $powerLevel. A power level greater than 50 is required to join this video call. Please contact a group admin.';
+  }
+
+  @override
   String get videoCallTitle => 'Group Call';
 
   @override
