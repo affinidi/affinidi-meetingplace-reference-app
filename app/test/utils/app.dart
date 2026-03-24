@@ -88,6 +88,7 @@ Future<void> startApp(
       ),
       availableAttachmentPluginsProvider.overrideWith(
         (ref) => [
+          AudioAttachmentsPlugin(),
           CameraAttachmentsPlugin(cacheManager: ref.read(cacheManagerProvider)),
           GalleryAttachmentsPlugin(
             cacheManager: ref.read(cacheManagerProvider),

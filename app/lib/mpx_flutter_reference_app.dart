@@ -13,6 +13,7 @@ export 'infrastructure/firebase_messaging/firebase_push_notification_messaging.d
 export 'infrastructure/loggers/app_logger/app_logger.dart';
 export 'infrastructure/loggers/error_logger/error_logger.dart';
 export 'infrastructure/loggers/riverpod_provider_logger/provider_debug_logger.dart';
+export 'infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 export 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
 export 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
 export 'infrastructure/providers/available_attachment_plugins_provider.dart';
