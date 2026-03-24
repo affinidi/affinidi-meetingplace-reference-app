@@ -42,12 +42,9 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
     // Auto-close on success.
     ref.listen(deploymentNotifierProvider, (_, next) {
       if (next is AsyncData && next.value != null) {
-        _autoCloseTimer ??= Timer(
-          const Duration(seconds: 2),
-          () {
-            if (mounted) Navigator.of(context).pop();
-          },
-        );
+        _autoCloseTimer ??= Timer(const Duration(seconds: 2), () {
+          if (mounted) Navigator.of(context).pop();
+        });
       }
     });
 
@@ -82,10 +79,9 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
           // Title
           Text(
             'Deploy as My Representative',
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(
@@ -93,11 +89,10 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
             'Your representative will respond on your behalf '
             'while you are in focus mode.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.7),
-                ),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -109,9 +104,7 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
           deployState.maybeWhen(
             data: (result) {
               if (result == null) return const SizedBox.shrink();
-              return _SuccessBanner(
-                vcId: result.vcId,
-              );
+              return _SuccessBanner(vcId: result.vcId);
             },
             orElse: () => const SizedBox.shrink(),
           ),
@@ -129,10 +122,9 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
             data: (result) {
               if (result != null) return const SizedBox.shrink();
               return FilledButton.icon(
-                onPressed: () =>
-                    ref.read(deploymentNotifierProvider.notifier).deploy(
-                          widget.ownerDid,
-                        ),
+                onPressed: () => ref
+                    .read(deploymentNotifierProvider.notifier)
+                    .deploy(widget.ownerDid),
                 icon: const Icon(Icons.verified_outlined, size: 18),
                 label: const Text('Issue VC & Activate Agent'),
               );
@@ -147,10 +139,9 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
               label: const Text('Issuing VC…'),
             ),
             orElse: () => FilledButton.icon(
-              onPressed: () =>
-                  ref.read(deploymentNotifierProvider.notifier).deploy(
-                        widget.ownerDid,
-                      ),
+              onPressed: () => ref
+                  .read(deploymentNotifierProvider.notifier)
+                  .deploy(widget.ownerDid),
               icon: const Icon(Icons.verified_outlined, size: 18),
               label: const Text('Issue VC & Activate Agent'),
             ),
@@ -195,8 +186,11 @@ class _SuccessBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.check_circle_outline,
-              color: Colors.green.shade700, size: 18),
+          Icon(
+            Icons.check_circle_outline,
+            color: Colors.green.shade700,
+            size: 18,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Column(

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,7 +41,17 @@ class AgentLearnService {
     required String messageText,
     List<Map<String, dynamic>>? recentHistory,
   }) {
-    if (!isLearningEnabled || _backendUrl.isEmpty) return;
+    if (!isLearningEnabled) {
+      debugPrint('[AgentLearn] skipped — learning toggle is OFF');
+      return;
+    }
+    if (_backendUrl.isEmpty) {
+      debugPrint('[AgentLearn] skipped — AGENT_BACKEND_URL is not configured');
+      return;
+    }
+    debugPrint(
+      '[AgentLearn] sending message to backend (ownerDid: $ownerDid, conv: $conversationId)',
+    );
     unawaited(
       _sendObservation(
         ownerDid: ownerDid,
@@ -60,7 +71,7 @@ class AgentLearnService {
     List<Map<String, dynamic>>? recentHistory,
   }) async {
     try {
-      await _client.post(
+      final response = await _client.post(
         Uri.parse('$_backendUrl/learn'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -72,8 +83,11 @@ class AgentLearnService {
           'timestamp': DateTime.now().toIso8601String(),
         }),
       );
-    } catch (_) {
-      // Fire-and-forget: never surface errors to the caller.
+      debugPrint(
+        '[AgentLearn] /learn response: ${response.statusCode} — ${response.body}',
+      );
+    } catch (e) {
+      debugPrint('[AgentLearn] /learn error: $e');
     }
   }
 }

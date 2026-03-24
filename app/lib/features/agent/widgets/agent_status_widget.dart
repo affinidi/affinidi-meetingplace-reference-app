@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../agent_feature.dart' show AgentLearnService;
 import '../models/agent_readiness_state.dart';
 import '../providers/agent_providers.dart';
 import '../services/agent_learn_service.dart' show AgentLearnService;
@@ -28,6 +28,9 @@ class _AgentStatusWidgetState extends ConsumerState<AgentStatusWidget> {
   void initState() {
     super.initState();
     _isLearning = ref.read(agentLearnServiceProvider).isLearningEnabled;
+    debugPrint(
+      '[AgentWidget] init — learning enabled: $_isLearning, ownerDid: ${widget.ownerDid}',
+    );
   }
 
   @override
@@ -49,11 +52,24 @@ class _AgentStatusWidgetState extends ConsumerState<AgentStatusWidget> {
               children: [
                 const Icon(Icons.smart_toy_outlined, size: 20),
                 const SizedBox(width: 8),
-                Text(
-                  'AI Personal Representative',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+                Expanded(
+                  child: Text(
+                    'AI Personal Representative',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh, size: 20),
+                  tooltip: 'Refresh readiness',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () {
+                    debugPrint(
+                      '[AgentWidget] manual refresh for ${widget.ownerDid}',
+                    );
+                    ref.invalidate(agentReadinessProvider(widget.ownerDid));
+                  },
                 ),
               ],
             ),

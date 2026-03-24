@@ -71,7 +71,7 @@ class SettingsScreen extends HookConsumerWidget {
                   const _VersionInfoSection(),
                   const _MeetingPlaceControlPlaneSection(),
                   const SizedBox(height: 24),
-                  AgentStatusWidget(ownerDid: ownerDid ?? ''),
+                  if (ownerDid != null) AgentStatusWidget(ownerDid: ownerDid),
                   const SizedBox(height: 24),
                   const _ServerSettingsSection(),
                   const SizedBox(height: 24),

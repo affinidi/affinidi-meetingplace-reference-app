@@ -7,6 +7,7 @@ class AgentConfig {
 
   static const String backendUrl = String.fromEnvironment(
     'AGENT_BACKEND_URL',
-    defaultValue: '',
+    defaultValue:
+        'https://8tqfn539mf.execute-api.ap-southeast-1.amazonaws.com/prod',
   );
 }

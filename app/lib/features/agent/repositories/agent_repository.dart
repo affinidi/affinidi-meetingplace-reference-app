@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/agent_deployment_exception.dart';
@@ -24,17 +25,23 @@ class AgentRepository {
   final String _backendUrl;
 
   Future<AgentReadinessState> getReadiness(String ownerDid) async {
+    debugPrint('[AgentRepo] polling /readiness for $ownerDid');
     try {
       final uri = Uri.parse(
         '$_backendUrl/readiness',
       ).replace(queryParameters: {'did': ownerDid});
       final response = await _client.get(uri);
+      debugPrint(
+        '[AgentRepo] /readiness response: ${response.statusCode} — ${response.body}',
+      );
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body) as Map<String, dynamic>;
         return AgentReadinessState.fromJson(json);
       }
+      debugPrint('[AgentRepo] /readiness non-200, returning initial state');
       return AgentReadinessState.initial();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[AgentRepo] /readiness error: $e');
       return AgentReadinessState.initial();
     }
   }

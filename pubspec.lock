@@ -985,10 +985,10 @@ packages:
     dependency: transitive
     description:
       name: json_annotation
-      sha256: cb09e7dac6210041fad964ed7fbee004f14258b4eca4040f72d1234062ace4c8
+      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
       url: "https://pub.dev"
     source: hosted
-    version: "4.11.0"
+    version: "4.9.0"
   json_ld_processor:
     dependency: transitive
     description:
@@ -997,6 +997,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  json_serializable:
+    dependency: transitive
+    description:
+      name: json_serializable
+      sha256: c50ef5fc083d5b5e12eef489503ba3bf5ccc899e487d691584699b4bdefeea8c
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.9.5"
   leak_tracker:
     dependency: transitive
     description:

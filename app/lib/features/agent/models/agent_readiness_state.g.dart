@@ -12,7 +12,8 @@ _AgentReadinessState _$AgentReadinessStateFromJson(Map<String, dynamic> json) =>
       statusLabel: json['statusLabel'] as String,
       isReady: json['isReady'] as bool,
       messagesObserved: (json['messagesObserved'] as num).toInt(),
-      conversationsObserved: (json['conversationsObserved'] as num).toInt(),
+      conversationsObserved:
+          (json['conversationsObserved'] as num?)?.toInt() ?? 0,
       whatsMissing:
           (json['whatsMissing'] as List<dynamic>?)
               ?.map((e) => e as String)

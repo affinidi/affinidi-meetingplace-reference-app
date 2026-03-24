@@ -228,14 +228,14 @@ return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.message
 @JsonSerializable()
 
 class _AgentReadinessState implements AgentReadinessState {
-  const _AgentReadinessState({required this.scorePercent, required this.statusLabel, required this.isReady, required this.messagesObserved, required this.conversationsObserved, final  List<String> whatsMissing = const [], this.lastAnalysedAt, this.persona}): _whatsMissing = whatsMissing;
+  const _AgentReadinessState({required this.scorePercent, required this.statusLabel, required this.isReady, required this.messagesObserved, this.conversationsObserved = 0, final  List<String> whatsMissing = const [], this.lastAnalysedAt, this.persona}): _whatsMissing = whatsMissing;
   factory _AgentReadinessState.fromJson(Map<String, dynamic> json) => _$AgentReadinessStateFromJson(json);
 
 @override final  int scorePercent;
 @override final  String statusLabel;
 @override final  bool isReady;
 @override final  int messagesObserved;
-@override final  int conversationsObserved;
+@override@JsonKey() final  int conversationsObserved;
  final  List<String> _whatsMissing;
 @override@JsonKey() List<String> get whatsMissing {
   if (_whatsMissing is EqualUnmodifiableListView) return _whatsMissing;

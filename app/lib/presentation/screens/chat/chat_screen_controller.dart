@@ -709,11 +709,26 @@ class ChatScreenController extends _$ChatScreenController
     // Fire-and-forget: ship outbound message to the agent learning backend.
     final ownerDid =
         ref.read(identitiesServiceProvider).currentIdentity?.did ?? '';
-    ref.read(agentLearnServiceProvider).observeOutboundMessage(
+    final recentHistory = state.messages
+        .whereType<chat.Message>()
+        .take(10)
+        .toList()
+        .reversed
+        .map<Map<String, dynamic>>(
+          (m) => {
+            'role': m.isFromMe ? 'user' : 'assistant',
+            'content': m.value,
+          },
+        )
+        .toList();
+    ref
+        .read(agentLearnServiceProvider)
+        .observeOutboundMessage(
           ownerDid: ownerDid,
           conversationId: state.contact?.channelDid ?? state.contact?.id ?? '',
           recipientDid: state.contact?.card.did ?? '',
           messageText: trimmedMessage,
+          recentHistory: recentHistory,
         );
   }
 

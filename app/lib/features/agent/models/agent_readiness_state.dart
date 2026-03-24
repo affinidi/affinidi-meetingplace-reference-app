@@ -12,7 +12,7 @@ abstract class AgentReadinessState with _$AgentReadinessState {
     required String statusLabel,
     required bool isReady,
     required int messagesObserved,
-    required int conversationsObserved,
+    @Default(0) int conversationsObserved,
     @Default([]) List<String> whatsMissing,
     DateTime? lastAnalysedAt,
     AgentPersona? persona,
