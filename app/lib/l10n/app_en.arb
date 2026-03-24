@@ -1430,6 +1430,19 @@
 	"cameraOpenSettings": "Open Settings",
 	"cameraNotAvailable": "Camera not available",
 	"goBack": "Go Back",
+	"videoCallPermissionDeniedTitle": "Permission Required",
+	"@videoCallPermissionDeniedTitle": {
+		"type": "text"
+	},
+	"videoCallPermissionDeniedMessage": "Your current power level is {powerLevel}. A power level greater than 50 is required to join this video call. Please contact a group admin.",
+	"@videoCallPermissionDeniedMessage": {
+		"type": "text",
+		"placeholders": {
+			"powerLevel": {
+				"type": "int"
+			}
+		}
+	},
 	"videoCallTitle": "Group Call",
 	"@videoCallTitle": {
 		"type": "text"

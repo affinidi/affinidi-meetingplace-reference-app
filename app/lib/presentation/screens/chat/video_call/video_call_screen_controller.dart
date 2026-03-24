@@ -60,6 +60,16 @@ class VideoCallScreenController extends _$VideoCallScreenController {
     try {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
 
+      final powerLevel = await sdk.getOwnPowerLevel(roomId: roomId);
+      if (powerLevel <= 50) {
+        state = state.copyWith(
+          status: VideoCallStatus.error,
+          error: 'Insufficient permission: your power level ($powerLevel) '
+              'must be greater than 50 to join this call.',
+        );
+        return;
+      }
+
       await _signalMatrixRTC(sdk);
       _subscribeToMatrixRTCEvents(sdk);
       _cacheLocalMatrixUserId(sdk);
