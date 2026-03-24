@@ -410,6 +410,10 @@ class ChatScreenController extends _$ChatScreenController
           groupMessageSenderName: groupMessageSenderName,
           contactName: contactName,
         );
+
+        if (state.isFocusModeActive) {
+          unawaited(_triggerAgentResponse(chatItem));
+        }
       }
     }
     _hideActivity();
@@ -730,6 +734,67 @@ class ChatScreenController extends _$ChatScreenController
           messageText: trimmedMessage,
           recentHistory: recentHistory,
         );
+  }
+
+  // ── Focus mode ──────────────────────────────────────────────────────────
+
+  void toggleFocusMode() {
+    state = state.copyWith(
+      isFocusModeActive: !state.isFocusModeActive,
+      agentSuggestion: null,
+      isAgentThinking: false,
+    );
+  }
+
+  void dismissSuggestion() {
+    state = state.copyWith(agentSuggestion: null, isAgentThinking: false);
+  }
+
+  void acceptSuggestion() {
+    final suggestion = state.agentSuggestion;
+    if (suggestion == null) return;
+    messageTextController.text = suggestion;
+    state = state.copyWith(agentSuggestion: null, isAgentThinking: false);
+    sendMessage();
+  }
+
+  Future<void> _triggerAgentResponse(chat.Message inboundMsg) async {
+    state = state.copyWith(isAgentThinking: true, agentSuggestion: null);
+
+    final ownerDid =
+        ref.read(identitiesServiceProvider).currentIdentity?.did ?? '';
+    if (ownerDid.isEmpty) {
+      state = state.copyWith(isAgentThinking: false);
+      return;
+    }
+
+    // Build conversation history: contact = 'user', owner = 'assistant'
+    final history = state.messages
+        .whereType<chat.Message>()
+        .take(20)
+        .toList()
+        .reversed
+        .map<Map<String, dynamic>>(
+          (m) => {
+            'role': m.isFromMe ? 'assistant' : 'user',
+            'content': m.value,
+          },
+        )
+        .toList();
+
+    final result = await ref.read(agentRepositoryProvider).getAgentResponse(
+      ownerDid: ownerDid,
+      inboundMessage: inboundMsg.value,
+      recentHistory: history,
+    );
+
+    // Discard if focus mode was toggled off while the request was in flight
+    if (!state.isFocusModeActive) return;
+
+    state = state.copyWith(
+      agentSuggestion: result?.response,
+      isAgentThinking: false,
+    );
   }
 
   Future<void> sendChatActivity() async {

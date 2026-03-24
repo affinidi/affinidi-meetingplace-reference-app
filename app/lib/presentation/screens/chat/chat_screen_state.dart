@@ -31,6 +31,9 @@ abstract class ChatScreenState with _$ChatScreenState {
     ScreenEffect? effect,
     @Default({}) Map<String, Uint8List> attachmentsDataCache,
     String? notificationToken,
+    @Default(false) bool isFocusModeActive,
+    String? agentSuggestion,
+    @Default(false) bool isAgentThinking,
   }) = _ChatScreenState;
 
   int getIndexOfNextMessageFromMe(int startingFrom) {

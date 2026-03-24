@@ -17,6 +17,8 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
+import '../../../core/config/agent_config.dart';
+import '../../../features/agent/providers/agent_providers.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/concierge_message_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -44,6 +46,8 @@ import 'chat_items/joining_group_chat_item.dart';
 import 'chat_items/leaving_group_chat_item.dart';
 import 'chat_screen_controller.dart';
 
+part 'agent_focus_banner.dart';
+part 'agent_suggestion_widget.dart';
 part 'awaiting_members_warning.dart';
 part 'chat_contact_display_name.dart';
 part 'chat_contact_presence_status.dart';
@@ -114,6 +118,7 @@ class ChatScreen extends HookConsumerWidget {
                   children: [
                     ChatActivityProgressIndicator(contactId: _contactId),
                     _NotificationsUnavailableWarning(_contactId),
+                    _AgentFocusBanner(_contactId),
                     Expanded(child: _ChatMessageList(_contactId)),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -121,6 +126,7 @@ class ChatScreen extends HookConsumerWidget {
                         contactId: _contactId,
                       ),
                     ),
+                    _AgentSuggestionWidget(_contactId),
                     _ChatTextEntry(contactId: _contactId),
                   ],
                 ),

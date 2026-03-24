@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../models/agent_deployment_exception.dart';
 import '../models/agent_readiness_state.dart';
+import '../models/agent_response.dart';
 import '../models/deployment_result.dart';
 
 /// Data-access layer for the AI Personal Representative backend.
@@ -43,6 +44,34 @@ class AgentRepository {
     } catch (e) {
       debugPrint('[AgentRepo] /readiness error: $e');
       return AgentReadinessState.initial();
+    }
+  }
+
+  Future<AgentResponse?> getAgentResponse({
+    required String ownerDid,
+    required String inboundMessage,
+    required List<Map<String, dynamic>> recentHistory,
+  }) async {
+    debugPrint('[AgentRepo] calling /respond for $ownerDid');
+    try {
+      final response = await _client.post(
+        Uri.parse('$_backendUrl/respond'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'ownerDid': ownerDid,
+          'inboundMessage': inboundMessage,
+          'recentHistory': recentHistory,
+        }),
+      );
+      debugPrint('[AgentRepo] /respond: ${response.statusCode} — ${response.body}');
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        return AgentResponse.fromJson(json);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('[AgentRepo] /respond error: $e');
+      return null;
     }
   }
 
