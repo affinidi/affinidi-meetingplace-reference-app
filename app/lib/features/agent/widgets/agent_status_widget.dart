@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../core/config/agent_config.dart';
 import '../models/agent_readiness_state.dart';
 import '../providers/agent_providers.dart';
+import '../screens/agent_onboarding_screen.dart';
 import '../services/agent_learn_service.dart' show AgentLearnService;
 import 'deploy_agent_sheet.dart';
 
@@ -211,9 +213,32 @@ class _ReadinessSection extends ConsumerWidget {
             label: const Text('Deploy as My Representative'),
             style: FilledButton.styleFrom(backgroundColor: Colors.green),
           ),
+        ] else if (AgentConfig.backendUrl.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: () => _openOnboarding(context, ref),
+            icon: const Icon(Icons.auto_fix_high_outlined, size: 16),
+            label: const Text('Quick Setup'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.deepPurpleAccent,
+              side: const BorderSide(color: Colors.deepPurpleAccent),
+            ),
+          ),
         ],
       ],
     );
+  }
+
+  Future<void> _openOnboarding(BuildContext context, WidgetRef ref) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => AgentOnboardingScreen(ownerDid: ownerDid),
+      ),
+    );
+    if (result == true) {
+      ref.invalidate(agentReadinessProvider(ownerDid));
+    }
   }
 
   void _openDeploySheet(BuildContext context, WidgetRef ref) {

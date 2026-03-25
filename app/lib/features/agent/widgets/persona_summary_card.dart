@@ -461,39 +461,38 @@ class _HardLimitsSection extends StatelessWidget {
           ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 6),
-        Wrap(
-          spacing: 6,
-          runSpacing: 4,
-          children: limits
-              .map(
-                (l) => Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 3,
+        for (final l in limits)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade200),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 1),
+                    child: Icon(
+                      Icons.block,
+                      size: 11,
+                      color: Colors.red.shade600,
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.shade200),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      l,
+                      style: TextStyle(fontSize: 11, color: Colors.red.shade700),
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.block, size: 11, color: Colors.red.shade600),
-                      const SizedBox(width: 4),
-                      Text(
-                        l,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.red.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-              .toList(),
-        ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }

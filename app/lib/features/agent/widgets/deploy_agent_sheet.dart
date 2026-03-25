@@ -48,113 +48,123 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
       }
     });
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 12,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.85;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: maxHeight),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 12,
+          bottom: bottomInset + 24,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // Title
-          Text(
-            'Deploy as My Representative',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Confirming will issue an AgentConfigVC into your Affinidi Vault. '
-            'Your representative will respond on your behalf '
-            'while you are in focus mode.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(
+            // Title
+            Text(
+              'Deploy as My Representative',
+              style: Theme.of(
                 context,
-              ).colorScheme.onSurface.withValues(alpha: 0.7),
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            Text(
+              'Confirming will issue an AgentConfigVC into your Affinidi Vault. '
+              'Your representative will respond on your behalf '
+              'while you are in focus mode.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+            const SizedBox(height: 16),
 
-          // Persona summary
-          PersonaSummaryCard(readiness: widget.readiness),
-          const SizedBox(height: 16),
+            // Persona summary — scrollable so tall cards don't overflow
+            Flexible(
+              child: SingleChildScrollView(
+                child: PersonaSummaryCard(readiness: widget.readiness),
+              ),
+            ),
+            const SizedBox(height: 16),
 
-          // Success banner
-          deployState.maybeWhen(
-            data: (result) {
-              if (result == null) return const SizedBox.shrink();
-              return _SuccessBanner(vcId: result.vcId);
-            },
-            orElse: () => const SizedBox.shrink(),
-          ),
+            // Success banner
+            deployState.maybeWhen(
+              data: (result) {
+                if (result == null) return const SizedBox.shrink();
+                return _SuccessBanner(vcId: result.vcId);
+              },
+              orElse: () => const SizedBox.shrink(),
+            ),
 
-          // Error banner
-          deployState.maybeWhen(
-            error: (err, _) => _ErrorBanner(message: err.toString()),
-            orElse: () => const SizedBox.shrink(),
-          ),
+            // Error banner
+            deployState.maybeWhen(
+              error: (err, _) => _ErrorBanner(message: err.toString()),
+              orElse: () => const SizedBox.shrink(),
+            ),
 
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-          // Primary action button
-          deployState.maybeWhen(
-            data: (result) {
-              if (result != null) return const SizedBox.shrink();
-              return FilledButton.icon(
+            // Primary action button
+            deployState.maybeWhen(
+              data: (result) {
+                if (result != null) return const SizedBox.shrink();
+                return FilledButton.icon(
+                  onPressed: () => ref
+                      .read(deploymentNotifierProvider.notifier)
+                      .deploy(widget.ownerDid),
+                  icon: const Icon(Icons.verified_outlined, size: 18),
+                  label: const Text('Issue VC & Activate Agent'),
+                );
+              },
+              loading: () => FilledButton.icon(
+                onPressed: null,
+                icon: const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                label: const Text('Issuing VC…'),
+              ),
+              orElse: () => FilledButton.icon(
                 onPressed: () => ref
                     .read(deploymentNotifierProvider.notifier)
                     .deploy(widget.ownerDid),
                 icon: const Icon(Icons.verified_outlined, size: 18),
                 label: const Text('Issue VC & Activate Agent'),
-              );
-            },
-            loading: () => FilledButton.icon(
-              onPressed: null,
-              icon: const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              label: const Text('Issuing VC…'),
             ),
-            orElse: () => FilledButton.icon(
-              onPressed: () => ref
-                  .read(deploymentNotifierProvider.notifier)
-                  .deploy(widget.ownerDid),
-              icon: const Icon(Icons.verified_outlined, size: 18),
-              label: const Text('Issue VC & Activate Agent'),
+
+            const SizedBox(height: 8),
+
+            // Cancel button
+            OutlinedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
             ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Cancel button
-          OutlinedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

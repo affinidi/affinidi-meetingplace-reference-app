@@ -31,7 +31,7 @@ class _AgentSuggestionWidget extends ConsumerWidget {
             color: Colors.deepPurpleAccent.withValues(alpha: 0.45),
           ),
         ),
-        child: isThinking ? _buildThinking() : _buildSuggestion(context, ref, provider, suggestion!),
+        child: isThinking ? _buildThinking() : _buildSuggestion(context, ref, suggestion!),
       ),
     );
   }
@@ -57,9 +57,10 @@ class _AgentSuggestionWidget extends ConsumerWidget {
   Widget _buildSuggestion(
     BuildContext context,
     WidgetRef ref,
-    AutoDisposeNotifierProvider<ChatScreenController, ChatScreenState> provider,
     String suggestion,
-  ) =>
+  ) {
+    final provider = chatScreenControllerProvider(_contactId);
+    return
       Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -127,4 +128,5 @@ class _AgentSuggestionWidget extends ConsumerWidget {
           ),
         ],
       );
+  }
 }

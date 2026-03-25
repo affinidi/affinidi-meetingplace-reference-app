@@ -47,6 +47,25 @@ class AgentRepository {
     }
   }
 
+  Future<bool> submitOnboarding({
+    required String ownerDid,
+    required Map<String, dynamic> answers,
+  }) async {
+    debugPrint('[AgentRepo] submitting onboarding for $ownerDid');
+    try {
+      final response = await _client.post(
+        Uri.parse('$_backendUrl/onboard'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'ownerDid': ownerDid, 'answers': answers}),
+      );
+      debugPrint('[AgentRepo] /onboard: ${response.statusCode} — ${response.body}');
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint('[AgentRepo] /onboard error: $e');
+      return false;
+    }
+  }
+
   Future<AgentResponse?> getAgentResponse({
     required String ownerDid,
     required String inboundMessage,
