@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
+import '../../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/channel_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -24,10 +25,9 @@ import '../../../widgets/images/group_image.dart';
 import '../../../widgets/mnemonic_pill.dart';
 import '../../../widgets/profile_circle_avatar.dart';
 import '../../../widgets/qr/qr_code_view.dart';
+import '../../chat/chat_screen_controller.dart';
 import '../../media/image_view_screen/image_view_screen.dart';
 import 'connection_details_screen_controller.dart';
-import '../../chat/chat_screen_controller.dart';
-import '../../../../domain/models/contacts/contact_presence_status.dart';
 
 part 'connection_details_actions_bar.dart';
 part 'connection_details_display_name.dart';
