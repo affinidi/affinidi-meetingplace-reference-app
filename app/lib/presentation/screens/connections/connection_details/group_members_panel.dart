@@ -88,15 +88,21 @@ class _GroupMembersList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = connectionDetailsScreenControllerProvider(_contactId);
+    final controller = ref.read(provider.notifier);
     final contact = ref.watch(provider.select((state) => state.contact));
     final members = ref.watch(provider.members);
     final isDebugMode = ref.watch(
       provider.select((state) => state.isDebugMode),
     );
+
     final presences = ref.watch(
       chatScreenControllerProvider(
         _contactId,
       ).select((state) => state.memberPresenceStatuses),
+    );
+
+    final isCurrentUserGroupAdmin = ref.watch(
+      provider.select((state) => state.connection?.ownedByMe ?? false),
     );
 
     String getMemberText(GroupMember member) {
@@ -114,6 +120,96 @@ class _GroupMembersList extends ConsumerWidget {
       ].join(' ');
     }
 
+    Future<void> setMemberPowerLevel(GroupMember member) async {
+      // Capture context-dependent objects before any async gap so snackbars
+      // are shown even if the widget rebuilds during an await.
+      final messenger = ScaffoldMessenger.of(context);
+      final l10n = context.l10n;
+
+      try {
+        final currentPowerLevel = await controller.getMemberPowerLevel(
+          memberDid: member.did,
+        );
+        // context.mounted is still required here because showModalBottomSheet
+        // needs a live BuildContext to push the sheet route.
+        if (!context.mounted) return;
+
+        final selectedPowerLevel = await showModalBottomSheet<int>(
+          context: context,
+          builder: (sheetContext) {
+            Widget option(int powerLevel, String label) {
+              final selected = currentPowerLevel == powerLevel;
+              return ListTile(
+                title: Text(
+                  label,
+                  style: const TextStyle(color: Colors.black87),
+                ),
+                trailing: selected
+                    ? const Icon(Icons.check, color: Colors.green)
+                    : null,
+                onTap: () => Navigator.of(sheetContext).pop(powerLevel),
+              );
+            }
+
+            return Theme(
+              data: ThemeData.light(),
+              child: SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      child: Text(
+                        l10n.setPowerLevelTitle,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    option(0, l10n.setPowerLevelMember),
+                    option(50, l10n.setPowerLevelModerator),
+                    option(100, l10n.setPowerLevelAdmin),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+
+        if (selectedPowerLevel == null ||
+            selectedPowerLevel == currentPowerLevel) {
+          return;
+        }
+
+        await controller.setMemberPowerLevel(
+          memberDid: member.did,
+          powerLevel: selectedPowerLevel,
+        );
+
+        // Matrix state propagation is eventually consistent on the local
+        // client. Refresh the screen state best-effort, but do not convert
+        // delayed sync into a hard failure.
+        try {
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+          await controller.initialize();
+        } catch (_) {}
+
+        // Use pre-captured messenger — fires even if context is stale.
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('${l10n.setPowerLevelSuccess} ($selectedPowerLevel)'),
+          ),
+        );
+      } catch (e) {
+        messenger.showSnackBar(
+          SnackBar(content: Text('${l10n.setPowerLevelFailure}: $e')),
+        );
+      }
+    }
+
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
@@ -121,8 +217,12 @@ class _GroupMembersList extends ConsumerWidget {
       itemBuilder: (context, index) {
         final member = members[index];
         final isDeleted = member.status == GroupMemberStatus.deleted;
+        final isYou = member.did == contact?.channelDid;
 
         return ListTile(
+          onTap: isCurrentUserGroupAdmin && !isDeleted && !isYou
+              ? () => setMemberPowerLevel(member)
+              : null,
           leading: ClipRRect(
             borderRadius: BorderRadius.circular(6.0),
             child: Container(
@@ -140,7 +240,6 @@ class _GroupMembersList extends ConsumerWidget {
             getMemberText(member),
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
           ),
-          trailing: !isDeleted ? _PresenceDot(presences[member.did]) : null,
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -163,11 +262,63 @@ class _GroupMembersList extends ConsumerWidget {
                   color: isDeleted ? Colors.red : Colors.white70,
                 ),
               ),
+              _GroupMemberPowerLevelText(
+                contactId: _contactId,
+                memberDid: member.did,
+                isDeleted: isDeleted,
+              ),
             ],
           ),
+          trailing: isDeleted
+              ? null
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _PresenceDot(presences[member.did]),
+                    if (isCurrentUserGroupAdmin && !isYou) ...[
+                      const SizedBox(width: 8),
+                      const Icon(Icons.manage_accounts_outlined),
+                    ],
+                  ],
+                ),
         );
       },
       separatorBuilder: (context, index) => const Divider(),
+    );
+  }
+}
+
+class _GroupMemberPowerLevelText extends ConsumerWidget {
+  const _GroupMemberPowerLevelText({
+    required this.contactId,
+    required this.memberDid,
+    required this.isDeleted,
+  });
+
+  final String contactId;
+  final String memberDid;
+  final bool isDeleted;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (isDeleted) return const SizedBox.shrink();
+
+    final provider = connectionDetailsScreenControllerProvider(contactId);
+    final controller = ref.read(provider.notifier);
+
+    return FutureBuilder<int>(
+      future: controller.getMemberPowerLevel(memberDid: memberDid),
+      builder: (context, snapshot) {
+        final powerLevel = snapshot.data;
+        if (powerLevel == null) {
+          return const SizedBox.shrink();
+        }
+
+        return Text(
+          'Power level: $powerLevel',
+          style: const TextStyle(fontSize: 12, color: Colors.white70),
+        );
+      },
     );
   }
 }

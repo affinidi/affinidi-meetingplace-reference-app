@@ -1520,5 +1520,29 @@
 				"type": "int"
 			}
 		}
+	},
+	"setPowerLevelTitle": "Set Power Level",
+	"@setPowerLevelTitle": {
+		"type": "text"
+	},
+	"setPowerLevelMember": "Member (0) - no video call",
+	"@setPowerLevelMember": {
+		"type": "text"
+	},
+	"setPowerLevelModerator": "Moderator (50) - no video call",
+	"@setPowerLevelModerator": {
+		"type": "text"
+	},
+	"setPowerLevelAdmin": "Admin (100) - can video call",
+	"@setPowerLevelAdmin": {
+		"type": "text"
+	},
+	"setPowerLevelSuccess": "Power level updated successfully",
+	"@setPowerLevelSuccess": {
+		"type": "text"
+	},
+	"setPowerLevelFailure": "Failed to update power level",
+	"@setPowerLevelFailure": {
+		"type": "text"
 	}
 }

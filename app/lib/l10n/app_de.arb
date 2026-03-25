@@ -358,5 +358,11 @@
 	"chatNotificationsWhyLink": "Warum?",
 	"chatNotificationsWhyNote": "Sie sehen neue Nachrichten nur, wenn Sie sich im Chat befinden. Es wird keine Abzeichenaktualisierungen oder Benachrichtigungen geben, die Sie darüber informieren, dass neue Nachrichten eingegangen sind, selbst wenn die App geöffnet ist.",
 	"chatNotificationsWhyTitle": "Warum keine Push-Benachrichtigungen?",
+	"setPowerLevelTitle": "Set Power Level",
+	"setPowerLevelMember": "Member (0) - no video call",
+	"setPowerLevelModerator": "Moderator (50) - no video call",
+	"setPowerLevelAdmin": "Admin (100) - can video call",
+	"setPowerLevelSuccess": "Power level updated successfully",
+	"setPowerLevelFailure": "Failed to update power level",
 	"goBack": "Zurück gehen"
 }

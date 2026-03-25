@@ -1573,4 +1573,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String videoCallShowMore(int count) {
     return '+$count more';
   }
+
+  @override
+  String get setPowerLevelTitle => 'Set Power Level';
+
+  @override
+  String get setPowerLevelMember => 'Member (0) - no video call';
+
+  @override
+  String get setPowerLevelModerator => 'Moderator (50) - no video call';
+
+  @override
+  String get setPowerLevelAdmin => 'Admin (100) - can video call';
+
+  @override
+  String get setPowerLevelSuccess => 'Power level updated successfully';
+
+  @override
+  String get setPowerLevelFailure => 'Failed to update power level';
 }

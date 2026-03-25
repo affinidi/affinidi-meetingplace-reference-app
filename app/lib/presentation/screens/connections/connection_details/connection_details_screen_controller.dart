@@ -227,6 +227,39 @@ class ConnectionDetailsScreenController
     state = state.copyWith(showMnemonic: val);
   }
 
+  Future<int> getMemberPowerLevel({required String memberDid}) async {
+    final roomId = state.group?.matrixRoomId;
+    if (roomId == null) {
+      throw AppException(
+        'Group does not have a valid room ID',
+        code: AppExceptionType.missingChannel.name,
+      );
+    }
+
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    return coreSdk.getMemberPowerLevel(roomId: roomId, targetDid: memberDid);
+  }
+
+  Future<void> setMemberPowerLevel({
+    required String memberDid,
+    required int powerLevel,
+  }) async {
+    final roomId = state.group?.matrixRoomId;
+    if (roomId == null) {
+      throw AppException(
+        'Group does not have a valid room ID',
+        code: AppExceptionType.missingChannel.name,
+      );
+    }
+
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    await coreSdk.setMemberPowerLevel(
+      roomId: roomId,
+      targetDid: memberDid,
+      powerLevel: powerLevel,
+    );
+  }
+
   Future<Uint8List> getImageBytes({
     required bool hasOtherPartyPic,
     required String? otherPartyProfilePic,
