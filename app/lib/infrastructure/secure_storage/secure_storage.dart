@@ -232,6 +232,25 @@ class SecureStorage implements KeyRepository, KeyStore {
     );
   }
 
+  static const _matrixLoginKey = 'matrix_login';
+
+  /// Saves the Matrix login JWT.
+  @override
+  Future<void> saveMatrixLoginCredential({required String jwt}) =>
+      _secureStorage.write(key: _matrixLoginKey, value: jwt);
+
+  /// Gets the stored Matrix login JWT.
+  ///
+  /// Returns null if no credential is stored.
+  @override
+  Future<String?> getMatrixLoginCredential() =>
+      _secureStorage.read(key: _matrixLoginKey);
+
+  /// Removes the stored Matrix login JWT.
+  @override
+  Future<void> removeMatrixLoginCredential() =>
+      _secureStorage.delete(key: _matrixLoginKey);
+
   /// Gets the stored push notification token.
   ///
   /// Returns null if no token is stored.
