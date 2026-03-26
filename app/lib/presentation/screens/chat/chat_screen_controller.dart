@@ -670,12 +670,22 @@ class ChatScreenController extends _$ChatScreenController
 
     final mentionUserIds = await _resolveMentionUserIds(trimmedMessage);
 
-    unawaited(
-      _chatSDK?.sendTextMessage(trimmedMessage, mentionUserIds: mentionUserIds),
-    );
-    _sendChatActivityTimedAction?.cancel();
-    if (messageTextController.text == originalText) {
-      messageTextController.clear();
+    try {
+      await _chatSDK?.sendTextMessage(
+        trimmedMessage,
+        mentionUserIds: mentionUserIds,
+      );
+      _sendChatActivityTimedAction?.cancel();
+      if (messageTextController.text == originalText) {
+        messageTextController.clear();
+      }
+    } catch (e, st) {
+      _logger.error(
+        'Failed to send chat message',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
     }
   }
 
