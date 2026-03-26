@@ -134,6 +134,14 @@ class Environment {
     );
     return value.isEmpty ? null : value;
   }
+
+  String? get conciergeAgentMnemonic {
+    const value = String.fromEnvironment(
+      'CONCIERGE_AGENT_MNEMONIC',
+      defaultValue: '',
+    );
+    return value.isEmpty ? null : value;
+  }
 }
 
 Provider<Environment> environmentProvider = Provider<Environment>((ref) {

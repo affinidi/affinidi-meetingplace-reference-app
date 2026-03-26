@@ -18,19 +18,19 @@ class _AiAgentItem {
   final String? mnemonic;
 }
 
-const _hardcodedAgents = [
+List<_AiAgentItem> _hardcodedAgents(Environment environment) => [
   _AiAgentItem(
     icon: '🧑‍💼',
     name: 'Concierge',
     description: 'Your personal meeting assistant',
-    mnemonic: 'agent-affinidi-1006',
+    mnemonic: environment.conciergeAgentMnemonic,
   ),
-  _AiAgentItem(
+  const _AiAgentItem(
     icon: '📊',
     name: 'Analyst',
     description: 'Insights, summaries and data help',
   ),
-  _AiAgentItem(
+  const _AiAgentItem(
     icon: '🗓️',
     name: 'Scheduler',
     description: 'Booking, reminders and calendar tasks',
@@ -61,15 +61,16 @@ class _AiAgentPicker extends ConsumerWidget {
     final controller = ref.read(
       chatScreenControllerProvider(_contactId).notifier,
     );
+    final agents = _hardcodedAgents(ref.read(environmentProvider));
 
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
       child: BottomSheetMenu(
         showHandle: true,
         header: 'Invite AI Agent',
-        itemCount: _hardcodedAgents.length,
+        itemCount: agents.length,
         itemBuilder: (context, index) {
-          final agent = _hardcodedAgents[index];
+          final agent = agents[index];
           final hasMnemonic = agent.mnemonic != null;
           return ListTile(
             enabled: hasMnemonic,

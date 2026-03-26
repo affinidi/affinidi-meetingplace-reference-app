@@ -13,20 +13,19 @@ class ChatMentionsService {
   /// Returns the Matrix user IDs that should be included in `m.mentions` for
   /// [messageText], or `null` if no mentions were found.
   ///
-  /// Looks up each mentioned member's Matrix user ID via [getChannelByDid].
+  /// Looks up each mentioned member's Matrix user ID via [resolveMatrixUserId].
   Future<List<String>?> resolveMentionUserIds(
     String messageText,
     sdk.Group group,
-    Future<sdk.Channel?> Function(String did) getChannelByDid,
+    Future<String> Function(String did) resolveMatrixUserId,
   ) async {
     final memberDids = extractMentionedMemberDids(messageText, group);
     if (memberDids.isEmpty) return null;
 
     final matrixUserIds = <String>{};
     for (final did in memberDids) {
-      final channel = await getChannelByDid(did);
-      final matrixUserId = channel?.otherPartyMatrixUserId;
-      if (matrixUserId != null && matrixUserId.isNotEmpty) {
+      final matrixUserId = await resolveMatrixUserId(did);
+      if (matrixUserId.isNotEmpty) {
         matrixUserIds.add(matrixUserId);
       }
     }

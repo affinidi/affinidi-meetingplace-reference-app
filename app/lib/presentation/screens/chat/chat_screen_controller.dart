@@ -696,10 +696,14 @@ class ChatScreenController extends _$ChatScreenController
     if (group == null) return null;
 
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    final senderDid = state.contact?.channelDid;
+    if (senderDid == null || senderDid.isEmpty) return null;
+
     return _mentions.resolveMentionUserIds(
       messageText,
       group,
-      coreSdk.getChannelByOtherPartyPermanentDid,
+      (targetDid) =>
+          coreSdk.matrixUserIdForDid(did: senderDid, targetDid: targetDid),
     );
   }
 
