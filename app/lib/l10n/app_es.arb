@@ -358,5 +358,11 @@
 	"chatNotificationsWhyLink": "¿Por qué?",
 	"chatNotificationsWhyNote": "Solo verás mensajes nuevos cuando estés en el chat. No habrá actualizaciones de insignias ni notificaciones que te informen que han llegado mensajes nuevos, incluso si la aplicación está abierta.",
 	"chatNotificationsWhyTitle": "¿Por qué no hay notificaciones push?",
+	"setPowerLevelTitle": "Set Power Level",
+	"setPowerLevelMember": "Member (0) - no video call",
+	"setPowerLevelModerator": "Moderator (50) - no video call",
+	"setPowerLevelVideoCallAllowance": "Admin (100) - can video call",
+	"setPowerLevelSuccess": "Power level updated successfully",
+	"setPowerLevelFailure": "Failed to update power level",
 	"goBack": "Volver"
 }

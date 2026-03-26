@@ -2206,6 +2206,18 @@ abstract class AppLocalizations {
   /// **'Go Back'**
   String get goBack;
 
+  /// No description provided for @videoCallPermissionDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission Required'**
+  String get videoCallPermissionDeniedTitle;
+
+  /// No description provided for @videoCallPermissionDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your current power level is {powerLevel}. A power level greater than 50 is required to join this video call. Please contact a group admin.'**
+  String videoCallPermissionDeniedMessage(int powerLevel);
+
   /// No description provided for @videoCallTitle.
   ///
   /// In en, this message translates to:
@@ -2289,6 +2301,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'+{count} more'**
   String videoCallShowMore(int count);
+
+  /// No description provided for @setPowerLevelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Power Level'**
+  String get setPowerLevelTitle;
+
+  /// No description provided for @setPowerLevelMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member (0) - no video call'**
+  String get setPowerLevelMember;
+
+  /// No description provided for @setPowerLevelModerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderator (50) - no video call'**
+  String get setPowerLevelModerator;
+
+  /// No description provided for @setPowerLevelVideoCallAllowance.
+  ///
+  /// In en, this message translates to:
+  /// **'Video Call Allowance (99) - video call allowed'**
+  String get setPowerLevelVideoCallAllowance;
+
+  /// No description provided for @setPowerLevelSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Power level updated successfully'**
+  String get setPowerLevelSuccess;
+
+  /// No description provided for @setPowerLevelFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update power level'**
+  String get setPowerLevelFailure;
 }
 
 class _AppLocalizationsDelegate

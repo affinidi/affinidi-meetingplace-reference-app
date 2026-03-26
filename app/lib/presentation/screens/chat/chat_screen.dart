@@ -34,6 +34,7 @@ import '../../../infrastructure/plugins/audio_attachments_plugin/audio_attachmen
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/permission_service/permission_service.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../effects/balloon/ballon_effect.dart';
@@ -123,10 +124,51 @@ class ChatScreen extends HookConsumerWidget {
               return IconButton(
                 icon: const Icon(Icons.video_call_outlined),
                 tooltip: 'Start group call',
-                onPressed: () => VideoCallRoute(
-                  contactId: _contactId,
-                  matrixRoomId: matrixRoomId,
-                ).go(context),
+                onPressed: () async {
+                  try {
+                    final sdk = await ref.read(meetingPlaceSdkProvider.future);
+                    final powerLevel = await sdk.getOwnPowerLevel(
+                      roomId: matrixRoomId,
+                    );
+                    if (powerLevel <= 50) {
+                      if (!context.mounted) return;
+                      await showDialog<void>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text(
+                            context.l10n.videoCallPermissionDeniedTitle,
+                          ),
+                          content: Text(
+                            context.l10n.videoCallPermissionDeniedMessage(
+                              powerLevel,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(),
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        ),
+                      );
+                      return;
+                    }
+                    if (!context.mounted) return;
+                    VideoCallRoute(
+                      contactId: _contactId,
+                      matrixRoomId: matrixRoomId,
+                    ).go(context);
+                  } catch (_) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Unable to verify permissions. Please try again.',
+                        ),
+                      ),
+                    );
+                  }
+                },
               );
             },
           ),

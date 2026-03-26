@@ -17,6 +17,7 @@ abstract class ConnectionDetailsScreenState
     ConnectionOffer? connection,
     Identity? identity,
     Group? group,
+    @Default(<String, int>{}) Map<String, int> memberPowerLevels,
     @Default(false) bool showDeletedMembers,
     @Default('') String mediatorName,
     @Default(false) bool isDebugMode,

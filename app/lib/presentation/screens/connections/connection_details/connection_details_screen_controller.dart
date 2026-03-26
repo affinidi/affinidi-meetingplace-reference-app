@@ -227,6 +227,71 @@ class ConnectionDetailsScreenController
     state = state.copyWith(showMnemonic: val);
   }
 
+  Future<int> getMemberPowerLevel({required String memberDid}) async {
+    final cachedPowerLevel = state.memberPowerLevels[memberDid];
+    if (cachedPowerLevel != null) {
+      return cachedPowerLevel;
+    }
+
+    final roomId = state.group?.matrixRoomId;
+    if (roomId == null) {
+      throw AppException(
+        'Group does not have a valid room ID',
+        code: AppExceptionType.missingChannel.name,
+      );
+    }
+
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    final powerLevel = await coreSdk.getMemberPowerLevel(
+      roomId: roomId,
+      targetDid: memberDid,
+      forceSync: true,
+    );
+    state = state.copyWith(
+      memberPowerLevels: {...state.memberPowerLevels, memberDid: powerLevel},
+    );
+    return powerLevel;
+  }
+
+  Future<void> setMemberPowerLevel({
+    required String memberDid,
+    required int powerLevel,
+  }) async {
+    final roomId = state.group?.matrixRoomId;
+    if (roomId == null) {
+      throw AppException(
+        'Group does not have a valid room ID',
+        code: AppExceptionType.missingChannel.name,
+      );
+    }
+
+    final ownerDid = state.group?.ownerDid;
+    if (ownerDid == null) {
+      throw AppException(
+        'Group does not have an owner DID',
+        code: AppExceptionType.missingChannel.name,
+      );
+    }
+
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+
+    // Background member-join operations (joinRoom → ensureLoggedIn(memberDid))
+    // can overwrite _activeClient to a member's Matrix session (PL 0).
+    // Re-activate the owner's session before sending the power_levels state
+    // event so the homeserver sees a PL 100 caller.
+    await coreSdk.loginToMatrixServer(ownerDid);
+
+    await coreSdk.setMemberPowerLevel(
+      roomId: roomId,
+      targetDid: memberDid,
+      powerLevel: powerLevel,
+    );
+
+    state = state.copyWith(
+      memberPowerLevels: {...state.memberPowerLevels, memberDid: powerLevel},
+    );
+  }
+
   Future<Uint8List> getImageBytes({
     required bool hasOtherPartyPic,
     required String? otherPartyProfilePic,

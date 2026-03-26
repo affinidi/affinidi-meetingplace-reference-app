@@ -1525,6 +1525,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get goBack => 'Zurück gehen';
 
   @override
+  String get videoCallPermissionDeniedTitle => 'Permission Required';
+
+  @override
+  String videoCallPermissionDeniedMessage(int powerLevel) {
+    return 'Your current power level is $powerLevel. A power level greater than 50 is required to join this video call. Please contact a group admin.';
+  }
+
+  @override
   String get videoCallTitle => 'Group Call';
 
   @override
@@ -1573,4 +1581,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String videoCallShowMore(int count) {
     return '+$count more';
   }
+
+  @override
+  String get setPowerLevelTitle => 'Set Power Level';
+
+  @override
+  String get setPowerLevelMember => 'Member (0) - no video call';
+
+  @override
+  String get setPowerLevelModerator => 'Moderator (50) - no video call';
+
+  @override
+  String get setPowerLevelVideoCallAllowance => 'Admin (100) - can video call';
+
+  @override
+  String get setPowerLevelSuccess => 'Power level updated successfully';
+
+  @override
+  String get setPowerLevelFailure => 'Failed to update power level';
 }

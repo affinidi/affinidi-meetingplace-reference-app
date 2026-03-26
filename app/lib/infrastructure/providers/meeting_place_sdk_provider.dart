@@ -66,7 +66,11 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
           'matrix_$key',
           database: await sqlite.openDatabase('./data/matrix_$key.sqlite'),
         );
-        final client = Client('matrix_client_$key', database: database);
+        final client = Client(
+          'matrix_client_$key',
+          database: database,
+          onSoftLogout: (client) => client.refreshAccessToken(),
+        );
         client.homeserver = Uri.parse(environment.matrixHomeserver);
         return client;
       },
