@@ -1554,7 +1554,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setPowerLevelModerator => 'Moderator (50) - no video call';
 
   @override
-  String get setPowerLevelAdmin => 'Admin (100) - can video call';
+  String get setPowerLevelVideoCallAllowance =>
+      'Video Call Allowance (99) - video call allowed';
 
   @override
   String get setPowerLevelSuccess => 'Power level updated successfully';

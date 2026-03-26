@@ -64,7 +64,8 @@ class VideoCallScreenController extends _$VideoCallScreenController {
       if (powerLevel <= 50) {
         state = state.copyWith(
           status: VideoCallStatus.error,
-          error: 'Insufficient permission: your power level ($powerLevel) '
+          error:
+              'Insufficient permission: your power level ($powerLevel) '
               'must be greater than 50 to join this call.',
         );
         return;

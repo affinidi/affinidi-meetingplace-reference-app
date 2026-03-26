@@ -361,7 +361,7 @@
 	"setPowerLevelTitle": "Set Power Level",
 	"setPowerLevelMember": "Member (0) - no video call",
 	"setPowerLevelModerator": "Moderator (50) - no video call",
-	"setPowerLevelAdmin": "Admin (100) - can video call",
+	"setPowerLevelVideoCallAllowance": "Admin (100) - can video call",
 	"setPowerLevelSuccess": "Power level updated successfully",
 	"setPowerLevelFailure": "Failed to update power level",
 	"goBack": "Zurück gehen"

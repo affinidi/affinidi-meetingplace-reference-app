@@ -126,8 +126,7 @@ class ChatScreen extends HookConsumerWidget {
                 tooltip: 'Start group call',
                 onPressed: () async {
                   try {
-                    final sdk =
-                        await ref.read(meetingPlaceSdkProvider.future);
+                    final sdk = await ref.read(meetingPlaceSdkProvider.future);
                     final powerLevel = await sdk.getOwnPowerLevel(
                       roomId: matrixRoomId,
                     );

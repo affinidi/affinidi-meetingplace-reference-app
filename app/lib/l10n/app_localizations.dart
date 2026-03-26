@@ -2320,11 +2320,11 @@ abstract class AppLocalizations {
   /// **'Moderator (50) - no video call'**
   String get setPowerLevelModerator;
 
-  /// No description provided for @setPowerLevelAdmin.
+  /// No description provided for @setPowerLevelVideoCallAllowance.
   ///
   /// In en, this message translates to:
-  /// **'Admin (100) - can video call'**
-  String get setPowerLevelAdmin;
+  /// **'Video Call Allowance (99) - video call allowed'**
+  String get setPowerLevelVideoCallAllowance;
 
   /// No description provided for @setPowerLevelSuccess.
   ///

@@ -171,7 +171,7 @@ class _GroupMembersList extends ConsumerWidget {
                     const Divider(height: 1),
                     option(0, l10n.setPowerLevelMember),
                     option(50, l10n.setPowerLevelModerator),
-                    option(100, l10n.setPowerLevelAdmin),
+                    option(99, l10n.setPowerLevelVideoCallAllowance),
                   ],
                 ),
               ),
@@ -305,6 +305,16 @@ class _GroupMemberPowerLevelText extends ConsumerWidget {
 
     final provider = connectionDetailsScreenControllerProvider(contactId);
     final controller = ref.read(provider.notifier);
+    final cachedPowerLevel = ref.watch(
+      provider.select((state) => state.memberPowerLevels[memberDid]),
+    );
+
+    if (cachedPowerLevel != null) {
+      return Text(
+        'Power level: $cachedPowerLevel',
+        style: const TextStyle(fontSize: 12, color: Colors.white70),
+      );
+    }
 
     return FutureBuilder<int>(
       future: controller.getMemberPowerLevel(memberDid: memberDid),
