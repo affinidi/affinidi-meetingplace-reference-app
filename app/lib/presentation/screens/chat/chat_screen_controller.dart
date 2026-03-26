@@ -1000,13 +1000,16 @@ class ChatScreenController extends _$ChatScreenController
   ) async {
     messageTextController.clear();
     final mentionUserIds = await _resolveMentionUserIds(text);
-    unawaited(
-      _chatSDK?.sendTextMessage(
+    state = state.copyWith(isSendingAttachment: true);
+    try {
+      await _chatSDK?.sendTextMessage(
         text,
         attachments: messageAttachment.map((a) => a.toAttachment()).toList(),
         mentionUserIds: mentionUserIds,
-      ),
-    );
+      );
+    } finally {
+      state = state.copyWith(isSendingAttachment: false);
+    }
     _sendChatActivityTimedAction?.cancel();
   }
 

@@ -26,6 +26,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     @Default(-1) int selectedReactionIndex,
     @Default(false) bool isActive,
     @Default(false) bool isInitialized,
+    @Default(false) bool isSendingAttachment,
     @Default(ContactPresenceStatus.unknown)
     ContactPresenceStatus contactPresenceStatus,
     @Default({}) Map<String, ContactPresenceStatus> memberPresenceStatuses,

@@ -68,6 +68,7 @@ part 'chat_media_options.dart';
 part 'chat_message_list.dart';
 part 'chat_text_entry.dart';
 part 'chat_typing_activity_indicator.dart';
+part 'chat_attachment_uploading_indicator.dart';
 part 'notifications_unavailable_warning.dart';
 part 'reactions.dart';
 
@@ -190,6 +191,7 @@ class ChatScreen extends HookConsumerWidget {
                         contactId: _contactId,
                       ),
                     ),
+                    _AttachmentUploadingIndicator(contactId: _contactId),
                     _ChatTextEntry(contactId: _contactId),
                   ],
                 ),

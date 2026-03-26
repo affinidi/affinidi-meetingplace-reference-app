@@ -1562,4 +1562,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get setPowerLevelFailure => 'Failed to update power level';
+
+  @override
+  String get uploadingImage => 'Uploading image...';
 }

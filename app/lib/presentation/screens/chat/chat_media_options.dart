@@ -188,13 +188,11 @@ class _ChatMediaOptions extends ConsumerWidget {
 
       if (!context.mounted) return;
 
-      if (result != null) {
-        await controller.sendAttachment(result.text, result.attachments);
-      }
-
-      if (!context.mounted) return;
-
       Navigator.of(context).pop();
+
+      if (result != null) {
+        unawaited(controller.sendAttachment(result.text, result.attachments));
+      }
     }
 
     final items = <_ChatMediaOptionItem>[

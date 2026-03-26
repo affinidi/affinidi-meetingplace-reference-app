@@ -1544,5 +1544,9 @@
 	"setPowerLevelFailure": "Failed to update power level",
 	"@setPowerLevelFailure": {
 		"type": "text"
+	},
+	"uploadingImage": "Uploading image...",
+	"@uploadingImage": {
+		"type": "text"
 	}
 }

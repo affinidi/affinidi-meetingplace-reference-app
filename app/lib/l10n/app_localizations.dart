@@ -2337,6 +2337,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to update power level'**
   String get setPowerLevelFailure;
+
+  /// No description provided for @uploadingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading image...'**
+  String get uploadingImage;
 }
 
 class _AppLocalizationsDelegate

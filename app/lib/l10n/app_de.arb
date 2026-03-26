@@ -364,5 +364,6 @@
 	"setPowerLevelVideoCallAllowance": "Admin (100) - can video call",
 	"setPowerLevelSuccess": "Power level updated successfully",
 	"setPowerLevelFailure": "Failed to update power level",
-	"goBack": "Zurück gehen"
+"goBack": "Zurück gehen",
+        "uploadingImage": "Bild wird hochgeladen..."
 }

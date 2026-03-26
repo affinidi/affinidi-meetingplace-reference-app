@@ -229,7 +229,7 @@ return $default(_that.contact,_that.channel,_that.connection,_that.identity,_tha
 
 
 class _ConnectionDetailsScreenState extends ConnectionDetailsScreenState {
-  _ConnectionDetailsScreenState({this.contact, this.channel, this.connection, this.identity, this.group, final  Map<String, int> memberPowerLevels = const <String, int>{}, this.showDeletedMembers = false, this.mediatorName = '', this.isDebugMode = false, this.showMnemonic = false, this.showQrIcon = false, this.showQrView = false}): _memberPowerLevels = memberPowerLevels,super._();
+   _ConnectionDetailsScreenState({this.contact, this.channel, this.connection, this.identity, this.group, final  Map<String, int> memberPowerLevels = const <String, int>{}, this.showDeletedMembers = false, this.mediatorName = '', this.isDebugMode = false, this.showMnemonic = false, this.showQrIcon = false, this.showQrView = false}): _memberPowerLevels = memberPowerLevels,super._();
   
 
 @override final  Contact? contact;
@@ -240,8 +240,10 @@ class _ConnectionDetailsScreenState extends ConnectionDetailsScreenState {
  final  Map<String, int> _memberPowerLevels;
 @override@JsonKey() Map<String, int> get memberPowerLevels {
   if (_memberPowerLevels is EqualUnmodifiableMapView) return _memberPowerLevels;
+  // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_memberPowerLevels);
 }
+
 @override@JsonKey() final  bool showDeletedMembers;
 @override@JsonKey() final  String mediatorName;
 @override@JsonKey() final  bool isDebugMode;
@@ -303,7 +305,7 @@ as Contact?,channel: freezed == channel ? _self.channel : channel // ignore: cas
 as Channel?,connection: freezed == connection ? _self.connection : connection // ignore: cast_nullable_to_non_nullable
 as ConnectionOffer?,identity: freezed == identity ? _self.identity : identity // ignore: cast_nullable_to_non_nullable
 as Identity?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
-as Group?,memberPowerLevels: null == memberPowerLevels ? _self.memberPowerLevels : memberPowerLevels // ignore: cast_nullable_to_non_nullable
+as Group?,memberPowerLevels: null == memberPowerLevels ? _self._memberPowerLevels : memberPowerLevels // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,showDeletedMembers: null == showDeletedMembers ? _self.showDeletedMembers : showDeletedMembers // ignore: cast_nullable_to_non_nullable
 as bool,mediatorName: null == mediatorName ? _self.mediatorName : mediatorName // ignore: cast_nullable_to_non_nullable
 as String,isDebugMode: null == isDebugMode ? _self.isDebugMode : isDebugMode // ignore: cast_nullable_to_non_nullable

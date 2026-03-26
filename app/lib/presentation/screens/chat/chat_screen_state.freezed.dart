@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatScreenState {
 
- Contact? get contact; Group? get group; String? get offerName; ContactCard? get otherPartyCard; List<chat.ChatItem> get messages; List<String> get membersTyping; int get selectedReactionIndex; bool get isActive; bool get isInitialized; ContactPresenceStatus get contactPresenceStatus; Map<String, ContactPresenceStatus> get memberPresenceStatuses; ScreenEffect? get effect; Map<String, Uint8List> get attachmentsDataCache; String? get notificationToken;
+ Contact? get contact; Group? get group; String? get offerName; ContactCard? get otherPartyCard; List<chat.ChatItem> get messages; List<String> get membersTyping; int get selectedReactionIndex; bool get isActive; bool get isInitialized; bool get isSendingAttachment; ContactPresenceStatus get contactPresenceStatus; Map<String, ContactPresenceStatus> get memberPresenceStatuses; ScreenEffect? get effect; Map<String, Uint8List> get attachmentsDataCache; String? get notificationToken;
 /// Create a copy of ChatScreenState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ChatScreenStateCopyWith<ChatScreenState> get copyWith => _$ChatScreenStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.offerName, offerName) || other.offerName == offerName)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other.messages, messages)&&const DeepCollectionEquality().equals(other.membersTyping, membersTyping)&&(identical(other.selectedReactionIndex, selectedReactionIndex) || other.selectedReactionIndex == selectedReactionIndex)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&const DeepCollectionEquality().equals(other.memberPresenceStatuses, memberPresenceStatuses)&&(identical(other.effect, effect) || other.effect == effect)&&const DeepCollectionEquality().equals(other.attachmentsDataCache, attachmentsDataCache)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.offerName, offerName) || other.offerName == offerName)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other.messages, messages)&&const DeepCollectionEquality().equals(other.membersTyping, membersTyping)&&(identical(other.selectedReactionIndex, selectedReactionIndex) || other.selectedReactionIndex == selectedReactionIndex)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.isSendingAttachment, isSendingAttachment) || other.isSendingAttachment == isSendingAttachment)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&const DeepCollectionEquality().equals(other.memberPresenceStatuses, memberPresenceStatuses)&&(identical(other.effect, effect) || other.effect == effect)&&const DeepCollectionEquality().equals(other.attachmentsDataCache, attachmentsDataCache)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contact,group,offerName,otherPartyCard,const DeepCollectionEquality().hash(messages),const DeepCollectionEquality().hash(membersTyping),selectedReactionIndex,isActive,isInitialized,contactPresenceStatus,const DeepCollectionEquality().hash(memberPresenceStatuses),effect,const DeepCollectionEquality().hash(attachmentsDataCache),notificationToken);
+int get hashCode => Object.hash(runtimeType,contact,group,offerName,otherPartyCard,const DeepCollectionEquality().hash(messages),const DeepCollectionEquality().hash(membersTyping),selectedReactionIndex,isActive,isInitialized,isSendingAttachment,contactPresenceStatus,const DeepCollectionEquality().hash(memberPresenceStatuses),effect,const DeepCollectionEquality().hash(attachmentsDataCache),notificationToken);
 
 @override
 String toString() {
-  return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, memberPresenceStatuses: $memberPresenceStatuses, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
+  return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, isSendingAttachment: $isSendingAttachment, contactPresenceStatus: $contactPresenceStatus, memberPresenceStatuses: $memberPresenceStatuses, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ChatScreenStateCopyWith<$Res>  {
   factory $ChatScreenStateCopyWith(ChatScreenState value, $Res Function(ChatScreenState) _then) = _$ChatScreenStateCopyWithImpl;
 @useResult
 $Res call({
- Contact? contact, Group? group, String? offerName, ContactCard? otherPartyCard, List<chat.ChatItem> messages, List<String> membersTyping, int selectedReactionIndex, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, Map<String, ContactPresenceStatus> memberPresenceStatuses, ScreenEffect? effect, Map<String, Uint8List> attachmentsDataCache, String? notificationToken
+ Contact? contact, Group? group, String? offerName, ContactCard? otherPartyCard, List<chat.ChatItem> messages, List<String> membersTyping, int selectedReactionIndex, bool isActive, bool isInitialized, bool isSendingAttachment, ContactPresenceStatus contactPresenceStatus, Map<String, ContactPresenceStatus> memberPresenceStatuses, ScreenEffect? effect, Map<String, Uint8List> attachmentsDataCache, String? notificationToken
 });
 
 
@@ -62,7 +62,7 @@ class _$ChatScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatScreenState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? contact = freezed,Object? group = freezed,Object? offerName = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? membersTyping = null,Object? selectedReactionIndex = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? memberPresenceStatuses = null,Object? effect = freezed,Object? attachmentsDataCache = null,Object? notificationToken = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? contact = freezed,Object? group = freezed,Object? offerName = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? membersTyping = null,Object? selectedReactionIndex = null,Object? isActive = null,Object? isInitialized = null,Object? isSendingAttachment = null,Object? contactPresenceStatus = null,Object? memberPresenceStatuses = null,Object? effect = freezed,Object? attachmentsDataCache = null,Object? notificationToken = freezed,}) {
   return _then(_self.copyWith(
 contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
 as Contact?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
@@ -73,6 +73,7 @@ as List<chat.ChatItem>,membersTyping: null == membersTyping ? _self.membersTypin
 as List<String>,selectedReactionIndex: null == selectedReactionIndex ? _self.selectedReactionIndex : selectedReactionIndex // ignore: cast_nullable_to_non_nullable
 as int,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,isInitialized: null == isInitialized ? _self.isInitialized : isInitialized // ignore: cast_nullable_to_non_nullable
+as bool,isSendingAttachment: null == isSendingAttachment ? _self.isSendingAttachment : isSendingAttachment // ignore: cast_nullable_to_non_nullable
 as bool,contactPresenceStatus: null == contactPresenceStatus ? _self.contactPresenceStatus : contactPresenceStatus // ignore: cast_nullable_to_non_nullable
 as ContactPresenceStatus,memberPresenceStatuses: null == memberPresenceStatuses ? _self.memberPresenceStatuses : memberPresenceStatuses // ignore: cast_nullable_to_non_nullable
 as Map<String, ContactPresenceStatus>,effect: freezed == effect ? _self.effect : effect // ignore: cast_nullable_to_non_nullable
@@ -175,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  Map<String, ContactPresenceStatus> memberPresenceStatuses,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  bool isSendingAttachment,  ContactPresenceStatus contactPresenceStatus,  Map<String, ContactPresenceStatus> memberPresenceStatuses,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatScreenState() when $default != null:
-return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.memberPresenceStatuses,_that.effect,_that.attachmentsDataCache,_that.notificationToken);case _:
+return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.isSendingAttachment,_that.contactPresenceStatus,_that.memberPresenceStatuses,_that.effect,_that.attachmentsDataCache,_that.notificationToken);case _:
   return orElse();
 
 }
@@ -196,10 +197,10 @@ return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  Map<String, ContactPresenceStatus> memberPresenceStatuses,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  bool isSendingAttachment,  ContactPresenceStatus contactPresenceStatus,  Map<String, ContactPresenceStatus> memberPresenceStatuses,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken)  $default,) {final _that = this;
 switch (_that) {
 case _ChatScreenState():
-return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.memberPresenceStatuses,_that.effect,_that.attachmentsDataCache,_that.notificationToken);case _:
+return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.isSendingAttachment,_that.contactPresenceStatus,_that.memberPresenceStatuses,_that.effect,_that.attachmentsDataCache,_that.notificationToken);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -216,10 +217,10 @@ return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  Map<String, ContactPresenceStatus> memberPresenceStatuses,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  bool isSendingAttachment,  ContactPresenceStatus contactPresenceStatus,  Map<String, ContactPresenceStatus> memberPresenceStatuses,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatScreenState() when $default != null:
-return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.memberPresenceStatuses,_that.effect,_that.attachmentsDataCache,_that.notificationToken);case _:
+return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.isSendingAttachment,_that.contactPresenceStatus,_that.memberPresenceStatuses,_that.effect,_that.attachmentsDataCache,_that.notificationToken);case _:
   return null;
 
 }
@@ -231,7 +232,7 @@ return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_
 
 
 class _ChatScreenState extends ChatScreenState {
-   _ChatScreenState({this.contact, this.group, this.offerName, this.otherPartyCard, final  List<chat.ChatItem> messages = const [], final  List<String> membersTyping = const [], this.selectedReactionIndex = -1, this.isActive = false, this.isInitialized = false, this.contactPresenceStatus = ContactPresenceStatus.unknown, final  Map<String, ContactPresenceStatus> memberPresenceStatuses = const {}, this.effect, final  Map<String, Uint8List> attachmentsDataCache = const {}, this.notificationToken}): _messages = messages,_membersTyping = membersTyping,_memberPresenceStatuses = memberPresenceStatuses,_attachmentsDataCache = attachmentsDataCache,super._();
+   _ChatScreenState({this.contact, this.group, this.offerName, this.otherPartyCard, final  List<chat.ChatItem> messages = const [], final  List<String> membersTyping = const [], this.selectedReactionIndex = -1, this.isActive = false, this.isInitialized = false, this.isSendingAttachment = false, this.contactPresenceStatus = ContactPresenceStatus.unknown, final  Map<String, ContactPresenceStatus> memberPresenceStatuses = const {}, this.effect, final  Map<String, Uint8List> attachmentsDataCache = const {}, this.notificationToken}): _messages = messages,_membersTyping = membersTyping,_memberPresenceStatuses = memberPresenceStatuses,_attachmentsDataCache = attachmentsDataCache,super._();
   
 
 @override final  Contact? contact;
@@ -255,6 +256,7 @@ class _ChatScreenState extends ChatScreenState {
 @override@JsonKey() final  int selectedReactionIndex;
 @override@JsonKey() final  bool isActive;
 @override@JsonKey() final  bool isInitialized;
+@override@JsonKey() final  bool isSendingAttachment;
 @override@JsonKey() final  ContactPresenceStatus contactPresenceStatus;
  final  Map<String, ContactPresenceStatus> _memberPresenceStatuses;
 @override@JsonKey() Map<String, ContactPresenceStatus> get memberPresenceStatuses {
@@ -283,16 +285,16 @@ _$ChatScreenStateCopyWith<_ChatScreenState> get copyWith => __$ChatScreenStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.offerName, offerName) || other.offerName == offerName)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other._messages, _messages)&&const DeepCollectionEquality().equals(other._membersTyping, _membersTyping)&&(identical(other.selectedReactionIndex, selectedReactionIndex) || other.selectedReactionIndex == selectedReactionIndex)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&const DeepCollectionEquality().equals(other._memberPresenceStatuses, _memberPresenceStatuses)&&(identical(other.effect, effect) || other.effect == effect)&&const DeepCollectionEquality().equals(other._attachmentsDataCache, _attachmentsDataCache)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.offerName, offerName) || other.offerName == offerName)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other._messages, _messages)&&const DeepCollectionEquality().equals(other._membersTyping, _membersTyping)&&(identical(other.selectedReactionIndex, selectedReactionIndex) || other.selectedReactionIndex == selectedReactionIndex)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.isSendingAttachment, isSendingAttachment) || other.isSendingAttachment == isSendingAttachment)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&const DeepCollectionEquality().equals(other._memberPresenceStatuses, _memberPresenceStatuses)&&(identical(other.effect, effect) || other.effect == effect)&&const DeepCollectionEquality().equals(other._attachmentsDataCache, _attachmentsDataCache)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contact,group,offerName,otherPartyCard,const DeepCollectionEquality().hash(_messages),const DeepCollectionEquality().hash(_membersTyping),selectedReactionIndex,isActive,isInitialized,contactPresenceStatus,const DeepCollectionEquality().hash(_memberPresenceStatuses),effect,const DeepCollectionEquality().hash(_attachmentsDataCache),notificationToken);
+int get hashCode => Object.hash(runtimeType,contact,group,offerName,otherPartyCard,const DeepCollectionEquality().hash(_messages),const DeepCollectionEquality().hash(_membersTyping),selectedReactionIndex,isActive,isInitialized,isSendingAttachment,contactPresenceStatus,const DeepCollectionEquality().hash(_memberPresenceStatuses),effect,const DeepCollectionEquality().hash(_attachmentsDataCache),notificationToken);
 
 @override
 String toString() {
-  return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, memberPresenceStatuses: $memberPresenceStatuses, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
+  return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, isSendingAttachment: $isSendingAttachment, contactPresenceStatus: $contactPresenceStatus, memberPresenceStatuses: $memberPresenceStatuses, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken)';
 }
 
 
@@ -303,7 +305,7 @@ abstract mixin class _$ChatScreenStateCopyWith<$Res> implements $ChatScreenState
   factory _$ChatScreenStateCopyWith(_ChatScreenState value, $Res Function(_ChatScreenState) _then) = __$ChatScreenStateCopyWithImpl;
 @override @useResult
 $Res call({
- Contact? contact, Group? group, String? offerName, ContactCard? otherPartyCard, List<chat.ChatItem> messages, List<String> membersTyping, int selectedReactionIndex, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, Map<String, ContactPresenceStatus> memberPresenceStatuses, ScreenEffect? effect, Map<String, Uint8List> attachmentsDataCache, String? notificationToken
+ Contact? contact, Group? group, String? offerName, ContactCard? otherPartyCard, List<chat.ChatItem> messages, List<String> membersTyping, int selectedReactionIndex, bool isActive, bool isInitialized, bool isSendingAttachment, ContactPresenceStatus contactPresenceStatus, Map<String, ContactPresenceStatus> memberPresenceStatuses, ScreenEffect? effect, Map<String, Uint8List> attachmentsDataCache, String? notificationToken
 });
 
 
@@ -320,7 +322,7 @@ class __$ChatScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatScreenState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? contact = freezed,Object? group = freezed,Object? offerName = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? membersTyping = null,Object? selectedReactionIndex = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? memberPresenceStatuses = null,Object? effect = freezed,Object? attachmentsDataCache = null,Object? notificationToken = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? contact = freezed,Object? group = freezed,Object? offerName = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? membersTyping = null,Object? selectedReactionIndex = null,Object? isActive = null,Object? isInitialized = null,Object? isSendingAttachment = null,Object? contactPresenceStatus = null,Object? memberPresenceStatuses = null,Object? effect = freezed,Object? attachmentsDataCache = null,Object? notificationToken = freezed,}) {
   return _then(_ChatScreenState(
 contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
 as Contact?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
@@ -331,6 +333,7 @@ as List<chat.ChatItem>,membersTyping: null == membersTyping ? _self._membersTypi
 as List<String>,selectedReactionIndex: null == selectedReactionIndex ? _self.selectedReactionIndex : selectedReactionIndex // ignore: cast_nullable_to_non_nullable
 as int,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,isInitialized: null == isInitialized ? _self.isInitialized : isInitialized // ignore: cast_nullable_to_non_nullable
+as bool,isSendingAttachment: null == isSendingAttachment ? _self.isSendingAttachment : isSendingAttachment // ignore: cast_nullable_to_non_nullable
 as bool,contactPresenceStatus: null == contactPresenceStatus ? _self.contactPresenceStatus : contactPresenceStatus // ignore: cast_nullable_to_non_nullable
 as ContactPresenceStatus,memberPresenceStatuses: null == memberPresenceStatuses ? _self._memberPresenceStatuses : memberPresenceStatuses // ignore: cast_nullable_to_non_nullable
 as Map<String, ContactPresenceStatus>,effect: freezed == effect ? _self.effect : effect // ignore: cast_nullable_to_non_nullable
