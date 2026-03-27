@@ -47,7 +47,6 @@ class _ChatMessageList extends HookConsumerWidget {
       onTap: hideReactionPicker,
       child: Column(
         children: [
-          _AwaitingMembersWarning(contactId: _contactId),
           Expanded(
             child: ListView.builder(
               controller: scrollController,
