@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeploymentResult {
 
- String get vcId; String get agentDid; String get systemPromptHash; int get trainedOnMessages;
+ String get vcId; String get agentDid; String get systemPromptHash; int get trainedOnMessages; String? get credentialOfferUri; String? get issuanceId;
 /// Create a copy of DeploymentResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $DeploymentResultCopyWith<DeploymentResult> get copyWith => _$DeploymentResultCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeploymentResult&&(identical(other.vcId, vcId) || other.vcId == vcId)&&(identical(other.agentDid, agentDid) || other.agentDid == agentDid)&&(identical(other.systemPromptHash, systemPromptHash) || other.systemPromptHash == systemPromptHash)&&(identical(other.trainedOnMessages, trainedOnMessages) || other.trainedOnMessages == trainedOnMessages));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeploymentResult&&(identical(other.vcId, vcId) || other.vcId == vcId)&&(identical(other.agentDid, agentDid) || other.agentDid == agentDid)&&(identical(other.systemPromptHash, systemPromptHash) || other.systemPromptHash == systemPromptHash)&&(identical(other.trainedOnMessages, trainedOnMessages) || other.trainedOnMessages == trainedOnMessages)&&(identical(other.credentialOfferUri, credentialOfferUri) || other.credentialOfferUri == credentialOfferUri)&&(identical(other.issuanceId, issuanceId) || other.issuanceId == issuanceId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,vcId,agentDid,systemPromptHash,trainedOnMessages);
+int get hashCode => Object.hash(runtimeType,vcId,agentDid,systemPromptHash,trainedOnMessages,credentialOfferUri,issuanceId);
 
 @override
 String toString() {
-  return 'DeploymentResult(vcId: $vcId, agentDid: $agentDid, systemPromptHash: $systemPromptHash, trainedOnMessages: $trainedOnMessages)';
+  return 'DeploymentResult(vcId: $vcId, agentDid: $agentDid, systemPromptHash: $systemPromptHash, trainedOnMessages: $trainedOnMessages, credentialOfferUri: $credentialOfferUri, issuanceId: $issuanceId)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $DeploymentResultCopyWith<$Res>  {
   factory $DeploymentResultCopyWith(DeploymentResult value, $Res Function(DeploymentResult) _then) = _$DeploymentResultCopyWithImpl;
 @useResult
 $Res call({
- String vcId, String agentDid, String systemPromptHash, int trainedOnMessages
+ String vcId, String agentDid, String systemPromptHash, int trainedOnMessages, String? credentialOfferUri, String? issuanceId
 });
 
 
@@ -65,13 +65,15 @@ class _$DeploymentResultCopyWithImpl<$Res>
 
 /// Create a copy of DeploymentResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? vcId = null,Object? agentDid = null,Object? systemPromptHash = null,Object? trainedOnMessages = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? vcId = null,Object? agentDid = null,Object? systemPromptHash = null,Object? trainedOnMessages = null,Object? credentialOfferUri = freezed,Object? issuanceId = freezed,}) {
   return _then(_self.copyWith(
 vcId: null == vcId ? _self.vcId : vcId // ignore: cast_nullable_to_non_nullable
 as String,agentDid: null == agentDid ? _self.agentDid : agentDid // ignore: cast_nullable_to_non_nullable
 as String,systemPromptHash: null == systemPromptHash ? _self.systemPromptHash : systemPromptHash // ignore: cast_nullable_to_non_nullable
 as String,trainedOnMessages: null == trainedOnMessages ? _self.trainedOnMessages : trainedOnMessages // ignore: cast_nullable_to_non_nullable
-as int,
+as int,credentialOfferUri: freezed == credentialOfferUri ? _self.credentialOfferUri : credentialOfferUri // ignore: cast_nullable_to_non_nullable
+as String?,issuanceId: freezed == issuanceId ? _self.issuanceId : issuanceId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -156,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String vcId,  String agentDid,  String systemPromptHash,  int trainedOnMessages)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String vcId,  String agentDid,  String systemPromptHash,  int trainedOnMessages,  String? credentialOfferUri,  String? issuanceId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeploymentResult() when $default != null:
-return $default(_that.vcId,_that.agentDid,_that.systemPromptHash,_that.trainedOnMessages);case _:
+return $default(_that.vcId,_that.agentDid,_that.systemPromptHash,_that.trainedOnMessages,_that.credentialOfferUri,_that.issuanceId);case _:
   return orElse();
 
 }
@@ -177,10 +179,10 @@ return $default(_that.vcId,_that.agentDid,_that.systemPromptHash,_that.trainedOn
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String vcId,  String agentDid,  String systemPromptHash,  int trainedOnMessages)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String vcId,  String agentDid,  String systemPromptHash,  int trainedOnMessages,  String? credentialOfferUri,  String? issuanceId)  $default,) {final _that = this;
 switch (_that) {
 case _DeploymentResult():
-return $default(_that.vcId,_that.agentDid,_that.systemPromptHash,_that.trainedOnMessages);case _:
+return $default(_that.vcId,_that.agentDid,_that.systemPromptHash,_that.trainedOnMessages,_that.credentialOfferUri,_that.issuanceId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +199,10 @@ return $default(_that.vcId,_that.agentDid,_that.systemPromptHash,_that.trainedOn
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String vcId,  String agentDid,  String systemPromptHash,  int trainedOnMessages)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String vcId,  String agentDid,  String systemPromptHash,  int trainedOnMessages,  String? credentialOfferUri,  String? issuanceId)?  $default,) {final _that = this;
 switch (_that) {
 case _DeploymentResult() when $default != null:
-return $default(_that.vcId,_that.agentDid,_that.systemPromptHash,_that.trainedOnMessages);case _:
+return $default(_that.vcId,_that.agentDid,_that.systemPromptHash,_that.trainedOnMessages,_that.credentialOfferUri,_that.issuanceId);case _:
   return null;
 
 }
@@ -212,13 +214,15 @@ return $default(_that.vcId,_that.agentDid,_that.systemPromptHash,_that.trainedOn
 @JsonSerializable()
 
 class _DeploymentResult implements DeploymentResult {
-  const _DeploymentResult({required this.vcId, required this.agentDid, required this.systemPromptHash, required this.trainedOnMessages});
+  const _DeploymentResult({required this.vcId, required this.agentDid, required this.systemPromptHash, required this.trainedOnMessages, this.credentialOfferUri, this.issuanceId});
   factory _DeploymentResult.fromJson(Map<String, dynamic> json) => _$DeploymentResultFromJson(json);
 
 @override final  String vcId;
 @override final  String agentDid;
 @override final  String systemPromptHash;
 @override final  int trainedOnMessages;
+@override final  String? credentialOfferUri;
+@override final  String? issuanceId;
 
 /// Create a copy of DeploymentResult
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +237,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeploymentResult&&(identical(other.vcId, vcId) || other.vcId == vcId)&&(identical(other.agentDid, agentDid) || other.agentDid == agentDid)&&(identical(other.systemPromptHash, systemPromptHash) || other.systemPromptHash == systemPromptHash)&&(identical(other.trainedOnMessages, trainedOnMessages) || other.trainedOnMessages == trainedOnMessages));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeploymentResult&&(identical(other.vcId, vcId) || other.vcId == vcId)&&(identical(other.agentDid, agentDid) || other.agentDid == agentDid)&&(identical(other.systemPromptHash, systemPromptHash) || other.systemPromptHash == systemPromptHash)&&(identical(other.trainedOnMessages, trainedOnMessages) || other.trainedOnMessages == trainedOnMessages)&&(identical(other.credentialOfferUri, credentialOfferUri) || other.credentialOfferUri == credentialOfferUri)&&(identical(other.issuanceId, issuanceId) || other.issuanceId == issuanceId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,vcId,agentDid,systemPromptHash,trainedOnMessages);
+int get hashCode => Object.hash(runtimeType,vcId,agentDid,systemPromptHash,trainedOnMessages,credentialOfferUri,issuanceId);
 
 @override
 String toString() {
-  return 'DeploymentResult(vcId: $vcId, agentDid: $agentDid, systemPromptHash: $systemPromptHash, trainedOnMessages: $trainedOnMessages)';
+  return 'DeploymentResult(vcId: $vcId, agentDid: $agentDid, systemPromptHash: $systemPromptHash, trainedOnMessages: $trainedOnMessages, credentialOfferUri: $credentialOfferUri, issuanceId: $issuanceId)';
 }
 
 
@@ -253,7 +257,7 @@ abstract mixin class _$DeploymentResultCopyWith<$Res> implements $DeploymentResu
   factory _$DeploymentResultCopyWith(_DeploymentResult value, $Res Function(_DeploymentResult) _then) = __$DeploymentResultCopyWithImpl;
 @override @useResult
 $Res call({
- String vcId, String agentDid, String systemPromptHash, int trainedOnMessages
+ String vcId, String agentDid, String systemPromptHash, int trainedOnMessages, String? credentialOfferUri, String? issuanceId
 });
 
 
@@ -270,13 +274,15 @@ class __$DeploymentResultCopyWithImpl<$Res>
 
 /// Create a copy of DeploymentResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? vcId = null,Object? agentDid = null,Object? systemPromptHash = null,Object? trainedOnMessages = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? vcId = null,Object? agentDid = null,Object? systemPromptHash = null,Object? trainedOnMessages = null,Object? credentialOfferUri = freezed,Object? issuanceId = freezed,}) {
   return _then(_DeploymentResult(
 vcId: null == vcId ? _self.vcId : vcId // ignore: cast_nullable_to_non_nullable
 as String,agentDid: null == agentDid ? _self.agentDid : agentDid // ignore: cast_nullable_to_non_nullable
 as String,systemPromptHash: null == systemPromptHash ? _self.systemPromptHash : systemPromptHash // ignore: cast_nullable_to_non_nullable
 as String,trainedOnMessages: null == trainedOnMessages ? _self.trainedOnMessages : trainedOnMessages // ignore: cast_nullable_to_non_nullable
-as int,
+as int,credentialOfferUri: freezed == credentialOfferUri ? _self.credentialOfferUri : credentialOfferUri // ignore: cast_nullable_to_non_nullable
+as String?,issuanceId: freezed == issuanceId ? _self.issuanceId : issuanceId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -6,6 +6,7 @@ import '../../../core/config/agent_config.dart';
 import '../models/agent_readiness_state.dart';
 import '../providers/agent_providers.dart';
 import '../screens/agent_onboarding_screen.dart';
+import '../screens/agent_vc_screen.dart';
 import '../services/agent_learn_service.dart' show AgentLearnService;
 import 'deploy_agent_sheet.dart';
 
@@ -208,6 +209,16 @@ class _ReadinessSection extends ConsumerWidget {
         if (readiness.isDeployed) ...[
           const SizedBox(height: 12),
           _DeployedBadge(),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => _openVcScreen(context),
+            icon: const Icon(Icons.verified_outlined, size: 16),
+            label: const Text('View Agent Credential'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF6A0DAD),
+              side: const BorderSide(color: Color(0xFF6A0DAD)),
+            ),
+          ),
         ] else if (readiness.isReady) ...[
           const SizedBox(height: 12),
           FilledButton.icon(
@@ -258,6 +269,14 @@ class _ReadinessSection extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (_) =>
           DeployAgentSheet(ownerDid: ownerDid, readiness: readiness),
+    );
+  }
+
+  void _openVcScreen(BuildContext context) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => AgentVcScreen(ownerDid: ownerDid),
+      ),
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../models/agent_deployment_exception.dart';
 import '../models/agent_readiness_state.dart';
 import '../models/agent_response.dart';
+import '../models/agent_vc_data.dart';
 import '../models/deployment_result.dart';
 
 /// Data-access layer for the AI Personal Representative backend.
@@ -111,6 +112,24 @@ class AgentRepository {
       return null;
     } catch (e) {
       debugPrint('[AgentRepo] /respond error: $e');
+      return null;
+    }
+  }
+
+  Future<AgentVcData?> getAgentVc(String ownerDid) async {
+    debugPrint('[AgentRepo] fetching VC for $ownerDid');
+    try {
+      final uri = Uri.parse('$_backendUrl/vc')
+          .replace(queryParameters: {'did': ownerDid});
+      final response = await _client.get(uri);
+      debugPrint('[AgentRepo] /vc: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        return AgentVcData.fromJson(json);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('[AgentRepo] /vc error: $e');
       return null;
     }
   }

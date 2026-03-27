@@ -12,6 +12,8 @@ _DeploymentResult _$DeploymentResultFromJson(Map<String, dynamic> json) =>
       agentDid: json['agentDid'] as String,
       systemPromptHash: json['systemPromptHash'] as String,
       trainedOnMessages: (json['trainedOnMessages'] as num).toInt(),
+      credentialOfferUri: json['credentialOfferUri'] as String?,
+      issuanceId: json['issuanceId'] as String?,
     );
 
 Map<String, dynamic> _$DeploymentResultToJson(_DeploymentResult instance) =>
@@ -20,4 +22,6 @@ Map<String, dynamic> _$DeploymentResultToJson(_DeploymentResult instance) =>
       'agentDid': instance.agentDid,
       'systemPromptHash': instance.systemPromptHash,
       'trainedOnMessages': instance.trainedOnMessages,
+      'credentialOfferUri': instance.credentialOfferUri,
+      'issuanceId': instance.issuanceId,
     };

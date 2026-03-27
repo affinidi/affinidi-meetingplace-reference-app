@@ -10,6 +10,8 @@ abstract class DeploymentResult with _$DeploymentResult {
     required String agentDid,
     required String systemPromptHash,
     required int trainedOnMessages,
+    String? credentialOfferUri,
+    String? issuanceId,
   }) = _DeploymentResult;
 
   factory DeploymentResult.fromJson(Map<String, dynamic> json) =>

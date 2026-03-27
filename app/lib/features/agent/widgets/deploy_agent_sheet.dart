@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../models/agent_readiness_state.dart';
@@ -29,9 +30,16 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
   Timer? _autoCloseTimer;
 
   @override
+  void initState() {
+    super.initState();
+    // Reset at open so the sheet always starts idle.
+    // ref is valid in initState but NOT in dispose — hence the move.
+    ref.read(deploymentNotifierProvider.notifier).reset();
+  }
+
+  @override
   void dispose() {
     _autoCloseTimer?.cancel();
-    ref.read(deploymentNotifierProvider.notifier).reset();
     super.dispose();
   }
 
@@ -109,11 +117,20 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
             ),
             const SizedBox(height: 16),
 
-            // Success banner
+            // Success banner + claim button
             deployState.maybeWhen(
               data: (result) {
                 if (result == null) return const SizedBox.shrink();
-                return _SuccessBanner(vcId: result.vcId);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _SuccessBanner(vcId: result.vcId),
+                    if (result.credentialOfferUri != null) ...[
+                      const SizedBox(height: 8),
+                      _ClaimVcButton(offerUri: result.credentialOfferUri!),
+                    ],
+                  ],
+                );
               },
               orElse: () => const SizedBox.shrink(),
             ),
@@ -257,6 +274,39 @@ class _ErrorBanner extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ClaimVcButton extends StatelessWidget {
+  const _ClaimVcButton({required this.offerUri});
+
+  final String offerUri;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () async {
+        await Clipboard.setData(ClipboardData(text: offerUri));
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Credential offer URL copied — open Affinidi Vault and paste it to claim.',
+            ),
+            duration: Duration(seconds: 4),
+          ),
+        );
+      },
+      icon: const Icon(
+        Icons.account_balance_wallet_outlined,
+        size: 18,
+      ),
+      label: const Text('Claim Agent VC in Vault'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF6A0DAD),
+        side: const BorderSide(color: Color(0xFF6A0DAD)),
       ),
     );
   }
