@@ -36,7 +36,7 @@ class _AgentOnboardingScreenState
   bool _isAnswered(OnboardingQuestion q) {
     final answer = _answers[q.id];
     if (answer == null) return false;
-    if (answer is List) return (answer as List).isNotEmpty;
+    if (answer is List) return answer.isNotEmpty;
     if (answer is String) return answer.trim().isNotEmpty;
     return false;
   }

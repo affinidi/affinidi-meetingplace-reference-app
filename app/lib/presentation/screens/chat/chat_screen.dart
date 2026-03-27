@@ -43,6 +43,8 @@ import 'chat_items/chat_encryption_notice.dart';
 import 'chat_items/group_deleted_chat_item.dart';
 import 'chat_items/joining_group_chat_item.dart';
 import 'chat_items/leaving_group_chat_item.dart';
+import '../../../application/services/identities_service/identities_service.dart';
+import '../../../features/agent/providers/agent_providers.dart';
 import 'chat_screen_controller.dart';
 
 part 'agent_focus_banner.dart';

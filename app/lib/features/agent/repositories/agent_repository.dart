@@ -66,6 +66,27 @@ class AgentRepository {
     }
   }
 
+  Future<void> submitFeedback({
+    required String ownerDid,
+    required String messageId,
+    required String rating,
+  }) async {
+    debugPrint('[AgentRepo] submitting feedback for $ownerDid: $rating on $messageId');
+    try {
+      await _client.post(
+        Uri.parse('$_backendUrl/feedback'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'ownerDid': ownerDid,
+          'messageId': messageId,
+          'rating': rating,
+        }),
+      );
+    } catch (e) {
+      debugPrint('[AgentRepo] /feedback error: $e');
+    }
+  }
+
   Future<AgentResponse?> getAgentResponse({
     required String ownerDid,
     required String inboundMessage,

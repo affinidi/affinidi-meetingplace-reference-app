@@ -19,6 +19,13 @@ class _ChatMessageList extends HookConsumerWidget {
       provider.select((state) => state.selectedReactionIndex),
     );
 
+    final agentSentMessageIds = ref.watch(
+      provider.select((state) => state.agentSentMessageIds),
+    );
+    final ownerDid = ref.watch(
+      identitiesServiceProvider.select((s) => s.currentIdentity?.did ?? ''),
+    );
+
     var lastUsedChatItemStatus = chat.ChatItemStatus.error;
 
     final scrollController = useScrollController();
@@ -106,6 +113,10 @@ class _ChatMessageList extends HookConsumerWidget {
                   }
                 }
 
+                final isAgentMessage = chatItem is chat.Message &&
+                    chatItem.isFromMe &&
+                    agentSentMessageIds.contains(chatItem.messageId);
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
@@ -153,21 +164,35 @@ class _ChatMessageList extends HookConsumerWidget {
                                           ? 0
                                           : 8,
                                     ),
-                              decoration: BoxDecoration(
-                                color: getChatItemColor(
-                                  context.colorScheme,
-                                  chatItem,
-                                ),
-                                borderRadius: BorderRadius.circular(16.0),
-                              ),
+                              decoration: isAgentMessage
+                                  ? BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF6A0DAD),
+                                          Color(0xFF3B2FBE),
+                                        ],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    )
+                                  : BoxDecoration(
+                                      color: getChatItemColor(
+                                        context.colorScheme,
+                                        chatItem,
+                                      ),
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    ),
                               child: ChatItem(
                                 chatItem: chatItem,
                                 index: index,
                                 contactId: _contactId,
-                                chatItemColor: getChatItemColor(
-                                  context.colorScheme,
-                                  chatItem,
-                                ),
+                                chatItemColor: isAgentMessage
+                                    ? const Color(0xFF6A0DAD)
+                                    : getChatItemColor(
+                                        context.colorScheme,
+                                        chatItem,
+                                      ),
                               ),
                             ),
                           ],
@@ -215,6 +240,18 @@ class _ChatMessageList extends HookConsumerWidget {
                                 ),
                               )
                             : const SizedBox(height: 1),
+                        if (isAgentMessage && ownerDid.isNotEmpty)
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(60, 0, 5, 8),
+                              child: _AgentFeedbackRow(
+                                ownerDid: ownerDid,
+                                messageId: chatItem.messageId,
+                                contactId: _contactId,
+                              ),
+                            ),
+                          ),
                       ],
                     ],
                   ),
@@ -254,4 +291,65 @@ Color getChatItemColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
   }
 
   return const Color.fromARGB(248, 107, 65, 162);
+}
+
+class _AgentFeedbackRow extends ConsumerStatefulWidget {
+  const _AgentFeedbackRow({
+    required this.ownerDid,
+    required this.messageId,
+    required this.contactId,
+  });
+
+  final String ownerDid;
+  final String messageId;
+  final String contactId;
+
+  @override
+  ConsumerState<_AgentFeedbackRow> createState() => _AgentFeedbackRowState();
+}
+
+class _AgentFeedbackRowState extends ConsumerState<_AgentFeedbackRow> {
+  String? _submitted; // 'up' | 'down' | null
+
+  Future<void> _submit(String rating) async {
+    if (_submitted != null) return;
+    setState(() => _submitted = rating);
+    await ref.read(agentRepositoryProvider).submitFeedback(
+      ownerDid: widget.ownerDid,
+      messageId: widget.messageId,
+      rating: rating,
+    );
+    ref.invalidate(agentReadinessProvider(widget.ownerDid));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _thumb(Icons.thumb_up_outlined, Icons.thumb_up, 'up'),
+        const SizedBox(width: 4),
+        _thumb(Icons.thumb_down_outlined, Icons.thumb_down, 'down'),
+      ],
+    );
+  }
+
+  Widget _thumb(IconData outline, IconData filled, String rating) {
+    final isThis = _submitted == rating;
+    final isOther = _submitted != null && _submitted != rating;
+    return GestureDetector(
+      onTap: isOther ? null : () => _submit(rating),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: isOther ? 0.3 : 1.0,
+        child: Icon(
+          isThis ? filled : outline,
+          size: 16,
+          color: isThis
+              ? (rating == 'up' ? Colors.greenAccent : Colors.redAccent)
+              : Colors.white54,
+        ),
+      ),
+    );
+  }
 }

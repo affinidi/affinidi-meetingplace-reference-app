@@ -71,6 +71,7 @@ class ChatScreenController extends _$ChatScreenController
   TimedAction? _updateContactPresenceStatusTimedAction;
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
+  bool _awaitingAgentMessageAck = false;
   late final _chatResumingLock = Lock();
 
   late final Map<String, ProviderSubscription<void>>
@@ -399,6 +400,16 @@ class ChatScreenController extends _$ChatScreenController
           chatItem is chat.ConciergeMessage ||
           chatItem is chat.EventMessage) {
         _upsertChatItem(chatItem);
+        // Detect when the agent's accepted suggestion arrives in the stream
+        if (chatItem is chat.Message && chatItem.isFromMe && _awaitingAgentMessageAck) {
+          _awaitingAgentMessageAck = false;
+          state = state.copyWith(
+            agentSentMessageIds: [
+              ...state.agentSentMessageIds,
+              chatItem.messageId,
+            ],
+          );
+        }
       }
 
       if (chatItem is chat.Message && !chatItem.isFromMe) {
@@ -754,6 +765,7 @@ class ChatScreenController extends _$ChatScreenController
     final suggestion = state.agentSuggestion;
     if (suggestion == null) return;
     messageTextController.text = suggestion;
+    _awaitingAgentMessageAck = true;
     state = state.copyWith(agentSuggestion: null, isAgentThinking: false);
     sendMessage();
   }

@@ -34,6 +34,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     @Default(false) bool isFocusModeActive,
     String? agentSuggestion,
     @Default(false) bool isAgentThinking,
+    @Default([]) List<String> agentSentMessageIds,
   }) = _ChatScreenState;
 
   int getIndexOfNextMessageFromMe(int startingFrom) {

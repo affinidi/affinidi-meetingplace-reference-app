@@ -12,6 +12,7 @@ _AgentReadinessState _$AgentReadinessStateFromJson(Map<String, dynamic> json) =>
       statusLabel: json['statusLabel'] as String,
       isReady: json['isReady'] as bool,
       messagesObserved: (json['messagesObserved'] as num).toInt(),
+      isDeployed: json['isDeployed'] as bool? ?? false,
       conversationsObserved:
           (json['conversationsObserved'] as num?)?.toInt() ?? 0,
       whatsMissing:
@@ -19,6 +20,8 @@ _AgentReadinessState _$AgentReadinessStateFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      feedbackUpCount: (json['feedbackUpCount'] as num?)?.toInt() ?? 0,
+      feedbackDownCount: (json['feedbackDownCount'] as num?)?.toInt() ?? 0,
       lastAnalysedAt: json['lastAnalysedAt'] == null
           ? null
           : DateTime.parse(json['lastAnalysedAt'] as String),
@@ -34,8 +37,11 @@ Map<String, dynamic> _$AgentReadinessStateToJson(
   'statusLabel': instance.statusLabel,
   'isReady': instance.isReady,
   'messagesObserved': instance.messagesObserved,
+  'isDeployed': instance.isDeployed,
   'conversationsObserved': instance.conversationsObserved,
   'whatsMissing': instance.whatsMissing,
+  'feedbackUpCount': instance.feedbackUpCount,
+  'feedbackDownCount': instance.feedbackDownCount,
   'lastAnalysedAt': instance.lastAnalysedAt?.toIso8601String(),
   'persona': instance.persona,
 };

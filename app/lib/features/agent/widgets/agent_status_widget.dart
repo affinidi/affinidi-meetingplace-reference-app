@@ -205,7 +205,10 @@ class _ReadinessSection extends ConsumerWidget {
             ).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
-        if (readiness.isReady) ...[
+        if (readiness.isDeployed) ...[
+          const SizedBox(height: 12),
+          _DeployedBadge(),
+        ] else if (readiness.isReady) ...[
           const SizedBox(height: 12),
           FilledButton.icon(
             onPressed: () => _openDeploySheet(context, ref),
@@ -223,6 +226,13 @@ class _ReadinessSection extends ConsumerWidget {
               foregroundColor: Colors.deepPurpleAccent,
               side: const BorderSide(color: Colors.deepPurpleAccent),
             ),
+          ),
+        ],
+        if (readiness.feedbackUpCount > 0 || readiness.feedbackDownCount > 0) ...[
+          const SizedBox(height: 10),
+          _FeedbackStats(
+            upCount: readiness.feedbackUpCount,
+            downCount: readiness.feedbackDownCount,
           ),
         ],
       ],
@@ -248,6 +258,84 @@ class _ReadinessSection extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (_) =>
           DeployAgentSheet(ownerDid: ownerDid, readiness: readiness),
+    );
+  }
+}
+
+class _DeployedBadge extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF6A0DAD), Color(0xFF3B2FBE)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.smart_toy_outlined, color: Colors.white, size: 16),
+          SizedBox(width: 8),
+          Text(
+            'Active Representative',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeedbackStats extends StatelessWidget {
+  const _FeedbackStats({required this.upCount, required this.downCount});
+
+  final int upCount;
+  final int downCount;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = upCount + downCount;
+    final pct = total > 0 ? (upCount / total * 100).round() : 0;
+    return Row(
+      children: [
+        const Icon(Icons.rate_review_outlined, size: 14, color: Colors.blueGrey),
+        const SizedBox(width: 6),
+        Text(
+          'Message feedback:',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const Spacer(),
+        Icon(Icons.thumb_up, size: 13, color: Colors.green.shade600),
+        const SizedBox(width: 2),
+        Text(
+          '$upCount',
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: Colors.green.shade600),
+        ),
+        const SizedBox(width: 8),
+        Icon(Icons.thumb_down, size: 13, color: Colors.red.shade400),
+        const SizedBox(width: 2),
+        Text(
+          '$downCount',
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: Colors.red.shade400),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '($pct% positive)',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+        ),
+      ],
     );
   }
 }
