@@ -18,6 +18,44 @@ class OnboardingQuestion {
   final String placeholder;
 
   static const List<OnboardingQuestion> all = [
+    // ── Layer 2: declarative knowledge ──────────────────────────────────────
+    OnboardingQuestion(
+      id: 'role',
+      title: 'Your role',
+      subtitle: 'What is your professional role? Your representative will use this as context.',
+      inputType: QuestionInputType.text,
+      placeholder: 'e.g. Senior Engineer at Acme / Product Lead / Founder & CEO',
+    ),
+    OnboardingQuestion(
+      id: 'expertise',
+      title: 'Areas of expertise',
+      subtitle: 'Select every domain you work in. Your agent will draw on this knowledge.',
+      inputType: QuestionInputType.multiChips,
+      options: [
+        'Identity & SSI',
+        'Verifiable Credentials',
+        'Privacy & Data',
+        'Flutter / Mobile',
+        'AWS / Cloud',
+        'Node.js / TypeScript',
+        'Python',
+        'Product Management',
+        'UX & Design',
+        'AI / ML',
+        'APIs & Integrations',
+        'DevOps',
+        'Blockchain / Web3',
+      ],
+    ),
+    OnboardingQuestion(
+      id: 'currentFocus',
+      title: 'Current focus',
+      subtitle: 'Briefly describe what you are working on right now.',
+      inputType: QuestionInputType.textMultiline,
+      placeholder:
+          'e.g. Building an AI representative app using Affinidi Trust Fabric to issue agent configuration VCs…',
+    ),
+    // ── Layer 1: behavioural style ───────────────────────────────────────────
     OnboardingQuestion(
       id: 'tone',
       title: 'Communication style',

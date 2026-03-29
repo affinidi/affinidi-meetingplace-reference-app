@@ -32,9 +32,11 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
   @override
   void initState() {
     super.initState();
-    // Reset at open so the sheet always starts idle.
-    // ref is valid in initState but NOT in dispose — hence the move.
-    ref.read(deploymentNotifierProvider.notifier).reset();
+    // Defer reset until after the current build frame — modifying a provider
+    // during initState (which runs inside the build phase) is not allowed.
+    Future(() {
+      if (mounted) ref.read(deploymentNotifierProvider.notifier).reset();
+    });
   }
 
   @override
