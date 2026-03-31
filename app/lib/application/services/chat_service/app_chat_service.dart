@@ -254,7 +254,7 @@ class AppChatService extends _$AppChatService implements ChatService {
   @override
   Future<void> updateGroupContactPendingStatus(
     Contact contact,
-    Group? group,
+    Group group,
   ) async {
     await _groupDelegate.updateGroupContactPendingStatus(contact, group);
   }

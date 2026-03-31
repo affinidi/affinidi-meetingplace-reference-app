@@ -25,7 +25,7 @@ abstract class ChatService {
     DateTime datePresence,
     int presenceIntervalInSeconds,
   );
-  Future<void> updateGroupContactPendingStatus(Contact contact, Group? group);
+  Future<void> updateGroupContactPendingStatus(Contact contact, Group group);
 
   void onPresenceUpdated(DateTime datePresence);
 
