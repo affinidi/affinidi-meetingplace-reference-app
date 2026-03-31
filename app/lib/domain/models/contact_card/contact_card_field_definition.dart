@@ -19,12 +19,16 @@ enum ContactCardFieldKey {
   postcode,
 }
 
+abstract class ContactCardFieldTags {
+  static const String identityCard = 'identityCard';
+}
+
 class ContactCardFieldDefinition {
   ContactCardFieldDefinition({
     required this.key,
     required this.icon,
     required this.iconColor,
-    this.showOnIdentityCard = false,
+    this.tags = const [],
     required this.keyboardType,
     required this.textCapitalization,
     required this.autocorrect,
@@ -33,7 +37,7 @@ class ContactCardFieldDefinition {
     required this.textInputAction,
     required this.placeholder,
     required List<FieldValidator> Function(BuildContext context) validators,
-    required this.sdkPath,
+    required this.jsonPath,
     required this.nullWhenEmpty,
     required String? Function(ContactCard) valueAccessor,
     required ContactCard Function(ContactCard, String?) updateCard,
@@ -45,7 +49,7 @@ class ContactCardFieldDefinition {
   final IconData icon;
   final Color Function(AppCustomColors customColors, ColorScheme colorScheme)
   iconColor;
-  final bool showOnIdentityCard;
+  final List<String> tags;
   final TextInputType? keyboardType;
   final TextCapitalization textCapitalization;
   final bool autocorrect;
@@ -54,10 +58,12 @@ class ContactCardFieldDefinition {
   final TextInputAction textInputAction;
   final String Function(AppLocalizations l10n) placeholder;
   final List<FieldValidator> Function(BuildContext context) _validatorsBuilder;
-  final List<String> sdkPath;
+  final List<String> jsonPath;
   final bool nullWhenEmpty;
   final String? Function(ContactCard) _valueAccessor;
   final ContactCard Function(ContactCard, String?) _updateCard;
+
+  bool hasTag(String tag) => tags.contains(tag);
 
   String get name => key.name;
 
@@ -69,7 +75,7 @@ class ContactCardFieldDefinition {
   String valueFrom(ContactCard card) => _valueAccessor(card) ?? '';
 
   String sdkValueFrom(sdk.ContactCard card) {
-    return _sdkPathValue(card.contactInfo, sdkPath);
+    return _sdkPathValue(card.contactInfo, jsonPath);
   }
 
   String? nullableValueFrom(ContactCard card) => _valueAccessor(card);
@@ -112,7 +118,7 @@ class ContactCardFieldDefinitions {
           errorText: context.l10n.nameTooLong,
         ),
       ],
-      sdkPath: const ['n', 'given'],
+      jsonPath: const ['n', 'given'],
       nullWhenEmpty: false,
       valueAccessor: (card) => card.firstName,
       updateCard: (card, value) => card.copyWith(firstName: value ?? ''),
@@ -135,7 +141,7 @@ class ContactCardFieldDefinitions {
           errorText: context.l10n.nameTooLong,
         ),
       ],
-      sdkPath: const ['n', 'surname'],
+      jsonPath: const ['n', 'surname'],
       nullWhenEmpty: true,
       valueAccessor: (card) => card.lastName,
       updateCard: (card, value) => card.copyWith(lastName: value),
@@ -158,7 +164,7 @@ class ContactCardFieldDefinitions {
           errorText: context.l10n.nameTooLong,
         ),
       ],
-      sdkPath: const ['org'],
+      jsonPath: const ['org'],
       nullWhenEmpty: true,
       valueAccessor: (card) => card.organization,
       updateCard: (card, value) => card.copyWith(organization: value),
@@ -181,7 +187,7 @@ class ContactCardFieldDefinitions {
           errorText: context.l10n.nameTooLong,
         ),
       ],
-      sdkPath: const ['url'],
+      jsonPath: const ['url'],
       nullWhenEmpty: true,
       valueAccessor: (card) => card.website,
       updateCard: (card, value) => card.copyWith(website: value),
@@ -204,11 +210,11 @@ class ContactCardFieldDefinitions {
           errorText: context.l10n.emailTooLong,
         ),
       ],
-      sdkPath: const ['email', 'type', 'work'],
+      jsonPath: const ['email', 'type', 'work'],
       nullWhenEmpty: true,
       valueAccessor: (card) => card.email,
       updateCard: (card, value) => card.copyWith(email: value),
-      showOnIdentityCard: true,
+      tags: const [ContactCardFieldTags.identityCard],
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.mobile,
@@ -222,11 +228,11 @@ class ContactCardFieldDefinitions {
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterMobile,
       validators: (_) => [],
-      sdkPath: const ['tel', 'type', 'cell'],
+      jsonPath: const ['tel', 'type', 'cell'],
       nullWhenEmpty: true,
       valueAccessor: (card) => card.mobile,
       updateCard: (card, value) => card.copyWith(mobile: value),
-      showOnIdentityCard: true,
+      tags: const [ContactCardFieldTags.identityCard],
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.postcode,
@@ -245,7 +251,7 @@ class ContactCardFieldDefinitions {
           errorText: context.l10n.nameTooLong,
         ),
       ],
-      sdkPath: const ['adr', 'postalCode'],
+      jsonPath: const ['adr', 'postalCode'],
       nullWhenEmpty: true,
       valueAccessor: (card) => card.postcode,
       updateCard: (card, value) => card.copyWith(postcode: value),

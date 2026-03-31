@@ -237,7 +237,7 @@ class _IdentityContent extends StatelessWidget {
     final l10n = context.l10n;
 
     final fields = ContactCardFieldDefinitions.values
-        .where((field) => field.showOnIdentityCard)
+        .where((field) => field.hasTag(ContactCardFieldTags.identityCard))
         .toList(growable: false);
 
     final name = identity.card.fullName.isNotEmpty

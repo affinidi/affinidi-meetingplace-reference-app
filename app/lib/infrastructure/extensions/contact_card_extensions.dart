@@ -100,11 +100,11 @@ class ContactCardUtils {
   static String getFullName(Map<dynamic, dynamic> contactInfo) {
     final firstName = getPathValue(
       contactInfo,
-      ContactCardFieldDefinitions.byKey(ContactCardFieldKey.firstName).sdkPath,
+      ContactCardFieldDefinitions.byKey(ContactCardFieldKey.firstName).jsonPath,
     );
     final lastName = getPathValue(
       contactInfo,
-      ContactCardFieldDefinitions.byKey(ContactCardFieldKey.lastName).sdkPath,
+      ContactCardFieldDefinitions.byKey(ContactCardFieldKey.lastName).jsonPath,
     );
     return [firstName, lastName].nonEmpty.join(' ');
   }
@@ -121,7 +121,10 @@ class ContactCardUtils {
     );
 
     for (final field in ContactCardFieldDefinitions.editable) {
-      card = field.updateContactCard(card, getPathValue(values, field.sdkPath));
+      card = field.updateContactCard(
+        card,
+        getPathValue(values, field.jsonPath),
+      );
     }
 
     final profilePic = getPathValue(values, _profilePicPath);
@@ -141,7 +144,8 @@ extension ContactCardExtensions on ContactCard {
   bool get hasProfilePic => profilePic != null && profilePic!.trim().isNotEmpty;
 
   /// Full display name composed from first and last name.
-  String get fullName => '$firstName ${lastName ?? ''}'.trim();
+  String get fullName =>
+      [firstName.trim(), lastName?.trim()].nonNulls.join(' ');
 
   /// ImageProvider for the contact's profile picture or default placeholder
   ImageProvider<Object> image({required BaseCacheManager cacheManager}) {
@@ -165,7 +169,7 @@ extension ContactCardExtensions on ContactCard {
     for (final field in ContactCardFieldDefinitions.editable) {
       ContactCardUtils.setPathValue(
         contactInfo,
-        field.sdkPath,
+        field.jsonPath,
         field.valueFrom(this),
       );
     }
@@ -188,24 +192,24 @@ extension ContactCardExtensions on ContactCard {
 extension SdkContactCardFields on sdk.ContactCard {
   String valueForField(ContactCardFieldKey key) {
     final field = ContactCardFieldDefinitions.byKey(key);
-    return ContactCardUtils.getPathValue(contactInfo, field.sdkPath);
+    return ContactCardUtils.getPathValue(contactInfo, field.jsonPath);
   }
 
   void setValueForField(ContactCardFieldKey key, String value) {
     final field = ContactCardFieldDefinitions.byKey(key);
-    ContactCardUtils.setPathValue(contactInfo, field.sdkPath, value);
+    ContactCardUtils.setPathValue(contactInfo, field.jsonPath, value);
   }
 
   String get firstName => ContactCardUtils.getPathValue(
     contactInfo,
-    ContactCardFieldDefinitions.byKey(ContactCardFieldKey.firstName).sdkPath,
+    ContactCardFieldDefinitions.byKey(ContactCardFieldKey.firstName).jsonPath,
   );
   set firstName(String value) =>
       setValueForField(ContactCardFieldKey.firstName, value);
 
   String get lastName => ContactCardUtils.getPathValue(
     contactInfo,
-    ContactCardFieldDefinitions.byKey(ContactCardFieldKey.lastName).sdkPath,
+    ContactCardFieldDefinitions.byKey(ContactCardFieldKey.lastName).jsonPath,
   );
   set lastName(String value) =>
       setValueForField(ContactCardFieldKey.lastName, value);
