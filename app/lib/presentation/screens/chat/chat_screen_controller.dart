@@ -401,7 +401,9 @@ class ChatScreenController extends _$ChatScreenController
           chatItem is chat.EventMessage) {
         _upsertChatItem(chatItem);
         // Detect when the agent's accepted suggestion arrives in the stream
-        if (chatItem is chat.Message && chatItem.isFromMe && _awaitingAgentMessageAck) {
+        if (chatItem is chat.Message &&
+            chatItem.isFromMe &&
+            _awaitingAgentMessageAck) {
           _awaitingAgentMessageAck = false;
           state = state.copyWith(
             agentSentMessageIds: [
@@ -794,11 +796,13 @@ class ChatScreenController extends _$ChatScreenController
         )
         .toList();
 
-    final result = await ref.read(agentRepositoryProvider).getAgentResponse(
-      ownerDid: ownerDid,
-      inboundMessage: inboundMsg.value,
-      recentHistory: history,
-    );
+    final result = await ref
+        .read(agentRepositoryProvider)
+        .getAgentResponse(
+          ownerDid: ownerDid,
+          inboundMessage: inboundMsg.value,
+          recentHistory: history,
+        );
 
     // Discard if focus mode was toggled off while the request was in flight
     if (!state.isFocusModeActive) return;

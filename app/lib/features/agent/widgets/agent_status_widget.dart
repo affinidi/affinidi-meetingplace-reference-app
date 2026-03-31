@@ -209,6 +209,10 @@ class _ReadinessSection extends ConsumerWidget {
         if (readiness.isDeployed) ...[
           const SizedBox(height: 12),
           _DeployedBadge(),
+          if (readiness.suggestRedeploy) ...[
+            const SizedBox(height: 8),
+            _UpdateNudge(ownerDid: ownerDid, readiness: readiness),
+          ],
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: () => _openVcScreen(context),
@@ -239,7 +243,8 @@ class _ReadinessSection extends ConsumerWidget {
             ),
           ),
         ],
-        if (readiness.feedbackUpCount > 0 || readiness.feedbackDownCount > 0) ...[
+        if (readiness.feedbackUpCount > 0 ||
+            readiness.feedbackDownCount > 0) ...[
           const SizedBox(height: 10),
           _FeedbackStats(
             upCount: readiness.feedbackUpCount,
@@ -274,8 +279,77 @@ class _ReadinessSection extends ConsumerWidget {
 
   void _openVcScreen(BuildContext context) {
     Navigator.of(context).push<void>(
-      MaterialPageRoute(
-        builder: (_) => AgentVcScreen(ownerDid: ownerDid),
+      MaterialPageRoute(builder: (_) => AgentVcScreen(ownerDid: ownerDid)),
+    );
+  }
+}
+
+class _UpdateNudge extends StatelessWidget {
+  const _UpdateNudge({required this.ownerDid, required this.readiness});
+
+  final String ownerDid;
+  final AgentReadinessState readiness;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.amber.shade300),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.auto_fix_high_outlined,
+            size: 18,
+            color: Colors.amber.shade800,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Style update ready',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    color: Colors.amber.shade900,
+                  ),
+                ),
+                Text(
+                  'Feedback refined your style. Redeploy to apply.',
+                  style: TextStyle(fontSize: 11, color: Colors.amber.shade800),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => DeployAgentSheet(
+                ownerDid: ownerDid,
+                readiness: readiness,
+                isUpdate: true,
+              ),
+            ),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.amber.shade900,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              'Update',
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -325,33 +399,38 @@ class _FeedbackStats extends StatelessWidget {
     final pct = total > 0 ? (upCount / total * 100).round() : 0;
     return Row(
       children: [
-        const Icon(Icons.rate_review_outlined, size: 14, color: Colors.blueGrey),
-        const SizedBox(width: 6),
-        Text(
-          'Message feedback:',
-          style: Theme.of(context).textTheme.bodySmall,
+        const Icon(
+          Icons.rate_review_outlined,
+          size: 14,
+          color: Colors.blueGrey,
         ),
+        const SizedBox(width: 6),
+        Text('Message feedback:', style: Theme.of(context).textTheme.bodySmall),
         const Spacer(),
         Icon(Icons.thumb_up, size: 13, color: Colors.green.shade600),
         const SizedBox(width: 2),
         Text(
           '$upCount',
-          style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(color: Colors.green.shade600),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Colors.green.shade600),
         ),
         const SizedBox(width: 8),
         Icon(Icons.thumb_down, size: 13, color: Colors.red.shade400),
         const SizedBox(width: 2),
         Text(
           '$downCount',
-          style: Theme.of(context).textTheme.bodySmall
-              ?.copyWith(color: Colors.red.shade400),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Colors.red.shade400),
         ),
         const SizedBox(width: 8),
         Text(
           '($pct% positive)',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
       ],

@@ -22,14 +22,17 @@ class OnboardingQuestion {
     OnboardingQuestion(
       id: 'role',
       title: 'Your role',
-      subtitle: 'What is your professional role? Your representative will use this as context.',
+      subtitle:
+          'What is your professional role? Your representative will use this as context.',
       inputType: QuestionInputType.text,
-      placeholder: 'e.g. Senior Engineer at Acme / Product Lead / Founder & CEO',
+      placeholder:
+          'e.g. Senior Engineer at Acme / Product Lead / Founder & CEO',
     ),
     OnboardingQuestion(
       id: 'expertise',
       title: 'Areas of expertise',
-      subtitle: 'Select every domain you work in. Your agent will draw on this knowledge.',
+      subtitle:
+          'Select every domain you work in. Your agent will draw on this knowledge.',
       inputType: QuestionInputType.multiChips,
       options: [
         'Identity & SSI',
@@ -59,7 +62,8 @@ class OnboardingQuestion {
     OnboardingQuestion(
       id: 'tone',
       title: 'Communication style',
-      subtitle: 'Select everything that describes how you typically write messages.',
+      subtitle:
+          'Select everything that describes how you typically write messages.',
       inputType: QuestionInputType.multiChips,
       options: [
         'Friendly',
@@ -117,7 +121,8 @@ class OnboardingQuestion {
     OnboardingQuestion(
       id: 'hardLimits',
       title: 'Off-limits topics',
-      subtitle: 'What should your AI representative never discuss on your behalf?',
+      subtitle:
+          'What should your AI representative never discuss on your behalf?',
       inputType: QuestionInputType.multiChips,
       options: [
         'Financial decisions',

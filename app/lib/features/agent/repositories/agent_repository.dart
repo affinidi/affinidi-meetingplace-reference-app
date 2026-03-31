@@ -59,7 +59,9 @@ class AgentRepository {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'ownerDid': ownerDid, 'answers': answers}),
       );
-      debugPrint('[AgentRepo] /onboard: ${response.statusCode} — ${response.body}');
+      debugPrint(
+        '[AgentRepo] /onboard: ${response.statusCode} — ${response.body}',
+      );
       return response.statusCode == 200;
     } catch (e) {
       debugPrint('[AgentRepo] /onboard error: $e');
@@ -72,7 +74,9 @@ class AgentRepository {
     required String messageId,
     required String rating,
   }) async {
-    debugPrint('[AgentRepo] submitting feedback for $ownerDid: $rating on $messageId');
+    debugPrint(
+      '[AgentRepo] submitting feedback for $ownerDid: $rating on $messageId',
+    );
     try {
       await _client.post(
         Uri.parse('$_backendUrl/feedback'),
@@ -104,7 +108,9 @@ class AgentRepository {
           'recentHistory': recentHistory,
         }),
       );
-      debugPrint('[AgentRepo] /respond: ${response.statusCode} — ${response.body}');
+      debugPrint(
+        '[AgentRepo] /respond: ${response.statusCode} — ${response.body}',
+      );
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body) as Map<String, dynamic>;
         return AgentResponse.fromJson(json);
@@ -119,8 +125,9 @@ class AgentRepository {
   Future<AgentVcData?> getAgentVc(String ownerDid) async {
     debugPrint('[AgentRepo] fetching VC for $ownerDid');
     try {
-      final uri = Uri.parse('$_backendUrl/vc')
-          .replace(queryParameters: {'did': ownerDid});
+      final uri = Uri.parse(
+        '$_backendUrl/vc',
+      ).replace(queryParameters: {'did': ownerDid});
       final response = await _client.get(uri);
       debugPrint('[AgentRepo] /vc: ${response.statusCode}');
       if (response.statusCode == 200) {
@@ -131,6 +138,35 @@ class AgentRepository {
     } catch (e) {
       debugPrint('[AgentRepo] /vc error: $e');
       return null;
+    }
+  }
+
+  Future<void> revokeAgent(String ownerDid) async {
+    debugPrint('[AgentRepo] revoking agent for $ownerDid');
+    final response = await _client.post(
+      Uri.parse('$_backendUrl/revoke'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'ownerDid': ownerDid}),
+    );
+    debugPrint('[AgentRepo] /revoke: ${response.statusCode}');
+    if (response.statusCode != 200) {
+      throw Exception('Revoke failed: ${response.body}');
+    }
+  }
+
+  Future<void> rollbackAgent(String ownerDid) async {
+    debugPrint('[AgentRepo] rolling back agent for $ownerDid');
+    final response = await _client.post(
+      Uri.parse('$_backendUrl/rollback'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'ownerDid': ownerDid}),
+    );
+    debugPrint(
+      '[AgentRepo] /rollback: ${response.statusCode} — ${response.body}',
+    );
+    if (response.statusCode != 200) {
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      throw Exception(json['error'] ?? 'Rollback failed');
     }
   }
 

@@ -17,8 +17,7 @@ class AgentOnboardingScreen extends ConsumerStatefulWidget {
       _AgentOnboardingScreenState();
 }
 
-class _AgentOnboardingScreenState
-    extends ConsumerState<AgentOnboardingScreen> {
+class _AgentOnboardingScreenState extends ConsumerState<AgentOnboardingScreen> {
   final _questions = OnboardingQuestion.all;
   final _answers = <String, dynamic>{};
   final _pageController = PageController();
@@ -111,10 +110,9 @@ class _AgentOnboardingScreenState
               child: Text(
                 '${_currentPage + 1} of $total',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               ),
             ),
@@ -127,8 +125,9 @@ class _AgentOnboardingScreenState
           LinearProgressIndicator(
             value: progress,
             minHeight: 3,
-            backgroundColor:
-                Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.1),
             valueColor: const AlwaysStoppedAnimation(Colors.deepPurpleAccent),
           ),
 
@@ -158,8 +157,7 @@ class _AgentOnboardingScreenState
                   TextButton.icon(
                     onPressed: _isSubmitting ? null : _back,
                     icon: const Icon(Icons.arrow_back, size: 16),
-                    label:
-                        Text(_currentPage == 0 ? 'Cancel' : 'Back'),
+                    label: Text(_currentPage == 0 ? 'Cancel' : 'Back'),
                   ),
                   const Spacer(),
                   // Next / Finish
@@ -172,9 +170,7 @@ class _AgentOnboardingScreenState
                       : FilledButton.icon(
                           onPressed: canProceed ? _next : null,
                           icon: Icon(
-                            isLast
-                                ? Icons.check_rounded
-                                : Icons.arrow_forward,
+                            isLast ? Icons.check_rounded : Icons.arrow_forward,
                             size: 16,
                           ),
                           label: Text(isLast ? 'Finish' : 'Next'),
@@ -214,19 +210,17 @@ class _QuestionPage extends StatelessWidget {
         children: [
           Text(
             question.title,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.w700),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 8),
           Text(
             question.subtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context)
-                  .colorScheme
-                  .onSurface
-                  .withValues(alpha: 0.65),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.65),
             ),
           ),
           const SizedBox(height: 32),
@@ -248,9 +242,7 @@ class _QuestionPage extends StatelessWidget {
       case QuestionInputType.multiChips:
         return _ChipGroup(
           options: question.options,
-          selected: answer is List
-              ? Set<String>.from(answer as List)
-              : {},
+          selected: answer is List ? Set<String>.from(answer as List) : {},
           multiSelect: true,
           onChanged: onChanged,
         );
@@ -321,10 +313,9 @@ class _ChipGroup extends StatelessWidget {
               border: Border.all(
                 color: isSelected
                     ? Colors.deepPurpleAccent
-                    : Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withValues(alpha: 0.3),
+                    : Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
             child: Text(
@@ -333,8 +324,7 @@ class _ChipGroup extends StatelessWidget {
                 color: isSelected
                     ? Colors.white
                     : Theme.of(context).colorScheme.onSurface,
-                fontWeight:
-                    isSelected ? FontWeight.w600 : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
           ),
@@ -389,27 +379,20 @@ class _TextInputState extends State<_TextInput> {
       decoration: InputDecoration(
         hintText: widget.placeholder,
         hintStyle: TextStyle(
-          color: Theme.of(context)
-              .colorScheme
-              .onSurface
-              .withValues(alpha: 0.35),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurface.withValues(alpha: 0.35),
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: Theme.of(context)
-                .colorScheme
-                .outline
-                .withValues(alpha: 0.3),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: Theme.of(context)
-                .colorScheme
-                .outline
-                .withValues(alpha: 0.3),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         focusedBorder: OutlineInputBorder(

@@ -19,6 +19,8 @@ class _AgentVcScreenState extends ConsumerState<AgentVcScreen> {
   AgentVcData? _vc;
   bool _loading = true;
   String? _error;
+  bool _isRevoking = false;
+  bool _isRollingBack = false;
 
   @override
   void initState() {
@@ -27,14 +29,92 @@ class _AgentVcScreenState extends ConsumerState<AgentVcScreen> {
   }
 
   Future<void> _load() async {
-    final data =
-        await ref.read(agentRepositoryProvider).getAgentVc(widget.ownerDid);
+    final data = await ref
+        .read(agentRepositoryProvider)
+        .getAgentVc(widget.ownerDid);
     if (!mounted) return;
     setState(() {
       _vc = data;
       _loading = false;
       _error = data == null ? 'Could not load credential data.' : null;
     });
+  }
+
+  Future<void> _revoke() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Revoke agent?'),
+        content: const Text(
+          'This will deactivate your AI representative immediately. '
+          'You can deploy a new one at any time.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Revoke'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _isRevoking = true);
+    try {
+      await ref.read(agentRepositoryProvider).revokeAgent(widget.ownerDid);
+      if (!mounted) return;
+      ref.invalidate(agentReadinessProvider(widget.ownerDid));
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Revoke failed: $e')));
+    } finally {
+      if (mounted) setState(() => _isRevoking = false);
+    }
+  }
+
+  Future<void> _rollback() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Restore previous version?'),
+        content: const Text(
+          'This will revert your representative\'s prompt to the previous version. '
+          'Your current version will remain saved.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Restore'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _isRollingBack = true);
+    try {
+      await ref.read(agentRepositoryProvider).rollbackAgent(widget.ownerDid);
+      if (!mounted) return;
+      await _load();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Restored to previous version.')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+    } finally {
+      if (mounted) setState(() => _isRollingBack = false);
+    }
   }
 
   Future<void> _claimInVault() async {
@@ -66,18 +146,20 @@ class _AgentVcScreenState extends ConsumerState<AgentVcScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Text(
-                    _error!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                )
-              : _VcContent(
-                  vc: _vc!,
-                  onClaim: _vc?.credentialOfferUri != null ? _claimInVault : null,
-                ),
+          ? Center(
+              child: Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            )
+          : _VcContent(
+              vc: _vc!,
+              onClaim: _vc?.credentialOfferUri != null ? _claimInVault : null,
+              onRevoke: _revoke,
+              onRollback: _rollback,
+              isRevoking: _isRevoking,
+              isRollingBack: _isRollingBack,
+            ),
     );
   }
 }
@@ -85,21 +167,33 @@ class _AgentVcScreenState extends ConsumerState<AgentVcScreen> {
 // ── VC content ──────────────────────────────────────────────────────────────
 
 class _VcContent extends StatelessWidget {
-  const _VcContent({required this.vc, required this.onClaim});
+  const _VcContent({
+    required this.vc,
+    required this.onClaim,
+    required this.onRevoke,
+    required this.onRollback,
+    required this.isRevoking,
+    required this.isRollingBack,
+  });
 
   final AgentVcData vc;
   final VoidCallback? onClaim;
+  final VoidCallback onRevoke;
+  final VoidCallback onRollback;
+  final bool isRevoking;
+  final bool isRollingBack;
 
   @override
   Widget build(BuildContext context) {
     final claims = vc.claims;
     // hardLimits is stored as { items: [...] } to match the TAgentConfigV1R1 schema shape.
     final hardLimitsRaw = claims['hardLimits'];
-    final hardLimits = (hardLimitsRaw is Map
-            ? (hardLimitsRaw['items'] as List<dynamic>? ?? [])
-            : (hardLimitsRaw as List<dynamic>? ?? []))
-        .map((e) => e.toString())
-        .toList();
+    final hardLimits =
+        (hardLimitsRaw is Map
+                ? (hardLimitsRaw['items'] as List<dynamic>? ?? [])
+                : (hardLimitsRaw as List<dynamic>? ?? []))
+            .map((e) => e.toString())
+            .toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -154,20 +248,11 @@ class _VcContent extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                _MetaRow(
-                  label: 'Issued',
-                  value: _formatDate(vc.issuedAt),
-                ),
+                _MetaRow(label: 'Issued', value: _formatDate(vc.issuedAt)),
                 const SizedBox(height: 4),
-                _MetaRow(
-                  label: 'Holder',
-                  value: _truncateDid(vc.holderDid),
-                ),
+                _MetaRow(label: 'Holder', value: _truncateDid(vc.holderDid)),
                 const SizedBox(height: 4),
-                _MetaRow(
-                  label: 'ID',
-                  value: _truncate(vc.issuanceId, 24),
-                ),
+                _MetaRow(label: 'ID', value: _truncate(vc.issuanceId, 24)),
               ],
             ),
           ),
@@ -212,11 +297,7 @@ class _VcContent extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.block,
-                      size: 14,
-                      color: Colors.red.shade400,
-                    ),
+                    Icon(Icons.block, size: 14, color: Colors.red.shade400),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -246,13 +327,53 @@ class _VcContent extends StatelessWidget {
               'Opens your Affinidi Vault to store this credential.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
+
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 16),
+          const _SectionHeader(label: 'AGENT ACTIONS'),
+          const SizedBox(height: 12),
+
+          OutlinedButton.icon(
+            onPressed: isRollingBack ? null : onRollback,
+            icon: isRollingBack
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.history, size: 16),
+            label: Text(
+              isRollingBack ? 'Restoring…' : 'Restore previous version',
+            ),
+          ),
+          const SizedBox(height: 8),
+
+          OutlinedButton.icon(
+            onPressed: isRevoking ? null : onRevoke,
+            icon: isRevoking
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.red.shade400,
+                    ),
+                  )
+                : const Icon(Icons.delete_outline, size: 16),
+            label: Text(isRevoking ? 'Revoking…' : 'Revoke agent'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red.shade600,
+              side: BorderSide(color: Colors.red.shade300),
+            ),
+          ),
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -270,8 +391,18 @@ class _VcContent extends StatelessWidget {
       s.length > max ? '${s.substring(0, max)}…' : s;
 
   static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 }
 
@@ -287,10 +418,7 @@ class _MetaRow extends StatelessWidget {
       children: [
         Text(
           '$label: ',
-          style: const TextStyle(
-            color: Colors.white60,
-            fontSize: 11,
-          ),
+          style: const TextStyle(color: Colors.white60, fontSize: 11),
         ),
         Expanded(
           child: Text(
@@ -318,10 +446,7 @@ class _SectionHeader extends StatelessWidget {
       label,
       style: Theme.of(context).textTheme.labelMedium?.copyWith(
         fontWeight: FontWeight.w700,
-        color: Theme.of(context)
-            .colorScheme
-            .onSurface
-            .withValues(alpha: 0.5),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
         letterSpacing: 0.8,
       ),
     );
@@ -352,9 +477,9 @@ class _ClaimRow extends StatelessWidget {
             width: 110,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(

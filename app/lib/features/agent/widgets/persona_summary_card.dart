@@ -486,7 +486,10 @@ class _HardLimitsSection extends StatelessWidget {
                   Expanded(
                     child: Text(
                       l,
-                      style: TextStyle(fontSize: 11, color: Colors.red.shade700),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.red.shade700,
+                      ),
                     ),
                   ),
                 ],

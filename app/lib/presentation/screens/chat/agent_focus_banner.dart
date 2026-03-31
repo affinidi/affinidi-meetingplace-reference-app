@@ -11,10 +11,13 @@ class _AgentFocusBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (AgentConfig.backendUrl.isEmpty) return const SizedBox.shrink();
 
-    final ownerDid =
-        ref.watch(identitiesServiceProvider.select((s) => s.currentIdentity?.did ?? ''));
+    final ownerDid = ref.watch(
+      identitiesServiceProvider.select((s) => s.currentIdentity?.did ?? ''),
+    );
     final isDeployed = ref.watch(
-      agentReadinessProvider(ownerDid).select((a) => a.valueOrNull?.isDeployed ?? false),
+      agentReadinessProvider(
+        ownerDid,
+      ).select((a) => a.valueOrNull?.isDeployed ?? false),
     );
     if (!isDeployed) return const SizedBox.shrink();
 
@@ -32,8 +35,9 @@ class _AgentFocusBanner extends ConsumerWidget {
           Icon(
             Icons.smart_toy_outlined,
             size: 15,
-            color:
-                isActive ? Colors.deepPurpleAccent : context.colorScheme.onSurfaceVariant,
+            color: isActive
+                ? Colors.deepPurpleAccent
+                : context.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: 8),
           Expanded(

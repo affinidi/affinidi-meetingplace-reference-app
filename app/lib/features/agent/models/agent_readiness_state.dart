@@ -17,6 +17,8 @@ abstract class AgentReadinessState with _$AgentReadinessState {
     @Default([]) List<String> whatsMissing,
     @Default(0) int feedbackUpCount,
     @Default(0) int feedbackDownCount,
+    @Default(false) bool needsRedeploy,
+    @Default(false) bool suggestRedeploy,
     DateTime? lastAnalysedAt,
     AgentPersona? persona,
   }) = _AgentReadinessState;

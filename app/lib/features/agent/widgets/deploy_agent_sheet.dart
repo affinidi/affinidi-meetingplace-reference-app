@@ -16,11 +16,13 @@ class DeployAgentSheet extends ConsumerStatefulWidget {
   const DeployAgentSheet({
     required this.ownerDid,
     required this.readiness,
+    this.isUpdate = false,
     super.key,
   });
 
   final String ownerDid;
   final AgentReadinessState readiness;
+  final bool isUpdate;
 
   @override
   ConsumerState<DeployAgentSheet> createState() => _DeployAgentSheetState();
@@ -93,16 +95,21 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
 
             // Title
             Text(
-              'Deploy as My Representative',
+              widget.isUpdate
+                  ? 'Update My Representative'
+                  : 'Deploy as My Representative',
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
             Text(
-              'Confirming will issue an AgentConfigVC into your Affinidi Vault. '
-              'Your representative will respond on your behalf '
-              'while you are in focus mode.',
+              widget.isUpdate
+                  ? 'Your style was refined based on feedback. '
+                        'Confirming will reissue the AgentConfigVC with the updated prompt.'
+                  : 'Confirming will issue an AgentConfigVC into your Affinidi Vault. '
+                        'Your representative will respond on your behalf '
+                        'while you are in focus mode.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
@@ -154,7 +161,11 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
                       .read(deploymentNotifierProvider.notifier)
                       .deploy(widget.ownerDid),
                   icon: const Icon(Icons.verified_outlined, size: 18),
-                  label: const Text('Issue VC & Activate Agent'),
+                  label: Text(
+                    widget.isUpdate
+                        ? 'Update & Reissue VC'
+                        : 'Issue VC & Activate Agent',
+                  ),
                 );
               },
               loading: () => FilledButton.icon(
@@ -164,14 +175,18 @@ class _DeployAgentSheetState extends ConsumerState<DeployAgentSheet> {
                   height: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                label: const Text('Issuing VC…'),
+                label: Text(widget.isUpdate ? 'Updating…' : 'Issuing VC…'),
               ),
               orElse: () => FilledButton.icon(
                 onPressed: () => ref
                     .read(deploymentNotifierProvider.notifier)
                     .deploy(widget.ownerDid),
                 icon: const Icon(Icons.verified_outlined, size: 18),
-                label: const Text('Issue VC & Activate Agent'),
+                label: Text(
+                  widget.isUpdate
+                      ? 'Update & Reissue VC'
+                      : 'Issue VC & Activate Agent',
+                ),
               ),
             ),
 
@@ -301,10 +316,7 @@ class _ClaimVcButton extends StatelessWidget {
           ),
         );
       },
-      icon: const Icon(
-        Icons.account_balance_wallet_outlined,
-        size: 18,
-      ),
+      icon: const Icon(Icons.account_balance_wallet_outlined, size: 18),
       label: const Text('Claim Agent VC in Vault'),
       style: OutlinedButton.styleFrom(
         foregroundColor: const Color(0xFF6A0DAD),

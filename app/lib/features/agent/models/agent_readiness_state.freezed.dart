@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AgentReadinessState {
 
- int get scorePercent; String get statusLabel; bool get isReady; int get messagesObserved; bool get isDeployed; int get conversationsObserved; List<String> get whatsMissing; int get feedbackUpCount; int get feedbackDownCount; DateTime? get lastAnalysedAt; AgentPersona? get persona;
+ int get scorePercent; String get statusLabel; bool get isReady; int get messagesObserved; bool get isDeployed; int get conversationsObserved; List<String> get whatsMissing; int get feedbackUpCount; int get feedbackDownCount; bool get needsRedeploy; bool get suggestRedeploy; DateTime? get lastAnalysedAt; AgentPersona? get persona;
 /// Create a copy of AgentReadinessState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $AgentReadinessStateCopyWith<AgentReadinessState> get copyWith => _$AgentReadine
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AgentReadinessState&&(identical(other.scorePercent, scorePercent) || other.scorePercent == scorePercent)&&(identical(other.statusLabel, statusLabel) || other.statusLabel == statusLabel)&&(identical(other.isReady, isReady) || other.isReady == isReady)&&(identical(other.messagesObserved, messagesObserved) || other.messagesObserved == messagesObserved)&&(identical(other.isDeployed, isDeployed) || other.isDeployed == isDeployed)&&(identical(other.conversationsObserved, conversationsObserved) || other.conversationsObserved == conversationsObserved)&&const DeepCollectionEquality().equals(other.whatsMissing, whatsMissing)&&(identical(other.feedbackUpCount, feedbackUpCount) || other.feedbackUpCount == feedbackUpCount)&&(identical(other.feedbackDownCount, feedbackDownCount) || other.feedbackDownCount == feedbackDownCount)&&(identical(other.lastAnalysedAt, lastAnalysedAt) || other.lastAnalysedAt == lastAnalysedAt)&&(identical(other.persona, persona) || other.persona == persona));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AgentReadinessState&&(identical(other.scorePercent, scorePercent) || other.scorePercent == scorePercent)&&(identical(other.statusLabel, statusLabel) || other.statusLabel == statusLabel)&&(identical(other.isReady, isReady) || other.isReady == isReady)&&(identical(other.messagesObserved, messagesObserved) || other.messagesObserved == messagesObserved)&&(identical(other.isDeployed, isDeployed) || other.isDeployed == isDeployed)&&(identical(other.conversationsObserved, conversationsObserved) || other.conversationsObserved == conversationsObserved)&&const DeepCollectionEquality().equals(other.whatsMissing, whatsMissing)&&(identical(other.feedbackUpCount, feedbackUpCount) || other.feedbackUpCount == feedbackUpCount)&&(identical(other.feedbackDownCount, feedbackDownCount) || other.feedbackDownCount == feedbackDownCount)&&(identical(other.needsRedeploy, needsRedeploy) || other.needsRedeploy == needsRedeploy)&&(identical(other.suggestRedeploy, suggestRedeploy) || other.suggestRedeploy == suggestRedeploy)&&(identical(other.lastAnalysedAt, lastAnalysedAt) || other.lastAnalysedAt == lastAnalysedAt)&&(identical(other.persona, persona) || other.persona == persona));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,scorePercent,statusLabel,isReady,messagesObserved,isDeployed,conversationsObserved,const DeepCollectionEquality().hash(whatsMissing),feedbackUpCount,feedbackDownCount,lastAnalysedAt,persona);
+int get hashCode => Object.hash(runtimeType,scorePercent,statusLabel,isReady,messagesObserved,isDeployed,conversationsObserved,const DeepCollectionEquality().hash(whatsMissing),feedbackUpCount,feedbackDownCount,needsRedeploy,suggestRedeploy,lastAnalysedAt,persona);
 
 @override
 String toString() {
-  return 'AgentReadinessState(scorePercent: $scorePercent, statusLabel: $statusLabel, isReady: $isReady, messagesObserved: $messagesObserved, isDeployed: $isDeployed, conversationsObserved: $conversationsObserved, whatsMissing: $whatsMissing, feedbackUpCount: $feedbackUpCount, feedbackDownCount: $feedbackDownCount, lastAnalysedAt: $lastAnalysedAt, persona: $persona)';
+  return 'AgentReadinessState(scorePercent: $scorePercent, statusLabel: $statusLabel, isReady: $isReady, messagesObserved: $messagesObserved, isDeployed: $isDeployed, conversationsObserved: $conversationsObserved, whatsMissing: $whatsMissing, feedbackUpCount: $feedbackUpCount, feedbackDownCount: $feedbackDownCount, needsRedeploy: $needsRedeploy, suggestRedeploy: $suggestRedeploy, lastAnalysedAt: $lastAnalysedAt, persona: $persona)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $AgentReadinessStateCopyWith<$Res>  {
   factory $AgentReadinessStateCopyWith(AgentReadinessState value, $Res Function(AgentReadinessState) _then) = _$AgentReadinessStateCopyWithImpl;
 @useResult
 $Res call({
- int scorePercent, String statusLabel, bool isReady, int messagesObserved, bool isDeployed, int conversationsObserved, List<String> whatsMissing, int feedbackUpCount, int feedbackDownCount, DateTime? lastAnalysedAt, AgentPersona? persona
+ int scorePercent, String statusLabel, bool isReady, int messagesObserved, bool isDeployed, int conversationsObserved, List<String> whatsMissing, int feedbackUpCount, int feedbackDownCount, bool needsRedeploy, bool suggestRedeploy, DateTime? lastAnalysedAt, AgentPersona? persona
 });
 
 
@@ -65,7 +65,7 @@ class _$AgentReadinessStateCopyWithImpl<$Res>
 
 /// Create a copy of AgentReadinessState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? scorePercent = null,Object? statusLabel = null,Object? isReady = null,Object? messagesObserved = null,Object? isDeployed = null,Object? conversationsObserved = null,Object? whatsMissing = null,Object? feedbackUpCount = null,Object? feedbackDownCount = null,Object? lastAnalysedAt = freezed,Object? persona = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? scorePercent = null,Object? statusLabel = null,Object? isReady = null,Object? messagesObserved = null,Object? isDeployed = null,Object? conversationsObserved = null,Object? whatsMissing = null,Object? feedbackUpCount = null,Object? feedbackDownCount = null,Object? needsRedeploy = null,Object? suggestRedeploy = null,Object? lastAnalysedAt = freezed,Object? persona = freezed,}) {
   return _then(_self.copyWith(
 scorePercent: null == scorePercent ? _self.scorePercent : scorePercent // ignore: cast_nullable_to_non_nullable
 as int,statusLabel: null == statusLabel ? _self.statusLabel : statusLabel // ignore: cast_nullable_to_non_nullable
@@ -76,7 +76,9 @@ as bool,conversationsObserved: null == conversationsObserved ? _self.conversatio
 as int,whatsMissing: null == whatsMissing ? _self.whatsMissing : whatsMissing // ignore: cast_nullable_to_non_nullable
 as List<String>,feedbackUpCount: null == feedbackUpCount ? _self.feedbackUpCount : feedbackUpCount // ignore: cast_nullable_to_non_nullable
 as int,feedbackDownCount: null == feedbackDownCount ? _self.feedbackDownCount : feedbackDownCount // ignore: cast_nullable_to_non_nullable
-as int,lastAnalysedAt: freezed == lastAnalysedAt ? _self.lastAnalysedAt : lastAnalysedAt // ignore: cast_nullable_to_non_nullable
+as int,needsRedeploy: null == needsRedeploy ? _self.needsRedeploy : needsRedeploy // ignore: cast_nullable_to_non_nullable
+as bool,suggestRedeploy: null == suggestRedeploy ? _self.suggestRedeploy : suggestRedeploy // ignore: cast_nullable_to_non_nullable
+as bool,lastAnalysedAt: freezed == lastAnalysedAt ? _self.lastAnalysedAt : lastAnalysedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,persona: freezed == persona ? _self.persona : persona // ignore: cast_nullable_to_non_nullable
 as AgentPersona?,
   ));
@@ -175,10 +177,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int scorePercent,  String statusLabel,  bool isReady,  int messagesObserved,  bool isDeployed,  int conversationsObserved,  List<String> whatsMissing,  int feedbackUpCount,  int feedbackDownCount,  DateTime? lastAnalysedAt,  AgentPersona? persona)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int scorePercent,  String statusLabel,  bool isReady,  int messagesObserved,  bool isDeployed,  int conversationsObserved,  List<String> whatsMissing,  int feedbackUpCount,  int feedbackDownCount,  bool needsRedeploy,  bool suggestRedeploy,  DateTime? lastAnalysedAt,  AgentPersona? persona)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AgentReadinessState() when $default != null:
-return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.messagesObserved,_that.isDeployed,_that.conversationsObserved,_that.whatsMissing,_that.feedbackUpCount,_that.feedbackDownCount,_that.lastAnalysedAt,_that.persona);case _:
+return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.messagesObserved,_that.isDeployed,_that.conversationsObserved,_that.whatsMissing,_that.feedbackUpCount,_that.feedbackDownCount,_that.needsRedeploy,_that.suggestRedeploy,_that.lastAnalysedAt,_that.persona);case _:
   return orElse();
 
 }
@@ -196,10 +198,10 @@ return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.message
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int scorePercent,  String statusLabel,  bool isReady,  int messagesObserved,  bool isDeployed,  int conversationsObserved,  List<String> whatsMissing,  int feedbackUpCount,  int feedbackDownCount,  DateTime? lastAnalysedAt,  AgentPersona? persona)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int scorePercent,  String statusLabel,  bool isReady,  int messagesObserved,  bool isDeployed,  int conversationsObserved,  List<String> whatsMissing,  int feedbackUpCount,  int feedbackDownCount,  bool needsRedeploy,  bool suggestRedeploy,  DateTime? lastAnalysedAt,  AgentPersona? persona)  $default,) {final _that = this;
 switch (_that) {
 case _AgentReadinessState():
-return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.messagesObserved,_that.isDeployed,_that.conversationsObserved,_that.whatsMissing,_that.feedbackUpCount,_that.feedbackDownCount,_that.lastAnalysedAt,_that.persona);case _:
+return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.messagesObserved,_that.isDeployed,_that.conversationsObserved,_that.whatsMissing,_that.feedbackUpCount,_that.feedbackDownCount,_that.needsRedeploy,_that.suggestRedeploy,_that.lastAnalysedAt,_that.persona);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -216,10 +218,10 @@ return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.message
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int scorePercent,  String statusLabel,  bool isReady,  int messagesObserved,  bool isDeployed,  int conversationsObserved,  List<String> whatsMissing,  int feedbackUpCount,  int feedbackDownCount,  DateTime? lastAnalysedAt,  AgentPersona? persona)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int scorePercent,  String statusLabel,  bool isReady,  int messagesObserved,  bool isDeployed,  int conversationsObserved,  List<String> whatsMissing,  int feedbackUpCount,  int feedbackDownCount,  bool needsRedeploy,  bool suggestRedeploy,  DateTime? lastAnalysedAt,  AgentPersona? persona)?  $default,) {final _that = this;
 switch (_that) {
 case _AgentReadinessState() when $default != null:
-return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.messagesObserved,_that.isDeployed,_that.conversationsObserved,_that.whatsMissing,_that.feedbackUpCount,_that.feedbackDownCount,_that.lastAnalysedAt,_that.persona);case _:
+return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.messagesObserved,_that.isDeployed,_that.conversationsObserved,_that.whatsMissing,_that.feedbackUpCount,_that.feedbackDownCount,_that.needsRedeploy,_that.suggestRedeploy,_that.lastAnalysedAt,_that.persona);case _:
   return null;
 
 }
@@ -231,7 +233,7 @@ return $default(_that.scorePercent,_that.statusLabel,_that.isReady,_that.message
 @JsonSerializable()
 
 class _AgentReadinessState implements AgentReadinessState {
-  const _AgentReadinessState({required this.scorePercent, required this.statusLabel, required this.isReady, required this.messagesObserved, this.isDeployed = false, this.conversationsObserved = 0, final  List<String> whatsMissing = const [], this.feedbackUpCount = 0, this.feedbackDownCount = 0, this.lastAnalysedAt, this.persona}): _whatsMissing = whatsMissing;
+  const _AgentReadinessState({required this.scorePercent, required this.statusLabel, required this.isReady, required this.messagesObserved, this.isDeployed = false, this.conversationsObserved = 0, final  List<String> whatsMissing = const [], this.feedbackUpCount = 0, this.feedbackDownCount = 0, this.needsRedeploy = false, this.suggestRedeploy = false, this.lastAnalysedAt, this.persona}): _whatsMissing = whatsMissing;
   factory _AgentReadinessState.fromJson(Map<String, dynamic> json) => _$AgentReadinessStateFromJson(json);
 
 @override final  int scorePercent;
@@ -249,6 +251,8 @@ class _AgentReadinessState implements AgentReadinessState {
 
 @override@JsonKey() final  int feedbackUpCount;
 @override@JsonKey() final  int feedbackDownCount;
+@override@JsonKey() final  bool needsRedeploy;
+@override@JsonKey() final  bool suggestRedeploy;
 @override final  DateTime? lastAnalysedAt;
 @override final  AgentPersona? persona;
 
@@ -265,16 +269,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AgentReadinessState&&(identical(other.scorePercent, scorePercent) || other.scorePercent == scorePercent)&&(identical(other.statusLabel, statusLabel) || other.statusLabel == statusLabel)&&(identical(other.isReady, isReady) || other.isReady == isReady)&&(identical(other.messagesObserved, messagesObserved) || other.messagesObserved == messagesObserved)&&(identical(other.isDeployed, isDeployed) || other.isDeployed == isDeployed)&&(identical(other.conversationsObserved, conversationsObserved) || other.conversationsObserved == conversationsObserved)&&const DeepCollectionEquality().equals(other._whatsMissing, _whatsMissing)&&(identical(other.feedbackUpCount, feedbackUpCount) || other.feedbackUpCount == feedbackUpCount)&&(identical(other.feedbackDownCount, feedbackDownCount) || other.feedbackDownCount == feedbackDownCount)&&(identical(other.lastAnalysedAt, lastAnalysedAt) || other.lastAnalysedAt == lastAnalysedAt)&&(identical(other.persona, persona) || other.persona == persona));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AgentReadinessState&&(identical(other.scorePercent, scorePercent) || other.scorePercent == scorePercent)&&(identical(other.statusLabel, statusLabel) || other.statusLabel == statusLabel)&&(identical(other.isReady, isReady) || other.isReady == isReady)&&(identical(other.messagesObserved, messagesObserved) || other.messagesObserved == messagesObserved)&&(identical(other.isDeployed, isDeployed) || other.isDeployed == isDeployed)&&(identical(other.conversationsObserved, conversationsObserved) || other.conversationsObserved == conversationsObserved)&&const DeepCollectionEquality().equals(other._whatsMissing, _whatsMissing)&&(identical(other.feedbackUpCount, feedbackUpCount) || other.feedbackUpCount == feedbackUpCount)&&(identical(other.feedbackDownCount, feedbackDownCount) || other.feedbackDownCount == feedbackDownCount)&&(identical(other.needsRedeploy, needsRedeploy) || other.needsRedeploy == needsRedeploy)&&(identical(other.suggestRedeploy, suggestRedeploy) || other.suggestRedeploy == suggestRedeploy)&&(identical(other.lastAnalysedAt, lastAnalysedAt) || other.lastAnalysedAt == lastAnalysedAt)&&(identical(other.persona, persona) || other.persona == persona));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,scorePercent,statusLabel,isReady,messagesObserved,isDeployed,conversationsObserved,const DeepCollectionEquality().hash(_whatsMissing),feedbackUpCount,feedbackDownCount,lastAnalysedAt,persona);
+int get hashCode => Object.hash(runtimeType,scorePercent,statusLabel,isReady,messagesObserved,isDeployed,conversationsObserved,const DeepCollectionEquality().hash(_whatsMissing),feedbackUpCount,feedbackDownCount,needsRedeploy,suggestRedeploy,lastAnalysedAt,persona);
 
 @override
 String toString() {
-  return 'AgentReadinessState(scorePercent: $scorePercent, statusLabel: $statusLabel, isReady: $isReady, messagesObserved: $messagesObserved, isDeployed: $isDeployed, conversationsObserved: $conversationsObserved, whatsMissing: $whatsMissing, feedbackUpCount: $feedbackUpCount, feedbackDownCount: $feedbackDownCount, lastAnalysedAt: $lastAnalysedAt, persona: $persona)';
+  return 'AgentReadinessState(scorePercent: $scorePercent, statusLabel: $statusLabel, isReady: $isReady, messagesObserved: $messagesObserved, isDeployed: $isDeployed, conversationsObserved: $conversationsObserved, whatsMissing: $whatsMissing, feedbackUpCount: $feedbackUpCount, feedbackDownCount: $feedbackDownCount, needsRedeploy: $needsRedeploy, suggestRedeploy: $suggestRedeploy, lastAnalysedAt: $lastAnalysedAt, persona: $persona)';
 }
 
 
@@ -285,7 +289,7 @@ abstract mixin class _$AgentReadinessStateCopyWith<$Res> implements $AgentReadin
   factory _$AgentReadinessStateCopyWith(_AgentReadinessState value, $Res Function(_AgentReadinessState) _then) = __$AgentReadinessStateCopyWithImpl;
 @override @useResult
 $Res call({
- int scorePercent, String statusLabel, bool isReady, int messagesObserved, bool isDeployed, int conversationsObserved, List<String> whatsMissing, int feedbackUpCount, int feedbackDownCount, DateTime? lastAnalysedAt, AgentPersona? persona
+ int scorePercent, String statusLabel, bool isReady, int messagesObserved, bool isDeployed, int conversationsObserved, List<String> whatsMissing, int feedbackUpCount, int feedbackDownCount, bool needsRedeploy, bool suggestRedeploy, DateTime? lastAnalysedAt, AgentPersona? persona
 });
 
 
@@ -302,7 +306,7 @@ class __$AgentReadinessStateCopyWithImpl<$Res>
 
 /// Create a copy of AgentReadinessState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? scorePercent = null,Object? statusLabel = null,Object? isReady = null,Object? messagesObserved = null,Object? isDeployed = null,Object? conversationsObserved = null,Object? whatsMissing = null,Object? feedbackUpCount = null,Object? feedbackDownCount = null,Object? lastAnalysedAt = freezed,Object? persona = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? scorePercent = null,Object? statusLabel = null,Object? isReady = null,Object? messagesObserved = null,Object? isDeployed = null,Object? conversationsObserved = null,Object? whatsMissing = null,Object? feedbackUpCount = null,Object? feedbackDownCount = null,Object? needsRedeploy = null,Object? suggestRedeploy = null,Object? lastAnalysedAt = freezed,Object? persona = freezed,}) {
   return _then(_AgentReadinessState(
 scorePercent: null == scorePercent ? _self.scorePercent : scorePercent // ignore: cast_nullable_to_non_nullable
 as int,statusLabel: null == statusLabel ? _self.statusLabel : statusLabel // ignore: cast_nullable_to_non_nullable
@@ -313,7 +317,9 @@ as bool,conversationsObserved: null == conversationsObserved ? _self.conversatio
 as int,whatsMissing: null == whatsMissing ? _self._whatsMissing : whatsMissing // ignore: cast_nullable_to_non_nullable
 as List<String>,feedbackUpCount: null == feedbackUpCount ? _self.feedbackUpCount : feedbackUpCount // ignore: cast_nullable_to_non_nullable
 as int,feedbackDownCount: null == feedbackDownCount ? _self.feedbackDownCount : feedbackDownCount // ignore: cast_nullable_to_non_nullable
-as int,lastAnalysedAt: freezed == lastAnalysedAt ? _self.lastAnalysedAt : lastAnalysedAt // ignore: cast_nullable_to_non_nullable
+as int,needsRedeploy: null == needsRedeploy ? _self.needsRedeploy : needsRedeploy // ignore: cast_nullable_to_non_nullable
+as bool,suggestRedeploy: null == suggestRedeploy ? _self.suggestRedeploy : suggestRedeploy // ignore: cast_nullable_to_non_nullable
+as bool,lastAnalysedAt: freezed == lastAnalysedAt ? _self.lastAnalysedAt : lastAnalysedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,persona: freezed == persona ? _self.persona : persona // ignore: cast_nullable_to_non_nullable
 as AgentPersona?,
   ));

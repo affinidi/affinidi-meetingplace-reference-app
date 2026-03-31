@@ -16,7 +16,8 @@ class AgentVcData {
 
   factory AgentVcData.fromJson(Map<String, dynamic> json) => AgentVcData(
     issuanceId: json['issuanceId'] as String? ?? '',
-    issuedAt: DateTime.tryParse(json['issuedAt'] as String? ?? '') ?? DateTime.now(),
+    issuedAt:
+        DateTime.tryParse(json['issuedAt'] as String? ?? '') ?? DateTime.now(),
     holderDid: json['holderDid'] as String? ?? '',
     credentialOfferUri: json['credentialOfferUri'] as String?,
     claims: (json['claims'] as Map<String, dynamic>?) ?? {},

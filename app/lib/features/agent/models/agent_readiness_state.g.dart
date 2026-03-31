@@ -22,6 +22,8 @@ _AgentReadinessState _$AgentReadinessStateFromJson(Map<String, dynamic> json) =>
           const [],
       feedbackUpCount: (json['feedbackUpCount'] as num?)?.toInt() ?? 0,
       feedbackDownCount: (json['feedbackDownCount'] as num?)?.toInt() ?? 0,
+      needsRedeploy: json['needsRedeploy'] as bool? ?? false,
+      suggestRedeploy: json['suggestRedeploy'] as bool? ?? false,
       lastAnalysedAt: json['lastAnalysedAt'] == null
           ? null
           : DateTime.parse(json['lastAnalysedAt'] as String),
@@ -42,6 +44,8 @@ Map<String, dynamic> _$AgentReadinessStateToJson(
   'whatsMissing': instance.whatsMissing,
   'feedbackUpCount': instance.feedbackUpCount,
   'feedbackDownCount': instance.feedbackDownCount,
+  'needsRedeploy': instance.needsRedeploy,
+  'suggestRedeploy': instance.suggestRedeploy,
   'lastAnalysedAt': instance.lastAnalysedAt?.toIso8601String(),
   'persona': instance.persona,
 };

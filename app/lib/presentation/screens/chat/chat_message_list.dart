@@ -113,7 +113,8 @@ class _ChatMessageList extends HookConsumerWidget {
                   }
                 }
 
-                final isAgentMessage = chatItem is chat.Message &&
+                final isAgentMessage =
+                    chatItem is chat.Message &&
                     chatItem.isFromMe &&
                     agentSentMessageIds.contains(chatItem.messageId);
 
@@ -314,11 +315,13 @@ class _AgentFeedbackRowState extends ConsumerState<_AgentFeedbackRow> {
   Future<void> _submit(String rating) async {
     if (_submitted != null) return;
     setState(() => _submitted = rating);
-    await ref.read(agentRepositoryProvider).submitFeedback(
-      ownerDid: widget.ownerDid,
-      messageId: widget.messageId,
-      rating: rating,
-    );
+    await ref
+        .read(agentRepositoryProvider)
+        .submitFeedback(
+          ownerDid: widget.ownerDid,
+          messageId: widget.messageId,
+          rating: rating,
+        );
     ref.invalidate(agentReadinessProvider(widget.ownerDid));
   }
 
