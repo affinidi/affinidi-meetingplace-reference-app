@@ -11,6 +11,12 @@ import 'identities_table.dart';
 
 part 'identities_database.g.dart';
 
+extension _IdentityFieldSql on IdentityField {
+  String get identityAlterTableSql => requiredValue
+      ? "$columnName TEXT NOT NULL DEFAULT ''"
+      : '$columnName TEXT';
+}
+
 /// Drift database for managing identities.
 ///
 /// - Uses encrypted storage with a passphrase.

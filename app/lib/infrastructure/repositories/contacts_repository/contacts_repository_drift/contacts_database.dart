@@ -17,6 +17,10 @@ import '../../../secure_storage/secure_storage.dart';
 
 part 'contacts_database.g.dart';
 
+extension _IdentityFieldSql on IdentityField {
+  String get contactCardAlterTableSql => "$columnName TEXT NOT NULL DEFAULT ''";
+}
+
 /// Drift database for managing contacts and their associated cards.
 ///
 /// Includes [Contacts] (main contact records) and [ContactCards]

@@ -30,12 +30,6 @@ abstract base class IdentityField {
   final IdentityFieldInputKind inputKind;
   final bool autofocus;
   final bool shouldValidateOnBlur;
-
-  String get identityAlterTableSql => requiredValue
-      ? "$columnName TEXT NOT NULL DEFAULT ''"
-      : '$columnName TEXT';
-
-  String get contactCardAlterTableSql => "$columnName TEXT NOT NULL DEFAULT ''";
 }
 
 final class FirstNameIdentityField extends IdentityField {
