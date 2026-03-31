@@ -79,7 +79,6 @@ class AppChatService extends _$AppChatService implements ChatService {
     _channelDid = channelDid;
     _logger = ref.read(appLoggerProvider);
 
-    _conciergeDelegate = AppConciergeDelegate(getChatSdk: () => _chatSDK!);
     _groupDelegate = AppGroupDelegate(ref: ref);
     _setupChatProtocolRouter();
 
@@ -152,6 +151,7 @@ class AppChatService extends _$AppChatService implements ChatService {
     if (channel == null) return;
 
     _chatSDK = await ref.read(chatSdkProvider(channel).future);
+    _conciergeDelegate = AppConciergeDelegate(chatSdk: _chatSDK!);
     _isGroupChat =
         ref
             .read(contactsServiceProvider)
