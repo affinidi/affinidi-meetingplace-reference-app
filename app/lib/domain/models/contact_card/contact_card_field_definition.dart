@@ -13,6 +13,7 @@ enum ContactCardFieldKey {
   firstName,
   lastName,
   organization,
+  website,
   email,
   mobile,
   postcode,
@@ -23,6 +24,7 @@ class ContactCardFieldDefinition {
     required this.key,
     required this.icon,
     required this.iconColor,
+    this.showOnIdentityCard = false,
     required this.keyboardType,
     required this.textCapitalization,
     required this.autocorrect,
@@ -45,6 +47,7 @@ class ContactCardFieldDefinition {
   final IconData icon;
   final Color Function(AppCustomColors customColors, ColorScheme colorScheme)
   iconColor;
+  final bool showOnIdentityCard;
   final TextInputType? keyboardType;
   final TextCapitalization textCapitalization;
   final bool autocorrect;
@@ -171,6 +174,31 @@ class ContactCardFieldDefinitions {
       updateCard: (card, value) => card.copyWith(organization: value),
     ),
     ContactCardFieldDefinition(
+      key: ContactCardFieldKey.website,
+      icon: Icons.language,
+      iconColor: (customColors, colorScheme) => customColors.violet,
+      keyboardType: TextInputType.url,
+      textCapitalization: TextCapitalization.none,
+      autocorrect: false,
+      autofocus: false,
+      shouldValidateOnBlur: true,
+      textInputAction: TextInputAction.next,
+      placeholder: (l10n) => l10n.enterWebsite,
+      validators: (context) => [
+        ZalgoTextValidator(errorText: context.l10n.zalgoTextDetectedError),
+        MaxLengthValidator(
+          MaxLengthValidatorType.large.value,
+          errorText: context.l10n.nameTooLong,
+        ),
+      ],
+      sdkPath: const ['url'],
+      identitiesColumnName: 'website',
+      contactsColumnName: 'website',
+      nullWhenEmpty: true,
+      valueAccessor: (card) => card.website,
+      updateCard: (card, value) => card.copyWith(website: value),
+    ),
+    ContactCardFieldDefinition(
       key: ContactCardFieldKey.email,
       icon: Icons.email,
       iconColor: (customColors, colorScheme) => customColors.warning,
@@ -194,6 +222,7 @@ class ContactCardFieldDefinitions {
       nullWhenEmpty: true,
       valueAccessor: (card) => card.email,
       updateCard: (card, value) => card.copyWith(email: value),
+      showOnIdentityCard: true,
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.mobile,
@@ -213,6 +242,7 @@ class ContactCardFieldDefinitions {
       nullWhenEmpty: true,
       valueAccessor: (card) => card.mobile,
       updateCard: (card, value) => card.copyWith(mobile: value),
+      showOnIdentityCard: true,
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.postcode,
@@ -280,24 +310,6 @@ class ContactCardFieldDefinitions {
     }
     return updatedCard;
   }
-
-  static ContactCardFieldDefinition get firstName =>
-      byKey(ContactCardFieldKey.firstName);
-
-  static ContactCardFieldDefinition get lastName =>
-      byKey(ContactCardFieldKey.lastName);
-
-  static ContactCardFieldDefinition get email =>
-      byKey(ContactCardFieldKey.email);
-
-  static ContactCardFieldDefinition get organization =>
-      byKey(ContactCardFieldKey.organization);
-
-  static ContactCardFieldDefinition get mobile =>
-      byKey(ContactCardFieldKey.mobile);
-
-  static ContactCardFieldDefinition get postcode =>
-      byKey(ContactCardFieldKey.postcode);
 }
 
 String _sdkPathValue(Map<dynamic, dynamic> contactInfo, List<String> pathKeys) {

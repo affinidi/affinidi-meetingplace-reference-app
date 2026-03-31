@@ -12,7 +12,9 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final canSave = ref.watch(provider.select((state) => state.canSave));
     final canDelete = ref.watch(provider.select((state) => state.canDelete));
-    final emailField = ContactCardFieldDefinitions.email;
+    final emailField = ContactCardFieldDefinitions.byKey(
+      ContactCardFieldKey.email,
+    );
 
     Future<void> handleSave() async {
       controller.updateErrorVisibilityOnBlur(

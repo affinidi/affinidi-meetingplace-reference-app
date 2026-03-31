@@ -14,7 +14,9 @@ class _OfferDetailsAliasProfilePanel extends ConsumerWidget {
         if (card == null) {
           return null;
         }
-        return ContactCardFieldDefinitions.firstName.sdkValueFrom(card);
+        return ContactCardFieldDefinitions.byKey(
+          ContactCardFieldKey.firstName,
+        ).sdkValueFrom(card);
       }),
     );
     final isUsingPrimaryIdentity = ref.watch(

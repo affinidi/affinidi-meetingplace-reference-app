@@ -27,7 +27,8 @@ builders:
     build_extensions: { ".dart": [".registry.g.dart"] }
     auto_apply: root_package
     build_to: source
-    runs_before: ["freezed:freezed"]
+    runs_before:
+      ["copy_with_extension_gen:copy_with_extension_gen", "freezed:freezed"]
   contact_cards_table:
     import: "package:mpx_flutter_reference_app/builders/contact_card_field_drift_glue_builder.dart"
     builder_factories: ["contactCardsTableBuilder"]

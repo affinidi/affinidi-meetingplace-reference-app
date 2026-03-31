@@ -1102,6 +1102,17 @@ class $ContactCardsTable extends ContactCards
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _websiteMeta = const VerificationMeta(
+    'website',
+  );
+  @override
+  late final GeneratedColumn<String> website = GeneratedColumn<String>(
+    'website',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _emailMeta = const VerificationMeta('email');
   @override
   late final GeneratedColumn<String> email = GeneratedColumn<String>(
@@ -1162,6 +1173,7 @@ class $ContactCardsTable extends ContactCards
     firstName,
     lastName,
     organization,
+    website,
     email,
     mobile,
     postcode,
@@ -1233,6 +1245,14 @@ class $ContactCardsTable extends ContactCards
       );
     } else if (isInserting) {
       context.missing(_organizationMeta);
+    }
+    if (data.containsKey('website')) {
+      context.handle(
+        _websiteMeta,
+        website.isAcceptableOrUnknown(data['website']!, _websiteMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_websiteMeta);
     }
     if (data.containsKey('email')) {
       context.handle(
@@ -1314,6 +1334,10 @@ class $ContactCardsTable extends ContactCards
         DriftSqlType.string,
         data['${effectivePrefix}organization'],
       )!,
+      website: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}website'],
+      )!,
       email: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}email'],
@@ -1351,6 +1375,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
   final String firstName;
   final String lastName;
   final String organization;
+  final String website;
   final String email;
   final String mobile;
   final String postcode;
@@ -1364,6 +1389,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     required this.firstName,
     required this.lastName,
     required this.organization,
+    required this.website,
     required this.email,
     required this.mobile,
     required this.postcode,
@@ -1380,6 +1406,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     map['first_name'] = Variable<String>(firstName);
     map['last_name'] = Variable<String>(lastName);
     map['organization'] = Variable<String>(organization);
+    map['website'] = Variable<String>(website);
     map['email'] = Variable<String>(email);
     map['mobile'] = Variable<String>(mobile);
     map['postcode'] = Variable<String>(postcode);
@@ -1399,6 +1426,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       firstName: Value(firstName),
       lastName: Value(lastName),
       organization: Value(organization),
+      website: Value(website),
       email: Value(email),
       mobile: Value(mobile),
       postcode: Value(postcode),
@@ -1420,6 +1448,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       firstName: serializer.fromJson<String>(json['firstName']),
       lastName: serializer.fromJson<String>(json['lastName']),
       organization: serializer.fromJson<String>(json['organization']),
+      website: serializer.fromJson<String>(json['website']),
       email: serializer.fromJson<String>(json['email']),
       mobile: serializer.fromJson<String>(json['mobile']),
       postcode: serializer.fromJson<String>(json['postcode']),
@@ -1440,6 +1469,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       'firstName': serializer.toJson<String>(firstName),
       'lastName': serializer.toJson<String>(lastName),
       'organization': serializer.toJson<String>(organization),
+      'website': serializer.toJson<String>(website),
       'email': serializer.toJson<String>(email),
       'mobile': serializer.toJson<String>(mobile),
       'postcode': serializer.toJson<String>(postcode),
@@ -1458,6 +1488,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     String? firstName,
     String? lastName,
     String? organization,
+    String? website,
     String? email,
     String? mobile,
     String? postcode,
@@ -1471,6 +1502,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     firstName: firstName ?? this.firstName,
     lastName: lastName ?? this.lastName,
     organization: organization ?? this.organization,
+    website: website ?? this.website,
     email: email ?? this.email,
     mobile: mobile ?? this.mobile,
     postcode: postcode ?? this.postcode,
@@ -1489,6 +1521,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       organization: data.organization.present
           ? data.organization.value
           : this.organization,
+      website: data.website.present ? data.website.value : this.website,
       email: data.email.present ? data.email.value : this.email,
       mobile: data.mobile.present ? data.mobile.value : this.mobile,
       postcode: data.postcode.present ? data.postcode.value : this.postcode,
@@ -1511,6 +1544,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('organization: $organization, ')
+          ..write('website: $website, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
           ..write('postcode: $postcode, ')
@@ -1531,6 +1565,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     firstName,
     lastName,
     organization,
+    website,
     email,
     mobile,
     postcode,
@@ -1548,6 +1583,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           other.firstName == this.firstName &&
           other.lastName == this.lastName &&
           other.organization == this.organization &&
+          other.website == this.website &&
           other.email == this.email &&
           other.mobile == this.mobile &&
           other.postcode == this.postcode &&
@@ -1564,6 +1600,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   final Value<String> firstName;
   final Value<String> lastName;
   final Value<String> organization;
+  final Value<String> website;
   final Value<String> email;
   final Value<String> mobile;
   final Value<String> postcode;
@@ -1577,6 +1614,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     this.firstName = const Value.absent(),
     this.lastName = const Value.absent(),
     this.organization = const Value.absent(),
+    this.website = const Value.absent(),
     this.email = const Value.absent(),
     this.mobile = const Value.absent(),
     this.postcode = const Value.absent(),
@@ -1591,6 +1629,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     required String firstName,
     required String lastName,
     required String organization,
+    required String website,
     required String email,
     required String mobile,
     required String postcode,
@@ -1602,6 +1641,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
        firstName = Value(firstName),
        lastName = Value(lastName),
        organization = Value(organization),
+       website = Value(website),
        email = Value(email),
        mobile = Value(mobile),
        postcode = Value(postcode),
@@ -1615,6 +1655,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     Expression<String>? firstName,
     Expression<String>? lastName,
     Expression<String>? organization,
+    Expression<String>? website,
     Expression<String>? email,
     Expression<String>? mobile,
     Expression<String>? postcode,
@@ -1629,6 +1670,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
       if (firstName != null) 'first_name': firstName,
       if (lastName != null) 'last_name': lastName,
       if (organization != null) 'organization': organization,
+      if (website != null) 'website': website,
       if (email != null) 'email': email,
       if (mobile != null) 'mobile': mobile,
       if (postcode != null) 'postcode': postcode,
@@ -1646,6 +1688,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     Value<String>? firstName,
     Value<String>? lastName,
     Value<String>? organization,
+    Value<String>? website,
     Value<String>? email,
     Value<String>? mobile,
     Value<String>? postcode,
@@ -1660,6 +1703,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       organization: organization ?? this.organization,
+      website: website ?? this.website,
       email: email ?? this.email,
       mobile: mobile ?? this.mobile,
       postcode: postcode ?? this.postcode,
@@ -1693,6 +1737,9 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     if (organization.present) {
       map['organization'] = Variable<String>(organization.value);
     }
+    if (website.present) {
+      map['website'] = Variable<String>(website.value);
+    }
     if (email.present) {
       map['email'] = Variable<String>(email.value);
     }
@@ -1723,6 +1770,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('organization: $organization, ')
+          ..write('website: $website, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
           ..write('postcode: $postcode, ')
@@ -2322,6 +2370,7 @@ typedef $$ContactCardsTableCreateCompanionBuilder =
       required String firstName,
       required String lastName,
       required String organization,
+      required String website,
       required String email,
       required String mobile,
       required String postcode,
@@ -2337,6 +2386,7 @@ typedef $$ContactCardsTableUpdateCompanionBuilder =
       Value<String> firstName,
       Value<String> lastName,
       Value<String> organization,
+      Value<String> website,
       Value<String> email,
       Value<String> mobile,
       Value<String> postcode,
@@ -2405,6 +2455,11 @@ class $$ContactCardsTableFilterComposer
 
   ColumnFilters<String> get organization => $composableBuilder(
     column: $table.organization,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get website => $composableBuilder(
+    column: $table.website,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2496,6 +2551,11 @@ class $$ContactCardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get website => $composableBuilder(
+    column: $table.website,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get email => $composableBuilder(
     column: $table.email,
     builder: (column) => ColumnOrderings(column),
@@ -2574,6 +2634,9 @@ class $$ContactCardsTableAnnotationComposer
     column: $table.organization,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get website =>
+      $composableBuilder(column: $table.website, builder: (column) => column);
 
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
@@ -2656,6 +2719,7 @@ class $$ContactCardsTableTableManager
                 Value<String> firstName = const Value.absent(),
                 Value<String> lastName = const Value.absent(),
                 Value<String> organization = const Value.absent(),
+                Value<String> website = const Value.absent(),
                 Value<String> email = const Value.absent(),
                 Value<String> mobile = const Value.absent(),
                 Value<String> postcode = const Value.absent(),
@@ -2670,6 +2734,7 @@ class $$ContactCardsTableTableManager
                 firstName: firstName,
                 lastName: lastName,
                 organization: organization,
+                website: website,
                 email: email,
                 mobile: mobile,
                 postcode: postcode,
@@ -2685,6 +2750,7 @@ class $$ContactCardsTableTableManager
                 required String firstName,
                 required String lastName,
                 required String organization,
+                required String website,
                 required String email,
                 required String mobile,
                 required String postcode,
@@ -2698,6 +2764,7 @@ class $$ContactCardsTableTableManager
                 firstName: firstName,
                 lastName: lastName,
                 organization: organization,
+                website: website,
                 email: email,
                 mobile: mobile,
                 postcode: postcode,

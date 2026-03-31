@@ -236,13 +236,9 @@ class _IdentityContent extends StatelessWidget {
     final textTheme = context.textTheme;
     final l10n = context.l10n;
 
-    final emailField = ContactCardFieldDefinitions.email;
-    final emailValue = emailField.valueFrom(identity.card);
-    final email = emailValue.isNotEmpty ? emailValue : l10n.notShared;
-
-    final mobileField = ContactCardFieldDefinitions.mobile;
-    final phoneValue = mobileField.valueFrom(identity.card);
-    final phone = phoneValue.isNotEmpty ? phoneValue : l10n.notShared;
+    final fields = ContactCardFieldDefinitions.values
+        .where((field) => field.showOnIdentityCard)
+        .toList(growable: false);
 
     final name = identity.card.fullName.isNotEmpty
         ? identity.card.fullName
@@ -269,42 +265,50 @@ class _IdentityContent extends StatelessWidget {
             ],
           ),
         SizedBox(height: identityCardSize.isSmall ? 12 : 16),
-        _ContactInfoRow(
-          icon: emailField.icon,
-          text: email,
-          identityCardSize: identityCardSize,
-        ),
-        SizedBox(height: identityCardSize.isSmall ? 6 : 8),
-        _ContactInfoRow(
-          icon: mobileField.icon,
-          text: phone,
-          identityCardSize: identityCardSize,
-        ),
+        for (final field in fields) ...[
+          _ContactInfoRow(
+            icon: field.icon,
+            label: field.label(l10n),
+            text: _valueOrNotShared(
+              field.valueFrom(identity.card),
+              l10n.notShared,
+            ),
+            identityCardSize: identityCardSize,
+          ),
+          SizedBox(height: identityCardSize.isSmall ? 6 : 8),
+        ],
       ],
     );
+  }
+
+  String _valueOrNotShared(String value, String notShared) {
+    final trimmed = value.trim();
+    return trimmed.isNotEmpty ? trimmed : notShared;
   }
 }
 
 class _ContactInfoRow extends StatelessWidget {
   const _ContactInfoRow({
     required this.icon,
+    required this.label,
     required this.text,
     required this.identityCardSize,
   });
 
   final IconData icon;
+  final String label;
   final String text;
   final IdentityCardSize identityCardSize;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
+    final colorScheme = context.colorScheme;
 
     return Row(
       spacing: 8,
       children: [
-        Icon(icon, color: colorScheme.onSurfaceVariant, size: 16),
+        Icon(icon, color: colorScheme.onSurface, size: 16),
         Expanded(
           child: Text(
             text,

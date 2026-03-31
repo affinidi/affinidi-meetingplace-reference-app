@@ -523,7 +523,7 @@ abstract class AppLocalizations {
   /// No description provided for @contactCardFieldName.
   ///
   /// In en, this message translates to:
-  /// **'{field, select, firstName{First name} lastName{Last name} email{Email} mobile{Mobile} postcode{Postcode} organization{Organization} other{}}'**
+  /// **'{field, select, firstName{First name} lastName{Last name} organization{Organization} website{Website} email{Email} mobile{Mobile} postcode{Postcode} other{}}'**
   String contactCardFieldName(String field);
 
   /// No description provided for @offerDetailsHeader.
@@ -1149,6 +1149,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter organization'**
   String get enterOrganization;
+
+  /// No description provided for @enterWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter website'**
+  String get enterWebsite;
 
   /// No description provided for @enterEmail.
   ///

@@ -13,6 +13,7 @@ class ContactCards extends Table {
   TextColumn get firstName => text()();
   TextColumn get lastName => text()();
   TextColumn get organization => text()();
+  TextColumn get website => text()();
   TextColumn get email => text()();
   TextColumn get mobile => text()();
   TextColumn get postcode => text()();

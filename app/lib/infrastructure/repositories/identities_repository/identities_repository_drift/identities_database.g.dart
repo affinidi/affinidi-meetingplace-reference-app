@@ -72,6 +72,17 @@ class $IdentitiesTableTable extends IdentitiesTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _websiteMeta = const VerificationMeta(
+    'website',
+  );
+  @override
+  late final GeneratedColumn<String> website = GeneratedColumn<String>(
+    'website',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _emailMeta = const VerificationMeta('email');
   @override
   late final GeneratedColumn<String> email = GeneratedColumn<String>(
@@ -146,6 +157,7 @@ class $IdentitiesTableTable extends IdentitiesTable
     firstName,
     lastName,
     organization,
+    website,
     email,
     mobile,
     postcode,
@@ -208,6 +220,12 @@ class $IdentitiesTableTable extends IdentitiesTable
           data['organization']!,
           _organizationMeta,
         ),
+      );
+    }
+    if (data.containsKey('website')) {
+      context.handle(
+        _websiteMeta,
+        website.isAcceptableOrUnknown(data['website']!, _websiteMeta),
       );
     }
     if (data.containsKey('email')) {
@@ -279,6 +297,10 @@ class $IdentitiesTableTable extends IdentitiesTable
         DriftSqlType.string,
         data['${effectivePrefix}organization'],
       ),
+      website: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}website'],
+      ),
       email: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}email'],
@@ -319,6 +341,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   final String firstName;
   final String? lastName;
   final String? organization;
+  final String? website;
   final String? email;
   final String? mobile;
   final String? postcode;
@@ -332,6 +355,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     required this.firstName,
     this.lastName,
     this.organization,
+    this.website,
     this.email,
     this.mobile,
     this.postcode,
@@ -351,6 +375,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     }
     if (!nullToAbsent || organization != null) {
       map['organization'] = Variable<String>(organization);
+    }
+    if (!nullToAbsent || website != null) {
+      map['website'] = Variable<String>(website);
     }
     if (!nullToAbsent || email != null) {
       map['email'] = Variable<String>(email);
@@ -383,6 +410,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       organization: organization == null && nullToAbsent
           ? const Value.absent()
           : Value(organization),
+      website: website == null && nullToAbsent
+          ? const Value.absent()
+          : Value(website),
       email: email == null && nullToAbsent
           ? const Value.absent()
           : Value(email),
@@ -414,6 +444,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       firstName: serializer.fromJson<String>(json['firstName']),
       lastName: serializer.fromJson<String?>(json['lastName']),
       organization: serializer.fromJson<String?>(json['organization']),
+      website: serializer.fromJson<String?>(json['website']),
       email: serializer.fromJson<String?>(json['email']),
       mobile: serializer.fromJson<String?>(json['mobile']),
       postcode: serializer.fromJson<String?>(json['postcode']),
@@ -432,6 +463,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       'firstName': serializer.toJson<String>(firstName),
       'lastName': serializer.toJson<String?>(lastName),
       'organization': serializer.toJson<String?>(organization),
+      'website': serializer.toJson<String?>(website),
       'email': serializer.toJson<String?>(email),
       'mobile': serializer.toJson<String?>(mobile),
       'postcode': serializer.toJson<String?>(postcode),
@@ -448,6 +480,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     String? firstName,
     Value<String?> lastName = const Value.absent(),
     Value<String?> organization = const Value.absent(),
+    Value<String?> website = const Value.absent(),
     Value<String?> email = const Value.absent(),
     Value<String?> mobile = const Value.absent(),
     Value<String?> postcode = const Value.absent(),
@@ -461,6 +494,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     firstName: firstName ?? this.firstName,
     lastName: lastName.present ? lastName.value : this.lastName,
     organization: organization.present ? organization.value : this.organization,
+    website: website.present ? website.value : this.website,
     email: email.present ? email.value : this.email,
     mobile: mobile.present ? mobile.value : this.mobile,
     postcode: postcode.present ? postcode.value : this.postcode,
@@ -480,6 +514,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       organization: data.organization.present
           ? data.organization.value
           : this.organization,
+      website: data.website.present ? data.website.value : this.website,
       email: data.email.present ? data.email.value : this.email,
       mobile: data.mobile.present ? data.mobile.value : this.mobile,
       postcode: data.postcode.present ? data.postcode.value : this.postcode,
@@ -500,6 +535,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('organization: $organization, ')
+          ..write('website: $website, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
           ..write('postcode: $postcode, ')
@@ -518,6 +554,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     firstName,
     lastName,
     organization,
+    website,
     email,
     mobile,
     postcode,
@@ -535,6 +572,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           other.firstName == this.firstName &&
           other.lastName == this.lastName &&
           other.organization == this.organization &&
+          other.website == this.website &&
           other.email == this.email &&
           other.mobile == this.mobile &&
           other.postcode == this.postcode &&
@@ -550,6 +588,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
   final Value<String> firstName;
   final Value<String?> lastName;
   final Value<String?> organization;
+  final Value<String?> website;
   final Value<String?> email;
   final Value<String?> mobile;
   final Value<String?> postcode;
@@ -564,6 +603,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     this.firstName = const Value.absent(),
     this.lastName = const Value.absent(),
     this.organization = const Value.absent(),
+    this.website = const Value.absent(),
     this.email = const Value.absent(),
     this.mobile = const Value.absent(),
     this.postcode = const Value.absent(),
@@ -579,6 +619,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     required String firstName,
     this.lastName = const Value.absent(),
     this.organization = const Value.absent(),
+    this.website = const Value.absent(),
     this.email = const Value.absent(),
     this.mobile = const Value.absent(),
     this.postcode = const Value.absent(),
@@ -596,6 +637,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Expression<String>? firstName,
     Expression<String>? lastName,
     Expression<String>? organization,
+    Expression<String>? website,
     Expression<String>? email,
     Expression<String>? mobile,
     Expression<String>? postcode,
@@ -611,6 +653,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       if (firstName != null) 'first_name': firstName,
       if (lastName != null) 'last_name': lastName,
       if (organization != null) 'organization': organization,
+      if (website != null) 'website': website,
       if (email != null) 'email': email,
       if (mobile != null) 'mobile': mobile,
       if (postcode != null) 'postcode': postcode,
@@ -628,6 +671,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Value<String>? firstName,
     Value<String?>? lastName,
     Value<String?>? organization,
+    Value<String?>? website,
     Value<String?>? email,
     Value<String?>? mobile,
     Value<String?>? postcode,
@@ -643,6 +687,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       organization: organization ?? this.organization,
+      website: website ?? this.website,
       email: email ?? this.email,
       mobile: mobile ?? this.mobile,
       postcode: postcode ?? this.postcode,
@@ -673,6 +718,9 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     }
     if (organization.present) {
       map['organization'] = Variable<String>(organization.value);
+    }
+    if (website.present) {
+      map['website'] = Variable<String>(website.value);
     }
     if (email.present) {
       map['email'] = Variable<String>(email.value);
@@ -707,6 +755,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
           ..write('organization: $organization, ')
+          ..write('website: $website, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
           ..write('postcode: $postcode, ')
@@ -740,6 +789,7 @@ typedef $$IdentitiesTableTableCreateCompanionBuilder =
       required String firstName,
       Value<String?> lastName,
       Value<String?> organization,
+      Value<String?> website,
       Value<String?> email,
       Value<String?> mobile,
       Value<String?> postcode,
@@ -756,6 +806,7 @@ typedef $$IdentitiesTableTableUpdateCompanionBuilder =
       Value<String> firstName,
       Value<String?> lastName,
       Value<String?> organization,
+      Value<String?> website,
       Value<String?> email,
       Value<String?> mobile,
       Value<String?> postcode,
@@ -801,6 +852,11 @@ class $$IdentitiesTableTableFilterComposer
 
   ColumnFilters<String> get organization => $composableBuilder(
     column: $table.organization,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get website => $composableBuilder(
+    column: $table.website,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -874,6 +930,11 @@ class $$IdentitiesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get website => $composableBuilder(
+    column: $table.website,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get email => $composableBuilder(
     column: $table.email,
     builder: (column) => ColumnOrderings(column),
@@ -935,6 +996,9 @@ class $$IdentitiesTableTableAnnotationComposer
     column: $table.organization,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get website =>
+      $composableBuilder(column: $table.website, builder: (column) => column);
 
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
@@ -1000,6 +1064,7 @@ class $$IdentitiesTableTableTableManager
                 Value<String> firstName = const Value.absent(),
                 Value<String?> lastName = const Value.absent(),
                 Value<String?> organization = const Value.absent(),
+                Value<String?> website = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> mobile = const Value.absent(),
                 Value<String?> postcode = const Value.absent(),
@@ -1014,6 +1079,7 @@ class $$IdentitiesTableTableTableManager
                 firstName: firstName,
                 lastName: lastName,
                 organization: organization,
+                website: website,
                 email: email,
                 mobile: mobile,
                 postcode: postcode,
@@ -1030,6 +1096,7 @@ class $$IdentitiesTableTableTableManager
                 required String firstName,
                 Value<String?> lastName = const Value.absent(),
                 Value<String?> organization = const Value.absent(),
+                Value<String?> website = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> mobile = const Value.absent(),
                 Value<String?> postcode = const Value.absent(),
@@ -1044,6 +1111,7 @@ class $$IdentitiesTableTableTableManager
                 firstName: firstName,
                 lastName: lastName,
                 organization: organization,
+                website: website,
                 email: email,
                 mobile: mobile,
                 postcode: postcode,

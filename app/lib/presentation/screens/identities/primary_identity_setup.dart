@@ -16,7 +16,9 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
     );
     final canSave = ref.watch(provider.select((s) => s.canSave));
     final l10n = context.l10n;
-    final emailField = ContactCardFieldDefinitions.email;
+    final emailField = ContactCardFieldDefinitions.byKey(
+      ContactCardFieldKey.email,
+    );
 
     Future<void> handleSave() async {
       controller.updateErrorVisibilityOnBlur(emailField, formKey);

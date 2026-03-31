@@ -314,10 +314,11 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(field, {
       'firstName': 'First name',
       'lastName': 'Last name',
+      'organization': 'Organization',
+      'website': 'Website',
       'email': 'Email',
       'mobile': 'Mobile',
       'postcode': 'Postcode',
-      'organization': 'Organization',
       'other': '',
     });
     return '$_temp0';
@@ -789,6 +790,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterOrganization => 'Enter organization';
+
+  @override
+  String get enterWebsite => 'Enter website';
 
   @override
   String get enterEmail => 'Enter email';

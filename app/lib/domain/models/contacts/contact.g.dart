@@ -13,7 +13,7 @@ abstract class _$ContactCWProxy {
 
   Contact offerLink(String offerLink);
 
-  Contact card(InvalidType card);
+  Contact card(ContactCard card);
 
   Contact type(ContactType type);
 
@@ -25,7 +25,7 @@ abstract class _$ContactCWProxy {
 
   Contact category(ContactCategory category);
 
-  Contact otherPartyCard(InvalidType otherPartyCard);
+  Contact otherPartyCard(ContactCard? otherPartyCard);
 
   Contact displayName(String? displayName);
 
@@ -51,13 +51,13 @@ abstract class _$ContactCWProxy {
     String? channelDid,
     String? channelDidSha256,
     String offerLink,
-    InvalidType card,
+    ContactCard card,
     ContactType type,
     ContactStatus status,
     String mediatorDid,
     ContactOrigin origin,
     ContactCategory category,
-    InvalidType otherPartyCard,
+    ContactCard? otherPartyCard,
     String? displayName,
     bool badgeUpdateInProgress,
     int badgeCount,
@@ -85,7 +85,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
   Contact offerLink(String offerLink) => this(offerLink: offerLink);
 
   @override
-  Contact card(InvalidType card) => this(card: card);
+  Contact card(ContactCard card) => this(card: card);
 
   @override
   Contact type(ContactType type) => this(type: type);
@@ -103,7 +103,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
   Contact category(ContactCategory category) => this(category: category);
 
   @override
-  Contact otherPartyCard(InvalidType otherPartyCard) =>
+  Contact otherPartyCard(ContactCard? otherPartyCard) =>
       this(otherPartyCard: otherPartyCard);
 
   @override
@@ -175,7 +175,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       card: card == const $CopyWithPlaceholder()
           ? _value.card
           // ignore: cast_nullable_to_non_nullable
-          : card as InvalidType,
+          : card as ContactCard,
       dateAdded: _value.dateAdded,
       type: type == const $CopyWithPlaceholder()
           ? _value.type
@@ -200,7 +200,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       otherPartyCard: otherPartyCard == const $CopyWithPlaceholder()
           ? _value.otherPartyCard
           // ignore: cast_nullable_to_non_nullable
-          : otherPartyCard as InvalidType,
+          : otherPartyCard as ContactCard?,
       displayName: displayName == const $CopyWithPlaceholder()
           ? _value.displayName
           // ignore: cast_nullable_to_non_nullable
