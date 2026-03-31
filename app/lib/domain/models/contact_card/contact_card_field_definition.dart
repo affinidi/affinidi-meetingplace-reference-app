@@ -34,8 +34,6 @@ class ContactCardFieldDefinition {
     required this.placeholder,
     required List<FieldValidator> Function(BuildContext context) validators,
     required this.sdkPath,
-    required this.identitiesColumnName,
-    required this.contactsColumnName,
     required this.nullWhenEmpty,
     required String? Function(ContactCard) valueAccessor,
     required ContactCard Function(ContactCard, String?) updateCard,
@@ -57,8 +55,6 @@ class ContactCardFieldDefinition {
   final String Function(AppLocalizations l10n) placeholder;
   final List<FieldValidator> Function(BuildContext context) _validatorsBuilder;
   final List<String> sdkPath;
-  final String identitiesColumnName;
-  final String contactsColumnName;
   final bool nullWhenEmpty;
   final String? Function(ContactCard) _valueAccessor;
   final ContactCard Function(ContactCard, String?) _updateCard;
@@ -117,8 +113,6 @@ class ContactCardFieldDefinitions {
         ),
       ],
       sdkPath: const ['n', 'given'],
-      identitiesColumnName: 'firstName',
-      contactsColumnName: 'firstName',
       nullWhenEmpty: false,
       valueAccessor: (card) => card.firstName,
       updateCard: (card, value) => card.copyWith(firstName: value ?? ''),
@@ -142,8 +136,6 @@ class ContactCardFieldDefinitions {
         ),
       ],
       sdkPath: const ['n', 'surname'],
-      identitiesColumnName: 'lastName',
-      contactsColumnName: 'lastName',
       nullWhenEmpty: true,
       valueAccessor: (card) => card.lastName,
       updateCard: (card, value) => card.copyWith(lastName: value),
@@ -167,8 +159,6 @@ class ContactCardFieldDefinitions {
         ),
       ],
       sdkPath: const ['org'],
-      identitiesColumnName: 'organization',
-      contactsColumnName: 'organization',
       nullWhenEmpty: true,
       valueAccessor: (card) => card.organization,
       updateCard: (card, value) => card.copyWith(organization: value),
@@ -192,8 +182,6 @@ class ContactCardFieldDefinitions {
         ),
       ],
       sdkPath: const ['url'],
-      identitiesColumnName: 'website',
-      contactsColumnName: 'website',
       nullWhenEmpty: true,
       valueAccessor: (card) => card.website,
       updateCard: (card, value) => card.copyWith(website: value),
@@ -217,8 +205,6 @@ class ContactCardFieldDefinitions {
         ),
       ],
       sdkPath: const ['email', 'type', 'work'],
-      identitiesColumnName: 'email',
-      contactsColumnName: 'email',
       nullWhenEmpty: true,
       valueAccessor: (card) => card.email,
       updateCard: (card, value) => card.copyWith(email: value),
@@ -237,8 +223,6 @@ class ContactCardFieldDefinitions {
       placeholder: (l10n) => l10n.enterMobile,
       validators: (_) => [],
       sdkPath: const ['tel', 'type', 'cell'],
-      identitiesColumnName: 'mobile',
-      contactsColumnName: 'mobile',
       nullWhenEmpty: true,
       valueAccessor: (card) => card.mobile,
       updateCard: (card, value) => card.copyWith(mobile: value),
@@ -262,8 +246,6 @@ class ContactCardFieldDefinitions {
         ),
       ],
       sdkPath: const ['adr', 'postalCode'],
-      identitiesColumnName: 'postcode',
-      contactsColumnName: 'postcode',
       nullWhenEmpty: true,
       valueAccessor: (card) => card.postcode,
       updateCard: (card, value) => card.copyWith(postcode: value),

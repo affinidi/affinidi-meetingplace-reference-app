@@ -1069,116 +1069,25 @@ class $ContactCardsTable extends ContactCards
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _firstNameMeta = const VerificationMeta(
-    'firstName',
+  static const VerificationMeta _contactInfoJsonMeta = const VerificationMeta(
+    'contactInfoJson',
   );
   @override
-  late final GeneratedColumn<String> firstName = GeneratedColumn<String>(
-    'first_name',
+  late final GeneratedColumn<String> contactInfoJson = GeneratedColumn<String>(
+    'contact_info_json',
     aliasedName,
     false,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
   );
-  static const VerificationMeta _lastNameMeta = const VerificationMeta(
-    'lastName',
-  );
-  @override
-  late final GeneratedColumn<String> lastName = GeneratedColumn<String>(
-    'last_name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _organizationMeta = const VerificationMeta(
-    'organization',
-  );
-  @override
-  late final GeneratedColumn<String> organization = GeneratedColumn<String>(
-    'organization',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _websiteMeta = const VerificationMeta(
-    'website',
-  );
-  @override
-  late final GeneratedColumn<String> website = GeneratedColumn<String>(
-    'website',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _emailMeta = const VerificationMeta('email');
-  @override
-  late final GeneratedColumn<String> email = GeneratedColumn<String>(
-    'email',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _mobileMeta = const VerificationMeta('mobile');
-  @override
-  late final GeneratedColumn<String> mobile = GeneratedColumn<String>(
-    'mobile',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _postcodeMeta = const VerificationMeta(
-    'postcode',
-  );
-  @override
-  late final GeneratedColumn<String> postcode = GeneratedColumn<String>(
-    'postcode',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _profilePicMeta = const VerificationMeta(
-    'profilePic',
-  );
-  @override
-  late final GeneratedColumn<String> profilePic = GeneratedColumn<String>(
-    'profile_pic',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _meetingplaceIdentityCardColorMeta =
-      const VerificationMeta('meetingplaceIdentityCardColor');
-  @override
-  late final GeneratedColumn<String> meetingplaceIdentityCardColor =
-      GeneratedColumn<String>(
-        'meetingplace_identity_card_color',
-        aliasedName,
-        false,
-        type: DriftSqlType.string,
-        requiredDuringInsert: true,
-      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     contactId,
     did,
     type,
-    firstName,
-    lastName,
-    organization,
-    website,
-    email,
-    mobile,
-    postcode,
-    profilePic,
-    meetingplaceIdentityCardColor,
+    contactInfoJson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1219,83 +1128,14 @@ class $ContactCardsTable extends ContactCards
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
-    if (data.containsKey('first_name')) {
+    if (data.containsKey('contact_info_json')) {
       context.handle(
-        _firstNameMeta,
-        firstName.isAcceptableOrUnknown(data['first_name']!, _firstNameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_firstNameMeta);
-    }
-    if (data.containsKey('last_name')) {
-      context.handle(
-        _lastNameMeta,
-        lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_lastNameMeta);
-    }
-    if (data.containsKey('organization')) {
-      context.handle(
-        _organizationMeta,
-        organization.isAcceptableOrUnknown(
-          data['organization']!,
-          _organizationMeta,
+        _contactInfoJsonMeta,
+        contactInfoJson.isAcceptableOrUnknown(
+          data['contact_info_json']!,
+          _contactInfoJsonMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_organizationMeta);
-    }
-    if (data.containsKey('website')) {
-      context.handle(
-        _websiteMeta,
-        website.isAcceptableOrUnknown(data['website']!, _websiteMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_websiteMeta);
-    }
-    if (data.containsKey('email')) {
-      context.handle(
-        _emailMeta,
-        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_emailMeta);
-    }
-    if (data.containsKey('mobile')) {
-      context.handle(
-        _mobileMeta,
-        mobile.isAcceptableOrUnknown(data['mobile']!, _mobileMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_mobileMeta);
-    }
-    if (data.containsKey('postcode')) {
-      context.handle(
-        _postcodeMeta,
-        postcode.isAcceptableOrUnknown(data['postcode']!, _postcodeMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_postcodeMeta);
-    }
-    if (data.containsKey('profile_pic')) {
-      context.handle(
-        _profilePicMeta,
-        profilePic.isAcceptableOrUnknown(data['profile_pic']!, _profilePicMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_profilePicMeta);
-    }
-    if (data.containsKey('meetingplace_identity_card_color')) {
-      context.handle(
-        _meetingplaceIdentityCardColorMeta,
-        meetingplaceIdentityCardColor.isAcceptableOrUnknown(
-          data['meetingplace_identity_card_color']!,
-          _meetingplaceIdentityCardColorMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_meetingplaceIdentityCardColorMeta);
     }
     return context;
   }
@@ -1322,41 +1162,9 @@ class $ContactCardsTable extends ContactCards
         DriftSqlType.string,
         data['${effectivePrefix}type'],
       )!,
-      firstName: attachedDatabase.typeMapping.read(
+      contactInfoJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}first_name'],
-      )!,
-      lastName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}last_name'],
-      )!,
-      organization: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}organization'],
-      )!,
-      website: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}website'],
-      )!,
-      email: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}email'],
-      )!,
-      mobile: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}mobile'],
-      )!,
-      postcode: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}postcode'],
-      )!,
-      profilePic: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}profile_pic'],
-      )!,
-      meetingplaceIdentityCardColor: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}meetingplace_identity_card_color'],
+        data['${effectivePrefix}contact_info_json'],
       )!,
     );
   }
@@ -1372,29 +1180,13 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
   final String contactId;
   final String did;
   final String type;
-  final String firstName;
-  final String lastName;
-  final String organization;
-  final String website;
-  final String email;
-  final String mobile;
-  final String postcode;
-  final String profilePic;
-  final String meetingplaceIdentityCardColor;
+  final String contactInfoJson;
   const ContactCard({
     required this.id,
     required this.contactId,
     required this.did,
     required this.type,
-    required this.firstName,
-    required this.lastName,
-    required this.organization,
-    required this.website,
-    required this.email,
-    required this.mobile,
-    required this.postcode,
-    required this.profilePic,
-    required this.meetingplaceIdentityCardColor,
+    required this.contactInfoJson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1403,17 +1195,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     map['contact_id'] = Variable<String>(contactId);
     map['did'] = Variable<String>(did);
     map['type'] = Variable<String>(type);
-    map['first_name'] = Variable<String>(firstName);
-    map['last_name'] = Variable<String>(lastName);
-    map['organization'] = Variable<String>(organization);
-    map['website'] = Variable<String>(website);
-    map['email'] = Variable<String>(email);
-    map['mobile'] = Variable<String>(mobile);
-    map['postcode'] = Variable<String>(postcode);
-    map['profile_pic'] = Variable<String>(profilePic);
-    map['meetingplace_identity_card_color'] = Variable<String>(
-      meetingplaceIdentityCardColor,
-    );
+    map['contact_info_json'] = Variable<String>(contactInfoJson);
     return map;
   }
 
@@ -1423,15 +1205,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       contactId: Value(contactId),
       did: Value(did),
       type: Value(type),
-      firstName: Value(firstName),
-      lastName: Value(lastName),
-      organization: Value(organization),
-      website: Value(website),
-      email: Value(email),
-      mobile: Value(mobile),
-      postcode: Value(postcode),
-      profilePic: Value(profilePic),
-      meetingplaceIdentityCardColor: Value(meetingplaceIdentityCardColor),
+      contactInfoJson: Value(contactInfoJson),
     );
   }
 
@@ -1445,17 +1219,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       contactId: serializer.fromJson<String>(json['contactId']),
       did: serializer.fromJson<String>(json['did']),
       type: serializer.fromJson<String>(json['type']),
-      firstName: serializer.fromJson<String>(json['firstName']),
-      lastName: serializer.fromJson<String>(json['lastName']),
-      organization: serializer.fromJson<String>(json['organization']),
-      website: serializer.fromJson<String>(json['website']),
-      email: serializer.fromJson<String>(json['email']),
-      mobile: serializer.fromJson<String>(json['mobile']),
-      postcode: serializer.fromJson<String>(json['postcode']),
-      profilePic: serializer.fromJson<String>(json['profilePic']),
-      meetingplaceIdentityCardColor: serializer.fromJson<String>(
-        json['meetingplaceIdentityCardColor'],
-      ),
+      contactInfoJson: serializer.fromJson<String>(json['contactInfoJson']),
     );
   }
   @override
@@ -1466,17 +1230,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       'contactId': serializer.toJson<String>(contactId),
       'did': serializer.toJson<String>(did),
       'type': serializer.toJson<String>(type),
-      'firstName': serializer.toJson<String>(firstName),
-      'lastName': serializer.toJson<String>(lastName),
-      'organization': serializer.toJson<String>(organization),
-      'website': serializer.toJson<String>(website),
-      'email': serializer.toJson<String>(email),
-      'mobile': serializer.toJson<String>(mobile),
-      'postcode': serializer.toJson<String>(postcode),
-      'profilePic': serializer.toJson<String>(profilePic),
-      'meetingplaceIdentityCardColor': serializer.toJson<String>(
-        meetingplaceIdentityCardColor,
-      ),
+      'contactInfoJson': serializer.toJson<String>(contactInfoJson),
     };
   }
 
@@ -1485,30 +1239,13 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     String? contactId,
     String? did,
     String? type,
-    String? firstName,
-    String? lastName,
-    String? organization,
-    String? website,
-    String? email,
-    String? mobile,
-    String? postcode,
-    String? profilePic,
-    String? meetingplaceIdentityCardColor,
+    String? contactInfoJson,
   }) => ContactCard(
     id: id ?? this.id,
     contactId: contactId ?? this.contactId,
     did: did ?? this.did,
     type: type ?? this.type,
-    firstName: firstName ?? this.firstName,
-    lastName: lastName ?? this.lastName,
-    organization: organization ?? this.organization,
-    website: website ?? this.website,
-    email: email ?? this.email,
-    mobile: mobile ?? this.mobile,
-    postcode: postcode ?? this.postcode,
-    profilePic: profilePic ?? this.profilePic,
-    meetingplaceIdentityCardColor:
-        meetingplaceIdentityCardColor ?? this.meetingplaceIdentityCardColor,
+    contactInfoJson: contactInfoJson ?? this.contactInfoJson,
   );
   ContactCard copyWithCompanion(ContactCardsCompanion data) {
     return ContactCard(
@@ -1516,21 +1253,9 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       contactId: data.contactId.present ? data.contactId.value : this.contactId,
       did: data.did.present ? data.did.value : this.did,
       type: data.type.present ? data.type.value : this.type,
-      firstName: data.firstName.present ? data.firstName.value : this.firstName,
-      lastName: data.lastName.present ? data.lastName.value : this.lastName,
-      organization: data.organization.present
-          ? data.organization.value
-          : this.organization,
-      website: data.website.present ? data.website.value : this.website,
-      email: data.email.present ? data.email.value : this.email,
-      mobile: data.mobile.present ? data.mobile.value : this.mobile,
-      postcode: data.postcode.present ? data.postcode.value : this.postcode,
-      profilePic: data.profilePic.present
-          ? data.profilePic.value
-          : this.profilePic,
-      meetingplaceIdentityCardColor: data.meetingplaceIdentityCardColor.present
-          ? data.meetingplaceIdentityCardColor.value
-          : this.meetingplaceIdentityCardColor,
+      contactInfoJson: data.contactInfoJson.present
+          ? data.contactInfoJson.value
+          : this.contactInfoJson,
     );
   }
 
@@ -1541,37 +1266,13 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           ..write('contactId: $contactId, ')
           ..write('did: $did, ')
           ..write('type: $type, ')
-          ..write('firstName: $firstName, ')
-          ..write('lastName: $lastName, ')
-          ..write('organization: $organization, ')
-          ..write('website: $website, ')
-          ..write('email: $email, ')
-          ..write('mobile: $mobile, ')
-          ..write('postcode: $postcode, ')
-          ..write('profilePic: $profilePic, ')
-          ..write(
-            'meetingplaceIdentityCardColor: $meetingplaceIdentityCardColor',
-          )
+          ..write('contactInfoJson: $contactInfoJson')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    contactId,
-    did,
-    type,
-    firstName,
-    lastName,
-    organization,
-    website,
-    email,
-    mobile,
-    postcode,
-    profilePic,
-    meetingplaceIdentityCardColor,
-  );
+  int get hashCode => Object.hash(id, contactId, did, type, contactInfoJson);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1580,16 +1281,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           other.contactId == this.contactId &&
           other.did == this.did &&
           other.type == this.type &&
-          other.firstName == this.firstName &&
-          other.lastName == this.lastName &&
-          other.organization == this.organization &&
-          other.website == this.website &&
-          other.email == this.email &&
-          other.mobile == this.mobile &&
-          other.postcode == this.postcode &&
-          other.profilePic == this.profilePic &&
-          other.meetingplaceIdentityCardColor ==
-              this.meetingplaceIdentityCardColor);
+          other.contactInfoJson == this.contactInfoJson);
 }
 
 class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
@@ -1597,86 +1289,36 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   final Value<String> contactId;
   final Value<String> did;
   final Value<String> type;
-  final Value<String> firstName;
-  final Value<String> lastName;
-  final Value<String> organization;
-  final Value<String> website;
-  final Value<String> email;
-  final Value<String> mobile;
-  final Value<String> postcode;
-  final Value<String> profilePic;
-  final Value<String> meetingplaceIdentityCardColor;
+  final Value<String> contactInfoJson;
   const ContactCardsCompanion({
     this.id = const Value.absent(),
     this.contactId = const Value.absent(),
     this.did = const Value.absent(),
     this.type = const Value.absent(),
-    this.firstName = const Value.absent(),
-    this.lastName = const Value.absent(),
-    this.organization = const Value.absent(),
-    this.website = const Value.absent(),
-    this.email = const Value.absent(),
-    this.mobile = const Value.absent(),
-    this.postcode = const Value.absent(),
-    this.profilePic = const Value.absent(),
-    this.meetingplaceIdentityCardColor = const Value.absent(),
+    this.contactInfoJson = const Value.absent(),
   });
   ContactCardsCompanion.insert({
     this.id = const Value.absent(),
     required String contactId,
     required String did,
     required String type,
-    required String firstName,
-    required String lastName,
-    required String organization,
-    required String website,
-    required String email,
-    required String mobile,
-    required String postcode,
-    required String profilePic,
-    required String meetingplaceIdentityCardColor,
+    this.contactInfoJson = const Value.absent(),
   }) : contactId = Value(contactId),
        did = Value(did),
-       type = Value(type),
-       firstName = Value(firstName),
-       lastName = Value(lastName),
-       organization = Value(organization),
-       website = Value(website),
-       email = Value(email),
-       mobile = Value(mobile),
-       postcode = Value(postcode),
-       profilePic = Value(profilePic),
-       meetingplaceIdentityCardColor = Value(meetingplaceIdentityCardColor);
+       type = Value(type);
   static Insertable<ContactCard> custom({
     Expression<int>? id,
     Expression<String>? contactId,
     Expression<String>? did,
     Expression<String>? type,
-    Expression<String>? firstName,
-    Expression<String>? lastName,
-    Expression<String>? organization,
-    Expression<String>? website,
-    Expression<String>? email,
-    Expression<String>? mobile,
-    Expression<String>? postcode,
-    Expression<String>? profilePic,
-    Expression<String>? meetingplaceIdentityCardColor,
+    Expression<String>? contactInfoJson,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (contactId != null) 'contact_id': contactId,
       if (did != null) 'did': did,
       if (type != null) 'type': type,
-      if (firstName != null) 'first_name': firstName,
-      if (lastName != null) 'last_name': lastName,
-      if (organization != null) 'organization': organization,
-      if (website != null) 'website': website,
-      if (email != null) 'email': email,
-      if (mobile != null) 'mobile': mobile,
-      if (postcode != null) 'postcode': postcode,
-      if (profilePic != null) 'profile_pic': profilePic,
-      if (meetingplaceIdentityCardColor != null)
-        'meetingplace_identity_card_color': meetingplaceIdentityCardColor,
+      if (contactInfoJson != null) 'contact_info_json': contactInfoJson,
     });
   }
 
@@ -1685,31 +1327,14 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     Value<String>? contactId,
     Value<String>? did,
     Value<String>? type,
-    Value<String>? firstName,
-    Value<String>? lastName,
-    Value<String>? organization,
-    Value<String>? website,
-    Value<String>? email,
-    Value<String>? mobile,
-    Value<String>? postcode,
-    Value<String>? profilePic,
-    Value<String>? meetingplaceIdentityCardColor,
+    Value<String>? contactInfoJson,
   }) {
     return ContactCardsCompanion(
       id: id ?? this.id,
       contactId: contactId ?? this.contactId,
       did: did ?? this.did,
       type: type ?? this.type,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      organization: organization ?? this.organization,
-      website: website ?? this.website,
-      email: email ?? this.email,
-      mobile: mobile ?? this.mobile,
-      postcode: postcode ?? this.postcode,
-      profilePic: profilePic ?? this.profilePic,
-      meetingplaceIdentityCardColor:
-          meetingplaceIdentityCardColor ?? this.meetingplaceIdentityCardColor,
+      contactInfoJson: contactInfoJson ?? this.contactInfoJson,
     );
   }
 
@@ -1728,34 +1353,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     if (type.present) {
       map['type'] = Variable<String>(type.value);
     }
-    if (firstName.present) {
-      map['first_name'] = Variable<String>(firstName.value);
-    }
-    if (lastName.present) {
-      map['last_name'] = Variable<String>(lastName.value);
-    }
-    if (organization.present) {
-      map['organization'] = Variable<String>(organization.value);
-    }
-    if (website.present) {
-      map['website'] = Variable<String>(website.value);
-    }
-    if (email.present) {
-      map['email'] = Variable<String>(email.value);
-    }
-    if (mobile.present) {
-      map['mobile'] = Variable<String>(mobile.value);
-    }
-    if (postcode.present) {
-      map['postcode'] = Variable<String>(postcode.value);
-    }
-    if (profilePic.present) {
-      map['profile_pic'] = Variable<String>(profilePic.value);
-    }
-    if (meetingplaceIdentityCardColor.present) {
-      map['meetingplace_identity_card_color'] = Variable<String>(
-        meetingplaceIdentityCardColor.value,
-      );
+    if (contactInfoJson.present) {
+      map['contact_info_json'] = Variable<String>(contactInfoJson.value);
     }
     return map;
   }
@@ -1767,17 +1366,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
           ..write('contactId: $contactId, ')
           ..write('did: $did, ')
           ..write('type: $type, ')
-          ..write('firstName: $firstName, ')
-          ..write('lastName: $lastName, ')
-          ..write('organization: $organization, ')
-          ..write('website: $website, ')
-          ..write('email: $email, ')
-          ..write('mobile: $mobile, ')
-          ..write('postcode: $postcode, ')
-          ..write('profilePic: $profilePic, ')
-          ..write(
-            'meetingplaceIdentityCardColor: $meetingplaceIdentityCardColor',
-          )
+          ..write('contactInfoJson: $contactInfoJson')
           ..write(')'))
         .toString();
   }
@@ -2367,15 +1956,7 @@ typedef $$ContactCardsTableCreateCompanionBuilder =
       required String contactId,
       required String did,
       required String type,
-      required String firstName,
-      required String lastName,
-      required String organization,
-      required String website,
-      required String email,
-      required String mobile,
-      required String postcode,
-      required String profilePic,
-      required String meetingplaceIdentityCardColor,
+      Value<String> contactInfoJson,
     });
 typedef $$ContactCardsTableUpdateCompanionBuilder =
     ContactCardsCompanion Function({
@@ -2383,15 +1964,7 @@ typedef $$ContactCardsTableUpdateCompanionBuilder =
       Value<String> contactId,
       Value<String> did,
       Value<String> type,
-      Value<String> firstName,
-      Value<String> lastName,
-      Value<String> organization,
-      Value<String> website,
-      Value<String> email,
-      Value<String> mobile,
-      Value<String> postcode,
-      Value<String> profilePic,
-      Value<String> meetingplaceIdentityCardColor,
+      Value<String> contactInfoJson,
     });
 
 final class $$ContactCardsTableReferences
@@ -2443,48 +2016,8 @@ class $$ContactCardsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get firstName => $composableBuilder(
-    column: $table.firstName,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get lastName => $composableBuilder(
-    column: $table.lastName,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get organization => $composableBuilder(
-    column: $table.organization,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get website => $composableBuilder(
-    column: $table.website,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get email => $composableBuilder(
-    column: $table.email,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get mobile => $composableBuilder(
-    column: $table.mobile,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get postcode => $composableBuilder(
-    column: $table.postcode,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get profilePic => $composableBuilder(
-    column: $table.profilePic,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get meetingplaceIdentityCardColor => $composableBuilder(
-    column: $table.meetingplaceIdentityCardColor,
+  ColumnFilters<String> get contactInfoJson => $composableBuilder(
+    column: $table.contactInfoJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2536,51 +2069,10 @@ class $$ContactCardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get firstName => $composableBuilder(
-    column: $table.firstName,
+  ColumnOrderings<String> get contactInfoJson => $composableBuilder(
+    column: $table.contactInfoJson,
     builder: (column) => ColumnOrderings(column),
   );
-
-  ColumnOrderings<String> get lastName => $composableBuilder(
-    column: $table.lastName,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get organization => $composableBuilder(
-    column: $table.organization,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get website => $composableBuilder(
-    column: $table.website,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get email => $composableBuilder(
-    column: $table.email,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get mobile => $composableBuilder(
-    column: $table.mobile,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get postcode => $composableBuilder(
-    column: $table.postcode,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get profilePic => $composableBuilder(
-    column: $table.profilePic,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get meetingplaceIdentityCardColor =>
-      $composableBuilder(
-        column: $table.meetingplaceIdentityCardColor,
-        builder: (column) => ColumnOrderings(column),
-      );
 
   $$ContactsTableOrderingComposer get contactId {
     final $$ContactsTableOrderingComposer composer = $composerBuilder(
@@ -2624,39 +2116,10 @@ class $$ContactCardsTableAnnotationComposer
   GeneratedColumn<String> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<String> get firstName =>
-      $composableBuilder(column: $table.firstName, builder: (column) => column);
-
-  GeneratedColumn<String> get lastName =>
-      $composableBuilder(column: $table.lastName, builder: (column) => column);
-
-  GeneratedColumn<String> get organization => $composableBuilder(
-    column: $table.organization,
+  GeneratedColumn<String> get contactInfoJson => $composableBuilder(
+    column: $table.contactInfoJson,
     builder: (column) => column,
   );
-
-  GeneratedColumn<String> get website =>
-      $composableBuilder(column: $table.website, builder: (column) => column);
-
-  GeneratedColumn<String> get email =>
-      $composableBuilder(column: $table.email, builder: (column) => column);
-
-  GeneratedColumn<String> get mobile =>
-      $composableBuilder(column: $table.mobile, builder: (column) => column);
-
-  GeneratedColumn<String> get postcode =>
-      $composableBuilder(column: $table.postcode, builder: (column) => column);
-
-  GeneratedColumn<String> get profilePic => $composableBuilder(
-    column: $table.profilePic,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get meetingplaceIdentityCardColor =>
-      $composableBuilder(
-        column: $table.meetingplaceIdentityCardColor,
-        builder: (column) => column,
-      );
 
   $$ContactsTableAnnotationComposer get contactId {
     final $$ContactsTableAnnotationComposer composer = $composerBuilder(
@@ -2716,30 +2179,13 @@ class $$ContactCardsTableTableManager
                 Value<String> contactId = const Value.absent(),
                 Value<String> did = const Value.absent(),
                 Value<String> type = const Value.absent(),
-                Value<String> firstName = const Value.absent(),
-                Value<String> lastName = const Value.absent(),
-                Value<String> organization = const Value.absent(),
-                Value<String> website = const Value.absent(),
-                Value<String> email = const Value.absent(),
-                Value<String> mobile = const Value.absent(),
-                Value<String> postcode = const Value.absent(),
-                Value<String> profilePic = const Value.absent(),
-                Value<String> meetingplaceIdentityCardColor =
-                    const Value.absent(),
+                Value<String> contactInfoJson = const Value.absent(),
               }) => ContactCardsCompanion(
                 id: id,
                 contactId: contactId,
                 did: did,
                 type: type,
-                firstName: firstName,
-                lastName: lastName,
-                organization: organization,
-                website: website,
-                email: email,
-                mobile: mobile,
-                postcode: postcode,
-                profilePic: profilePic,
-                meetingplaceIdentityCardColor: meetingplaceIdentityCardColor,
+                contactInfoJson: contactInfoJson,
               ),
           createCompanionCallback:
               ({
@@ -2747,29 +2193,13 @@ class $$ContactCardsTableTableManager
                 required String contactId,
                 required String did,
                 required String type,
-                required String firstName,
-                required String lastName,
-                required String organization,
-                required String website,
-                required String email,
-                required String mobile,
-                required String postcode,
-                required String profilePic,
-                required String meetingplaceIdentityCardColor,
+                Value<String> contactInfoJson = const Value.absent(),
               }) => ContactCardsCompanion.insert(
                 id: id,
                 contactId: contactId,
                 did: did,
                 type: type,
-                firstName: firstName,
-                lastName: lastName,
-                organization: organization,
-                website: website,
-                email: email,
-                mobile: mobile,
-                postcode: postcode,
-                profilePic: profilePic,
-                meetingplaceIdentityCardColor: meetingplaceIdentityCardColor,
+                contactInfoJson: contactInfoJson,
               ),
           withReferenceMapper: (p0) => p0
               .map(

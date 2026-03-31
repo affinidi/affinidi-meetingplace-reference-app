@@ -1,6 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
 
-import '../../../../domain/models/contact_card/contact_card_field_definition.drift_glue.g.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
+
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../domain/repositories/identities_repository.dart';
 import '../../../extensions/contact_card_extensions.dart';
@@ -72,13 +74,32 @@ class IdentitiesRepositoryDrift implements IdentitiesRepository {
 ///  database rows.
 extension IdentityMapper on Identity {
   /// Converts an [Identity] into an [IdentityRecord] for persistence.
-  IdentityRecord toRecord() => buildIdentityRecordFromIdentity(this);
+  IdentityRecord toRecord() {
+    final contactInfoJson = jsonEncode(toSdkContactCard().contactInfo);
+    return IdentityRecord(
+      id: id,
+      did: did,
+      displayName: card.displayName,
+      contactInfoJson: contactInfoJson,
+      isPrimary: isPrimary,
+    );
+  }
 
   /// Creates an [Identity] domain model from a [IdentityRecord].
   static Identity fromRecord(IdentityRecord record) {
-    final card = hydrateIdentityRecordContactCard(
-      record,
+    final decoded = jsonDecode(record.contactInfoJson) as Map<String, dynamic>;
+    final sdkCard = sdk.ContactCard(
+      did: record.did,
       type: ContactCardType.individual.value,
+      contactInfo: decoded,
+    );
+    final hydrated = ContactCardUtils.fromSdkContactCard(sdkCard);
+
+    final card = hydrated.copyWith(
+      id: record.id,
+      did: record.did,
+      type: sdkCard.type,
+      displayName: record.displayName,
     );
 
     return Identity(

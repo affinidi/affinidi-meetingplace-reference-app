@@ -1,26 +1,11 @@
 targets:
   $default:
     builders:
-      mpx_flutter_reference_app|contact_card_field_drift_glue:
-        generate_for:
-          - lib/domain/models/contact_card/contact_card_field_definition.dart
       mpx_flutter_reference_app|contact_card_model:
         generate_for:
           - lib/domain/models/contact_card/contact_card.dart
-      mpx_flutter_reference_app|contact_cards_table:
-        generate_for:
-          - lib/infrastructure/repositories/contacts_repository/contacts_repository_drift/contacts_database.dart
-      mpx_flutter_reference_app|identities_table:
-        generate_for:
-          - lib/infrastructure/repositories/identities_repository/identities_repository_drift/identities_table.dart
 
 builders:
-  contact_card_field_drift_glue:
-    import: "package:mpx_flutter_reference_app/builders/contact_card_field_drift_glue_builder.dart"
-    builder_factories: ["contactCardFieldDriftGlueBuilder"]
-    build_extensions: { ".dart": [".drift_glue.g.dart"] }
-    auto_apply: root_package
-    build_to: source
   contact_card_model:
     import: "package:mpx_flutter_reference_app/builders/contact_card_field_drift_glue_builder.dart"
     builder_factories: ["contactCardModelBuilder"]
@@ -29,17 +14,3 @@ builders:
     build_to: source
     runs_before:
       ["copy_with_extension_gen:copy_with_extension_gen", "freezed:freezed"]
-  contact_cards_table:
-    import: "package:mpx_flutter_reference_app/builders/contact_card_field_drift_glue_builder.dart"
-    builder_factories: ["contactCardsTableBuilder"]
-    build_extensions: { ".dart": [".contact_card_fields.g.dart"] }
-    auto_apply: root_package
-    build_to: source
-    runs_before: ["drift_dev:drift_dev"]
-  identities_table:
-    import: "package:mpx_flutter_reference_app/builders/contact_card_field_drift_glue_builder.dart"
-    builder_factories: ["identitiesTableBuilder"]
-    build_extensions: { ".dart": [".contact_card_fields.g.dart"] }
-    auto_apply: root_package
-    build_to: source
-    runs_before: ["drift_dev:drift_dev"]

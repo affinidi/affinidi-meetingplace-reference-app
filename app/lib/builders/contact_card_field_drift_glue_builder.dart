@@ -3,42 +3,14 @@ import 'package:build/build.dart';
 const _fieldDefinitionPath =
     'lib/domain/models/contact_card/contact_card_field_definition.dart';
 const _contactCardPath = 'lib/domain/models/contact_card/contact_card.dart';
-const _contactsDatabasePath =
-    'lib/infrastructure/repositories/contacts_repository/'
-    'contacts_repository_drift/contacts_database.dart';
-const _identitiesTablePath =
-    'lib/infrastructure/repositories/identities_repository/'
-    'identities_repository_drift/identities_table.dart';
 
-Builder contactCardFieldDriftGlueBuilder(BuilderOptions options) {
-  return const _ContactCardFieldDriftGlueBuilder();
-}
-
+/// Generates `contact_card.registry.g.dart` from `ContactCardFieldDefinitions`.
+///
+/// The app previously had additional builders to generate Drift glue and per-
+/// field table columns. After migrating persistence to a JSON blob, only the
+/// ContactCard model generation remains.
 Builder contactCardModelBuilder(BuilderOptions options) {
   return const _ContactCardModelBuilder();
-}
-
-Builder contactCardsTableBuilder(BuilderOptions options) {
-  return const _ContactCardsTableBuilder();
-}
-
-Builder identitiesTableBuilder(BuilderOptions options) {
-  return const _IdentitiesTableBuilder();
-}
-
-class _ContactCardFieldDriftGlueBuilder extends _ContactCardRegistryBuilder {
-  const _ContactCardFieldDriftGlueBuilder();
-
-  @override
-  String get inputPath => _fieldDefinitionPath;
-
-  @override
-  String get outputExtension => '.drift_glue.g.dart';
-
-  @override
-  String buildOutput(List<_ParsedField> fields) {
-    return _GeneratedGlueWriter(fields).write();
-  }
 }
 
 class _ContactCardModelBuilder extends _ContactCardRegistryBuilder {
@@ -53,36 +25,6 @@ class _ContactCardModelBuilder extends _ContactCardRegistryBuilder {
   @override
   String buildOutput(List<_ParsedField> fields) {
     return _GeneratedContactCardModelWriter(fields).write();
-  }
-}
-
-class _ContactCardsTableBuilder extends _ContactCardRegistryBuilder {
-  const _ContactCardsTableBuilder();
-
-  @override
-  String get inputPath => _contactsDatabasePath;
-
-  @override
-  String get outputExtension => '.contact_card_fields.g.dart';
-
-  @override
-  String buildOutput(List<_ParsedField> fields) {
-    return _GeneratedContactCardsTableWriter(fields).write();
-  }
-}
-
-class _IdentitiesTableBuilder extends _ContactCardRegistryBuilder {
-  const _IdentitiesTableBuilder();
-
-  @override
-  String get inputPath => _identitiesTablePath;
-
-  @override
-  String get outputExtension => '.contact_card_fields.g.dart';
-
-  @override
-  String buildOutput(List<_ParsedField> fields) {
-    return _GeneratedIdentitiesTableWriter(fields).write();
   }
 }
 
@@ -128,35 +70,18 @@ abstract class _ContactCardRegistryBuilder implements Builder {
 }
 
 class _ParsedField {
-  const _ParsedField({
-    required this.key,
-    required this.identitiesColumnName,
-    required this.contactsColumnName,
-    required this.nullWhenEmpty,
-  });
+  const _ParsedField({required this.key, required this.nullWhenEmpty});
 
   final String key;
-  final String identitiesColumnName;
-  final String contactsColumnName;
   final bool nullWhenEmpty;
 
-  String get enumValue => 'ContactCardFieldKey.$key';
-
   String get modelType => nullWhenEmpty ? 'String?' : 'String';
-
-  String get identitiesColumnTypeSuffix => nullWhenEmpty ? '.nullable()' : '';
 }
 
 class _ContactCardFieldParser {
   static const String _definitionToken = 'ContactCardFieldDefinition(';
   static final RegExp _keyPattern = RegExp(
     r'key:\s*ContactCardFieldKey\.(\w+)',
-  );
-  static final RegExp _identitiesColumnPattern = RegExp(
-    r"identitiesColumnName:\s*'([^']+)'",
-  );
-  static final RegExp _contactsColumnPattern = RegExp(
-    r"contactsColumnName:\s*'([^']+)'",
   );
   static final RegExp _nullWhenEmptyPattern = RegExp(
     r'nullWhenEmpty:\s*(true|false)',
@@ -168,16 +93,6 @@ class _ContactCardFieldParser {
         .map((block) {
           return _ParsedField(
             key: _readRequired(_keyPattern, block, 'key'),
-            identitiesColumnName: _readRequired(
-              _identitiesColumnPattern,
-              block,
-              'identitiesColumnName',
-            ),
-            contactsColumnName: _readRequired(
-              _contactsColumnPattern,
-              block,
-              'contactsColumnName',
-            ),
             nullWhenEmpty:
                 _readRequired(_nullWhenEmptyPattern, block, 'nullWhenEmpty') ==
                 'true',
@@ -196,9 +111,7 @@ class _ContactCardFieldParser {
 
       final startParenIndex = tokenIndex + _definitionToken.length - 1;
 
-      // Skip the constructor declaration:
-      // `ContactCardFieldDefinition({ ... })`.
-      // We only want instances: `ContactCardFieldDefinition(`.
+      // Skip the constructor declaration `ContactCardFieldDefinition({ ... })`.
       var lookahead = startParenIndex + 1;
       while (lookahead < source.length && source[lookahead].trim().isEmpty) {
         lookahead++;
@@ -209,7 +122,6 @@ class _ContactCardFieldParser {
       }
 
       final extracted = _extractBalancedParentheses(source, startParenIndex);
-
       blocks.add(extracted.content);
       searchIndex = extracted.endIndex;
     }
@@ -398,367 +310,5 @@ class _GeneratedContactCardModelWriter {
       ..writeln('}');
 
     return buffer.toString();
-  }
-}
-
-class _GeneratedContactCardsTableWriter {
-  const _GeneratedContactCardsTableWriter(this.fields);
-
-  final List<_ParsedField> fields;
-
-  String write() {
-    final buffer = StringBuffer()
-      ..writeln('// GENERATED CODE - DO NOT MODIFY BY HAND')
-      ..writeln()
-      ..writeln("part of 'contacts_database.dart';")
-      ..writeln()
-      ..writeln('@DataClassName(\'ContactCard\')')
-      ..writeln('class ContactCards extends Table {')
-      ..writeln('  IntColumn get id => integer().autoIncrement()();')
-      ..writeln('  TextColumn get contactId => text().customConstraint(')
-      ..writeln(
-        "    'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL',",
-      )
-      ..writeln('  )();')
-      ..writeln('  TextColumn get did => text()();')
-      ..writeln('  TextColumn get type => text()();');
-
-    for (final field in fields) {
-      buffer.writeln(
-        '  TextColumn get ${field.contactsColumnName} => text()();',
-      );
-    }
-
-    buffer
-      ..writeln('  TextColumn get profilePic => text()();')
-      ..writeln('  TextColumn get meetingplaceIdentityCardColor => text()();')
-      ..writeln('}');
-
-    return buffer.toString();
-  }
-}
-
-class _GeneratedIdentitiesTableWriter {
-  const _GeneratedIdentitiesTableWriter(this.fields);
-
-  final List<_ParsedField> fields;
-
-  String write() {
-    final buffer = StringBuffer()
-      ..writeln('// GENERATED CODE - DO NOT MODIFY BY HAND')
-      ..writeln()
-      ..writeln("part of 'identities_table.dart';")
-      ..writeln()
-      ..writeln('@DataClassName(\'IdentityRecord\')')
-      ..writeln('class IdentitiesTable extends Table {')
-      ..writeln('  TextColumn get id => text().clientDefault(generateUuid)();')
-      ..writeln('  TextColumn get did => text()();')
-      ..writeln('  TextColumn get displayName => text()();');
-
-    for (final field in fields) {
-      buffer.writeln(
-        '  TextColumn get ${field.identitiesColumnName} => '
-        'text()${field.identitiesColumnTypeSuffix}();',
-      );
-    }
-
-    buffer
-      ..writeln('  TextColumn get profilePic => text().nullable()();')
-      ..writeln('  TextColumn get cardColor => text().nullable()();')
-      ..writeln(
-        '  BoolColumn get isPrimary => '
-        'boolean().withDefault(const Constant(false))();',
-      )
-      ..writeln()
-      ..writeln('  @override')
-      ..writeln('  Set<Column> get primaryKey => {id};')
-      ..writeln('}');
-
-    return buffer.toString();
-  }
-}
-
-class _GeneratedGlueWriter {
-  const _GeneratedGlueWriter(this.fields);
-
-  final List<_ParsedField> fields;
-
-  String write() {
-    final buffer = StringBuffer()
-      ..writeln('// GENERATED CODE - DO NOT MODIFY BY HAND')
-      ..writeln()
-      ..writeln("import 'package:drift/drift.dart';")
-      ..writeln()
-      ..writeln(
-        '''import 'package:mpx_flutter_reference_app/'''
-        '''domain/models/contact_card/contact_card.dart';''',
-      )
-      ..writeln(
-        '''import 'package:mpx_flutter_reference_app/'''
-        '''domain/models/contact_card/contact_card_field_definition.dart';''',
-      )
-      ..writeln(
-        '''import 'package:mpx_flutter_reference_app/'''
-        '''domain/models/identity/identity.dart';''',
-      )
-      ..writeln(
-        '''import 'package:mpx_flutter_reference_app/infrastructure/'''
-        '''extensions/contact_card_extensions.dart';''',
-      )
-      ..writeln(
-        '''import 'package:mpx_flutter_reference_app/infrastructure/'''
-        '''repositories/contacts_repository/contacts_repository_drift/'''
-        '''contacts_database.dart' as contacts_db;''',
-      )
-      ..writeln(
-        '''import 'package:mpx_flutter_reference_app/infrastructure/'''
-        '''repositories/identities_repository/'''
-        '''identities_repository_drift/identities_database.dart';''',
-      )
-      ..writeln()
-      ..writeln('class GeneratedTextColumnMigration {')
-      ..writeln('  const GeneratedTextColumnMigration({')
-      ..writeln('    required this.key,')
-      ..writeln('    required this.tableName,')
-      ..writeln('    required this.columnName,')
-      ..writeln('    required this.isNullable,')
-      ..writeln("    this.defaultValue = '',")
-      ..writeln('  });')
-      ..writeln()
-      ..writeln('  final ContactCardFieldKey key;')
-      ..writeln('  final String tableName;')
-      ..writeln('  final String columnName;')
-      ..writeln('  final bool isNullable;')
-      ..writeln('  final String defaultValue;')
-      ..writeln()
-      ..writeln('  String get addColumnSql {')
-      ..writeln(
-        '''    final escapedDefaultValue = '''
-        '''defaultValue.replaceAll("'", "''");''',
-      )
-      ..writeln(
-        '''    final nullableClause = isNullable ? '' : '''
-        '''" NOT NULL DEFAULT '\$escapedDefaultValue'";''',
-      )
-      ..writeln(
-        '''    return 'ALTER TABLE \$tableName ADD COLUMN '''
-        '''\$columnName TEXT\$nullableClause';''',
-      )
-      ..writeln('  }')
-      ..writeln('}')
-      ..writeln()
-      ..writeln('List<String> missingGeneratedColumnSql(')
-      ..writeln('  Iterable<GeneratedTextColumnMigration> migrations,')
-      ..writeln('  Iterable<String> existingColumns,')
-      ..writeln(') {')
-      ..writeln('  final existing = existingColumns.toSet();')
-      ..writeln('  return [')
-      ..writeln('    for (final migration in migrations)')
-      ..writeln(
-        '''      if (!existing.contains(migration.columnName)) '''
-        '''migration.addColumnSql,''',
-      )
-      ..writeln('  ];')
-      ..writeln('}')
-      ..writeln()
-      ..writeln('const generatedIdentityContactCardFieldMigrations =')
-      ..writeln('    <GeneratedTextColumnMigration>[');
-
-    for (final field in fields) {
-      buffer.writeln(_identityMigrationLine(field));
-    }
-
-    buffer
-      ..writeln('];')
-      ..writeln()
-      ..writeln('const generatedContactCardFieldMigrations =')
-      ..writeln('    <GeneratedTextColumnMigration>[');
-
-    for (final field in fields) {
-      buffer.writeln(_contactMigrationLine(field));
-    }
-
-    buffer
-      ..writeln('];')
-      ..writeln()
-      ..writeln('List<String> missingIdentityContactCardFieldSql(')
-      ..writeln('  Iterable<String> existingColumns,')
-      ..writeln(') {')
-      ..writeln('  return missingGeneratedColumnSql(')
-      ..writeln('    generatedIdentityContactCardFieldMigrations,')
-      ..writeln('    existingColumns,')
-      ..writeln('  );')
-      ..writeln('}')
-      ..writeln()
-      ..writeln('List<String> missingContactCardFieldSql(')
-      ..writeln('  Iterable<String> existingColumns,')
-      ..writeln(') {')
-      ..writeln('  return missingGeneratedColumnSql(')
-      ..writeln('    generatedContactCardFieldMigrations,')
-      ..writeln('    existingColumns,')
-      ..writeln('  );')
-      ..writeln('}')
-      ..writeln()
-      ..writeln(
-        'IdentityRecord buildIdentityRecordFromIdentity(Identity identity) {',
-      )
-      ..writeln(
-        '''  final fieldValues = ContactCardFieldDefinitions.'''
-        '''valuesFromCard(identity.card);''',
-      )
-      ..writeln('  return IdentityRecord(')
-      ..writeln('    id: identity.id,')
-      ..writeln('    did: identity.did,')
-      ..writeln('    isPrimary: identity.isPrimary,')
-      ..writeln('    displayName: identity.card.displayName,');
-
-    for (final field in fields) {
-      final suffix = field.nullWhenEmpty ? '' : " ?? ''";
-      buffer.writeln(
-        '''    ${field.identitiesColumnName}: '''
-        '''fieldValues[${field.enumValue}]$suffix,''',
-      );
-    }
-
-    buffer
-      ..writeln('    profilePic: identity.card.profilePic,')
-      ..writeln('    cardColor: identity.card.cardColor,')
-      ..writeln('  );')
-      ..writeln('}')
-      ..writeln()
-      ..writeln('Map<ContactCardFieldKey, String?> identityRecordFieldValues(')
-      ..writeln('  IdentityRecord record,')
-      ..writeln(') {')
-      ..writeln('  return {');
-
-    for (final field in fields) {
-      buffer.writeln(
-        '    ${field.enumValue}: record.${field.identitiesColumnName},',
-      );
-    }
-
-    buffer
-      ..writeln('  };')
-      ..writeln('}')
-      ..writeln()
-      ..writeln('contacts_db.ContactCardsCompanion buildContactCardCompanion({')
-      ..writeln('  required ContactCard card,')
-      ..writeln('  String? contactId,')
-      ..writeln('}) {')
-      ..writeln(
-        '''  final fieldValues = ContactCardFieldDefinitions.'''
-        '''nonNullableValuesFromCard(card);''',
-      )
-      ..writeln('  return contacts_db.ContactCardsCompanion(')
-      ..writeln(
-        '''    contactId: contactId == null ? const Value.absent() : '''
-        '''Value(contactId),''',
-      )
-      ..writeln('    did: Value(card.did),')
-      ..writeln('    type: Value(card.type),');
-
-    for (final field in fields) {
-      buffer.writeln(
-        '''    ${field.contactsColumnName}: '''
-        '''Value(fieldValues[${field.enumValue}] ?? ''),''',
-      );
-    }
-
-    buffer
-      ..writeln("    profilePic: Value(card.profilePic ?? ''),")
-      ..writeln(
-        "    meetingplaceIdentityCardColor: Value(card.cardColor ?? ''),",
-      )
-      ..writeln('  );')
-      ..writeln('}')
-      ..writeln()
-      ..writeln('Map<ContactCardFieldKey, String?> contactCardRowFieldValues(')
-      ..writeln('  contacts_db.ContactCard record,')
-      ..writeln(') {')
-      ..writeln('  return {');
-
-    for (final field in fields) {
-      buffer.writeln(
-        '    ${field.enumValue}: record.${field.contactsColumnName},',
-      );
-    }
-
-    buffer
-      ..writeln('  };')
-      ..writeln('}')
-      ..writeln()
-      ..writeln('ContactCard hydrateIdentityRecordContactCard(')
-      ..writeln('  IdentityRecord record, {')
-      ..writeln('  required String type,')
-      ..writeln('}) {')
-      ..writeln('  return ContactCardFieldDefinitions.applyFieldValues(')
-      ..writeln('    ContactCard(')
-      ..writeln('      id: record.id,')
-      ..writeln('      did: record.did,')
-      ..writeln('      type: type,');
-
-    for (final field in fields.where((field) => !field.nullWhenEmpty)) {
-      buffer.writeln("      ${field.key}: '',");
-    }
-
-    buffer
-      ..writeln('      displayName: record.displayName,')
-      ..writeln('      profilePic: record.profilePic,')
-      ..writeln('      cardColor: record.cardColor,')
-      ..writeln('    ),')
-      ..writeln('    identityRecordFieldValues(record),')
-      ..writeln('  );')
-      ..writeln('}')
-      ..writeln()
-      ..writeln('ContactCard hydrateContactCardRow(')
-      ..writeln('  contacts_db.ContactCard record, {')
-      ..writeln('  required String id,')
-      ..writeln('}) {')
-      ..writeln(
-        '  final hydratedCard = ContactCardFieldDefinitions.applyFieldValues(',
-      )
-      ..writeln('    ContactCard(')
-      ..writeln('      id: id,')
-      ..writeln('      did: record.did,')
-      ..writeln('      type: record.type,');
-
-    for (final field in fields.where((field) => !field.nullWhenEmpty)) {
-      buffer.writeln("      ${field.key}: '',");
-    }
-
-    buffer
-      ..writeln("      displayName: '',")
-      ..writeln('    ),')
-      ..writeln('    contactCardRowFieldValues(record),')
-      ..writeln('  );')
-      ..writeln('  return hydratedCard.copyWith(')
-      ..writeln('    displayName: hydratedCard.fullName,')
-      ..writeln(
-        '    profilePic: record.profilePic.isEmpty ? null : record.profilePic,',
-      )
-      ..writeln('    cardColor: record.meetingplaceIdentityCardColor.isEmpty')
-      ..writeln('        ? null')
-      ..writeln('        : record.meetingplaceIdentityCardColor,')
-      ..writeln('  );')
-      ..writeln('}');
-
-    return buffer.toString();
-  }
-
-  String _identityMigrationLine(_ParsedField field) {
-    final nullable = field.nullWhenEmpty ? 'true' : 'false';
-    return '  GeneratedTextColumnMigration('
-        'key: ${field.enumValue}, '
-        "tableName: 'identities_table', "
-        "columnName: '${field.identitiesColumnName}', "
-        'isNullable: $nullable),';
-  }
-
-  String _contactMigrationLine(_ParsedField field) {
-    return '  GeneratedTextColumnMigration('
-        'key: ${field.enumValue}, '
-        "tableName: 'contact_cards', "
-        "columnName: '${field.contactsColumnName}', "
-        "isNullable: false, defaultValue: ''),";
   }
 }

@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import '../../../../domain/models/contact_card/contact_card_field_definition.drift_glue.g.dart';
 import '../../../database/database_platform.dart';
 import '../../../providers/applications_documents_directory_provider.dart';
 import '../../../secure_storage/secure_storage.dart';
@@ -37,40 +35,10 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
        );
 
   @override
-  int get schemaVersion => 3;
-
-  Future<List<String>> _existingColumnNames(String tableName) async {
-    final result = await customSelect('PRAGMA table_info($tableName)').get();
-    return result
-        .map((row) => row.data['name'])
-        .whereType<String>()
-        .toList(growable: false);
-  }
-
-  Future<void> _applyGeneratedIdentityFieldMigrations() async {
-    final existingColumns = await _existingColumnNames('identities_table');
-    final statements = missingIdentityContactCardFieldSql(existingColumns);
-    for (final statement in statements) {
-      await customStatement(statement);
-    }
-  }
+  int get schemaVersion => 4;
 
   @override
-  MigrationStrategy get migration => MigrationStrategy(
-    onUpgrade: (migrator, from, to) async {
-      if (from < 3) {
-        final existingColumns = await _existingColumnNames('identities_table');
-
-        if (!existingColumns.contains('did')) {
-          await customStatement(
-            '''ALTER TABLE identities_table ADD COLUMN did TEXT NOT NULL DEFAULT '\'''',
-          );
-        }
-
-        await _applyGeneratedIdentityFieldMigrations();
-      }
-    },
-  );
+  MigrationStrategy get migration => MigrationStrategy();
 }
 
 /// A provider that initializes and supplies the [IdentitiesDatabase].

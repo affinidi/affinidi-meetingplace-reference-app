@@ -4,8 +4,6 @@ import 'package:clock/clock.dart';
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../../../domain/models/contact_card/contact_card_field_definition.drift_glue.g.dart';
 import '../../../../domain/models/contacts/contact_category.dart';
 import '../../../../domain/models/contacts/contact_origin.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
@@ -14,7 +12,6 @@ import '../../../database/database_platform.dart';
 import '../../../providers/applications_documents_directory_provider.dart';
 import '../../../secure_storage/secure_storage.dart';
 
-part 'contacts_database.contact_card_fields.g.dart';
 part 'contacts_database.g.dart';
 
 /// Drift database for managing contacts and their associated cards.
@@ -43,98 +40,25 @@ class ContactsDatabase extends _$ContactsDatabase {
        );
 
   @override
-  int get schemaVersion => 6;
-
-  Future<List<String>> _existingColumnNames(String tableName) async {
-    final result = await customSelect('PRAGMA table_info($tableName)').get();
-    return result
-        .map((row) => row.data['name'])
-        .whereType<String>()
-        .toList(growable: false);
-  }
-
-  Future<void> _applyGeneratedContactCardFieldMigrations() async {
-    final existingColumns = await _existingColumnNames('contact_cards');
-    final statements = missingContactCardFieldSql(existingColumns);
-    for (final statement in statements) {
-      await customStatement(statement);
-    }
-  }
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },
-    onUpgrade: (migrator, from, to) async {
-      if (from < 2) {
-        final result = await customSelect('PRAGMA table_info(contacts)').get();
-
-        final hasBeenOpenedExists = result.any(
-          (row) => row.data['name'] == 'has_been_opened',
-        );
-
-        if (!hasBeenOpenedExists) {
-          await customStatement(
-            'ALTER TABLE contacts ADD COLUMN has_been_opened INTEGER NOT '
-            'NULL DEFAULT 0 CHECK (has_been_opened IN (0, 1))',
-          );
-        }
-      }
-
-      //this migration removes the column unsentMessage and chatInProgress
-      if (from < 3) {
-        await migrator.alterTable(
-          // ignore: experimental_member_use
-          TableMigration(
-            contacts,
-            columnTransformer: {
-              contacts.id: contacts.id,
-              contacts.channelDid: contacts.channelDid,
-              contacts.channelDidSha256: contacts.channelDidSha256,
-              contacts.dateAdded: contacts.dateAdded,
-              contacts.offerLink: contacts.offerLink,
-              contacts.mediatorDid: contacts.mediatorDid,
-              contacts.type: contacts.type,
-              contacts.status: contacts.status,
-              contacts.origin: contacts.origin,
-              contacts.category: contacts.category,
-              contacts.displayName: contacts.displayName,
-              contacts.badgeUpdateInProgress: contacts.badgeUpdateInProgress,
-              contacts.badgeCount: contacts.badgeCount,
-              contacts.currentMessageSeqNo: contacts.currentMessageSeqNo,
-              contacts.hasBeenOpened: contacts.hasBeenOpened,
-              contacts.lastKeepAliveMessage: contacts.lastKeepAliveMessage,
-            },
-          ),
-        );
-      }
-      if (from < 4) {
-        final result = await customSelect('PRAGMA table_info(contacts)').get();
-
-        final notificationBannerDismissedExists = result.any(
-          (row) => row.data['name'] == 'notification_banner_dismissed',
-        );
-
-        if (!notificationBannerDismissedExists) {
-          await customStatement(
-            'ALTER TABLE contacts ADD COLUMN notification_banner_dismissed'
-            ' INTEGER NOT NULL DEFAULT 0 CHECK'
-            ' (notification_banner_dismissed IN (0, 1))',
-          );
-
-          await customStatement(
-            'UPDATE contacts SET notification_banner_dismissed = 1'
-            ' WHERE origin != 1',
-          );
-        }
-      }
-
-      if (from < 6) {
-        await _applyGeneratedContactCardFieldMigrations();
-      }
-    },
   );
+}
+
+@DataClassName('ContactCard')
+class ContactCards extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get contactId => text().customConstraint(
+    'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL',
+  )();
+  TextColumn get did => text()();
+  TextColumn get type => text()();
+  TextColumn get contactInfoJson => text().withDefault(const Constant('{}'))();
 }
 
 /// Main contacts table.

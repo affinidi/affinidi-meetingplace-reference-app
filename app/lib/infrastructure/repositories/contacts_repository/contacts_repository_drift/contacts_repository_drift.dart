@@ -1,12 +1,16 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:uuid/uuid.dart';
 
-import '../../../../domain/models/contact_card/contact_card_field_definition.drift_glue.g.dart';
+import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../domain/models/contacts/contact.dart' as model;
 import '../../../../domain/repositories/contacts_repository.dart';
 import '../../../exceptions/app_exception.dart';
 import '../../../exceptions/app_exception_type.dart';
+import '../../../extensions/contact_card_extensions.dart';
 import 'contacts_database.dart' as db;
 
 /// Drift implementation of [ContactsRepository].
@@ -69,7 +73,7 @@ class ContactsRepositoryDrift implements ContactsRepository {
       final card = contact.card;
       await _database
           .into(_database.contactCards)
-          .insert(buildContactCardCompanion(card: card, contactId: contactId));
+          .insert(_buildContactCardCompanion(card: card, contactId: contactId));
 
       final newContact = await _getContactById(contactId);
       if (newContact == null) {
@@ -164,9 +168,23 @@ class ContactsRepositoryDrift implements ContactsRepository {
       final card = contact.card;
       await (_database.update(_database.contactCards)
             ..where((c) => c.contactId.equals(contact.id)))
-          .write(buildContactCardCompanion(card: card));
+          .write(_buildContactCardCompanion(card: card));
     });
   }
+}
+
+db.ContactCardsCompanion _buildContactCardCompanion({
+  required ContactCard card,
+  String? contactId,
+}) {
+  final contactInfo = card.toSdkContactCard().contactInfo;
+
+  return db.ContactCardsCompanion(
+    contactId: contactId == null ? const Value.absent() : Value(contactId),
+    did: Value(card.did),
+    type: Value(card.type),
+    contactInfoJson: Value(jsonEncode(contactInfo)),
+  );
 }
 
 class _ContactMapper {
@@ -174,10 +192,14 @@ class _ContactMapper {
     db.Contact contact,
     db.ContactCard contactCard,
   ) {
-    final domainCard = hydrateContactCardRow(
-      contactCard,
-      id: const Uuid().v4(),
+    final decoded =
+        jsonDecode(contactCard.contactInfoJson) as Map<String, dynamic>;
+    final sdkCard = sdk.ContactCard(
+      did: contactCard.did,
+      type: contactCard.type,
+      contactInfo: decoded,
     );
+    final domainCard = ContactCardUtils.fromSdkContactCard(sdkCard);
 
     return model.Contact(
       id: contact.id,

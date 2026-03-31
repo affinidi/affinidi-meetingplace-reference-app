@@ -39,100 +39,17 @@ class $IdentitiesTableTable extends IdentitiesTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _firstNameMeta = const VerificationMeta(
-    'firstName',
+  static const VerificationMeta _contactInfoJsonMeta = const VerificationMeta(
+    'contactInfoJson',
   );
   @override
-  late final GeneratedColumn<String> firstName = GeneratedColumn<String>(
-    'first_name',
+  late final GeneratedColumn<String> contactInfoJson = GeneratedColumn<String>(
+    'contact_info_json',
     aliasedName,
     false,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _lastNameMeta = const VerificationMeta(
-    'lastName',
-  );
-  @override
-  late final GeneratedColumn<String> lastName = GeneratedColumn<String>(
-    'last_name',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
     requiredDuringInsert: false,
-  );
-  static const VerificationMeta _organizationMeta = const VerificationMeta(
-    'organization',
-  );
-  @override
-  late final GeneratedColumn<String> organization = GeneratedColumn<String>(
-    'organization',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _websiteMeta = const VerificationMeta(
-    'website',
-  );
-  @override
-  late final GeneratedColumn<String> website = GeneratedColumn<String>(
-    'website',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _emailMeta = const VerificationMeta('email');
-  @override
-  late final GeneratedColumn<String> email = GeneratedColumn<String>(
-    'email',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _mobileMeta = const VerificationMeta('mobile');
-  @override
-  late final GeneratedColumn<String> mobile = GeneratedColumn<String>(
-    'mobile',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _postcodeMeta = const VerificationMeta(
-    'postcode',
-  );
-  @override
-  late final GeneratedColumn<String> postcode = GeneratedColumn<String>(
-    'postcode',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _profilePicMeta = const VerificationMeta(
-    'profilePic',
-  );
-  @override
-  late final GeneratedColumn<String> profilePic = GeneratedColumn<String>(
-    'profile_pic',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _cardColorMeta = const VerificationMeta(
-    'cardColor',
-  );
-  @override
-  late final GeneratedColumn<String> cardColor = GeneratedColumn<String>(
-    'card_color',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
   );
   static const VerificationMeta _isPrimaryMeta = const VerificationMeta(
     'isPrimary',
@@ -154,15 +71,7 @@ class $IdentitiesTableTable extends IdentitiesTable
     id,
     did,
     displayName,
-    firstName,
-    lastName,
-    organization,
-    website,
-    email,
-    mobile,
-    postcode,
-    profilePic,
-    cardColor,
+    contactInfoJson,
     isPrimary,
   ];
   @override
@@ -199,63 +108,13 @@ class $IdentitiesTableTable extends IdentitiesTable
     } else if (isInserting) {
       context.missing(_displayNameMeta);
     }
-    if (data.containsKey('first_name')) {
+    if (data.containsKey('contact_info_json')) {
       context.handle(
-        _firstNameMeta,
-        firstName.isAcceptableOrUnknown(data['first_name']!, _firstNameMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_firstNameMeta);
-    }
-    if (data.containsKey('last_name')) {
-      context.handle(
-        _lastNameMeta,
-        lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta),
-      );
-    }
-    if (data.containsKey('organization')) {
-      context.handle(
-        _organizationMeta,
-        organization.isAcceptableOrUnknown(
-          data['organization']!,
-          _organizationMeta,
+        _contactInfoJsonMeta,
+        contactInfoJson.isAcceptableOrUnknown(
+          data['contact_info_json']!,
+          _contactInfoJsonMeta,
         ),
-      );
-    }
-    if (data.containsKey('website')) {
-      context.handle(
-        _websiteMeta,
-        website.isAcceptableOrUnknown(data['website']!, _websiteMeta),
-      );
-    }
-    if (data.containsKey('email')) {
-      context.handle(
-        _emailMeta,
-        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
-      );
-    }
-    if (data.containsKey('mobile')) {
-      context.handle(
-        _mobileMeta,
-        mobile.isAcceptableOrUnknown(data['mobile']!, _mobileMeta),
-      );
-    }
-    if (data.containsKey('postcode')) {
-      context.handle(
-        _postcodeMeta,
-        postcode.isAcceptableOrUnknown(data['postcode']!, _postcodeMeta),
-      );
-    }
-    if (data.containsKey('profile_pic')) {
-      context.handle(
-        _profilePicMeta,
-        profilePic.isAcceptableOrUnknown(data['profile_pic']!, _profilePicMeta),
-      );
-    }
-    if (data.containsKey('card_color')) {
-      context.handle(
-        _cardColorMeta,
-        cardColor.isAcceptableOrUnknown(data['card_color']!, _cardColorMeta),
       );
     }
     if (data.containsKey('is_primary')) {
@@ -285,42 +144,10 @@ class $IdentitiesTableTable extends IdentitiesTable
         DriftSqlType.string,
         data['${effectivePrefix}display_name'],
       )!,
-      firstName: attachedDatabase.typeMapping.read(
+      contactInfoJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}first_name'],
+        data['${effectivePrefix}contact_info_json'],
       )!,
-      lastName: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}last_name'],
-      ),
-      organization: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}organization'],
-      ),
-      website: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}website'],
-      ),
-      email: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}email'],
-      ),
-      mobile: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}mobile'],
-      ),
-      postcode: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}postcode'],
-      ),
-      profilePic: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}profile_pic'],
-      ),
-      cardColor: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}card_color'],
-      ),
       isPrimary: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_primary'],
@@ -336,31 +163,21 @@ class $IdentitiesTableTable extends IdentitiesTable
 
 class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   final String id;
+
+  /// Permanent DID for this identity.
   final String did;
+
+  /// Alias / user-facing name override (not part of SDK contactInfo).
   final String displayName;
-  final String firstName;
-  final String? lastName;
-  final String? organization;
-  final String? website;
-  final String? email;
-  final String? mobile;
-  final String? postcode;
-  final String? profilePic;
-  final String? cardColor;
+
+  /// JSON blob holding all contact card fields mapped by sdkPath.
+  final String contactInfoJson;
   final bool isPrimary;
   const IdentityRecord({
     required this.id,
     required this.did,
     required this.displayName,
-    required this.firstName,
-    this.lastName,
-    this.organization,
-    this.website,
-    this.email,
-    this.mobile,
-    this.postcode,
-    this.profilePic,
-    this.cardColor,
+    required this.contactInfoJson,
     required this.isPrimary,
   });
   @override
@@ -369,31 +186,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     map['id'] = Variable<String>(id);
     map['did'] = Variable<String>(did);
     map['display_name'] = Variable<String>(displayName);
-    map['first_name'] = Variable<String>(firstName);
-    if (!nullToAbsent || lastName != null) {
-      map['last_name'] = Variable<String>(lastName);
-    }
-    if (!nullToAbsent || organization != null) {
-      map['organization'] = Variable<String>(organization);
-    }
-    if (!nullToAbsent || website != null) {
-      map['website'] = Variable<String>(website);
-    }
-    if (!nullToAbsent || email != null) {
-      map['email'] = Variable<String>(email);
-    }
-    if (!nullToAbsent || mobile != null) {
-      map['mobile'] = Variable<String>(mobile);
-    }
-    if (!nullToAbsent || postcode != null) {
-      map['postcode'] = Variable<String>(postcode);
-    }
-    if (!nullToAbsent || profilePic != null) {
-      map['profile_pic'] = Variable<String>(profilePic);
-    }
-    if (!nullToAbsent || cardColor != null) {
-      map['card_color'] = Variable<String>(cardColor);
-    }
+    map['contact_info_json'] = Variable<String>(contactInfoJson);
     map['is_primary'] = Variable<bool>(isPrimary);
     return map;
   }
@@ -403,31 +196,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       id: Value(id),
       did: Value(did),
       displayName: Value(displayName),
-      firstName: Value(firstName),
-      lastName: lastName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastName),
-      organization: organization == null && nullToAbsent
-          ? const Value.absent()
-          : Value(organization),
-      website: website == null && nullToAbsent
-          ? const Value.absent()
-          : Value(website),
-      email: email == null && nullToAbsent
-          ? const Value.absent()
-          : Value(email),
-      mobile: mobile == null && nullToAbsent
-          ? const Value.absent()
-          : Value(mobile),
-      postcode: postcode == null && nullToAbsent
-          ? const Value.absent()
-          : Value(postcode),
-      profilePic: profilePic == null && nullToAbsent
-          ? const Value.absent()
-          : Value(profilePic),
-      cardColor: cardColor == null && nullToAbsent
-          ? const Value.absent()
-          : Value(cardColor),
+      contactInfoJson: Value(contactInfoJson),
       isPrimary: Value(isPrimary),
     );
   }
@@ -441,15 +210,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       id: serializer.fromJson<String>(json['id']),
       did: serializer.fromJson<String>(json['did']),
       displayName: serializer.fromJson<String>(json['displayName']),
-      firstName: serializer.fromJson<String>(json['firstName']),
-      lastName: serializer.fromJson<String?>(json['lastName']),
-      organization: serializer.fromJson<String?>(json['organization']),
-      website: serializer.fromJson<String?>(json['website']),
-      email: serializer.fromJson<String?>(json['email']),
-      mobile: serializer.fromJson<String?>(json['mobile']),
-      postcode: serializer.fromJson<String?>(json['postcode']),
-      profilePic: serializer.fromJson<String?>(json['profilePic']),
-      cardColor: serializer.fromJson<String?>(json['cardColor']),
+      contactInfoJson: serializer.fromJson<String>(json['contactInfoJson']),
       isPrimary: serializer.fromJson<bool>(json['isPrimary']),
     );
   }
@@ -460,15 +221,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       'id': serializer.toJson<String>(id),
       'did': serializer.toJson<String>(did),
       'displayName': serializer.toJson<String>(displayName),
-      'firstName': serializer.toJson<String>(firstName),
-      'lastName': serializer.toJson<String?>(lastName),
-      'organization': serializer.toJson<String?>(organization),
-      'website': serializer.toJson<String?>(website),
-      'email': serializer.toJson<String?>(email),
-      'mobile': serializer.toJson<String?>(mobile),
-      'postcode': serializer.toJson<String?>(postcode),
-      'profilePic': serializer.toJson<String?>(profilePic),
-      'cardColor': serializer.toJson<String?>(cardColor),
+      'contactInfoJson': serializer.toJson<String>(contactInfoJson),
       'isPrimary': serializer.toJson<bool>(isPrimary),
     };
   }
@@ -477,29 +230,13 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     String? id,
     String? did,
     String? displayName,
-    String? firstName,
-    Value<String?> lastName = const Value.absent(),
-    Value<String?> organization = const Value.absent(),
-    Value<String?> website = const Value.absent(),
-    Value<String?> email = const Value.absent(),
-    Value<String?> mobile = const Value.absent(),
-    Value<String?> postcode = const Value.absent(),
-    Value<String?> profilePic = const Value.absent(),
-    Value<String?> cardColor = const Value.absent(),
+    String? contactInfoJson,
     bool? isPrimary,
   }) => IdentityRecord(
     id: id ?? this.id,
     did: did ?? this.did,
     displayName: displayName ?? this.displayName,
-    firstName: firstName ?? this.firstName,
-    lastName: lastName.present ? lastName.value : this.lastName,
-    organization: organization.present ? organization.value : this.organization,
-    website: website.present ? website.value : this.website,
-    email: email.present ? email.value : this.email,
-    mobile: mobile.present ? mobile.value : this.mobile,
-    postcode: postcode.present ? postcode.value : this.postcode,
-    profilePic: profilePic.present ? profilePic.value : this.profilePic,
-    cardColor: cardColor.present ? cardColor.value : this.cardColor,
+    contactInfoJson: contactInfoJson ?? this.contactInfoJson,
     isPrimary: isPrimary ?? this.isPrimary,
   );
   IdentityRecord copyWithCompanion(IdentitiesTableCompanion data) {
@@ -509,19 +246,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       displayName: data.displayName.present
           ? data.displayName.value
           : this.displayName,
-      firstName: data.firstName.present ? data.firstName.value : this.firstName,
-      lastName: data.lastName.present ? data.lastName.value : this.lastName,
-      organization: data.organization.present
-          ? data.organization.value
-          : this.organization,
-      website: data.website.present ? data.website.value : this.website,
-      email: data.email.present ? data.email.value : this.email,
-      mobile: data.mobile.present ? data.mobile.value : this.mobile,
-      postcode: data.postcode.present ? data.postcode.value : this.postcode,
-      profilePic: data.profilePic.present
-          ? data.profilePic.value
-          : this.profilePic,
-      cardColor: data.cardColor.present ? data.cardColor.value : this.cardColor,
+      contactInfoJson: data.contactInfoJson.present
+          ? data.contactInfoJson.value
+          : this.contactInfoJson,
       isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
     );
   }
@@ -532,36 +259,15 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           ..write('id: $id, ')
           ..write('did: $did, ')
           ..write('displayName: $displayName, ')
-          ..write('firstName: $firstName, ')
-          ..write('lastName: $lastName, ')
-          ..write('organization: $organization, ')
-          ..write('website: $website, ')
-          ..write('email: $email, ')
-          ..write('mobile: $mobile, ')
-          ..write('postcode: $postcode, ')
-          ..write('profilePic: $profilePic, ')
-          ..write('cardColor: $cardColor, ')
+          ..write('contactInfoJson: $contactInfoJson, ')
           ..write('isPrimary: $isPrimary')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    did,
-    displayName,
-    firstName,
-    lastName,
-    organization,
-    website,
-    email,
-    mobile,
-    postcode,
-    profilePic,
-    cardColor,
-    isPrimary,
-  );
+  int get hashCode =>
+      Object.hash(id, did, displayName, contactInfoJson, isPrimary);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -569,15 +275,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           other.id == this.id &&
           other.did == this.did &&
           other.displayName == this.displayName &&
-          other.firstName == this.firstName &&
-          other.lastName == this.lastName &&
-          other.organization == this.organization &&
-          other.website == this.website &&
-          other.email == this.email &&
-          other.mobile == this.mobile &&
-          other.postcode == this.postcode &&
-          other.profilePic == this.profilePic &&
-          other.cardColor == this.cardColor &&
+          other.contactInfoJson == this.contactInfoJson &&
           other.isPrimary == this.isPrimary);
 }
 
@@ -585,30 +283,14 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
   final Value<String> id;
   final Value<String> did;
   final Value<String> displayName;
-  final Value<String> firstName;
-  final Value<String?> lastName;
-  final Value<String?> organization;
-  final Value<String?> website;
-  final Value<String?> email;
-  final Value<String?> mobile;
-  final Value<String?> postcode;
-  final Value<String?> profilePic;
-  final Value<String?> cardColor;
+  final Value<String> contactInfoJson;
   final Value<bool> isPrimary;
   final Value<int> rowid;
   const IdentitiesTableCompanion({
     this.id = const Value.absent(),
     this.did = const Value.absent(),
     this.displayName = const Value.absent(),
-    this.firstName = const Value.absent(),
-    this.lastName = const Value.absent(),
-    this.organization = const Value.absent(),
-    this.website = const Value.absent(),
-    this.email = const Value.absent(),
-    this.mobile = const Value.absent(),
-    this.postcode = const Value.absent(),
-    this.profilePic = const Value.absent(),
-    this.cardColor = const Value.absent(),
+    this.contactInfoJson = const Value.absent(),
     this.isPrimary = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -616,33 +298,16 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     this.id = const Value.absent(),
     required String did,
     required String displayName,
-    required String firstName,
-    this.lastName = const Value.absent(),
-    this.organization = const Value.absent(),
-    this.website = const Value.absent(),
-    this.email = const Value.absent(),
-    this.mobile = const Value.absent(),
-    this.postcode = const Value.absent(),
-    this.profilePic = const Value.absent(),
-    this.cardColor = const Value.absent(),
+    this.contactInfoJson = const Value.absent(),
     this.isPrimary = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : did = Value(did),
-       displayName = Value(displayName),
-       firstName = Value(firstName);
+       displayName = Value(displayName);
   static Insertable<IdentityRecord> custom({
     Expression<String>? id,
     Expression<String>? did,
     Expression<String>? displayName,
-    Expression<String>? firstName,
-    Expression<String>? lastName,
-    Expression<String>? organization,
-    Expression<String>? website,
-    Expression<String>? email,
-    Expression<String>? mobile,
-    Expression<String>? postcode,
-    Expression<String>? profilePic,
-    Expression<String>? cardColor,
+    Expression<String>? contactInfoJson,
     Expression<bool>? isPrimary,
     Expression<int>? rowid,
   }) {
@@ -650,15 +315,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       if (id != null) 'id': id,
       if (did != null) 'did': did,
       if (displayName != null) 'display_name': displayName,
-      if (firstName != null) 'first_name': firstName,
-      if (lastName != null) 'last_name': lastName,
-      if (organization != null) 'organization': organization,
-      if (website != null) 'website': website,
-      if (email != null) 'email': email,
-      if (mobile != null) 'mobile': mobile,
-      if (postcode != null) 'postcode': postcode,
-      if (profilePic != null) 'profile_pic': profilePic,
-      if (cardColor != null) 'card_color': cardColor,
+      if (contactInfoJson != null) 'contact_info_json': contactInfoJson,
       if (isPrimary != null) 'is_primary': isPrimary,
       if (rowid != null) 'rowid': rowid,
     });
@@ -668,15 +325,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Value<String>? id,
     Value<String>? did,
     Value<String>? displayName,
-    Value<String>? firstName,
-    Value<String?>? lastName,
-    Value<String?>? organization,
-    Value<String?>? website,
-    Value<String?>? email,
-    Value<String?>? mobile,
-    Value<String?>? postcode,
-    Value<String?>? profilePic,
-    Value<String?>? cardColor,
+    Value<String>? contactInfoJson,
     Value<bool>? isPrimary,
     Value<int>? rowid,
   }) {
@@ -684,15 +333,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       id: id ?? this.id,
       did: did ?? this.did,
       displayName: displayName ?? this.displayName,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      organization: organization ?? this.organization,
-      website: website ?? this.website,
-      email: email ?? this.email,
-      mobile: mobile ?? this.mobile,
-      postcode: postcode ?? this.postcode,
-      profilePic: profilePic ?? this.profilePic,
-      cardColor: cardColor ?? this.cardColor,
+      contactInfoJson: contactInfoJson ?? this.contactInfoJson,
       isPrimary: isPrimary ?? this.isPrimary,
       rowid: rowid ?? this.rowid,
     );
@@ -710,32 +351,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     if (displayName.present) {
       map['display_name'] = Variable<String>(displayName.value);
     }
-    if (firstName.present) {
-      map['first_name'] = Variable<String>(firstName.value);
-    }
-    if (lastName.present) {
-      map['last_name'] = Variable<String>(lastName.value);
-    }
-    if (organization.present) {
-      map['organization'] = Variable<String>(organization.value);
-    }
-    if (website.present) {
-      map['website'] = Variable<String>(website.value);
-    }
-    if (email.present) {
-      map['email'] = Variable<String>(email.value);
-    }
-    if (mobile.present) {
-      map['mobile'] = Variable<String>(mobile.value);
-    }
-    if (postcode.present) {
-      map['postcode'] = Variable<String>(postcode.value);
-    }
-    if (profilePic.present) {
-      map['profile_pic'] = Variable<String>(profilePic.value);
-    }
-    if (cardColor.present) {
-      map['card_color'] = Variable<String>(cardColor.value);
+    if (contactInfoJson.present) {
+      map['contact_info_json'] = Variable<String>(contactInfoJson.value);
     }
     if (isPrimary.present) {
       map['is_primary'] = Variable<bool>(isPrimary.value);
@@ -752,15 +369,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
           ..write('id: $id, ')
           ..write('did: $did, ')
           ..write('displayName: $displayName, ')
-          ..write('firstName: $firstName, ')
-          ..write('lastName: $lastName, ')
-          ..write('organization: $organization, ')
-          ..write('website: $website, ')
-          ..write('email: $email, ')
-          ..write('mobile: $mobile, ')
-          ..write('postcode: $postcode, ')
-          ..write('profilePic: $profilePic, ')
-          ..write('cardColor: $cardColor, ')
+          ..write('contactInfoJson: $contactInfoJson, ')
           ..write('isPrimary: $isPrimary, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -786,15 +395,7 @@ typedef $$IdentitiesTableTableCreateCompanionBuilder =
       Value<String> id,
       required String did,
       required String displayName,
-      required String firstName,
-      Value<String?> lastName,
-      Value<String?> organization,
-      Value<String?> website,
-      Value<String?> email,
-      Value<String?> mobile,
-      Value<String?> postcode,
-      Value<String?> profilePic,
-      Value<String?> cardColor,
+      Value<String> contactInfoJson,
       Value<bool> isPrimary,
       Value<int> rowid,
     });
@@ -803,15 +404,7 @@ typedef $$IdentitiesTableTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> did,
       Value<String> displayName,
-      Value<String> firstName,
-      Value<String?> lastName,
-      Value<String?> organization,
-      Value<String?> website,
-      Value<String?> email,
-      Value<String?> mobile,
-      Value<String?> postcode,
-      Value<String?> profilePic,
-      Value<String?> cardColor,
+      Value<String> contactInfoJson,
       Value<bool> isPrimary,
       Value<int> rowid,
     });
@@ -840,48 +433,8 @@ class $$IdentitiesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get firstName => $composableBuilder(
-    column: $table.firstName,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get lastName => $composableBuilder(
-    column: $table.lastName,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get organization => $composableBuilder(
-    column: $table.organization,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get website => $composableBuilder(
-    column: $table.website,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get email => $composableBuilder(
-    column: $table.email,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get mobile => $composableBuilder(
-    column: $table.mobile,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get postcode => $composableBuilder(
-    column: $table.postcode,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get profilePic => $composableBuilder(
-    column: $table.profilePic,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get cardColor => $composableBuilder(
-    column: $table.cardColor,
+  ColumnFilters<String> get contactInfoJson => $composableBuilder(
+    column: $table.contactInfoJson,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -915,48 +468,8 @@ class $$IdentitiesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get firstName => $composableBuilder(
-    column: $table.firstName,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get lastName => $composableBuilder(
-    column: $table.lastName,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get organization => $composableBuilder(
-    column: $table.organization,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get website => $composableBuilder(
-    column: $table.website,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get email => $composableBuilder(
-    column: $table.email,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get mobile => $composableBuilder(
-    column: $table.mobile,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get postcode => $composableBuilder(
-    column: $table.postcode,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get profilePic => $composableBuilder(
-    column: $table.profilePic,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get cardColor => $composableBuilder(
-    column: $table.cardColor,
+  ColumnOrderings<String> get contactInfoJson => $composableBuilder(
+    column: $table.contactInfoJson,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -986,36 +499,10 @@ class $$IdentitiesTableTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get firstName =>
-      $composableBuilder(column: $table.firstName, builder: (column) => column);
-
-  GeneratedColumn<String> get lastName =>
-      $composableBuilder(column: $table.lastName, builder: (column) => column);
-
-  GeneratedColumn<String> get organization => $composableBuilder(
-    column: $table.organization,
+  GeneratedColumn<String> get contactInfoJson => $composableBuilder(
+    column: $table.contactInfoJson,
     builder: (column) => column,
   );
-
-  GeneratedColumn<String> get website =>
-      $composableBuilder(column: $table.website, builder: (column) => column);
-
-  GeneratedColumn<String> get email =>
-      $composableBuilder(column: $table.email, builder: (column) => column);
-
-  GeneratedColumn<String> get mobile =>
-      $composableBuilder(column: $table.mobile, builder: (column) => column);
-
-  GeneratedColumn<String> get postcode =>
-      $composableBuilder(column: $table.postcode, builder: (column) => column);
-
-  GeneratedColumn<String> get profilePic => $composableBuilder(
-    column: $table.profilePic,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get cardColor =>
-      $composableBuilder(column: $table.cardColor, builder: (column) => column);
 
   GeneratedColumn<bool> get isPrimary =>
       $composableBuilder(column: $table.isPrimary, builder: (column) => column);
@@ -1061,30 +548,14 @@ class $$IdentitiesTableTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> did = const Value.absent(),
                 Value<String> displayName = const Value.absent(),
-                Value<String> firstName = const Value.absent(),
-                Value<String?> lastName = const Value.absent(),
-                Value<String?> organization = const Value.absent(),
-                Value<String?> website = const Value.absent(),
-                Value<String?> email = const Value.absent(),
-                Value<String?> mobile = const Value.absent(),
-                Value<String?> postcode = const Value.absent(),
-                Value<String?> profilePic = const Value.absent(),
-                Value<String?> cardColor = const Value.absent(),
+                Value<String> contactInfoJson = const Value.absent(),
                 Value<bool> isPrimary = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IdentitiesTableCompanion(
                 id: id,
                 did: did,
                 displayName: displayName,
-                firstName: firstName,
-                lastName: lastName,
-                organization: organization,
-                website: website,
-                email: email,
-                mobile: mobile,
-                postcode: postcode,
-                profilePic: profilePic,
-                cardColor: cardColor,
+                contactInfoJson: contactInfoJson,
                 isPrimary: isPrimary,
                 rowid: rowid,
               ),
@@ -1093,30 +564,14 @@ class $$IdentitiesTableTableTableManager
                 Value<String> id = const Value.absent(),
                 required String did,
                 required String displayName,
-                required String firstName,
-                Value<String?> lastName = const Value.absent(),
-                Value<String?> organization = const Value.absent(),
-                Value<String?> website = const Value.absent(),
-                Value<String?> email = const Value.absent(),
-                Value<String?> mobile = const Value.absent(),
-                Value<String?> postcode = const Value.absent(),
-                Value<String?> profilePic = const Value.absent(),
-                Value<String?> cardColor = const Value.absent(),
+                Value<String> contactInfoJson = const Value.absent(),
                 Value<bool> isPrimary = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IdentitiesTableCompanion.insert(
                 id: id,
                 did: did,
                 displayName: displayName,
-                firstName: firstName,
-                lastName: lastName,
-                organization: organization,
-                website: website,
-                email: email,
-                mobile: mobile,
-                postcode: postcode,
-                profilePic: profilePic,
-                cardColor: cardColor,
+                contactInfoJson: contactInfoJson,
                 isPrimary: isPrimary,
                 rowid: rowid,
               ),
