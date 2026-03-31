@@ -25,10 +25,11 @@ class _ContactGridView extends ConsumerWidget {
     return GridView.builder(
       // TODO(MA): Remove shrink wrap to enable lazy loading
       shrinkWrap: true,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: isLandscapeOrTablet ? 5 : 3,
-        childAspectRatio: isLandscapeOrTablet ? 1 : 0.85,
+        childAspectRatio: isLandscapeOrTablet ? 1 : 0.95,
       ),
       itemCount: contacts.length,
       itemBuilder: (context, index) => _ContactGridItem(
@@ -58,9 +59,10 @@ class _ContactGridItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final fullName = contact.card.displayName;
+    final fullName = contact.card.displayName.trim();
     final displayName = contact.displayName?.trim();
     final hasDisplayName = displayName != null && displayName.isNotEmpty;
+    final shouldShowDisplayName = displayName != fullName;
 
     final isEditMode = ref.watch(
       contactsScreenControllerProvider.select((state) => state.isEditMode),
@@ -71,104 +73,112 @@ class _ContactGridItem extends ConsumerWidget {
       ),
     );
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => onTap(contact: contact, isSelected: isSelected),
-          onDoubleTap: () => onDoubleTap(contact: contact),
-          onLongPress: () => onLongPress(contact: contact),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => onTap(contact: contact, isSelected: isSelected),
+              onDoubleTap: () => onDoubleTap(contact: contact),
+              onLongPress: () => onLongPress(contact: contact),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: contact.getStatusColor(context, asAvatar: true),
-                        width: 2,
-                      ),
-                    ),
-                    child: _ContactAvatar(contact: contact),
-                  ),
-                  if (contact.badgeCount > 0 || contact.isOobContact)
-                    Positioned(
-                      bottom: -5,
-                      right: -15,
-                      child: contact.badgeUpdateInProgress
-                          ? const SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: CircularProgressIndicator.adaptive(
-                                strokeWidth: 3,
-                              ),
-                            )
-                          : _ContactNotificationBadge(
-                              origin: contact.origin,
-                              badgeCount: contact.badgeCount,
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: contact.getStatusColor(
+                              context,
+                              asAvatar: true,
                             ),
-                    )
-                  else if (contact.isNewUnopenedChannel)
-                    Positioned(
-                      bottom: -2,
-                      right: -2,
-                      child: _ContactNewChannelDotBadge(origin: contact.origin),
-                    ),
-                  if (isEditMode)
-                    Positioned(
-                      bottom: -28,
-                      right: -18,
-                      child: Checkbox(
-                        value: isSelected,
-                        visualDensity: VisualDensity.adaptivePlatformDensity,
-                        onChanged: (_) =>
-                            onTap(contact: contact, isSelected: isSelected),
+                            width: 2,
+                          ),
+                        ),
+                        child: _ContactAvatar(contact: contact),
                       ),
+                      if (contact.badgeCount > 0 || contact.isOobContact)
+                        Positioned(
+                          bottom: -5,
+                          right: -15,
+                          child: contact.badgeUpdateInProgress
+                              ? const SizedBox(
+                                  width: 32,
+                                  height: 32,
+                                  child: CircularProgressIndicator.adaptive(
+                                    strokeWidth: 3,
+                                  ),
+                                )
+                              : _ContactNotificationBadge(
+                                  origin: contact.origin,
+                                  badgeCount: contact.badgeCount,
+                                ),
+                        )
+                      else if (contact.isNewUnopenedChannel)
+                        Positioned(
+                          bottom: -3,
+                          right: -3,
+                          child: _ContactNewChannelDotBadge(
+                            origin: contact.origin,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  if (hasDisplayName && shouldShowDisplayName)
+                    Column(
+                      children: [
+                        Text(
+                          contact.displayName!,
+                          style: context.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: context.colorScheme.primary,
+                          ),
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 2),
+                      ],
                     ),
+                  Text(
+                    fullName,
+                    style: contact.type == ContactType.individual
+                        ? (hasDisplayName
+                              ? context.textTheme.labelSmall
+                              : context.textTheme.titleSmall)
+                        : context.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: context.colorScheme.onSurface.withAlpha(179),
+                          ),
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
                 ],
               ),
-              const SizedBox(height: 6),
-              if (hasDisplayName && contact.isIndividual)
-                Column(
-                  children: [
-                    Text(
-                      contact.displayName!,
-                      style: context.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: context.colorScheme.primary,
-                      ),
-                      textAlign: TextAlign.center,
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 2),
-                  ],
-                ),
-              Text(
-                displayName ?? fullName,
-                style: contact.isIndividual
-                    ? (hasDisplayName
-                          ? context.textTheme.labelSmall
-                          : context.textTheme.titleSmall)
-                    : context.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: context.colorScheme.onSurface.withAlpha(179),
-                      ),
-                textAlign: TextAlign.center,
-                softWrap: true,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+        if (isEditMode)
+          Positioned(
+            top: -10,
+            right: 0,
+            child: Checkbox(
+              value: isSelected,
+              visualDensity: VisualDensity.adaptivePlatformDensity,
+              onChanged: (_) => onTap(contact: contact, isSelected: isSelected),
+            ),
+          ),
+      ],
     );
   }
 }
