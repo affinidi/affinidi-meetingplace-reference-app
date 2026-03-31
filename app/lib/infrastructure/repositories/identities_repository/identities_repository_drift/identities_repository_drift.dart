@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../domain/models/contact_card/contact_card.dart';
+import '../../../../domain/models/contact_card/contact_card_field_definition.drift_glue.g.dart';
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../domain/repositories/identities_repository.dart';
 import '../../../extensions/contact_card_extensions.dart';
@@ -72,35 +72,20 @@ class IdentitiesRepositoryDrift implements IdentitiesRepository {
 ///  database rows.
 extension IdentityMapper on Identity {
   /// Converts an [Identity] into an [IdentityRecord] for persistence.
-  IdentityRecord toRecord() => IdentityRecord(
-    id: id,
-    did: did,
-    isPrimary: isPrimary,
-    displayName: card.displayName,
-    firstName: card.firstName,
-    lastName: card.lastName,
-    email: card.email,
-    mobile: card.mobile,
-    profilePic: card.profilePic,
-    cardColor: card.cardColor,
-  );
+  IdentityRecord toRecord() => buildIdentityRecordFromIdentity(this);
 
   /// Creates an [Identity] domain model from a [IdentityRecord].
-  static Identity fromRecord(IdentityRecord record) => Identity(
-    id: record.id,
-    did: record.did,
-    isPrimary: record.isPrimary,
-    card: ContactCard(
+  static Identity fromRecord(IdentityRecord record) {
+    final card = hydrateIdentityRecordContactCard(
+      record,
+      type: ContactCardType.individual.value,
+    );
+
+    return Identity(
       id: record.id,
       did: record.did,
-      type: ContactCardType.individual.value,
-      displayName: record.displayName,
-      firstName: record.firstName,
-      lastName: record.lastName,
-      email: record.email,
-      mobile: record.mobile,
-      profilePic: record.profilePic,
-      cardColor: record.cardColor,
-    ),
-  );
+      isPrimary: record.isPrimary,
+      card: card,
+    );
+  }
 }

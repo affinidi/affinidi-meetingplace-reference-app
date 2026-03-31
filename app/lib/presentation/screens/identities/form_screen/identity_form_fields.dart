@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../infrastructure/extensions/identities_extensions.dart';
+import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
-import '../../../config/persona_field_config.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
 import '../../../widgets/profile_picture.dart';
@@ -30,9 +30,9 @@ class IdentityFormFields extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
-    final personaFields = PersonaField.values;
+    final personaFields = ContactCardFieldDefinitions.values;
 
-    String? validateField(PersonaField field, String? value) {
+    String? validateField(ContactCardFieldDefinition field, String? value) {
       if (field.shouldValidateOnBlur &&
           !controller.shouldShowValidation(field)) {
         return null;
@@ -41,7 +41,10 @@ class IdentityFormFields extends ConsumerWidget {
       return field.validator(context).call(value);
     }
 
-    Widget buildPersonaField(PersonaField field, double traversalOrder) {
+    Widget buildPersonaField(
+      ContactCardFieldDefinition field,
+      double traversalOrder,
+    ) {
       return FormRowTextField(
         icon: field.icon,
         label: field.label(context.l10n),

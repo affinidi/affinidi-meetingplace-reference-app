@@ -335,7 +335,7 @@
 	"@generalConnect": {
 		"type": "text"
 	},
-	"contactCardFieldName": "{field, select, firstName{First name} lastName{Last name} email{Email} mobile{Mobile} other{}}",
+	"contactCardFieldName": "{field, select, firstName{First name} lastName{Last name} email{Email} mobile{Mobile} postcode{Postcode} other{}}",
 	"@contactCardFieldName": {
 		"type": "text",
 		"placeholders": {
@@ -712,6 +712,7 @@
 	"enterLastName": "Enter last name",
 	"enterEmail": "Enter email",
 	"enterMobile": "Enter mobile",
+	"enterPostcode": "Enter postcode",
 	"anonymous": "Anonymous",
 	"aliasLabel": "Alias label",
 	"enterAliasLabel": "Enter alias label",

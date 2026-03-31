@@ -5,7 +5,16 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../presentation/validators/max_length_validator_type.dart';
 import '../../presentation/validators/zalgo_text_validator.dart';
 
-enum InputType { firstName, lastName, description, email, phone, alias, chat }
+enum InputType {
+  firstName,
+  lastName,
+  description,
+  email,
+  phone,
+  postcode,
+  alias,
+  chat,
+}
 
 class InputValidators {
   static MultiValidator getValidator(
@@ -48,6 +57,13 @@ class InputValidators {
       case InputType.phone:
         // TODO: Use Intl Phone Number Input for validation
         return MultiValidator([]);
+      case InputType.postcode:
+        return MultiValidator([
+          MaxLengthValidator(
+            MaxLengthValidatorType.small.value,
+            errorText: context.l10n.nameTooLong,
+          ),
+        ]);
       case InputType.alias:
         return MultiValidator([
           ZalgoTextValidator(errorText: context.l10n.zalgoTextDetectedError),

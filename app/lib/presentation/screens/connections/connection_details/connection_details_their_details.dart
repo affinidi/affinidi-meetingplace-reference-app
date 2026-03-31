@@ -28,6 +28,8 @@ class _TheirDetailsPanel extends ConsumerWidget {
     final groupId = ref.watch(
       provider.select((state) => state.group?.id ?? ''),
     );
+    final emailField = ContactCardFieldDefinitions.email;
+    final mobileField = ContactCardFieldDefinitions.mobile;
 
     return FormCard(
       title: context.l10n.theirDetails,
@@ -41,27 +43,28 @@ class _TheirDetailsPanel extends ConsumerWidget {
               label: context.l10n.generalName,
               value: contactName,
             ),
+
           if (email != null && email.isNotEmpty) ...[
             const Divider(),
             FormRowIconTitle(
-              icon: PersonaField.email.icon,
-              iconColor: PersonaField.email.iconColor(
+              icon: emailField.icon,
+              iconColor: emailField.iconColor(
                 context.customColors,
                 context.colorScheme,
               ),
-              label: PersonaField.email.label(context.l10n),
+              label: emailField.label(context.l10n),
               value: email,
             ),
           ],
           if (mobile != null && mobile.isNotEmpty) ...[
             const Divider(),
             FormRowIconTitle(
-              icon: PersonaField.mobile.icon,
-              iconColor: PersonaField.mobile.iconColor(
+              icon: mobileField.icon,
+              iconColor: mobileField.iconColor(
                 context.customColors,
                 context.colorScheme,
               ),
-              label: PersonaField.mobile.label(context.l10n),
+              label: mobileField.label(context.l10n),
               value: mobile,
             ),
           ],

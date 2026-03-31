@@ -325,6 +325,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'lastName': 'Nachname',
       'email': 'E-Mail',
       'mobile': 'Mobil',
+      'postcode': 'Postleitzahl',
       'other': '',
     });
     return '$_temp0';
@@ -812,6 +813,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get enterMobile => 'Hier kommt das Handy ins Spiel';
+
+  @override
+  String get enterPostcode => 'Postleitzahl eingeben';
 
   @override
   String get anonymous => 'Anonym';

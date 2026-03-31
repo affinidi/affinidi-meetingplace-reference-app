@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
+import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/channel_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -13,7 +14,6 @@ import '../../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../../infrastructure/extensions/date_time_extensions.dart';
 import '../../../../infrastructure/extensions/did_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
-import '../../../config/persona_field_config.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/buttons/elevated_loading_button.dart';
 import '../../../widgets/form_rows/form_card.dart';

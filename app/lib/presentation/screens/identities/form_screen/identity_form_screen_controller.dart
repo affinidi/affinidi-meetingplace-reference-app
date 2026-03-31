@@ -4,10 +4,10 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
+import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
-import '../../../config/persona_field_config.dart';
 import 'identity_form_mode.dart';
 import 'identity_form_screen_state.dart';
 
@@ -18,10 +18,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   late final scrollController = ScrollController();
 
   late final _fieldControllers = {
-    for (final field in PersonaField.values) field: TextEditingController(),
+    for (final field in ContactCardFieldDefinitions.values)
+      field: TextEditingController(),
   };
   late final _fieldFocusNodes = {
-    for (final field in PersonaField.values.where(
+    for (final field in ContactCardFieldDefinitions.values.where(
       (field) => field.shouldValidateOnBlur,
     ))
       field: FocusNode(),
@@ -30,11 +31,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   GlobalKey<FormState>? _formKey;
 
-  TextEditingController controllerFor(PersonaField field) {
+  TextEditingController controllerFor(ContactCardFieldDefinition field) {
     return _fieldControllers[field]!;
   }
 
-  FocusNode? focusNodeFor(PersonaField field) {
+  FocusNode? focusNodeFor(ContactCardFieldDefinition field) {
     return _fieldFocusNodes[field];
   }
 
@@ -108,7 +109,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       );
     }
 
-    for (final field in PersonaField.values) {
+    for (final field in ContactCardFieldDefinitions.values) {
       controllerFor(field).text = field.valueFrom(identity.card);
     }
     aliasController.text = identity.card.displayName;
@@ -117,7 +118,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   bool _hasEnteredAnyInfo(bool canSave) {
-    return PersonaField.values.any(
+    return ContactCardFieldDefinitions.values.any(
           (field) => controllerFor(field).text.trim().isNotEmpty,
         ) &&
         canSave;
@@ -130,7 +131,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   void validateForm(GlobalKey<FormState> formKey) {
     final ctx = formKey.currentContext!;
-    final isValidForSave = PersonaField.values.every((field) {
+    final isValidForSave = ContactCardFieldDefinitions.values.every((field) {
       return field.validator(ctx).call(controllerFor(field).text) == null;
     });
 
@@ -140,11 +141,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     );
   }
 
-  bool shouldShowValidation(PersonaField field) {
+  bool shouldShowValidation(ContactCardFieldDefinition field) {
     return state.showingErrorFields.contains(field);
   }
 
-  void _setErrorVisibility(PersonaField field, bool visible) {
+  void _setErrorVisibility(ContactCardFieldDefinition field, bool visible) {
     final current = {...state.showingErrorFields};
     if (visible) {
       current.add(field);
@@ -154,12 +155,12 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     state = state.copyWith(showingErrorFields: current);
   }
 
-  String _textFor(PersonaField field) {
+  String _textFor(ContactCardFieldDefinition field) {
     return controllerFor(field).text;
   }
 
   void updateErrorVisibilityOnBlur(
-    PersonaField field,
+    ContactCardFieldDefinition field,
     GlobalKey<FormState> formKey,
   ) {
     final ctx = formKey.currentContext!;
@@ -169,7 +170,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     validateForm(formKey);
   }
 
-  void handleFieldChange(PersonaField field, GlobalKey<FormState> formKey) {
+  void handleFieldChange(
+    ContactCardFieldDefinition field,
+    GlobalKey<FormState> formKey,
+  ) {
     if (state.showingErrorFields.contains(field)) {
       final ctx = formKey.currentContext!;
       final error = field.validator(ctx).call(_textFor(field));
@@ -192,7 +196,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void updateField(
-    PersonaField field,
+    ContactCardFieldDefinition field,
     String value,
     GlobalKey<FormState> formKey,
   ) {
@@ -200,7 +204,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     if (error == null) {
       var updatedCard = field.updateContactCard(state.identity.card, value);
 
-      if (field == PersonaField.firstName && state.isAliasMirroringFirstName) {
+      if (field.key == ContactCardFieldKey.firstName &&
+          state.isAliasMirroringFirstName) {
         aliasController.text = value;
         updatedCard = updatedCard.copyWith(displayName: value);
       }
@@ -240,10 +245,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     var updatedCard = state.identity.card;
 
-    for (final field in PersonaField.values) {
+    for (final field in ContactCardFieldDefinitions.values) {
       final controllerValue = controllerFor(field).text.trim();
       final persistedValue =
-          field == PersonaField.firstName && controllerValue.isEmpty
+          field.key == ContactCardFieldKey.firstName && controllerValue.isEmpty
           ? anonymousLabel
           : controllerValue;
       updatedCard = field.updateContactCard(updatedCard, persistedValue);

@@ -316,6 +316,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'lastName': 'Last name',
       'email': 'Email',
       'mobile': 'Mobile',
+      'postcode': 'Postcode',
       'other': '',
     });
     return '$_temp0';
@@ -790,6 +791,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterMobile => 'Enter mobile';
+
+  @override
+  String get enterPostcode => 'Enter postcode';
 
   @override
   String get anonymous => 'Anonymous';

@@ -1109,6 +1109,17 @@ class $ContactCardsTable extends ContactCards
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _postcodeMeta = const VerificationMeta(
+    'postcode',
+  );
+  @override
+  late final GeneratedColumn<String> postcode = GeneratedColumn<String>(
+    'postcode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _profilePicMeta = const VerificationMeta(
     'profilePic',
   );
@@ -1141,6 +1152,7 @@ class $ContactCardsTable extends ContactCards
     lastName,
     email,
     mobile,
+    postcode,
     profilePic,
     meetingplaceIdentityCardColor,
   ];
@@ -1215,6 +1227,14 @@ class $ContactCardsTable extends ContactCards
     } else if (isInserting) {
       context.missing(_mobileMeta);
     }
+    if (data.containsKey('postcode')) {
+      context.handle(
+        _postcodeMeta,
+        postcode.isAcceptableOrUnknown(data['postcode']!, _postcodeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_postcodeMeta);
+    }
     if (data.containsKey('profile_pic')) {
       context.handle(
         _profilePicMeta,
@@ -1275,6 +1295,10 @@ class $ContactCardsTable extends ContactCards
         DriftSqlType.string,
         data['${effectivePrefix}mobile'],
       )!,
+      postcode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}postcode'],
+      )!,
       profilePic: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}profile_pic'],
@@ -1301,6 +1325,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
   final String lastName;
   final String email;
   final String mobile;
+  final String postcode;
   final String profilePic;
   final String meetingplaceIdentityCardColor;
   const ContactCard({
@@ -1312,6 +1337,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     required this.lastName,
     required this.email,
     required this.mobile,
+    required this.postcode,
     required this.profilePic,
     required this.meetingplaceIdentityCardColor,
   });
@@ -1326,6 +1352,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     map['last_name'] = Variable<String>(lastName);
     map['email'] = Variable<String>(email);
     map['mobile'] = Variable<String>(mobile);
+    map['postcode'] = Variable<String>(postcode);
     map['profile_pic'] = Variable<String>(profilePic);
     map['meetingplace_identity_card_color'] = Variable<String>(
       meetingplaceIdentityCardColor,
@@ -1343,6 +1370,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       lastName: Value(lastName),
       email: Value(email),
       mobile: Value(mobile),
+      postcode: Value(postcode),
       profilePic: Value(profilePic),
       meetingplaceIdentityCardColor: Value(meetingplaceIdentityCardColor),
     );
@@ -1362,6 +1390,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       lastName: serializer.fromJson<String>(json['lastName']),
       email: serializer.fromJson<String>(json['email']),
       mobile: serializer.fromJson<String>(json['mobile']),
+      postcode: serializer.fromJson<String>(json['postcode']),
       profilePic: serializer.fromJson<String>(json['profilePic']),
       meetingplaceIdentityCardColor: serializer.fromJson<String>(
         json['meetingplaceIdentityCardColor'],
@@ -1380,6 +1409,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       'lastName': serializer.toJson<String>(lastName),
       'email': serializer.toJson<String>(email),
       'mobile': serializer.toJson<String>(mobile),
+      'postcode': serializer.toJson<String>(postcode),
       'profilePic': serializer.toJson<String>(profilePic),
       'meetingplaceIdentityCardColor': serializer.toJson<String>(
         meetingplaceIdentityCardColor,
@@ -1396,6 +1426,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     String? lastName,
     String? email,
     String? mobile,
+    String? postcode,
     String? profilePic,
     String? meetingplaceIdentityCardColor,
   }) => ContactCard(
@@ -1407,6 +1438,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     lastName: lastName ?? this.lastName,
     email: email ?? this.email,
     mobile: mobile ?? this.mobile,
+    postcode: postcode ?? this.postcode,
     profilePic: profilePic ?? this.profilePic,
     meetingplaceIdentityCardColor:
         meetingplaceIdentityCardColor ?? this.meetingplaceIdentityCardColor,
@@ -1421,6 +1453,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       lastName: data.lastName.present ? data.lastName.value : this.lastName,
       email: data.email.present ? data.email.value : this.email,
       mobile: data.mobile.present ? data.mobile.value : this.mobile,
+      postcode: data.postcode.present ? data.postcode.value : this.postcode,
       profilePic: data.profilePic.present
           ? data.profilePic.value
           : this.profilePic,
@@ -1441,6 +1474,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           ..write('lastName: $lastName, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
+          ..write('postcode: $postcode, ')
           ..write('profilePic: $profilePic, ')
           ..write(
             'meetingplaceIdentityCardColor: $meetingplaceIdentityCardColor',
@@ -1459,6 +1493,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     lastName,
     email,
     mobile,
+    postcode,
     profilePic,
     meetingplaceIdentityCardColor,
   );
@@ -1474,6 +1509,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           other.lastName == this.lastName &&
           other.email == this.email &&
           other.mobile == this.mobile &&
+          other.postcode == this.postcode &&
           other.profilePic == this.profilePic &&
           other.meetingplaceIdentityCardColor ==
               this.meetingplaceIdentityCardColor);
@@ -1488,6 +1524,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   final Value<String> lastName;
   final Value<String> email;
   final Value<String> mobile;
+  final Value<String> postcode;
   final Value<String> profilePic;
   final Value<String> meetingplaceIdentityCardColor;
   const ContactCardsCompanion({
@@ -1499,6 +1536,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     this.lastName = const Value.absent(),
     this.email = const Value.absent(),
     this.mobile = const Value.absent(),
+    this.postcode = const Value.absent(),
     this.profilePic = const Value.absent(),
     this.meetingplaceIdentityCardColor = const Value.absent(),
   });
@@ -1511,6 +1549,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     required String lastName,
     required String email,
     required String mobile,
+    required String postcode,
     required String profilePic,
     required String meetingplaceIdentityCardColor,
   }) : contactId = Value(contactId),
@@ -1520,6 +1559,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
        lastName = Value(lastName),
        email = Value(email),
        mobile = Value(mobile),
+       postcode = Value(postcode),
        profilePic = Value(profilePic),
        meetingplaceIdentityCardColor = Value(meetingplaceIdentityCardColor);
   static Insertable<ContactCard> custom({
@@ -1531,6 +1571,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     Expression<String>? lastName,
     Expression<String>? email,
     Expression<String>? mobile,
+    Expression<String>? postcode,
     Expression<String>? profilePic,
     Expression<String>? meetingplaceIdentityCardColor,
   }) {
@@ -1543,6 +1584,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
       if (lastName != null) 'last_name': lastName,
       if (email != null) 'email': email,
       if (mobile != null) 'mobile': mobile,
+      if (postcode != null) 'postcode': postcode,
       if (profilePic != null) 'profile_pic': profilePic,
       if (meetingplaceIdentityCardColor != null)
         'meetingplace_identity_card_color': meetingplaceIdentityCardColor,
@@ -1558,6 +1600,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     Value<String>? lastName,
     Value<String>? email,
     Value<String>? mobile,
+    Value<String>? postcode,
     Value<String>? profilePic,
     Value<String>? meetingplaceIdentityCardColor,
   }) {
@@ -1570,6 +1613,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
       mobile: mobile ?? this.mobile,
+      postcode: postcode ?? this.postcode,
       profilePic: profilePic ?? this.profilePic,
       meetingplaceIdentityCardColor:
           meetingplaceIdentityCardColor ?? this.meetingplaceIdentityCardColor,
@@ -1603,6 +1647,9 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     if (mobile.present) {
       map['mobile'] = Variable<String>(mobile.value);
     }
+    if (postcode.present) {
+      map['postcode'] = Variable<String>(postcode.value);
+    }
     if (profilePic.present) {
       map['profile_pic'] = Variable<String>(profilePic.value);
     }
@@ -1625,6 +1672,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
           ..write('lastName: $lastName, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
+          ..write('postcode: $postcode, ')
           ..write('profilePic: $profilePic, ')
           ..write(
             'meetingplaceIdentityCardColor: $meetingplaceIdentityCardColor',
@@ -2222,6 +2270,7 @@ typedef $$ContactCardsTableCreateCompanionBuilder =
       required String lastName,
       required String email,
       required String mobile,
+      required String postcode,
       required String profilePic,
       required String meetingplaceIdentityCardColor,
     });
@@ -2235,6 +2284,7 @@ typedef $$ContactCardsTableUpdateCompanionBuilder =
       Value<String> lastName,
       Value<String> email,
       Value<String> mobile,
+      Value<String> postcode,
       Value<String> profilePic,
       Value<String> meetingplaceIdentityCardColor,
     });
@@ -2305,6 +2355,11 @@ class $$ContactCardsTableFilterComposer
 
   ColumnFilters<String> get mobile => $composableBuilder(
     column: $table.mobile,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get postcode => $composableBuilder(
+    column: $table.postcode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2386,6 +2441,11 @@ class $$ContactCardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get postcode => $composableBuilder(
+    column: $table.postcode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get profilePic => $composableBuilder(
     column: $table.profilePic,
     builder: (column) => ColumnOrderings(column),
@@ -2450,6 +2510,9 @@ class $$ContactCardsTableAnnotationComposer
 
   GeneratedColumn<String> get mobile =>
       $composableBuilder(column: $table.mobile, builder: (column) => column);
+
+  GeneratedColumn<String> get postcode =>
+      $composableBuilder(column: $table.postcode, builder: (column) => column);
 
   GeneratedColumn<String> get profilePic => $composableBuilder(
     column: $table.profilePic,
@@ -2524,6 +2587,7 @@ class $$ContactCardsTableTableManager
                 Value<String> lastName = const Value.absent(),
                 Value<String> email = const Value.absent(),
                 Value<String> mobile = const Value.absent(),
+                Value<String> postcode = const Value.absent(),
                 Value<String> profilePic = const Value.absent(),
                 Value<String> meetingplaceIdentityCardColor =
                     const Value.absent(),
@@ -2536,6 +2600,7 @@ class $$ContactCardsTableTableManager
                 lastName: lastName,
                 email: email,
                 mobile: mobile,
+                postcode: postcode,
                 profilePic: profilePic,
                 meetingplaceIdentityCardColor: meetingplaceIdentityCardColor,
               ),
@@ -2549,6 +2614,7 @@ class $$ContactCardsTableTableManager
                 required String lastName,
                 required String email,
                 required String mobile,
+                required String postcode,
                 required String profilePic,
                 required String meetingplaceIdentityCardColor,
               }) => ContactCardsCompanion.insert(
@@ -2560,6 +2626,7 @@ class $$ContactCardsTableTableManager
                 lastName: lastName,
                 email: email,
                 mobile: mobile,
+                postcode: postcode,
                 profilePic: profilePic,
                 meetingplaceIdentityCardColor: meetingplaceIdentityCardColor,
               ),

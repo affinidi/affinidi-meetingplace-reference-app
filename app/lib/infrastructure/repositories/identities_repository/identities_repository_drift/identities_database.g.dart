@@ -79,6 +79,17 @@ class $IdentitiesTableTable extends IdentitiesTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _postcodeMeta = const VerificationMeta(
+    'postcode',
+  );
+  @override
+  late final GeneratedColumn<String> postcode = GeneratedColumn<String>(
+    'postcode',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _profilePicMeta = const VerificationMeta(
     'profilePic',
   );
@@ -125,6 +136,7 @@ class $IdentitiesTableTable extends IdentitiesTable
     lastName,
     email,
     mobile,
+    postcode,
     profilePic,
     cardColor,
     isPrimary,
@@ -189,6 +201,12 @@ class $IdentitiesTableTable extends IdentitiesTable
         mobile.isAcceptableOrUnknown(data['mobile']!, _mobileMeta),
       );
     }
+    if (data.containsKey('postcode')) {
+      context.handle(
+        _postcodeMeta,
+        postcode.isAcceptableOrUnknown(data['postcode']!, _postcodeMeta),
+      );
+    }
     if (data.containsKey('profile_pic')) {
       context.handle(
         _profilePicMeta,
@@ -244,6 +262,10 @@ class $IdentitiesTableTable extends IdentitiesTable
         DriftSqlType.string,
         data['${effectivePrefix}mobile'],
       ),
+      postcode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}postcode'],
+      ),
       profilePic: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}profile_pic'],
@@ -273,6 +295,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   final String? lastName;
   final String? email;
   final String? mobile;
+  final String? postcode;
   final String? profilePic;
   final String? cardColor;
   final bool isPrimary;
@@ -284,6 +307,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     this.lastName,
     this.email,
     this.mobile,
+    this.postcode,
     this.profilePic,
     this.cardColor,
     required this.isPrimary,
@@ -303,6 +327,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     }
     if (!nullToAbsent || mobile != null) {
       map['mobile'] = Variable<String>(mobile);
+    }
+    if (!nullToAbsent || postcode != null) {
+      map['postcode'] = Variable<String>(postcode);
     }
     if (!nullToAbsent || profilePic != null) {
       map['profile_pic'] = Variable<String>(profilePic);
@@ -329,6 +356,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       mobile: mobile == null && nullToAbsent
           ? const Value.absent()
           : Value(mobile),
+      postcode: postcode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(postcode),
       profilePic: profilePic == null && nullToAbsent
           ? const Value.absent()
           : Value(profilePic),
@@ -352,6 +382,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       lastName: serializer.fromJson<String?>(json['lastName']),
       email: serializer.fromJson<String?>(json['email']),
       mobile: serializer.fromJson<String?>(json['mobile']),
+      postcode: serializer.fromJson<String?>(json['postcode']),
       profilePic: serializer.fromJson<String?>(json['profilePic']),
       cardColor: serializer.fromJson<String?>(json['cardColor']),
       isPrimary: serializer.fromJson<bool>(json['isPrimary']),
@@ -368,6 +399,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       'lastName': serializer.toJson<String?>(lastName),
       'email': serializer.toJson<String?>(email),
       'mobile': serializer.toJson<String?>(mobile),
+      'postcode': serializer.toJson<String?>(postcode),
       'profilePic': serializer.toJson<String?>(profilePic),
       'cardColor': serializer.toJson<String?>(cardColor),
       'isPrimary': serializer.toJson<bool>(isPrimary),
@@ -382,6 +414,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     Value<String?> lastName = const Value.absent(),
     Value<String?> email = const Value.absent(),
     Value<String?> mobile = const Value.absent(),
+    Value<String?> postcode = const Value.absent(),
     Value<String?> profilePic = const Value.absent(),
     Value<String?> cardColor = const Value.absent(),
     bool? isPrimary,
@@ -393,6 +426,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     lastName: lastName.present ? lastName.value : this.lastName,
     email: email.present ? email.value : this.email,
     mobile: mobile.present ? mobile.value : this.mobile,
+    postcode: postcode.present ? postcode.value : this.postcode,
     profilePic: profilePic.present ? profilePic.value : this.profilePic,
     cardColor: cardColor.present ? cardColor.value : this.cardColor,
     isPrimary: isPrimary ?? this.isPrimary,
@@ -408,6 +442,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       lastName: data.lastName.present ? data.lastName.value : this.lastName,
       email: data.email.present ? data.email.value : this.email,
       mobile: data.mobile.present ? data.mobile.value : this.mobile,
+      postcode: data.postcode.present ? data.postcode.value : this.postcode,
       profilePic: data.profilePic.present
           ? data.profilePic.value
           : this.profilePic,
@@ -426,6 +461,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           ..write('lastName: $lastName, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
+          ..write('postcode: $postcode, ')
           ..write('profilePic: $profilePic, ')
           ..write('cardColor: $cardColor, ')
           ..write('isPrimary: $isPrimary')
@@ -442,6 +478,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     lastName,
     email,
     mobile,
+    postcode,
     profilePic,
     cardColor,
     isPrimary,
@@ -457,6 +494,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           other.lastName == this.lastName &&
           other.email == this.email &&
           other.mobile == this.mobile &&
+          other.postcode == this.postcode &&
           other.profilePic == this.profilePic &&
           other.cardColor == this.cardColor &&
           other.isPrimary == this.isPrimary);
@@ -470,6 +508,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
   final Value<String?> lastName;
   final Value<String?> email;
   final Value<String?> mobile;
+  final Value<String?> postcode;
   final Value<String?> profilePic;
   final Value<String?> cardColor;
   final Value<bool> isPrimary;
@@ -482,6 +521,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     this.lastName = const Value.absent(),
     this.email = const Value.absent(),
     this.mobile = const Value.absent(),
+    this.postcode = const Value.absent(),
     this.profilePic = const Value.absent(),
     this.cardColor = const Value.absent(),
     this.isPrimary = const Value.absent(),
@@ -495,6 +535,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     this.lastName = const Value.absent(),
     this.email = const Value.absent(),
     this.mobile = const Value.absent(),
+    this.postcode = const Value.absent(),
     this.profilePic = const Value.absent(),
     this.cardColor = const Value.absent(),
     this.isPrimary = const Value.absent(),
@@ -510,6 +551,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Expression<String>? lastName,
     Expression<String>? email,
     Expression<String>? mobile,
+    Expression<String>? postcode,
     Expression<String>? profilePic,
     Expression<String>? cardColor,
     Expression<bool>? isPrimary,
@@ -523,6 +565,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       if (lastName != null) 'last_name': lastName,
       if (email != null) 'email': email,
       if (mobile != null) 'mobile': mobile,
+      if (postcode != null) 'postcode': postcode,
       if (profilePic != null) 'profile_pic': profilePic,
       if (cardColor != null) 'card_color': cardColor,
       if (isPrimary != null) 'is_primary': isPrimary,
@@ -538,6 +581,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Value<String?>? lastName,
     Value<String?>? email,
     Value<String?>? mobile,
+    Value<String?>? postcode,
     Value<String?>? profilePic,
     Value<String?>? cardColor,
     Value<bool>? isPrimary,
@@ -551,6 +595,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
       mobile: mobile ?? this.mobile,
+      postcode: postcode ?? this.postcode,
       profilePic: profilePic ?? this.profilePic,
       cardColor: cardColor ?? this.cardColor,
       isPrimary: isPrimary ?? this.isPrimary,
@@ -582,6 +627,9 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     if (mobile.present) {
       map['mobile'] = Variable<String>(mobile.value);
     }
+    if (postcode.present) {
+      map['postcode'] = Variable<String>(postcode.value);
+    }
     if (profilePic.present) {
       map['profile_pic'] = Variable<String>(profilePic.value);
     }
@@ -607,6 +655,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
           ..write('lastName: $lastName, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
+          ..write('postcode: $postcode, ')
           ..write('profilePic: $profilePic, ')
           ..write('cardColor: $cardColor, ')
           ..write('isPrimary: $isPrimary, ')
@@ -638,6 +687,7 @@ typedef $$IdentitiesTableTableCreateCompanionBuilder =
       Value<String?> lastName,
       Value<String?> email,
       Value<String?> mobile,
+      Value<String?> postcode,
       Value<String?> profilePic,
       Value<String?> cardColor,
       Value<bool> isPrimary,
@@ -652,6 +702,7 @@ typedef $$IdentitiesTableTableUpdateCompanionBuilder =
       Value<String?> lastName,
       Value<String?> email,
       Value<String?> mobile,
+      Value<String?> postcode,
       Value<String?> profilePic,
       Value<String?> cardColor,
       Value<bool> isPrimary,
@@ -699,6 +750,11 @@ class $$IdentitiesTableTableFilterComposer
 
   ColumnFilters<String> get mobile => $composableBuilder(
     column: $table.mobile,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get postcode => $composableBuilder(
+    column: $table.postcode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -762,6 +818,11 @@ class $$IdentitiesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get postcode => $composableBuilder(
+    column: $table.postcode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get profilePic => $composableBuilder(
     column: $table.profilePic,
     builder: (column) => ColumnOrderings(column),
@@ -809,6 +870,9 @@ class $$IdentitiesTableTableAnnotationComposer
 
   GeneratedColumn<String> get mobile =>
       $composableBuilder(column: $table.mobile, builder: (column) => column);
+
+  GeneratedColumn<String> get postcode =>
+      $composableBuilder(column: $table.postcode, builder: (column) => column);
 
   GeneratedColumn<String> get profilePic => $composableBuilder(
     column: $table.profilePic,
@@ -866,6 +930,7 @@ class $$IdentitiesTableTableTableManager
                 Value<String?> lastName = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> mobile = const Value.absent(),
+                Value<String?> postcode = const Value.absent(),
                 Value<String?> profilePic = const Value.absent(),
                 Value<String?> cardColor = const Value.absent(),
                 Value<bool> isPrimary = const Value.absent(),
@@ -878,6 +943,7 @@ class $$IdentitiesTableTableTableManager
                 lastName: lastName,
                 email: email,
                 mobile: mobile,
+                postcode: postcode,
                 profilePic: profilePic,
                 cardColor: cardColor,
                 isPrimary: isPrimary,
@@ -892,6 +958,7 @@ class $$IdentitiesTableTableTableManager
                 Value<String?> lastName = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> mobile = const Value.absent(),
+                Value<String?> postcode = const Value.absent(),
                 Value<String?> profilePic = const Value.absent(),
                 Value<String?> cardColor = const Value.absent(),
                 Value<bool> isPrimary = const Value.absent(),
@@ -904,6 +971,7 @@ class $$IdentitiesTableTableTableManager
                 lastName: lastName,
                 email: email,
                 mobile: mobile,
+                postcode: postcode,
                 profilePic: profilePic,
                 cardColor: cardColor,
                 isPrimary: isPrimary,

@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../domain/models/contact_card/contact_card_field_definition.drift_glue.g.dart';
 import '../../../../domain/models/contacts/contact_category.dart';
 import '../../../../domain/models/contacts/contact_origin.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
@@ -13,6 +14,7 @@ import '../../../database/database_platform.dart';
 import '../../../providers/applications_documents_directory_provider.dart';
 import '../../../secure_storage/secure_storage.dart';
 
+part 'contacts_database.contact_card_fields.g.dart';
 part 'contacts_database.g.dart';
 
 /// Drift database for managing contacts and their associated cards.
@@ -41,7 +43,23 @@ class ContactsDatabase extends _$ContactsDatabase {
        );
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 6;
+
+  Future<List<String>> _existingColumnNames(String tableName) async {
+    final result = await customSelect('PRAGMA table_info($tableName)').get();
+    return result
+        .map((row) => row.data['name'])
+        .whereType<String>()
+        .toList(growable: false);
+  }
+
+  Future<void> _applyGeneratedContactCardFieldMigrations() async {
+    final existingColumns = await _existingColumnNames('contact_cards');
+    final statements = missingContactCardFieldSql(existingColumns);
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
+  }
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -111,6 +129,10 @@ class ContactsDatabase extends _$ContactsDatabase {
           );
         }
       }
+
+      if (from < 6) {
+        await _applyGeneratedContactCardFieldMigrations();
+      }
     },
   );
 }
@@ -140,26 +162,6 @@ class Contacts extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
-}
-
-/// Contact cards table linked to [Contacts].
-///
-/// Stores additional profile details such as first/last name, email,
-/// mobile number, and profile picture.
-@DataClassName('ContactCard')
-class ContactCards extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get contactId => text().customConstraint(
-    'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL',
-  )();
-  TextColumn get did => text()();
-  TextColumn get type => text()();
-  TextColumn get firstName => text()();
-  TextColumn get lastName => text()();
-  TextColumn get email => text()();
-  TextColumn get mobile => text()();
-  TextColumn get profilePic => text()();
-  TextColumn get meetingplaceIdentityCardColor => text()();
 }
 
 /// Converts between [ContactType] enum and its int representation.

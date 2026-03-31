@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
 import '../../domain/models/contact_card/contact_card.dart';
+import '../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
-import '../config/persona_field_config.dart';
 
 class ContactCardView extends StatelessWidget {
   const ContactCardView({super.key, required this.card});
@@ -34,11 +34,11 @@ class SdkContactCardView extends StatelessWidget {
 class _PersonaFieldListView extends StatelessWidget {
   const _PersonaFieldListView({required this.valueResolver});
 
-  final String Function(PersonaField) valueResolver;
+  final String Function(ContactCardFieldDefinition) valueResolver;
 
   @override
   Widget build(BuildContext context) {
-    final fields = PersonaField.values
+    final fields = ContactCardFieldDefinitions.values
         .where((field) => valueResolver(field).isNotEmpty)
         .toList();
 

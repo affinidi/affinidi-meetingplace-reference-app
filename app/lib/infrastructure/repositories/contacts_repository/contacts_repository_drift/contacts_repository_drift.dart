@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../domain/models/contact_card/contact_card.dart';
+import '../../../../domain/models/contact_card/contact_card_field_definition.drift_glue.g.dart';
 import '../../../../domain/models/contacts/contact.dart' as model;
 import '../../../../domain/repositories/contacts_repository.dart';
 import '../../../exceptions/app_exception.dart';
@@ -69,19 +69,7 @@ class ContactsRepositoryDrift implements ContactsRepository {
       final card = contact.card;
       await _database
           .into(_database.contactCards)
-          .insert(
-            db.ContactCardsCompanion(
-              contactId: Value(contactId),
-              did: Value(card.did),
-              type: Value(card.type),
-              firstName: Value(card.firstName),
-              lastName: Value(card.lastName ?? ''),
-              email: Value(card.email ?? ''),
-              mobile: Value(card.mobile ?? ''),
-              profilePic: Value(card.profilePic ?? ''),
-              meetingplaceIdentityCardColor: Value(card.cardColor ?? ''),
-            ),
-          );
+          .insert(buildContactCardCompanion(card: card, contactId: contactId));
 
       final newContact = await _getContactById(contactId);
       if (newContact == null) {
@@ -174,20 +162,9 @@ class ContactsRepositoryDrift implements ContactsRepository {
       );
 
       final card = contact.card;
-      await (_database.update(
-        _database.contactCards,
-      )..where((c) => c.contactId.equals(contact.id))).write(
-        db.ContactCardsCompanion(
-          did: Value(card.did),
-          type: Value(card.type),
-          firstName: Value(card.firstName),
-          lastName: Value(card.lastName ?? ''),
-          email: Value(card.email ?? ''),
-          mobile: Value(card.mobile ?? ''),
-          profilePic: Value(card.profilePic ?? ''),
-          meetingplaceIdentityCardColor: Value(card.cardColor ?? ''),
-        ),
-      );
+      await (_database.update(_database.contactCards)
+            ..where((c) => c.contactId.equals(contact.id)))
+          .write(buildContactCardCompanion(card: card));
     });
   }
 }
@@ -197,24 +174,9 @@ class _ContactMapper {
     db.Contact contact,
     db.ContactCard contactCard,
   ) {
-    final domainCard = ContactCard(
+    final domainCard = hydrateContactCardRow(
+      contactCard,
       id: const Uuid().v4(),
-      did: contactCard.did,
-      type: contactCard.type,
-      firstName: contactCard.firstName,
-      displayName: [
-        contactCard.firstName,
-        contactCard.lastName,
-      ].where((s) => s.isNotEmpty).join(' '),
-      lastName: contactCard.lastName.isEmpty ? null : contactCard.lastName,
-      email: contactCard.email.isEmpty ? null : contactCard.email,
-      mobile: contactCard.mobile.isEmpty ? null : contactCard.mobile,
-      profilePic: contactCard.profilePic.isEmpty
-          ? null
-          : contactCard.profilePic,
-      cardColor: contactCard.meetingplaceIdentityCardColor.isEmpty
-          ? null
-          : contactCard.meetingplaceIdentityCardColor,
     );
 
     return model.Contact(
