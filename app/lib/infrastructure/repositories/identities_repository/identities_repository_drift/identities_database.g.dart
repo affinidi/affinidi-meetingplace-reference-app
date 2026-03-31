@@ -61,6 +61,17 @@ class $IdentitiesTableTable extends IdentitiesTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _organizationMeta = const VerificationMeta(
+    'organization',
+  );
+  @override
+  late final GeneratedColumn<String> organization = GeneratedColumn<String>(
+    'organization',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _emailMeta = const VerificationMeta('email');
   @override
   late final GeneratedColumn<String> email = GeneratedColumn<String>(
@@ -134,6 +145,7 @@ class $IdentitiesTableTable extends IdentitiesTable
     displayName,
     firstName,
     lastName,
+    organization,
     email,
     mobile,
     postcode,
@@ -187,6 +199,15 @@ class $IdentitiesTableTable extends IdentitiesTable
       context.handle(
         _lastNameMeta,
         lastName.isAcceptableOrUnknown(data['last_name']!, _lastNameMeta),
+      );
+    }
+    if (data.containsKey('organization')) {
+      context.handle(
+        _organizationMeta,
+        organization.isAcceptableOrUnknown(
+          data['organization']!,
+          _organizationMeta,
+        ),
       );
     }
     if (data.containsKey('email')) {
@@ -254,6 +275,10 @@ class $IdentitiesTableTable extends IdentitiesTable
         DriftSqlType.string,
         data['${effectivePrefix}last_name'],
       ),
+      organization: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization'],
+      ),
       email: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}email'],
@@ -293,6 +318,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   final String displayName;
   final String firstName;
   final String? lastName;
+  final String? organization;
   final String? email;
   final String? mobile;
   final String? postcode;
@@ -305,6 +331,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     required this.displayName,
     required this.firstName,
     this.lastName,
+    this.organization,
     this.email,
     this.mobile,
     this.postcode,
@@ -321,6 +348,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     map['first_name'] = Variable<String>(firstName);
     if (!nullToAbsent || lastName != null) {
       map['last_name'] = Variable<String>(lastName);
+    }
+    if (!nullToAbsent || organization != null) {
+      map['organization'] = Variable<String>(organization);
     }
     if (!nullToAbsent || email != null) {
       map['email'] = Variable<String>(email);
@@ -350,6 +380,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       lastName: lastName == null && nullToAbsent
           ? const Value.absent()
           : Value(lastName),
+      organization: organization == null && nullToAbsent
+          ? const Value.absent()
+          : Value(organization),
       email: email == null && nullToAbsent
           ? const Value.absent()
           : Value(email),
@@ -380,6 +413,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       displayName: serializer.fromJson<String>(json['displayName']),
       firstName: serializer.fromJson<String>(json['firstName']),
       lastName: serializer.fromJson<String?>(json['lastName']),
+      organization: serializer.fromJson<String?>(json['organization']),
       email: serializer.fromJson<String?>(json['email']),
       mobile: serializer.fromJson<String?>(json['mobile']),
       postcode: serializer.fromJson<String?>(json['postcode']),
@@ -397,6 +431,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       'displayName': serializer.toJson<String>(displayName),
       'firstName': serializer.toJson<String>(firstName),
       'lastName': serializer.toJson<String?>(lastName),
+      'organization': serializer.toJson<String?>(organization),
       'email': serializer.toJson<String?>(email),
       'mobile': serializer.toJson<String?>(mobile),
       'postcode': serializer.toJson<String?>(postcode),
@@ -412,6 +447,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     String? displayName,
     String? firstName,
     Value<String?> lastName = const Value.absent(),
+    Value<String?> organization = const Value.absent(),
     Value<String?> email = const Value.absent(),
     Value<String?> mobile = const Value.absent(),
     Value<String?> postcode = const Value.absent(),
@@ -424,6 +460,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     displayName: displayName ?? this.displayName,
     firstName: firstName ?? this.firstName,
     lastName: lastName.present ? lastName.value : this.lastName,
+    organization: organization.present ? organization.value : this.organization,
     email: email.present ? email.value : this.email,
     mobile: mobile.present ? mobile.value : this.mobile,
     postcode: postcode.present ? postcode.value : this.postcode,
@@ -440,6 +477,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           : this.displayName,
       firstName: data.firstName.present ? data.firstName.value : this.firstName,
       lastName: data.lastName.present ? data.lastName.value : this.lastName,
+      organization: data.organization.present
+          ? data.organization.value
+          : this.organization,
       email: data.email.present ? data.email.value : this.email,
       mobile: data.mobile.present ? data.mobile.value : this.mobile,
       postcode: data.postcode.present ? data.postcode.value : this.postcode,
@@ -459,6 +499,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           ..write('displayName: $displayName, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
+          ..write('organization: $organization, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
           ..write('postcode: $postcode, ')
@@ -476,6 +517,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     displayName,
     firstName,
     lastName,
+    organization,
     email,
     mobile,
     postcode,
@@ -492,6 +534,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           other.displayName == this.displayName &&
           other.firstName == this.firstName &&
           other.lastName == this.lastName &&
+          other.organization == this.organization &&
           other.email == this.email &&
           other.mobile == this.mobile &&
           other.postcode == this.postcode &&
@@ -506,6 +549,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
   final Value<String> displayName;
   final Value<String> firstName;
   final Value<String?> lastName;
+  final Value<String?> organization;
   final Value<String?> email;
   final Value<String?> mobile;
   final Value<String?> postcode;
@@ -519,6 +563,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     this.displayName = const Value.absent(),
     this.firstName = const Value.absent(),
     this.lastName = const Value.absent(),
+    this.organization = const Value.absent(),
     this.email = const Value.absent(),
     this.mobile = const Value.absent(),
     this.postcode = const Value.absent(),
@@ -533,6 +578,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     required String displayName,
     required String firstName,
     this.lastName = const Value.absent(),
+    this.organization = const Value.absent(),
     this.email = const Value.absent(),
     this.mobile = const Value.absent(),
     this.postcode = const Value.absent(),
@@ -549,6 +595,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Expression<String>? displayName,
     Expression<String>? firstName,
     Expression<String>? lastName,
+    Expression<String>? organization,
     Expression<String>? email,
     Expression<String>? mobile,
     Expression<String>? postcode,
@@ -563,6 +610,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       if (displayName != null) 'display_name': displayName,
       if (firstName != null) 'first_name': firstName,
       if (lastName != null) 'last_name': lastName,
+      if (organization != null) 'organization': organization,
       if (email != null) 'email': email,
       if (mobile != null) 'mobile': mobile,
       if (postcode != null) 'postcode': postcode,
@@ -579,6 +627,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Value<String>? displayName,
     Value<String>? firstName,
     Value<String?>? lastName,
+    Value<String?>? organization,
     Value<String?>? email,
     Value<String?>? mobile,
     Value<String?>? postcode,
@@ -593,6 +642,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       displayName: displayName ?? this.displayName,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
+      organization: organization ?? this.organization,
       email: email ?? this.email,
       mobile: mobile ?? this.mobile,
       postcode: postcode ?? this.postcode,
@@ -620,6 +670,9 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     }
     if (lastName.present) {
       map['last_name'] = Variable<String>(lastName.value);
+    }
+    if (organization.present) {
+      map['organization'] = Variable<String>(organization.value);
     }
     if (email.present) {
       map['email'] = Variable<String>(email.value);
@@ -653,6 +706,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
           ..write('displayName: $displayName, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
+          ..write('organization: $organization, ')
           ..write('email: $email, ')
           ..write('mobile: $mobile, ')
           ..write('postcode: $postcode, ')
@@ -685,6 +739,7 @@ typedef $$IdentitiesTableTableCreateCompanionBuilder =
       required String displayName,
       required String firstName,
       Value<String?> lastName,
+      Value<String?> organization,
       Value<String?> email,
       Value<String?> mobile,
       Value<String?> postcode,
@@ -700,6 +755,7 @@ typedef $$IdentitiesTableTableUpdateCompanionBuilder =
       Value<String> displayName,
       Value<String> firstName,
       Value<String?> lastName,
+      Value<String?> organization,
       Value<String?> email,
       Value<String?> mobile,
       Value<String?> postcode,
@@ -740,6 +796,11 @@ class $$IdentitiesTableTableFilterComposer
 
   ColumnFilters<String> get lastName => $composableBuilder(
     column: $table.lastName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organization => $composableBuilder(
+    column: $table.organization,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -808,6 +869,11 @@ class $$IdentitiesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get organization => $composableBuilder(
+    column: $table.organization,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get email => $composableBuilder(
     column: $table.email,
     builder: (column) => ColumnOrderings(column),
@@ -864,6 +930,11 @@ class $$IdentitiesTableTableAnnotationComposer
 
   GeneratedColumn<String> get lastName =>
       $composableBuilder(column: $table.lastName, builder: (column) => column);
+
+  GeneratedColumn<String> get organization => $composableBuilder(
+    column: $table.organization,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get email =>
       $composableBuilder(column: $table.email, builder: (column) => column);
@@ -928,6 +999,7 @@ class $$IdentitiesTableTableTableManager
                 Value<String> displayName = const Value.absent(),
                 Value<String> firstName = const Value.absent(),
                 Value<String?> lastName = const Value.absent(),
+                Value<String?> organization = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> mobile = const Value.absent(),
                 Value<String?> postcode = const Value.absent(),
@@ -941,6 +1013,7 @@ class $$IdentitiesTableTableTableManager
                 displayName: displayName,
                 firstName: firstName,
                 lastName: lastName,
+                organization: organization,
                 email: email,
                 mobile: mobile,
                 postcode: postcode,
@@ -956,6 +1029,7 @@ class $$IdentitiesTableTableTableManager
                 required String displayName,
                 required String firstName,
                 Value<String?> lastName = const Value.absent(),
+                Value<String?> organization = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> mobile = const Value.absent(),
                 Value<String?> postcode = const Value.absent(),
@@ -969,6 +1043,7 @@ class $$IdentitiesTableTableTableManager
                 displayName: displayName,
                 firstName: firstName,
                 lastName: lastName,
+                organization: organization,
                 email: email,
                 mobile: mobile,
                 postcode: postcode,

@@ -9,6 +9,7 @@ class IdentitiesTable extends Table {
   TextColumn get displayName => text()();
   TextColumn get firstName => text()();
   TextColumn get lastName => text().nullable()();
+  TextColumn get organization => text().nullable()();
   TextColumn get email => text().nullable()();
   TextColumn get mobile => text().nullable()();
   TextColumn get postcode => text().nullable()();

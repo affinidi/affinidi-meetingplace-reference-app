@@ -148,10 +148,7 @@ class _ParsedField {
 }
 
 class _ContactCardFieldParser {
-  static final RegExp _definitionPattern = RegExp(
-    r'ContactCardFieldDefinition\((.*?)\),',
-    dotAll: true,
-  );
+  static const String _definitionToken = 'ContactCardFieldDefinition(';
   static final RegExp _keyPattern = RegExp(
     r'key:\s*ContactCardFieldKey\.(\w+)',
   );
@@ -166,10 +163,9 @@ class _ContactCardFieldParser {
   );
 
   static List<_ParsedField> parse(String source) {
-    return _definitionPattern
-        .allMatches(source)
-        .map((match) {
-          final block = match.group(1) ?? '';
+    final blocks = _extractDefinitionBlocks(source);
+    return blocks
+        .map((block) {
           return _ParsedField(
             key: _readRequired(_keyPattern, block, 'key'),
             identitiesColumnName: _readRequired(
@@ -188,6 +184,146 @@ class _ContactCardFieldParser {
           );
         })
         .toList(growable: false);
+  }
+
+  static List<String> _extractDefinitionBlocks(String source) {
+    final blocks = <String>[];
+    var searchIndex = 0;
+
+    while (true) {
+      final tokenIndex = source.indexOf(_definitionToken, searchIndex);
+      if (tokenIndex < 0) break;
+
+      final startParenIndex = tokenIndex + _definitionToken.length - 1;
+
+      // Skip the constructor declaration:
+      // `ContactCardFieldDefinition({ ... })`.
+      // We only want instances: `ContactCardFieldDefinition(`.
+      var lookahead = startParenIndex + 1;
+      while (lookahead < source.length && source[lookahead].trim().isEmpty) {
+        lookahead++;
+      }
+      if (lookahead < source.length && source[lookahead] == '{') {
+        searchIndex = lookahead + 1;
+        continue;
+      }
+
+      final extracted = _extractBalancedParentheses(source, startParenIndex);
+
+      blocks.add(extracted.content);
+      searchIndex = extracted.endIndex;
+    }
+
+    return blocks;
+  }
+
+  static ({String content, int endIndex}) _extractBalancedParentheses(
+    String source,
+    int startParenIndex,
+  ) {
+    if (startParenIndex < 0 || startParenIndex >= source.length) {
+      throw StateError('Invalid ContactCardFieldDefinition start index.');
+    }
+    if (source[startParenIndex] != '(') {
+      throw StateError('Expected "(" at ContactCardFieldDefinition start.');
+    }
+
+    var depth = 0;
+    var i = startParenIndex;
+
+    var inLineComment = false;
+    var inBlockComment = false;
+    String? stringDelimiter;
+    var isTripleQuoted = false;
+
+    for (; i < source.length; i++) {
+      final ch = source[i];
+
+      if (inLineComment) {
+        if (ch == '\n') {
+          inLineComment = false;
+        }
+        continue;
+      }
+
+      if (inBlockComment) {
+        if (ch == '*' && i + 1 < source.length && source[i + 1] == '/') {
+          inBlockComment = false;
+          i++;
+        }
+        continue;
+      }
+
+      if (stringDelimiter != null) {
+        if (!isTripleQuoted && ch == '\\') {
+          i++;
+          continue;
+        }
+
+        if (isTripleQuoted) {
+          if (i + 2 < source.length &&
+              source[i] == stringDelimiter &&
+              source[i + 1] == stringDelimiter &&
+              source[i + 2] == stringDelimiter) {
+            stringDelimiter = null;
+            isTripleQuoted = false;
+            i += 2;
+          }
+          continue;
+        }
+
+        if (ch == stringDelimiter) {
+          stringDelimiter = null;
+        }
+        continue;
+      }
+
+      if (ch == '/' && i + 1 < source.length) {
+        final next = source[i + 1];
+        if (next == '/') {
+          inLineComment = true;
+          i++;
+          continue;
+        }
+        if (next == '*') {
+          inBlockComment = true;
+          i++;
+          continue;
+        }
+      }
+
+      if (ch == '\'' || ch == '"') {
+        final delimiter = ch;
+        if (i + 2 < source.length &&
+            source[i + 1] == delimiter &&
+            source[i + 2] == delimiter) {
+          stringDelimiter = delimiter;
+          isTripleQuoted = true;
+          i += 2;
+          continue;
+        }
+
+        stringDelimiter = delimiter;
+        isTripleQuoted = false;
+        continue;
+      }
+
+      if (ch == '(') {
+        depth++;
+        continue;
+      }
+
+      if (ch == ')') {
+        depth--;
+        if (depth == 0) {
+          final content = source.substring(startParenIndex + 1, i);
+          return (content: content, endIndex: i + 1);
+        }
+        continue;
+      }
+    }
+
+    throw StateError('Unterminated ContactCardFieldDefinition parentheses.');
   }
 
   static String _readRequired(RegExp pattern, String input, String label) {

@@ -326,6 +326,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'email': 'E-Mail',
       'mobile': 'Mobil',
       'postcode': 'Postleitzahl',
+      'organization': 'Organisation',
       'other': '',
     });
     return '$_temp0';
@@ -807,6 +808,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get enterLastName => 'Nachname eingeben';
+
+  @override
+  String get enterOrganization => 'Organisation eingeben';
 
   @override
   String get enterEmail => 'E-Mail-Adresse eingeben';

@@ -2,19 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
+import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../presentation/themes/app_custom_colors.dart';
-import '../../../presentation/validators/input_validators.dart';
+import '../../../presentation/validators/max_length_validator_type.dart';
+import '../../../presentation/validators/zalgo_text_validator.dart';
 import 'contact_card.dart';
 
-enum ContactCardFieldKey { firstName, lastName, email, mobile, postcode }
+enum ContactCardFieldKey {
+  firstName,
+  lastName,
+  organization,
+  email,
+  mobile,
+  postcode,
+}
 
 class ContactCardFieldDefinition {
   ContactCardFieldDefinition({
     required this.key,
     required this.icon,
     required this.iconColor,
-    required this.inputType,
     required this.keyboardType,
     required this.textCapitalization,
     required this.autocorrect,
@@ -22,6 +30,7 @@ class ContactCardFieldDefinition {
     required this.shouldValidateOnBlur,
     required this.textInputAction,
     required this.placeholder,
+    required List<FieldValidator> Function(BuildContext context) validators,
     required this.sdkPath,
     required this.identitiesColumnName,
     required this.contactsColumnName,
@@ -29,13 +38,13 @@ class ContactCardFieldDefinition {
     required String? Function(ContactCard) valueAccessor,
     required ContactCard Function(ContactCard, String?) updateCard,
   }) : _valueAccessor = valueAccessor,
-       _updateCard = updateCard;
+       _updateCard = updateCard,
+       _validatorsBuilder = validators;
 
   final ContactCardFieldKey key;
   final IconData icon;
   final Color Function(AppCustomColors customColors, ColorScheme colorScheme)
   iconColor;
-  final InputType inputType;
   final TextInputType? keyboardType;
   final TextCapitalization textCapitalization;
   final bool autocorrect;
@@ -43,6 +52,7 @@ class ContactCardFieldDefinition {
   final bool shouldValidateOnBlur;
   final TextInputAction textInputAction;
   final String Function(AppLocalizations l10n) placeholder;
+  final List<FieldValidator> Function(BuildContext context) _validatorsBuilder;
   final List<String> sdkPath;
   final String identitiesColumnName;
   final String contactsColumnName;
@@ -55,7 +65,7 @@ class ContactCardFieldDefinition {
   String label(AppLocalizations l10n) => l10n.contactCardFieldName(name);
 
   MultiValidator validator(BuildContext context) =>
-      InputValidators.getValidator(context, inputType);
+      MultiValidator(_validatorsBuilder(context));
 
   String valueFrom(ContactCard card) => _valueAccessor(card) ?? '';
 
@@ -89,7 +99,6 @@ class ContactCardFieldDefinitions {
       key: ContactCardFieldKey.firstName,
       icon: Icons.person,
       iconColor: (customColors, colorScheme) => customColors.success,
-      inputType: InputType.firstName,
       keyboardType: null,
       textCapitalization: TextCapitalization.sentences,
       autocorrect: true,
@@ -97,18 +106,24 @@ class ContactCardFieldDefinitions {
       shouldValidateOnBlur: false,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterFirstName,
+      validators: (context) => [
+        ZalgoTextValidator(errorText: context.l10n.zalgoTextDetectedError),
+        MaxLengthValidator(
+          MaxLengthValidatorType.medium.value,
+          errorText: context.l10n.nameTooLong,
+        ),
+      ],
       sdkPath: const ['n', 'given'],
       identitiesColumnName: 'firstName',
       contactsColumnName: 'firstName',
       nullWhenEmpty: false,
-      valueAccessor: _firstNameValue,
-      updateCard: _updateFirstName,
+      valueAccessor: (card) => card.firstName,
+      updateCard: (card, value) => card.copyWith(firstName: value ?? ''),
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.lastName,
       icon: Icons.badge,
       iconColor: (customColors, colorScheme) => customColors.purple,
-      inputType: InputType.lastName,
       keyboardType: null,
       textCapitalization: TextCapitalization.sentences,
       autocorrect: true,
@@ -116,18 +131,49 @@ class ContactCardFieldDefinitions {
       shouldValidateOnBlur: false,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterLastName,
+      validators: (context) => [
+        ZalgoTextValidator(errorText: context.l10n.zalgoTextDetectedError),
+        MaxLengthValidator(
+          MaxLengthValidatorType.medium.value,
+          errorText: context.l10n.nameTooLong,
+        ),
+      ],
       sdkPath: const ['n', 'surname'],
       identitiesColumnName: 'lastName',
       contactsColumnName: 'lastName',
       nullWhenEmpty: true,
-      valueAccessor: _lastNameValue,
-      updateCard: _updateLastName,
+      valueAccessor: (card) => card.lastName,
+      updateCard: (card, value) => card.copyWith(lastName: value),
+    ),
+    ContactCardFieldDefinition(
+      key: ContactCardFieldKey.organization,
+      icon: Icons.business,
+      iconColor: (customColors, colorScheme) => customColors.cyan,
+      keyboardType: TextInputType.text,
+      textCapitalization: TextCapitalization.words,
+      autocorrect: true,
+      autofocus: false,
+      shouldValidateOnBlur: false,
+      textInputAction: TextInputAction.next,
+      placeholder: (l10n) => l10n.enterOrganization,
+      validators: (context) => [
+        ZalgoTextValidator(errorText: context.l10n.zalgoTextDetectedError),
+        MaxLengthValidator(
+          MaxLengthValidatorType.medium.value,
+          errorText: context.l10n.nameTooLong,
+        ),
+      ],
+      sdkPath: const ['org'],
+      identitiesColumnName: 'organization',
+      contactsColumnName: 'organization',
+      nullWhenEmpty: true,
+      valueAccessor: (card) => card.organization,
+      updateCard: (card, value) => card.copyWith(organization: value),
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.email,
       icon: Icons.email,
       iconColor: (customColors, colorScheme) => customColors.warning,
-      inputType: InputType.email,
       keyboardType: TextInputType.emailAddress,
       textCapitalization: TextCapitalization.none,
       autocorrect: false,
@@ -135,18 +181,24 @@ class ContactCardFieldDefinitions {
       shouldValidateOnBlur: true,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterEmail,
+      validators: (context) => [
+        EmailValidator(errorText: context.l10n.invalidEmail),
+        MaxLengthValidator(
+          MaxLengthValidatorType.large.value,
+          errorText: context.l10n.emailTooLong,
+        ),
+      ],
       sdkPath: const ['email', 'type', 'work'],
       identitiesColumnName: 'email',
       contactsColumnName: 'email',
       nullWhenEmpty: true,
-      valueAccessor: _emailValue,
-      updateCard: _updateEmail,
+      valueAccessor: (card) => card.email,
+      updateCard: (card, value) => card.copyWith(email: value),
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.mobile,
       icon: Icons.phone,
       iconColor: (customColors, colorScheme) => colorScheme.primary,
-      inputType: InputType.phone,
       keyboardType: TextInputType.phone,
       textCapitalization: TextCapitalization.none,
       autocorrect: false,
@@ -154,18 +206,18 @@ class ContactCardFieldDefinitions {
       shouldValidateOnBlur: true,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterMobile,
+      validators: (_) => [],
       sdkPath: const ['tel', 'type', 'cell'],
       identitiesColumnName: 'mobile',
       contactsColumnName: 'mobile',
       nullWhenEmpty: true,
-      valueAccessor: _mobileValue,
-      updateCard: _updateMobile,
+      valueAccessor: (card) => card.mobile,
+      updateCard: (card, value) => card.copyWith(mobile: value),
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.postcode,
       icon: Icons.markunread_mailbox_outlined,
       iconColor: (customColors, colorScheme) => customColors.orange,
-      inputType: InputType.postcode,
       keyboardType: TextInputType.streetAddress,
       textCapitalization: TextCapitalization.characters,
       autocorrect: false,
@@ -173,12 +225,18 @@ class ContactCardFieldDefinitions {
       shouldValidateOnBlur: false,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterPostcode,
+      validators: (context) => [
+        MaxLengthValidator(
+          MaxLengthValidatorType.small.value,
+          errorText: context.l10n.nameTooLong,
+        ),
+      ],
       sdkPath: const ['adr', 'postalCode'],
       identitiesColumnName: 'postcode',
       contactsColumnName: 'postcode',
       nullWhenEmpty: true,
-      valueAccessor: _postcodeValue,
-      updateCard: _updatePostcode,
+      valueAccessor: (card) => card.postcode,
+      updateCard: (card, value) => card.copyWith(postcode: value),
     ),
   ];
 
@@ -232,6 +290,9 @@ class ContactCardFieldDefinitions {
   static ContactCardFieldDefinition get email =>
       byKey(ContactCardFieldKey.email);
 
+  static ContactCardFieldDefinition get organization =>
+      byKey(ContactCardFieldKey.organization);
+
   static ContactCardFieldDefinition get mobile =>
       byKey(ContactCardFieldKey.mobile);
 
@@ -259,34 +320,4 @@ String _sdkPathValue(Map<dynamic, dynamic> contactInfo, List<String> pathKeys) {
   }
 
   return '';
-}
-
-String? _firstNameValue(ContactCard card) => card.firstName;
-
-String? _lastNameValue(ContactCard card) => card.lastName;
-
-String? _emailValue(ContactCard card) => card.email;
-
-String? _mobileValue(ContactCard card) => card.mobile;
-
-String? _postcodeValue(ContactCard card) => card.postcode;
-
-ContactCard _updateFirstName(ContactCard card, String? value) {
-  return card.copyWith(firstName: value ?? '');
-}
-
-ContactCard _updateLastName(ContactCard card, String? value) {
-  return card.copyWith(lastName: value);
-}
-
-ContactCard _updateEmail(ContactCard card, String? value) {
-  return card.copyWith(email: value);
-}
-
-ContactCard _updateMobile(ContactCard card, String? value) {
-  return card.copyWith(mobile: value);
-}
-
-ContactCard _updatePostcode(ContactCard card, String? value) {
-  return card.copyWith(postcode: value);
 }

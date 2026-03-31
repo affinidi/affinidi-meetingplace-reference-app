@@ -19,6 +19,7 @@ void main() {
         {
           ContactCardFieldKey.firstName: 'Marco',
           ContactCardFieldKey.lastName: '',
+          ContactCardFieldKey.organization: '',
           ContactCardFieldKey.email: '',
           ContactCardFieldKey.mobile: '',
           ContactCardFieldKey.postcode: '',
@@ -27,6 +28,7 @@ void main() {
 
       expect(hydrated.firstName, 'Marco');
       expect(hydrated.lastName, isNull);
+      expect(hydrated.organization, isNull);
       expect(hydrated.email, isNull);
       expect(hydrated.mobile, isNull);
       expect(hydrated.postcode, isNull);
@@ -40,6 +42,7 @@ void main() {
         firstName: 'Marco',
         displayName: 'Marco Rossi',
         lastName: 'Rossi',
+        organization: 'Affinidi',
         email: 'marco@example.com',
         mobile: '+39000111222',
         postcode: '20121',
@@ -49,6 +52,10 @@ void main() {
 
       expect(sdkCard.firstName, card.firstName);
       expect(sdkCard.lastName, card.lastName);
+      expect(
+        sdkCard.valueForField(ContactCardFieldKey.organization),
+        card.organization,
+      );
       expect(sdkCard.email, card.email);
       expect(sdkCard.mobile, card.mobile);
       expect(sdkCard.postcode, card.postcode);
@@ -63,6 +70,7 @@ void main() {
 
       expect(hydrated.firstName, card.firstName);
       expect(hydrated.lastName, card.lastName);
+      expect(hydrated.organization, card.organization);
       expect(hydrated.email, card.email);
       expect(hydrated.mobile, card.mobile);
       expect(hydrated.postcode, card.postcode);
@@ -70,8 +78,8 @@ void main() {
     });
 
     test('emits migration metadata for missing generated columns', () {
-      expect(generatedIdentityContactCardFieldMigrations, hasLength(5));
-      expect(generatedContactCardFieldMigrations, hasLength(5));
+      expect(generatedIdentityContactCardFieldMigrations, hasLength(6));
+      expect(generatedContactCardFieldMigrations, hasLength(6));
 
       final missingIdentitySql = missingIdentityContactCardFieldSql(const [
         'firstName',
@@ -85,6 +93,10 @@ void main() {
 
       expect(
         missingIdentitySql,
+        contains('ALTER TABLE identities_table ADD COLUMN organization TEXT'),
+      );
+      expect(
+        missingIdentitySql,
         contains('ALTER TABLE identities_table ADD COLUMN email TEXT'),
       );
       expect(
@@ -94,6 +106,12 @@ void main() {
       expect(
         missingIdentitySql,
         contains('ALTER TABLE identities_table ADD COLUMN postcode TEXT'),
+      );
+      expect(
+        missingContactSql,
+        contains(
+          '''ALTER TABLE contact_cards ADD COLUMN organization TEXT NOT NULL DEFAULT '\'''',
+        ),
       );
       expect(
         missingContactSql,

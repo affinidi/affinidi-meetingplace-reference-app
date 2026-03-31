@@ -60,6 +60,12 @@ const generatedIdentityContactCardFieldMigrations =
         isNullable: true,
       ),
       GeneratedTextColumnMigration(
+        key: ContactCardFieldKey.organization,
+        tableName: 'identities_table',
+        columnName: 'organization',
+        isNullable: true,
+      ),
+      GeneratedTextColumnMigration(
         key: ContactCardFieldKey.email,
         tableName: 'identities_table',
         columnName: 'email',
@@ -91,6 +97,13 @@ const generatedContactCardFieldMigrations = <GeneratedTextColumnMigration>[
     key: ContactCardFieldKey.lastName,
     tableName: 'contact_cards',
     columnName: 'lastName',
+    isNullable: false,
+    defaultValue: '',
+  ),
+  GeneratedTextColumnMigration(
+    key: ContactCardFieldKey.organization,
+    tableName: 'contact_cards',
+    columnName: 'organization',
     isNullable: false,
     defaultValue: '',
   ),
@@ -142,6 +155,7 @@ IdentityRecord buildIdentityRecordFromIdentity(Identity identity) {
     displayName: identity.card.displayName,
     firstName: fieldValues[ContactCardFieldKey.firstName] ?? '',
     lastName: fieldValues[ContactCardFieldKey.lastName],
+    organization: fieldValues[ContactCardFieldKey.organization],
     email: fieldValues[ContactCardFieldKey.email],
     mobile: fieldValues[ContactCardFieldKey.mobile],
     postcode: fieldValues[ContactCardFieldKey.postcode],
@@ -156,6 +170,7 @@ Map<ContactCardFieldKey, String?> identityRecordFieldValues(
   return {
     ContactCardFieldKey.firstName: record.firstName,
     ContactCardFieldKey.lastName: record.lastName,
+    ContactCardFieldKey.organization: record.organization,
     ContactCardFieldKey.email: record.email,
     ContactCardFieldKey.mobile: record.mobile,
     ContactCardFieldKey.postcode: record.postcode,
@@ -175,6 +190,7 @@ contacts_db.ContactCardsCompanion buildContactCardCompanion({
     type: Value(card.type),
     firstName: Value(fieldValues[ContactCardFieldKey.firstName] ?? ''),
     lastName: Value(fieldValues[ContactCardFieldKey.lastName] ?? ''),
+    organization: Value(fieldValues[ContactCardFieldKey.organization] ?? ''),
     email: Value(fieldValues[ContactCardFieldKey.email] ?? ''),
     mobile: Value(fieldValues[ContactCardFieldKey.mobile] ?? ''),
     postcode: Value(fieldValues[ContactCardFieldKey.postcode] ?? ''),
@@ -189,6 +205,7 @@ Map<ContactCardFieldKey, String?> contactCardRowFieldValues(
   return {
     ContactCardFieldKey.firstName: record.firstName,
     ContactCardFieldKey.lastName: record.lastName,
+    ContactCardFieldKey.organization: record.organization,
     ContactCardFieldKey.email: record.email,
     ContactCardFieldKey.mobile: record.mobile,
     ContactCardFieldKey.postcode: record.postcode,
