@@ -10,13 +10,13 @@ class AppConciergeDelegate implements ConciergeDelegate {
   final MeetingPlaceChatSDK Function() _getChatSdk;
 
   @override
-  Future<void> approveConnectionRequest(ConciergeMessage chatItem) async {
-    await _getChatSdk().approveConnectionRequest(chatItem);
+  Future<void> approveConnectionRequest(ConciergeMessage message) async {
+    await _getChatSdk().approveConnectionRequest(message);
   }
 
   @override
-  Future<void> rejectConnectionRequest(ConciergeMessage chatItem) async {
-    await _getChatSdk().rejectConnectionRequest(chatItem);
+  Future<void> rejectConnectionRequest(ConciergeMessage message) async {
+    await _getChatSdk().rejectConnectionRequest(message);
   }
 
   @override

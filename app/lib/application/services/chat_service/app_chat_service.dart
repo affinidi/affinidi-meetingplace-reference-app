@@ -280,13 +280,13 @@ class AppChatService extends _$AppChatService implements ChatService {
   }
 
   @override
-  Future<void> rejectConnectionRequest(ConciergeMessage chatItem) async {
-    await _conciergeDelegate.rejectConnectionRequest(chatItem);
+  Future<void> rejectConnectionRequest(ConciergeMessage message) async {
+    await _conciergeDelegate.rejectConnectionRequest(message);
   }
 
   @override
-  Future<void> approveConnectionRequest(ConciergeMessage chatItem) async {
-    await _conciergeDelegate.approveConnectionRequest(chatItem);
+  Future<void> approveConnectionRequest(ConciergeMessage message) async {
+    await _conciergeDelegate.approveConnectionRequest(message);
   }
 
   @override
