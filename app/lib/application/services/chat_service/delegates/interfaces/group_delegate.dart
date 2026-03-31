@@ -5,5 +5,5 @@ import '../../../../../domain/models/contacts/contact.dart';
 /// Interface for handling group-related operations within the chat service.
 abstract class GroupDelegate {
   Future<Group?> refreshGroup(String groupId);
-  Future<void> updateGroupContactPendingStatus(Contact contact, Group? group);
+  Future<void> updateGroupContactPendingStatus(Contact contact, Group group);
 }

@@ -22,10 +22,8 @@ class AppGroupDelegate implements GroupDelegate {
   @override
   Future<void> updateGroupContactPendingStatus(
     Contact contact,
-    Group? group,
+    Group group,
   ) async {
-    if (group == null) return;
-
     final moreMembersPendingApproval = group.members.any(
       (m) => m.status == GroupMemberStatus.pendingApproval,
     );
