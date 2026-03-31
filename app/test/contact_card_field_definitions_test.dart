@@ -4,81 +4,78 @@ import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_car
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card_field_definition.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
+const _baseCard = ContactCard(
+  id: 'card-id',
+  did: 'did:key:test',
+  type: 'individual',
+  firstName: '',
+  displayName: '',
+);
+
 void main() {
   group('ContactCardFieldDefinitions', () {
-    test('normalizes nullable editable fields to null when hydrating', () {
-      final hydrated = ContactCardFieldDefinitions.applyFieldValues(
-        const ContactCard(
-          id: 'card-id',
-          did: 'did:key:test',
-          type: 'individual',
-          firstName: '',
-          displayName: '',
-        ),
-        {
-          ContactCardFieldKey.firstName: 'Marco',
-          ContactCardFieldKey.lastName: '',
-          ContactCardFieldKey.organization: '',
-          ContactCardFieldKey.website: '',
-          ContactCardFieldKey.email: '',
-          ContactCardFieldKey.mobile: '',
-          ContactCardFieldKey.postcode: '',
-        },
-      );
-
-      expect(hydrated.firstName, 'Marco');
-      expect(hydrated.lastName, isNull);
-      expect(hydrated.organization, isNull);
-      expect(hydrated.website, isNull);
-      expect(hydrated.email, isNull);
-      expect(hydrated.mobile, isNull);
-      expect(hydrated.postcode, isNull);
-    });
-
-    test('round-trips editable fields through sdk contact card paths', () {
-      const card = ContactCard(
-        id: 'card-id',
-        did: 'did:key:test',
-        type: 'individual',
-        firstName: 'Marco',
-        displayName: 'Marco Rossi',
-        lastName: 'Rossi',
-        organization: 'Affinidi',
-        website: 'https://affinidi.com',
-        email: 'marco@example.com',
-        mobile: '+39000111222',
-        postcode: '20121',
-      );
-
-      final sdkCard = card.toSdkContactCard();
-
-      expect(sdkCard.firstName, card.firstName);
-      expect(sdkCard.lastName, card.lastName);
+    test('has a definition for every contact card field key', () {
       expect(
-        sdkCard.valueForField(ContactCardFieldKey.organization),
-        card.organization,
+        ContactCardFieldDefinitions.values.map((field) => field.key),
+        unorderedEquals(ContactCardFieldKey.values),
       );
-      expect(sdkCard.valueForField(ContactCardFieldKey.website), card.website);
-      expect(sdkCard.email, card.email);
-      expect(sdkCard.mobile, card.mobile);
-      expect(sdkCard.postcode, card.postcode);
-
-      final hydrated = ContactCardUtils.fromSdkContactCard(
-        sdk.ContactCard(
-          did: sdkCard.did,
-          type: sdkCard.type,
-          contactInfo: Map<String, dynamic>.from(sdkCard.contactInfo),
-        ),
-      );
-
-      expect(hydrated.firstName, card.firstName);
-      expect(hydrated.lastName, card.lastName);
-      expect(hydrated.organization, card.organization);
-      expect(hydrated.website, card.website);
-      expect(hydrated.email, card.email);
-      expect(hydrated.mobile, card.mobile);
-      expect(hydrated.postcode, card.postcode);
-      expect(hydrated.displayName, card.displayName);
     });
+
+    test('normalizes empty values according to each field definition', () {
+      for (final field in ContactCardFieldDefinitions.values) {
+        final hydrated = field.hydrateContactCard(_baseCard, '');
+
+        if (field.nullWhenEmpty) {
+          expect(field.nullableValueFrom(hydrated), isNull, reason: field.name);
+        } else {
+          expect(field.valueFrom(hydrated), '', reason: field.name);
+        }
+      }
+    });
+
+    test(
+      'round-trips every field through the registry and sdk contact card',
+      () {
+        var card = _baseCard;
+        final expectedValues = <ContactCardFieldKey, String>{};
+
+        for (final field in ContactCardFieldDefinitions.values) {
+          final sampleValue = 'value-${field.name}';
+          card = field.updateContactCard(card, sampleValue);
+          expectedValues[field.key] = field.valueFrom(card);
+          expect(expectedValues[field.key], sampleValue, reason: field.name);
+        }
+
+        card = card.copyWith(displayName: card.fullName);
+
+        final sdkCard = card.toSdkContactCard();
+
+        for (final field in ContactCardFieldDefinitions.values) {
+          expect(
+            sdkCard.valueForField(field.key),
+            expectedValues[field.key],
+            reason: field.name,
+          );
+        }
+
+        final hydrated = ContactCardUtils.fromSdkContactCard(
+          sdk.ContactCard(
+            did: sdkCard.did,
+            type: sdkCard.type,
+            contactInfo: Map<String, dynamic>.from(sdkCard.contactInfo),
+          ),
+        );
+
+        for (final field in ContactCardFieldDefinitions.values) {
+          expect(
+            field.valueFrom(hydrated),
+            expectedValues[field.key],
+            reason: field.name,
+          );
+        }
+
+        expect(hydrated.displayName, hydrated.fullName);
+      },
+    );
   });
 }
