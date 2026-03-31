@@ -323,11 +323,8 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(field, {
       'firstName': 'Vorname',
       'lastName': 'Nachname',
-      'organization': 'Organisation',
-      'website': 'Webseite',
       'email': 'E-Mail',
       'mobile': 'Mobil',
-      'postcode': 'Postleitzahl',
       'other': '',
     });
     return '$_temp0';
@@ -811,19 +808,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get enterLastName => 'Nachname eingeben';
 
   @override
-  String get enterOrganization => 'Organisation eingeben';
-
-  @override
-  String get enterWebsite => 'Webseite eingeben';
-
-  @override
   String get enterEmail => 'E-Mail-Adresse eingeben';
 
   @override
   String get enterMobile => 'Hier kommt das Handy ins Spiel';
-
-  @override
-  String get enterPostcode => 'Postleitzahl eingeben';
 
   @override
   String get anonymous => 'Anonym';

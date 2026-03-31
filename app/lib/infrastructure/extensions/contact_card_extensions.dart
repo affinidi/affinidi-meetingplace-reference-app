@@ -221,10 +221,6 @@ extension SdkContactCardFields on sdk.ContactCard {
   set mobile(String value) =>
       setValueForField(ContactCardFieldKey.mobile, value);
 
-  String get postcode => valueForField(ContactCardFieldKey.postcode);
-  set postcode(String value) =>
-      setValueForField(ContactCardFieldKey.postcode, value);
-
   String get profilePic => ContactCardUtils.getPathValue(
     contactInfo,
     _profilePicPath,

@@ -321,11 +321,8 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(field, {
       'firstName': 'Nombre',
       'lastName': 'Apellido',
-      'organization': 'Organización',
-      'website': 'Sitio web',
       'email': 'Correo electrónico',
       'mobile': 'Móvil',
-      'postcode': 'Código postal',
       'other': '',
     });
     return '$_temp0';
@@ -807,19 +804,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get enterLastName => 'Ingrese el apellido';
 
   @override
-  String get enterOrganization => 'Ingrese la organización';
-
-  @override
-  String get enterWebsite => 'Ingrese el sitio web';
-
-  @override
   String get enterEmail => 'Ingrese el correo electrónico';
 
   @override
   String get enterMobile => 'Ingrese al móvil';
-
-  @override
-  String get enterPostcode => 'Ingrese el código postal';
 
   @override
   String get anonymous => 'Anónimo';

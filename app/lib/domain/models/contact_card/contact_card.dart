@@ -11,11 +11,8 @@ abstract class ContactCard with _$ContactCard {
     required String firstName,
     required String displayName,
     String? lastName,
-    String? organization,
-    String? website,
     String? email,
     String? mobile,
-    String? postcode,
     String? profilePic,
     String? cardColor,
   }) = _ContactCard;
@@ -28,11 +25,8 @@ abstract class ContactCard with _$ContactCard {
       firstName: '',
       displayName: '',
       lastName: null,
-      organization: null,
-      website: null,
       email: null,
       mobile: null,
-      postcode: null,
       profilePic: null,
       cardColor: null,
     );

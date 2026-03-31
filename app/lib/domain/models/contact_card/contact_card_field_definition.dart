@@ -9,15 +9,7 @@ import '../../../presentation/validators/max_length_validator_type.dart';
 import '../../../presentation/validators/zalgo_text_validator.dart';
 import 'contact_card.dart';
 
-enum ContactCardFieldKey {
-  firstName,
-  lastName,
-  organization,
-  website,
-  email,
-  mobile,
-  postcode,
-}
+enum ContactCardFieldKey { firstName, lastName, email, mobile }
 
 abstract class ContactCardFieldTags {
   static const String identityCard = 'identityCard';
@@ -147,52 +139,6 @@ class ContactCardFieldDefinitions {
       updateCard: (card, value) => card.copyWith(lastName: value),
     ),
     ContactCardFieldDefinition(
-      key: ContactCardFieldKey.organization,
-      icon: Icons.business,
-      iconColor: (customColors, colorScheme) => customColors.cyan,
-      keyboardType: TextInputType.text,
-      textCapitalization: TextCapitalization.words,
-      autocorrect: true,
-      autofocus: false,
-      shouldValidateOnBlur: false,
-      textInputAction: TextInputAction.next,
-      placeholder: (l10n) => l10n.enterOrganization,
-      validators: (context) => [
-        ZalgoTextValidator(errorText: context.l10n.zalgoTextDetectedError),
-        MaxLengthValidator(
-          MaxLengthValidatorType.medium.value,
-          errorText: context.l10n.nameTooLong,
-        ),
-      ],
-      jsonPath: const ['org'],
-      nullWhenEmpty: true,
-      valueAccessor: (card) => card.organization,
-      updateCard: (card, value) => card.copyWith(organization: value),
-    ),
-    ContactCardFieldDefinition(
-      key: ContactCardFieldKey.website,
-      icon: Icons.language,
-      iconColor: (customColors, colorScheme) => customColors.violet,
-      keyboardType: TextInputType.url,
-      textCapitalization: TextCapitalization.none,
-      autocorrect: false,
-      autofocus: false,
-      shouldValidateOnBlur: true,
-      textInputAction: TextInputAction.next,
-      placeholder: (l10n) => l10n.enterWebsite,
-      validators: (context) => [
-        ZalgoTextValidator(errorText: context.l10n.zalgoTextDetectedError),
-        MaxLengthValidator(
-          MaxLengthValidatorType.large.value,
-          errorText: context.l10n.nameTooLong,
-        ),
-      ],
-      jsonPath: const ['url'],
-      nullWhenEmpty: true,
-      valueAccessor: (card) => card.website,
-      updateCard: (card, value) => card.copyWith(website: value),
-    ),
-    ContactCardFieldDefinition(
       key: ContactCardFieldKey.email,
       icon: Icons.email,
       iconColor: (customColors, colorScheme) => customColors.warning,
@@ -233,28 +179,6 @@ class ContactCardFieldDefinitions {
       valueAccessor: (card) => card.mobile,
       updateCard: (card, value) => card.copyWith(mobile: value),
       tags: const [ContactCardFieldTags.identityCard],
-    ),
-    ContactCardFieldDefinition(
-      key: ContactCardFieldKey.postcode,
-      icon: Icons.markunread_mailbox_outlined,
-      iconColor: (customColors, colorScheme) => customColors.orange,
-      keyboardType: TextInputType.streetAddress,
-      textCapitalization: TextCapitalization.characters,
-      autocorrect: false,
-      autofocus: false,
-      shouldValidateOnBlur: false,
-      textInputAction: TextInputAction.next,
-      placeholder: (l10n) => l10n.enterPostcode,
-      validators: (context) => [
-        MaxLengthValidator(
-          MaxLengthValidatorType.small.value,
-          errorText: context.l10n.nameTooLong,
-        ),
-      ],
-      jsonPath: const ['adr', 'postalCode'],
-      nullWhenEmpty: true,
-      valueAccessor: (card) => card.postcode,
-      updateCard: (card, value) => card.copyWith(postcode: value),
     ),
   ];
 

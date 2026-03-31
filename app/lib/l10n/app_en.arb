@@ -335,7 +335,7 @@
 	"@generalConnect": {
 		"type": "text"
 	},
-	"contactCardFieldName": "{field, select, firstName{First name} lastName{Last name} organization{Organization} website{Website} email{Email} mobile{Mobile} postcode{Postcode} other{}}",
+	"contactCardFieldName": "{field, select, firstName{First name} lastName{Last name} email{Email} mobile{Mobile} other{}}",
 	"@contactCardFieldName": {
 		"type": "text",
 		"placeholders": {
@@ -710,11 +710,8 @@
 	"profilePictureChangePrompt": "Tap here to change your profile picture",
 	"enterFirstName": "Enter first name",
 	"enterLastName": "Enter last name",
-	"enterOrganization": "Enter organization",
-	"enterWebsite": "Enter website",
 	"enterEmail": "Enter email",
 	"enterMobile": "Enter mobile",
-	"enterPostcode": "Enter postcode",
 	"anonymous": "Anonymous",
 	"aliasLabel": "Alias label",
 	"enterAliasLabel": "Enter alias label",
