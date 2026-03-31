@@ -31,8 +31,8 @@ abstract class ChatService {
 
   Future<void> sendTextMessage(String message, {List<Attachment>? attachments});
   Future<void> sendChatActivity();
-  Future<void> rejectConnectionRequest(ConciergeMessage chatItem);
-  Future<void> approveConnectionRequest(ConciergeMessage chatItem);
+  Future<void> rejectConnectionRequest(ConciergeMessage message);
+  Future<void> approveConnectionRequest(ConciergeMessage message);
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message);
   Future<void> rejectChatContactDetailsUpdate(ConciergeMessage message);
   Future<void> reactOnMessage(Message message, {required String reaction});
