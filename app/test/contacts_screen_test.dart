@@ -90,8 +90,13 @@ void main() {
     testWidgets('should display group contact in grid', (tester) async {
       await navigateToContactsScreen(tester);
 
-      final contactName = FakeContacts.groupContact.displayName ?? 'Group';
-      expect(findContactByName(contactName), findsWidgets);
+      final groupContact = FakeContacts.groupContact;
+      final card = groupContact.card;
+      final groupName = [
+        card.firstName,
+        card.lastName ?? '',
+      ].where((s) => s.isNotEmpty).join(' ');
+      expect(findContactByName(groupName), findsWidgets);
     });
 
     testWidgets('should show badge count when greater than 0', (tester) async {
@@ -319,10 +324,14 @@ void main() {
 
       final contactName1 =
           FakeContacts.individualContact.displayName ?? 'Contact';
-      final contactName2 = FakeContacts.groupContact.displayName ?? 'Group';
-
+      final groupContact = FakeContacts.groupContact;
+      final card = groupContact.card;
+      final groupName = [
+        card.firstName,
+        card.lastName ?? '',
+      ].where((s) => s.isNotEmpty).join(' ');
       expect(findContactByName(contactName1), findsWidgets);
-      expect(findContactByName(contactName2), findsWidgets);
+      expect(findContactByName(groupName), findsWidgets);
     });
   });
 
@@ -634,7 +643,11 @@ void main() {
       await navigateToContactsScreen(tester);
 
       final groupContact = FakeContacts.groupContact;
-      final groupName = groupContact.displayName ?? 'Group';
+      final card = groupContact.card;
+      final groupName = [
+        card.firstName,
+        card.lastName ?? '',
+      ].where((s) => s.isNotEmpty).join(' ');
 
       expect(findContactByName(groupName), findsWidgets);
       expect(groupContact.isGroup, isTrue);
