@@ -32,15 +32,23 @@ class PresenceProtocolHandler implements ChatProtocolHandler {
   @override
   Future<void> handle(StreamData data, String channelDid) async {
     final plainTextMessage = data.plainTextMessage;
-    if (plainTextMessage == null) return;
+    if (plainTextMessage == null) {
+      _logger.warning('Presence message is null', name: _logKey);
+      return;
+    }
 
     final timestamp = DateTime.tryParse(
       plainTextMessage.body?['timestamp'] as String? ?? '',
     );
-    if (timestamp == null || channelDid.isEmpty) return;
+    if (timestamp == null || channelDid.isEmpty) {
+      _logger.warning(
+        'Invalid presence data: timestamp=$timestamp, channelDid=$channelDid',
+        name: _logKey,
+      );
+      return;
+    }
 
     _logger.info('Received chat presence update', name: _logKey);
-
     unawaited(
       _ref
           .read(contactsServiceProvider.notifier)
