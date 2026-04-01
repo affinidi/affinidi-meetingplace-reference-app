@@ -23,7 +23,7 @@ void main() {
 
     test('normalizes empty values according to each field definition', () {
       for (final field in ContactCardFieldDefinitions.values) {
-        final hydrated = field.hydrateContactCard(_baseCard, '');
+        final hydrated = field.updateContactCard(_baseCard, '');
 
         if (field.nullWhenEmpty) {
           expect(field.nullableValueFrom(hydrated), isNull, reason: field.name);

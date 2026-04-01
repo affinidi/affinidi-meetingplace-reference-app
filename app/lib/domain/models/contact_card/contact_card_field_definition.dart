@@ -16,6 +16,15 @@ abstract class ContactCardFieldTags {
   static const String searchable = 'searchable';
 }
 
+typedef ContactCardFieldColor =
+    Color Function(AppCustomColors customColors, ColorScheme colorScheme);
+typedef ContactCardFieldPlaceholder = String Function(AppLocalizations l10n);
+typedef ContactCardFieldValidators =
+    List<FieldValidator> Function(BuildContext context);
+typedef ContactCardFieldValueAccessor = String? Function(ContactCard card);
+typedef ContactCardFieldUpdater =
+    ContactCard Function(ContactCard card, String? value);
+
 class ContactCardFieldDefinition {
   ContactCardFieldDefinition({
     required this.key,
@@ -29,19 +38,18 @@ class ContactCardFieldDefinition {
     required this.shouldValidateOnBlur,
     required this.textInputAction,
     required this.placeholder,
-    required List<FieldValidator> Function(BuildContext context) validators,
+    required ContactCardFieldValidators validators,
     required this.jsonPath,
     required this.nullWhenEmpty,
-    required String? Function(ContactCard) valueAccessor,
-    required ContactCard Function(ContactCard, String?) updateCard,
+    required ContactCardFieldValueAccessor valueAccessor,
+    required ContactCardFieldUpdater updateCard,
   }) : _valueAccessor = valueAccessor,
        _updateCard = updateCard,
        _validatorsBuilder = validators;
 
   final ContactCardFieldKey key;
   final IconData icon;
-  final Color Function(AppCustomColors customColors, ColorScheme colorScheme)
-  iconColor;
+  final ContactCardFieldColor iconColor;
   final List<String> tags;
   final TextInputType? keyboardType;
   final TextCapitalization textCapitalization;
@@ -49,12 +57,12 @@ class ContactCardFieldDefinition {
   final bool autofocus;
   final bool shouldValidateOnBlur;
   final TextInputAction textInputAction;
-  final String Function(AppLocalizations l10n) placeholder;
-  final List<FieldValidator> Function(BuildContext context) _validatorsBuilder;
+  final ContactCardFieldPlaceholder placeholder;
+  final ContactCardFieldValidators _validatorsBuilder;
   final List<String> jsonPath;
   final bool nullWhenEmpty;
-  final String? Function(ContactCard) _valueAccessor;
-  final ContactCard Function(ContactCard, String?) _updateCard;
+  final ContactCardFieldValueAccessor _valueAccessor;
+  final ContactCardFieldUpdater _updateCard;
 
   bool hasTag(String tag) => tags.contains(tag);
 
@@ -68,16 +76,12 @@ class ContactCardFieldDefinition {
   String valueFrom(ContactCard card) => _valueAccessor(card) ?? '';
 
   String sdkValueFrom(sdk.ContactCard card) {
-    return _sdkPathValue(card.contactInfo, jsonPath);
+    return _jsonPathValue(card.contactInfo, jsonPath);
   }
 
   String? nullableValueFrom(ContactCard card) => _valueAccessor(card);
 
-  ContactCard updateContactCard(ContactCard card, String value) {
-    return _updateCard(card, _normalize(value));
-  }
-
-  ContactCard hydrateContactCard(ContactCard card, String? value) {
+  ContactCard updateContactCard(ContactCard card, String? value) {
     return _updateCard(card, _normalize(value));
   }
 
@@ -213,7 +217,7 @@ class ContactCardFieldDefinitions {
   ) {
     var updatedCard = card;
     for (final field in values) {
-      updatedCard = field.hydrateContactCard(
+      updatedCard = field.updateContactCard(
         updatedCard,
         fieldValues[field.key],
       );
@@ -222,7 +226,10 @@ class ContactCardFieldDefinitions {
   }
 }
 
-String _sdkPathValue(Map<dynamic, dynamic> contactInfo, List<String> pathKeys) {
+String _jsonPathValue(
+  Map<dynamic, dynamic> contactInfo,
+  List<String> pathKeys,
+) {
   if (pathKeys.isEmpty) return '';
 
   var parentElement = contactInfo;
