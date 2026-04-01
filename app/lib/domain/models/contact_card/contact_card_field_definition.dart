@@ -81,8 +81,6 @@ class ContactCardFieldDefinition {
     return _updateCard(card, _normalize(value));
   }
 
-  String valueForNonNullableStorage(ContactCard card) => valueFrom(card);
-
   String? _normalize(String? value) {
     if (nullWhenEmpty && (value == null || value.isEmpty)) {
       return null;
@@ -206,15 +204,6 @@ class ContactCardFieldDefinitions {
   static Map<ContactCardFieldKey, String?> valuesFromCard(ContactCard card) {
     return {
       for (final field in values) field.key: field.nullableValueFrom(card),
-    };
-  }
-
-  static Map<ContactCardFieldKey, String> nonNullableValuesFromCard(
-    ContactCard card,
-  ) {
-    return {
-      for (final field in values)
-        field.key: field.valueForNonNullableStorage(card),
     };
   }
 
