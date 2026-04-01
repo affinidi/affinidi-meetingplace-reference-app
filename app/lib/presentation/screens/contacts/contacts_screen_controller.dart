@@ -9,6 +9,7 @@ import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/mediator/mediator.dart';
 import '../../../infrastructure/extensions/contacts_screen_filter_extensions.dart';
+import '../../../infrastructure/extensions/string_list_extensions.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'contacts_screen_filter.dart';
 import 'contacts_screen_state.dart';
@@ -123,6 +124,7 @@ class ContactsScreenController extends _$ContactsScreenController {
       final searchableText = ContactCardFieldDefinitions.values
           .where((f) => f.hasTag(ContactCardFieldTags.searchable))
           .map((f) => f.valueFrom(contact.card))
+          .nonEmpty
           .join(' ')
           .toLowerCase();
       final displayName = contact.displayName?.toLowerCase() ?? '';

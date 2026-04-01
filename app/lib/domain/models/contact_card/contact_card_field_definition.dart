@@ -163,7 +163,10 @@ class ContactCardFieldDefinitions {
       nullWhenEmpty: true,
       valueAccessor: (card) => card.email,
       updateCard: (card, value) => card.copyWith(email: value),
-      tags: const [ContactCardFieldTags.identityCard],
+      tags: const [
+        ContactCardFieldTags.identityCard,
+        ContactCardFieldTags.searchable,
+      ],
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.mobile,
@@ -181,7 +184,10 @@ class ContactCardFieldDefinitions {
       nullWhenEmpty: true,
       valueAccessor: (card) => card.mobile,
       updateCard: (card, value) => card.copyWith(mobile: value),
-      tags: const [ContactCardFieldTags.identityCard],
+      tags: const [
+        ContactCardFieldTags.identityCard,
+        ContactCardFieldTags.searchable,
+      ],
     ),
   ];
 

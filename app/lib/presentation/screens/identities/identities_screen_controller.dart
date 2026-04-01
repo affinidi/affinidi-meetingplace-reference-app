@@ -6,6 +6,7 @@ import '../../../domain/models/contact_card/contact_card.dart';
 import '../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/identities_screen_filter_extensions.dart';
+import '../../../infrastructure/extensions/string_list_extensions.dart';
 import 'identities_screen_filter.dart';
 import 'identities_screen_state.dart';
 
@@ -70,7 +71,9 @@ class IdentitiesScreenController extends _$IdentitiesScreenController {
       searchFiltered = allIdentities.where((identity) {
         final card = identity.card;
         final searchableText = ContactCardFieldDefinitions.values
+            .where((f) => f.hasTag(ContactCardFieldTags.searchable))
             .map((f) => f.valueFrom(card))
+            .nonEmpty
             .join(' ')
             .toLowerCase();
         return searchableText.contains(lowerQuery);
