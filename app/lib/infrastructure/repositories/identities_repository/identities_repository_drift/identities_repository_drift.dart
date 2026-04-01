@@ -93,9 +93,8 @@ extension IdentityMapper on Identity {
       type: ContactCardType.individual.value,
       contactInfo: decoded,
     );
-    final hydrated = ContactCardUtils.fromSdkContactCard(sdkCard);
 
-    final card = hydrated.copyWith(
+    final card = ContactCardUtils.fromSdkContactCard(sdkCard).copyWith(
       id: record.id,
       did: record.did,
       type: sdkCard.type,

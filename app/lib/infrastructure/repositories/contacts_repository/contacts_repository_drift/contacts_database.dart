@@ -114,21 +114,6 @@ class ContactsDatabase extends _$ContactsDatabase {
   );
 }
 
-/// Contact cards table linked to [Contacts].
-///
-/// Stores additional profile details such as first/last name, email,
-/// mobile number, and profile picture.
-@DataClassName('ContactCard')
-class ContactCards extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get contactId => text().customConstraint(
-    'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL',
-  )();
-  TextColumn get did => text()();
-  TextColumn get type => text()();
-  TextColumn get contactInfoJson => text().withDefault(const Constant('{}'))();
-}
-
 /// Main contacts table.
 @DataClassName('Contact')
 class Contacts extends Table {
@@ -154,6 +139,21 @@ class Contacts extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+}
+
+/// Contact cards table linked to [Contacts].
+///
+/// Stores additional profile details such as first/last name, email,
+/// mobile number, and profile picture.
+@DataClassName('ContactCard')
+class ContactCards extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get contactId => text().customConstraint(
+    'REFERENCES contacts(id) ON DELETE CASCADE UNIQUE NOT NULL',
+  )();
+  TextColumn get did => text()();
+  TextColumn get type => text()();
+  TextColumn get contactInfoJson => text().withDefault(const Constant('{}'))();
 }
 
 /// Converts between [ContactType] enum and its int representation.
