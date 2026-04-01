@@ -120,7 +120,7 @@ class ContactCardUtils {
       displayName: '',
     );
 
-    for (final field in ContactCardFieldDefinitions.editable) {
+    for (final field in ContactCardFieldDefinitions.values) {
       card = field.updateContactCard(
         card,
         getPathValue(values, field.jsonPath),
@@ -165,7 +165,7 @@ extension ContactCardExtensions on ContactCard {
 
   sdk.ContactCard toSdkContactCard() {
     final contactInfo = <String, dynamic>{};
-    for (final field in ContactCardFieldDefinitions.editable) {
+    for (final field in ContactCardFieldDefinitions.values) {
       ContactCardUtils.setPathValue(
         contactInfo,
         field.jsonPath,

@@ -193,8 +193,6 @@ class ContactCardFieldDefinitions {
     ),
   ];
 
-  static List<ContactCardFieldDefinition> get editable => values;
-
   static final _byKey = {for (final field in values) field.key: field};
 
   static ContactCardFieldDefinition byKey(ContactCardFieldKey key) {
