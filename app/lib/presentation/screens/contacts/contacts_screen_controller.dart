@@ -121,6 +121,7 @@ class ContactsScreenController extends _$ContactsScreenController {
     final allContacts = ref.read(contactsServiceProvider).contacts;
     final filteredContacts = allContacts.where((contact) {
       final searchableText = ContactCardFieldDefinitions.values
+          .where((f) => f.hasTag(ContactCardFieldTags.searchable))
           .map((f) => f.valueFrom(contact.card))
           .join(' ')
           .toLowerCase();

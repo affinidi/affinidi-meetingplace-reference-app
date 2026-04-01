@@ -13,6 +13,7 @@ enum ContactCardFieldKey { firstName, lastName, email, mobile }
 
 abstract class ContactCardFieldTags {
   static const String identityCard = 'identityCard';
+  static const String searchable = 'searchable';
 }
 
 class ContactCardFieldDefinition {
@@ -114,6 +115,7 @@ class ContactCardFieldDefinitions {
       nullWhenEmpty: false,
       valueAccessor: (card) => card.firstName,
       updateCard: (card, value) => card.copyWith(firstName: value ?? ''),
+      tags: const [ContactCardFieldTags.searchable],
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.lastName,
@@ -137,6 +139,7 @@ class ContactCardFieldDefinitions {
       nullWhenEmpty: true,
       valueAccessor: (card) => card.lastName,
       updateCard: (card, value) => card.copyWith(lastName: value),
+      tags: const [ContactCardFieldTags.searchable],
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.email,
