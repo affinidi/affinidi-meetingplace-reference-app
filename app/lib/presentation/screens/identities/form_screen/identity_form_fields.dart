@@ -32,41 +32,6 @@ class IdentityFormFields extends ConsumerWidget {
     final cacheManager = ref.read(cacheManagerProvider);
     final personaFields = ContactCardFieldDefinitions.values;
 
-    String? validateField(ContactCardFieldDefinition field, String? value) {
-      if (field.shouldValidateOnBlur &&
-          !controller.shouldShowValidation(field)) {
-        return null;
-      }
-
-      return field.validator(context).call(value);
-    }
-
-    Widget buildPersonaField(
-      ContactCardFieldDefinition field,
-      double traversalOrder,
-    ) {
-      return FormRowTextField(
-        icon: field.icon,
-        label: field.label(context.l10n),
-        color: field.iconColor(context.customColors, context.colorScheme),
-        controller: controller.controllerFor(field),
-        placeholder: field.placeholder(context.l10n),
-        textCapitalization: field.textCapitalization,
-        autocorrect: field.autocorrect,
-        singleLine: true,
-        focusNode: controller.focusNodeFor(field),
-        keyboardType: field.keyboardType,
-        onChanged: (value) => controller.updateField(field, value, formKey),
-        onFieldSubmitted: field.shouldValidateOnBlur
-            ? (_) => controller.updateErrorVisibilityOnBlur(field, formKey)
-            : null,
-        validator: (value) => validateField(field, value),
-        textInputAction: field.textInputAction,
-        traversalOrder: traversalOrder,
-        autofocus: field.autofocus,
-      );
-    }
-
     return Form(
       key: formKey,
       child: FormCard(
@@ -134,11 +99,66 @@ class IdentityFormFields extends ConsumerWidget {
             ),
             for (var index = 0; index < personaFields.length; index++) ...[
               const Divider(),
-              buildPersonaField(personaFields[index], (index + 1).toDouble()),
+              _PersonaField(
+                identityId: identityId,
+                field: personaFields[index],
+                formKey: formKey,
+                traversalOrder: (index + 1).toDouble(),
+              ),
             ],
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PersonaField extends ConsumerWidget {
+  const _PersonaField({
+    required this.identityId,
+    required this.field,
+    required this.formKey,
+    required this.traversalOrder,
+  });
+
+  final String? identityId;
+  final ContactCardFieldDefinition field;
+  final GlobalKey<FormState> formKey;
+  final double traversalOrder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = identityFormScreenControllerProvider(identityId);
+    final controller = ref.read(provider.notifier);
+
+    String? validateField(BuildContext context, String? value) {
+      if (field.shouldValidateOnBlur &&
+          !controller.shouldShowValidation(field)) {
+        return null;
+      }
+
+      return field.validator(context).call(value);
+    }
+
+    return FormRowTextField(
+      icon: field.icon,
+      label: field.label(context.l10n),
+      color: field.iconColor(context.customColors, context.colorScheme),
+      controller: controller.controllerFor(field),
+      placeholder: field.placeholder(context.l10n),
+      textCapitalization: field.textCapitalization,
+      autocorrect: field.autocorrect,
+      singleLine: true,
+      focusNode: controller.focusNodeFor(field),
+      keyboardType: field.keyboardType,
+      onChanged: (value) => controller.updateField(field, value, formKey),
+      onFieldSubmitted: field.shouldValidateOnBlur
+          ? (_) => controller.updateErrorVisibilityOnBlur(field, formKey)
+          : null,
+      validator: (value) => validateField(context, value),
+      textInputAction: field.textInputAction,
+      traversalOrder: traversalOrder,
+      autofocus: field.autofocus,
     );
   }
 }
