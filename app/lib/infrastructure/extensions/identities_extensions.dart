@@ -70,7 +70,7 @@ extension IdentityExtensions on Identity {
   String getDisplayName({required AppLocalizations l10n}) {
     if (isPrimary) return l10n.displayNamePrimary;
     if (isPlaceholder) return l10n.displayNameAddNew;
-    return card.displayName.isNotEmpty ? card.displayName : '';
+    return card.displayName.isNotEmpty == true ? card.displayName : '';
   }
 
   /// Returns a subtitle for the identity.

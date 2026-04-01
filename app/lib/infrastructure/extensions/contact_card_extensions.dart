@@ -144,8 +144,7 @@ extension ContactCardExtensions on ContactCard {
   bool get hasProfilePic => profilePic != null && profilePic!.trim().isNotEmpty;
 
   /// Full display name composed from first and last name.
-  String get fullName =>
-      [firstName.trim(), lastName?.trim()].nonNulls.join(' ');
+  String get fullName => '$firstName ${lastName ?? ''}'.trim();
 
   /// ImageProvider for the contact's profile picture or default placeholder
   ImageProvider<Object> image({required BaseCacheManager cacheManager}) {

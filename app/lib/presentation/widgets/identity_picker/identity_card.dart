@@ -302,13 +302,13 @@ class _ContactInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = context.textTheme;
     final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
 
     return Row(
       spacing: 8,
       children: [
-        Icon(icon, color: colorScheme.onSurface, size: 16),
+        Icon(icon, color: colorScheme.onSurfaceVariant, size: 16),
         Expanded(
           child: Text(
             text,

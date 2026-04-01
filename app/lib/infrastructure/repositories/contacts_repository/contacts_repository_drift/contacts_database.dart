@@ -40,16 +40,84 @@ class ContactsDatabase extends _$ContactsDatabase {
        );
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
     },
+    onUpgrade: (migrator, from, to) async {
+      if (from < 2) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+
+        final hasBeenOpenedExists = result.any(
+          (row) => row.data['name'] == 'has_been_opened',
+        );
+
+        if (!hasBeenOpenedExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN has_been_opened INTEGER NOT '
+            'NULL DEFAULT 0 CHECK (has_been_opened IN (0, 1))',
+          );
+        }
+      }
+
+      //this migration removes the column unsentMessage and chatInProgress
+      if (from < 3) {
+        await migrator.alterTable(
+          // ignore: experimental_member_use
+          TableMigration(
+            contacts,
+            columnTransformer: {
+              contacts.id: contacts.id,
+              contacts.channelDid: contacts.channelDid,
+              contacts.channelDidSha256: contacts.channelDidSha256,
+              contacts.dateAdded: contacts.dateAdded,
+              contacts.offerLink: contacts.offerLink,
+              contacts.mediatorDid: contacts.mediatorDid,
+              contacts.type: contacts.type,
+              contacts.status: contacts.status,
+              contacts.origin: contacts.origin,
+              contacts.category: contacts.category,
+              contacts.displayName: contacts.displayName,
+              contacts.badgeUpdateInProgress: contacts.badgeUpdateInProgress,
+              contacts.badgeCount: contacts.badgeCount,
+              contacts.currentMessageSeqNo: contacts.currentMessageSeqNo,
+              contacts.hasBeenOpened: contacts.hasBeenOpened,
+              contacts.lastKeepAliveMessage: contacts.lastKeepAliveMessage,
+            },
+          ),
+        );
+      }
+      if (from < 4) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+
+        final notificationBannerDismissedExists = result.any(
+          (row) => row.data['name'] == 'notification_banner_dismissed',
+        );
+
+        if (!notificationBannerDismissedExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN notification_banner_dismissed'
+            ' INTEGER NOT NULL DEFAULT 0 CHECK'
+            ' (notification_banner_dismissed IN (0, 1))',
+          );
+
+          await customStatement(
+            'UPDATE contacts SET notification_banner_dismissed = 1'
+            ' WHERE origin != 1',
+          );
+        }
+      }
+    },
   );
 }
 
+/// Contact cards table linked to [Contacts].
+///
+/// Stores additional profile details such as first/last name, email,
+/// mobile number, and profile picture.
 @DataClassName('ContactCard')
 class ContactCards extends Table {
   IntColumn get id => integer().autoIncrement()();

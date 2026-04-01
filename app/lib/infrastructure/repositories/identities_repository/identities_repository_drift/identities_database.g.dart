@@ -167,7 +167,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   /// Permanent DID for this identity.
   final String did;
 
-  /// Alias / user-facing name override (not part of SDK contactInfo).
+  /// Alias / user-facing name override.
   final String displayName;
 
   /// JSON blob holding all contact card fields mapped by sdkPath.
