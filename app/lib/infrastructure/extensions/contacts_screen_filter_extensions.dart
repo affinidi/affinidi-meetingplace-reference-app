@@ -12,6 +12,10 @@ extension ContactsScreenFilterExtensions on ContactsScreenFilter {
         return {ContactCategory.group};
       case ContactsScreenFilter.service:
         return {ContactCategory.service, ContactCategory.robot};
+      // case ContactsScreenFilter.business:
+      //   return {
+      //     ContactCategory.organization,
+      //   };
       case ContactsScreenFilter.any:
         return {
           ContactCategory.person,

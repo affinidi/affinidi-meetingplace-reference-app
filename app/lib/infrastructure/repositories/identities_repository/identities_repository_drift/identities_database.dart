@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import '../../../database/database_platform.dart';
 import '../../../providers/applications_documents_directory_provider.dart';
 import '../../../secure_storage/secure_storage.dart';
@@ -35,7 +36,7 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
        );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

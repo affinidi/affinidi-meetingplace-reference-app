@@ -4,6 +4,7 @@ import 'package:clock/clock.dart';
 import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
+
 import '../../../../domain/models/contacts/contact_category.dart';
 import '../../../../domain/models/contacts/contact_origin.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
