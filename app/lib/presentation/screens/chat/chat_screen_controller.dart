@@ -338,7 +338,7 @@ class ChatScreenController extends _$ChatScreenController
     final group = state.group;
     if (contact == null) return;
     if (group == null) return;
-    
+
     await _chatService?.updateGroupContactPendingStatus(contact, group);
   }
 
