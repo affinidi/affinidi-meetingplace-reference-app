@@ -75,13 +75,17 @@ class IdentitiesRepositoryDrift implements IdentitiesRepository {
 extension IdentityMapper on Identity {
   /// Converts an [Identity] into an [IdentityRecord] for persistence.
   IdentityRecord toRecord() {
-    final contactInfoJson = jsonEncode(toSdkContactCard().contactInfo);
+    final contactInfo = Map<String, dynamic>.from(
+      toSdkContactCard().contactInfo,
+    )..remove('photo');
+    final contactInfoJson = jsonEncode(contactInfo);
     return IdentityRecord(
       id: id,
       did: did,
       displayName: card.displayName,
       contactInfoJson: contactInfoJson,
       isPrimary: isPrimary,
+      profilePic: card.profilePic,
     );
   }
 
@@ -99,6 +103,7 @@ extension IdentityMapper on Identity {
       did: record.did,
       type: sdkCard.type,
       displayName: record.displayName,
+      profilePic: record.profilePic,
     );
 
     return Identity(

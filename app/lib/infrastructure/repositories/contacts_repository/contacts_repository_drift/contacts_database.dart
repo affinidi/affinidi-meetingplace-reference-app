@@ -155,6 +155,7 @@ class ContactCards extends Table {
   TextColumn get did => text()();
   TextColumn get type => text()();
   TextColumn get contactInfoJson => text().withDefault(const Constant('{}'))();
+  TextColumn get profilePic => text().nullable()();
 }
 
 /// Converts between [ContactType] enum and its int representation.

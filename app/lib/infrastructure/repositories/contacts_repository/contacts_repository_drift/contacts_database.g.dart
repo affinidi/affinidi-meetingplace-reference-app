@@ -1081,6 +1081,17 @@ class $ContactCardsTable extends ContactCards
     requiredDuringInsert: false,
     defaultValue: const Constant('{}'),
   );
+  static const VerificationMeta _profilePicMeta = const VerificationMeta(
+    'profilePic',
+  );
+  @override
+  late final GeneratedColumn<String> profilePic = GeneratedColumn<String>(
+    'profile_pic',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1088,6 +1099,7 @@ class $ContactCardsTable extends ContactCards
     did,
     type,
     contactInfoJson,
+    profilePic,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1137,6 +1149,12 @@ class $ContactCardsTable extends ContactCards
         ),
       );
     }
+    if (data.containsKey('profile_pic')) {
+      context.handle(
+        _profilePicMeta,
+        profilePic.isAcceptableOrUnknown(data['profile_pic']!, _profilePicMeta),
+      );
+    }
     return context;
   }
 
@@ -1166,6 +1184,10 @@ class $ContactCardsTable extends ContactCards
         DriftSqlType.string,
         data['${effectivePrefix}contact_info_json'],
       )!,
+      profilePic: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_pic'],
+      ),
     );
   }
 
@@ -1181,12 +1203,17 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
   final String did;
   final String type;
   final String contactInfoJson;
+
+  /// Profile picture of the contact, stored outside the JSON blob to avoid
+  /// database field size limitations.
+  final String? profilePic;
   const ContactCard({
     required this.id,
     required this.contactId,
     required this.did,
     required this.type,
     required this.contactInfoJson,
+    this.profilePic,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1196,6 +1223,9 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     map['did'] = Variable<String>(did);
     map['type'] = Variable<String>(type);
     map['contact_info_json'] = Variable<String>(contactInfoJson);
+    if (!nullToAbsent || profilePic != null) {
+      map['profile_pic'] = Variable<String>(profilePic);
+    }
     return map;
   }
 
@@ -1206,6 +1236,9 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       did: Value(did),
       type: Value(type),
       contactInfoJson: Value(contactInfoJson),
+      profilePic: profilePic == null && nullToAbsent
+          ? const Value.absent()
+          : Value(profilePic),
     );
   }
 
@@ -1220,6 +1253,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       did: serializer.fromJson<String>(json['did']),
       type: serializer.fromJson<String>(json['type']),
       contactInfoJson: serializer.fromJson<String>(json['contactInfoJson']),
+      profilePic: serializer.fromJson<String?>(json['profilePic']),
     );
   }
   @override
@@ -1231,6 +1265,7 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       'did': serializer.toJson<String>(did),
       'type': serializer.toJson<String>(type),
       'contactInfoJson': serializer.toJson<String>(contactInfoJson),
+      'profilePic': serializer.toJson<String?>(profilePic),
     };
   }
 
@@ -1240,12 +1275,14 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
     String? did,
     String? type,
     String? contactInfoJson,
+    Value<String?> profilePic = const Value.absent(),
   }) => ContactCard(
     id: id ?? this.id,
     contactId: contactId ?? this.contactId,
     did: did ?? this.did,
     type: type ?? this.type,
     contactInfoJson: contactInfoJson ?? this.contactInfoJson,
+    profilePic: profilePic.present ? profilePic.value : this.profilePic,
   );
   ContactCard copyWithCompanion(ContactCardsCompanion data) {
     return ContactCard(
@@ -1256,6 +1293,9 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
       contactInfoJson: data.contactInfoJson.present
           ? data.contactInfoJson.value
           : this.contactInfoJson,
+      profilePic: data.profilePic.present
+          ? data.profilePic.value
+          : this.profilePic,
     );
   }
 
@@ -1266,13 +1306,15 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           ..write('contactId: $contactId, ')
           ..write('did: $did, ')
           ..write('type: $type, ')
-          ..write('contactInfoJson: $contactInfoJson')
+          ..write('contactInfoJson: $contactInfoJson, ')
+          ..write('profilePic: $profilePic')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, contactId, did, type, contactInfoJson);
+  int get hashCode =>
+      Object.hash(id, contactId, did, type, contactInfoJson, profilePic);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1281,7 +1323,8 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
           other.contactId == this.contactId &&
           other.did == this.did &&
           other.type == this.type &&
-          other.contactInfoJson == this.contactInfoJson);
+          other.contactInfoJson == this.contactInfoJson &&
+          other.profilePic == this.profilePic);
 }
 
 class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
@@ -1290,12 +1333,14 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
   final Value<String> did;
   final Value<String> type;
   final Value<String> contactInfoJson;
+  final Value<String?> profilePic;
   const ContactCardsCompanion({
     this.id = const Value.absent(),
     this.contactId = const Value.absent(),
     this.did = const Value.absent(),
     this.type = const Value.absent(),
     this.contactInfoJson = const Value.absent(),
+    this.profilePic = const Value.absent(),
   });
   ContactCardsCompanion.insert({
     this.id = const Value.absent(),
@@ -1303,6 +1348,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     required String did,
     required String type,
     this.contactInfoJson = const Value.absent(),
+    this.profilePic = const Value.absent(),
   }) : contactId = Value(contactId),
        did = Value(did),
        type = Value(type);
@@ -1312,6 +1358,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     Expression<String>? did,
     Expression<String>? type,
     Expression<String>? contactInfoJson,
+    Expression<String>? profilePic,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1319,6 +1366,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
       if (did != null) 'did': did,
       if (type != null) 'type': type,
       if (contactInfoJson != null) 'contact_info_json': contactInfoJson,
+      if (profilePic != null) 'profile_pic': profilePic,
     });
   }
 
@@ -1328,6 +1376,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     Value<String>? did,
     Value<String>? type,
     Value<String>? contactInfoJson,
+    Value<String?>? profilePic,
   }) {
     return ContactCardsCompanion(
       id: id ?? this.id,
@@ -1335,6 +1384,7 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
       did: did ?? this.did,
       type: type ?? this.type,
       contactInfoJson: contactInfoJson ?? this.contactInfoJson,
+      profilePic: profilePic ?? this.profilePic,
     );
   }
 
@@ -1356,6 +1406,9 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
     if (contactInfoJson.present) {
       map['contact_info_json'] = Variable<String>(contactInfoJson.value);
     }
+    if (profilePic.present) {
+      map['profile_pic'] = Variable<String>(profilePic.value);
+    }
     return map;
   }
 
@@ -1366,7 +1419,8 @@ class ContactCardsCompanion extends UpdateCompanion<ContactCard> {
           ..write('contactId: $contactId, ')
           ..write('did: $did, ')
           ..write('type: $type, ')
-          ..write('contactInfoJson: $contactInfoJson')
+          ..write('contactInfoJson: $contactInfoJson, ')
+          ..write('profilePic: $profilePic')
           ..write(')'))
         .toString();
   }
@@ -1957,6 +2011,7 @@ typedef $$ContactCardsTableCreateCompanionBuilder =
       required String did,
       required String type,
       Value<String> contactInfoJson,
+      Value<String?> profilePic,
     });
 typedef $$ContactCardsTableUpdateCompanionBuilder =
     ContactCardsCompanion Function({
@@ -1965,6 +2020,7 @@ typedef $$ContactCardsTableUpdateCompanionBuilder =
       Value<String> did,
       Value<String> type,
       Value<String> contactInfoJson,
+      Value<String?> profilePic,
     });
 
 final class $$ContactCardsTableReferences
@@ -2021,6 +2077,11 @@ class $$ContactCardsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get profilePic => $composableBuilder(
+    column: $table.profilePic,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$ContactsTableFilterComposer get contactId {
     final $$ContactsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -2074,6 +2135,11 @@ class $$ContactCardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get profilePic => $composableBuilder(
+    column: $table.profilePic,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ContactsTableOrderingComposer get contactId {
     final $$ContactsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -2118,6 +2184,11 @@ class $$ContactCardsTableAnnotationComposer
 
   GeneratedColumn<String> get contactInfoJson => $composableBuilder(
     column: $table.contactInfoJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get profilePic => $composableBuilder(
+    column: $table.profilePic,
     builder: (column) => column,
   );
 
@@ -2180,12 +2251,14 @@ class $$ContactCardsTableTableManager
                 Value<String> did = const Value.absent(),
                 Value<String> type = const Value.absent(),
                 Value<String> contactInfoJson = const Value.absent(),
+                Value<String?> profilePic = const Value.absent(),
               }) => ContactCardsCompanion(
                 id: id,
                 contactId: contactId,
                 did: did,
                 type: type,
                 contactInfoJson: contactInfoJson,
+                profilePic: profilePic,
               ),
           createCompanionCallback:
               ({
@@ -2194,12 +2267,14 @@ class $$ContactCardsTableTableManager
                 required String did,
                 required String type,
                 Value<String> contactInfoJson = const Value.absent(),
+                Value<String?> profilePic = const Value.absent(),
               }) => ContactCardsCompanion.insert(
                 id: id,
                 contactId: contactId,
                 did: did,
                 type: type,
                 contactInfoJson: contactInfoJson,
+                profilePic: profilePic,
               ),
           withReferenceMapper: (p0) => p0
               .map(

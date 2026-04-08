@@ -51,6 +51,17 @@ class $IdentitiesTableTable extends IdentitiesTable
     requiredDuringInsert: false,
     defaultValue: const Constant('{}'),
   );
+  static const VerificationMeta _profilePicMeta = const VerificationMeta(
+    'profilePic',
+  );
+  @override
+  late final GeneratedColumn<String> profilePic = GeneratedColumn<String>(
+    'profile_pic',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isPrimaryMeta = const VerificationMeta(
     'isPrimary',
   );
@@ -72,6 +83,7 @@ class $IdentitiesTableTable extends IdentitiesTable
     did,
     displayName,
     contactInfoJson,
+    profilePic,
     isPrimary,
   ];
   @override
@@ -117,6 +129,12 @@ class $IdentitiesTableTable extends IdentitiesTable
         ),
       );
     }
+    if (data.containsKey('profile_pic')) {
+      context.handle(
+        _profilePicMeta,
+        profilePic.isAcceptableOrUnknown(data['profile_pic']!, _profilePicMeta),
+      );
+    }
     if (data.containsKey('is_primary')) {
       context.handle(
         _isPrimaryMeta,
@@ -148,6 +166,10 @@ class $IdentitiesTableTable extends IdentitiesTable
         DriftSqlType.string,
         data['${effectivePrefix}contact_info_json'],
       )!,
+      profilePic: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_pic'],
+      ),
       isPrimary: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_primary'],
@@ -172,12 +194,17 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
 
   /// JSON blob holding all contact card fields mapped by sdkPath.
   final String contactInfoJson;
+
+  /// Profile picture of the identity, stored outside the JSON blob to avoid
+  /// database field size limitations.
+  final String? profilePic;
   final bool isPrimary;
   const IdentityRecord({
     required this.id,
     required this.did,
     required this.displayName,
     required this.contactInfoJson,
+    this.profilePic,
     required this.isPrimary,
   });
   @override
@@ -187,6 +214,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     map['did'] = Variable<String>(did);
     map['display_name'] = Variable<String>(displayName);
     map['contact_info_json'] = Variable<String>(contactInfoJson);
+    if (!nullToAbsent || profilePic != null) {
+      map['profile_pic'] = Variable<String>(profilePic);
+    }
     map['is_primary'] = Variable<bool>(isPrimary);
     return map;
   }
@@ -197,6 +227,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       did: Value(did),
       displayName: Value(displayName),
       contactInfoJson: Value(contactInfoJson),
+      profilePic: profilePic == null && nullToAbsent
+          ? const Value.absent()
+          : Value(profilePic),
       isPrimary: Value(isPrimary),
     );
   }
@@ -211,6 +244,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       did: serializer.fromJson<String>(json['did']),
       displayName: serializer.fromJson<String>(json['displayName']),
       contactInfoJson: serializer.fromJson<String>(json['contactInfoJson']),
+      profilePic: serializer.fromJson<String?>(json['profilePic']),
       isPrimary: serializer.fromJson<bool>(json['isPrimary']),
     );
   }
@@ -222,6 +256,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       'did': serializer.toJson<String>(did),
       'displayName': serializer.toJson<String>(displayName),
       'contactInfoJson': serializer.toJson<String>(contactInfoJson),
+      'profilePic': serializer.toJson<String?>(profilePic),
       'isPrimary': serializer.toJson<bool>(isPrimary),
     };
   }
@@ -231,12 +266,14 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     String? did,
     String? displayName,
     String? contactInfoJson,
+    Value<String?> profilePic = const Value.absent(),
     bool? isPrimary,
   }) => IdentityRecord(
     id: id ?? this.id,
     did: did ?? this.did,
     displayName: displayName ?? this.displayName,
     contactInfoJson: contactInfoJson ?? this.contactInfoJson,
+    profilePic: profilePic.present ? profilePic.value : this.profilePic,
     isPrimary: isPrimary ?? this.isPrimary,
   );
   IdentityRecord copyWithCompanion(IdentitiesTableCompanion data) {
@@ -249,6 +286,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       contactInfoJson: data.contactInfoJson.present
           ? data.contactInfoJson.value
           : this.contactInfoJson,
+      profilePic: data.profilePic.present
+          ? data.profilePic.value
+          : this.profilePic,
       isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
     );
   }
@@ -260,6 +300,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           ..write('did: $did, ')
           ..write('displayName: $displayName, ')
           ..write('contactInfoJson: $contactInfoJson, ')
+          ..write('profilePic: $profilePic, ')
           ..write('isPrimary: $isPrimary')
           ..write(')'))
         .toString();
@@ -267,7 +308,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
 
   @override
   int get hashCode =>
-      Object.hash(id, did, displayName, contactInfoJson, isPrimary);
+      Object.hash(id, did, displayName, contactInfoJson, profilePic, isPrimary);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -276,6 +317,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           other.did == this.did &&
           other.displayName == this.displayName &&
           other.contactInfoJson == this.contactInfoJson &&
+          other.profilePic == this.profilePic &&
           other.isPrimary == this.isPrimary);
 }
 
@@ -284,6 +326,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
   final Value<String> did;
   final Value<String> displayName;
   final Value<String> contactInfoJson;
+  final Value<String?> profilePic;
   final Value<bool> isPrimary;
   final Value<int> rowid;
   const IdentitiesTableCompanion({
@@ -291,6 +334,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     this.did = const Value.absent(),
     this.displayName = const Value.absent(),
     this.contactInfoJson = const Value.absent(),
+    this.profilePic = const Value.absent(),
     this.isPrimary = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -299,6 +343,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     required String did,
     required String displayName,
     this.contactInfoJson = const Value.absent(),
+    this.profilePic = const Value.absent(),
     this.isPrimary = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : did = Value(did),
@@ -308,6 +353,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Expression<String>? did,
     Expression<String>? displayName,
     Expression<String>? contactInfoJson,
+    Expression<String>? profilePic,
     Expression<bool>? isPrimary,
     Expression<int>? rowid,
   }) {
@@ -316,6 +362,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       if (did != null) 'did': did,
       if (displayName != null) 'display_name': displayName,
       if (contactInfoJson != null) 'contact_info_json': contactInfoJson,
+      if (profilePic != null) 'profile_pic': profilePic,
       if (isPrimary != null) 'is_primary': isPrimary,
       if (rowid != null) 'rowid': rowid,
     });
@@ -326,6 +373,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Value<String>? did,
     Value<String>? displayName,
     Value<String>? contactInfoJson,
+    Value<String?>? profilePic,
     Value<bool>? isPrimary,
     Value<int>? rowid,
   }) {
@@ -334,6 +382,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       did: did ?? this.did,
       displayName: displayName ?? this.displayName,
       contactInfoJson: contactInfoJson ?? this.contactInfoJson,
+      profilePic: profilePic ?? this.profilePic,
       isPrimary: isPrimary ?? this.isPrimary,
       rowid: rowid ?? this.rowid,
     );
@@ -354,6 +403,9 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     if (contactInfoJson.present) {
       map['contact_info_json'] = Variable<String>(contactInfoJson.value);
     }
+    if (profilePic.present) {
+      map['profile_pic'] = Variable<String>(profilePic.value);
+    }
     if (isPrimary.present) {
       map['is_primary'] = Variable<bool>(isPrimary.value);
     }
@@ -370,6 +422,7 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
           ..write('did: $did, ')
           ..write('displayName: $displayName, ')
           ..write('contactInfoJson: $contactInfoJson, ')
+          ..write('profilePic: $profilePic, ')
           ..write('isPrimary: $isPrimary, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -396,6 +449,7 @@ typedef $$IdentitiesTableTableCreateCompanionBuilder =
       required String did,
       required String displayName,
       Value<String> contactInfoJson,
+      Value<String?> profilePic,
       Value<bool> isPrimary,
       Value<int> rowid,
     });
@@ -405,6 +459,7 @@ typedef $$IdentitiesTableTableUpdateCompanionBuilder =
       Value<String> did,
       Value<String> displayName,
       Value<String> contactInfoJson,
+      Value<String?> profilePic,
       Value<bool> isPrimary,
       Value<int> rowid,
     });
@@ -435,6 +490,11 @@ class $$IdentitiesTableTableFilterComposer
 
   ColumnFilters<String> get contactInfoJson => $composableBuilder(
     column: $table.contactInfoJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profilePic => $composableBuilder(
+    column: $table.profilePic,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -473,6 +533,11 @@ class $$IdentitiesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get profilePic => $composableBuilder(
+    column: $table.profilePic,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isPrimary => $composableBuilder(
     column: $table.isPrimary,
     builder: (column) => ColumnOrderings(column),
@@ -501,6 +566,11 @@ class $$IdentitiesTableTableAnnotationComposer
 
   GeneratedColumn<String> get contactInfoJson => $composableBuilder(
     column: $table.contactInfoJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get profilePic => $composableBuilder(
+    column: $table.profilePic,
     builder: (column) => column,
   );
 
@@ -549,6 +619,7 @@ class $$IdentitiesTableTableTableManager
                 Value<String> did = const Value.absent(),
                 Value<String> displayName = const Value.absent(),
                 Value<String> contactInfoJson = const Value.absent(),
+                Value<String?> profilePic = const Value.absent(),
                 Value<bool> isPrimary = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IdentitiesTableCompanion(
@@ -556,6 +627,7 @@ class $$IdentitiesTableTableTableManager
                 did: did,
                 displayName: displayName,
                 contactInfoJson: contactInfoJson,
+                profilePic: profilePic,
                 isPrimary: isPrimary,
                 rowid: rowid,
               ),
@@ -565,6 +637,7 @@ class $$IdentitiesTableTableTableManager
                 required String did,
                 required String displayName,
                 Value<String> contactInfoJson = const Value.absent(),
+                Value<String?> profilePic = const Value.absent(),
                 Value<bool> isPrimary = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IdentitiesTableCompanion.insert(
@@ -572,6 +645,7 @@ class $$IdentitiesTableTableTableManager
                 did: did,
                 displayName: displayName,
                 contactInfoJson: contactInfoJson,
+                profilePic: profilePic,
                 isPrimary: isPrimary,
                 rowid: rowid,
               ),

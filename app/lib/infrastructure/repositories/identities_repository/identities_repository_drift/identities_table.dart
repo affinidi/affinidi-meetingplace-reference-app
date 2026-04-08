@@ -22,6 +22,9 @@ class IdentitiesTable extends Table {
   /// JSON blob holding all contact card fields mapped by sdkPath.
   TextColumn get contactInfoJson => text().withDefault(const Constant('{}'))();
 
+  /// Profile picture of the identity
+  TextColumn get profilePic => text().nullable()();
+
   BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
 
   @override

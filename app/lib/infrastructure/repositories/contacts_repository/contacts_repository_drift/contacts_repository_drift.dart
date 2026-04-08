@@ -177,13 +177,16 @@ db.ContactCardsCompanion _buildContactCardCompanion({
   required ContactCard card,
   String? contactId,
 }) {
-  final contactInfo = card.toSdkContactCard().contactInfo;
+  final contactInfo = Map<String, dynamic>.from(
+    card.toSdkContactCard().contactInfo,
+  )..remove('photo');
 
   return db.ContactCardsCompanion(
     contactId: contactId == null ? const Value.absent() : Value(contactId),
     did: Value(card.did),
     type: Value(card.type),
     contactInfoJson: Value(jsonEncode(contactInfo)),
+    profilePic: Value(card.profilePic),
   );
 }
 
@@ -199,7 +202,9 @@ class _ContactMapper {
       type: contactCard.type,
       contactInfo: decoded,
     );
-    final domainCard = ContactCardUtils.fromSdkContactCard(sdkCard);
+    final domainCard = ContactCardUtils.fromSdkContactCard(
+      sdkCard,
+    ).copyWith(profilePic: contactCard.profilePic);
 
     return model.Contact(
       id: contact.id,
