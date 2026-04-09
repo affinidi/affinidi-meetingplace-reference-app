@@ -3,6 +3,7 @@ import 'package:form_field_validator/form_field_validator.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../presentation/themes/app_custom_colors.dart';
 import '../../../presentation/validators/max_length_validator_type.dart';
@@ -34,7 +35,7 @@ class ContactCardFieldDefinition {
     required this.keyboardType,
     required this.textCapitalization,
     required this.autocorrect,
-    required this.autofocus,
+    this.autofocus = false,
     required this.shouldValidateOnBlur,
     required this.textInputAction,
     required this.placeholder,
@@ -76,7 +77,7 @@ class ContactCardFieldDefinition {
   String valueFrom(ContactCard card) => _valueAccessor(card) ?? '';
 
   String sdkValueFrom(sdk.ContactCard card) {
-    return _jsonPathValue(card.contactInfo, jsonPath);
+    return ContactCardUtils.getPathValue(card.contactInfo, jsonPath);
   }
 
   String? nullableValueFrom(ContactCard card) => _valueAccessor(card);
@@ -94,7 +95,7 @@ class ContactCardFieldDefinition {
 }
 
 class ContactCardFieldDefinitions {
-  static final values = <ContactCardFieldDefinition>[
+  static final List<ContactCardFieldDefinition> values = List.unmodifiable([
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.firstName,
       icon: Icons.person,
@@ -102,7 +103,6 @@ class ContactCardFieldDefinitions {
       keyboardType: null,
       textCapitalization: TextCapitalization.sentences,
       autocorrect: true,
-      autofocus: false,
       shouldValidateOnBlur: false,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterFirstName,
@@ -126,7 +126,6 @@ class ContactCardFieldDefinitions {
       keyboardType: null,
       textCapitalization: TextCapitalization.sentences,
       autocorrect: true,
-      autofocus: false,
       shouldValidateOnBlur: false,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterLastName,
@@ -150,7 +149,6 @@ class ContactCardFieldDefinitions {
       keyboardType: TextInputType.emailAddress,
       textCapitalization: TextCapitalization.none,
       autocorrect: false,
-      autofocus: false,
       shouldValidateOnBlur: true,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterEmail,
@@ -177,7 +175,6 @@ class ContactCardFieldDefinitions {
       keyboardType: TextInputType.phone,
       textCapitalization: TextCapitalization.none,
       autocorrect: false,
-      autofocus: false,
       shouldValidateOnBlur: true,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterMobile,
@@ -191,7 +188,7 @@ class ContactCardFieldDefinitions {
         ContactCardFieldTags.searchable,
       ],
     ),
-  ];
+  ]);
 
   static final _byKey = {for (final field in values) field.key: field};
 
@@ -224,27 +221,4 @@ class ContactCardFieldDefinitions {
   }
 }
 
-String _jsonPathValue(
-  Map<dynamic, dynamic> contactInfo,
-  List<String> pathKeys,
-) {
-  if (pathKeys.isEmpty) return '';
 
-  var parentElement = contactInfo;
-  for (final pathKey in pathKeys) {
-    final elementAtPath = parentElement[pathKey];
-    if (elementAtPath == null) {
-      return '';
-    }
-
-    if ((pathKey == pathKeys.last) && elementAtPath is String) {
-      return elementAtPath;
-    }
-
-    if (elementAtPath is Map<dynamic, dynamic>) {
-      parentElement = elementAtPath;
-    }
-  }
-
-  return '';
-}
