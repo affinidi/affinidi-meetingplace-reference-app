@@ -220,5 +220,3 @@ class ContactCardFieldDefinitions {
     return updatedCard;
   }
 }
-
-
