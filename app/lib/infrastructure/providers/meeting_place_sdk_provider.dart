@@ -10,6 +10,7 @@ import 'package:ssi/ssi.dart';
 
 import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
+import '../matrix/tuwunel_dev_matrix_jwt.dart';
 import '../secure_storage/secure_storage.dart';
 import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
@@ -81,6 +82,12 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
     // Must happen after SDK creation and before any group call is started.
     // The SDK creates the VoIP instance lazily, bound to the active client.
     sdk.initializeMatrixRTC(ref.read(matrixRtcDelegateProvider));
+
+    await TuwunelDevMatrixJwt.injectDevCredentialIfConfigured(
+      environment: environment,
+      sdk: sdk,
+      secureStorage: secureStorage,
+    );
 
     logger.info('Completed initializing MeetingPlace SDK', name: logKey);
 

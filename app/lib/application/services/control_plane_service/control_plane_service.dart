@@ -5,12 +5,15 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/firebase_messaging/push_notifications_handler.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/matrix/tuwunel_dev_matrix_jwt.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../infrastructure/secure_storage/secure_storage.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
 import 'control_plane_service_state.dart';
 
@@ -168,11 +171,39 @@ class ControlPlaneService extends _$ControlPlaneService
 
       try {
         final sdk = await ref.read(meetingPlaceSdkProvider.future);
+        final environment = ref.read(environmentProvider);
         _logger.info(
           'Registering device with MeetingPlaceCoreSDK',
           name: _logKey,
         );
-        await sdk.registerForPushNotifications(token);
+        try {
+          await sdk.registerForPushNotifications(token);
+        } on MeetingPlaceCoreSDKException catch (e) {
+          // Control plane mints Matrix JWTs only for allow-listed homeservers.
+          // Local Tuwunel URLs are rejected with HTTP 400.
+          final devSecret = environment.matrixJwtHs256Secret;
+          if (devSecret == null ||
+              devSecret.isEmpty ||
+              !e.code.contains('matrix_registration')) {
+            rethrow;
+          }
+          _logger.warning(
+            'Control plane Matrix credential failed (${e.code}); '
+            'continuing with local Tuwunel JWT (dev only).',
+            name: _logKey,
+          );
+          // Core SDK sets discovery.device only after register returns.
+          // Otherwise MissingDeviceException breaks control plane calls.
+          sdk.discovery.device = Device(
+            deviceToken: token,
+            platformType: PlatformType.pushNotification,
+          );
+        }
+        await TuwunelDevMatrixJwt.injectDevCredentialIfConfigured(
+          environment: environment,
+          sdk: sdk,
+          secureStorage: await ref.read(secureStorageProvider.future),
+        );
         _lastRegisteredDeviceToken = token;
 
         if (state.isDeviceTokenRegistered != true) {

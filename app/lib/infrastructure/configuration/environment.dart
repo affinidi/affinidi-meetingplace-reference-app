@@ -115,6 +115,17 @@ class Environment {
     defaultValue: 'http://localhost:9000',
   );
 
+  /// When set, the app stores an HS256 Matrix login JWT compatible with
+  /// Tuwunel (`TUWUNEL_JWT__KEY`), overriding the control-plane credential.
+  /// Use only for local Tuwunel bring-up; must match the homeserver JWT secret.
+  String? get matrixJwtHs256Secret {
+    const value = String.fromEnvironment(
+      'MATRIX_JWT_HS256_SECRET',
+      defaultValue: '',
+    );
+    return value.isEmpty ? null : value;
+  }
+
   String get livekitUrl => const String.fromEnvironment(
     'LIVEKIT_URL',
     defaultValue: 'ws://localhost:7880',
