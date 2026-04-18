@@ -2224,6 +2224,30 @@ abstract class AppLocalizations {
   /// **'Group Call'**
   String get videoCallTitle;
 
+  /// No description provided for @groupCallVoiceAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice call'**
+  String get groupCallVoiceAppBarTitle;
+
+  /// No description provided for @groupCallStartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start group call'**
+  String get groupCallStartTitle;
+
+  /// No description provided for @groupCallStartVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice call'**
+  String get groupCallStartVoice;
+
+  /// No description provided for @groupCallStartVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video call'**
+  String get groupCallStartVideo;
+
   /// No description provided for @videoCallJoiningCall.
   ///
   /// In en, this message translates to:

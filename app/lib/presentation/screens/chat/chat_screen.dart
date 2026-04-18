@@ -125,40 +125,44 @@ class ChatScreen extends HookConsumerWidget {
               if (matrixRoomId == null) return const SizedBox.shrink();
               return IconButton(
                 icon: const Icon(Icons.video_call_outlined),
-                tooltip: 'Start group call',
+                tooltip: context.l10n.groupCallStartTitle,
                 onPressed: () async {
                   try {
-                    final sdk = await ref.read(meetingPlaceSdkProvider.future);
-                    final powerLevel = await sdk.getOwnPowerLevel(
-                      roomId: matrixRoomId,
-                    );
-                    if (powerLevel <= 50) {
-                      if (!context.mounted) return;
-                      await showDialog<void>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Text(
-                            context.l10n.videoCallPermissionDeniedTitle,
-                          ),
-                          content: Text(
-                            context.l10n.videoCallPermissionDeniedMessage(
-                              powerLevel,
+                    await ref.read(meetingPlaceSdkProvider.future);
+                    if (!context.mounted) return;
+                    final l10n = context.l10n;
+                    final audioOnly = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: Text(l10n.groupCallStartTitle),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.call),
+                              title: Text(l10n.groupCallStartVoice),
+                              onTap: () => Navigator.of(ctx).pop(true),
                             ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(),
-                              child: const Text('OK'),
+                            ListTile(
+                              leading: const Icon(Icons.videocam),
+                              title: Text(l10n.groupCallStartVideo),
+                              onTap: () => Navigator.of(ctx).pop(false),
                             ),
                           ],
                         ),
-                      );
-                      return;
-                    }
-                    if (!context.mounted) return;
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: Text(l10n.generalCancel),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (!context.mounted || audioOnly == null) return;
                     VideoCallRoute(
                       contactId: _contactId,
                       matrixRoomId: matrixRoomId,
+                      audioOnly: audioOnly,
                     ).go(context);
                   } catch (_) {
                     if (!context.mounted) return;

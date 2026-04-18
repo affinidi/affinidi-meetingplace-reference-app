@@ -1498,6 +1498,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoCallTitle => 'Group Call';
 
   @override
+  String get groupCallVoiceAppBarTitle => 'Voice call';
+
+  @override
+  String get groupCallStartTitle => 'Start group call';
+
+  @override
+  String get groupCallStartVoice => 'Voice call';
+
+  @override
+  String get groupCallStartVideo => 'Video call';
+
+  @override
   String get videoCallJoiningCall => 'Joining call...';
 
   @override

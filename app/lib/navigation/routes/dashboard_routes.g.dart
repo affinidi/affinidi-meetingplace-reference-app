@@ -236,6 +236,13 @@ mixin _$VideoCallRoute on GoRouteData {
   static VideoCallRoute _fromState(GoRouterState state) => VideoCallRoute(
     contactId: state.pathParameters['contactId']!,
     matrixRoomId: state.pathParameters['matrixRoomId']!,
+    audioOnly:
+        _$convertMapValue(
+          'audio-only',
+          state.uri.queryParameters,
+          _$boolConverter,
+        ) ??
+        false,
   );
 
   VideoCallRoute get _self => this as VideoCallRoute;
@@ -243,6 +250,9 @@ mixin _$VideoCallRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/contacts/${Uri.encodeComponent(_self.contactId)}/chat/${Uri.encodeComponent(_self.matrixRoomId)}/video-call',
+    queryParams: {
+      if (_self.audioOnly != false) 'audio-only': _self.audioOnly.toString(),
+    },
   );
 
   @override
@@ -497,4 +507,24 @@ mixin _$SettingsRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+T? _$convertMapValue<T>(
+  String key,
+  Map<String, String> map,
+  T? Function(String) converter,
+) {
+  final value = map[key];
+  return value == null ? null : converter(value);
+}
+
+bool _$boolConverter(String value) {
+  switch (value) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      throw UnsupportedError('Cannot convert "$value" into a bool.');
+  }
 }

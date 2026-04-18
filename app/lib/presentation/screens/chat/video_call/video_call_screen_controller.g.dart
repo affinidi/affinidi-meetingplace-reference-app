@@ -7,7 +7,7 @@ part of 'video_call_screen_controller.dart';
 // **************************************************************************
 
 String _$videoCallScreenControllerHash() =>
-    r'd1851a459ff767900f32150004c00fd279cd5ab3';
+    r'9284c73a10c2cf27360e151abf85239556f17ffb';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -34,8 +34,9 @@ abstract class _$VideoCallScreenController
     extends BuildlessAutoDisposeNotifier<VideoCallScreenState> {
   late final String roomId;
   late final String contactId;
+  late final bool audioOnly;
 
-  VideoCallScreenState build(String roomId, String contactId);
+  VideoCallScreenState build(String roomId, String contactId, bool audioOnly);
 }
 
 /// See also [VideoCallScreenController].
@@ -48,15 +49,19 @@ class VideoCallScreenControllerFamily extends Family<VideoCallScreenState> {
   const VideoCallScreenControllerFamily();
 
   /// See also [VideoCallScreenController].
-  VideoCallScreenControllerProvider call(String roomId, String contactId) {
-    return VideoCallScreenControllerProvider(roomId, contactId);
+  VideoCallScreenControllerProvider call(
+    String roomId,
+    String contactId,
+    bool audioOnly,
+  ) {
+    return VideoCallScreenControllerProvider(roomId, contactId, audioOnly);
   }
 
   @override
   VideoCallScreenControllerProvider getProviderOverride(
     covariant VideoCallScreenControllerProvider provider,
   ) {
-    return call(provider.roomId, provider.contactId);
+    return call(provider.roomId, provider.contactId, provider.audioOnly);
   }
 
   static const Iterable<ProviderOrFamily>? _dependencies = null;
@@ -82,11 +87,15 @@ class VideoCallScreenControllerProvider
           VideoCallScreenState
         > {
   /// See also [VideoCallScreenController].
-  VideoCallScreenControllerProvider(String roomId, String contactId)
-    : this._internal(
+  VideoCallScreenControllerProvider(
+    String roomId,
+    String contactId,
+    bool audioOnly,
+  ) : this._internal(
         () => VideoCallScreenController()
           ..roomId = roomId
-          ..contactId = contactId,
+          ..contactId = contactId
+          ..audioOnly = audioOnly,
         from: videoCallScreenControllerProvider,
         name: r'videoCallScreenControllerProvider',
         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -97,6 +106,7 @@ class VideoCallScreenControllerProvider
             VideoCallScreenControllerFamily._allTransitiveDependencies,
         roomId: roomId,
         contactId: contactId,
+        audioOnly: audioOnly,
       );
 
   VideoCallScreenControllerProvider._internal(
@@ -108,16 +118,18 @@ class VideoCallScreenControllerProvider
     required super.from,
     required this.roomId,
     required this.contactId,
+    required this.audioOnly,
   }) : super.internal();
 
   final String roomId;
   final String contactId;
+  final bool audioOnly;
 
   @override
   VideoCallScreenState runNotifierBuild(
     covariant VideoCallScreenController notifier,
   ) {
-    return notifier.build(roomId, contactId);
+    return notifier.build(roomId, contactId, audioOnly);
   }
 
   @override
@@ -127,7 +139,8 @@ class VideoCallScreenControllerProvider
       override: VideoCallScreenControllerProvider._internal(
         () => create()
           ..roomId = roomId
-          ..contactId = contactId,
+          ..contactId = contactId
+          ..audioOnly = audioOnly,
         from: from,
         name: null,
         dependencies: null,
@@ -135,6 +148,7 @@ class VideoCallScreenControllerProvider
         debugGetCreateSourceHash: null,
         roomId: roomId,
         contactId: contactId,
+        audioOnly: audioOnly,
       ),
     );
   }
@@ -152,7 +166,8 @@ class VideoCallScreenControllerProvider
   bool operator ==(Object other) {
     return other is VideoCallScreenControllerProvider &&
         other.roomId == roomId &&
-        other.contactId == contactId;
+        other.contactId == contactId &&
+        other.audioOnly == audioOnly;
   }
 
   @override
@@ -160,6 +175,7 @@ class VideoCallScreenControllerProvider
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
     hash = _SystemHash.combine(hash, roomId.hashCode);
     hash = _SystemHash.combine(hash, contactId.hashCode);
+    hash = _SystemHash.combine(hash, audioOnly.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -174,6 +190,9 @@ mixin VideoCallScreenControllerRef
 
   /// The parameter `contactId` of this provider.
   String get contactId;
+
+  /// The parameter `audioOnly` of this provider.
+  bool get audioOnly;
 }
 
 class _VideoCallScreenControllerProviderElement
@@ -190,6 +209,8 @@ class _VideoCallScreenControllerProviderElement
   @override
   String get contactId =>
       (origin as VideoCallScreenControllerProvider).contactId;
+  @override
+  bool get audioOnly => (origin as VideoCallScreenControllerProvider).audioOnly;
 }
 
 // ignore_for_file: type=lint

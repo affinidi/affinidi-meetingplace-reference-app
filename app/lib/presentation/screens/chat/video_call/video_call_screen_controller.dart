@@ -39,10 +39,10 @@ class VideoCallScreenController extends _$VideoCallScreenController {
   String? _localMatrixUserId;
 
   @override
-  VideoCallScreenState build(String roomId, String contactId) {
+  VideoCallScreenState build(String roomId, String contactId, bool audioOnly) {
     Future(() async {
       if (state.status == VideoCallStatus.idle) {
-        await joinCall();
+        await joinCall(audioOnly: audioOnly);
       }
     });
 
@@ -50,7 +50,7 @@ class VideoCallScreenController extends _$VideoCallScreenController {
     return const VideoCallScreenState();
   }
 
-  Future<void> joinCall() async {
+  Future<void> joinCall({bool audioOnly = false}) async {
     if (state.status == VideoCallStatus.connected ||
         state.status == VideoCallStatus.connecting) {
       return;
@@ -60,18 +60,15 @@ class VideoCallScreenController extends _$VideoCallScreenController {
     try {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
 
-      final powerLevel = await sdk.getOwnPowerLevel(roomId: roomId);
-      if (powerLevel <= 50) {
-        state = state.copyWith(
-          status: VideoCallStatus.error,
-          error:
-              'Insufficient permission: your power level ($powerLevel) '
-              'must be greater than 50 to join this call.',
-        );
-        return;
-      }
-
-      await _signalMatrixRTC(sdk);
+      _logger.info('Joining call: signalling MatrixRTC', name: _logKey);
+      await _signalMatrixRTC(sdk).timeout(
+        const Duration(seconds: 45),
+        onTimeout: () => throw TimeoutException(
+          'MatrixRTC (startVideoCall) timed out after 45s. '
+          'Check that MATRIX_HOMESERVER is reachable from this device '
+          '(on a phone, use your PC\'s LAN IP or a tunnel, not localhost).',
+        ),
+      );
       _subscribeToMatrixRTCEvents(sdk);
       _cacheLocalMatrixUserId(sdk);
 
@@ -79,13 +76,26 @@ class VideoCallScreenController extends _$VideoCallScreenController {
 
       final (:keyProvider, :token) = await _prepareE2EECredentials();
 
+      final livekitUrl = _livekitService.serverUrl;
+      _logger.info(
+        'Joining call: connecting to LiveKit at $livekitUrl',
+        name: _logKey,
+      );
       await _connectToLiveKit(
         displayName: myDisplayName,
         token: token,
         keyProvider: keyProvider,
+      ).timeout(
+        const Duration(seconds: 35),
+        onTimeout: () => throw TimeoutException(
+          'LiveKit connect timed out after 35s (url=$livekitUrl). '
+          'On a physical device, localhost points at the phone, not your '
+          'Docker host — set LIVEKIT_URL to ws://<host-lan-ip>:7880 (same '
+          'for MATRIX_HOMESERVER if needed).',
+        ),
       );
 
-      await _enableLocalMedia();
+      await _enableLocalMedia(enableCamera: !audioOnly);
 
       _logger.info('Joined video call for room $roomId', name: _logKey);
     } catch (error, stackTrace) {
@@ -230,21 +240,34 @@ class VideoCallScreenController extends _$VideoCallScreenController {
     );
   }
 
-  /// Enables microphone and camera. Camera failures (e.g. on simulators)
-  /// are caught and logged rather than aborting the call.
-  Future<void> _enableLocalMedia() async {
+  /// Enables microphone and optionally the camera. Camera failures (e.g. on
+  /// simulators) are caught and logged rather than aborting the call.
+  Future<void> _enableLocalMedia({required bool enableCamera}) async {
     await _livekitService.setMicrophoneEnabled(true);
     var cameraEnabled = false;
-    try {
-      await _livekitService.setCameraEnabled(true);
-      cameraEnabled = true;
-    } catch (e, stackTrace) {
-      _logger.error(
-        'Camera unavailable: $e',
-        name: _logKey,
-        error: e,
-        stackTrace: stackTrace,
-      );
+    if (enableCamera) {
+      try {
+        await _livekitService.setCameraEnabled(true);
+        cameraEnabled = true;
+      } catch (e, stackTrace) {
+        _logger.error(
+          'Camera unavailable: $e',
+          name: _logKey,
+          error: e,
+          stackTrace: stackTrace,
+        );
+      }
+    } else {
+      try {
+        await _livekitService.setCameraEnabled(false);
+      } catch (e, stackTrace) {
+        _logger.error(
+          'Could not disable camera: $e',
+          name: _logKey,
+          error: e,
+          stackTrace: stackTrace,
+        );
+      }
     }
 
     state = state.copyWith(

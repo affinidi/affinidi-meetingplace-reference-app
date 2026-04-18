@@ -14,10 +14,12 @@ class VideoCallScreen extends HookConsumerWidget {
     super.key,
     required this.roomId,
     required this.contactId,
+    this.audioOnly = false,
   });
 
   final String roomId;
   final String contactId;
+  final bool audioOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,6 +29,7 @@ class VideoCallScreen extends HookConsumerWidget {
       videoCallScreenControllerProvider(
         roomId,
         contactId,
+        audioOnly,
       ).select((s) => s.participantEvent),
     );
 
@@ -64,13 +67,19 @@ class VideoCallScreen extends HookConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(l10n.videoCallTitle),
+        title: Text(
+          audioOnly ? l10n.groupCallVoiceAppBarTitle : l10n.videoCallTitle,
+        ),
         automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
           Expanded(
-            child: _ParticipantGrid(roomId: roomId, contactId: contactId),
+            child: _ParticipantGrid(
+              roomId: roomId,
+              contactId: contactId,
+              audioOnly: audioOnly,
+            ),
           ),
         ],
       ),
@@ -79,10 +88,15 @@ class VideoCallScreen extends HookConsumerWidget {
 }
 
 class _ParticipantGrid extends HookConsumerWidget {
-  const _ParticipantGrid({required this.roomId, required this.contactId});
+  const _ParticipantGrid({
+    required this.roomId,
+    required this.contactId,
+    required this.audioOnly,
+  });
 
   final String roomId;
   final String contactId;
+  final bool audioOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -90,24 +104,28 @@ class _ParticipantGrid extends HookConsumerWidget {
       videoCallScreenControllerProvider(
         roomId,
         contactId,
+        audioOnly,
       ).select((s) => s.status),
     );
     final hasError = ref.watch(
       videoCallScreenControllerProvider(
         roomId,
         contactId,
+        audioOnly,
       ).select((s) => s.hasError),
     );
     final error = ref.watch(
       videoCallScreenControllerProvider(
         roomId,
         contactId,
+        audioOnly,
       ).select((s) => s.error),
     );
     final participants = ref.watch(
       videoCallScreenControllerProvider(
         roomId,
         contactId,
+        audioOnly,
       ).select((s) => s.participants),
     );
 
@@ -161,6 +179,7 @@ class _ParticipantGrid extends HookConsumerWidget {
       return _GridLayout(
         roomId: roomId,
         contactId: contactId,
+        audioOnly: audioOnly,
         participants: participants,
         totalCount: totalCount,
         showControls: showControls,
@@ -171,6 +190,7 @@ class _ParticipantGrid extends HookConsumerWidget {
     return _FocusedLayout(
       roomId: roomId,
       contactId: contactId,
+      audioOnly: audioOnly,
       participants: participants,
       totalCount: totalCount,
       showControls: showControls,
@@ -465,6 +485,7 @@ class _GridLayout extends HookConsumerWidget {
   const _GridLayout({
     required this.roomId,
     required this.contactId,
+    required this.audioOnly,
     required this.participants,
     required this.totalCount,
     required this.showControls,
@@ -473,6 +494,7 @@ class _GridLayout extends HookConsumerWidget {
 
   final String roomId;
   final String contactId;
+  final bool audioOnly;
   final List<Participant> participants;
   final int totalCount;
   final ValueNotifier<bool> showControls;
@@ -481,7 +503,8 @@ class _GridLayout extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(
-      videoCallScreenControllerProvider(roomId, contactId).notifier,
+      videoCallScreenControllerProvider(roomId, contactId, audioOnly)
+          .notifier,
     );
     final youLabel = context.l10n.videoCallYou;
     final scrollController = useScrollController();
@@ -551,6 +574,7 @@ class _GridLayout extends HookConsumerWidget {
             duration: const Duration(milliseconds: 100),
             roomId: roomId,
             contactId: contactId,
+            audioOnly: audioOnly,
           ),
         ],
       ),
@@ -562,6 +586,7 @@ class _FocusedLayout extends ConsumerWidget {
   const _FocusedLayout({
     required this.roomId,
     required this.contactId,
+    required this.audioOnly,
     required this.participants,
     required this.totalCount,
     required this.showControls,
@@ -570,6 +595,7 @@ class _FocusedLayout extends ConsumerWidget {
 
   final String roomId;
   final String contactId;
+  final bool audioOnly;
   final List<Participant> participants;
   final int totalCount;
   final ValueNotifier<bool> showControls;
@@ -578,7 +604,8 @@ class _FocusedLayout extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(
-      videoCallScreenControllerProvider(roomId, contactId).notifier,
+      videoCallScreenControllerProvider(roomId, contactId, audioOnly)
+          .notifier,
     );
     final youLabel = context.l10n.videoCallYou;
 
@@ -689,6 +716,7 @@ class _FocusedLayout extends ConsumerWidget {
             duration: const Duration(milliseconds: 150),
             roomId: roomId,
             contactId: contactId,
+            audioOnly: audioOnly,
           ),
         ],
       ),
@@ -740,12 +768,14 @@ class _AnimatedControlsOverlay extends StatelessWidget {
     required this.duration,
     required this.roomId,
     required this.contactId,
+    required this.audioOnly,
   });
 
   final bool visible;
   final Duration duration;
   final String roomId;
   final String contactId;
+  final bool audioOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -759,7 +789,11 @@ class _AnimatedControlsOverlay extends StatelessWidget {
         child: AnimatedOpacity(
           duration: duration,
           opacity: visible ? 1.0 : 0.0,
-          child: _CallControls(roomId: roomId, contactId: contactId),
+          child: _CallControls(
+            roomId: roomId,
+            contactId: contactId,
+            audioOnly: audioOnly,
+          ),
         ),
       ),
     );
@@ -825,26 +859,34 @@ class _ParticipantTile extends StatelessWidget {
 }
 
 class _CallControls extends ConsumerWidget {
-  const _CallControls({required this.roomId, required this.contactId});
+  const _CallControls({
+    required this.roomId,
+    required this.contactId,
+    required this.audioOnly,
+  });
 
   final String roomId;
   final String contactId;
+  final bool audioOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(
-      videoCallScreenControllerProvider(roomId, contactId).notifier,
+      videoCallScreenControllerProvider(roomId, contactId, audioOnly)
+          .notifier,
     );
     final isMicEnabled = ref.watch(
       videoCallScreenControllerProvider(
         roomId,
         contactId,
+        audioOnly,
       ).select((s) => s.isMicEnabled),
     );
     final isCameraEnabled = ref.watch(
       videoCallScreenControllerProvider(
         roomId,
         contactId,
+        audioOnly,
       ).select((s) => s.isCameraEnabled),
     );
     final l10n = context.l10n;

@@ -1447,6 +1447,22 @@
 	"@videoCallTitle": {
 		"type": "text"
 	},
+	"groupCallVoiceAppBarTitle": "Voice call",
+	"@groupCallVoiceAppBarTitle": {
+		"type": "text"
+	},
+	"groupCallStartTitle": "Start group call",
+	"@groupCallStartTitle": {
+		"type": "text"
+	},
+	"groupCallStartVoice": "Voice call",
+	"@groupCallStartVoice": {
+		"type": "text"
+	},
+	"groupCallStartVideo": "Video call",
+	"@groupCallStartVideo": {
+		"type": "text"
+	},
 	"videoCallJoiningCall": "Joining call...",
 	"@videoCallJoiningCall": {
 		"type": "text"
