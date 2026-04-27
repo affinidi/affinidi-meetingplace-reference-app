@@ -63,6 +63,7 @@ class _ContactGridItem extends ConsumerWidget {
     final displayName = contact.displayName?.trim();
     final hasDisplayName = displayName != null && displayName.isNotEmpty;
     final shouldShowDisplayName = displayName != fullName;
+    final showCustomDisplayName = hasDisplayName && shouldShowDisplayName;
 
     final isEditMode = ref.watch(
       contactsScreenControllerProvider.select((state) => state.isEditMode),
@@ -131,7 +132,7 @@ class _ContactGridItem extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  if (hasDisplayName && shouldShowDisplayName)
+                  if (showCustomDisplayName)
                     Column(
                       children: [
                         Text(
@@ -143,7 +144,7 @@ class _ContactGridItem extends ConsumerWidget {
                           textAlign: TextAlign.center,
                           softWrap: true,
                           overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
+                          maxLines: 1,
                         ),
                         const SizedBox(height: 2),
                       ],
@@ -161,7 +162,7 @@ class _ContactGridItem extends ConsumerWidget {
                     textAlign: TextAlign.center,
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
+                    maxLines: showCustomDisplayName ? 1 : 2,
                   ),
                 ],
               ),
