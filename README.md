@@ -16,6 +16,7 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
   - [Core Components](#core-components)
   - [Access Rules and Data Flow](#access-rules-and-data-flow)
   - [Affinidi Meeting Place SDK Integration](#affinidi-meeting-place-sdk-integration)
+  - [Chat Screen Architecture](#chat-screen-architecture)
 - [Requirements](#requirements)
 - [Getting started](#getting-started)
 - [Environment Variables](#environment-variables)
@@ -164,6 +165,14 @@ The app integrates with Affinidi Meeting Place using:
 - **Provider Pattern**: Manages SDK instances through dependency injection.
 
 This architecture ensures that the Affinidi SDK integration is properly abstracted and can be easily maintained or replaced if needed.
+
+### Chat Screen Architecture
+
+The chat screen follows the same layered architecture, with clear separation between presentation, application, and SDK concerns. The diagram below shows the component breakdown of the chat screen.
+
+![Chat Screen Architecture](./assets/docs/chat_screen_architecture.png)
+
+> The source diagram is available at [`assets/docs/chat_screen_architecture.puml`](./assets/docs/chat_screen_architecture.puml).
 
 ## Requirements
 
