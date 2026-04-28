@@ -10,6 +10,9 @@ import 'interfaces/chat_protocol_handler.dart';
 /// Handles `ChatProtocol.chatPresence` and the presence side-effect of
 /// `ChatProtocol.chatActivity` — extracts the sender timestamp, persists it
 /// to the contacts service, and notifies the caller.
+///
+/// Both protocols are handled because an actively typing user must remain
+/// online; before the handler split, `chatActivity` also refreshed presence.
 class PresenceProtocolHandler implements ChatProtocolHandler {
   PresenceProtocolHandler({
     required Ref ref,
@@ -27,7 +30,8 @@ class PresenceProtocolHandler implements ChatProtocolHandler {
 
   @override
   bool canHandle(String protocolType) =>
-      protocolType == ChatProtocol.chatPresence.value;
+      protocolType == ChatProtocol.chatPresence.value ||
+      protocolType == ChatProtocol.chatActivity.value;
 
   @override
   Future<void> handle(StreamData data, String channelDid) async {
