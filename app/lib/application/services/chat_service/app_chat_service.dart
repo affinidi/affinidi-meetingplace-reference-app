@@ -502,6 +502,7 @@ class AppChatService extends _$AppChatService implements ChatService {
   }
 
   void _onOtherPartyCardUpdated(domain.ContactCard domainCard) {
+    _otherPartyFirstName = domainCard.firstName;
     state = state.copyWith(otherPartyCard: domainCard);
     _logger.info('Updated other party contact card', name: _logKey);
   }
