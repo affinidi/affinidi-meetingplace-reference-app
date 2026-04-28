@@ -56,7 +56,7 @@ class ChatScreenController extends _$ChatScreenController
   >
   _conciergeLoadingControllers = {};
 
-  late final ChatService? _chatService;
+  ChatService? _chatService;
 
   @override
   ChatScreenState build(String contactId) {
@@ -321,8 +321,8 @@ class ChatScreenController extends _$ChatScreenController
       _chatService?.onPresenceUpdated(contact.lastKeepAliveMessage!);
     }
 
-    await _chatService!.updateContactSequenceNumber(channelDid);
-    await _chatService.startChatSession();
+    await _chatService?.updateContactSequenceNumber(channelDid);
+    await _chatService?.startChatSession();
 
     if (channel.type == ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
