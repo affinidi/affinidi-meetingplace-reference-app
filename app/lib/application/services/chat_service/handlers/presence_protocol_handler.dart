@@ -22,7 +22,7 @@ class PresenceProtocolHandler implements ChatProtocolHandler {
        _onPresenceUpdated = onPresenceUpdated,
        _logger = logger;
 
-  static const _logKey = 'PRESENCEHANDLER';
+  static const _logKey = 'PRESENCEPROTOCOLHANDLER';
 
   final Ref _ref;
   final void Function(DateTime timestamp) _onPresenceUpdated;

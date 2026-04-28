@@ -14,7 +14,7 @@ class ChatMessageProtocolHandler implements ChatProtocolHandler {
   }) : _onUpdateSequenceNumber = onUpdateSequenceNumber,
        _logger = logger;
 
-  static const _logKey = 'CHATMESSAGEHANDLER';
+  static const _logKey = 'CHATMESSAGEPROTOCOLHANDLER';
 
   final Future<void> Function(String channelDid) _onUpdateSequenceNumber;
   final AppLogger _logger;

@@ -16,7 +16,7 @@ class TypingProtocolHandler implements ChatProtocolHandler {
        _onTypingMember = onTypingMember,
        _logger = logger;
 
-  static const _logKey = 'TYPINGHANDLER';
+  static const _logKey = 'TYPINGPROTOCOLHANDLER';
 
   final int _secondsToShow;
   final void Function(String? senderDid) _onTypingMember;

@@ -13,7 +13,7 @@ class EffectProtocolHandler implements ChatProtocolHandler {
   }) : _onEffect = onEffect,
        _logger = logger;
 
-  static const _logKey = 'EFFECTHANDLER';
+  static const _logKey = 'EFFECTPROTOCOLHANDLER';
 
   final void Function(String? effectName) _onEffect;
   final AppLogger _logger;
