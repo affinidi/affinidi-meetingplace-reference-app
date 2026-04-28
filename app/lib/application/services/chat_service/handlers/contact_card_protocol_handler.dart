@@ -27,7 +27,7 @@ class ContactCardProtocolHandler implements ChatProtocolHandler {
        _onOtherPartyCardUpdated = onOtherPartyCardUpdated,
        _logger = logger;
 
-  static const _logKey = 'CONTACTCARDHANDLER';
+  static const _logKey = 'CONTACTCARDPROTOCOLHANDLER';
 
   final Ref _ref;
   final bool Function() _isGroupChat;

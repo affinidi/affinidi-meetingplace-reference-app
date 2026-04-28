@@ -13,7 +13,7 @@ class GroupDetailsProtocolHandler implements ChatProtocolHandler {
   }) : _onGroupDetailsUpdated = onGroupDetailsUpdated,
        _logger = logger;
 
-  static const _logKey = 'GROUPDETAILSHANDLER';
+  static const _logKey = 'GROUPDETAILSPROTOCOLHANDLER';
 
   final void Function(StreamData data, String channelDid)
   _onGroupDetailsUpdated;

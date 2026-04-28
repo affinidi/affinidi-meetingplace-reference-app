@@ -23,12 +23,12 @@ Container_Boundary(app, "Application Layer") {
   Component(acs, "AppChatService", "Riverpod Notifier", "Orchestrator: subscribes to ChatStream,\nroutes StreamData, owns ChatServiceState")
 
   Boundary(routing, "Message Routing") {
-    Component(pph, "PresenceHandler", "ChatProtocolHandler", "chatPresence + chatActivity")
-    Component(tph, "TypingHandler", "ChatProtocolHandler", "chatActivity")
-    Component(eph, "EffectHandler", "ChatProtocolHandler", "chatEffect")
-    Component(cmph, "MessageHandler", "ChatProtocolHandler", "chatMessage")
-    Component(ccph, "ContactCardHandler", "ChatProtocolHandler", "chatContactDetailsUpdate")
-    Component(gdph, "GroupDetailsHandler", "ChatProtocolHandler", "chatGroupDetailsUpdate")
+    Component(pph, "PresenceProtocolHandler", "ChatProtocolHandler", "chatPresence + chatActivity")
+    Component(tph, "TypingProtocolHandler", "ChatProtocolHandler", "chatActivity")
+    Component(eph, "EffectProtocolHandler", "ChatProtocolHandler", "chatEffect")
+    Component(cmph, "ChatMessageProtocolHandler", "ChatProtocolHandler", "chatMessage")
+    Component(ccph, "ContactCardProtocolHandler", "ChatProtocolHandler", "chatContactDetailsUpdate")
+    Component(gdph, "GroupDetailsProtocolHandler", "ChatProtocolHandler", "chatGroupDetailsUpdate")
     Component(cpr, "ChatProtocolRouter", "Router", "Fans out StreamData\nto all matching handlers")
   }
 
