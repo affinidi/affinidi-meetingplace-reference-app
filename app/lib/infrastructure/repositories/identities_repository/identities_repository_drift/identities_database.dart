@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -36,13 +37,60 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
        );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (migrator, from, to) async {
+      // Replaces individual columns with a single contact_info_json column.
       if (from < 2) {
-        await migrator.addColumn(identitiesTable, identitiesTable.did);
+        await migrator.addColumn(
+          identitiesTable,
+          identitiesTable.contactInfoJson,
+        );
+
+        final rows = await customSelect(
+          'SELECT id, first_name, last_name, email, mobile, card_color'
+          ' FROM identities_table',
+        ).get();
+
+        for (final row in rows) {
+          final contactInfo = jsonEncode(<String, dynamic>{
+            'n': {
+              'given': row.data['first_name'] as String? ?? '',
+              'surname': row.data['last_name'] as String? ?? '',
+            },
+            'email': {
+              'type': {'work': row.data['email'] as String? ?? ''},
+            },
+            'tel': {
+              'type': {'cell': row.data['mobile'] as String? ?? ''},
+            },
+            'x-meetingplace-identity-card-color':
+                row.data['card_color'] as String? ?? '',
+          });
+
+          await (update(
+            identitiesTable,
+          )..where((t) => t.id.equals(row.data['id'] as String))).write(
+            IdentitiesTableCompanion(contactInfoJson: Value(contactInfo)),
+          );
+        }
+
+        await migrator.alterTable(
+          // ignore: experimental_member_use
+          TableMigration(
+            identitiesTable,
+            columnTransformer: {
+              identitiesTable.id: identitiesTable.id,
+              identitiesTable.did: identitiesTable.did,
+              identitiesTable.displayName: identitiesTable.displayName,
+              identitiesTable.contactInfoJson: identitiesTable.contactInfoJson,
+              identitiesTable.profilePic: identitiesTable.profilePic,
+              identitiesTable.isPrimary: identitiesTable.isPrimary,
+            },
+          ),
+        );
       }
     },
   );

@@ -195,8 +195,7 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   /// JSON blob holding all contact card fields mapped by sdkPath.
   final String contactInfoJson;
 
-  /// Profile picture of the identity, stored outside the JSON blob to avoid
-  /// database field size limitations.
+  /// Profile picture of the identity
   final String? profilePic;
   final bool isPrimary;
   const IdentityRecord({

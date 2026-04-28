@@ -1203,9 +1203,6 @@ class ContactCard extends DataClass implements Insertable<ContactCard> {
   final String did;
   final String type;
   final String contactInfoJson;
-
-  /// Profile picture of the contact, stored outside the JSON blob to avoid
-  /// database field size limitations.
   final String? profilePic;
   const ContactCard({
     required this.id,

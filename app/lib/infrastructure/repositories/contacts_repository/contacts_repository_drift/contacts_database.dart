@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:clock/clock.dart';
@@ -41,7 +42,7 @@ class ContactsDatabase extends _$ContactsDatabase {
        );
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -110,6 +111,54 @@ class ContactsDatabase extends _$ContactsDatabase {
             ' WHERE origin != 1',
           );
         }
+      }
+
+      // Replaces individual columns with a single contact_info_json column.
+      if (from < 5) {
+        await migrator.addColumn(contactCards, contactCards.contactInfoJson);
+
+        final rows = await customSelect(
+          'SELECT id, first_name, last_name, email, mobile,'
+          ' meetingplace_identity_card_color FROM contact_cards',
+        ).get();
+
+        for (final row in rows) {
+          final contactInfo = jsonEncode(<String, dynamic>{
+            'n': {
+              'given': row.data['first_name'] as String? ?? '',
+              'surname': row.data['last_name'] as String? ?? '',
+            },
+            'email': {
+              'type': {'work': row.data['email'] as String? ?? ''},
+            },
+            'tel': {
+              'type': {'cell': row.data['mobile'] as String? ?? ''},
+            },
+            'x-meetingplace-identity-card-color':
+                row.data['meetingplace_identity_card_color'] as String? ?? '',
+          });
+
+          await (update(
+            contactCards,
+          )..where((c) => c.id.equals(row.data['id'] as int))).write(
+            ContactCardsCompanion(contactInfoJson: Value(contactInfo)),
+          );
+        }
+
+        await migrator.alterTable(
+          // ignore: experimental_member_use
+          TableMigration(
+            contactCards,
+            columnTransformer: {
+              contactCards.id: contactCards.id,
+              contactCards.contactId: contactCards.contactId,
+              contactCards.did: contactCards.did,
+              contactCards.type: contactCards.type,
+              contactCards.contactInfoJson: contactCards.contactInfoJson,
+              contactCards.profilePic: contactCards.profilePic,
+            },
+          ),
+        );
       }
     },
   );
