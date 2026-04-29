@@ -430,7 +430,7 @@ class AppChatService extends _$AppChatService implements ChatService {
           ?.contactCard
           .firstName;
     }
-    contactName = state.otherPartyCard?.firstName;
+    contactName = _otherPartyFirstName;
 
     _logger.info(
       '_onTypingMember called with senderDid: $senderDid, '
