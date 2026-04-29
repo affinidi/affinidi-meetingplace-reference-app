@@ -18,7 +18,7 @@ abstract class ChatService {
   int get chatPresenceIntervalInSeconds;
 
   Future<void> startChatSession();
-  void disposeChat();
+  void pauseChat();
 
   Future<String?> restoreUnsentMessage(String contactId);
   Future<ContactPresenceStatus> calculateContactPresenceStatus(
