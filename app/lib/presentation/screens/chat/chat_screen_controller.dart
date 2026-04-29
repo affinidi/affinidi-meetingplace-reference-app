@@ -318,7 +318,7 @@ class ChatScreenController extends _$ChatScreenController
 
     final lastKeepAliveMessage = contact.lastKeepAliveMessage;
     if (lastKeepAliveMessage != null) {
-      _chatService?.onPresenceUpdated(contact.lastKeepAliveMessage!);
+      _chatService?.onPresenceUpdated(lastKeepAliveMessage);
     }
 
     await _chatService?.updateContactSequenceNumber(channelDid);
