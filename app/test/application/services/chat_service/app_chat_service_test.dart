@@ -130,9 +130,9 @@ void main() {
       expect(fakeChatSdk.lastEffectSent, Effect.confetti.name);
     });
 
-    test('ends session and cancels subscription on disposeChat', () async {
+    test('ends session and cancels subscription on pauseChat', () async {
       await chatService.startChatSession();
-      chatService.disposeChat();
+      chatService.pauseChat();
       expect(fakeChatSdk.sessionEnded, true);
     });
 
@@ -180,10 +180,10 @@ void main() {
       expect(fakeChatSdk.sendTextMessageCalls.last['attachments'], isNotEmpty);
     });
 
-    test('disposeChat can be called multiple times safely', () async {
+    test('pauseChat can be called multiple times safely', () async {
       await chatService.startChatSession();
-      chatService.disposeChat();
-      chatService.disposeChat();
+      chatService.pauseChat();
+      chatService.pauseChat();
       expect(fakeChatSdk.sessionEnded, true);
     });
 

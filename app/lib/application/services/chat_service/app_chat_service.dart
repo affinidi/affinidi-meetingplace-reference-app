@@ -260,7 +260,7 @@ class AppChatService extends _$AppChatService implements ChatService {
   }
 
   @override
-  void disposeChat() {
+  void pauseChat() {
     _chatSDK?.endChatSession();
     _messageSubscription?.cancel();
     _messageSubscription = null;
