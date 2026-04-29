@@ -6,6 +6,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
+import 'package:meeting_place_control_plane/meeting_place_control_plane.dart'
+    as cp;
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -37,6 +39,35 @@ import 'chat_screen_state.dart';
 
 part 'chat_screen_controller.g.dart';
 
+/// Outcome of a chat send action initiated from the chat screen.
+///
+/// - [ok]: the send was accepted and dispatched to the SDK.
+/// - [emptyMessage]: the user attempted to send an empty/whitespace message.
+/// - [trustDenied]: the local trust policy denied the action; the message
+///   was not dispatched.
+/// - [error]: an unexpected error occurred while preparing the send.
+enum ChatSendResultStatus { ok, emptyMessage, trustDenied, error }
+
+/// Result returned by [ChatScreenController.sendMessage] /
+/// [ChatScreenController.sendAttachment] so the UI can react with a
+/// user-friendly message when needed.
+class ChatSendResult {
+  const ChatSendResult({required this.status, this.deniedReason});
+
+  final ChatSendResultStatus status;
+  final String? deniedReason;
+
+  bool get isOk => status == ChatSendResultStatus.ok;
+  bool get isTrustDenied => status == ChatSendResultStatus.trustDenied;
+
+  static const ChatSendResult ok = ChatSendResult(
+    status: ChatSendResultStatus.ok,
+  );
+  static const ChatSendResult empty = ChatSendResult(
+    status: ChatSendResultStatus.emptyMessage,
+  );
+}
+
 @riverpod
 /// Controller class for managing the state and logic of the chat screen.
 ///
@@ -61,6 +92,10 @@ class ChatScreenController extends _$ChatScreenController
 
   late final messageTextController = TextEditingController();
   late final _logger = ref.read(appLoggerProvider);
+  late final cp.TrustPolicyEnforcer _trustPolicyEnforcer = ref.read(
+    trustPolicyEnforcerProvider,
+  );
+  late final _environment = ref.read(environmentProvider);
 
   chat.MeetingPlaceChatSDK? _chatSDK;
   chat.ChatStream? messagesSubscription;
@@ -69,6 +104,7 @@ class ChatScreenController extends _$ChatScreenController
   TimedAction? _updateContactPresenceStatusTimedAction;
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
+  String? _actorDid;
   late final _chatResumingLock = Lock();
 
   late final Map<String, ProviderSubscription<void>>
@@ -313,6 +349,7 @@ class ChatScreenController extends _$ChatScreenController
           : ContactCardUtils.fromSdkContactCard(srcCard),
       notificationToken: channel.otherPartyNotificationToken,
     );
+    _actorDid = channel.permanentChannelDid;
 
     _chatSDK = await ref.watch(chatSdkProvider(channel).future);
 
@@ -693,16 +730,27 @@ class ChatScreenController extends _$ChatScreenController
   ///
   /// The message text is trimmed and validated before sending.
   /// Clears the input field upon successful send.
-  Future<void> sendMessage() async {
+  ///
+  /// Returns a [ChatSendResult] so the UI can show user-friendly feedback
+  /// when the trust policy denies the action (e.g. read-only group).
+  Future<ChatSendResult> sendMessage() async {
     final originalText = messageTextController.text;
     final trimmedMessage = originalText.trimRight();
-    if (trimmedMessage.isEmpty) return;
+    if (trimmedMessage.isEmpty) return ChatSendResult.empty;
+
+    final trustResult = await _ensureTrustPolicyAllows(
+      cp.TrustAction.sendGroupMessage,
+    );
+    if (!trustResult.isOk) {
+      return trustResult;
+    }
 
     unawaited(_chatSDK?.sendTextMessage(trimmedMessage));
     _sendChatActivityTimedAction?.cancel();
     if (messageTextController.text == originalText) {
       messageTextController.clear();
     }
+    return ChatSendResult.ok;
   }
 
   Future<void> sendChatActivity() async {
@@ -926,11 +974,18 @@ class ChatScreenController extends _$ChatScreenController
   /// image or file, to the chat. It performs necessary validations and updates
   /// the chat state accordingly.
   ///
-  /// Returns a [Future] that completes when the attachment has been sent.
-  Future<void> sendAttachment(
+  /// Returns a [ChatSendResult] so callers can react to trust policy denials.
+  Future<ChatSendResult> sendAttachment(
     String text,
     List<MessageAttachment> messageAttachment,
   ) async {
+    final trustResult = await _ensureTrustPolicyAllows(
+      cp.TrustAction.sendGroupMessage,
+    );
+    if (!trustResult.isOk) {
+      return trustResult;
+    }
+
     messageTextController.clear();
     unawaited(
       _chatSDK?.sendTextMessage(
@@ -939,6 +994,70 @@ class ChatScreenController extends _$ChatScreenController
       ),
     );
     _sendChatActivityTimedAction?.cancel();
+    return ChatSendResult.ok;
+  }
+
+  /// Pre-checks the configured `TrustPolicyEnforcer` for the given
+  /// group [action]. Returns [ChatSendResult.ok] when the action is allowed
+  /// (or when this is not a group chat), and a
+  /// [ChatSendResultStatus.trustDenied] result when the policy denies it.
+  /// Network or unexpected errors are logged and surfaced as
+  /// [ChatSendResultStatus.error] so the SDK-side enforcement still acts as
+  /// the authoritative deny, while the UI does not silently spin on a backend
+  /// it cannot reach.
+  Future<ChatSendResult> _ensureTrustPolicyAllows(cp.TrustAction action) async {
+    if (!state.isGroupChat) {
+      return ChatSendResult.ok;
+    }
+
+    final groupDid = state.group?.did;
+    final actorDid = _actorDid;
+    if (groupDid == null || actorDid == null) {
+      return ChatSendResult.ok;
+    }
+
+    try {
+      await _trustPolicyEnforcer.enforceOrThrow(
+        cp.TrustAuthorizationRequest(
+          action: action,
+          groupId: groupDid,
+          actorDid: actorDid,
+          subjectDid: actorDid,
+          credentialProof: _environment.trustCredentialProof.isNotEmpty
+              ? _environment.trustCredentialProof
+              : null,
+          issuerDid: _environment.trustIssuerDid.isNotEmpty
+              ? _environment.trustIssuerDid
+              : null,
+          scope: _environment.trustScope.isNotEmpty
+              ? _environment.trustScope
+              : null,
+          metadata: {'role': _environment.trustRole},
+        ),
+      );
+      return ChatSendResult.ok;
+    } on cp.TrustPolicyDeniedException catch (e, st) {
+      _logger.warning(
+        'Trust policy denied chat send: ${e.action} on ${e.groupId}',
+        name: _logKey,
+      );
+      _logger.info(
+        'Trust deny stack: $st',
+        name: _logKey,
+      );
+      return ChatSendResult(
+        status: ChatSendResultStatus.trustDenied,
+        deniedReason: e.message,
+      );
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Trust policy check failed for action ${action.name}',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return const ChatSendResult(status: ChatSendResultStatus.error);
+    }
   }
 
   /// Loads an image attachment into the chat screen.

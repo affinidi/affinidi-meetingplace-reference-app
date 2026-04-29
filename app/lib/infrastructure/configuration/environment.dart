@@ -49,6 +49,28 @@ class Environment {
   );
   String get marketplaceQrPrefix =>
       const String.fromEnvironment('MARKETPLACE_QR_PREFIX');
+  bool get isTrustEnforcementEnabled => const bool.fromEnvironment(
+    'TRUST_ENFORCEMENT_ENABLED',
+    defaultValue: false,
+  );
+  String get trustEnforcerUrl =>
+      const String.fromEnvironment('TRUST_ENFORCER_URL', defaultValue: '');
+  String get trustEnforcerEndpointPath => const String.fromEnvironment(
+    'TRUST_ENFORCER_ENDPOINT_PATH',
+    defaultValue: '/v1/authorize',
+  );
+  String get trustCredentialProof => const String.fromEnvironment(
+    'TRUST_CREDENTIAL_PROOF',
+    defaultValue: '',
+  );
+  String get trustIssuerDid =>
+      const String.fromEnvironment('TRUST_ISSUER_DID', defaultValue: '');
+  String get trustScope =>
+      const String.fromEnvironment('TRUST_SCOPE', defaultValue: '');
+  String get trustRole => const String.fromEnvironment(
+    'TRUST_ROLE',
+    defaultValue: 'viewer',
+  );
 
   ImageConfig get chatImageConfig => ImageConfig(
     qualityPercentage: const int.fromEnvironment(

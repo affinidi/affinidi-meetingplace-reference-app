@@ -1094,44 +1094,39 @@ packages:
     source: hosted
     version: "0.13.0"
   meeting_place_chat:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_chat
-      sha256: "5ddf0ef665a5fa6a962fc61a5cb4330615c9b0f9c5dd28de6d578f94677f211c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.31"
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat"
+      relative: true
+    source: path
+    version: "0.0.1-dev.33"
   meeting_place_control_plane:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_control_plane
-      sha256: "8f7a8808bac14b4781fcce16df7762d54e254e3283aecf77194e51ae9d6d2af1"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_control_plane"
+      relative: true
+    source: path
     version: "0.0.1-dev.16"
   meeting_place_core:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_core
-      sha256: c67d354f6decfae74c0632318553481cad44864ac08ae9b3afbc78e810df5fda
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.29"
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_core"
+      relative: true
+    source: path
+    version: "0.0.1-dev.31"
   meeting_place_drift_repository:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_drift_repository
-      sha256: "7d0350dd24578323263005ab0756a6e1fa3adb5dcb497200eb08e9287688b3ff"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.32"
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository"
+      relative: true
+    source: path
+    version: "0.0.1-dev.34"
   meeting_place_mediator:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_mediator
-      sha256: "78585d43e0e06405539e1da9a432b5328222bc98e63adb35c27d1b218f6ccffb"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_mediator"
+      relative: true
+    source: path
     version: "0.0.1-dev.15"
   melos:
     dependency: "direct dev"

@@ -28,9 +28,25 @@ class _ChatTextEntry extends HookConsumerWidget {
       FocusScope.of(context).requestFocus(focusNode);
     }
 
-    void sendMessage() {
+    Future<void> sendMessage() async {
       if (!context.mounted) return;
-      controller.sendMessage();
+      final result = await controller.sendMessage();
+      if (!context.mounted) return;
+      if (result.isTrustDenied) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: context.colorScheme.error,
+              content: Text(
+                result.deniedReason ??
+                    'You do not have permission to send messages in '
+                        'this group.',
+              ),
+            ),
+          );
+      }
       showKeyboard();
     }
 

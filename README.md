@@ -23,6 +23,7 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
   - [Optional Environment Variables](#optional-environment-variables)
 - [VSCode Configuration](#vscode-configuration)
 - [Run App on Simulator](#run-app-on-simulator)
+- [VTI Local Demo (SDK-Enforced Trust)](#vti-local-demo-sdk-enforced-trust)
 - [Troubleshooting](#troubleshooting)
 - [Support \& Feedback](#support--feedback)
   - [Reporting Technical Issues](#reporting-technical-issues)
@@ -345,6 +346,138 @@ chmod +x .git/hooks/pre-commit
 
 This will automatically run `melos run analyze` before every commit and block the commit if there are any issues.
 **Note:** The hook file must be named `pre-commit` (no extension) in `.git/hooks`.
+
+## VTI Local Demo (SDK-Enforced Trust)
+
+This reference app ships with a lightweight **Verifiable Trust Infrastructure (VTI)** demo flow. It allows you to demonstrate the conceptual read-only group flow end-to-end on a single laptop, with the **Meeting Place SDK** consulting a local **Policy Decision Point (PDP)** before performing sensitive group actions (e.g. `sendGroupMessage`).
+
+### What's real vs. simulated in this phase
+
+- **Real:** Runtime authorization check on the SDK send path. When trust enforcement is enabled, the chat send flow calls the configured PDP first; deny responses are surfaced as a user-friendly error in the app and the message is not dispatched.
+- **Simulated:** Verifiable Credential issuance and cryptographic proof verification are represented as policy/role state plus optional `credentialProof` / `issuerDid` placeholders in the request payload.
+
+### Prerequisites
+
+- Python 3.9+ (for the local PDP script)
+- `curl` (or any HTTP client)
+- A working local Meeting Place setup (see [Required Environment Variables](#required-environment-variables))
+
+### 1) Start the local PDP
+
+The PDP lives at `scripts/mock_trust_api.py` and exposes the contract consumed by `HttpTrustPolicyEnforcer` in the SDK. It also offers helper endpoints for policy CRUD and role assignment so you can drive the demo from the terminal without editing code.
+
+```bash
+python3 scripts/mock_trust_api.py
+```
+
+You should see:
+
+```
+Local PDP running at http://127.0.0.1:8080
+  Decision endpoint : POST /v1/authorize
+  Policies          : GET/POST /v1/policies, GET/PUT/DELETE /v1/policies/<groupId>
+  Roles             : GET/POST /v1/roles, DELETE /v1/roles?actorDid=&groupId=
+  Decision log      : GET /v1/decisions
+  Health            : GET /health
+```
+
+Smoke-test it from another terminal:
+
+```bash
+curl -s http://127.0.0.1:8080/health
+```
+
+### 2) Configure trust enforcement in the app
+
+In `configurations/.env`, enable the trust hook and point it at the local PDP:
+
+```bash
+TRUST_ENFORCEMENT_ENABLED="true"
+TRUST_ENFORCER_URL="http://127.0.0.1:8080"
+TRUST_ENFORCER_ENDPOINT_PATH="/v1/authorize"
+TRUST_CREDENTIAL_PROOF=""
+TRUST_ISSUER_DID=""
+TRUST_SCOPE=""
+TRUST_ROLE="viewer"
+```
+
+When `TRUST_ENFORCEMENT_ENABLED` is `false` (or unset), the app falls back to a no-op enforcer and behaves like upstream.
+`TRUST_CREDENTIAL_PROOF` / `TRUST_ISSUER_DID` / `TRUST_SCOPE` / `TRUST_ROLE`
+are SDK-side proof-context placeholders to support presentation and
+progressive migration toward real VTA proof presentation.
+
+### 3) Run the app
+
+Use your usual run target. For example:
+
+```bash
+flutter run --dart-define-from-file=../configurations/.env
+```
+
+> The SDK's trust enforcer is also wired into the Control Plane handlers (`GroupSendMessageHandler`, etc.) as defense in depth. The app additionally pre-checks at the chat controller layer so denies are surfaced cleanly in the UI before the message is queued.
+
+### 4) Drive the demo from the terminal
+
+The PDP defaults to a read-only policy where `viewer` cannot send group messages but `admin` can. You can override per-group policies and assign roles per `(actorDid, groupId)` to mirror the conceptual flow.
+
+> Replace `<group-did>` and `<bob-did>` with the values shown in the app or the SDK logs (the chat controller logs the actor and group DIDs via the SDK). For a quick demo, you can also assign a role using the wildcard policy already in place.
+
+#### a. Inspect default policy
+
+```bash
+curl -s http://127.0.0.1:8080/v1/policies | jq .
+```
+
+#### b. Create a read-only policy for a group
+
+```bash
+curl -s -X POST http://127.0.0.1:8080/v1/policies \
+  -H 'content-type: application/json' \
+  -d '{"groupId":"<group-did>","template":"read-only"}'
+```
+
+#### c. Assign Bob the `viewer` role
+
+```bash
+curl -s -X POST http://127.0.0.1:8080/v1/roles \
+  -H 'content-type: application/json' \
+  -d '{"actorDid":"<bob-did>","groupId":"<group-did>","role":"viewer"}'
+```
+
+In the app, send a message in that group as Bob. You should see a red SnackBar saying you do not have permission, and the PDP terminal will log:
+
+```
+[PDP] ... action=sendGroupMessage groupId=<group-did> role=viewer source=role_assignment ... -> DENY (denied_by_policy)
+```
+
+#### d. Promote Bob to `admin` and try again
+
+```bash
+curl -s -X POST http://127.0.0.1:8080/v1/roles \
+  -H 'content-type: application/json' \
+  -d '{"actorDid":"<bob-did>","groupId":"<group-did>","role":"admin"}'
+```
+
+Re-send the message. The PDP terminal now logs `-> ALLOW (allowed_by_policy)` and the message is delivered through the existing DIDComm path.
+
+#### e. Inspect recent decisions
+
+```bash
+curl -s http://127.0.0.1:8080/v1/decisions | jq '.decisions[-5:]'
+```
+
+### 5) Reset between demo runs
+
+```bash
+curl -s -X DELETE http://127.0.0.1:8080/v1/roles
+curl -s -X DELETE http://127.0.0.1:8080/v1/policies/<group-did>
+```
+
+### Troubleshooting the demo
+
+- **App still allows sending after deny config**: confirm `TRUST_ENFORCEMENT_ENABLED=true` is set in `configurations/.env` and that you re-ran the app with `--dart-define-from-file=../configurations/.env`.
+- **`http://127.0.0.1:8080` unreachable from device/simulator**: use `10.0.2.2` for Android emulators or your host LAN IP for physical devices, then update `TRUST_ENFORCER_URL` accordingly.
+- **No PDP log entry on send**: ensure the action is happening on a *group* chat. Direct chats skip the trust pre-check by design.
 
 ## Troubleshooting
 

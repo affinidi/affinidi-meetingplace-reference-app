@@ -16,6 +16,16 @@ dev_dependencies:
 
 dependency_overrides:
   meta: 1.17.0
+  meeting_place_chat:
+    path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
+  meeting_place_control_plane:
+    path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_control_plane
+  meeting_place_core:
+    path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_core
+  meeting_place_drift_repository:
+    path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
+  meeting_place_mediator:
+    path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_mediator
 
 melos:
   scripts:

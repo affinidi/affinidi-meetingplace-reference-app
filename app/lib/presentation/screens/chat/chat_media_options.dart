@@ -85,13 +85,35 @@ class _ChatMediaOptions extends ConsumerWidget {
 
       if (!context.mounted) return;
 
+      ChatSendResult? sendResult;
       if (result != null) {
-        await controller.sendAttachment(result.text, result.attachments);
+        sendResult = await controller.sendAttachment(
+          result.text,
+          result.attachments,
+        );
       }
 
       if (!context.mounted) return;
 
       Navigator.of(context).pop();
+
+      if (!context.mounted) return;
+
+      if (sendResult != null && sendResult.isTrustDenied) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: context.colorScheme.error,
+              content: Text(
+                sendResult.deniedReason ??
+                    'You do not have permission to send messages '
+                        'in this group.',
+              ),
+            ),
+          );
+      }
     }
 
     final items = <_ChatMediaOptionItem>[
