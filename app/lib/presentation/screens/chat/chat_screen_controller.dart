@@ -34,6 +34,7 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
+import 'proof_flow_controller.dart';
 
 part 'chat_screen_controller.g.dart';
 
@@ -481,6 +482,23 @@ class ChatScreenController extends _$ChatScreenController
     unawaited(_chatService?.sendTextMessage(trimmedMessage) ?? Future.value());
     _sendChatActivityTimedAction?.cancel();
     messageTextController.clear();
+  }
+
+  /// Sends a message directly with optional attachments
+  Future<void> sendMessageDirect(
+    String message, {
+    List<chat.Attachment>? attachments,
+  }) async {
+    final trimmedMessage = message.trimRight();
+    // Allow empty messages if attachments are present
+    if (trimmedMessage.isEmpty &&
+        (attachments == null || attachments.isEmpty)) {
+      return;
+    }
+
+    unawaited(
+      _chatSDK?.sendTextMessage(trimmedMessage, attachments: attachments),
+    );
   }
 
   Future<void> sendChatActivity() async {

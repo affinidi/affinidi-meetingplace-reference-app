@@ -18,6 +18,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'contacts': 'Channels',
       'identities': 'Identities',
       'rCards': 'R-Cards',
+      'credentials': 'Credentials',
       'settings': 'Settings',
       'other': 'Invalid',
     });
@@ -113,6 +114,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'scanQRCode': 'Direct scan a QR Code',
       'claimAnOffer': 'Accept Meeting Place Invitation',
       'publishAnOffer': 'Publish Meeting Place Invitation',
+      'prove': 'Prove',
       'other': '',
     });
     return '$_temp0';
@@ -156,6 +158,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'scanQRCode': 'Scan a QR Code with your camera',
       'claimAnOffer': 'Connect with someone through Meeting Place',
       'publishAnOffer': 'Advertise your invitation to connect on Meeting Place',
+      'prove': 'Zero-knowledge proof verification',
       'other': '',
     });
     return '$_temp0';

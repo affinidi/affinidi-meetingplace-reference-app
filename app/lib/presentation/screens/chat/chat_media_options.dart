@@ -171,6 +171,19 @@ class _ChatMediaOptions extends ConsumerWidget {
           sendEffect(ScreenEffect.confetti());
         },
       ),
+      _ChatMediaOptionItem(
+        icon: const MaterialIcon(Icons.verified_user),
+        label: 'Human Zero-Knowledge Proof',
+        onTap: () {
+          // Trigger liveness check request
+          ref
+              .read(proofFlowControllerProvider(_contactId).notifier)
+              .requestLivenessCheck();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+      ),
     ];
 
     return BackdropFilter(

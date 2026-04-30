@@ -62,6 +62,18 @@ class _ChatMessageList extends HookConsumerWidget {
                   return const SizedBox.shrink();
                 }
 
+                // Hide messages that are just liveness/proof attachments with no text
+                if (chatItem is chat.Message && chatItem.value.isEmpty) {
+                  final attachments = chatItem.attachments;
+                  final hasOnlyLivenessAttachments = attachments.isNotEmpty &&
+                      attachments.every((att) => 
+                        att.format == ZkpConstants.livenessCheckRequestType ||
+                        att.format == ZkpConstants.livenessProofType
+                      );
+                  if (hasOnlyLivenessAttachments) {
+                    return const SizedBox.shrink();
+                  }
+                }
                 var nextItemFromSameDid = false;
 
                 if (index < sortedMessages.length - 1) {
@@ -122,6 +134,10 @@ class _ChatMessageList extends HookConsumerWidget {
                         alignment:
                             (chatItem is EncryptionNotice ||
                                 chatItem is chat.ConciergeMessage ||
+                                chatItem is ZkpRequestReceivedNotice ||
+                                chatItem is ZkpPausedNotice ||
+                                chatItem is ZkpProofSharedNotice ||
+                                chatItem is ZkpProofReceivedNotice ||
                                 chatItem.status ==
                                     chat.ChatItemStatus.userInput)
                             ? Alignment.center
@@ -131,7 +147,11 @@ class _ChatMessageList extends HookConsumerWidget {
                         child: Column(
                           crossAxisAlignment:
                               (chatItem is EncryptionNotice ||
-                                  chatItem is chat.ConciergeMessage)
+                                  chatItem is chat.ConciergeMessage ||
+                                  chatItem is ZkpRequestReceivedNotice ||
+                                  chatItem is ZkpPausedNotice ||
+                                  chatItem is ZkpProofSharedNotice ||
+                                  chatItem is ZkpProofReceivedNotice)
                               ? CrossAxisAlignment.center
                               : chatItem.isFromMe
                               ? CrossAxisAlignment.end
@@ -221,17 +241,17 @@ chat.ChatItemStatus consolidateChatItemStatus(chat.ChatItem chatItem) {
 }
 
 Color getChatItemColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
+  if (chatItem.type == chat.ChatItemType.conciergeMessage) {
+    return AppCustomColors.conciergeMessageColor;
+  } else if (chatItem.type == chat.ChatItemType.eventMessage) {
+    return Colors.transparent;
+  }
+
   if (chatItem.isFromMe) {
     if (chatItem.status == chat.ChatItemStatus.error) {
       return Colors.red;
     }
     return colorScheme.primary;
-  }
-
-  if (chatItem.type == chat.ChatItemType.conciergeMessage) {
-    return const Color.fromARGB(255, 53, 130, 6);
-  } else if (chatItem.type == chat.ChatItemType.eventMessage) {
-    return Colors.transparent;
   }
 
   return const Color.fromARGB(248, 107, 65, 162);
@@ -288,7 +308,12 @@ class _RCardBubble extends StatelessWidget {
     final chatItemColor = getChatItemColor(context.colorScheme, chatItem);
 
     final margin =
-        chatItem is EncryptionNotice ||
+      chatItem is ZkpRequestReceivedNotice ||
+        chatItem is ZkpPausedNotice ||
+        chatItem is ZkpProofSharedNotice ||
+        chatItem is ZkpProofReceivedNotice
+      ? const EdgeInsets.symmetric(vertical: 8)
+      : chatItem is EncryptionNotice ||
             chatItem is chat.ConciergeMessage ||
             chatItem is chat.EventMessage
         ? const EdgeInsets.fromLTRB(20, 8, 20, 8)

@@ -7,6 +7,7 @@ import '../../presentation/screens/chat/chat_screen.dart';
 import '../../presentation/screens/connections/connection_details/connection_details_screen.dart';
 import '../../presentation/screens/connections/connections_screen.dart';
 import '../../presentation/screens/contacts/contacts_screen.dart';
+import '../../presentation/screens/credentials/credentials_screen.dart';
 import '../../presentation/screens/identities/form_screen/identity_form_screen.dart';
 import '../../presentation/screens/identities/identities_screen.dart';
 import '../../presentation/screens/offer/accept_offer_screen/accept_offer_screen.dart';
@@ -125,6 +126,14 @@ part 'vrc/vrc_details_route.dart';
         ),
       ],
     ),
+    TypedStatefulShellBranch<CredentialsBranchData>(
+      routes: [
+        TypedGoRoute<CredentialsRoute>(
+          path: RoutePaths.credentials,
+          name: RouteNames.credentials,
+        ),
+      ],
+    ),
     TypedStatefulShellBranch<SettingsBranchData>(
       routes: [
         TypedGoRoute<SettingsRoute>(
@@ -159,6 +168,7 @@ final _contactsNavigatorKey = GlobalKey<NavigatorState>();
 final _connectionsNavigatorKey = GlobalKey<NavigatorState>();
 final _identitiesNavigatorKey = GlobalKey<NavigatorState>();
 final _rCardsNavigatorKey = GlobalKey<NavigatorState>();
+final _credentialsNavigatorKey = GlobalKey<NavigatorState>();
 final _settingsNavigatorKey = GlobalKey<NavigatorState>();
 
 // Branch data classes for each tab
@@ -183,6 +193,14 @@ class IdentitiesBranchData extends StatefulShellBranchData {
   static final $navigatorKey = _identitiesNavigatorKey;
   static const String $restorationScopeId =
       'identitiesBranchRestorationScopeId';
+}
+
+class CredentialsBranchData extends StatefulShellBranchData {
+  const CredentialsBranchData();
+
+  static final $navigatorKey = _credentialsNavigatorKey;
+  static const String $restorationScopeId =
+      'credentialsBranchRestorationScopeId';
 }
 
 class SettingsBranchData extends StatefulShellBranchData {
@@ -224,7 +242,15 @@ class IdentitiesRoute extends GoRouteData with $IdentitiesRoute {
       const IdentitiesScreen();
 }
 
-class SettingsRoute extends GoRouteData with $SettingsRoute {
+class CredentialsRoute extends GoRouteData with _$CredentialsRoute {
+  const CredentialsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const CredentialsScreen();
+}
+
+class SettingsRoute extends GoRouteData with _$SettingsRoute {
   const SettingsRoute();
 
   @override

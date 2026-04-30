@@ -109,7 +109,7 @@ abstract class AppLocalizations {
   /// No description provided for @tabsTitle.
   ///
   /// In en, this message translates to:
-  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} settings{Settings} other{Invalid}}'**
+  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
 
   /// No description provided for @publishOffer.
@@ -259,7 +259,7 @@ abstract class AppLocalizations {
   /// No description provided for @newConnectionOptionTitle.
   ///
   /// In en, this message translates to:
-  /// **'{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} other{}}'**
+  /// **'{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} prove{Prove} other{}}'**
   String newConnectionOptionTitle(String option);
 
   /// No description provided for @setExpiryDateTime.
@@ -307,7 +307,7 @@ abstract class AppLocalizations {
   /// No description provided for @newConnectionOptionSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} other{}}'**
+  /// **'{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} prove{Zero-knowledge proof verification} other{}}'**
   String newConnectionOptionSubtitle(String option);
 
   /// No description provided for @unableToDetectCamera.

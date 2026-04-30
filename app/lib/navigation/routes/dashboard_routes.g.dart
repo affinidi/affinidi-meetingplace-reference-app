@@ -129,6 +129,15 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
               factory: $VrcDetailsRoute._fromState,
             ),
           ],
+      navigatorKey: CredentialsBranchData.$navigatorKey,
+      restorationScopeId: CredentialsBranchData.$restorationScopeId,
+
+      routes: [
+        GoRouteData.$route(
+          path: '/credentials',
+          name: 'credentials',
+
+          factory: _$CredentialsRoute._fromState,
         ),
       ],
     ),
@@ -446,6 +455,12 @@ mixin $RCardsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/r-cards');
+mixin _$CredentialsRoute on GoRouteData {
+  static CredentialsRoute _fromState(GoRouterState state) =>
+      const CredentialsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/credentials');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -512,6 +527,7 @@ mixin $VrcDetailsRoute on GoRouteData {
 }
 
 mixin $SettingsRoute on GoRouteData {
+mixin _$SettingsRoute on GoRouteData {
   static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
 
   @override
