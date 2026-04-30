@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:clock/clock.dart';
@@ -13,7 +14,7 @@ import 'logger_target.dart';
 /// growth.
 class DebugLogCollectorTarget implements LoggerTarget {
   DebugLogCollectorTarget(this._logFile, {int maxMemoryEntries = 1000})
-      : _maxMemoryEntries = maxMemoryEntries {
+    : _maxMemoryEntries = maxMemoryEntries {
     if (_logFile.existsSync()) {
       final lines = _logFile.readAsLinesSync();
       final nonEmptyLines = lines.where((l) => l.trim().isNotEmpty).toList();
@@ -32,7 +33,7 @@ class DebugLogCollectorTarget implements LoggerTarget {
 
   final File _logFile;
   final int _maxMemoryEntries;
-  final List<AppLogEntry> _logs = [];
+  final ListQueue<AppLogEntry> _logs = ListQueue<AppLogEntry>();
   final StreamController<AppLogEntry> _logController =
       StreamController<AppLogEntry>.broadcast();
 
@@ -132,7 +133,7 @@ class DebugLogCollectorTarget implements LoggerTarget {
 
     _logs.add(entry);
     if (_logs.length > _maxMemoryEntries) {
-      _logs.removeAt(0);
+      _logs.removeFirst();
     }
     _logController.add(entry);
 

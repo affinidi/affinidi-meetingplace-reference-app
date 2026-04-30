@@ -33,10 +33,8 @@ class Environment {
 
   int get maxOfferUsages => 100;
 
-  int get maxLogMemoryEntries => const int.fromEnvironment(
-    'MAX_LOG_MEMORY_ENTRIES',
-    defaultValue: 1000,
-  );
+  int get maxLogMemoryEntries =>
+      const int.fromEnvironment('MAX_LOG_MEMORY_ENTRIES', defaultValue: 1000);
 
   Duration get minimumExpiryOffset => const Duration(minutes: 5);
   Duration get defaultExpiryOffset => const Duration(days: 7);
