@@ -28,6 +28,9 @@ class FakeEnvironment implements Environment {
   final int maxOfferUsages;
 
   @override
+  int get maxLogMemoryEntries => 1000;
+
+  @override
   FirebaseEnvironment get firebase => FirebaseEnvironment.instance;
 
   @override

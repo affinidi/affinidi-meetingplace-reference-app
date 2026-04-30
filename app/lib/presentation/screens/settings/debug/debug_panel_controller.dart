@@ -99,7 +99,6 @@ class DebugPanelController extends _$DebugPanelController {
 
   Future<void> shareLogFile() async {
     final filePath = ref.read(appLoggerProvider).logFilePath;
-    if (filePath == null) return;
     final shareService = ref.read(shareServiceProvider);
     await shareService.share(ShareParams(files: [XFile(filePath)]));
   }

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:clock/clock.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'app_log_entry.dart';
 import 'log_constants.dart';
@@ -13,54 +12,35 @@ import 'logger_target.dart';
 /// parsed into [logs] and trimmed to [_maxMemoryEntries] to prevent unbounded
 /// growth.
 class DebugLogCollectorTarget implements LoggerTarget {
-  DebugLogCollectorTarget() {
-    _initialize();
-  }
-
-  File? _logFile;
-  final List<AppLogEntry> _pendingBuffer = [];
-  final List<AppLogEntry> _logs = [];
-  final StreamController<AppLogEntry> _logController =
-      StreamController<AppLogEntry>.broadcast();
-
-  static const int _maxMemoryEntries = 1000;
-  static final RegExp _lineRegex = RegExp(r'^\[(.+?)\] \[(.+?)\] (.+)$');
-
-  bool _isSdkLog(String loggerName) {
-    final isAppLog = loggerName.contains(LogConstants.logName);
-    return !isAppLog;
-  }
-
-  Future<void> _initialize() async {
-    final dir = await getApplicationDocumentsDirectory();
-    _logFile = File('${dir.path}/app_debug.log');
-
-    // Flush any buffered entries synchronously now that we have a path.
-    if (_pendingBuffer.isNotEmpty) {
-      final buffer = StringBuffer();
-      for (final entry in _pendingBuffer) {
-        buffer.write('${_formatEntry(entry)}\n');
-      }
-      _logFile!.writeAsStringSync(buffer.toString(), mode: FileMode.append);
-      _pendingBuffer.clear();
-    }
-
-    // Parse existing log file into the in-memory list.
-    if (await _logFile!.exists()) {
-      final lines = await _logFile!.readAsLines();
+  DebugLogCollectorTarget(this._logFile, {int maxMemoryEntries = 1000})
+      : _maxMemoryEntries = maxMemoryEntries {
+    if (_logFile.existsSync()) {
+      final lines = _logFile.readAsLinesSync();
       final nonEmptyLines = lines.where((l) => l.trim().isNotEmpty).toList();
 
-      // Trim file on disk if it exceeds the max line cap.
       if (nonEmptyLines.length > _maxMemoryEntries) {
         final trimmed = nonEmptyLines.sublist(
           nonEmptyLines.length - _maxMemoryEntries,
         );
-        _logFile!.writeAsStringSync('${trimmed.join('\n')}\n');
+        _logFile.writeAsStringSync('${trimmed.join('\n')}\n');
         _loadEntries(trimmed);
       } else {
         _loadEntries(nonEmptyLines);
       }
     }
+  }
+
+  final File _logFile;
+  final int _maxMemoryEntries;
+  final List<AppLogEntry> _logs = [];
+  final StreamController<AppLogEntry> _logController =
+      StreamController<AppLogEntry>.broadcast();
+
+  static final RegExp _lineRegex = RegExp(r'^\[(.+?)\] \[(.+?)\] (.+)$');
+
+  bool _isSdkLog(String loggerName) {
+    final isAppLog = loggerName.contains(LogConstants.logName);
+    return !isAppLog;
   }
 
   void _loadEntries(List<String> lines) {
@@ -76,7 +56,7 @@ class DebugLogCollectorTarget implements LoggerTarget {
   /// Stream of new log entries as they are added during this session.
   Stream<AppLogEntry> get logStream => _logController.stream;
 
-  String? get logFilePath => _logFile?.path;
+  String get logFilePath => _logFile.path;
 
   void dispose() => _logController.close();
 
@@ -147,12 +127,10 @@ class DebugLogCollectorTarget implements LoggerTarget {
     }
     _logController.add(entry);
 
-    final file = _logFile;
-    if (file == null) {
-      _pendingBuffer.add(entry);
-    } else {
-      file.writeAsStringSync('${_formatEntry(entry)}\n', mode: FileMode.append);
-    }
+    _logFile.writeAsStringSync(
+      '${_formatEntry(entry)}\n',
+      mode: FileMode.append,
+    );
   }
 
   @override
@@ -177,6 +155,6 @@ class DebugLogCollectorTarget implements LoggerTarget {
   @override
   void clearLogs() {
     _logs.clear();
-    _logFile?.writeAsStringSync('');
+    _logFile.writeAsStringSync('');
   }
 }

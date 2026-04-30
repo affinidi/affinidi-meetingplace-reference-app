@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'infrastructure/configuration/environment.dart';
 import 'infrastructure/database/setup_sql_cipher.dart';
 import 'infrastructure/firebase_messaging/firebase_options.dart';
 import 'infrastructure/firebase_messaging/firebase_push_notification_messaging.dart';
@@ -32,6 +36,11 @@ import 'presentation/app/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final dir = await getApplicationDocumentsDirectory();
+  AppLogger.initialize(
+    File('${dir.path}/app_debug.log'),
+    maxLogMemoryEntries: Environment.instance.maxLogMemoryEntries,
+  );
   ErrorLoggingHandler.instance.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final sharedPreferences = await SharedPreferences.getInstance();

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
@@ -8,18 +10,31 @@ import 'logger_target.dart';
 
 class AppLogger
     implements MeetingPlaceChatSDKLogger, MeetingPlaceCoreSDKLogger {
-  AppLogger._() {
-    _loggers = <LoggerTarget>[ConsoleLoggerTarget(), _debugCollector];
+  AppLogger._(this._debugCollector, this._loggers);
+
+  static AppLogger? _instance;
+
+  static AppLogger get instance {
+    return _instance!;
   }
 
-  static final AppLogger _instance = AppLogger._();
-  static final AppLogger instance = _instance;
+  static void initialize(File logFile, {int maxLogMemoryEntries = 1000}) {
+    if (_instance != null) return;
+    final debugCollector = DebugLogCollectorTarget(
+      logFile,
+      maxMemoryEntries: maxLogMemoryEntries,
+    );
+    _instance = AppLogger._(debugCollector, <LoggerTarget>[
+      ConsoleLoggerTarget(),
+      debugCollector,
+    ]);
+  }
 
-  final DebugLogCollectorTarget _debugCollector = DebugLogCollectorTarget();
-  late final List<LoggerTarget> _loggers;
+  final DebugLogCollectorTarget _debugCollector;
+  final List<LoggerTarget> _loggers;
 
   /// Path to the persisted log file, or null until initialize completes.
-  String? get logFilePath => _debugCollector.logFilePath;
+  String get logFilePath => _debugCollector.logFilePath;
 
   Stream<AppLogEntry> get logStream => _debugCollector.logStream;
 
