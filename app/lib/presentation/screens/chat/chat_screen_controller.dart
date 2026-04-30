@@ -13,7 +13,12 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/network_connectivity_service/network_connectivity_service.dart';
+import '../../../application/services/zkp_service/zkp_constants.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
+import '../../../domain/models/chat/zkp_paused_notice.dart';
+import '../../../domain/models/chat/zkp_proof_shared_notice.dart';
+import '../../../domain/models/chat/zkp_proof_received_notice.dart';
+import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_status.dart';
@@ -34,6 +39,7 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
+import 'proof_flow_controller.dart';
 
 part 'chat_screen_controller.g.dart';
 
@@ -389,6 +395,20 @@ class ChatScreenController extends _$ChatScreenController
           chat.ChatProtocol.chatGroupDetailsUpdate.value) {
         _updateGroupDetails(data, channelDid);
       }
+
+      // Handle liveness check request messages by checking attachments
+      final attachments = plainTextMessage.attachments;
+      if (attachments != null && attachments.isNotEmpty) {
+        for (final attachment in attachments) {
+          if (attachment.format == ZkpConstants.livenessCheckRequestType) {
+            _handleLivenessRequest(channelDid, data);
+            break;
+          } else if (attachment.format == ZkpConstants.livenessProofType) {
+            _handleLivenessProof(channelDid, data);
+            break;
+          }
+        }
+      }
     }
 
     final chatItem = data.chatItem;
@@ -411,6 +431,93 @@ class ChatScreenController extends _$ChatScreenController
       }
     }
     _hideActivity();
+  }
+
+  /// Handle incoming liveness check request from another user
+  void _handleLivenessRequest(String channelDid, chat.StreamData data) {
+    final contact = state.contact;
+    if (contact == null || contact.channelDid != channelDid) return;
+
+    // Only show banner for incoming messages, not messages sent by current user
+    final chatItem = data.chatItem;
+    if (chatItem == null || chatItem.isFromMe) return;
+
+    _logger.info('Liveness request received from $channelDid', name: _logKey);
+
+    // Notify the proof flow controller
+    ref
+        .read(proofFlowControllerProvider(contact.id).notifier)
+        .onLivenessRequestReceived();
+  }
+
+  /// Handle incoming liveness proof from another user
+  void _handleLivenessProof(String channelDid, chat.StreamData data) {
+    _logger.info('_handleLivenessProof called for channel: $channelDid', name: _logKey);
+
+    final contact = state.contact;
+    if (contact == null || contact.channelDid != channelDid) {
+      _logger.warning('  Contact mismatch or not found', name: _logKey);
+      return;
+    }
+
+    // Only process incoming messages, not messages sent by current user
+    final chatItem = data.chatItem;
+    if (chatItem == null || chatItem.isFromMe) {
+      _logger.info('  Skipping: chatItem null or isFromMe', name: _logKey);
+      return;
+    }
+
+    _logger.info('Liveness proof received from $channelDid', name: _logKey);
+
+    // Extract proof data from plainTextMessage
+    _logger.info('  Extracting proof data from attachment', name: _logKey);
+
+    final plainTextMessage = data.plainTextMessage;
+    if (plainTextMessage == null) {
+      _logger.warning('  No plainTextMessage found in data', name: _logKey);
+      return;
+    }
+
+    final attachments = plainTextMessage.attachments;
+
+    if (attachments == null || attachments.isEmpty) {
+      _logger.warning('  No attachments found', name: _logKey);
+      return;
+    }
+
+    _logger.info('  Found ${attachments.length} attachment(s)', name: _logKey);
+
+    final attachment = attachments.firstWhere(
+      (att) => att.format == ZkpConstants.livenessProofType,
+      orElse: () => chat.Attachment(
+        id: '',
+        mediaType: '',
+        format: '',
+        lastModifiedTime: DateTime.now(),
+      ),
+    );
+
+    _logger.info('  Attachment format: ${attachment.format}', name: _logKey);
+
+    if (attachment.format == null ||
+        attachment.format!.isEmpty ||
+        attachment.data?.json == null) {
+      _logger.warning('  No proof data found in attachment', name: _logKey);
+      return;
+    }
+
+    _logger.info('  Decoding proof JSON data', name: _logKey);
+    final proofData = jsonDecode(attachment.data!.json!) as Map<String, dynamic>;
+
+    _logger.info('  Decoded proof data with keys: ${proofData.keys}', name: _logKey);
+
+    // Trigger proof verification with extracted data
+    _logger.info('  Passing proof to ProofFlowController', name: _logKey);
+    ref
+        .read(proofFlowControllerProvider(contact.id).notifier)
+        .onProofReceived(proofData);
+
+    _logger.info('_handleLivenessProof completed', name: _logKey);
   }
 
   String? _getGroupMemberNameFromMessage(
@@ -642,6 +749,64 @@ class ChatScreenController extends _$ChatScreenController
     _membersTypingTimedAction?.start(args: [groupMessageSenderName]);
   }
 
+  /// Insert a ZKP paused notice into the chat (local only, not sent)
+  void insertZkpPausedNotice() {
+    final contact = state.contact;
+    if (contact == null || contact.channelDid == null) return;
+
+    final notice = ZkpPausedNotice(
+      chatId: contact.channelDid!,
+      dateCreated: DateTime.now(),
+    );
+    _upsertChatItem(notice);
+  }
+
+  /// Insert a ZKP proof shared notice (after sending proof)
+  void insertZkpProofSharedNotice() {
+    final contact = state.contact;
+    if (contact == null || contact.channelDid == null) return;
+
+    final notice = ZkpProofSharedNotice(
+      chatId: contact.channelDid!,
+      dateCreated: DateTime.now(),
+    );
+    _upsertChatItem(notice);
+  }
+
+  /// Insert a ZKP proof received notice (after receiving proof)
+  void insertZkpProofReceivedNotice() {
+    final contact = state.contact;
+    if (contact == null || contact.channelDid == null) return;
+
+    final contactName = contact.displayName?.isNotEmpty == true
+        ? contact.displayName!
+        : contact.card.firstName;
+
+    final notice = ZkpProofReceivedNotice(
+      chatId: contact.channelDid!,
+      dateCreated: DateTime.now(),
+      contactName: contactName,
+    );
+    _upsertChatItem(notice);
+  }
+
+  /// Insert a ZKP request received notice (when receiving liveness check request)
+  void insertZkpRequestReceivedNotice() {
+    final contact = state.contact;
+    if (contact == null || contact.channelDid == null) return;
+
+    final contactName = contact.displayName?.isNotEmpty == true
+        ? contact.displayName!
+        : contact.card.firstName;
+
+    final notice = ZkpRequestReceivedNotice(
+      chatId: contact.channelDid!,
+      dateCreated: DateTime.now(),
+      contactName: contactName,
+    );
+    _upsertChatItem(notice);
+  }
+
   void _upsertChatItem(chat.ChatItem item) {
     final existingMessages = state.messages;
     final existingItemIndex = existingMessages.indexWhere(
@@ -703,6 +868,22 @@ class ChatScreenController extends _$ChatScreenController
     if (messageTextController.text == originalText) {
       messageTextController.clear();
     }
+  }
+
+  /// Sends a message directly with optional attachments
+  Future<void> sendMessageDirect(
+    String message, {
+    List<chat.Attachment>? attachments,
+  }) async {
+    final trimmedMessage = message.trimRight();
+    // Allow empty messages if attachments are present
+    if (trimmedMessage.isEmpty && (attachments == null || attachments.isEmpty)) {
+      return;
+    }
+
+    unawaited(
+      _chatSDK?.sendTextMessage(trimmedMessage, attachments: attachments),
+    );
   }
 
   Future<void> sendChatActivity() async {
