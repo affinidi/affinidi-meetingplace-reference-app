@@ -18,7 +18,7 @@ class AppLogger
   final DebugLogCollectorTarget _debugCollector = DebugLogCollectorTarget();
   late final List<LoggerTarget> _loggers;
 
-  /// Path to the persisted log file, or null until [initialize] completes.
+  /// Path to the persisted log file, or null until initialize completes.
   String? get logFilePath => _debugCollector.logFilePath;
 
   Stream<AppLogEntry> get logStream => _debugCollector.logStream;
