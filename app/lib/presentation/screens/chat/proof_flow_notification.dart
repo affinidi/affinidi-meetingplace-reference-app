@@ -3,16 +3,17 @@ part of 'chat_screen.dart';
 /// Banner showing liveness check prompt (initiator side)
 class _LivenessBanner extends ConsumerWidget {
   const _LivenessBanner(this._contactId);
-  
+
   final String _contactId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(proofFlowControllerProvider(_contactId));
     final chatState = ref.watch(chatScreenControllerProvider(_contactId));
-    final contactName = chatState.contact?.displayName ?? 
-                        chatState.contact?.card.firstName ?? 
-                        'this contact';
+    final contactName =
+        chatState.contact?.displayName ??
+        chatState.contact?.card.firstName ??
+        'this contact';
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -93,16 +94,17 @@ class _LivenessBanner extends ConsumerWidget {
 /// Banner showing verification result (initiator side)
 class _VerificationResultBanner extends ConsumerWidget {
   const _VerificationResultBanner(this._contactId);
-  
+
   final String _contactId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(proofFlowControllerProvider(_contactId));
     final chatState = ref.watch(chatScreenControllerProvider(_contactId));
-    final contactName = chatState.contact?.displayName ?? 
-                        chatState.contact?.card.firstName ?? 
-                        'Contact';
+    final contactName =
+        chatState.contact?.displayName ??
+        chatState.contact?.card.firstName ??
+        'Contact';
 
     // Don't show banner for successful verification, only for failures
     if (!state.verificationFailed) {
