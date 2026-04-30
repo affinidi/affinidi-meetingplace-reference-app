@@ -1050,7 +1050,7 @@
 	"@debugPanelLogsCopied": {
 		"type": "text"
 	},
-  "debugPanelShareLogs": "Share logs",
+	"debugPanelShareLogs": "Share logs",
 	"@debugPanelShareLogs": {
 		"type": "text"
 	},
