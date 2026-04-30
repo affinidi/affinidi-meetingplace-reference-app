@@ -24,7 +24,6 @@ class _ChatMediaOption extends StatelessWidget {
     final tappable = _item.onTap != null;
     final styleEnabled = _item.enabled;
     final icon = _item.icon;
-
     Widget leading;
     if (icon is MaterialIcon) {
       leading = Icon(
@@ -51,7 +50,6 @@ class _ChatMediaOption extends StatelessWidget {
     } else {
       leading = const SizedBox.shrink();
     }
-
     return ListTile(
       enabled: tappable,
       leading: leading,
