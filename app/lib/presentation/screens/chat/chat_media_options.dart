@@ -20,7 +20,6 @@ class _ChatMediaOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = _item.onTap != null;
-
     Widget leading;
     if (_item.icon is IconData) {
       leading = Icon(
@@ -37,7 +36,6 @@ class _ChatMediaOption extends StatelessWidget {
         ),
       );
     }
-
     return ListTile(
       enabled: enabled,
       leading: leading,
