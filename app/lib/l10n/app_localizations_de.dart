@@ -17,6 +17,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'connections': 'Einladungen',
       'contacts': 'Kanäle',
       'identities': 'Identitäten',
+      'credentials': 'Anmeldeinformationen',
       'settings': 'Einstellungen',
       'other': 'Ungültig',
     });

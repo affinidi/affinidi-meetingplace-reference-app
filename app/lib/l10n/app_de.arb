@@ -232,7 +232,7 @@
 	"subtitleAddNew": "Erstellen eines neuen Alias",
 	"subtitleAlias": "Alias-Identität",
 	"subtitlePrimary": "Ihre primäre Identität",
-	"tabsTitle": "{tabName, select, connections{Einladungen} contacts{Kanäle} identities{Identitäten} settings{Einstellungen} other{Ungültig}}",
+	"tabsTitle": "{tabName, select, connections{Einladungen} contacts{Kanäle} identities{Identitäten} credentials{Anmeldeinformationen} settings{Einstellungen} other{Ungültig}}",
 	"theirDetails": "Ihre Details",
 	"thisFieldIsRequired": "Dieses Feld ist ein Pflichtfeld",
 	"timeAgoDay": "{days, plural, =1{1 day ago} other{{days} days ago}}",

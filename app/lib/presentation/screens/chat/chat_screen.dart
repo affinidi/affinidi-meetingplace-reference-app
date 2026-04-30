@@ -14,7 +14,12 @@ import 'package:intl/intl.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
 
+import '../../../application/services/zkp_service/zkp_constants.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
+import '../../../domain/models/chat/zkp_paused_notice.dart';
+import '../../../domain/models/chat/zkp_proof_shared_notice.dart';
+import '../../../domain/models/chat/zkp_proof_received_notice.dart';
+import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
@@ -31,6 +36,7 @@ import '../../../navigation/routes/dashboard_routes.dart';
 import '../../effects/balloon/ballon_effect.dart';
 import '../../effects/confetti/confetti_effect.dart';
 import '../../effects/screen_effect.dart';
+import '../../themes/app_custom_colors.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
@@ -39,10 +45,15 @@ import '../../widgets/info_banner.dart';
 import '../../widgets/profile_circle_avatar.dart';
 import 'chat_activity_progress_indicator.dart';
 import 'chat_items/chat_encryption_notice.dart';
+import 'zkp_paused_notice_widget.dart';
+import 'zkp_proof_shared_notice_widget.dart';
+import 'zkp_proof_received_notice_widget.dart';
+import 'zkp_request_received_notice_widget.dart';
 import 'chat_items/group_deleted_chat_item.dart';
 import 'chat_items/joining_group_chat_item.dart';
 import 'chat_items/leaving_group_chat_item.dart';
 import 'chat_screen_controller.dart';
+import 'proof_flow_controller.dart';
 
 part 'awaiting_members_warning.dart';
 part 'chat_contact_display_name.dart';
@@ -60,6 +71,7 @@ part 'chat_message_list.dart';
 part 'chat_text_entry.dart';
 part 'chat_typing_activity_indicator.dart';
 part 'notifications_unavailable_warning.dart';
+part 'proof_flow_notification.dart';
 part 'reactions.dart';
 
 class ChatScreen extends HookConsumerWidget {
@@ -114,6 +126,8 @@ class ChatScreen extends HookConsumerWidget {
                   children: [
                     ChatActivityProgressIndicator(contactId: _contactId),
                     _NotificationsUnavailableWarning(_contactId),
+                    _LivenessBanner(_contactId),
+                    _VerificationResultBanner(_contactId),
                     Expanded(child: _ChatMessageList(_contactId)),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),

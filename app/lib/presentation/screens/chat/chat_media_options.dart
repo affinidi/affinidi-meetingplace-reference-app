@@ -2,12 +2,12 @@ part of 'chat_screen.dart';
 
 class _ChatMediaOptionItem {
   const _ChatMediaOptionItem({
-    required this.textCharacterIcon,
+    required this.icon,
     required this.label,
     required this.onTap,
   });
 
-  final String textCharacterIcon;
+  final dynamic icon; // Can be String (emoji) or IconData
   final String label;
   final VoidCallback? onTap;
 }
@@ -20,15 +20,27 @@ class _ChatMediaOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = _item.onTap != null;
-    return ListTile(
-      enabled: enabled,
-      leading: Text(
-        _item.textCharacterIcon,
+    
+    Widget leading;
+    if (_item.icon is IconData) {
+      leading = Icon(
+        _item.icon as IconData,
+        size: 30,
+        color: !enabled ? context.theme.disabledColor : Colors.white,
+      );
+    } else {
+      leading = Text(
+        _item.icon as String,
         style: TextStyle(
           fontSize: 30,
           color: !enabled ? context.theme.disabledColor : null,
         ),
-      ),
+      );
+    }
+    
+    return ListTile(
+      enabled: enabled,
+      leading: leading,
       title: Text(
         _item.label,
         style: TextStyle(
@@ -103,13 +115,13 @@ class _ChatMediaOptions extends ConsumerWidget {
                   '(${context.l10n.platformNotSupported})';
 
         return _ChatMediaOptionItem(
-          textCharacterIcon: plugin.icon,
+          icon: plugin.icon,
           label: label,
           onTap: supported ? () => attachFromPlugin(plugin) : null,
         );
       }),
       _ChatMediaOptionItem(
-        textCharacterIcon: '🎈',
+        icon: '🎈',
         label: context.l10n.generalBalloons,
         onTap: () {
           sendEffect(ScreenEffect.balloons());
@@ -117,10 +129,23 @@ class _ChatMediaOptions extends ConsumerWidget {
       ),
       _ChatMediaOptionItem(
         // https://www.amp-what.com/unicode/search/confetti
-        textCharacterIcon: '🎊',
+        icon: '🎊',
         label: context.l10n.generalConfetti,
         onTap: () {
           sendEffect(ScreenEffect.confetti());
+        },
+      ),
+      _ChatMediaOptionItem(
+        icon: Icons.verified_user,
+        label: 'Human Zero-Knowledge Proof',
+        onTap: () {
+          // Trigger liveness check request
+          ref
+              .read(proofFlowControllerProvider(_contactId).notifier)
+              .requestLivenessCheck();
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
         },
       ),
     ];
