@@ -79,7 +79,11 @@ dependencies:
   stack_trace: ^1.12.1
   synchronized: ^3.4.0
   uuid: ^4.5.1
+  vc_zkp:
+    path: ../../affinidi-zk-vc-dart-with-binaries
   video_player: ^2.10.0
+  circom_witnesscalc: ^0.0.1-beta.1
+  flutter_rapidsnark: ^0.0.1-beta.7
 
 dev_dependencies:
   build_runner: ^2.4.8
@@ -99,3 +103,6 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/videos/
+    - assets/SimpleVCProof.wcd
+    - assets/SimpleVCProof.groth16.zkey
+    - assets/SimpleVCProof.groth16.vkey.json
