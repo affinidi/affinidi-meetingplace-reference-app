@@ -22,7 +22,7 @@ class DebugLogCollectorTarget implements LoggerTarget {
         final trimmed = nonEmptyLines.sublist(
           nonEmptyLines.length - _maxMemoryEntries,
         );
-        _logFile.writeAsStringSync('${trimmed.join('\n')}\n');
+        _enqueueWrite(() => _logFile.writeAsString('${trimmed.join('\n')}\n'));
         _loadEntries(trimmed);
       } else {
         _loadEntries(nonEmptyLines);
@@ -35,6 +35,12 @@ class DebugLogCollectorTarget implements LoggerTarget {
   final List<AppLogEntry> _logs = [];
   final StreamController<AppLogEntry> _logController =
       StreamController<AppLogEntry>.broadcast();
+
+  Future<void> _writeQueue = Future<void>.value();
+
+  void _enqueueWrite(Future<void> Function() write) {
+    _writeQueue = _writeQueue.then((_) => write()).catchError((_) {});
+  }
 
   static final RegExp _lineRegex = RegExp(r'^\[(.+?)\] \[(.+?)\] (.+)$');
 
@@ -58,7 +64,10 @@ class DebugLogCollectorTarget implements LoggerTarget {
 
   String get logFilePath => _logFile.path;
 
-  void dispose() => _logController.close();
+  Future<void> dispose() async {
+    await _writeQueue;
+    await _logController.close();
+  }
 
   AppLogEntry? _parseLine(String line) {
     final match = _lineRegex.firstMatch(line);
@@ -127,9 +136,11 @@ class DebugLogCollectorTarget implements LoggerTarget {
     }
     _logController.add(entry);
 
-    _logFile.writeAsStringSync(
-      '${_formatEntry(entry)}\n',
-      mode: FileMode.append,
+    _enqueueWrite(
+      () => _logFile.writeAsString(
+        '${_formatEntry(entry)}\n',
+        mode: FileMode.append,
+      ),
     );
   }
 
@@ -155,6 +166,6 @@ class DebugLogCollectorTarget implements LoggerTarget {
   @override
   void clearLogs() {
     _logs.clear();
-    _logFile.writeAsStringSync('');
+    _enqueueWrite(() => _logFile.writeAsString(''));
   }
 }
