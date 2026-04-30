@@ -132,6 +132,19 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
       ],
     ),
     StatefulShellBranchData.$branch(
+      navigatorKey: CredentialsBranchData.$navigatorKey,
+      restorationScopeId: CredentialsBranchData.$restorationScopeId,
+
+      routes: [
+        GoRouteData.$route(
+          path: '/credentials',
+          name: 'credentials',
+
+          factory: _$CredentialsRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
       navigatorKey: SettingsBranchData.$navigatorKey,
       restorationScopeId: SettingsBranchData.$restorationScopeId,
 
@@ -427,6 +440,27 @@ mixin _$IdentityFormRoute on GoRouteData {
       if (_self.identityId != null) 'identity-id': _self.identityId,
     },
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin _$CredentialsRoute on GoRouteData {
+  static CredentialsRoute _fromState(GoRouterState state) =>
+      const CredentialsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/credentials');
 
   @override
   void go(BuildContext context) => context.go(location);

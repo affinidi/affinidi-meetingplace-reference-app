@@ -51,30 +51,32 @@ class ContactsScreen extends ConsumerWidget {
     ref.keepAround(contactsScreenControllerProvider);
 
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SectionBanner(
-              title: l10n.tabsTitle(Tabs.contacts.name),
-              subtitle: context.l10n.contactsPanelSubtitle,
-              icon: Icon(Icons.chat, color: colorScheme.onSurfaceVariant),
-              onTap: () => _showNewConnectionsMenu(context, ref),
-            ),
-            _FiltersBar(),
-            Padding(
-              padding: const EdgeInsets.all(2),
-              child: _ActionsBar(
-                onSelectNewConnectionsOption: () =>
-                    _showNewConnectionsMenu(context, ref),
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionBanner(
+                title: l10n.tabsTitle(Tabs.contacts.name),
+                subtitle: context.l10n.contactsPanelSubtitle,
+                icon: Icon(Icons.chat, color: colorScheme.onSurfaceVariant),
+                onTap: () => _showNewConnectionsMenu(context, ref),
               ),
-            ),
-            ModalAsyncLoadingStatus(
-              controller.deleteContactLoadingController,
-              successMessage: l10n.contactsDeleted(1),
-            ),
-            _ContactsLayout(),
-          ],
+              _FiltersBar(),
+              Padding(
+                padding: const EdgeInsets.all(2),
+                child: _ActionsBar(
+                  onSelectNewConnectionsOption: () =>
+                      _showNewConnectionsMenu(context, ref),
+                ),
+              ),
+              ModalAsyncLoadingStatus(
+                controller.deleteContactLoadingController,
+                successMessage: l10n.contactsDeleted(1),
+              ),
+              _ContactsLayout(),
+            ],
+          ),
         ),
       ),
     );
