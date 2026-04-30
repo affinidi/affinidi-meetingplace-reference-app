@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:clock/clock.dart';
@@ -15,19 +16,47 @@ import 'logger_target.dart';
 class DebugLogCollectorTarget implements LoggerTarget {
   DebugLogCollectorTarget(this._logFile, {int maxMemoryEntries = 1000})
     : _maxMemoryEntries = maxMemoryEntries {
-    if (_logFile.existsSync()) {
-      final lines = _logFile.readAsLinesSync();
-      final nonEmptyLines = lines.where((l) => l.trim().isNotEmpty).toList();
+    _writeQueue = _loadFromFile();
+  }
 
-      if (nonEmptyLines.length > _maxMemoryEntries) {
-        final trimmed = nonEmptyLines.sublist(
-          nonEmptyLines.length - _maxMemoryEntries,
-        );
-        _enqueueWrite(() => _logFile.writeAsString('${trimmed.join('\n')}\n'));
-        _loadEntries(trimmed);
-      } else {
-        _loadEntries(nonEmptyLines);
+  Future<void> _loadFromFile() async {
+    if (!await _logFile.exists()) return;
+
+    final loaded = ListQueue<AppLogEntry>();
+    var exceededCap = false;
+
+    final lines = _logFile
+        .openRead()
+        .transform(utf8.decoder)
+        .transform(const LineSplitter());
+
+    await for (final line in lines) {
+      if (line.trim().isEmpty) continue;
+      final entry = _parseLine(line);
+      if (entry == null) continue;
+      loaded.add(entry);
+      if (loaded.length > _maxMemoryEntries) {
+        loaded.removeFirst();
+        exceededCap = true;
       }
+    }
+
+    final live = List<AppLogEntry>.from(_logs);
+    _logs
+      ..clear()
+      ..addAll(loaded)
+      ..addAll(live);
+    while (_logs.length > _maxMemoryEntries) {
+      _logs.removeFirst();
+    }
+
+    // Trim the on-disk file to the capped historical view. Live appends are
+    if (exceededCap) {
+      final buffer = StringBuffer();
+      for (final entry in loaded) {
+        buffer.write('${_formatEntry(entry)}\n');
+      }
+      await _logFile.writeAsString(buffer.toString());
     }
   }
 
@@ -48,16 +77,6 @@ class DebugLogCollectorTarget implements LoggerTarget {
   bool _isSdkLog(String loggerName) {
     final isAppLog = loggerName.contains(LogConstants.logName);
     return !isAppLog;
-  }
-
-  void _loadEntries(List<String> lines) {
-    final entries = lines.map(_parseLine).whereType<AppLogEntry>().toList();
-    final capped = entries.length > _maxMemoryEntries
-        ? entries.sublist(entries.length - _maxMemoryEntries)
-        : entries;
-    _logs
-      ..clear()
-      ..addAll(capped);
   }
 
   /// Stream of new log entries as they are added during this session.
