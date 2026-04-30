@@ -32,7 +32,7 @@ class DebugLogCollectorTarget implements LoggerTarget {
 
     await for (final line in lines) {
       if (line.trim().isEmpty) continue;
-      final entry = _parseLine(line);
+      final entry = AppLogEntry.tryParse(line);
       if (entry == null) continue;
       loaded.add(entry);
       if (loaded.length > _maxMemoryEntries) {
@@ -54,7 +54,7 @@ class DebugLogCollectorTarget implements LoggerTarget {
     if (exceededCap) {
       final buffer = StringBuffer();
       for (final entry in loaded) {
-        buffer.write('${_formatEntry(entry)}\n');
+        buffer.write('${entry.serialize()}\n');
       }
       await _logFile.writeAsString(buffer.toString());
     }
@@ -72,8 +72,6 @@ class DebugLogCollectorTarget implements LoggerTarget {
     _writeQueue = _writeQueue.then((_) => write()).catchError((_) {});
   }
 
-  static final RegExp _lineRegex = RegExp(r'^\[(.+?)\] \[(.+?)\] (.+)$');
-
   bool _isSdkLog(String loggerName) {
     final isAppLog = loggerName.contains(LogConstants.logName);
     return !isAppLog;
@@ -87,56 +85,6 @@ class DebugLogCollectorTarget implements LoggerTarget {
   Future<void> dispose() async {
     await _writeQueue;
     await _logController.close();
-  }
-
-  AppLogEntry? _parseLine(String line) {
-    final match = _lineRegex.firstMatch(line);
-    if (match == null) return null;
-    final timestamp = DateTime.tryParse(match.group(1)!);
-    if (timestamp == null) return null;
-    final level = match.group(2)!;
-    final rest = match.group(3)!;
-    String loggerName;
-    String message;
-    if (rest.startsWith('[')) {
-      final closingBracket = rest.indexOf(']');
-      if (closingBracket != -1 && rest.length > closingBracket + 2) {
-        final afterBracket = rest.substring(closingBracket + 2);
-        final nextSpace = afterBracket.indexOf(' ');
-        if (nextSpace != -1) {
-          loggerName =
-              '${rest.substring(0, closingBracket + 1)} '
-              '${afterBracket.substring(0, nextSpace)}';
-          message = afterBracket.substring(nextSpace + 1);
-        } else {
-          loggerName = rest;
-          message = '';
-        }
-      } else {
-        loggerName = rest;
-        message = '';
-      }
-    } else {
-      final spaceIndex = rest.indexOf(' ');
-      if (spaceIndex != -1) {
-        loggerName = rest.substring(0, spaceIndex);
-        message = rest.substring(spaceIndex + 1);
-      } else {
-        loggerName = rest;
-        message = '';
-      }
-    }
-    return AppLogEntry(
-      timestamp: timestamp,
-      level: level,
-      loggerName: loggerName,
-      message: message,
-    );
-  }
-
-  String _formatEntry(AppLogEntry entry) {
-    return '[${entry.timestamp.toIso8601String()}] '
-        '[${entry.level}] ${entry.loggerName} ${entry.message}';
   }
 
   void _addLog(String loggerName, String message, String level) {
@@ -158,7 +106,7 @@ class DebugLogCollectorTarget implements LoggerTarget {
 
     _enqueueWrite(
       () => _logFile.writeAsString(
-        '${_formatEntry(entry)}\n',
+        '${entry.serialize()}\n',
         mode: FileMode.append,
       ),
     );
