@@ -84,8 +84,6 @@ dependencies:
   vc_zkp:
     path: ../../affinidi-vc-zkp-dart
   video_player: ^2.10.0
-  circom_witnesscalc: ^0.0.1-beta.1
-  flutter_rapidsnark: ^0.0.1-beta.7
 
 dev_dependencies:
   build_runner: ^2.4.8
