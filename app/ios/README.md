@@ -4,17 +4,19 @@
 
 The ZKP proof generation features (using `flutter_rapidsnark` and `circom_witnesscalc`) require C++ standard library linkage. 
 
-### Manual Configuration
+### One-Time Setup Required
 
-If you need to manually configure the build settings (e.g., if you've renamed the `Runner.xcodeproj` file or prefer manual setup), add the following to your project's build settings:
+**You must configure these build settings once** in your Xcode project:
 
-1. Open your Xcode project
-2. Select your target (e.g., `Runner`)
-3. Go to **Build Settings**
-4. Find **Other Linker Flags** (`OTHER_LDFLAGS`)
-5. Add `-lc++` to the flags
-6. Find **C++ Standard Library** (`CLANG_CXX_LIBRARY`)  
-7. Set it to `libc++`
+1. Open your Xcode project (`Runner.xcodeproj` or your renamed project file)
+2. Select your app target in the left sidebar
+3. Go to **Build Settings** tab
+4. Search for **Other Linker Flags** (or `OTHER_LDFLAGS`)
+5. Double-click to edit and add: `-lc++`
+6. Search for **C++ Standard Library** (or `CLANG_CXX_LIBRARY`)
+7. Set it to: `libc++`
+
+**Important:** This is a one-time setup. You need to configure this before building the app for iOS.
 
 These settings ensure that the native ZKP libraries can properly link against the C++ standard library.
 
