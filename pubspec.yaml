@@ -14,6 +14,8 @@ dev_dependencies:
   melos: ^7.1.1
 
 dependency_overrides:
+  ffi: 2.2.0
+  meta: ^1.18.2
   test_api: ^0.7.12
 
 hooks:
