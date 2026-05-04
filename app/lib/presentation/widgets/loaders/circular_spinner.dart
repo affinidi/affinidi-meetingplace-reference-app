@@ -25,10 +25,8 @@ class _CircularSpinnerState extends State<CircularSpinner>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    )..repeat();
+    _controller = AnimationController(vsync: this, duration: widget.duration)
+      ..repeat();
   }
 
   @override
@@ -68,26 +66,29 @@ class _CircularSpinnerPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
     final radius = size.width / 2;
-    
+
     // Draw the full circle background (light gray or transparent)
     final backgroundPaint = Paint()
       ..color = color.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
       ..strokeCap = StrokeCap.round;
-    
+
     canvas.drawCircle(center, radius - 2, backgroundPaint);
-    
+
     // Draw the 25% arc (90 degrees) in theme color
     final arcPaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
       ..strokeCap = StrokeCap.round;
-    
-    const sweepAngle = pi / 2; // 90 degrees = 25% of circle
-    final startAngle = (rotation * 2 * pi) - (pi / 2); // Start from top and rotate
-    
+
+    // 90 degrees = 25% of circle
+    const sweepAngle = pi / 2;
+
+    // Start from top and rotate
+    final startAngle = (rotation * 2 * pi) - (pi / 2);
+
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - 2),
       startAngle,

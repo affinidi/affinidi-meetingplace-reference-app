@@ -3,15 +3,12 @@ import 'package:uuid/uuid.dart';
 
 /// Represents a chat item that displays when user shares a ZKP proof.
 ///
-/// This class extends [chat.ChatItem] and shows the user that they shared a proof.
+/// This class extends [chat.ChatItem] and shows the
+/// user that they shared a proof.
 class ZkpProofSharedNotice extends chat.ChatItem {
-  ZkpProofSharedNotice({
-    required String chatId,
-    required DateTime dateCreated,
-  }) : super(
+  ZkpProofSharedNotice({required super.chatId, required super.dateCreated})
+    : super(
         messageId: 'zkp-proof-shared-${const Uuid().v4()}',
-        chatId: chatId,
-        dateCreated: dateCreated,
         senderDid: '',
         isFromMe: true,
         status: chat.ChatItemStatus.confirmed,

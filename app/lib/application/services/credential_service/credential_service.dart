@@ -4,31 +4,34 @@ import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
+import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../zkp_service/zkp_constants.dart';
 import 'credential_service_state.dart';
 
 final credentialServiceProvider =
     StateNotifierProvider<CredentialService, CredentialServiceState>((ref) {
-  return CredentialService(ref: ref);
-});
+      return CredentialService(ref: ref);
+    });
 
 /// Service responsible for managing Verifiable Credentials (VCs)
-/// 
+///
 /// Handles creation, storage, and retrieval of credentials.
 /// Separates credential lifecycle management from ZKP operations.
 class CredentialService extends StateNotifier<CredentialServiceState> {
-  CredentialService({required this.ref}) : super(const CredentialServiceState()) {
+  CredentialService({required this.ref})
+    : super(const CredentialServiceState()) {
     _logger = ref.read(appLoggerProvider);
   }
 
   final Ref ref;
-  late final dynamic _logger;
+  late final AppLogger _logger;
   static const _logKey = 'CredentialService';
 
   /// Creates a signed liveness credential
-  /// 
-  /// Returns a tuple of (document, issuerPub, holderPub) for use in ZKP generation
+  ///
+  /// Returns a tuple of (document, issuerPub, holderPub)
+  /// for use in ZKP generation
   Future<CredentialCreationResult> createLivenessCredential({
     String? holderDid,
   }) async {
@@ -57,7 +60,9 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
       final header = <String, Object?>{
         'version': '1',
         'issued_at': now.millisecondsSinceEpoch ~/ 1000,
-        'expires_at': now.add(ZkpConstants.vcExpiryDuration).millisecondsSinceEpoch ~/ 1000,
+        'expires_at':
+            now.add(ZkpConstants.vcExpiryDuration).millisecondsSinceEpoch ~/
+            1000,
         'issuer': ZkpConstants.vcIssuerName,
         'holderAx': holderPub.ax,
         'holderAy': holderPub.ay,
