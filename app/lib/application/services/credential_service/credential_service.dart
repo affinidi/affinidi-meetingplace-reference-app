@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
@@ -52,7 +53,7 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
       );
 
       // Build credential header
-      final now = DateTime.now();
+      final now = clock.now();
       final header = <String, Object?>{
         'version': '1',
         'issued_at': now.millisecondsSinceEpoch ~/ 1000,
