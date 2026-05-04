@@ -91,8 +91,9 @@ class ZkpService {
           .map((b) => b.toRadixString(16).padLeft(2, '0'))
           .join();
       final challengeNonceBi = BigInt.parse(challengeNonceHex, radix: 16);
+      // Domain-tagged two-input challenge hash to avoid [x] vs [x,0] ambiguity
       final challengeDigest = await crypto.poseidonHashFieldElements(
-        <String>[challengeNonceBi.toString()],
+        <String>['1', challengeNonceBi.toString()],
       );
 
       final challengeSig = await holder.signPreparedDigest(
