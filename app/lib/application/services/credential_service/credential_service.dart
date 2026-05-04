@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
@@ -104,8 +106,9 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
 
   /// Generates a random 32-byte private key as hex string
   String _randomPrivateKeyHex() {
-    final random = List.generate(32, (_) => DateTime.now().microsecondsSinceEpoch % 256);
-    return random.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+    final random = Random.secure();
+    final bytes = List.generate(32, (_) => random.nextInt(256));
+    return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
 }
 
