@@ -2187,6 +2187,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Human ZKP'**
   String get humanZkp;
+
+  /// No description provided for @livenessCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Credential'**
+  String get livenessCredential;
+
+  /// No description provided for @verifiableCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifiable Credential'**
+  String get verifiableCredential;
+
+  /// No description provided for @verifiableCredentialWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifiable Credential wallet'**
+  String get verifiableCredentialWallet;
+
+  /// No description provided for @noCredentialsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any credentials yet.'**
+  String get noCredentialsYet;
+
+  /// No description provided for @credentialDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Details'**
+  String get credentialDetails;
+
+  /// No description provided for @generatingZeroKnowledgeProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating Zero-Knowledge Proof...'**
+  String get generatingZeroKnowledgeProof;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @generateCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate credential'**
+  String get generateCredential;
+
+  /// No description provided for @generateProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate proof'**
+  String get generateProof;
 }
 
 class _AppLocalizationsDelegate

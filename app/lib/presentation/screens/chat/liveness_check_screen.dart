@@ -241,14 +241,14 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
                       ),
-                      child: const Text('Cancel'),
+                      child: Text(context.l10n.cancel),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _handleGenerateCredential,
-                      child: const Text('Generate credential'),
+                      child: Text(context.l10n.generateCredential),
                     ),
                   ),
                 ],
@@ -340,9 +340,9 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const CredentialCard(
-                topLeftText: 'Liveness Credential',
-                bottomLeftText: 'Verifiable Credential',
+              CredentialCard(
+                topLeftText: context.l10n.livenessCredential,
+                bottomLeftText: context.l10n.verifiableCredential,
               ),
               const Spacer(),
               Row(
@@ -363,7 +363,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _handleGenerateProof,
-                      child: const Text('Generate proof'),
+                      child: Text(context.l10n.generateProof),
                     ),
                   ),
                 ],
@@ -504,10 +504,10 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
             if (_isGenerating) ...[
               const LinearProgressIndicator(),
               const SizedBox(height: 16),
-              const Center(
+              Center(
                 child: Text(
-                  'Generating Zero-Knowledge Proof...',
-                  style: TextStyle(
+                  context.l10n.generatingZeroKnowledgeProof,
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Colors.black87,
                   ),
@@ -526,14 +526,14 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
                       disabledBackgroundColor: Colors.red.withValues(alpha: 0.5),
                       disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
                     ),
-                    child: const Text('Cancel'),
+                    child: Text(context.l10n.cancel),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _isGenerating ? null : _handleGenerateProof,
-                    child: const Text('Generate proof'),
+                    child: Text(context.l10n.generateProof),
                   ),
                 ),
               ],
@@ -545,6 +545,21 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
   }
 
   Widget _buildDetailRow(String label, String value) {
+    return _DetailRow(label: label, value: value);
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
