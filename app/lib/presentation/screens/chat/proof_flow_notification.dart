@@ -21,7 +21,7 @@ class _LivenessBanner extends ConsumerWidget {
     }
 
     return Container(
-      width: MediaQuery.of(context).size.width,
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       color: Colors.grey.shade700,
       child: Column(

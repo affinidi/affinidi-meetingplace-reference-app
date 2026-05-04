@@ -1511,4 +1511,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get goBack => 'Zurück gehen';
+
+  @override
+  String get humanZkp => 'Human ZKP';
 }
