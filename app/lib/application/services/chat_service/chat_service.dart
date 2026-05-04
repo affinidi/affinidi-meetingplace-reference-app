@@ -1,19 +1,20 @@
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
 
-import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
+import '../../../presentation/screens/chat/chat_screen_controller.dart'
+    show ChatScreenController;
+import 'delegates/chat_concierge_messenger.dart' show ChatConciergeMessenger;
+import 'delegates/chat_group_manager.dart' show ChatGroupManager;
+import 'delegates/interfaces/concierge_messaging.dart';
+import 'delegates/interfaces/group_managing.dart';
 
-/// Service that manages chat sessions, including message handling,
-/// presence updates, and group interactions.
+/// Unified facade for managing a chat session.
 ///
-/// Owns the chat session state `ChatServiceState` and provides
-/// methods for starting, updating, and ending chat sessions. Handles
-/// all Meeting Place SDK interactions related to chats, such as sending
-/// messages, updating contact presence, and managing group details.
-/// Delegates specific operations to `GroupDelegate` and `ConciergeDelegate`
-///  to keep responsibilities focused.
-abstract class ChatService {
+/// Extends [ConciergeMessaging] and [GroupManaging] to aggregate all
+/// chat-related operations into a single interface for [ChatScreenController].
+/// Concrete implementations delegate concierge and group operations to
+/// [ChatConciergeMessenger] and [ChatGroupManager] internally.
+abstract class ChatService implements ConciergeMessaging, GroupManaging {
   int get secondsToShowChatActivityIndicator;
   int get chatPresenceIntervalInSeconds;
 
@@ -25,16 +26,11 @@ abstract class ChatService {
     DateTime datePresence,
     int presenceIntervalInSeconds,
   );
-  Future<void> updateGroupContactPendingStatus(Contact contact, Group group);
 
   void onPresenceUpdated(DateTime datePresence);
 
   Future<void> sendTextMessage(String message, {List<Attachment>? attachments});
   Future<void> sendChatActivity();
-  Future<void> rejectConnectionRequest(ConciergeMessage message);
-  Future<void> approveConnectionRequest(ConciergeMessage message);
-  Future<void> sendChatContactDetailsUpdate(ConciergeMessage message);
-  Future<void> rejectChatContactDetailsUpdate(ConciergeMessage message);
   Future<void> reactOnMessage(Message message, {required String reaction});
   Future<void> sendEffect(Effect effectType);
 

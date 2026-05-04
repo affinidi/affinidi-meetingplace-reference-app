@@ -1,10 +1,10 @@
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
-import 'interfaces/concierge_delegate.dart';
+import 'interfaces/concierge_messaging.dart';
 
-/// Encapsulates all concierge-related SDK interactions.
-class AppConciergeDelegate implements ConciergeDelegate {
-  AppConciergeDelegate({required MeetingPlaceChatSDK chatSdk})
+/// Handles concierge-related SDK interactions.
+class ChatConciergeMessenger implements ConciergeMessaging {
+  ChatConciergeMessenger({required MeetingPlaceChatSDK chatSdk})
     : _chatSdk = chatSdk;
 
   final MeetingPlaceChatSDK _chatSdk;

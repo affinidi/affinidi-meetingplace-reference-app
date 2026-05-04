@@ -1,12 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'app_chat_service.dart';
+part of 'chat_session_service.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appChatServiceHash() => r'3c7f74fc4267c88f424e51034572a7961ca5e724';
+String _$chatSessionServiceHash() =>
+    r'72c534bfe68edaecd2c941047e25faed49a2adb7';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -29,30 +30,30 @@ class _SystemHash {
   }
 }
 
-abstract class _$AppChatService
+abstract class _$ChatSessionService
     extends BuildlessAutoDisposeNotifier<ChatServiceState> {
   late final String channelDid;
 
   ChatServiceState build(String channelDid);
 }
 
-/// See also [AppChatService].
-@ProviderFor(AppChatService)
-const appChatServiceProvider = AppChatServiceFamily();
+/// See also [ChatSessionService].
+@ProviderFor(ChatSessionService)
+const chatSessionServiceProvider = ChatSessionServiceFamily();
 
-/// See also [AppChatService].
-class AppChatServiceFamily extends Family<ChatServiceState> {
-  /// See also [AppChatService].
-  const AppChatServiceFamily();
+/// See also [ChatSessionService].
+class ChatSessionServiceFamily extends Family<ChatServiceState> {
+  /// See also [ChatSessionService].
+  const ChatSessionServiceFamily();
 
-  /// See also [AppChatService].
-  AppChatServiceProvider call(String channelDid) {
-    return AppChatServiceProvider(channelDid);
+  /// See also [ChatSessionService].
+  ChatSessionServiceProvider call(String channelDid) {
+    return ChatSessionServiceProvider(channelDid);
   }
 
   @override
-  AppChatServiceProvider getProviderOverride(
-    covariant AppChatServiceProvider provider,
+  ChatSessionServiceProvider getProviderOverride(
+    covariant ChatSessionServiceProvider provider,
   ) {
     return call(provider.channelDid);
   }
@@ -69,28 +70,29 @@ class AppChatServiceFamily extends Family<ChatServiceState> {
       _allTransitiveDependencies;
 
   @override
-  String? get name => r'appChatServiceProvider';
+  String? get name => r'chatSessionServiceProvider';
 }
 
-/// See also [AppChatService].
-class AppChatServiceProvider
-    extends AutoDisposeNotifierProviderImpl<AppChatService, ChatServiceState> {
-  /// See also [AppChatService].
-  AppChatServiceProvider(String channelDid)
+/// See also [ChatSessionService].
+class ChatSessionServiceProvider
+    extends
+        AutoDisposeNotifierProviderImpl<ChatSessionService, ChatServiceState> {
+  /// See also [ChatSessionService].
+  ChatSessionServiceProvider(String channelDid)
     : this._internal(
-        () => AppChatService()..channelDid = channelDid,
-        from: appChatServiceProvider,
-        name: r'appChatServiceProvider',
+        () => ChatSessionService()..channelDid = channelDid,
+        from: chatSessionServiceProvider,
+        name: r'chatSessionServiceProvider',
         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
             ? null
-            : _$appChatServiceHash,
-        dependencies: AppChatServiceFamily._dependencies,
+            : _$chatSessionServiceHash,
+        dependencies: ChatSessionServiceFamily._dependencies,
         allTransitiveDependencies:
-            AppChatServiceFamily._allTransitiveDependencies,
+            ChatSessionServiceFamily._allTransitiveDependencies,
         channelDid: channelDid,
       );
 
-  AppChatServiceProvider._internal(
+  ChatSessionServiceProvider._internal(
     super._createNotifier, {
     required super.name,
     required super.dependencies,
@@ -103,15 +105,15 @@ class AppChatServiceProvider
   final String channelDid;
 
   @override
-  ChatServiceState runNotifierBuild(covariant AppChatService notifier) {
+  ChatServiceState runNotifierBuild(covariant ChatSessionService notifier) {
     return notifier.build(channelDid);
   }
 
   @override
-  Override overrideWith(AppChatService Function() create) {
+  Override overrideWith(ChatSessionService Function() create) {
     return ProviderOverride(
       origin: this,
-      override: AppChatServiceProvider._internal(
+      override: ChatSessionServiceProvider._internal(
         () => create()..channelDid = channelDid,
         from: from,
         name: null,
@@ -124,14 +126,15 @@ class AppChatServiceProvider
   }
 
   @override
-  AutoDisposeNotifierProviderElement<AppChatService, ChatServiceState>
+  AutoDisposeNotifierProviderElement<ChatSessionService, ChatServiceState>
   createElement() {
-    return _AppChatServiceProviderElement(this);
+    return _ChatSessionServiceProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is AppChatServiceProvider && other.channelDid == channelDid;
+    return other is ChatSessionServiceProvider &&
+        other.channelDid == channelDid;
   }
 
   @override
@@ -145,18 +148,20 @@ class AppChatServiceProvider
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-mixin AppChatServiceRef on AutoDisposeNotifierProviderRef<ChatServiceState> {
+mixin ChatSessionServiceRef
+    on AutoDisposeNotifierProviderRef<ChatServiceState> {
   /// The parameter `channelDid` of this provider.
   String get channelDid;
 }
 
-class _AppChatServiceProviderElement
-    extends AutoDisposeNotifierProviderElement<AppChatService, ChatServiceState>
-    with AppChatServiceRef {
-  _AppChatServiceProviderElement(super.provider);
+class _ChatSessionServiceProviderElement
+    extends
+        AutoDisposeNotifierProviderElement<ChatSessionService, ChatServiceState>
+    with ChatSessionServiceRef {
+  _ChatSessionServiceProviderElement(super.provider);
 
   @override
-  String get channelDid => (origin as AppChatServiceProvider).channelDid;
+  String get channelDid => (origin as ChatSessionServiceProvider).channelDid;
 }
 
 // ignore_for_file: type=lint

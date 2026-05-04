@@ -28,10 +28,10 @@ import '../network_connectivity_service/network_connectivity_service.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
 import 'chat_service_state.dart';
-import 'delegates/app_concierge_delegate.dart';
-import 'delegates/app_group_delegate.dart';
-import 'delegates/interfaces/concierge_delegate.dart';
-import 'delegates/interfaces/group_delegate.dart';
+import 'delegates/chat_concierge_messenger.dart';
+import 'delegates/chat_group_manager.dart';
+import 'delegates/interfaces/concierge_messaging.dart';
+import 'delegates/interfaces/group_managing.dart';
 import 'handlers/chat_message_protocol_handler.dart';
 import 'handlers/contact_card_protocol_handler.dart';
 import 'handlers/effect_protocol_handler.dart';
@@ -39,10 +39,10 @@ import 'handlers/group_details_protocol_handler.dart';
 import 'handlers/presence_protocol_handler.dart';
 import 'handlers/typing_protocol_handler.dart';
 
-part 'app_chat_service.g.dart';
+part 'chat_session_service.g.dart';
 
 @riverpod
-class AppChatService extends _$AppChatService implements ChatService {
+class ChatSessionService extends _$ChatSessionService implements ChatService {
   static const _logKey = 'CHATSVC';
   // Maximum typing indicators to prevent UI overflow on small screens
   static const _maxTypingMembersVisible = 4;
@@ -57,8 +57,8 @@ class AppChatService extends _$AppChatService implements ChatService {
   String? _otherPartyFirstName;
   StreamSubscription? _messageSubscription;
 
-  late ConciergeDelegate _conciergeDelegate;
-  late GroupDelegate _groupDelegate;
+  late ConciergeMessaging _conciergeMessenger;
+  late GroupManaging _groupManager;
   late ChatProtocolRouter _router;
 
   TimedAction? _presenceTimedAction;
@@ -79,7 +79,7 @@ class AppChatService extends _$AppChatService implements ChatService {
     _channelDid = channelDid;
     _logger = ref.read(appLoggerProvider);
 
-    _groupDelegate = AppGroupDelegate(ref: ref);
+    _groupManager = ChatGroupManager(ref: ref);
     _setupChatProtocolRouter();
 
     ref.listen(networkConnectivityServiceProvider, (previous, next) {
@@ -97,7 +97,7 @@ class AppChatService extends _$AppChatService implements ChatService {
       _typingTimedAction?.cancel();
       _messageSubscription?.cancel();
       _chatSDK?.endChatSession();
-      _logger.info('AppChatService disposed', name: _logKey);
+      _logger.info('ChatSessionService disposed', name: _logKey);
     });
 
     return ChatServiceState();
@@ -151,7 +151,7 @@ class AppChatService extends _$AppChatService implements ChatService {
     if (channel == null) return;
 
     _chatSDK = await ref.read(chatSdkProvider(channel).future);
-    _conciergeDelegate = AppConciergeDelegate(chatSdk: _chatSDK!);
+    _conciergeMessenger = ChatConciergeMessenger(chatSdk: _chatSDK!);
     _isGroupChat =
         ref
             .read(contactsServiceProvider)
@@ -164,6 +164,13 @@ class AppChatService extends _$AppChatService implements ChatService {
         ? ContactCardUtils.fromSdkContactCard(srcCard)
         : null;
     _otherPartyFirstName = initialCard?.firstName;
+
+    if (_isGroupChat) {
+      final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
+      if (group != null) {
+        state = state.copyWith(group: group);
+      }
+    }
   }
 
   @override
@@ -256,8 +263,12 @@ class AppChatService extends _$AppChatService implements ChatService {
     Contact contact,
     Group group,
   ) async {
-    await _groupDelegate.updateGroupContactPendingStatus(contact, group);
+    await _groupManager.updateGroupContactPendingStatus(contact, group);
   }
+
+  @override
+  Future<Group?> refreshGroup(String groupId) =>
+      _groupManager.refreshGroup(groupId);
 
   @override
   void pauseChat() {
@@ -281,22 +292,22 @@ class AppChatService extends _$AppChatService implements ChatService {
 
   @override
   Future<void> rejectConnectionRequest(ConciergeMessage message) async {
-    await _conciergeDelegate.rejectConnectionRequest(message);
+    await _conciergeMessenger.rejectConnectionRequest(message);
   }
 
   @override
   Future<void> approveConnectionRequest(ConciergeMessage message) async {
-    await _conciergeDelegate.approveConnectionRequest(message);
+    await _conciergeMessenger.approveConnectionRequest(message);
   }
 
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
-    await _conciergeDelegate.sendChatContactDetailsUpdate(message);
+    await _conciergeMessenger.sendChatContactDetailsUpdate(message);
   }
 
   @override
   Future<void> rejectChatContactDetailsUpdate(ConciergeMessage message) async {
-    await _conciergeDelegate.rejectChatContactDetailsUpdate(message);
+    await _conciergeMessenger.rejectChatContactDetailsUpdate(message);
   }
 
   @override
@@ -430,7 +441,16 @@ class AppChatService extends _$AppChatService implements ChatService {
           ?.contactCard
           .firstName;
     }
-    contactName = _otherPartyFirstName;
+
+    if (!_isGroupChat) {
+      contactName = _otherPartyFirstName?.isNotEmpty == true
+          ? _otherPartyFirstName
+          : ref
+                .read(contactsServiceProvider)
+                .getContactByChannelDid(_channelDid)
+                ?.card
+                .firstName;
+    }
 
     _logger.info(
       '_onTypingMember called with senderDid: $senderDid, '
@@ -511,7 +531,7 @@ class AppChatService extends _$AppChatService implements ChatService {
     final currentGroup = state.group;
     if (currentGroup == null) return;
 
-    final refreshedGroup = await _groupDelegate.refreshGroup(currentGroup.id);
+    final refreshedGroup = await _groupManager.refreshGroup(currentGroup.id);
     if (refreshedGroup == null) return;
 
     state = state.copyWith(group: refreshedGroup);
@@ -519,12 +539,25 @@ class AppChatService extends _$AppChatService implements ChatService {
 
   void _clearMembersTypingActivity(String? senderDid) {
     final memberNames = [...state.membersTyping];
-    if (memberNames.isEmpty || senderDid == null || senderDid.isEmpty) return;
+    if (memberNames.isEmpty) return;
 
-    final groupMessageSenderName = _isGroupChat
+    // For group chats, senderDid is required to identify which member to remove
+    if (_isGroupChat && (senderDid == null || senderDid.isEmpty)) return;
+
+    final groupMessageSenderName = _isGroupChat && senderDid != null
         ? state.getGroupMemberByDid(senderDid)?.contactCard.firstName
         : null;
-    final contactName = !_isGroupChat ? _otherPartyFirstName : null;
+
+    String? contactName;
+    if (!_isGroupChat) {
+      contactName = _otherPartyFirstName?.isNotEmpty == true
+          ? _otherPartyFirstName
+          : ref
+                .read(contactsServiceProvider)
+                .getContactByChannelDid(_channelDid)
+                ?.card
+                .firstName;
+    }
 
     memberNames.removeWhere(
       (name) => name == groupMessageSenderName || name == contactName,

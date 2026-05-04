@@ -10,8 +10,8 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
-import '../../../application/services/chat_service/app_chat_service.dart';
 import '../../../application/services/chat_service/chat_service.dart';
+import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
@@ -66,8 +66,8 @@ class ChatScreenController extends _$ChatScreenController
     final channelDid = contact?.channelDid;
 
     if (channelDid != null) {
-      _chatService = ref.read(appChatServiceProvider(channelDid).notifier);
-      ref.listen(appChatServiceProvider(channelDid), (previous, next) {
+      _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
+      ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
         var newEffect = state.effect;
         if (next.effect != null && previous?.effect != next.effect) {
           newEffect = _mapEffect(next.effect!);
