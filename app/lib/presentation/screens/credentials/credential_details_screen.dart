@@ -19,7 +19,9 @@ class CredentialDetailsScreen extends ConsumerWidget {
         actions: [
           IconButton(
             onPressed: () {
-              ref.read(credentialsScreenControllerProvider.notifier).deleteCredential();
+              ref
+                  .read(credentialsScreenControllerProvider.notifier)
+                  .deleteCredential();
               Navigator.of(context).pop();
             },
             icon: const Icon(Icons.delete),
@@ -47,20 +49,14 @@ class CredentialDetailsScreen extends ConsumerWidget {
                       label: 'Types',
                       value: '[VerifiableCredential, LivenessCredential]',
                     ),
-                    Divider(
-                      color: colorScheme.primary,
-                      height: 24,
-                    ),
+                    Divider(color: colorScheme.primary, height: 24),
                     const _DetailRow(label: 'Issuer', value: 'Affinidi'),
-                    Divider(
-                      color: colorScheme.primary,
-                      height: 24,
+                    Divider(color: colorScheme.primary, height: 24),
+                    const _DetailRow(
+                      label: 'Issued on',
+                      value: '17 April 2026',
                     ),
-                    const _DetailRow(label: 'Issued on', value: '17 April 2026'),
-                    Divider(
-                      color: colorScheme.primary,
-                      height: 24,
-                    ),
+                    Divider(color: colorScheme.primary, height: 24),
                     const _DetailRow(label: 'Human', value: 'Yes'),
                   ],
                 ),
@@ -74,10 +70,7 @@ class CredentialDetailsScreen extends ConsumerWidget {
 }
 
 class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
+  const _DetailRow({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -93,16 +86,13 @@ class _DetailRow extends StatelessWidget {
             width: 100,
             child: Text(
               '$label:',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            child: Text(value, style: Theme.of(context).textTheme.bodyLarge),
           ),
         ],
       ),

@@ -6,13 +6,9 @@ import 'package:uuid/uuid.dart';
 /// This class extends [chat.ChatItem] and is used to inform the user that
 /// they paused the Human ZKP request.
 class ZkpPausedNotice extends chat.ChatItem {
-  ZkpPausedNotice({
-    required String chatId,
-    required DateTime dateCreated,
-  }) : super(
+  ZkpPausedNotice({required super.chatId, required super.dateCreated})
+    : super(
         messageId: 'zkp-paused-${const Uuid().v4()}',
-        chatId: chatId,
-        dateCreated: dateCreated,
         senderDid: '',
         isFromMe: true,
         status: chat.ChatItemStatus.confirmed,

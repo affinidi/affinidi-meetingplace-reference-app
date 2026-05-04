@@ -16,9 +16,10 @@ abstract class ZkpProofResult with _$ZkpProofResult {
 @Freezed(fromJson: false, toJson: false)
 sealed class ZkpVerificationResult with _$ZkpVerificationResult {
   const ZkpVerificationResult._();
-  
+
   const factory ZkpVerificationResult.success() = ZkpVerificationSuccess;
-  const factory ZkpVerificationResult.failure(String error) = ZkpVerificationFailure;
+  const factory ZkpVerificationResult.failure(String error) =
+      ZkpVerificationFailure;
 
   bool get isValid => switch (this) {
     ZkpVerificationSuccess() => true,

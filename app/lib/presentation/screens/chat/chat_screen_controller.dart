@@ -16,8 +16,8 @@ import '../../../application/services/network_connectivity_service/network_conne
 import '../../../application/services/zkp_service/zkp_constants.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/chat/zkp_paused_notice.dart';
-import '../../../domain/models/chat/zkp_proof_shared_notice.dart';
 import '../../../domain/models/chat/zkp_proof_received_notice.dart';
+import '../../../domain/models/chat/zkp_proof_shared_notice.dart';
 import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -452,7 +452,10 @@ class ChatScreenController extends _$ChatScreenController
 
   /// Handle incoming liveness proof from another user
   void _handleLivenessProof(String channelDid, chat.StreamData data) {
-    _logger.info('_handleLivenessProof called for channel: $channelDid', name: _logKey);
+    _logger.info(
+      '_handleLivenessProof called for channel: $channelDid',
+      name: _logKey,
+    );
 
     final contact = state.contact;
     if (contact == null || contact.channelDid != channelDid) {
@@ -507,9 +510,13 @@ class ChatScreenController extends _$ChatScreenController
     }
 
     _logger.info('  Decoding proof JSON data', name: _logKey);
-    final proofData = jsonDecode(attachment.data!.json!) as Map<String, dynamic>;
+    final proofData =
+        jsonDecode(attachment.data!.json!) as Map<String, dynamic>;
 
-    _logger.info('  Decoded proof data with keys: ${proofData.keys}', name: _logKey);
+    _logger.info(
+      '  Decoded proof data with keys: ${proofData.keys}',
+      name: _logKey,
+    );
 
     // Trigger proof verification with extracted data
     _logger.info('  Passing proof to ProofFlowController', name: _logKey);
@@ -790,7 +797,8 @@ class ChatScreenController extends _$ChatScreenController
     _upsertChatItem(notice);
   }
 
-  /// Insert a ZKP request received notice (when receiving liveness check request)
+  /// Insert a ZKP request received notice (when receiving liveness
+  /// check request)
   void insertZkpRequestReceivedNotice() {
     final contact = state.contact;
     if (contact == null || contact.channelDid == null) return;
@@ -877,7 +885,8 @@ class ChatScreenController extends _$ChatScreenController
   }) async {
     final trimmedMessage = message.trimRight();
     // Allow empty messages if attachments are present
-    if (trimmedMessage.isEmpty && (attachments == null || attachments.isEmpty)) {
+    if (trimmedMessage.isEmpty &&
+        (attachments == null || attachments.isEmpty)) {
       return;
     }
 
