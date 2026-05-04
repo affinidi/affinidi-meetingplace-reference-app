@@ -339,7 +339,11 @@ class ChatScreenController extends _$ChatScreenController
     if (contact == null) return;
     if (group == null) return;
 
-    await _chatService?.updateGroupContactPendingStatus(contact, group);
+    final refreshedGroup = await _chatService?.refreshGroup(group.id) ?? group;
+    await _chatService?.updateGroupContactPendingStatus(
+      contact,
+      refreshedGroup,
+    );
   }
 
   /// Sends a text message to the chat.
