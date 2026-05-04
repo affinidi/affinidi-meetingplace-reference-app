@@ -8,20 +8,21 @@ import '../../screens/chat/chat_items/concierge_message.dart';
 enum ZkpNoticeType {
   /// User shared a proof
   shared,
-  
+
   /// User received a proof
   received,
-  
+
   /// User received a proof request
   request,
-  
+
   /// User paused the ZKP flow
   paused,
 }
 
 /// Unified widget for displaying ZKP-related notices
 ///
-/// Replaces multiple separate notice widgets with a single configurable component
+/// Replaces multiple separate notice widgets with a single
+/// configurable component
 class ZkpNoticeBanner extends ConsumerWidget {
   const ZkpNoticeBanner({
     super.key,
@@ -44,14 +45,16 @@ class ZkpNoticeBanner extends ConsumerWidget {
       case ZkpNoticeType.paused:
         return ConciergeMessage(
           dateCreated: dateCreated,
-          message: 'You paused the Human ZKP request.\nTap "+" icon to restart it.',
+          message:
+              'You paused the Human ZKP request.\nTap "+" icon to restart it.',
         );
 
       case ZkpNoticeType.shared:
         return _ProofNotice(
           dateCreated: dateCreated,
           isFromMe: true,
-          message: 'You have shared a Zero‑Knowledge Proof confirming you are '
+          message:
+              'You have shared a Zero‑Knowledge Proof confirming you are '
               'human.\n*No personal data was shared.',
         );
 
@@ -59,7 +62,8 @@ class ZkpNoticeBanner extends ConsumerWidget {
         return _ProofNotice(
           dateCreated: dateCreated,
           isFromMe: false,
-          message: '${contactName ?? 'Contact'} has shared a Zero‑Knowledge Proof '
+          message:
+              '${contactName ?? 'Contact'} has shared a Zero‑Knowledge Proof '
               'confirming they are human.',
         );
 
@@ -104,27 +108,26 @@ class _ProofNotice extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
-              alignment: isFromMe ? Alignment.centerRight : Alignment.centerLeft,
+              alignment: isFromMe
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                margin: isFromMe 
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+                margin: isFromMe
                     ? const EdgeInsets.only(left: 60)
                     : const EdgeInsets.only(right: 60),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: const Alignment(-0.5, -1.3),
                     end: const Alignment(0.342, 2.2),
-                    colors: [
-                      Colors.black,
-                      colorScheme.primary,
-                    ],
+                    colors: [Colors.black, colorScheme.primary],
                     stops: const [0.4, 1.075],
                   ),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: colorScheme.primary,
-                    width: 1,
-                  ),
+                  border: Border.all(color: colorScheme.primary, width: 1),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -211,10 +214,7 @@ class _ProofRequestNotice extends StatelessWidget {
             'You can generate the proof using an existing Liveness Credential '
             'or complete a quick liveness check.',
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 12),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -228,9 +228,7 @@ class _ProofRequestNotice extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                       minimumSize: const Size(80, 25),
                       shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(8),
-                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                         side: BorderSide(color: Colors.white, width: 1),
                       ),
                     ),
@@ -251,9 +249,7 @@ class _ProofRequestNotice extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       minimumSize: const Size(80, 25),
                       shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(8),
-                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
                         side: BorderSide(color: Colors.white, width: 1),
                       ),
                     ),

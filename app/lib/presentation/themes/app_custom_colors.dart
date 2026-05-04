@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 
 @immutable
 class AppCustomColors extends ThemeExtension<AppCustomColors> {
-  /// Color for concierge messages in chat
-  static const conciergeMessageColor = Color.fromARGB(255, 53, 130, 6);
-  
   const AppCustomColors({
     Color? cyan,
     Color? purple,
@@ -32,6 +29,9 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
        _orange = orange,
        _disabledGrey = disabledGrey,
        _darkGrey = darkGrey;
+
+  /// Color for concierge messages in chat
+  static const conciergeMessageColor = Color.fromARGB(255, 53, 130, 6);
 
   final Color? _cyan;
   final Color? _purple;

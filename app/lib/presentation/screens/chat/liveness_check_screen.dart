@@ -10,10 +10,7 @@ import 'chat_screen_controller.dart';
 import 'proof_flow_controller.dart';
 
 class LivenessCheckScreen extends ConsumerStatefulWidget {
-  const LivenessCheckScreen({
-    required this.contactId,
-    super.key,
-  });
+  const LivenessCheckScreen({required this.contactId, super.key});
 
   final String contactId;
 
@@ -22,13 +19,7 @@ class LivenessCheckScreen extends ConsumerStatefulWidget {
       _LivenessCheckScreenState();
 }
 
-enum FlowStep {
-  searchingVC,
-  vcNotFound,
-  generatingVC,
-  vcGenerated,
-  foundVC,
-}
+enum FlowStep { searchingVC, vcNotFound, generatingVC, vcGenerated, foundVC }
 
 class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
   FlowStep _currentStep = FlowStep.searchingVC;
@@ -43,12 +34,14 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
   Future<void> _startSearch() async {
     // Wait 3 seconds before checking for VC
     await Future<void>.delayed(const Duration(seconds: 3));
-    
+
     if (!mounted) return;
-    
+
     // Check if user has credentials
-    final hasCredentials = ref.read(credentialsScreenControllerProvider).hasCredentials;
-    
+    final hasCredentials = ref
+        .read(credentialsScreenControllerProvider)
+        .hasCredentials;
+
     setState(() {
       _currentStep = hasCredentials ? FlowStep.foundVC : FlowStep.vcNotFound;
     });
@@ -61,12 +54,12 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
 
     // Simulate credential generation
     await Future<void>.delayed(const Duration(seconds: 3));
-    
+
     if (!mounted) return;
 
     // Save credential to Credentials tab
     ref.read(credentialsScreenControllerProvider.notifier).saveCredential();
-    
+
     setState(() {
       _currentStep = FlowStep.vcGenerated;
     });
@@ -77,7 +70,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     ref
         .read(chatScreenControllerProvider(widget.contactId).notifier)
         .insertZkpPausedNotice();
-    
+
     Navigator.of(context).pop();
   }
 
@@ -86,7 +79,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     ref
         .read(chatScreenControllerProvider(widget.contactId).notifier)
         .insertZkpPausedNotice();
-    
+
     Navigator.of(context).pop();
   }
 
@@ -95,7 +88,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     ref
         .read(chatScreenControllerProvider(widget.contactId).notifier)
         .insertZkpPausedNotice();
-    
+
     Navigator.of(context).pop();
   }
 
@@ -104,7 +97,9 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
       _isGenerating = true;
     });
 
-    final contact = ref.read(contactsServiceProvider).getContactById(widget.contactId);
+    final contact = ref
+        .read(contactsServiceProvider)
+        .getContactById(widget.contactId);
     final contactDid = contact?.channelDid;
 
     final controller = ref.read(
@@ -114,10 +109,15 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     await controller.generateAndSendProof(holderDid: contactDid);
 
     if (!mounted) return;
-    
+
     Navigator.of(context).pop();
   }
-  PreferredSizeWidget _buildAppBar(BuildContext context, String title, VoidCallback? onBackPressed) {
+
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    String title,
+    VoidCallback? onBackPressed,
+  ) {
     return AppBar(
       backgroundColor: context.colorScheme.primary,
       foregroundColor: Colors.white,
@@ -147,17 +147,24 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final contact = ref.watch(contactsServiceProvider).getContactById(widget.contactId);
+    final contact = ref
+        .watch(contactsServiceProvider)
+        .getContactById(widget.contactId);
     final contactDid = contact?.channelDid ?? 'did:example:unknown';
 
     if (_currentStep == FlowStep.searchingVC) {
       // Screen: Searching for VC
       return Scaffold(
-        appBar: _buildAppBar(context, 'Liveness Credential Request', _handleBack),
+        appBar: _buildAppBar(
+          context,
+          'Liveness Credential Request',
+          _handleBack,
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -182,27 +189,26 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     if (_currentStep == FlowStep.vcNotFound) {
       // Screen: VC Not Found (Demo Mode)
       return Scaffold(
-        appBar: _buildAppBar(context, 'Liveness Check (Demo Mode)', _handleBack),
+        appBar: _buildAppBar(
+          context,
+          'Liveness Check (Demo Mode)',
+          _handleBack,
+        ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 50),
-              const Icon(
-                Icons.search_off,
-                size: 64,
-                color: Colors.grey,
-              ),
+              const Icon(Icons.search_off, size: 64, color: Colors.grey),
               const SizedBox(height: 60),
               const Text(
-                'No Liveness Credential was found.\n\n'
-                'To continue, a mock Liveness Credential will be generated locally. '
-                'This credential is used to demonstrate how a Zero‑Knowledge Proof (ZKP) is derived.',
+                '''No Liveness Credential was found.
+                
+To continue, a mock Liveness Credential will be generated locally. 
+This credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.''',
                 textAlign: TextAlign.left,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 24),
               Container(
@@ -221,7 +227,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'This reference app runs in demo mode and does not perform a real liveness check.',
+                        '''This reference app runs in demo mode and does not perform a real liveness check.''',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey.shade700,
@@ -262,7 +268,11 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     if (_currentStep == FlowStep.generatingVC) {
       // Screen: Generating VC
       return Scaffold(
-        appBar: _buildAppBar(context, 'Liveness Check (Demo Mode)', null),  // Disabled during generation
+        appBar: _buildAppBar(
+          context,
+          'Liveness Check (Demo Mode)',
+          null,
+        ), // Disabled during generation
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -275,39 +285,39 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
                 Text(
                   'Liveness Check in progress...',
                   textAlign: TextAlign.center,
-                style: textTheme.titleLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.bold,
+                  style: textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.grey.shade700,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'This is a simulated flow for development and demonstration purposes only.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade700,
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        color: Colors.grey.shade700,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          '''This is a simulated flow for development and demonstration purposes only.''',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade700,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const Spacer(),
+                const Spacer(),
               ],
             ),
           ),
@@ -318,26 +328,24 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     if (_currentStep == FlowStep.vcGenerated) {
       // Screen: VC Generated Successfully
       return Scaffold(
-        appBar: _buildAppBar(context, 'Liveness Credential Request', _handleBack),
+        appBar: _buildAppBar(
+          context,
+          'Liveness Credential Request',
+          _handleBack,
+        ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 50),
-              Icon(
-                Icons.check_circle,
-                size: 64,
-                color: Colors.green.shade600,
-              ),
+              Icon(Icons.check_circle, size: 64, color: Colors.green.shade600),
               const SizedBox(height: 60),
               const Text(
-                'A mock Liveness Credential has been generated and securely stored under the Credentials tab.\n'
-                'You can now continue to generate a Human Zero-Knowledge proof.',
+                '''A mock Liveness Credential has been generated and securely stored under the Credentials tab.
+You can now continue to generate a Human Zero-Knowledge proof.''',
                 textAlign: TextAlign.left,
-                style: TextStyle(
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 24),
               CredentialCard(
@@ -376,7 +384,11 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
 
     // Screen 4: VC Details
     return Scaffold(
-      appBar: _buildAppBar(context, 'Liveness Credential Request', _isGenerating ? null : _handleBack),
+      appBar: _buildAppBar(
+        context,
+        'Liveness Credential Request',
+        _isGenerating ? null : _handleBack,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -386,10 +398,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
               decoration: BoxDecoration(
                 color: Colors.black,
                 borderRadius: BorderRadius.circular(25.0),
-                border: Border.all(
-                  color: colorScheme.primary,
-                  width: 1,
-                ),
+                border: Border.all(color: colorScheme.primary, width: 1),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -455,42 +464,18 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
                           padding: const EdgeInsets.all(12),
                           child: Column(
                             children: [
-                              _buildDetailRow(
-                                'Issued to',
-                                contactDid,
-                              ),
-                              Divider(
-                                color: colorScheme.primary,
-                                height: 16,
-                              ),
+                              _buildDetailRow('Issued to', contactDid),
+                              Divider(color: colorScheme.primary, height: 16),
                               _buildDetailRow(
                                 'Types',
                                 '[VerifiableCredential, LivenessCredential]',
                               ),
-                              Divider(
-                                color: colorScheme.primary,
-                                height: 16,
-                              ),
-                              _buildDetailRow(
-                                'Issuer',
-                                'Affinidi',
-                              ),
-                              Divider(
-                                color: colorScheme.primary,
-                                height: 16,
-                              ),
-                              _buildDetailRow(
-                                'Issued on',
-                                '17 April 2026',
-                              ),
-                              Divider(
-                                color: colorScheme.primary,
-                                height: 16,
-                              ),
-                              _buildDetailRow(
-                                'Human',
-                                'Yes',
-                              ),
+                              Divider(color: colorScheme.primary, height: 16),
+                              _buildDetailRow('Issuer', 'Affinidi'),
+                              Divider(color: colorScheme.primary, height: 16),
+                              _buildDetailRow('Issued on', '17 April 2026'),
+                              Divider(color: colorScheme.primary, height: 16),
+                              _buildDetailRow('Human', 'Yes'),
                             ],
                           ),
                         ),
@@ -507,10 +492,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
               Center(
                 child: Text(
                   context.l10n.generatingZeroKnowledgeProof,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.black87),
                 ),
               ),
               const SizedBox(height: 16),
@@ -523,8 +505,12 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.red.withValues(alpha: 0.5),
-                      disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
+                      disabledBackgroundColor: Colors.red.withValues(
+                        alpha: 0.5,
+                      ),
+                      disabledForegroundColor: Colors.white.withValues(
+                        alpha: 0.5,
+                      ),
                     ),
                     child: Text(context.l10n.cancel),
                   ),
@@ -550,10 +536,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
 }
 
 class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
+  const _DetailRow({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -579,10 +562,7 @@ class _DetailRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
           ),
         ],

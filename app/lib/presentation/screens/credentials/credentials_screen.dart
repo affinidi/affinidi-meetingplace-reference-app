@@ -16,7 +16,9 @@ class CredentialsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
     final hasCredentials = ref.watch(
-      credentialsScreenControllerProvider.select((state) => state.hasCredentials),
+      credentialsScreenControllerProvider.select(
+        (state) => state.hasCredentials,
+      ),
     );
 
     return SafeArea(
@@ -54,10 +56,7 @@ class _EmptyStateWidget extends StatelessWidget {
     return Center(
       child: Text(
         l10n.noCredentialsYet,
-        style: const TextStyle(
-          fontSize: 16,
-          color: Colors.grey,
-        ),
+        style: const TextStyle(fontSize: 16, color: Colors.grey),
       ),
     );
   }
@@ -93,7 +92,9 @@ class _CredentialsListWidget extends ConsumerWidget {
                 child: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.white),
                   onPressed: () {
-                    ref.read(credentialsScreenControllerProvider.notifier).deleteCredential();
+                    ref
+                        .read(credentialsScreenControllerProvider.notifier)
+                        .deleteCredential();
                   },
                 ),
               ),
