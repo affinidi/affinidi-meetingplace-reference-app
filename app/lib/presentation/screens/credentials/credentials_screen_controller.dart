@@ -4,10 +4,11 @@ import 'credentials_screen_state.dart';
 
 final credentialsScreenControllerProvider =
     StateNotifierProvider<CredentialsScreenController, CredentialsScreenState>(
-  (ref) => CredentialsScreenController(),
-);
+      (ref) => CredentialsScreenController(),
+    );
 
-class CredentialsScreenController extends StateNotifier<CredentialsScreenState> {
+class CredentialsScreenController
+    extends StateNotifier<CredentialsScreenState> {
   CredentialsScreenController() : super(const CredentialsScreenState());
 
   /// Save a credential (temporarily for this session)

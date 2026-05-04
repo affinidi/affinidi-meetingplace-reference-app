@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
+import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../credential_service/credential_service.dart';
 import 'zkp_service_state.dart';
@@ -20,7 +21,7 @@ final zkpServiceProvider = Provider<ZkpService>(
 
 /// BN254 field prime (for blinder factor generation)
 final _bn254Prime = BigInt.parse(
-  '21888242871839275222246405745257275088548364400416034343698204186575808495617',
+  '''21888242871839275222246405745257275088548364400416034343698204186575808495617''',
 );
 
 /// Service responsible for Zero-Knowledge Proof generation and verification
@@ -30,8 +31,8 @@ class ZkpService {
   }
 
   final Ref _ref;
-  late final dynamic _logger;
-  
+  late final AppLogger _logger;
+
   static const _logKey = 'ZkpService';
   static const _wcdAsset = 'assets/SimpleVCProof.wcd';
   static const _zkeyAsset = 'assets/SimpleVCProof.groth16.zkey';
@@ -62,10 +63,10 @@ class ZkpService {
   /// - User identity remains untraceable
   Future<ZkpProofResult?> generateProof({String? holderDid}) async {
     _logger.info('Starting ZKP proof generation', name: _logKey);
-    
+
     try {
       final stopwatch = Stopwatch()..start();
-      
+
       // 1. Create credential using credential service
       _logger.info('  Step 1/5: Creating liveness credential', name: _logKey);
       final credentialService = _ref.read(credentialServiceProvider.notifier);
@@ -86,15 +87,19 @@ class ZkpService {
 
       // 3. Generate challenge signature
       _logger.info('  Step 3/5: Generating challenge signature', name: _logKey);
-      final challengeNonce = List<int>.generate(32, (_) => Random.secure().nextInt(256));
+      final challengeNonce = List<int>.generate(
+        32,
+        (_) => Random.secure().nextInt(256),
+      );
       final challengeNonceHex = challengeNonce
           .map((b) => b.toRadixString(16).padLeft(2, '0'))
           .join();
       final challengeNonceBi = BigInt.parse(challengeNonceHex, radix: 16);
       // Domain-tagged two-input challenge hash to avoid [x] vs [x,0] ambiguity
-      final challengeDigest = await crypto.poseidonHashFieldElements(
-        <String>['1', challengeNonceBi.toString()],
-      );
+      final challengeDigest = await crypto.poseidonHashFieldElements(<String>[
+        '1',
+        challengeNonceBi.toString(),
+      ]);
 
       final challengeSig = await holder.signPreparedDigest(
         digest: challengeDigest,
@@ -104,7 +109,10 @@ class ZkpService {
       final blinderFactor = _randomBlinderFactor();
 
       // 4. Build circuit inputs and generate witness
-      _logger.info('  Step 4/5: Building circuit inputs and generating witness', name: _logKey);
+      _logger.info(
+        '  Step 4/5: Building circuit inputs and generating witness',
+        name: _logKey,
+      );
       final sig = document.signature;
       final circuitInputs = <String, Object?>{
         'header_commitments': holderInputs.headerCommitments,
@@ -150,11 +158,14 @@ class ZkpService {
         zkeyPath: zkeyFile.path,
         witness: witness,
       );
-      
+
       stopwatch.stop();
       final timeMs = stopwatch.elapsedMilliseconds;
 
-      _logger.info('ZKP proof generated successfully in ${timeMs}ms', name: _logKey);
+      _logger.info(
+        'ZKP proof generated successfully in ${timeMs}ms',
+        name: _logKey,
+      );
 
       return ZkpProofResult(
         proof: proof.proof,
@@ -162,7 +173,11 @@ class ZkpService {
         generationTimeMs: timeMs,
       );
     } catch (e, st) {
-      _logger.error('Failed to generate ZKP proof: $e', name: _logKey, stackTrace: st);
+      _logger.error(
+        'Failed to generate ZKP proof: $e',
+        name: _logKey,
+        stackTrace: st,
+      );
       return null;
     }
   }
@@ -175,7 +190,7 @@ class ZkpService {
     required String publicSignals,
   }) async {
     _logger.info('Starting ZKP proof verification', name: _logKey);
-    
+
     try {
       // Load verification key
       final vkeyJson = await rootBundle.loadString(_vkeyAsset);
@@ -189,11 +204,15 @@ class ZkpService {
 
       _logger.info('Proof verification result: $isValid', name: _logKey);
 
-      return isValid 
+      return isValid
           ? const ZkpVerificationResult.success()
           : const ZkpVerificationResult.failure('Proof verification failed');
     } catch (e, st) {
-      _logger.error('Failed to verify proof: $e', name: _logKey, stackTrace: st);
+      _logger.error(
+        'Failed to verify proof: $e',
+        name: _logKey,
+        stackTrace: st,
+      );
       return ZkpVerificationResult.failure('Verification error: $e');
     }
   }
