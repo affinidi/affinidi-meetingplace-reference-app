@@ -40,9 +40,6 @@ class ZkpNoticeBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = context.colorScheme;
-    final textTheme = context.textTheme;
-
     switch (type) {
       case ZkpNoticeType.paused:
         return ConciergeMessage(
@@ -51,37 +48,48 @@ class ZkpNoticeBanner extends ConsumerWidget {
         );
 
       case ZkpNoticeType.shared:
-        return _buildProofNotice(
-          context,
-          colorScheme,
-          textTheme,
+        return _ProofNotice(
+          dateCreated: dateCreated,
           isFromMe: true,
           message: 'You have shared a Zero‑Knowledge Proof confirming you are '
               'human.\n*No personal data was shared.',
         );
 
       case ZkpNoticeType.received:
-        return _buildProofNotice(
-          context,
-          colorScheme,
-          textTheme,
+        return _ProofNotice(
+          dateCreated: dateCreated,
           isFromMe: false,
           message: '${contactName ?? 'Contact'} has shared a Zero‑Knowledge Proof '
               'confirming they are human.',
         );
 
       case ZkpNoticeType.request:
-        return _buildRequestNotice(context, colorScheme);
+        return _ProofRequestNotice(
+          contactName: contactName,
+          onGenerateProof: onGenerateProof,
+          onDoLater: onDoLater,
+        );
     }
   }
+}
 
-  Widget _buildProofNotice(
-    BuildContext context,
-    ColorScheme colorScheme,
-    TextTheme textTheme, {
-    required bool isFromMe,
-    required String message,
-  }) {
+/// Widget displaying a proof notice (shared or received)
+class _ProofNotice extends StatelessWidget {
+  const _ProofNotice({
+    required this.dateCreated,
+    required this.isFromMe,
+    required this.message,
+  });
+
+  final DateTime dateCreated;
+  final bool isFromMe;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Column(
@@ -137,7 +145,7 @@ class ZkpNoticeBanner extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Human ZKP',
+                      context.l10n.humanZkp,
                       style: textTheme.bodyMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -152,8 +160,24 @@ class ZkpNoticeBanner extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildRequestNotice(BuildContext context, ColorScheme colorScheme) {
+/// Widget displaying a proof request notice
+class _ProofRequestNotice extends StatelessWidget {
+  const _ProofRequestNotice({
+    this.contactName,
+    this.onGenerateProof,
+    this.onDoLater,
+  });
+
+  final String? contactName;
+  final VoidCallback? onGenerateProof;
+  final VoidCallback? onDoLater;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+
     return Container(
       constraints: const BoxConstraints(maxWidth: 600),
       padding: const EdgeInsets.all(10),

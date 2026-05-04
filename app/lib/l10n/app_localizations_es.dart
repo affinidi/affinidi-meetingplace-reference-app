@@ -1735,4 +1735,5 @@ class AppLocalizationsEs extends AppLocalizations {
   String trustedBy(int count) {
     return 'Trusted by $count';
   }
+  String get humanZkp => 'Human ZKP';
 }

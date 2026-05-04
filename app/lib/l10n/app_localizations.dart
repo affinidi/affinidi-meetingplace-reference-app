@@ -2571,6 +2571,11 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trusted by {count}'**
   String trustedBy(int count);
+  /// No description provided for @humanZkp.
+  ///
+  /// In en, this message translates to:
+  /// **'Human ZKP'**
+  String get humanZkp;
 }
 
 class _AppLocalizationsDelegate

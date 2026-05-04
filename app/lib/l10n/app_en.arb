@@ -1528,5 +1528,8 @@
 		"placeholders": {
 			"count": { "type": "int" }
 		}
+	"humanZkp": "Human ZKP",
+	"@humanZkp": {
+		"type": "text"
 	}
 }
