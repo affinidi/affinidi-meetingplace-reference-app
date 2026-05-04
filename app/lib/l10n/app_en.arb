@@ -1531,5 +1531,41 @@
 	"humanZkp": "Human ZKP",
 	"@humanZkp": {
 		"type": "text"
+	},
+	"livenessCredential": "Liveness Credential",
+	"@livenessCredential": {
+		"type": "text"
+	},
+	"verifiableCredential": "Verifiable Credential",
+	"@verifiableCredential": {
+		"type": "text"
+	},
+	"verifiableCredentialWallet": "Verifiable Credential wallet",
+	"@verifiableCredentialWallet": {
+		"type": "text"
+	},
+	"noCredentialsYet": "You don't have any credentials yet.",
+	"@noCredentialsYet": {
+		"type": "text"
+	},
+	"credentialDetails": "Credential Details",
+	"@credentialDetails": {
+		"type": "text"
+	},
+	"generatingZeroKnowledgeProof": "Generating Zero-Knowledge Proof...",
+	"@generatingZeroKnowledgeProof": {
+		"type": "text"
+	},
+	"cancel": "Cancel",
+	"@cancel": {
+		"type": "text"
+	},
+	"generateCredential": "Generate credential",
+	"@generateCredential": {
+		"type": "text"
+	},
+	"generateProof": "Generate proof",
+	"@generateProof": {
+		"type": "text"
 	}
 }

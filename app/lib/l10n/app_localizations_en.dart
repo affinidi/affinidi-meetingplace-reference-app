@@ -1706,4 +1706,32 @@ class AppLocalizationsEn extends AppLocalizations {
     return 'Trusted by $count';
   }
   String get humanZkp => 'Human ZKP';
+
+  @override
+  String get livenessCredential => 'Liveness Credential';
+
+  @override
+  String get verifiableCredential => 'Verifiable Credential';
+
+  @override
+  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
+
+  @override
+  String get noCredentialsYet => 'You don\'t have any credentials yet.';
+
+  @override
+  String get credentialDetails => 'Credential Details';
+
+  @override
+  String get generatingZeroKnowledgeProof =>
+      'Generating Zero-Knowledge Proof...';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get generateCredential => 'Generate credential';
+
+  @override
+  String get generateProof => 'Generate proof';
 }
