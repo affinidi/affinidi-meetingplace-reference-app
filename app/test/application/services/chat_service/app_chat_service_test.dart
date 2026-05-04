@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:mpx_flutter_reference_app/application/services/chat_service/app_chat_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
+import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
@@ -23,9 +23,9 @@ import '../../../fakes/fake_meeting_place_sdk.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('AppChatService - Session & SDK Delegation', () {
+  group('ChatSessionService - Session & SDK Delegation', () {
     late ProviderContainer container;
-    late AppChatService chatService;
+    late ChatSessionService chatService;
     late FakeMeetingPlaceSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late FakeContactsService fakeContactsService;
@@ -51,11 +51,13 @@ void main() {
         ],
       );
       container.listen(
-        appChatServiceProvider(channelDid),
+        chatSessionServiceProvider(channelDid),
         (previous, value) {},
         fireImmediately: true,
       );
-      chatService = container.read(appChatServiceProvider(channelDid).notifier);
+      chatService = container.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
 
       final knownGroup = FakeGroups.approvedGroup();
       fakeCoreSdk.setMockGroup(knownGroup);
@@ -145,12 +147,12 @@ void main() {
     test('skips badge reset when channel is missing on start', () async {
       final missingChannelDid = 'did:key:missing';
       container.listen(
-        appChatServiceProvider(missingChannelDid),
+        chatSessionServiceProvider(missingChannelDid),
         (previous, value) {},
         fireImmediately: true,
       );
       final missingService = container.read(
-        appChatServiceProvider(missingChannelDid).notifier,
+        chatSessionServiceProvider(missingChannelDid).notifier,
       );
       await missingService.startChatSession();
       expect(fakeContactsService.resetBadgeCalledWith, isNull);
@@ -230,9 +232,9 @@ void main() {
     });
   });
 
-  group('AppChatService - State Emissions', () {
+  group('ChatSessionService - State Emissions', () {
     late ProviderContainer container;
-    late AppChatService chatService;
+    late ChatSessionService chatService;
     late FakeMeetingPlaceSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late FakeContactsService fakeContactsService;
@@ -241,7 +243,7 @@ void main() {
     final channelDid = testContact.channelDid!;
 
     ChatServiceState serviceState() =>
-        container.read(appChatServiceProvider(channelDid));
+        container.read(chatSessionServiceProvider(channelDid));
 
     setUp(() async {
       fakeCoreSdk = FakeMeetingPlaceSDK(
@@ -261,11 +263,13 @@ void main() {
         ],
       );
       container.listen(
-        appChatServiceProvider(channelDid),
+        chatSessionServiceProvider(channelDid),
         (previous, value) {},
         fireImmediately: true,
       );
-      chatService = container.read(appChatServiceProvider(channelDid).notifier);
+      chatService = container.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
     });
 
     test('adds chatItem to state when receiving message', () async {
@@ -381,19 +385,19 @@ void main() {
       addTearDown(groupContainer.dispose);
 
       groupContainer.listen(
-        appChatServiceProvider(groupChannelDid),
+        chatSessionServiceProvider(groupChannelDid),
         (previous, value) {},
         fireImmediately: true,
       );
       final groupService = groupContainer.read(
-        appChatServiceProvider(groupChannelDid).notifier,
+        chatSessionServiceProvider(groupChannelDid).notifier,
       );
       await groupService.startChatSession();
 
       groupService.state = groupService.state.copyWith(group: knownGroup);
 
       expect(
-        groupContainer.read(appChatServiceProvider(groupChannelDid)).group,
+        groupContainer.read(chatSessionServiceProvider(groupChannelDid)).group,
         isNotNull,
       );
 
@@ -402,7 +406,7 @@ void main() {
       );
 
       expect(
-        groupContainer.read(appChatServiceProvider(groupChannelDid)).group,
+        groupContainer.read(chatSessionServiceProvider(groupChannelDid)).group,
         isNotNull,
       );
     });

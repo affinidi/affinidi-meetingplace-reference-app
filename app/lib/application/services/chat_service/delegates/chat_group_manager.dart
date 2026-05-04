@@ -5,11 +5,11 @@ import '../../../../domain/models/contacts/contact.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../contacts_service/contacts_service.dart';
-import 'interfaces/group_delegate.dart';
+import 'interfaces/group_managing.dart';
 
-/// Encapsulates all group-related SDK interactions.
-class AppGroupDelegate implements GroupDelegate {
-  AppGroupDelegate({required Ref ref}) : _ref = ref;
+/// Handles group management SDK and contacts interactions.
+class ChatGroupManager implements GroupManaging {
+  ChatGroupManager({required Ref ref}) : _ref = ref;
 
   final Ref _ref;
 
