@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/cards/credential_card.dart';
 import 'credentials_screen_controller.dart';
 
@@ -10,10 +11,11 @@ class CredentialDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Credential Details'),
+        title: Text(l10n.credentialDetails),
         actions: [
           IconButton(
             onPressed: () {
@@ -31,9 +33,9 @@ class CredentialDetailsScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Show the credential card
-              const CredentialCard(
-                topLeftText: 'Liveness Credential',
-                bottomLeftText: 'Verifiable Credential',
+              CredentialCard(
+                topLeftText: l10n.livenessCredential,
+                bottomLeftText: l10n.verifiableCredential,
               ),
               const SizedBox(height: 24),
               // Table with dividers
@@ -41,26 +43,25 @@ class CredentialDetailsScreen extends ConsumerWidget {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    _buildDetailRow(
-                      context,
-                      'Types',
-                      '[VerifiableCredential, LivenessCredential]',
+                    const _DetailRow(
+                      label: 'Types',
+                      value: '[VerifiableCredential, LivenessCredential]',
                     ),
                     Divider(
                       color: colorScheme.primary,
                       height: 24,
                     ),
-                    _buildDetailRow(context, 'Issuer', 'Affinidi'),
+                    const _DetailRow(label: 'Issuer', value: 'Affinidi'),
                     Divider(
                       color: colorScheme.primary,
                       height: 24,
                     ),
-                    _buildDetailRow(context, 'Issued on', '17 April 2026'),
+                    const _DetailRow(label: 'Issued on', value: '17 April 2026'),
                     Divider(
                       color: colorScheme.primary,
                       height: 24,
                     ),
-                    _buildDetailRow(context, 'Human', 'Yes'),
+                    const _DetailRow(label: 'Human', value: 'Yes'),
                   ],
                 ),
               ),
@@ -70,8 +71,19 @@ class CredentialDetailsScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildDetailRow(BuildContext context, String label, String value) {
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    required this.label,
+    required this.value,
+  });
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(

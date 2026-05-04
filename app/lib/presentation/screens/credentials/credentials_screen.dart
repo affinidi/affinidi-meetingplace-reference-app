@@ -26,7 +26,7 @@ class CredentialsScreen extends ConsumerWidget {
           children: [
             SectionBanner(
               title: l10n.tabsTitle(Tabs.credentials.name),
-              subtitle: 'Verifiable Credential wallet',
+              subtitle: l10n.verifiableCredentialWallet,
               icon: Icon(
                 Icons.credit_card,
                 color: colorScheme.onSurfaceVariant,
@@ -35,27 +35,41 @@ class CredentialsScreen extends ConsumerWidget {
             ),
             // Content
             hasCredentials
-                ? _buildCredentialsList(context, ref)
-                : _buildEmptyState(),
+                ? const _CredentialsListWidget()
+                : const _EmptyStateWidget(),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildEmptyState() {
-    return const Center(
+class _EmptyStateWidget extends StatelessWidget {
+  const _EmptyStateWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Center(
       child: Text(
-        'You don\'t have any credentials yet.',
-        style: TextStyle(
+        l10n.noCredentialsYet,
+        style: const TextStyle(
           fontSize: 16,
           color: Colors.grey,
         ),
       ),
     );
   }
+}
 
-  Widget _buildCredentialsList(BuildContext context, WidgetRef ref) {
+class _CredentialsListWidget extends ConsumerWidget {
+  const _CredentialsListWidget();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -63,8 +77,8 @@ class CredentialsScreen extends ConsumerWidget {
           Stack(
             children: [
               CredentialCard(
-                topLeftText: 'Liveness Credential',
-                bottomLeftText: 'Verifiable Credential',
+                topLeftText: l10n.livenessCredential,
+                bottomLeftText: l10n.verifiableCredential,
                 onTap: () {
                   Navigator.of(context).push<void>(
                     MaterialPageRoute(
