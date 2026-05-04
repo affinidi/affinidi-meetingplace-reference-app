@@ -1460,4 +1460,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goBack => 'Go Back';
+
+  @override
+  String get humanZkp => 'Human ZKP';
 }
