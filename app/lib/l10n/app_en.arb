@@ -1417,5 +1417,9 @@
 	"cameraAccessDenied": "Camera access denied or unavailable.",
 	"cameraOpenSettings": "Open Settings",
 	"cameraNotAvailable": "Camera not available",
-	"goBack": "Go Back"
+	"goBack": "Go Back",
+	"humanZkp": "Human ZKP",
+	"@humanZkp": {
+		"type": "text"
+	}
 }

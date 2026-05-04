@@ -2187,6 +2187,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Back'**
   String get goBack;
+
+  /// No description provided for @humanZkp.
+  ///
+  /// In en, this message translates to:
+  /// **'Human ZKP'**
+  String get humanZkp;
 }
 
 class _AppLocalizationsDelegate
