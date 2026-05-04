@@ -24,6 +24,7 @@ environment:
 dependencies:
   app_badge_plus: ^1.2.3
   camera: ^0.11.2
+  circom_witnesscalc: ^0.0.1-beta.1
   clear_all_notifications: ^1.0.0
   clock: any
   collection: ^1.19.1
@@ -45,6 +46,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_riverpod: ^3.3.1
+  flutter_rapidsnark: ^0.0.1-beta.7
   flutter_secure_storage: ^9.2.4
   flutter_svg: ^2.0.9
   form_field_validator: ^1.1.0
@@ -85,8 +87,6 @@ dependencies:
   vc_zkp:
     path: ../../affinidi-vc-zkp-dart
   video_player: ^2.10.0
-  circom_witnesscalc: ^0.0.1-beta.1
-  flutter_rapidsnark: ^0.0.1-beta.7
 
 hooks:
   user_defines:
