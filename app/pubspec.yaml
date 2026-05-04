@@ -80,7 +80,7 @@ dependencies:
   synchronized: ^3.4.0
   uuid: ^4.5.1
   vc_zkp:
-    path: ../../affinidi-zk-vc-dart-with-binaries
+    path: ../../affinidi-vc-zkp-dart
   video_player: ^2.10.0
   circom_witnesscalc: ^0.0.1-beta.1
   flutter_rapidsnark: ^0.0.1-beta.7
