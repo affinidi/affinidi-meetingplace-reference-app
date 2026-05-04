@@ -122,23 +122,4 @@ post_install do |installer|
 
     end
   end
-
-  # Link libc++ in Runner app target so C++ symbols from plugins resolve
-  runner_project_path = File.join(File.dirname(__FILE__), 'Runner.xcodeproj')
-  if File.exist?(runner_project_path)
-    require 'xcodeproj'
-    runner_project = Xcodeproj::Project.open(runner_project_path)
-    runner_project.native_targets.each do |target|
-      next unless target.name == 'Runner'
-      target.build_configurations.each do |config|
-        ldflags = config.build_settings['OTHER_LDFLAGS']
-        ldflags = ldflags.nil? ? ['$(inherited)'] : (ldflags.is_a?(Array) ? ldflags.dup : [ldflags.to_s])
-        ldflags << '-lc++' unless ldflags.any? { |f| f.to_s.include?('lc++') }
-        config.build_settings['OTHER_LDFLAGS'] = ldflags
-        config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
-      end
-      break
-    end
-    runner_project.save
-  end
 end
