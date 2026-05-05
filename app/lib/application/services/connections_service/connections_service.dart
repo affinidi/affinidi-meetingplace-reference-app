@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/identity/identity.dart';
@@ -12,6 +13,7 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../presentation/screens/offer/publish_offer_screen/publish_offer_form_data.dart';
 import '../control_plane_service/control_plane_service.dart';
+import '../identities_service/identities_service.dart';
 import 'connections_service_state.dart';
 
 part 'connections_service.g.dart';
@@ -206,7 +208,12 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      await sdk.approveConnectionRequest(channel: channel);
+      final rCardAttachments = await _buildRCardAttachments(sdk, channel);
+
+      await sdk.approveConnectionRequest(
+        channel: channel,
+        attachments: rCardAttachments,
+      );
 
       _logger.info('Connection request approved successfully', name: _logKey);
     } catch (error, stackTrace) {
@@ -473,5 +480,44 @@ class ConnectionsService extends _$ConnectionsService {
     }
 
     state = state.copyWith(selectedOffer: result.connectionOffer);
+  }
+
+  Future<List<Attachment>?> _buildRCardAttachments(
+    MeetingPlaceCoreSDK sdk,
+    Channel channel,
+  ) async {
+    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
+
+    final externalRef = channel.externalRef;
+    if (externalRef == null || externalRef.isEmpty) return null;
+
+    final identity =
+        ref.read(identitiesServiceProvider).getIdentityById(externalRef);
+    if (identity == null || identity.did.isEmpty) return null;
+
+    try {
+      final didManager = await sdk.getDidManager(identity.did);
+      return RCardAttachmentBuilder.buildForPersona(
+        persona: PersonaDid(
+          did: identity.did,
+          name: identity.card.displayName,
+        ),
+        card: RCardSubject(
+          firstName: identity.card.firstName,
+          lastName: identity.card.lastName,
+          email: identity.card.email,
+          phone: identity.card.mobile,
+        ),
+        issuerDidManager: didManager,
+      );
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to build R-Card attachments',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return null;
+    }
   }
 }

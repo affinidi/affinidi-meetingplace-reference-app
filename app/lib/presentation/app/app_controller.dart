@@ -9,6 +9,7 @@ import '../../application/services/contacts_connections_service/contacts_connect
 import '../../application/services/contacts_service/contacts_service.dart';
 import '../../application/services/control_plane_service/control_plane_service.dart';
 import '../../application/services/network_connectivity_service/network_connectivity_service.dart';
+import '../../application/services/r_cards_service/r_cards_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
 
@@ -25,6 +26,7 @@ class AppController extends _$AppController with WidgetsBindingObserver {
       (prev, next) async {
         if (next) {
           ref.read(controlPlaneServiceProvider);
+          ref.read(rCardsServiceProvider);
           await ref.read(contactsServiceProvider.notifier).ensureInitialized();
           await ref
               .read(connectionsServiceProvider.notifier)
