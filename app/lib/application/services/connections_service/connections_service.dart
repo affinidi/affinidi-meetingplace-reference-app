@@ -486,8 +486,7 @@ class ConnectionsService extends _$ConnectionsService {
     MeetingPlaceCoreSDK sdk,
     Channel channel,
   ) async {
-    final identitiesNotifier = ref.read(identitiesServiceProvider.notifier);
-    await identitiesNotifier.ensureInitialized();
+    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
 
     final externalRef = channel.externalRef;
     if (externalRef == null || externalRef.isEmpty) {
@@ -498,7 +497,8 @@ class ConnectionsService extends _$ConnectionsService {
       return null;
     }
 
-    final identity = identitiesNotifier.state.getIdentityById(externalRef);
+    final identity =
+        ref.read(identitiesServiceProvider).getIdentityById(externalRef);
     if (identity == null || identity.did.isEmpty) {
       _logger.warning(
         'Skipping R-Card attachment: no identity found for'
@@ -510,8 +510,11 @@ class ConnectionsService extends _$ConnectionsService {
 
     try {
       final didManager = await sdk.getDidManager(identity.did);
-      return RCardDIDCommAttachmentBuilder.build(
-        issuerDid: identity.did,
+      return RCardAttachmentBuilder.buildForPersona(
+        persona: PersonaDid(
+          did: identity.did,
+          name: identity.card.displayName,
+        ),
         card: RCardSubject(
           firstName: identity.card.firstName,
           lastName: identity.card.lastName,

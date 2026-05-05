@@ -64,42 +64,40 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
               VdipClient.requestIssuanceMessageType,
               VdipClient.issuedCredentialMessageType,
             ],
-            onBuildAttachments:
-                (
-                  Channel channel,
-                  Future<DidManager> Function(String did) getDidManager,
-                ) async {
-                  try {
-                    await ref
-                        .read(identitiesServiceProvider.notifier)
-                        .ensureInitialized();
+            onBuildAttachments: (channel) async {
+              try {
+                await ref
+                    .read(identitiesServiceProvider.notifier)
+                    .ensureInitialized();
 
-                    final externalRef = channel.externalRef;
-                    if (externalRef == null || externalRef.isEmpty) {
-                      return null;
-                    }
+                final externalRef = channel.externalRef;
+                if (externalRef == null || externalRef.isEmpty) return null;
 
-                    final identity = ref
-                        .read(identitiesServiceProvider)
-                        .getIdentityById(externalRef);
-                    if (identity == null || identity.did.isEmpty) return null;
+                final identity = ref
+                    .read(identitiesServiceProvider)
+                    .getIdentityById(externalRef);
+                if (identity == null || identity.did.isEmpty) return null;
 
-                    final didManager = await getDidManager(identity.did);
+                final sdk = await ref.read(meetingPlaceSdkProvider.future);
+                final didManager = await sdk.getDidManager(identity.did);
 
-                    return RCardDIDCommAttachmentBuilder.build(
-                      issuerDid: identity.did,
-                      card: RCardSubject(
-                        firstName: identity.card.firstName,
-                        lastName: identity.card.lastName,
-                        email: identity.card.email,
-                        phone: identity.card.mobile,
-                      ),
-                      issuerDidManager: didManager,
-                    );
-                  } catch (_) {
-                    return null;
-                  }
-                },
+                return RCardAttachmentBuilder.buildForPersona(
+                  persona: PersonaDid(
+                    did: identity.did,
+                    name: identity.card.displayName,
+                  ),
+                  card: RCardSubject(
+                    firstName: identity.card.firstName,
+                    lastName: identity.card.lastName,
+                    email: identity.card.email,
+                    phone: identity.card.mobile,
+                  ),
+                  issuerDidManager: didManager,
+                );
+              } catch (_) {
+                return null;
+              }
+            },
           ),
         );
 
