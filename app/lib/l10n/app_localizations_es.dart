@@ -355,7 +355,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'connection_offer_owned_by_claiming_party':
           '¡No puedes aceptar esta invitación porque eres el invitador!',
       'connection_offer_already_claimed_by_claiming_party':
-          'No puedes aceptar esta invitación porque ya solicitaste conectarte y tienes una reclamación pendiente',
+          'No puedes aceptar esta invitación porque ya solicitaste conectarte y tienes una reclamación pendiente en curso',
       'missingMnemonic':
           'Por favor, introduce una frase de invitación para buscar',
       'connection_offer_not_found_error':
@@ -367,7 +367,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'offerOwnedByClaimingParty':
           'No puedes reclamar esta invitación porque eres el propietario',
       'offerAlreadyClaimedByParty':
-          'No puedes reclamar esta oferta porque ya aceptaste la invitación y tienes una solicitud pendiente',
+          'No puedes reclamar esta oferta porque ya aceptaste la invitación y tienes una solicitud pendiente en curso',
       'offerNotFound':
           'Los detalles que proporcionaste no coinciden con ninguna invitación activa.',
       'mediatorAlreadyExists':
@@ -377,7 +377,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'unableToFindMediator':
           'No se encontró un servidor de mensajes en la URL proporcionada',
       'oobFlowTimedOut':
-          'No se pudo establecer conexión con la otra parte, probablemente el código QR ya fue usado',
+          'No se pudo establecer una conexión con la otra parte, probablemente el código QR ya fue usado',
       'connection_offer_expired': 'Esta invitación ha expirado',
       'connection_offer_limit_exceeded':
           'Esta invitación ha alcanzado su número máximo de usos',
@@ -389,7 +389,7 @@ class AppLocalizationsEs extends AppLocalizations {
           'Los datos del código QR no coinciden con ninguna invitación activa',
       'oob_invalid_type': 'Los datos del código QR no son compatibles',
       'network_error':
-          'No se pudo conectar. Comprueba tu conexión a internet e inténtalo de nuevo.',
+          'No se pudo conectar. Verifica tu conexión a internet y vuelve a intentarlo.',
       'other': '$errorCode',
     });
     return '$_temp0';
@@ -466,10 +466,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String contactsFilterLabel(String filter) {
     String _temp0 = intl.Intl.selectLogic(filter, {
-      'any': 'Any',
-      'person': 'Person',
-      'service': 'AI Agent',
-      'business': 'Business',
+      'any': 'Cualquiera',
+      'person': 'Persona',
+      'group': 'Grupo',
+      'service': 'Agente de IA',
+      'business': 'Negocio',
       'other': '',
     });
     return '$_temp0';
@@ -1114,6 +1115,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get debugPanelLogsCopied => 'Registros copiados en el portapapeles';
+
+  @override
+  String get debugPanelShareLogs => 'Compartir registros';
 
   @override
   String get serverSettings => 'Configuración del servidor';
