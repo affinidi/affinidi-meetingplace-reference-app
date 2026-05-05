@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../infrastructure/loggers/app_logger/log_constants.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../../infrastructure/providers/share_service_provider.dart';
 import 'debug_panel_state.dart';
 
 part 'debug_panel_controller.g.dart';
@@ -93,6 +95,12 @@ class DebugPanelController extends _$DebugPanelController {
   void clearLogs() {
     ref.read(appLoggerProvider).clearLogs();
     state = state.copyWith(logs: []);
+  }
+
+  Future<void> shareLogFile() async {
+    final filePath = ref.read(appLoggerProvider).logFilePath;
+    final shareService = ref.read(shareServiceProvider);
+    await shareService.share(ShareParams(files: [XFile(filePath)]));
   }
 
   void addTestLog() {

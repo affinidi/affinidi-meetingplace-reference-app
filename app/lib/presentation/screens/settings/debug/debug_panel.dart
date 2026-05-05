@@ -62,6 +62,7 @@ class DebugPanel extends HookConsumerWidget {
             onSelected: (value) => switch (value) {
               LogConstants.clearLogs => controller.clearLogs(),
               LogConstants.copyLogs => _copyLogsToClipboard(context, ref),
+              LogConstants.shareLogs => controller.shareLogFile(),
               LogConstants.addTestLog => controller.addTestLog(),
               _ => null,
             },
@@ -73,6 +74,10 @@ class DebugPanel extends HookConsumerWidget {
               PopupMenuItem(
                 value: LogConstants.copyLogs,
                 child: Text(l10n.debugPanelCopyLogs),
+              ),
+              PopupMenuItem(
+                value: LogConstants.shareLogs,
+                child: Text(l10n.debugPanelShareLogs),
               ),
               PopupMenuItem(
                 value: LogConstants.addTestLog,

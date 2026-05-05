@@ -1096,6 +1096,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get debugPanelLogsCopied => 'Logs copied to clipboard';
 
   @override
+  String get debugPanelShareLogs => 'Share logs';
+
+  @override
   String get serverSettings => 'Server Settings';
 
   @override

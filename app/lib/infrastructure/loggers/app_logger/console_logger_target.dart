@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:developer';
 
 import 'app_log_entry.dart';
@@ -5,7 +6,7 @@ import 'log_constants.dart';
 import 'logger_target.dart';
 
 class ConsoleLoggerTarget implements LoggerTarget {
-  final List<AppLogEntry> _logs = [];
+  final ListQueue<AppLogEntry> _logs = ListQueue<AppLogEntry>();
 
   bool _isSdkLog(String loggerName) {
     final isAppLog = loggerName.contains(LogConstants.logName);

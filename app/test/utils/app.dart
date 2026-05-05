@@ -66,6 +66,7 @@ Future<void> startApp(
   QrCodeViewFactory? qrCodeViewFactory,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
+  AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
   SharedPreferences.setMockInitialValues({
     'alreadyOnboarded': alreadyOnboarded,
   });
