@@ -17,6 +17,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'connections': 'Einladungen',
       'contacts': 'Kanäle',
       'identities': 'Identitäten',
+      'rCards': 'R-Karten',
       'settings': 'Einstellungen',
       'other': 'Ungültig',
     });
@@ -294,6 +295,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get generalDelete => 'Löschen';
+
+  @override
+  String get generalSave => 'Speichern';
 
   @override
   String get generalDone => 'Fertig';
@@ -1496,4 +1500,133 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get goBack => 'Zurück gehen';
+
+  @override
+  String get rCardsPanelSubtitle => 'Beziehungskarten von Ihren Kontakten';
+
+  @override
+  String get rCardsEmpty =>
+      'R-Karten sind eine moderne, selbstaktualisierende Version von vCards. Sobald Sie Ihre erste Verbindung herstellen, erscheinen Ihre digitalen Visitenkarten hier.';
+
+  @override
+  String rCardsFilterLabel(String filter) {
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'all': 'Alle',
+      'nonAnonymous': 'Nicht-anonym',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get noRCardsFoundWithFilter =>
+      'Keine R-Karten gefunden, die Ihrer Suche entsprechen.';
+
+  @override
+  String get rCardDetailsTitle => 'R-Karten Details';
+
+  @override
+  String get rCardSectionIdentity => 'Identität';
+
+  @override
+  String get rCardSectionMetadata => 'Credential-Details';
+
+  @override
+  String get rCardFieldName => 'Name';
+
+  @override
+  String get rCardFieldEmail => 'E-Mail';
+
+  @override
+  String get rCardFieldPhone => 'Telefon';
+
+  @override
+  String get rCardFieldCompany => 'Unternehmen';
+
+  @override
+  String get rCardFieldPosition => 'Position';
+
+  @override
+  String get rCardFieldWebsite => 'Website';
+
+  @override
+  String get rCardFieldSocial => 'Sozial';
+
+  @override
+  String get rCardFieldSubjectDid => 'Subjekt-DID';
+
+  @override
+  String get rCardAddNotes => 'Notizen hinzufügen';
+
+  @override
+  String get rCardUpdateNotes => 'Notizen aktualisieren';
+
+  @override
+  String get rCardNotesTitle => 'Notizen';
+
+  @override
+  String get rCardNotesPlaceholder => 'Schreiben Sie hier Ihre Notizen...';
+
+  @override
+  String get rCardDeletePrompt =>
+      'Möchten Sie diese R-Karte wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
+
+  @override
+  String rCardChatWith(String name) {
+    return 'Chat mit $name';
+  }
+
+  @override
+  String get rCardFieldIssuerDid => 'Aussteller-DID';
+
+  @override
+  String get rCardFieldReceivedAt => 'Empfangen';
+
+  @override
+  String get rCardFieldIssuedAt => 'Ausgestellt';
+
+  @override
+  String get rCardTitle => 'R-Karte';
+
+  @override
+  String get verifiableCredential => 'Überprüfbarer Nachweis';
+
+  @override
+  String get verified => 'Verifiziert';
+
+  @override
+  String get verifiableCredentialDescription =>
+      'Gesicherte digitale Nachweise, die auf Echtheit überprüft werden können';
+
+  @override
+  String get secureAttachmentsTitle => 'Sichere Anhänge';
+
+  @override
+  String get credentialDetails => 'Nachweisdetails';
+
+  @override
+  String get genRCard => 'R-Karte';
+
+  @override
+  String get rCardPickIdentitySubtitle =>
+      'Wähle die Identität aus, die als R-Karte geteilt werden soll';
+
+  @override
+  String get rCardFooterSent => 'R-Karte wurde gesendet.';
+
+  @override
+  String get rCardFooterSaved => 'R-Karte wurde gespeichert.';
+
+  @override
+  String get goToRCard => 'Zur R-Karte';
+
+  @override
+  String get selectPersonaTitle => 'Persona auswählen';
+
+  @override
+  String get selectPersonaInstruction =>
+      'Wische links oder rechts, um die Persona auszuwählen, die du für die R‑Karte verwenden möchtest';
+
+  @override
+  String get sendRCard => 'R-Karte senden';
 }

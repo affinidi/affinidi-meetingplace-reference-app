@@ -27,6 +27,10 @@ class RoutePaths {
   static const oobShareQr = 'oob-share-qr';
   static const oobScanQr = 'oob-scan-qr';
 
+  // R-Cards
+  static const rCards = '/r-cards';
+  static const rCardDetails = ':subjectDid/details';
+
   // Media
   static const media = '/media';
   static const mediaPreview = 'preview';

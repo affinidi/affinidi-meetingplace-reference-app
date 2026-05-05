@@ -75,7 +75,7 @@ final class ConnectionsServiceProvider
 }
 
 String _$connectionsServiceHash() =>
-    r'29bb4c5010de33344e44dc47998e623f2bbcbf54';
+    r'8edee265e6cf16d387c5c8b05f0f2938e4e4a705';
 
 /// Service responsible for managing connection offers and channels.
 ///

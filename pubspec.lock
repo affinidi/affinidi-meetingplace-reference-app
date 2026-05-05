@@ -621,10 +621,10 @@ packages:
     dependency: transitive
     description:
       name: firebase_core_platform_interface
-      sha256: cccb4f572325dc14904c02fcc7db6323ad62ba02536833dddb5c02cac7341c64
+      sha256: "0ecda14c1bfc9ed8cac303dd0f8d04a320811b479362a9a4efb14fd331a473ce"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.2"
+    version: "6.0.3"
   firebase_core_web:
     dependency: transitive
     description:
@@ -1017,10 +1017,10 @@ packages:
     dependency: transitive
     description:
       name: json_annotation
-      sha256: cb09e7dac6210041fad964ed7fbee004f14258b4eca4040f72d1234062ace4c8
+      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
       url: "https://pub.dev"
     source: hosted
-    version: "4.11.0"
+    version: "4.9.0"
   json_ld_processor:
     dependency: transitive
     description:
@@ -1134,7 +1134,7 @@ packages:
     source: hosted
     version: "0.13.0"
   meeting_place_chat:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: meeting_place_chat
       sha256: "82a2f387459885d1d87155e7a60a2b1c00ebb56fece327d5328b6e765c018855"
@@ -1150,7 +1150,7 @@ packages:
     source: hosted
     version: "0.0.1-dev.19"
   meeting_place_core:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: meeting_place_core
       sha256: "356124fe5d986a811002a2189cd299b3fcd3c32f00142cc1a30e946028f830e8"
@@ -1181,6 +1181,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.1-dev.15"
+  meeting_place_relationship:
+    dependency: "direct overridden"
+    description:
+      path: "packages/meeting_place_relationship"
+      ref: "203cfa3c6498f754b788d353b0c2ae305c8262c8"
+      resolved-ref: "203cfa3c6498f754b788d353b0c2ae305c8262c8"
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
+    version: "0.0.1-dev.1"
   melos:
     dependency: "direct dev"
     description:

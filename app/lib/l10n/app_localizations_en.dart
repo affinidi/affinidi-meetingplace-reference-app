@@ -17,6 +17,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'connections': 'Invitations',
       'contacts': 'Channels',
       'identities': 'Identities',
+      'rCards': 'R-Cards',
       'settings': 'Settings',
       'other': 'Invalid',
     });
@@ -285,6 +286,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generalDelete => 'Delete';
+
+  @override
+  String get generalSave => 'Save';
 
   @override
   String get generalDone => 'Done';
@@ -1457,4 +1461,134 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goBack => 'Go Back';
+
+  @override
+  String get rCardsPanelSubtitle =>
+      'Relationship cards received from your contacts';
+
+  @override
+  String get rCardsEmpty =>
+      'R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.';
+
+  @override
+  String rCardsFilterLabel(String filter) {
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'all': 'All',
+      'nonAnonymous': 'Non-anonymous',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get noRCardsFoundWithFilter =>
+      'No R-Cards found matching your search.';
+
+  @override
+  String get rCardDetailsTitle => 'R-Card Details';
+
+  @override
+  String get rCardSectionIdentity => 'Identity';
+
+  @override
+  String get rCardSectionMetadata => 'Credential Details';
+
+  @override
+  String get rCardFieldName => 'Name';
+
+  @override
+  String get rCardFieldEmail => 'Email';
+
+  @override
+  String get rCardFieldPhone => 'Phone';
+
+  @override
+  String get rCardFieldCompany => 'Company';
+
+  @override
+  String get rCardFieldPosition => 'Position';
+
+  @override
+  String get rCardFieldWebsite => 'Website';
+
+  @override
+  String get rCardFieldSocial => 'Social';
+
+  @override
+  String get rCardFieldSubjectDid => 'Subject DID';
+
+  @override
+  String get rCardAddNotes => 'Add notes';
+
+  @override
+  String get rCardUpdateNotes => 'Update notes';
+
+  @override
+  String get rCardNotesTitle => 'Notes';
+
+  @override
+  String get rCardNotesPlaceholder => 'Write your notes here...';
+
+  @override
+  String get rCardDeletePrompt =>
+      'Are you sure you want to delete this R-Card? This action cannot be undone.';
+
+  @override
+  String rCardChatWith(String name) {
+    return 'Chat with $name';
+  }
+
+  @override
+  String get rCardFieldIssuerDid => 'Issuer DID';
+
+  @override
+  String get rCardFieldReceivedAt => 'Received';
+
+  @override
+  String get rCardFieldIssuedAt => 'Issued';
+
+  @override
+  String get rCardTitle => 'R-Card';
+
+  @override
+  String get verifiableCredential => 'Verifiable Credential';
+
+  @override
+  String get verified => 'Verified';
+
+  @override
+  String get verifiableCredentialDescription =>
+      'Secured digital credentials that can be verified for authenticity';
+
+  @override
+  String get secureAttachmentsTitle => 'Secure Attachments';
+
+  @override
+  String get credentialDetails => 'Credential Details';
+
+  @override
+  String get genRCard => 'R-Card';
+
+  @override
+  String get rCardPickIdentitySubtitle =>
+      'Select the identity to share as an R-Card';
+
+  @override
+  String get rCardFooterSent => 'R-Card has been sent.';
+
+  @override
+  String get rCardFooterSaved => 'R-Card has been saved.';
+
+  @override
+  String get goToRCard => 'Go to R-Card';
+
+  @override
+  String get selectPersonaTitle => 'Select Persona';
+
+  @override
+  String get selectPersonaInstruction =>
+      'Swipe left or right to choose the persona you want to use to generate the R‑Card';
+
+  @override
+  String get sendRCard => 'Send R-Card';
 }

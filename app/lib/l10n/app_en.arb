@@ -3,7 +3,7 @@
 	"@appName": {
 		"type": "text"
 	},
-	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} settings{Settings} other{Invalid}}",
+	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} settings{Settings} other{Invalid}}",
 	"@tabsTitle": {
 		"type": "text",
 		"placeholders": {
@@ -304,6 +304,10 @@
 	},
 	"generalDelete": "Delete",
 	"@generalDelete": {
+		"type": "text"
+	},
+	"generalSave": "Save",
+	"@generalSave": {
 		"type": "text"
 	},
 	"generalDone": "Done",
@@ -1405,5 +1409,57 @@
 	"cameraAccessDenied": "Camera access denied or unavailable.",
 	"cameraOpenSettings": "Open Settings",
 	"cameraNotAvailable": "Camera not available",
-	"goBack": "Go Back"
+	"goBack": "Go Back",
+	"rCardsPanelSubtitle": "Relationship cards received from your contacts",
+	"rCardsEmpty": "R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.",
+	"rCardsFilterLabel": "{filter, select, all{All} nonAnonymous{Non-anonymous} other{}}",
+	"@rCardsFilterLabel": {
+		"placeholders": {
+			"filter": {
+				"type": "String"
+			}
+		}
+	},
+	"noRCardsFoundWithFilter": "No R-Cards found matching your search.",
+	"rCardDetailsTitle": "R-Card Details",
+	"rCardSectionIdentity": "Identity",
+	"rCardSectionMetadata": "Credential Details",
+	"rCardFieldName": "Name",
+	"rCardFieldEmail": "Email",
+	"rCardFieldPhone": "Phone",
+	"rCardFieldCompany": "Company",
+	"rCardFieldPosition": "Position",
+	"rCardFieldWebsite": "Website",
+	"rCardFieldSocial": "Social",
+	"rCardFieldSubjectDid": "Subject DID",
+	"rCardAddNotes": "Add notes",
+	"rCardUpdateNotes": "Update notes",
+	"rCardNotesTitle": "Notes",
+	"rCardNotesPlaceholder": "Write your notes here...",
+	"rCardDeletePrompt": "Are you sure you want to delete this R-Card? This action cannot be undone.",
+	"rCardChatWith": "Chat with {name}",
+	"@rCardChatWith": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"rCardFieldIssuerDid": "Issuer DID",
+	"rCardFieldReceivedAt": "Received",
+	"rCardFieldIssuedAt": "Issued",
+	"rCardTitle": "R-Card",
+	"verifiableCredential": "Verifiable Credential",
+	"verified": "Verified",
+	"verifiableCredentialDescription": "Secured digital credentials that can be verified for authenticity",
+	"secureAttachmentsTitle": "Secure Attachments",
+	"credentialDetails": "Credential Details",
+	"genRCard": "R-Card",
+	"rCardPickIdentitySubtitle": "Select the identity to share as an R-Card",
+	"rCardFooterSent": "R-Card has been sent.",
+	"rCardFooterSaved": "R-Card has been saved.",
+	"goToRCard": "Go to R-Card",
+	"selectPersonaTitle": "Select Persona",
+	"selectPersonaInstruction": "Swipe left or right to choose the persona you want to use to generate the R‑Card",
+	"sendRCard": "Send R-Card"
 }

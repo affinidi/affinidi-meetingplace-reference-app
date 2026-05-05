@@ -137,38 +137,11 @@ class _ChatMessageList extends HookConsumerWidget {
                                   contactId: _contactId,
                                 ),
                               ),
-                            Container(
-                              margin:
-                                  chatItem is EncryptionNotice ||
-                                      chatItem is chat.ConciergeMessage ||
-                                      chatItem is chat.EventMessage
-                                  ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
-                                  : EdgeInsets.fromLTRB(
-                                      (chatItem.isFromMe) ? 60 : 0,
-                                      8,
-                                      (chatItem.isFromMe) ? 0 : 60,
-                                      (selectedReactionIndex == index ||
-                                              chatItem is chat.Message &&
-                                                  chatItem.reactions.isNotEmpty)
-                                          ? 0
-                                          : 8,
-                                    ),
-                              decoration: BoxDecoration(
-                                color: getChatItemColor(
-                                  context.colorScheme,
-                                  chatItem,
-                                ),
-                                borderRadius: BorderRadius.circular(16.0),
-                              ),
-                              child: ChatItem(
-                                chatItem: chatItem,
-                                index: index,
-                                contactId: _contactId,
-                                chatItemColor: getChatItemColor(
-                                  context.colorScheme,
-                                  chatItem,
-                                ),
-                              ),
+                            _RCardBubble(
+                              chatItem: chatItem,
+                              index: index,
+                              contactId: _contactId,
+                              selectedReactionIndex: selectedReactionIndex,
                             ),
                           ],
                         ),
@@ -254,4 +227,79 @@ Color getChatItemColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
   }
 
   return const Color.fromARGB(248, 107, 65, 162);
+}
+
+bool _isCredentialOnlyMessage(chat.ChatItem chatItem) {
+  if (chatItem is! chat.Message) return false;
+  final attachments = chatItem.attachments;
+  return attachments.length == 1 && attachments.first.isRCard;
+}
+
+class _RCardBubble extends StatelessWidget {
+  const _RCardBubble({
+    required this.chatItem,
+    required this.index,
+    required this.contactId,
+    required this.selectedReactionIndex,
+  });
+
+  final chat.ChatItem chatItem;
+  final int index;
+  final String contactId;
+  final int? selectedReactionIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final isCredentialOnly = _isCredentialOnlyMessage(chatItem);
+    final chatItemColor = getChatItemColor(context.colorScheme, chatItem);
+
+    final margin =
+        chatItem is EncryptionNotice ||
+            chatItem is chat.ConciergeMessage ||
+            chatItem is chat.EventMessage
+        ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
+        : EdgeInsets.fromLTRB(
+            (chatItem.isFromMe) ? 60 : 0,
+            8,
+            (chatItem.isFromMe) ? 0 : 60,
+            (selectedReactionIndex == index ||
+                    chatItem is chat.Message &&
+                        (chatItem as chat.Message).reactions.isNotEmpty)
+                ? 0
+                : 8,
+          );
+
+    final bubble = Container(
+      margin: margin,
+      decoration: BoxDecoration(
+        color: chatItemColor,
+        borderRadius: BorderRadius.circular(isCredentialOnly ? 20.0 : 16.0),
+      ),
+      child: isCredentialOnly
+          ? Padding(
+              padding: const EdgeInsets.all(3),
+              child: ChatItem(
+                chatItem: chatItem,
+                index: index,
+                contactId: contactId,
+                chatItemColor: chatItemColor,
+              ),
+            )
+          : ChatItem(
+              chatItem: chatItem,
+              index: index,
+              contactId: contactId,
+              chatItemColor: chatItemColor,
+            ),
+    );
+
+    if (!isCredentialOnly) return bubble;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bubbleWidth = constraints.maxWidth * 0.67 + 16;
+        return SizedBox(width: bubbleWidth, child: bubble);
+      },
+    );
+  }
 }

@@ -18,6 +18,7 @@ import 'infrastructure/loggers/riverpod_provider_logger/provider_debug_logger.da
 import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
 import 'infrastructure/plugins/device_region_plugin/device_region_plugin.dart';
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
+import 'infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import 'infrastructure/providers/available_attachment_plugins_provider.dart';
 import 'infrastructure/providers/cache_manager_provider.dart';
 import 'infrastructure/providers/channel_repository_provider.dart';
@@ -28,10 +29,12 @@ import 'infrastructure/providers/group_repository_provider.dart';
 import 'infrastructure/providers/identities_repository_provider.dart';
 import 'infrastructure/providers/mediators_repository_provider.dart';
 import 'infrastructure/providers/push_notification_messaging_provider.dart';
+import 'infrastructure/providers/r_cards_repository_provider.dart';
 import 'infrastructure/providers/shared_preferences_provider.dart';
 import 'infrastructure/repositories/contacts_repository/contacts_repository_drift/contacts_repository_drift.dart';
 import 'infrastructure/repositories/identities_repository/identities_repository_drift/identities_repository_drift.dart';
 import 'infrastructure/repositories/mediators_repository/mediators_repository_drift/mediators_repository_drift.dart';
+import 'infrastructure/repositories/r_card_repository/r_card_repository_drift/r_cards_repository_drift.dart';
 import 'presentation/app/app.dart';
 
 void main() async {
@@ -73,6 +76,10 @@ void main() async {
             GalleryAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),
             ),
+            RCardAttachmentsPlugin(
+              cacheManager: ref.read(cacheManagerProvider),
+              ref: ref,
+            ),
           ],
         ),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),
@@ -84,6 +91,7 @@ void main() async {
         groupsRepositoryProvider.overrideWith(groupsRepositoryDrift),
         identitiesRepositoryProvider.overrideWith(identitiesRepositoryDrift),
         mediatorsRepositoryProvider.overrideWith(mediatorsRepositoryDrift),
+        rCardsRepositoryProvider.overrideWith(rCardsRepositoryDrift),
         pushNotificationMessagingProvider.overrideWith(
           (ref) =>
               FirebasePushNotificationMessaging(FirebaseMessaging.instance)

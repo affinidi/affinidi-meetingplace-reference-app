@@ -109,7 +109,7 @@ abstract class AppLocalizations {
   /// No description provided for @tabsTitle.
   ///
   /// In en, this message translates to:
-  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} settings{Settings} other{Invalid}}'**
+  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
 
   /// No description provided for @publishOffer.
@@ -477,6 +477,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get generalDelete;
+
+  /// No description provided for @generalSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get generalSave;
 
   /// No description provided for @generalDone.
   ///
@@ -2151,6 +2157,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Back'**
   String get goBack;
+
+  /// No description provided for @rCardsPanelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship cards received from your contacts'**
+  String get rCardsPanelSubtitle;
+
+  /// No description provided for @rCardsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.'**
+  String get rCardsEmpty;
+
+  /// No description provided for @rCardsFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{filter, select, all{All} nonAnonymous{Non-anonymous} other{}}'**
+  String rCardsFilterLabel(String filter);
+
+  /// No description provided for @noRCardsFoundWithFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No R-Cards found matching your search.'**
+  String get noRCardsFoundWithFilter;
+
+  /// No description provided for @rCardDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card Details'**
+  String get rCardDetailsTitle;
+
+  /// No description provided for @rCardSectionIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get rCardSectionIdentity;
+
+  /// No description provided for @rCardSectionMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Details'**
+  String get rCardSectionMetadata;
+
+  /// No description provided for @rCardFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get rCardFieldName;
+
+  /// No description provided for @rCardFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get rCardFieldEmail;
+
+  /// No description provided for @rCardFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get rCardFieldPhone;
+
+  /// No description provided for @rCardFieldCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get rCardFieldCompany;
+
+  /// No description provided for @rCardFieldPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get rCardFieldPosition;
+
+  /// No description provided for @rCardFieldWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get rCardFieldWebsite;
+
+  /// No description provided for @rCardFieldSocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get rCardFieldSocial;
+
+  /// No description provided for @rCardFieldSubjectDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject DID'**
+  String get rCardFieldSubjectDid;
+
+  /// No description provided for @rCardAddNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add notes'**
+  String get rCardAddNotes;
+
+  /// No description provided for @rCardUpdateNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Update notes'**
+  String get rCardUpdateNotes;
+
+  /// No description provided for @rCardNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get rCardNotesTitle;
+
+  /// No description provided for @rCardNotesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your notes here...'**
+  String get rCardNotesPlaceholder;
+
+  /// No description provided for @rCardDeletePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this R-Card? This action cannot be undone.'**
+  String get rCardDeletePrompt;
+
+  /// No description provided for @rCardChatWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with {name}'**
+  String rCardChatWith(String name);
+
+  /// No description provided for @rCardFieldIssuerDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuer DID'**
+  String get rCardFieldIssuerDid;
+
+  /// No description provided for @rCardFieldReceivedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get rCardFieldReceivedAt;
+
+  /// No description provided for @rCardFieldIssuedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued'**
+  String get rCardFieldIssuedAt;
+
+  /// No description provided for @rCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card'**
+  String get rCardTitle;
+
+  /// No description provided for @verifiableCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifiable Credential'**
+  String get verifiableCredential;
+
+  /// No description provided for @verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verified;
+
+  /// No description provided for @verifiableCredentialDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Secured digital credentials that can be verified for authenticity'**
+  String get verifiableCredentialDescription;
+
+  /// No description provided for @secureAttachmentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Attachments'**
+  String get secureAttachmentsTitle;
+
+  /// No description provided for @credentialDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Details'**
+  String get credentialDetails;
+
+  /// No description provided for @genRCard.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card'**
+  String get genRCard;
+
+  /// No description provided for @rCardPickIdentitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the identity to share as an R-Card'**
+  String get rCardPickIdentitySubtitle;
+
+  /// No description provided for @rCardFooterSent.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card has been sent.'**
+  String get rCardFooterSent;
+
+  /// No description provided for @rCardFooterSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card has been saved.'**
+  String get rCardFooterSaved;
+
+  /// No description provided for @goToRCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to R-Card'**
+  String get goToRCard;
+
+  /// No description provided for @selectPersonaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Persona'**
+  String get selectPersonaTitle;
+
+  /// No description provided for @selectPersonaInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left or right to choose the persona you want to use to generate the R‑Card'**
+  String get selectPersonaInstruction;
+
+  /// No description provided for @sendRCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Send R-Card'**
+  String get sendRCard;
 }
 
 class _AppLocalizationsDelegate
