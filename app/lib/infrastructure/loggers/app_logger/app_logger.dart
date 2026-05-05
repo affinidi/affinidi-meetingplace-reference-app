@@ -26,7 +26,7 @@ class AppLogger
     );
     _instance = AppLogger._(debugCollector, <LoggerTarget>[
       ConsoleLoggerTarget(),
-      // debugCollector,
+      debugCollector,
     ]);
   }
 

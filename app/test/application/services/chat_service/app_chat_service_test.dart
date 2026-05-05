@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
@@ -6,6 +8,7 @@ import 'package:mpx_flutter_reference_app/application/services/chat_service/chat
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
@@ -24,6 +27,7 @@ import '../../../fakes/fake_meeting_place_sdk.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
 
   group('ChatSessionService - Session & SDK Delegation', () {
     late ProviderContainer container;
