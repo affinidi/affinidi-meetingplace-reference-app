@@ -109,7 +109,7 @@ abstract class AppLocalizations {
   /// No description provided for @tabsTitle.
   ///
   /// In en, this message translates to:
-  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} settings{Settings} other{Invalid}}'**
+  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
 
   /// No description provided for @publishOffer.
@@ -2151,6 +2151,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Back'**
   String get goBack;
+
+  /// No description provided for @rCardsPanelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship cards received from your contacts'**
+  String get rCardsPanelSubtitle;
+
+  /// No description provided for @rCardsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No R-Cards received yet'**
+  String get rCardsEmpty;
+
+  /// No description provided for @rCardDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card Details'**
+  String get rCardDetailsTitle;
+
+  /// No description provided for @rCardSectionIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get rCardSectionIdentity;
+
+  /// No description provided for @rCardSectionMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Details'**
+  String get rCardSectionMetadata;
+
+  /// No description provided for @rCardFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get rCardFieldName;
+
+  /// No description provided for @rCardFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get rCardFieldEmail;
+
+  /// No description provided for @rCardFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get rCardFieldPhone;
+
+  /// No description provided for @rCardFieldCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get rCardFieldCompany;
+
+  /// No description provided for @rCardFieldPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get rCardFieldPosition;
+
+  /// No description provided for @rCardFieldWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get rCardFieldWebsite;
+
+  /// No description provided for @rCardFieldSubjectDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject DID'**
+  String get rCardFieldSubjectDid;
+
+  /// No description provided for @rCardFieldIssuerDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuer DID'**
+  String get rCardFieldIssuerDid;
+
+  /// No description provided for @rCardFieldReceivedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get rCardFieldReceivedAt;
+
+  /// No description provided for @rCardFieldIssuedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued'**
+  String get rCardFieldIssuedAt;
 }
 
 class _AppLocalizationsDelegate

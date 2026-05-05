@@ -17,6 +17,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'connections': 'Einladungen',
       'contacts': 'Kanäle',
       'identities': 'Identitäten',
+      'rCards': 'R-Karten',
       'settings': 'Einstellungen',
       'other': 'Ungültig',
     });
@@ -1496,4 +1497,49 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get goBack => 'Zurück gehen';
+
+  @override
+  String get rCardsPanelSubtitle => 'Beziehungskarten von Ihren Kontakten';
+
+  @override
+  String get rCardsEmpty => 'Noch keine R-Karten empfangen';
+
+  @override
+  String get rCardDetailsTitle => 'R-Karten Details';
+
+  @override
+  String get rCardSectionIdentity => 'Identität';
+
+  @override
+  String get rCardSectionMetadata => 'Credential-Details';
+
+  @override
+  String get rCardFieldName => 'Name';
+
+  @override
+  String get rCardFieldEmail => 'E-Mail';
+
+  @override
+  String get rCardFieldPhone => 'Telefon';
+
+  @override
+  String get rCardFieldCompany => 'Unternehmen';
+
+  @override
+  String get rCardFieldPosition => 'Position';
+
+  @override
+  String get rCardFieldWebsite => 'Website';
+
+  @override
+  String get rCardFieldSubjectDid => 'Subjekt-DID';
+
+  @override
+  String get rCardFieldIssuerDid => 'Aussteller-DID';
+
+  @override
+  String get rCardFieldReceivedAt => 'Empfangen';
+
+  @override
+  String get rCardFieldIssuedAt => 'Ausgestellt';
 }

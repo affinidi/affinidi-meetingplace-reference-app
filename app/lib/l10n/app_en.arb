@@ -3,7 +3,7 @@
 	"@appName": {
 		"type": "text"
 	},
-	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} settings{Settings} other{Invalid}}",
+	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} settings{Settings} other{Invalid}}",
 	"@tabsTitle": {
 		"type": "text",
 		"placeholders": {
@@ -1405,5 +1405,20 @@
 	"cameraAccessDenied": "Camera access denied or unavailable.",
 	"cameraOpenSettings": "Open Settings",
 	"cameraNotAvailable": "Camera not available",
-	"goBack": "Go Back"
+	"goBack": "Go Back",
+	"rCardsPanelSubtitle": "Relationship cards received from your contacts",
+	"rCardsEmpty": "No R-Cards received yet",
+	"rCardDetailsTitle": "R-Card Details",
+	"rCardSectionIdentity": "Identity",
+	"rCardSectionMetadata": "Credential Details",
+	"rCardFieldName": "Name",
+	"rCardFieldEmail": "Email",
+	"rCardFieldPhone": "Phone",
+	"rCardFieldCompany": "Company",
+	"rCardFieldPosition": "Position",
+	"rCardFieldWebsite": "Website",
+	"rCardFieldSubjectDid": "Subject DID",
+	"rCardFieldIssuerDid": "Issuer DID",
+	"rCardFieldReceivedAt": "Received",
+	"rCardFieldIssuedAt": "Issued"
 }

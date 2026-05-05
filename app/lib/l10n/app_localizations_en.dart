@@ -17,6 +17,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'connections': 'Invitations',
       'contacts': 'Channels',
       'identities': 'Identities',
+      'rCards': 'R-Cards',
       'settings': 'Settings',
       'other': 'Invalid',
     });
@@ -1457,4 +1458,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goBack => 'Go Back';
+
+  @override
+  String get rCardsPanelSubtitle =>
+      'Relationship cards received from your contacts';
+
+  @override
+  String get rCardsEmpty => 'No R-Cards received yet';
+
+  @override
+  String get rCardDetailsTitle => 'R-Card Details';
+
+  @override
+  String get rCardSectionIdentity => 'Identity';
+
+  @override
+  String get rCardSectionMetadata => 'Credential Details';
+
+  @override
+  String get rCardFieldName => 'Name';
+
+  @override
+  String get rCardFieldEmail => 'Email';
+
+  @override
+  String get rCardFieldPhone => 'Phone';
+
+  @override
+  String get rCardFieldCompany => 'Company';
+
+  @override
+  String get rCardFieldPosition => 'Position';
+
+  @override
+  String get rCardFieldWebsite => 'Website';
+
+  @override
+  String get rCardFieldSubjectDid => 'Subject DID';
+
+  @override
+  String get rCardFieldIssuerDid => 'Issuer DID';
+
+  @override
+  String get rCardFieldReceivedAt => 'Received';
+
+  @override
+  String get rCardFieldIssuedAt => 'Issued';
 }

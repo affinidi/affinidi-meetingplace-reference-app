@@ -36,4 +36,8 @@ class RouteNames {
 
   // Splash
   static const splash = 'splash';
+
+  // R-Cards
+  static const rCards = 'rCards';
+  static const rCardDetails = 'rCardDetails';
 }

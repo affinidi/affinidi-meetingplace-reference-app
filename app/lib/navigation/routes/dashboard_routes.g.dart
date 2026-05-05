@@ -132,6 +132,29 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
       ],
     ),
     StatefulShellBranchData.$branch(
+      navigatorKey: RCardsBranchData.$navigatorKey,
+      restorationScopeId: RCardsBranchData.$restorationScopeId,
+
+      routes: [
+        GoRouteData.$route(
+          path: '/r-cards',
+          name: 'rCards',
+
+          factory: _$RCardsRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: ':subjectDid/details',
+              name: 'rCardDetails',
+
+              parentNavigatorKey: RCardDetailsRoute.$parentNavigatorKey,
+
+              factory: _$RCardDetailsRoute._fromState,
+            ),
+          ],
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
       navigatorKey: SettingsBranchData.$navigatorKey,
       restorationScopeId: SettingsBranchData.$restorationScopeId,
 
@@ -426,6 +449,51 @@ mixin _$IdentityFormRoute on GoRouteData {
     queryParams: {
       if (_self.identityId != null) 'identity-id': _self.identityId,
     },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin _$RCardsRoute on GoRouteData {
+  static RCardsRoute _fromState(GoRouterState state) => const RCardsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/r-cards');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin _$RCardDetailsRoute on GoRouteData {
+  static RCardDetailsRoute _fromState(GoRouterState state) =>
+      RCardDetailsRoute(subjectDid: state.pathParameters['subjectDid']!);
+
+  RCardDetailsRoute get _self => this as RCardDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/r-cards/${Uri.encodeComponent(_self.subjectDid)}/details',
   );
 
   @override
