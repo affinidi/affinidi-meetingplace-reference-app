@@ -18,6 +18,7 @@ import 'infrastructure/loggers/error_logger/error_logger.dart';
 import 'infrastructure/loggers/riverpod_provider_logger/provider_debug_logger.dart';
 import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
+import 'infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import 'infrastructure/providers/available_attachment_plugins_provider.dart';
 import 'infrastructure/providers/cache_manager_provider.dart';
 import 'infrastructure/providers/channel_repository_provider.dart';
@@ -76,6 +77,10 @@ void main() async {
             ),
             GalleryAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),
+            ),
+            RCardAttachmentsPlugin(
+              cacheManager: ref.read(cacheManagerProvider),
+              ref: ref,
             ),
           ],
         ),

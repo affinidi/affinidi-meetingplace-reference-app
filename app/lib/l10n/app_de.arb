@@ -370,5 +370,13 @@
 	"verified": "Verifiziert",
 	"verifiableCredentialDescription": "Gesicherte digitale Nachweise, die auf Echtheit überprüft werden können",
 	"secureAttachmentsTitle": "Sichere Anhänge",
-	"credentialDetails": "Nachweisdetails"
+	"credentialDetails": "Nachweisdetails",
+	"genRCard": "R-Karte",
+	"rCardPickIdentitySubtitle": "Wähle die Identität aus, die als R-Karte geteilt werden soll",
+	"rCardFooterSent": "R-Karte wurde gesendet.",
+	"rCardFooterSaved": "R-Karte wurde gespeichert.",
+	"goToRCard": "Zur R-Karte",
+	"selectPersonaTitle": "Persona auswählen",
+	"selectPersonaInstruction": "Wische links oder rechts, um die Persona auszuwählen, die du für die R‑Karte verwenden möchtest",
+	"sendRCard": "R-Karte senden"
 }

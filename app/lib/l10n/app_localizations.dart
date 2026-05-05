@@ -2277,6 +2277,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Credential Details'**
   String get credentialDetails;
+
+  /// No description provided for @genRCard.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card'**
+  String get genRCard;
+
+  /// No description provided for @rCardPickIdentitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the identity to share as an R-Card'**
+  String get rCardPickIdentitySubtitle;
+
+  /// No description provided for @rCardFooterSent.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card has been sent.'**
+  String get rCardFooterSent;
+
+  /// No description provided for @rCardFooterSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card has been saved.'**
+  String get rCardFooterSaved;
+
+  /// No description provided for @goToRCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to R-Card'**
+  String get goToRCard;
+
+  /// No description provided for @selectPersonaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Persona'**
+  String get selectPersonaTitle;
+
+  /// No description provided for @selectPersonaInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left or right to choose the persona you want to use to generate the R‑Card'**
+  String get selectPersonaInstruction;
+
+  /// No description provided for @sendRCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Send R-Card'**
+  String get sendRCard;
 }
 
 class _AppLocalizationsDelegate

@@ -1426,5 +1426,13 @@
 	"verified": "Verified",
 	"verifiableCredentialDescription": "Secured digital credentials that can be verified for authenticity",
 	"secureAttachmentsTitle": "Secure Attachments",
-	"credentialDetails": "Credential Details"
+	"credentialDetails": "Credential Details",
+	"genRCard": "R-Card",
+	"rCardPickIdentitySubtitle": "Select the identity to share as an R-Card",
+	"rCardFooterSent": "R-Card has been sent.",
+	"rCardFooterSaved": "R-Card has been saved.",
+	"goToRCard": "Go to R-Card",
+	"selectPersonaTitle": "Select Persona",
+	"selectPersonaInstruction": "Swipe left or right to choose the persona you want to use to generate the R‑Card",
+	"sendRCard": "Send R-Card"
 }

@@ -232,7 +232,7 @@
 	"subtitleAddNew": "Crear un nuevo alias",
 	"subtitleAlias": "Identidad de alias",
 	"subtitlePrimary": "Su identidad principal",
-    "tabsTitle": "{tabName, select, connections{Invitaciones} contacts{Canales} identities{Identidades} rCards{Tarjetas-R} settings{Configuración} other{Inválido}}",
+	"tabsTitle": "{tabName, select, connections{Invitaciones} contacts{Canales} identities{Identidades} rCards{Tarjetas-R} settings{Configuración} other{Inválido}}",
 	"theirDetails": "Sus detalles",
 	"thisFieldIsRequired": "Este campo es obligatorio",
 	"timeAgoDay": "{days, plural, =1{1 day ago} other{{days} days ago}}",
@@ -368,7 +368,15 @@
 	"rCardTitle": "Tarjeta R",
 	"verifiableCredential": "Credencial verificable",
 	"verified": "Verificado",
-        "verifiableCredentialDescription": "Credenciales digitales seguras que pueden verificarse para comprobar su autenticidad",
-        "secureAttachmentsTitle": "Archivos adjuntos seguros",
-        "credentialDetails": "Detalles de la credencial"
+	"verifiableCredentialDescription": "Credenciales digitales seguras que pueden verificarse para comprobar su autenticidad",
+	"secureAttachmentsTitle": "Archivos adjuntos seguros",
+	"credentialDetails": "Detalles de la credencial",
+	"genRCard": "Tarjeta R",
+	"rCardPickIdentitySubtitle": "Selecciona la identidad para compartir como Tarjeta R",
+	"rCardFooterSent": "Tarjeta R enviada.",
+	"rCardFooterSaved": "Tarjeta R guardada.",
+	"goToRCard": "Ir a la Tarjeta R",
+	"selectPersonaTitle": "Seleccionar Persona",
+	"selectPersonaInstruction": "Desliza a la izquierda o derecha para elegir la persona que deseas usar para generar la Tarjeta‑R",
+	"sendRCard": "Enviar Tarjeta R"
 }

@@ -7,6 +7,7 @@ import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../painting/cached_base64_image.dart';
 import '../../widgets/cards/r_card_header_card.dart';
+import 'r_card_details_screen.dart' show RCardDetailsScreen;
 
 /// Provider used to trigger the "return" animation when navigating back
 /// from [RCardDetailsScreen].
@@ -60,26 +61,20 @@ class _RCardsDeckState extends ConsumerState<RCardsDeck>
   void _initializeAnimations({bool isInitialLoad = false}) {
     _fadeControllers = List.generate(
       widget.cards.length,
-      (index) => AnimationController(
-        duration: _fadeAnimationDuration,
-        vsync: this,
-      ),
+      (index) =>
+          AnimationController(duration: _fadeAnimationDuration, vsync: this),
     );
 
     _slideControllers = List.generate(
       widget.cards.length,
-      (index) => AnimationController(
-        duration: _slideAnimationDuration,
-        vsync: this,
-      ),
+      (index) =>
+          AnimationController(duration: _slideAnimationDuration, vsync: this),
     );
 
     _overlayControllers = List.generate(
       widget.cards.length,
-      (index) => AnimationController(
-        duration: _fadeAnimationDuration,
-        vsync: this,
-      ),
+      (index) =>
+          AnimationController(duration: _fadeAnimationDuration, vsync: this),
     );
 
     _initialSlideDownController = AnimationController(
@@ -88,35 +83,33 @@ class _RCardsDeckState extends ConsumerState<RCardsDeck>
     );
 
     _fadeAnimations = _fadeControllers.map((controller) {
-      return Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeOut),
-      );
+      return Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
     }).toList();
 
     _slideUpAnimations = _slideControllers.map((controller) {
       return Tween<Offset>(
         begin: const Offset(0, 2),
         end: Offset.zero,
-      ).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeOut),
-      );
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
     }).toList();
 
     _overlayAnimations = _overlayControllers.map((controller) {
-      return Tween<double>(begin: 0.0, end: 0.8).animate(
-        CurvedAnimation(parent: controller, curve: Curves.easeOut),
-      );
+      return Tween<double>(
+        begin: 0.0,
+        end: 0.8,
+      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
     }).toList();
 
-    _initialSlideDownAnimation = Tween<Offset>(
-      begin: const Offset(0, -0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _initialSlideDownController,
-        curve: Curves.easeOut,
-      ),
-    );
+    _initialSlideDownAnimation =
+        Tween<Offset>(begin: const Offset(0, -0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _initialSlideDownController,
+            curve: Curves.easeOut,
+          ),
+        );
 
     if (isInitialLoad && !_hasPlayedInitialAnimation) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -239,14 +232,11 @@ class _RCardsDeckState extends ConsumerState<RCardsDeck>
   Widget build(BuildContext context) {
     final cacheManager = ref.read(cacheManagerProvider);
 
-    ref.listen<String?>(
-      returningCardProvider,
-      (previous, next) {
-        if (next != null && next != previous) {
-          _handleReturningCard(next);
-        }
-      },
-    );
+    ref.listen<String?>(returningCardProvider, (previous, next) {
+      if (next != null && next != previous) {
+        _handleReturningCard(next);
+      }
+    });
 
     const cardHeight = RCardHeaderCard.height;
     const overlapOffset = 60.0;
@@ -349,9 +339,10 @@ class _RCardItemState extends State<_RCardItem>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _liftAnimation = Tween<double>(begin: 0.0, end: -20.0).animate(
-      CurvedAnimation(parent: _liftController, curve: Curves.easeOut),
-    );
+    _liftAnimation = Tween<double>(
+      begin: 0.0,
+      end: -20.0,
+    ).animate(CurvedAnimation(parent: _liftController, curve: Curves.easeOut));
   }
 
   @override
@@ -378,8 +369,9 @@ class _RCardItemState extends State<_RCardItem>
       child: Stack(
         children: [
           GestureDetector(
-            onTap: () => RCardDetailsRoute(subjectDid: widget.card.subjectDid)
-                .push<void>(context),
+            onTap: () => RCardDetailsRoute(
+              subjectDid: widget.card.subjectDid,
+            ).push<void>(context),
             onLongPressStart: (_) => _liftController.forward(),
             onLongPressEnd: (_) => _liftController.reverse(),
             onLongPressCancel: () => _liftController.reverse(),
@@ -406,7 +398,8 @@ class _RCardItemState extends State<_RCardItem>
                     height: RCardHeaderCard.height,
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(
-                        alpha: widget.overlayAnimation.value *
+                        alpha:
+                            widget.overlayAnimation.value *
                             widget.overlayOpacity,
                       ),
                       borderRadius: BorderRadius.circular(16),

@@ -36,10 +36,7 @@ class CredentialCardContainer extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.circular(25.0),
-        border: Border.all(
-          color: colorScheme.primary,
-          width: 1,
-        ),
+        border: Border.all(color: colorScheme.primary, width: 1),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -95,10 +92,7 @@ class CredentialCardContainer extends StatelessWidget {
           ),
 
           // Body
-          Container(
-            padding: const EdgeInsets.all(24),
-            child: content,
-          ),
+          Container(padding: const EdgeInsets.all(24), child: content),
         ],
       ),
     );

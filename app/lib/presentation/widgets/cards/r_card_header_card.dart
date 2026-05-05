@@ -4,11 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 
 class RCardHeaderCard extends StatelessWidget {
-  const RCardHeaderCard({
-    super.key,
-    required this.name,
-    this.avatarImage,
-  });
+  const RCardHeaderCard({super.key, required this.name, this.avatarImage});
 
   static const double height = 240;
 
@@ -29,10 +25,7 @@ class RCardHeaderCard extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
-            colors: [
-              Colors.black,
-              colorScheme.primary,
-            ],
+            colors: [Colors.black, colorScheme.primary],
           ),
         ),
         child: Stack(
@@ -75,10 +68,7 @@ class RCardHeaderCard extends StatelessWidget {
                         backgroundColor: Colors.black,
                         foregroundImage: avatarImage,
                         child: avatarImage == null
-                            ? const Icon(
-                                Icons.person,
-                                color: Colors.white,
-                              )
+                            ? const Icon(Icons.person, color: Colors.white)
                             : null,
                       ),
                     ],

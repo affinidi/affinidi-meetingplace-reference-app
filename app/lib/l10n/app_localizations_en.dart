@@ -1523,4 +1523,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get credentialDetails => 'Credential Details';
+
+  @override
+  String get genRCard => 'R-Card';
+
+  @override
+  String get rCardPickIdentitySubtitle =>
+      'Select the identity to share as an R-Card';
+
+  @override
+  String get rCardFooterSent => 'R-Card has been sent.';
+
+  @override
+  String get rCardFooterSaved => 'R-Card has been saved.';
+
+  @override
+  String get goToRCard => 'Go to R-Card';
+
+  @override
+  String get selectPersonaTitle => 'Select Persona';
+
+  @override
+  String get selectPersonaInstruction =>
+      'Swipe left or right to choose the persona you want to use to generate the R‑Card';
+
+  @override
+  String get sendRCard => 'Send R-Card';
 }

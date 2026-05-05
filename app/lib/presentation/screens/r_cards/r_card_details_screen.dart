@@ -44,7 +44,7 @@ class RCardDetailsScreen extends ConsumerWidget {
     final issuedAtText = issuedAt == null
         ? '—'
         : '${DateFormat('MMM d y').format(issuedAt.toLocal())} at '
-            '${DateFormat('h:mma').format(issuedAt.toLocal())}';
+              '${DateFormat('h:mma').format(issuedAt.toLocal())}';
 
     final rows = <CredentialDetailRowData>[
       if (subject?.firstName != null || subject?.lastName != null)
