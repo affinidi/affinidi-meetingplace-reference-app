@@ -364,5 +364,11 @@
 	"rCardFieldSubjectDid": "DID del sujeto",
 	"rCardFieldIssuerDid": "DID del emisor",
 	"rCardFieldReceivedAt": "Recibido",
-	"rCardFieldIssuedAt": "Emitido"
+	"rCardFieldIssuedAt": "Emitido",
+	"rCardTitle": "Tarjeta R",
+	"verifiableCredential": "Credencial verificable",
+	"verified": "Verificado",
+        "verifiableCredentialDescription": "Credenciales digitales seguras que pueden verificarse para comprobar su autenticidad",
+        "secureAttachmentsTitle": "Archivos adjuntos seguros",
+        "credentialDetails": "Detalles de la credencial"
 }

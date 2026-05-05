@@ -1542,4 +1542,23 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get rCardFieldIssuedAt => 'Ausgestellt';
+
+  @override
+  String get rCardTitle => 'R-Karte';
+
+  @override
+  String get verifiableCredential => 'Überprüfbarer Nachweis';
+
+  @override
+  String get verified => 'Verifiziert';
+
+  @override
+  String get verifiableCredentialDescription =>
+      'Gesicherte digitale Nachweise, die auf Echtheit überprüft werden können';
+
+  @override
+  String get secureAttachmentsTitle => 'Sichere Anhänge';
+
+  @override
+  String get credentialDetails => 'Nachweisdetails';
 }

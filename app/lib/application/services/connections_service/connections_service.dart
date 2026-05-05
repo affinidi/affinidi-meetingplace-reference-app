@@ -491,17 +491,15 @@ class ConnectionsService extends _$ConnectionsService {
     final externalRef = channel.externalRef;
     if (externalRef == null || externalRef.isEmpty) return null;
 
-    final identity =
-        ref.read(identitiesServiceProvider).getIdentityById(externalRef);
+    final identity = ref
+        .read(identitiesServiceProvider)
+        .getIdentityById(externalRef);
     if (identity == null || identity.did.isEmpty) return null;
 
     try {
       final didManager = await sdk.getDidManager(identity.did);
       return RCardAttachmentBuilder.buildForPersona(
-        persona: PersonaDid(
-          did: identity.did,
-          name: identity.card.displayName,
-        ),
+        persona: PersonaDid(did: identity.did, name: identity.card.displayName),
         card: RCardSubject(
           firstName: identity.card.firstName,
           lastName: identity.card.lastName,

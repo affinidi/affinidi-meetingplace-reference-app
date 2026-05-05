@@ -1420,5 +1420,11 @@
 	"rCardFieldSubjectDid": "Subject DID",
 	"rCardFieldIssuerDid": "Issuer DID",
 	"rCardFieldReceivedAt": "Received",
-	"rCardFieldIssuedAt": "Issued"
+	"rCardFieldIssuedAt": "Issued",
+	"rCardTitle": "R-Card",
+	"verifiableCredential": "Verifiable Credential",
+	"verified": "Verified",
+	"verifiableCredentialDescription": "Secured digital credentials that can be verified for authenticity",
+	"secureAttachmentsTitle": "Secure Attachments",
+	"credentialDetails": "Credential Details"
 }

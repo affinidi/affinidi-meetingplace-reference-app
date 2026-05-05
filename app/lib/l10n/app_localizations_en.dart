@@ -1504,4 +1504,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rCardFieldIssuedAt => 'Issued';
+
+  @override
+  String get rCardTitle => 'R-Card';
+
+  @override
+  String get verifiableCredential => 'Verifiable Credential';
+
+  @override
+  String get verified => 'Verified';
+
+  @override
+  String get verifiableCredentialDescription =>
+      'Secured digital credentials that can be verified for authenticity';
+
+  @override
+  String get secureAttachmentsTitle => 'Secure Attachments';
+
+  @override
+  String get credentialDetails => 'Credential Details';
 }

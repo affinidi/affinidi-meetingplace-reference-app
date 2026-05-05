@@ -2241,6 +2241,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Issued'**
   String get rCardFieldIssuedAt;
+
+  /// No description provided for @rCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card'**
+  String get rCardTitle;
+
+  /// No description provided for @verifiableCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifiable Credential'**
+  String get verifiableCredential;
+
+  /// No description provided for @verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verified;
+
+  /// No description provided for @verifiableCredentialDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Secured digital credentials that can be verified for authenticity'**
+  String get verifiableCredentialDescription;
+
+  /// No description provided for @secureAttachmentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Attachments'**
+  String get secureAttachmentsTitle;
+
+  /// No description provided for @credentialDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Details'**
+  String get credentialDetails;
 }
 
 class _AppLocalizationsDelegate

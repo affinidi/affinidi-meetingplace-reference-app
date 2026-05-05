@@ -232,7 +232,7 @@
 	"subtitleAddNew": "Erstellen eines neuen Alias",
 	"subtitleAlias": "Alias-Identität",
 	"subtitlePrimary": "Ihre primäre Identität",
-    "tabsTitle": "{tabName, select, connections{Einladungen} contacts{Kanäle} identities{Identitäten} rCards{R-Karten} settings{Einstellungen} other{Ungültig}}",
+	"tabsTitle": "{tabName, select, connections{Einladungen} contacts{Kanäle} identities{Identitäten} rCards{R-Karten} settings{Einstellungen} other{Ungültig}}",
 	"theirDetails": "Ihre Details",
 	"thisFieldIsRequired": "Dieses Feld ist ein Pflichtfeld",
 	"timeAgoDay": "{days, plural, =1{1 day ago} other{{days} days ago}}",
@@ -364,5 +364,11 @@
 	"rCardFieldSubjectDid": "Subjekt-DID",
 	"rCardFieldIssuerDid": "Aussteller-DID",
 	"rCardFieldReceivedAt": "Empfangen",
-	"rCardFieldIssuedAt": "Ausgestellt"
+	"rCardFieldIssuedAt": "Ausgestellt",
+	"rCardTitle": "R-Karte",
+	"verifiableCredential": "Überprüfbarer Nachweis",
+	"verified": "Verifiziert",
+	"verifiableCredentialDescription": "Gesicherte digitale Nachweise, die auf Echtheit überprüft werden können",
+	"secureAttachmentsTitle": "Sichere Anhänge",
+	"credentialDetails": "Nachweisdetails"
 }

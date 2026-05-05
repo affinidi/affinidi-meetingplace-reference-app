@@ -1535,4 +1535,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get rCardFieldIssuedAt => 'Emitido';
+
+  @override
+  String get rCardTitle => 'Tarjeta R';
+
+  @override
+  String get verifiableCredential => 'Credencial verificable';
+
+  @override
+  String get verified => 'Verificado';
+
+  @override
+  String get verifiableCredentialDescription =>
+      'Credenciales digitales seguras que pueden verificarse para comprobar su autenticidad';
+
+  @override
+  String get secureAttachmentsTitle => 'Archivos adjuntos seguros';
+
+  @override
+  String get credentialDetails => 'Detalles de la credencial';
 }
