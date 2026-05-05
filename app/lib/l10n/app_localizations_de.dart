@@ -364,7 +364,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'connection_offer_not_found_error':
           'Die von Ihnen angegebenen Details stimmen mit keiner aktiven Einladung überein.',
       'discovery_register_offer_group_generic':
-          'Fehler beim Veröffentlichen der Einladung.',
+          'Einladung konnte nicht veröffentlicht werden.',
       'missingDeviceToken':
           'Benachrichtigungstoken für das Gerät konnte nicht gefunden werden',
       'offerOwnedByClaimingParty':
@@ -380,7 +380,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'unableToFindMediator':
           'Kein Nachrichtendienst unter der angegebenen URL gefunden',
       'oobFlowTimedOut':
-          'Verbindung mit der anderen Partei konnte nicht hergestellt werden, der QR-Code wurde wahrscheinlich bereits verwendet',
+          'Verbindung zur anderen Partei konnte nicht hergestellt werden, der QR-Code wurde wahrscheinlich bereits verwendet',
       'connection_offer_expired': 'Diese Einladung ist abgelaufen',
       'connection_offer_limit_exceeded':
           'Diese Einladung hat die maximale Anzahl von Verwendungen erreicht',
@@ -392,7 +392,7 @@ class AppLocalizationsDe extends AppLocalizations {
           'QR-Code-Daten stimmen mit keiner aktiven Einladung überein',
       'oob_invalid_type': 'QR-Code-Daten werden nicht unterstützt',
       'network_error':
-          'Verbindung fehlgeschlagen. Bitte Internetverbindung prüfen und erneut versuchen.',
+          'Verbindung konnte nicht hergestellt werden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.',
       'other': '$errorCode',
     });
     return '$_temp0';
@@ -470,10 +470,11 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String contactsFilterLabel(String filter) {
     String _temp0 = intl.Intl.selectLogic(filter, {
-      'any': 'Any',
+      'any': 'Beliebig',
       'person': 'Person',
-      'service': 'AI Agent',
-      'business': 'Business',
+      'group': 'Gruppe',
+      'service': 'KI-Agent',
+      'business': 'Unternehmen',
       'other': '',
     });
     return '$_temp0';
@@ -1124,6 +1125,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get debugPanelLogsCopied =>
       'Protokolle, die in die Zwischenablage kopiert werden';
+
+  @override
+  String get debugPanelShareLogs => 'Protokolle teilen';
 
   @override
   String get serverSettings => 'Server-Einstellungen';

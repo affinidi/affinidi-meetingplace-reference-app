@@ -1606,6 +1606,12 @@ abstract class AppLocalizations {
   /// **'Logs copied to clipboard'**
   String get debugPanelLogsCopied;
 
+  /// No description provided for @debugPanelShareLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Share logs'**
+  String get debugPanelShareLogs;
+
   /// No description provided for @serverSettings.
   ///
   /// In en, this message translates to:
