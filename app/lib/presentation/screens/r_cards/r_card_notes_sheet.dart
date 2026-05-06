@@ -30,10 +30,7 @@ class RCardNotesSheet extends StatefulWidget {
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewInsetsOf(context).bottom,
         ),
-        child: RCardNotesSheet(
-          initialNotes: initialNotes,
-          onSave: onSave,
-        ),
+        child: RCardNotesSheet(initialNotes: initialNotes, onSave: onSave),
       ),
     );
   }
@@ -174,8 +171,9 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
                   onPressed: _canSave ? save : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: saveButtonColor,
-                    disabledBackgroundColor:
-                        saveButtonColor.withValues(alpha: 0.4),
+                    disabledBackgroundColor: saveButtonColor.withValues(
+                      alpha: 0.4,
+                    ),
                     foregroundColor: Colors.black,
                     elevation: 0,
                     padding: const EdgeInsets.symmetric(horizontal: 28),

@@ -144,11 +144,7 @@ class RCardsService extends _$RCardsService {
     final file = File(filePath);
     await file.writeAsString(content, encoding: utf8);
 
-    return XFile(
-      filePath,
-      mimeType: 'text/vcard',
-      name: fileName,
-    );
+    return XFile(filePath, mimeType: 'text/vcard', name: fileName);
   }
 
   String? _toVCard(ReceivedRCard card) {

@@ -22,10 +22,7 @@ class RCardDetailsRoute extends GoRouteData with _$RCardDetailsRoute {
       transitionDuration: const Duration(milliseconds: 500),
       reverseTransitionDuration: const Duration(milliseconds: 500),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final fadeAnimation = Tween<double>(
-          begin: 0.0,
-          end: 1.0,
-        ).animate(
+        final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
           CurvedAnimation(
             parent: animation,
             curve: const Interval(0.4, 1.0, curve: Curves.easeInOut),

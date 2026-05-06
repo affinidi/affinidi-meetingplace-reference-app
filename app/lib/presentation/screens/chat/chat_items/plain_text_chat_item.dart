@@ -162,10 +162,7 @@ class _AttachmentWidget extends HookConsumerWidget {
         if (_attachment.isRCard) {
           return LayoutBuilder(
             builder: (context, constraints) {
-              return SizedBox(
-                width: constraints.maxWidth,
-                child: child,
-              );
+              return SizedBox(width: constraints.maxWidth, child: child);
             },
           );
         }

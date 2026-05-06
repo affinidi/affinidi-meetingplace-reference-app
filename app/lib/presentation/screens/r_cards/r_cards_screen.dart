@@ -26,39 +26,35 @@ class RCardsScreen extends HookConsumerWidget {
     final controller = ref.read(provider.notifier);
 
     final filter = ref.watch(provider.select((state) => state.filter));
-    final isSearchActive =
-        ref.watch(provider.select((state) => state.isSearchActive));
+    final isSearchActive = ref.watch(
+      provider.select((state) => state.isSearchActive),
+    );
     final cards = ref.watch(provider.select((state) => state.cards));
 
     final searchController = useTextEditingController();
 
-    useEffect(
-      () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          controller.setAnonymousLabel(l10n.anonymous);
-        });
-        return null;
-      },
-      [l10n.anonymous],
-    );
+    useEffect(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.setAnonymousLabel(l10n.anonymous);
+      });
+      return null;
+    }, [l10n.anonymous]);
 
-    useEffect(
-      () {
-        if (!isSearchActive) {
-          searchController.clear();
-        }
-        return null;
-      },
-      [isSearchActive],
-    );
+    useEffect(() {
+      if (!isSearchActive) {
+        searchController.clear();
+      }
+      return null;
+    }, [isSearchActive]);
 
     Future<void> exportAll() async {
       final box = context.findRenderObject() as RenderBox?;
       final allCards = ref.read(rCardsServiceProvider);
       if (allCards.isEmpty) return;
 
-      final xFile =
-          await ref.read(rCardsServiceProvider.notifier).exportAllAsVcf();
+      final xFile = await ref
+          .read(rCardsServiceProvider.notifier)
+          .exportAllAsVcf();
 
       final params = ShareParams(
         files: [xFile],
@@ -66,8 +62,9 @@ class RCardsScreen extends HookConsumerWidget {
         mailToFallbackEnabled: true,
         fileNameOverrides: [xFile.name],
         title: l10n.tabsTitle(Tabs.rCards.name),
-        sharePositionOrigin:
-            box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+        sharePositionOrigin: box == null
+            ? null
+            : box.localToGlobal(Offset.zero) & box.size,
       );
 
       await SharePlus.instance.share(params);
@@ -101,9 +98,7 @@ class RCardsScreen extends HookConsumerWidget {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           hintText: l10n.generalSearch,
-                          hintStyle: const TextStyle(
-                            color: Color(0xFFBDBDBD),
-                          ),
+                          hintStyle: const TextStyle(color: Color(0xFFBDBDBD)),
                           filled: true,
                           fillColor: const Color(0xFF1C1C1E),
                           isDense: true,
@@ -215,9 +210,7 @@ class _EmptyStateWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final hasFilterApplied = ref.watch(
-      rCardsScreenControllerProvider.select(
-        (state) => state.hasFilterApplied,
-      ),
+      rCardsScreenControllerProvider.select((state) => state.hasFilterApplied),
     );
 
     return Padding(
@@ -226,9 +219,7 @@ class _EmptyStateWidget extends ConsumerWidget {
         height: MediaQuery.sizeOf(context).height * 0.5,
         child: Center(
           child: Text(
-            hasFilterApplied
-                ? l10n.noRCardsFoundWithFilter
-                : l10n.rCardsEmpty,
+            hasFilterApplied ? l10n.noRCardsFoundWithFilter : l10n.rCardsEmpty,
             textAlign: TextAlign.center,
           ),
         ),

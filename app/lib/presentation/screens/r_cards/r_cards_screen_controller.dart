@@ -15,15 +15,11 @@ class RCardsScreenController extends _$RCardsScreenController {
 
   @override
   RCardsScreenState build() {
-    ref.listen(
-      rCardsServiceProvider,
-      (prev, next) {
-        Future.microtask(() {
-          state = state.copyWith(cards: _applyFilters(next));
-        });
-      },
-      fireImmediately: true,
-    );
+    ref.listen(rCardsServiceProvider, (prev, next) {
+      Future.microtask(() {
+        state = state.copyWith(cards: _applyFilters(next));
+      });
+    }, fireImmediately: true);
 
     final initialCards = ref.read(rCardsServiceProvider);
 
@@ -36,8 +32,9 @@ class RCardsScreenController extends _$RCardsScreenController {
 
   void setAnonymousLabel(String label) {
     _anonymousLabel = label;
-    state =
-        state.copyWith(cards: _applyFilters(ref.read(rCardsServiceProvider)));
+    state = state.copyWith(
+      cards: _applyFilters(ref.read(rCardsServiceProvider)),
+    );
   }
 
   void toggleSearch() {
@@ -66,10 +63,7 @@ class RCardsScreenController extends _$RCardsScreenController {
     _lastSearchQuery = '';
     final allCards = ref.read(rCardsServiceProvider);
     final filteredResults = _applyFilters(allCards);
-    state = state.copyWith(
-      filter: filter,
-      cards: filteredResults,
-    );
+    state = state.copyWith(filter: filter, cards: filteredResults);
   }
 
   List<ReceivedRCard> _applyFilters(List<ReceivedRCard> all) {

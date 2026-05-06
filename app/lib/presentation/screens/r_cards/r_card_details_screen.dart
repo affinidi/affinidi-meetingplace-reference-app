@@ -80,7 +80,8 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
     if (_dragOffset >= dismissThreshold) {
       if (mounted) {
         final cards = ref.read(rCardsServiceProvider);
-        final useVirtual = widget.vcBlob != null &&
+        final useVirtual =
+            widget.vcBlob != null &&
             (cards.isEmpty ||
                 cards.indexWhere(
                       (c) => c.subjectDid.trim() == widget.subjectDid.trim(),
@@ -88,8 +89,8 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
                     0);
         final currentCard =
             !useVirtual && _currentIndex >= 0 && _currentIndex < cards.length
-                ? cards[_currentIndex].subjectDid
-                : null;
+            ? cards[_currentIndex].subjectDid
+            : null;
 
         Navigator.of(context).pop();
 
@@ -123,8 +124,10 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
 
     final List<ReceivedRCard> displayCards;
     if (useVirtualCard) {
-      final virtual =
-          ReceivedRCard.fromVcBlob(widget.subjectDid, widget.vcBlob!);
+      final virtual = ReceivedRCard.fromVcBlob(
+        widget.subjectDid,
+        widget.vcBlob!,
+      );
       if (virtual == null) {
         return const _NoCardsScaffold();
       }
@@ -179,8 +182,9 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
           onVerticalDragUpdate: _handleVerticalDragUpdate,
           onVerticalDragEnd: _handleVerticalDragEnd,
           child: AnimatedContainer(
-            duration:
-                _isDragging ? Duration.zero : const Duration(milliseconds: 300),
+            duration: _isDragging
+                ? Duration.zero
+                : const Duration(milliseconds: 300),
             curve: Curves.easeOut,
             transform: Matrix4.translationValues(0, _dragOffset, 0),
             child: PageView.builder(
@@ -261,8 +265,9 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
       mailToFallbackEnabled: true,
       fileNameOverrides: [xFile.name],
       title: l10n.tabsTitle(Tabs.rCards.name),
-      sharePositionOrigin:
-          box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      sharePositionOrigin: box == null
+          ? null
+          : box.localToGlobal(Offset.zero) & box.size,
     );
 
     await SharePlus.instance.share(params);
@@ -356,10 +361,10 @@ class _RCardDetailsContent extends ConsumerWidget {
     final opacity = dragOffset <= fadeStartThreshold
         ? 1.0
         : dragOffset >= fadeEndThreshold
-            ? 0.0
-            : 1.0 -
-                ((dragOffset - fadeStartThreshold) /
-                    (fadeEndThreshold - fadeStartThreshold));
+        ? 0.0
+        : 1.0 -
+              ((dragOffset - fadeStartThreshold) /
+                  (fadeEndThreshold - fadeStartThreshold));
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -374,7 +379,10 @@ class _RCardDetailsContent extends ConsumerWidget {
                   name: displayName,
                   avatarImage: (profilePic == null || profilePic.isEmpty)
                       ? defaultProfileImage
-                      : CachedBase64Image(profilePic, cacheManager: cacheManager),
+                      : CachedBase64Image(
+                          profilePic,
+                          cacheManager: cacheManager,
+                        ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -467,8 +475,7 @@ class _RCardDetailsContent extends ConsumerWidget {
                           ),
                           style: TextButton.styleFrom(
                             foregroundColor: context.colorScheme.primary,
-                            textStyle:
-                                context.textTheme.titleMedium?.copyWith(
+                            textStyle: context.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -605,4 +612,3 @@ class _NoCardsScaffold extends ConsumerWidget {
     );
   }
 }
-

@@ -47,10 +47,7 @@ class _RCardAttachmentWidget extends StatelessWidget {
     if (_isFromMe && vcBlob != null && vcBlob.isNotEmpty) {
       context.push<void>(
         route.location,
-        extra: {
-          'vcBlob': vcBlob,
-          'isFromMe': true,
-        },
+        extra: {'vcBlob': vcBlob, 'isFromMe': true},
       );
     } else {
       route.push<void>(context);
