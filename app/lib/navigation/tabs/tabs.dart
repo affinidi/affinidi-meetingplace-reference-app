@@ -22,7 +22,7 @@ enum Tabs {
       case Tabs.identities:
         return const Icon(Icons.fingerprint);
       case Tabs.rCards:
-        return const Icon(Icons.badge_outlined);
+        return const Icon(Icons.credit_card);
       case Tabs.settings:
         return const Icon(Icons.settings);
     }
