@@ -4,7 +4,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
-import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/connectivity_provider.dart';
 import 'network_connectivity_service_state.dart';
 
@@ -16,7 +15,7 @@ class NetworkConnectivityService extends _$NetworkConnectivityService {
   NetworkConnectivityService() : super();
   static const _logKey = 'NETCONNSVC';
 
-  late final AppLogger _logger = ref.read(appLoggerProvider);
+  late final AppLogger _logger = AppLogger.instance;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   late final _connectivity = ref.read(connectivityProvider);
 

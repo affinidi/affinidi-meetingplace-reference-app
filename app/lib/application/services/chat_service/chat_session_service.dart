@@ -19,7 +19,6 @@ import '../../../infrastructure/extensions/list_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_badge_provider.dart';
-import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
@@ -77,7 +76,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   ChatServiceState build(String channelDid) {
     _channelDid = channelDid;
-    _logger = ref.read(appLoggerProvider);
+    _logger = AppLogger.instance;
 
     _groupManager = ChatGroupManager(ref: ref);
     _setupChatProtocolRouter();
