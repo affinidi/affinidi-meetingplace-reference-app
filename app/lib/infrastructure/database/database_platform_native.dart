@@ -9,6 +9,20 @@ import '../configuration/environment.dart';
 
 /// Class with implementations specific to native platforms
 class DatabasePlatform {
+  static void _configureEncryptedDatabase(
+    Database sqliteDb,
+    String passphrase,
+  ) {
+    sqliteDb.execute("PRAGMA cipher = 'sqlcipher';");
+    sqliteDb.execute('PRAGMA legacy = 4;');
+    sqliteDb.execute("PRAGMA key = '$passphrase';");
+
+    final cipherVersion = sqliteDb.select('PRAGMA cipher_version;');
+    if (cipherVersion.isEmpty) {
+      throw UnsupportedError('Database encryption support not available');
+    }
+  }
+
   /// Creates a database for native platform using SQLite
   ///
   /// [databaseName] - The database name
@@ -21,12 +35,7 @@ class DatabasePlatform {
     final dbPath = p.join(directory.path, databaseName);
 
     final sqliteDb = sqlite3.open(dbPath);
-    sqliteDb.execute("PRAGMA key = '$passphrase';");
-
-    final cipherVersion = sqliteDb.select('PRAGMA cipher_version;');
-    if (cipherVersion.isEmpty) {
-      throw UnsupportedError('SQLCipher not available');
-    }
+    _configureEncryptedDatabase(sqliteDb, passphrase);
 
     sqliteDb.select('SELECT count(*) FROM sqlite_master;');
 
@@ -41,7 +50,7 @@ class DatabasePlatform {
     required String passphrase,
   }) async {
     final sqliteDb = sqlite3.openInMemory();
-    sqliteDb.execute("PRAGMA key = '$passphrase';");
+    _configureEncryptedDatabase(sqliteDb, passphrase);
 
     return NativeDatabase.opened(
       sqliteDb,

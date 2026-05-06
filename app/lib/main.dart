@@ -10,7 +10,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'infrastructure/configuration/environment.dart';
-import 'infrastructure/database/setup_sql_cipher.dart';
 import 'infrastructure/firebase_messaging/firebase_options.dart';
 import 'infrastructure/firebase_messaging/firebase_push_notification_messaging.dart';
 import 'infrastructure/loggers/app_logger/app_logger.dart';
@@ -59,9 +58,6 @@ void main() async {
     name: logKey,
   );
   logger.info('Build mode: ${kDebugMode ? 'debug' : 'release'}', name: logKey);
-
-  await setupSqlCipher();
-  logger.info('SQLCipher setup completed', name: logKey);
 
   logger.info('Launching Flutter app with ProviderScope', name: logKey);
   runApp(

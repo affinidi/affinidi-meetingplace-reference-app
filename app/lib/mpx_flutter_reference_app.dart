@@ -7,7 +7,6 @@ export 'package:firebase_messaging/firebase_messaging.dart';
 export 'package:flutter_riverpod/flutter_riverpod.dart';
 export 'package:shared_preferences/shared_preferences.dart';
 
-export 'infrastructure/database/setup_sql_cipher.dart';
 export 'infrastructure/firebase_messaging/firebase_options.dart';
 export 'infrastructure/firebase_messaging/firebase_push_notification_messaging.dart';
 export 'infrastructure/loggers/app_logger/app_logger.dart';
