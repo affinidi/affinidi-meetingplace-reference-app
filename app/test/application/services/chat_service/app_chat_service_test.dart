@@ -8,12 +8,14 @@ import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presenc
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 
 import '../../../fakes/fake_app_badge_service.dart';
 import '../../../fakes/fake_channels.dart';
 import '../../../fakes/fake_chat_sdk.dart';
+import '../../../fakes/fake_connectivity.dart';
 import '../../../fakes/fake_contacts.dart';
 import '../../../fakes/fake_contacts_service.dart';
 import '../../../fakes/fake_environment.dart';
@@ -48,6 +50,7 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          connectivityProvider.overrideWith((ref) => FakeConnectivity()),
         ],
       );
       container.listen(
@@ -262,6 +265,7 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          connectivityProvider.overrideWith((ref) => FakeConnectivity()),
         ],
       );
       container.listen(
