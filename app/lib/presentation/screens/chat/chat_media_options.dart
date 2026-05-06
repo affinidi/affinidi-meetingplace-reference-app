@@ -81,15 +81,20 @@ class _ChatMediaOptions extends ConsumerWidget {
     void attachFromPlugin(AttachmentPlugin plugin) async {
       if (!context.mounted) return;
 
-      final result = await plugin.pickAttachments(context);
+      var pickContext = context;
+      if (plugin.dismissSheetBeforePicking) {
+        final rootNav = Navigator.of(context, rootNavigator: true);
+        Navigator.of(context).pop();
+        pickContext = rootNav.context;
+      }
+
+      final result = await plugin.pickAttachments(pickContext);
 
       if (result != null) {
         await controller.sendAttachment(result.text, result.attachments);
       }
 
-      // Only pop if still mounted — plugins that dismiss the sheet themselves
-      // (e.g. R-Card picker) will have already invalidated this context.
-      if (context.mounted) {
+      if (!plugin.dismissSheetBeforePicking && context.mounted) {
         Navigator.of(context).pop();
       }
     }

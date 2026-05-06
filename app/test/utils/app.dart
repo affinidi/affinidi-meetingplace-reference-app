@@ -23,7 +23,9 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_prov
 import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/qr_code_view_factory_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/share_service_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/repositories/r_card_repository/r_card_repository_drift/r_cards_repository_drift.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
@@ -115,6 +117,7 @@ Future<void> startApp(
         (ref) => pushNotificationMessaging ?? FakePushNotificationMessaging(),
       ),
       groupsRepositoryProvider.overrideWith(groupsRepositoryInMemoryDrift),
+      rCardsRepositoryProvider.overrideWith(rCardsRepositoryInMemoryDrift),
       identitiesRepositoryProvider.overrideWith((ref) async {
         final repo = await identitiesRepositoryInMemoryDrift(ref);
         for (final identity in identities) {

@@ -55,36 +55,45 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
           controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
           logger: logger,
           options: MeetingPlaceCoreSDKOptions(
-            onBuildAttachments: (channel) async {
-              try {
-                final identities = ref
-                    .read(identitiesServiceProvider)
-                    .identities;
-                final primary =
-                    identities.where((id) => id.isPrimary).firstOrNull ??
-                    identities.firstOrNull;
-                if (primary == null || primary.did.isEmpty) return null;
+            onBuildAttachments:
+                (
+                  Channel channel,
+                  Future<DidManager> Function(String did) getDidManager,
+                ) async {
+                  try {
+                    await ref
+                        .read(identitiesServiceProvider.notifier)
+                        .ensureInitialized();
 
-                final sdk = await ref.read(meetingPlaceSdkProvider.future);
-                final didManager = await sdk.getDidManager(primary.did);
+                    final externalRef = channel.externalRef;
+                    if (externalRef == null || externalRef.isEmpty) {
+                      return null;
+                    }
 
-                return RCardAttachmentBuilder.buildForPersona(
-                  persona: PersonaDid(
-                    did: primary.did,
-                    name: primary.card.displayName,
-                  ),
-                  card: RCardSubject(
-                    firstName: primary.card.firstName,
-                    lastName: primary.card.lastName,
-                    email: primary.card.email,
-                    phone: primary.card.mobile,
-                  ),
-                  issuerDidManager: didManager,
-                );
-              } catch (_) {
-                return null;
-              }
-            },
+                    final identity = ref
+                        .read(identitiesServiceProvider)
+                        .getIdentityById(externalRef);
+                    if (identity == null || identity.did.isEmpty) return null;
+
+                    final didManager = await getDidManager(identity.did);
+
+                    return RCardAttachmentBuilder.buildForPersona(
+                      persona: PersonaDid(
+                        did: identity.did,
+                        name: identity.card.displayName,
+                      ),
+                      card: RCardSubject(
+                        firstName: identity.card.firstName,
+                        lastName: identity.card.lastName,
+                        email: identity.card.email,
+                        phone: identity.card.mobile,
+                      ),
+                      issuerDidManager: didManager,
+                    );
+                  } catch (_) {
+                    return null;
+                  }
+                },
           ),
         );
 

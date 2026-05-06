@@ -56,11 +56,7 @@ class _SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.info_outline,
-            color: colorScheme.onSurface,
-            size: 12,
-          ),
+          Icon(Icons.info_outline, color: colorScheme.onSurface, size: 12),
           const SizedBox(width: 4),
           Text(
             title,
@@ -90,10 +86,7 @@ class _DetailsContainer extends StatelessWidget {
           for (var i = 0; i < rows.length; i++) ...[
             _DetailRow(row: rows[i]),
             if (i != rows.length - 1)
-              Divider(
-                color: context.colorScheme.primary,
-                height: 16,
-              ),
+              Divider(color: context.colorScheme.primary, height: 16),
           ],
         ],
       ),
@@ -124,10 +117,7 @@ class _DetailRow extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              row.value,
-              style: const TextStyle(color: Colors.white),
-            ),
+            child: Text(row.value, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

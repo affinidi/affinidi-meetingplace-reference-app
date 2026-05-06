@@ -14,14 +14,25 @@ dev_dependencies:
   melos: ^7.1.1
 
 dependency_overrides:
-  test_api: ^0.7.12
+  meeting_place_core:
+    # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_core
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: 82c63814c0ea2fb122c2ff5b27bc1fc731f13bcb
+      path: packages/meeting_place_core
+  meeting_place_relationship:
+    # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: 82c63814c0ea2fb122c2ff5b27bc1fc731f13bcb
+      path: packages/meeting_place_relationship
   meta: ^1.18.2
+  test_api: ^0.7.12
 
 hooks:
   user_defines:
     sqlite3:
       source: sqlite3mc
-
 
 melos:
   scripts:

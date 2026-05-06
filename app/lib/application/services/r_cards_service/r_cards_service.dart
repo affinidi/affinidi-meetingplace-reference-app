@@ -63,6 +63,8 @@ class RCardsService extends _$RCardsService {
     );
   }
 
+  /// Subscribes to [MeetingPlaceRelationshipSDK.incomingRCards] and persists
+  /// each verified card to the repository.
   Future<void> _listenForIncoming() async {
     try {
       final relationshipSDK = await ref.read(relationshipSdkProvider.future);
@@ -149,7 +151,13 @@ class RCardsService extends _$RCardsService {
 
   String? _toVCard(ReceivedRCard card) {
     final subject = RCardSubject.fromVcBlob(card.vcBlob);
-    if (subject == null) return null;
+    if (subject == null) {
+      _logger.warning(
+        'Skipping R-Card export: failed to parse vcBlob for ${card.subjectDid}',
+        name: _logKey,
+      );
+      return null;
+    }
 
     return subject.toVCard();
   }

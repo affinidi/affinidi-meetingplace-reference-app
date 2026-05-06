@@ -38,6 +38,9 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
   bool get isPlatformSupported => true;
 
   @override
+  bool get dismissSheetBeforePicking => true;
+
+  @override
   String localizedName(BuildContext context) => context.l10n.genRCard;
 
   @override
@@ -46,13 +49,10 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
   ) async {
     if (!context.mounted) return null;
 
-    // Dismiss the bottom sheet immediately so it doesn't flash on back/cancel
-    final navigator = Navigator.of(context, rootNavigator: true);
-    navigator.pop();
-
-    final identity = await navigator.push<Identity>(
-      MaterialPageRoute(builder: (_) => const _SelectRCardPersonaScreen()),
-    );
+    final identity = await Navigator.of(context, rootNavigator: true)
+        .push<Identity>(
+          MaterialPageRoute(builder: (_) => const _SelectRCardPersonaScreen()),
+        );
 
     if (identity == null) return null;
 
