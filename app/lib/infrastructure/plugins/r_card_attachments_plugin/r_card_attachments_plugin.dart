@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
@@ -111,5 +112,3 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
           isFromMe: isFromMe,
         );
 }
-
-

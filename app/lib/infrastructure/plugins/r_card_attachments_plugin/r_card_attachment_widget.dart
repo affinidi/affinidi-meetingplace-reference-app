@@ -8,11 +8,13 @@ class _RCardAttachmentWidget extends StatelessWidget {
     required bool isFromMe,
   }) : _attachment = attachment,
        _cacheManager = cacheManager,
-       _chatItemColor = chatItemColor;
+       _chatItemColor = chatItemColor,
+       _isFromMe = isFromMe;
 
   final Attachment _attachment;
   final BaseCacheManager _cacheManager;
   final Color _chatItemColor;
+  final bool _isFromMe;
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +41,19 @@ class _RCardAttachmentWidget extends StatelessWidget {
   }
 
   void _openRCardDetails(BuildContext context) {
-    RCardDetailsRoute(
-      subjectDid: _attachment.rCardSubjectDid!,
-    ).push<void>(context);
+    final subjectDid = _attachment.rCardSubjectDid!;
+    final vcBlob = _attachment.rCardVcBlob;
+    final route = RCardDetailsRoute(subjectDid: subjectDid);
+    if (_isFromMe && vcBlob != null && vcBlob.isNotEmpty) {
+      context.push<void>(
+        route.location,
+        extra: {
+          'vcBlob': vcBlob,
+          'isFromMe': true,
+        },
+      );
+    } else {
+      route.push<void>(context);
+    }
   }
 }

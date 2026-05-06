@@ -21,7 +21,6 @@ class RCardChatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
     return SizedBox(
       height: height,
       child: GestureDetector(
@@ -30,12 +29,12 @@ class RCardChatTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: colorScheme.primary),
+              border: Border.all(color: chatItemColor, width: 2.0),
               borderRadius: BorderRadius.circular(16),
               gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: [Colors.black, colorScheme.primary],
+                colors: [Colors.black, chatItemColor],
               ),
             ),
             child: Stack(
