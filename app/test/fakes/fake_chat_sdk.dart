@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_chat/src/sdk/chat.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 class FakeChatSdk implements MeetingPlaceChatSDK {
@@ -9,6 +9,17 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =
       StreamController<StreamData>.broadcast();
+
+  bool chatActivitySent = false;
+  ConciergeMessage? lastRejectedConnection;
+  ConciergeMessage? lastApprovedConnection;
+  ConciergeMessage? lastContactDetailsUpdateSent;
+  ConciergeMessage? lastContactDetailsUpdateRejected;
+  Message? lastReactionMessage;
+  String? lastReaction;
+  bool sessionEnded = false;
+  String? lastEffectSent;
+  bool shouldThrowOnStartSession = false;
 
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
@@ -268,49 +279,194 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     return eventMessage;
   }
 
+  ConciergeMessage fakeConciergeMessage() {
+    return ConciergeMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'fake-concierge-message-id',
+      senderDid: 'fake-sender-did',
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.userInput,
+      data: {},
+      conciergeType: ConciergeMessageType.permissionToJoinGroup,
+    );
+  }
+
+  Message fakeMessage() {
+    return Message(
+      chatId: 'fake-chat-id',
+      messageId: 'fake-message-id',
+      value: 'test',
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      isFromMe: false,
+      senderDid: 'fake-sender-did',
+      attachments: [],
+    );
+  }
+
+  void simulateIncomingPresenceMessage({
+    required String timestamp,
+    required String recipientDid,
+  }) {
+    _streamController.add(
+      StreamData(
+        plainTextMessage: PlainTextMessage(
+          id: 'presence-${DateTime.now().millisecondsSinceEpoch}',
+          type: Uri.parse(ChatProtocol.chatPresence.value),
+          body: {'timestamp': timestamp},
+          from: recipientDid,
+        ),
+        chatItem: null,
+      ),
+    );
+  }
+
+  void simulateIncomingTypingActivity({
+    required String senderDid,
+    required DateTime createdTime,
+    required String recipientDid,
+  }) {
+    _streamController.add(
+      StreamData(
+        plainTextMessage: PlainTextMessage(
+          id: 'typing-${DateTime.now().millisecondsSinceEpoch}',
+          type: Uri.parse(ChatProtocol.chatActivity.value),
+          createdTime: createdTime,
+          from: senderDid,
+        ),
+        chatItem: null,
+      ),
+    );
+  }
+
+  void simulateIncomingEffectMessage({
+    required String effectName,
+    required String recipientDid,
+  }) {
+    _streamController.add(
+      StreamData(
+        plainTextMessage: PlainTextMessage(
+          id: 'effect-${DateTime.now().millisecondsSinceEpoch}',
+          type: Uri.parse(ChatProtocol.chatEffect.value),
+          body: {'effect': effectName},
+          from: recipientDid,
+        ),
+        chatItem: null,
+      ),
+    );
+  }
+
+  void simulateIncomingGroupDetailsUpdate({required String recipientDid}) {
+    _streamController.add(
+      StreamData(
+        plainTextMessage: PlainTextMessage(
+          id: 'group-details-${DateTime.now().millisecondsSinceEpoch}',
+          type: Uri.parse(ChatProtocol.chatGroupDetailsUpdate.value),
+          from: recipientDid,
+          body: {
+            'groupId': 'fake-group-id',
+            'groupDid': recipientDid,
+            'offerLink': 'https://fake.link',
+            'members': <Map<String, dynamic>>[],
+            'adminDids': <String>[recipientDid],
+            'dateCreated': DateTime.now().toIso8601String(),
+            'groupPublicKey': 'fake-public-key',
+          },
+        ),
+        chatItem: null,
+      ),
+    );
+  }
+
+  void simulateIncomingContactCardUpdate({
+    required String contactDid,
+    required ContactCard card,
+    required String recipientDid,
+  }) {
+    _streamController.add(
+      StreamData(
+        plainTextMessage: PlainTextMessage(
+          id: 'contact-card-${DateTime.now().millisecondsSinceEpoch}',
+          type: Uri.parse(ChatProtocol.chatContactDetailsUpdate.value),
+          from: contactDid,
+          body: {
+            'did': card.did,
+            'type': card.type,
+            'contactInfo': {
+              'n': {
+                'given': card.firstName,
+                'surname': card.lastName ?? '',
+                'displayName': card.displayName,
+              },
+              'email': {
+                'type': {'work': card.email ?? ''},
+              },
+              'tel': {
+                'type': {'cell': card.mobile ?? ''},
+              },
+              'photo': card.profilePic ?? '',
+              'x-meetingplace-identity-card-color': card.cardColor ?? '',
+            },
+          },
+        ),
+        chatItem: null,
+      ),
+    );
+  }
+
   @override
   Future<ChatStream?> get chatStreamSubscription async {
     return _FakeChatStream(_streamController.stream);
   }
 
   @override
-  void endChatSession() {}
+  Future<void> endChatSession() async {
+    sessionEnded = true;
+  }
 
   @override
   Future<void> reactOnMessage(
     Message message, {
     required String reaction,
   }) async {
+    lastReactionMessage = message;
+    lastReaction = reaction;
     reactOnMessageCalls.add({'message': message, 'reaction': reaction});
   }
 
   @override
   Future<void> sendChatActivity() async {
-    // No-op for tests - just return successfully
+    chatActivitySent = true;
   }
 
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
+    lastContactDetailsUpdateSent = message;
     sendContactDetailsUpdateCalls.add({'message': message});
   }
 
   @override
   Future<void> rejectChatContactDetailsUpdate(ConciergeMessage message) async {
+    lastContactDetailsUpdateRejected = message;
     cancelUpdatingContactDetailsCalls.add({'message': message});
   }
 
   @override
   Future<void> sendEffect(Effect effect) async {
+    lastEffectSent = effect.name;
     sendEffectCalls.add({'effect': effect});
   }
 
   @override
   Future<void> approveConnectionRequest(ConciergeMessage message) async {
+    lastApprovedConnection = message;
     approveConnectionRequestCalls.add({'message': message});
   }
 
   @override
   Future<void> rejectConnectionRequest(ConciergeMessage message) async {
+    lastRejectedConnection = message;
     rejectConnectionRequestCalls.add({'message': message});
   }
 
@@ -338,7 +494,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   @override
   Future<Chat> startChatSession() async {
-    _chatSessionStartedCalls = 1;
+    _chatSessionStartedCalls++;
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    if (shouldThrowOnStartSession) {
+      throw Exception('Simulated SDK error');
+    }
     return FakeChat();
   }
 
@@ -401,6 +561,9 @@ class _FakeChatStream implements ChatStream {
     );
     return this;
   }
+
+  @override
+  Stream<StreamData> get stream => _stream;
 
   @override
   Future<void> dispose() async {

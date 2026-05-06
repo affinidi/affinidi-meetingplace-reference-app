@@ -1,0 +1,135 @@
+@startuml chat_screen_architecture
+!include <C4/C4_Component>
+
+title Chat Screen - Component Architecture
+
+' ─────────────────────────────────────────────
+' PRESENTATION LAYER
+' ─────────────────────────────────────────────
+Container_Boundary(pres, "Presentation Layer") {
+  Component(chatScreen, "ChatScreen", "Flutter Widget", "Entry point. Composes all chat UI sub-widgets")
+  Component(widgets, "Chat UI Widgets", "Flutter Widgets", "MessageList, TextEntry, TypingIndicator,\nPresenceStatus, Effects, ConciergeItems, etc.")
+  Component(csc, "ChatScreenController", "Riverpod Notifier", "UI state, screen lifecycle,\nuser interactions")
+  Component(css, "ChatScreenState", "Freezed State", "UI-only: effect, attachments,\nselected reaction")
+}
+
+' ─────────────────────────────────────────────
+' APPLICATION LAYER
+' ─────────────────────────────────────────────
+Container_Boundary(app, "Application Layer") {
+
+  Component(csst, "ChatServiceState", "Freezed State", "Domain: messages, presence,\ntyping, effect")
+
+  Component(acs, "AppChatService", "Riverpod Notifier", "Orchestrator: subscribes to ChatStream,\nroutes StreamData, owns ChatServiceState")
+
+  Boundary(routing, "Message Routing") {
+    Component(pph, "PresenceProtocolHandler", "ChatProtocolHandler", "chatPresence + chatActivity")
+    Component(tph, "TypingProtocolHandler", "ChatProtocolHandler", "chatActivity")
+    Component(eph, "EffectProtocolHandler", "ChatProtocolHandler", "chatEffect")
+    Component(cmph, "ChatMessageProtocolHandler", "ChatProtocolHandler", "chatMessage")
+    Component(ccph, "ContactCardProtocolHandler", "ChatProtocolHandler", "chatContactDetailsUpdate")
+    Component(gdph, "GroupDetailsProtocolHandler", "ChatProtocolHandler", "chatGroupDetailsUpdate")
+    Component(cpr, "ChatProtocolRouter", "Router", "Fans out StreamData\nto all matching handlers")
+  }
+
+  Boundary(del, "Delegates") {
+    Component(agd, "AppGroupDelegate", "GroupDelegate", "Group refresh and\npending member status")
+    Component(acd, "AppConciergeDelegate", "ConciergeDelegate", "Approve/reject connection requests\nand profile updates")
+  }
+
+  Component(contactsSvc, "ContactsService", "Riverpod Notifier", "Manages contact cards,\npresence, and sequence numbers")
+}
+
+' ─────────────────────────────────────────────
+' SDK LAYER
+' ─────────────────────────────────────────────
+Container_Boundary(sdkb, "SDK Layer") {
+  Component(coreSdk, "MeetingPlaceCoreSDK", "meeting_place_core", "Channels, groups, connection offers.\nManages mediator and DIDComm internally")
+  Component(chatSdk, "MeetingPlaceChatSDK", "meeting_place_chat", "Chat sessions, send messages, presence,\nreactions, effects. Emits StreamData via ChatStream")
+  Component(driftRepo, "MeetingPlaceDriftRepository", "meeting_place_drift_repository", "Local SQLite persistence for messages,\nchannels, groups, and connection offers")
+}
+
+' ─────────────────────────────────────────────
+' LAYOUT HINTS
+' ─────────────────────────────────────────────
+' Layer ordering (boundary-level)
+Lay_D(pres, app)
+Lay_D(app, sdkb)
+
+' PL above AL: anchor left edge
+Lay_D(chatScreen, csst)
+
+' AL above SDK: anchor via deepest node in routing and contactsSvc
+Lay_D(gdph, coreSdk)
+Lay_D(gdph, chatSdk)
+Lay_D(contactsSvc, coreSdk)
+Lay_D(contactsSvc, chatSdk)
+
+' Presentation: natural layout (no hints)
+
+' Application: csst → acs → cpr (close together), del below acs
+Lay_R(csst, acs)
+Lay_R(acs, cpr)
+Lay_D(acs, del)
+
+' Routing: cpr on top, handlers spread horizontally below
+Lay_D(cpr, pph)
+Lay_R(pph, tph)
+Lay_R(tph, eph)
+Lay_R(eph, cmph)
+Lay_R(cmph, ccph)
+Lay_R(ccph, gdph)
+
+' Delegates: agd and acd side by side (horizontal)
+Lay_R(agd, acd)
+
+' SDK: coreSdk and chatSdk top row, driftRepo below
+Lay_R(coreSdk, chatSdk)
+Lay_D(coreSdk, driftRepo)
+Lay_D(chatSdk, driftRepo)
+
+' ─────────────────────────────────────────────
+' RELATIONSHIPS (commented out for layout positioning)
+' ─────────────────────────────────────────────
+
+' Presentation internal
+Rel_D(chatScreen, widgets, "composes")
+Rel_D(chatScreen, csc, "reads state, calls actions")
+Rel_D(widgets, csc, "observe via provider selectors")
+Rel_R(csc, css, "owns")
+
+' Presentation → Application
+Rel_D(csc, acs, "reads notifier")
+Rel_D(csc, csst, "listens, syncs from")
+Rel_D(csc, coreSdk, "get channel info")
+
+' Application - orchestrator
+Rel_R(acs, cpr, "routes incoming StreamData")
+Rel_D(acs, acd, "approve/reject\nconcierge messages")
+Rel_D(acs, agd, "refresh group,\nupdate member status")
+Rel_D(acs, contactsSvc, "update contact card,\nsequence number, presence")
+
+' Application - handlers → ContactsService
+Rel_D(pph, contactsSvc, "update presence")
+Rel_D(ccph, contactsSvc, "update contact card")
+Rel_D(agd, contactsSvc, "read/update contacts")
+
+' Application - routing (handlers below cpr)
+Rel_D(cpr, pph, "dispatch")
+Rel_D(cpr, tph, "dispatch")
+Rel_D(cpr, eph, "dispatch")
+Rel_D(cpr, cmph, "dispatch")
+Rel_D(cpr, ccph, "dispatch")
+Rel_D(cpr, gdph, "dispatch")
+
+' Application → SDK
+Rel_D(acs, chatSdk, "start/end session,\nsubscribes to ChatStream, send messages")
+Rel_D(acs, coreSdk, "channel and group info")
+Rel_D(acd, chatSdk, "SDK calls")
+Rel_D(agd, coreSdk, "SDK calls")
+
+' SDK internal
+Rel_D(coreSdk, driftRepo, "persists channels,\ngroups, offers")
+Rel_D(chatSdk, driftRepo, "persists messages")
+
+@enduml
