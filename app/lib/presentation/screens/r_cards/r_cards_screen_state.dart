@@ -1,0 +1,16 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+
+import 'r_cards_screen_filter.dart';
+
+part 'r_cards_screen_state.freezed.dart';
+
+@Freezed(fromJson: false, toJson: false)
+abstract class RCardsScreenState with _$RCardsScreenState {
+  factory RCardsScreenState({
+    @Default(RCardsScreenFilter.all) RCardsScreenFilter filter,
+    @Default([]) List<ReceivedRCard> cards,
+    @Default(false) bool isSearchActive,
+    @Default(false) bool hasFilterApplied,
+  }) = _RCardsScreenState;
+}
