@@ -288,6 +288,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalDelete => 'Delete';
 
   @override
+  String get generalSave => 'Save';
+
+  @override
   String get generalDone => 'Done';
 
   @override
@@ -1464,7 +1467,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Relationship cards received from your contacts';
 
   @override
-  String get rCardsEmpty => 'No R-Cards received yet';
+  String get rCardsEmpty =>
+      'R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.';
+
+  @override
+  String rCardsFilterLabel(String filter) {
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'all': 'All',
+      'nonAnonymous': 'Non-anonymous',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get noRCardsFoundWithFilter =>
+      'No R-Cards found matching your search.';
 
   @override
   String get rCardDetailsTitle => 'R-Card Details';
@@ -1494,7 +1512,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rCardFieldWebsite => 'Website';
 
   @override
+  String get rCardFieldSocial => 'Social';
+
+  @override
   String get rCardFieldSubjectDid => 'Subject DID';
+
+  @override
+  String get rCardAddNotes => 'Add notes';
+
+  @override
+  String get rCardUpdateNotes => 'Update notes';
+
+  @override
+  String get rCardNotesTitle => 'Notes';
+
+  @override
+  String get rCardNotesPlaceholder => 'Write your notes here...';
+
+  @override
+  String get rCardDeletePrompt =>
+      'Are you sure you want to delete this R-Card? This action cannot be undone.';
+
+  @override
+  String rCardChatWith(String name) {
+    return 'Chat with $name';
+  }
 
   @override
   String get rCardFieldIssuerDid => 'Issuer DID';

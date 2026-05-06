@@ -478,6 +478,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get generalDelete;
 
+  /// No description provided for @generalSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get generalSave;
+
   /// No description provided for @generalDone.
   ///
   /// In en, this message translates to:
@@ -2161,8 +2167,20 @@ abstract class AppLocalizations {
   /// No description provided for @rCardsEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No R-Cards received yet'**
+  /// **'R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.'**
   String get rCardsEmpty;
+
+  /// No description provided for @rCardsFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{filter, select, all{All} nonAnonymous{Non-anonymous} other{}}'**
+  String rCardsFilterLabel(String filter);
+
+  /// No description provided for @noRCardsFoundWithFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No R-Cards found matching your search.'**
+  String get noRCardsFoundWithFilter;
 
   /// No description provided for @rCardDetailsTitle.
   ///
@@ -2218,11 +2236,53 @@ abstract class AppLocalizations {
   /// **'Website'**
   String get rCardFieldWebsite;
 
+  /// No description provided for @rCardFieldSocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get rCardFieldSocial;
+
   /// No description provided for @rCardFieldSubjectDid.
   ///
   /// In en, this message translates to:
   /// **'Subject DID'**
   String get rCardFieldSubjectDid;
+
+  /// No description provided for @rCardAddNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add notes'**
+  String get rCardAddNotes;
+
+  /// No description provided for @rCardUpdateNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Update notes'**
+  String get rCardUpdateNotes;
+
+  /// No description provided for @rCardNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get rCardNotesTitle;
+
+  /// No description provided for @rCardNotesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your notes here...'**
+  String get rCardNotesPlaceholder;
+
+  /// No description provided for @rCardDeletePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this R-Card? This action cannot be undone.'**
+  String get rCardDeletePrompt;
+
+  /// No description provided for @rCardChatWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with {name}'**
+  String rCardChatWith(String name);
 
   /// No description provided for @rCardFieldIssuerDid.
   ///

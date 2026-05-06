@@ -306,6 +306,10 @@
 	"@generalDelete": {
 		"type": "text"
 	},
+	"generalSave": "Save",
+	"@generalSave": {
+		"type": "text"
+	},
 	"generalDone": "Done",
 	"@generalDone": {
 		"type": "text"
@@ -1407,7 +1411,16 @@
 	"cameraNotAvailable": "Camera not available",
 	"goBack": "Go Back",
 	"rCardsPanelSubtitle": "Relationship cards received from your contacts",
-	"rCardsEmpty": "No R-Cards received yet",
+	"rCardsEmpty": "R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.",
+	"rCardsFilterLabel": "{filter, select, all{All} nonAnonymous{Non-anonymous} other{}}",
+	"@rCardsFilterLabel": {
+		"placeholders": {
+			"filter": {
+				"type": "String"
+			}
+		}
+	},
+	"noRCardsFoundWithFilter": "No R-Cards found matching your search.",
 	"rCardDetailsTitle": "R-Card Details",
 	"rCardSectionIdentity": "Identity",
 	"rCardSectionMetadata": "Credential Details",
@@ -1417,7 +1430,21 @@
 	"rCardFieldCompany": "Company",
 	"rCardFieldPosition": "Position",
 	"rCardFieldWebsite": "Website",
+	"rCardFieldSocial": "Social",
 	"rCardFieldSubjectDid": "Subject DID",
+	"rCardAddNotes": "Add notes",
+	"rCardUpdateNotes": "Update notes",
+	"rCardNotesTitle": "Notes",
+	"rCardNotesPlaceholder": "Write your notes here...",
+	"rCardDeletePrompt": "Are you sure you want to delete this R-Card? This action cannot be undone.",
+	"rCardChatWith": "Chat with {name}",
+	"@rCardChatWith": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"rCardFieldIssuerDid": "Issuer DID",
 	"rCardFieldReceivedAt": "Received",
 	"rCardFieldIssuedAt": "Issued",

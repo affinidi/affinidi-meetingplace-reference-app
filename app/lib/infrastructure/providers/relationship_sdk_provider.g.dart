@@ -8,8 +8,8 @@ part of 'relationship_sdk_provider.dart';
 
 String _$relationshipSdkHash() => r'2ec76f890ece255e68e3a915b551239e11257111';
 
-/// Provides the [MeetingPlaceRelationshipSDK] instance backed by the
-/// [MeetingPlaceCoreSDK] from [meetingPlaceSdkProvider].
+/// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
+/// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
 ///
 /// Keep-alive ensures the relationship SDK is initialized once and shared
 /// across the app lifetime.
