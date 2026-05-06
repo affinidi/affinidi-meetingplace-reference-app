@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../infrastructure/configuration/environment.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/tabs/navigation_tab_destination.dart';
 import '../../navigation/tabs/tabs.dart';
@@ -14,6 +15,15 @@ class ScaffoldWithNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isZkpEnabled = Environment.instance.zkpEnabled;
+
+    final visibleTabs = isZkpEnabled
+        ? Tabs.values
+        : Tabs.values.where((tab) => tab != Tabs.credentials).toList();
+    final visibleBranchIndexes = visibleTabs.map((tab) => tab.index).toList();
+
+    final currentIndex = navigationShell.currentIndex;
+    final selectedIndex = visibleBranchIndexes.indexOf(currentIndex);
 
     return Scaffold(
       body: SafeArea(
@@ -25,9 +35,12 @@ class ScaffoldWithNavBar extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: navigationShell.goBranch,
-        destinations: Tabs.values.map((tab) => tab.destination(l10n)).toList(),
+        selectedIndex: selectedIndex == -1 ? 0 : selectedIndex,
+        onDestinationSelected: (visibleIndex) {
+          final branchIndex = visibleBranchIndexes[visibleIndex];
+          navigationShell.goBranch(branchIndex);
+        },
+        destinations: visibleTabs.map((tab) => tab.destination(l10n)).toList(),
       ),
     );
   }
