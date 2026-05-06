@@ -63,6 +63,8 @@ void main() {
       fakeCoreSdk.setMockGroup(knownGroup);
     });
 
+    tearDown(() => container.dispose());
+
     test('sets session state and delegates to SDK on start', () async {
       await chatService.startChatSession();
 
@@ -271,6 +273,8 @@ void main() {
         chatSessionServiceProvider(channelDid).notifier,
       );
     });
+
+    tearDown(() => container.dispose());
 
     test('adds chatItem to state when receiving message', () async {
       await chatService.startChatSession();
