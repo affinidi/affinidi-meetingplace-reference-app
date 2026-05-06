@@ -1,3 +1,4 @@
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_category.dart';
@@ -198,4 +199,52 @@ class FakeContacts {
     badgeCount: 0,
     notificationBannerDismissed: true,
   );
+
+  static Contact newIndividualContact({
+    required String id,
+    required String channelDid,
+  }) => Contact(
+    id: id,
+    channelDid: channelDid,
+    channelDidSha256: individualContact.channelDidSha256,
+    offerLink: individualContact.offerLink,
+    card: individualContact.card,
+    dateAdded: individualContact.dateAdded,
+    type: individualContact.type,
+    status: individualContact.status,
+    mediatorDid: individualContact.mediatorDid,
+    origin: individualContact.origin,
+    category: individualContact.category,
+    otherPartyCard: individualContact.otherPartyCard,
+    displayName: individualContact.displayName,
+    badgeUpdateInProgress: individualContact.badgeUpdateInProgress,
+    badgeCount: individualContact.badgeCount,
+    currentMessageSeqNo: individualContact.currentMessageSeqNo,
+    hasBeenOpened: individualContact.hasBeenOpened,
+    lastKeepAliveMessage: individualContact.lastKeepAliveMessage,
+    notificationBannerDismissed: individualContact.notificationBannerDismissed,
+  );
+
+  static sdk.ContactCard get sdkContactCard {
+    final card = individualContact.card;
+    return sdk.ContactCard(
+      did: card.did,
+      type: card.type,
+      contactInfo: {
+        'n': {
+          'given': card.firstName,
+          'surname': card.lastName ?? '',
+          'displayName': card.displayName,
+        },
+        'email': {
+          'type': {'work': card.email ?? ''},
+        },
+        'tel': {
+          'type': {'cell': card.mobile ?? ''},
+        },
+        'photo': card.profilePic ?? '',
+        'x-meetingplace-identity-card-color': card.cardColor ?? '',
+      },
+    );
+  }
 }
