@@ -26,6 +26,7 @@ import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../domain/models/identity/identity.dart';
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/concierge_message_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -101,6 +102,7 @@ class ChatScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
+    final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     ref.keepAround(provider);
 
     Future<void> onVrcStart() async {
@@ -184,8 +186,10 @@ class ChatScreen extends HookConsumerWidget {
                     ChatActivityProgressIndicator(contactId: _contactId),
                     _NotificationsUnavailableWarning(_contactId),
                     _VrcBanner(_contactId),
-                    _LivenessBanner(_contactId),
-                    _VerificationResultBanner(_contactId),
+                    if (isZkpEnabled) ...[
+                      _LivenessBanner(_contactId),
+                      _VerificationResultBanner(_contactId),
+                    ],
                     Expanded(child: _ChatMessageList(_contactId)),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
