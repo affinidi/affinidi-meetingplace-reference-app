@@ -6,7 +6,9 @@ import 'package:mpx_flutter_reference_app/application/services/chat_service/chat
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -50,6 +52,7 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          appLoggerProvider.overrideWithValue(AppLogger.instance),
           connectivityProvider.overrideWith((ref) => FakeConnectivity()),
         ],
       );
@@ -265,6 +268,7 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          appLoggerProvider.overrideWithValue(AppLogger.instance),
           connectivityProvider.overrideWith((ref) => FakeConnectivity()),
         ],
       );
@@ -388,6 +392,8 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          appLoggerProvider.overrideWithValue(AppLogger.instance),
+          connectivityProvider.overrideWith((ref) => FakeConnectivity()),
         ],
       );
       addTearDown(groupContainer.dispose);
