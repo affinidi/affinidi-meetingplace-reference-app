@@ -4,20 +4,18 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 
 import '../../../fakes/fake_app_badge_service.dart';
 import '../../../fakes/fake_channels.dart';
 import '../../../fakes/fake_chat_sdk.dart';
-import '../../../fakes/fake_connectivity.dart';
 import '../../../fakes/fake_contacts.dart';
 import '../../../fakes/fake_contacts_service.dart';
 import '../../../fakes/fake_environment.dart';
@@ -52,8 +50,9 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
-          appLoggerProvider.overrideWithValue(AppLogger.instance),
-          connectivityProvider.overrideWith((ref) => FakeConnectivity()),
+          networkConnectivityServiceProvider.overrideWith(
+            _FakeNetworkConnectivityService.new,
+          ),
         ],
       );
       container.listen(
@@ -268,8 +267,9 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
-          appLoggerProvider.overrideWithValue(AppLogger.instance),
-          connectivityProvider.overrideWith((ref) => FakeConnectivity()),
+          networkConnectivityServiceProvider.overrideWith(
+            _FakeNetworkConnectivityService.new,
+          ),
         ],
       );
       container.listen(
@@ -392,8 +392,9 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
-          appLoggerProvider.overrideWithValue(AppLogger.instance),
-          connectivityProvider.overrideWith((ref) => FakeConnectivity()),
+          networkConnectivityServiceProvider.overrideWith(
+            _FakeNetworkConnectivityService.new,
+          ),
         ],
       );
       addTearDown(groupContainer.dispose);
@@ -444,4 +445,11 @@ void main() {
       },
     );
   });
+}
+
+class _FakeNetworkConnectivityService extends NetworkConnectivityService {
+  @override
+  NetworkConnectivityServiceState build() {
+    return const NetworkConnectivityServiceState(isConnected: true);
+  }
 }
