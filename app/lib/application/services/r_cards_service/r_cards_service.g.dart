@@ -6,14 +6,14 @@ part of 'r_cards_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$rCardsServiceHash() => r'9c77811352894dc2c4d693da72d2829ed51452f9';
+String _$rCardsServiceHash() => r'40445ccaa6363eef2ccdd8b35f5203904c9015f8';
 
 /// Service that drives the R-Card feature.
 ///
 /// Responsibilities:
 /// - Exposes all stored [ReceivedRCard]s as live state for the UI.
-/// - Subscribes to [MeetingPlaceRelationshipSDK.incomingRCards] and persists
-///   every verified card via [RCardRepository.upsertFromVdip].
+/// - Subscribes to `MeetingPlaceRelationshipSDK.incomingRCards` and persists
+///   every verified card via `RCardRepository.upsertFromVdip`.
 ///
 /// Copied from [RCardsService].
 @ProviderFor(RCardsService)

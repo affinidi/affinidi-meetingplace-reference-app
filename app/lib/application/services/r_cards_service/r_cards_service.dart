@@ -1,7 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
+import 'package:cross_file/cross_file.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -101,5 +106,55 @@ class RCardsService extends _$RCardsService {
         name: _logKey,
       );
     }
+  }
+
+  Future<XFile> exportAllAsVcf() async {
+    final repository = await ref.read(rCardsRepositoryProvider.future);
+    final cards = await repository.listAll();
+
+    final blocks = cards.map(_toVCard).whereType<String>().join();
+    return _writeVcfFile(blocks, fileName: 'R-Cards.vcf');
+  }
+
+  Future<XFile?> exportSingleAsVcf(ReceivedRCard card) async {
+    final vCard = _toVCard(card);
+    if (vCard == null) return null;
+
+    return _writeVcfFile(vCard, fileName: 'R-Card.vcf');
+  }
+
+  Future<void> deleteBySubjectDid(String subjectDid) async {
+    final repository = await ref.read(rCardsRepositoryProvider.future);
+    await repository.deleteBySubjectDid(subjectDid);
+  }
+
+  Future<void> updateNotes(String subjectDid, String? notes) async {
+    final repository = await ref.read(rCardsRepositoryProvider.future);
+    await repository.updateNotes(subjectDid, notes);
+  }
+
+  Future<XFile> _writeVcfFile(
+    String content, {
+    required String fileName,
+  }) async {
+    final directory = await getTemporaryDirectory();
+    final safeName = '${const Uuid().v4()}_$fileName';
+    final filePath = '${directory.path}/$safeName';
+
+    final file = File(filePath);
+    await file.writeAsString(content, encoding: utf8);
+
+    return XFile(
+      filePath,
+      mimeType: 'text/vcard',
+      name: fileName,
+    );
+  }
+
+  String? _toVCard(ReceivedRCard card) {
+    final subject = RCardSubject.fromVcBlob(card.vcBlob);
+    if (subject == null) return null;
+
+    return subject.toVCard();
   }
 }
