@@ -68,10 +68,7 @@ class _DescriptionBanner extends StatelessWidget {
           const Icon(Icons.verified_user, size: 24, color: Colors.white),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              description,
-              style: context.textTheme.bodyMedium,
-            ),
+            child: Text(description, style: context.textTheme.bodyMedium),
           ),
         ],
       ),
