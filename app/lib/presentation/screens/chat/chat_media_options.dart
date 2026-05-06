@@ -20,7 +20,7 @@ class _ChatMediaOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = _item.onTap != null;
-    
+
     Widget leading;
     if (_item.icon is IconData) {
       leading = Icon(
@@ -37,7 +37,7 @@ class _ChatMediaOption extends StatelessWidget {
         ),
       );
     }
-    
+
     return ListTile(
       enabled: enabled,
       leading: leading,
@@ -74,6 +74,7 @@ class _ChatMediaOptions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     final availableAttachmentPlugins = ref.read(
@@ -135,19 +136,20 @@ class _ChatMediaOptions extends ConsumerWidget {
           sendEffect(ScreenEffect.confetti());
         },
       ),
-      _ChatMediaOptionItem(
-        icon: Icons.verified_user,
-        label: 'Human Zero-Knowledge Proof',
-        onTap: () {
-          // Trigger liveness check request
-          ref
-              .read(proofFlowControllerProvider(_contactId).notifier)
-              .requestLivenessCheck();
-          if (context.mounted) {
-            Navigator.of(context).pop();
-          }
-        },
-      ),
+      if (isZkpEnabled)
+        _ChatMediaOptionItem(
+          icon: Icons.verified_user,
+          label: 'Human Zero-Knowledge Proof',
+          onTap: () {
+            // Trigger liveness check request
+            ref
+                .read(proofFlowControllerProvider(_contactId).notifier)
+                .requestLivenessCheck();
+            if (context.mounted) {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
     ];
 
     return BackdropFilter(
