@@ -59,6 +59,7 @@ class ChatScreenController extends _$ChatScreenController
   late final int _chatPresenceIntervalInSeconds = ref
       .read(environmentProvider)
       .chatPresenceIntervalInSeconds;
+  late final bool _isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
   // Maximum typing indicators to prevent UI overflow on small screens
   static const int _maxNumberOfTypingMembersVisible = 4;
   // Grace period to avoid blinking of presence indicator
@@ -396,19 +397,11 @@ class ChatScreenController extends _$ChatScreenController
         _updateGroupDetails(data, channelDid);
       }
 
-      // Handle liveness check request messages by checking attachments
-      final attachments = plainTextMessage.attachments;
-      if (attachments != null && attachments.isNotEmpty) {
-        for (final attachment in attachments) {
-          if (attachment.format == ZkpConstants.livenessCheckRequestType) {
-            _handleLivenessRequest(channelDid, data);
-            break;
-          } else if (attachment.format == ZkpConstants.livenessProofType) {
-            _handleLivenessProof(channelDid, data);
-            break;
-          }
-        }
-      }
+      _handleZkpAttachment(
+        plainTextMessage: plainTextMessage,
+        channelDid: channelDid,
+        data: data,
+      );
     }
 
     final chatItem = data.chatItem;
@@ -525,6 +518,26 @@ class ChatScreenController extends _$ChatScreenController
         .onProofReceived(proofData);
 
     _logger.info('_handleLivenessProof completed', name: _logKey);
+  }
+
+  void _handleZkpAttachment({
+    required chat.PlainTextMessage plainTextMessage,
+    required String channelDid,
+    required chat.StreamData data,
+  }) {
+    if (!_isZkpEnabled) return;
+    final attachments = plainTextMessage.attachments;
+    if (attachments != null && attachments.isNotEmpty) {
+      for (final attachment in attachments) {
+        if (attachment.format == ZkpConstants.livenessCheckRequestType) {
+          _handleLivenessRequest(channelDid, data);
+          break;
+        } else if (attachment.format == ZkpConstants.livenessProofType) {
+          _handleLivenessProof(channelDid, data);
+          break;
+        }
+      }
+    }
   }
 
   String? _getGroupMemberNameFromMessage(
@@ -758,6 +771,7 @@ class ChatScreenController extends _$ChatScreenController
 
   /// Insert a ZKP paused notice into the chat (local only, not sent)
   void insertZkpPausedNotice() {
+    if (!_isZkpEnabled) return;
     final contact = state.contact;
     if (contact == null || contact.channelDid == null) return;
 
@@ -770,6 +784,7 @@ class ChatScreenController extends _$ChatScreenController
 
   /// Insert a ZKP proof shared notice (after sending proof)
   void insertZkpProofSharedNotice() {
+    if (!_isZkpEnabled) return;
     final contact = state.contact;
     if (contact == null || contact.channelDid == null) return;
 
@@ -782,6 +797,7 @@ class ChatScreenController extends _$ChatScreenController
 
   /// Insert a ZKP proof received notice (after receiving proof)
   void insertZkpProofReceivedNotice() {
+    if (!_isZkpEnabled) return;
     final contact = state.contact;
     if (contact == null || contact.channelDid == null) return;
 
@@ -800,6 +816,7 @@ class ChatScreenController extends _$ChatScreenController
   /// Insert a ZKP request received notice (when receiving liveness
   /// check request)
   void insertZkpRequestReceivedNotice() {
+    if (!_isZkpEnabled) return;
     final contact = state.contact;
     if (contact == null || contact.channelDid == null) return;
 
