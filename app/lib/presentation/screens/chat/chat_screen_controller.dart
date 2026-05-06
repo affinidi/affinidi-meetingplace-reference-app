@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
@@ -19,6 +20,7 @@ import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -34,7 +36,7 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
-import 'proof_flow_controller.dart';
+import 'chat_zkp_handler.dart';
 
 part 'chat_screen_controller.g.dart';
 
@@ -48,10 +50,19 @@ class ChatScreenController extends _$ChatScreenController
     with WidgetsBindingObserver {
   ChatScreenController() : super();
 
+  late final bool _isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
   static const _logKey = 'UXCHAT';
 
   late final messageTextController = TextEditingController();
   late final _logger = ref.read(appLoggerProvider);
+  late final _zkpHandler = ChatZkpHandler(
+    ref: ref,
+    logger: _logger,
+    logKey: _logKey,
+    isZkpEnabled: _isZkpEnabled,
+    getContact: () => state.contact,
+    onUpsertChatItem: _upsertChatItemThroughService,
+  );
 
   TimedAction? _sendChatActivityTimedAction;
   Timer? _saveUnsentMessageDebouncer;
@@ -86,7 +97,11 @@ class ChatScreenController extends _$ChatScreenController
     var hasInitializedState = false;
 
     if (channelDid != null) {
-      _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
+      final sessionService = ref.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
+      _chatService = sessionService;
+      sessionService.setZkpCallback(_zkpHandler.handleZkpAttachment);
       ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
         Future.microtask(() {
           if (hasInitializedState) {
@@ -425,7 +440,7 @@ class ChatScreenController extends _$ChatScreenController
     await _chatService?.updateContactSequenceNumber(channelDid);
     await _chatService?.startChatSession();
 
-    if (channel.type == ChannelType.group) {
+    if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
       final connection = await coreSdk.getConnectionOffer(channel.offerLink);
       state = state.copyWith(group: group, offerName: connection?.offerName);
@@ -455,6 +470,38 @@ class ChatScreenController extends _$ChatScreenController
     }
 
     _hideActivity();
+  }
+
+  /// Insert a ZKP paused notice into the chat (local only, not sent)
+  void insertZkpPausedNotice() {
+    _zkpHandler.insertZkpPausedNotice();
+  }
+
+  /// Insert a ZKP proof shared notice (after sending proof)
+  void insertZkpProofSharedNotice() {
+    _zkpHandler.insertZkpProofSharedNotice();
+  }
+
+  /// Insert a ZKP proof received notice (after receiving proof)
+  void insertZkpProofReceivedNotice() {
+    _zkpHandler.insertZkpProofReceivedNotice();
+  }
+
+  /// Insert a ZKP request received notice (when receiving liveness
+  /// check request)
+  void insertZkpRequestReceivedNotice() {
+    _zkpHandler.insertZkpRequestReceivedNotice();
+  }
+
+  /// Routes a chat item through the service to persist it in the service state.
+  /// This ensures ZKP notices survive ref.listen state overwrites.
+  void _upsertChatItemThroughService(chat.ChatItem item) {
+    assert(
+      _chatService != null,
+      'ChatService must be initialized before upserting chat items. '
+      'This likely means a ZKP callback fired before build() completed.',
+    );
+    _chatService?.upsertChatItem(item);
   }
 
   Future<void> _updateGroupContactPendingStatus() async {
@@ -497,7 +544,7 @@ class ChatScreenController extends _$ChatScreenController
     }
 
     unawaited(
-      _chatSDK?.sendTextMessage(trimmedMessage, attachments: attachments),
+      _chatService?.sendTextMessage(trimmedMessage, attachments: attachments),
     );
   }
 
