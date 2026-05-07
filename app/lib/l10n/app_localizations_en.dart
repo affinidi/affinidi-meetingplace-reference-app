@@ -1559,4 +1559,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get human => 'Human';
+
+  @override
+  String get proofFlowThisContact => 'this contact';
+
+  @override
+  String get proofFlowContact => 'Contact';
+
+  @override
+  String proofFlowCheckIfHuman(String contactName) {
+    return 'Check if $contactName is human using a Zero‑Knowledge Proof (ZKP) derived from a Liveness Credential.';
+  }
+
+  @override
+  String get proofFlowRequestProof => 'Request proof';
+
+  @override
+  String proofFlowVerifyingProof(String contactName) {
+    return 'Verifying proof from $contactName...';
+  }
+
+  @override
+  String proofFlowVerificationFailed(String contactName) {
+    return 'Verification failed for $contactName';
+  }
+
+  @override
+  String get zkpNoticePaused =>
+      'You paused the Human ZKP proof request.\nTap the \"+\" icon to restart it.';
+
+  @override
+  String get zkpNoticeShared =>
+      'You have shared a Zero‑Knowledge Proof confirming you are human.\n*No personal data was shared.';
+
+  @override
+  String zkpNoticeReceived(String contactName) {
+    return '$contactName has shared a Zero‑Knowledge Proof confirming they are human.';
+  }
+
+  @override
+  String zkpNoticeRequest(String contactName) {
+    return '$contactName has requested a Zero‑Knowledge Proof to confirm you are human.\nYou can generate the proof using an existing Liveness Credential or complete a quick liveness check.';
+  }
 }
