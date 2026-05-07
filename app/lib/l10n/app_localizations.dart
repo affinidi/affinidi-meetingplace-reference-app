@@ -2293,8 +2293,14 @@ abstract class AppLocalizations {
   /// No description provided for @mockLivenessCredentialGenerated.
   ///
   /// In en, this message translates to:
-  /// **'A mock Liveness Credential has been generated and securely stored under the Credentials tab.\nYou can now continue to generate a Human Zero-Knowledge proof.'**
+  /// **'A mock Liveness Credential has been generated and securely stored under the Credentials tab.'**
   String get mockLivenessCredentialGenerated;
+
+  /// No description provided for @mockLivenessCredentialNext.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now continue to generate a Human Zero-Knowledge proof.'**
+  String get mockLivenessCredentialNext;
 
   /// No description provided for @doLater.
   ///
