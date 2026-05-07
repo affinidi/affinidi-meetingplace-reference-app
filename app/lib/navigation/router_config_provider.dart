@@ -7,7 +7,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../application/services/authentication_service/authentication_service.dart';
 import '../application/services/identities_service/identities_service.dart';
 import '../application/services/settings_service/settings_service.dart';
-import '../infrastructure/configuration/environment.dart';
 import '../presentation/screens/authentication/authentication_screen/authentication_screen.dart';
 import '../presentation/screens/onboarding/onboarding_screen/onboarding_screen.dart';
 import 'routes/app_routes.dart';
@@ -62,11 +61,6 @@ Future<String?> _guard(
 
   if (await _shouldRedirectToIdentities(ref)) {
     return RoutePaths.identities;
-  }
-
-  final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
-  if (!isZkpEnabled && state.matchedLocation == RoutePaths.contacts) {
-    return defaultRoute;
   }
 
   if ((state.matchedLocation == RoutePaths.authentication &&
