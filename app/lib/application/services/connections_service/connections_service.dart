@@ -486,15 +486,27 @@ class ConnectionsService extends _$ConnectionsService {
     MeetingPlaceCoreSDK sdk,
     Channel channel,
   ) async {
-    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
+    final identitiesNotifier = ref.read(identitiesServiceProvider.notifier);
+    await identitiesNotifier.ensureInitialized();
 
     final externalRef = channel.externalRef;
-    if (externalRef == null || externalRef.isEmpty) return null;
+    if (externalRef == null || externalRef.isEmpty) {
+      _logger.warning(
+        'Skipping R-Card attachment: channel has no externalRef',
+        name: _logKey,
+      );
+      return null;
+    }
 
-    final identity = ref
-        .read(identitiesServiceProvider)
-        .getIdentityById(externalRef);
-    if (identity == null || identity.did.isEmpty) return null;
+    final identity = identitiesNotifier.state.getIdentityById(externalRef);
+    if (identity == null || identity.did.isEmpty) {
+      _logger.warning(
+        'Skipping R-Card attachment: no identity found for'
+        ' externalRef $externalRef',
+        name: _logKey,
+      );
+      return null;
+    }
 
     try {
       final didManager = await sdk.getDidManager(identity.did);

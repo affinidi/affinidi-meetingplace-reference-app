@@ -54,38 +54,39 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
           controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
           logger: logger,
           options: MeetingPlaceCoreSDKOptions(
-            onBuildAttachments: (
-              channel,
-              Future<DidManager> Function(String did) getDidManager,
-            ) async {
-              try {
-                final identities = ref
-                    .read(identitiesServiceProvider)
-                    .identities;
-                final primary =
-                    identities.where((id) => id.isPrimary).firstOrNull ??
-                    identities.firstOrNull;
-                if (primary == null || primary.did.isEmpty) return null;
+            onBuildAttachments:
+                (
+                  channel,
+                  Future<DidManager> Function(String did) getDidManager,
+                ) async {
+                  try {
+                    final identities = ref
+                        .read(identitiesServiceProvider)
+                        .identities;
+                    final primary =
+                        identities.where((id) => id.isPrimary).firstOrNull ??
+                        identities.firstOrNull;
+                    if (primary == null || primary.did.isEmpty) return null;
 
-                final didManager = await getDidManager(primary.did);
+                    final didManager = await getDidManager(primary.did);
 
-                return RCardAttachmentBuilder.buildForPersona(
-                  persona: PersonaDid(
-                    did: primary.did,
-                    name: primary.card.displayName,
-                  ),
-                  card: RCardSubject(
-                    firstName: primary.card.firstName,
-                    lastName: primary.card.lastName,
-                    email: primary.card.email,
-                    phone: primary.card.mobile,
-                  ),
-                  issuerDidManager: didManager,
-                );
-              } catch (_) {
-                return null;
-              }
-            },
+                    return RCardAttachmentBuilder.buildForPersona(
+                      persona: PersonaDid(
+                        did: primary.did,
+                        name: primary.card.displayName,
+                      ),
+                      card: RCardSubject(
+                        firstName: primary.card.firstName,
+                        lastName: primary.card.lastName,
+                        email: primary.card.email,
+                        phone: primary.card.mobile,
+                      ),
+                      issuerDidManager: didManager,
+                    );
+                  } catch (_) {
+                    return null;
+                  }
+                },
           ),
         );
 
