@@ -60,26 +60,32 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
                   Future<DidManager> Function(String did) getDidManager,
                 ) async {
                   try {
-                    final identities = ref
-                        .read(identitiesServiceProvider)
-                        .identities;
-                    final primary =
-                        identities.where((id) => id.isPrimary).firstOrNull ??
-                        identities.firstOrNull;
-                    if (primary == null || primary.did.isEmpty) return null;
+                    await ref
+                        .read(identitiesServiceProvider.notifier)
+                        .ensureInitialized();
 
-                    final didManager = await getDidManager(primary.did);
+                    final externalRef = channel.externalRef;
+                    if (externalRef == null || externalRef.isEmpty) {
+                      return null;
+                    }
+
+                    final identity = ref
+                        .read(identitiesServiceProvider)
+                        .getIdentityById(externalRef);
+                    if (identity == null || identity.did.isEmpty) return null;
+
+                    final didManager = await getDidManager(identity.did);
 
                     return RCardAttachmentBuilder.buildForPersona(
                       persona: PersonaDid(
-                        did: primary.did,
-                        name: primary.card.displayName,
+                        did: identity.did,
+                        name: identity.card.displayName,
                       ),
                       card: RCardSubject(
-                        firstName: primary.card.firstName,
-                        lastName: primary.card.lastName,
-                        email: primary.card.email,
-                        phone: primary.card.mobile,
+                        firstName: identity.card.firstName,
+                        lastName: identity.card.lastName,
+                        email: identity.card.email,
+                        phone: identity.card.mobile,
                       ),
                       issuerDidManager: didManager,
                     );
