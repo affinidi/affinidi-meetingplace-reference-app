@@ -30,6 +30,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   late final aliasController = TextEditingController();
 
   GlobalKey<FormState>? _formKey;
+  bool _focusListenersInitialized = false;
 
   TextEditingController controllerFor(ContactCardFieldDefinition field) {
     return _fieldControllers[field]!;
@@ -41,6 +42,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   void initializeFocusListeners(GlobalKey<FormState> formKey) {
     _formKey = formKey;
+    if (_focusListenersInitialized) return;
+    _focusListenersInitialized = true;
     for (final entry in _fieldFocusNodes.entries) {
       final field = entry.key;
       final focusNode = entry.value;
