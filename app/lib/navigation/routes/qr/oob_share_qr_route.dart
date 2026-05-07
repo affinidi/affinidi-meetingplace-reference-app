@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class OOBShareQrRoute extends GoRouteData with _$OOBShareQrRoute {
+class OOBShareQrRoute extends GoRouteData with $OOBShareQrRoute {
   const OOBShareQrRoute();
 
   static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;

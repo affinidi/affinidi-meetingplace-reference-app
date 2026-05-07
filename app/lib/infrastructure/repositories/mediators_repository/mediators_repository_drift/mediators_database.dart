@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../domain/models/mediator/mediator_status.dart';

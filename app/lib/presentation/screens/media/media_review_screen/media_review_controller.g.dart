@@ -6,22 +6,58 @@ part of 'media_review_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(MediaReviewController)
+final mediaReviewControllerProvider = MediaReviewControllerProvider._();
+
+final class MediaReviewControllerProvider
+    extends $NotifierProvider<MediaReviewController, void> {
+  MediaReviewControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mediaReviewControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$mediaReviewControllerHash();
+
+  @$internal
+  @override
+  MediaReviewController create() => MediaReviewController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
 String _$mediaReviewControllerHash() =>
     r'c175c6e72aa4042d2dadfe12af0c4442c26b94af';
 
-/// See also [MediaReviewController].
-@ProviderFor(MediaReviewController)
-final mediaReviewControllerProvider =
-    AutoDisposeNotifierProvider<MediaReviewController, void>.internal(
-      MediaReviewController.new,
-      name: r'mediaReviewControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$mediaReviewControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$MediaReviewController = AutoDisposeNotifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$MediaReviewController extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

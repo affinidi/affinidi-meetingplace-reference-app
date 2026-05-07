@@ -6,28 +6,62 @@ part of 'app_logger_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$appLoggerHash() => r'f33c31fa60711e20bec1a671bd6813515b933036';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// A Riverpod provider that exposes the global [AppLogger] instance.
+///
+/// Useful for consistent logging across the app.
+///
+/// [ref] - The Riverpod reference used for dependency injection.
+
+@ProviderFor(appLogger)
+final appLoggerProvider = AppLoggerProvider._();
 
 /// A Riverpod provider that exposes the global [AppLogger] instance.
 ///
 /// Useful for consistent logging across the app.
 ///
 /// [ref] - The Riverpod reference used for dependency injection.
-///
-/// Copied from [appLogger].
-@ProviderFor(appLogger)
-final appLoggerProvider = Provider<AppLogger>.internal(
-  appLogger,
-  name: r'appLoggerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$appLoggerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef AppLoggerRef = ProviderRef<AppLogger>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class AppLoggerProvider
+    extends $FunctionalProvider<AppLogger, AppLogger, AppLogger>
+    with $Provider<AppLogger> {
+  /// A Riverpod provider that exposes the global [AppLogger] instance.
+  ///
+  /// Useful for consistent logging across the app.
+  ///
+  /// [ref] - The Riverpod reference used for dependency injection.
+  AppLoggerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'appLoggerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$appLoggerHash();
+
+  @$internal
+  @override
+  $ProviderElement<AppLogger> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  AppLogger create(Ref ref) {
+    return appLogger(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AppLogger value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AppLogger>(value),
+    );
+  }
+}
+
+String _$appLoggerHash() => r'f33c31fa60711e20bec1a671bd6813515b933036';

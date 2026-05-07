@@ -46,11 +46,13 @@ class DatabasePlatform {
   }
 
   /// Creates an in-memory database for native platform using SQLite
+  ///
+  /// In-memory databases do not support encryption (sqlite3mc limitation),
+  /// so encryption configuration is skipped.
   static Future<QueryExecutor> createInMemoryDatabase({
     required String passphrase,
   }) async {
     final sqliteDb = sqlite3.openInMemory();
-    _configureEncryptedDatabase(sqliteDb, passphrase);
 
     return NativeDatabase.opened(
       sqliteDb,

@@ -6,202 +6,136 @@ part of 'chat_screen_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$chatScreenControllerHash() =>
-    r'ad48b0f9e225a029183daa69cf329e2b92b79a82';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$ChatScreenController
-    extends BuildlessAutoDisposeNotifier<ChatScreenState> {
-  late final String contactId;
-
-  ChatScreenState build(String contactId);
-}
-
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 /// Controller class for managing the state and logic of the chat screen.
 ///
 /// Extends [_$ChatScreenController] to provide reactive state management
 /// and business logic for chat-related features, such as handling messages,
 /// user interactions, and UI updates within the chat screen.
-///
-/// Copied from [ChatScreenController].
+
 @ProviderFor(ChatScreenController)
-const chatScreenControllerProvider = ChatScreenControllerFamily();
+final chatScreenControllerProvider = ChatScreenControllerFamily._();
 
 /// Controller class for managing the state and logic of the chat screen.
 ///
 /// Extends [_$ChatScreenController] to provide reactive state management
 /// and business logic for chat-related features, such as handling messages,
 /// user interactions, and UI updates within the chat screen.
-///
-/// Copied from [ChatScreenController].
-class ChatScreenControllerFamily extends Family<ChatScreenState> {
+final class ChatScreenControllerProvider
+    extends $NotifierProvider<ChatScreenController, ChatScreenState> {
   /// Controller class for managing the state and logic of the chat screen.
   ///
   /// Extends [_$ChatScreenController] to provide reactive state management
   /// and business logic for chat-related features, such as handling messages,
   /// user interactions, and UI updates within the chat screen.
-  ///
-  /// Copied from [ChatScreenController].
-  const ChatScreenControllerFamily();
+  ChatScreenControllerProvider._({
+    required ChatScreenControllerFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'chatScreenControllerProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
-  /// Controller class for managing the state and logic of the chat screen.
-  ///
-  /// Extends [_$ChatScreenController] to provide reactive state management
-  /// and business logic for chat-related features, such as handling messages,
-  /// user interactions, and UI updates within the chat screen.
-  ///
-  /// Copied from [ChatScreenController].
-  ChatScreenControllerProvider call(String contactId) {
-    return ChatScreenControllerProvider(contactId);
+  @override
+  String debugGetCreateSourceHash() => _$chatScreenControllerHash();
+
+  @override
+  String toString() {
+    return r'chatScreenControllerProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  ChatScreenControllerProvider getProviderOverride(
-    covariant ChatScreenControllerProvider provider,
-  ) {
-    return call(provider.contactId);
-  }
+  ChatScreenController create() => ChatScreenController();
 
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'chatScreenControllerProvider';
-}
-
-/// Controller class for managing the state and logic of the chat screen.
-///
-/// Extends [_$ChatScreenController] to provide reactive state management
-/// and business logic for chat-related features, such as handling messages,
-/// user interactions, and UI updates within the chat screen.
-///
-/// Copied from [ChatScreenController].
-class ChatScreenControllerProvider
-    extends
-        AutoDisposeNotifierProviderImpl<ChatScreenController, ChatScreenState> {
-  /// Controller class for managing the state and logic of the chat screen.
-  ///
-  /// Extends [_$ChatScreenController] to provide reactive state management
-  /// and business logic for chat-related features, such as handling messages,
-  /// user interactions, and UI updates within the chat screen.
-  ///
-  /// Copied from [ChatScreenController].
-  ChatScreenControllerProvider(String contactId)
-    : this._internal(
-        () => ChatScreenController()..contactId = contactId,
-        from: chatScreenControllerProvider,
-        name: r'chatScreenControllerProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$chatScreenControllerHash,
-        dependencies: ChatScreenControllerFamily._dependencies,
-        allTransitiveDependencies:
-            ChatScreenControllerFamily._allTransitiveDependencies,
-        contactId: contactId,
-      );
-
-  ChatScreenControllerProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.contactId,
-  }) : super.internal();
-
-  final String contactId;
-
-  @override
-  ChatScreenState runNotifierBuild(covariant ChatScreenController notifier) {
-    return notifier.build(contactId);
-  }
-
-  @override
-  Override overrideWith(ChatScreenController Function() create) {
-    return ProviderOverride(
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChatScreenState value) {
+    return $ProviderOverride(
       origin: this,
-      override: ChatScreenControllerProvider._internal(
-        () => create()..contactId = contactId,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        contactId: contactId,
-      ),
+      providerOverride: $SyncValueProvider<ChatScreenState>(value),
     );
   }
 
   @override
-  AutoDisposeNotifierProviderElement<ChatScreenController, ChatScreenState>
-  createElement() {
-    return _ChatScreenControllerProviderElement(this);
-  }
-
-  @override
   bool operator ==(Object other) {
-    return other is ChatScreenControllerProvider &&
-        other.contactId == contactId;
+    return other is ChatScreenControllerProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, contactId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin ChatScreenControllerRef
-    on AutoDisposeNotifierProviderRef<ChatScreenState> {
-  /// The parameter `contactId` of this provider.
-  String get contactId;
-}
+String _$chatScreenControllerHash() =>
+    r'388723e7efb679c922c48e2a89a0b91bb11b5c34';
 
-class _ChatScreenControllerProviderElement
-    extends
-        AutoDisposeNotifierProviderElement<
+/// Controller class for managing the state and logic of the chat screen.
+///
+/// Extends [_$ChatScreenController] to provide reactive state management
+/// and business logic for chat-related features, such as handling messages,
+/// user interactions, and UI updates within the chat screen.
+
+final class ChatScreenControllerFamily extends $Family
+    with
+        $ClassFamilyOverride<
           ChatScreenController,
-          ChatScreenState
-        >
-    with ChatScreenControllerRef {
-  _ChatScreenControllerProviderElement(super.provider);
+          ChatScreenState,
+          ChatScreenState,
+          ChatScreenState,
+          String
+        > {
+  ChatScreenControllerFamily._()
+    : super(
+        retry: null,
+        name: r'chatScreenControllerProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Controller class for managing the state and logic of the chat screen.
+  ///
+  /// Extends [_$ChatScreenController] to provide reactive state management
+  /// and business logic for chat-related features, such as handling messages,
+  /// user interactions, and UI updates within the chat screen.
+
+  ChatScreenControllerProvider call(String contactId) =>
+      ChatScreenControllerProvider._(argument: contactId, from: this);
 
   @override
-  String get contactId => (origin as ChatScreenControllerProvider).contactId;
+  String toString() => r'chatScreenControllerProvider';
 }
 
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+/// Controller class for managing the state and logic of the chat screen.
+///
+/// Extends [_$ChatScreenController] to provide reactive state management
+/// and business logic for chat-related features, such as handling messages,
+/// user interactions, and UI updates within the chat screen.
+
+abstract class _$ChatScreenController extends $Notifier<ChatScreenState> {
+  late final _$args = ref.$arg as String;
+  String get contactId => _$args;
+
+  ChatScreenState build(String contactId);
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<ChatScreenState, ChatScreenState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<ChatScreenState, ChatScreenState>,
+              ChatScreenState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, () => build(_$args));
+  }
+}

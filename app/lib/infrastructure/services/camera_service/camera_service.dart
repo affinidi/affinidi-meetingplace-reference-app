@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -48,18 +49,22 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
 
   late final AppLogger _logger = ref.read(appLoggerProvider);
   static const _logKey = 'CAMSVCS';
+  CameraController? _activeController;
 
   @override
   CameraServiceState build() {
     WidgetsBinding.instance.addObserver(this);
-    ref.onDispose(() {
-      WidgetsBinding.instance.removeObserver(this);
-      state.controller?.dispose();
-    });
+    ref.onDispose(_dispose);
 
     Future(checkCameraAvailability);
 
     return CameraServiceState();
+  }
+
+  void _dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _activeController?.dispose();
+    _activeController = null;
   }
 
   @override
@@ -95,6 +100,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
 
     await controller.initialize();
 
+    _activeController = controller;
     state = state.copyWith(
       controller: controller,
       cameras: cameras,
@@ -136,6 +142,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   /// Sets the controller in state to `null`.
   Future<void> closeCamera() async {
     final controller = state.controller;
+    _activeController = null;
     state = state.copyWith(controller: null);
 
     await controller?.dispose();

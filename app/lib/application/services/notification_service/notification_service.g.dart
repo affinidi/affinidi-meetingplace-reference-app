@@ -6,6 +6,62 @@ part of 'notification_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Service responsible for tracking notification counters for app features.
+///
+/// This service:
+/// - Observes contacts and connections providers for badge counts.
+/// - Maintains per-type counters (contacts, connections) in state.
+/// - Exposes counter state via the provider for UI to display aggregated
+///  counts.
+
+@ProviderFor(NotificationService)
+final notificationServiceProvider = NotificationServiceProvider._();
+
+/// Service responsible for tracking notification counters for app features.
+///
+/// This service:
+/// - Observes contacts and connections providers for badge counts.
+/// - Maintains per-type counters (contacts, connections) in state.
+/// - Exposes counter state via the provider for UI to display aggregated
+///  counts.
+final class NotificationServiceProvider
+    extends $NotifierProvider<NotificationService, NotificationServiceState> {
+  /// Service responsible for tracking notification counters for app features.
+  ///
+  /// This service:
+  /// - Observes contacts and connections providers for badge counts.
+  /// - Maintains per-type counters (contacts, connections) in state.
+  /// - Exposes counter state via the provider for UI to display aggregated
+  ///  counts.
+  NotificationServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'notificationServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$notificationServiceHash();
+
+  @$internal
+  @override
+  NotificationService create() => NotificationService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(NotificationServiceState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<NotificationServiceState>(value),
+    );
+  }
+}
+
 String _$notificationServiceHash() =>
     r'b63bfe651b102ebecb42be4c6c517432e853e9de';
 
@@ -16,20 +72,23 @@ String _$notificationServiceHash() =>
 /// - Maintains per-type counters (contacts, connections) in state.
 /// - Exposes counter state via the provider for UI to display aggregated
 ///  counts.
-///
-/// Copied from [NotificationService].
-@ProviderFor(NotificationService)
-final notificationServiceProvider =
-    NotifierProvider<NotificationService, NotificationServiceState>.internal(
-      NotificationService.new,
-      name: r'notificationServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$notificationServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$NotificationService = Notifier<NotificationServiceState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$NotificationService
+    extends $Notifier<NotificationServiceState> {
+  NotificationServiceState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<NotificationServiceState, NotificationServiceState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<NotificationServiceState, NotificationServiceState>,
+              NotificationServiceState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

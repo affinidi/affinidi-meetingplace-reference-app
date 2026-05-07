@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class AcceptOfferRoute extends GoRouteData with _$AcceptOfferRoute {
+class AcceptOfferRoute extends GoRouteData with $AcceptOfferRoute {
   AcceptOfferRoute({required String mnemonic, required String identityId})
     : _mnemonic = mnemonic,
       _identityId = identityId;

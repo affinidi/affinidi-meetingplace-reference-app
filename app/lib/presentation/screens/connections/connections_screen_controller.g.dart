@@ -6,25 +6,62 @@ part of 'connections_screen_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(ConnectionsScreenController)
+final connectionsScreenControllerProvider =
+    ConnectionsScreenControllerProvider._();
+
+final class ConnectionsScreenControllerProvider
+    extends
+        $NotifierProvider<ConnectionsScreenController, ConnectionsScreenState> {
+  ConnectionsScreenControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'connectionsScreenControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$connectionsScreenControllerHash();
+
+  @$internal
+  @override
+  ConnectionsScreenController create() => ConnectionsScreenController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ConnectionsScreenState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ConnectionsScreenState>(value),
+    );
+  }
+}
+
 String _$connectionsScreenControllerHash() =>
     r'c8fd0a49c97669a8368862676d20821d245745d4';
 
-/// See also [ConnectionsScreenController].
-@ProviderFor(ConnectionsScreenController)
-final connectionsScreenControllerProvider =
-    NotifierProvider<
-      ConnectionsScreenController,
-      ConnectionsScreenState
-    >.internal(
-      ConnectionsScreenController.new,
-      name: r'connectionsScreenControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$connectionsScreenControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$ConnectionsScreenController = Notifier<ConnectionsScreenState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$ConnectionsScreenController
+    extends $Notifier<ConnectionsScreenState> {
+  ConnectionsScreenState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<ConnectionsScreenState, ConnectionsScreenState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<ConnectionsScreenState, ConnectionsScreenState>,
+              ConnectionsScreenState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

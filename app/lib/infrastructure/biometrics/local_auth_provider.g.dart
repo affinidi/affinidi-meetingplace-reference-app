@@ -6,27 +6,65 @@ part of 'local_auth_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$localAuthHash() => r'352b04d375edb7326ce1ca3fb7835db923b866eb';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Provides a LocalAuthentication instance from the `local_auth` plugin.
+///
+/// Factory parameters:
+/// - [ref] - Riverpod Ref used to construct the provider.
+
+@ProviderFor(localAuth)
+final localAuthProvider = LocalAuthProvider._();
 
 /// Provides a LocalAuthentication instance from the `local_auth` plugin.
 ///
 /// Factory parameters:
 /// - [ref] - Riverpod Ref used to construct the provider.
-///
-/// Copied from [localAuth].
-@ProviderFor(localAuth)
-final localAuthProvider = Provider<LocalAuthentication>.internal(
-  localAuth,
-  name: r'localAuthProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$localAuthHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef LocalAuthRef = ProviderRef<LocalAuthentication>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class LocalAuthProvider
+    extends
+        $FunctionalProvider<
+          LocalAuthentication,
+          LocalAuthentication,
+          LocalAuthentication
+        >
+    with $Provider<LocalAuthentication> {
+  /// Provides a LocalAuthentication instance from the `local_auth` plugin.
+  ///
+  /// Factory parameters:
+  /// - [ref] - Riverpod Ref used to construct the provider.
+  LocalAuthProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'localAuthProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$localAuthHash();
+
+  @$internal
+  @override
+  $ProviderElement<LocalAuthentication> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  LocalAuthentication create(Ref ref) {
+    return localAuth(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(LocalAuthentication value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<LocalAuthentication>(value),
+    );
+  }
+}
+
+String _$localAuthHash() => r'352b04d375edb7326ce1ca3fb7835db923b866eb';

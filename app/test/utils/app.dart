@@ -96,7 +96,6 @@ Future<void> startApp(
         (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated),
       ),
       chatRepositoryProvider.overrideWith(chatRepositoryInMemoryDrift),
-      environmentProvider.overrideWithValue(FakeEnvironment()),
       channelRepositoryProvider.overrideWith(channelRepositoryInMemoryDrift),
       connectionOfferRepositoryProvider.overrideWith(
         connectionOfferRepositoryInMemoryDrift,

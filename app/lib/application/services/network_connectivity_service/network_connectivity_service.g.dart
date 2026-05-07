@@ -6,28 +6,79 @@ part of 'network_connectivity_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Service for monitoring network connectivity status and notifying changes.
+
+@ProviderFor(NetworkConnectivityService)
+final networkConnectivityServiceProvider =
+    NetworkConnectivityServiceProvider._();
+
+/// Service for monitoring network connectivity status and notifying changes.
+final class NetworkConnectivityServiceProvider
+    extends
+        $NotifierProvider<
+          NetworkConnectivityService,
+          NetworkConnectivityServiceState
+        > {
+  /// Service for monitoring network connectivity status and notifying changes.
+  NetworkConnectivityServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'networkConnectivityServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$networkConnectivityServiceHash();
+
+  @$internal
+  @override
+  NetworkConnectivityService create() => NetworkConnectivityService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(NetworkConnectivityServiceState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<NetworkConnectivityServiceState>(
+        value,
+      ),
+    );
+  }
+}
+
 String _$networkConnectivityServiceHash() =>
     r'c39ef7af6a96313a30e8e2612bfdaf8651afe737';
 
 /// Service for monitoring network connectivity status and notifying changes.
-///
-/// Copied from [NetworkConnectivityService].
-@ProviderFor(NetworkConnectivityService)
-final networkConnectivityServiceProvider =
-    NotifierProvider<
-      NetworkConnectivityService,
-      NetworkConnectivityServiceState
-    >.internal(
-      NetworkConnectivityService.new,
-      name: r'networkConnectivityServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$networkConnectivityServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$NetworkConnectivityService =
-    Notifier<NetworkConnectivityServiceState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$NetworkConnectivityService
+    extends $Notifier<NetworkConnectivityServiceState> {
+  NetworkConnectivityServiceState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              NetworkConnectivityServiceState,
+              NetworkConnectivityServiceState
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                NetworkConnectivityServiceState,
+                NetworkConnectivityServiceState
+              >,
+              NetworkConnectivityServiceState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

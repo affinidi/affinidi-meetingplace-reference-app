@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class ConnectionDetailsRoute extends GoRouteData with _$ConnectionDetailsRoute {
+class ConnectionDetailsRoute extends GoRouteData with $ConnectionDetailsRoute {
   const ConnectionDetailsRoute({required this.contactId});
 
   final String contactId;
