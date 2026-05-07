@@ -56,7 +56,7 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
           options: MeetingPlaceCoreSDKOptions(
             onBuildAttachments:
                 (
-                  channel,
+                  Channel channel,
                   Future<DidManager> Function(String did) getDidManager,
                 ) async {
                   try {
