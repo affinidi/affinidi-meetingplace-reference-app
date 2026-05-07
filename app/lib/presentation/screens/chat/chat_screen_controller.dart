@@ -19,6 +19,7 @@ import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
+import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
@@ -546,6 +547,17 @@ class ChatScreenController extends _$ChatScreenController
     unawaited(
       _chatService?.sendTextMessage(trimmedMessage, attachments: attachments),
     );
+  }
+
+  bool get canRequestZkp => _isChannelReadyForZkp(state.contact?.status);
+
+  bool _isChannelReadyForZkp(ContactStatus? status) {
+    final hasIncomingMessageFromOtherParty = state.messages.any(
+      (item) => item is chat.Message && !item.isFromMe,
+    );
+    return state.isInitialized &&
+        hasIncomingMessageFromOtherParty &&
+        (status == ContactStatus.approved || status == ContactStatus.active);
   }
 
   Future<void> sendChatActivity() async {

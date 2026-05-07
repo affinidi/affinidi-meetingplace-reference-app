@@ -10,6 +10,14 @@ class _LivenessBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(proofFlowControllerProvider(_contactId));
     final chatState = ref.watch(chatScreenControllerProvider(_contactId));
+    final hasIncomingMessageFromOtherParty = chatState.messages.any(
+      (item) => item is chat.Message && !item.isFromMe,
+    );
+    final canRequestZkp =
+        chatState.isInitialized &&
+        hasIncomingMessageFromOtherParty &&
+        (chatState.contact?.status == ContactStatus.approved ||
+            chatState.contact?.status == ContactStatus.active);
     final contactName =
         chatState.contact?.displayName ??
         chatState.contact?.card.firstName ??
@@ -17,7 +25,7 @@ class _LivenessBanner extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    if (!state.showBanner || state.bannerDismissed) {
+    if (!state.showBanner || state.bannerDismissed || !canRequestZkp) {
       return const SizedBox.shrink();
     }
 
