@@ -1,8 +1,6 @@
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import '../../../domain/models/contacts/contact_presence_status.dart';
-import '../../../presentation/screens/chat/chat_screen_controller.dart'
-    show ChatScreenController;
 import 'delegates/chat_concierge_messenger.dart' show ChatConciergeMessenger;
 import 'delegates/chat_group_manager.dart' show ChatGroupManager;
 import 'delegates/interfaces/concierge_messaging.dart';
@@ -11,7 +9,7 @@ import 'delegates/interfaces/group_managing.dart';
 /// Unified facade for managing a chat session.
 ///
 /// Extends [ConciergeMessaging] and [GroupManaging] to aggregate all
-/// chat-related operations into a single interface for [ChatScreenController].
+/// chat-related operations into a single application-layer interface.
 /// Concrete implementations delegate concierge and group operations to
 /// [ChatConciergeMessenger] and [ChatGroupManager] internally.
 abstract class ChatService implements ConciergeMessaging, GroupManaging {
