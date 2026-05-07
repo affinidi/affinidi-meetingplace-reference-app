@@ -268,7 +268,6 @@ class _IdentityContent extends StatelessWidget {
         for (final field in fields) ...[
           _ContactInfoRow(
             icon: field.icon,
-            label: field.label(l10n),
             text: _valueOrNotShared(
               field.valueFrom(identity.card),
               l10n.notShared,
@@ -290,13 +289,11 @@ class _IdentityContent extends StatelessWidget {
 class _ContactInfoRow extends StatelessWidget {
   const _ContactInfoRow({
     required this.icon,
-    required this.label,
     required this.text,
     required this.identityCardSize,
   });
 
   final IconData icon;
-  final String label;
   final String text;
   final IdentityCardSize identityCardSize;
 
