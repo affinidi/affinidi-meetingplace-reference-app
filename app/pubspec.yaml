@@ -84,8 +84,7 @@ dependencies:
   stack_trace: ^1.12.1
   synchronized: ^3.4.0
   uuid: ^4.5.1
-  vc_zkp:
-    path: ../../affinidi-vc-zkp-dart
+  vc_zkp: ^1.2.4
   video_player: ^2.10.0
 
 hooks:

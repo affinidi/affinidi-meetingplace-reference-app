@@ -2021,10 +2021,11 @@ packages:
   vc_zkp:
     dependency: transitive
     description:
-      path: "../affinidi-vc-zkp-dart"
-      relative: true
-    source: path
-    version: "1.0.0"
+      name: vc_zkp
+      sha256: "4ed87f70d832063bd4905a71e7f3655b93189b87b6ff5c05b2ca5a222ff47584"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.4"
   vector_graphics:
     dependency: transitive
     description:
