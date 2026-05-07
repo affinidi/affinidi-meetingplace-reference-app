@@ -7,7 +7,7 @@ part of 'debug_panel_controller.dart';
 // **************************************************************************
 
 String _$debugPanelControllerHash() =>
-    r'd1af49c9d10b068808d7c270b04d94add35cd26c';
+    r'39bc1b2be66c011c8d0d232d87f48de32465edef';
 
 /// See also [DebugPanelController].
 @ProviderFor(DebugPanelController)
