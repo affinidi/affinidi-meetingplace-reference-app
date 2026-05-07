@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../widgets/banners/zkp_notice_banner.dart';
 import 'chat_screen_controller.dart';
-import 'liveness_check_screen.dart';
+import '../zkp/liveness_check_screen.dart';
 import 'proof_flow_controller.dart';
 
 class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
@@ -12,8 +12,8 @@ class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
     super.key,
     required ZkpRequestReceivedNotice chatItem,
     required String contactId,
-  })  : _chatItem = chatItem,
-        _contactId = contactId;
+  }) : _chatItem = chatItem,
+       _contactId = contactId;
 
   final ZkpRequestReceivedNotice _chatItem;
   final String _contactId;
@@ -27,9 +27,7 @@ class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
       onGenerateProof: () {
         Navigator.of(context).push<void>(
           MaterialPageRoute(
-            builder: (context) => LivenessCheckScreen(
-              contactId: _contactId,
-            ),
+            builder: (context) => LivenessCheckScreen(contactId: _contactId),
           ),
         );
       },
