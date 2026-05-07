@@ -24,6 +24,7 @@ import '../../../domain/models/chat/zkp_proof_shared_notice.dart';
 import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
+import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/configuration/environment.dart';

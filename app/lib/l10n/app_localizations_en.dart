@@ -1762,7 +1762,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mockLivenessCredentialGenerated =>
-      'A mock Liveness Credential has been generated and securely stored under the Credentials tab.\nYou can now continue to generate a Human Zero-Knowledge proof.';
+      'A mock Liveness Credential has been generated and securely stored under the Credentials tab.';
+
+  @override
+  String get mockLivenessCredentialNext =>
+      'You can now continue to generate a Human Zero-Knowledge proof.';
 
   @override
   String get doLater => 'Do later';
