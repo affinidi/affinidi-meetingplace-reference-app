@@ -374,5 +374,5 @@
 	"zkpNoticePaused": "Has pausado la solicitud de prueba de ZKP humano.\nToca el icono \"+\" para reiniciarla.",
 	"zkpNoticeShared": "Has compartido una Prueba de Conocimiento Cero que confirma que eres humano.\n*No se compartieron datos personales.",
 	"zkpNoticeReceived": "{contactName} ha compartido una Prueba de Conocimiento Cero que confirma que es humano.",
-	"zkpNoticeRequest": "{contactName} ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida."
+	"zkpNoticeRequest": "{contactName} ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano. Puedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida."
 }
