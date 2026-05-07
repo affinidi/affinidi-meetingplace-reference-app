@@ -3,7 +3,7 @@ import 'package:form_field_validator/form_field_validator.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../../infrastructure/extensions/map_path_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../presentation/themes/app_custom_colors.dart';
 import '../../../presentation/validators/max_length_validator_type.dart';
@@ -77,7 +77,7 @@ class ContactCardFieldDefinition {
   String valueFrom(ContactCard card) => _valueAccessor(card) ?? '';
 
   String sdkValueFrom(sdk.ContactCard card) {
-    return ContactCardUtils.getPathValue(card.contactInfo, jsonPath);
+    return card.contactInfo.getPathValue(jsonPath);
   }
 
   String? nullableValueFrom(ContactCard card) => _valueAccessor(card);

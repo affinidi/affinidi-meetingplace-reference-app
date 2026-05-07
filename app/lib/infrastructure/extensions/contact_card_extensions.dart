@@ -7,6 +7,7 @@ import '../../domain/models/contact_card/contact_card.dart';
 import '../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../presentation/painting/cached_base64_image.dart';
 import '../../presentation/widgets/images/default_profile_image.dart';
+import 'map_path_extensions.dart';
 import 'string_list_extensions.dart';
 
 enum ContactCardType {
@@ -34,51 +35,13 @@ class ContactCardUtils {
     Map<dynamic, dynamic> contactInfo,
     List<String> pathKeys, {
     String defaultValue = '',
-  }) {
-    if (pathKeys.isEmpty) return defaultValue;
-
-    var parentElement = contactInfo;
-    for (final pathKey in pathKeys) {
-      final elementAtPath = parentElement[pathKey];
-      if (elementAtPath == null) {
-        return defaultValue;
-      }
-
-      if ((pathKey == pathKeys.last) && elementAtPath is String) {
-        return elementAtPath;
-      }
-
-      if (elementAtPath is Map<dynamic, dynamic>) {
-        parentElement = elementAtPath;
-      }
-    }
-
-    return defaultValue;
-  }
+  }) => contactInfo.getPathValue(pathKeys, defaultValue: defaultValue);
 
   static void setPathValue(
     Map<dynamic, dynamic> contactInfo,
     List<String> pathKeys,
     String value,
-  ) {
-    if (pathKeys.isEmpty) return;
-
-    var parentElement = contactInfo;
-    for (final pathKey in pathKeys) {
-      if (pathKey == pathKeys.last) continue;
-
-      final elementAtPath = parentElement[pathKey];
-      if (elementAtPath == null) {
-        var newNode = <dynamic, dynamic>{};
-        parentElement[pathKey] = newNode;
-        parentElement = newNode;
-      } else if (elementAtPath is Map<dynamic, dynamic>) {
-        parentElement = elementAtPath;
-      }
-    }
-
-    parentElement[pathKeys.last] = value;
-  }
+  ) => contactInfo.setPathValue(pathKeys, value);
 
   static bool hasProfilePic(Map<dynamic, dynamic> contactInfo) {
     final pic = getPathValue(contactInfo, _profilePicPath);
