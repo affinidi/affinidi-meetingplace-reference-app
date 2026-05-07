@@ -64,4 +64,5 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
     required String vcBlob,
     required String senderDid,
   });
+  void upsertChatItem(ChatItem item);
 }

@@ -12,14 +12,11 @@ import 'chat_screen_controller.dart';
 import 'proof_flow_state.dart';
 
 final proofFlowControllerProvider =
-    StateNotifierProvider.family<ProofFlowController, ProofFlowState, String>((
-      ref,
-      contactId,
-    ) {
-      return ProofFlowController(ref: ref, contactId: contactId);
-    });
-
-class ProofFlowController extends StateNotifier<ProofFlowState> {
+    StateNotifierProvider.family<ProofFlowController, ProofFlowState, String>(
+      (ref, contactId) {
+        return ProofFlowController(ref: ref, contactId: contactId);
+      },
+    );
   ProofFlowController({required this.ref, required this.contactId})
     : super(const ProofFlowState()) {
     _logger = ref.read(appLoggerProvider);
