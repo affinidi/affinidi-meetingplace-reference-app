@@ -72,7 +72,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   /// Tapping opens the image in full-screen view via [ImageViewScreen].
   @override
   Widget renderAttachment({
-    required Attachment attachment,
+    required ChatAttachment attachment,
     required bool isFromMe,
     Color? chatItemColor,
   }) => _GalleryAttachmentWidget(
@@ -86,7 +86,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   /// ListView with disabled scrolling physics.
   @override
   Widget renderAttachments({
-    required List<Attachment> attachments,
+    required List<ChatAttachment> attachments,
     required bool isFromMe,
     Color? chatItemColor,
   }) => _ListGalleryAttachmentsWidget(
@@ -98,7 +98,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   ///
   /// Returns `true` if the attachment format matches this plugin's name.
   @override
-  bool supportsFormat(Attachment attachment) {
+  bool supportsFormat(ChatAttachment attachment) {
     return attachment.format == _pluginName;
   }
 
@@ -121,12 +121,12 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
 /// attachment as a separate [_GalleryAttachmentWidget].
 class _ListGalleryAttachmentsWidget extends StatelessWidget {
   const _ListGalleryAttachmentsWidget({
-    required List<Attachment> attachments,
+    required List<ChatAttachment> attachments,
     required BaseCacheManager cacheManager,
   }) : _attachments = attachments,
        _cacheManager = cacheManager;
 
-  final List<Attachment> _attachments;
+  final List<ChatAttachment> _attachments;
   final BaseCacheManager _cacheManager;
 
   @override
@@ -154,12 +154,12 @@ class _ListGalleryAttachmentsWidget extends StatelessWidget {
 /// - Returns empty widget if attachment data is invalid
 class _GalleryAttachmentWidget extends StatelessWidget {
   _GalleryAttachmentWidget({
-    required Attachment attachment,
+    required ChatAttachment attachment,
     required BaseCacheManager cacheManager,
   }) : _attachment = attachment,
        _cacheManager = cacheManager;
 
-  final Attachment _attachment;
+  final ChatAttachment _attachment;
   final BaseCacheManager _cacheManager;
 
   @override

@@ -136,7 +136,7 @@ class _TextMessage extends StatelessWidget {
 class _AttachmentWidget extends HookConsumerWidget {
   _AttachmentWidget({
     required String contactId,
-    required chat.Attachment attachment,
+    required chat.ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
   }) : _attachment = attachment,
@@ -144,7 +144,7 @@ class _AttachmentWidget extends HookConsumerWidget {
        _chatItemColor = chatItemColor,
        super(key: ValueKey('chat_attachment_${attachment.id!}'));
 
-  final chat.Attachment _attachment;
+  final chat.ChatAttachment _attachment;
   final bool _isFromMe;
   final Color _chatItemColor;
 

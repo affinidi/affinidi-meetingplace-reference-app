@@ -29,7 +29,11 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
 
   void onPresenceUpdated(DateTime datePresence);
 
-  Future<void> sendTextMessage(String message, {List<Attachment>? attachments});
+  Future<void> sendTextMessage(
+    String message, {
+    List<ChatAttachment>? attachments,
+  });
+
   Future<void> sendChatActivity();
   Future<void> reactOnMessage(Message message, {required String reaction});
   Future<void> sendEffect(Effect effectType);

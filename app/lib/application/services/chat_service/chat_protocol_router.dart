@@ -17,12 +17,11 @@ class ChatProtocolRouter {
 
   /// Dispatches `data` to every handler that can process its protocol type.
   Future<void> route(StreamData data, String channelDid) async {
-    final protocolType = data.plainTextMessage?.type.toString();
-    if (protocolType == null) return;
-
-    for (final handler in _handlers) {
-      if (handler.canHandle(protocolType)) {
-        await handler.handle(data, channelDid);
+    if (data.event case final event?) {
+      for (final handler in _handlers) {
+        if (handler.canHandle(event)) {
+          await handler.handle(event, channelDid);
+        }
       }
     }
   }
