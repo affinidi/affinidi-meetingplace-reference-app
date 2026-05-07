@@ -46,6 +46,13 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
     final chatController = ref.read(
       chatScreenControllerProvider(contactId).notifier,
     );
+    if (!chatController.canRequestZkp) {
+      _logger.warning(
+        'Skipped liveness request: channel is not ready for ZKP flow',
+        name: _logKey,
+      );
+      return;
+    }
 
     await chatController.sendMessageDirect(
       '', // Empty message - UI banners will show the request

@@ -75,6 +75,15 @@ class _ChatMediaOptions extends ConsumerWidget {
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
+    final chatState = ref.watch(provider);
+    final hasIncomingMessageFromOtherParty = chatState.messages.any(
+      (item) => item is chat.Message && !item.isFromMe,
+    );
+    final canRequestZkp =
+        chatState.isInitialized &&
+        hasIncomingMessageFromOtherParty &&
+        (chatState.contact?.status == ContactStatus.approved ||
+            chatState.contact?.status == ContactStatus.active);
     final availableAttachmentPlugins = ref.read(
       availableAttachmentPluginsProvider,
     );
@@ -138,15 +147,17 @@ class _ChatMediaOptions extends ConsumerWidget {
         _ChatMediaOptionItem(
           icon: Icons.verified_user,
           label: 'Human Zero-Knowledge Proof',
-          onTap: () {
-            // Trigger liveness check request
-            ref
-                .read(proofFlowControllerProvider(_contactId).notifier)
-                .requestLivenessCheck();
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
-          },
+          onTap: canRequestZkp
+              ? () {
+                  // Trigger liveness check request once channel is ready.
+                  ref
+                      .read(proofFlowControllerProvider(_contactId).notifier)
+                      .requestLivenessCheck();
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
+                }
+              : null,
         ),
     ];
 

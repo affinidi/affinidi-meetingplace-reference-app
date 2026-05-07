@@ -14,6 +14,7 @@ import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../domain/models/contacts/contact.dart';
+import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
@@ -31,6 +32,7 @@ import 'chat_zkp_handler.dart';
 part 'chat_screen_controller.g.dart';
 
 @riverpod
+
 /// Controller class for managing the state and logic of the chat screen.
 ///
 /// Extends [_$ChatScreenController] to provide reactive state management
@@ -60,12 +62,10 @@ class ChatScreenController extends _$ChatScreenController
   late final _chatResumingLock = Lock();
 
   late final Map<String, ProviderSubscription<void>>
-  _conciergeLoadingControllersSubscriptions = {};
-  late final Map<
-    String,
-    AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  >
-  _conciergeLoadingControllers = {};
+      _conciergeLoadingControllersSubscriptions = {};
+  late final Map<String,
+          AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>>
+      _conciergeLoadingControllers = {};
 
   ChatService? _chatService;
 
@@ -240,7 +240,7 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  _addConciergeSubscriptionIfNeeded(String id) {
+      _addConciergeSubscriptionIfNeeded(String id) {
     var existing = _conciergeLoadingControllers[id];
     if (existing == null) {
       existing = AsyncLoadingController.provider(id);
@@ -254,24 +254,24 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  conciergeApproveLoadingController(chat.ConciergeMessage message) {
+      conciergeApproveLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded('approve_${message.messageId}');
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  conciergeRejectLoadingController(chat.ConciergeMessage message) {
+      conciergeRejectLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded('reject_${message.messageId}');
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  conciergeSendProfileLoadingController(chat.ConciergeMessage message) {
+      conciergeSendProfileLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded(
       'send_profile_${message.messageId}',
     );
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  conciergeAskLaterToSendProfileLoadingController(
+      conciergeAskLaterToSendProfileLoadingController(
     chat.ConciergeMessage message,
   ) {
     return _addConciergeSubscriptionIfNeeded(
@@ -280,7 +280,8 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  conciergeCancelSendProfileLoadingController(chat.ConciergeMessage message) {
+      conciergeCancelSendProfileLoadingController(
+          chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded(
       'cancel_send_profile_${message.messageId}',
     );
@@ -325,9 +326,8 @@ class ChatScreenController extends _$ChatScreenController
     }
     final srcCard = channel.otherPartyContactCard;
     state = state.copyWith(
-      otherPartyCard: srcCard == null
-          ? null
-          : ContactCardUtils.fromSdkContactCard(srcCard),
+      otherPartyCard:
+          srcCard == null ? null : ContactCardUtils.fromSdkContactCard(srcCard),
       notificationToken: channel.otherPartyNotificationToken,
     );
 
@@ -424,6 +424,17 @@ class ChatScreenController extends _$ChatScreenController
     );
   }
 
+  bool get canRequestZkp => _isChannelReadyForZkp(state.contact?.status);
+
+  bool _isChannelReadyForZkp(ContactStatus? status) {
+    final hasIncomingMessageFromOtherParty = state.messages.any(
+      (item) => item is chat.Message && !item.isFromMe,
+    );
+    return state.isInitialized &&
+        hasIncomingMessageFromOtherParty &&
+        (status == ContactStatus.approved || status == ContactStatus.active);
+  }
+
   Future<void> sendChatActivity() async {
     _sendChatActivityTimedAction ??= TimedAction(
       onRun: (args) async {
@@ -496,13 +507,13 @@ class ChatScreenController extends _$ChatScreenController
       await ref
           .read(conciergeApproveLoadingController(chatItem).notifier)
           .start(() async {
-            _logger.info(
-              '''Approving membership for messageId: ${chatItem.messageId}''',
-              name: _logKey,
-            );
-            await _chatService?.approveConnectionRequest(chatItem);
-            await _updateGroupContactPendingStatus();
-          });
+        _logger.info(
+          '''Approving membership for messageId: ${chatItem.messageId}''',
+          name: _logKey,
+        );
+        await _chatService?.approveConnectionRequest(chatItem);
+        await _updateGroupContactPendingStatus();
+      });
     } finally {
       _hideActivity();
     }
@@ -543,14 +554,14 @@ class ChatScreenController extends _$ChatScreenController
     await ref
         .read(conciergeAskLaterToSendProfileLoadingController(message).notifier)
         .start(() async {
-          _logger.info(
-            '''Hiding profile update message till later for messageId: ${message.messageId}''',
-            name: _logKey,
-          );
-          final msgs = List.of(state.messages)
-            ..removeWhere((m) => m.messageId == message.messageId);
-          state = state.copyWith(messages: msgs);
-        });
+      _logger.info(
+        '''Hiding profile update message till later for messageId: ${message.messageId}''',
+        name: _logKey,
+      );
+      final msgs = List.of(state.messages)
+        ..removeWhere((m) => m.messageId == message.messageId);
+      state = state.copyWith(messages: msgs);
+    });
   }
 
   /// Cancels the ongoing process of updating contact details.
@@ -565,12 +576,12 @@ class ChatScreenController extends _$ChatScreenController
     await ref
         .read(conciergeCancelSendProfileLoadingController(message).notifier)
         .start(() async {
-          _logger.info(
-            '''Decided to not send profile update message for messageId: ${message.messageId}''',
-            name: _logKey,
-          );
-          await _chatService?.rejectChatContactDetailsUpdate(message);
-        });
+      _logger.info(
+        '''Decided to not send profile update message for messageId: ${message.messageId}''',
+        name: _logKey,
+      );
+      await _chatService?.rejectChatContactDetailsUpdate(message);
+    });
   }
 
   /// Sets a reaction for a specific message.
@@ -582,9 +593,8 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> setMessageReaction(String messageId, String reaction) async {
     try {
       _showActivity();
-      final message =
-          state.messages.firstWhereOrNull((m) => m.messageId == messageId)
-              as chat.Message?;
+      final message = state.messages
+          .firstWhereOrNull((m) => m.messageId == messageId) as chat.Message?;
 
       if (message == null) {
         throw AppException(
@@ -747,14 +757,13 @@ extension ChatScreenControllerProviderSelectors
 
   ProviderListenable<List<String>> get awaitingMemberNames {
     return select((state) {
-      final awaitingMembers = state.messages
-          .whereType<chat.EventMessage>()
-          .where(
-            (message) =>
-                message.eventType ==
-                    chat.EventMessageType.awaitingGroupMemberToJoin &&
-                message.status == chat.ChatItemStatus.received,
-          );
+      final awaitingMembers =
+          state.messages.whereType<chat.EventMessage>().where(
+                (message) =>
+                    message.eventType ==
+                        chat.EventMessageType.awaitingGroupMemberToJoin &&
+                    message.status == chat.ChatItemStatus.received,
+              );
 
       final memberDidsWhoLeft = state.messages
           .whereType<chat.EventMessage>()
