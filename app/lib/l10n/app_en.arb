@@ -1627,5 +1627,70 @@
 	"human": "Human",
 	"@human": {
 		"type": "text"
+	},
+	"proofFlowThisContact": "this contact",
+	"@proofFlowThisContact": {
+		"type": "text"
+	},
+	"proofFlowContact": "Contact",
+	"@proofFlowContact": {
+		"type": "text"
+	},
+	"proofFlowCheckIfHuman": "Check if {contactName} is human using a Zero\u2011Knowledge Proof (ZKP) derived from a Liveness Credential.",
+	"@proofFlowCheckIfHuman": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
+	},
+	"proofFlowRequestProof": "Request proof",
+	"@proofFlowRequestProof": {
+		"type": "text"
+	},
+	"proofFlowVerifyingProof": "Verifying proof from {contactName}...",
+	"@proofFlowVerifyingProof": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
+	},
+	"proofFlowVerificationFailed": "Verification failed for {contactName}",
+	"@proofFlowVerificationFailed": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
+	},
+	"zkpNoticePaused": "You paused the Human ZKP proof request.\nTap the \"+\" icon to restart it.",
+	"@zkpNoticePaused": {
+		"type": "text"
+	},
+	"zkpNoticeShared": "You have shared a Zero\u2011Knowledge Proof confirming you are human.\n*No personal data was shared.",
+	"@zkpNoticeShared": {
+		"type": "text"
+	},
+	"zkpNoticeReceived": "{contactName} has shared a Zero\u2011Knowledge Proof confirming they are human.",
+	"@zkpNoticeReceived": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
+	},
+	"zkpNoticeRequest": "{contactName} has requested a Zero\u2011Knowledge Proof to confirm you are human.\nYou can generate the proof using an existing Liveness Credential or complete a quick liveness check.",
+	"@zkpNoticeRequest": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
 	}
 }

@@ -1817,4 +1817,46 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get human => 'Humano';
+
+  @override
+  String get proofFlowThisContact => 'este contacto';
+
+  @override
+  String get proofFlowContact => 'Contacto';
+
+  @override
+  String proofFlowCheckIfHuman(String contactName) {
+    return 'Comprueba si $contactName es humano usando una Prueba de Conocimiento Cero (ZKP) derivada de una Credencial de Detección de Vida.';
+  }
+
+  @override
+  String get proofFlowRequestProof => 'Solicitar prueba';
+
+  @override
+  String proofFlowVerifyingProof(String contactName) {
+    return 'Verificando prueba de $contactName...';
+  }
+
+  @override
+  String proofFlowVerificationFailed(String contactName) {
+    return 'Verificación fallida para $contactName';
+  }
+
+  @override
+  String get zkpNoticePaused =>
+      'Has pausado la solicitud de prueba de ZKP humano.\nToca el icono \"+\" para reiniciarla.';
+
+  @override
+  String get zkpNoticeShared =>
+      'Has compartido una Prueba de Conocimiento Cero que confirma que eres humano.\n*No se compartieron datos personales.';
+
+  @override
+  String zkpNoticeReceived(String contactName) {
+    return '$contactName ha compartido una Prueba de Conocimiento Cero que confirma que es humano.';
+  }
+
+  @override
+  String zkpNoticeRequest(String contactName) {
+    return '$contactName ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.';
+  }
 }

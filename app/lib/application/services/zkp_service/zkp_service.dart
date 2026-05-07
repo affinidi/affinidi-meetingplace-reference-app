@@ -34,9 +34,9 @@ class ZkpService {
   late final AppLogger _logger;
 
   static const _logKey = 'ZkpService';
-  static const _wcdAsset = 'assets/SimpleVCProof.wcd';
-  static const _zkeyAsset = 'assets/SimpleVCProof.groth16.zkey';
-  static const _vkeyAsset = 'assets/SimpleVCProof.groth16.vkey.json';
+  static const _wcdAsset = 'assets/zkp/SimpleVCProof.wcd';
+  static const _zkeyAsset = 'assets/zkp/SimpleVCProof.groth16.zkey';
+  static const _vkeyAsset = 'assets/zkp/SimpleVCProof.groth16.vkey.json';
 
   /// Generate random blinder factor (field element string)
   String _randomBlinderFactor() {

@@ -455,5 +455,15 @@
 	"types": "Tipos",
 	"issuer": "Emisor",
 	"issuedOn": "Emitido el",
-	"human": "Humano"
+	"human": "Humano",
+	"proofFlowThisContact": "este contacto",
+	"proofFlowContact": "Contacto",
+	"proofFlowCheckIfHuman": "Comprueba si {contactName} es humano usando una Prueba de Conocimiento Cero (ZKP) derivada de una Credencial de Detección de Vida.",
+	"proofFlowRequestProof": "Solicitar prueba",
+	"proofFlowVerifyingProof": "Verificando prueba de {contactName}...",
+	"proofFlowVerificationFailed": "Verificación fallida para {contactName}",
+	"zkpNoticePaused": "Has pausado la solicitud de prueba de ZKP humano.\nToca el icono \"+\" para reiniciarla.",
+	"zkpNoticeShared": "Has compartido una Prueba de Conocimiento Cero que confirma que eres humano.\n*No se compartieron datos personales.",
+	"zkpNoticeReceived": "{contactName} ha compartido una Prueba de Conocimiento Cero que confirma que es humano.",
+	"zkpNoticeRequest": "{contactName} ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida."
 }

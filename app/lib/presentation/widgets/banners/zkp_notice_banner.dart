@@ -45,26 +45,23 @@ class ZkpNoticeBanner extends ConsumerWidget {
       case ZkpNoticeType.paused:
         return ConciergeMessage(
           dateCreated: dateCreated,
-          message:
-              'You paused the Human ZKP request.\nTap "+" icon to restart it.',
+          message: context.l10n.zkpNoticePaused,
         );
 
       case ZkpNoticeType.shared:
         return _ProofNotice(
           dateCreated: dateCreated,
           isFromMe: true,
-          message:
-              'You have shared a Zero‑Knowledge Proof confirming you are '
-              'human.\n*No personal data was shared.',
+          message: context.l10n.zkpNoticeShared,
         );
 
       case ZkpNoticeType.received:
         return _ProofNotice(
           dateCreated: dateCreated,
           isFromMe: false,
-          message:
-              '${contactName ?? 'Contact'} has shared a Zero‑Knowledge Proof '
-              'confirming they are human.',
+          message: context.l10n.zkpNoticeReceived(
+            contactName ?? context.l10n.proofFlowContact,
+          ),
         );
 
       case ZkpNoticeType.request:
@@ -105,57 +102,54 @@ class _ProofNotice extends StatelessWidget {
             fullWidth: true,
           ),
           const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-              alignment: isFromMe
-                  ? Alignment.centerRight
-                  : Alignment.centerLeft,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
+          Align(
+            alignment: isFromMe ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              margin: isFromMe
+                  ? const EdgeInsets.only(left: 60)
+                  : const EdgeInsets.only(right: 60),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: const Alignment(-0.5, -1.3),
+                  end: const Alignment(0.342, 2.2),
+                  colors: [Colors.black, colorScheme.primary],
+                  stops: const [0.4, 1.075],
                 ),
-                margin: isFromMe
-                    ? const EdgeInsets.only(left: 60)
-                    : const EdgeInsets.only(right: 60),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: const Alignment(-0.5, -1.3),
-                    end: const Alignment(0.342, 2.2),
-                    colors: [Colors.black, colorScheme.primary],
-                    stops: const [0.4, 1.075],
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isFromMe
+                      ? colorScheme.primary
+                      : const Color(0xFF2E3035),
+                  width: 4,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0x4D0368C0),
+                    ),
+                    child: Icon(
+                      Icons.verified_user,
+                      size: 22,
+                      color: colorScheme.primary,
+                    ),
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: colorScheme.primary, width: 1),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black.withValues(alpha: 0.3),
-                      ),
-                      child: Icon(
-                        Icons.verified_user,
-                        size: 22,
-                        color: colorScheme.primary,
-                      ),
+                  const SizedBox(width: 12),
+                  Text(
+                    context.l10n.humanZkp,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      context.l10n.humanZkp,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -198,10 +192,10 @@ class _ProofRequestNotice extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Text(
-            'Concierge Message',
+          Text(
+            context.l10n.genWordConciergeMessage,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -209,10 +203,9 @@ class _ProofRequestNotice extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '${contactName ?? 'Someone'} has requested a Zero‑Knowledge '
-            'Proof to confirm you are human.\n'
-            'You can generate the proof using an existing Liveness Credential '
-            'or complete a quick liveness check.',
+            context.l10n.zkpNoticeRequest(
+              contactName ?? context.l10n.proofFlowThisContact,
+            ),
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white, fontSize: 12),
           ),
@@ -234,7 +227,7 @@ class _ProofRequestNotice extends StatelessWidget {
                     ),
                     onPressed: onGenerateProof,
                     child: Text(
-                      'Generate proof',
+                      context.l10n.generateProof,
                       style: TextStyle(
                         color: colorScheme.surface.withValues(alpha: 0.8),
                       ),
@@ -254,9 +247,9 @@ class _ProofRequestNotice extends StatelessWidget {
                       ),
                     ),
                     onPressed: onDoLater,
-                    child: const Text(
-                      'Do later',
-                      style: TextStyle(color: Colors.white),
+                    child: Text(
+                      context.l10n.doLater,
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
