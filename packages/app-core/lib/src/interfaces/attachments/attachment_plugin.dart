@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart';
 
-import 'attachment_plugin_icon.dart';
-import 'attachment_plugin_pick_result.dart';
+import '../../../mpx_app_core.dart';
 
 abstract interface class AttachmentPlugin {
   AttachmentPluginIcon get icon;
