@@ -3,8 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../widgets/banners/zkp_notice_banner.dart';
-import 'chat_screen_controller.dart';
 import '../zkp/liveness_check_screen.dart';
+import 'chat_screen_controller.dart';
 import 'proof_flow_controller.dart';
 
 class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {

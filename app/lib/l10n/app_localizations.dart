@@ -2301,6 +2301,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Human'**
   String get human;
+
+  /// No description provided for @proofFlowThisContact.
+  ///
+  /// In en, this message translates to:
+  /// **'this contact'**
+  String get proofFlowThisContact;
+
+  /// No description provided for @proofFlowContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get proofFlowContact;
+
+  /// No description provided for @proofFlowCheckIfHuman.
+  ///
+  /// In en, this message translates to:
+  /// **'Check if {contactName} is human using a Zero‑Knowledge Proof (ZKP) derived from a Liveness Credential.'**
+  String proofFlowCheckIfHuman(String contactName);
+
+  /// No description provided for @proofFlowRequestProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Request proof'**
+  String get proofFlowRequestProof;
+
+  /// No description provided for @proofFlowVerifyingProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying proof from {contactName}...'**
+  String proofFlowVerifyingProof(String contactName);
+
+  /// No description provided for @proofFlowVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed for {contactName}'**
+  String proofFlowVerificationFailed(String contactName);
+
+  /// No description provided for @zkpNoticePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'You paused the Human ZKP proof request.\nTap the \"+\" icon to restart it.'**
+  String get zkpNoticePaused;
+
+  /// No description provided for @zkpNoticeShared.
+  ///
+  /// In en, this message translates to:
+  /// **'You have shared a Zero‑Knowledge Proof confirming you are human.\n*No personal data was shared.'**
+  String get zkpNoticeShared;
+
+  /// No description provided for @zkpNoticeReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'{contactName} has shared a Zero‑Knowledge Proof confirming they are human.'**
+  String zkpNoticeReceived(String contactName);
+
+  /// No description provided for @zkpNoticeRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'{contactName} has requested a Zero‑Knowledge Proof to confirm you are human.\nYou can generate the proof using an existing Liveness Credential or complete a quick liveness check.'**
+  String zkpNoticeRequest(String contactName);
 }
 
 class _AppLocalizationsDelegate

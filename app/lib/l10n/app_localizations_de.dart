@@ -1579,4 +1579,46 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get human => 'Mensch';
+
+  @override
+  String get proofFlowThisContact => 'dieser Kontakt';
+
+  @override
+  String get proofFlowContact => 'Kontakt';
+
+  @override
+  String proofFlowCheckIfHuman(String contactName) {
+    return 'Überprüfe, ob $contactName ein Mensch ist, mithilfe eines Zero-Knowledge-Beweises (ZKP), der aus einem Liveness-Nachweis abgeleitet wurde.';
+  }
+
+  @override
+  String get proofFlowRequestProof => 'Beweis anfordern';
+
+  @override
+  String proofFlowVerifyingProof(String contactName) {
+    return 'Beweis von $contactName wird überprüft...';
+  }
+
+  @override
+  String proofFlowVerificationFailed(String contactName) {
+    return 'Überprüfung für $contactName fehlgeschlagen';
+  }
+
+  @override
+  String get zkpNoticePaused =>
+      'Sie haben die Human-ZKP-Beweisanforderung pausiert.\nTippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
+
+  @override
+  String get zkpNoticeShared =>
+      'Sie haben einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass Sie ein Mensch sind.\n*Es wurden keine persönlichen Daten geteilt.';
+
+  @override
+  String zkpNoticeReceived(String contactName) {
+    return '$contactName hat einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass sie/er ein Mensch ist.';
+  }
+
+  @override
+  String zkpNoticeRequest(String contactName) {
+    return '$contactName hat einen Zero‑Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.';
+  }
 }
