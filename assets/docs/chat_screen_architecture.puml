@@ -20,7 +20,7 @@ Container_Boundary(app, "Application Layer") {
 
   Component(csst, "ChatServiceState", "Freezed State", "Domain: messages, presence,\ntyping, effect")
 
-  Component(acs, "AppChatService", "Riverpod Notifier", "Orchestrator: subscribes to ChatStream,\nroutes StreamData, owns ChatServiceState")
+  Component(acs, "ChatSessionService", "Riverpod Notifier", "Orchestrator: subscribes to ChatStream,\nroutes StreamData, owns ChatServiceState")
 
   Boundary(routing, "Message Routing") {
     Component(pph, "PresenceProtocolHandler", "ChatProtocolHandler", "chatPresence + chatActivity")
@@ -33,8 +33,8 @@ Container_Boundary(app, "Application Layer") {
   }
 
   Boundary(del, "Delegates") {
-    Component(agd, "AppGroupDelegate", "GroupDelegate", "Group refresh and\npending member status")
-    Component(acd, "AppConciergeDelegate", "ConciergeDelegate", "Approve/reject connection requests\nand profile updates")
+    Component(agd, "ChatGroupManager", "GroupManaging", "Group refresh and\npending member status")
+    Component(acd, "ChatConciergeMessenger", "ConciergeMessaging", "Approve/reject connection requests\nand profile updates")
   }
 
   Component(contactsSvc, "ContactsService", "Riverpod Notifier", "Manages contact cards,\npresence, and sequence numbers")
