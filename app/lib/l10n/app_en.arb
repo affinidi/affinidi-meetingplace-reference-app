@@ -1457,5 +1457,65 @@
 	"generateProof": "Generate proof",
 	"@generateProof": {
 		"type": "text"
+	},
+	"livenessCredentialRequest": "Liveness Credential Request",
+	"@livenessCredentialRequest": {
+		"type": "text"
+	},
+	"livenessCheckDemoMode": "Liveness Check (Demo Mode)",
+	"@livenessCheckDemoMode": {
+		"type": "text"
+	},
+	"searchingForLivenessCredential": "Searching for Liveness Credential...",
+	"@searchingForLivenessCredential": {
+		"type": "text"
+	},
+	"noLivenessCredentialFound": "No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.",
+	"@noLivenessCredentialFound": {
+		"type": "text"
+	},
+	"livenessCheckDemoModeNote": "This reference app runs in demo mode and does not perform a real liveness check.",
+	"@livenessCheckDemoModeNote": {
+		"type": "text"
+	},
+	"livenessCheckInProgress": "Liveness Check in progress...",
+	"@livenessCheckInProgress": {
+		"type": "text"
+	},
+	"livenessCheckSimulatedFlow": "This is a simulated flow for development and demonstration purposes only.",
+	"@livenessCheckSimulatedFlow": {
+		"type": "text"
+	},
+	"mockLivenessCredentialGenerated": "A mock Liveness Credential has been generated and securely stored under the Credentials tab.\nYou can now continue to generate a Human Zero-Knowledge proof.",
+	"@mockLivenessCredentialGenerated": {
+		"type": "text"
+	},
+	"doLater": "Do later",
+	"@doLater": {
+		"type": "text"
+	},
+	"verified": "Verified",
+	"@verified": {
+		"type": "text"
+	},
+	"issuedTo": "Issued to",
+	"@issuedTo": {
+		"type": "text"
+	},
+	"types": "Types",
+	"@types": {
+		"type": "text"
+	},
+	"issuer": "Issuer",
+	"@issuer": {
+		"type": "text"
+	},
+	"issuedOn": "Issued on",
+	"@issuedOn": {
+		"type": "text"
+	},
+	"human": "Human",
+	"@human": {
+		"type": "text"
 	}
 }

@@ -2247,6 +2247,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Generate proof'**
   String get generateProof;
+
+  /// No description provided for @livenessCredentialRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Credential Request'**
+  String get livenessCredentialRequest;
+
+  /// No description provided for @livenessCheckDemoMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Check (Demo Mode)'**
+  String get livenessCheckDemoMode;
+
+  /// No description provided for @searchingForLivenessCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for Liveness Credential...'**
+  String get searchingForLivenessCredential;
+
+  /// No description provided for @noLivenessCredentialFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.'**
+  String get noLivenessCredentialFound;
+
+  /// No description provided for @livenessCheckDemoModeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This reference app runs in demo mode and does not perform a real liveness check.'**
+  String get livenessCheckDemoModeNote;
+
+  /// No description provided for @livenessCheckInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Check in progress...'**
+  String get livenessCheckInProgress;
+
+  /// No description provided for @livenessCheckSimulatedFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a simulated flow for development and demonstration purposes only.'**
+  String get livenessCheckSimulatedFlow;
+
+  /// No description provided for @mockLivenessCredentialGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'A mock Liveness Credential has been generated and securely stored under the Credentials tab.\nYou can now continue to generate a Human Zero-Knowledge proof.'**
+  String get mockLivenessCredentialGenerated;
+
+  /// No description provided for @doLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Do later'**
+  String get doLater;
+
+  /// No description provided for @verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verified;
+
+  /// No description provided for @issuedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued to'**
+  String get issuedTo;
+
+  /// No description provided for @types.
+  ///
+  /// In en, this message translates to:
+  /// **'Types'**
+  String get types;
+
+  /// No description provided for @issuer.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuer'**
+  String get issuer;
+
+  /// No description provided for @issuedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued on'**
+  String get issuedOn;
+
+  /// No description provided for @human.
+  ///
+  /// In en, this message translates to:
+  /// **'Human'**
+  String get human;
 }
 
 class _AppLocalizationsDelegate

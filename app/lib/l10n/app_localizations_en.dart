@@ -1509,4 +1509,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generateProof => 'Generate proof';
+
+  @override
+  String get livenessCredentialRequest => 'Liveness Credential Request';
+
+  @override
+  String get livenessCheckDemoMode => 'Liveness Check (Demo Mode)';
+
+  @override
+  String get searchingForLivenessCredential =>
+      'Searching for Liveness Credential...';
+
+  @override
+  String get noLivenessCredentialFound =>
+      'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.';
+
+  @override
+  String get livenessCheckDemoModeNote =>
+      'This reference app runs in demo mode and does not perform a real liveness check.';
+
+  @override
+  String get livenessCheckInProgress => 'Liveness Check in progress...';
+
+  @override
+  String get livenessCheckSimulatedFlow =>
+      'This is a simulated flow for development and demonstration purposes only.';
+
+  @override
+  String get mockLivenessCredentialGenerated =>
+      'A mock Liveness Credential has been generated and securely stored under the Credentials tab.\nYou can now continue to generate a Human Zero-Knowledge proof.';
+
+  @override
+  String get doLater => 'Do later';
+
+  @override
+  String get verified => 'Verified';
+
+  @override
+  String get issuedTo => 'Issued to';
+
+  @override
+  String get types => 'Types';
+
+  @override
+  String get issuer => 'Issuer';
+
+  @override
+  String get issuedOn => 'Issued on';
+
+  @override
+  String get human => 'Human';
 }

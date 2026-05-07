@@ -1538,4 +1538,57 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get generateProof => 'Generate proof';
+
+  @override
+  String get livenessCredentialRequest =>
+      'Solicitud de credencial de detección de vida';
+
+  @override
+  String get livenessCheckDemoMode =>
+      'Verificación de detección de vida (Modo Demo)';
+
+  @override
+  String get searchingForLivenessCredential =>
+      'Buscando credencial de detección de vida...';
+
+  @override
+  String get noLivenessCredentialFound =>
+      'No se encontró ninguna credencial de detección de vida.\n\nPara continuar, se generará localmente una credencial de detección de vida simulada.\nEsta credencial se utiliza para demostrar cómo se deriva una prueba de conocimiento cero (ZKP).';
+
+  @override
+  String get livenessCheckDemoModeNote =>
+      'Esta aplicación de referencia se ejecuta en modo de demostración y no realiza una verificación de detección de vida real.';
+
+  @override
+  String get livenessCheckInProgress =>
+      'Verificación de detección de vida en progreso...';
+
+  @override
+  String get livenessCheckSimulatedFlow =>
+      'Este es un flujo simulado solo para fines de desarrollo y demostración.';
+
+  @override
+  String get mockLivenessCredentialGenerated =>
+      'Se ha generado una credencial de detección de vida simulada y se ha almacenado de forma segura en la pestaña Credenciales.\nAhora puede continuar para generar una prueba de conocimiento cero humana.';
+
+  @override
+  String get doLater => 'Más tarde';
+
+  @override
+  String get verified => 'Verificado';
+
+  @override
+  String get issuedTo => 'Emitido a';
+
+  @override
+  String get types => 'Tipos';
+
+  @override
+  String get issuer => 'Emisor';
+
+  @override
+  String get issuedOn => 'Emitido el';
+
+  @override
+  String get human => 'Humano';
 }
