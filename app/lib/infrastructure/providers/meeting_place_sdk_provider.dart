@@ -54,7 +54,10 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
           controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
           logger: logger,
           options: MeetingPlaceCoreSDKOptions(
-            onBuildAttachments: (channel) async {
+            onBuildAttachments: (
+              channel,
+              Future<DidManager> Function(String did) getDidManager,
+            ) async {
               try {
                 final identities = ref
                     .read(identitiesServiceProvider)
@@ -64,8 +67,7 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
                     identities.firstOrNull;
                 if (primary == null || primary.did.isEmpty) return null;
 
-                final sdk = await ref.read(meetingPlaceSdkProvider.future);
-                final didManager = await sdk.getDidManager(primary.did);
+                final didManager = await getDidManager(primary.did);
 
                 return RCardAttachmentBuilder.buildForPersona(
                   persona: PersonaDid(

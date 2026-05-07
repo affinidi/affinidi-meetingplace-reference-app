@@ -25,6 +25,9 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
 
   final BaseCacheManager _cacheManager;
 
+  @override
+  bool get dismissSheetBeforePicking => false;
+
   /// Prompts the user to pick and review an image from gallery.
   ///
   /// Opens [MediaScreen] with gallery mode enabled. The user can select
