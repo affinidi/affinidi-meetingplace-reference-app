@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import 'credential_detail_row.dart';
 
 /// Reusable container card for displaying credential details
@@ -35,10 +35,7 @@ class CredentialDetailCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.black,
           borderRadius: BorderRadius.circular(25.0),
-          border: Border.all(
-            color: colorScheme.primary,
-            width: 1,
-          ),
+          border: Border.all(color: colorScheme.primary, width: 1),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -106,10 +103,7 @@ class CredentialDetailCard extends StatelessWidget {
                       value: details[i].value,
                     ),
                     if (i < details.length - 1)
-                      Divider(
-                        color: colorScheme.primary,
-                        height: 16,
-                      ),
+                      Divider(color: colorScheme.primary, height: 16),
                   ],
                 ],
               ),

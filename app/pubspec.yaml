@@ -108,6 +108,5 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/videos/
-    - assets/SimpleVCProof.wcd
-    - assets/SimpleVCProof.groth16.zkey
-    - assets/SimpleVCProof.groth16.vkey.json
+    - assets/zkp/
+

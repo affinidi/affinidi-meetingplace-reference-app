@@ -349,5 +349,20 @@
 	"chatNotificationsWhyNote": "Sie sehen neue Nachrichten nur, wenn Sie sich im Chat befinden. Es wird keine Abzeichenaktualisierungen oder Benachrichtigungen geben, die Sie darüber informieren, dass neue Nachrichten eingegangen sind, selbst wenn die App geöffnet ist.",
 	"chatNotificationsWhyTitle": "Warum keine Push-Benachrichtigungen?",
 	"goBack": "Zurück gehen",
-	"debugPanelShareLogs": "Protokolle teilen"
+	"debugPanelShareLogs": "Protokolle teilen",
+	"livenessCredentialRequest": "Anforderung eines Liveness-Nachweises",
+	"livenessCheckDemoMode": "Liveness-Prüfung (Demo-Modus)",
+	"searchingForLivenessCredential": "Suche nach Liveness-Nachweis...",
+	"noLivenessCredentialFound": "Es wurde kein Liveness-Nachweis gefunden.\n\nZum Fortfahren wird lokal ein simulierter Liveness-Nachweis generiert.\nDieser Nachweis dient zur Demonstration, wie ein Zero-Knowledge-Beweis (ZKP) abgeleitet wird.",
+	"livenessCheckDemoModeNote": "Diese Referenz-App läuft im Demo-Modus und führt keine echte Liveness-Prüfung durch.",
+	"livenessCheckInProgress": "Liveness-Prüfung läuft...",
+	"livenessCheckSimulatedFlow": "Dies ist ein simulierter Ablauf nur für Entwicklungs- und Demonstrationszwecke.",
+	"mockLivenessCredentialGenerated": "Ein simulierter Liveness-Nachweis wurde generiert und sicher unter dem Tab Anmeldeinformationen gespeichert.\nSie können jetzt fortfahren, um einen menschlichen Zero-Knowledge-Beweis zu generieren.",
+	"doLater": "Später",
+	"verified": "Verifiziert",
+	"issuedTo": "Ausgestellt an",
+	"types": "Typen",
+	"issuer": "Aussteller",
+	"issuedOn": "Ausgestellt am",
+	"human": "Mensch"
 }

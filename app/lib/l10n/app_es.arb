@@ -349,5 +349,20 @@
 	"chatNotificationsWhyNote": "Solo verás mensajes nuevos cuando estés en el chat. No habrá actualizaciones de insignias ni notificaciones que te informen que han llegado mensajes nuevos, incluso si la aplicación está abierta.",
 	"chatNotificationsWhyTitle": "¿Por qué no hay notificaciones push?",
 	"goBack": "Volver",
-	"debugPanelShareLogs": "Compartir registros"
+        "debugPanelShareLogs": "Compartir registros",
+	"livenessCredentialRequest": "Solicitud de credencial de detección de vida",
+	"livenessCheckDemoMode": "Verificación de detección de vida (Modo Demo)",
+	"searchingForLivenessCredential": "Buscando credencial de detección de vida...",
+	"noLivenessCredentialFound": "No se encontró ninguna credencial de detección de vida.\n\nPara continuar, se generará localmente una credencial de detección de vida simulada.\nEsta credencial se utiliza para demostrar cómo se deriva una prueba de conocimiento cero (ZKP).",
+	"livenessCheckDemoModeNote": "Esta aplicación de referencia se ejecuta en modo de demostración y no realiza una verificación de detección de vida real.",
+	"livenessCheckInProgress": "Verificación de detección de vida en progreso...",
+	"livenessCheckSimulatedFlow": "Este es un flujo simulado solo para fines de desarrollo y demostración.",
+	"mockLivenessCredentialGenerated": "Se ha generado una credencial de detección de vida simulada y se ha almacenado de forma segura en la pestaña Credenciales.\nAhora puede continuar para generar una prueba de conocimiento cero humana.",
+	"doLater": "Más tarde",
+	"verified": "Verificado",
+	"issuedTo": "Emitido a",
+	"types": "Tipos",
+	"issuer": "Emisor",
+	"issuedOn": "Emitido el",
+	"human": "Humano"
 }

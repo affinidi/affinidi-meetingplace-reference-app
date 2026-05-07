@@ -32,6 +32,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
 
   /// Color for concierge messages in chat
   static const conciergeMessageColor = Color.fromARGB(255, 53, 130, 6);
+  static const primaryBrand10 = Color(0xFFE8EEFF);
+  static const secondaryBrand90 = Color(0xFF1D2138);
 
   final Color? _cyan;
   final Color? _purple;
