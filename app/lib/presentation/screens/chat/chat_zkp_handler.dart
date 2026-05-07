@@ -29,12 +29,10 @@ class ChatZkpHandler {
   final Contact? Function() getContact;
   final void Function(chat.ChatItem item) onUpsertChatItem;
 
-  void handleZkpAttachment({
-    required chat.PlainTextMessage plainTextMessage,
-    required String channelDid,
-    required chat.StreamData data,
-  }) {
+  void handleZkpAttachment(chat.StreamData data, String channelDid) {
     if (!isZkpEnabled) return;
+    final plainTextMessage = data.plainTextMessage;
+    if (plainTextMessage == null) return;
     final attachments = plainTextMessage.attachments;
     if (attachments == null || attachments.isEmpty) return;
 

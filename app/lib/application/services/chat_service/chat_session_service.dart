@@ -64,6 +64,17 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   TimedAction? _presenceTimedAction;
   TimedAction? _typingTimedAction;
 
+  void Function(StreamData data, String channelDid)? _zkpCallback;
+
+  /// Registers a callback that is invoked for every incoming message so the
+  /// presentation layer can handle ZKP attachments without coupling this
+  /// service to proof-flow logic.
+  void setZkpCallback(
+    void Function(StreamData data, String channelDid) callback,
+  ) {
+    _zkpCallback = callback;
+  }
+
   @override
   int get secondsToShowChatActivityIndicator =>
       ref.read(environmentProvider).chatActivityExpiresInSeconds;
@@ -97,6 +108,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _typingTimedAction?.dispose();
       _messageSubscription?.dispose();
       _chatSDK?.endChatSession();
+      _zkpCallback = null;
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
 
@@ -380,12 +392,16 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     await _router.route(data, channelDid);
 
+    if (data.plainTextMessage != null) {
+      _zkpCallback?.call(data, channelDid);
+    }
+
     final chatItem = data.chatItem;
     if (chatItem != null) {
       if (chatItem is Message ||
           chatItem is ConciergeMessage ||
           chatItem is EventMessage) {
-        _upsertChatItem(chatItem);
+        upsertChatItem(chatItem);
       }
       if (chatItem is Message && !chatItem.isFromMe) {
         _clearMembersTypingActivity(data.plainTextMessage?.from);
@@ -395,7 +411,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _toggleChatLoading(false);
   }
 
-  void _upsertChatItem(ChatItem item) {
+  @override
+  void upsertChatItem(ChatItem item) {
     final existing = state.messages;
     final idx = existing.indexWhere((m) => m.messageId == item.messageId);
     final messages = idx == -1

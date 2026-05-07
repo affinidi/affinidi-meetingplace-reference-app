@@ -37,4 +37,6 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   Future<void> updateContactSequenceNumber(String channelDid);
   Future<void> resetBadgeCount();
   void clearEffect();
+
+  void upsertChatItem(ChatItem item);
 }
