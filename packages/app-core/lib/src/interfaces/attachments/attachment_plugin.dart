@@ -6,6 +6,11 @@ import 'attachment_plugin_pick_result.dart';
 abstract interface class AttachmentPlugin {
   String get icon;
 
+  /// When `true`, the consumer must dismiss the sheet (or any overlay that
+  /// launched the plugin) **before** calling [pickAttachments]. The plugin
+  /// itself will not attempt to pop any route.
+  bool get dismissSheetBeforePicking => false;
+
   Future<AttachmentPluginPickResult?> pickAttachments(BuildContext context);
 
   Widget renderAttachment({
