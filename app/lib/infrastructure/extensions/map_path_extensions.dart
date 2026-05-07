@@ -17,6 +17,8 @@ extension MapPathExtensions on Map<dynamic, dynamic> {
 
       if (elementAtPath is Map<dynamic, dynamic>) {
         parentElement = elementAtPath;
+      } else {
+        return defaultValue;
       }
     }
 
@@ -33,12 +35,12 @@ extension MapPathExtensions on Map<dynamic, dynamic> {
       if (pathKey == pathKeys.last) continue;
 
       final elementAtPath = parentElement[pathKey];
-      if (elementAtPath == null) {
+      if (elementAtPath is Map<dynamic, dynamic>) {
+        parentElement = elementAtPath;
+      } else {
         final newNode = <dynamic, dynamic>{};
         parentElement[pathKey] = newNode;
         parentElement = newNode;
-      } else if (elementAtPath is Map<dynamic, dynamic>) {
-        parentElement = elementAtPath;
       }
     }
 

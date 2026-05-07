@@ -41,10 +41,6 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   void initializeFocusListeners(GlobalKey<FormState> formKey) {
     _formKey = formKey;
-  }
-
-  @override
-  IdentityFormScreenState build(String? identityId) {
     for (final entry in _fieldFocusNodes.entries) {
       final field = entry.key;
       final focusNode = entry.value;
@@ -54,7 +50,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
         }
       });
     }
+  }
 
+  @override
+  IdentityFormScreenState build(String? identityId) {
     ref.onDispose(() {
       scrollController.dispose();
       for (final controller in _fieldControllers.values) {

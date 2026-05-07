@@ -103,6 +103,7 @@ class ContactCardFieldDefinitions {
       keyboardType: null,
       textCapitalization: TextCapitalization.sentences,
       autocorrect: true,
+      autofocus: true,
       shouldValidateOnBlur: false,
       textInputAction: TextInputAction.next,
       placeholder: (l10n) => l10n.enterFirstName,
