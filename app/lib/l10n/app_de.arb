@@ -374,5 +374,5 @@
 	"zkpNoticePaused": "Sie haben die Human-ZKP-Beweisanforderung pausiert.\nTippen Sie auf das \"+\"-Symbol, um sie neu zu starten.",
 	"zkpNoticeShared": "Sie haben einen Zero\u2011Knowledge-Beweis geteilt, der bestätigt, dass Sie ein Mensch sind.\n*Es wurden keine persönlichen Daten geteilt.",
 	"zkpNoticeReceived": "{contactName} hat einen Zero\u2011Knowledge-Beweis geteilt, der bestätigt, dass sie/er ein Mensch ist.",
-	"zkpNoticeRequest": "{contactName} hat einen Zero\u2011Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen."
+	"zkpNoticeRequest": "{contactName} hat einen Zero\u2011Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind. Sie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen."
 }

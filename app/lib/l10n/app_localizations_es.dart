@@ -1613,6 +1613,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String zkpNoticeRequest(String contactName) {
-    return '$contactName ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.';
+    return '$contactName ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano. Puedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.';
   }
 }
