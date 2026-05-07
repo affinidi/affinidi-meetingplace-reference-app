@@ -1599,6 +1599,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String zkpNoticeRequest(String contactName) {
-    return '$contactName has requested a Zero‑Knowledge Proof to confirm you are human.\nYou can generate the proof using an existing Liveness Credential or complete a quick liveness check.';
+    return '$contactName has requested a Zero‑Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.';
   }
 }
