@@ -13,7 +13,7 @@ class _LivenessBanner extends ConsumerWidget {
     final contactName =
         chatState.contact?.displayName ??
         chatState.contact?.card.firstName ??
-        'this contact';
+        context.l10n.proofFlowThisContact;
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -23,24 +23,24 @@ class _LivenessBanner extends ConsumerWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      color: Colors.grey.shade700,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      color: const Color(0xff2c2c2c),
       child: Column(
-        spacing: 8,
         children: [
           Text(
-            'Check if $contactName is human using a Zero‑Knowledge Proof.',
+            context.l10n.proofFlowCheckIfHuman(contactName),
             style: textTheme.bodyMedium!.copyWith(
               color: colorScheme.onSurface.withValues(alpha: 0.8),
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w400,
             ),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.only(right: 10),
+                padding: const EdgeInsets.only(right: 16),
                 child: TextButton(
                   onPressed: () {
                     ref
@@ -49,16 +49,21 @@ class _LivenessBanner extends ConsumerWidget {
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: colorScheme.onSurface,
-                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 16,
+                    ),
                     minimumSize: const Size(80, 25),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8)),
                       side: BorderSide(color: Colors.white, width: 1),
                     ),
                   ),
                   child: Text(
-                    'Request proof',
-                    style: TextStyle(
+                    context.l10n.proofFlowRequestProof,
+                    style: textTheme.bodyMedium!.copyWith(
+                      fontWeight: FontWeight.w600,
                       color: colorScheme.surface.withValues(alpha: 0.8),
                     ),
                   ),
@@ -71,16 +76,23 @@ class _LivenessBanner extends ConsumerWidget {
                       .dismissBanner();
                 },
                 style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 4,
+                    horizontal: 16,
+                  ),
                   minimumSize: const Size(80, 25),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(8)),
                     side: BorderSide(color: Colors.white, width: 1),
                   ),
                 ),
-                child: const Text(
-                  'Do later',
-                  style: TextStyle(color: Colors.white),
+                child: Text(
+                  context.l10n.doLater,
+                  style: textTheme.bodyMedium!.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -104,7 +116,7 @@ class _VerificationResultBanner extends ConsumerWidget {
     final contactName =
         chatState.contact?.displayName ??
         chatState.contact?.card.firstName ??
-        'Contact';
+        context.l10n.proofFlowContact;
 
     // Don't show banner for successful verification, only for failures
     if (!state.verificationFailed) {
@@ -130,7 +142,7 @@ class _VerificationResultBanner extends ConsumerWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Verifying proof from $contactName...',
+                context.l10n.proofFlowVerifyingProof(contactName),
                 style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ),
@@ -153,7 +165,7 @@ class _VerificationResultBanner extends ConsumerWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Verification failed for $contactName',
+              context.l10n.proofFlowVerificationFailed(contactName),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
