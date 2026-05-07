@@ -1554,6 +1554,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Se ha generado una credencial de detección de vida simulada y se ha almacenado de forma segura en la pestaña Credenciales.\nAhora puede continuar para generar una prueba de conocimiento cero humana.';
 
   @override
+  String get mockLivenessCredentialNext =>
+      'You can now continue to generate a Human Zero-Knowledge proof.';
+
+  @override
   String get doLater => 'Más tarde';
 
   @override

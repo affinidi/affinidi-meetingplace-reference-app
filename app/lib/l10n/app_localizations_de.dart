@@ -1560,6 +1560,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Ein simulierter Liveness-Nachweis wurde generiert und sicher unter dem Tab Anmeldeinformationen gespeichert.\nSie können jetzt fortfahren, um einen menschlichen Zero-Knowledge-Beweis zu generieren.';
 
   @override
+  String get mockLivenessCredentialNext =>
+      'You can now continue to generate a Human Zero-Knowledge proof.';
+
+  @override
   String get doLater => 'Später';
 
   @override

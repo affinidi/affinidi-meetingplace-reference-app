@@ -1474,8 +1474,12 @@
 	"@livenessCheckSimulatedFlow": {
 		"type": "text"
 	},
-	"mockLivenessCredentialGenerated": "A mock Liveness Credential has been generated and securely stored under the Credentials tab.\nYou can now continue to generate a Human Zero-Knowledge proof.",
+	"mockLivenessCredentialGenerated": "A mock Liveness Credential has been generated and securely stored under the Credentials tab.",
 	"@mockLivenessCredentialGenerated": {
+		"type": "text"
+	},
+	"mockLivenessCredentialNext": "You can now continue to generate a Human Zero-Knowledge proof.",
+	"@mockLivenessCredentialNext": {
 		"type": "text"
 	},
 	"doLater": "Do later",

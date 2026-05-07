@@ -224,17 +224,29 @@ class VcGeneratedStepView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 50),
-          Icon(Icons.check_circle, size: 64, color: Colors.green.shade600),
-          const SizedBox(height: 60),
+          const SizedBox(height: 20),
+          const Icon(
+            Icons.check_circle,
+            size: 80,
+            color: AppCustomColors.utilitySuccess100,
+          ),
+          const SizedBox(height: 30),
           Text(
             context.l10n.mockLivenessCredentialGenerated,
             style: const TextStyle(fontSize: 16),
           ),
-          const SizedBox(height: 24),
-          CredentialCard(
-            topLeftText: context.l10n.livenessCredential,
-            bottomLeftText: context.l10n.verifiableCredential,
+          const SizedBox(height: 16),
+          Text(
+            context.l10n.mockLivenessCredentialNext,
+            style: const TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            height: 208,
+            child: CredentialCard(
+              topLeftText: context.l10n.livenessCredential,
+              bottomLeftText: context.l10n.verifiableCredential,
+            ),
           ),
           const Spacer(),
           Row(

@@ -34,6 +34,7 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   static const conciergeMessageColor = Color.fromARGB(255, 53, 130, 6);
   static const primaryBrand10 = Color(0xFFE8EEFF);
   static const secondaryBrand90 = Color(0xFF1D2138);
+  static const utilitySuccess100 = Color(0xFF00A08D);
 
   final Color? _cyan;
   final Color? _purple;
