@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
-import '../credentials/credentials_screen_controller.dart';
+import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/zkp/liveness_check_widgets.dart';
 import '../chat/chat_screen_controller.dart';
-import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../chat/proof_flow_controller.dart';
+import '../credentials/credentials_screen_controller.dart';
 
 enum _FlowStep { searchingVC, vcNotFound, generatingVC, vcGenerated, foundVC }
 
@@ -118,7 +118,28 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(appBarTitle),
+        backgroundColor: context.colorScheme.primary,
+        foregroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment.bottomCenter,
+              radius: 1,
+              colors: [
+                context.colorScheme.primary,
+                const Color.fromARGB(159, 5, 19, 94),
+              ],
+            ),
+          ),
+        ),
+        title: Text(
+          appBarTitle,
+          style: context.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
         leading: onBack != null
             ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: onBack)
             : null,

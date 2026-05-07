@@ -1770,4 +1770,55 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get generateProof => 'Generate proof';
+
+  @override
+  String get livenessCredentialRequest =>
+      'Anforderung eines Liveness-Nachweises';
+
+  @override
+  String get livenessCheckDemoMode => 'Liveness-Prüfung (Demo-Modus)';
+
+  @override
+  String get searchingForLivenessCredential =>
+      'Suche nach Liveness-Nachweis...';
+
+  @override
+  String get noLivenessCredentialFound =>
+      'Es wurde kein Liveness-Nachweis gefunden.\n\nZum Fortfahren wird lokal ein simulierter Liveness-Nachweis generiert.\nDieser Nachweis dient zur Demonstration, wie ein Zero-Knowledge-Beweis (ZKP) abgeleitet wird.';
+
+  @override
+  String get livenessCheckDemoModeNote =>
+      'Diese Referenz-App läuft im Demo-Modus und führt keine echte Liveness-Prüfung durch.';
+
+  @override
+  String get livenessCheckInProgress => 'Liveness-Prüfung läuft...';
+
+  @override
+  String get livenessCheckSimulatedFlow =>
+      'Dies ist ein simulierter Ablauf nur für Entwicklungs- und Demonstrationszwecke.';
+
+  @override
+  String get mockLivenessCredentialGenerated =>
+      'Ein simulierter Liveness-Nachweis wurde generiert und sicher unter dem Tab Anmeldeinformationen gespeichert.\nSie können jetzt fortfahren, um einen menschlichen Zero-Knowledge-Beweis zu generieren.';
+
+  @override
+  String get doLater => 'Später';
+
+  @override
+  String get verified => 'Verifiziert';
+
+  @override
+  String get issuedTo => 'Ausgestellt an';
+
+  @override
+  String get types => 'Typen';
+
+  @override
+  String get issuer => 'Aussteller';
+
+  @override
+  String get issuedOn => 'Ausgestellt am';
+
+  @override
+  String get human => 'Mensch';
 }
