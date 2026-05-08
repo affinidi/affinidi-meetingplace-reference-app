@@ -20,11 +20,14 @@ class ChatMessageProtocolHandler implements ChatProtocolHandler {
   final AppLogger _logger;
 
   @override
-  bool canHandle(String protocolType) =>
-      protocolType == ChatProtocol.chatMessage.value;
+  bool canHandle(ChatEvent event) => event is ChatMessageEvent;
 
   @override
-  Future<void> handle(StreamData data, String channelDid) async {
+  Future<void> handle(ChatEvent event, String channelDid) async {
+    if (event is! ChatMessageEvent) {
+      throw StateError('Unexpected event type: ${event.runtimeType}');
+    }
+
     _logger.info(
       'Received chat message, updating sequence number',
       name: _logKey,

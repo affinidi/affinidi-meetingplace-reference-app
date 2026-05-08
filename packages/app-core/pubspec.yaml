@@ -12,7 +12,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  meeting_place_core: ^0.0.1-dev.33
+  meeting_place_chat: ^0.0.1-dev.0
+  meeting_place_core: ^0.0.1-dev.36
 
 dev_dependencies:
   dart_flutter_team_lints: ^3.3.0

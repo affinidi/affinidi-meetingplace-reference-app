@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
@@ -282,7 +281,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   Future<void> sendTextMessage(
     String message, {
-    List<Attachment>? attachments,
+    List<ChatAttachment>? attachments,
   }) async {
     await _chatSDK?.sendTextMessage(message, attachments: attachments);
   }
@@ -367,16 +366,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   ) async {
     _toggleChatLoading(true);
     _logger.info(
-      '[MessagesStream] Received message type: '
-      '${data.plainTextMessage?.type.toString()}',
+      '[MessagesStream] Received event: ${data.event.runtimeType}',
       name: _logKey,
     );
-    _logger.info(
-      '[MessagesStream] body: '
-      '${json.encode(data.plainTextMessage?.toJson())}',
-      name: _logKey,
-    );
-
     await _router.route(data, channelDid);
 
     final chatItem = data.chatItem;
@@ -387,7 +379,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         _upsertChatItem(chatItem);
       }
       if (chatItem is Message && !chatItem.isFromMe) {
-        _clearMembersTypingActivity(data.plainTextMessage?.from);
+        _clearMembersTypingActivity(chatItem.senderDid);
       }
     }
 
@@ -515,7 +507,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     state = state.copyWith(effect: null);
   }
 
-  void _onGroupDetailsUpdated(StreamData data, String channelDid) {
+  void _onGroupDetailsUpdated(ChatEvent event, String channelDid) {
     _logger.info(
       'Updating group details for channel ${channelDid.topAndTail()}',
       name: _logKey,

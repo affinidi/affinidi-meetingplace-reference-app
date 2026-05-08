@@ -102,10 +102,10 @@ Future<void> verifyMessageWithAttachmentSent(
   expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
   final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
   expect(sendCall['text'], message);
-  expect(sendCall['attachments'], isA<List<Attachment>>());
+  expect(sendCall['attachments'], isA<List<ChatAttachment>>());
   expect((sendCall['attachments'] as List).length, 1);
 
-  final attachments = sendCall['attachments'] as List<Attachment>;
+  final attachments = sendCall['attachments'] as List<ChatAttachment>;
   meetingPlaceChatSDK.simulateIncomingTextMessage(
     text: message,
     recipientDid: FakeChannels.groupChannel.permanentChannelDid!,

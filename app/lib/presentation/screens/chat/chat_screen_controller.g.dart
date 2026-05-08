@@ -37,6 +37,10 @@ abstract class _$ChatScreenController
   ChatScreenState build(String contactId);
 }
 
+<<<<<<< HEAD
+=======
+>>>>>>> 464577c (fix: align with transport-agnostic type changes on SDK (#112))
+>>>>>>> 0452086 (fix: align with transport-agnostic type changes on SDK (#112))
 /// Controller class for managing the state and logic of the chat screen.
 ///
 /// Extends [_$ChatScreenController] to provide reactive state management
