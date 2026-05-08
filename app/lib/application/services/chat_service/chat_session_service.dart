@@ -355,7 +355,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String message, {
     List<ChatAttachment>? attachments,
   }) async {
-    await _chatSDK?.sendTextMessage(message, attachments: attachments);
+    await _chatSDK?.sendTextMessage(message, attachments: attachments ?? []);
   }
 
   @override
