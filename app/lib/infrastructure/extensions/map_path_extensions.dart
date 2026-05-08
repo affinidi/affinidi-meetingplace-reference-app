@@ -37,10 +37,15 @@ extension MapPathExtensions on Map<dynamic, dynamic> {
       final elementAtPath = parentElement[pathKey];
       if (elementAtPath is Map<dynamic, dynamic>) {
         parentElement = elementAtPath;
-      } else {
+      } else if (elementAtPath == null) {
         final newNode = <dynamic, dynamic>{};
         parentElement[pathKey] = newNode;
         parentElement = newNode;
+      } else {
+        throw StateError(
+          "setPathValue: expected a map at key '$pathKey' but found "
+          '${elementAtPath.runtimeType}',
+        );
       }
     }
 
