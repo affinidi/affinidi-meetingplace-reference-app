@@ -27,22 +27,18 @@ class PresenceProtocolHandler implements ChatProtocolHandler {
   final AppLogger _logger;
 
   @override
-  bool canHandle(String protocolType) =>
-      protocolType == ChatProtocol.chatPresence.value ||
-      protocolType == ChatProtocol.chatActivity.value;
+  bool canHandle(ChatEvent event) =>
+      event is ChatPresenceEvent || event is ChatActivityEvent;
 
   @override
-  Future<void> handle(StreamData data, String channelDid) async {
-    final plainTextMessage = data.plainTextMessage;
-    if (plainTextMessage == null) {
-      _logger.warning('Presence message is null', name: _logKey);
-      return;
-    }
+  Future<void> handle(ChatEvent event, String channelDid) async {
+    final timestamp = switch (event) {
+      ChatPresenceEvent(:final timestamp) => timestamp,
+      ChatActivityEvent(:final timestamp) => timestamp,
+      _ => throw StateError('Unexpected event type: ${event.runtimeType}'),
+    };
 
-    final timestamp = DateTime.tryParse(
-      plainTextMessage.body?['timestamp'] as String? ?? '',
-    );
-    if (timestamp == null || channelDid.isEmpty) {
+    if (channelDid.isEmpty) {
       _logger.warning(
         'Invalid presence data: timestamp=$timestamp, channelDid=$channelDid',
         name: _logKey,

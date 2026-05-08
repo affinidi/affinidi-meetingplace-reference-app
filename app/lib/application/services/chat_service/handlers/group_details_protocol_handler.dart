@@ -7,23 +7,28 @@ import 'interfaces/chat_protocol_handler.dart';
 /// trigger a group refresh. Add new group-details-update logic here.
 class GroupDetailsProtocolHandler implements ChatProtocolHandler {
   GroupDetailsProtocolHandler({
-    required this._onGroupDetailsUpdated,
-    required this._logger,
-  });
+    required void Function(ChatEvent event, String channelDid)
+    onGroupDetailsUpdated,
+    required AppLogger logger,
+  }) : _onGroupDetailsUpdated = onGroupDetailsUpdated,
+       _logger = logger;
 
   static const _logKey = 'GROUPDETAILSPROTOCOLHANDLER';
 
-  final void Function(StreamData data, String channelDid)
+  final void Function(ChatEvent event, String channelDid)
   _onGroupDetailsUpdated;
   final AppLogger _logger;
 
   @override
-  bool canHandle(String protocolType) =>
-      protocolType == ChatProtocol.chatGroupDetailsUpdate.value;
+  bool canHandle(ChatEvent event) => event is ChatGroupDetailsUpdateEvent;
 
   @override
-  Future<void> handle(StreamData data, String channelDid) async {
+  Future<void> handle(ChatEvent event, String channelDid) async {
+    if (event is! ChatGroupDetailsUpdateEvent) {
+      throw StateError('Unexpected event type: ${event.runtimeType}');
+    }
+
     _logger.info('Received group details update', name: _logKey);
-    _onGroupDetailsUpdated(data, channelDid);
+    _onGroupDetailsUpdated(event, channelDid);
   }
 }

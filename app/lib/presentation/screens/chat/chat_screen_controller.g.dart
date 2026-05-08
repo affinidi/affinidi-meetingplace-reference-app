@@ -6,8 +6,46 @@ part of 'chat_screen_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+<<<<<<< HEAD
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+=======
+String _$chatScreenControllerHash() =>
+    r'ad48b0f9e225a029183daa69cf329e2b92b79a82';
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
+  }
+
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+abstract class _$ChatScreenController
+    extends BuildlessAutoDisposeNotifier<ChatScreenState> {
+  late final String contactId;
+
+  ChatScreenState build(String contactId);
+}
+
+<<<<<<< HEAD
+=======
+>>>>>>> 464577c (fix: align with transport-agnostic type changes on SDK (#112))
+>>>>>>> 0452086 (fix: align with transport-agnostic type changes on SDK (#112))
+>>>>>>> b3b18aad (fix: align with transport-agnostic type changes on SDK (#112))
 /// Controller class for managing the state and logic of the chat screen.
 ///
 /// Extends [_$ChatScreenController] to provide reactive state management
