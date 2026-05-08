@@ -32,24 +32,24 @@ const _meetingPlaceIdentityCardColorPath = [
 
 class ContactCardUtils {
   static String getPathValue(
-    Map<dynamic, dynamic> contactInfo,
+    Map<String, dynamic> contactInfo,
     List<String> pathKeys, {
     String defaultValue = '',
   }) => contactInfo.getPathValue(pathKeys, defaultValue: defaultValue);
 
   static void setPathValue(
-    Map<dynamic, dynamic> contactInfo,
+    Map<String, dynamic> contactInfo,
     List<String> pathKeys,
     String value,
   ) => contactInfo.setPathValue(pathKeys, value);
 
-  static bool hasProfilePic(Map<dynamic, dynamic> contactInfo) {
+  static bool hasProfilePic(Map<String, dynamic> contactInfo) {
     final pic = getPathValue(contactInfo, _profilePicPath);
     return pic.isNotEmpty;
   }
 
   static ImageProvider<Object> getImage(
-    Map<dynamic, dynamic> contactInfo, {
+    Map<String, dynamic> contactInfo, {
     required BaseCacheManager cacheManager,
   }) {
     return hasProfilePic(contactInfo)
@@ -60,7 +60,7 @@ class ContactCardUtils {
         : defaultProfileImage;
   }
 
-  static String getFullName(Map<dynamic, dynamic> contactInfo) {
+  static String getFullName(Map<String, dynamic> contactInfo) {
     final firstName = getPathValue(
       contactInfo,
       ContactCardFieldDefinitions.byKey(ContactCardFieldKey.firstName).jsonPath,

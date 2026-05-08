@@ -1,4 +1,4 @@
-extension MapPathExtensions on Map<dynamic, dynamic> {
+extension MapPathExtensions on Map<String, dynamic> {
   /// Returns the string value at the nested [pathKeys] location, or
   /// [defaultValue] if any key is missing or the final value is not a String.
   String getPathValue(List<String> pathKeys, {String defaultValue = ''}) {
@@ -15,7 +15,7 @@ extension MapPathExtensions on Map<dynamic, dynamic> {
         return elementAtPath;
       }
 
-      if (elementAtPath is Map<dynamic, dynamic>) {
+      if (elementAtPath is Map<String, dynamic>) {
         parentElement = elementAtPath;
       } else {
         return defaultValue;
@@ -35,10 +35,10 @@ extension MapPathExtensions on Map<dynamic, dynamic> {
       if (pathKey == pathKeys.last) continue;
 
       final elementAtPath = parentElement[pathKey];
-      if (elementAtPath is Map<dynamic, dynamic>) {
+      if (elementAtPath is Map<String, dynamic>) {
         parentElement = elementAtPath;
       } else if (elementAtPath == null) {
-        final newNode = <dynamic, dynamic>{};
+        final newNode = <String, dynamic>{};
         parentElement[pathKey] = newNode;
         parentElement = newNode;
       } else {

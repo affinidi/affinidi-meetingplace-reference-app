@@ -57,7 +57,7 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
         ).get();
 
         for (final row in rows) {
-          final contactInfoMap = <dynamic, dynamic>{};
+          final contactInfoMap = <String, dynamic>{};
           contactInfoMap.setPathValue(
             ContactCardFieldDefinitions.byKey(
               ContactCardFieldKey.firstName,

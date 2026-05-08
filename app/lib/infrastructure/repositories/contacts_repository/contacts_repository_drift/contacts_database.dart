@@ -125,7 +125,7 @@ class ContactsDatabase extends _$ContactsDatabase {
         ).get();
 
         for (final row in rows) {
-          final contactInfoMap = <dynamic, dynamic>{};
+          final contactInfoMap = <String, dynamic>{};
           contactInfoMap.setPathValue(
             ContactCardFieldDefinitions.byKey(
               ContactCardFieldKey.firstName,
