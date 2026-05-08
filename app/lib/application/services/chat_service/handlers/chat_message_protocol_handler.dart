@@ -24,7 +24,9 @@ class ChatMessageProtocolHandler implements ChatProtocolHandler {
 
   @override
   Future<void> handle(ChatEvent event, String channelDid) async {
-    if (event is! ChatMessageEvent) return;
+    if (event is! ChatMessageEvent) {
+      throw StateError('Unexpected event type: ${event.runtimeType}');
+    }
 
     _logger.info(
       'Received chat message, updating sequence number',

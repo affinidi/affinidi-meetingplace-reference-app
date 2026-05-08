@@ -27,7 +27,9 @@ class TypingProtocolHandler implements ChatProtocolHandler {
 
   @override
   Future<void> handle(ChatEvent event, String channelDid) async {
-    if (event is! ChatActivityEvent) return;
+    if (event is! ChatActivityEvent) {
+      throw StateError('Unexpected event type: ${event.runtimeType}');
+    }
 
     final createdTime = event.createdTime;
     if (createdTime == null) return;

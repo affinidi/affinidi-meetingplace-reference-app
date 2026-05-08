@@ -37,10 +37,10 @@ class PresenceProtocolHandler implements ChatProtocolHandler {
     final timestamp = switch (event) {
       ChatPresenceEvent(:final timestamp) => timestamp,
       ChatActivityEvent(:final timestamp) => timestamp,
-      _ => null,
+      _ => throw StateError('Unexpected event type: ${event.runtimeType}'),
     };
 
-    if (timestamp == null || channelDid.isEmpty) {
+    if (channelDid.isEmpty) {
       _logger.warning(
         'Invalid presence data: timestamp=$timestamp, channelDid=$channelDid',
         name: _logKey,

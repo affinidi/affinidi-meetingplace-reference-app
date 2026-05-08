@@ -46,7 +46,7 @@ class ContactCardProtocolHandler implements ChatProtocolHandler {
     }
 
     if (event is! ChatContactDetailsUpdateEvent) {
-      return;
+      throw StateError('Unexpected event type: ${event.runtimeType}');
     }
 
     final domainCard = ContactCardUtils.fromSdkContactCard(event.contactCard);
