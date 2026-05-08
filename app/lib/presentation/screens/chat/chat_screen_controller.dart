@@ -13,6 +13,7 @@ import 'package:synchronized/synchronized.dart';
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../domain/models/chat/zkp_paused_notice.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
@@ -24,6 +25,7 @@ import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
+import '../../../infrastructure/services/zkp_notices_service/zkp_notices_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
@@ -32,7 +34,6 @@ import 'chat_zkp_handler.dart';
 part 'chat_screen_controller.g.dart';
 
 @riverpod
-
 /// Controller class for managing the state and logic of the chat screen.
 ///
 /// Extends [_$ChatScreenController] to provide reactive state management
@@ -54,6 +55,7 @@ class ChatScreenController extends _$ChatScreenController
     isZkpEnabled: _isZkpEnabled,
     getContact: () => state.contact,
     onUpsertChatItem: _upsertChatItemThroughService,
+    onPersistZkpNotice: _persistZkpNotice,
   );
 
   TimedAction? _sendChatActivityTimedAction;
@@ -62,10 +64,12 @@ class ChatScreenController extends _$ChatScreenController
   late final _chatResumingLock = Lock();
 
   late final Map<String, ProviderSubscription<void>>
-      _conciergeLoadingControllersSubscriptions = {};
-  late final Map<String,
-          AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>>
-      _conciergeLoadingControllers = {};
+  _conciergeLoadingControllersSubscriptions = {};
+  late final Map<
+    String,
+    AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
+  >
+  _conciergeLoadingControllers = {};
 
   ChatService? _chatService;
 
@@ -240,7 +244,7 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      _addConciergeSubscriptionIfNeeded(String id) {
+  _addConciergeSubscriptionIfNeeded(String id) {
     var existing = _conciergeLoadingControllers[id];
     if (existing == null) {
       existing = AsyncLoadingController.provider(id);
@@ -254,24 +258,24 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeApproveLoadingController(chat.ConciergeMessage message) {
+  conciergeApproveLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded('approve_${message.messageId}');
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeRejectLoadingController(chat.ConciergeMessage message) {
+  conciergeRejectLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded('reject_${message.messageId}');
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeSendProfileLoadingController(chat.ConciergeMessage message) {
+  conciergeSendProfileLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded(
       'send_profile_${message.messageId}',
     );
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeAskLaterToSendProfileLoadingController(
+  conciergeAskLaterToSendProfileLoadingController(
     chat.ConciergeMessage message,
   ) {
     return _addConciergeSubscriptionIfNeeded(
@@ -280,8 +284,7 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-      conciergeCancelSendProfileLoadingController(
-          chat.ConciergeMessage message) {
+  conciergeCancelSendProfileLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded(
       'cancel_send_profile_${message.messageId}',
     );
@@ -326,8 +329,9 @@ class ChatScreenController extends _$ChatScreenController
     }
     final srcCard = channel.otherPartyContactCard;
     state = state.copyWith(
-      otherPartyCard:
-          srcCard == null ? null : ContactCardUtils.fromSdkContactCard(srcCard),
+      otherPartyCard: srcCard == null
+          ? null
+          : ContactCardUtils.fromSdkContactCard(srcCard),
       notificationToken: channel.otherPartyNotificationToken,
     );
 
@@ -338,6 +342,7 @@ class ChatScreenController extends _$ChatScreenController
 
     await _chatService?.updateContactSequenceNumber(channelDid);
     await _chatService?.startChatSession();
+    await _restoreZkpNotices(channelDid);
 
     if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
@@ -349,24 +354,24 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   /// Insert a ZKP paused notice into the chat (local only, not sent)
-  void insertZkpPausedNotice() {
-    _zkpHandler.insertZkpPausedNotice();
+  Future<void> insertZkpPausedNotice() async {
+    await _zkpHandler.insertZkpPausedNotice();
   }
 
   /// Insert a ZKP proof shared notice (after sending proof)
-  void insertZkpProofSharedNotice() {
-    _zkpHandler.insertZkpProofSharedNotice();
+  Future<void> insertZkpProofSharedNotice() async {
+    await _zkpHandler.insertZkpProofSharedNotice();
   }
 
   /// Insert a ZKP proof received notice (after receiving proof)
-  void insertZkpProofReceivedNotice() {
-    _zkpHandler.insertZkpProofReceivedNotice();
+  Future<void> insertZkpProofReceivedNotice() async {
+    await _zkpHandler.insertZkpProofReceivedNotice();
   }
 
   /// Insert a ZKP request received notice (when receiving liveness
   /// check request)
-  void insertZkpRequestReceivedNotice() {
-    _zkpHandler.insertZkpRequestReceivedNotice();
+  Future<void> insertZkpRequestReceivedNotice() async {
+    await _zkpHandler.insertZkpRequestReceivedNotice();
   }
 
   /// Routes a chat item through the service to persist it in the service state.
@@ -378,6 +383,40 @@ class ChatScreenController extends _$ChatScreenController
       'This likely means a ZKP callback fired before build() completed.',
     );
     _chatService?.upsertChatItem(item);
+  }
+
+  Future<void> _persistZkpNotice(chat.ChatItem item) async {
+    try {
+      await ref.read(zkpNoticesServiceProvider).upsertNotice(item);
+    } catch (e, st) {
+      _logger.error(
+        'Failed to persist ZKP notice',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+    }
+  }
+
+  Future<void> _restoreZkpNotices(String channelDid) async {
+    try {
+      final notices = await ref
+          .read(zkpNoticesServiceProvider)
+          .loadNotices(channelDid);
+      for (final notice in notices) {
+        // Proof/request notices are now derived from persisted DIDComm messages.
+        // Only restore explicit local "paused" notices from local storage.
+        if (notice is! ZkpPausedNotice) continue;
+        _chatService?.upsertChatItem(notice);
+      }
+    } catch (e, st) {
+      _logger.error(
+        'Failed to restore ZKP notices',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+    }
   }
 
   Future<void> _updateGroupContactPendingStatus() async {
@@ -507,13 +546,13 @@ class ChatScreenController extends _$ChatScreenController
       await ref
           .read(conciergeApproveLoadingController(chatItem).notifier)
           .start(() async {
-        _logger.info(
-          '''Approving membership for messageId: ${chatItem.messageId}''',
-          name: _logKey,
-        );
-        await _chatService?.approveConnectionRequest(chatItem);
-        await _updateGroupContactPendingStatus();
-      });
+            _logger.info(
+              '''Approving membership for messageId: ${chatItem.messageId}''',
+              name: _logKey,
+            );
+            await _chatService?.approveConnectionRequest(chatItem);
+            await _updateGroupContactPendingStatus();
+          });
     } finally {
       _hideActivity();
     }
@@ -554,14 +593,14 @@ class ChatScreenController extends _$ChatScreenController
     await ref
         .read(conciergeAskLaterToSendProfileLoadingController(message).notifier)
         .start(() async {
-      _logger.info(
-        '''Hiding profile update message till later for messageId: ${message.messageId}''',
-        name: _logKey,
-      );
-      final msgs = List.of(state.messages)
-        ..removeWhere((m) => m.messageId == message.messageId);
-      state = state.copyWith(messages: msgs);
-    });
+          _logger.info(
+            '''Hiding profile update message till later for messageId: ${message.messageId}''',
+            name: _logKey,
+          );
+          final msgs = List.of(state.messages)
+            ..removeWhere((m) => m.messageId == message.messageId);
+          state = state.copyWith(messages: msgs);
+        });
   }
 
   /// Cancels the ongoing process of updating contact details.
@@ -576,12 +615,12 @@ class ChatScreenController extends _$ChatScreenController
     await ref
         .read(conciergeCancelSendProfileLoadingController(message).notifier)
         .start(() async {
-      _logger.info(
-        '''Decided to not send profile update message for messageId: ${message.messageId}''',
-        name: _logKey,
-      );
-      await _chatService?.rejectChatContactDetailsUpdate(message);
-    });
+          _logger.info(
+            '''Decided to not send profile update message for messageId: ${message.messageId}''',
+            name: _logKey,
+          );
+          await _chatService?.rejectChatContactDetailsUpdate(message);
+        });
   }
 
   /// Sets a reaction for a specific message.
@@ -593,8 +632,9 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> setMessageReaction(String messageId, String reaction) async {
     try {
       _showActivity();
-      final message = state.messages
-          .firstWhereOrNull((m) => m.messageId == messageId) as chat.Message?;
+      final message =
+          state.messages.firstWhereOrNull((m) => m.messageId == messageId)
+              as chat.Message?;
 
       if (message == null) {
         throw AppException(
@@ -757,13 +797,14 @@ extension ChatScreenControllerProviderSelectors
 
   ProviderListenable<List<String>> get awaitingMemberNames {
     return select((state) {
-      final awaitingMembers =
-          state.messages.whereType<chat.EventMessage>().where(
-                (message) =>
-                    message.eventType ==
-                        chat.EventMessageType.awaitingGroupMemberToJoin &&
-                    message.status == chat.ChatItemStatus.received,
-              );
+      final awaitingMembers = state.messages
+          .whereType<chat.EventMessage>()
+          .where(
+            (message) =>
+                message.eventType ==
+                    chat.EventMessageType.awaitingGroupMemberToJoin &&
+                message.status == chat.ChatItemStatus.received,
+          );
 
       final memberDidsWhoLeft = state.messages
           .whereType<chat.EventMessage>()

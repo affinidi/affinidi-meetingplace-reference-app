@@ -11,9 +11,10 @@ class ZkpRequestReceivedNotice extends chat.ChatItem {
     required super.chatId,
     required super.dateCreated,
     required String contactName,
+    String? messageId,
   }) : _contactName = contactName,
        super(
-         messageId: 'zkp-request-received-${const Uuid().v4()}',
+         messageId: messageId ?? 'zkp-request-received-${const Uuid().v4()}',
          senderDid: '',
          isFromMe: false,
          status: chat.ChatItemStatus.confirmed,
