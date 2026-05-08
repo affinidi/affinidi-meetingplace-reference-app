@@ -8,6 +8,9 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
+import '../../../domain/models/chat/zkp_proof_received_notice.dart';
+import '../../../domain/models/chat/zkp_proof_shared_notice.dart';
+import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../../domain/models/contact_card/contact_card.dart' as domain;
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -23,6 +26,7 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
+import '../zkp_service/zkp_constants.dart';
 import '../contacts_service/contacts_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
 import 'chat_protocol_router.dart';
@@ -227,10 +231,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         ),
       );
 
-      final messages = [
+      final baseMessages = [
         EncryptionNotice(),
         ...chatSession.messages,
       ].sortedBy((item) => item.dateCreated).reversed.toList();
+      final messages = _appendDerivedZkpNotices(baseMessages);
       state = state.copyWith(messages: messages, isInitialized: true);
 
       await _resetBadgeCount();
@@ -416,6 +421,67 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         ? existing.insertSorted(item)
         : existing.replaceItemAtIndex(idx, item);
     state = state.copyWith(messages: messages);
+  }
+
+  List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
+    final derived = <ChatItem>[];
+    final contactName = _otherPartyFirstName?.isNotEmpty == true
+        ? _otherPartyFirstName!
+        : ref
+                  .read(contactsServiceProvider)
+                  .getContactByChannelDid(_channelDid)
+                  ?.card
+                  .firstName ??
+              '';
+
+    for (final item in existing) {
+      if (item is! Message) continue;
+      if (item.value.isNotEmpty || item.attachments.isEmpty) continue;
+
+      final hasRequest = item.attachments.any(
+        (att) => att.format == ZkpConstants.livenessCheckRequestType,
+      );
+      final hasProof = item.attachments.any(
+        (att) => att.format == ZkpConstants.livenessProofType,
+      );
+
+      if (hasRequest && !item.isFromMe) {
+        derived.add(
+          ZkpRequestReceivedNotice(
+            chatId: item.chatId,
+            dateCreated: item.dateCreated,
+            contactName: contactName,
+            messageId: 'zkp-request-received-${item.messageId}',
+          ),
+        );
+      }
+
+      if (hasProof) {
+        if (item.isFromMe) {
+          derived.add(
+            ZkpProofSharedNotice(
+              chatId: item.chatId,
+              dateCreated: item.dateCreated,
+              messageId: 'zkp-proof-shared-${item.messageId}',
+            ),
+          );
+        } else {
+          derived.add(
+            ZkpProofReceivedNotice(
+              chatId: item.chatId,
+              dateCreated: item.dateCreated,
+              contactName: contactName,
+              messageId: 'zkp-proof-received-${item.messageId}',
+            ),
+          );
+        }
+      }
+    }
+
+    return [
+      ...existing,
+      ...derived,
+    ].sortedBy((item) => item.dateCreated).reversed.toList();
   }
 
   // ---------------------------------------------------------------------------

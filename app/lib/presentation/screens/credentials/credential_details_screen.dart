@@ -18,8 +18,8 @@ class CredentialDetailsScreen extends ConsumerWidget {
         title: Text(l10n.credentialDetails),
         actions: [
           IconButton(
-            onPressed: () {
-              ref
+            onPressed: () async {
+              await ref
                   .read(credentialsScreenControllerProvider.notifier)
                   .deleteCredential();
               Navigator.of(context).pop();
