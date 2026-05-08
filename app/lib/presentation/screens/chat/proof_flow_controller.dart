@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +36,7 @@ final proofFlowControllerProvider =
     final chatController = ref.read(
       chatScreenControllerProvider(contactId).notifier,
     );
-    chatController.insertZkpPausedNotice();
+    unawaited(chatController.insertZkpPausedNotice());
   }
 
   /// Request liveness check from contact
@@ -73,7 +74,7 @@ final proofFlowControllerProvider =
     final chatController = ref.read(
       chatScreenControllerProvider(contactId).notifier,
     );
-    chatController.insertZkpRequestReceivedNotice();
+    unawaited(chatController.insertZkpRequestReceivedNotice());
 
     state = state.copyWith(hasIncomingRequest: true);
   }
@@ -157,10 +158,12 @@ final proofFlowControllerProvider =
 
       // Insert concierge message showing proof was shared
       _logger.info('Proof sent to contact successfully', name: _logKey);
-      chatController.insertZkpProofSharedNotice();
+      await chatController.insertZkpProofSharedNotice();
 
       // Save credential to Credentials tab
-      ref.read(credentialsScreenControllerProvider.notifier).saveCredential();
+      await ref
+          .read(credentialsScreenControllerProvider.notifier)
+          .saveCredential();
 
       state = state.copyWith(
         isGeneratingProof: false,
@@ -250,7 +253,7 @@ final proofFlowControllerProvider =
     final chatController = ref.read(
       chatScreenControllerProvider(contactId).notifier,
     );
-    chatController.insertZkpProofReceivedNotice();
+    unawaited(chatController.insertZkpProofReceivedNotice());
 
     // Automatically verify the proof
     _logger.info('  Triggering automatic verification', name: _logKey);
