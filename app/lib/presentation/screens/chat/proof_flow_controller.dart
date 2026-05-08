@@ -36,7 +36,7 @@ final proofFlowControllerProvider =
     final chatController = ref.read(
       chatScreenControllerProvider(contactId).notifier,
     );
-    unawaited(chatController.insertZkpPausedNotice());
+    unawaited(chatController.insertZkpPausedNotice(persist: false));
   }
 
   /// Request liveness check from contact

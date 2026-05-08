@@ -66,9 +66,9 @@ class _ChatMessageList extends HookConsumerWidget {
                 if (chatItem is chat.Message && chatItem.value.isEmpty) {
                   final attachments = chatItem.attachments;
                   final hasOnlyLivenessAttachments = attachments.isNotEmpty &&
-                      attachments.every((att) => 
+                      attachments.every((att) =>
                         att.format == ZkpConstants.livenessCheckRequestType ||
-                        att.format == ZkpConstants.livenessProofType
+                        att.format == ZkpConstants.livenessProofType,
                       );
                   if (hasOnlyLivenessAttachments) {
                     return const SizedBox.shrink();
@@ -165,12 +165,21 @@ class _ChatMessageList extends HookConsumerWidget {
                                   contactId: _contactId,
                                 ),
                               ),
-                            _RCardBubble(
-                              chatItem: chatItem,
-                              index: index,
-                              contactId: _contactId,
-                              selectedReactionIndex: selectedReactionIndex,
-                            ),
+                            _isRCardOnlyMessage(chatItem)
+                                ? _RCardBubble(
+                                    chatItem: chatItem,
+                                    index: index,
+                                    contactId: _contactId,
+                                    selectedReactionIndex:
+                                        selectedReactionIndex,
+                                  )
+                                : _ZkpBubble(
+                                    chatItem: chatItem,
+                                    index: index,
+                                    contactId: _contactId,
+                                    selectedReactionIndex:
+                                        selectedReactionIndex,
+                                  ),
                           ],
                         ),
                       ),
@@ -305,28 +314,32 @@ class _RCardBubble extends StatelessWidget {
       }
     }
 
+    if (!isCredentialOnly) {
+      return _ZkpBubble(
+        chatItem: chatItem,
+        index: index,
+        contactId: contactId,
+        selectedReactionIndex: selectedReactionIndex,
+      );
+    }
+
     final chatItemColor = getChatItemColor(context.colorScheme, chatItem);
 
     final margin =
-      chatItem is ZkpRequestReceivedNotice ||
-        chatItem is ZkpPausedNotice ||
-        chatItem is ZkpProofSharedNotice ||
-        chatItem is ZkpProofReceivedNotice
-      ? const EdgeInsets.symmetric(vertical: 8)
-      : chatItem is EncryptionNotice ||
+        chatItem is EncryptionNotice ||
             chatItem is chat.ConciergeMessage ||
             chatItem is chat.EventMessage
-        ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
-        : EdgeInsets.fromLTRB(
-            (chatItem.isFromMe) ? 60 : 0,
-            8,
-            (chatItem.isFromMe) ? 0 : 60,
-            (selectedReactionIndex == index ||
-                    chatItem is chat.Message &&
-                        (chatItem as chat.Message).reactions.isNotEmpty)
-                ? 0
-                : 8,
-          );
+            ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
+            : EdgeInsets.fromLTRB(
+                (chatItem.isFromMe) ? 60 : 0,
+                8,
+                (chatItem.isFromMe) ? 0 : 60,
+                (selectedReactionIndex == index ||
+                        chatItem is chat.Message &&
+                            (chatItem as chat.Message).reactions.isNotEmpty)
+                    ? 0
+                    : 8,
+              );
 
     final bubble = Container(
       margin: margin,
@@ -361,6 +374,60 @@ class _RCardBubble extends StatelessWidget {
         final bubbleWidth = constraints.maxWidth * 0.67 + 16;
         return SizedBox(width: bubbleWidth, child: bubble);
       },
+    );
+  }
+}
+
+class _ZkpBubble extends StatelessWidget {
+  const _ZkpBubble({
+    required this.chatItem,
+    required this.index,
+    required this.contactId,
+    required this.selectedReactionIndex,
+  });
+
+  final chat.ChatItem chatItem;
+  final int index;
+  final String contactId;
+  final int? selectedReactionIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final margin =
+        chatItem is ZkpRequestReceivedNotice ||
+            chatItem is ZkpPausedNotice ||
+            chatItem is ZkpProofSharedNotice ||
+            chatItem is ZkpProofReceivedNotice
+        ? const EdgeInsets.symmetric(vertical: 8)
+        : chatItem is EncryptionNotice ||
+              chatItem is chat.ConciergeMessage ||
+              chatItem is chat.EventMessage
+        ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
+        : EdgeInsets.fromLTRB(
+            (chatItem.isFromMe) ? 60 : 0,
+            8,
+            (chatItem.isFromMe) ? 0 : 60,
+            (selectedReactionIndex == index ||
+                    chatItem is chat.Message &&
+                        (chatItem as chat.Message).reactions.isNotEmpty)
+                ? 0
+                : 8,
+          );
+
+    final chatItemColor = getChatItemColor(context.colorScheme, chatItem);
+
+    return Container(
+      margin: margin,
+      decoration: BoxDecoration(
+        color: chatItemColor,
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: ChatItem(
+        chatItem: chatItem,
+        index: index,
+        contactId: contactId,
+        chatItemColor: chatItemColor,
+      ),
     );
   }
 }
