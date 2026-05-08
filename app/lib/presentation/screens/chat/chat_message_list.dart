@@ -22,6 +22,36 @@ class _ChatMessageList extends HookConsumerWidget {
     var lastUsedChatItemStatus = chat.ChatItemStatus.error;
 
     final scrollController = useScrollController();
+    final pausedRequestNotices = sortedMessages.whereType<ZkpPausedNotice>();
+    final pausedNoticeMessageIds =
+        pausedRequestNotices.map((n) => n.messageId).toSet();
+
+    bool shouldHideChatItem(chat.ChatItem item) {
+      // Hide messages that are just liveness/proof attachments with no text.
+      if (item is chat.Message && item.value.isEmpty) {
+        final attachments = item.attachments;
+        final hasOnlyLivenessAttachments = attachments.isNotEmpty &&
+            attachments.every(
+              (att) =>
+                  att.format == ZkpConstants.livenessCheckRequestType ||
+                  att.format == ZkpConstants.livenessProofType,
+            );
+        if (hasOnlyLivenessAttachments) {
+          return true;
+        }
+      }
+
+      // If the user hit "Do later" for a received proof request,
+      // hide the request CTA banner and show only the paused notice.
+      if (item is ZkpRequestReceivedNotice) {
+        final expectedPausedNoticeMessageId = 'zkp-paused-${item.messageId}';
+        return pausedNoticeMessageIds.contains(
+          expectedPausedNoticeMessageId,
+        );
+      }
+
+      return false;
+    }
 
     void hideReactionPicker() {
       if (!context.mounted) return;
@@ -29,19 +59,22 @@ class _ChatMessageList extends HookConsumerWidget {
       controller.clearSelectedReaction();
     }
 
-    useEffect(() {
-      if (!context.mounted) return;
+    useEffect(
+      () {
+        if (!context.mounted) return;
 
-      scrollController.addListener(() {
-        if (scrollController.position.userScrollDirection ==
-            ScrollDirection.reverse) {
-          FocusManager.instance.primaryFocus?.unfocus();
-          hideReactionPicker();
-        }
-      });
+        scrollController.addListener(() {
+          if (scrollController.position.userScrollDirection ==
+              ScrollDirection.reverse) {
+            FocusManager.instance.primaryFocus?.unfocus();
+            hideReactionPicker();
+          }
+        });
 
-      return null;
-    }, []);
+        return null;
+      },
+      [],
+    );
 
     return GestureDetector(
       onTap: hideReactionPicker,
@@ -55,24 +88,23 @@ class _ChatMessageList extends HookConsumerWidget {
               itemCount: sortedMessages.length,
               itemBuilder: (context, index) {
                 var chatItem = sortedMessages[index];
-                
-                // Hide messages that are just liveness/proof attachments with no text
-                if (chatItem is chat.Message && chatItem.value.isEmpty) {
-                  final attachments = chatItem.attachments;
-                  final hasOnlyLivenessAttachments = attachments.isNotEmpty &&
-                      attachments.every((att) => 
-                        att.format == ZkpConstants.livenessCheckRequestType ||
-                        att.format == ZkpConstants.livenessProofType
-                      );
-                  if (hasOnlyLivenessAttachments) {
-                    return const SizedBox.shrink();
-                  }
+
+                if (shouldHideChatItem(chatItem)) {
+                  return const SizedBox.shrink();
                 }
-                
+
                 var nextItemFromSameDid = false;
 
-                if (index < sortedMessages.length - 1) {
-                  var chatItemNext = sortedMessages[index + 1];
+                // When hidden items exist, skip over them so sender grouping
+                // (from-info / status alignment) stays visually correct.
+                var nextIndex = index + 1;
+                while (nextIndex < sortedMessages.length &&
+                    shouldHideChatItem(sortedMessages[nextIndex])) {
+                  nextIndex++;
+                }
+
+                if (nextIndex < sortedMessages.length) {
+                  var chatItemNext = sortedMessages[nextIndex];
                   nextItemFromSameDid =
                       chatItemNext.senderDid == chatItem.senderDid;
                 }
@@ -98,9 +130,8 @@ class _ChatMessageList extends HookConsumerWidget {
                     // the next item - this
                     // will propagate all the way down
                     //
-                    var indexOfNextMessageFromMe = ref
-                        .read(provider)
-                        .getIndexOfNextMessageFromMe(index);
+                    var indexOfNextMessageFromMe =
+                        ref.read(provider).getIndexOfNextMessageFromMe(index);
                     if (indexOfNextMessageFromMe != -1) {
                       var chatItemNextFromMe =
                           sortedMessages[indexOfNextMessageFromMe];
@@ -125,8 +156,7 @@ class _ChatMessageList extends HookConsumerWidget {
                   child: Column(
                     children: [
                       Align(
-                        alignment:
-                            (chatItem is EncryptionNotice ||
+                        alignment: (chatItem is EncryptionNotice ||
                                 chatItem is chat.ConciergeMessage ||
                                 chatItem is ZkpRequestReceivedNotice ||
                                 chatItem is ZkpPausedNotice ||
@@ -136,11 +166,10 @@ class _ChatMessageList extends HookConsumerWidget {
                                     chat.ChatItemStatus.userInput)
                             ? Alignment.center
                             : (chatItem.isFromMe)
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
                         child: Column(
-                          crossAxisAlignment:
-                              (chatItem is EncryptionNotice ||
+                          crossAxisAlignment: (chatItem is EncryptionNotice ||
                                   chatItem is chat.ConciergeMessage ||
                                   chatItem is ZkpRequestReceivedNotice ||
                                   chatItem is ZkpPausedNotice ||
@@ -148,8 +177,8 @@ class _ChatMessageList extends HookConsumerWidget {
                                   chatItem is ZkpProofReceivedNotice)
                               ? CrossAxisAlignment.center
                               : chatItem.isFromMe
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
+                                  ? CrossAxisAlignment.end
+                                  : CrossAxisAlignment.start,
                           children: [
                             if (!nextItemFromSameDid)
                               Padding(
@@ -160,26 +189,26 @@ class _ChatMessageList extends HookConsumerWidget {
                                 ),
                               ),
                             Container(
-                              margin:
-                                  chatItem is ZkpRequestReceivedNotice ||
+                              margin: chatItem is ZkpRequestReceivedNotice ||
                                       chatItem is ZkpPausedNotice ||
                                       chatItem is ZkpProofSharedNotice ||
                                       chatItem is ZkpProofReceivedNotice
                                   ? const EdgeInsets.symmetric(vertical: 8)
                                   : chatItem is EncryptionNotice ||
-                                      chatItem is chat.ConciergeMessage ||
-                                      chatItem is chat.EventMessage
-                                  ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
-                                  : EdgeInsets.fromLTRB(
-                                      (chatItem.isFromMe) ? 60 : 0,
-                                      8,
-                                      (chatItem.isFromMe) ? 0 : 60,
-                                      (selectedReactionIndex == index ||
-                                              chatItem is chat.Message &&
-                                                  chatItem.reactions.isNotEmpty)
-                                          ? 0
-                                          : 8,
-                                    ),
+                                          chatItem is chat.ConciergeMessage ||
+                                          chatItem is chat.EventMessage
+                                      ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
+                                      : EdgeInsets.fromLTRB(
+                                          (chatItem.isFromMe) ? 60 : 0,
+                                          8,
+                                          (chatItem.isFromMe) ? 0 : 60,
+                                          (selectedReactionIndex == index ||
+                                                  chatItem is chat.Message &&
+                                                      chatItem
+                                                          .reactions.isNotEmpty)
+                                              ? 0
+                                              : 8,
+                                        ),
                               decoration: BoxDecoration(
                                 color: getChatItemColor(
                                   context.colorScheme,

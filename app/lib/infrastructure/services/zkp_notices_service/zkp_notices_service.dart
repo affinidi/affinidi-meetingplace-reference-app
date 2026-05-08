@@ -24,7 +24,9 @@ class ZkpNoticesService {
 
   Future<void> upsertNotice(chat.ChatItem notice) async {
     final storage = await _ref.read(secureStorageProvider.future);
-    final records = await storage.getZkpNotices(notice.chatId);
+    final records = List<Map<String, dynamic>>.from(
+      await storage.getZkpNotices(notice.chatId),
+    );
     final updatedRecord = _noticeToRecord(notice);
     if (updatedRecord == null) return;
 

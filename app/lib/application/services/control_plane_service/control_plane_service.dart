@@ -418,7 +418,7 @@ class _ControlPlaneEventsProcessor {
           name: _logKey,
         );
         completer.complete();
-        rethrow;
+        _shouldRunAgain = false;
       }
       await completer.future;
     } while (_shouldRunAgain);

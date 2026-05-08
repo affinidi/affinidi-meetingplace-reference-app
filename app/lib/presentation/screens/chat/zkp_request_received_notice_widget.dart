@@ -12,8 +12,8 @@ class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
     super.key,
     required ZkpRequestReceivedNotice chatItem,
     required String contactId,
-  }) : _chatItem = chatItem,
-       _contactId = contactId;
+  })  : _chatItem = chatItem,
+        _contactId = contactId;
 
   final ZkpRequestReceivedNotice _chatItem;
   final String _contactId;
@@ -34,7 +34,10 @@ class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
       onDoLater: () async {
         await ref
             .read(chatScreenControllerProvider(_contactId).notifier)
-            .insertZkpPausedNotice();
+            .insertZkpPausedNotice(
+              pausedForNoticeMessageId: _chatItem.messageId,
+              persist: false,
+            );
         ref
             .read(proofFlowControllerProvider(_contactId).notifier)
             .dismissRequest();

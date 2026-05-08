@@ -118,7 +118,10 @@ class ChatZkpHandler {
         .onProofReceived(proofData);
   }
 
-  Future<void> insertZkpPausedNotice() async {
+  Future<void> insertZkpPausedNotice({
+    String? pausedForNoticeMessageId,
+    bool persist = true,
+  }) async {
     if (!isZkpEnabled) return;
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
@@ -126,9 +129,16 @@ class ChatZkpHandler {
     final notice = ZkpPausedNotice(
       chatId: contact.channelDid!,
       dateCreated: DateTime.now(),
+      // When pausing an incoming proof request, make the paused notice
+      // deterministic so the UI can hide the request notice after Do-later.
+      messageId: pausedForNoticeMessageId == null
+          ? null
+          : 'zkp-paused-$pausedForNoticeMessageId',
     );
     onUpsertChatItem(notice);
-    await _persistNoticeSafely(notice);
+    if (persist) {
+      await _persistNoticeSafely(notice);
+    }
   }
 
   Future<void> insertZkpProofSharedNotice() async {
