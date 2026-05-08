@@ -36,7 +36,7 @@ class ContactCardProtocolHandler implements ChatProtocolHandler {
   bool canHandle(ChatEvent event) => event is ChatContactDetailsUpdateEvent;
 
   @override
-  Future<void> handle(StreamData data, String channelDid) async {
+  Future<void> handle(ChatEvent event, String channelDid) async {
     if (_isGroupChat()) {
       _onGroupDetailsUpdated(data.event!, channelDid);
       return;

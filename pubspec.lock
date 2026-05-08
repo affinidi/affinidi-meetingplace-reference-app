@@ -5,10 +5,10 @@ packages:
     dependency: transitive
     description:
       name: _fe_analyzer_shared
-      sha256: c209688d9f5a5f26b2fb47a188131a6fb9e876ae9e47af3737c0b4f58a93470d
+      sha256: "5b7468c326d2f8a4f630056404ca0d291ade42918f4a3c6233618e724f39da8e"
       url: "https://pub.dev"
     source: hosted
-    version: "91.0.0"
+    version: "92.0.0"
   _flutterfire_internals:
     dependency: transitive
     description:
@@ -53,10 +53,10 @@ packages:
     dependency: transitive
     description:
       name: analyzer
-      sha256: a40a0cee526a7e1f387c6847bd8a5ccbf510a75952ef8a28338e989558072cb0
+      sha256: "70e4b1ef8003c64793a9e268a551a82869a8a96f39deb73dea28084b0e8bf75e"
       url: "https://pub.dev"
     source: hosted
-    version: "8.4.0"
+    version: "9.0.0"
   analyzer_buffer:
     dependency: transitive
     description:
@@ -863,10 +863,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_riverpod
-      sha256: "9e2d6907f12cc7d23a846847615941bddee8709bf2bfd274acdf5e80bcf22fde"
+      sha256: "4e166be88e1dbbaa34a280bdb744aeae73b7ef25fdf8db7a3bb776760a3648e2"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.3"
+    version: "3.3.1"
   flutter_rust_bridge:
     dependency: transitive
     description:
@@ -961,10 +961,10 @@ packages:
     dependency: transitive
     description:
       name: freezed
-      sha256: "13065f10e135263a4f5a4391b79a8efc5fb8106f8dd555a9e49b750b45393d77"
+      sha256: f23ea33b3863f119b58ed1b586e881a46bd28715ddcc4dbc33104524e3434131
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.3"
+    version: "3.2.5"
   freezed_annotation:
     dependency: transitive
     description:
@@ -1033,10 +1033,10 @@ packages:
     dependency: transitive
     description:
       name: hooks_riverpod
-      sha256: ae4a2f6d82dd895379f9b95457e090ac2d2fef9446f9325f8d31b9c86cadc131
+      sha256: "08527ec06aaef75e4b78694e045ef0cd8346594eaf9cc18b0f866398b07b93b1"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.3"
+    version: "3.3.1"
   html:
     dependency: transitive
     description:
@@ -1193,10 +1193,10 @@ packages:
     dependency: transitive
     description:
       name: json_annotation
-      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
+      sha256: cb09e7dac6210041fad964ed7fbee004f14258b4eca4040f72d1234062ace4c8
       url: "https://pub.dev"
     source: hosted
-    version: "4.9.0"
+    version: "4.11.0"
   json_ld_processor:
     dependency: transitive
     description:
@@ -1209,10 +1209,10 @@ packages:
     dependency: transitive
     description:
       name: json_serializable
-      sha256: c5b2ee75210a0f263c6c7b9eeea80553dbae96ea1bf57f02484e806a3ffdffa3
+      sha256: "44729f5c45748e6748f6b9a57ab8f7e4336edc8ae41fc295070e3814e616a6c0"
       url: "https://pub.dev"
     source: hosted
-    version: "6.11.2"
+    version: "6.13.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -1334,7 +1334,7 @@ packages:
     source: hosted
     version: "0.0.1-dev.46"
   meeting_place_control_plane:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: meeting_place_control_plane
       sha256: "03a2965658a448be4de0a6dcabc20850a04f1a00b7de20df06d73a4ef55cd2ff"
@@ -1342,7 +1342,7 @@ packages:
     source: hosted
     version: "0.0.1-dev.20"
   meeting_place_core:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: meeting_place_core
       sha256: "870e2abdf2b4888848503046c6c18a4298ba104137ed945f132b0b6f58505a25"
@@ -1358,7 +1358,7 @@ packages:
     source: hosted
     version: "0.0.1-dev.6"
   meeting_place_drift_repository:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: meeting_place_drift_repository
       sha256: e2c18e05f25e1aa099f2893e5c03b7d7521ab365afa3f25a728aca0999c3e649
@@ -1366,12 +1366,11 @@ packages:
     source: hosted
     version: "0.0.1-dev.46"
   meeting_place_mediator:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_mediator
-      sha256: "78585d43e0e06405539e1da9a432b5328222bc98e63adb35c27d1b218f6ccffb"
-      url: "https://pub.dev"
-    source: hosted
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_mediator"
+      relative: true
+    source: path
     version: "0.0.1-dev.15"
   melos:
     dependency: "direct dev"
@@ -1873,34 +1872,34 @@ packages:
     dependency: transitive
     description:
       name: riverpod
-      sha256: c406de02bff19d920b832bddfb8283548bfa05ce41c59afba57ce643e116aa59
+      sha256: "8c22216be8ad3ef2b44af3a329693558c98eca7b8bd4ef495c92db0bba279f83"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.3"
+    version: "3.2.1"
   riverpod_analyzer_utils:
     dependency: transitive
     description:
       name: riverpod_analyzer_utils
-      sha256: a0f68adb078b790faa3c655110a017f9a7b7b079a57bbd40f540e80dce5fcd29
+      sha256: e55bc08c084a424e1bbdc303fe8ea75daafe4269b68fd0e0f6f1678413715b66
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0-dev.7"
+    version: "1.0.0-dev.9"
   riverpod_annotation:
     dependency: transitive
     description:
       name: riverpod_annotation
-      sha256: "7230014155777fc31ba3351bc2cb5a3b5717b11bfafe52b1553cb47d385f8897"
+      sha256: "16471a1260b94e939394d78f1c63a9350936ac4a68c9fbdab40be47268c0b04f"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.3"
+    version: "4.0.2"
   riverpod_generator:
     dependency: transitive
     description:
       name: riverpod_generator
-      sha256: "49894543a42cf7a9954fc4e7366b6d3cb2e6ec0fa07775f660afcdd92d097702"
+      sha256: "6f9220534d7a353b53c875ea191a84d28cb4e52ac420a66a1bd7318329d977b0"
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.3"
+    version: "4.0.3"
   rxdart:
     dependency: transitive
     description:
