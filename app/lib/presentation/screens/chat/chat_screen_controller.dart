@@ -354,8 +354,14 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   /// Insert a ZKP paused notice into the chat (local only, not sent)
-  Future<void> insertZkpPausedNotice() async {
-    await _zkpHandler.insertZkpPausedNotice();
+  Future<void> insertZkpPausedNotice({
+    String? pausedForNoticeMessageId,
+    bool persist = true,
+  }) async {
+    await _zkpHandler.insertZkpPausedNotice(
+      pausedForNoticeMessageId: pausedForNoticeMessageId,
+      persist: persist,
+    );
   }
 
   /// Insert a ZKP proof shared notice (after sending proof)

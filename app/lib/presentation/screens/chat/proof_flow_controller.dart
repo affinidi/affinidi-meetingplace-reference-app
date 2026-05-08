@@ -39,7 +39,7 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
     final chatController = ref.read(
       chatScreenControllerProvider(contactId).notifier,
     );
-    unawaited(chatController.insertZkpPausedNotice());
+    unawaited(chatController.insertZkpPausedNotice(persist: false));
   }
 
   /// Request liveness check from contact
