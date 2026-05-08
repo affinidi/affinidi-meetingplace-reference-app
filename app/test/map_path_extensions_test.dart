@@ -166,8 +166,7 @@ void main() {
       map.setPathValue(['tel', 'type', 'cell'], '+1234567890');
       map.setPathValue(['x-meetingplace-identity-card-color'], '#FF0000');
 
-      final decoded =
-          jsonDecode(jsonEncode(map)) as Map<String, dynamic>;
+      final decoded = jsonDecode(jsonEncode(map)) as Map<String, dynamic>;
 
       expect(decoded.getPathValue(['n', 'given']), 'Alice');
       expect(decoded.getPathValue(['n', 'surname']), 'Smith');
