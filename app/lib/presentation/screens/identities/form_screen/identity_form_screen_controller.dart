@@ -35,9 +35,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   String? _normalizedMobile;
   bool? _isMobileValid;
   bool _hasTouchedMobile = false;
+  PhoneNumber? _initialMobilePhoneNumber;
 
   bool? get isMobileValid => _isMobileValid;
   bool get hasTouchedMobile => _hasTouchedMobile;
+  PhoneNumber? get initialMobilePhoneNumber => _initialMobilePhoneNumber;
 
   TextEditingController controllerFor(ContactCardFieldDefinition field) {
     return _fieldControllers[field]!;
@@ -64,6 +66,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   @override
   IdentityFormScreenState build(String? identityId) {
+
 
     ref.onDispose(() {
       scrollController.dispose();
@@ -97,7 +100,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       firstName: '',
       displayName: '',
     );
-
+    _initialMobilePhoneNumber = null;
     return Identity(id: uuid.v4(), did: '', card: newCard);
   }
 
@@ -127,8 +130,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     }
     aliasController.text = identity.card.displayName;
     _normalizedMobile = identity.card.mobile;
-    _isMobileValid = identity.card.mobile?.isNotEmpty == true ? true : null;
+    _isMobileValid = null;
     _hasTouchedMobile = false;
+    _initialMobilePhoneNumber = _parseInitialMobilePhoneNumber(
+      identity.card.mobile,
+    );
 
     return identity;
   }
@@ -138,6 +144,33 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
           (field) => controllerFor(field).text.trim().isNotEmpty,
         ) &&
         canSave;
+  }
+
+  PhoneNumber? _parseInitialMobilePhoneNumber(String? mobile) {
+    final trimmedMobile = mobile?.trim() ?? '';
+    final hasLeadingPlus = trimmedMobile.startsWith('+');
+    final digitsOnly = trimmedMobile.replaceAll(RegExp(r'\D'), '');
+    final normalizedMobile = hasLeadingPlus && digitsOnly.isNotEmpty
+        ? '+$digitsOnly'
+        : digitsOnly;
+
+    if (normalizedMobile.isEmpty || !normalizedMobile.startsWith('+')) {
+      return null;
+    }
+
+    final prefixEnd = normalizedMobile.length < 5 ? normalizedMobile.length : 5;
+
+    for (var end = prefixEnd; end >= 2; end--) {
+      final isoCode = PhoneNumber.getISO2CodeByPrefix(
+        normalizedMobile.substring(0, end),
+      );
+
+      if (isoCode != null) {
+        return PhoneNumber(phoneNumber: normalizedMobile, isoCode: isoCode);
+      }
+    }
+
+    return null;
   }
 
   void _updateIdentityCard(ContactCard updatedCard) {

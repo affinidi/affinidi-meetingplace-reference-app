@@ -27,28 +27,6 @@ class IdentityFormFields extends ConsumerWidget {
   final GlobalKey<FormState> formKey;
   final String title;
 
-  PhoneNumber? _getInitialMobilePhoneNumber(String? mobile) {
-    final normalizedMobile = mobile?.replaceAll(RegExp(r'[^\d+]'), '') ?? '';
-
-    if (normalizedMobile.isEmpty || !normalizedMobile.startsWith('+')) {
-      return null;
-    }
-
-    final prefixEnd = normalizedMobile.length < 5 ? normalizedMobile.length : 5;
-
-    for (var end = prefixEnd; end >= 2; end--) {
-      final isoCode = PhoneNumber.getISO2CodeByPrefix(
-        normalizedMobile.substring(0, end),
-      );
-
-      if (isoCode != null) {
-        return PhoneNumber(phoneNumber: normalizedMobile, isoCode: isoCode);
-      }
-    }
-
-    return null;
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = identityFormScreenControllerProvider(identityId);
@@ -61,9 +39,7 @@ class IdentityFormFields extends ConsumerWidget {
     final mobileField = ContactCardFieldDefinitions.byKey(
       ContactCardFieldKey.mobile,
     );
-    final initialMobilePhoneNumber = _getInitialMobilePhoneNumber(
-      identity.card.mobile,
-    );
+    final initialMobilePhoneNumber = controller.initialMobilePhoneNumber;
 
     return Form(
       key: formKey,
