@@ -71,7 +71,6 @@ class _CredentialsListWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final tabController = useTabController(initialLength: 1);
-    final colorScheme = context.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -90,8 +89,8 @@ class _CredentialsListWidget extends HookConsumerWidget {
               ),
             ),
             IconButton(
-              onPressed: () {
-                ref
+              onPressed: () async {
+                await ref
                     .read(credentialsScreenControllerProvider.notifier)
                     .deleteCredential();
               },

@@ -20,6 +20,7 @@ class ChatZkpHandler {
     required this.isZkpEnabled,
     required this.getContact,
     required this.onUpsertChatItem,
+    required this.onPersistZkpNotice,
   });
 
   final Ref ref;
@@ -28,6 +29,7 @@ class ChatZkpHandler {
   final bool isZkpEnabled;
   final Contact? Function() getContact;
   final void Function(chat.ChatItem item) onUpsertChatItem;
+  final Future<void> Function(chat.ChatItem item) onPersistZkpNotice;
 
   void handleZkpAttachment(chat.StreamData data, String channelDid) {
     if (!isZkpEnabled) return;
@@ -116,30 +118,33 @@ class ChatZkpHandler {
         .onProofReceived(proofData);
   }
 
-  void insertZkpPausedNotice() {
+  Future<void> insertZkpPausedNotice() async {
     if (!isZkpEnabled) return;
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
 
-    onUpsertChatItem(
-      ZkpPausedNotice(chatId: contact.channelDid!, dateCreated: DateTime.now()),
+    final notice = ZkpPausedNotice(
+      chatId: contact.channelDid!,
+      dateCreated: DateTime.now(),
     );
+    onUpsertChatItem(notice);
+    await _persistNoticeSafely(notice);
   }
 
-  void insertZkpProofSharedNotice() {
+  Future<void> insertZkpProofSharedNotice() async {
     if (!isZkpEnabled) return;
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
 
-    onUpsertChatItem(
-      ZkpProofSharedNotice(
-        chatId: contact.channelDid!,
-        dateCreated: DateTime.now(),
-      ),
+    final notice = ZkpProofSharedNotice(
+      chatId: contact.channelDid!,
+      dateCreated: DateTime.now(),
     );
+    onUpsertChatItem(notice);
+    await _persistNoticeSafely(notice);
   }
 
-  void insertZkpProofReceivedNotice() {
+  Future<void> insertZkpProofReceivedNotice() async {
     if (!isZkpEnabled) return;
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
@@ -148,16 +153,16 @@ class ChatZkpHandler {
         ? contact.displayName!
         : contact.card.firstName;
 
-    onUpsertChatItem(
-      ZkpProofReceivedNotice(
-        chatId: contact.channelDid!,
-        dateCreated: DateTime.now(),
-        contactName: contactName,
-      ),
+    final notice = ZkpProofReceivedNotice(
+      chatId: contact.channelDid!,
+      dateCreated: DateTime.now(),
+      contactName: contactName,
     );
+    onUpsertChatItem(notice);
+    await _persistNoticeSafely(notice);
   }
 
-  void insertZkpRequestReceivedNotice() {
+  Future<void> insertZkpRequestReceivedNotice() async {
     if (!isZkpEnabled) return;
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
@@ -166,12 +171,25 @@ class ChatZkpHandler {
         ? contact.displayName!
         : contact.card.firstName;
 
-    onUpsertChatItem(
-      ZkpRequestReceivedNotice(
-        chatId: contact.channelDid!,
-        dateCreated: DateTime.now(),
-        contactName: contactName,
-      ),
+    final notice = ZkpRequestReceivedNotice(
+      chatId: contact.channelDid!,
+      dateCreated: DateTime.now(),
+      contactName: contactName,
     );
+    onUpsertChatItem(notice);
+    await _persistNoticeSafely(notice);
+  }
+
+  Future<void> _persistNoticeSafely(chat.ChatItem notice) async {
+    try {
+      await onPersistZkpNotice(notice);
+    } catch (e, st) {
+      logger.error(
+        'Failed to persist ZKP notice',
+        error: e,
+        stackTrace: st,
+        name: logKey,
+      );
+    }
   }
 }

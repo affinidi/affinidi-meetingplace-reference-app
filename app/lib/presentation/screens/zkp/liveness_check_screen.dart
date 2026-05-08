@@ -49,7 +49,9 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     await Future<void>.delayed(const Duration(seconds: 3));
     if (!mounted) return;
 
-    ref.read(credentialsScreenControllerProvider.notifier).saveCredential();
+    await ref
+        .read(credentialsScreenControllerProvider.notifier)
+        .saveCredential();
     setState(() => _currentStep = _FlowStep.vcGenerated);
   }
 
