@@ -81,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.1"
+  base58check:
+    dependency: transitive
+    description:
+      name: base58check
+      sha256: "6c300dfc33e598d2fe26319e13f6243fea81eaf8204cb4c6b69ef20a625319a5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   base_codecs:
     dependency: transitive
     description:
@@ -97,6 +105,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  blurhash_dart:
+    dependency: transitive
+    description:
+      name: blurhash_dart
+      sha256: "43955b6c2e30a7d440028d1af0fa185852f3534b795cc6eb81fbf397b464409f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -121,6 +137,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.4"
+  build_cli_annotations:
+    dependency: transitive
+    description:
+      name: build_cli_annotations
+      sha256: e563c2e01de8974566a1998410d3f6f03521788160a02503b0b1f1a46c7b3d95
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.1"
   build_config:
     dependency: transitive
     description:
@@ -217,6 +241,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.5+3"
+  canonical_json:
+    dependency: transitive
+    description:
+      name: canonical_json
+      sha256: "618db0b1ea4238a3ef2f325908beee6269550d73b69dc5220456b75ce3cec072"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.3"
   characters:
     dependency: transitive
     description:
@@ -715,6 +747,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.1"
+  flutter_rust_bridge:
+    dependency: transitive
+    description:
+      name: flutter_rust_bridge
+      sha256: "37ef40bc6f863652e865f0b2563ea07f0d3c58d8efad803cc01933a4b2ee067e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.11.1"
   flutter_secure_storage:
     dependency: transitive
     description:
@@ -877,6 +917,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.15.6"
+  html_unescape:
+    dependency: transitive
+    description:
+      name: html_unescape
+      sha256: "15362d7a18f19d7b742ef8dcb811f5fd2a2df98db9f80ea393c075189e0b61e3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   http:
     dependency: transitive
     description:
@@ -1109,6 +1157,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  markdown:
+    dependency: transitive
+    description:
+      name: markdown
+      sha256: ee85086ad7698b42522c6ad42fe195f1b9898e4d974a1af4576c1a3a176cada9
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.3.1"
   matcher:
     dependency: transitive
     description:
@@ -1125,12 +1181,20 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  matrix:
+    dependency: transitive
+    description:
+      name: matrix
+      sha256: "734eae63fa4b707999ee9165e0fc7e1205d1fcb37fef9727bb4f79cda460e1ab"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.1.2"
   meeting_place_chat:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_chat"
-      ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
-      resolved-ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
+      ref: c6a8050aa122024889e48beceaed5406b4262324
+      resolved-ref: c6a8050aa122024889e48beceaed5406b4262324
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.35"
@@ -1138,8 +1202,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_control_plane"
-      ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
-      resolved-ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
+      ref: c6a8050aa122024889e48beceaed5406b4262324
+      resolved-ref: c6a8050aa122024889e48beceaed5406b4262324
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.16"
@@ -1147,8 +1211,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_core"
-      ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
-      resolved-ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
+      ref: c6a8050aa122024889e48beceaed5406b4262324
+      resolved-ref: c6a8050aa122024889e48beceaed5406b4262324
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.33"
@@ -1156,8 +1220,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_drift_repository"
-      ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
-      resolved-ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
+      ref: c6a8050aa122024889e48beceaed5406b4262324
+      resolved-ref: c6a8050aa122024889e48beceaed5406b4262324
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.36"
@@ -1165,8 +1229,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_mediator"
-      ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
-      resolved-ref: "68145439c37a644ca6bf57b646324bd6586f8a5f"
+      ref: c6a8050aa122024889e48beceaed5406b4262324
+      resolved-ref: c6a8050aa122024889e48beceaed5406b4262324
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.15"
@@ -1530,6 +1594,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.2"
+  random_string:
+    dependency: transitive
+    description:
+      name: random_string
+      sha256: "03b52435aae8cbdd1056cf91bfc5bf845e9706724dd35ae2e99fa14a1ef79d02"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
   recase:
     dependency: transitive
     description:
@@ -1602,6 +1674,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.28.0"
+  sdp_transform:
+    dependency: transitive
+    description:
+      name: sdp_transform
+      sha256: "73e412a5279a5c2de74001535208e20fff88f225c9a4571af0f7146202755e45"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2"
   selective_disclosure_jwt:
     dependency: transitive
     description:
@@ -1703,6 +1783,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  slugify:
+    dependency: transitive
+    description:
+      name: slugify
+      sha256: b272501565cb28050cac2d96b7bf28a2d24c8dae359280361d124f3093d337c3
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   smooth_page_indicator:
     dependency: transitive
     description:
@@ -1727,6 +1815,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.7"
+  source_map_stack_trace:
+    dependency: transitive
+    description:
+      name: source_map_stack_trace
+      sha256: c0713a43e323c3302c2abe2a1cc89aa057a387101ebd280371d6a6c9fa68516b
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.2"
   source_maps:
     dependency: transitive
     description:
@@ -1783,6 +1879,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.0"
+  sqflite_sqlcipher:
+    dependency: transitive
+    description:
+      name: sqflite_sqlcipher
+      sha256: ba7733c5514cf0ccb0331997b771a890f73678bcd84cdfb5f7487a88a71f1738
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.4.0"
   sqlcipher_flutter_libs:
     dependency: transitive
     description:
@@ -1879,6 +1983,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.12"
+  test_core:
+    dependency: transitive
+    description:
+      name: test_core
+      sha256: "0cc24b5ff94b38d2ae73e1eb43cc302b77964fbf67abad1e296025b78deb53d0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.12"
   timing:
     dependency: transitive
     description:
@@ -1895,6 +2007,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  unorm_dart:
+    dependency: transitive
+    description:
+      name: unorm_dart
+      sha256: "0c69186b03ca6addab0774bcc0f4f17b88d4ce78d9d4d8f0619e30a99ead58e7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.2"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -2015,6 +2135,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "15.2.0"
+  vodozemac:
+    dependency: transitive
+    description:
+      name: vodozemac
+      sha256: bbe7dd31d7f623e2aeedb92e4b71a8b519e6109ce1e2911b5a220f6752b65cda
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   watcher:
     dependency: transitive
     description:
@@ -2047,6 +2175,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
+  webrtc_interface:
+    dependency: transitive
+    description:
+      name: webrtc_interface
+      sha256: c6f100eac5057d9a817a60473126f9828c796d42884d498af4f339c97b21014f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.1"
   win32:
     dependency: transitive
     description:

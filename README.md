@@ -262,6 +262,20 @@ Setting up DIDComm Mediator generates the Mediator DID that you can use to popul
 DEFAULT_MEDIATOR_DID=""
 ```
 
+#### Connect to Matrix Homeserver
+
+The Matrix Homeserver is a messaging server that stores and relays messages between clients using the Matrix protocol.
+
+TBD
+
+Setting up a Matrix Homeserver generates the homeserver URL that you can use to populate the `MATRIX_HOMESERVER` env variable.
+
+```bash
+# Required for MeetingPlaceCoreSDK functionality
+# Your Matrix Homeserver URL
+MATRIX_HOMESERVER=""
+```
+
 #### Enable Push Notifications
 
 To enable push notification, create a [Firebase](https://firebase.google.com/docs/projects/learn-more) project. After creating the project, follows the steps below:

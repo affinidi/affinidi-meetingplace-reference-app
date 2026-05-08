@@ -7,6 +7,7 @@ import 'fake_mediators.dart';
 class FakeEnvironment implements Environment {
   FakeEnvironment({
     this.controlPlaneDid = 'did:test:control-plane',
+    this.matrixHomeserver = 'https://test-matrix.org',
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
     Map<String, String> defaultMediators = const {},
@@ -23,6 +24,9 @@ class FakeEnvironment implements Environment {
 
   @override
   final String defaultMediatorDid;
+
+  @override
+  final String matrixHomeserver;
 
   @override
   final int maxOfferUsages;

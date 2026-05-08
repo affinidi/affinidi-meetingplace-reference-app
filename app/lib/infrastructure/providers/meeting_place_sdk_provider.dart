@@ -9,6 +9,7 @@ import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
 import 'group_repository_provider.dart';
+import 'matrix_config_provider.dart';
 
 /// A provider that initializes and supplies the [MeetingPlaceCoreSDK]
 /// instance.
@@ -51,6 +52,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
       ),
       mediatorDid: initialMediatorDid,
       controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
+      matrixConfig: await ref.read(matrixConfigProvider.future),
       logger: logger,
     );
 

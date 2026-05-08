@@ -13,6 +13,7 @@ import 'image_config.dart';
 /// - [controlPlaneDid] - CONTROL_PLANE_DID compile-time environment value.
 /// - [defaultMediatorDid] - DEFAULT_MEDIATOR_DID compile-time environment
 ///  value.
+/// - [matrixHomeserver] - MATRIX_HOMESERVER compile-time environment value.
 /// - [firebase] - FirebaseEnvironment singleton providing firebase-related
 ///  config.
 /// - [maxOfferUsages] - Maximum usages for offers.
@@ -27,8 +28,13 @@ class Environment {
 
   String get controlPlaneDid =>
       const String.fromEnvironment('CONTROL_PLANE_DID');
+
   String get defaultMediatorDid =>
       const String.fromEnvironment('DEFAULT_MEDIATOR_DID');
+
+  String get matrixHomeserver =>
+      const String.fromEnvironment('MATRIX_HOMESERVER');
+
   FirebaseEnvironment get firebase => FirebaseEnvironment.instance;
 
   int get maxOfferUsages => 100;
