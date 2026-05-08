@@ -492,7 +492,10 @@ class _ActionButton extends HookWidget {
         actions: pieActions,
         child: _RippleButton(
           animations: animations,
-          onTap: pieMenuController.openMenu,
+          onTap: () =>
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                pieMenuController.openMenu();
+              }),
         ),
       ),
     );

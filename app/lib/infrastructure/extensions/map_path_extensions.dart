@@ -5,14 +5,15 @@ extension MapPathExtensions on Map<String, dynamic> {
     if (pathKeys.isEmpty) return defaultValue;
 
     var parentElement = this;
-    for (final pathKey in pathKeys) {
+    for (var i = 0; i < pathKeys.length; i++) {
+      final pathKey = pathKeys[i];
       final elementAtPath = parentElement[pathKey];
       if (elementAtPath == null) {
         return defaultValue;
       }
 
-      if ((pathKey == pathKeys.last) && elementAtPath is String) {
-        return elementAtPath;
+      if (i == pathKeys.length - 1) {
+        return elementAtPath is String ? elementAtPath : defaultValue;
       }
 
       if (elementAtPath is Map<String, dynamic>) {
@@ -31,9 +32,8 @@ extension MapPathExtensions on Map<String, dynamic> {
     if (pathKeys.isEmpty) return;
 
     var parentElement = this;
-    for (final pathKey in pathKeys) {
-      if (pathKey == pathKeys.last) continue;
-
+    for (var i = 0; i < pathKeys.length - 1; i++) {
+      final pathKey = pathKeys[i];
       final elementAtPath = parentElement[pathKey];
       if (elementAtPath is Map<String, dynamic>) {
         parentElement = elementAtPath;
