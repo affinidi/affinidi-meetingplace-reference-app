@@ -21,15 +21,15 @@ class TypingProtocolHandler implements ChatProtocolHandler {
   final AppLogger _logger;
 
   @override
-  bool canHandle(String protocolType) =>
-      protocolType == ChatProtocol.chatActivity.value;
+  bool canHandle(ChatEvent event) => event is ChatActivityEvent;
 
   @override
-  Future<void> handle(StreamData data, String channelDid) async {
-    final plainTextMessage = data.plainTextMessage;
-    if (plainTextMessage == null) return;
+  Future<void> handle(ChatEvent event, String channelDid) async {
+    if (event is! ChatActivityEvent) {
+      throw StateError('Unexpected event type: ${event.runtimeType}');
+    }
 
-    final createdTime = plainTextMessage.createdTime;
+    final createdTime = event.createdTime;
     if (createdTime == null) return;
 
     final differenceInSeconds = clock.now().difference(createdTime).inSeconds;
@@ -37,8 +37,6 @@ class TypingProtocolHandler implements ChatProtocolHandler {
     if (isExpired) return;
 
     _logger.info('Received chat activity update', name: _logKey);
-
-    final senderDid = plainTextMessage.from;
-    _onTypingMember(senderDid);
+    _onTypingMember(event.senderDid);
   }
 }

@@ -1,6 +1,5 @@
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
-import '../../../../infrastructure/extensions/plain_text_message_extensions.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import 'interfaces/chat_protocol_handler.dart';
 
@@ -15,13 +14,15 @@ class EffectProtocolHandler implements ChatProtocolHandler {
   final AppLogger _logger;
 
   @override
-  bool canHandle(String protocolType) =>
-      protocolType == ChatProtocol.chatEffect.value;
+  bool canHandle(ChatEvent event) => event is ChatEffectEvent;
 
   @override
-  Future<void> handle(StreamData data, String channelDid) async {
+  Future<void> handle(ChatEvent event, String channelDid) async {
+    if (event is! ChatEffectEvent) {
+      throw StateError('Unexpected event type: ${event.runtimeType}');
+    }
+
     _logger.info('Received chat effect update', name: _logKey);
-    final effectName = data.plainTextMessage?.effectName;
-    _onEffect(effectName);
+    _onEffect(event.effectName);
   }
 }

@@ -11,7 +11,7 @@ Message _message(String id, DateTime dateCreated) {
     status: ChatItemStatus.confirmed,
     isFromMe: true,
     senderDid: 'did:key:sender',
-    attachments: const <Attachment>[],
+    attachments: const <ChatAttachment>[],
   );
 }
 

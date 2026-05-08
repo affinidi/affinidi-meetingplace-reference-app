@@ -74,7 +74,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   /// Tapping opens the image in full-screen view via [ImageViewScreen].
   @override
   Widget renderAttachment({
-    required Attachment attachment,
+    required ChatAttachment attachment,
     required bool isFromMe,
     Color? chatItemColor,
   }) => _GalleryAttachmentWidget(
@@ -88,7 +88,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   /// ListView with disabled scrolling physics.
   @override
   Widget renderAttachments({
-    required List<Attachment> attachments,
+    required List<ChatAttachment> attachments,
     required bool isFromMe,
     Color? chatItemColor,
   }) => _ListGalleryAttachmentsWidget(
@@ -100,7 +100,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   ///
   /// Returns `true` if the attachment format matches this plugin's name.
   @override
-  bool supportsFormat(Attachment attachment) {
+  bool supportsFormat(ChatAttachment attachment) {
     return attachment.format == _pluginName;
   }
 
@@ -128,7 +128,7 @@ class _ListGalleryAttachmentsWidget extends StatelessWidget {
     required this._cacheManager,
   });
 
-  final List<Attachment> _attachments;
+  final List<ChatAttachment> _attachments;
   final BaseCacheManager _cacheManager;
 
   @override
@@ -160,7 +160,7 @@ class _GalleryAttachmentWidget extends StatelessWidget {
     required this._cacheManager,
   });
 
-  final Attachment _attachment;
+  final ChatAttachment _attachment;
   final BaseCacheManager _cacheManager;
 
   @override

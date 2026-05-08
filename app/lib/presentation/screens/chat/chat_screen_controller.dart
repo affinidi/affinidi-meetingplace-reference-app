@@ -807,7 +807,7 @@ class ChatScreenController extends _$ChatScreenController
   /// related to the image.
   ///
   /// [attachment] - The image attachment to be loaded.
-  void loadImageAttachment(Attachment attachment) {
+  void loadImageAttachment(ChatAttachment attachment) {
     final attachmentId = attachment.id;
     if (attachmentId == null) {
       _logger.info(

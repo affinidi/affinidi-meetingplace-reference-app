@@ -213,7 +213,7 @@ void main() {
       await chatService.startChatSession();
       await chatService.sendTextMessage(
         'hello',
-        attachments: [Attachment(id: '1')],
+        attachments: [ChatAttachment(id: '1')],
       );
       expect(fakeChatSdk.sendTextMessageCalls.last['attachments'], isNotEmpty);
     });

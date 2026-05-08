@@ -272,8 +272,8 @@ mixin $FindOfferRoute on GoRouteData {
 
 mixin $AcceptOfferRoute on GoRouteData {
   static AcceptOfferRoute _fromState(GoRouterState state) => AcceptOfferRoute(
-    mnemonic: state.pathParameters['mnemonic']!,
-    identityId: state.uri.queryParameters['identity-id']!,
+    _mnemonic: state.uri.queryParameters['_mnemonic']!,
+    _identityId: state.uri.queryParameters['_identity-id']!,
   );
 
   AcceptOfferRoute get _self => this as AcceptOfferRoute;
@@ -281,7 +281,10 @@ mixin $AcceptOfferRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/connections/find-offer/${Uri.encodeComponent(_self.mnemonic)}/accept',
-    queryParams: {'identity-id': _self.identityId},
+    queryParams: {
+      '_mnemonic': _self._mnemonic,
+      '_identity-id': _self._identityId,
+    },
   );
 
   @override
