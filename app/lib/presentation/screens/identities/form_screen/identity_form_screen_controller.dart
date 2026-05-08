@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -31,6 +32,12 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   GlobalKey<FormState>? _formKey;
   bool _focusListenersInitialized = false;
+  String? _normalizedMobile;
+  bool? _isMobileValid;
+  bool _hasTouchedMobile = false;
+
+  bool? get isMobileValid => _isMobileValid;
+  bool get hasTouchedMobile => _hasTouchedMobile;
 
   TextEditingController controllerFor(ContactCardFieldDefinition field) {
     return _fieldControllers[field]!;
@@ -57,6 +64,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   @override
   IdentityFormScreenState build(String? identityId) {
+
     ref.onDispose(() {
       scrollController.dispose();
       for (final controller in _fieldControllers.values) {
@@ -95,6 +103,9 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   Identity _loadIdentity(String? identityId) {
     if (identityId == null) {
+      _normalizedMobile = null;
+      _isMobileValid = null;
+      _hasTouchedMobile = false;
       return _makeNewIdentity();
     }
 
@@ -115,6 +126,9 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       controllerFor(field).text = field.valueFrom(identity.card);
     }
     aliasController.text = identity.card.displayName;
+    _normalizedMobile = identity.card.mobile;
+    _isMobileValid = identity.card.mobile?.isNotEmpty == true ? true : null;
+    _hasTouchedMobile = false;
 
     return identity;
   }
@@ -134,6 +148,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   void validateForm(GlobalKey<FormState> formKey) {
     final ctx = formKey.currentContext!;
     final isValidForSave = ContactCardFieldDefinitions.values.every((field) {
+      if (field.key == ContactCardFieldKey.mobile) {
+        final mobile = controllerFor(field).text.trim();
+        return mobile.isEmpty || _isMobileValid == true;
+      }
       return field.validator(ctx).call(controllerFor(field).text) == null;
     });
 
@@ -166,8 +184,15 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     GlobalKey<FormState> formKey,
   ) {
     final ctx = formKey.currentContext!;
-    final error = field.validator(ctx).call(_textFor(field));
-    _setErrorVisibility(field, error != null);
+    final bool hasError;
+    if (field.key == ContactCardFieldKey.mobile) {
+      final mobile = controllerFor(field).text.trim();
+      hasError = mobile.isNotEmpty && _isMobileValid != true;
+    } else {
+      final error = field.validator(ctx).call(_textFor(field));
+      hasError = error != null;
+    }
+    _setErrorVisibility(field, hasError);
     formKey.currentState?.validate();
     validateForm(formKey);
   }
@@ -178,7 +203,14 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   ) {
     if (state.showingErrorFields.contains(field)) {
       final ctx = formKey.currentContext!;
-      final error = field.validator(ctx).call(_textFor(field));
+      final bool hasError;
+      if (field.key == ContactCardFieldKey.mobile) {
+        final mobile = controllerFor(field).text.trim();
+        hasError = mobile.isNotEmpty && _isMobileValid != true;
+      } else {
+        final error = field.validator(ctx).call(_textFor(field));
+        hasError = error != null;
+      }
       if (error == null) {
         _setErrorVisibility(field, false);
         formKey.currentState?.validate();
@@ -222,6 +254,30 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     }
   }
 
+  void updateMobile(PhoneNumber phoneNumber) {
+    _hasTouchedMobile = true;
+    _normalizedMobile = phoneNumber.phoneNumber;
+  }
+
+  void updateMobileValidation(bool isValid, GlobalKey<FormState> formKey) {
+    final mobileField = ContactCardFieldDefinitions.byKey(
+      ContactCardFieldKey.mobile,
+    );
+    final mobile = controllerFor(mobileField).text.trim();
+    _isMobileValid = mobile.isEmpty ? null : isValid;
+
+    if (mobile.isEmpty) {
+      _normalizedMobile = null;
+      _updateIdentityCard(state.identity.card.copyWith(mobile: null));
+    } else if (_isMobileValid == true && _normalizedMobile != null) {
+      _updateIdentityCard(
+        state.identity.card.copyWith(mobile: _normalizedMobile),
+      );
+    }
+
+    handleFieldChange(mobileField, formKey);
+  }
+
   void updateCardColor(Color color) {
     final identity = state.identity;
 
@@ -248,11 +304,25 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     var updatedCard = state.identity.card;
 
     for (final field in ContactCardFieldDefinitions.values) {
-      final controllerValue = controllerFor(field).text.trim();
-      final persistedValue =
-          field.key == ContactCardFieldKey.firstName && controllerValue.isEmpty
-          ? anonymousLabel
-          : controllerValue;
+      final String? persistedValue;
+      if (field.key == ContactCardFieldKey.mobile) {
+        if (!_hasTouchedMobile) {
+          persistedValue = updatedCard.mobile;
+        } else {
+          final mobile = controllerFor(field).text.trim();
+          persistedValue = mobile.isEmpty
+              ? null
+              : _isMobileValid == true && _normalizedMobile != null
+              ? _normalizedMobile
+              : updatedCard.mobile;
+        }
+      } else {
+        final controllerValue = controllerFor(field).text.trim();
+        persistedValue =
+            field.key == ContactCardFieldKey.firstName && controllerValue.isEmpty
+            ? anonymousLabel
+            : controllerValue;
+      }
       updatedCard = field.updateContactCard(updatedCard, persistedValue);
     }
 

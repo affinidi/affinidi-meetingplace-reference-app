@@ -1,14 +1,17 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 import '../../../../../infrastructure/extensions/identities_extensions.dart';
 import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../validators/input_validators.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
+import '../../../widgets/form_rows/label_icon.dart';
 import '../../../widgets/profile_picture.dart';
 import '../../media/media_screen/media_screen.dart';
 import 'identity_form_screen_controller.dart';
@@ -24,13 +27,43 @@ class IdentityFormFields extends ConsumerWidget {
   final GlobalKey<FormState> formKey;
   final String title;
 
+  PhoneNumber? _getInitialMobilePhoneNumber(String? mobile) {
+    final normalizedMobile = mobile?.replaceAll(RegExp(r'[^\d+]'), '') ?? '';
+
+    if (normalizedMobile.isEmpty || !normalizedMobile.startsWith('+')) {
+      return null;
+    }
+
+    final prefixEnd = normalizedMobile.length < 5 ? normalizedMobile.length : 5;
+
+    for (var end = prefixEnd; end >= 2; end--) {
+      final isoCode = PhoneNumber.getISO2CodeByPrefix(
+        normalizedMobile.substring(0, end),
+      );
+
+      if (isoCode != null) {
+        return PhoneNumber(phoneNumber: normalizedMobile, isoCode: isoCode);
+      }
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = identityFormScreenControllerProvider(identityId);
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
-    final personaFields = ContactCardFieldDefinitions.values;
+    final personaFields = ContactCardFieldDefinitions.values
+        .where((f) => f.key != ContactCardFieldKey.mobile)
+        .toList();
+    final mobileField = ContactCardFieldDefinitions.byKey(
+      ContactCardFieldKey.mobile,
+    );
+    final initialMobilePhoneNumber = _getInitialMobilePhoneNumber(
+      identity.card.mobile,
+    );
 
     return Form(
       key: formKey,
@@ -106,6 +139,70 @@ class IdentityFormFields extends ConsumerWidget {
                 traversalOrder: (index + 1).toDouble(),
               ),
             ],
+            const Divider(),
+            ListTile(
+              leading: LabelIcon(
+                icon: Icons.phone,
+                iconColor: context.colorScheme.primary,
+                label: context.l10n.mobile,
+              ),
+              title: Row(
+                children: [
+                  Text(
+                    context.l10n.mobile,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: InternationalPhoneNumberInput(
+                      initialValue: initialMobilePhoneNumber,
+                      textFieldController:
+                          controller.controllerFor(mobileField),
+                      focusNode: controller.focusNodeFor(mobileField)!,
+                      keyboardAction: TextInputAction.next,
+                      selectorConfig: const SelectorConfig(
+                        setSelectorButtonAsPrefixIcon: true,
+                      ),
+                      inputDecoration: InputDecoration(
+                        hintText: context.l10n.enterMobile,
+                      ),
+                      textStyle: context.textTheme.bodyMedium?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                      selectorTextStyle:
+                          context.textTheme.bodyMedium?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                      onInputChanged: controller.updateMobile,
+                      onInputValidated: (isValid) {
+                        controller.updateMobileValidation(isValid, formKey);
+                      },
+                      onFieldSubmitted: (_) {
+                        controller.updateErrorVisibilityOnBlur(
+                          mobileField,
+                          formKey,
+                        );
+                      },
+                      validator: (value) {
+                        if (!controller.shouldShowValidation(mobileField)) {
+                          return null;
+                        }
+                        return InputValidators.getValidator(
+                          context,
+                          InputType.phone,
+                          isPhoneValid: controller.isMobileValid,
+                          hasTouchedPhone: controller.hasTouchedMobile,
+                        ).call(value);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+            ),
           ],
         ),
       ),

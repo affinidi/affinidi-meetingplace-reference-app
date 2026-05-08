@@ -7,11 +7,35 @@ import '../../presentation/validators/zalgo_text_validator.dart';
 
 enum InputType { firstName, lastName, description, email, phone, alias, chat }
 
+class PhoneValidator extends TextFieldValidator {
+  PhoneValidator({
+    required String errorText,
+    required this.isPhoneValid,
+    required this.hasTouchedPhone,
+  }) : super(errorText);
+
+  final bool? isPhoneValid;
+  final bool hasTouchedPhone;
+
+  @override
+  bool isValid(String? value) {
+    final phoneNumber = value?.trim() ?? '';
+
+    if (phoneNumber.isEmpty || !hasTouchedPhone) {
+      return true;
+    }
+
+    return isPhoneValid == true;
+  }
+}
+
 class InputValidators {
   static MultiValidator getValidator(
     BuildContext context,
-    InputType inputType,
-  ) {
+    InputType inputType, {
+    bool? isPhoneValid,
+    bool hasTouchedPhone = false,
+  }) {
     switch (inputType) {
       case InputType.firstName:
         return MultiValidator([
@@ -46,8 +70,13 @@ class InputValidators {
           ),
         ]);
       case InputType.phone:
-        // TODO: Use Intl Phone Number Input for validation
-        return MultiValidator([]);
+        return MultiValidator([
+          PhoneValidator(
+            errorText: context.l10n.invalidMobileNumber,
+            isPhoneValid: isPhoneValid,
+            hasTouchedPhone: hasTouchedPhone,
+          ),
+        ]);
       case InputType.alias:
         return MultiValidator([
           ZalgoTextValidator(errorText: context.l10n.zalgoTextDetectedError),

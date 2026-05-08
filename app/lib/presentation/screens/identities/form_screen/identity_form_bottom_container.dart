@@ -17,6 +17,13 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
     );
 
     Future<void> handleSave() async {
+      final mobileField = ContactCardFieldDefinitions.byKey(
+        ContactCardFieldKey.mobile,
+      );
+      controller.updateErrorVisibilityOnBlur(
+        mobileField,
+        editIdentityScreenFormKey,
+      );
       controller.updateErrorVisibilityOnBlur(
         emailField,
         editIdentityScreenFormKey,
