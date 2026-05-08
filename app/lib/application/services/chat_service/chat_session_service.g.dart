@@ -59,7 +59,7 @@ final class ChatSessionServiceProvider
 }
 
 String _$chatSessionServiceHash() =>
-    r'b48a6311f8a4608c6668ee3c29191476ea230b4f';
+    r'431dbc6b11ed000fec74ff2a1b12ddcaa56bdf63';
 
 final class ChatSessionServiceFamily extends $Family
     with

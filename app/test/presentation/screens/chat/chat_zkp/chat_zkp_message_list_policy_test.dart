@@ -69,12 +69,12 @@ void main() {
           status: ChatItemStatus.confirmed,
           value: '',
           attachments: [
-            Attachment(
+            ChatAttachment(
               id: 'att-proof',
               mediaType: 'application/json',
               format: LivenessZkpProtocol.livenessProofFormat,
               lastModifiedTime: when,
-              data: AttachmentData(
+              data: ChatAttachmentData(
                 json:
                     '{"type":"liveness_proof","proof":"p","publicSignals":"s"}',
               ),

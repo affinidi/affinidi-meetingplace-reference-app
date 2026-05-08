@@ -296,7 +296,21 @@ The DIDComm Mediator routes messages between parties without reading their conte
 DEFAULT_MEDIATOR_DID=""
 ```
 
-#### Enable push notifications
+#### Connect to Matrix Homeserver
+
+The Matrix Homeserver is a messaging server that stores and relays messages between clients using the Matrix protocol.
+
+TBD
+
+Setting up a Matrix Homeserver generates the homeserver URL that you can use to populate the `MATRIX_HOMESERVER` env variable.
+
+```bash
+# Required for MeetingPlaceCoreSDK functionality
+# Your Matrix Homeserver URL
+MATRIX_HOMESERVER=""
+```
+
+#### Enable Push Notifications
 
 Create a [Firebase](https://firebase.google.com/docs/projects/learn-more) project, then:
 
