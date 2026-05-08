@@ -38,15 +38,16 @@ class _PersonaFieldListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fields = ContactCardFieldDefinitions.values
-        .where((field) => valueResolver(field).isNotEmpty)
+    final entries = ContactCardFieldDefinitions.values
+        .map((field) => (field, valueResolver(field)))
+        .where((entry) => entry.$2.isNotEmpty)
         .toList();
 
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemBuilder: (context, index) {
-        final field = fields[index];
+        final (field, value) = entries[index];
         return ListTile(
           iconColor: context.colorScheme.onPrimary,
           dense: true,
@@ -76,7 +77,7 @@ class _PersonaFieldListView extends StatelessWidget {
               ),
               Expanded(
                 child: Text(
-                  valueResolver(field),
+                  value,
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: context.colorScheme.onSurfaceVariant,
                   ),
@@ -87,7 +88,7 @@ class _PersonaFieldListView extends StatelessWidget {
         );
       },
       separatorBuilder: (context, index) => const Divider(),
-      itemCount: fields.length,
+      itemCount: entries.length,
     );
   }
 }

@@ -6,11 +6,13 @@ import 'package:drift/drift.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../domain/models/contacts/contact_category.dart';
 import '../../../../domain/models/contacts/contact_origin.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
 import '../../../../domain/models/contacts/contact_type.dart';
 import '../../../database/database_platform.dart';
+import '../../../extensions/map_path_extensions.dart';
 import '../../../providers/applications_documents_directory_provider.dart';
 import '../../../secure_storage/secure_storage.dart';
 
@@ -123,20 +125,36 @@ class ContactsDatabase extends _$ContactsDatabase {
         ).get();
 
         for (final row in rows) {
-          final contactInfo = jsonEncode(<String, dynamic>{
-            'n': {
-              'given': row.data['first_name'] as String? ?? '',
-              'surname': row.data['last_name'] as String? ?? '',
-            },
-            'email': {
-              'type': {'work': row.data['email'] as String? ?? ''},
-            },
-            'tel': {
-              'type': {'cell': row.data['mobile'] as String? ?? ''},
-            },
-            'x-meetingplace-identity-card-color':
-                row.data['meetingplace_identity_card_color'] as String? ?? '',
-          });
+          final contactInfoMap = <dynamic, dynamic>{};
+          contactInfoMap.setPathValue(
+            ContactCardFieldDefinitions.byKey(
+              ContactCardFieldKey.firstName,
+            ).jsonPath,
+            row.data['first_name'] as String? ?? '',
+          );
+          contactInfoMap.setPathValue(
+            ContactCardFieldDefinitions.byKey(
+              ContactCardFieldKey.lastName,
+            ).jsonPath,
+            row.data['last_name'] as String? ?? '',
+          );
+          contactInfoMap.setPathValue(
+            ContactCardFieldDefinitions.byKey(
+              ContactCardFieldKey.email,
+            ).jsonPath,
+            row.data['email'] as String? ?? '',
+          );
+          contactInfoMap.setPathValue(
+            ContactCardFieldDefinitions.byKey(
+              ContactCardFieldKey.mobile,
+            ).jsonPath,
+            row.data['mobile'] as String? ?? '',
+          );
+          contactInfoMap.setPathValue(
+            const ['x-meetingplace-identity-card-color'],
+            row.data['meetingplace_identity_card_color'] as String? ?? '',
+          );
+          final contactInfo = jsonEncode(contactInfoMap);
 
           await (update(
             contactCards,
