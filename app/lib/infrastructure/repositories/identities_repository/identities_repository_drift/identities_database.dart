@@ -82,10 +82,9 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
             ).jsonPath,
             row.data['mobile'] as String? ?? '',
           );
-          contactInfoMap.setPathValue(
-            const ['x-meetingplace-identity-card-color'],
-            row.data['card_color'] as String? ?? '',
-          );
+          contactInfoMap.setPathValue(const [
+            'x-meetingplace-identity-card-color',
+          ], row.data['card_color'] as String? ?? '');
           final contactInfo = jsonEncode(contactInfoMap);
 
           await (update(
