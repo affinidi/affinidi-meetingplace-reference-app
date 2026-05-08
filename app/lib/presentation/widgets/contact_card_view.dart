@@ -40,7 +40,6 @@ class _PersonaFieldListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final entries = ContactCardFieldDefinitions.values
         .map((field) => (field, valueResolver(field)))
-        .where((entry) => entry.$2.isNotEmpty)
         .toList();
 
     return ListView.separated(

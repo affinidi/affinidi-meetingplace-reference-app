@@ -143,9 +143,7 @@ class _IdentityHeader extends StatelessWidget {
               spacing: 4,
               children: [
                 Text(
-                  identity.getDisplayName(l10n: l10n).isNotEmpty
-                      ? identity.getDisplayName(l10n: l10n)
-                      : identity.card.fullName,
+                  identity.getDisplayName(l10n: l10n),
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onPrimary,
