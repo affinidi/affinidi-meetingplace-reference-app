@@ -13,6 +13,26 @@ class _LivenessBanner extends ConsumerWidget {
     final hasIncomingMessageFromOtherParty = chatState.messages.any(
       (item) => item is chat.Message && !item.isFromMe,
     );
+    final hasPausedNotice = chatState.messages.any(
+      (item) => item is ZkpPausedNotice,
+    );
+    final hasRequestedOtherPartyProof = chatState.messages.any(
+      (item) =>
+          item is chat.Message &&
+          item.isFromMe &&
+          item.attachments.any(
+            (att) => att.format == ZkpConstants.livenessCheckRequestType,
+          ),
+    );
+    final hasSharedProof = chatState.messages.any(
+      (item) =>
+          item is ZkpProofSharedNotice ||
+          (item is chat.Message &&
+              item.isFromMe &&
+              item.attachments.any(
+                (att) => att.format == ZkpConstants.livenessProofType,
+              )),
+    );
     final canRequestZkp =
         chatState.isInitialized &&
         hasIncomingMessageFromOtherParty &&
@@ -25,7 +45,11 @@ class _LivenessBanner extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    if (!state.showBanner || state.bannerDismissed || !canRequestZkp) {
+    if (!state.showBanner ||
+        !canRequestZkp ||
+        hasPausedNotice ||
+        hasRequestedOtherPartyProof ||
+        hasSharedProof) {
       return const SizedBox.shrink();
     }
 
