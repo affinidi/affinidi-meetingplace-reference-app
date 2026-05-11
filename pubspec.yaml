@@ -19,13 +19,13 @@ dependency_overrides:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_core
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 82c63814c0ea2fb122c2ff5b27bc1fc731f13bcb
+      ref: dc7c0ed305b92530a3704ec856001d8db31e86fe
       path: packages/meeting_place_core
   meeting_place_relationship:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 82c63814c0ea2fb122c2ff5b27bc1fc731f13bcb
+      ref: dc7c0ed305b92530a3704ec856001d8db31e86fe
       path: packages/meeting_place_relationship
   meta: 1.17.0
 

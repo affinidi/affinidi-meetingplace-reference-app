@@ -60,8 +60,8 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
       final sdk = await _ref.read(meetingPlaceSdkProvider.future);
       final didManager = await sdk.getDidManager(identity.did);
 
-      final attachments = await RCardAttachmentBuilder.buildForPersona(
-        persona: PersonaDid(did: identity.did, name: identity.card.displayName),
+      final attachments = await RCardDIDCommAttachmentBuilder.buildForOwner(
+        issuerDid: identity.did,
         card: RCardSubject(
           firstName: identity.card.firstName,
           lastName: identity.card.lastName,
@@ -74,7 +74,7 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
       return AttachmentPluginPickResult(
         text: '',
         attachments: attachments
-            .map((a) => _RCardMessageAttachment(attachment: a))
+            .map((Attachment a) => _RCardMessageAttachment(attachment: a))
             .toList(),
       );
     } catch (_) {
