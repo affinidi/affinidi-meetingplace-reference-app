@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 /// Extension methods on [WidgetRef] for managing provider lifecycles.
 extension WidgetRefExtensions on WidgetRef {

@@ -15,7 +15,7 @@ class DatabasePlatform {
   ) {
     sqliteDb.execute("PRAGMA cipher = 'sqlcipher';");
     sqliteDb.execute('PRAGMA legacy = 4;');
-    sqliteDb.execute("PRAGMA key = '$passphrase';");
+    sqliteDb.execute("PRAGMA key = '${passphrase.replaceAll("'", "''")}';");
 
     final cipherVersion = sqliteDb.select('PRAGMA cipher_version;');
     if (cipherVersion.isEmpty) {
@@ -49,9 +49,7 @@ class DatabasePlatform {
   ///
   /// In-memory databases do not support encryption (sqlite3mc limitation),
   /// so encryption configuration is skipped.
-  static Future<QueryExecutor> createInMemoryDatabase({
-    required String passphrase,
-  }) async {
+  static Future<QueryExecutor> createInMemoryDatabase() async {
     final sqliteDb = sqlite3.openInMemory();
 
     return NativeDatabase.opened(
@@ -89,9 +87,7 @@ LazyDatabase openConnection({
 }) {
   return LazyDatabase(() async {
     if (inMemory) {
-      final database = await DatabasePlatform.createInMemoryDatabase(
-        passphrase: passphrase,
-      );
+      final database = await DatabasePlatform.createInMemoryDatabase();
       return database;
     }
 

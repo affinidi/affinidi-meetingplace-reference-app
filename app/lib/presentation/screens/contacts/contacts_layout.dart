@@ -36,9 +36,12 @@ class _ContactsLayout extends ConsumerWidget {
         final container = ProviderScope.containerOf(context);
         final provider = chatScreenControllerProvider(contact.id);
         final sub = container.listen(provider, (_, _) {});
-        await ref.read(provider.notifier).initialize();
-        await ChatRoute(contactId: contact.id).push<void>(context);
-        sub.close();
+        try {
+          await ref.read(provider.notifier).initialize();
+          await ChatRoute(contactId: contact.id).push<void>(context);
+        } finally {
+          sub.close();
+        }
         return;
       }
 
