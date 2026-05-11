@@ -19,7 +19,7 @@ part 'r_cards_service.g.dart';
 ///
 /// Responsibilities:
 /// - Exposes all stored [ReceivedRCard]s as live state for the UI.
-/// - Subscribes to `MeetingPlaceRelationshipSDK.incomingRCards` and persists
+/// - Subscribes to `MeetingPlaceRelationshipSDK.receivedRCards` and persists
 ///   every verified card via `RCardRepository.upsertFromVdip`.
 @Riverpod(keepAlive: true)
 class RCardsService extends _$RCardsService {
@@ -63,14 +63,14 @@ class RCardsService extends _$RCardsService {
     );
   }
 
-  /// Subscribes to [MeetingPlaceRelationshipSDK.incomingRCards] and persists
+  /// Subscribes to [MeetingPlaceRelationshipSDK.receivedRCards] and persists
   /// each verified card to the repository.
   Future<void> _listenForIncoming() async {
     try {
       final relationshipSDK = await ref.read(relationshipSdkProvider.future);
       final repository = await ref.read(rCardsRepositoryProvider.future);
 
-      _incomingSubscription = relationshipSDK.incomingRCards.listen(
+      _incomingSubscription = relationshipSDK.receivedRCards.listen(
         (rCard) async {
           try {
             await repository.upsertFromVdip(
@@ -93,7 +93,7 @@ class RCardsService extends _$RCardsService {
         },
         onError: (Object error, StackTrace stackTrace) {
           _logger.error(
-            'Error on incomingRCards stream',
+            'Error on receivedRCards stream',
             error: error,
             stackTrace: stackTrace,
             name: _logKey,

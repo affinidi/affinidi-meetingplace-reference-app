@@ -25,6 +25,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  affinidi_tdk_didcomm_mediator_client:
+    dependency: transitive
+    description:
+      name: affinidi_tdk_didcomm_mediator_client
+      sha256: "87838c0289e2ae116d350cf1c5317f7b26731760da601429669aac4889478f59"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  affinidi_tdk_vdip:
+    dependency: transitive
+    description:
+      name: affinidi_tdk_vdip
+      sha256: f90b6598d10c0a31aaa8bcb8d9b619fe8ef7eb585acd5654fd123073051563e5
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
+  affinidi_tdk_vdsp:
+    dependency: transitive
+    description:
+      name: affinidi_tdk_vdsp
+      sha256: "0e5fcdceda9baf5ae2b1ba5c1b67dd2709705e5c9ee74f341a97bf0c0df73fe3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
   analyzer:
     dependency: transitive
     description:
@@ -457,6 +481,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.12"
+  dcql:
+    dependency: transitive
+    description:
+      name: dcql
+      sha256: c0c9d1ae3065b45c8959461eec043cdda59fa34b334d1cdb5b65a03e1a08b66a
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.1"
   didcomm:
     dependency: transitive
     description:
@@ -997,6 +1029,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  json_serializable:
+    dependency: transitive
+    description:
+      name: json_serializable
+      sha256: c50ef5fc083d5b5e12eef489503ba3bf5ccc899e487d691584699b4bdefeea8c
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.9.5"
   leak_tracker:
     dependency: transitive
     description:
@@ -1113,8 +1153,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_core"
-      ref: dc7c0ed305b92530a3704ec856001d8db31e86fe
-      resolved-ref: dc7c0ed305b92530a3704ec856001d8db31e86fe
+      ref: "1f4b628e8fa77b7fdba87faf7a5785d9c2a23a44"
+      resolved-ref: "1f4b628e8fa77b7fdba87faf7a5785d9c2a23a44"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.33"
@@ -1138,8 +1178,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_relationship"
-      ref: dc7c0ed305b92530a3704ec856001d8db31e86fe
-      resolved-ref: dc7c0ed305b92530a3704ec856001d8db31e86fe
+      ref: "1f4b628e8fa77b7fdba87faf7a5785d9c2a23a44"
+      resolved-ref: "1f4b628e8fa77b7fdba87faf7a5785d9c2a23a44"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.1"
