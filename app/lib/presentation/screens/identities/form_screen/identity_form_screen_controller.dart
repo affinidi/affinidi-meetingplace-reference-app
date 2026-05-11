@@ -173,6 +173,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     return null;
   }
 
+
   void _updateIdentityCard(ContactCard updatedCard) {
     final updatedIdentity = state.identity.copyWith(card: updatedCard);
     state = state.copyWith(identity: updatedIdentity);
@@ -340,14 +341,15 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       final String? persistedValue;
       if (field.key == ContactCardFieldKey.mobile) {
         if (!_hasTouchedMobile) {
-          persistedValue = updatedCard.mobile;
+          persistedValue =
+              await _validatedStoredMobile(updatedCard.mobile);
         } else {
           final mobile = controllerFor(field).text.trim();
           persistedValue = mobile.isEmpty
               ? null
               : _isMobileValid == true && _normalizedMobile != null
               ? _normalizedMobile
-              : updatedCard.mobile;
+              : null;
         }
       } else {
         final controllerValue = controllerFor(field).text.trim();
