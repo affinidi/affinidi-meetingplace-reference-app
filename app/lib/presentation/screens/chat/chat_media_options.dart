@@ -5,11 +5,13 @@ class _ChatMediaOptionItem {
     required this.textCharacterIcon,
     required this.label,
     required this.onTap,
+    this.enabled = true,
   });
 
   final String textCharacterIcon;
   final String label;
   final VoidCallback? onTap;
+  final bool enabled;
 }
 
 class _ChatMediaOption extends StatelessWidget {
@@ -19,20 +21,21 @@ class _ChatMediaOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = _item.onTap != null;
+    final tappable = _item.onTap != null;
+    final styleEnabled = _item.enabled;
     return ListTile(
-      enabled: enabled,
+      enabled: tappable,
       leading: Text(
         _item.textCharacterIcon,
         style: TextStyle(
           fontSize: 30,
-          color: !enabled ? context.theme.disabledColor : null,
+          color: !tappable ? context.theme.disabledColor : null,
         ),
       ),
       title: Text(
         _item.label,
         style: TextStyle(
-          color: !enabled ? context.theme.disabledColor : Colors.white,
+          color: !styleEnabled ? context.theme.disabledColor : Colors.white,
           fontSize: 18,
         ),
         overflow: TextOverflow.ellipsis,
@@ -67,6 +70,11 @@ class _ChatMediaOptions extends ConsumerWidget {
     final availableAttachmentPlugins = ref.read(
       availableAttachmentPluginsProvider,
     );
+    final isGroupChat = ref.watch(
+      provider.select((state) => state.contact?.isGroup ?? false),
+    );
+
+    final shouldEnableRCardAttachment = !isGroupChat;
 
     void sendEffect(ScreenEffect effect) {
       if (!context.mounted) return;
@@ -101,16 +109,22 @@ class _ChatMediaOptions extends ConsumerWidget {
 
     final items = <_ChatMediaOptionItem>[
       ...availableAttachmentPlugins.map((plugin) {
-        final supported = plugin.isPlatformSupported;
-        final label = supported
-            ? plugin.localizedName(context)
-            : '${plugin.localizedName(context)}\n'
-                  '(${context.l10n.platformNotSupported})';
+        final platformSupported = plugin.isPlatformSupported;
+        final enabled = switch (plugin) {
+          RCardAttachmentsPlugin() => shouldEnableRCardAttachment,
+          _ => true,
+        };
+        final supported = platformSupported && enabled;
+        final label = !platformSupported
+            ? '${plugin.localizedName(context)}\n'
+                  '(${context.l10n.platformNotSupported})'
+            : plugin.localizedName(context);
 
         return _ChatMediaOptionItem(
           textCharacterIcon: plugin.icon,
           label: label,
           onTap: supported ? () => attachFromPlugin(plugin) : null,
+          enabled: supported,
         );
       }),
       _ChatMediaOptionItem(

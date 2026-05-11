@@ -8,7 +8,11 @@ import 'package:uuid/uuid.dart';
 class RCardAttachment implements MessageAttachment {
   RCardAttachment({required String vcBlob}) : _vcBlob = vcBlob;
 
-  static const pluginFormat = 'mpx_r_card_attachment_plugin';
+  /// The DIDComm attachment format identifier for R-Card attachments.
+  ///
+  /// Mirrors [RCardDIDCommAttachmentBuilder.attachmentFormat] — use either;
+  /// they are the same value.
+  static const pluginFormat = RCardDIDCommAttachmentBuilder.attachmentFormat;
 
   final String _vcBlob;
 
@@ -43,6 +47,36 @@ extension AttachmentRCardX on Attachment {
       return json;
     } catch (_) {
       return json;
+    }
+  }
+
+  bool get isRCardUpdate {
+    if (!isRCard) return false;
+    final json = data?.json;
+    if (json == null || json.isEmpty) return false;
+    try {
+      final decoded = jsonDecode(json);
+      if (decoded is Map<String, dynamic>) {
+        return (decoded['isUpdate'] as bool?) ?? false;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool get isRCardAutoExchange {
+    if (!isRCard) return false;
+    final json = data?.json;
+    if (json == null || json.isEmpty) return false;
+    try {
+      final decoded = jsonDecode(json);
+      if (decoded is Map<String, dynamic>) {
+        return (decoded['isAutoExchange'] as bool?) ?? false;
+      }
+      return false;
+    } catch (_) {
+      return false;
     }
   }
 

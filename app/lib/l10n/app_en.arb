@@ -1458,8 +1458,11 @@
 	"rCardPickIdentitySubtitle": "Select the identity to share as an R-Card",
 	"rCardFooterSent": "R-Card has been sent.",
 	"rCardFooterSaved": "R-Card has been saved.",
+	"rCardFooterUpdateShared": "R-Card update has been shared.",
+	"rCardFooterUpdateSaved": "R-Card update has been saved.",
+	"rCardsExchanged": "R-Cards have been exchanged.",
 	"goToRCard": "Go to R-Card",
-	"selectPersonaTitle": "Select Persona",
-	"selectPersonaInstruction": "Swipe left or right to choose the persona you want to use to generate the R‑Card",
+	"selectIdentityTitle": "Select Identity",
+	"selectIdentityInstruction": "Swipe left or right to choose the identity you want to use to generate the R‑Card",
 	"sendRCard": "Send R-Card"
 }

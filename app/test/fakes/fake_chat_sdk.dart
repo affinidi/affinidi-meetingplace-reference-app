@@ -28,6 +28,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
+  final List<List<Attachment>> createChatMessageFromIssuedCredentialCalls = [];
+  final List<List<Attachment>> createChatMessageFromRequestCredentialCalls = [];
 
   int get startChatSessionCallCount => _chatSessionStartedCalls;
   int get startedChatPresenceUpdatesCount => _startedChatPresenceUpdates;
@@ -505,6 +507,20 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   @override
   Future<void> startChatPresenceUpdates() async {
     _startedChatPresenceUpdates += 1;
+  }
+
+  @override
+  Future<void> createChatMessageFromIssuedCredential({
+    required List<Attachment> attachments,
+  }) async {
+    createChatMessageFromIssuedCredentialCalls.add(attachments);
+  }
+
+  @override
+  Future<void> createChatMessageFromRequestCredential({
+    required List<Attachment> attachments,
+  }) async {
+    createChatMessageFromRequestCredentialCalls.add(attachments);
   }
 
   @override

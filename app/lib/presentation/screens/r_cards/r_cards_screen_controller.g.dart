@@ -7,7 +7,7 @@ part of 'r_cards_screen_controller.dart';
 // **************************************************************************
 
 String _$rCardsScreenControllerHash() =>
-    r'b8c52b5d8904016de16261324d60770787f6fc11';
+    r'dd09c77576e35e30945914f562a526fbcdf85f3c';
 
 /// See also [RCardsScreenController].
 @ProviderFor(RCardsScreenController)

@@ -22,7 +22,7 @@ class RCardsDeck extends ConsumerStatefulWidget {
   });
 
   final String deckKey;
-  final List<ReceivedRCard> cards;
+  final List<RCard> cards;
   final RCardSubject? Function(String) extractSubject;
 
   @override
@@ -290,7 +290,7 @@ class _RCardsDeckState extends ConsumerState<RCardsDeck>
 
   Widget _buildCardWithOverlay(
     int index,
-    ReceivedRCard card,
+    RCard card,
     RCardSubject? Function(String) extractSubject,
     BaseCacheManager cacheManager,
   ) {
@@ -317,7 +317,7 @@ class _RCardItem extends StatefulWidget {
     required this.overlayAnimation,
   });
 
-  final ReceivedRCard card;
+  final RCard card;
   final RCardSubject? Function(String) extractSubject;
   final BaseCacheManager cacheManager;
   final double overlayOpacity;

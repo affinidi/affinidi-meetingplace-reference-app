@@ -1,15 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:mpx_flutter_reference_app/application/services/r_cards_service/r_cards_service.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/r_cards/r_cards_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/r_cards/r_cards_screen_filter.dart';
+import 'package:ssi/ssi.dart';
 
 import 'fakes/fake_r_cards_service.dart';
-import 'fixtures/r_card_fixtures.dart';
 
-ReceivedRCard _card({required String subjectDid, required String vcBlob}) {
-  return ReceivedRCard(
+RCard _card({required String subjectDid, required String vcBlob}) {
+  return RCard(
     subjectDid: subjectDid,
     vcBlob: vcBlob,
     issuerDid: 'did:key:issuer',
@@ -19,7 +21,56 @@ ReceivedRCard _card({required String subjectDid, required String vcBlob}) {
   );
 }
 
+Future<String> _buildSignedRCardBlob({
+  required DidKeyManager issuerManager,
+  required String issuerDid,
+  required String subjectDid,
+  required RCardSubject subject,
+}) async {
+  final vc = await CredentialBuilder.buildRCard(
+    issuerDid: issuerDid,
+    subjectDid: subjectDid,
+    subject: subject,
+    issuerDidManager: issuerManager,
+  );
+  return jsonEncode(vc.toJson());
+}
+
 void main() {
+  late DidKeyManager issuerManager;
+  late String issuerDid;
+  late String aliceSmithVcBlob;
+  late String bobJonesVcBlob;
+  late String anonymousVcBlob;
+
+  setUpAll(() async {
+    final wallet = PersistentWallet(InMemoryKeyStore());
+    issuerManager = DidKeyManager(wallet: wallet, store: InMemoryDidStore());
+    final keyPair = await wallet.generateKey();
+    await issuerManager.addVerificationMethod(keyPair.id);
+    final didDoc = await issuerManager.getDidDocument();
+    issuerDid = didDoc.id;
+
+    aliceSmithVcBlob = await _buildSignedRCardBlob(
+      issuerManager: issuerManager,
+      issuerDid: issuerDid,
+      subjectDid: 'did:key:alice',
+      subject: const RCardSubject(firstName: 'Alice', lastName: 'Smith'),
+    );
+    bobJonesVcBlob = await _buildSignedRCardBlob(
+      issuerManager: issuerManager,
+      issuerDid: issuerDid,
+      subjectDid: 'did:key:bob',
+      subject: const RCardSubject(firstName: 'Bob', lastName: 'Jones'),
+    );
+    anonymousVcBlob = await _buildSignedRCardBlob(
+      issuerManager: issuerManager,
+      issuerDid: issuerDid,
+      subjectDid: 'did:key:anon',
+      subject: const RCardSubject(firstName: 'Anonymous'),
+    );
+  });
+
   group('RCardsScreenController', () {
     late ProviderContainer container;
 
@@ -31,7 +82,7 @@ void main() {
       container.dispose();
     });
 
-    ProviderContainer containerWithCards(List<ReceivedRCard> cards) {
+    ProviderContainer containerWithCards(List<RCard> cards) {
       return ProviderContainer(
         overrides: [
           rCardsServiceProvider.overrideWith(() => FakeRCardsService(cards)),

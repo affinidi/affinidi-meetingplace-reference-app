@@ -9,7 +9,7 @@ part 'r_cards_screen_state.freezed.dart';
 abstract class RCardsScreenState with _$RCardsScreenState {
   factory RCardsScreenState({
     @Default(RCardsScreenFilter.all) RCardsScreenFilter filter,
-    @Default([]) List<ReceivedRCard> cards,
+    @Default([]) List<RCard> cards,
     @Default(false) bool isSearchActive,
     @Default(false) bool hasFilterApplied,
   }) = _RCardsScreenState;

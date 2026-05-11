@@ -14,12 +14,16 @@ import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../domain/models/contacts/contact.dart';
+import '../../../domain/models/contacts/contact_presence_status.dart';
+import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/event_message_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
+import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
@@ -47,6 +51,8 @@ class ChatScreenController extends _$ChatScreenController
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
+  StreamSubscription<Identity>? _rCardPluginSubscription;
+  bool _rCardListenerSet = false;
 
   late final Map<String, ProviderSubscription<void>>
   _conciergeLoadingControllersSubscriptions = {};
@@ -64,28 +70,54 @@ class ChatScreenController extends _$ChatScreenController
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     final channelDid = contact?.channelDid;
+    var pendingState = ChatScreenState(
+      contact: contact,
+      isActive: true,
+      isInitialized: false,
+      contactPresenceStatus: ContactPresenceStatus.unknown,
+    );
+    var hasInitializedState = false;
 
     if (channelDid != null) {
       _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
       ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
-        var newEffect = state.effect;
-        if (next.effect != null && previous?.effect != next.effect) {
-          newEffect = _mapEffect(next.effect!);
-        } else if (next.effect == null) {
-          newEffect = null;
-        }
+        Future.microtask(() {
+          var newEffect = pendingState.effect;
+          if (next.effect != null && previous?.effect != next.effect) {
+            newEffect = _mapEffect(next.effect!);
+          } else if (next.effect == null) {
+            newEffect = null;
+          }
 
-        state = state.copyWith(
-          messages: next.messages,
-          membersTyping: next.membersTyping,
-          contactPresenceStatus: next.contactPresenceStatus,
-          isActive: next.isActive,
-          isInitialized: next.isInitialized,
-          group: next.group ?? state.group,
-          otherPartyCard: next.otherPartyCard ?? state.otherPartyCard,
-          effect: newEffect,
-        );
-      });
+          pendingState = pendingState.copyWith(
+            messages: next.messages,
+            membersTyping: next.membersTyping,
+            contactPresenceStatus: next.contactPresenceStatus,
+            isActive: next.isActive,
+            isInitialized: next.isInitialized,
+            group: next.group ?? pendingState.group,
+            otherPartyCard: next.otherPartyCard ?? pendingState.otherPartyCard,
+            effect: newEffect,
+          );
+
+          if (hasInitializedState) {
+            state = pendingState;
+          }
+        });
+      }, fireImmediately: true);
+
+      if (!_rCardListenerSet) {
+        _rCardListenerSet = true;
+        final plugins = ref.read(availableAttachmentPluginsProvider);
+        final rCardPlugin = plugins
+            .whereType<RCardAttachmentsPlugin>()
+            .firstOrNull;
+        _rCardPluginSubscription = rCardPlugin?.onRCardFromAttachment.listen((
+          identity,
+        ) {
+          unawaited(_chatService?.sendRCardFromPlugin(identity));
+        });
+      }
     }
 
     ref.listen(
@@ -106,6 +138,7 @@ class ChatScreenController extends _$ChatScreenController
     ref.onDispose(() {
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
+      _rCardPluginSubscription?.cancel();
       _chatService?.pauseChat();
 
       messageTextController.removeListener(_onMessageTextChanged);
@@ -118,7 +151,8 @@ class ChatScreenController extends _$ChatScreenController
       WidgetsBinding.instance.removeObserver(this);
     });
 
-    return ChatScreenState(isActive: true, isInitialized: false);
+    hasInitializedState = true;
+    return pendingState;
   }
 
   ScreenEffect? _mapEffect(chat.Effect effect) {

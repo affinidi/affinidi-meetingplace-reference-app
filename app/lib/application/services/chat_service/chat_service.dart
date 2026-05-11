@@ -1,6 +1,7 @@
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import '../../../domain/models/contacts/contact_presence_status.dart';
+import '../../../domain/models/identity/identity.dart';
 import '../../../presentation/screens/chat/chat_screen_controller.dart'
     show ChatScreenController;
 import 'delegates/chat_concierge_messenger.dart' show ChatConciergeMessenger;
@@ -37,4 +38,6 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   Future<void> updateContactSequenceNumber(String channelDid);
   Future<void> resetBadgeCount();
   void clearEffect();
+
+  Future<void> sendRCardFromPlugin(Identity identity);
 }

@@ -10,7 +10,6 @@ import 'package:uuid/uuid.dart';
 
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../infrastructure/providers/r_cards_repository_provider.dart';
 import '../../../infrastructure/providers/relationship_sdk_provider.dart';
 
 part 'r_cards_service.g.dart';
@@ -18,40 +17,34 @@ part 'r_cards_service.g.dart';
 /// Service that drives the R-Card feature.
 ///
 /// Responsibilities:
-/// - Exposes all stored [ReceivedRCard]s as live state for the UI.
-/// - Subscribes to `MeetingPlaceRelationshipSDK.incomingRCards` and persists
-///   every verified card via `RCardRepository.upsertFromVdip`.
+/// - Exposes all stored [RCard]s as live state for the UI.
+/// - Delegates all persistence operations to [MeetingPlaceRelationshipSDK]
+///   so consumers only need one dependency for the full R-Card feature.
 @Riverpod(keepAlive: true)
 class RCardsService extends _$RCardsService {
   static const _logKey = 'RCARDSVC';
 
   late final AppLogger _logger = ref.read(appLoggerProvider);
 
-  StreamSubscription<ReceivedRCard>? _incomingSubscription;
-  StreamSubscription<List<ReceivedRCard>>? _watchSubscription;
+  StreamSubscription<List<RCard>>? _watchSubscription;
 
   @override
-  List<ReceivedRCard> build() {
-    unawaited(_init());
+  List<RCard> build() {
+    unawaited(_startWatching());
 
     ref.onDispose(() {
-      _incomingSubscription?.cancel();
       _watchSubscription?.cancel();
     });
 
     return const [];
   }
 
-  Future<void> _init() async {
-    await Future.wait([_startWatching(), _listenForIncoming()]);
-  }
-
   Future<void> _startWatching() async {
-    final repository = await ref.read(rCardsRepositoryProvider.future);
+    final sdk = await ref.read(relationshipSdkProvider.future);
 
     await _watchSubscription?.cancel();
-    _watchSubscription = repository.watchAll().listen(
-      (cards) => state = cards,
+    _watchSubscription = sdk.watchReceivedRCards().listen(
+      (List<RCard> cards) => state = cards,
       onError: (Object error, StackTrace stackTrace) {
         _logger.error(
           'Failed to watch R-Cards',
@@ -63,62 +56,15 @@ class RCardsService extends _$RCardsService {
     );
   }
 
-  /// Subscribes to [MeetingPlaceRelationshipSDK.incomingRCards] and persists
-  /// each verified card to the repository.
-  Future<void> _listenForIncoming() async {
-    try {
-      final relationshipSDK = await ref.read(relationshipSdkProvider.future);
-      final repository = await ref.read(rCardsRepositoryProvider.future);
-
-      _incomingSubscription = relationshipSDK.incomingRCards.listen(
-        (rCard) async {
-          try {
-            await repository.upsertFromVdip(
-              subjectDid: rCard.subjectDid,
-              issuerDid: rCard.issuerDid,
-              vcBlob: rCard.vcBlob,
-              issuanceDate: rCard.issuanceDate,
-              threadId: rCard.threadId,
-              contactChannelDid: rCard.contactChannelDid,
-              receivedAt: rCard.receivedAt,
-            );
-          } catch (error, stackTrace) {
-            _logger.error(
-              'Failed to persist incoming R-Card',
-              error: error,
-              stackTrace: stackTrace,
-              name: _logKey,
-            );
-          }
-        },
-        onError: (Object error, StackTrace stackTrace) {
-          _logger.error(
-            'Error on incomingRCards stream',
-            error: error,
-            stackTrace: stackTrace,
-            name: _logKey,
-          );
-        },
-      );
-    } catch (error, stackTrace) {
-      _logger.error(
-        'Failed to start incoming R-Card listener',
-        error: error,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-    }
-  }
-
   Future<XFile> exportAllAsVcf() async {
-    final repository = await ref.read(rCardsRepositoryProvider.future);
-    final cards = await repository.listAll();
+    final sdk = await ref.read(relationshipSdkProvider.future);
+    final cards = await sdk.listReceivedRCards();
 
     final blocks = cards.map(_toVCard).whereType<String>().join();
     return _writeVcfFile(blocks, fileName: 'R-Cards.vcf');
   }
 
-  Future<XFile?> exportSingleAsVcf(ReceivedRCard card) async {
+  Future<XFile?> exportSingleAsVcf(RCard card) async {
     final vCard = _toVCard(card);
     if (vCard == null) return null;
 
@@ -126,13 +72,13 @@ class RCardsService extends _$RCardsService {
   }
 
   Future<void> deleteBySubjectDid(String subjectDid) async {
-    final repository = await ref.read(rCardsRepositoryProvider.future);
-    await repository.deleteBySubjectDid(subjectDid);
+    final sdk = await ref.read(relationshipSdkProvider.future);
+    await sdk.deleteReceivedRCard(subjectDid);
   }
 
   Future<void> updateNotes(String subjectDid, String? notes) async {
-    final repository = await ref.read(rCardsRepositoryProvider.future);
-    await repository.updateNotes(subjectDid, notes);
+    final sdk = await ref.read(relationshipSdkProvider.future);
+    await sdk.updateReceivedRCardNotes(subjectDid, notes);
   }
 
   Future<XFile> _writeVcfFile(
@@ -149,7 +95,7 @@ class RCardsService extends _$RCardsService {
     return XFile(filePath, mimeType: 'text/vcard', name: fileName);
   }
 
-  String? _toVCard(ReceivedRCard card) {
+  String? _toVCard(RCard card) {
     final subject = RCardSubject.fromVcBlob(card.vcBlob);
     if (subject == null) {
       _logger.warning(

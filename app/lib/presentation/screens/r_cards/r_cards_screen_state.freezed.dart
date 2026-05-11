@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RCardsScreenState {
 
- RCardsScreenFilter get filter; List<ReceivedRCard> get cards; bool get isSearchActive; bool get hasFilterApplied;
+ RCardsScreenFilter get filter; List<RCard> get cards; bool get isSearchActive; bool get hasFilterApplied;
 /// Create a copy of RCardsScreenState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -45,7 +45,7 @@ abstract mixin class $RCardsScreenStateCopyWith<$Res>  {
   factory $RCardsScreenStateCopyWith(RCardsScreenState value, $Res Function(RCardsScreenState) _then) = _$RCardsScreenStateCopyWithImpl;
 @useResult
 $Res call({
- RCardsScreenFilter filter, List<ReceivedRCard> cards, bool isSearchActive, bool hasFilterApplied
+ RCardsScreenFilter filter, List<RCard> cards, bool isSearchActive, bool hasFilterApplied
 });
 
 
@@ -66,7 +66,7 @@ class _$RCardsScreenStateCopyWithImpl<$Res>
   return _then(_self.copyWith(
 filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
 as RCardsScreenFilter,cards: null == cards ? _self.cards : cards // ignore: cast_nullable_to_non_nullable
-as List<ReceivedRCard>,isSearchActive: null == isSearchActive ? _self.isSearchActive : isSearchActive // ignore: cast_nullable_to_non_nullable
+as List<RCard>,isSearchActive: null == isSearchActive ? _self.isSearchActive : isSearchActive // ignore: cast_nullable_to_non_nullable
 as bool,hasFilterApplied: null == hasFilterApplied ? _self.hasFilterApplied : hasFilterApplied // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
@@ -153,7 +153,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RCardsScreenFilter filter,  List<ReceivedRCard> cards,  bool isSearchActive,  bool hasFilterApplied)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RCardsScreenFilter filter,  List<RCard> cards,  bool isSearchActive,  bool hasFilterApplied)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RCardsScreenState() when $default != null:
 return $default(_that.filter,_that.cards,_that.isSearchActive,_that.hasFilterApplied);case _:
@@ -174,7 +174,7 @@ return $default(_that.filter,_that.cards,_that.isSearchActive,_that.hasFilterApp
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RCardsScreenFilter filter,  List<ReceivedRCard> cards,  bool isSearchActive,  bool hasFilterApplied)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RCardsScreenFilter filter,  List<RCard> cards,  bool isSearchActive,  bool hasFilterApplied)  $default,) {final _that = this;
 switch (_that) {
 case _RCardsScreenState():
 return $default(_that.filter,_that.cards,_that.isSearchActive,_that.hasFilterApplied);case _:
@@ -194,7 +194,7 @@ return $default(_that.filter,_that.cards,_that.isSearchActive,_that.hasFilterApp
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RCardsScreenFilter filter,  List<ReceivedRCard> cards,  bool isSearchActive,  bool hasFilterApplied)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RCardsScreenFilter filter,  List<RCard> cards,  bool isSearchActive,  bool hasFilterApplied)?  $default,) {final _that = this;
 switch (_that) {
 case _RCardsScreenState() when $default != null:
 return $default(_that.filter,_that.cards,_that.isSearchActive,_that.hasFilterApplied);case _:
@@ -209,12 +209,12 @@ return $default(_that.filter,_that.cards,_that.isSearchActive,_that.hasFilterApp
 
 
 class _RCardsScreenState implements RCardsScreenState {
-   _RCardsScreenState({this.filter = RCardsScreenFilter.all, final  List<ReceivedRCard> cards = const [], this.isSearchActive = false, this.hasFilterApplied = false}): _cards = cards;
+   _RCardsScreenState({this.filter = RCardsScreenFilter.all, final  List<RCard> cards = const [], this.isSearchActive = false, this.hasFilterApplied = false}): _cards = cards;
   
 
 @override@JsonKey() final  RCardsScreenFilter filter;
- final  List<ReceivedRCard> _cards;
-@override@JsonKey() List<ReceivedRCard> get cards {
+ final  List<RCard> _cards;
+@override@JsonKey() List<RCard> get cards {
   if (_cards is EqualUnmodifiableListView) return _cards;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_cards);
@@ -253,7 +253,7 @@ abstract mixin class _$RCardsScreenStateCopyWith<$Res> implements $RCardsScreenS
   factory _$RCardsScreenStateCopyWith(_RCardsScreenState value, $Res Function(_RCardsScreenState) _then) = __$RCardsScreenStateCopyWithImpl;
 @override @useResult
 $Res call({
- RCardsScreenFilter filter, List<ReceivedRCard> cards, bool isSearchActive, bool hasFilterApplied
+ RCardsScreenFilter filter, List<RCard> cards, bool isSearchActive, bool hasFilterApplied
 });
 
 
@@ -274,7 +274,7 @@ class __$RCardsScreenStateCopyWithImpl<$Res>
   return _then(_RCardsScreenState(
 filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
 as RCardsScreenFilter,cards: null == cards ? _self._cards : cards // ignore: cast_nullable_to_non_nullable
-as List<ReceivedRCard>,isSearchActive: null == isSearchActive ? _self.isSearchActive : isSearchActive // ignore: cast_nullable_to_non_nullable
+as List<RCard>,isSearchActive: null == isSearchActive ? _self.isSearchActive : isSearchActive // ignore: cast_nullable_to_non_nullable
 as bool,hasFilterApplied: null == hasFilterApplied ? _self.hasFilterApplied : hasFilterApplied // ignore: cast_nullable_to_non_nullable
 as bool,
   ));

@@ -66,7 +66,7 @@ class RCardsScreenController extends _$RCardsScreenController {
     state = state.copyWith(filter: filter, cards: filteredResults);
   }
 
-  List<ReceivedRCard> _applyFilters(List<ReceivedRCard> all) {
+  List<RCard> _applyFilters(List<RCard> all) {
     var cards = all;
 
     if (_lastSearchQuery.isNotEmpty) {
@@ -95,7 +95,7 @@ class RCardsScreenController extends _$RCardsScreenController {
     }
   }
 
-  bool _isAnonymous(ReceivedRCard card) {
+  bool _isAnonymous(RCard card) {
     final s = RCardSubject.fromVcBlob(card.vcBlob);
     final firstName = s?.firstName?.trim() ?? '';
     final lastName = s?.lastName?.trim() ?? '';

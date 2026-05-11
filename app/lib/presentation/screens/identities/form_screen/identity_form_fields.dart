@@ -33,7 +33,7 @@ class IdentityFormFields extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
-    final personaFields = ContactCardFieldDefinitions.values
+    final identityFields = ContactCardFieldDefinitions.values
         .where((f) => f.key != ContactCardFieldKey.mobile)
         .toList();
     final mobileField = ContactCardFieldDefinitions.byKey(
@@ -106,18 +106,18 @@ class IdentityFormFields extends ConsumerWidget {
                 ],
               ),
             ),
-            for (var index = 0; index < personaFields.length; index++) ...[
+            for (var index = 0; index < identityFields.length; index++) ...[
               const Divider(),
-              _PersonaField(
+              _IdentityField(
                 identityId: identityId,
-                field: personaFields[index],
+                field: identityFields[index],
                 formKey: formKey,
                 traversalOrder: (index + 1).toDouble(),
               ),
             ],
             const Divider(),
             FocusTraversalOrder(
-              order: NumericFocusOrder((personaFields.length + 1).toDouble()),
+              order: NumericFocusOrder((identityFields.length + 1).toDouble()),
               child: ListTile(
                 leading: LabelIcon(
                   icon: Icons.phone,
@@ -212,8 +212,8 @@ class IdentityFormFields extends ConsumerWidget {
   }
 }
 
-class _PersonaField extends ConsumerWidget {
-  const _PersonaField({
+class _IdentityField extends ConsumerWidget {
+  const _IdentityField({
     required this.identityId,
     required this.field,
     required this.formKey,

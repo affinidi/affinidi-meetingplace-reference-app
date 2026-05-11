@@ -385,9 +385,10 @@
 	"genRCard": "R-Karte",
 	"rCardPickIdentitySubtitle": "Wähle die Identität aus, die als R-Karte geteilt werden soll",
 	"rCardFooterSent": "R-Karte wurde gesendet.",
+	"rCardFooterUpdateShared": "R-Karten-Update wurde geteilt.",
 	"rCardFooterSaved": "R-Karte wurde gespeichert.",
 	"goToRCard": "Zur R-Karte",
-	"selectPersonaTitle": "Persona auswählen",
-	"selectPersonaInstruction": "Wische links oder rechts, um die Persona auszuwählen, die du für die R‑Karte verwenden möchtest",
+	"selectIdentityTitle": "Identität auswählen",
+	"selectIdentityInstruction": "Wische links oder rechts, um die Identität auszuwählen, die du für die R‑Karte verwenden möchtest",
 	"sendRCard": "R-Karte senden"
 }

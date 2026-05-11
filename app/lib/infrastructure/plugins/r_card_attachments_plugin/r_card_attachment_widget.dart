@@ -41,7 +41,8 @@ class _RCardAttachmentWidget extends StatelessWidget {
   }
 
   void _openRCardDetails(BuildContext context) {
-    final subjectDid = _attachment.rCardSubjectDid!;
+    final subjectDid = _attachment.rCardSubjectDid;
+    if (subjectDid == null || subjectDid.isEmpty) return;
     final vcBlob = _attachment.rCardVcBlob;
     final route = RCardDetailsRoute(subjectDid: subjectDid);
     if (_isFromMe && vcBlob != null && vcBlob.isNotEmpty) {

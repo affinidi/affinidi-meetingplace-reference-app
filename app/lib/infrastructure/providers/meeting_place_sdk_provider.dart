@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -55,6 +56,15 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
           controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
           logger: logger,
           options: MeetingPlaceCoreSDKOptions(
+            expectedMessageWrappingTypes: const [
+              MessageWrappingType.authcryptPlaintext,
+              MessageWrappingType.authcryptSignPlaintext,
+            ],
+            messageTypesForSequenceTracking: [
+              ChatProtocol.chatMessage.value,
+              VdipClient.requestIssuanceMessageType,
+              VdipClient.issuedCredentialMessageType,
+            ],
             onBuildAttachments:
                 (
                   Channel channel,
@@ -77,11 +87,8 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
 
                     final didManager = await getDidManager(identity.did);
 
-                    return RCardAttachmentBuilder.buildForPersona(
-                      persona: PersonaDid(
-                        did: identity.did,
-                        name: identity.card.displayName,
-                      ),
+                    return RCardDIDCommAttachmentBuilder.buildForOwner(
+                      issuerDid: identity.did,
                       card: RCardSubject(
                         firstName: identity.card.firstName,
                         lastName: identity.card.lastName,

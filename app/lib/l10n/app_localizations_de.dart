@@ -1618,14 +1618,23 @@ class AppLocalizationsDe extends AppLocalizations {
   String get rCardFooterSaved => 'R-Karte wurde gespeichert.';
 
   @override
+  String get rCardFooterUpdateShared => 'R-Karten-Update wurde geteilt.';
+
+  @override
+  String get rCardFooterUpdateSaved => 'R-Card update has been saved.';
+
+  @override
+  String get rCardsExchanged => 'R-Cards have been exchanged.';
+
+  @override
   String get goToRCard => 'Zur R-Karte';
 
   @override
-  String get selectPersonaTitle => 'Persona auswählen';
+  String get selectIdentityTitle => 'Identität auswählen';
 
   @override
-  String get selectPersonaInstruction =>
-      'Wische links oder rechts, um die Persona auszuwählen, die du für die R‑Karte verwenden möchtest';
+  String get selectIdentityInstruction =>
+      'Wische links oder rechts, um die Identität auszuwählen, die du für die R‑Karte verwenden möchtest';
 
   @override
   String get sendRCard => 'R-Karte senden';

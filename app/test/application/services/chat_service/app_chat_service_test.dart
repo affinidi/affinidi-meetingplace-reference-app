@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
@@ -10,11 +12,14 @@ import 'package:mpx_flutter_reference_app/application/services/network_connectiv
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
+import 'package:ssi/ssi.dart';
 
 import '../../../fakes/fake_app_badge_service.dart';
 import '../../../fakes/fake_channels.dart';
@@ -23,6 +28,7 @@ import '../../../fakes/fake_contacts.dart';
 import '../../../fakes/fake_contacts_service.dart';
 import '../../../fakes/fake_environment.dart';
 import '../../../fakes/fake_groups.dart';
+import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_meeting_place_sdk.dart';
 
 void main() {
@@ -54,6 +60,9 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => _FakeRCardRepository(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -271,6 +280,9 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => _FakeRCardRepository(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -396,6 +408,9 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => _FakeRCardRepository(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -449,6 +464,156 @@ void main() {
       },
     );
   });
+
+  group('ChatSessionService - R-Card Integration', () {
+    late ProviderContainer container;
+    late ChatSessionService chatService;
+    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeChatSdk fakeChatSdk;
+    late DidKeyManager issuerManager;
+
+    final testContact = FakeContacts.individualContact;
+    final channelDid = testContact.channelDid!;
+
+    setUpAll(() async {
+      final wallet = PersistentWallet(InMemoryKeyStore());
+      issuerManager = DidKeyManager(wallet: wallet, store: InMemoryDidStore());
+      final keyPair = await wallet.generateKey();
+      await issuerManager.addVerificationMethod(keyPair.id);
+    });
+
+    Channel makeChannel({
+      String permanentChannelDid = 'did:key:my-channel',
+      String? otherPartyPermanentChannelDid,
+    }) {
+      return Channel(
+        offerLink: 'test-offer-link',
+        publishOfferDid: 'did:key:publisher',
+        mediatorDid: 'did:key:mediator',
+        status: ChannelStatus.inaugurated,
+        contactCard: FakeContacts.individualContact.card.toSdkContactCard(),
+        outboundMessageId: 'msg-1',
+        acceptOfferDid: 'did:key:accept',
+        permanentChannelDid: permanentChannelDid,
+        otherPartyPermanentChannelDid:
+            otherPartyPermanentChannelDid ?? channelDid,
+        type: ChannelType.individual,
+        isConnectionInitiator: false,
+      );
+    }
+
+    ProviderContainer makeContainer(FakeMeetingPlaceSDK coreSdk) {
+      final c = ProviderContainer(
+        overrides: [
+          meetingPlaceSdkProvider.overrideWith((ref) async => coreSdk),
+          chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+          contactsServiceProvider.overrideWith(FakeContactsService.new),
+          environmentProvider.overrideWithValue(FakeEnvironment()),
+          appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => _FakeRCardRepository(),
+          ),
+          networkConnectivityServiceProvider.overrideWith(
+            _FakeNetworkConnectivityService.new,
+          ),
+        ],
+      );
+      c.listen(
+        chatSessionServiceProvider(channelDid),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      return c;
+    }
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      fakeCoreSdk = FakeMeetingPlaceSDK(channels: {channelDid: makeChannel()});
+      fakeCoreSdk.setFakeDidManager(issuerManager);
+      container = makeContainer(fakeCoreSdk);
+      chatService = container.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
+    });
+
+    tearDown(() => container.dispose());
+
+    test(
+      'sendRCardFromPlugin calls createChatMessageFromIssuedCredential',
+      () async {
+        await chatService.startChatSession();
+
+        await chatService.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(
+          fakeChatSdk.createChatMessageFromIssuedCredentialCalls,
+          hasLength(1),
+        );
+      },
+    );
+
+    test('sendRCardFromPlugin is a no-op when channel is not found', () async {
+      final noChannelSdk = FakeMeetingPlaceSDK(channels: {});
+      final noChannelContainer = makeContainer(noChannelSdk);
+      addTearDown(noChannelContainer.dispose);
+
+      noChannelContainer.listen(
+        chatSessionServiceProvider(channelDid),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      final service = noChannelContainer.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
+      await service.startChatSession();
+
+      await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeChatSdk.createChatMessageFromIssuedCredentialCalls, isEmpty);
+    });
+
+    test('sendRCardFromPlugin silently skips when channel '
+        'lacks permanentChannelDid', () async {
+      final incompleteChannel = Channel(
+        offerLink: 'link',
+        publishOfferDid: 'did:key:pub',
+        mediatorDid: 'did:key:med',
+        status: ChannelStatus.inaugurated,
+        contactCard: FakeContacts.individualContact.card.toSdkContactCard(),
+        outboundMessageId: 'msg',
+        acceptOfferDid: 'did:key:acc',
+        permanentChannelDid: null,
+        otherPartyPermanentChannelDid: null,
+        type: ChannelType.individual,
+        isConnectionInitiator: false,
+      );
+      final sdkWithIncompleteChannel = FakeMeetingPlaceSDK(
+        channels: {channelDid: incompleteChannel},
+      );
+      sdkWithIncompleteChannel.setFakeDidManager(issuerManager);
+      final c = makeContainer(sdkWithIncompleteChannel);
+      addTearDown(c.dispose);
+
+      final service = c.read(chatSessionServiceProvider(channelDid).notifier);
+      await service.startChatSession();
+
+      await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeChatSdk.createChatMessageFromIssuedCredentialCalls, isEmpty);
+    });
+
+    test('pauseChat cancels rCard subscription without error', () async {
+      await chatService.startChatSession();
+
+      chatService.pauseChat();
+      chatService.pauseChat(); // second call must not throw
+
+      expect(fakeChatSdk.sessionEnded, isTrue);
+    });
+  });
 }
 
 class _FakeNetworkConnectivityService extends NetworkConnectivityService {
@@ -456,4 +621,24 @@ class _FakeNetworkConnectivityService extends NetworkConnectivityService {
   NetworkConnectivityServiceState build() {
     return const NetworkConnectivityServiceState(isConnected: true);
   }
+}
+
+class _FakeRCardRepository implements RCardRepository {
+  @override
+  Future<void> deleteBySubjectDid(String subjectDid) async {}
+
+  @override
+  Future<RCard?> getBySubjectDid(String subjectDid) async => null;
+
+  @override
+  Future<List<RCard>> listAll() async => const [];
+
+  @override
+  Future<void> updateNotes(String subjectDid, String? notes) async {}
+
+  @override
+  Future<void> upsert(RCard rCard) async {}
+
+  @override
+  Stream<List<RCard>> watchAll() => const Stream.empty();
 }

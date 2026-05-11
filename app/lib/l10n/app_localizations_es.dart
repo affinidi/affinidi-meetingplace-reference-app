@@ -1611,14 +1611,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rCardFooterSaved => 'Tarjeta R guardada.';
 
   @override
+  String get rCardFooterUpdateShared =>
+      'La actualización de la tarjeta R ha sido compartida.';
+
+  @override
+  String get rCardFooterUpdateSaved => 'R-Card update has been saved.';
+
+  @override
+  String get rCardsExchanged => 'R-Cards have been exchanged.';
+
+  @override
   String get goToRCard => 'Ir a la Tarjeta R';
 
   @override
-  String get selectPersonaTitle => 'Seleccionar Persona';
+  String get selectIdentityTitle => 'Seleccionar Identidad';
 
   @override
-  String get selectPersonaInstruction =>
-      'Desliza a la izquierda o derecha para elegir la persona que deseas usar para generar la Tarjeta‑R';
+  String get selectIdentityInstruction =>
+      'Desliza a la izquierda o derecha para elegir la identidad que deseas usar para generar la Tarjeta‑R';
 
   @override
   String get sendRCard => 'Enviar Tarjeta R';

@@ -510,8 +510,8 @@ class ConnectionsService extends _$ConnectionsService {
 
     try {
       final didManager = await sdk.getDidManager(identity.did);
-      return RCardAttachmentBuilder.buildForPersona(
-        persona: PersonaDid(did: identity.did, name: identity.card.displayName),
+      return RCardDIDCommAttachmentBuilder.buildForOwner(
+        issuerDid: identity.did,
         card: RCardSubject(
           firstName: identity.card.firstName,
           lastName: identity.card.lastName,

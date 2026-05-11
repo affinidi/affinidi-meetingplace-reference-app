@@ -2362,23 +2362,41 @@ abstract class AppLocalizations {
   /// **'R-Card has been saved.'**
   String get rCardFooterSaved;
 
+  /// No description provided for @rCardFooterUpdateShared.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card update has been shared.'**
+  String get rCardFooterUpdateShared;
+
+  /// No description provided for @rCardFooterUpdateSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card update has been saved.'**
+  String get rCardFooterUpdateSaved;
+
+  /// No description provided for @rCardsExchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Cards have been exchanged.'**
+  String get rCardsExchanged;
+
   /// No description provided for @goToRCard.
   ///
   /// In en, this message translates to:
   /// **'Go to R-Card'**
   String get goToRCard;
 
-  /// No description provided for @selectPersonaTitle.
+  /// No description provided for @selectIdentityTitle.
   ///
   /// In en, this message translates to:
-  /// **'Select Persona'**
-  String get selectPersonaTitle;
+  /// **'Select Identity'**
+  String get selectIdentityTitle;
 
-  /// No description provided for @selectPersonaInstruction.
+  /// No description provided for @selectIdentityInstruction.
   ///
   /// In en, this message translates to:
-  /// **'Swipe left or right to choose the persona you want to use to generate the R‑Card'**
-  String get selectPersonaInstruction;
+  /// **'Swipe left or right to choose the identity you want to use to generate the R‑Card'**
+  String get selectIdentityInstruction;
 
   /// No description provided for @sendRCard.
   ///

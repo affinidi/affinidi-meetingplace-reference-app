@@ -6,13 +6,12 @@ part of 'r_cards_repository_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$rCardsRepositoryHash() => r'1dc79d28826ce956d1e401e50fc745de506374a5';
+String _$rCardsRepositoryHash() => r'0c9f2cd684f9a5d327f0ed8fb7d51078f9a51611';
 
 /// Provides the app-wide [RCardRepository] instance.
 ///
 /// The default implementation throws [UnimplementedError]. Override this
-/// provider in the root [ProviderScope] with a concrete implementation
-/// such as `rCardsRepositoryDrift`.
+/// provider in the root [ProviderScope] with [rCardsRepositoryDrift].
 ///
 /// Copied from [rCardsRepository].
 @ProviderFor(rCardsRepository)
