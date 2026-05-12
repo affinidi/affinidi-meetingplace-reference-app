@@ -8,9 +8,6 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
-import '../../../domain/models/chat/zkp_proof_received_notice.dart';
-import '../../../domain/models/chat/zkp_proof_shared_notice.dart';
-import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../../domain/models/contact_card/contact_card.dart' as domain;
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -479,6 +476,14 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       if (chatItem is Message && !chatItem.isFromMe) {
         _clearMembersTypingActivity(data.plainTextMessage?.from);
       }
+      if (chatItem is Message) {
+        final peerName = _peerFirstNameForZkpUi();
+        final derivedRows =
+            _deriveHumanZkpConciergeMessages(chatItem, peerName);
+        for (final row in derivedRows) {
+          upsertChatItem(row);
+        }
+      }
     }
 
     _toggleChatLoading(false);
@@ -494,9 +499,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     state = state.copyWith(messages: messages);
   }
 
-  List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
-    final derived = <ChatItem>[];
-    final contactName = _otherPartyFirstName?.isNotEmpty == true
+  String _peerFirstNameForZkpUi() {
+    return _otherPartyFirstName?.isNotEmpty == true
         ? _otherPartyFirstName!
         : ref
             .read(contactsServiceProvider)
@@ -504,49 +508,63 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
             ?.card
             .firstName ??
             '';
+  }
+  List<ConciergeMessage> _deriveHumanZkpConciergeMessages(
+    Message item,
+    String contactName,
+  ) {
+    final out = <ConciergeMessage>[];
+    if (item.value.isNotEmpty || item.attachments.isEmpty) return out;
 
-    for (final item in existing) {
-      if (item is! Message) continue;
-      if (item.value.isNotEmpty || item.attachments.isEmpty) continue;
+    final hasRequest = item.attachments.any(
+      (att) => att.format == ZkpConstants.livenessCheckRequestType,
+    );
+    final hasProof = item.attachments.any(
+      (att) => att.format == ZkpConstants.livenessProofType,
+    );
 
-      final hasRequest = item.attachments.any(
-        (att) => att.format == ZkpConstants.livenessCheckRequestType,
+    if (hasRequest && !item.isFromMe) {
+      out.add(
+        ZkpConciergeMessages.humanZkpRequest(
+          chatId: item.chatId,
+          messageId: 'zkp-request-received-${item.messageId}',
+          dateCreated: item.dateCreated,
+          contactName: contactName,
+        ),
       );
-      final hasProof = item.attachments.any(
-        (att) => att.format == ZkpConstants.livenessProofType,
-      );
+    }
 
-      if (hasRequest && !item.isFromMe) {
-        derived.add(
-          ZkpRequestReceivedNotice(
+    if (hasProof) {
+      if (item.isFromMe) {
+        out.add(
+          ZkpConciergeMessages.humanZkpProofShared(
             chatId: item.chatId,
+            messageId: 'zkp-proof-shared-${item.messageId}',
+            dateCreated: item.dateCreated,
+          ),
+        );
+      } else {
+        out.add(
+          ZkpConciergeMessages.humanZkpProofReceived(
+            chatId: item.chatId,
+            messageId: 'zkp-proof-received-${item.messageId}',
             dateCreated: item.dateCreated,
             contactName: contactName,
-            messageId: 'zkp-request-received-${item.messageId}',
           ),
         );
       }
+    }
 
-      if (hasProof) {
-        if (item.isFromMe) {
-          derived.add(
-            ZkpProofSharedNotice(
-              chatId: item.chatId,
-              dateCreated: item.dateCreated,
-              messageId: 'zkp-proof-shared-${item.messageId}',
-            ),
-          );
-        } else {
-          derived.add(
-            ZkpProofReceivedNotice(
-              chatId: item.chatId,
-              dateCreated: item.dateCreated,
-              contactName: contactName,
-              messageId: 'zkp-proof-received-${item.messageId}',
-            ),
-          );
-        }
-      }
+    return out;
+  }
+
+  List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
+    final derived = <ChatItem>[];
+    final contactName = _peerFirstNameForZkpUi();
+
+    for (final item in existing) {
+      if (item is! Message) continue;
+      derived.addAll(_deriveHumanZkpConciergeMessages(item, contactName));
     }
 
     return [

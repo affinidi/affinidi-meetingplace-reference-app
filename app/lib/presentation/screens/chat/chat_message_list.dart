@@ -1,5 +1,16 @@
 part of 'chat_screen.dart';
 
+bool _isHumanZkpConcierge(chat.ChatItem item) {
+  if (item is! chat.ConciergeMessage) return false;
+  const ids = {
+    ZkpConstants.conciergeHumanZkpRequest,
+    ZkpConstants.conciergeHumanZkpPaused,
+    ZkpConstants.conciergeHumanZkpProofShared,
+    ZkpConstants.conciergeHumanZkpProofReceived,
+  };
+  return ids.contains(item.conciergeType.value);
+}
+
 class _ChatMessageList extends HookConsumerWidget {
   const _ChatMessageList(this._contactId);
 
@@ -22,6 +33,56 @@ class _ChatMessageList extends HookConsumerWidget {
     var lastUsedChatItemStatus = chat.ChatItemStatus.error;
 
     final scrollController = useScrollController();
+    final pausedNoticeMessageIds = sortedMessages
+        .where(
+          (n) =>
+              n is chat.ConciergeMessage &&
+              n.conciergeType.value == ZkpConstants.conciergeHumanZkpPaused,
+        )
+        .map((n) => (n as chat.ConciergeMessage).messageId)
+        .toSet();
+
+    final hasSharedHumanZkpProof = sortedMessages.any(
+      (m) =>
+          (m is chat.ConciergeMessage &&
+              m.conciergeType.value ==
+                  ZkpConstants.conciergeHumanZkpProofShared) ||
+          (m is chat.Message &&
+              m.isFromMe &&
+              m.attachments.any(
+                (a) => a.format == ZkpConstants.livenessProofType,
+              )),
+    );
+
+    bool shouldHideChatItem(chat.ChatItem item) {
+      // Hide messages that are just liveness/proof attachments with no text.
+      if (item is chat.Message && item.value.isEmpty) {
+        final attachments = item.attachments;
+        final hasOnlyLivenessAttachments =
+            attachments.isNotEmpty &&
+            attachments.every(
+              (att) =>
+                  att.format == ZkpConstants.livenessCheckRequestType ||
+                  att.format == ZkpConstants.livenessProofType,
+            );
+        if (hasOnlyLivenessAttachments) {
+          return true;
+        }
+      }
+
+      // Hide the proof-request concierge once user shared a proof, or after
+      // "Do later" (paired paused notice).
+      if (item is chat.ConciergeMessage &&
+          item.conciergeType.value == ZkpConstants.conciergeHumanZkpRequest) {
+        if (hasSharedHumanZkpProof) {
+          return true;
+        }
+        final expectedPausedNoticeMessageId = 'zkp-paused-${item.messageId}';
+        return pausedNoticeMessageIds.contains(expectedPausedNoticeMessageId);
+      }
+
+      return false;
+    }
 
     void hideReactionPicker() {
       if (!context.mounted) return;
@@ -56,28 +117,21 @@ class _ChatMessageList extends HookConsumerWidget {
               itemBuilder: (context, index) {
                 var chatItem = sortedMessages[index];
 
-                // VRC request messages are protocol signals
-                // — never render them.
-                if (_isVrcRequestOnlyMessage(chatItem)) {
+                if (_isVrcRequestOnlyMessage(chatItem) ||
+                    shouldHideChatItem(chatItem)) {
                   return const SizedBox.shrink();
-                }
-
-                // Hide messages that are just liveness/proof attachments with no text
-                if (chatItem is chat.Message && chatItem.value.isEmpty) {
-                  final attachments = chatItem.attachments;
-                  final hasOnlyLivenessAttachments = attachments.isNotEmpty &&
-                      attachments.every((att) =>
-                        att.format == ZkpConstants.livenessCheckRequestType ||
-                        att.format == ZkpConstants.livenessProofType,
-                      );
-                  if (hasOnlyLivenessAttachments) {
-                    return const SizedBox.shrink();
-                  }
                 }
                 var nextItemFromSameDid = false;
 
-                if (index < sortedMessages.length - 1) {
-                  var chatItemNext = sortedMessages[index + 1];
+                var nextIndex = index + 1;
+                while (nextIndex < sortedMessages.length &&
+                    (_isVrcRequestOnlyMessage(sortedMessages[nextIndex]) ||
+                        shouldHideChatItem(sortedMessages[nextIndex]))) {
+                  nextIndex++;
+                }
+
+                if (nextIndex < sortedMessages.length) {
+                  var chatItemNext = sortedMessages[nextIndex];
                   nextItemFromSameDid =
                       chatItemNext.senderDid == chatItem.senderDid;
                 }
@@ -134,10 +188,6 @@ class _ChatMessageList extends HookConsumerWidget {
                         alignment:
                             (chatItem is EncryptionNotice ||
                                 chatItem is chat.ConciergeMessage ||
-                                chatItem is ZkpRequestReceivedNotice ||
-                                chatItem is ZkpPausedNotice ||
-                                chatItem is ZkpProofSharedNotice ||
-                                chatItem is ZkpProofReceivedNotice ||
                                 chatItem.status ==
                                     chat.ChatItemStatus.userInput)
                             ? Alignment.center
@@ -147,11 +197,7 @@ class _ChatMessageList extends HookConsumerWidget {
                         child: Column(
                           crossAxisAlignment:
                               (chatItem is EncryptionNotice ||
-                                  chatItem is chat.ConciergeMessage ||
-                                  chatItem is ZkpRequestReceivedNotice ||
-                                  chatItem is ZkpPausedNotice ||
-                                  chatItem is ZkpProofSharedNotice ||
-                                  chatItem is ZkpProofReceivedNotice)
+                              chatItem is chat.ConciergeMessage)
                               ? CrossAxisAlignment.center
                               : chatItem.isFromMe
                               ? CrossAxisAlignment.end
@@ -251,6 +297,14 @@ chat.ChatItemStatus consolidateChatItemStatus(chat.ChatItem chatItem) {
 
 Color getChatItemColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
   if (chatItem.type == chat.ChatItemType.conciergeMessage) {
+    final cm = chatItem as chat.ConciergeMessage;
+    final typeValue = cm.conciergeType.value;
+    if (typeValue == ZkpConstants.conciergeHumanZkpRequest ||
+        typeValue == ZkpConstants.conciergeHumanZkpPaused ||
+        typeValue == ZkpConstants.conciergeHumanZkpProofShared ||
+        typeValue == ZkpConstants.conciergeHumanZkpProofReceived) {
+      return Colors.transparent;
+    }
     return AppCustomColors.conciergeMessageColor;
   } else if (chatItem.type == chat.ChatItemType.eventMessage) {
     return Colors.transparent;
@@ -394,10 +448,7 @@ class _ZkpBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final margin =
-        chatItem is ZkpRequestReceivedNotice ||
-            chatItem is ZkpPausedNotice ||
-            chatItem is ZkpProofSharedNotice ||
-            chatItem is ZkpProofReceivedNotice
+      _isHumanZkpConcierge(chatItem)
         ? const EdgeInsets.symmetric(vertical: 8)
         : chatItem is EncryptionNotice ||
               chatItem is chat.ConciergeMessage ||

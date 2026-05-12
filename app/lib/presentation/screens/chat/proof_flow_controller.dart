@@ -50,12 +50,6 @@ final proofFlowControllerProvider =
 
   /// Called when contact receives liveness check request
   void onLivenessRequestReceived() {
-    // Insert concierge message showing the request
-    final chatController = ref.read(
-      chatScreenControllerProvider(contactId).notifier,
-    );
-    unawaited(chatController.insertZkpRequestReceivedNotice());
-
     state = state.copyWith(hasIncomingRequest: true);
   }
 
@@ -145,9 +139,7 @@ final proofFlowControllerProvider =
         ],
       );
 
-      // Insert concierge message showing proof was shared
       _logger.info('Proof sent to contact successfully', name: _logKey);
-      await chatController.insertZkpProofSharedNotice();
 
       // Save credential to Credentials tab
       await ref
@@ -234,17 +226,9 @@ final proofFlowControllerProvider =
     // Store the received proof data
     state = state.copyWith(receivedProofData: proofData);
 
-    // Insert concierge message showing proof was received
-    _logger.info(
-      '  Inserting "proof received" concierge message',
-      name: _logKey,
-    );
-    final chatController = ref.read(
-      chatScreenControllerProvider(contactId).notifier,
-    );
-    unawaited(chatController.insertZkpProofReceivedNotice());
+    _logger.info('Proof received', name: _logKey);
 
-    // Automatically verify the proof
+    // Verify the proof
     _logger.info('  Triggering automatic verification', name: _logKey);
     verifyProof();
   }

@@ -3,11 +3,8 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 
+import '../../../application/services/zkp_service/zkp_concierge_messages.dart';
 import '../../../application/services/zkp_service/zkp_constants.dart';
-import '../../../domain/models/chat/zkp_paused_notice.dart';
-import '../../../domain/models/chat/zkp_proof_received_notice.dart';
-import '../../../domain/models/chat/zkp_proof_shared_notice.dart';
-import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import 'proof_flow_controller.dart';
@@ -20,7 +17,6 @@ class ChatZkpHandler {
     required this.isZkpEnabled,
     required this.getContact,
     required this.onUpsertChatItem,
-    required this.onPersistZkpNotice,
   });
 
   final Ref ref;
@@ -29,7 +25,6 @@ class ChatZkpHandler {
   final bool isZkpEnabled;
   final Contact? Function() getContact;
   final void Function(chat.ChatItem item) onUpsertChatItem;
-  final Future<void> Function(chat.ChatItem item) onPersistZkpNotice;
 
   void handleZkpAttachment(chat.StreamData data, String channelDid) {
     if (!isZkpEnabled) return;
@@ -120,86 +115,16 @@ class ChatZkpHandler {
 
   Future<void> insertZkpPausedNotice({
     String? pausedForNoticeMessageId,
-    bool persist = true,
   }) async {
     if (!isZkpEnabled) return;
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
 
-    final notice = ZkpPausedNotice(
+    final notice = ZkpConciergeMessages.humanZkpPaused(
       chatId: contact.channelDid!,
       dateCreated: DateTime.now(),
-      // When pausing an incoming proof request, make the paused notice
-      // deterministic so the UI can hide the request notice after Do-later.
-      messageId: pausedForNoticeMessageId == null
-          ? null
-          : 'zkp-paused-$pausedForNoticeMessageId',
+      pausedForRequestMessageId: pausedForNoticeMessageId,
     );
     onUpsertChatItem(notice);
-    if (persist) {
-      await _persistNoticeSafely(notice);
-    }
-  }
-
-  Future<void> insertZkpProofSharedNotice() async {
-    if (!isZkpEnabled) return;
-    final contact = getContact();
-    if (contact == null || contact.channelDid == null) return;
-
-    final notice = ZkpProofSharedNotice(
-      chatId: contact.channelDid!,
-      dateCreated: DateTime.now(),
-    );
-    onUpsertChatItem(notice);
-    await _persistNoticeSafely(notice);
-  }
-
-  Future<void> insertZkpProofReceivedNotice() async {
-    if (!isZkpEnabled) return;
-    final contact = getContact();
-    if (contact == null || contact.channelDid == null) return;
-
-    final contactName = contact.displayName?.isNotEmpty == true
-        ? contact.displayName!
-        : contact.card.firstName;
-
-    final notice = ZkpProofReceivedNotice(
-      chatId: contact.channelDid!,
-      dateCreated: DateTime.now(),
-      contactName: contactName,
-    );
-    onUpsertChatItem(notice);
-    await _persistNoticeSafely(notice);
-  }
-
-  Future<void> insertZkpRequestReceivedNotice() async {
-    if (!isZkpEnabled) return;
-    final contact = getContact();
-    if (contact == null || contact.channelDid == null) return;
-
-    final contactName = contact.displayName?.isNotEmpty == true
-        ? contact.displayName!
-        : contact.card.firstName;
-
-    final notice = ZkpRequestReceivedNotice(
-      chatId: contact.channelDid!,
-      dateCreated: DateTime.now(),
-      contactName: contactName,
-    );
-    onUpsertChatItem(notice);
-    await _persistNoticeSafely(notice);
-  }
-
-  Future<void> _persistNoticeSafely(chat.ChatItem notice) async {
-    try {
-      await onPersistZkpNotice(notice);
-    } catch (e, st) {
-      logger.error(
-        'Failed to persist ZKP notice',
-        error: e,
-        stackTrace: st,
-        name: logKey,
-      );
-    }
   }
 }

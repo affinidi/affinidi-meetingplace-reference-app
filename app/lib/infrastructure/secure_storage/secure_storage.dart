@@ -296,32 +296,6 @@ class SecureStorage implements KeyRepository, KeyStore {
     );
   }
 
-  /// Gets persisted ZKP notices for a channel.
-  Future<List<Map<String, dynamic>>> getZkpNotices(String channelDid) async {
-    final key = 'zkp_notices_$channelDid';
-    final json = await _secureStorage.read(key: key);
-    if (json == null || json.isEmpty) return const [];
-
-    try {
-      final decoded = jsonDecode(json) as List<dynamic>;
-      return decoded.whereType<Map>().map(Map<String, dynamic>.from).toList();
-    } catch (_) {
-      return const [];
-    }
-  }
-
-  /// Saves persisted ZKP notices for a channel.
-  Future<void> saveZkpNotices(
-    String channelDid,
-    List<Map<String, dynamic>> notices,
-  ) async {
-    final key = 'zkp_notices_$channelDid';
-    if (notices.isEmpty) {
-      await _secureStorage.delete(key: key);
-      return;
-    }
-    await _secureStorage.write(key: key, value: jsonEncode(notices));
-  }
 }
 
 /// Provides a configured [SecureStorage] instance.
