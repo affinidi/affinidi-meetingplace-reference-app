@@ -478,8 +478,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       }
       if (chatItem is Message) {
         final peerName = _peerFirstNameForZkpUi();
-        final derivedRows =
-            _deriveHumanZkpConciergeMessages(chatItem, peerName);
+        final derivedRows = _deriveHumanZkpConciergeMessages(
+          chatItem,
+          peerName,
+        );
         for (final row in derivedRows) {
           upsertChatItem(row);
         }

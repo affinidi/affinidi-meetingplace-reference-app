@@ -218,6 +218,7 @@
 	"qrScannerTimeoutError": "Se agotó el tiempo de espera de aceptación del flujo OOB después de 30 segundos",
 	"qrScannerTitle": "Escanear código QR",
 	"qrScannerTryAgain": "Vuelve a intentarlo",
+	"rCardsPlaceholderMessage": "Las R-Cards aparecerán aquí.",
 	"revealConnectionCode": "Revelar frase de contraseña de invitación",
 	"searchableAtMeetingPlace": "Se puede buscar en meetingplace.world",
 	"searchableHelperText": "Cuando se selecciona, los detalles que comparta en esta oferta se podrán buscar públicamente en meetingplace.world",

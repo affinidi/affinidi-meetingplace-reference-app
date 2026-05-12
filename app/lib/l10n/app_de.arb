@@ -218,6 +218,7 @@
 	"qrScannerTimeoutError": "Zeitüberschreitung bei der Annahme des OOB-Flusses nach 30 Sekunden",
 	"qrScannerTitle": "QR-Code scannen",
 	"qrScannerTryAgain": "Wiederholen",
+	"rCardsPlaceholderMessage": "R-Cards werden hier angezeigt.",
 	"revealConnectionCode": "Passphrase für Einladung anzeigen",
 	"searchableAtMeetingPlace": "Durchsuchbar bei meetingplace.world",
 	"searchableHelperText": "Wenn diese Option ausgewählt ist, können die Details, die Sie in diesem Angebot teilen, unter meetingplace.world",

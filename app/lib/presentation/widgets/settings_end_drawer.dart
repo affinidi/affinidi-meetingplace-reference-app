@@ -2,23 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
-import '../../navigation/routes/dashboard_routes.dart';
-import '../../navigation/tabs/tabs.dart';
+import '../../navigation/routes/route_paths.dart';
 
 /// Right-side drawer with a shortcut to the Settings tab.
 class SettingsEndDrawer extends StatelessWidget {
   const SettingsEndDrawer({super.key});
 
   void _openSettings(BuildContext context) {
-    final router = GoRouter.of(context);
     Navigator.of(context).pop();
-    router.go(const SettingsRoute().location);
+    GoRouter.of(context).push(RoutePaths.settings);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final title = l10n.tabsTitle(Tabs.settings.name);
+    final title = l10n.tabsTitle('settings');
 
     return Drawer(
       backgroundColor: Colors.black,
@@ -37,7 +35,11 @@ class SettingsEndDrawer extends StatelessWidget {
             ListTile(
               minLeadingWidth: 20,
               horizontalTitleGap: 8,
-              leading: const Icon(Icons.settings, color: Colors.white),
+              leading: const Icon(
+                Icons.settings,
+                color: Colors.white,
+                size: 20,
+              ),
               title: Text(
                 title,
                 style: Theme.of(

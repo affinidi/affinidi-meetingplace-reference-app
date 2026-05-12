@@ -26,6 +26,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get rCardsPlaceholderMessage => 'R-Cards will appear here.';
+
+  @override
   String get publishOffer => 'Publish Invitation';
 
   @override

@@ -18,7 +18,6 @@ import '../../presentation/screens/oob/oob_scan_qr_screen/oob_scan_qr_screen.dar
 import '../../presentation/screens/oob/oob_share_qr_screen/oob_share_qr_screen.dart';
 import '../../presentation/screens/r_cards/r_card_details_screen.dart';
 import '../../presentation/screens/r_cards/r_cards_screen.dart';
-import '../../presentation/screens/settings/settings_screen.dart';
 import '../../presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
 import '../router_config_provider.dart';
 import 'route_names.dart';
@@ -134,14 +133,6 @@ part 'vrc/vrc_details_route.dart';
         ),
       ],
     ),
-    TypedStatefulShellBranch<SettingsBranchData>(
-      routes: [
-        TypedGoRoute<SettingsRoute>(
-          path: RoutePaths.settings,
-          name: RouteNames.settings,
-        ),
-      ],
-    ),
   ],
 )
 class DashboardShellRouteData extends StatefulShellRouteData {
@@ -169,7 +160,6 @@ final _connectionsNavigatorKey = GlobalKey<NavigatorState>();
 final _identitiesNavigatorKey = GlobalKey<NavigatorState>();
 final _rCardsNavigatorKey = GlobalKey<NavigatorState>();
 final _credentialsNavigatorKey = GlobalKey<NavigatorState>();
-final _settingsNavigatorKey = GlobalKey<NavigatorState>();
 
 // Branch data classes for each tab
 class ContactsBranchData extends StatefulShellBranchData {
@@ -195,21 +185,6 @@ class IdentitiesBranchData extends StatefulShellBranchData {
       'identitiesBranchRestorationScopeId';
 }
 
-class CredentialsBranchData extends StatefulShellBranchData {
-  const CredentialsBranchData();
-
-  static final $navigatorKey = _credentialsNavigatorKey;
-  static const String $restorationScopeId =
-      'credentialsBranchRestorationScopeId';
-}
-
-class SettingsBranchData extends StatefulShellBranchData {
-  const SettingsBranchData();
-
-  static final $navigatorKey = _settingsNavigatorKey;
-  static const String $restorationScopeId = 'settingsBranchRestorationScopeId';
-}
-
 class RCardsBranchData extends StatefulShellBranchData {
   const RCardsBranchData();
 
@@ -217,6 +192,13 @@ class RCardsBranchData extends StatefulShellBranchData {
   static const String $restorationScopeId = 'rCardsBranchRestorationScopeId';
 }
 
+class CredentialsBranchData extends StatefulShellBranchData {
+  const CredentialsBranchData();
+
+  static final $navigatorKey = _credentialsNavigatorKey;
+  static const String $restorationScopeId =
+      'credentialsBranchRestorationScopeId';
+}
 // Main tabs
 class ContactsRoute extends GoRouteData with $ContactsRoute {
   const ContactsRoute();
@@ -248,14 +230,6 @@ class CredentialsRoute extends GoRouteData with _$CredentialsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const CredentialsScreen();
-}
-
-class SettingsRoute extends GoRouteData with _$SettingsRoute {
-  const SettingsRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const SettingsScreen();
 }
 
 class RCardsRoute extends GoRouteData with $RCardsRoute {

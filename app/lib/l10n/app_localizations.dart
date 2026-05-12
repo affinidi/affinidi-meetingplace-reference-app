@@ -112,6 +112,12 @@ abstract class AppLocalizations {
   /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
 
+  /// No description provided for @rCardsPlaceholderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Cards will appear here.'**
+  String get rCardsPlaceholderMessage;
+
   /// No description provided for @publishOffer.
   ///
   /// In en, this message translates to:

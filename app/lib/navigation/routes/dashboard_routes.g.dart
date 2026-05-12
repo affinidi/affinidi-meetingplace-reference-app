@@ -141,17 +141,6 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
         ),
       ],
     ),
-    StatefulShellBranchData.$branch(
-      navigatorKey: SettingsBranchData.$navigatorKey,
-      restorationScopeId: SettingsBranchData.$restorationScopeId,
-      routes: [
-        GoRouteData.$route(
-          path: '/settings',
-          name: 'settings',
-          factory: $SettingsRoute._fromState,
-        ),
-      ],
-    ),
   ],
 );
 
@@ -455,6 +444,21 @@ mixin $RCardsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/r-cards');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
 mixin _$CredentialsRoute on GoRouteData {
   static CredentialsRoute _fromState(GoRouterState state) =>
       const CredentialsRoute();

@@ -12,6 +12,10 @@
 			}
 		}
 	},
+	"rCardsPlaceholderMessage": "R-Cards will appear here.",
+	"@rCardsPlaceholderMessage": {
+		"type": "text"
+	},
 	"publishOffer": "Publish Invitation",
 	"@publishOffer": {
 		"type": "text"

@@ -3,6 +3,7 @@ class RouteNames {
   static const contacts = 'contacts';
   static const connections = 'connections';
   static const identities = 'identities';
+  static const rCards = 'r-cards';
   static const credentials = 'credentials';
   static const settings = 'settings';
 

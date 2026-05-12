@@ -295,7 +295,6 @@ class SecureStorage implements KeyRepository, KeyStore {
       value: hasCredential.toString(),
     );
   }
-
 }
 
 /// Provides a configured [SecureStorage] instance.

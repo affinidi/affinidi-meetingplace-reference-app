@@ -6,17 +6,6 @@ part of 'router_config_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-// GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint, type=warning
-/// Provides the app's [GoRouter] configuration.
-///
-/// Sets up navigation guards, refresh logic, and the main route table.
-///
-/// [ref] - Used to read dependencies like authentication and settings state.
-
-@ProviderFor(routerConfig)
-final routerConfigProvider = RouterConfigProvider._();
-
 /// Provides the app's [GoRouter] configuration.
 ///
 /// Sets up navigation guards, refresh logic, and the main route table.
