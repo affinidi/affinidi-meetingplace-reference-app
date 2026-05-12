@@ -120,12 +120,12 @@ class IdentityFormFields extends ConsumerWidget {
               leading: LabelIcon(
                 icon: Icons.phone,
                 iconColor: context.colorScheme.primary,
-                label: context.l10n.mobile,
+                label: mobileField.label(context.l10n),
               ),
               title: Row(
                 children: [
                   Text(
-                    context.l10n.mobile,
+                    mobileField.label(context.l10n),
                     style: context.textTheme.bodyMedium?.copyWith(
                       color: context.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w900,

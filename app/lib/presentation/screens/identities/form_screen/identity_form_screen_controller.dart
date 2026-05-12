@@ -173,6 +173,28 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     return null;
   }
 
+  Future<String?> _validatedStoredMobile(String? mobile) async {
+    final parsedMobile = _parseInitialMobilePhoneNumber(mobile);
+    final normalizedMobile = parsedMobile?.phoneNumber;
+    final isoCode = parsedMobile?.isoCode;
+
+    if (normalizedMobile == null || isoCode == null) {
+      return null;
+    }
+
+    try {
+      final phoneNumberType = await PhoneNumber.getPhoneNumberType(
+        normalizedMobile,
+        isoCode,
+      );
+
+      return phoneNumberType == PhoneNumberType.UNKNOWN
+          ? null
+          : normalizedMobile;
+    } on Exception {
+      return null;
+    }
+  }
 
   void _updateIdentityCard(ContactCard updatedCard) {
     final updatedIdentity = state.identity.copyWith(card: updatedCard);
@@ -245,7 +267,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
         final error = field.validator(ctx).call(_textFor(field));
         hasError = error != null;
       }
-      if (error == null) {
+      if (!hasError) {
         _setErrorVisibility(field, false);
         formKey.currentState?.validate();
       }
@@ -354,7 +376,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       } else {
         final controllerValue = controllerFor(field).text.trim();
         persistedValue =
-            field.key == ContactCardFieldKey.firstName && controllerValue.isEmpty
+            field.key == ContactCardFieldKey.firstName &&
+                controllerValue.isEmpty
             ? anonymousLabel
             : controllerValue;
       }
