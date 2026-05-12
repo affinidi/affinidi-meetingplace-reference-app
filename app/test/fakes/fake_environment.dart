@@ -72,6 +72,9 @@ class FakeEnvironment implements Environment {
   bool get isBiometricsEnabled => true;
 
   @override
+  bool get zkpEnabled => false;
+
+  @override
   String get appVersionName => '1.0.0-test';
 
   @override
