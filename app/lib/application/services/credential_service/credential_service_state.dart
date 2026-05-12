@@ -6,9 +6,8 @@ part 'credential_service_state.freezed.dart';
 /// State for credential service
 @Freezed(fromJson: false, toJson: false)
 abstract class CredentialServiceState with _$CredentialServiceState {
-  const factory CredentialServiceState({
-    CredentialData? latestCredential,
-  }) = _CredentialServiceState;
+  const factory CredentialServiceState({CredentialData? latestCredential}) =
+      _CredentialServiceState;
 }
 
 /// Data class representing a credential and its metadata

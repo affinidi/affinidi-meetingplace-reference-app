@@ -4,9 +4,7 @@ part 'credentials_screen_state.g.dart';
 
 @CopyWith()
 class CredentialsScreenState {
-  const CredentialsScreenState({
-    this.hasCredentials = false,
-  });
+  const CredentialsScreenState({this.hasCredentials = false});
 
   final bool hasCredentials;
 }
