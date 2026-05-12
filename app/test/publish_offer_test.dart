@@ -63,15 +63,9 @@ Future<void> setupPublishOfferTest(
   await tester.pumpAndSettle();
 }
 
-Future<void> tapToggleSwitchByKey(
-  WidgetTester tester,
-  String key, {
-  bool ensureVisible = false,
-}) async {
+Future<void> tapToggleSwitchByKey(WidgetTester tester, String key) async {
   final switchFinder = findToggleSwitchByKey(key);
-  if (ensureVisible) {
-    await tester.ensureVisible(switchFinder);
-  }
+  await tester.ensureVisible(switchFinder);
   await tester.tap(switchFinder);
   await tester.pumpAndSettle();
 }
@@ -314,7 +308,6 @@ void main() {
         await tapToggleSwitchByKey(
           tester,
           'random_phrase_switch_${testIdentity.id}',
-          ensureVisible: true,
         );
 
         expect(find.text(l10n.customPhrase), findsOneWidget);
@@ -346,7 +339,6 @@ void main() {
           await tapToggleSwitchByKey(
             tester,
             'random_phrase_switch_${testIdentity.id}',
-            ensureVisible: true,
           );
 
           expect(find.text(l10n.customPhrase), findsOneWidget);
@@ -411,7 +403,6 @@ void main() {
             await tapToggleSwitchByKey(
               tester,
               'random_phrase_switch_${testIdentity.id}',
-              ensureVisible: true,
             );
 
             final customPhraseField = findTextFieldByKey(
@@ -424,7 +415,6 @@ void main() {
             await tapToggleSwitchByKey(
               tester,
               'random_phrase_switch_${testIdentity.id}',
-              ensureVisible: true,
             );
 
             expect(find.text(l10n.customPhrase), findsNothing);
@@ -469,7 +459,6 @@ void main() {
             await tapToggleSwitchByKey(
               tester,
               'random_phrase_switch_${testIdentity.id}',
-              ensureVisible: true,
             );
 
             expect(find.text(l10n.customPhrase), findsOneWidget);
@@ -513,7 +502,6 @@ void main() {
               await tapToggleSwitchByKey(
                 tester,
                 'random_phrase_switch_${testIdentity.id}',
-                ensureVisible: true,
               );
 
               expect(find.text(l10n.customPhrase), findsOneWidget);
@@ -678,7 +666,6 @@ void main() {
         await tapToggleSwitchByKey(
           tester,
           'set_expiry_switch_${testIdentity.id}',
-          ensureVisible: true,
         );
 
         await tapPublishButton(tester, l10n.publishToMeetingPlace);
@@ -726,7 +713,6 @@ void main() {
             await tapToggleSwitchByKey(
               tester,
               'set_expiry_switch_${testIdentity.id}',
-              ensureVisible: true,
             );
 
             final changeButtons = find.text(l10n.changeButton);
@@ -801,7 +787,6 @@ void main() {
                 await tapToggleSwitchByKey(
                   tester,
                   'set_expiry_switch_${testIdentity.id}',
-                  ensureVisible: true,
                 );
 
                 final changeButtons = find.text(l10n.changeButton);
@@ -821,7 +806,6 @@ void main() {
                 await tapToggleSwitchByKey(
                   tester,
                   'set_expiry_switch_${testIdentity.id}',
-                  ensureVisible: true,
                 );
 
                 expect(find.text(l10n.setExpiryHelperDisabled), findsOneWidget);
@@ -875,7 +859,6 @@ void main() {
         await tapToggleSwitchByKey(
           tester,
           'limit_uses_switch_${testIdentity.id}',
-          ensureVisible: true,
         );
 
         await tapPublishButton(tester, l10n.publishToMeetingPlace);
@@ -914,7 +897,6 @@ void main() {
           await tapToggleSwitchByKey(
             tester,
             'limit_uses_switch_${testIdentity.id}',
-            ensureVisible: true,
           );
 
           final usageLabel = find.text(l10n.canBeUsedTimes(3));
@@ -970,7 +952,6 @@ void main() {
               await tapToggleSwitchByKey(
                 tester,
                 'limit_uses_switch_${testIdentity.id}',
-                ensureVisible: true,
               );
 
               final usageLabel = find.text(l10n.canBeUsedTimes(3));
@@ -994,7 +975,6 @@ void main() {
               await tapToggleSwitchByKey(
                 tester,
                 'limit_uses_switch_${testIdentity.id}',
-                ensureVisible: true,
               );
 
               expect(find.text(l10n.limitUsesHelperDisabled), findsOneWidget);

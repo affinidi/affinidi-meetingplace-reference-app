@@ -90,6 +90,34 @@ class ChatScreen extends HookConsumerWidget {
     final controller = ref.read(provider.notifier);
     ref.keepAround(provider);
 
+    Future<void> onVrcStart() async {
+      final state = ref.read(chatScreenControllerProvider(_contactId));
+      final role = state.hasVrcRequestReceived
+          ? VrcExchangeRole.responder
+          : VrcExchangeRole.initiator;
+      final otherPartyCard = role == VrcExchangeRole.responder
+          ? state.otherPartyCard
+          : null;
+      final otherPartyFirstName = state.otherPartyCard?.firstName ?? '';
+      final identity = await Navigator.of(context, rootNavigator: true)
+          .push<Identity>(
+            MaterialPageRoute(
+              builder: (_) => SelectVrcIdentityScreen(
+                name: otherPartyFirstName,
+                role: role,
+                otherPartyCard: otherPartyCard,
+              ),
+            ),
+          );
+      if (identity == null || !context.mounted) return;
+      await controller.selectIdentityAndApproveVrcExchange(
+        null,
+        identity: identity,
+        role: role,
+      );
+      controller.resetShouldStartVrcExchangeFromAttachment();
+    }
+
     useEffect(() {
       if (!context.mounted) return;
 
@@ -101,6 +129,19 @@ class ChatScreen extends HookConsumerWidget {
 
       return null;
     }, []);
+
+    ref.listen(
+      chatScreenControllerProvider(
+        _contactId,
+      ).select((s) => s.shouldStartVrcExchangeFromAttachment),
+      (_, shouldStart) {
+        if (!shouldStart) return;
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!context.mounted) return;
+          await onVrcStart();
+        });
+      },
+    );
 
     return Scaffold(
       appBar: AppBar(

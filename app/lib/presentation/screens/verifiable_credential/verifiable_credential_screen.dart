@@ -8,7 +8,6 @@ import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/vrc/vrc_credential.dart';
 import '../../../domain/models/vrc/vrc_credential_subject.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../widgets/credential/credential_card_components.dart';
 import '../../widgets/credential/credential_details_accordion.dart';
 import '../../widgets/credential/credential_details_screen_scaffold.dart';
@@ -51,52 +50,105 @@ class VrcDetailsScreen extends ConsumerWidget {
 
     if (displayCredential == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.vrcDetailsTitle), centerTitle: true),
+        appBar: AppBar(
+          title: Text(l10n.secureAttachmentsTitle),
+          centerTitle: true,
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
-    return _VrcDetailsContent(
-      credential: displayCredential,
-      isFromMe: isFromMe,
-    );
+    return _VrcDetailsContent(credential: displayCredential);
   }
 }
 
 class _VrcDetailsContent extends StatelessWidget {
-  const _VrcDetailsContent({required this.credential, required this.isFromMe});
+  const _VrcDetailsContent({required this.credential});
 
   final VrcCredential credential;
-  final bool isFromMe;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final dateFormatter = DateFormat.yMMMMd();
+    final dateFormatter = DateFormat.yMd();
 
     VrcCredentialSubject? subject;
+    var credentialTypes = <String>[];
     try {
-      final decoded = credential.vc.isNotEmpty
-          ? _decodeSubject(credential.vc)
+      final raw = credential.vc.isNotEmpty
+          ? jsonDecode(credential.vc) as Map<String, dynamic>?
           : null;
-      if (decoded != null) {
-        subject = VrcCredentialSubject.fromJson(decoded);
+      if (raw != null) {
+        final subjectData = _decodeSubject(credential.vc);
+        if (subjectData != null) {
+          subject = VrcCredentialSubject.fromJson(subjectData);
+        }
+        credentialTypes = (raw['type'] as List?)?.cast<String>() ?? [];
       }
     } catch (_) {}
 
+    final issuerSubRows = <CredentialDetailRowData>[
+      if (subject?.from.name.isNotEmpty == true)
+        CredentialDetailRowData(
+          label: l10n.generalName,
+          value: subject!.from.name,
+        ),
+      CredentialDetailRowData(
+        label: l10n.generalDid,
+        value: credential.issuerIdentityDid,
+      ),
+    ];
+
+    final holderSubRows = <CredentialDetailRowData>[
+      if (subject?.to.name.isNotEmpty == true)
+        CredentialDetailRowData(
+          label: l10n.generalName,
+          value: subject!.to.name,
+        ),
+      CredentialDetailRowData(
+        label: l10n.generalDid,
+        value: credential.holderIdentityDid,
+      ),
+    ];
+
+    final rows = <CredentialDetailRowData>[
+      CredentialDetailRowData(
+        label: l10n.vrcSectionIssuer,
+        value: '',
+        subRows: issuerSubRows,
+      ),
+      CredentialDetailRowData(
+        label: l10n.vrcSectionHolder,
+        value: '',
+        subRows: holderSubRows,
+      ),
+      if (credentialTypes.isNotEmpty)
+        CredentialDetailRowData(
+          label: l10n.vrcFieldTypes,
+          value: credentialTypes.join(', '),
+        ),
+      CredentialDetailRowData(
+        label: l10n.vrcFieldIssuedAt,
+        value: dateFormatter.format(credential.issuedAt),
+      ),
+      if (credential.verifiedAt != null)
+        CredentialDetailRowData(
+          label: l10n.vrcFieldVerifiedAt,
+          value: dateFormatter.format(credential.verifiedAt!),
+        ),
+    ];
+
     return CredentialDetailsScreenScaffold(
-      title: l10n.vrcDetailsTitle,
-      description: l10n.vrcDescription,
-      credentialCard: _VrcCredentialCard(
-        l10n: l10n,
-        issuerName: subject?.from.name ?? '',
-        issuerDid: credential.issuerIdentityDid,
-        holderName: subject?.to.name ?? '',
-        holderDid: credential.holderIdentityDid,
-        issuedAt: dateFormatter.format(credential.issuedAt),
-        verifiedAt: credential.verifiedAt != null
-            ? dateFormatter.format(credential.verifiedAt!)
-            : null,
+      title: l10n.secureAttachmentsTitle,
+      description: l10n.verifiableCredentialDescription,
+      credentialCard: CredentialCardContainer(
+        title: l10n.verifiableCredential,
+        subtitle: l10n.verified,
+        content: CredentialDetailsAccordion(
+          title: l10n.verifiableRelationshipCredential,
+          sectionHeaderText: l10n.credentialDetails,
+          rows: rows,
+        ),
       ),
     );
   }
@@ -112,91 +164,5 @@ class _VrcDetailsContent extends StatelessWidget {
       }
     } catch (_) {}
     return null;
-  }
-}
-
-class _VrcCredentialCard extends StatelessWidget {
-  const _VrcCredentialCard({
-    required this.l10n,
-    required this.issuerName,
-    required this.issuerDid,
-    required this.holderName,
-    required this.holderDid,
-    required this.issuedAt,
-    this.verifiedAt,
-  });
-
-  final AppLocalizations l10n;
-  final String issuerName;
-  final String issuerDid;
-  final String holderName;
-  final String holderDid;
-  final String issuedAt;
-  final String? verifiedAt;
-
-  @override
-  Widget build(BuildContext context) {
-    return CredentialCardContainer(
-      title: l10n.verifiableRelationshipCredential,
-      subtitle: l10n.vrcDetailsTitle,
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CredentialDetailsAccordion(
-            title: l10n.vrcSectionIssuer,
-            sectionHeaderText: l10n.vrcSectionIssuer,
-            rows: [
-              if (issuerName.isNotEmpty)
-                CredentialDetailRowData(
-                  icon: Icons.person_outline,
-                  label: l10n.vrcFieldName,
-                  value: issuerName,
-                ),
-              CredentialDetailRowData(
-                icon: Icons.fingerprint,
-                label: l10n.vrcFieldDid,
-                value: issuerDid,
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          CredentialDetailsAccordion(
-            title: l10n.vrcSectionHolder,
-            sectionHeaderText: l10n.vrcSectionHolder,
-            rows: [
-              if (holderName.isNotEmpty)
-                CredentialDetailRowData(
-                  icon: Icons.person_outline,
-                  label: l10n.vrcFieldName,
-                  value: holderName,
-                ),
-              CredentialDetailRowData(
-                icon: Icons.fingerprint,
-                label: l10n.vrcFieldDid,
-                value: holderDid,
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          CredentialDetailsAccordion(
-            title: l10n.vrcSectionMetadata,
-            sectionHeaderText: l10n.vrcSectionMetadata,
-            rows: [
-              CredentialDetailRowData(
-                icon: Icons.calendar_today_outlined,
-                label: l10n.vrcFieldIssuedAt,
-                value: issuedAt,
-              ),
-              if (verifiedAt != null)
-                CredentialDetailRowData(
-                  icon: Icons.verified_outlined,
-                  label: l10n.vrcFieldVerifiedAt,
-                  value: verifiedAt!,
-                ),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 }

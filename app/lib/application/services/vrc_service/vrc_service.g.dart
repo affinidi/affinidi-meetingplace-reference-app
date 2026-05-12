@@ -6,7 +6,7 @@ part of 'vrc_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$vrcServiceHash() => r'dd49d5b910204e696583796bfd42c2c0838843e3';
+String _$vrcServiceHash() => r'1a968c5d075a043a58506cc804da93df6b4fa8bf';
 
 /// Service that manages Verifiable Relationship Credentials (VRC).
 ///

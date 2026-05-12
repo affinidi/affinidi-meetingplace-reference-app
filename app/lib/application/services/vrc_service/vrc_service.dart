@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/vrc/vrc_credential.dart';
 import '../../../infrastructure/providers/relationship_sdk_provider.dart';
-import '../../../infrastructure/providers/vrc_repository_provider.dart';
 import 'vrc_event.dart';
 
 part 'vrc_service.g.dart';
@@ -35,46 +35,59 @@ class VrcService extends _$VrcService {
   }
 
   Future<void> _fetchVrcs() async {
-    final repository = await ref.read(vrcRepositoryProvider.future);
-    state = await repository.listVrcs();
+    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+    final vrcs = await relationshipSdk.listVrcs();
+    state = vrcs.map(_toVrcCredential).toList();
   }
 
   Future<void> saveVrc(String rawVc, String channelId) async {
     final relationshipSdk = await ref.read(relationshipSdkProvider.future);
-    final repository = await ref.read(vrcRepositoryProvider.future);
+    final vrc = await relationshipSdk.storeVrc(
+      vcBlob: rawVc,
+      channelId: channelId,
+      verifiedAt: DateTime.now(),
+    );
 
-    final parsed = await relationshipSdk.parseVrc(vcBlob: rawVc);
+    if (vrc == null) return;
 
-    if (parsed == null) return;
+    final credential = _toVrcCredential(vrc);
 
-    final credential = parsed.toVrcCredential(channelId: channelId);
-
-    await repository.saveVrc(credential);
-    state = await repository.listVrcs();
+    state = (await relationshipSdk.listVrcs()).map(_toVrcCredential).toList();
 
     _eventController.add(VrcReceived(credential: credential));
   }
 
   Future<void> deleteVrc(String id) async {
-    final repository = await ref.read(vrcRepositoryProvider.future);
-    await repository.deleteVrc(id);
-    state = await repository.listVrcs();
+    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+    await relationshipSdk.deleteVrc(id);
+    state = (await relationshipSdk.listVrcs()).map(_toVrcCredential).toList();
   }
 
   Future<List<VrcCredential>> listVrcsByDid(String did) async {
-    final repository = await ref.read(vrcRepositoryProvider.future);
-    return repository.listVrcsByDid(did);
+    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+    final vrcs = await relationshipSdk.listVrcsByHolderDid(did);
+    return vrcs.map(_toVrcCredential).toList();
   }
 
   Future<int> countVrcsByDid(String did) async {
-    final repository = await ref.read(vrcRepositoryProvider.future);
-    return repository.countVrcsByDid(did);
+    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+    return relationshipSdk.countVrcsByHolderDid(did);
   }
 
   Future<bool> hasVrcInChannel(String? channelId) async {
     if (channelId == null) return false;
-    final repository = await ref.read(vrcRepositoryProvider.future);
-    final vrcs = await repository.listVrcs();
+    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+    final vrcs = await relationshipSdk.listVrcs();
     return vrcs.any((v) => v.channelId == channelId);
   }
+
+  VrcCredential _toVrcCredential(Vrc vrc) => VrcCredential(
+    id: vrc.id,
+    vc: vrc.vcBlob,
+    channelId: vrc.channelId,
+    holderIdentityDid: vrc.holderDid,
+    issuerIdentityDid: vrc.issuerDid,
+    issuedAt: vrc.issuedAt,
+    verifiedAt: vrc.verifiedAt,
+  );
 }

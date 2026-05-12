@@ -1655,7 +1655,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vrcSectionIssuer => 'Aussteller';
 
   @override
-  String get vrcSectionHolder => 'Inhaber';
+  String get vrcSectionHolder => 'Ausgestellt an';
 
   @override
   String get vrcSectionMetadata => 'Nachweisdetails';
@@ -1667,10 +1667,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vrcFieldName => 'Name';
 
   @override
-  String get vrcFieldIssuedAt => 'Ausgestellt';
+  String get vrcFieldIssuedAt => 'Ausgestellt am';
 
   @override
   String get vrcFieldVerifiedAt => 'Verifiziert';
+
+  @override
+  String get vrcFieldTypes => 'Typen';
 
   @override
   String get vrcDescription =>

@@ -1650,7 +1650,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vrcSectionIssuer => 'Emisor';
 
   @override
-  String get vrcSectionHolder => 'Titular';
+  String get vrcSectionHolder => 'Emitido a';
 
   @override
   String get vrcSectionMetadata => 'Detalles de la Credencial';
@@ -1662,10 +1662,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vrcFieldName => 'Nombre';
 
   @override
-  String get vrcFieldIssuedAt => 'Emitida';
+  String get vrcFieldIssuedAt => 'Emitido el';
 
   @override
   String get vrcFieldVerifiedAt => 'Verificada';
+
+  @override
+  String get vrcFieldTypes => 'Tipos';
 
   @override
   String get vrcDescription =>

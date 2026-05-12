@@ -33,6 +33,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     String? notificationToken,
     @Default(false) bool shouldEnableVrcAttachment,
     @Default(false) bool shouldShowVrcBanner,
+    @Default(false) bool shouldStartVrcExchangeFromAttachment,
   }) = _ChatScreenState;
 
   bool get hasPendingVrcConcierge => messages.any(

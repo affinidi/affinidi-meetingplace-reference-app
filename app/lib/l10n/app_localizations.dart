@@ -2431,7 +2431,7 @@ abstract class AppLocalizations {
   /// No description provided for @vrcSectionHolder.
   ///
   /// In en, this message translates to:
-  /// **'Holder'**
+  /// **'Issued to'**
   String get vrcSectionHolder;
 
   /// No description provided for @vrcSectionMetadata.
@@ -2455,7 +2455,7 @@ abstract class AppLocalizations {
   /// No description provided for @vrcFieldIssuedAt.
   ///
   /// In en, this message translates to:
-  /// **'Issued'**
+  /// **'Issued On'**
   String get vrcFieldIssuedAt;
 
   /// No description provided for @vrcFieldVerifiedAt.
@@ -2463,6 +2463,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verified'**
   String get vrcFieldVerifiedAt;
+
+  /// No description provided for @vrcFieldTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Types'**
+  String get vrcFieldTypes;
 
   /// No description provided for @vrcDescription.
   ///

@@ -19,6 +19,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_prov
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repository_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import 'package:ssi/ssi.dart';
 
@@ -32,6 +33,7 @@ import '../../../fakes/fake_groups.dart';
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_meeting_place_sdk.dart';
 import '../../../fakes/fake_vrc_repository.dart';
+import '../../../fakes/fake_secure_storage.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -67,6 +69,9 @@ void main() {
           ),
           vrcRepositoryProvider.overrideWith(
             (ref) async => FakeNoOpVrcRepository(),
+          ),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
           ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
@@ -291,6 +296,9 @@ void main() {
           vrcRepositoryProvider.overrideWith(
             (ref) async => FakeNoOpVrcRepository(),
           ),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -421,6 +429,9 @@ void main() {
           ),
           vrcRepositoryProvider.overrideWith(
             (ref) async => FakeNoOpVrcRepository(),
+          ),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
           ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,

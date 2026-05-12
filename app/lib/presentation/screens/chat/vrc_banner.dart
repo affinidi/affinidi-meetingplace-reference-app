@@ -12,6 +12,12 @@ class _VrcBanner extends ConsumerWidget {
     final shouldShowVrcBanner = ref.watch(
       provider.select((state) => state.shouldShowVrcBanner),
     );
+    final hasVrcRequestReceived = ref.watch(
+      provider.select((state) => state.hasVrcRequestReceived),
+    );
+    final role = hasVrcRequestReceived
+        ? VrcExchangeRole.responder
+        : VrcExchangeRole.initiator;
     final otherPartyFirstName = ref.watch(provider.otherPartyName);
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
@@ -27,12 +33,16 @@ class _VrcBanner extends ConsumerWidget {
     }
 
     Future<void> startVrcExchange() async {
+      final otherPartyCard = role == VrcExchangeRole.responder
+          ? ref.read(provider.select((s) => s.otherPartyCard))
+          : null;
       final identity = await Navigator.of(context, rootNavigator: true)
           .push<Identity>(
             MaterialPageRoute(
               builder: (_) => SelectVrcIdentityScreen(
                 name: otherPartyFirstName,
-                role: VrcExchangeRole.initiator,
+                role: role,
+                otherPartyCard: otherPartyCard,
               ),
             ),
           );
@@ -42,7 +52,7 @@ class _VrcBanner extends ConsumerWidget {
           .selectIdentityAndApproveVrcExchange(
             null,
             identity: identity,
-            role: VrcExchangeRole.initiator,
+            role: role,
           );
     }
 

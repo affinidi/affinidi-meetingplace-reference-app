@@ -55,4 +55,10 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   /// confirmed in the DB and removes them from the live message list.
   /// Marks all pending VRC concierge messages as confirmed and removes them.
   Future<void> dismissVrcConciergeMessages();
+
+  /// Creates a local chat message showing a VRC sent by the local user.
+  ///
+  /// Intended to be called after the VDIP issuance has completed so the
+  /// sender sees the credential tile immediately (isFromMe: true).
+  Future<void> showSentVrcAttachment(String vcBlob);
 }

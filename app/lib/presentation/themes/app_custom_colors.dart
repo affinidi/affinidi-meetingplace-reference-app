@@ -18,7 +18,11 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? darkGrey,
     Color? searchHintText,
     Color? searchFieldFill,
+    Color? fromMeColor,
+    Color? fromMeDarkColor,
   }) : _cyan = cyan,
+       _fromMeColor = fromMeColor,
+       _fromMeDarkColor = fromMeDarkColor,
        _purple = purple,
        _rose = rose,
        _violet = violet,
@@ -49,6 +53,12 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color? _darkGrey;
   final Color? _searchHintText;
   final Color? _searchFieldFill;
+  final Color? _fromMeColor;
+  final Color? _fromMeDarkColor;
+
+  Color get fromMeColor =>
+      _fromMeColor ?? const Color.fromARGB(255, 3, 104, 192);
+  Color get fromMeDarkColor => _fromMeDarkColor ?? const Color(0xFF020B1A);
 
   Color get cyan => _cyan ?? Colors.cyan;
   Color get purple => _purple ?? Colors.purple;
@@ -85,6 +95,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? darkGrey,
     Color? searchHintText,
     Color? searchFieldFill,
+    Color? fromMeColor,
+    Color? fromMeDarkColor,
   }) {
     return AppCustomColors(
       cyan: cyan ?? _cyan,
@@ -102,6 +114,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
       darkGrey: darkGrey ?? _darkGrey,
       searchHintText: searchHintText ?? _searchHintText,
       searchFieldFill: searchFieldFill ?? _searchFieldFill,
+      fromMeColor: fromMeColor ?? _fromMeColor,
+      fromMeDarkColor: fromMeDarkColor ?? _fromMeDarkColor,
     );
   }
 
@@ -124,6 +138,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
       darkGrey: Color.lerp(_darkGrey, other._darkGrey, t),
       searchHintText: Color.lerp(_searchHintText, other._searchHintText, t),
       searchFieldFill: Color.lerp(_searchFieldFill, other._searchFieldFill, t),
+      fromMeColor: Color.lerp(_fromMeColor, other._fromMeColor, t),
+      fromMeDarkColor: Color.lerp(_fromMeDarkColor, other._fromMeDarkColor, t),
     );
   }
 }

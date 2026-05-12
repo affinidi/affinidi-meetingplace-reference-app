@@ -84,22 +84,23 @@ class _ConciergeVrcChatItem extends ConsumerWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 10, right: 10),
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: context.colorScheme.onSurface,
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                     minimumSize: const Size(80, 25),
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    textStyle: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8)),
+                      side: BorderSide(color: Colors.white, width: 1),
                     ),
                   ),
                   onPressed: onStartNow,
-                  child: Text(l10n.generateVrc),
+                  child: Text(
+                    l10n.generateVrc,
+                    style: TextStyle(
+                      color: context.colorScheme.surface.withValues(alpha: 0.8),
+                    ),
+                  ),
                 ),
               ),
               Padding(

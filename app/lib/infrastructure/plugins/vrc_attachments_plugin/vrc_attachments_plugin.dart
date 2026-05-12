@@ -40,6 +40,9 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
   bool get isPlatformSupported => true;
 
   @override
+  bool get dismissSheetBeforePicking => true;
+
+  @override
   String localizedName(BuildContext context) =>
       context.l10n.verifiableRelationshipCredential;
 

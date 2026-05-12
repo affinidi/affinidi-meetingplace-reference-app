@@ -544,6 +544,9 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
 class FakeChat implements Chat {
   @override
+  String get id => 'fake-chat-id';
+
+  @override
   ChatStream? stream;
 
   @override
