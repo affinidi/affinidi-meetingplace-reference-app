@@ -1097,10 +1097,10 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_chat
-      sha256: "94c4837b720bfad6a2f5e2eb77ab7ade15cbbff87928774a9921c1d65ea9c97b"
+      sha256: "2bca07a2f44659fbbc0238cf1c847e12da361daf12bf09e7e888f27aaf5fd670"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.34"
+    version: "0.0.1-dev.35"
   meeting_place_control_plane:
     dependency: transitive
     description:
@@ -1113,18 +1113,18 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_core
-      sha256: ee745686ff4f0285fd06f0f5a7e3e50b766b171246bad3cd1e2468f7045225ac
+      sha256: af794a18dd6014eca9b46f1bc41b40b24bfe67eebc51c7043a7cb50d82a23d0f
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.32"
+    version: "0.0.1-dev.33"
   meeting_place_drift_repository:
     dependency: transitive
     description:
       name: meeting_place_drift_repository
-      sha256: "87a5691315d6db26395987dbe113b81e6f0d718b4d510fb8eed805d9f7185bd6"
+      sha256: "2707a9e938f8ffa3f03f695a883ed2b242dc8ea4309524137530b89af38cbe8d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.35"
+    version: "0.0.1-dev.36"
   meeting_place_mediator:
     dependency: transitive
     description:

@@ -11,8 +11,6 @@ class _TheirDetailsPanel extends ConsumerWidget {
     final otherPartyCard = ref.watch(provider.otherPartyCard);
 
     final contactName = otherPartyCard?.fullName;
-    final email = otherPartyCard?.email;
-    final mobile = otherPartyCard?.mobile;
 
     final theirDid = ref.watch(
       provider.select((state) => state.channel?.otherPartyPermanentChannelDid),
@@ -29,79 +27,97 @@ class _TheirDetailsPanel extends ConsumerWidget {
       provider.select((state) => state.group?.id ?? ''),
     );
 
+    final fields = ContactCardFieldDefinitions.values
+        .where(
+          (field) =>
+              field.key != ContactCardFieldKey.firstName &&
+              field.key != ContactCardFieldKey.lastName,
+        )
+        .toList(growable: false);
+
+    final items = <Widget>[];
+
+    if (contactName != null && contactName.isNotEmpty) {
+      items.add(
+        FormRowIconTitle(
+          icon: Icons.person,
+          iconColor: context.colorScheme.primary,
+          label: context.l10n.generalName,
+          value: contactName,
+        ),
+      );
+    }
+
+    for (final field in fields) {
+      final value = (otherPartyCard?.valueForField(field.key) ?? '').trim();
+      if (value.isEmpty) continue;
+
+      items.add(
+        FormRowIconTitle(
+          icon: field.icon,
+          iconColor: field.iconColor(context.customColors, context.colorScheme),
+          label: field.label(context.l10n),
+          value: value,
+        ),
+      );
+    }
+
+    if (isDebugMode && theirDid != null && theirDid.isNotEmpty) {
+      items.add(
+        FormRowIconTitle(
+          icon: Icons.fingerprint,
+          iconColor: context.customColors.orange,
+          label: context.l10n.generalDid,
+          value: theirDid.topAndTail(),
+          isCopiable: true,
+        ),
+      );
+    }
+
+    if (isDebugMode && theirDidSha256 != null && theirDidSha256.isNotEmpty) {
+      items.add(
+        FormRowIconTitle(
+          icon: Icons.drag_indicator_sharp,
+          iconColor: context.customColors.success,
+          label: context.l10n.generalDidSha256,
+          value: theirDidSha256.topAndTail(),
+          isCopiable: true,
+        ),
+      );
+    }
+
+    if (isDebugMode && offerLink.isNotEmpty) {
+      items.add(
+        FormRowIconTitle(
+          icon: Icons.link,
+          iconColor: context.colorScheme.secondary,
+          label: context.l10n.generalOfferLink,
+          value: offerLink,
+          isCopiable: true,
+        ),
+      );
+    }
+
+    if (isDebugMode && groupId.isNotEmpty) {
+      items.add(
+        FormRowIconTitle(
+          icon: Icons.group,
+          iconColor: context.customColors.purple,
+          label: context.l10n.generalGroupId,
+          value: groupId.topAndTail(),
+          isCopiable: true,
+        ),
+      );
+    }
+
     return FormCard(
       title: context.l10n.theirDetails,
-      child: Column(
-        spacing: 5,
-        children: [
-          if (contactName != null)
-            FormRowIconTitle(
-              icon: Icons.person,
-              iconColor: context.colorScheme.primary,
-              label: context.l10n.generalName,
-              value: contactName,
-            ),
-          if (email != null && email.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.email,
-              iconColor: context.customColors.purple,
-              label: context.l10n.generalEmail,
-              value: email,
-            ),
-          ],
-          if (mobile != null && mobile.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.cell_tower,
-              iconColor: context.customColors.brown,
-              label: context.l10n.generalMobile,
-              value: mobile,
-            ),
-          ],
-          if (isDebugMode && theirDid != null && theirDid.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.fingerprint,
-              iconColor: context.customColors.orange,
-              label: context.l10n.generalDid,
-              value: theirDid.topAndTail(),
-              isCopiable: true,
-            ),
-          ],
-          if (isDebugMode &&
-              theirDidSha256 != null &&
-              theirDidSha256.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.drag_indicator_sharp,
-              iconColor: context.customColors.success,
-              label: context.l10n.generalDidSha256,
-              value: theirDidSha256.topAndTail(),
-              isCopiable: true,
-            ),
-          ],
-          if (isDebugMode && offerLink.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.link,
-              iconColor: context.colorScheme.secondary,
-              label: context.l10n.generalOfferLink,
-              value: offerLink,
-              isCopiable: true,
-            ),
-          ],
-          if (isDebugMode && groupId.isNotEmpty) ...[
-            const Divider(),
-            FormRowIconTitle(
-              icon: Icons.group,
-              iconColor: context.customColors.purple,
-              label: context.l10n.generalGroupId,
-              value: groupId.topAndTail(),
-              isCopiable: true,
-            ),
-          ],
-        ],
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: items.length,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) => items[index],
       ),
     );
   }

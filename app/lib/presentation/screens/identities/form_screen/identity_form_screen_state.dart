@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../domain/models/identity/identity.dart';
 
 part 'identity_form_screen_state.freezed.dart';
@@ -14,6 +15,6 @@ abstract class IdentityFormScreenState with _$IdentityFormScreenState {
     @Default(false) bool hasSaved,
     @Default(false) bool hasDeleted,
     @Default(true) bool isAliasMirroringFirstName,
-    @Default({}) Set<String> showingErrorFields,
+    @Default({}) Set<ContactCardFieldDefinition> showingErrorFields,
   }) = _IdentityFormScreenState;
 }

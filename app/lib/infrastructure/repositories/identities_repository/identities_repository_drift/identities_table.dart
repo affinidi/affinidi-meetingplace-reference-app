@@ -12,14 +12,19 @@ String generateUuid() => const Uuid().v4();
 @DataClassName('IdentityRecord')
 class IdentitiesTable extends Table {
   TextColumn get id => text().clientDefault(generateUuid)();
+
+  /// Permanent DID for this identity.
   TextColumn get did => text()();
+
+  /// Alias / user-facing name override.
   TextColumn get displayName => text()();
-  TextColumn get firstName => text()();
-  TextColumn get lastName => text().nullable()();
-  TextColumn get email => text().nullable()();
-  TextColumn get mobile => text().nullable()();
+
+  /// JSON blob holding all contact card fields mapped by sdkPath.
+  TextColumn get contactInfoJson => text().withDefault(const Constant('{}'))();
+
+  /// Profile picture of the identity
   TextColumn get profilePic => text().nullable()();
-  TextColumn get cardColor => text().nullable()();
+
   BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
 
   @override

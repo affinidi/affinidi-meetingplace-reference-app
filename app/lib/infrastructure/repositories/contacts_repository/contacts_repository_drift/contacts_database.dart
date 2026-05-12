@@ -1,15 +1,19 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:clock/clock.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../domain/models/contacts/contact_category.dart';
 import '../../../../domain/models/contacts/contact_origin.dart';
 import '../../../../domain/models/contacts/contact_status.dart';
 import '../../../../domain/models/contacts/contact_type.dart';
 import '../../../database/database_platform.dart';
+import '../../../extensions/map_path_extensions.dart';
 import '../../../providers/applications_documents_directory_provider.dart';
 import '../../../secure_storage/secure_storage.dart';
 
@@ -40,8 +44,14 @@ class ContactsDatabase extends _$ContactsDatabase {
          ),
        );
 
+  /// Creates a [ContactsDatabase] backed by the given [executor].
+  ///
+  /// Intended for use in tests only.
+  @visibleForTesting
+  ContactsDatabase.withExecutor(super.executor);
+
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -111,6 +121,69 @@ class ContactsDatabase extends _$ContactsDatabase {
           );
         }
       }
+
+      // Replaces individual columns with a single contact_info_json column.
+      if (from < 5) {
+        await migrator.addColumn(contactCards, contactCards.contactInfoJson);
+
+        final rows = await customSelect(
+          'SELECT id, first_name, last_name, email, mobile,'
+          ' meetingplace_identity_card_color FROM contact_cards',
+        ).get();
+
+        for (final row in rows) {
+          final contactInfoMap = <String, dynamic>{};
+          contactInfoMap.setPathValue(
+            ContactCardFieldDefinitions.byKey(
+              ContactCardFieldKey.firstName,
+            ).jsonPath,
+            row.data['first_name'] as String? ?? '',
+          );
+          contactInfoMap.setPathValue(
+            ContactCardFieldDefinitions.byKey(
+              ContactCardFieldKey.lastName,
+            ).jsonPath,
+            row.data['last_name'] as String? ?? '',
+          );
+          contactInfoMap.setPathValue(
+            ContactCardFieldDefinitions.byKey(
+              ContactCardFieldKey.email,
+            ).jsonPath,
+            row.data['email'] as String? ?? '',
+          );
+          contactInfoMap.setPathValue(
+            ContactCardFieldDefinitions.byKey(
+              ContactCardFieldKey.mobile,
+            ).jsonPath,
+            row.data['mobile'] as String? ?? '',
+          );
+          contactInfoMap.setPathValue(const [
+            'x-meetingplace-identity-card-color',
+          ], row.data['meetingplace_identity_card_color'] as String? ?? '');
+          final contactInfo = jsonEncode(contactInfoMap);
+
+          await (update(
+            contactCards,
+          )..where((c) => c.id.equals(row.data['id'] as int))).write(
+            ContactCardsCompanion(contactInfoJson: Value(contactInfo)),
+          );
+        }
+
+        await migrator.alterTable(
+          // ignore: experimental_member_use
+          TableMigration(
+            contactCards,
+            columnTransformer: {
+              contactCards.id: contactCards.id,
+              contactCards.contactId: contactCards.contactId,
+              contactCards.did: contactCards.did,
+              contactCards.type: contactCards.type,
+              contactCards.contactInfoJson: contactCards.contactInfoJson,
+              contactCards.profilePic: contactCards.profilePic,
+            },
+          ),
+        );
+      }
     },
   );
 }
@@ -154,12 +227,8 @@ class ContactCards extends Table {
   )();
   TextColumn get did => text()();
   TextColumn get type => text()();
-  TextColumn get firstName => text()();
-  TextColumn get lastName => text()();
-  TextColumn get email => text()();
-  TextColumn get mobile => text()();
-  TextColumn get profilePic => text()();
-  TextColumn get meetingplaceIdentityCardColor => text()();
+  TextColumn get contactInfoJson => text().withDefault(const Constant('{}'))();
+  TextColumn get profilePic => text().nullable()();
 }
 
 /// Converts between [ContactType] enum and its int representation.

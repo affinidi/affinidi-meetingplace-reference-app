@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/extensions/did_extensions.dart';
@@ -23,11 +24,11 @@ import 'offer_details_screen_controller.dart';
 
 part 'offer_details_action_bar.dart';
 part 'offer_details_alias_profile_panel.dart';
+part 'offer_details_description.dart';
 part 'offer_details_did_info_panel.dart';
 part 'offer_details_header.dart';
 part 'offer_details_info_panel.dart';
 part 'offer_details_name.dart';
-part 'offer_details_description.dart';
 part 'offer_details_personal_info_panel.dart';
 part 'offer_details_phrase.dart';
 part 'offer_details_validity_visibility_panel.dart';

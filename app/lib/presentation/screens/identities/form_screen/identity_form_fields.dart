@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../infrastructure/extensions/identities_extensions.dart';
+import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
-import '../../../validators/input_validators.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
 import '../../../widgets/profile_picture.dart';
@@ -16,13 +16,11 @@ import 'identity_form_screen_controller.dart';
 class IdentityFormFields extends ConsumerWidget {
   IdentityFormFields(
     this.identityId, {
-    required this.controller,
     required this.formKey,
     required this.title,
   });
 
   final String? identityId;
-  final IdentityFormScreenController controller;
   final GlobalKey<FormState> formKey;
   final String title;
 
@@ -32,6 +30,7 @@ class IdentityFormFields extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
+    final personaFields = ContactCardFieldDefinitions.values;
 
     return Form(
       key: formKey,
@@ -98,91 +97,68 @@ class IdentityFormFields extends ConsumerWidget {
                 ],
               ),
             ),
-            const Divider(),
-            FormRowTextField(
-              icon: Icons.person,
-              label: context.l10n.firstName,
-              color: context.customColors.success,
-              controller: controller.displayNameController,
-              placeholder: context.l10n.enterFirstName,
-              textCapitalization: TextCapitalization.sentences,
-              autocorrect: true,
-              singleLine: true,
-              onChanged: (value) {
-                controller.updateFirstName(value, formKey);
-                controller.validateForm(formKey);
-              },
-              validator: InputValidators.getValidator(
-                context,
-                InputType.firstName,
-              ).call,
-              textInputAction: TextInputAction.next,
-              traversalOrder: 1.0,
-              autofocus: true,
-            ),
-            const Divider(),
-            FormRowTextField(
-              icon: Icons.badge,
-              label: context.l10n.lastName,
-              color: context.customColors.purple,
-              controller: controller.lastNameController,
-              placeholder: context.l10n.enterLastName,
-              textCapitalization: TextCapitalization.sentences,
-              autocorrect: true,
-              singleLine: true,
-              onChanged: (value) {
-                controller.updateLastName(value, formKey);
-                controller.validateForm(formKey);
-              },
-              validator: InputValidators.getValidator(
-                context,
-                InputType.lastName,
-              ).call,
-              textInputAction: TextInputAction.next,
-              traversalOrder: 2.0,
-            ),
-            const Divider(),
-            FormRowTextField(
-              icon: Icons.email,
-              label: context.l10n.email,
-              color: context.customColors.warning,
-              controller: controller.emailController,
-              placeholder: context.l10n.enterEmail,
-              focusNode: controller.emailFocusNode,
-              singleLine: true,
-              keyboardType: TextInputType.emailAddress,
-              onChanged: (value) {
-                controller.updateEmail(value, formKey);
-                controller.handleFieldChange('email', formKey);
-              },
-              onFieldSubmitted: (_) {
-                controller.updateErrorVisibilityOnBlur('email', formKey);
-              },
-              validator: (value) {
-                if (!controller.shouldShowValidation('email')) {
-                  return null;
-                }
-                return InputValidators.getValidator(
-                  context,
-                  InputType.email,
-                ).call(value);
-              },
-              textInputAction: TextInputAction.next,
-              traversalOrder: 3.0,
-            ),
-            const Divider(),
-            FormRowTextField(
-              icon: Icons.phone,
-              label: context.l10n.mobile,
-              color: context.colorScheme.primary,
-              controller: controller.mobileController,
-              placeholder: context.l10n.enterMobile,
-              singleLine: true,
-              keyboardType: TextInputType.phone,
-            ),
+            for (var index = 0; index < personaFields.length; index++) ...[
+              const Divider(),
+              _PersonaField(
+                identityId: identityId,
+                field: personaFields[index],
+                formKey: formKey,
+                traversalOrder: (index + 1).toDouble(),
+              ),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PersonaField extends ConsumerWidget {
+  const _PersonaField({
+    required this.identityId,
+    required this.field,
+    required this.formKey,
+    required this.traversalOrder,
+  });
+
+  final String? identityId;
+  final ContactCardFieldDefinition field;
+  final GlobalKey<FormState> formKey;
+  final double traversalOrder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = identityFormScreenControllerProvider(identityId);
+    final controller = ref.read(provider.notifier);
+
+    String? validateField(BuildContext context, String? value) {
+      if (field.shouldValidateOnBlur &&
+          !controller.shouldShowValidation(field)) {
+        return null;
+      }
+
+      return field.validator(context).call(value);
+    }
+
+    return FormRowTextField(
+      icon: field.icon,
+      label: field.label(context.l10n),
+      color: field.iconColor(context.customColors, context.colorScheme),
+      controller: controller.controllerFor(field),
+      placeholder: field.placeholder(context.l10n),
+      textCapitalization: field.textCapitalization,
+      autocorrect: field.autocorrect,
+      singleLine: true,
+      focusNode: controller.focusNodeFor(field),
+      keyboardType: field.keyboardType,
+      onChanged: (value) => controller.updateField(field, value, formKey),
+      onFieldSubmitted: field.shouldValidateOnBlur
+          ? (_) => controller.updateErrorVisibilityOnBlur(field, formKey)
+          : null,
+      validator: (value) => validateField(context, value),
+      textInputAction: field.textInputAction,
+      traversalOrder: traversalOrder,
+      autofocus: field.autofocus,
     );
   }
 }

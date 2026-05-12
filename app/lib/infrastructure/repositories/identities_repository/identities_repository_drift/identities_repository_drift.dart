@@ -1,6 +1,8 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:convert';
 
-import '../../../../domain/models/contact_card/contact_card.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
+
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../domain/repositories/identities_repository.dart';
 import '../../../extensions/contact_card_extensions.dart';
@@ -72,35 +74,43 @@ class IdentitiesRepositoryDrift implements IdentitiesRepository {
 ///  database rows.
 extension IdentityMapper on Identity {
   /// Converts an [Identity] into an [IdentityRecord] for persistence.
-  IdentityRecord toRecord() => IdentityRecord(
-    id: id,
-    did: did,
-    isPrimary: isPrimary,
-    displayName: card.displayName,
-    firstName: card.firstName,
-    lastName: card.lastName,
-    email: card.email,
-    mobile: card.mobile,
-    profilePic: card.profilePic,
-    cardColor: card.cardColor,
-  );
+  IdentityRecord toRecord() {
+    final contactInfo = Map<String, dynamic>.from(
+      toSdkContactCard().contactInfo,
+    )..remove('photo');
+    final contactInfoJson = jsonEncode(contactInfo);
+    return IdentityRecord(
+      id: id,
+      did: did,
+      displayName: card.displayName,
+      contactInfoJson: contactInfoJson,
+      isPrimary: isPrimary,
+      profilePic: card.profilePic,
+    );
+  }
 
   /// Creates an [Identity] domain model from a [IdentityRecord].
-  static Identity fromRecord(IdentityRecord record) => Identity(
-    id: record.id,
-    did: record.did,
-    isPrimary: record.isPrimary,
-    card: ContactCard(
-      id: record.id,
+  static Identity fromRecord(IdentityRecord record) {
+    final decoded = jsonDecode(record.contactInfoJson) as Map<String, dynamic>;
+    final sdkCard = sdk.ContactCard(
       did: record.did,
       type: ContactCardType.individual.value,
+      contactInfo: decoded,
+    );
+
+    final card = ContactCardUtils.fromSdkContactCard(sdkCard).copyWith(
+      id: record.id,
+      did: record.did,
+      type: sdkCard.type,
       displayName: record.displayName,
-      firstName: record.firstName,
-      lastName: record.lastName,
-      email: record.email,
-      mobile: record.mobile,
       profilePic: record.profilePic,
-      cardColor: record.cardColor,
-    ),
-  );
+    );
+
+    return Identity(
+      id: record.id,
+      did: record.did,
+      isPrimary: record.isPrimary,
+      card: card,
+    );
+  }
 }

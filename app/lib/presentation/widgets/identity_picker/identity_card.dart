@@ -5,6 +5,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:pie_menu/pie_menu.dart';
 
+import '../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -142,9 +143,7 @@ class _IdentityHeader extends StatelessWidget {
               spacing: 4,
               children: [
                 Text(
-                  identity.isPrimary || identity.isPlaceholder
-                      ? identity.getDisplayName(l10n: l10n)
-                      : identity.card.fullName,
+                  identity.getDisplayName(l10n: l10n),
                   style: textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onPrimary,
@@ -235,14 +234,11 @@ class _IdentityContent extends StatelessWidget {
     final textTheme = context.textTheme;
     final l10n = context.l10n;
 
-    final email = identity.card.emailAddress.isNotEmpty == true
-        ? identity.card.emailAddress
-        : l10n.notShared;
-    final phone = identity.card.mobilePhone.isNotEmpty == true
-        ? identity.card.mobilePhone
-        : l10n.notShared;
+    final fields = ContactCardFieldDefinitions.values
+        .where((field) => field.hasTag(ContactCardFieldTags.identityCard))
+        .toList(growable: false);
 
-    final name = identity.card.fullName.isNotEmpty == true
+    final name = identity.card.fullName.isNotEmpty
         ? identity.card.fullName
         : '';
 
@@ -267,19 +263,24 @@ class _IdentityContent extends StatelessWidget {
             ],
           ),
         SizedBox(height: identityCardSize.isSmall ? 12 : 16),
-        _ContactInfoRow(
-          icon: Icons.email,
-          text: email,
-          identityCardSize: identityCardSize,
-        ),
-        SizedBox(height: identityCardSize.isSmall ? 6 : 8),
-        _ContactInfoRow(
-          icon: Icons.phone,
-          text: phone,
-          identityCardSize: identityCardSize,
-        ),
+        for (final field in fields) ...[
+          _ContactInfoRow(
+            icon: field.icon,
+            text: _valueOrNotShared(
+              field.valueFrom(identity.card),
+              l10n.notShared,
+            ),
+            identityCardSize: identityCardSize,
+          ),
+          SizedBox(height: identityCardSize.isSmall ? 6 : 8),
+        ],
       ],
     );
+  }
+
+  String _valueOrNotShared(String value, String notShared) {
+    final trimmed = value.trim();
+    return trimmed.isNotEmpty ? trimmed : notShared;
   }
 }
 
@@ -491,7 +492,9 @@ class _ActionButton extends HookWidget {
         actions: pieActions,
         child: _RippleButton(
           animations: animations,
-          onTap: pieMenuController.openMenu,
+          onTap: () => WidgetsBinding.instance.addPostFrameCallback((_) {
+            pieMenuController.openMenu();
+          }),
         ),
       ),
     );

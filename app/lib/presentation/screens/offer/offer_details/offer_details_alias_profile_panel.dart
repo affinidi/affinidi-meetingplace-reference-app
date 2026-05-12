@@ -9,7 +9,15 @@ class _OfferDetailsAliasProfilePanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controllerProvider = offerDetailsScreenControllerProvider(offerLink);
     final alias = ref.watch(
-      controllerProvider.select((state) => state.offer?.contactCard.firstName),
+      controllerProvider.select((state) {
+        final card = state.offer?.contactCard;
+        if (card == null) {
+          return null;
+        }
+        return ContactCardFieldDefinitions.byKey(
+          ContactCardFieldKey.firstName,
+        ).sdkValueFrom(card);
+      }),
     );
     final isUsingPrimaryIdentity = ref.watch(
       controllerProvider.select((state) => state.isUsingPrimaryIdentity),

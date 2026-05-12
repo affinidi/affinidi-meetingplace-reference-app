@@ -15,7 +15,6 @@ class _IdentityFormSection extends ConsumerWidget {
 
     return IdentityFormFields(
       identityId,
-      controller: controller,
       formKey: editIdentityScreenFormKey,
       title: context.l10n.identityAliasPersonalDetails,
     );

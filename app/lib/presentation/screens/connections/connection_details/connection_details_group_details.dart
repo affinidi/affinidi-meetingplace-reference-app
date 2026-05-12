@@ -11,9 +11,6 @@ class _GroupDetailsPanel extends ConsumerWidget {
     final groupAdminCard = ref.read(provider.groupAdminCard);
     final groupName = ref.watch(provider.groupName);
 
-    final email = groupAdminCard?.email;
-    final mobile = groupAdminCard?.mobile;
-
     final adminDid = ref.watch(
       provider.select((state) => state.group?.ownerDid),
     );
@@ -31,6 +28,14 @@ class _GroupDetailsPanel extends ConsumerWidget {
 
     final items = <Widget>[];
 
+    final fields = ContactCardFieldDefinitions.values
+        .where(
+          (field) =>
+              field.key != ContactCardFieldKey.firstName &&
+              field.key != ContactCardFieldKey.lastName,
+        )
+        .toList(growable: false);
+
     if (groupName != null) {
       items.add(
         FormRowIconTitle(
@@ -42,24 +47,17 @@ class _GroupDetailsPanel extends ConsumerWidget {
       );
     }
 
-    if (email != null && email.isNotEmpty) {
-      items.add(
-        FormRowIconTitle(
-          icon: Icons.email,
-          iconColor: context.customColors.purple,
-          label: context.l10n.generalEmail,
-          value: email,
-        ),
-      );
-    }
+    for (final field in fields) {
+      final value = (groupAdminCard?.valueForField(field.key) ?? '').trim();
 
-    if (mobile != null && mobile.isNotEmpty) {
+      if (value.isEmpty) continue;
+
       items.add(
         FormRowIconTitle(
-          icon: Icons.cell_tower,
-          iconColor: context.customColors.brown,
-          label: context.l10n.generalMobile,
-          value: mobile,
+          icon: field.icon,
+          iconColor: field.iconColor(context.customColors, context.colorScheme),
+          label: field.label(context.l10n),
+          value: value,
         ),
       );
     }
