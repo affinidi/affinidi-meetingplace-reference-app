@@ -31,7 +31,75 @@ abstract class ChatScreenState with _$ChatScreenState {
     ScreenEffect? effect,
     @Default({}) Map<String, Uint8List> attachmentsDataCache,
     String? notificationToken,
+    @Default(false) bool shouldEnableVrcAttachment,
+    @Default(false) bool shouldShowVrcBanner,
   }) = _ChatScreenState;
+
+  bool get hasPendingVrcConcierge => messages.any(
+    (m) =>
+        m is chat.ConciergeMessage &&
+        m.conciergeType ==
+            chat.ConciergeMessageType.fromJson(
+              'permissionToVerifyRelationship',
+            ) &&
+        m.status == chat.ChatItemStatus.userInput,
+  );
+
+  bool get hasVrcExchangeDoLater => messages.any(
+    (m) =>
+        m is chat.EventMessage &&
+        m.eventType == chat.EventMessageType.fromJson('vrcExchangeDoLater'),
+  );
+
+  bool get hasVrcExchangeInitiated => messages.any(
+    (m) =>
+        m is chat.EventMessage &&
+        m.eventType == chat.EventMessageType.fromJson('vrcExchangeInitiated'),
+  );
+
+  bool get hasVrcRequestReceived => messages.any(
+    (m) =>
+        m is chat.EventMessage &&
+        m.eventType == chat.EventMessageType.fromJson('vrcRequestReceived'),
+  );
+
+  bool get hasVrcExchangeCompleted => messages.any(
+    (m) =>
+        m is chat.EventMessage &&
+        m.eventType == chat.EventMessageType.fromJson('vrcExchangeCompleted'),
+  );
+
+  String? get vrcRequestIdentityDid {
+    final event = messages.whereType<chat.EventMessage>().firstWhereOrNull(
+      (m) =>
+          m.eventType == chat.EventMessageType.fromJson('vrcRequestReceived'),
+    );
+    return event?.data['identityDid'] as String?;
+  }
+
+  String? get vrcRequestIdentityName {
+    final event = messages.whereType<chat.EventMessage>().firstWhereOrNull(
+      (m) =>
+          m.eventType == chat.EventMessageType.fromJson('vrcRequestReceived'),
+    );
+    return event?.data['identityName'] as String?;
+  }
+
+  String? get vrcInitiatorIdentityDid {
+    final event = messages.whereType<chat.EventMessage>().firstWhereOrNull(
+      (m) =>
+          m.eventType == chat.EventMessageType.fromJson('vrcExchangeInitiated'),
+    );
+    return event?.data['identityDid'] as String?;
+  }
+
+  String? get vrcInitiatorIdentityName {
+    final event = messages.whereType<chat.EventMessage>().firstWhereOrNull(
+      (m) =>
+          m.eventType == chat.EventMessageType.fromJson('vrcExchangeInitiated'),
+    );
+    return event?.data['identityName'] as String?;
+  }
 
   int getIndexOfNextMessageFromMe(int startingFrom) {
     if (startingFrom >= messages.length) return -1;

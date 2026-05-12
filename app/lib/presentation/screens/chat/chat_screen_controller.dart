@@ -6,6 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart'
+    show CredentialBuilder, VrcCredentialSubject, VrcExchangeRole, VrcParty;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
@@ -13,15 +15,20 @@ import 'package:synchronized/synchronized.dart';
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/vrc_service/vrc_event.dart';
+import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';
+import '../../../domain/models/vrc/vrc_credential.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/event_message_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_message_attachment.dart';
+import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_message_attachment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -53,6 +60,7 @@ class ChatScreenController extends _$ChatScreenController
   late final _chatResumingLock = Lock();
   StreamSubscription<Identity>? _rCardPluginSubscription;
   bool _rCardListenerSet = false;
+  StreamSubscription<VrcEvent>? _vrcEventsSub;
 
   late final Map<String, ProviderSubscription<void>>
   _conciergeLoadingControllersSubscriptions = {};
@@ -89,6 +97,44 @@ class ChatScreenController extends _$ChatScreenController
             newEffect = null;
           }
 
+          // Auto-hide the VRC banner when the peer's request concierge arrives.
+          final hasVrcRequestConcierge = next.messages.any(
+            (m) =>
+                m is chat.ConciergeMessage &&
+                m.conciergeType ==
+                    chat.ConciergeMessageType.fromJson(
+                      'permissionToVerifyRelationship',
+                    ),
+          );
+          final wasAlreadyPresent =
+              previous?.messages.any(
+                (m) =>
+                    m is chat.ConciergeMessage &&
+                    m.conciergeType ==
+                        chat.ConciergeMessageType.fromJson(
+                          'permissionToVerifyRelationship',
+                        ),
+              ) ??
+              false;
+          final shouldHideBanner =
+              hasVrcRequestConcierge &&
+              !wasAlreadyPresent &&
+              pendingState.shouldShowVrcBanner;
+
+          // Also suppress banner if exchange was initiated or deferred.
+          final hasVrcExchangeInitiated = next.messages.any(
+            (m) =>
+                m is chat.EventMessage &&
+                m.eventType ==
+                    chat.EventMessageType.fromJson('vrcExchangeInitiated'),
+          );
+          final hasVrcExchangeDoLater = next.messages.any(
+            (m) =>
+                m is chat.EventMessage &&
+                m.eventType ==
+                    chat.EventMessageType.fromJson('vrcExchangeDoLater'),
+          );
+
           pendingState = pendingState.copyWith(
             messages: next.messages,
             membersTyping: next.membersTyping,
@@ -98,6 +144,16 @@ class ChatScreenController extends _$ChatScreenController
             group: next.group ?? pendingState.group,
             otherPartyCard: next.otherPartyCard ?? pendingState.otherPartyCard,
             effect: newEffect,
+            shouldShowVrcBanner:
+                (shouldHideBanner ||
+                    hasVrcExchangeInitiated ||
+                    hasVrcExchangeDoLater)
+                ? false
+                : pendingState.shouldShowVrcBanner,
+            shouldEnableVrcAttachment:
+                (shouldHideBanner || hasVrcExchangeInitiated)
+                ? false
+                : pendingState.shouldEnableVrcAttachment,
           );
 
           if (hasInitializedState) {
@@ -135,7 +191,17 @@ class ChatScreenController extends _$ChatScreenController
 
     messageTextController.addListener(_onMessageTextChanged);
 
+    _vrcEventsSub?.cancel();
+    _vrcEventsSub = ref.read(vrcServiceProvider.notifier).events.listen((
+      event,
+    ) {
+      if (event is VrcReceived) {
+        Future(() => _maybeReciprocateVrc(event.credential));
+      }
+    });
+
     ref.onDispose(() {
+      _vrcEventsSub?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
       _rCardPluginSubscription?.cancel();
@@ -362,6 +428,29 @@ class ChatScreenController extends _$ChatScreenController
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
       final connection = await coreSdk.getConnectionOffer(channel.offerLink);
       state = state.copyWith(group: group, offerName: connection?.offerName);
+    } else {
+      final hasVrc = await ref
+          .read(vrcServiceProvider.notifier)
+          .hasVrcInChannel(channelDid);
+      final hasVrcExchangeInitiated = state.hasVrcExchangeInitiated;
+      final hasVrcExchangeDoLater = state.hasVrcExchangeDoLater;
+      final hasVrcRequestReceived = state.hasVrcRequestReceived;
+      final hasPendingVrcConcierge = state.hasPendingVrcConcierge;
+      final suppressBanner =
+          hasVrc ||
+          hasVrcExchangeInitiated ||
+          hasVrcExchangeDoLater ||
+          hasPendingVrcConcierge;
+      final shouldEnableAttachment =
+          !hasVrc &&
+          !hasVrcExchangeInitiated &&
+          (!hasPendingVrcConcierge ||
+              hasVrcRequestReceived ||
+              hasVrcExchangeDoLater);
+      state = state.copyWith(
+        shouldShowVrcBanner: !suppressBanner,
+        shouldEnableVrcAttachment: shouldEnableAttachment,
+      );
     }
 
     _hideActivity();
@@ -677,6 +766,162 @@ class ChatScreenController extends _$ChatScreenController
     await ref
         .read(contactsServiceProvider.notifier)
         .updateContact(updatedContact);
+  }
+
+  Future<void> selectIdentityAndApproveVrcExchange(
+    chat.ConciergeMessage? chatItem, {
+    required Identity identity,
+    required VrcExchangeRole role,
+  }) async {
+    try {
+      if (role == VrcExchangeRole.initiator) {
+        await sendAttachment('', [
+          VrcRequestMessageAttachment(
+            identityDid: identity.did,
+            identityName: identity.card.displayName,
+          ),
+        ]);
+        state = state.copyWith(
+          shouldShowVrcBanner: false,
+          shouldEnableVrcAttachment: false,
+        );
+        await _chatService?.persistLocalEventMessage(
+          chat.EventMessageType.fromJson('vrcExchangeInitiated'),
+          data: {
+            'identityDid': identity.did,
+            'identityName': identity.card.displayName,
+          },
+        );
+      } else {
+        final peerIdentityDid = state.vrcRequestIdentityDid ?? '';
+        final peerIdentityName = state.vrcRequestIdentityName ?? '';
+
+        final sdk = await ref.read(meetingPlaceSdkProvider.future);
+        final didManager = await sdk.getDidManager(identity.did);
+
+        final vc = await CredentialBuilder.buildVrc(
+          issuerDid: identity.did,
+          subject: VrcCredentialSubject(
+            from: VrcParty(did: identity.did, name: identity.card.displayName),
+            to: VrcParty(did: peerIdentityDid, name: peerIdentityName),
+          ),
+          issuerDidManager: didManager,
+        );
+        final vcBlob = jsonEncode(vc.toJson());
+
+        await sendAttachment('', [VrcMessageAttachment(vcBlob: vcBlob)]);
+        await _chatService?.dismissVrcConciergeMessages();
+
+        state = state.copyWith(
+          shouldEnableVrcAttachment: false,
+          shouldShowVrcBanner: false,
+        );
+      }
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to approve VRC exchange',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    }
+  }
+
+  Future<void> doLaterVrcExchangeFromConcierge(
+    chat.ConciergeMessage chatItem,
+  ) async {
+    await _chatService?.dismissVrcConciergeMessages();
+    state = state.copyWith(
+      shouldShowVrcBanner: false,
+      shouldEnableVrcAttachment: true,
+    );
+    await _chatService?.persistLocalEventMessage(
+      chat.EventMessageType.fromJson('vrcExchangeDoLater'),
+    );
+  }
+
+  Future<void> doLaterVrcExchangeFromBanner() async {
+    await _chatService?.persistLocalEventMessage(
+      chat.EventMessageType.fromJson('vrcExchangeDoLater'),
+    );
+    state = state.copyWith(
+      shouldShowVrcBanner: false,
+      shouldEnableVrcAttachment: true,
+    );
+  }
+
+  Future<void> _maybeReciprocateVrc(VrcCredential credential) async {
+    final channelDid = state.contact?.channelDid;
+    if (channelDid == null || credential.channelId != channelDid) return;
+
+    if (state.hasVrcExchangeCompleted) return;
+
+    if (state.hasVrcExchangeInitiated) {
+      final localIdentityDid = state.vrcInitiatorIdentityDid;
+      final localIdentityName = state.vrcInitiatorIdentityName ?? '';
+      if (localIdentityDid == null || localIdentityDid.isEmpty) {
+        _logger.warning(
+          'No initiator identity found; cannot reciprocate VRC',
+          name: _logKey,
+        );
+        return;
+      }
+
+      final peerIdentityDid = credential.issuerIdentityDid;
+      final peerIdentityName = _extractIssuerName(credential);
+
+      try {
+        final sdk = await ref.read(meetingPlaceSdkProvider.future);
+        final didManager = await sdk.getDidManager(localIdentityDid);
+
+        final vc = await CredentialBuilder.buildVrc(
+          issuerDid: localIdentityDid,
+          subject: VrcCredentialSubject(
+            from: VrcParty(did: localIdentityDid, name: localIdentityName),
+            to: VrcParty(did: peerIdentityDid, name: peerIdentityName),
+          ),
+          issuerDidManager: didManager,
+        );
+        final vcBlob = jsonEncode(vc.toJson());
+
+        await sendAttachment('', [VrcMessageAttachment(vcBlob: vcBlob)]);
+        await _chatService?.persistLocalEventMessage(
+          chat.EventMessageType.fromJson('vrcExchangeCompleted'),
+        );
+        state = state.copyWith(shouldEnableVrcAttachment: false);
+        _logger.info(
+          'VRC exchange completed (initiator reciprocated)',
+          name: _logKey,
+        );
+      } catch (error, stackTrace) {
+        _logger.error(
+          'Failed to reciprocate VRC',
+          error: error,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
+    } else if (state.hasVrcRequestReceived) {
+      await _chatService?.persistLocalEventMessage(
+        chat.EventMessageType.fromJson('vrcExchangeCompleted'),
+      );
+      state = state.copyWith(shouldEnableVrcAttachment: false);
+      _logger.info(
+        'VRC exchange completed (responder received initiator VRC)',
+        name: _logKey,
+      );
+    }
+  }
+
+  String _extractIssuerName(VrcCredential credential) {
+    try {
+      final decoded = jsonDecode(credential.vc) as Map<String, dynamic>;
+      final subject = decoded['credentialSubject'] as Map<String, dynamic>?;
+      final from = subject?['from'] as Map<String, dynamic>?;
+      return from?['name'] as String? ?? '';
+    } catch (_) {
+      return '';
+    }
   }
 }
 

@@ -150,6 +150,14 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
 
               factory: _$RCardDetailsRoute._fromState,
             ),
+            GoRouteData.$route(
+              path: ':credentialId/vrc-details',
+              name: 'vrcDetails',
+
+              parentNavigatorKey: VrcDetailsRoute.$parentNavigatorKey,
+
+              factory: _$VrcDetailsRoute._fromState,
+            ),
           ],
         ),
       ],
@@ -494,6 +502,31 @@ mixin _$RCardDetailsRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/r-cards/${Uri.encodeComponent(_self.subjectDid)}/details',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin _$VrcDetailsRoute on GoRouteData {
+  static VrcDetailsRoute _fromState(GoRouterState state) =>
+      VrcDetailsRoute(credentialId: state.pathParameters['credentialId']!);
+
+  VrcDetailsRoute get _self => this as VrcDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/r-cards/${Uri.encodeComponent(_self.credentialId)}/vrc-details',
   );
 
   @override

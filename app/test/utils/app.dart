@@ -29,6 +29,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place
 import 'package:mpx_flutter_reference_app/infrastructure/providers/qr_code_view_factory_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/share_service_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
@@ -138,6 +139,7 @@ Future<void> startApp(
         }
         return repo;
       }),
+      vrcRepositoryProvider.overrideWith(vrcRepositoryInMemoryDrift),
       identitiesRepositoryProvider.overrideWith((ref) async {
         final repo = await identitiesRepositoryInMemoryDrift(ref);
         for (final identity in identities) {

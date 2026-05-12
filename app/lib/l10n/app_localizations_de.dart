@@ -1638,4 +1638,98 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get sendRCard => 'R-Karte senden';
+
+  @override
+  String selectIdentityToVerifyRelationshipWithName(String name) {
+    return 'Wähle die Identität aus, die du verwenden möchtest, um deine Beziehung mit $name zu bestätigen';
+  }
+
+  @override
+  String get verifiableRelationshipCredential =>
+      'Überprüfbarer Beziehungsnachweis';
+
+  @override
+  String get vrcDetailsTitle => 'Beziehungsnachweis';
+
+  @override
+  String get vrcSectionIssuer => 'Aussteller';
+
+  @override
+  String get vrcSectionHolder => 'Inhaber';
+
+  @override
+  String get vrcSectionMetadata => 'Nachweisdetails';
+
+  @override
+  String get vrcFieldDid => 'DID';
+
+  @override
+  String get vrcFieldName => 'Name';
+
+  @override
+  String get vrcFieldIssuedAt => 'Ausgestellt';
+
+  @override
+  String get vrcFieldVerifiedAt => 'Verifiziert';
+
+  @override
+  String get vrcDescription =>
+      'Dieser Nachweis bestätigt die Beziehung zwischen zwei Parteien.';
+
+  @override
+  String verifyRelationshipPrompt(String firstName) {
+    return 'Bestätige deine Beziehung mit $firstName, indem du eine Verifiable Relationship Credential (VRC) ausstellst. Jeder VRC-Austausch erhöht deinen Vertrauenswert.';
+  }
+
+  @override
+  String get generateVrc => 'Jetzt starten';
+
+  @override
+  String get generalVerify => 'Confirm';
+
+  @override
+  String get doLater => 'Später';
+
+  @override
+  String get vrcExchangeInitiated => 'Du hast den VRC-Austausch eingeleitet.';
+
+  @override
+  String vrcRequestReceived(String name) {
+    return '$name hat den VRC-Austausch eingeleitet.';
+  }
+
+  @override
+  String get vrcDoLater =>
+      'VRC-Austausch pausiert. Tippe auf + und wähle \'Verifiable Relationship Credential\' um fortzufahren.';
+
+  @override
+  String get vrcExchangeCompleted =>
+      'Du hast deine Beziehung erfolgreich verifiziert';
+
+  @override
+  String vrcVerifyPrompt(String name) {
+    return 'Möchtest du deine Beziehung mit $name verifizieren? Jeder VRC-Austausch erhöht deinen Vertrauensscore.';
+  }
+
+  @override
+  String get vrcStartNow => 'Jetzt starten';
+
+  @override
+  String get vrcDoLaterButton => 'Später';
+
+  @override
+  String get vrcYesButton => 'Ja';
+
+  @override
+  String nameSelectedIdentity(String name) {
+    return '$name\'s selected identity';
+  }
+
+  @override
+  String selectIdentityToVerifyRelationshipPrompt(String name) {
+    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
+  }
+
+  @override
+  String get sendVrc => 'Beziehungsnachweis senden';
 }

@@ -19,6 +19,7 @@ import 'infrastructure/loggers/riverpod_provider_logger/provider_debug_logger.da
 import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
 import 'infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import 'infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import 'infrastructure/providers/available_attachment_plugins_provider.dart';
 import 'infrastructure/providers/cache_manager_provider.dart';
 import 'infrastructure/providers/channel_repository_provider.dart';
@@ -36,6 +37,7 @@ import 'infrastructure/repositories/contacts_repository/contacts_repository_drif
 import 'infrastructure/repositories/identities_repository/identities_repository_drift/identities_repository_drift.dart';
 import 'infrastructure/repositories/mediators_repository/mediators_repository_drift/mediators_repository_drift.dart';
 import 'infrastructure/repositories/r_card_repository/r_card_repository_drift/r_cards_repository_drift.dart';
+import 'infrastructure/repositories/vrc_repository/vrc_repository_drift/vrc_repository_drift.dart';
 import 'presentation/app/app.dart';
 
 void main() async {
@@ -82,6 +84,7 @@ void main() async {
             RCardAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),
             ),
+            VrcAttachmentsPlugin(ref: ref),
           ],
         ),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),

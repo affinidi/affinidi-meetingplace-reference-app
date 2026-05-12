@@ -107,7 +107,8 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
 
   /// The emoji icon representing this plugin type.
   @override
-  String get icon => '🖼';
+  @override
+  AttachmentPluginIcon get icon => const EmojiIcon('🖼');
 
   /// Returns the localized display name for this plugin.
   @override

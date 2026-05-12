@@ -392,5 +392,50 @@
 	"goToRCard": "Ir a la Tarjeta R",
 	"selectIdentityTitle": "Seleccionar Identidad",
 	"selectIdentityInstruction": "Desliza a la izquierda o derecha para elegir la identidad que deseas usar para generar la Tarjeta‑R",
-	"sendRCard": "Enviar Tarjeta R"
+	"sendRCard": "Enviar Tarjeta R",
+	"verifiableRelationshipCredential": "Credencial de Relación Verificable",
+	"vrcDetailsTitle": "Credencial de Relación",
+	"vrcSectionIssuer": "Emisor",
+	"vrcSectionHolder": "Titular",
+	"vrcSectionMetadata": "Detalles de la Credencial",
+	"vrcFieldDid": "DID",
+	"vrcFieldName": "Nombre",
+	"vrcFieldIssuedAt": "Emitida",
+	"vrcFieldVerifiedAt": "Verificada",
+	"vrcDescription": "Esta credencial verifica la relación entre dos partes.",
+	"selectIdentityToVerifyRelationshipWithName": "Selecciona la identidad que deseas usar para verificar tu relación con {name}",
+	"@selectIdentityToVerifyRelationshipWithName": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"verifyRelationshipPrompt": "Verifica tu relación con {firstName} emitiendo una Credencial de Relación Verificable (VRC). Cada intercambio de VRC aumenta tu puntuación de confianza.",
+	"@verifyRelationshipPrompt": {
+		"placeholders": {
+			"firstName": { "type": "String" }
+		}
+	},
+	"generateVrc": "Empezar ahora",
+	"doLater": "Más tarde",
+	"vrcExchangeInitiated": "Has iniciado el intercambio de VRC.",
+	"vrcRequestReceived": "{name} ha iniciado el intercambio de VRC.",
+	"@vrcRequestReceived": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcDoLater": "El intercambio de VRC está en pausa. Toca + y selecciona 'Verifiable Relationship Credential' para continuar.",
+	"vrcExchangeCompleted": "Has verificado tu relación con éxito",
+	"vrcVerifyPrompt": "¿Deseas verificar tu relación con {name}? Cada intercambio de VRC aumenta tu puntuación de confianza.",
+	"@vrcVerifyPrompt": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcStartNow": "Comenzar ahora",
+	"vrcDoLaterButton": "Más tarde",
+	"vrcYesButton": "Sí",
+	"notShared": "No compartido",
+	"vrcResponderIntro": "{name} ha seleccionado la siguiente persona para verificar la relación:",
+	"sendVrc": "Enviar Credencial de Relación"
 }

@@ -12,11 +12,14 @@ import 'package:form_field_validator/form_field_validator.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
+import 'package:meeting_place_relationship/meeting_place_relationship.dart'
+    show VrcExchangeRole;
 import 'package:mpx_app_core/mpx_app_core.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
+import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/concierge_message_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -26,6 +29,9 @@ import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachment.dart';
+import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
+import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
@@ -43,6 +49,10 @@ import 'chat_activity_progress_indicator.dart';
 import 'chat_items/chat_encryption_notice.dart';
 import 'chat_items/chat_r_card_updated_by_me_notice.dart';
 import 'chat_items/chat_r_cards_exchanged_notice.dart';
+import 'chat_items/chat_vrc_exchange_complete_notice.dart';
+import 'chat_items/chat_vrc_exchange_do_later_notice.dart';
+import 'chat_items/chat_vrc_exchange_initiated_notice.dart';
+import 'chat_items/chat_vrc_request_received_notice.dart';
 import 'chat_items/group_deleted_chat_item.dart';
 import 'chat_items/joining_group_chat_item.dart';
 import 'chat_items/leaving_group_chat_item.dart';
@@ -56,6 +66,8 @@ part 'chat_item.dart';
 part 'chat_items/chat_item_from_info.dart';
 part 'chat_items/concierge_join_group_request_chat_item.dart';
 part 'chat_items/concierge_update_profile_request_chat_item.dart';
+part 'chat_items/concierge_vrc_chat_item.dart';
+part 'vrc_banner.dart';
 part 'chat_items/plain_text_chat_item.dart';
 part 'chat_items/reaction_picker_chat_item.dart';
 part 'chat_items/unknown_chat_item.dart';
@@ -118,6 +130,7 @@ class ChatScreen extends HookConsumerWidget {
                   children: [
                     ChatActivityProgressIndicator(contactId: _contactId),
                     _NotificationsUnavailableWarning(_contactId),
+                    _VrcBanner(_contactId),
                     Expanded(child: _ChatMessageList(_contactId)),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),

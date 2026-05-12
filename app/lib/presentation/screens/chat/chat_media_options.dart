@@ -2,13 +2,13 @@ part of 'chat_screen.dart';
 
 class _ChatMediaOptionItem {
   const _ChatMediaOptionItem({
-    required this.textCharacterIcon,
+    required this.icon,
     required this.label,
     required this.onTap,
     this.enabled = true,
   });
 
-  final String textCharacterIcon;
+  final AttachmentPluginIcon icon;
   final String label;
   final VoidCallback? onTap;
   final bool enabled;
@@ -23,15 +23,38 @@ class _ChatMediaOption extends StatelessWidget {
   Widget build(BuildContext context) {
     final tappable = _item.onTap != null;
     final styleEnabled = _item.enabled;
-    return ListTile(
-      enabled: tappable,
-      leading: Text(
-        _item.textCharacterIcon,
+    final icon = _item.icon;
+
+    Widget leading;
+    if (icon is MaterialIcon) {
+      leading = Icon(
+        icon.iconData,
+        size: 30,
+        color: icon.color ?? (!tappable ? context.theme.disabledColor : null),
+      );
+    } else if (icon is AssetIcon) {
+      leading = Image.asset(
+        icon.assetPath,
+        width: 30,
+        height: 30,
+        color: !tappable ? context.theme.disabledColor : null,
+        colorBlendMode: !tappable ? BlendMode.srcIn : null,
+      );
+    } else if (icon is EmojiIcon) {
+      leading = Text(
+        icon.emoji,
         style: TextStyle(
           fontSize: 30,
           color: !tappable ? context.theme.disabledColor : null,
         ),
-      ),
+      );
+    } else {
+      leading = const SizedBox.shrink();
+    }
+
+    return ListTile(
+      enabled: tappable,
+      leading: leading,
       title: Text(
         _item.label,
         style: TextStyle(
@@ -73,8 +96,10 @@ class _ChatMediaOptions extends ConsumerWidget {
     final isGroupChat = ref.watch(
       provider.select((state) => state.contact?.isGroup ?? false),
     );
-
     final shouldEnableRCardAttachment = !isGroupChat;
+    final shouldEnableVrcAttachment = ref.watch(
+      provider.select((state) => state.shouldEnableVrcAttachment),
+    );
 
     void sendEffect(ScreenEffect effect) {
       if (!context.mounted) return;
@@ -112,6 +137,7 @@ class _ChatMediaOptions extends ConsumerWidget {
         final platformSupported = plugin.isPlatformSupported;
         final enabled = switch (plugin) {
           RCardAttachmentsPlugin() => shouldEnableRCardAttachment,
+          VrcAttachmentsPlugin() => shouldEnableVrcAttachment,
           _ => true,
         };
         final supported = platformSupported && enabled;
@@ -121,14 +147,14 @@ class _ChatMediaOptions extends ConsumerWidget {
             : plugin.localizedName(context);
 
         return _ChatMediaOptionItem(
-          textCharacterIcon: plugin.icon,
+          icon: plugin.icon,
           label: label,
           onTap: supported ? () => attachFromPlugin(plugin) : null,
           enabled: supported,
         );
       }),
       _ChatMediaOptionItem(
-        textCharacterIcon: '🎈',
+        icon: const EmojiIcon('🎈'),
         label: context.l10n.generalBalloons,
         onTap: () {
           sendEffect(ScreenEffect.balloons());
@@ -136,7 +162,7 @@ class _ChatMediaOptions extends ConsumerWidget {
       ),
       _ChatMediaOptionItem(
         // https://www.amp-what.com/unicode/search/confetti
-        textCharacterIcon: '🎊',
+        icon: const EmojiIcon('🎊'),
         label: context.l10n.generalConfetti,
         onTap: () {
           sendEffect(ScreenEffect.confetti());

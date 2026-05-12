@@ -7,6 +7,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contact_card/contact_card.dart' as domain;
@@ -20,6 +21,7 @@ import '../../../infrastructure/extensions/did_extensions.dart';
 import '../../../infrastructure/extensions/list_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_repository_provider.dart';
@@ -30,6 +32,7 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../contacts_service/contacts_service.dart';
 import '../identities_service/identities_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
+import '../vrc_service/vrc_service.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
 import 'chat_service_state.dart';
@@ -58,6 +61,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late String _channelDid;
 
   MeetingPlaceChatSDK? _chatSDK;
+  String? _chatId;
   bool _isGroupChat = false;
   String? _otherPartyFirstName;
   ChatStream? _chatStreamRef;
@@ -122,6 +126,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         ),
         ChatMessageProtocolHandler(
           onUpdateSequenceNumber: updateContactSequenceNumber,
+          onVrcReceived: (String vcBlob, String channelDid) =>
+              ref.read(vrcServiceProvider.notifier).saveVrc(vcBlob, channelDid),
+          onVrcRequestReceived: _onVrcRequestReceived,
           logger: _logger,
         ),
         TypingProtocolHandler(
@@ -194,6 +201,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     try {
       final chatSession = await _chatSDK!.startChatSession();
+      _chatId = chatSession.id;
 
       unawaited(
         _chatSDK!.chatStreamSubscription.then(
@@ -570,9 +578,19 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     final chatItem = data.chatItem;
     if (chatItem != null) {
-      if (chatItem is Message ||
-          chatItem is ConciergeMessage ||
-          chatItem is EventMessage) {
+      // VRC request messages are protocol signals; they must not appear as
+      // chat bubbles on either side of the conversation.
+      final isVrcRequest =
+          chatItem is Message &&
+          chatItem.attachments.isNotEmpty &&
+          chatItem.attachments.every(
+            (a) => a.format == VrcRequestAttachment.pluginFormat,
+          );
+
+      if (!isVrcRequest &&
+          (chatItem is Message ||
+              chatItem is ConciergeMessage ||
+              chatItem is EventMessage)) {
         _upsertChatItem(chatItem);
       }
       if (chatItem is Message && !chatItem.isFromMe) {
@@ -716,6 +734,133 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _otherPartyFirstName = domainCard.firstName;
     state = state.copyWith(otherPartyCard: domainCard);
     _logger.info('Updated other party contact card', name: _logKey);
+  }
+
+  /// Triggered when a peer sends a VRC exchange request.
+  ///
+  /// Injects an [EventMessage] (vrcRequestReceived) and a
+  /// [ConciergeMessage] (permissionToVerifyRelationship) into the local
+  /// message list so the user is prompted to start or defer the exchange.
+  Future<void> _onVrcRequestReceived(
+    String channelDid,
+    String? identityDid,
+    String? identityName,
+  ) async {
+    final chatId = _chatId;
+    if (chatId == null) {
+      _logger.warning(
+        'Cannot persist VRC request: chatId not yet known',
+        name: _logKey,
+      );
+      return;
+    }
+
+    // Guard: skip if VRC already exists for this channel.
+    final hasVrc = await ref
+        .read(vrcServiceProvider.notifier)
+        .hasVrcInChannel(channelDid);
+    if (hasVrc) {
+      _logger.warning(
+        'VRC already exists, skipping concierge UI',
+        name: _logKey,
+      );
+      return;
+    }
+
+    final now = DateTime.now();
+    final data = <String, dynamic>{};
+    if (identityDid != null) data['identityDid'] = identityDid;
+    if (identityName != null) data['identityName'] = identityName;
+
+    final eventMessage = EventMessage(
+      chatId: chatId,
+      messageId: const Uuid().v4(),
+      senderDid: channelDid,
+      isFromMe: false,
+      dateCreated: now,
+      status: ChatItemStatus.received,
+      eventType: EventMessageType.fromJson('vrcRequestReceived'),
+      data: data,
+    );
+    final conciergeMessage = ConciergeMessage(
+      chatId: chatId,
+      messageId: const Uuid().v4(),
+      senderDid: channelDid,
+      isFromMe: false,
+      // Place the concierge prompt after the event notice
+      dateCreated: now.add(const Duration(milliseconds: 1)),
+      status: ChatItemStatus.userInput,
+      conciergeType: ConciergeMessageType.fromJson(
+        'permissionToVerifyRelationship',
+      ),
+      data: const {},
+    );
+    final repository = await ref.read(chatRepositoryProvider.future);
+    await Future.wait<void>([
+      repository.createMessage(eventMessage),
+      repository.createMessage(conciergeMessage),
+    ]);
+    _upsertChatItem(eventMessage);
+    _upsertChatItem(conciergeMessage);
+    _logger.info(
+      'Persisted and injected VRC request concierge for channel $channelDid',
+      name: _logKey,
+    );
+  }
+
+  @override
+  Future<void> persistLocalEventMessage(
+    EventMessageType eventType, {
+    Map<String, dynamic> data = const {},
+  }) async {
+    final chatId = _chatId;
+    if (chatId == null) {
+      _logger.warning(
+        'Cannot persist local event: chatId not yet known',
+        name: _logKey,
+      );
+      return;
+    }
+    final eventMessage = EventMessage(
+      chatId: chatId,
+      messageId:
+          'local_${eventType.value}_${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: '',
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.sent,
+      eventType: eventType,
+      data: data,
+    );
+    final repository = await ref.read(chatRepositoryProvider.future);
+    await repository.createMessage(eventMessage);
+    _upsertChatItem(eventMessage);
+  }
+
+  @override
+  Future<void> dismissVrcConciergeMessages() async {
+    final repository = await ref.read(chatRepositoryProvider.future);
+    final toRemove = state.messages
+        .whereType<ConciergeMessage>()
+        .where(
+          (m) =>
+              m.conciergeType ==
+              ConciergeMessageType.fromJson('permissionToVerifyRelationship'),
+        )
+        .toList();
+
+    for (final msg in toRemove) {
+      msg.status = ChatItemStatus.confirmed;
+      await repository.updateMesssage(msg);
+      _removeChatItem(msg);
+    }
+  }
+
+  void _removeChatItem(ChatItem item) {
+    final messages = state.messages
+        .where((m) => m.messageId != item.messageId)
+        .toList();
+    state = state.copyWith(messages: messages);
   }
 
   Future<void> _refreshGroup() async {

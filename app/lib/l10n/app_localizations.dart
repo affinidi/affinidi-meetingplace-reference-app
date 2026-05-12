@@ -2403,6 +2403,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send R-Card'**
   String get sendRCard;
+
+  /// No description provided for @selectIdentityToVerifyRelationshipWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the identity that you would like to use to verify your relationship with {name}.'**
+  String selectIdentityToVerifyRelationshipWithName(String name);
+
+  /// No description provided for @verifiableRelationshipCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifiable Relationship Credential'**
+  String get verifiableRelationshipCredential;
+
+  /// No description provided for @vrcDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship Credential'**
+  String get vrcDetailsTitle;
+
+  /// No description provided for @vrcSectionIssuer.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuer'**
+  String get vrcSectionIssuer;
+
+  /// No description provided for @vrcSectionHolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Holder'**
+  String get vrcSectionHolder;
+
+  /// No description provided for @vrcSectionMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Details'**
+  String get vrcSectionMetadata;
+
+  /// No description provided for @vrcFieldDid.
+  ///
+  /// In en, this message translates to:
+  /// **'DID'**
+  String get vrcFieldDid;
+
+  /// No description provided for @vrcFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get vrcFieldName;
+
+  /// No description provided for @vrcFieldIssuedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued'**
+  String get vrcFieldIssuedAt;
+
+  /// No description provided for @vrcFieldVerifiedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get vrcFieldVerifiedAt;
+
+  /// No description provided for @vrcDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This credential verifies the relationship between two parties.'**
+  String get vrcDescription;
+
+  /// No description provided for @verifyRelationshipPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your relationship with {firstName} by issuing a Verifiable Relationship Credential (VRC). Each VRC exchange increases your trust score.'**
+  String verifyRelationshipPrompt(String firstName);
+
+  /// No description provided for @generateVrc.
+  ///
+  /// In en, this message translates to:
+  /// **'Start now'**
+  String get generateVrc;
+
+  /// No description provided for @generalVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get generalVerify;
+
+  /// No description provided for @doLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Do later'**
+  String get doLater;
+
+  /// No description provided for @vrcExchangeInitiated.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve initiated the VRC exchange.'**
+  String get vrcExchangeInitiated;
+
+  /// No description provided for @vrcRequestReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has initiated the VRC exchange.'**
+  String vrcRequestReceived(String name);
+
+  /// No description provided for @vrcDoLater.
+  ///
+  /// In en, this message translates to:
+  /// **'VRC exchange is paused. Tap + and select \'Verifiable Relationship Credential\' to resume.'**
+  String get vrcDoLater;
+
+  /// No description provided for @vrcExchangeCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'You have successfully verified your relationship'**
+  String get vrcExchangeCompleted;
+
+  /// No description provided for @vrcVerifyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to verify your relationship with {name}? Each VRC exchange increases your trust score.'**
+  String vrcVerifyPrompt(String name);
+
+  /// No description provided for @vrcStartNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Now'**
+  String get vrcStartNow;
+
+  /// No description provided for @vrcDoLaterButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Do Later'**
+  String get vrcDoLaterButton;
+
+  /// No description provided for @vrcYesButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get vrcYesButton;
+
+  /// No description provided for @nameSelectedIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s selected identity'**
+  String nameSelectedIdentity(String name);
+
+  /// No description provided for @selectIdentityToVerifyRelationshipPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left or right to choose the identity you want to use to verify your relationship with {name}.'**
+  String selectIdentityToVerifyRelationshipPrompt(String name);
+
+  /// No description provided for @sendVrc.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Relationship Credential'**
+  String get sendVrc;
 }
 
 class _AppLocalizationsDelegate
