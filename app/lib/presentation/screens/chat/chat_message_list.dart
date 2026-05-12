@@ -1,5 +1,16 @@
 part of 'chat_screen.dart';
 
+bool _isHumanZkpConcierge(chat.ChatItem item) {
+  if (item is! chat.ConciergeMessage) return false;
+  const ids = {
+    ZkpConstants.conciergeHumanZkpRequest,
+    ZkpConstants.conciergeHumanZkpPaused,
+    ZkpConstants.conciergeHumanZkpProofShared,
+    ZkpConstants.conciergeHumanZkpProofReceived,
+  };
+  return ids.contains(item.conciergeType.value);
+}
+
 class _ChatMessageList extends HookConsumerWidget {
   const _ChatMessageList(this._contactId);
 
@@ -22,15 +33,33 @@ class _ChatMessageList extends HookConsumerWidget {
     var lastUsedChatItemStatus = chat.ChatItemStatus.error;
 
     final scrollController = useScrollController();
-    final pausedRequestNotices = sortedMessages.whereType<ZkpPausedNotice>();
-    final pausedNoticeMessageIds =
-        pausedRequestNotices.map((n) => n.messageId).toSet();
+    final pausedNoticeMessageIds = sortedMessages
+        .where(
+          (n) =>
+              n is chat.ConciergeMessage &&
+              n.conciergeType.value == ZkpConstants.conciergeHumanZkpPaused,
+        )
+        .map((n) => (n as chat.ConciergeMessage).messageId)
+        .toSet();
+
+    final hasSharedHumanZkpProof = sortedMessages.any(
+      (m) =>
+          (m is chat.ConciergeMessage &&
+              m.conciergeType.value ==
+                  ZkpConstants.conciergeHumanZkpProofShared) ||
+          (m is chat.Message &&
+              m.isFromMe &&
+              m.attachments.any(
+                (a) => a.format == ZkpConstants.livenessProofType,
+              )),
+    );
 
     bool shouldHideChatItem(chat.ChatItem item) {
       // Hide messages that are just liveness/proof attachments with no text.
       if (item is chat.Message && item.value.isEmpty) {
         final attachments = item.attachments;
-        final hasOnlyLivenessAttachments = attachments.isNotEmpty &&
+        final hasOnlyLivenessAttachments =
+            attachments.isNotEmpty &&
             attachments.every(
               (att) =>
                   att.format == ZkpConstants.livenessCheckRequestType ||
@@ -41,13 +70,15 @@ class _ChatMessageList extends HookConsumerWidget {
         }
       }
 
-      // If the user hit "Do later" for a received proof request,
-      // hide the request CTA banner and show only the paused notice.
-      if (item is ZkpRequestReceivedNotice) {
+      // Hide the proof-request concierge once user shared a proof, or after
+      // "Do later" (paired paused notice).
+      if (item is chat.ConciergeMessage &&
+          item.conciergeType.value == ZkpConstants.conciergeHumanZkpRequest) {
+        if (hasSharedHumanZkpProof) {
+          return true;
+        }
         final expectedPausedNoticeMessageId = 'zkp-paused-${item.messageId}';
-        return pausedNoticeMessageIds.contains(
-          expectedPausedNoticeMessageId,
-        );
+        return pausedNoticeMessageIds.contains(expectedPausedNoticeMessageId);
       }
 
       return false;
@@ -59,22 +90,19 @@ class _ChatMessageList extends HookConsumerWidget {
       controller.clearSelectedReaction();
     }
 
-    useEffect(
-      () {
-        if (!context.mounted) return;
+    useEffect(() {
+      if (!context.mounted) return;
 
-        scrollController.addListener(() {
-          if (scrollController.position.userScrollDirection ==
-              ScrollDirection.reverse) {
-            FocusManager.instance.primaryFocus?.unfocus();
-            hideReactionPicker();
-          }
-        });
+      scrollController.addListener(() {
+        if (scrollController.position.userScrollDirection ==
+            ScrollDirection.reverse) {
+          FocusManager.instance.primaryFocus?.unfocus();
+          hideReactionPicker();
+        }
+      });
 
-        return null;
-      },
-      [],
-    );
+      return null;
+    }, []);
 
     return GestureDetector(
       onTap: hideReactionPicker,
@@ -130,8 +158,9 @@ class _ChatMessageList extends HookConsumerWidget {
                     // the next item - this
                     // will propagate all the way down
                     //
-                    var indexOfNextMessageFromMe =
-                        ref.read(provider).getIndexOfNextMessageFromMe(index);
+                    var indexOfNextMessageFromMe = ref
+                        .read(provider)
+                        .getIndexOfNextMessageFromMe(index);
                     if (indexOfNextMessageFromMe != -1) {
                       var chatItemNextFromMe =
                           sortedMessages[indexOfNextMessageFromMe];
@@ -156,29 +185,23 @@ class _ChatMessageList extends HookConsumerWidget {
                   child: Column(
                     children: [
                       Align(
-                        alignment: (chatItem is EncryptionNotice ||
+                        alignment:
+                            (chatItem is EncryptionNotice ||
                                 chatItem is chat.ConciergeMessage ||
-                                chatItem is ZkpRequestReceivedNotice ||
-                                chatItem is ZkpPausedNotice ||
-                                chatItem is ZkpProofSharedNotice ||
-                                chatItem is ZkpProofReceivedNotice ||
                                 chatItem.status ==
                                     chat.ChatItemStatus.userInput)
                             ? Alignment.center
                             : (chatItem.isFromMe)
-                                ? Alignment.centerRight
-                                : Alignment.centerLeft,
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
                         child: Column(
-                          crossAxisAlignment: (chatItem is EncryptionNotice ||
-                                  chatItem is chat.ConciergeMessage ||
-                                  chatItem is ZkpRequestReceivedNotice ||
-                                  chatItem is ZkpPausedNotice ||
-                                  chatItem is ZkpProofSharedNotice ||
-                                  chatItem is ZkpProofReceivedNotice)
+                          crossAxisAlignment:
+                              (chatItem is EncryptionNotice ||
+                                  chatItem is chat.ConciergeMessage)
                               ? CrossAxisAlignment.center
                               : chatItem.isFromMe
-                                  ? CrossAxisAlignment.end
-                                  : CrossAxisAlignment.start,
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
                           children: [
                             if (!nextItemFromSameDid)
                               Padding(
@@ -189,26 +212,22 @@ class _ChatMessageList extends HookConsumerWidget {
                                 ),
                               ),
                             Container(
-                              margin: chatItem is ZkpRequestReceivedNotice ||
-                                      chatItem is ZkpPausedNotice ||
-                                      chatItem is ZkpProofSharedNotice ||
-                                      chatItem is ZkpProofReceivedNotice
+                              margin: _isHumanZkpConcierge(chatItem)
                                   ? const EdgeInsets.symmetric(vertical: 8)
                                   : chatItem is EncryptionNotice ||
-                                          chatItem is chat.ConciergeMessage ||
-                                          chatItem is chat.EventMessage
-                                      ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
-                                      : EdgeInsets.fromLTRB(
-                                          (chatItem.isFromMe) ? 60 : 0,
-                                          8,
-                                          (chatItem.isFromMe) ? 0 : 60,
-                                          (selectedReactionIndex == index ||
-                                                  chatItem is chat.Message &&
-                                                      chatItem
-                                                          .reactions.isNotEmpty)
-                                              ? 0
-                                              : 8,
-                                        ),
+                                        chatItem is chat.ConciergeMessage ||
+                                        chatItem is chat.EventMessage
+                                  ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
+                                  : EdgeInsets.fromLTRB(
+                                      (chatItem.isFromMe) ? 60 : 0,
+                                      8,
+                                      (chatItem.isFromMe) ? 0 : 60,
+                                      (selectedReactionIndex == index ||
+                                              chatItem is chat.Message &&
+                                                  chatItem.reactions.isNotEmpty)
+                                          ? 0
+                                          : 8,
+                                    ),
                               decoration: BoxDecoration(
                                 color: getChatItemColor(
                                   context.colorScheme,
@@ -297,6 +316,14 @@ chat.ChatItemStatus consolidateChatItemStatus(chat.ChatItem chatItem) {
 
 Color getChatItemColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
   if (chatItem.type == chat.ChatItemType.conciergeMessage) {
+    final cm = chatItem as chat.ConciergeMessage;
+    final typeValue = cm.conciergeType.value;
+    if (typeValue == ZkpConstants.conciergeHumanZkpRequest ||
+        typeValue == ZkpConstants.conciergeHumanZkpPaused ||
+        typeValue == ZkpConstants.conciergeHumanZkpProofShared ||
+        typeValue == ZkpConstants.conciergeHumanZkpProofReceived) {
+      return Colors.transparent;
+    }
     return AppCustomColors.conciergeMessageColor;
   } else if (chatItem.type == chat.ChatItemType.eventMessage) {
     return Colors.transparent;
