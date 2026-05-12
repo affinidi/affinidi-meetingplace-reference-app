@@ -28,32 +28,14 @@ final proofFlowControllerProvider =
   late final AppLogger _logger;
   static const _logKey = 'ProofFlowController';
 
-  /// Dismiss the top banner and insert a "paused" notice
-  void dismissBanner() {
-    state = state.copyWith(bannerDismissed: true);
-
-    // Insert a local notice that user paused the ZKP request
-    final chatController = ref.read(
-      chatScreenControllerProvider(contactId).notifier,
-    );
-    unawaited(chatController.insertZkpPausedNotice(persist: false));
-  }
-
   /// Request liveness check from contact
   Future<void> requestLivenessCheck() async {
     final chatController = ref.read(
       chatScreenControllerProvider(contactId).notifier,
     );
-    if (!chatController.canRequestZkp) {
-      _logger.warning(
-        'Skipped liveness request: channel is not ready for ZKP flow',
-        name: _logKey,
-      );
-      return;
-    }
 
     await chatController.sendMessageDirect(
-      '', // Empty message - UI banners will show the request
+      '', // Empty message - UI banners will show the request // TODO
       attachments: [
         chat.Attachment(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -64,8 +46,6 @@ final proofFlowControllerProvider =
         ),
       ],
     );
-
-    state = state.copyWith(bannerDismissed: true);
   }
 
   /// Called when contact receives liveness check request
@@ -82,6 +62,15 @@ final proofFlowControllerProvider =
   /// Dismiss incoming request and insert a "paused" notice
   void dismissRequest() {
     state = state.copyWith(hasIncomingRequest: false);
+  }
+
+  /// Clear verification failure state after dismissing result banner.
+  void clearVerificationFailure() {
+    state = state.copyWith(
+      verificationFailed: false,
+      errorMessage: null,
+      isVerifyingProof: false,
+    );
   }
 
   /// Search for Liveness VC in wallet (always returns false
