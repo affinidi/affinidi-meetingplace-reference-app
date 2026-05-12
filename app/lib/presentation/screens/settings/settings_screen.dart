@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../domain/models/mediator/mediator_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../navigation/routes/route_paths.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../dialogs/settings/delete_mediator_dialog.dart';
 import '../../dialogs/settings/rename_mediator_dialog.dart';
@@ -72,6 +74,14 @@ class SettingsScreen extends HookConsumerWidget {
             SectionBanner(
               title: l10n.tabsTitle('settings'),
               subtitle: l10n.settingsScreenSubtitle,
+              onClose: () {
+                final router = GoRouter.of(context);
+                if (router.canPop()) {
+                  router.pop();
+                } else {
+                  router.go(RoutePaths.contacts);
+                }
+              },
             ),
             const SettingsPanelScrollContent(),
           ],
