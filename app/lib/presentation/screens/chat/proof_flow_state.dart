@@ -1,8 +1,6 @@
 /// State for liveness check proof flow
 class ProofFlowState {
   const ProofFlowState({
-    this.showBanner = true,
-    this.bannerDismissed = false,
     this.hasIncomingRequest = false,
     this.isCheckingVC = false,
     this.hasVC = false,
@@ -16,8 +14,6 @@ class ProofFlowState {
     this.errorMessage,
   });
 
-  final bool showBanner;
-  final bool bannerDismissed;
   final bool hasIncomingRequest;
   final bool isCheckingVC;
   final bool hasVC;
@@ -31,8 +27,6 @@ class ProofFlowState {
   final String? errorMessage;
 
   ProofFlowState copyWith({
-    bool? showBanner,
-    bool? bannerDismissed,
     bool? hasIncomingRequest,
     bool? isCheckingVC,
     bool? hasVC,
@@ -46,8 +40,6 @@ class ProofFlowState {
     String? errorMessage,
   }) {
     return ProofFlowState(
-      showBanner: showBanner ?? this.showBanner,
-      bannerDismissed: bannerDismissed ?? this.bannerDismissed,
       hasIncomingRequest: hasIncomingRequest ?? this.hasIncomingRequest,
       isCheckingVC: isCheckingVC ?? this.isCheckingVC,
       hasVC: hasVC ?? this.hasVC,
