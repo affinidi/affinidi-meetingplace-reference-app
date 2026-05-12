@@ -132,6 +132,19 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
       ],
     ),
     StatefulShellBranchData.$branch(
+      navigatorKey: RCardsBranchData.$navigatorKey,
+      restorationScopeId: RCardsBranchData.$restorationScopeId,
+
+      routes: [
+        GoRouteData.$route(
+          path: '/r-cards',
+          name: 'r-cards',
+
+          factory: _$RCardsRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
       navigatorKey: CredentialsBranchData.$navigatorKey,
       restorationScopeId: CredentialsBranchData.$restorationScopeId,
 
@@ -141,19 +154,6 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
           name: 'credentials',
 
           factory: _$CredentialsRoute._fromState,
-        ),
-      ],
-    ),
-    StatefulShellBranchData.$branch(
-      navigatorKey: SettingsBranchData.$navigatorKey,
-      restorationScopeId: SettingsBranchData.$restorationScopeId,
-
-      routes: [
-        GoRouteData.$route(
-          path: '/settings',
-          name: 'settings',
-
-          factory: _$SettingsRoute._fromState,
         ),
       ],
     ),
@@ -455,12 +455,11 @@ mixin _$IdentityFormRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$CredentialsRoute on GoRouteData {
-  static CredentialsRoute _fromState(GoRouterState state) =>
-      const CredentialsRoute();
+mixin _$RCardsRoute on GoRouteData {
+  static RCardsRoute _fromState(GoRouterState state) => const RCardsRoute();
 
   @override
-  String get location => GoRouteData.$location('/credentials');
+  String get location => GoRouteData.$location('/r-cards');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -476,11 +475,12 @@ mixin _$CredentialsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$SettingsRoute on GoRouteData {
-  static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
+mixin _$CredentialsRoute on GoRouteData {
+  static CredentialsRoute _fromState(GoRouterState state) =>
+      const CredentialsRoute();
 
   @override
-  String get location => GoRouteData.$location('/settings');
+  String get location => GoRouteData.$location('/credentials');
 
   @override
   void go(BuildContext context) => context.go(location);

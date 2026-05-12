@@ -206,7 +206,7 @@ return $default(_that.counters);case _:
 
 
 class _NotificationServiceState implements NotificationServiceState {
-   _NotificationServiceState({final  Map<NotificationCounterType, int> counters = const {NotificationCounterType.contacts : 0, NotificationCounterType.connections : 0, NotificationCounterType.identities : 0}}): _counters = counters;
+   _NotificationServiceState({final  Map<NotificationCounterType, int> counters = const {NotificationCounterType.contacts : 0, NotificationCounterType.connections : 0, NotificationCounterType.identities : 0, NotificationCounterType.rCards : 0, NotificationCounterType.credentials : 0}}): _counters = counters;
   
 
  final  Map<NotificationCounterType, int> _counters;

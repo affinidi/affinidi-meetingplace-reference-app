@@ -6,6 +6,7 @@ class RoutePaths {
   static const connections = '/connections';
   static const contacts = '/contacts';
   static const identities = '/identities';
+  static const rCards = '/r-cards';
   static const credentials = '/credentials';
   static const settings = '/settings';
 

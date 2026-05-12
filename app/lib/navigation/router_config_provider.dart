@@ -9,6 +9,7 @@ import '../application/services/identities_service/identities_service.dart';
 import '../application/services/settings_service/settings_service.dart';
 import '../presentation/screens/authentication/authentication_screen/authentication_screen.dart';
 import '../presentation/screens/onboarding/onboarding_screen/onboarding_screen.dart';
+import '../presentation/screens/settings/settings_screen.dart';
 import 'routes/app_routes.dart';
 import 'routes/route_paths.dart';
 
@@ -130,6 +131,12 @@ GoRouter routerConfig(Ref ref) {
         redirect: (context, state) => defaultRoute,
       ),
       ...appRoutes,
+      GoRoute(
+        path: RoutePaths.settings,
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: SettingsScreen()),
+      ),
       GoRoute(
         path: RoutePaths.authentication,
         pageBuilder: (context, state) =>

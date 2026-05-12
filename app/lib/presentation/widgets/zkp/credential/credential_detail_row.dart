@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Data model for a single detail row in a credential
 class CredentialDetailRowData {
-  const CredentialDetailRowData({
-    required this.label,
-    required this.value,
-  });
+  const CredentialDetailRowData({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -43,10 +40,7 @@ class CredentialDetailRow extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
           ),
         ],

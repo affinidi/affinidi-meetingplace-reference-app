@@ -11,6 +11,8 @@ abstract class NotificationServiceState with _$NotificationServiceState {
       NotificationCounterType.contacts: 0,
       NotificationCounterType.connections: 0,
       NotificationCounterType.identities: 0,
+      NotificationCounterType.rCards: 0,
+      NotificationCounterType.credentials: 0,
     })
     Map<NotificationCounterType, int> counters,
   }) = _NotificationServiceState;

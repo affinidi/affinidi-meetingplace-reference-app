@@ -4,10 +4,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import '../../widgets/banners/zkp_notice_banner.dart';
 
 class ZkpProofReceivedNoticeWidget extends StatelessWidget {
-  const ZkpProofReceivedNoticeWidget({
-    super.key,
-    required this.chatItem,
-  });
+  const ZkpProofReceivedNoticeWidget({super.key, required this.chatItem});
 
   final chat.ConciergeMessage chatItem;
 

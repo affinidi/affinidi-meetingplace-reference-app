@@ -113,9 +113,7 @@ class ChatZkpHandler {
         .onProofReceived(proofData);
   }
 
-  Future<void> insertZkpPausedNotice({
-    String? pausedForNoticeMessageId,
-  }) async {
+  Future<void> insertZkpPausedNotice({String? pausedForNoticeMessageId}) async {
     if (!isZkpEnabled) return;
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
