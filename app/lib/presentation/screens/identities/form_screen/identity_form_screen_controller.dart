@@ -32,6 +32,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   GlobalKey<FormState>? _formKey;
   bool _focusListenersInitialized = false;
+  String? _storedMobile;
   String? _normalizedMobile;
   bool? _isMobileValid;
   bool _hasTouchedMobile = false;
@@ -66,8 +67,6 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
   @override
   IdentityFormScreenState build(String? identityId) {
-
-
     ref.onDispose(() {
       scrollController.dispose();
       for (final controller in _fieldControllers.values) {
@@ -100,6 +99,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       firstName: '',
       displayName: '',
     );
+    _storedMobile = null;
     _initialMobilePhoneNumber = null;
     return Identity(id: uuid.v4(), did: '', card: newCard);
   }
@@ -129,6 +129,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       controllerFor(field).text = field.valueFrom(identity.card);
     }
     aliasController.text = identity.card.displayName;
+    _storedMobile = identity.card.mobile;
     _normalizedMobile = identity.card.mobile;
     _isMobileValid = null;
     _hasTouchedMobile = false;
@@ -144,6 +145,24 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
           (field) => controllerFor(field).text.trim().isNotEmpty,
         ) &&
         canSave;
+  }
+
+  bool _didMobileChange(String? normalizedMobile, String mobile) {
+    final storedMobile = _storedMobile?.trim();
+
+    if (mobile.isEmpty) {
+      return storedMobile?.isNotEmpty ?? false;
+    }
+
+    if (storedMobile == null || storedMobile.isEmpty) {
+      return true;
+    }
+
+    if (normalizedMobile == null) {
+      return true;
+    }
+
+    return normalizedMobile != storedMobile;
   }
 
   PhoneNumber? _parseInitialMobilePhoneNumber(String? mobile) {
@@ -173,29 +192,6 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     return null;
   }
 
-  Future<String?> _validatedStoredMobile(String? mobile) async {
-    final parsedMobile = _parseInitialMobilePhoneNumber(mobile);
-    final normalizedMobile = parsedMobile?.phoneNumber;
-    final isoCode = parsedMobile?.isoCode;
-
-    if (normalizedMobile == null || isoCode == null) {
-      return null;
-    }
-
-    try {
-      final phoneNumberType = await PhoneNumber.getPhoneNumberType(
-        normalizedMobile,
-        isoCode,
-      );
-
-      return phoneNumberType == PhoneNumberType.UNKNOWN
-          ? null
-          : normalizedMobile;
-    } on Exception {
-      return null;
-    }
-  }
-
   void _updateIdentityCard(ContactCard updatedCard) {
     final updatedIdentity = state.identity.copyWith(card: updatedCard);
     state = state.copyWith(identity: updatedIdentity);
@@ -206,7 +202,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final isValidForSave = ContactCardFieldDefinitions.values.every((field) {
       if (field.key == ContactCardFieldKey.mobile) {
         final mobile = controllerFor(field).text.trim();
-        return mobile.isEmpty || _isMobileValid == true;
+        return mobile.isEmpty || !_hasTouchedMobile || _isMobileValid == true;
       }
       return field.validator(ctx).call(controllerFor(field).text) == null;
     });
@@ -243,7 +239,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final bool hasError;
     if (field.key == ContactCardFieldKey.mobile) {
       final mobile = controllerFor(field).text.trim();
-      hasError = mobile.isNotEmpty && _isMobileValid != true;
+      hasError =
+          _hasTouchedMobile && mobile.isNotEmpty && _isMobileValid != true;
     } else {
       final error = field.validator(ctx).call(_textFor(field));
       hasError = error != null;
@@ -262,7 +259,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       final bool hasError;
       if (field.key == ContactCardFieldKey.mobile) {
         final mobile = controllerFor(field).text.trim();
-        hasError = mobile.isNotEmpty && _isMobileValid != true;
+        hasError =
+            _hasTouchedMobile && mobile.isNotEmpty && _isMobileValid != true;
       } else {
         final error = field.validator(ctx).call(_textFor(field));
         hasError = error != null;
@@ -311,7 +309,15 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   void updateMobile(PhoneNumber phoneNumber) {
-    _hasTouchedMobile = true;
+    final mobileField = ContactCardFieldDefinitions.byKey(
+      ContactCardFieldKey.mobile,
+    );
+    final mobile = controllerFor(mobileField).text.trim();
+
+    if (_didMobileChange(phoneNumber.phoneNumber, mobile)) {
+      _hasTouchedMobile = true;
+    }
+
     _normalizedMobile = phoneNumber.phoneNumber;
   }
 
@@ -320,6 +326,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       ContactCardFieldKey.mobile,
     );
     final mobile = controllerFor(mobileField).text.trim();
+
+    if (_didMobileChange(_normalizedMobile, mobile)) {
+      _hasTouchedMobile = true;
+    }
+
     _isMobileValid = mobile.isEmpty ? null : isValid;
 
     if (mobile.isEmpty) {
@@ -363,15 +374,14 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       final String? persistedValue;
       if (field.key == ContactCardFieldKey.mobile) {
         if (!_hasTouchedMobile) {
-          persistedValue =
-              await _validatedStoredMobile(updatedCard.mobile);
+          persistedValue = updatedCard.mobile;
         } else {
           final mobile = controllerFor(field).text.trim();
           persistedValue = mobile.isEmpty
               ? null
               : _isMobileValid == true && _normalizedMobile != null
               ? _normalizedMobile
-              : null;
+              : updatedCard.mobile;
         }
       } else {
         final controllerValue = controllerFor(field).text.trim();
