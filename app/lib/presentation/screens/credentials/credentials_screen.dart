@@ -16,7 +16,6 @@ class CredentialsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
     final hasCredentials = ref.watch(
       credentialsScreenControllerProvider.select(
         (state) => state.hasCredentials,
@@ -31,11 +30,6 @@ class CredentialsScreen extends ConsumerWidget {
             SectionBanner(
               title: l10n.tabsTitle(Tabs.credentials.name),
               subtitle: l10n.verifiableCredentialWallet,
-              icon: Icon(
-                Icons.credit_card,
-                color: colorScheme.onSurfaceVariant,
-                size: 24,
-              ),
             ),
             // Content
             hasCredentials

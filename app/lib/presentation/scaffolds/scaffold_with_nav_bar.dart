@@ -7,6 +7,8 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/tabs/navigation_tab_destination.dart';
 import '../../navigation/tabs/tabs.dart';
 import '../widgets/loaders/control_plane_events_progress_indicator.dart';
+import '../widgets/settings_end_drawer.dart';
+import 'dashboard_shell_scaffold_key.dart';
 
 class ScaffoldWithNavBar extends ConsumerWidget {
   const ScaffoldWithNavBar({super.key, required this.navigationShell});
@@ -27,6 +29,8 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final selectedIndex = visibleBranchIndexes.indexOf(currentIndex);
 
     return Scaffold(
+      key: dashboardShellScaffoldKey,
+      endDrawer: const SettingsEndDrawer(),
       body: SafeArea(
         child: Column(
           children: [
