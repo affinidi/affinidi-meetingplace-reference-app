@@ -39,13 +39,16 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
        );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (migrator, from, to) async {
-      // Replaces individual columns with a single contact_info_json column.
       if (from < 2) {
+        await migrator.addColumn(identitiesTable, identitiesTable.did);
+      }
+
+      if (from < 3) {
         await migrator.addColumn(
           identitiesTable,
           identitiesTable.contactInfoJson,

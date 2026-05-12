@@ -1097,10 +1097,10 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_chat
-      sha256: "94c4837b720bfad6a2f5e2eb77ab7ade15cbbff87928774a9921c1d65ea9c97b"
+      sha256: "2bca07a2f44659fbbc0238cf1c847e12da361daf12bf09e7e888f27aaf5fd670"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.34"
+    version: "0.0.1-dev.35"
   meeting_place_control_plane:
     dependency: transitive
     description:
