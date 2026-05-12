@@ -39,7 +39,6 @@ class IdentitiesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
     ref.keepAround(identitiesScreenControllerProvider);
 
     return PieCanvas(
@@ -58,11 +57,6 @@ class IdentitiesScreen extends ConsumerWidget {
               SectionBanner(
                 title: l10n.tabsTitle(Tabs.identities.name),
                 subtitle: context.l10n.identitiesPanelSubtitle,
-                icon: Icon(
-                  Icons.fingerprint,
-                  color: colorScheme.onSurfaceVariant,
-                  size: 24,
-                ),
               ),
               _IdentitiesPanel(),
             ],

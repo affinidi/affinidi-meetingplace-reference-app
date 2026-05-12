@@ -24,7 +24,7 @@ enum Tabs {
         return const Icon(Icons.fingerprint);
       case Tabs.rCards:
       case Tabs.credentials:
-        return const Icon(Icons.credit_card);
+        return const Icon(Icons.verified_user);
       case Tabs.settings:
         return const Icon(Icons.settings);
     }

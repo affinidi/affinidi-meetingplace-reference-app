@@ -23,13 +23,35 @@ part 'meeting_place_control_plane_section.dart';
 part 'server_settings_section.dart';
 part 'version_info.dart';
 
+/// Shared settings sections for the Settings tab.
+class SettingsPanelScrollContent extends StatelessWidget {
+  const SettingsPanelScrollContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _VersionInfoSection(),
+          _MeetingPlaceControlPlaneSection(),
+          SizedBox(height: 24),
+          _ServerSettingsSection(),
+          SizedBox(height: 24),
+          _DebugSettingsSection(),
+        ],
+      ),
+    );
+  }
+}
+
 class SettingsScreen extends HookConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
     final provider = settingsScreenControllerProvider;
     final controller = ref.read(provider.notifier);
 
@@ -51,27 +73,8 @@ class SettingsScreen extends HookConsumerWidget {
             SectionBanner(
               title: l10n.tabsTitle(Tabs.settings.name),
               subtitle: l10n.settingsScreenSubtitle,
-              icon: Icon(
-                Icons.settings,
-                color: colorScheme.onSurfaceVariant,
-                size: 24,
-              ),
-              onTap: () {},
             ),
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _VersionInfoSection(),
-                  _MeetingPlaceControlPlaneSection(),
-                  SizedBox(height: 24),
-                  _ServerSettingsSection(),
-                  SizedBox(height: 24),
-                  _DebugSettingsSection(),
-                ],
-              ),
-            ),
+            const SettingsPanelScrollContent(),
           ],
         ),
       ),
