@@ -130,7 +130,6 @@ class ChatScreen extends HookConsumerWidget {
                     ChatActivityProgressIndicator(contactId: _contactId),
                     _NotificationsUnavailableWarning(_contactId),
                     if (isZkpEnabled) ...[
-                      _LivenessBanner(_contactId),
                       _VerificationResultBanner(_contactId),
                     ],
                     Expanded(child: _ChatMessageList(_contactId)),
