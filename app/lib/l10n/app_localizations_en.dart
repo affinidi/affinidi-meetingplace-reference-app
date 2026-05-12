@@ -17,12 +17,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'connections': 'Invitations',
       'contacts': 'Channels',
       'identities': 'Identities',
+      'rCards': 'R-Cards',
       'credentials': 'Credentials',
       'settings': 'Settings',
       'other': 'Invalid',
     });
     return '$_temp0';
   }
+
+  @override
+  String get rCardsPlaceholderMessage => 'R-Cards will appear here.';
 
   @override
   String get publishOffer => 'Publish Invitation';

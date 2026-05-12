@@ -1926,10 +1926,10 @@ packages:
     dependency: transitive
     description:
       name: vc_zkp
-      sha256: "4ed87f70d832063bd4905a71e7f3655b93189b87b6ff5c05b2ca5a222ff47584"
+      sha256: a62ed449e5ec2ed52c79f4cae5c78ab0090a0cf9833bfcb18a11fe0e8eaff321
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.4"
+    version: "1.2.5"
   vector_graphics:
     dependency: transitive
     description:
