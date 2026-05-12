@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:clock/clock.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -42,6 +43,12 @@ class ContactsDatabase extends _$ContactsDatabase {
            directory: directory,
          ),
        );
+
+  /// Creates a [ContactsDatabase] backed by the given [executor].
+  ///
+  /// Intended for use in tests only.
+  @visibleForTesting
+  ContactsDatabase.withExecutor(super.executor);
 
   @override
   int get schemaVersion => 5;

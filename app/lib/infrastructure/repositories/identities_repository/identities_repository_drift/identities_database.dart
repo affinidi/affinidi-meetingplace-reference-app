@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
@@ -37,6 +38,9 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
            directory: directory,
          ),
        );
+
+  @visibleForTesting
+  IdentitiesDatabase.withExecutor(super.executor);
 
   @override
   int get schemaVersion => 3;
