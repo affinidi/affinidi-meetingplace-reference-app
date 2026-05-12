@@ -19,7 +19,6 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import '../../../application/services/zkp_service/zkp_constants.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
-import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/configuration/environment.dart';
