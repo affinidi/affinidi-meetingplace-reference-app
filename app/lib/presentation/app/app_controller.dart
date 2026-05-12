@@ -12,6 +12,7 @@ import '../../application/services/network_connectivity_service/network_connecti
 import '../../application/services/r_cards_service/r_cards_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
+import '../../infrastructure/providers/relationship_sdk_provider.dart';
 
 part 'app_controller.g.dart';
 
@@ -24,6 +25,11 @@ class AppController extends _$AppController with WidgetsBindingObserver {
     ref.listen(
       authenticationServiceProvider.select((state) => state.isAuthenticated),
       (prev, next) async {
+        if (!next) {
+          final sdk = ref.read(relationshipSdkProvider).valueOrNull;
+          await sdk?.closeRelationshipStreams();
+          return;
+        }
         if (next) {
           ref.read(controlPlaneServiceProvider);
           ref.read(rCardsServiceProvider);

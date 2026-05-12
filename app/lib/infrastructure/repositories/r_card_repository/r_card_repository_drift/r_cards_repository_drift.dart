@@ -6,6 +6,14 @@ import '../../../../domain/repositories/r_card_repository.dart';
 import '../../../helpers/canonical_json.dart';
 import 'r_cards_database.dart' as db;
 
+String _safeCanonical(String json) {
+  try {
+    return canonicalizeJsonString(json);
+  } catch (_) {
+    return json;
+  }
+}
+
 /// Returns an [RCardRepository] backed by an encrypted on-device Drift
 /// database.
 Future<RCardRepository> rCardsRepositoryDrift(Ref ref) async {
@@ -47,10 +55,10 @@ class RCardsRepositoryDrift implements RCardRepository {
         _database.rCards,
       )..where((t) => t.subjectDid.equals(subjectDid))).getSingleOrNull();
 
-      final newCanonical = canonicalizeJsonString(vcBlob);
+      final newCanonical = _safeCanonical(vcBlob);
       final existingCanonical = existing == null
           ? null
-          : canonicalizeJsonString(existing.vcBlob);
+          : _safeCanonical(existing.vcBlob);
 
       if (existing != null && existingCanonical == newCanonical) {
         return;
