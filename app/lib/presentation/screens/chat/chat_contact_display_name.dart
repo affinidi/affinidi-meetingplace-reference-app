@@ -124,7 +124,9 @@ class _ChatContactImage extends ConsumerWidget {
       provider.select(
         (state) => state.messages.any(
           (item) =>
-              item is ZkpProofReceivedNotice ||
+              (item is chat.ConciergeMessage &&
+                  item.conciergeType.value ==
+                      ZkpConstants.conciergeHumanZkpProofReceived) ||
               (item is chat.Message &&
                   item.attachments.any(
                     (att) => att.format == ZkpConstants.livenessProofType,

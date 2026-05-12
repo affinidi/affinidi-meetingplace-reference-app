@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 
-import '../../../domain/models/chat/zkp_proof_shared_notice.dart';
 import '../../widgets/banners/zkp_notice_banner.dart';
 
 class ZkpProofSharedNoticeWidget extends StatelessWidget {
   const ZkpProofSharedNoticeWidget({
     super.key,
-    required ZkpProofSharedNotice chatItem,
-  }) : _chatItem = chatItem;
+    required this.chatItem,
+  });
 
-  final ZkpProofSharedNotice _chatItem;
+  final chat.ConciergeMessage chatItem;
 
   @override
   Widget build(BuildContext context) {
     return ZkpNoticeBanner(
       type: ZkpNoticeType.shared,
-      dateCreated: _chatItem.dateCreated.toLocal(),
+      dateCreated: chatItem.dateCreated.toLocal(),
     );
   }
 }

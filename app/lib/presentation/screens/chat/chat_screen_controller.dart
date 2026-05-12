@@ -13,9 +13,7 @@ import 'package:synchronized/synchronized.dart';
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
-import '../../../domain/models/chat/zkp_paused_notice.dart';
 import '../../../domain/models/contacts/contact.dart';
-import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
@@ -25,7 +23,6 @@ import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
-import '../../../infrastructure/services/zkp_notices_service/zkp_notices_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
@@ -55,7 +52,6 @@ class ChatScreenController extends _$ChatScreenController
     isZkpEnabled: _isZkpEnabled,
     getContact: () => state.contact,
     onUpsertChatItem: _upsertChatItemThroughService,
-    onPersistZkpNotice: _persistZkpNotice,
   );
 
   TimedAction? _sendChatActivityTimedAction;
@@ -342,7 +338,6 @@ class ChatScreenController extends _$ChatScreenController
 
     await _chatService?.updateContactSequenceNumber(channelDid);
     await _chatService?.startChatSession();
-    await _restoreZkpNotices(channelDid);
 
     if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
@@ -354,30 +349,10 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   /// Insert a ZKP paused notice into the chat (local only, not sent)
-  Future<void> insertZkpPausedNotice({
-    String? pausedForNoticeMessageId,
-    bool persist = true,
-  }) async {
+  Future<void> insertZkpPausedNotice({String? pausedForNoticeMessageId}) async {
     await _zkpHandler.insertZkpPausedNotice(
       pausedForNoticeMessageId: pausedForNoticeMessageId,
-      persist: persist,
     );
-  }
-
-  /// Insert a ZKP proof shared notice (after sending proof)
-  Future<void> insertZkpProofSharedNotice() async {
-    await _zkpHandler.insertZkpProofSharedNotice();
-  }
-
-  /// Insert a ZKP proof received notice (after receiving proof)
-  Future<void> insertZkpProofReceivedNotice() async {
-    await _zkpHandler.insertZkpProofReceivedNotice();
-  }
-
-  /// Insert a ZKP request received notice (when receiving liveness
-  /// check request)
-  Future<void> insertZkpRequestReceivedNotice() async {
-    await _zkpHandler.insertZkpRequestReceivedNotice();
   }
 
   /// Routes a chat item through the service to persist it in the service state.
@@ -389,40 +364,6 @@ class ChatScreenController extends _$ChatScreenController
       'This likely means a ZKP callback fired before build() completed.',
     );
     _chatService?.upsertChatItem(item);
-  }
-
-  Future<void> _persistZkpNotice(chat.ChatItem item) async {
-    try {
-      await ref.read(zkpNoticesServiceProvider).upsertNotice(item);
-    } catch (e, st) {
-      _logger.error(
-        'Failed to persist ZKP notice',
-        error: e,
-        stackTrace: st,
-        name: _logKey,
-      );
-    }
-  }
-
-  Future<void> _restoreZkpNotices(String channelDid) async {
-    try {
-      final notices = await ref
-          .read(zkpNoticesServiceProvider)
-          .loadNotices(channelDid);
-      for (final notice in notices) {
-        // Proof/request notices are now derived from persisted DIDComm messages.
-        // Only restore explicit local "paused" notices from local storage.
-        if (notice is! ZkpPausedNotice) continue;
-        _chatService?.upsertChatItem(notice);
-      }
-    } catch (e, st) {
-      _logger.error(
-        'Failed to restore ZKP notices',
-        error: e,
-        stackTrace: st,
-        name: _logKey,
-      );
-    }
   }
 
   Future<void> _updateGroupContactPendingStatus() async {
@@ -467,17 +408,6 @@ class ChatScreenController extends _$ChatScreenController
     unawaited(
       _chatService?.sendTextMessage(trimmedMessage, attachments: attachments),
     );
-  }
-
-  bool get canRequestZkp => _isChannelReadyForZkp(state.contact?.status);
-
-  bool _isChannelReadyForZkp(ContactStatus? status) {
-    final hasIncomingMessageFromOtherParty = state.messages.any(
-      (item) => item is chat.Message && !item.isFromMe,
-    );
-    return state.isInitialized &&
-        hasIncomingMessageFromOtherParty &&
-        (status == ContactStatus.approved || status == ContactStatus.active);
   }
 
   Future<void> sendChatActivity() async {
