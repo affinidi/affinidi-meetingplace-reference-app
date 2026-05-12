@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 
-import '../../../domain/models/chat/zkp_request_received_notice.dart';
 import '../../widgets/banners/zkp_notice_banner.dart';
 import '../zkp/liveness_check_screen.dart';
 import 'chat_screen_controller.dart';
@@ -10,20 +10,20 @@ import 'proof_flow_controller.dart';
 class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
   const ZkpRequestReceivedNoticeWidget({
     super.key,
-    required ZkpRequestReceivedNotice chatItem,
+    required this.chatItem,
     required String contactId,
-  })  : _chatItem = chatItem,
-        _contactId = contactId;
+  }) : _contactId = contactId;
 
-  final ZkpRequestReceivedNotice _chatItem;
+  final chat.ConciergeMessage chatItem;
   final String _contactId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final contactName = chatItem.data['contactName'] as String? ?? '';
     return ZkpNoticeBanner(
       type: ZkpNoticeType.request,
-      dateCreated: _chatItem.dateCreated.toLocal(),
-      contactName: _chatItem.contactName,
+      dateCreated: chatItem.dateCreated.toLocal(),
+      contactName: contactName,
       onGenerateProof: () {
         Navigator.of(context).push<void>(
           MaterialPageRoute(
@@ -35,8 +35,7 @@ class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
         await ref
             .read(chatScreenControllerProvider(_contactId).notifier)
             .insertZkpPausedNotice(
-              pausedForNoticeMessageId: _chatItem.messageId,
-              persist: false,
+              pausedForNoticeMessageId: chatItem.messageId,
             );
         ref
             .read(proofFlowControllerProvider(_contactId).notifier)
