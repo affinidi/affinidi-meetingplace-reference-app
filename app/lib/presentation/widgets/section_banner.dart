@@ -11,11 +11,14 @@ class SectionBanner extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.showProgress,
+    this.onClose,
   });
 
   final String title;
   final String subtitle;
   final bool? showProgress;
+
+  final VoidCallback? onClose;
 
   void _openSettingsDrawer() {
     dashboardShellScaffoldKey.currentState?.openEndDrawer();
@@ -75,11 +78,11 @@ class SectionBanner extends StatelessWidget {
                         child: IconButton(
                           padding: EdgeInsets.zero,
                           icon: Icon(
-                            Icons.menu,
+                            onClose != null ? Icons.close : Icons.menu,
                             color: colorScheme.onSurface.withValues(alpha: 0.5),
                             size: 28,
                           ),
-                          onPressed: _openSettingsDrawer,
+                          onPressed: onClose ?? _openSettingsDrawer,
                         ),
                       ),
               ],
