@@ -31,7 +31,6 @@ class ConnectionsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
     ref.keepAround(connectionsScreenControllerProvider);
 
     return SafeArea(
@@ -42,12 +41,6 @@ class ConnectionsScreen extends ConsumerWidget {
             SectionBanner(
               title: context.l10n.tabsTitle(Tabs.connections.name),
               subtitle: l10n.connectionsPanelSubtitle,
-              icon: Icon(
-                Icons.compare_arrows,
-                color: colorScheme.onSurfaceVariant,
-                size: 24,
-              ),
-              onTap: () => _showNewConnectionsMenu(context, ref),
             ),
             _FiltersBar(),
             Padding(

@@ -45,38 +45,33 @@ class ContactsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
     final provider = contactsScreenControllerProvider;
     final controller = ref.read(provider.notifier);
     ref.keepAround(contactsScreenControllerProvider);
 
     return SafeArea(
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SectionBanner(
-                title: l10n.tabsTitle(Tabs.contacts.name),
-                subtitle: context.l10n.contactsPanelSubtitle,
-                icon: Icon(Icons.chat, color: colorScheme.onSurfaceVariant),
-                onTap: () => _showNewConnectionsMenu(context, ref),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SectionBanner(
+              title: l10n.tabsTitle(Tabs.contacts.name),
+              subtitle: context.l10n.contactsPanelSubtitle,
+            ),
+            _FiltersBar(),
+            Padding(
+              padding: const EdgeInsets.all(2),
+              child: _ActionsBar(
+                onSelectNewConnectionsOption: () =>
+                    _showNewConnectionsMenu(context, ref),
               ),
-              _FiltersBar(),
-              Padding(
-                padding: const EdgeInsets.all(2),
-                child: _ActionsBar(
-                  onSelectNewConnectionsOption: () =>
-                      _showNewConnectionsMenu(context, ref),
-                ),
-              ),
-              ModalAsyncLoadingStatus(
-                controller.deleteContactLoadingController,
-                successMessage: l10n.contactsDeleted(1),
-              ),
-              _ContactsLayout(),
-            ],
-          ),
+            ),
+            ModalAsyncLoadingStatus(
+              controller.deleteContactLoadingController,
+              successMessage: l10n.contactsDeleted(1),
+            ),
+            _ContactsLayout(),
+          ],
         ),
       ),
     );
