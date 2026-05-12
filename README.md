@@ -100,7 +100,7 @@ The architecture is organised into distinct layers, each with specific responsib
 - **Repository Interfaces**: Contracts for data access.
 
 #### 4. Infrastructure Layer (`/lib/infrastructure/`)
-- **Database**: Local storage implementation using Drift.
+- **Database**: Local storage implementation using Drift. See the [Database Guide](docs/DATABASE_GUIDE.md) for how to create and manage databases, add new fields, and write migration tests.
 - **Repositories**: Concrete implementations of domain repository interfaces.
 - **Providers**: Riverpod providers for external packages and dependency injection.
 - **External Services**: Firebase messaging, biometrics, secure storage, media handling.
