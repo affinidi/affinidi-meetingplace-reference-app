@@ -81,12 +81,19 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
     required List<Attachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
-  }) => attachments.isEmpty
-      ? const SizedBox.shrink()
-      : _RCardAttachmentWidget(
-          attachment: attachments.first,
-          cacheManager: _cacheManager,
-          chatItemColor: chatItemColor,
-          isFromMe: isFromMe,
-        );
+  }) {
+    if (attachments.isEmpty) return const SizedBox.shrink();
+    return Column(
+      children: attachments
+          .map(
+            (attachment) => _RCardAttachmentWidget(
+              attachment: attachment,
+              cacheManager: _cacheManager,
+              chatItemColor: chatItemColor,
+              isFromMe: isFromMe,
+            ),
+          )
+          .toList(),
+    );
+  }
 }
