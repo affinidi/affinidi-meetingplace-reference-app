@@ -80,7 +80,6 @@ void main() async {
             ),
             RCardAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),
-              ref: ref,
             ),
           ],
         ),

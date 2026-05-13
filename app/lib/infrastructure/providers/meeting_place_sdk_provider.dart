@@ -1,3 +1,6 @@
+import 'package:affinidi_tdk_vdip/affinidi_tdk_vdip.dart';
+import 'package:didcomm/didcomm.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -54,6 +57,15 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
           controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
           logger: logger,
           options: MeetingPlaceCoreSDKOptions(
+            expectedMessageWrappingTypes: const [
+              MessageWrappingType.authcryptPlaintext,
+              MessageWrappingType.authcryptSignPlaintext,
+            ],
+            messageTypesForSequenceTracking: [
+              ChatProtocol.chatMessage.value,
+              VdipRequestIssuanceMessage.messageType.toString(),
+              VdipIssuedCredentialMessage.messageType.toString(),
+            ],
             onBuildAttachments:
                 (
                   Channel channel,

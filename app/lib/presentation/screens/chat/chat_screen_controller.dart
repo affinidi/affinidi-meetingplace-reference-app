@@ -14,12 +14,15 @@ import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../domain/models/contacts/contact.dart';
+import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/event_message_extensions.dart';
+import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
@@ -47,6 +50,8 @@ class ChatScreenController extends _$ChatScreenController
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
+  StreamSubscription<Identity>? _rCardPluginSubscription;
+  bool _rCardListenerSet = false;
 
   late final Map<String, ProviderSubscription<void>>
   _conciergeLoadingControllersSubscriptions = {};
@@ -86,6 +91,19 @@ class ChatScreenController extends _$ChatScreenController
           effect: newEffect,
         );
       });
+
+      if (!_rCardListenerSet) {
+        _rCardListenerSet = true;
+        final plugins = ref.read(availableAttachmentPluginsProvider);
+        final rCardPlugin = plugins
+            .whereType<RCardAttachmentsPlugin>()
+            .firstOrNull;
+        _rCardPluginSubscription = rCardPlugin?.onRCardFromAttachment.listen((
+          identity,
+        ) {
+          unawaited(_chatService?.sendRCardFromPlugin(identity));
+        });
+      }
     }
 
     ref.listen(
@@ -106,6 +124,7 @@ class ChatScreenController extends _$ChatScreenController
     ref.onDispose(() {
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
+      _rCardPluginSubscription?.cancel();
       _chatService?.pauseChat();
 
       messageTextController.removeListener(_onMessageTextChanged);
