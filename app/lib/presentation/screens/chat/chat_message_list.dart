@@ -55,6 +55,7 @@ class _ChatMessageList extends HookConsumerWidget {
               itemCount: sortedMessages.length,
               itemBuilder: (context, index) {
                 var chatItem = sortedMessages[index];
+
                 var nextItemFromSameDid = false;
 
                 if (index < sortedMessages.length - 1) {
@@ -65,7 +66,7 @@ class _ChatMessageList extends HookConsumerWidget {
 
                 var thisItemStatus = '';
 
-                if (chatItem.isFromMe) {
+                if (chatItem.isFromMe && !_isRCardOnlyMessage(chatItem)) {
                   if (index == indexOfLastMessageFromMe) {
                     // this is the last one from me, show status regardless
                     thisItemStatus = context.l10n.chatItemStatus(
@@ -107,6 +108,7 @@ class _ChatMessageList extends HookConsumerWidget {
                 }
 
                 return Padding(
+                  key: ValueKey(chatItem.messageId),
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Column(
                     children: [
@@ -229,7 +231,7 @@ Color getChatItemColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
   return const Color.fromARGB(248, 107, 65, 162);
 }
 
-bool _isCredentialOnlyMessage(chat.ChatItem chatItem) {
+bool _isRCardOnlyMessage(chat.ChatItem chatItem) {
   if (chatItem is! chat.Message) return false;
   final attachments = chatItem.attachments;
   return attachments.length == 1 && attachments.first.isRCard;
@@ -250,7 +252,22 @@ class _RCardBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCredentialOnly = _isCredentialOnlyMessage(chatItem);
+    final isCredentialOnly = _isRCardOnlyMessage(chatItem);
+
+    if (isCredentialOnly && chatItem.isFromMe) {
+      final msg = chatItem as chat.Message;
+      if (msg.attachments.first.isRCardUpdate) {
+        return ChatRCardUpdatedByMeNotice(dateCreated: chatItem.dateCreated);
+      }
+    }
+
+    if (isCredentialOnly && !chatItem.isFromMe) {
+      final msg = chatItem as chat.Message;
+      if (msg.attachments.first.isRCardAutoExchange) {
+        return ChatRCardsExchangedNotice(chatItem: chatItem);
+      }
+    }
+
     final chatItemColor = getChatItemColor(context.colorScheme, chatItem);
 
     final margin =

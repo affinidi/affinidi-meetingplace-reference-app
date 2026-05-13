@@ -40,6 +40,8 @@ import '../../widgets/info_banner.dart';
 import '../../widgets/profile_circle_avatar.dart';
 import 'chat_activity_progress_indicator.dart';
 import 'chat_items/chat_encryption_notice.dart';
+import 'chat_items/chat_r_card_updated_by_me_notice.dart';
+import 'chat_items/chat_r_cards_exchanged_notice.dart';
 import 'chat_items/group_deleted_chat_item.dart';
 import 'chat_items/joining_group_chat_item.dart';
 import 'chat_items/leaving_group_chat_item.dart';

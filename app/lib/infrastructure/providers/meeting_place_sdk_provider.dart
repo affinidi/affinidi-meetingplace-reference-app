@@ -1,5 +1,3 @@
-import 'package:affinidi_tdk_vdip/affinidi_tdk_vdip.dart';
-import 'package:didcomm/didcomm.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
@@ -63,8 +61,8 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
             ],
             messageTypesForSequenceTracking: [
               ChatProtocol.chatMessage.value,
-              VdipRequestIssuanceMessage.messageType.toString(),
-              VdipIssuedCredentialMessage.messageType.toString(),
+              VdipClient.requestIssuanceMessageType,
+              VdipClient.issuedCredentialMessageType,
             ],
             onBuildAttachments:
                 (
