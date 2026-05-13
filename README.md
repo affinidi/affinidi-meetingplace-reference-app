@@ -106,7 +106,7 @@ The architecture is organised into distinct layers, each with specific responsib
 - **External Services**: Firebase messaging, biometrics, secure storage, media handling.
 - **Configuration**: Environment settings and app configuration.
 
-> To add a new profile field (e.g. a new contact attribute), see the [Adding Profile Fields guide](docs/ADDING_PROFILE_FIELDS.md).
+> To add a new profile field (e.g. a new contact attribute), see the [Adding Profile Fields guide](doc/ADDING_PROFILE_FIELDS.md).
 
 ### Access Rules and Data Flow
 
