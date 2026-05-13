@@ -1580,6 +1580,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rCardFooterSaved => 'R-Card has been saved.';
 
   @override
+  String get rCardFooterUpdateShared => 'R-Card update has been shared.';
+
+  @override
+  String get rCardFooterUpdateSaved => 'R-Card update has been saved.';
+
+  @override
+  String get rCardsExchanged => 'R-Cards have been exchanged.';
+
+  @override
   String get goToRCard => 'Go to R-Card';
 
   @override

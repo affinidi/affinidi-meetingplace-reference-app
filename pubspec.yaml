@@ -15,17 +15,29 @@ dev_dependencies:
   melos: ^7.1.1
 
 dependency_overrides:
+  meeting_place_chat:
+    # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: 2626c76f01c7d52bff0c01f8be08c882ab980f99
+      path: packages/meeting_place_chat
   meeting_place_core:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_core
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 1f4b628e8fa77b7fdba87faf7a5785d9c2a23a44
+      ref: 2626c76f01c7d52bff0c01f8be08c882ab980f99
       path: packages/meeting_place_core
+  meeting_place_drift_repository:
+    # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: 2626c76f01c7d52bff0c01f8be08c882ab980f99
+      path: packages/meeting_place_drift_repository
   meeting_place_relationship:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 1f4b628e8fa77b7fdba87faf7a5785d9c2a23a44
+      ref: 2626c76f01c7d52bff0c01f8be08c882ab980f99
       path: packages/meeting_place_relationship
   meta: 1.17.0
 

@@ -1618,6 +1618,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get rCardFooterSaved => 'R-Karte wurde gespeichert.';
 
   @override
+  String get rCardFooterUpdateShared => 'R-Karten-Update wurde geteilt.';
+
+  @override
+  String get rCardFooterUpdateSaved => 'R-Card update has been saved.';
+
+  @override
+  String get rCardsExchanged => 'R-Cards have been exchanged.';
+
+  @override
   String get goToRCard => 'Zur R-Karte';
 
   @override
