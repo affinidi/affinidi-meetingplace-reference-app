@@ -46,6 +46,36 @@ extension AttachmentRCardX on Attachment {
     }
   }
 
+  bool get isRCardUpdate {
+    if (!isRCard) return false;
+    final json = data?.json;
+    if (json == null || json.isEmpty) return false;
+    try {
+      final decoded = jsonDecode(json);
+      if (decoded is Map<String, dynamic>) {
+        return (decoded['isUpdate'] as bool?) ?? false;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  bool get isRCardAutoExchange {
+    if (!isRCard) return false;
+    final json = data?.json;
+    if (json == null || json.isEmpty) return false;
+    try {
+      final decoded = jsonDecode(json);
+      if (decoded is Map<String, dynamic>) {
+        return (decoded['isAutoExchange'] as bool?) ?? false;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   String? get rCardSubjectDid {
     final vcBlob = rCardVcBlob;
     if (vcBlob == null || vcBlob.isEmpty) return null;

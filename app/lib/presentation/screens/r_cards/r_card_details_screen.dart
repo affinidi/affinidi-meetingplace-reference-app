@@ -19,9 +19,6 @@ import '../../widgets/images/default_profile_image.dart';
 import 'r_card_notes_sheet.dart';
 import 'r_cards_deck.dart' show returningCardProvider;
 
-/// Shows the full details of a single received R-Card, matching the H2H
-/// layout: drag-to-dismiss, swipe between cards, delete/download actions,
-/// notes and Chat-with button.
 class RCardDetailsScreen extends ConsumerStatefulWidget {
   const RCardDetailsScreen({
     super.key,
