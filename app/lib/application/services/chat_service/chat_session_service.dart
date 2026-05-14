@@ -60,7 +60,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   MeetingPlaceChatSDK? _chatSDK;
   bool _isGroupChat = false;
   String? _otherPartyFirstName;
-  ChatStream? _messageSubscription;
+  ChatStream? _chatStreamRef;
   StreamSubscription? _rCardSubscription;
 
   late ConciergeMessaging _conciergeMessenger;
@@ -101,8 +101,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     ref.onDispose(() {
       _presenceTimedAction?.cancel();
       _typingTimedAction?.cancel();
-      _messageSubscription?.dispose();
       _rCardSubscription?.cancel();
+      _chatStreamRef?.dispose();
+      _chatStreamRef = null;
       _chatSDK?.endChatSession();
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
@@ -182,8 +183,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   Future<void> startChatSession() async {
-    _messageSubscription?.dispose();
-    _messageSubscription = null;
+    _chatStreamRef?.dispose();
+    _chatStreamRef = null;
+
     await _rCardSubscription?.cancel();
     _rCardSubscription = null;
 
@@ -201,17 +203,18 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
               return;
             }
 
-            _messageSubscription = chatStream.listen(
-              (data) => _onChannelMessagesData(data, _channelDid),
-              onError: (Object error, StackTrace stackTrace) {
-                _logger.error(
-                  'Error in chat stream subscription',
-                  error: error,
-                  stackTrace: stackTrace,
-                  name: _logKey,
-                );
-              },
-            );
+            _chatStreamRef = chatStream
+              ..listen(
+                (data) => _onChannelMessagesData(data, _channelDid),
+                onError: (Object error, StackTrace stackTrace) {
+                  _logger.error(
+                    'Error in chat stream subscription',
+                    error: error,
+                    stackTrace: stackTrace,
+                    name: _logKey,
+                  );
+                },
+              );
           },
           onError: (Object error, StackTrace stackTrace) {
             _logger.error(
@@ -283,13 +286,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   void pauseChat() {
-    final sdk = _chatSDK;
-    _chatSDK = null;
-    _messageSubscription?.dispose();
-    _messageSubscription = null;
+    _chatStreamRef?.dispose();
+    _chatStreamRef = null;
+    _chatSDK?.endChatSession();
     _rCardSubscription?.cancel();
     _rCardSubscription = null;
-    sdk?.endChatSession();
   }
 
   @override
@@ -365,6 +366,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
+    await _conciergeMessenger.sendChatContactDetailsUpdate(message);
     await _sendProfileUpdateWithRCard(message);
   }
 
@@ -507,7 +509,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
   }
 
-  Future<void> _onRCardReceived(ReceivedRCard rCard) async {
+  Future<void> _onRCardReceived(RCard rCard) async {
     try {
       final chatSDK = _chatSDK;
       if (chatSDK == null) return;

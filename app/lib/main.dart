@@ -34,7 +34,6 @@ import 'infrastructure/providers/shared_preferences_provider.dart';
 import 'infrastructure/repositories/contacts_repository/contacts_repository_drift/contacts_repository_drift.dart';
 import 'infrastructure/repositories/identities_repository/identities_repository_drift/identities_repository_drift.dart';
 import 'infrastructure/repositories/mediators_repository/mediators_repository_drift/mediators_repository_drift.dart';
-import 'infrastructure/repositories/r_card_repository/r_card_repository_drift/r_cards_repository_drift.dart';
 import 'presentation/app/app.dart';
 
 void main() async {

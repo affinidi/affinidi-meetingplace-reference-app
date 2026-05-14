@@ -7,7 +7,7 @@ part of 'chat_session_service.dart';
 // **************************************************************************
 
 String _$chatSessionServiceHash() =>
-    r'b1aca15b3198482620eb5b0e0b38e91b13eab1ae';
+    r'f2936e4c2bf7b48354d5d2af20704a84476bf591';
 
 /// Copied from Dart SDK
 class _SystemHash {

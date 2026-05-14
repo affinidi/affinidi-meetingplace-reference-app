@@ -19,7 +19,7 @@ part 'r_card_chat_notifier_service.g.dart';
 ///
 /// These R-Cards arrive on [MeetingPlaceRelationshipSDK.receivedRCards] with
 /// [ReceivedRCard.localChannelDid] set (populated by
-/// [RCardChannelStreamManager]). When detected, this service persists an
+/// `RCardChannelStreamManager`). When detected, this service persists an
 /// R-Card attachment message in the relevant chat so users see the
 /// "R-Cards have been exchanged." notice when they open the conversation.
 ///

@@ -318,6 +318,15 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   }
 
   @override
+  Stream<(Channel, List<Attachment>)> get channelAttachments =>
+      const Stream.empty();
+
+  @override
+  VdipClient get vdip => _fakeVdipClient;
+
+  final _fakeVdipClient = _FakeVdipClient();
+
+  @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
   }
@@ -452,4 +461,12 @@ class _FakeOobStream implements OobStream {
   void triggerTimeout() {
     _timeoutCallback?.call();
   }
+}
+
+class _FakeVdipClient implements VdipClient {
+  @override
+  Stream<PlainTextMessage> get incomingMessages => const Stream.empty();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }

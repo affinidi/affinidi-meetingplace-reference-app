@@ -14,6 +14,7 @@ import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../domain/models/contacts/contact.dart';
+import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
@@ -90,7 +91,7 @@ class ChatScreenController extends _$ChatScreenController
           otherPartyCard: next.otherPartyCard ?? state.otherPartyCard,
           effect: newEffect,
         );
-      });
+      }, fireImmediately: true);
 
       if (!_rCardListenerSet) {
         _rCardListenerSet = true;
@@ -137,7 +138,12 @@ class ChatScreenController extends _$ChatScreenController
       WidgetsBinding.instance.removeObserver(this);
     });
 
-    return ChatScreenState(isActive: true, isInitialized: false);
+    return ChatScreenState(
+      contact: contact,
+      isActive: true,
+      isInitialized: false,
+      contactPresenceStatus: ContactPresenceStatus.unknown,
+    );
   }
 
   ScreenEffect? _mapEffect(chat.Effect effect) {

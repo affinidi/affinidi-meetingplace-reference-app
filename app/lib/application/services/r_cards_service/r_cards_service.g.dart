@@ -6,7 +6,7 @@ part of 'r_cards_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$rCardsServiceHash() => r'2731ac5485529e0ce0553a961d887b0d6e8c102e';
+String _$rCardsServiceHash() => r'6e37ef436886f2923c2d92085062e60017ce0be4';
 
 /// Service that drives the R-Card feature.
 ///
