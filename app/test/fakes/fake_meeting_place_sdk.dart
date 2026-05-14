@@ -464,8 +464,21 @@ class _FakeOobStream implements OobStream {
 }
 
 class _FakeVdipClient implements VdipClient {
+  final List<Future<void> Function(PlainTextMessage)> _messageProcessors = [];
+
   @override
   Stream<PlainTextMessage> get incomingMessages => const Stream.empty();
+
+  @override
+  List<Future<void> Function(PlainTextMessage)> get messageProcessors =>
+      List.unmodifiable(_messageProcessors);
+
+  @override
+  void registerMessageProcessor(
+    Future<void> Function(PlainTextMessage) processor,
+  ) {
+    _messageProcessors.add(processor);
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
@@ -14,6 +15,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 
 import '../../../fakes/fake_app_badge_service.dart';
@@ -54,6 +56,9 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => _FakeReceivedRCardRepository(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -271,6 +276,9 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => _FakeReceivedRCardRepository(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -396,6 +404,9 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => _FakeReceivedRCardRepository(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -456,4 +467,24 @@ class _FakeNetworkConnectivityService extends NetworkConnectivityService {
   NetworkConnectivityServiceState build() {
     return const NetworkConnectivityServiceState(isConnected: true);
   }
+}
+
+class _FakeReceivedRCardRepository implements ReceivedRCardRepository {
+  @override
+  Future<void> deleteBySubjectDid(String subjectDid) async {}
+
+  @override
+  Future<ReceivedRCard?> getBySubjectDid(String subjectDid) async => null;
+
+  @override
+  Future<List<ReceivedRCard>> listAll() async => const [];
+
+  @override
+  Future<void> updateNotes(String subjectDid, String? notes) async {}
+
+  @override
+  Future<void> upsert(ReceivedRCard rCard) async {}
+
+  @override
+  Stream<List<ReceivedRCard>> watchAll() => const Stream.empty();
 }
