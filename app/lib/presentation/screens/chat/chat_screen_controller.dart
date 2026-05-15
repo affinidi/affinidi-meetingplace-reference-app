@@ -81,27 +81,29 @@ class ChatScreenController extends _$ChatScreenController
     if (channelDid != null) {
       _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
       ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
-        var newEffect = pendingState.effect;
-        if (next.effect != null && previous?.effect != next.effect) {
-          newEffect = _mapEffect(next.effect!);
-        } else if (next.effect == null) {
-          newEffect = null;
-        }
+        Future.microtask(() {
+          var newEffect = pendingState.effect;
+          if (next.effect != null && previous?.effect != next.effect) {
+            newEffect = _mapEffect(next.effect!);
+          } else if (next.effect == null) {
+            newEffect = null;
+          }
 
-        pendingState = pendingState.copyWith(
-          messages: next.messages,
-          membersTyping: next.membersTyping,
-          contactPresenceStatus: next.contactPresenceStatus,
-          isActive: next.isActive,
-          isInitialized: next.isInitialized,
-          group: next.group ?? pendingState.group,
-          otherPartyCard: next.otherPartyCard ?? pendingState.otherPartyCard,
-          effect: newEffect,
-        );
+          pendingState = pendingState.copyWith(
+            messages: next.messages,
+            membersTyping: next.membersTyping,
+            contactPresenceStatus: next.contactPresenceStatus,
+            isActive: next.isActive,
+            isInitialized: next.isInitialized,
+            group: next.group ?? pendingState.group,
+            otherPartyCard: next.otherPartyCard ?? pendingState.otherPartyCard,
+            effect: newEffect,
+          );
 
-        if (hasInitializedState) {
-          state = pendingState;
-        }
+          if (hasInitializedState) {
+            state = pendingState;
+          }
+        });
       }, fireImmediately: true);
 
       if (!_rCardListenerSet) {
