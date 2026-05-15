@@ -57,7 +57,7 @@ void main() {
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
-            (ref) async => _FakeReceivedRCardRepository(),
+            (ref) async => _FakeRCardRepository(),
           ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
@@ -277,7 +277,7 @@ void main() {
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
-            (ref) async => _FakeReceivedRCardRepository(),
+            (ref) async => _FakeRCardRepository(),
           ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
@@ -405,7 +405,7 @@ void main() {
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
-            (ref) async => _FakeReceivedRCardRepository(),
+            (ref) async => _FakeRCardRepository(),
           ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
@@ -469,22 +469,22 @@ class _FakeNetworkConnectivityService extends NetworkConnectivityService {
   }
 }
 
-class _FakeReceivedRCardRepository implements ReceivedRCardRepository {
+class _FakeRCardRepository implements RCardRepository {
   @override
   Future<void> deleteBySubjectDid(String subjectDid) async {}
 
   @override
-  Future<ReceivedRCard?> getBySubjectDid(String subjectDid) async => null;
+  Future<RCard?> getBySubjectDid(String subjectDid) async => null;
 
   @override
-  Future<List<ReceivedRCard>> listAll() async => const [];
+  Future<List<RCard>> listAll() async => const [];
 
   @override
   Future<void> updateNotes(String subjectDid, String? notes) async {}
 
   @override
-  Future<void> upsert(ReceivedRCard rCard) async {}
+  Future<void> upsert(RCard rCard) async {}
 
   @override
-  Stream<List<ReceivedRCard>> watchAll() => const Stream.empty();
+  Stream<List<RCard>> watchAll() => const Stream.empty();
 }

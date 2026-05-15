@@ -9,7 +9,7 @@ import 'applications_documents_directory_provider.dart';
 
 part 'r_cards_repository_provider.g.dart';
 
-final _receivedRCardDatabaseProvider = FutureProvider<ReceivedRCardDatabase>((
+final _receivedRCardDatabaseProvider = FutureProvider<RCardDatabase>((
   ref,
 ) async {
   final secureStorage = await ref.read(secureStorageProvider.future);
@@ -19,7 +19,7 @@ final _receivedRCardDatabaseProvider = FutureProvider<ReceivedRCardDatabase>((
   );
   final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
 
-  final database = ReceivedRCardDatabase(
+  final database = RCardDatabase(
     databaseName: 'mpx_received_rcards_db',
     passphrase: passphrase,
     directory: directory,
@@ -31,56 +31,55 @@ final _receivedRCardDatabaseProvider = FutureProvider<ReceivedRCardDatabase>((
   return database;
 });
 
-final _receivedRCardInMemoryDatabaseProvider =
-    FutureProvider<ReceivedRCardDatabase>((ref) async {
-      final secureStorage = await ref.read(secureStorageProvider.future);
-      final passphrase = await secureStorage.provideDatabasePassphrase();
-      final directory = await ref.read(
-        applicationDocumentsDirectoryProvider.future,
-      );
-      final logStatements = ref
-          .read(environmentProvider)
-          .isDatabaseLoggingEnabled;
+final _receivedRCardInMemoryDatabaseProvider = FutureProvider<RCardDatabase>((
+  ref,
+) async {
+  final secureStorage = await ref.read(secureStorageProvider.future);
+  final passphrase = await secureStorage.provideDatabasePassphrase();
+  final directory = await ref.read(
+    applicationDocumentsDirectoryProvider.future,
+  );
+  final logStatements = ref.read(environmentProvider).isDatabaseLoggingEnabled;
 
-      final database = ReceivedRCardDatabase(
-        databaseName: 'mpx_received_rcards_db',
-        passphrase: passphrase,
-        directory: directory,
-        logStatements: logStatements,
-        inMemory: true,
-      );
+  final database = RCardDatabase(
+    databaseName: 'mpx_received_rcards_db',
+    passphrase: passphrase,
+    directory: directory,
+    logStatements: logStatements,
+    inMemory: true,
+  );
 
-      ref.onDispose(database.close);
+  ref.onDispose(database.close);
 
-      return database;
-    });
+  return database;
+});
 
-/// Returns a [ReceivedRCardRepository] backed by an encrypted on-device
+/// Returns a [RCardRepository] backed by an encrypted on-device
 /// Drift database.  Used as the `overrideWith` target for
 /// [rCardsRepositoryProvider] in the root [ProviderScope].
-Future<ReceivedRCardRepository> rCardsRepositoryDrift(Ref ref) async {
+Future<RCardRepository> rCardsRepositoryDrift(Ref ref) async {
   final database = await ref.read(_receivedRCardDatabaseProvider.future);
-  return ReceivedRCardRepositoryDrift(database: database);
+  return RCardRepositoryDrift(database: database);
 }
 
-/// Returns a [ReceivedRCardRepository] backed by an in-memory Drift database.
+/// Returns a [RCardRepository] backed by an in-memory Drift database.
 ///
 /// Intended for tests and Storybook-style previews only.
-Future<ReceivedRCardRepository> rCardsRepositoryInMemoryDrift(Ref ref) async {
+Future<RCardRepository> rCardsRepositoryInMemoryDrift(Ref ref) async {
   final database = await ref.read(
     _receivedRCardInMemoryDatabaseProvider.future,
   );
-  return ReceivedRCardRepositoryDrift(database: database);
+  return RCardRepositoryDrift(database: database);
 }
 
-/// Provides the app-wide [ReceivedRCardRepository] instance.
+/// Provides the app-wide [RCardRepository] instance.
 ///
 /// The default implementation throws [UnimplementedError]. Override this
 /// provider in the root [ProviderScope] with [rCardsRepositoryDrift].
 @Riverpod(keepAlive: true)
-Future<ReceivedRCardRepository> rCardsRepository(Ref ref) async {
+Future<RCardRepository> rCardsRepository(Ref ref) async {
   throw UnimplementedError(
-    'Please configure the application by providing a ReceivedRCardRepository '
+    'Please configure the application by providing a RCardRepository '
     'implementation in ProviderScope overrides.',
   );
 }

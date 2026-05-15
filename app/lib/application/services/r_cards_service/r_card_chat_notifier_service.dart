@@ -18,7 +18,7 @@ part 'r_card_chat_notifier_service.g.dart';
 /// DIDComm channel-inauguration (OOB) path.
 ///
 /// These R-Cards arrive on [MeetingPlaceRelationshipSDK.receivedRCards] with
-/// [ReceivedRCard.localChannelDid] set (populated by
+/// [RCard.localChannelDid] set (populated by
 /// `RCardChannelStreamManager`). When detected, this service persists an
 /// R-Card attachment message in the relevant chat so users see the
 /// "R-Cards have been exchanged." notice when they open the conversation.
@@ -31,7 +31,7 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
 
   late final AppLogger _logger = ref.read(appLoggerProvider);
 
-  StreamSubscription<ReceivedRCard>? _sub;
+  StreamSubscription<RCard>? _sub;
 
   @override
   void build() {
@@ -66,7 +66,7 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
   }
 
   Future<void> _onRCardReceived(
-    ReceivedRCard rCard,
+    RCard rCard,
     chat.ChatRepository chatRepo,
   ) async {
     // Only handle inauguration-path R-Cards — those have localChannelDid set.

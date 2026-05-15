@@ -119,12 +119,9 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
     final useVirtualCard =
         widget.vcBlob != null && (walletCards.isEmpty || inWalletIndex < 0);
 
-    final List<ReceivedRCard> displayCards;
+    final List<RCard> displayCards;
     if (useVirtualCard) {
-      final virtual = ReceivedRCard.fromVcBlob(
-        widget.subjectDid,
-        widget.vcBlob!,
-      );
+      final virtual = RCard.fromVcBlob(widget.subjectDid, widget.vcBlob!);
       if (virtual == null) {
         return const _NoCardsScaffold();
       }
@@ -212,7 +209,7 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
   Future<void> _deleteCard(
     BuildContext context,
     WidgetRef ref,
-    ReceivedRCard card,
+    RCard card,
   ) async {
     final l10n = context.l10n;
     final shouldDelete = await showDialog<bool>(
@@ -246,7 +243,7 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
   Future<void> _exportCard(
     BuildContext context,
     WidgetRef ref,
-    ReceivedRCard card,
+    RCard card,
   ) async {
     final l10n = context.l10n;
     final box = context.findRenderObject() as RenderBox?;
@@ -280,7 +277,7 @@ class _RCardDetailsContent extends ConsumerWidget {
     required this.screenHeight,
   });
 
-  final ReceivedRCard card;
+  final RCard card;
   final String subjectDid;
   final bool isOwnCard;
   final double dragOffset;

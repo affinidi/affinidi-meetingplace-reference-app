@@ -17,7 +17,7 @@ part 'r_cards_service.g.dart';
 /// Service that drives the R-Card feature.
 ///
 /// Responsibilities:
-/// - Exposes all stored [ReceivedRCard]s as live state for the UI.
+/// - Exposes all stored [RCard]s as live state for the UI.
 /// - Delegates all persistence operations to [MeetingPlaceRelationshipSDK]
 ///   so consumers only need one dependency for the full R-Card feature.
 @Riverpod(keepAlive: true)
@@ -26,10 +26,10 @@ class RCardsService extends _$RCardsService {
 
   late final AppLogger _logger = ref.read(appLoggerProvider);
 
-  StreamSubscription<List<ReceivedRCard>>? _watchSubscription;
+  StreamSubscription<List<RCard>>? _watchSubscription;
 
   @override
-  List<ReceivedRCard> build() {
+  List<RCard> build() {
     unawaited(_startWatching());
 
     ref.onDispose(() {
@@ -44,7 +44,7 @@ class RCardsService extends _$RCardsService {
 
     await _watchSubscription?.cancel();
     _watchSubscription = sdk.watchReceivedRCards().listen(
-      (List<ReceivedRCard> cards) => state = cards,
+      (List<RCard> cards) => state = cards,
       onError: (Object error, StackTrace stackTrace) {
         _logger.error(
           'Failed to watch R-Cards',
@@ -64,7 +64,7 @@ class RCardsService extends _$RCardsService {
     return _writeVcfFile(blocks, fileName: 'R-Cards.vcf');
   }
 
-  Future<XFile?> exportSingleAsVcf(ReceivedRCard card) async {
+  Future<XFile?> exportSingleAsVcf(RCard card) async {
     final vCard = _toVCard(card);
     if (vCard == null) return null;
 
@@ -95,7 +95,7 @@ class RCardsService extends _$RCardsService {
     return XFile(filePath, mimeType: 'text/vcard', name: fileName);
   }
 
-  String? _toVCard(ReceivedRCard card) {
+  String? _toVCard(RCard card) {
     final subject = RCardSubject.fromVcBlob(card.vcBlob);
     if (subject == null) {
       _logger.warning(

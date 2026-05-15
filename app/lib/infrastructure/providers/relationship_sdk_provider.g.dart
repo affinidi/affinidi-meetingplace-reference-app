@@ -6,12 +6,12 @@ part of 'relationship_sdk_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$relationshipSdkHash() => r'0be1cb0d163bfe986a2df0acb3cbc714b87d8ccb';
+String _$relationshipSdkHash() => r'4580bd51eca5599a21eecb7bf71dcff6e046dbf7';
 
 /// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
 /// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
 ///
-/// Injects the [ReceivedRCardRepository] from [rCardsRepositoryProvider]
+/// Injects the [RCardRepository] from [rCardsRepositoryProvider]
 /// so that every incoming R-Card is automatically persisted in the local
 /// encrypted database.
 ///

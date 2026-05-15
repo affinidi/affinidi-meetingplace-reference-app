@@ -10,7 +10,7 @@ part 'relationship_sdk_provider.g.dart';
 /// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
 /// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
 ///
-/// Injects the [ReceivedRCardRepository] from [rCardsRepositoryProvider]
+/// Injects the [RCardRepository] from [rCardsRepositoryProvider]
 /// so that every incoming R-Card is automatically persisted in the local
 /// encrypted database.
 ///
@@ -23,6 +23,6 @@ Future<MeetingPlaceRelationshipSDK> relationshipSdk(Ref ref) async {
 
   return MeetingPlaceRelationshipSDK(
     coreSDK: coreSDK,
-    receivedRCardRepository: repository,
+    rCardRepository: repository,
   );
 }

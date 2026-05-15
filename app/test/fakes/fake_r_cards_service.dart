@@ -4,8 +4,8 @@ import 'package:mpx_flutter_reference_app/application/services/r_cards_service/r
 class FakeRCardsService extends RCardsService {
   FakeRCardsService(this._cards);
 
-  final List<ReceivedRCard> _cards;
+  final List<RCard> _cards;
 
   @override
-  List<ReceivedRCard> build() => _cards;
+  List<RCard> build() => _cards;
 }

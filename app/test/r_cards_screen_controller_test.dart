@@ -10,8 +10,8 @@ import 'package:ssi/ssi.dart';
 
 import 'fakes/fake_r_cards_service.dart';
 
-ReceivedRCard _card({required String subjectDid, required String vcBlob}) {
-  return ReceivedRCard(
+RCard _card({required String subjectDid, required String vcBlob}) {
+  return RCard(
     subjectDid: subjectDid,
     vcBlob: vcBlob,
     issuerDid: 'did:key:issuer',
@@ -82,7 +82,7 @@ void main() {
       container.dispose();
     });
 
-    ProviderContainer containerWithCards(List<ReceivedRCard> cards) {
+    ProviderContainer containerWithCards(List<RCard> cards) {
       return ProviderContainer(
         overrides: [
           rCardsServiceProvider.overrideWith(() => FakeRCardsService(cards)),

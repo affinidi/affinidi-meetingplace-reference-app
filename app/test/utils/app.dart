@@ -119,7 +119,7 @@ Future<void> startApp(
       ),
       groupsRepositoryProvider.overrideWith(groupsRepositoryInMemoryDrift),
       rCardsRepositoryProvider.overrideWith(
-        (ref) async => _FakeReceivedRCardRepository(),
+        (ref) async => _FakeRCardRepository(),
       ),
       identitiesRepositoryProvider.overrideWith((ref) async {
         final repo = await identitiesRepositoryInMemoryDrift(ref);
@@ -249,8 +249,8 @@ Future<AppLocalizations> getL10n({
   return await AppLocalizations.delegate.load(locale);
 }
 
-class _FakeReceivedRCardRepository implements ReceivedRCardRepository {
-  final Map<String, ReceivedRCard> _cardsBySubjectDid = {};
+class _FakeRCardRepository implements RCardRepository {
+  final Map<String, RCard> _cardsBySubjectDid = {};
 
   @override
   Future<void> deleteBySubjectDid(String subjectDid) async {
@@ -258,12 +258,11 @@ class _FakeReceivedRCardRepository implements ReceivedRCardRepository {
   }
 
   @override
-  Future<ReceivedRCard?> getBySubjectDid(String subjectDid) async =>
+  Future<RCard?> getBySubjectDid(String subjectDid) async =>
       _cardsBySubjectDid[subjectDid];
 
   @override
-  Future<List<ReceivedRCard>> listAll() async =>
-      _cardsBySubjectDid.values.toList();
+  Future<List<RCard>> listAll() async => _cardsBySubjectDid.values.toList();
 
   @override
   Future<void> updateNotes(String subjectDid, String? notes) async {
@@ -273,12 +272,12 @@ class _FakeReceivedRCardRepository implements ReceivedRCardRepository {
   }
 
   @override
-  Future<void> upsert(ReceivedRCard rCard) async {
+  Future<void> upsert(RCard rCard) async {
     _cardsBySubjectDid[rCard.subjectDid] = rCard;
   }
 
   @override
-  Stream<List<ReceivedRCard>> watchAll() async* {
+  Stream<List<RCard>> watchAll() async* {
     yield _cardsBySubjectDid.values.toList();
   }
 }
