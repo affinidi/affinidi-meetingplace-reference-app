@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/mediator/mediator.dart';
@@ -117,7 +118,9 @@ Future<void> startApp(
         (ref) => pushNotificationMessaging ?? FakePushNotificationMessaging(),
       ),
       groupsRepositoryProvider.overrideWith(groupsRepositoryInMemoryDrift),
-      rCardsRepositoryProvider.overrideWith(rCardsRepositoryInMemoryDrift),
+      rCardsRepositoryProvider.overrideWith(
+        (ref) async => _FakeReceivedRCardRepository(),
+      ),
       identitiesRepositoryProvider.overrideWith((ref) async {
         final repo = await identitiesRepositoryInMemoryDrift(ref);
         for (final identity in identities) {
@@ -244,4 +247,38 @@ Future<AppLocalizations> getL10n({
   Locale locale = const Locale('en', 'US'),
 }) async {
   return await AppLocalizations.delegate.load(locale);
+}
+
+class _FakeReceivedRCardRepository implements ReceivedRCardRepository {
+  final Map<String, ReceivedRCard> _cardsBySubjectDid = {};
+
+  @override
+  Future<void> deleteBySubjectDid(String subjectDid) async {
+    _cardsBySubjectDid.remove(subjectDid);
+  }
+
+  @override
+  Future<ReceivedRCard?> getBySubjectDid(String subjectDid) async =>
+      _cardsBySubjectDid[subjectDid];
+
+  @override
+  Future<List<ReceivedRCard>> listAll() async =>
+      _cardsBySubjectDid.values.toList();
+
+  @override
+  Future<void> updateNotes(String subjectDid, String? notes) async {
+    final card = _cardsBySubjectDid[subjectDid];
+    if (card == null) return;
+    _cardsBySubjectDid[subjectDid] = card.copyWith(notes: notes);
+  }
+
+  @override
+  Future<void> upsert(ReceivedRCard rCard) async {
+    _cardsBySubjectDid[rCard.subjectDid] = rCard;
+  }
+
+  @override
+  Stream<List<ReceivedRCard>> watchAll() async* {
+    yield _cardsBySubjectDid.values.toList();
+  }
 }

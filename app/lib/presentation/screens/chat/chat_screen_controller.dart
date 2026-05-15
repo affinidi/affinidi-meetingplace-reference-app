@@ -70,27 +70,38 @@ class ChatScreenController extends _$ChatScreenController
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     final channelDid = contact?.channelDid;
+    var pendingState = ChatScreenState(
+      contact: contact,
+      isActive: true,
+      isInitialized: false,
+      contactPresenceStatus: ContactPresenceStatus.unknown,
+    );
+    var hasInitializedState = false;
 
     if (channelDid != null) {
       _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
       ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
-        var newEffect = state.effect;
+        var newEffect = pendingState.effect;
         if (next.effect != null && previous?.effect != next.effect) {
           newEffect = _mapEffect(next.effect!);
         } else if (next.effect == null) {
           newEffect = null;
         }
 
-        state = state.copyWith(
+        pendingState = pendingState.copyWith(
           messages: next.messages,
           membersTyping: next.membersTyping,
           contactPresenceStatus: next.contactPresenceStatus,
           isActive: next.isActive,
           isInitialized: next.isInitialized,
-          group: next.group ?? state.group,
-          otherPartyCard: next.otherPartyCard ?? state.otherPartyCard,
+          group: next.group ?? pendingState.group,
+          otherPartyCard: next.otherPartyCard ?? pendingState.otherPartyCard,
           effect: newEffect,
         );
+
+        if (hasInitializedState) {
+          state = pendingState;
+        }
       }, fireImmediately: true);
 
       if (!_rCardListenerSet) {
@@ -138,12 +149,8 @@ class ChatScreenController extends _$ChatScreenController
       WidgetsBinding.instance.removeObserver(this);
     });
 
-    return ChatScreenState(
-      contact: contact,
-      isActive: true,
-      isInitialized: false,
-      contactPresenceStatus: ContactPresenceStatus.unknown,
-    );
+    hasInitializedState = true;
+    return pendingState;
   }
 
   ScreenEffect? _mapEffect(chat.Effect effect) {
