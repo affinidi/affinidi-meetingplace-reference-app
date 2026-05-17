@@ -57,41 +57,82 @@ class _ProfilePictures extends ConsumerWidget {
         defaultProfileImage;
     final myImage =
         channel?.myImage(cacheManager: cacheManager) ?? defaultProfileImage;
+    final score = ref.watch(
+      provider.select((state) => state.connection?.score),
+    );
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Stack(
+      alignment: Alignment.center,
       children: [
-        _TranslatedPicture(
-          offset: const Offset(30, 0),
-          foregroundImage: hasOtherPartyPic ? otherPartyImage : null,
-          child: hasOtherPartyPic
-              ? null
-              : _DefaultImage(image: otherPartyImage),
-          size: _picSize,
-          onPressed: () => (
-            _navigateToImageView(
-              context: context,
-              imageBytesFuture: controller.getImageBytes(
-                hasOtherPartyPic: hasOtherPartyPic,
-                otherPartyProfilePic:
-                    channel?.otherPartyContactCard?.profilePic,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _TranslatedPicture(
+                offset: const Offset(30, 0),
+                foregroundImage: hasOtherPartyPic ? otherPartyImage : null,
+                child: hasOtherPartyPic
+                    ? null
+                    : _DefaultImage(image: otherPartyImage),
+                size: _picSize,
+                onPressed: () => (
+                  _navigateToImageView(
+                    context: context,
+                    imageBytesFuture: controller.getImageBytes(
+                      hasOtherPartyPic: hasOtherPartyPic,
+                      otherPartyProfilePic:
+                          channel?.otherPartyContactCard?.profilePic,
+                    ),
+                  ),
+                ),
+              ),
+              _TranslatedPicture(
+                offset: const Offset(-30, 0),
+                foregroundImage: hasMyPic ? myImage : null,
+                child: hasMyPic ? null : _DefaultImage(image: myImage),
+                size: _picSize,
+                onPressed: () => _navigateToImageView(
+                  context: context,
+                  imageBytesFuture: controller.getImageBytes(
+                    hasOtherPartyPic: hasMyPic,
+                    otherPartyProfilePic: channel?.contactCard?.profilePic,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (score != null && score > 0)
+          Positioned(
+            bottom: -20,
+            left: MediaQuery.of(context).size.width / 2 - _picSize + 15,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Chip(
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.verified_user,
+                      size: 18,
+                      color: colorScheme.onSurface,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      context.l10n.trustedBy(score),
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: colorScheme.primary,
               ),
             ),
           ),
-        ),
-        _TranslatedPicture(
-          offset: const Offset(-30, 0),
-          foregroundImage: hasMyPic ? myImage : null,
-          child: hasMyPic ? null : _DefaultImage(image: myImage),
-          size: _picSize,
-          onPressed: () => _navigateToImageView(
-            context: context,
-            imageBytesFuture: controller.getImageBytes(
-              hasOtherPartyPic: hasMyPic,
-              otherPartyProfilePic: channel?.contactCard?.profilePic,
-            ),
-          ),
-        ),
       ],
     );
   }

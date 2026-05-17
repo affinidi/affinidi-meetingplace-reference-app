@@ -485,6 +485,34 @@ void main() {
         expect(serviceState().otherPartyCard?.firstName, 'Updated Alice');
       },
     );
+
+    test(
+      'preserves messages added to state during replay after startChatSession',
+      () async {
+        final replayMessage = EventMessage(
+          chatId: 'fake-chat-id',
+          messageId: 'replay-vrc-request-id',
+          senderDid: channelDid,
+          isFromMe: false,
+          dateCreated: DateTime.now(),
+          status: ChatItemStatus.received,
+          eventType: EventMessageType.fromJson('vrcRequestReceived'),
+          data: const {},
+        );
+        chatService.state = chatService.state.copyWith(
+          messages: [replayMessage],
+        );
+
+        await chatService.startChatSession();
+
+        expect(
+          serviceState().messages.any(
+            (m) => m.messageId == 'replay-vrc-request-id',
+          ),
+          isTrue,
+        );
+      },
+    );
   });
 
   group('ChatSessionService - R-Card Integration', () {

@@ -70,6 +70,7 @@ Future<void> startApp(
   required List<Mediator> mediators,
   List<Contact> contacts = const [],
   List<RCard> rCards = const [],
+  List<Vrc> vrcs = const [],
   SecureStorage? secureStorage,
   ShareService? shareService,
   QrCodeViewFactory? qrCodeViewFactory,
@@ -104,6 +105,9 @@ Future<void> startApp(
   );
   final rCardRepository = RCardRepositoryDrift(database: rCardDatabase);
   final vrcRepository = VrcRepositoryDrift(database: vrcDatabase);
+  for (final vrc in vrcs) {
+    await vrcRepository.upsert(vrc);
+  }
 
   addTearDown(() async {
     await vrcDatabase.close();
@@ -251,6 +255,7 @@ Future<void> navigateToLocation(
   List<Mediator> mediators = const [],
   List<Contact> contacts = const [],
   List<RCard> rCards = const [],
+  List<Vrc> vrcs = const [],
   PushNotificationMessaging? pushNotificationMessaging,
   Connectivity? connectivity,
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
@@ -280,6 +285,7 @@ Future<void> navigateToLocation(
     mediators: mediators,
     contacts: contacts,
     rCards: rCards,
+    vrcs: vrcs,
     shareService: shareService,
     qrCodeViewFactory: qrCodeViewFactory,
     attachmentPlugins: attachmentPlugins,

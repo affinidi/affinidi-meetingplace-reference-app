@@ -14,6 +14,7 @@ import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../presentation/screens/offer/publish_offer_screen/publish_offer_form_data.dart';
 import '../control_plane_service/control_plane_service.dart';
 import '../identities_service/identities_service.dart';
+import '../vrc_service/vrc_service.dart';
 import 'connections_service_state.dart';
 
 part 'connections_service.g.dart';
@@ -336,6 +337,7 @@ class ConnectionsService extends _$ConnectionsService {
         maximumUsage: data.maxUsages,
         mediatorDid: data.selectedMediatorDid,
         externalRef: identity.id,
+        score: data.score,
       );
 
       _logger.info('Offer registered successfully', name: _logKey);
@@ -531,6 +533,71 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
       return null;
+    }
+  }
+
+  /// Updates the VRC trust score for all published offers associated with
+  /// the given [identity].
+  Future<void> updatePublishedOffersScore(Identity identity) async {
+    try {
+      final sdk = await ref.read(meetingPlaceSdkProvider.future);
+      final publishedOffers = await sdk
+          .getConnectionOffersByExternalRef(identity.id)
+          .then((offers) => offers.where((o) => o.isPublished).toList());
+
+      final acceptedOffers = state.connections
+          .where(
+            (o) =>
+                (o.isAccepted || o.isFinalised) &&
+                (o.externalRef == null || o.externalRef == identity.id),
+          )
+          .toList();
+
+      if (publishedOffers.isEmpty && acceptedOffers.isEmpty) return;
+
+      final score = await ref
+          .read(vrcServiceProvider.notifier)
+          .countVrcsByDid(identity.did);
+
+      if (publishedOffers.isNotEmpty) {
+        final result = await sdk.updateScoreForOffers(
+          score: score,
+          offers: publishedOffers,
+        );
+
+        if (result.failedOffers.isNotEmpty) {
+          _logger.warning(
+            'Failed to update score for offers: '
+            '${result.failedOffers.map((f) => f.mnemonic).join(', ')}',
+            name: _logKey,
+          );
+        }
+        _logger.info(
+          'Updated score to $score for ${result.updatedOffers.length} offers',
+          name: _logKey,
+        );
+      }
+
+      if (acceptedOffers.isNotEmpty) {
+        await sdk.updateLocalConnectionOffersScore(
+          score: score,
+          offers: acceptedOffers,
+        );
+        _logger.info(
+          'Updated local score to $score for ${acceptedOffers.length} '
+          'accepted offers',
+          name: _logKey,
+        );
+      }
+
+      await fetchConnections();
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Error updating published offers score',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
     }
   }
 }

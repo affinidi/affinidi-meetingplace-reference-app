@@ -1522,5 +1522,11 @@
 			"name": { "type": "String" }
 		}
 	},
-	"sendVrc": "Send Relationship Credential"
+	"sendVrc": "Send Relationship Credential",
+	"trustedBy": "Trusted by {count}",
+	"@trustedBy": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	}
 }

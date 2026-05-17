@@ -7,7 +7,7 @@ part of 'vrc_attachment_controller.dart';
 // **************************************************************************
 
 String _$vrcAttachmentControllerHash() =>
-    r'5e1259f7d36c95898fe47db10ae320944b7c6a54';
+    r'2808fccddae358014e51d48183580fa8b04d349b';
 
 /// Copied from Dart SDK
 class _SystemHash {

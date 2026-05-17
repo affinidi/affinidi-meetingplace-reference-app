@@ -2565,6 +2565,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send Relationship Credential'**
   String get sendVrc;
+
+  /// No description provided for @trustedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted by {count}'**
+  String trustedBy(int count);
 }
 
 class _AppLocalizationsDelegate

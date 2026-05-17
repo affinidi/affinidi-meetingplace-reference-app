@@ -97,9 +97,12 @@ class _ChatMediaOptions extends ConsumerWidget {
       provider.select((state) => state.contact?.isGroup ?? false),
     );
     final shouldEnableRCardAttachment = !isGroupChat;
-    final shouldEnableVrcAttachment = ref.watch(
-      provider.select((state) => state.shouldEnableVrcAttachment),
-    );
+    final contact = ref.watch(provider.select((state) => state.contact));
+    final isOobChat = contact?.origin == ContactOrigin.directInteractive;
+    final shouldEnableVrcAttachment =
+        !isGroupChat &&
+        !isOobChat &&
+        ref.watch(provider.select((state) => state.shouldEnableVrcAttachment));
 
     void sendEffect(ScreenEffect effect) {
       if (!context.mounted) return;

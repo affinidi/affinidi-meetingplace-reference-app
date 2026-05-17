@@ -15,6 +15,7 @@ export 'infrastructure/loggers/error_logger/error_logger.dart';
 export 'infrastructure/loggers/riverpod_provider_logger/provider_debug_logger.dart';
 export 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
 export 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
+export 'infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 export 'infrastructure/providers/available_attachment_plugins_provider.dart';
 export 'infrastructure/providers/cache_manager_provider.dart';
 export 'infrastructure/providers/channel_repository_provider.dart';

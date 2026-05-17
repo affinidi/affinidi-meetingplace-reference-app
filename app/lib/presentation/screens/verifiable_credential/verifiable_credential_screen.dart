@@ -131,11 +131,6 @@ class _VrcDetailsContent extends StatelessWidget {
         label: l10n.vrcFieldIssuedAt,
         value: dateFormatter.format(credential.issuedAt),
       ),
-      if (credential.verifiedAt != null)
-        CredentialDetailRowData(
-          label: l10n.vrcFieldVerifiedAt,
-          value: dateFormatter.format(credential.verifiedAt!),
-        ),
     ];
 
     return CredentialDetailsScreenScaffold(

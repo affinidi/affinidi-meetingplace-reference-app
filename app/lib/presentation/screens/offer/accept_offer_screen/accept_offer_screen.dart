@@ -99,39 +99,74 @@ class _Loader extends ConsumerWidget {
   }
 }
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   const _Header({required String mnemonic}) : _mnemonic = mnemonic;
-
-  final String _mnemonic;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: AlignmentDirectional.center,
-      children: [
-        const Column(children: [OfferBanner(), SizedBox(height: 110)]),
-        Positioned(bottom: 0, child: _ProfilePicture(mnemonic: _mnemonic)),
-      ],
-    );
-  }
-}
-
-class _ProfilePicture extends ConsumerWidget {
-  _ProfilePicture({required String mnemonic}) : _mnemonic = mnemonic;
 
   final String _mnemonic;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
+    final score = ref.watch(provider.select((state) => state.offer?.score));
+    return Stack(
+      alignment: AlignmentDirectional.center,
+      children: [
+        const Column(children: [OfferBanner(), SizedBox(height: 110)]),
+        Positioned(
+          bottom: 0,
+          child: _ProfilePictureWithScore(mnemonic: _mnemonic, score: score),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfilePictureWithScore extends ConsumerWidget {
+  const _ProfilePictureWithScore({
+    required this.mnemonic,
+    required this.score,
+  });
+
+  final String mnemonic;
+  final int? score;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = acceptOfferScreenControllerProvider(mnemonic);
     final cacheManager = ref.read(cacheManagerProvider);
     final profileImage = ref.watch(
       provider.select(
         (state) => state.offer?.contactCard.image(cacheManager: cacheManager),
       ),
     );
+    final colorScheme = context.colorScheme;
 
-    return ProfilePicture(image: profileImage);
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        ProfilePicture(image: profileImage),
+        if (score != null && score! > 0)
+          Chip(
+            label: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.verified_user,
+                  size: 18,
+                  color: colorScheme.onSurface,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  context.l10n.trustedBy(score!),
+                  style: context.textTheme.bodyMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            backgroundColor: colorScheme.primary,
+          ),
+      ],
+    );
   }
 }
 

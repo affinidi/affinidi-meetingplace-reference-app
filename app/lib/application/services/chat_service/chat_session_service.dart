@@ -30,6 +30,7 @@ import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/providers/relationship_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
+import '../connections_service/connections_service.dart';
 import '../contacts_service/contacts_service.dart';
 import '../identities_service/identities_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
@@ -356,6 +357,25 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           'VRC exchange completed (outcome: $outcome)',
           name: _logKey,
         );
+        final identityDid =
+            _vrcInitiatorIdentityDid ??
+            ref
+                .read(vrcServiceProvider)
+                .firstWhereOrNull((v) => v.channelId == _channelDid)
+                ?.holderIdentityDid;
+        final identity = identityDid != null
+            ? ref
+                  .read(identitiesServiceProvider)
+                  .identities
+                  .firstWhereOrNull((i) => i.did == identityDid)
+            : null;
+        if (identity != null) {
+          unawaited(
+            ref
+                .read(connectionsServiceProvider.notifier)
+                .updatePublishedOffersScore(identity),
+          );
+        }
       case VrcReceivedOutcome.ignored:
         break;
     }
@@ -439,9 +459,17 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         await _replayPendingVdipEvents();
       }
 
+      final dbMessageIds = {
+        EncryptionNotice().messageId,
+        for (final m in chatSession.messages) m.messageId,
+      };
+      final replayMessages = state.messages
+          .where((m) => !dbMessageIds.contains(m.messageId))
+          .toList();
       final messages = [
         EncryptionNotice(),
         ...chatSession.messages,
+        ...replayMessages,
       ].sortedBy((item) => item.dateCreated).reversed.toList();
       state = state.copyWith(messages: messages, isInitialized: true);
 

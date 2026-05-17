@@ -114,7 +114,7 @@ class ChatScreenController extends _$ChatScreenController
           final shouldHideBanner =
               hasVrcRequestConcierge &&
               !wasAlreadyPresent &&
-              pendingState.shouldShowVrcBanner;
+              state.shouldShowVrcBanner;
 
           final hasVrcExchangeInitiated = next.messages.any(
             (m) =>
@@ -151,9 +151,7 @@ class ChatScreenController extends _$ChatScreenController
                 ? false
                 : state.shouldShowVrcBanner,
             shouldEnableVrcAttachment:
-                (shouldHideBanner ||
-                    hasVrcExchangeInitiated ||
-                    hasVrcExchangeCompleted)
+                (hasVrcExchangeInitiated || hasVrcExchangeCompleted)
                 ? false
                 : state.shouldEnableVrcAttachment,
           );
@@ -406,7 +404,7 @@ class ChatScreenController extends _$ChatScreenController
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
       final connection = await coreSdk.getConnectionOffer(channel.offerLink);
       state = state.copyWith(group: group, offerName: connection?.offerName);
-    } else {
+    } else if (channel.type == ChannelType.individual) {
       final hasVrc = await ref
           .read(vrcServiceProvider.notifier)
           .hasVrcInChannel(channelDid);

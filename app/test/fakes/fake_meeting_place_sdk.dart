@@ -76,9 +76,17 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final List<Map<String, dynamic>> _publishOfferCalls = [];
   List<Map<String, dynamic>> get publishOfferCalls => _publishOfferCalls;
 
+  final List<ConnectionOffer> _allConnectionOffers = [];
+
+  void setAllConnectionOffers(List<ConnectionOffer> offers) {
+    _allConnectionOffers
+      ..clear()
+      ..addAll(offers);
+  }
+
   @override
   Future<List<ConnectionOffer>> listConnectionOffers() async {
-    return [];
+    return List.unmodifiable(_allConnectionOffers);
   }
 
   @override
@@ -342,6 +350,53 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   VdipClient get vdip => _fakeVdipClient;
 
   final _fakeVdipClient = _FakeVdipClient();
+
+  final Map<String, List<ConnectionOffer>> _connectionOffersByExternalRef = {};
+
+  void setConnectionOffersForExternalRef(
+    String externalRef,
+    List<ConnectionOffer> offers,
+  ) {
+    _connectionOffersByExternalRef[externalRef] = offers;
+  }
+
+  @override
+  Future<List<ConnectionOffer>> getConnectionOffersByExternalRef(
+    String externalRef,
+  ) async {
+    return _connectionOffersByExternalRef[externalRef] ?? [];
+  }
+
+  final List<Map<String, dynamic>> _updateScoreForOffersCalls = [];
+  List<Map<String, dynamic>> get updateScoreForOffersCalls =>
+      _updateScoreForOffersCalls;
+
+  @override
+  Future<UpdateScoreForOffersResult> updateScoreForOffers({
+    required int score,
+    required List<ConnectionOffer> offers,
+  }) async {
+    _updateScoreForOffersCalls.add({'score': score, 'offers': offers});
+    return UpdateScoreForOffersResult(
+      updatedOffers: offers.map((o) => o.mnemonic).toList(),
+      failedOffers: [],
+    );
+  }
+
+  final List<Map<String, dynamic>> _updateLocalConnectionOffersScoreCalls = [];
+  List<Map<String, dynamic>> get updateLocalConnectionOffersScoreCalls =>
+      _updateLocalConnectionOffersScoreCalls;
+
+  @override
+  Future<void> updateLocalConnectionOffersScore({
+    required int score,
+    required List<ConnectionOffer> offers,
+  }) async {
+    _updateLocalConnectionOffersScoreCalls.add({
+      'score': score,
+      'offers': offers,
+    });
+  }
 
   @override
   Future<void> closeVdipStream() async {}

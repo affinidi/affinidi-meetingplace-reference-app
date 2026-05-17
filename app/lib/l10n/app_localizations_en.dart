@@ -1697,4 +1697,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sendVrc => 'Send Relationship Credential';
+
+  @override
+  String trustedBy(int count) {
+    return 'Trusted by $count';
+  }
 }

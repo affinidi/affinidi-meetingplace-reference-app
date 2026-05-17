@@ -17,6 +17,7 @@ import 'package:meeting_place_relationship/meeting_place_relationship.dart'
 import 'package:mpx_app_core/mpx_app_core.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
+import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../domain/models/identity/identity.dart';
@@ -67,7 +68,6 @@ part 'chat_items/chat_item_from_info.dart';
 part 'chat_items/concierge_join_group_request_chat_item.dart';
 part 'chat_items/concierge_update_profile_request_chat_item.dart';
 part 'chat_items/concierge_vrc_chat_item.dart';
-part 'vrc_banner.dart';
 part 'chat_items/plain_text_chat_item.dart';
 part 'chat_items/reaction_picker_chat_item.dart';
 part 'chat_items/unknown_chat_item.dart';
@@ -77,6 +77,7 @@ part 'chat_text_entry.dart';
 part 'chat_typing_activity_indicator.dart';
 part 'notifications_unavailable_warning.dart';
 part 'reactions.dart';
+part 'vrc_banner.dart';
 
 class ChatScreen extends HookConsumerWidget {
   const ChatScreen({super.key, required String contactId})
