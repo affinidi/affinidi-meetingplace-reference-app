@@ -149,8 +149,10 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
         onCredentialTap: () {
           Navigator.of(context).push<void>(
             MaterialPageRoute<void>(
-              builder: (context) =>
-                  CredentialDetailsScreen(identityId: credential.identityId),
+              builder: (context) => CredentialDetailsScreen(
+                identityId: credential.identityId,
+                allowDelete: false,
+              ),
             ),
           );
         },

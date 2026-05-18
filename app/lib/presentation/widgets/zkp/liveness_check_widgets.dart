@@ -253,8 +253,10 @@ class VcGeneratedStepView extends StatelessWidget {
                 : () {
                     Navigator.of(context).push<void>(
                       MaterialPageRoute<void>(
-                        builder: (context) =>
-                            CredentialDetailsScreen(identityId: identityId!),
+                        builder: (context) => CredentialDetailsScreen(
+                          identityId: identityId!,
+                          allowDelete: false,
+                        ),
                       ),
                     );
                   },
