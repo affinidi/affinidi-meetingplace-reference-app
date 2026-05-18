@@ -4,6 +4,7 @@ import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../credentials/liveness_credential_details_table.dart';
 import '../../themes/app_custom_colors.dart';
+import '../../screens/credentials/credential_details_screen.dart';
 import '../cards/credential_card.dart';
 import '../loaders/linear_progress_indicator.dart' as custom_loader;
 import 'credential/credential_detail_card.dart';
@@ -209,10 +210,12 @@ class GeneratingVcStepView extends StatelessWidget {
 class VcGeneratedStepView extends StatelessWidget {
   const VcGeneratedStepView({
     super.key,
+    required this.identityId,
     required this.onDoLater,
     required this.onGenerateProof,
   });
 
+  final String? identityId;
   final VoidCallback onDoLater;
   final VoidCallback onGenerateProof;
 
@@ -242,12 +245,19 @@ class VcGeneratedStepView extends StatelessWidget {
             style: const TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 32),
-          SizedBox(
-            height: 208,
-            child: CredentialCard(
-              topLeftText: context.l10n.livenessCredential,
-              bottomLeftText: context.l10n.verifiableCredential,
-            ),
+          CredentialCard(
+            topLeftText: context.l10n.livenessCredential,
+            bottomLeftText: context.l10n.verifiableCredential,
+            onTap: identityId == null
+                ? null
+                : () {
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (context) =>
+                            CredentialDetailsScreen(identityId: identityId!),
+                      ),
+                    );
+                  },
           ),
           const Spacer(),
           Row(
@@ -287,6 +297,7 @@ class VcDetailsStepView extends StatelessWidget {
     required this.onCancel,
     this.onBack,
     this.onGenerateProof,
+    this.onCredentialTap,
   });
 
   final LivenessCredentialRecord credential;
@@ -294,6 +305,7 @@ class VcDetailsStepView extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback? onBack;
   final VoidCallback? onGenerateProof;
+  final VoidCallback? onCredentialTap;
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +314,10 @@ class VcDetailsStepView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LivenessCredentialCard(credential: credential),
+          LivenessCredentialCard(
+            credential: credential,
+            onTap: onCredentialTap,
+          ),
           const Spacer(),
           if (isGenerating) ...[
             custom_loader.LinearProgressIndicator(),
@@ -347,15 +362,21 @@ class VcDetailsStepView extends StatelessWidget {
 }
 
 class LivenessCredentialCard extends StatelessWidget {
-  const LivenessCredentialCard({super.key, required this.credential});
+  const LivenessCredentialCard({
+    super.key,
+    required this.credential,
+    this.onTap,
+  });
 
   final LivenessCredentialRecord credential;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return CredentialDetailCard(
       title: context.l10n.livenessCredential,
       subtitle: context.l10n.verified,
+      onTap: onTap,
       body: LivenessCredentialDetailsTable(
         record: credential,
         lightTheme: false,

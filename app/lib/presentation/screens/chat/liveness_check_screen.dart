@@ -8,6 +8,7 @@ import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/zkp/liveness_check_widgets.dart';
+import '../credentials/credential_details_screen.dart';
 import 'chat_screen_controller.dart';
 import 'proof_flow_controller.dart';
 
@@ -135,6 +136,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
       ),
       _FlowStep.generatingVC => const GeneratingVcStepView(),
       _FlowStep.vcGenerated => VcGeneratedStepView(
+        identityId: _proofIdentity?.id,
         onDoLater: _pauseAndPop,
         onGenerateProof: _handleGenerateProof,
       ),
@@ -144,6 +146,14 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
         onCancel: _pauseAndPop,
         onBack: _isGenerating ? null : _pauseAndPop,
         onGenerateProof: _isGenerating ? null : _handleGenerateProof,
+        onCredentialTap: () {
+          Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (context) =>
+                  CredentialDetailsScreen(identityId: credential.identityId),
+            ),
+          );
+        },
       ),
       _FlowStep.foundVC => VcNotFoundStepView(
         onCancel: _pauseAndPop,
