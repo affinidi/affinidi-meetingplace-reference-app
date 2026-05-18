@@ -11,6 +11,7 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_repository_provider.dart';
 import '../../../infrastructure/providers/relationship_sdk_provider.dart';
 import '../chat_service/chat_session_service.dart' show ChatSessionService;
+import '../contacts_service/contacts_service.dart';
 
 part 'r_card_chat_notifier_service.g.dart';
 
@@ -78,6 +79,12 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
         theirChannelDid.isEmpty) {
       return;
     }
+
+    // R-Cards are individual-only; skip group channels.
+    final contact = ref
+        .read(contactsServiceProvider)
+        .getContactByChannelDid(localChannelDid);
+    if (contact?.isGroup ?? false) return;
 
     final chatId = '$localChannelDid-$theirChannelDid';
 

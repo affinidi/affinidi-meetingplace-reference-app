@@ -25,6 +25,7 @@ import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
+import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
