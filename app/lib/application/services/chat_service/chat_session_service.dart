@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
@@ -26,7 +26,6 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../contacts_service/contacts_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
 import '../zkp_service/zkp_concierge_messages.dart';
-import '../zkp_service/zkp_constants.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
 import 'chat_service_state.dart';
@@ -72,7 +71,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   /// presentation layer can handle ZKP attachments without coupling this
   /// service to proof-flow logic.
   void setZkpCallback(
-    void Function(StreamData data, String channelDid) callback,
+    void Function(StreamData data, String channelDid)? callback,
   ) {
     _zkpCallback = callback;
   }
@@ -380,13 +379,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   ) async {
     _toggleChatLoading(true);
     _logger.info(
-      '[MessagesStream] Received message type: '
-      '${data.plainTextMessage?.type.toString()}',
-      name: _logKey,
-    );
-    _logger.info(
-      '[MessagesStream] body: '
-      '${json.encode(data.plainTextMessage?.toJson())}',
+      '[MessagesStream] type=${data.plainTextMessage?.type} '
+      'from=${data.plainTextMessage?.from}',
       name: _logKey,
     );
 
@@ -449,12 +443,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     final out = <ConciergeMessage>[];
     if (item.value.isNotEmpty || item.attachments.isEmpty) return out;
 
-    final hasRequest = item.attachments.any(
-      (att) => att.format == ZkpConstants.livenessCheckRequestType,
-    );
-    final hasProof = item.attachments.any(
-      (att) => att.format == ZkpConstants.livenessProofType,
-    );
+    final hasRequest =
+        LivenessZkpAttachmentParser.tryParseRequestIn(item.attachments) != null;
+    final hasProof =
+        LivenessZkpAttachmentParser.tryParseProofIn(item.attachments) != null;
 
     if (hasRequest && !item.isFromMe) {
       out.add(

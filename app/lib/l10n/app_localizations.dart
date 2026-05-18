@@ -2353,7 +2353,7 @@ abstract class AppLocalizations {
   /// No description provided for @zkpNoticePaused.
   ///
   /// In en, this message translates to:
-  /// **'You paused the Human ZKP proof request.\nTap the \"+\" icon to restart it.'**
+  /// **'You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.'**
   String get zkpNoticePaused;
 
   /// No description provided for @zkpNoticeShared.

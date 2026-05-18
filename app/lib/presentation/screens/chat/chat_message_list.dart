@@ -50,7 +50,7 @@ class _ChatMessageList extends HookConsumerWidget {
           (m is chat.Message &&
               m.isFromMe &&
               m.attachments.any(
-                (a) => a.format == ZkpConstants.livenessProofType,
+                LivenessZkpAttachmentParser.matchesProofFormat,
               )),
     );
 
@@ -62,8 +62,8 @@ class _ChatMessageList extends HookConsumerWidget {
             attachments.isNotEmpty &&
             attachments.every(
               (att) =>
-                  att.format == ZkpConstants.livenessCheckRequestType ||
-                  att.format == ZkpConstants.livenessProofType,
+                  LivenessZkpAttachmentParser.matchesRequestFormat(att) ||
+                  LivenessZkpAttachmentParser.matchesProofFormat(att),
             );
         if (hasOnlyLivenessAttachments) {
           return true;
@@ -181,7 +181,9 @@ class _ChatMessageList extends HookConsumerWidget {
                 }
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: _isHumanZkpConcierge(chatItem) ? 0 : 20,
+                  ),
                   child: Column(
                     children: [
                       Align(

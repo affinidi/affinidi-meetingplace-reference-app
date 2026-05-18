@@ -46,7 +46,12 @@ class ConciergeMessage extends StatelessWidget {
         : textStyle?.copyWith(fontSize: 14);
 
     final messageContent = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: _fullWidth
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.stretch,
+      mainAxisAlignment: _fullWidth
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
       children: [
         Text(
           hasActions
@@ -60,7 +65,11 @@ class ConciergeMessage extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
-        Text(_message, textAlign: TextAlign.left, style: textStyle),
+        Text(
+          _message,
+          textAlign: _fullWidth ? TextAlign.center : TextAlign.left,
+          style: textStyle,
+        ),
         if (hasActions) ...[
           const SizedBox(height: 16),
           Padding(
@@ -76,7 +85,7 @@ class ConciergeMessage extends StatelessWidget {
 
     Widget content = Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: _fullWidth ? 0 : 31,
+        horizontal: _fullWidth ? 24 : 31,
         vertical: 16,
       ),
       child: messageContent,

@@ -6,7 +6,7 @@ part of 'identities_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$identitiesServiceHash() => r'db4e472f39c31f60ff38243990f714c6776bb23b';
+String _$identitiesServiceHash() => r'8e71d9deae681da21d20290e3405c7fc0ccdc520';
 
 /// Service responsible for managing identities and the current contact card.
 ///

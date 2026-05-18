@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 
 import '../../../application/services/zkp_service/zkp_concierge_messages.dart';
-import '../../../application/services/zkp_service/zkp_constants.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import 'proof_flow_controller.dart';
@@ -33,16 +31,16 @@ class ChatZkpHandler {
     final attachments = plainTextMessage.attachments;
     if (attachments == null || attachments.isEmpty) return;
 
-    for (final attachment in attachments) {
-      if (attachment.format == ZkpConstants.livenessCheckRequestType) {
-        _handleLivenessRequest(channelDid, data);
-        break;
-      }
+    if (LivenessZkpAttachmentParser.tryParseRequestIn(attachments) != null) {
+      _handleLivenessRequest(channelDid, data);
+      return;
+    }
 
-      if (attachment.format == ZkpConstants.livenessProofType) {
-        _handleLivenessProof(channelDid, data);
-        break;
-      }
+    final proofPayload = LivenessZkpAttachmentParser.tryParseProofIn(
+      attachments,
+    );
+    if (proofPayload != null) {
+      _handleLivenessProof(channelDid, data, proofPayload);
     }
   }
 
@@ -59,7 +57,11 @@ class ChatZkpHandler {
         .onLivenessRequestReceived();
   }
 
-  void _handleLivenessProof(String channelDid, chat.StreamData data) {
+  void _handleLivenessProof(
+    String channelDid,
+    chat.StreamData data,
+    LivenessProofPayload proofPayload,
+  ) {
     logger.info(
       '_handleLivenessProof called for channel: $channelDid',
       name: logKey,
@@ -77,40 +79,9 @@ class ChatZkpHandler {
       return;
     }
 
-    final plainTextMessage = data.plainTextMessage;
-    if (plainTextMessage == null) {
-      logger.warning('  No plainTextMessage found in data', name: logKey);
-      return;
-    }
-
-    final attachments = plainTextMessage.attachments;
-    if (attachments == null || attachments.isEmpty) {
-      logger.warning('  No attachments found', name: logKey);
-      return;
-    }
-
-    final attachment = attachments.firstWhere(
-      (att) => att.format == ZkpConstants.livenessProofType,
-      orElse: () => chat.Attachment(
-        id: '',
-        mediaType: '',
-        format: '',
-        lastModifiedTime: DateTime.now(),
-      ),
-    );
-
-    if (attachment.format == null ||
-        attachment.format!.isEmpty ||
-        attachment.data?.json == null) {
-      logger.warning('  No proof data found in attachment', name: logKey);
-      return;
-    }
-
-    final proofData =
-        jsonDecode(attachment.data!.json!) as Map<String, dynamic>;
     ref
         .read(proofFlowControllerProvider(contact.id).notifier)
-        .onProofReceived(proofData);
+        .onProofReceived(proofPayload);
   }
 
   Future<void> insertZkpPausedNotice({String? pausedForNoticeMessageId}) async {

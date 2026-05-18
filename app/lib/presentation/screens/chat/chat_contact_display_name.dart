@@ -129,7 +129,7 @@ class _ChatContactImage extends ConsumerWidget {
                       ZkpConstants.conciergeHumanZkpProofReceived) ||
               (item is chat.Message &&
                   item.attachments.any(
-                    (att) => att.format == ZkpConstants.livenessProofType,
+                    LivenessZkpAttachmentParser.matchesProofFormat,
                   ) &&
                   !item.isFromMe),
         ),
@@ -165,17 +165,13 @@ class _ChatContactImage extends ConsumerWidget {
               width: 18,
               height: 18,
               decoration: BoxDecoration(
-                color: context.colorScheme.surface,
+                color: context.colorScheme.primary,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: context.colorScheme.primary,
-                  width: 1,
-                ),
               ),
               alignment: Alignment.center,
               child: Icon(
-                Icons.verified,
-                color: context.colorScheme.primary,
+                Icons.verified_user,
+                color: context.colorScheme.onPrimary,
                 size: 11,
               ),
             ),
