@@ -1197,6 +1197,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.1-dev.15"
+  meeting_place_relationship:
+    dependency: transitive
+    description:
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship"
+      relative: true
+    source: path
+    version: "0.0.1-dev.1"
   melos:
     dependency: "direct dev"
     description:
