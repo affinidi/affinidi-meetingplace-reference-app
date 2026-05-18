@@ -135,8 +135,9 @@ class IdentityFormFields extends ConsumerWidget {
                   Expanded(
                     child: InternationalPhoneNumberInput(
                       initialValue: initialMobilePhoneNumber,
-                      textFieldController:
-                          controller.controllerFor(mobileField),
+                      textFieldController: controller.controllerFor(
+                        mobileField,
+                      ),
                       focusNode: controller.focusNodeFor(mobileField)!,
                       keyboardAction: TextInputAction.next,
                       selectorConfig: const SelectorConfig(
@@ -148,8 +149,7 @@ class IdentityFormFields extends ConsumerWidget {
                       textStyle: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onSurfaceVariant,
                       ),
-                      selectorTextStyle:
-                          context.textTheme.bodyMedium?.copyWith(
+                      selectorTextStyle: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onSurfaceVariant,
                       ),
                       onInputChanged: controller.updateMobile,
