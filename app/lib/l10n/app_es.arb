@@ -366,6 +366,7 @@
 	"issuer": "Emisor",
 	"issuedOn": "Emitido el",
 	"human": "Humano",
+	"humanZeroKnowledgeProof": "Prueba de conocimiento cero humana",
 	"proofFlowThisContact": "este contacto",
 	"proofFlowContact": "Contacto",
 	"proofFlowCheckIfHuman": "Comprueba si {contactName} es humano usando una Prueba de Conocimiento Cero (ZKP) derivada de una Credencial de Detección de Vida.",

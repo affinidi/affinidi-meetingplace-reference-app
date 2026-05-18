@@ -138,7 +138,7 @@ class _ChatMediaOptions extends ConsumerWidget {
       if (isZkpEnabled)
         _ChatMediaOptionItem(
           icon: Icons.verified_user,
-          label: 'Human Zero-Knowledge Proof',
+          label: context.l10n.humanZeroKnowledgeProof,
           onTap: () {
             ref
                 .read(proofFlowControllerProvider(_contactId).notifier)

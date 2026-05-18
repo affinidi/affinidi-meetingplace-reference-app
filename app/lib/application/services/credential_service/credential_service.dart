@@ -19,6 +19,17 @@ final credentialServiceProvider =
       return service;
     });
 
+class LivenessCredentialSessionMissingException implements Exception {
+  const LivenessCredentialSessionMissingException();
+
+  static const message =
+      'Your liveness credential is not available in this app session. '
+      'Generate a new credential and try again.';
+
+  @override
+  String toString() => message;
+}
+
 class CredentialService extends StateNotifier<CredentialServiceState> {
   CredentialService({required this.ref})
     : super(const CredentialServiceState()) {
@@ -63,13 +74,10 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
     }
 
     _logger.info(
-      'No in-session VC for $identityId; minting credential for proof',
+      'No in-session VC for $identityId; proof requires explicit re-issue',
       name: _logKey,
     );
-    return createLivenessCredential(
-      identityId: identityId,
-      holderDid: holderDid,
-    );
+    throw const LivenessCredentialSessionMissingException();
   }
 
   Future<CredentialCreationResult> createLivenessCredential({

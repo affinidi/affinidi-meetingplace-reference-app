@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:circom_witnesscalc/circom_witnesscalc.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rapidsnark/flutter_rapidsnark.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
@@ -54,14 +54,8 @@ class ZkpService {
     }
   }
 
-  /// Generate a Zero-Knowledge Proof from a Liveness VC
-  ///
-  /// This creates a fresh VC, signs it, and generates a ZKP that proves:
-  /// - User has a valid VC signed by trusted issuer
-  /// - User controls the holder key embedded in the VC
-  /// - User can sign a verifier's challenge
-  /// - User identity remains untraceable
-  Future<ZkpProofResult?> generateProof({
+  /// Generate a Zero-Knowledge Proof from a Liveness VC in the current session
+  Future<ZkpProofGenerationResult> generateProof({
     required String identityId,
     required String holderDid,
   }) async {
@@ -70,7 +64,6 @@ class ZkpService {
     try {
       final stopwatch = Stopwatch()..start();
 
-      // 1. Load persisted VC or issue a new one
       _logger.info('  Step 1/5: Preparing liveness credential', name: _logKey);
       final credentialService = _ref.read(credentialServiceProvider.notifier);
       final credentialResult = await credentialService
@@ -85,12 +78,10 @@ class ZkpService {
 
       final crypto = RustEddsaHelperFfi();
 
-      // 2. Prepare circuit inputs
       _logger.info('  Step 2/5: Preparing circuit inputs', name: _logKey);
       final holder = VcHolder(crypto: crypto);
       final holderInputs = await holder.prepareForCircuit(document);
 
-      // 3. Generate challenge signature
       _logger.info('  Step 3/5: Generating challenge signature', name: _logKey);
       final challengeNonce = List<int>.generate(
         32,
@@ -100,7 +91,6 @@ class ZkpService {
           .map((b) => b.toRadixString(16).padLeft(2, '0'))
           .join();
       final challengeNonceBi = BigInt.parse(challengeNonceHex, radix: 16);
-      // Domain-tagged two-input challenge hash to avoid [x] vs [x,0] ambiguity
       final challengeDigest = await crypto.poseidonHashFieldElements(<String>[
         '1',
         challengeNonceBi.toString(),
@@ -113,7 +103,6 @@ class ZkpService {
 
       final blinderFactor = _randomBlinderFactor();
 
-      // 4. Build circuit inputs and generate witness
       _logger.info(
         '  Step 4/5: Building circuit inputs and generating witness',
         name: _logKey,
@@ -136,7 +125,6 @@ class ZkpService {
         'blinder_factor': blinderFactor,
       };
 
-      // Calculate witness
       final wcdBytes = await rootBundle.load(_wcdAsset);
       final witness = await CircomWitnesscalc().calculateWitness(
         inputs: jsonEncode(circuitInputs),
@@ -145,10 +133,11 @@ class ZkpService {
 
       if (witness == null) {
         _logger.error('Failed to calculate witness', name: _logKey);
-        return null;
+        return const ZkpProofGenerationResult.failure(
+          'Failed to calculate witness',
+        );
       }
 
-      // 8. Copy .zkey to temp directory (required by rapidsnark)
       final zkeyBytes = await rootBundle.load(_zkeyAsset);
       final tempDir = await getTemporaryDirectory();
       final zkeyFile = File('${tempDir.path}/SimpleVCProof.groth16.zkey');
@@ -157,7 +146,6 @@ class ZkpService {
       }
       await zkeyFile.writeAsBytes(zkeyBytes.buffer.asUint8List());
 
-      // 5. Generate proof
       _logger.info('  Step 5/5: Generating ZKP proof', name: _logKey);
       final proof = await Rapidsnark().groth16Prove(
         zkeyPath: zkeyFile.path,
@@ -172,10 +160,16 @@ class ZkpService {
         name: _logKey,
       );
 
-      return ZkpProofResult(
-        proof: proof.proof,
-        publicSignals: proof.publicSignals,
-        generationTimeMs: timeMs,
+      return ZkpProofGenerationResult.success(
+        ZkpProofResult(
+          proof: proof.proof,
+          publicSignals: proof.publicSignals,
+          generationTimeMs: timeMs,
+        ),
+      );
+    } on LivenessCredentialSessionMissingException {
+      return const ZkpProofGenerationResult.failure(
+        LivenessCredentialSessionMissingException.message,
       );
     } catch (e, st) {
       _logger.error(
@@ -183,7 +177,9 @@ class ZkpService {
         name: _logKey,
         stackTrace: st,
       );
-      return null;
+      return ZkpProofGenerationResult.failure(
+        'Failed to generate ZKP proof: $e',
+      );
     }
   }
 
