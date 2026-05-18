@@ -26,6 +26,7 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../contacts_service/contacts_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
 import '../zkp_service/zkp_concierge_messages.dart';
+import '../zkp_service/zkp_constants.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
 import 'chat_service_state.dart';
@@ -403,15 +404,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       if (chatItem is Message && !chatItem.isFromMe) {
         _clearMembersTypingActivity(data.plainTextMessage?.from);
       }
-      if (chatItem is Message) {
-        final peerName = _peerFirstNameForZkpUi();
-        final derivedRows = _deriveHumanZkpConciergeMessages(
-          chatItem,
-          peerName,
-        );
-        for (final row in derivedRows) {
-          upsertChatItem(row);
-        }
+      if (chatItem is Message && _messageHasZkpAttachments(chatItem)) {
+        _syncHumanZkpNotices();
       }
     }
 
@@ -486,19 +480,112 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     return out;
   }
 
+  /// Rebuilds human ZKP concierge rows from the latest attachment messages only.
   List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
-    final derived = <ChatItem>[];
     final contactName = _peerFirstNameForZkpUi();
 
+    Message? latestIncomingRequest;
+    Message? latestMyProof;
+    Message? latestTheirProof;
+
     for (final item in existing) {
-      if (item is! Message) continue;
-      derived.addAll(_deriveHumanZkpConciergeMessages(item, contactName));
+      if (item is! Message || !_messageHasZkpAttachments(item)) continue;
+
+      final hasRequest =
+          LivenessZkpAttachmentParser.tryParseRequestIn(item.attachments) !=
+          null;
+      final hasProof =
+          LivenessZkpAttachmentParser.tryParseProofIn(item.attachments) != null;
+
+      if (hasRequest && !item.isFromMe) {
+        if (latestIncomingRequest == null ||
+            item.dateCreated.isAfter(latestIncomingRequest.dateCreated)) {
+          latestIncomingRequest = item;
+        }
+      }
+      if (hasProof && item.isFromMe) {
+        if (latestMyProof == null ||
+            item.dateCreated.isAfter(latestMyProof.dateCreated)) {
+          latestMyProof = item;
+        }
+      }
+      if (hasProof && !item.isFromMe) {
+        if (latestTheirProof == null ||
+            item.dateCreated.isAfter(latestTheirProof.dateCreated)) {
+          latestTheirProof = item;
+        }
+      }
     }
 
+    final derived = <ConciergeMessage>[];
+
+    if (latestIncomingRequest != null) {
+      final fulfilledByMyProof =
+          latestMyProof != null &&
+          !latestMyProof.dateCreated.isBefore(
+            latestIncomingRequest.dateCreated,
+          );
+      if (!fulfilledByMyProof) {
+        derived.addAll(
+          _deriveHumanZkpConciergeMessages(latestIncomingRequest, contactName),
+        );
+      }
+    }
+    if (latestMyProof != null) {
+      derived.addAll(
+        _deriveHumanZkpConciergeMessages(latestMyProof, contactName),
+      );
+    }
+    if (latestTheirProof != null) {
+      derived.addAll(
+        _deriveHumanZkpConciergeMessages(latestTheirProof, contactName),
+      );
+    }
+
+    final latestRequestNoticeId = latestIncomingRequest == null
+        ? null
+        : 'zkp-request-received-${latestIncomingRequest.messageId}';
+
+    final pausedNotices = existing.whereType<ConciergeMessage>().where(
+      (notice) =>
+          notice.conciergeType.value == ZkpConstants.conciergeHumanZkpPaused &&
+          (latestRequestNoticeId == null ||
+              notice.messageId == 'zkp-paused-$latestRequestNoticeId'),
+    );
+
+    final withoutHumanZkp = existing.where(
+      (item) => !_isHumanZkpConcierge(item),
+    );
+
     return [
-      ...existing,
+      ...withoutHumanZkp,
+      ...pausedNotices,
       ...derived,
     ].sortedBy((item) => item.dateCreated).reversed.toList();
+  }
+
+  void _syncHumanZkpNotices() {
+    state = state.copyWith(messages: _appendDerivedZkpNotices(state.messages));
+  }
+
+  bool _messageHasZkpAttachments(Message message) {
+    if (message.value.isNotEmpty || message.attachments.isEmpty) return false;
+
+    return message.attachments.any(
+      (attachment) =>
+          LivenessZkpAttachmentParser.matchesRequestFormat(attachment) ||
+          LivenessZkpAttachmentParser.matchesProofFormat(attachment),
+    );
+  }
+
+  bool _isHumanZkpConcierge(ChatItem item) {
+    if (item is! ConciergeMessage) return false;
+    return const {
+      ZkpConstants.conciergeHumanZkpRequest,
+      ZkpConstants.conciergeHumanZkpPaused,
+      ZkpConstants.conciergeHumanZkpProofShared,
+      ZkpConstants.conciergeHumanZkpProofReceived,
+    }.contains(item.conciergeType.value);
   }
 
   // ---------------------------------------------------------------------------

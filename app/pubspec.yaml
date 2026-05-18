@@ -60,9 +60,14 @@ dependencies:
   intl: any
   intl_phone_number_input: ^0.7.5
   local_auth: ^2.3.0
-  meeting_place_chat: ^0.0.1-dev.39
-  meeting_place_core: ^0.0.1-dev.36
-  meeting_place_drift_repository: ^0.0.1-dev.40
+  meeting_place_chat:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
+  meeting_place_core:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_core
+  meeting_place_drift_repository:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
+  meeting_place_relationship:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship
   mobile_scanner: ^7.1.3
   mpx_app_core:
     path: ../packages/app-core
