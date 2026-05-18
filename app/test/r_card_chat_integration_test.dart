@@ -16,6 +16,7 @@ import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_r_card_attachments_plugin.dart';
+import 'fakes/fake_r_cards_service.dart';
 import 'utils/app.dart';
 
 void _mockSharePlus() {
@@ -50,6 +51,7 @@ void main() {
         contacts: [FakeContacts.individualContact],
         meetingPlaceChatSDK: meetingPlaceChatSDK,
         attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -71,6 +73,7 @@ void main() {
         contacts: [FakeContacts.individualContact],
         meetingPlaceChatSDK: meetingPlaceChatSDK,
         attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -100,6 +103,7 @@ void main() {
         contacts: [FakeContacts.individualContact],
         meetingPlaceChatSDK: meetingPlaceChatSDK,
         attachmentPlugins: [disabledPlugin],
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -127,6 +131,7 @@ void main() {
           contacts: [FakeContacts.individualContact],
           meetingPlaceChatSDK: meetingPlaceChatSDK,
           attachmentPlugins: const [],
+          rCardsServiceFactory: () => FakeRCardsService(const []),
         );
         await tester.pumpAndSettle();
 
@@ -149,6 +154,7 @@ void main() {
         contacts: [FakeContacts.individualContact],
         meetingPlaceChatSDK: meetingPlaceChatSDK,
         attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -175,6 +181,7 @@ void main() {
         contacts: [FakeContacts.individualContact],
         meetingPlaceChatSDK: meetingPlaceChatSDK,
         attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -207,6 +214,7 @@ void main() {
         contacts: [FakeContacts.individualContact],
         meetingPlaceChatSDK: meetingPlaceChatSDK,
         attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
@@ -264,6 +272,7 @@ void main() {
         contacts: [FakeContacts.groupContact],
         meetingPlaceChatSDK: meetingPlaceChatSDK,
         attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -293,6 +302,7 @@ void main() {
         contacts: [FakeContacts.groupContact],
         meetingPlaceChatSDK: meetingPlaceChatSDK,
         attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -319,6 +329,7 @@ void main() {
         mediators: [],
         contacts: [FakeContacts.individualContact],
         meetingPlaceChatSDK: chatSdk,
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 

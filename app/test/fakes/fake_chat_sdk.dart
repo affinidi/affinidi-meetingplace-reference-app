@@ -116,6 +116,86 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     return conciergeMessage;
   }
 
+  /// Simulates a permission to verify relationship concierge message
+  ConciergeMessage simulateVrcPermissionRequest({
+    required String senderDid,
+    required String recipientDid,
+  }) {
+    final conciergeMessage = ConciergeMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'concierge-vrc-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.userInput,
+      data: {},
+      conciergeType: ConciergeMessageType.fromJson(
+        'permissionToVerifyRelationship',
+      ),
+    );
+
+    final plainTextMessage = PlainTextMessage(
+      id: conciergeMessage.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/concierge'),
+      body: {
+        'type': 'permissionToVerifyRelationship',
+        'timestamp': conciergeMessage.dateCreated.toIso8601String(),
+      },
+      from: senderDid,
+      to: [recipientDid],
+      createdTime: conciergeMessage.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(
+        plainTextMessage: plainTextMessage,
+        chatItem: conciergeMessage,
+      ),
+    );
+
+    return conciergeMessage;
+  }
+
+  /// Simulates a VRC event message (e.g. vrcExchangeInitiated,
+  /// vrcExchangeDoLater, vrcExchangeCompleted, vrcRequestReceived). Pass
+  /// extra [data] as needed.
+  EventMessage simulateVrcEvent({
+    required String eventType,
+    required String senderDid,
+    required String recipientDid,
+    Map<String, dynamic> data = const {},
+  }) {
+    final eventMessage = EventMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'event-vrc-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.received,
+      eventType: EventMessageType.fromJson(eventType),
+      data: data,
+    );
+
+    final plainTextMessage = PlainTextMessage(
+      id: eventMessage.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+      body: {
+        'type': eventType,
+        'timestamp': eventMessage.dateCreated.toIso8601String(),
+        ...data,
+      },
+      from: senderDid,
+      to: [recipientDid],
+      createdTime: eventMessage.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
+    );
+
+    return eventMessage;
+  }
+
   /// Simulates a profile update request concierge message
   ConciergeMessage simulateProfileUpdateRequest({
     required String senderDid,

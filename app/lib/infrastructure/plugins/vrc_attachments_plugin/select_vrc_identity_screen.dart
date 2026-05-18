@@ -47,7 +47,7 @@ class SelectVrcIdentityScreenState
         backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
         centerTitle: true,
-        title: Text(l10n.selectPersonaTitle),
+        title: Text(l10n.selectIdentityTitle),
       ),
       body: SafeArea(
         child: Column(
@@ -132,7 +132,7 @@ class _InitiatorContent extends StatelessWidget {
           child: Text(
             name != null
                 ? l10n.selectIdentityToVerifyRelationshipWithName(name!)
-                : l10n.selectPersonaInstruction,
+                : l10n.selectIdentityInstruction,
             style: context.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurface,
             ),

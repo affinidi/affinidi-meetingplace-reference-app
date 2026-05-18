@@ -71,6 +71,7 @@ Future<void> startApp(
   List<Contact> contacts = const [],
   List<RCard> rCards = const [],
   List<Vrc> vrcs = const [],
+  List<AttachmentsPlugin>? attachmentPlugins,
   SecureStorage? secureStorage,
   ShareService? shareService,
   QrCodeViewFactory? qrCodeViewFactory,
@@ -138,6 +139,7 @@ Future<void> startApp(
               RCardAttachmentsPlugin(
                 cacheManager: ref.read(cacheManagerProvider),
               ),
+              VrcAttachmentsPlugin(),
             ],
       ),
       localAuthProvider.overrideWith(

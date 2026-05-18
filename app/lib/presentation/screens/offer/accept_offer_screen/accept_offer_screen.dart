@@ -122,10 +122,7 @@ class _Header extends ConsumerWidget {
 }
 
 class _ProfilePictureWithScore extends ConsumerWidget {
-  const _ProfilePictureWithScore({
-    required this.mnemonic,
-    required this.score,
-  });
+  const _ProfilePictureWithScore({required this.mnemonic, required this.score});
 
   final String mnemonic;
   final int? score;
@@ -158,8 +155,9 @@ class _ProfilePictureWithScore extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Text(
                   context.l10n.trustedBy(score!),
-                  style: context.textTheme.bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
