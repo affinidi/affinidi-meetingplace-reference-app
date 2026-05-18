@@ -55,7 +55,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   MeetingPlaceChatSDK? _chatSDK;
   bool _isGroupChat = false;
   String? _otherPartyFirstName;
-  StreamSubscription? _messageSubscription;
+  ChatStream? _messageSubscription;
 
   late ConciergeMessaging _conciergeMessenger;
   late GroupManaging _groupManager;
@@ -95,7 +95,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     ref.onDispose(() {
       _presenceTimedAction?.cancel();
       _typingTimedAction?.cancel();
-      _messageSubscription?.cancel();
+      _messageSubscription?.dispose();
       _chatSDK?.endChatSession();
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
@@ -175,7 +175,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   Future<void> startChatSession() async {
-    await _messageSubscription?.cancel();
+    _messageSubscription?.dispose();
     _messageSubscription = null;
 
     await _ensureChatSdkInitialized();
@@ -192,7 +192,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
               return;
             }
 
-            _messageSubscription = chatStream.stream.listen(
+            _messageSubscription = chatStream.listen(
               (data) => _onChannelMessagesData(data, _channelDid),
               onError: (Object error, StackTrace stackTrace) {
                 _logger.error(
@@ -272,9 +272,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   void pauseChat() {
-    _chatSDK?.endChatSession();
-    _messageSubscription?.cancel();
+    final sdk = _chatSDK;
+    _chatSDK = null;
+    _messageSubscription?.dispose();
     _messageSubscription = null;
+    sdk?.endChatSession();
   }
 
   @override
