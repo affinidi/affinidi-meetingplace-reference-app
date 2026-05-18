@@ -45,8 +45,8 @@ dependencies:
   flutter_hsvcolor_picker: ^1.5.1
   flutter_localizations:
     sdk: flutter
-  flutter_riverpod: ^3.3.1
   flutter_rapidsnark: ^0.0.1-beta.7
+  flutter_riverpod: ^3.3.1
   flutter_secure_storage: ^9.2.4
   flutter_svg: ^2.0.9
   form_field_validator: ^1.1.0
@@ -104,6 +104,28 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   riverpod_generator: ^4.0.4-dev.3
+
+dependency_overrides:
+  meeting_place_chat:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_chat
+      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+  meeting_place_core:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_core
+      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+  meeting_place_drift_repository:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_drift_repository
+      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+  meeting_place_relationship:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_relationship
+      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
 
 flutter:
   generate: true
