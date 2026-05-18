@@ -19,7 +19,7 @@ import '../../../presentation/widgets/identity_picker/identity_picker.dart';
 import 'r_card_attachment.dart';
 
 part 'r_card_attachment_widget.dart';
-part 'select_r_card_persona_screen.dart';
+part 'select_r_card_identity_screen.dart';
 
 class RCardAttachmentsPlugin implements AttachmentPlugin {
   RCardAttachmentsPlugin({required BaseCacheManager cacheManager})
@@ -51,7 +51,7 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
 
     final identity = await Navigator.of(context, rootNavigator: true)
         .push<Identity>(
-          MaterialPageRoute(builder: (_) => const _SelectRCardPersonaScreen()),
+          MaterialPageRoute(builder: (_) => const _SelectRCardIdentityScreen()),
         );
 
     if (identity == null) return null;

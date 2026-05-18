@@ -2386,17 +2386,17 @@ abstract class AppLocalizations {
   /// **'Go to R-Card'**
   String get goToRCard;
 
-  /// No description provided for @selectPersonaTitle.
+  /// No description provided for @selectIdentityTitle.
   ///
   /// In en, this message translates to:
-  /// **'Select Persona'**
-  String get selectPersonaTitle;
+  /// **'Select Identity'**
+  String get selectIdentityTitle;
 
-  /// No description provided for @selectPersonaInstruction.
+  /// No description provided for @selectIdentityInstruction.
   ///
   /// In en, this message translates to:
-  /// **'Swipe left or right to choose the persona you want to use to generate the R‑Card'**
-  String get selectPersonaInstruction;
+  /// **'Swipe left or right to choose the identity you want to use to generate the R‑Card'**
+  String get selectIdentityInstruction;
 
   /// No description provided for @sendRCard.
   ///

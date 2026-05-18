@@ -1,15 +1,15 @@
 part of 'r_card_attachments_plugin.dart';
 
-class _SelectRCardPersonaScreen extends ConsumerStatefulWidget {
-  const _SelectRCardPersonaScreen();
+class _SelectRCardIdentityScreen extends ConsumerStatefulWidget {
+  const _SelectRCardIdentityScreen();
 
   @override
-  ConsumerState<_SelectRCardPersonaScreen> createState() =>
-      _SelectRCardPersonaScreenState();
+  ConsumerState<_SelectRCardIdentityScreen> createState() =>
+      _SelectRCardIdentityScreenState();
 }
 
-class _SelectRCardPersonaScreenState
-    extends ConsumerState<_SelectRCardPersonaScreen> {
+class _SelectRCardIdentityScreenState
+    extends ConsumerState<_SelectRCardIdentityScreen> {
   Identity? _selected;
 
   @override
@@ -30,7 +30,7 @@ class _SelectRCardPersonaScreenState
         backgroundColor: colorScheme.primary,
         foregroundColor: Colors.white,
         centerTitle: true,
-        title: Text(l10n.selectPersonaTitle),
+        title: Text(l10n.selectIdentityTitle),
       ),
       body: SafeArea(
         child: Column(
@@ -50,14 +50,14 @@ class _SelectRCardPersonaScreenState
                         vertical: 14,
                       ),
                       child: Text(
-                        l10n.selectPersonaInstruction,
+                        l10n.selectIdentityInstruction,
                         style: context.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurface.withValues(alpha: 0.75),
                         ),
                       ),
                     ),
                     IdentityPicker(
-                      key: const ValueKey('rcard_persona_picker'),
+                      key: const ValueKey('rcard_identity_picker'),
                       identities: identities,
                       displayMode: true,
                       initialCardIndex: selectedIndex,

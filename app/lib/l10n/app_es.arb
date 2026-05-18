@@ -388,7 +388,7 @@
 	"rCardFooterUpdateShared": "La actualización de la tarjeta R ha sido compartida.",
 	"rCardFooterSaved": "Tarjeta R guardada.",
 	"goToRCard": "Ir a la Tarjeta R",
-	"selectPersonaTitle": "Seleccionar Persona",
-	"selectPersonaInstruction": "Desliza a la izquierda o derecha para elegir la persona que deseas usar para generar la Tarjeta‑R",
+	"selectIdentityTitle": "Seleccionar Identidad",
+	"selectIdentityInstruction": "Desliza a la izquierda o derecha para elegir la identidad que deseas usar para generar la Tarjeta‑R",
 	"sendRCard": "Enviar Tarjeta R"
 }

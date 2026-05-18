@@ -1592,11 +1592,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goToRCard => 'Go to R-Card';
 
   @override
-  String get selectPersonaTitle => 'Select Persona';
+  String get selectIdentityTitle => 'Select Identity';
 
   @override
-  String get selectPersonaInstruction =>
-      'Swipe left or right to choose the persona you want to use to generate the R‑Card';
+  String get selectIdentityInstruction =>
+      'Swipe left or right to choose the identity you want to use to generate the R‑Card';
 
   @override
   String get sendRCard => 'Send R-Card';
