@@ -120,19 +120,14 @@ class _ChatContactImage extends ConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final cacheManager = ref.read(cacheManagerProvider);
     final contact = ref.watch(provider.select((state) => state.contact));
+    final zkpEnabled = ref.watch(
+      environmentProvider.select((env) => env.zkpEnabled),
+    );
     final hasVerifiedProof = ref.watch(
       provider.select(
-        (state) => state.messages.any(
-          (item) =>
-              (item is chat.ConciergeMessage &&
-                  item.conciergeType.value ==
-                      ZkpConstants.conciergeHumanZkpProofReceived) ||
-              (item is chat.Message &&
-                  item.attachments.any(
-                    LivenessZkpAttachmentParser.matchesProofFormat,
-                  ) &&
-                  !item.isFromMe),
-        ),
+        (state) =>
+            zkpEnabled &&
+            ChatZkpMessageListPolicy.hasVerifiedProof(state.messages),
       ),
     );
 

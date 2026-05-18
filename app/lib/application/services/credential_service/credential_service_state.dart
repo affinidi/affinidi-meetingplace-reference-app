@@ -56,4 +56,7 @@ extension CredentialServiceStateX on CredentialServiceState {
 
   bool hasCredentialFor(String identityId) =>
       credentialsByIdentityId.containsKey(identityId);
+
+  bool hasSessionMaterialFor(String identityId) =>
+      sessionMaterialByIdentityId.containsKey(identityId);
 }

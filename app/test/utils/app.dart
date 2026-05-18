@@ -23,9 +23,9 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_prov
 import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/liveness_credentials_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/repositories/liveness_credentials_repository/liveness_credentials_repository_secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/qr_code_view_factory_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/share_service_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/repositories/liveness_credentials_repository/liveness_credentials_repository_secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';

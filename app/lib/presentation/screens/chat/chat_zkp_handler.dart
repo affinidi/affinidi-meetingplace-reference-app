@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
+import 'package:meeting_place_chat/meeting_place_chat.dart'
+    show LivenessZkpConciergeChatMapper;
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 
-import '../../../application/services/zkp_service/zkp_concierge_messages.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import 'proof_flow_controller.dart';
@@ -52,9 +55,6 @@ class ChatZkpHandler {
     if (chatItem == null || chatItem.isFromMe) return;
 
     logger.info('Liveness request received from $channelDid', name: logKey);
-    ref
-        .read(proofFlowControllerProvider(contact.id).notifier)
-        .onLivenessRequestReceived();
   }
 
   void _handleLivenessProof(
@@ -79,9 +79,11 @@ class ChatZkpHandler {
       return;
     }
 
-    ref
-        .read(proofFlowControllerProvider(contact.id).notifier)
-        .onProofReceived(proofPayload);
+    unawaited(
+      ref
+          .read(proofFlowControllerProvider(contact.id).notifier)
+          .onProofReceived(proofPayload),
+    );
   }
 
   Future<void> insertZkpPausedNotice({String? pausedForNoticeMessageId}) async {
@@ -89,11 +91,11 @@ class ChatZkpHandler {
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
 
-    final notice = ZkpConciergeMessages.humanZkpPaused(
+    final notice = LivenessZkpConciergeMessages.humanZkpPaused(
       chatId: contact.channelDid!,
       dateCreated: DateTime.now(),
-      pausedForRequestMessageId: pausedForNoticeMessageId,
+      pausedForRequestNoticeMessageId: pausedForNoticeMessageId,
     );
-    onUpsertChatItem(notice);
+    onUpsertChatItem(LivenessZkpConciergeChatMapper.toConciergeMessage(notice));
   }
 }

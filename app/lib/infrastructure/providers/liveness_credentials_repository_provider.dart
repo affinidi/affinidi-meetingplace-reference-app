@@ -10,6 +10,6 @@ Future<LivenessCredentialsRepository> livenessCredentialsRepository(
   Ref ref,
 ) async {
   throw UnimplementedError(
-    'Provide a LivenessCredentialsRepository implementation via ProviderScope overrides.',
+    'LivenessCredentialsRepositoryProvider is not implemented.',
   );
 }
