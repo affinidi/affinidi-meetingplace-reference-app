@@ -26,11 +26,13 @@ import 'infrastructure/providers/connection_offer_repository_provider.dart';
 import 'infrastructure/providers/contacts_repository_provider.dart';
 import 'infrastructure/providers/group_repository_provider.dart';
 import 'infrastructure/providers/identities_repository_provider.dart';
+import 'infrastructure/providers/liveness_credentials_repository_provider.dart';
 import 'infrastructure/providers/mediators_repository_provider.dart';
 import 'infrastructure/providers/push_notification_messaging_provider.dart';
 import 'infrastructure/providers/shared_preferences_provider.dart';
 import 'infrastructure/repositories/contacts_repository/contacts_repository_drift/contacts_repository_drift.dart';
 import 'infrastructure/repositories/identities_repository/identities_repository_drift/identities_repository_drift.dart';
+import 'infrastructure/repositories/liveness_credentials_repository/liveness_credentials_repository_secure_storage.dart';
 import 'infrastructure/repositories/mediators_repository/mediators_repository_drift/mediators_repository_drift.dart';
 import 'presentation/app/app.dart';
 
@@ -83,6 +85,9 @@ void main() async {
         contactsRepositoryProvider.overrideWith(contactsRepositoryDrift),
         groupsRepositoryProvider.overrideWith(groupsRepositoryDrift),
         identitiesRepositoryProvider.overrideWith(identitiesRepositoryDrift),
+        livenessCredentialsRepositoryProvider.overrideWith(
+          livenessCredentialsRepositorySecureStorage,
+        ),
         mediatorsRepositoryProvider.overrideWith(mediatorsRepositoryDrift),
         pushNotificationMessagingProvider.overrideWith(
           (ref) =>

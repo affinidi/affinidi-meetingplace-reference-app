@@ -1553,7 +1553,7 @@
 			}
 		}
 	},
-	"zkpNoticePaused": "You paused the Human ZKP proof request.\nTap the \"+\" icon to restart it.",
+	"zkpNoticePaused": "You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.",
 	"@zkpNoticePaused": {
 		"type": "text"
 	},

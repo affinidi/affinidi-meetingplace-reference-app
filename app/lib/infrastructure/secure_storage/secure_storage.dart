@@ -281,19 +281,19 @@ class SecureStorage implements KeyRepository, KeyStore {
     await _secureStorage.delete(key: 'unsent_messages');
   }
 
-  /// Gets whether liveness credential exists in wallet UI.
-  Future<bool> getHasLivenessCredential() async {
-    final value = await _secureStorage.read(key: 'zkp_has_liveness_credential');
-    if (value == null) return false;
-    return value.toLowerCase() == 'true';
+  /// Reads persisted liveness credential metadata (JSON array).
+  Future<String?> readLivenessCredentials() async {
+    return _secureStorage.read(key: 'zkp_liveness_credentials');
   }
 
-  /// Persists whether liveness credential exists in wallet UI.
-  Future<void> saveHasLivenessCredential(bool hasCredential) async {
-    await _secureStorage.write(
-      key: 'zkp_has_liveness_credential',
-      value: hasCredential.toString(),
-    );
+  /// Persists liveness credential metadata (JSON array).
+  Future<void> writeLivenessCredentials(String json) async {
+    await _secureStorage.write(key: 'zkp_liveness_credentials', value: json);
+  }
+
+  /// Clears all persisted liveness credential metadata.
+  Future<void> clearLivenessCredentials() async {
+    await _secureStorage.delete(key: 'zkp_liveness_credentials');
   }
 }
 

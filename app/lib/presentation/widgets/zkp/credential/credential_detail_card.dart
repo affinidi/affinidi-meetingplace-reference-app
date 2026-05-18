@@ -15,13 +15,15 @@ class CredentialDetailCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.subtitle,
-    required this.details,
+    this.details = const [],
+    this.body,
     this.onTap,
   });
 
   final String title;
   final String subtitle;
   final List<CredentialDetailRowData> details;
+  final Widget? body;
   final VoidCallback? onTap;
 
   @override
@@ -94,19 +96,21 @@ class CredentialDetailCard extends StatelessWidget {
             // Body with details
             Container(
               padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (var i = 0; i < details.length; i++) ...[
-                    CredentialDetailRow(
-                      label: details[i].label,
-                      value: details[i].value,
-                    ),
-                    if (i < details.length - 1)
-                      Divider(color: colorScheme.primary, height: 16),
-                  ],
-                ],
-              ),
+              child:
+                  body ??
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var i = 0; i < details.length; i++) ...[
+                        CredentialDetailRow(
+                          label: details[i].label,
+                          value: details[i].value,
+                        ),
+                        if (i < details.length - 1)
+                          Divider(color: colorScheme.primary, height: 16),
+                      ],
+                    ],
+                  ),
             ),
           ],
         ),

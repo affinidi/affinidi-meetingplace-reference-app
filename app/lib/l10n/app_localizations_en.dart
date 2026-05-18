@@ -1576,7 +1576,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zkpNoticePaused =>
-      'You paused the Human ZKP proof request.\nTap the \"+\" icon to restart it.';
+      'You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.';
 
   @override
   String get zkpNoticeShared =>

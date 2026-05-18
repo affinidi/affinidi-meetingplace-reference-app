@@ -61,18 +61,23 @@ class ZkpService {
   /// - User controls the holder key embedded in the VC
   /// - User can sign a verifier's challenge
   /// - User identity remains untraceable
-  Future<ZkpProofResult?> generateProof({String? holderDid}) async {
+  Future<ZkpProofResult?> generateProof({
+    required String identityId,
+    required String holderDid,
+  }) async {
     _logger.info('Starting ZKP proof generation', name: _logKey);
 
     try {
       final stopwatch = Stopwatch()..start();
 
-      // 1. Create credential using credential service
-      _logger.info('  Step 1/5: Creating liveness credential', name: _logKey);
+      // 1. Load persisted VC or issue a new one
+      _logger.info('  Step 1/5: Preparing liveness credential', name: _logKey);
       final credentialService = _ref.read(credentialServiceProvider.notifier);
-      final credentialResult = await credentialService.createLivenessCredential(
-        holderDid: holderDid,
-      );
+      final credentialResult = await credentialService
+          .prepareCredentialForProof(
+            identityId: identityId,
+            holderDid: holderDid,
+          );
 
       final document = credentialResult.document;
       final issuerPub = credentialResult.issuerPub;
