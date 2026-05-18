@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:ssi/src/did/did_document/did_document.dart';
+import 'package:ssi/ssi.dart';
 
 import 'fake_publish_offer_result.dart';
 
@@ -34,6 +34,12 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final bool _isPhraseAvailable;
   final bool _shouldTimeout;
   final Map<String, Channel> _channels;
+
+  DidKeyManager? _fakeDidManager;
+
+  void setFakeDidManager(DidKeyManager manager) {
+    _fakeDidManager = manager;
+  }
 
   // Getter to check if subscriptions have been created (useful for debugging)
   final ConnectionOffer? offerToFind;
@@ -160,6 +166,17 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
     final channel = _channels[channelDid];
     return channel;
+  }
+
+  @override
+  Future<DidManager> getDidManager(String did) async {
+    if (_fakeDidManager != null) return _fakeDidManager!;
+    final wallet = PersistentWallet(InMemoryKeyStore());
+    final manager = DidKeyManager(wallet: wallet, store: InMemoryDidStore());
+    final keyPair = await wallet.generateKey();
+    await manager.addVerificationMethod(keyPair.id);
+    _fakeDidManager = manager;
+    return manager;
   }
 
   @override
@@ -478,6 +495,14 @@ class _FakeVdipClient implements VdipClient {
     Future<void> Function(PlainTextMessage) processor,
   ) {
     _messageProcessors.add(processor);
+  }
+
+  @override
+  Future<void> issueCredential({
+    required Channel channel,
+    required VerifiableCredential credential,
+  }) async {
+    // no-op: credential issuance is not tested at the network level
   }
 
   @override
