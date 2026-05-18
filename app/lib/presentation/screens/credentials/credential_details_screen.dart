@@ -9,9 +9,14 @@ import '../../widgets/cards/credential_card.dart';
 import '../../widgets/credentials/liveness_credential_details_table.dart';
 
 class CredentialDetailsScreen extends ConsumerWidget {
-  const CredentialDetailsScreen({required this.identityId, super.key});
+  const CredentialDetailsScreen({
+    required this.identityId,
+    this.allowDelete = true,
+    super.key,
+  });
 
   final String identityId;
+  final bool allowDelete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -41,15 +46,16 @@ class CredentialDetailsScreen extends ConsumerWidget {
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         actions: [
-          IconButton(
-            onPressed: () async {
-              await ref
-                  .read(credentialServiceProvider.notifier)
-                  .deleteCredentialForIdentity(identityId);
-              if (context.mounted) Navigator.of(context).pop();
-            },
-            icon: const Icon(Icons.delete_outline, size: 24),
-          ),
+          if (allowDelete)
+            IconButton(
+              onPressed: () async {
+                await ref
+                    .read(credentialServiceProvider.notifier)
+                    .deleteCredentialForIdentity(identityId);
+                if (context.mounted) Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.delete_outline, size: 24),
+            ),
         ],
       ),
       body: SingleChildScrollView(
