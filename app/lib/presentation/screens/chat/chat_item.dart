@@ -23,23 +23,11 @@ class ChatItem extends StatelessWidget {
       return const ChatEncryptionNotice();
     }
 
-    if (_chatItem is chat.ConciergeMessage) {
-      final v = _chatItem.conciergeType.value;
-      if (v == ZkpConstants.conciergeHumanZkpPaused) {
-        return ZkpPausedNoticeWidget(chatItem: _chatItem);
-      }
-      if (v == ZkpConstants.conciergeHumanZkpProofShared) {
-        return ZkpProofSharedNoticeWidget(chatItem: _chatItem);
-      }
-      if (v == ZkpConstants.conciergeHumanZkpProofReceived) {
-        return ZkpProofReceivedNoticeWidget(chatItem: _chatItem);
-      }
-      if (v == ZkpConstants.conciergeHumanZkpRequest) {
-        return ZkpRequestReceivedNoticeWidget(
-          chatItem: _chatItem,
-          contactId: _contactId,
-        );
-      }
+    if (ChatZkpConciergeItem.matches(_chatItem)) {
+      return ChatZkpConciergeItem(
+        chatItem: _chatItem as chat.ConciergeMessage,
+        contactId: _contactId,
+      );
     }
 
     if (_chatItem is chat.Message) {

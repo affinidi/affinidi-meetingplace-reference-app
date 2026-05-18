@@ -456,6 +456,7 @@
 	"issuer": "Aussteller",
 	"issuedOn": "Ausgestellt am",
 	"human": "Mensch",
+	"humanZeroKnowledgeProof": "Human Zero-Knowledge-Beweis",
 	"proofFlowThisContact": "dieser Kontakt",
 	"proofFlowContact": "Kontakt",
 	"proofFlowCheckIfHuman": "Überprüfe, ob {contactName} ein Mensch ist, mithilfe eines Zero-Knowledge-Beweises (ZKP), der aus einem Liveness-Nachweis abgeleitet wurde.",

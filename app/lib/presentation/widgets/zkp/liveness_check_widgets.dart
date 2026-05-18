@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../credentials/liveness_credential_details_table.dart';
-import '../../themes/app_custom_colors.dart';
 import '../../screens/credentials/credential_details_screen.dart';
+import '../../themes/app_custom_colors.dart';
 import '../cards/credential_card.dart';
+import '../credentials/liveness_credential_details_table.dart';
 import '../loaders/linear_progress_indicator.dart' as custom_loader;
 import 'credential/credential_detail_card.dart';
 

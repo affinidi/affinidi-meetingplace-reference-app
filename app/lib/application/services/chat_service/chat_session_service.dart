@@ -27,8 +27,6 @@ import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../contacts_service/contacts_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
-import '../zkp_service/zkp_concierge_messages.dart';
-import '../zkp_service/zkp_constants.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
 import 'chat_service_state.dart';
@@ -504,7 +502,17 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     Message item,
     String contactName,
   ) {
-    final out = <ConciergeMessage>[];
+    return _deriveHumanZkpNotices(
+      item,
+      contactName,
+    ).map(LivenessZkpConciergeChatMapper.toConciergeMessage).toList();
+  }
+
+  List<LivenessZkpConciergeNotice> _deriveHumanZkpNotices(
+    Message item,
+    String contactName,
+  ) {
+    final out = <LivenessZkpConciergeNotice>[];
     if (item.value.isNotEmpty || item.attachments.isEmpty) return out;
 
     final hasRequest =
@@ -514,9 +522,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     if (hasRequest && !item.isFromMe) {
       out.add(
-        ZkpConciergeMessages.humanZkpRequest(
+        LivenessZkpConciergeMessages.humanZkpRequest(
           chatId: item.chatId,
-          messageId: 'zkp-request-received-${item.messageId}',
+          messageId: LivenessZkpConciergeIds.requestReceived(item.messageId),
           dateCreated: item.dateCreated,
           contactName: contactName,
         ),
@@ -526,17 +534,17 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     if (hasProof) {
       if (item.isFromMe) {
         out.add(
-          ZkpConciergeMessages.humanZkpProofShared(
+          LivenessZkpConciergeMessages.humanZkpProofShared(
             chatId: item.chatId,
-            messageId: 'zkp-proof-shared-${item.messageId}',
+            messageId: LivenessZkpConciergeIds.proofShared(item.messageId),
             dateCreated: item.dateCreated,
           ),
         );
       } else {
         out.add(
-          ZkpConciergeMessages.humanZkpProofReceived(
+          LivenessZkpConciergeMessages.humanZkpProofReceived(
             chatId: item.chatId,
-            messageId: 'zkp-proof-received-${item.messageId}',
+            messageId: LivenessZkpConciergeIds.proofReceived(item.messageId),
             dateCreated: item.dateCreated,
             contactName: contactName,
           ),
@@ -547,7 +555,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     return out;
   }
 
-  /// Rebuilds human ZKP concierge rows from the latest attachment messages only.
   List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
     final contactName = _peerFirstNameForZkpUi();
 
@@ -611,13 +618,19 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     final latestRequestNoticeId = latestIncomingRequest == null
         ? null
-        : 'zkp-request-received-${latestIncomingRequest.messageId}';
+        : LivenessZkpConciergeIds.requestReceived(
+            latestIncomingRequest.messageId,
+          );
 
     final pausedNotices = existing.whereType<ConciergeMessage>().where(
       (notice) =>
-          notice.conciergeType.value == ZkpConstants.conciergeHumanZkpPaused &&
+          notice.conciergeType.value ==
+              LivenessZkpConciergeTypes.humanZkpPaused &&
           (latestRequestNoticeId == null ||
-              notice.messageId == 'zkp-paused-$latestRequestNoticeId'),
+              notice.messageId ==
+                  LivenessZkpConciergeIds.paused(
+                    forRequestNoticeMessageId: latestRequestNoticeId,
+                  )),
     );
 
     final withoutHumanZkp = existing.where(
@@ -647,12 +660,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   bool _isHumanZkpConcierge(ChatItem item) {
     if (item is! ConciergeMessage) return false;
-    return const {
-      ZkpConstants.conciergeHumanZkpRequest,
-      ZkpConstants.conciergeHumanZkpPaused,
-      ZkpConstants.conciergeHumanZkpProofShared,
-      ZkpConstants.conciergeHumanZkpProofReceived,
-    }.contains(item.conciergeType.value);
+    return LivenessZkpConciergeTypes.isHumanZkpType(item.conciergeType.value);
   }
 
   // ---------------------------------------------------------------------------

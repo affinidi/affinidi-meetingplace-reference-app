@@ -36,6 +36,7 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
+import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp_handler.dart';
 import 'proof_flow_controller.dart';
 
@@ -498,15 +499,26 @@ class ChatScreenController extends _$ChatScreenController
     );
   }
 
+  Future<void> pauseHumanZkpRequestFlow() async {
+    final requestNoticeId =
+        ChatZkpMessageListPolicy.latestHumanZkpRequestNoticeMessageId(
+          state.messages,
+        );
+    await insertZkpPausedNotice(pausedForNoticeMessageId: requestNoticeId);
+  }
+
   /// Routes a chat item through the service to persist it in the service state.
   /// This ensures ZKP notices survive ref.listen state overwrites.
   void _upsertChatItemThroughService(chat.ChatItem item) {
-    assert(
-      _chatService != null,
-      'ChatService must be initialized before upserting chat items. '
-      'This likely means a ZKP callback fired before build() completed.',
-    );
-    _chatService?.upsertChatItem(item);
+    final service = _chatService;
+    if (service == null) {
+      _logger.warning(
+        'Skipping ZKP notice upsert: chat service not initialized yet',
+        name: _logKey,
+      );
+      return;
+    }
+    service.upsertChatItem(item);
   }
 
   Future<void> _updateGroupContactPendingStatus() async {

@@ -1536,6 +1536,10 @@
 	"@humanZkp": {
 		"type": "text"
 	},
+	"humanZeroKnowledgeProof": "Human Zero-Knowledge Proof",
+	"@humanZeroKnowledgeProof": {
+		"type": "text"
+	},
 	"livenessCredential": "Liveness Credential",
 	"@livenessCredential": {
 		"type": "text"

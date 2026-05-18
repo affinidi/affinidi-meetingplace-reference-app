@@ -56,22 +56,23 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
   }
 
   Future<void> _startSearch() async {
-    await Future<void>.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-
     final identity = _proofIdentity;
+    if (!mounted) return;
     if (identity == null) {
       setState(() => _currentStep = _FlowStep.vcNotFound);
       return;
     }
 
     await ref.read(credentialServiceProvider.notifier).ensureInitialized();
-    final hasCredential = ref
+    if (!mounted) return;
+    final hasSessionMaterial = ref
         .read(credentialServiceProvider)
-        .hasCredentialFor(identity.id);
+        .hasSessionMaterialFor(identity.id);
 
     setState(() {
-      _currentStep = hasCredential ? _FlowStep.foundVC : _FlowStep.vcNotFound;
+      _currentStep = hasSessionMaterial
+          ? _FlowStep.foundVC
+          : _FlowStep.vcNotFound;
     });
   }
 
@@ -81,33 +82,51 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
 
     setState(() => _currentStep = _FlowStep.generatingVC);
 
-    await Future<void>.delayed(const Duration(seconds: 3));
-    if (!mounted) return;
-
-    await ref
-        .read(credentialServiceProvider.notifier)
-        .issueLivenessCredential(
-          identityId: identity.id,
-          holderDid: identity.did,
-        );
-    setState(() => _currentStep = _FlowStep.vcGenerated);
+    try {
+      await ref
+          .read(credentialServiceProvider.notifier)
+          .issueLivenessCredential(
+            identityId: identity.id,
+            holderDid: identity.did,
+          );
+      if (!mounted) return;
+      setState(() => _currentStep = _FlowStep.vcGenerated);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _currentStep = _FlowStep.vcNotFound);
+    }
   }
 
   Future<void> _handleGenerateProof() async {
     setState(() => _isGenerating = true);
 
-    await ref
+    final error = await ref
         .read(proofFlowControllerProvider(widget.contactId).notifier)
         .generateAndSendProof();
 
     if (!mounted) return;
-    Navigator.of(context).pop();
+    if (error == null) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    if (error == LivenessCredentialSessionMissingException.message) {
+      setState(() {
+        _isGenerating = false;
+        _currentStep = _FlowStep.vcNotFound;
+      });
+      return;
+    }
+
+    setState(() => _isGenerating = false);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
   }
 
-  void _pauseAndPop() {
-    ref
+  Future<void> _pauseAndPop() async {
+    await ref
         .read(chatScreenControllerProvider(widget.contactId).notifier)
-        .insertZkpPausedNotice();
+        .pauseHumanZkpRequestFlow();
+    if (!mounted) return;
     Navigator.of(context).pop();
   }
 

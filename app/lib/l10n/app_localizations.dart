@@ -2583,6 +2583,12 @@ abstract class AppLocalizations {
   /// **'Human ZKP'**
   String get humanZkp;
 
+  /// No description provided for @humanZeroKnowledgeProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Human Zero-Knowledge Proof'**
+  String get humanZeroKnowledgeProof;
+
   /// No description provided for @livenessCredential.
   ///
   /// In en, this message translates to:

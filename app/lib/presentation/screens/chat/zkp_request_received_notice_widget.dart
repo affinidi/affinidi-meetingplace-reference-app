@@ -5,7 +5,6 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import '../../widgets/banners/zkp_notice_banner.dart';
 import 'chat_screen_controller.dart';
 import 'liveness_check_screen.dart';
-import 'proof_flow_controller.dart';
 
 class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
   const ZkpRequestReceivedNoticeWidget({
@@ -37,9 +36,6 @@ class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
             .insertZkpPausedNotice(
               pausedForNoticeMessageId: chatItem.messageId,
             );
-        ref
-            .read(proofFlowControllerProvider(_contactId).notifier)
-            .dismissRequest();
       },
     );
   }
