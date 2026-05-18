@@ -11,6 +11,11 @@ bool _isHumanZkpConcierge(chat.ChatItem item) {
   return ids.contains(item.conciergeType.value);
 }
 
+bool _isHumanZkpRequestConcierge(chat.ChatItem item) {
+  return item is chat.ConciergeMessage &&
+      item.conciergeType.value == ZkpConstants.conciergeHumanZkpRequest;
+}
+
 class _ChatMessageList extends HookConsumerWidget {
   const _ChatMessageList(this._contactId);
 
@@ -182,7 +187,11 @@ class _ChatMessageList extends HookConsumerWidget {
 
                 return Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: _isHumanZkpConcierge(chatItem) ? 0 : 20,
+                    horizontal:
+                        _isHumanZkpConcierge(chatItem) &&
+                            !_isHumanZkpRequestConcierge(chatItem)
+                        ? 0
+                        : 20,
                   ),
                   child: Column(
                     children: [
@@ -214,7 +223,9 @@ class _ChatMessageList extends HookConsumerWidget {
                                 ),
                               ),
                             Container(
-                              margin: _isHumanZkpConcierge(chatItem)
+                              margin: _isHumanZkpRequestConcierge(chatItem)
+                                  ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
+                                  : _isHumanZkpConcierge(chatItem)
                                   ? const EdgeInsets.symmetric(vertical: 8)
                                   : chatItem is EncryptionNotice ||
                                         chatItem is chat.ConciergeMessage ||
