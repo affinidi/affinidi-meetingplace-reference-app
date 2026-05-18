@@ -235,7 +235,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
             const MethodChannel('dev.fluttercommunity.plus/share'),
-            (MethodCall methodCall) async => {'status': 'success', 'raw': ''},
+            (MethodCall methodCall) async => null,
           );
 
       final fakeService = FakeRCardsService([]);
@@ -285,7 +285,7 @@ void main() {
 
       await navigateToLocation(
         tester,
-        '/r-cards/\${Uri.encodeComponent(aliceSubjectDid)}/details',
+        '/r-cards/${Uri.encodeComponent(aliceSubjectDid)}/details',
         identities: [FakeIdentities.primaryIdentity],
         mediators: [],
         contacts: [FakeContacts.individualContact],
@@ -294,12 +294,12 @@ void main() {
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      await tester.tap(
-        find.ancestor(
-          of: find.textContaining('Chat with'),
-          matching: find.byType(TextButton),
-        ),
+      final chatWithButton = find.ancestor(
+        of: find.textContaining('Chat with'),
+        matching: find.byType(TextButton),
       );
+      await tester.ensureVisible(chatWithButton);
+      await tester.tap(chatWithButton);
       await tester.pumpAndSettle();
 
       // Chat screen is now visible — message input is present
@@ -327,7 +327,7 @@ void main() {
       // Step 1: Start at the chat screen.
       await navigateToLocation(
         tester,
-        '/contacts/\${FakeContacts.individualContact.id}/chat',
+        '/contacts/${FakeContacts.individualContact.id}/chat',
         identities: [FakeIdentities.primaryIdentity],
         mediators: [],
         contacts: [FakeContacts.individualContact],
@@ -362,25 +362,26 @@ void main() {
       expect(find.text(l10n.goToRCard), findsOneWidget);
 
       // Step 3: Tap "Go to R-Card" → pushes R-Card details on top of chat.
+      await tester.ensureVisible(find.text(l10n.goToRCard));
       await tester.tap(find.text(l10n.goToRCard));
       await tester.pumpAndSettle();
 
       // We are now on R-Card details; chat screen is directly below.
-      expect(find.text(l10n.rCardDetailsTitle), findsOneWidget);
+      expect(find.textContaining('Chat with'), findsOneWidget);
 
       // Step 4: Tap "Chat with" — should pop (not push) back to chat.
-      await tester.tap(
-        find.ancestor(
-          of: find.textContaining('Chat with'),
-          matching: find.byType(TextButton),
-        ),
+      final chatWithButton2 = find.ancestor(
+        of: find.textContaining('Chat with'),
+        matching: find.byType(TextButton),
       );
+      await tester.ensureVisible(chatWithButton2);
+      await tester.tap(chatWithButton2);
       await tester.pumpAndSettle();
 
       // We are back on the chat screen — message input is present.
       expect(find.byKey(const Key('chat_message_input')), findsOneWidget);
-      // R-Card details title is gone — no duplicate chat was pushed.
-      expect(find.text(l10n.rCardDetailsTitle), findsNothing);
+      // R-Card details screen is gone — no duplicate chat was pushed.
+      expect(find.textContaining('Chat with'), findsNothing);
     });
   });
 }

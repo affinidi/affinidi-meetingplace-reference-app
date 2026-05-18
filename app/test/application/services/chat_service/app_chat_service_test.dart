@@ -471,6 +471,7 @@ void main() {
     late FakeMeetingPlaceSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late DidKeyManager issuerManager;
+    late String issuerDid;
 
     final testContact = FakeContacts.individualContact;
     final channelDid = testContact.channelDid!;
@@ -480,10 +481,12 @@ void main() {
       issuerManager = DidKeyManager(wallet: wallet, store: InMemoryDidStore());
       final keyPair = await wallet.generateKey();
       await issuerManager.addVerificationMethod(keyPair.id);
+      final didDoc = await issuerManager.getDidDocument();
+      issuerDid = didDoc.id;
     });
 
     Channel makeChannel({
-      String permanentChannelDid = 'did:key:my-channel',
+      String? permanentChannelDid,
       String? otherPartyPermanentChannelDid,
     }) {
       return Channel(
@@ -494,7 +497,7 @@ void main() {
         contactCard: FakeContacts.individualContact.card.toSdkContactCard(),
         outboundMessageId: 'msg-1',
         acceptOfferDid: 'did:key:accept',
-        permanentChannelDid: permanentChannelDid,
+        permanentChannelDid: permanentChannelDid ?? issuerDid,
         otherPartyPermanentChannelDid:
             otherPartyPermanentChannelDid ?? channelDid,
         type: ChannelType.individual,

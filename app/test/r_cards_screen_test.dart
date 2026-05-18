@@ -214,7 +214,7 @@ void main() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(
               const MethodChannel('dev.fluttercommunity.plus/share'),
-              (MethodCall methodCall) async => {'status': 'success', 'raw': ''},
+              (MethodCall methodCall) async => null,
             );
 
         final alice = RCard(
