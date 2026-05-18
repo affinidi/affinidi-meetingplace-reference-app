@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../screens/chat/chat_items/concierge_message.dart';
+import '../../themes/app_custom_colors.dart';
 
 /// Types of ZKP notices that can be displayed
 enum ZkpNoticeType {
@@ -181,7 +182,6 @@ class _ZkpBadge extends StatelessWidget {
   }
 }
 
-/// Widget displaying a proof request notice with action buttons
 class _ProofRequestNotice extends StatelessWidget {
   const _ProofRequestNotice({
     required this.dateCreated,
@@ -195,67 +195,90 @@ class _ProofRequestNotice extends StatelessWidget {
   final VoidCallback? onGenerateProof;
   final VoidCallback? onDoLater;
 
-  @override
-  Widget build(BuildContext context) {
-    return ConciergeMessage(
-      dateCreated: dateCreated,
-      message: context.l10n.zkpNoticeRequest(
-        contactName ?? context.l10n.proofFlowThisContact,
-      ),
-      actions: [
-        if (onGenerateProof != null)
-          _ActionButton(
-            onPressed: onGenerateProof!,
-            label: context.l10n.generateProof,
-            isPrimary: true,
-          ),
-        if (onDoLater != null)
-          _ActionButton(
-            onPressed: onDoLater!,
-            label: context.l10n.doLater,
-            isPrimary: false,
-          ),
+  static const _cardDecoration = BoxDecoration(
+    borderRadius: BorderRadius.all(Radius.circular(10)),
+    gradient: RadialGradient(
+      center: Alignment.bottomCenter,
+      radius: 2,
+      colors: [
+        AppCustomColors.conciergeCardGradientStart,
+        AppCustomColors.conciergeCardGradientEnd,
       ],
-    );
-  }
-}
+    ),
+  );
 
-/// Reusable action button for ZKP notices
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.onPressed,
-    required this.label,
-    required this.isPrimary,
-  });
-
-  final VoidCallback onPressed;
-  final String label;
-  final bool isPrimary;
+  static final _outlineButtonShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(8),
+    side: const BorderSide(color: Colors.white),
+  );
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final l10n = context.l10n;
 
-    return Padding(
-      padding: EdgeInsets.only(right: isPrimary ? 16 : 0),
-      child: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: isPrimary ? colorScheme.onSurface : null,
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
-          minimumSize: const Size(0, 32),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-            side: BorderSide(color: Colors.white, width: 1),
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 600),
+      padding: const EdgeInsets.all(10),
+      decoration: _cardDecoration,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(
+            l10n.genWordConciergeMessage,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        onPressed: onPressed,
-        child: Text(
-          label,
-          style: isPrimary
-              ? TextStyle(color: colorScheme.surface.withValues(alpha: 0.8))
-              : const TextStyle(color: Colors.white),
-        ),
+          Text(
+            l10n.zkpNoticeRequest(contactName ?? l10n.proofFlowThisContact),
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white, fontSize: 12),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (onGenerateProof != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10, right: 10),
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppCustomColors.conciergeActionOnWhite,
+                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                      minimumSize: const Size(80, 25),
+                      shape: _outlineButtonShape,
+                    ),
+                    onPressed: onGenerateProof,
+                    child: Text(
+                      l10n.generateProof,
+                      style: const TextStyle(
+                        color: AppCustomColors.conciergeActionOnWhite,
+                      ),
+                    ),
+                  ),
+                ),
+              if (onDoLater != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(80, 25),
+                      shape: _outlineButtonShape,
+                    ),
+                    onPressed: onDoLater,
+                    child: Text(
+                      l10n.doLater,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
