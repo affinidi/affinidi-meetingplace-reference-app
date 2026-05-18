@@ -1,101 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../application/services/credential_service/credential_service.dart';
+import '../../../application/services/credential_service/credential_service_state.dart';
+import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/cards/credential_card.dart';
-import 'credentials_screen_controller.dart';
+import '../../widgets/credentials/liveness_credential_details_table.dart';
 
 class CredentialDetailsScreen extends ConsumerWidget {
-  const CredentialDetailsScreen({super.key});
+  const CredentialDetailsScreen({required this.identityId, super.key});
+
+  final String identityId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
     final l10n = context.l10n;
+    final record = ref.watch(
+      credentialServiceProvider.select(
+        (state) => state.credentialFor(identityId),
+      ),
+    );
+
+    if (record == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            l10n.credentialDetails,
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+        ),
+        body: Center(child: Text(l10n.noCredentialsYet)),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.credentialDetails),
+        title: Text(
+          l10n.credentialDetails,
+          style: Theme.of(context).textTheme.headlineMedium,
+        ),
         actions: [
           IconButton(
             onPressed: () async {
               await ref
-                  .read(credentialsScreenControllerProvider.notifier)
-                  .deleteCredential();
-              Navigator.of(context).pop();
+                  .read(credentialServiceProvider.notifier)
+                  .deleteCredentialForIdentity(identityId);
+              if (context.mounted) Navigator.of(context).pop();
             },
-            icon: const Icon(Icons.delete),
+            icon: const Icon(Icons.delete_outline, size: 24),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Show the credential card
-              CredentialCard(
-                topLeftText: l10n.livenessCredential,
-                bottomLeftText: l10n.verifiableCredential,
-              ),
-              const SizedBox(height: 24),
-              // Table with dividers
-              Container(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    const _DetailRow(
-                      label: 'Types',
-                      value: '[VerifiableCredential, LivenessCredential]',
-                    ),
-                    Divider(color: colorScheme.primary, height: 24),
-                    const _DetailRow(label: 'Issuer', value: 'Affinidi'),
-                    Divider(color: colorScheme.primary, height: 24),
-                    const _DetailRow(
-                      label: 'Issued on',
-                      value: '17 April 2026',
-                    ),
-                    Divider(color: colorScheme.primary, height: 24),
-                    const _DetailRow(label: 'Human', value: 'Yes'),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            CredentialCard(
+              topLeftText: l10n.livenessCredential,
+              bottomLeftText: l10n.verifiableCredential,
+            ),
+            const SizedBox(height: 24),
+            _DetailsSection(record: record),
+          ],
         ),
       ),
     );
   }
 }
 
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.label, required this.value});
+class _DetailsSection extends StatelessWidget {
+  const _DetailsSection({required this.record});
 
-  final String label;
-  final String value;
+  final LivenessCredentialRecord record;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-            ),
-          ),
-          Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyLarge),
-          ),
-        ],
-      ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      child: LivenessCredentialDetailsTable(record: record),
     );
   }
 }

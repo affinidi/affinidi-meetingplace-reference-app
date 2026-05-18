@@ -37,6 +37,7 @@ import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
 import 'chat_zkp_handler.dart';
+import 'proof_flow_controller.dart';
 
 part 'chat_screen_controller.g.dart';
 
@@ -221,6 +222,20 @@ class ChatScreenController extends _$ChatScreenController
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
+      if (ref.read(environmentProvider).zkpEnabled) {
+        ref
+            .read(proofFlowControllerProvider(contactId).notifier)
+            .resetSession();
+      }
+      final channelDid = ref
+          .read(contactsServiceProvider)
+          .getContactById(contactId)
+          ?.channelDid;
+      if (channelDid != null) {
+        ref
+            .read(chatSessionServiceProvider(channelDid).notifier)
+            .setZkpCallback(null);
+      }
       _chatService?.pauseChat();
 
       messageTextController.removeListener(_onMessageTextChanged);
@@ -266,6 +281,10 @@ class ChatScreenController extends _$ChatScreenController
 
   Future<void> onScreenOpened() async {
     if (!state.isInitialized) return;
+
+    if (ref.read(environmentProvider).zkpEnabled) {
+      ref.read(proofFlowControllerProvider(contactId).notifier).resetSession();
+    }
 
     await _restoreUnsentMessage();
   }

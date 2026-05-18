@@ -12,6 +12,7 @@ import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
+import '../../../domain/models/identity/identity.dart';
 import '../../../domain/repositories/contacts_repository.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
@@ -23,6 +24,7 @@ import '../../../infrastructure/providers/contacts_repository_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../connections_service/connections_service.dart';
 import '../control_plane_service/control_plane_service.dart';
+import '../identities_service/identities_service.dart';
 import 'contacts_service_state.dart';
 
 part 'contacts_service.g.dart';
@@ -316,6 +318,62 @@ class ContactsService extends _$ContactsService {
 
     await coreSdk.leaveChannel(channel);
     _contactLeftChatController.add(channel);
+  }
+
+  Future<Identity?> resolveIdentityForContact(String contactId) async {
+    final contact = state.getContactById(contactId);
+    if (contact == null) {
+      _logger.warning(
+        'resolveIdentityForContact: unknown contact $contactId',
+        name: _logKey,
+      );
+      return null;
+    }
+
+    final identityId = await _resolveIdentityIdForContact(contact);
+    if (identityId == null) {
+      _logger.warning(
+        'resolveIdentityForContact: no identity linked to contact $contactId',
+        name: _logKey,
+      );
+      return null;
+    }
+
+    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
+    final identity = ref
+        .read(identitiesServiceProvider)
+        .getIdentityById(identityId);
+    if (identity == null) {
+      _logger.warning(
+        'resolveIdentityForContact: identity $identityId not in wallet',
+        name: _logKey,
+      );
+    }
+    return identity;
+  }
+
+  Future<String?> _resolveIdentityIdForContact(Contact contact) async {
+    if (contact.channelDid != null) {
+      final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+        contact.channelDid!,
+      );
+      final channelIdentityId = channel?.externalRef;
+      if (channelIdentityId != null && channelIdentityId.isNotEmpty) {
+        return channelIdentityId;
+      }
+    }
+
+    await ref.read(connectionsServiceProvider.notifier).ensureInitialized();
+    final offerIdentityId = ref
+        .read(connectionsServiceProvider)
+        .getConnectionByOfferLink(contact.offerLink)
+        ?.externalRef;
+    if (offerIdentityId != null && offerIdentityId.isNotEmpty) {
+      return offerIdentityId;
+    }
+
+    return null;
   }
 
   /// Update an existing contact and refresh state.

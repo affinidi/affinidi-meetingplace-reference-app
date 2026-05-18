@@ -368,15 +368,6 @@ class _RCardBubble extends StatelessWidget {
       }
     }
 
-    if (!isCredentialOnly) {
-      return _ZkpBubble(
-        chatItem: chatItem,
-        index: index,
-        contactId: contactId,
-        selectedReactionIndex: selectedReactionIndex,
-      );
-    }
-
     final chatItemColor = getChatItemColor(context.colorScheme, chatItem);
 
     final margin =

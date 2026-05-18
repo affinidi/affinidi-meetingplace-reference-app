@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../credentials/liveness_credential_details_table.dart';
 import '../../themes/app_custom_colors.dart';
 import '../cards/credential_card.dart';
 import '../loaders/linear_progress_indicator.dart' as custom_loader;
 import 'credential/credential_detail_card.dart';
-import 'credential/credential_detail_row.dart';
 
 /// Branded circular progress indicator.
 class ZkpLoader extends StatelessWidget {
@@ -281,14 +282,14 @@ class VcGeneratedStepView extends StatelessWidget {
 class VcDetailsStepView extends StatelessWidget {
   const VcDetailsStepView({
     super.key,
-    required this.contactDid,
+    required this.credential,
     required this.isGenerating,
     required this.onCancel,
     this.onBack,
     this.onGenerateProof,
   });
 
-  final String contactDid;
+  final LivenessCredentialRecord credential;
   final bool isGenerating;
   final VoidCallback onCancel;
   final VoidCallback? onBack;
@@ -301,7 +302,7 @@ class VcDetailsStepView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LivenessCredentialCard(contactDid: contactDid),
+          LivenessCredentialCard(credential: credential),
           const Spacer(),
           if (isGenerating) ...[
             custom_loader.LinearProgressIndicator(),
@@ -346,31 +347,19 @@ class VcDetailsStepView extends StatelessWidget {
 }
 
 class LivenessCredentialCard extends StatelessWidget {
-  const LivenessCredentialCard({super.key, required this.contactDid});
+  const LivenessCredentialCard({super.key, required this.credential});
 
-  final String contactDid;
+  final LivenessCredentialRecord credential;
 
   @override
   Widget build(BuildContext context) {
     return CredentialDetailCard(
       title: context.l10n.livenessCredential,
       subtitle: context.l10n.verified,
-      details: [
-        CredentialDetailRowData(
-          label: context.l10n.issuedTo,
-          value: contactDid,
-        ),
-        CredentialDetailRowData(
-          label: context.l10n.types,
-          value: '[VerifiableCredential, LivenessCredential]',
-        ),
-        CredentialDetailRowData(label: context.l10n.issuer, value: 'Affinidi'),
-        CredentialDetailRowData(
-          label: context.l10n.issuedOn,
-          value: '17 April 2026', // TODO: Use real date
-        ),
-        CredentialDetailRowData(label: context.l10n.human, value: 'Yes'),
-      ],
+      body: LivenessCredentialDetailsTable(
+        record: credential,
+        lightTheme: false,
+      ),
     );
   }
 }

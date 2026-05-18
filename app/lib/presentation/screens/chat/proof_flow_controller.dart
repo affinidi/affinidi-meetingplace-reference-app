@@ -1,23 +1,20 @@
-import 'dart:async';
-import 'dart:convert';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 
-import '../../../application/services/zkp_service/zkp_constants.dart';
+import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/zkp_service/zkp_service.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../credentials/credentials_screen_controller.dart';
 import 'chat_screen_controller.dart';
 import 'proof_flow_state.dart';
 
-final proofFlowControllerProvider =
-    StateNotifierProvider.family<ProofFlowController, ProofFlowState, String>(
-      (ref, contactId) {
-        return ProofFlowController(ref: ref, contactId: contactId);
-      },
-    );
+final proofFlowControllerProvider = StateNotifierProvider.autoDispose
+    .family<ProofFlowController, ProofFlowState, String>((ref, contactId) {
+      return ProofFlowController(ref: ref, contactId: contactId);
+    });
+
+class ProofFlowController extends StateNotifier<ProofFlowState> {
   ProofFlowController({required this.ref, required this.contactId})
     : super(const ProofFlowState()) {
     _logger = ref.read(appLoggerProvider);
@@ -34,17 +31,13 @@ final proofFlowControllerProvider =
       chatScreenControllerProvider(contactId).notifier,
     );
 
+    final attachments = LivenessZkpAttachmentBuilder.buildLivenessCheckRequest(
+      attachmentId: DateTime.now().millisecondsSinceEpoch.toString(),
+    );
+
     await chatController.sendMessageDirect(
-      '', // Empty message - UI banners will show the request // TODO
-      attachments: [
-        chat.Attachment(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          mediaType: 'application/json',
-          format: ZkpConstants.livenessCheckRequestType,
-          lastModifiedTime: DateTime.now(),
-          data: chat.AttachmentData(json: '{"type":"liveness_request"}'),
-        ),
-      ],
+      '',
+      attachments: List<chat.Attachment>.from(attachments),
     );
   }
 
@@ -58,43 +51,32 @@ final proofFlowControllerProvider =
     state = state.copyWith(hasIncomingRequest: false);
   }
 
+  /// Clears transient UI state when entering or leaving this chat.
+  void resetSession() {
+    state = const ProofFlowState();
+  }
+
   /// Clear verification failure state after dismissing result banner.
   void clearVerificationFailure() {
     state = state.copyWith(
       verificationFailed: false,
-      errorMessage: null,
       isVerifyingProof: false,
+      clearErrorMessage: true,
     );
   }
 
-  /// Search for Liveness VC in wallet (always returns false
-  /// for fresh generation)
-  Future<bool> searchForVC() async {
-    state = state.copyWith(isCheckingVC: true);
-
-    // Simulate search delay
-    await Future<void>.delayed(const Duration(seconds: 1));
-
-    // Always false - we generate fresh VCs each time
-    state = state.copyWith(isCheckingVC: false, hasVC: false);
-
-    return false;
-  }
-
-  /// Issue new Liveness VC via AWS Rekognition (mock liveness check)
-  Future<void> issueVC() async {
-    state = state.copyWith(isIssuingVC: true);
-
-    // Simulate AWS Liveness check (face scanning)
-    // In production, this would call AWS Rekognition SDK
-    await Future<void>.delayed(const Duration(seconds: 3));
-
-    // Mark VC as ready (will be generated in generateAndSendProof())
-    state = state.copyWith(isIssuingVC: false, hasVC: true);
-  }
-
   /// Generate ZKP from Liveness VC and send to contact
-  Future<void> generateAndSendProof({String? holderDid}) async {
+  Future<void> generateAndSendProof() async {
+    final identity = await ref
+        .read(contactsServiceProvider.notifier)
+        .resolveIdentityForContact(contactId);
+    if (identity == null || identity.did.isEmpty) {
+      throw Exception(
+        'No identity is linked to this connection. '
+        'Open this chat with the identity you used to connect.',
+      );
+    }
+
     _logger.info(
       'Starting proof generation for contact: $contactId',
       name: _logKey,
@@ -102,9 +84,11 @@ final proofFlowControllerProvider =
     state = state.copyWith(isGeneratingProof: true);
 
     try {
-      // Delegate proof generation to ZkpService
       final zkpService = ref.read(zkpServiceProvider);
-      final proofResult = await zkpService.generateProof(holderDid: holderDid);
+      final proofResult = await zkpService.generateProof(
+        identityId: identity.id,
+        holderDid: identity.did,
+      );
 
       if (proofResult == null) {
         throw Exception('Failed to generate proof');
@@ -115,36 +99,24 @@ final proofFlowControllerProvider =
         name: _logKey,
       );
 
-      // Send proof to contact via DIDComm
       final chatController = ref.read(
         chatScreenControllerProvider(contactId).notifier,
       );
 
+      final attachments = LivenessZkpAttachmentBuilder.buildLivenessProof(
+        payload: LivenessProofPayload(
+          proof: proofResult.proof,
+          publicSignals: proofResult.publicSignals,
+        ),
+        attachmentId: DateTime.now().millisecondsSinceEpoch.toString(),
+      );
+
       await chatController.sendMessageDirect(
-        '', // Empty message - only attachment needed for proof
-        attachments: [
-          chat.Attachment(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            mediaType: 'application/json',
-            format: 'https://affinidi.com/liveness-proof',
-            lastModifiedTime: DateTime.now(),
-            data: chat.AttachmentData(
-              json: jsonEncode({
-                'type': 'liveness_proof',
-                'proof': proofResult.proof,
-                'publicSignals': proofResult.publicSignals,
-              }),
-            ),
-          ),
-        ],
+        '',
+        attachments: List<chat.Attachment>.from(attachments),
       );
 
       _logger.info('Proof sent to contact successfully', name: _logKey);
-
-      // Save credential to Credentials tab
-      await ref
-          .read(credentialsScreenControllerProvider.notifier)
-          .saveCredential();
 
       state = state.copyWith(
         isGeneratingProof: false,
@@ -174,24 +146,21 @@ final proofFlowControllerProvider =
     state = state.copyWith(isVerifyingProof: true);
 
     try {
-      // Check if we have received proof data
-      if (state.receivedProofData == null) {
+      final payload = state.receivedProofPayload;
+      if (payload == null) {
         _logger.warning('No proof data found in state', name: _logKey);
         throw Exception('No proof data received');
       }
 
-      // Extract proof and public signals from received data
-      final proofData = state.receivedProofData!;
-      final proof = proofData['proof'] as String;
-      final publicSignals = proofData['publicSignals'] as String;
+      _logger.info(
+        'Verifying proof (${payload.proof.length} chars)',
+        name: _logKey,
+      );
 
-      _logger.info('Verifying proof (${proof.length} chars)', name: _logKey);
-
-      // Delegate verification to ZkpService
       final zkpService = ref.read(zkpServiceProvider);
       final verificationResult = await zkpService.verifyProof(
-        proof: proof,
-        publicSignals: publicSignals,
+        proof: payload.proof,
+        publicSignals: payload.publicSignals,
       );
 
       _logger.info(
@@ -220,15 +189,11 @@ final proofFlowControllerProvider =
   }
 
   /// Called when proof is received from contact
-  void onProofReceived(Map<String, dynamic> proofData) {
+  void onProofReceived(LivenessProofPayload payload) {
     _logger.info('Proof received from contact: $contactId', name: _logKey);
 
-    // Store the received proof data
-    state = state.copyWith(receivedProofData: proofData);
+    state = state.copyWith(receivedProofPayload: payload);
 
-    _logger.info('Proof received', name: _logKey);
-
-    // Verify the proof
     _logger.info('  Triggering automatic verification', name: _logKey);
     verifyProof();
   }

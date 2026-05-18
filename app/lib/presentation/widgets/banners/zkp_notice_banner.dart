@@ -46,6 +46,7 @@ class ZkpNoticeBanner extends ConsumerWidget {
         return ConciergeMessage(
           dateCreated: dateCreated,
           message: context.l10n.zkpNoticePaused,
+          fullWidth: true,
         );
 
       case ZkpNoticeType.shared:
@@ -89,27 +90,27 @@ class _ProofNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ConciergeMessage(
-            dateCreated: dateCreated,
-            message: message,
-            fullWidth: true,
-          ),
-          const SizedBox(height: 16),
-          _ZkpBadge(isFromMe: isFromMe),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ConciergeMessage(
+          dateCreated: dateCreated,
+          message: message,
+          fullWidth: true,
+        ),
+        const SizedBox(height: 16),
+        _ZkpBadge(isFromMe: isFromMe),
+      ],
     );
   }
 }
 
-/// Visual badge showing ZKP verification
+/// Visual badge showing ZKP verification (aligned like a chat message).
 class _ZkpBadge extends StatelessWidget {
   const _ZkpBadge({required this.isFromMe});
+
+  static const _chatListHorizontalPadding = 20.0;
+  static const _chatBubbleSideMargin = 60.0;
 
   final bool isFromMe;
 
@@ -123,8 +124,18 @@ class _ZkpBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         margin: isFromMe
-            ? const EdgeInsets.only(left: 60)
-            : const EdgeInsets.only(right: 60),
+            ? const EdgeInsets.fromLTRB(
+                _chatBubbleSideMargin,
+                0,
+                _chatListHorizontalPadding,
+                0,
+              )
+            : const EdgeInsets.fromLTRB(
+                _chatListHorizontalPadding,
+                0,
+                _chatBubbleSideMargin,
+                0,
+              ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: const Alignment(-0.5, -1.3),
@@ -149,10 +160,10 @@ class _ZkpBadge extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Color(0x4D0368C0),
               ),
-              child: Icon(
-                Icons.verified_user,
+              child: const Icon(
+                Icons.how_to_reg,
                 size: 22,
-                color: colorScheme.primary,
+                color: Colors.white,
               ),
             ),
             const SizedBox(width: 12),

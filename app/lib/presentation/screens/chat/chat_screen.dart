@@ -15,7 +15,6 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
 import 'package:mpx_app_core/mpx_app_core.dart';
-
 import '../../../application/services/zkp_service/zkp_constants.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
