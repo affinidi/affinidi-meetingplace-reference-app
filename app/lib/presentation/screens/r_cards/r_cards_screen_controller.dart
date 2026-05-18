@@ -2,6 +2,8 @@ import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../application/services/r_cards_service/r_cards_service.dart';
+import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'r_cards_screen_filter.dart';
 import 'r_cards_screen_state.dart';
 
@@ -12,6 +14,8 @@ class RCardsScreenController extends _$RCardsScreenController {
   RCardsScreenFilter _currentFilter = RCardsScreenFilter.all;
   String _lastSearchQuery = '';
   String _anonymousLabel = '';
+  final logKey = 'RCARDS';
+  late final AppLogger _logger = ref.read(appLoggerProvider);
 
   @override
   RCardsScreenState build() {
@@ -63,7 +67,11 @@ class RCardsScreenController extends _$RCardsScreenController {
     _lastSearchQuery = '';
     final allCards = ref.read(rCardsServiceProvider);
     final filteredResults = _applyFilters(allCards);
-    state = state.copyWith(filter: filter, cards: filteredResults);
+    state = state.copyWith(
+      filter: filter,
+      cards: filteredResults,
+      hasFilterApplied: allCards.length != filteredResults.length,
+    );
   }
 
   List<RCard> _applyFilters(List<RCard> all) {
@@ -72,7 +80,7 @@ class RCardsScreenController extends _$RCardsScreenController {
     if (_lastSearchQuery.isNotEmpty) {
       final q = _lastSearchQuery.toLowerCase();
       cards = cards.where((c) {
-        final s = RCardSubject.fromVcBlob(c.vcBlob);
+        final s = subjectFor(c);
         final searchable = [
           s?.firstName,
           s?.lastName,
@@ -96,9 +104,18 @@ class RCardsScreenController extends _$RCardsScreenController {
   }
 
   bool _isAnonymous(RCard card) {
-    final s = RCardSubject.fromVcBlob(card.vcBlob);
+    final s = subjectFor(card);
     final firstName = s?.firstName?.trim() ?? '';
     final lastName = s?.lastName?.trim() ?? '';
     return firstName == _anonymousLabel && lastName.isEmpty;
+  }
+
+  RCardSubject? subjectFor(RCard card) {
+    try {
+      return RCardSubject.fromVcBlob(card.vcBlob);
+    } on FormatException catch (e) {
+      _logger.warning('Failed to parse vcBlob: $e', name: logKey);
+      return null;
+    }
   }
 }

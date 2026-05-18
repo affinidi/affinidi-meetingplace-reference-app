@@ -1615,10 +1615,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'La actualización de la tarjeta R ha sido compartida.';
 
   @override
-  String get rCardFooterUpdateSaved => 'R-Card update has been saved.';
+  String get rCardFooterUpdateSaved =>
+      'La actualización de la tarjeta R se ha guardado.';
 
   @override
-  String get rCardsExchanged => 'R-Cards have been exchanged.';
+  String get rCardsExchanged => 'Tarjetas R intercambiadas';
 
   @override
   String get goToRCard => 'Ir a la Tarjeta R';
@@ -1632,4 +1633,105 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get sendRCard => 'Enviar Tarjeta R';
+
+  @override
+  String selectIdentityToVerifyRelationshipWithName(String name) {
+    return 'Selecciona la identidad que deseas usar para verificar tu relación con $name';
+  }
+
+  @override
+  String get verifiableRelationshipCredential =>
+      'Credencial de Relación Verificable';
+
+  @override
+  String get vrcDetailsTitle => 'Credencial de Relación';
+
+  @override
+  String get vrcSectionIssuer => 'Emisor';
+
+  @override
+  String get vrcSectionHolder => 'Emitido a';
+
+  @override
+  String get vrcSectionMetadata => 'Detalles de la Credencial';
+
+  @override
+  String get vrcFieldDid => 'DID';
+
+  @override
+  String get vrcFieldName => 'Nombre';
+
+  @override
+  String get vrcFieldIssuedAt => 'Emitido el';
+
+  @override
+  String get vrcFieldVerifiedAt => 'Verificada';
+
+  @override
+  String get vrcFieldTypes => 'Tipos';
+
+  @override
+  String get vrcDescription =>
+      'Esta credencial verifica la relación entre dos partes.';
+
+  @override
+  String verifyRelationshipPrompt(String firstName) {
+    return 'Verifica tu relación con $firstName emitiendo una Credencial de Relación Verificable (VRC). Cada intercambio de VRC aumenta tu puntuación de confianza.';
+  }
+
+  @override
+  String get generateVrc => 'Empezar ahora';
+
+  @override
+  String get generalVerify => 'Confirmar';
+
+  @override
+  String get doLater => 'Más tarde';
+
+  @override
+  String get vrcExchangeInitiated => 'Has iniciado el intercambio de VRC.';
+
+  @override
+  String vrcRequestReceived(String name) {
+    return '$name ha iniciado el intercambio de VRC.';
+  }
+
+  @override
+  String get vrcDoLater =>
+      'El intercambio de VRC está en pausa. Toca + y selecciona \'Credencial de Relación Verificable\' para continuar.';
+
+  @override
+  String get vrcExchangeCompleted => 'Has verificado tu relación con éxito';
+
+  @override
+  String vrcVerifyPrompt(String name) {
+    return '¿Deseas verificar tu relación con $name? Cada intercambio de VRC aumenta tu puntuación de confianza.';
+  }
+
+  @override
+  String get vrcStartNow => 'Comenzar ahora';
+
+  @override
+  String get vrcDoLaterButton => 'Más tarde';
+
+  @override
+  String get vrcYesButton => 'Sí';
+
+  @override
+  String nameSelectedIdentity(String name) {
+    return '$name\'s selected identity';
+  }
+
+  @override
+  String selectIdentityToVerifyRelationshipPrompt(String name) {
+    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
+  }
+
+  @override
+  String get sendVrc => 'Enviar Credencial de Relación';
+
+  @override
+  String trustedBy(int count) {
+    return 'Trusted by $count';
+  }
 }

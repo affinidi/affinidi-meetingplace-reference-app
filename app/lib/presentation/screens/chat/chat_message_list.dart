@@ -56,6 +56,12 @@ class _ChatMessageList extends HookConsumerWidget {
               itemBuilder: (context, index) {
                 var chatItem = sortedMessages[index];
 
+                // VRC request messages are protocol signals
+                // — never render them.
+                if (_isVrcRequestOnlyMessage(chatItem)) {
+                  return const SizedBox.shrink();
+                }
+
                 var nextItemFromSameDid = false;
 
                 if (index < sortedMessages.length - 1) {
@@ -234,7 +240,18 @@ Color getChatItemColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
 bool _isRCardOnlyMessage(chat.ChatItem chatItem) {
   if (chatItem is! chat.Message) return false;
   final attachments = chatItem.attachments;
-  return attachments.length == 1 && attachments.first.isRCard;
+  return attachments.length == 1 &&
+      (attachments.first.isRCard ||
+          attachments.first.format == VrcAttachment.pluginFormat ||
+          attachments.first.format == VrcRequestAttachment.pluginFormat);
+}
+
+/// VRC request messages are protocol signals — never displayed in the chat.
+bool _isVrcRequestOnlyMessage(chat.ChatItem chatItem) {
+  if (chatItem is! chat.Message) return false;
+  final attachments = chatItem.attachments;
+  return attachments.length == 1 &&
+      attachments.first.format == VrcRequestAttachment.pluginFormat;
 }
 
 class _RCardBubble extends StatelessWidget {
@@ -289,7 +306,9 @@ class _RCardBubble extends StatelessWidget {
     final bubble = Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: chatItemColor,
+        color: isCredentialOnly && !chatItem.isFromMe
+            ? const Color(0xFF2E3035)
+            : chatItemColor,
         borderRadius: BorderRadius.circular(isCredentialOnly ? 20.0 : 16.0),
       ),
       child: isCredentialOnly

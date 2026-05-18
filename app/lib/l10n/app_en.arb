@@ -1464,5 +1464,69 @@
 	"goToRCard": "Go to R-Card",
 	"selectIdentityTitle": "Select Identity",
 	"selectIdentityInstruction": "Swipe left or right to choose the identity you want to use to generate the R‑Card",
-	"sendRCard": "Send R-Card"
+	"sendRCard": "Send R-Card",
+	"selectIdentityToVerifyRelationshipWithName": "Select the identity that you would like to use to verify your relationship with {name}.",
+	"@selectIdentityToVerifyRelationshipWithName": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"verifiableRelationshipCredential": "Verifiable Relationship Credential",
+	"vrcDetailsTitle": "Relationship Credential",
+	"vrcSectionIssuer": "Issuer",
+	"vrcSectionHolder": "Issued to",
+	"vrcSectionMetadata": "Credential Details",
+	"vrcFieldDid": "DID",
+	"vrcFieldName": "Name",
+	"vrcFieldIssuedAt": "Issued On",
+	"vrcFieldVerifiedAt": "Verified",
+	"vrcFieldTypes": "Types",
+	"vrcDescription": "This credential verifies the relationship between two parties.",
+	"verifyRelationshipPrompt": "Verify your relationship with {firstName} by issuing a Verifiable Relationship Credential (VRC). Each VRC exchange increases your trust score.",
+	"@verifyRelationshipPrompt": {
+		"placeholders": {
+			"firstName": { "type": "String" }
+		}
+	},
+	"generateVrc": "Start now",
+	"generalVerify": "Confirm",
+	"doLater": "Do later",
+	"vrcExchangeInitiated": "You've initiated the VRC exchange.",
+	"vrcRequestReceived": "{name} has initiated the VRC exchange.",
+	"@vrcRequestReceived": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcDoLater": "VRC exchange is paused. Tap + and select 'Verifiable Relationship Credential' to resume.",
+	"vrcExchangeCompleted": "You have successfully verified your relationship",
+	"vrcVerifyPrompt": "Would you like to verify your relationship with {name}? Each VRC exchange increases your trust score.",
+	"@vrcVerifyPrompt": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcStartNow": "Start Now",
+	"vrcDoLaterButton": "Do Later",
+	"vrcYesButton": "Yes",
+	"notShared": "Not shared",
+	"nameSelectedIdentity": "{name}'s selected identity",
+	"@nameSelectedIdentity": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"selectIdentityToVerifyRelationshipPrompt": "Swipe left or right to choose the identity you want to use to verify your relationship with {name}.",
+	"@selectIdentityToVerifyRelationshipPrompt": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"sendVrc": "Send Relationship Credential",
+	"trustedBy": "Trusted by {count}",
+	"@trustedBy": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	}
 }

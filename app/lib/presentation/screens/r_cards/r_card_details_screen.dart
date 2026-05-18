@@ -18,6 +18,7 @@ import '../../widgets/cards/r_card_header_card.dart';
 import '../../widgets/images/default_profile_image.dart';
 import 'r_card_notes_sheet.dart';
 import 'r_cards_deck.dart' show returningCardProvider;
+import 'r_cards_screen_controller.dart';
 
 class RCardDetailsScreen extends ConsumerStatefulWidget {
   const RCardDetailsScreen({
@@ -287,7 +288,9 @@ class _RCardDetailsContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
 
-    final subject = RCardSubject.fromVcBlob(card.vcBlob);
+    final subject = ref
+        .read(rCardsScreenControllerProvider.notifier)
+        .subjectFor(card);
     final name = subject?.name.trim() ?? '';
     final displayName = name.isNotEmpty ? name : subjectDid;
     final profilePic = subject?.profilePic?.trim();
@@ -302,7 +305,7 @@ class _RCardDetailsContent extends ConsumerWidget {
 
     final contact = ref
         .read(contactsServiceProvider)
-        .getContactByChannelDid(card.contactChannelDid ?? '');
+        .getContactByChannelDid(card.issuerDid);
 
     Future<void> openUrl(String url) async {
       await Clipboard.setData(ClipboardData(text: url));

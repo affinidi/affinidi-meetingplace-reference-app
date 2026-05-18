@@ -96,8 +96,10 @@ class RCardsService extends _$RCardsService {
   }
 
   String? _toVCard(RCard card) {
-    final subject = RCardSubject.fromVcBlob(card.vcBlob);
-    if (subject == null) {
+    final RCardSubject subject;
+    try {
+      subject = RCardSubject.fromVcBlob(card.vcBlob);
+    } on FormatException {
       _logger.warning(
         'Skipping R-Card export: failed to parse vcBlob for ${card.subjectDid}',
         name: _logKey,

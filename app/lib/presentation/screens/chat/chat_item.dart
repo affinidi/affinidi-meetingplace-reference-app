@@ -50,6 +50,14 @@ class ChatItem extends StatelessWidget {
       );
     }
 
+    if (_chatItem is chat.ConciergeMessage &&
+        _chatItem.conciergeType ==
+            chat.ConciergeMessageType.fromJson(
+              'permissionToVerifyRelationship',
+            )) {
+      return _ConciergeVrcChatItem(chatItem: _chatItem, contactId: _contactId);
+    }
+
     if (_chatItem is chat.EventMessage &&
         _chatItem.eventType == chat.EventMessageType.groupMemberJoinedGroup) {
       return JoiningGroupChatItem(chatItem: _chatItem);
@@ -69,6 +77,42 @@ class ChatItem extends StatelessWidget {
         _chatItem.eventType ==
             chat.EventMessageType.awaitingGroupMemberToJoin) {
       return const SizedBox.shrink();
+    }
+
+    if (_chatItem is chat.EventMessage &&
+        _chatItem.eventType ==
+            chat.EventMessageType.fromJson('vrcExchangeInitiated')) {
+      return ChatVrcExchangeInitiatedNotice(
+        chatItem: _chatItem,
+        contactId: _contactId,
+      );
+    }
+
+    if (_chatItem is chat.EventMessage &&
+        _chatItem.eventType ==
+            chat.EventMessageType.fromJson('vrcRequestReceived')) {
+      return ChatVrcRequestReceivedNotice(
+        chatItem: _chatItem,
+        contactId: _contactId,
+      );
+    }
+
+    if (_chatItem is chat.EventMessage &&
+        _chatItem.eventType ==
+            chat.EventMessageType.fromJson('vrcExchangeDoLater')) {
+      return ChatVrcExchangeDoLaterNotice(
+        chatItem: _chatItem,
+        contactId: _contactId,
+      );
+    }
+
+    if (_chatItem is chat.EventMessage &&
+        _chatItem.eventType ==
+            chat.EventMessageType.fromJson('vrcExchangeCompleted')) {
+      return ChatVrcExchangeCompleteNotice(
+        chatItem: _chatItem,
+        contactId: _contactId,
+      );
     }
 
     return UnknownChatItem();

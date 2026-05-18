@@ -1600,4 +1600,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sendRCard => 'Send R-Card';
+
+  @override
+  String selectIdentityToVerifyRelationshipWithName(String name) {
+    return 'Select the identity that you would like to use to verify your relationship with $name.';
+  }
+
+  @override
+  String get verifiableRelationshipCredential =>
+      'Verifiable Relationship Credential';
+
+  @override
+  String get vrcDetailsTitle => 'Relationship Credential';
+
+  @override
+  String get vrcSectionIssuer => 'Issuer';
+
+  @override
+  String get vrcSectionHolder => 'Issued to';
+
+  @override
+  String get vrcSectionMetadata => 'Credential Details';
+
+  @override
+  String get vrcFieldDid => 'DID';
+
+  @override
+  String get vrcFieldName => 'Name';
+
+  @override
+  String get vrcFieldIssuedAt => 'Issued On';
+
+  @override
+  String get vrcFieldVerifiedAt => 'Verified';
+
+  @override
+  String get vrcFieldTypes => 'Types';
+
+  @override
+  String get vrcDescription =>
+      'This credential verifies the relationship between two parties.';
+
+  @override
+  String verifyRelationshipPrompt(String firstName) {
+    return 'Verify your relationship with $firstName by issuing a Verifiable Relationship Credential (VRC). Each VRC exchange increases your trust score.';
+  }
+
+  @override
+  String get generateVrc => 'Start now';
+
+  @override
+  String get generalVerify => 'Confirm';
+
+  @override
+  String get doLater => 'Do later';
+
+  @override
+  String get vrcExchangeInitiated => 'You\'ve initiated the VRC exchange.';
+
+  @override
+  String vrcRequestReceived(String name) {
+    return '$name has initiated the VRC exchange.';
+  }
+
+  @override
+  String get vrcDoLater =>
+      'VRC exchange is paused. Tap + and select \'Verifiable Relationship Credential\' to resume.';
+
+  @override
+  String get vrcExchangeCompleted =>
+      'You have successfully verified your relationship';
+
+  @override
+  String vrcVerifyPrompt(String name) {
+    return 'Would you like to verify your relationship with $name? Each VRC exchange increases your trust score.';
+  }
+
+  @override
+  String get vrcStartNow => 'Start Now';
+
+  @override
+  String get vrcDoLaterButton => 'Do Later';
+
+  @override
+  String get vrcYesButton => 'Yes';
+
+  @override
+  String nameSelectedIdentity(String name) {
+    return '$name\'s selected identity';
+  }
+
+  @override
+  String selectIdentityToVerifyRelationshipPrompt(String name) {
+    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
+  }
+
+  @override
+  String get sendVrc => 'Send Relationship Credential';
+
+  @override
+  String trustedBy(int count) {
+    return 'Trusted by $count';
+  }
 }

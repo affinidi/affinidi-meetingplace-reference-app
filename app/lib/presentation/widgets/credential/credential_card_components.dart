@@ -8,11 +8,13 @@ class CredentialDetailRowData {
     required this.label,
     required this.value,
     this.icon,
+    this.subRows,
   });
 
   final IconData? icon;
   final String label;
   final String value;
+  final List<CredentialDetailRowData>? subRows;
 }
 
 /// Reusable container card that wraps credential details.
@@ -30,13 +32,13 @@ class CredentialCardContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final customColors = context.customColors;
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.black,
         borderRadius: BorderRadius.circular(25.0),
-        border: Border.all(color: colorScheme.primary, width: 1),
+        border: Border.all(color: customColors.fromMeColor, width: 1),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -46,9 +48,13 @@ class CredentialCardContainer extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [colorScheme.primary, colorScheme.primaryContainer],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                stops: const [0.1647, 0.8365],
+                colors: [
+                  customColors.fromMeColor,
+                  customColors.fromMeDarkColor,
+                ],
               ),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(24),

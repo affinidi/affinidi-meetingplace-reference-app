@@ -19,6 +19,7 @@ import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plug
 import 'infrastructure/plugins/device_region_plugin/device_region_plugin.dart';
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
 import 'infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import 'infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import 'infrastructure/providers/available_attachment_plugins_provider.dart';
 import 'infrastructure/providers/cache_manager_provider.dart';
 import 'infrastructure/providers/channel_repository_provider.dart';
@@ -78,6 +79,7 @@ void main() async {
             RCardAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),
             ),
+            VrcAttachmentsPlugin(),
           ],
         ),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),

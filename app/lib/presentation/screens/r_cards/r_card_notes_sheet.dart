@@ -46,9 +46,6 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.initialNotes ?? '');
-    _controller.addListener(() {
-      setState(() {});
-    });
   }
 
   @override
@@ -165,25 +162,28 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
                 ),
                 child: Text(l10n.generalCancel),
               ),
-              SizedBox(
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: _canSave ? save : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: saveButtonColor,
-                    disabledBackgroundColor: saveButtonColor.withValues(
-                      alpha: 0.4,
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _controller,
+                builder: (context, _, _) => SizedBox(
+                  height: 44,
+                  child: ElevatedButton(
+                    onPressed: _canSave ? save : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: saveButtonColor,
+                      disabledBackgroundColor: saveButtonColor.withValues(
+                        alpha: 0.4,
+                      ),
+                      foregroundColor: Colors.black,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      shape: const StadiumBorder(),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    foregroundColor: Colors.black,
-                    elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 28),
-                    shape: const StadiumBorder(),
-                    textStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    child: Text(l10n.generalSave),
                   ),
-                  child: Text(l10n.generalSave),
                 ),
               ),
             ],

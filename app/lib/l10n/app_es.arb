@@ -136,6 +136,7 @@
 	"generalPhoto": "Foto",
 	"generalReject": "RECHAZAR",
 	"generalSearch": "Buscar",
+	"generalVerify": "Confirmar",
 	"generateRandomPhraseHelperDisabled": "La frase personalizada que ingrese se utilizará para identificar de manera única esta invitación a conectarse. Debe ser único en el universo de Meeting Place.",
 	"generateRandomPhraseHelperEnabled": "Generar una frase aleatoria",
 	"genericPublishError": "No se pudo publicar la oferta",
@@ -384,11 +385,59 @@
 	"credentialDetails": "Detalles de la credencial",
 	"genRCard": "Tarjeta R",
 	"rCardPickIdentitySubtitle": "Selecciona la identidad para compartir como Tarjeta R",
+	"rCardsExchanged": "Tarjetas R intercambiadas",
 	"rCardFooterSent": "Tarjeta R enviada.",
 	"rCardFooterUpdateShared": "La actualización de la tarjeta R ha sido compartida.",
+	"rCardFooterUpdateSaved": "La actualización de la tarjeta R se ha guardado.",
 	"rCardFooterSaved": "Tarjeta R guardada.",
 	"goToRCard": "Ir a la Tarjeta R",
 	"selectIdentityTitle": "Seleccionar Identidad",
 	"selectIdentityInstruction": "Desliza a la izquierda o derecha para elegir la identidad que deseas usar para generar la Tarjeta‑R",
-	"sendRCard": "Enviar Tarjeta R"
+	"sendRCard": "Enviar Tarjeta R",
+	"verifiableRelationshipCredential": "Credencial de Relación Verificable",
+	"vrcDetailsTitle": "Credencial de Relación",
+	"vrcSectionIssuer": "Emisor",
+	"vrcSectionHolder": "Emitido a",
+	"vrcSectionMetadata": "Detalles de la Credencial",
+	"vrcFieldDid": "DID",
+	"vrcFieldName": "Nombre",
+	"vrcFieldIssuedAt": "Emitido el",
+	"vrcFieldVerifiedAt": "Verificada",
+	"vrcFieldTypes": "Tipos",
+	"vrcDescription": "Esta credencial verifica la relación entre dos partes.",
+	"selectIdentityToVerifyRelationshipWithName": "Selecciona la identidad que deseas usar para verificar tu relación con {name}",
+	"@selectIdentityToVerifyRelationshipWithName": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"verifyRelationshipPrompt": "Verifica tu relación con {firstName} emitiendo una Credencial de Relación Verificable (VRC). Cada intercambio de VRC aumenta tu puntuación de confianza.",
+	"@verifyRelationshipPrompt": {
+		"placeholders": {
+			"firstName": { "type": "String" }
+		}
+	},
+	"generateVrc": "Empezar ahora",
+	"doLater": "Más tarde",
+	"vrcExchangeInitiated": "Has iniciado el intercambio de VRC.",
+	"vrcRequestReceived": "{name} ha iniciado el intercambio de VRC.",
+	"@vrcRequestReceived": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcDoLater": "El intercambio de VRC está en pausa. Toca + y selecciona 'Credencial de Relación Verificable' para continuar.",
+	"vrcExchangeCompleted": "Has verificado tu relación con éxito",
+	"vrcVerifyPrompt": "¿Deseas verificar tu relación con {name}? Cada intercambio de VRC aumenta tu puntuación de confianza.",
+	"@vrcVerifyPrompt": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcStartNow": "Comenzar ahora",
+	"vrcDoLaterButton": "Más tarde",
+	"vrcYesButton": "Sí",
+	"notShared": "No compartido",
+	"vrcResponderIntro": "{name} ha seleccionado la siguiente persona para verificar la relación:",
+	"sendVrc": "Enviar Credencial de Relación"
 }

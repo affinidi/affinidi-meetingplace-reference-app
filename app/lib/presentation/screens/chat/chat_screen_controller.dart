@@ -5,7 +5,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
-import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
+import 'package:meeting_place_relationship/meeting_place_relationship.dart'
+    show VrcExchangeRole;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
@@ -13,6 +15,7 @@ import 'package:synchronized/synchronized.dart';
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';
@@ -22,9 +25,11 @@ import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/event_message_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../infrastructure/providers/relationship_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
@@ -51,6 +56,7 @@ class ChatScreenController extends _$ChatScreenController
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
+  StreamSubscription<void>? _vrcPluginSubscription;
   StreamSubscription<Identity>? _rCardPluginSubscription;
   bool _rCardListenerSet = false;
 
@@ -82,12 +88,59 @@ class ChatScreenController extends _$ChatScreenController
       _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
       ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
         Future.microtask(() {
+          if (hasInitializedState) {
+            pendingState = state;
+          }
+
           var newEffect = pendingState.effect;
           if (next.effect != null && previous?.effect != next.effect) {
             newEffect = _mapEffect(next.effect!);
           } else if (next.effect == null) {
             newEffect = null;
           }
+
+          // Auto-hide the VRC banner when the peer's request concierge arrives.
+          final hasVrcRequestConcierge = next.messages.any(
+            (m) =>
+                m is chat.ConciergeMessage &&
+                m.conciergeType ==
+                    chat.ConciergeMessageType.fromJson(
+                      'permissionToVerifyRelationship',
+                    ),
+          );
+          final wasAlreadyPresent =
+              previous?.messages.any(
+                (m) =>
+                    m is chat.ConciergeMessage &&
+                    m.conciergeType ==
+                        chat.ConciergeMessageType.fromJson(
+                          'permissionToVerifyRelationship',
+                        ),
+              ) ??
+              false;
+          final shouldHideBanner =
+              hasVrcRequestConcierge &&
+              !wasAlreadyPresent &&
+              pendingState.shouldShowVrcBanner;
+
+          final hasVrcExchangeInitiated = next.messages.any(
+            (m) =>
+                m is chat.EventMessage &&
+                m.eventType ==
+                    chat.EventMessageType.fromJson('vrcExchangeInitiated'),
+          );
+          final hasVrcExchangeDoLater = next.messages.any(
+            (m) =>
+                m is chat.EventMessage &&
+                m.eventType ==
+                    chat.EventMessageType.fromJson('vrcExchangeDoLater'),
+          );
+          final hasVrcExchangeCompleted = next.messages.any(
+            (m) =>
+                m is chat.EventMessage &&
+                m.eventType ==
+                    chat.EventMessageType.fromJson('vrcExchangeCompleted'),
+          );
 
           pendingState = pendingState.copyWith(
             messages: next.messages,
@@ -98,6 +151,16 @@ class ChatScreenController extends _$ChatScreenController
             group: next.group ?? pendingState.group,
             otherPartyCard: next.otherPartyCard ?? pendingState.otherPartyCard,
             effect: newEffect,
+            shouldShowVrcBanner:
+                (shouldHideBanner ||
+                    hasVrcExchangeInitiated ||
+                    hasVrcExchangeDoLater)
+                ? false
+                : pendingState.shouldShowVrcBanner,
+            shouldEnableVrcAttachment:
+                (hasVrcExchangeInitiated || hasVrcExchangeCompleted)
+                ? false
+                : pendingState.shouldEnableVrcAttachment,
           );
 
           if (hasInitializedState) {
@@ -135,10 +198,13 @@ class ChatScreenController extends _$ChatScreenController
 
     messageTextController.addListener(_onMessageTextChanged);
 
+    _subscribeToVrcPlugin();
+
     ref.onDispose(() {
+      _vrcPluginSubscription?.cancel();
+      _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
-      _rCardPluginSubscription?.cancel();
       _chatService?.pauseChat();
 
       messageTextController.removeListener(_onMessageTextChanged);
@@ -362,6 +428,29 @@ class ChatScreenController extends _$ChatScreenController
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
       final connection = await coreSdk.getConnectionOffer(channel.offerLink);
       state = state.copyWith(group: group, offerName: connection?.offerName);
+    } else if (channel.type == ChannelType.individual) {
+      final hasVrc = await ref
+          .read(vrcServiceProvider.notifier)
+          .hasVrcInChannel(channelDid);
+      final hasVrcExchangeInitiated = state.hasVrcExchangeInitiated;
+      final hasVrcExchangeDoLater = state.hasVrcExchangeDoLater;
+      final hasVrcRequestReceived = state.hasVrcRequestReceived;
+      final hasPendingVrcConcierge = state.hasPendingVrcConcierge;
+      final suppressBanner =
+          hasVrc ||
+          hasVrcExchangeInitiated ||
+          hasVrcExchangeDoLater ||
+          hasPendingVrcConcierge;
+      final shouldEnableAttachment =
+          !hasVrc &&
+          !hasVrcExchangeInitiated &&
+          (!hasPendingVrcConcierge ||
+              hasVrcRequestReceived ||
+              hasVrcExchangeDoLater);
+      state = state.copyWith(
+        shouldShowVrcBanner: !suppressBanner,
+        shouldEnableVrcAttachment: shouldEnableAttachment,
+      );
     }
 
     _hideActivity();
@@ -678,6 +767,107 @@ class ChatScreenController extends _$ChatScreenController
         .read(contactsServiceProvider.notifier)
         .updateContact(updatedContact);
   }
+
+  Future<void> selectIdentityAndApproveVrcExchange({
+    required Identity identity,
+    required VrcExchangeRole role,
+  }) async {
+    try {
+      final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+
+      if (role == VrcExchangeRole.initiator) {
+        final channelDid = state.contact?.channelDid;
+        if (channelDid == null) return;
+        await relationshipSdk.requestVrcExchange(
+          channelDid: channelDid,
+          identityDid: identity.did,
+          identityName: identity.card.displayName,
+        );
+        state = state.copyWith(
+          shouldShowVrcBanner: false,
+          shouldEnableVrcAttachment: false,
+        );
+        await _chatService?.persistLocalEventMessage(
+          chat.EventMessageType.fromJson('vrcExchangeInitiated'),
+          data: {
+            'identityDid': identity.did,
+            'identityName': identity.card.displayName,
+          },
+        );
+      } else {
+        final peerIdentityDid = state.vrcRequestIdentityDid ?? '';
+        final peerIdentityName = state.vrcRequestIdentityName ?? '';
+        final channelDid = state.contact?.channelDid;
+        if (channelDid == null) return;
+        final sentVcBlob = await relationshipSdk.sendVrc(
+          channelDid: channelDid,
+          issuerDid: identity.did,
+          issuerName: identity.card.displayName,
+          peerDid: peerIdentityDid,
+          peerName: peerIdentityName,
+        );
+        if (sentVcBlob.isNotEmpty) {
+          final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+          final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+            channelDid,
+          );
+          final senderDid = channel?.permanentChannelDid;
+          if (senderDid == null || senderDid.isEmpty) return;
+          await _chatService?.showSentVrcAttachment(
+            vcBlob: sentVcBlob,
+            senderDid: senderDid,
+          );
+        }
+        await _chatService?.dismissVrcConciergeMessages();
+
+        state = state.copyWith(
+          shouldEnableVrcAttachment: false,
+          shouldShowVrcBanner: false,
+        );
+      }
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to approve VRC exchange',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    }
+  }
+
+  Future<void> doLaterVrcExchangeFromConcierge() async {
+    await _chatService?.dismissVrcConciergeMessages();
+    state = state.copyWith(
+      shouldShowVrcBanner: false,
+      shouldEnableVrcAttachment: true,
+    );
+    await _chatService?.persistLocalEventMessage(
+      chat.EventMessageType.fromJson('vrcExchangeDoLater'),
+    );
+  }
+
+  Future<void> doLaterVrcExchangeFromBanner() async {
+    await _chatService?.persistLocalEventMessage(
+      chat.EventMessageType.fromJson('vrcExchangeDoLater'),
+    );
+    state = state.copyWith(
+      shouldShowVrcBanner: false,
+      shouldEnableVrcAttachment: true,
+    );
+  }
+
+  void resetShouldStartVrcExchangeFromAttachment() {
+    state = state.copyWith(shouldStartVrcExchangeFromAttachment: false);
+  }
+
+  void _subscribeToVrcPlugin() {
+    _vrcPluginSubscription?.cancel();
+    final plugins = ref.read(availableAttachmentPluginsProvider);
+    final vrcPlugin = plugins.whereType<VrcAttachmentsPlugin>().firstOrNull;
+    _vrcPluginSubscription = vrcPlugin?.onPick.listen((_) {
+      state = state.copyWith(shouldStartVrcExchangeFromAttachment: true);
+    });
+  }
 }
 
 extension ChatScreenControllerProviderSelectors
@@ -693,7 +883,9 @@ extension ChatScreenControllerProviderSelectors
         return state.offerName ?? '';
       }
 
-      return state.otherPartyCard?.firstName ?? '';
+      return state.otherPartyCard?.firstName ??
+          state.contact?.card.firstName ??
+          '';
     });
   }
 
@@ -705,7 +897,7 @@ extension ChatScreenControllerProviderSelectors
     return select((state) {
       if (state.contact?.isGroup ?? false) return null;
 
-      return state.otherPartyCard?.firstName;
+      return state.otherPartyCard?.firstName ?? state.contact?.card.firstName;
     });
   }
 

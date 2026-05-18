@@ -66,6 +66,7 @@ void main() {
         identities: [FakeIdentities.primaryIdentity],
         mediators: [],
         contacts: [FakeContacts.individualContact],
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -83,6 +84,7 @@ void main() {
         identities: [FakeIdentities.primaryIdentity],
         mediators: [],
         contacts: [FakeContacts.individualContact],
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -97,6 +99,7 @@ void main() {
         identities: [FakeIdentities.primaryIdentity],
         mediators: [],
         contacts: [FakeContacts.individualContact],
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -114,6 +117,7 @@ void main() {
         identities: [FakeIdentities.primaryIdentity],
         mediators: [],
         contacts: [FakeContacts.individualContact],
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -148,6 +152,7 @@ void main() {
         mediators: [],
         contacts: [FakeContacts.individualContact],
         rCards: [alice, bob],
+        rCardsServiceFactory: () => FakeRCardsService([alice, bob]),
       );
       await tester.pumpAndSettle();
 
@@ -170,6 +175,7 @@ void main() {
         '/r-cards',
         identities: [FakeIdentities.primaryIdentity],
         mediators: [],
+        rCardsServiceFactory: () => FakeRCardsService(const []),
       );
       await tester.pumpAndSettle();
 
@@ -198,6 +204,7 @@ void main() {
         mediators: [],
         contacts: [FakeContacts.individualContact],
         rCards: [alice],
+        rCardsServiceFactory: () => FakeRCardsService([alice]),
       );
       await tester.pumpAndSettle();
 
@@ -214,7 +221,7 @@ void main() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(
               const MethodChannel('dev.fluttercommunity.plus/share'),
-              (MethodCall methodCall) async => {'status': 'success', 'raw': ''},
+              (MethodCall methodCall) async => null,
             );
 
         final alice = RCard(

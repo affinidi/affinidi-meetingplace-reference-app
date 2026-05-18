@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'meeting_place_sdk_provider.dart';
 import 'r_cards_repository_provider.dart';
+import 'vrc_repository_provider.dart';
 
 part 'relationship_sdk_provider.g.dart';
 
@@ -19,10 +20,12 @@ part 'relationship_sdk_provider.g.dart';
 @Riverpod(keepAlive: true)
 Future<MeetingPlaceRelationshipSDK> relationshipSdk(Ref ref) async {
   final coreSDK = await ref.read(meetingPlaceSdkProvider.future);
-  final repository = await ref.read(rCardsRepositoryProvider.future);
+  final rCardRepository = await ref.read(rCardsRepositoryProvider.future);
+  final vrcRepository = await ref.read(vrcRepositoryProvider.future);
 
   return MeetingPlaceRelationshipSDK(
     coreSDK: coreSDK,
-    rCardRepository: repository,
+    rCardRepository: rCardRepository,
+    vrcRepository: vrcRepository,
   );
 }

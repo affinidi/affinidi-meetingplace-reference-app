@@ -31,6 +31,9 @@ class RoutePaths {
   static const rCards = '/r-cards';
   static const rCardDetails = ':subjectDid/details';
 
+  // VRC
+  static const vrcDetails = ':credentialId/vrc-details';
+
   // Media
   static const media = '/media';
   static const mediaPreview = 'preview';

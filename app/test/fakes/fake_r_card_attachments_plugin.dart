@@ -4,7 +4,7 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 
 class FakeUnsupportedRCardPlugin implements AttachmentPlugin {
   @override
-  String get icon => '💳';
+  AttachmentPluginIcon get icon => const EmojiIcon('💳');
 
   @override
   bool get isPlatformSupported => false;

@@ -76,9 +76,7 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
                         .ensureInitialized();
 
                     final externalRef = channel.externalRef;
-                    if (externalRef == null || externalRef.isEmpty) {
-                      return null;
-                    }
+                    if (externalRef == null || externalRef.isEmpty) return null;
 
                     final identity = ref
                         .read(identitiesServiceProvider)
@@ -87,7 +85,7 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
 
                     final didManager = await getDidManager(identity.did);
 
-                    return RCardDIDCommAttachmentBuilder.buildForOwner(
+                    return RCardDIDCommAttachmentBuilder.build(
                       issuerDid: identity.did,
                       card: RCardSubject(
                         firstName: identity.card.firstName,

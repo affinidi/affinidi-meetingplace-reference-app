@@ -76,9 +76,17 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final List<Map<String, dynamic>> _publishOfferCalls = [];
   List<Map<String, dynamic>> get publishOfferCalls => _publishOfferCalls;
 
+  final List<ConnectionOffer> _allConnectionOffers = [];
+
+  void setAllConnectionOffers(List<ConnectionOffer> offers) {
+    _allConnectionOffers
+      ..clear()
+      ..addAll(offers);
+  }
+
   @override
   Future<List<ConnectionOffer>> listConnectionOffers() async {
-    return [];
+    return List.unmodifiable(_allConnectionOffers);
   }
 
   @override
@@ -337,13 +345,62 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   }
 
   @override
-  Stream<(Channel, List<Attachment>)> get channelAttachments =>
-      const Stream.empty();
+  Stream<ChannelAttachmentEvent> get channelAttachments => const Stream.empty();
 
   @override
   VdipClient get vdip => _fakeVdipClient;
 
   final _fakeVdipClient = _FakeVdipClient();
+
+  final Map<String, List<ConnectionOffer>> _connectionOffersByExternalRef = {};
+
+  void setConnectionOffersForExternalRef(
+    String externalRef,
+    List<ConnectionOffer> offers,
+  ) {
+    _connectionOffersByExternalRef[externalRef] = offers;
+  }
+
+  @override
+  Future<List<ConnectionOffer>> getConnectionOffersByExternalRef(
+    String externalRef,
+  ) async {
+    return _connectionOffersByExternalRef[externalRef] ?? [];
+  }
+
+  final List<Map<String, dynamic>> _updateScoreForOffersCalls = [];
+  List<Map<String, dynamic>> get updateScoreForOffersCalls =>
+      _updateScoreForOffersCalls;
+
+  @override
+  Future<UpdateScoreForOffersResult> updateScoreForOffers({
+    required int score,
+    required List<ConnectionOffer> offers,
+  }) async {
+    _updateScoreForOffersCalls.add({'score': score, 'offers': offers});
+    return UpdateScoreForOffersResult(
+      updatedOffers: offers.map((o) => o.mnemonic).toList(),
+      failedOffers: [],
+    );
+  }
+
+  final List<Map<String, dynamic>> _updateLocalConnectionOffersScoreCalls = [];
+  List<Map<String, dynamic>> get updateLocalConnectionOffersScoreCalls =>
+      _updateLocalConnectionOffersScoreCalls;
+
+  @override
+  Future<void> updateLocalConnectionOffersScore({
+    required int score,
+    required List<ConnectionOffer> offers,
+  }) async {
+    _updateLocalConnectionOffersScoreCalls.add({
+      'score': score,
+      'offers': offers,
+    });
+  }
+
+  @override
+  Future<void> closeVdipStream() async {}
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
@@ -484,6 +541,7 @@ class _FakeOobStream implements OobStream {
 
 class _FakeVdipClient implements VdipClient {
   final List<Future<void> Function(PlainTextMessage)> _messageProcessors = [];
+  final List<Map<String, dynamic>> sendIssuedCredentialCalls = [];
 
   @override
   Stream<PlainTextMessage> get incomingMessages => const Stream.empty();
@@ -505,6 +563,18 @@ class _FakeVdipClient implements VdipClient {
     required VerifiableCredential credential,
   }) async {
     // no-op: credential issuance is not tested at the network level
+  }
+
+  @override
+  Future<void> sendIssuedCredential({
+    required String senderDid,
+    required String recipientDid,
+    required VdipIssuedCredentialBody body,
+  }) async {
+    sendIssuedCredentialCalls.add({
+      'senderDid': senderDid,
+      'recipientDid': recipientDid,
+    });
   }
 
   @override

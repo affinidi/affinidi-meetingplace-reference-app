@@ -40,4 +40,7 @@ class RouteNames {
   // R-Cards
   static const rCards = 'rCards';
   static const rCardDetails = 'rCardDetails';
+
+  // VRC
+  static const vrcDetails = 'vrcDetails';
 }

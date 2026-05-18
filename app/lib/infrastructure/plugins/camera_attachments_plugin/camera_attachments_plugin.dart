@@ -109,7 +109,8 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
   }
 
   @override
-  String get icon => '📷';
+  @override
+  AttachmentPluginIcon get icon => const EmojiIcon('📷');
 
   @override
   String localizedName(BuildContext context) => context.l10n.generalCamera;

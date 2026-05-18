@@ -74,6 +74,7 @@ dependencies:
   riverpod_annotation: ^4.0.2
   share_plus: ^12.0.1
   shared_preferences: ^2.5.3
+  skeletonizer: ^2.1.3
   smooth_page_indicator: ^1.2.1
   sqlite3: ^3.0.0
   ssi: ^3.3.0

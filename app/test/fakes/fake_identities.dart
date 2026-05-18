@@ -5,7 +5,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card
 class FakeIdentities {
   static final primaryIdentity = Identity(
     id: 'primary-identity-id',
-    did: '',
+    did: 'did:key:primary-identity',
     card: ContactCard(
       id: 'primary-identity-id',
       did: 'did:key:primary-identity',
@@ -20,7 +20,7 @@ class FakeIdentities {
 
   static final secondaryIdentity = Identity(
     id: 'secondary-identity-id',
-    did: '',
+    did: 'did:key:secondary-identity',
     card: ContactCard(
       id: 'secondary-identity-id',
       did: 'did:key:secondary-identity',

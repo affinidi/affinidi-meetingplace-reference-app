@@ -18,6 +18,7 @@ import '../../presentation/screens/oob/oob_share_qr_screen/oob_share_qr_screen.d
 import '../../presentation/screens/r_cards/r_card_details_screen.dart';
 import '../../presentation/screens/r_cards/r_cards_screen.dart';
 import '../../presentation/screens/settings/settings_screen.dart';
+import '../../presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
 import '../router_config_provider.dart';
 import 'route_names.dart';
 import 'route_paths.dart';
@@ -33,6 +34,7 @@ part 'offer/publish_offer_route.dart';
 part 'qr/oob_share_qr_route.dart';
 part 'qr/qr_scanner_route.dart';
 part 'r_card/r_card_details_route.dart';
+part 'vrc/vrc_details_route.dart';
 
 // Dashboard shell route
 @TypedStatefulShellRoute<DashboardShellRouteData>(
@@ -114,6 +116,10 @@ part 'r_card/r_card_details_route.dart';
             TypedGoRoute<RCardDetailsRoute>(
               path: RoutePaths.rCardDetails,
               name: RouteNames.rCardDetails,
+            ),
+            TypedGoRoute<VrcDetailsRoute>(
+              path: RoutePaths.vrcDetails,
+              name: RouteNames.vrcDetails,
             ),
           ],
         ),

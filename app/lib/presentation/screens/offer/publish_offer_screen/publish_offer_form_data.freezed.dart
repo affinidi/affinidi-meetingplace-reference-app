@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PublishOfferFormData {
 
- String get headline; String get description; bool get isGroupOffer; bool get hasExpiry; bool get hasMaxUsages; bool get randomPhraseEnabled; bool get isSearchable; String get selectedMediatorDid; int? get maxUsages; String? get selectedMediatorName; DateTime? get expiryDate; String? get customPhrase; bool? get isPhraseAvailable; bool get isPhraseValidating;
+ String get headline; String get description; bool get isGroupOffer; bool get hasExpiry; bool get hasMaxUsages; bool get randomPhraseEnabled; bool get isSearchable; String get selectedMediatorDid; int? get maxUsages; int? get score; String? get selectedMediatorName; DateTime? get expiryDate; String? get customPhrase; bool? get isPhraseAvailable; bool get isPhraseValidating;
 /// Create a copy of PublishOfferFormData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $PublishOfferFormDataCopyWith<PublishOfferFormData> get copyWith => _$PublishOff
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PublishOfferFormData&&(identical(other.headline, headline) || other.headline == headline)&&(identical(other.description, description) || other.description == description)&&(identical(other.isGroupOffer, isGroupOffer) || other.isGroupOffer == isGroupOffer)&&(identical(other.hasExpiry, hasExpiry) || other.hasExpiry == hasExpiry)&&(identical(other.hasMaxUsages, hasMaxUsages) || other.hasMaxUsages == hasMaxUsages)&&(identical(other.randomPhraseEnabled, randomPhraseEnabled) || other.randomPhraseEnabled == randomPhraseEnabled)&&(identical(other.isSearchable, isSearchable) || other.isSearchable == isSearchable)&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.maxUsages, maxUsages) || other.maxUsages == maxUsages)&&(identical(other.selectedMediatorName, selectedMediatorName) || other.selectedMediatorName == selectedMediatorName)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.customPhrase, customPhrase) || other.customPhrase == customPhrase)&&(identical(other.isPhraseAvailable, isPhraseAvailable) || other.isPhraseAvailable == isPhraseAvailable)&&(identical(other.isPhraseValidating, isPhraseValidating) || other.isPhraseValidating == isPhraseValidating));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PublishOfferFormData&&(identical(other.headline, headline) || other.headline == headline)&&(identical(other.description, description) || other.description == description)&&(identical(other.isGroupOffer, isGroupOffer) || other.isGroupOffer == isGroupOffer)&&(identical(other.hasExpiry, hasExpiry) || other.hasExpiry == hasExpiry)&&(identical(other.hasMaxUsages, hasMaxUsages) || other.hasMaxUsages == hasMaxUsages)&&(identical(other.randomPhraseEnabled, randomPhraseEnabled) || other.randomPhraseEnabled == randomPhraseEnabled)&&(identical(other.isSearchable, isSearchable) || other.isSearchable == isSearchable)&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.maxUsages, maxUsages) || other.maxUsages == maxUsages)&&(identical(other.score, score) || other.score == score)&&(identical(other.selectedMediatorName, selectedMediatorName) || other.selectedMediatorName == selectedMediatorName)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.customPhrase, customPhrase) || other.customPhrase == customPhrase)&&(identical(other.isPhraseAvailable, isPhraseAvailable) || other.isPhraseAvailable == isPhraseAvailable)&&(identical(other.isPhraseValidating, isPhraseValidating) || other.isPhraseValidating == isPhraseValidating));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,headline,description,isGroupOffer,hasExpiry,hasMaxUsages,randomPhraseEnabled,isSearchable,selectedMediatorDid,maxUsages,selectedMediatorName,expiryDate,customPhrase,isPhraseAvailable,isPhraseValidating);
+int get hashCode => Object.hash(runtimeType,headline,description,isGroupOffer,hasExpiry,hasMaxUsages,randomPhraseEnabled,isSearchable,selectedMediatorDid,maxUsages,score,selectedMediatorName,expiryDate,customPhrase,isPhraseAvailable,isPhraseValidating);
 
 @override
 String toString() {
-  return 'PublishOfferFormData(headline: $headline, description: $description, isGroupOffer: $isGroupOffer, hasExpiry: $hasExpiry, hasMaxUsages: $hasMaxUsages, randomPhraseEnabled: $randomPhraseEnabled, isSearchable: $isSearchable, selectedMediatorDid: $selectedMediatorDid, maxUsages: $maxUsages, selectedMediatorName: $selectedMediatorName, expiryDate: $expiryDate, customPhrase: $customPhrase, isPhraseAvailable: $isPhraseAvailable, isPhraseValidating: $isPhraseValidating)';
+  return 'PublishOfferFormData(headline: $headline, description: $description, isGroupOffer: $isGroupOffer, hasExpiry: $hasExpiry, hasMaxUsages: $hasMaxUsages, randomPhraseEnabled: $randomPhraseEnabled, isSearchable: $isSearchable, selectedMediatorDid: $selectedMediatorDid, maxUsages: $maxUsages, score: $score, selectedMediatorName: $selectedMediatorName, expiryDate: $expiryDate, customPhrase: $customPhrase, isPhraseAvailable: $isPhraseAvailable, isPhraseValidating: $isPhraseValidating)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $PublishOfferFormDataCopyWith<$Res>  {
   factory $PublishOfferFormDataCopyWith(PublishOfferFormData value, $Res Function(PublishOfferFormData) _then) = _$PublishOfferFormDataCopyWithImpl;
 @useResult
 $Res call({
- String headline, String description, bool isGroupOffer, bool hasExpiry, bool hasMaxUsages, bool randomPhraseEnabled, bool isSearchable, String selectedMediatorDid, int? maxUsages, String? selectedMediatorName, DateTime? expiryDate, String? customPhrase, bool? isPhraseAvailable, bool isPhraseValidating
+ String headline, String description, bool isGroupOffer, bool hasExpiry, bool hasMaxUsages, bool randomPhraseEnabled, bool isSearchable, String selectedMediatorDid, int? maxUsages, int? score, String? selectedMediatorName, DateTime? expiryDate, String? customPhrase, bool? isPhraseAvailable, bool isPhraseValidating
 });
 
 
@@ -62,7 +62,7 @@ class _$PublishOfferFormDataCopyWithImpl<$Res>
 
 /// Create a copy of PublishOfferFormData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? headline = null,Object? description = null,Object? isGroupOffer = null,Object? hasExpiry = null,Object? hasMaxUsages = null,Object? randomPhraseEnabled = null,Object? isSearchable = null,Object? selectedMediatorDid = null,Object? maxUsages = freezed,Object? selectedMediatorName = freezed,Object? expiryDate = freezed,Object? customPhrase = freezed,Object? isPhraseAvailable = freezed,Object? isPhraseValidating = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? headline = null,Object? description = null,Object? isGroupOffer = null,Object? hasExpiry = null,Object? hasMaxUsages = null,Object? randomPhraseEnabled = null,Object? isSearchable = null,Object? selectedMediatorDid = null,Object? maxUsages = freezed,Object? score = freezed,Object? selectedMediatorName = freezed,Object? expiryDate = freezed,Object? customPhrase = freezed,Object? isPhraseAvailable = freezed,Object? isPhraseValidating = null,}) {
   return _then(_self.copyWith(
 headline: null == headline ? _self.headline : headline // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -73,6 +73,7 @@ as bool,randomPhraseEnabled: null == randomPhraseEnabled ? _self.randomPhraseEna
 as bool,isSearchable: null == isSearchable ? _self.isSearchable : isSearchable // ignore: cast_nullable_to_non_nullable
 as bool,selectedMediatorDid: null == selectedMediatorDid ? _self.selectedMediatorDid : selectedMediatorDid // ignore: cast_nullable_to_non_nullable
 as String,maxUsages: freezed == maxUsages ? _self.maxUsages : maxUsages // ignore: cast_nullable_to_non_nullable
+as int?,score: freezed == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
 as int?,selectedMediatorName: freezed == selectedMediatorName ? _self.selectedMediatorName : selectedMediatorName // ignore: cast_nullable_to_non_nullable
 as String?,expiryDate: freezed == expiryDate ? _self.expiryDate : expiryDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,customPhrase: freezed == customPhrase ? _self.customPhrase : customPhrase // ignore: cast_nullable_to_non_nullable
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String headline,  String description,  bool isGroupOffer,  bool hasExpiry,  bool hasMaxUsages,  bool randomPhraseEnabled,  bool isSearchable,  String selectedMediatorDid,  int? maxUsages,  String? selectedMediatorName,  DateTime? expiryDate,  String? customPhrase,  bool? isPhraseAvailable,  bool isPhraseValidating)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String headline,  String description,  bool isGroupOffer,  bool hasExpiry,  bool hasMaxUsages,  bool randomPhraseEnabled,  bool isSearchable,  String selectedMediatorDid,  int? maxUsages,  int? score,  String? selectedMediatorName,  DateTime? expiryDate,  String? customPhrase,  bool? isPhraseAvailable,  bool isPhraseValidating)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PublishOfferFormData() when $default != null:
-return $default(_that.headline,_that.description,_that.isGroupOffer,_that.hasExpiry,_that.hasMaxUsages,_that.randomPhraseEnabled,_that.isSearchable,_that.selectedMediatorDid,_that.maxUsages,_that.selectedMediatorName,_that.expiryDate,_that.customPhrase,_that.isPhraseAvailable,_that.isPhraseValidating);case _:
+return $default(_that.headline,_that.description,_that.isGroupOffer,_that.hasExpiry,_that.hasMaxUsages,_that.randomPhraseEnabled,_that.isSearchable,_that.selectedMediatorDid,_that.maxUsages,_that.score,_that.selectedMediatorName,_that.expiryDate,_that.customPhrase,_that.isPhraseAvailable,_that.isPhraseValidating);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.headline,_that.description,_that.isGroupOffer,_that.hasExp
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String headline,  String description,  bool isGroupOffer,  bool hasExpiry,  bool hasMaxUsages,  bool randomPhraseEnabled,  bool isSearchable,  String selectedMediatorDid,  int? maxUsages,  String? selectedMediatorName,  DateTime? expiryDate,  String? customPhrase,  bool? isPhraseAvailable,  bool isPhraseValidating)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String headline,  String description,  bool isGroupOffer,  bool hasExpiry,  bool hasMaxUsages,  bool randomPhraseEnabled,  bool isSearchable,  String selectedMediatorDid,  int? maxUsages,  int? score,  String? selectedMediatorName,  DateTime? expiryDate,  String? customPhrase,  bool? isPhraseAvailable,  bool isPhraseValidating)  $default,) {final _that = this;
 switch (_that) {
 case _PublishOfferFormData():
-return $default(_that.headline,_that.description,_that.isGroupOffer,_that.hasExpiry,_that.hasMaxUsages,_that.randomPhraseEnabled,_that.isSearchable,_that.selectedMediatorDid,_that.maxUsages,_that.selectedMediatorName,_that.expiryDate,_that.customPhrase,_that.isPhraseAvailable,_that.isPhraseValidating);case _:
+return $default(_that.headline,_that.description,_that.isGroupOffer,_that.hasExpiry,_that.hasMaxUsages,_that.randomPhraseEnabled,_that.isSearchable,_that.selectedMediatorDid,_that.maxUsages,_that.score,_that.selectedMediatorName,_that.expiryDate,_that.customPhrase,_that.isPhraseAvailable,_that.isPhraseValidating);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +205,10 @@ return $default(_that.headline,_that.description,_that.isGroupOffer,_that.hasExp
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String headline,  String description,  bool isGroupOffer,  bool hasExpiry,  bool hasMaxUsages,  bool randomPhraseEnabled,  bool isSearchable,  String selectedMediatorDid,  int? maxUsages,  String? selectedMediatorName,  DateTime? expiryDate,  String? customPhrase,  bool? isPhraseAvailable,  bool isPhraseValidating)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String headline,  String description,  bool isGroupOffer,  bool hasExpiry,  bool hasMaxUsages,  bool randomPhraseEnabled,  bool isSearchable,  String selectedMediatorDid,  int? maxUsages,  int? score,  String? selectedMediatorName,  DateTime? expiryDate,  String? customPhrase,  bool? isPhraseAvailable,  bool isPhraseValidating)?  $default,) {final _that = this;
 switch (_that) {
 case _PublishOfferFormData() when $default != null:
-return $default(_that.headline,_that.description,_that.isGroupOffer,_that.hasExpiry,_that.hasMaxUsages,_that.randomPhraseEnabled,_that.isSearchable,_that.selectedMediatorDid,_that.maxUsages,_that.selectedMediatorName,_that.expiryDate,_that.customPhrase,_that.isPhraseAvailable,_that.isPhraseValidating);case _:
+return $default(_that.headline,_that.description,_that.isGroupOffer,_that.hasExpiry,_that.hasMaxUsages,_that.randomPhraseEnabled,_that.isSearchable,_that.selectedMediatorDid,_that.maxUsages,_that.score,_that.selectedMediatorName,_that.expiryDate,_that.customPhrase,_that.isPhraseAvailable,_that.isPhraseValidating);case _:
   return null;
 
 }
@@ -219,7 +220,7 @@ return $default(_that.headline,_that.description,_that.isGroupOffer,_that.hasExp
 
 
 class _PublishOfferFormData implements PublishOfferFormData {
-  const _PublishOfferFormData({required this.headline, required this.description, required this.isGroupOffer, required this.hasExpiry, required this.hasMaxUsages, required this.randomPhraseEnabled, required this.isSearchable, required this.selectedMediatorDid, this.maxUsages, this.selectedMediatorName, this.expiryDate, this.customPhrase, this.isPhraseAvailable, this.isPhraseValidating = false});
+  const _PublishOfferFormData({required this.headline, required this.description, required this.isGroupOffer, required this.hasExpiry, required this.hasMaxUsages, required this.randomPhraseEnabled, required this.isSearchable, required this.selectedMediatorDid, this.maxUsages, this.score, this.selectedMediatorName, this.expiryDate, this.customPhrase, this.isPhraseAvailable, this.isPhraseValidating = false});
   
 
 @override final  String headline;
@@ -231,6 +232,7 @@ class _PublishOfferFormData implements PublishOfferFormData {
 @override final  bool isSearchable;
 @override final  String selectedMediatorDid;
 @override final  int? maxUsages;
+@override final  int? score;
 @override final  String? selectedMediatorName;
 @override final  DateTime? expiryDate;
 @override final  String? customPhrase;
@@ -247,16 +249,16 @@ _$PublishOfferFormDataCopyWith<_PublishOfferFormData> get copyWith => __$Publish
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PublishOfferFormData&&(identical(other.headline, headline) || other.headline == headline)&&(identical(other.description, description) || other.description == description)&&(identical(other.isGroupOffer, isGroupOffer) || other.isGroupOffer == isGroupOffer)&&(identical(other.hasExpiry, hasExpiry) || other.hasExpiry == hasExpiry)&&(identical(other.hasMaxUsages, hasMaxUsages) || other.hasMaxUsages == hasMaxUsages)&&(identical(other.randomPhraseEnabled, randomPhraseEnabled) || other.randomPhraseEnabled == randomPhraseEnabled)&&(identical(other.isSearchable, isSearchable) || other.isSearchable == isSearchable)&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.maxUsages, maxUsages) || other.maxUsages == maxUsages)&&(identical(other.selectedMediatorName, selectedMediatorName) || other.selectedMediatorName == selectedMediatorName)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.customPhrase, customPhrase) || other.customPhrase == customPhrase)&&(identical(other.isPhraseAvailable, isPhraseAvailable) || other.isPhraseAvailable == isPhraseAvailable)&&(identical(other.isPhraseValidating, isPhraseValidating) || other.isPhraseValidating == isPhraseValidating));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PublishOfferFormData&&(identical(other.headline, headline) || other.headline == headline)&&(identical(other.description, description) || other.description == description)&&(identical(other.isGroupOffer, isGroupOffer) || other.isGroupOffer == isGroupOffer)&&(identical(other.hasExpiry, hasExpiry) || other.hasExpiry == hasExpiry)&&(identical(other.hasMaxUsages, hasMaxUsages) || other.hasMaxUsages == hasMaxUsages)&&(identical(other.randomPhraseEnabled, randomPhraseEnabled) || other.randomPhraseEnabled == randomPhraseEnabled)&&(identical(other.isSearchable, isSearchable) || other.isSearchable == isSearchable)&&(identical(other.selectedMediatorDid, selectedMediatorDid) || other.selectedMediatorDid == selectedMediatorDid)&&(identical(other.maxUsages, maxUsages) || other.maxUsages == maxUsages)&&(identical(other.score, score) || other.score == score)&&(identical(other.selectedMediatorName, selectedMediatorName) || other.selectedMediatorName == selectedMediatorName)&&(identical(other.expiryDate, expiryDate) || other.expiryDate == expiryDate)&&(identical(other.customPhrase, customPhrase) || other.customPhrase == customPhrase)&&(identical(other.isPhraseAvailable, isPhraseAvailable) || other.isPhraseAvailable == isPhraseAvailable)&&(identical(other.isPhraseValidating, isPhraseValidating) || other.isPhraseValidating == isPhraseValidating));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,headline,description,isGroupOffer,hasExpiry,hasMaxUsages,randomPhraseEnabled,isSearchable,selectedMediatorDid,maxUsages,selectedMediatorName,expiryDate,customPhrase,isPhraseAvailable,isPhraseValidating);
+int get hashCode => Object.hash(runtimeType,headline,description,isGroupOffer,hasExpiry,hasMaxUsages,randomPhraseEnabled,isSearchable,selectedMediatorDid,maxUsages,score,selectedMediatorName,expiryDate,customPhrase,isPhraseAvailable,isPhraseValidating);
 
 @override
 String toString() {
-  return 'PublishOfferFormData(headline: $headline, description: $description, isGroupOffer: $isGroupOffer, hasExpiry: $hasExpiry, hasMaxUsages: $hasMaxUsages, randomPhraseEnabled: $randomPhraseEnabled, isSearchable: $isSearchable, selectedMediatorDid: $selectedMediatorDid, maxUsages: $maxUsages, selectedMediatorName: $selectedMediatorName, expiryDate: $expiryDate, customPhrase: $customPhrase, isPhraseAvailable: $isPhraseAvailable, isPhraseValidating: $isPhraseValidating)';
+  return 'PublishOfferFormData(headline: $headline, description: $description, isGroupOffer: $isGroupOffer, hasExpiry: $hasExpiry, hasMaxUsages: $hasMaxUsages, randomPhraseEnabled: $randomPhraseEnabled, isSearchable: $isSearchable, selectedMediatorDid: $selectedMediatorDid, maxUsages: $maxUsages, score: $score, selectedMediatorName: $selectedMediatorName, expiryDate: $expiryDate, customPhrase: $customPhrase, isPhraseAvailable: $isPhraseAvailable, isPhraseValidating: $isPhraseValidating)';
 }
 
 
@@ -267,7 +269,7 @@ abstract mixin class _$PublishOfferFormDataCopyWith<$Res> implements $PublishOff
   factory _$PublishOfferFormDataCopyWith(_PublishOfferFormData value, $Res Function(_PublishOfferFormData) _then) = __$PublishOfferFormDataCopyWithImpl;
 @override @useResult
 $Res call({
- String headline, String description, bool isGroupOffer, bool hasExpiry, bool hasMaxUsages, bool randomPhraseEnabled, bool isSearchable, String selectedMediatorDid, int? maxUsages, String? selectedMediatorName, DateTime? expiryDate, String? customPhrase, bool? isPhraseAvailable, bool isPhraseValidating
+ String headline, String description, bool isGroupOffer, bool hasExpiry, bool hasMaxUsages, bool randomPhraseEnabled, bool isSearchable, String selectedMediatorDid, int? maxUsages, int? score, String? selectedMediatorName, DateTime? expiryDate, String? customPhrase, bool? isPhraseAvailable, bool isPhraseValidating
 });
 
 
@@ -284,7 +286,7 @@ class __$PublishOfferFormDataCopyWithImpl<$Res>
 
 /// Create a copy of PublishOfferFormData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? headline = null,Object? description = null,Object? isGroupOffer = null,Object? hasExpiry = null,Object? hasMaxUsages = null,Object? randomPhraseEnabled = null,Object? isSearchable = null,Object? selectedMediatorDid = null,Object? maxUsages = freezed,Object? selectedMediatorName = freezed,Object? expiryDate = freezed,Object? customPhrase = freezed,Object? isPhraseAvailable = freezed,Object? isPhraseValidating = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? headline = null,Object? description = null,Object? isGroupOffer = null,Object? hasExpiry = null,Object? hasMaxUsages = null,Object? randomPhraseEnabled = null,Object? isSearchable = null,Object? selectedMediatorDid = null,Object? maxUsages = freezed,Object? score = freezed,Object? selectedMediatorName = freezed,Object? expiryDate = freezed,Object? customPhrase = freezed,Object? isPhraseAvailable = freezed,Object? isPhraseValidating = null,}) {
   return _then(_PublishOfferFormData(
 headline: null == headline ? _self.headline : headline // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
@@ -295,6 +297,7 @@ as bool,randomPhraseEnabled: null == randomPhraseEnabled ? _self.randomPhraseEna
 as bool,isSearchable: null == isSearchable ? _self.isSearchable : isSearchable // ignore: cast_nullable_to_non_nullable
 as bool,selectedMediatorDid: null == selectedMediatorDid ? _self.selectedMediatorDid : selectedMediatorDid // ignore: cast_nullable_to_non_nullable
 as String,maxUsages: freezed == maxUsages ? _self.maxUsages : maxUsages // ignore: cast_nullable_to_non_nullable
+as int?,score: freezed == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
 as int?,selectedMediatorName: freezed == selectedMediatorName ? _self.selectedMediatorName : selectedMediatorName // ignore: cast_nullable_to_non_nullable
 as String?,expiryDate: freezed == expiryDate ? _self.expiryDate : expiryDate // ignore: cast_nullable_to_non_nullable
 as DateTime?,customPhrase: freezed == customPhrase ? _self.customPhrase : customPhrase // ignore: cast_nullable_to_non_nullable

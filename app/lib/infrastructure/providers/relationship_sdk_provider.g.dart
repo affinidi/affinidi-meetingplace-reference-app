@@ -6,7 +6,7 @@ part of 'relationship_sdk_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$relationshipSdkHash() => r'4580bd51eca5599a21eecb7bf71dcff6e046dbf7';
+String _$relationshipSdkHash() => r'58aed20a8830106186da02ab0f789c3ef2d44dbb';
 
 /// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
 /// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.

@@ -10,8 +10,8 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_reposito
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/relationship_sdk_provider.dart';
 
+import '../../../fakes/fake_channels.dart';
 import '../../../fakes/fake_chat_repository.dart';
-import '../../../fakes/fake_contacts.dart';
 import '../../../fakes/fake_contacts_service.dart';
 import '../../../fakes/fake_r_card_repository.dart';
 import '../../../fakes/fake_relationship_sdk.dart';
@@ -62,11 +62,11 @@ void main() {
           version: 1,
           issuanceDate: DateTime(2024),
           receivedAt: DateTime(2024),
-          localChannelDid: FakeContacts.groupContact.channelDid,
-          contactChannelDid: 'did:key:other-party',
         );
 
-        fakeRelationshipSdk.emit(rCard);
+        fakeRelationshipSdk.emitOnChannel(
+          ChannelRCardEvent(channel: FakeChannels.groupChannel, rCard: rCard),
+        );
         await Future<void>.delayed(Duration.zero);
 
         expect(fakeChatRepo.createdMessages, isEmpty);
@@ -83,11 +83,14 @@ void main() {
           version: 1,
           issuanceDate: DateTime(2024),
           receivedAt: DateTime(2024),
-          localChannelDid: FakeContacts.individualContact.channelDid,
-          contactChannelDid: 'did:key:other-party',
         );
 
-        fakeRelationshipSdk.emit(rCard);
+        fakeRelationshipSdk.emitOnChannel(
+          ChannelRCardEvent(
+            channel: FakeChannels.individualChannel,
+            rCard: rCard,
+          ),
+        );
         await Future<void>.delayed(Duration.zero);
 
         expect(fakeChatRepo.createdMessages, hasLength(1));

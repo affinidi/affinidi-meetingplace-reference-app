@@ -18,10 +18,10 @@ part 'r_card_chat_notifier_service.g.dart';
 /// Global service that creates chat messages for R-Cards delivered via the
 /// DIDComm channel-inauguration (OOB) path.
 ///
-/// These R-Cards arrive on [MeetingPlaceRelationshipSDK.receivedRCards] with
-/// [RCard.localChannelDid] set (populated by
-/// `RCardChannelStreamManager`). When detected, this service persists an
-/// R-Card attachment message in the relevant chat so users see the
+/// These R-Cards arrive on
+/// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+/// originating channel. When detected, this service persists an R-Card
+/// attachment message in the relevant chat so users see the
 /// "R-Cards have been exchanged." notice when they open the conversation.
 ///
 /// VDIP-path R-Cards (explicit sends) are handled by [ChatSessionService] and
@@ -32,7 +32,7 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
 
   late final AppLogger _logger = ref.read(appLoggerProvider);
 
-  StreamSubscription<RCard>? _sub;
+  StreamSubscription<ChannelRCardEvent>? _sub;
 
   @override
   void build() {
@@ -45,8 +45,8 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
       final sdk = await ref.read(relationshipSdkProvider.future);
       final chatRepo = await ref.read(chatRepositoryProvider.future);
 
-      _sub = sdk.receivedRCards.listen(
-        (rCard) => unawaited(_onRCardReceived(rCard, chatRepo)),
+      _sub = sdk.receivedRCardsOnChannel.listen(
+        (event) => unawaited(_onRCardReceived(event, chatRepo)),
         onError: (Object error, StackTrace st) {
           _logger.error(
             'Error in R-Card chat notifier stream',
@@ -67,12 +67,14 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
   }
 
   Future<void> _onRCardReceived(
-    RCard rCard,
+    ChannelRCardEvent event,
     chat.ChatRepository chatRepo,
   ) async {
-    // Only handle inauguration-path R-Cards — those have localChannelDid set.
-    final localChannelDid = rCard.localChannelDid;
-    final theirChannelDid = rCard.contactChannelDid;
+    // Only handle inauguration-path R-Cards — those arrive on
+    // receivedRCardsOnChannel with channel context attached.
+    final localChannelDid = event.channel.permanentChannelDid;
+    final theirChannelDid = event.channel.otherPartyPermanentChannelDid;
+    final rCard = event.rCard;
     if (localChannelDid == null ||
         localChannelDid.isEmpty ||
         theirChannelDid == null ||
