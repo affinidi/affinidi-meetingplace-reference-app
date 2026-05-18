@@ -40,6 +40,11 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
 
   /// Color for concierge messages in chat
   static const conciergeMessageColor = Color.fromARGB(255, 53, 130, 6);
+  static const grey800 = Color(0xFF404040);
+  static const conciergeCardGradientStart = grey800;
+  static const conciergeCardGradientEnd = Color(0xFF1F1F1F);
+  static const conciergeActionOnWhite = grey800;
+
   static const primaryBrand10 = Color(0xFFE8EEFF);
   static const secondaryBrand90 = Color(0xFF1D2138);
   static const utilitySuccess100 = Color(0xFF00A08D);

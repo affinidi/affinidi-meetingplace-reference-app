@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/app_custom_colors.dart';
 
 class ConciergeMessage extends StatelessWidget {
   const ConciergeMessage({
@@ -99,8 +100,8 @@ class ConciergeMessage extends StatelessWidget {
             center: Alignment.bottomCenter,
             radius: 2,
             colors: [
-              Color.fromARGB(255, 76, 76, 76),
-              Color.fromARGB(255, 31, 31, 31),
+              AppCustomColors.conciergeCardGradientStart,
+              AppCustomColors.conciergeCardGradientEnd,
             ],
           ),
         ),
