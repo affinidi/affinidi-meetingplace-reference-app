@@ -62,29 +62,26 @@ void main() {
       expect(controller.hasTouchedMobile, isTrue);
     });
 
-    test(
-      'does not mark mobile as touched when library normalizes a stored '
-      'formatted number',
-      () {
-        // Stored with hyphens; library returns digits-only E.164
-        final identity = FakeIdentities.primaryIdentity.copyWith(
-          card: FakeIdentities.primaryIdentity.card.copyWith(
-            mobile: '+1-234-567-890',
-          ),
-        );
-        final service = _FakeIdentitiesService([identity]);
-        final container = makeContainer(service);
-        final provider = identityFormScreenControllerProvider(identity.id);
-        final controller = container.read(provider.notifier);
+    test('does not mark mobile as touched when library normalizes a stored '
+        'formatted number', () {
+      // Stored with hyphens; library returns digits-only E.164
+      final identity = FakeIdentities.primaryIdentity.copyWith(
+        card: FakeIdentities.primaryIdentity.card.copyWith(
+          mobile: '+1-234-567-890',
+        ),
+      );
+      final service = _FakeIdentitiesService([identity]);
+      final container = makeContainer(service);
+      final provider = identityFormScreenControllerProvider(identity.id);
+      final controller = container.read(provider.notifier);
 
-        container.read(provider);
-        controller.updateMobile(
-          PhoneNumber(phoneNumber: '+1234567890', isoCode: 'US'),
-        );
+      container.read(provider);
+      controller.updateMobile(
+        PhoneNumber(phoneNumber: '+1234567890', isoCode: 'US'),
+      );
 
-        expect(controller.hasTouchedMobile, isFalse);
-      },
-    );
+      expect(controller.hasTouchedMobile, isFalse);
+    });
 
     testWidgets(
       'does not mark mobile as touched after both init callbacks for a '
