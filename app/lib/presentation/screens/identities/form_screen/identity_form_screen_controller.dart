@@ -129,13 +129,14 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       controllerFor(field).text = field.valueFrom(identity.card);
     }
     aliasController.text = identity.card.displayName;
-    _storedMobile = identity.card.mobile;
-    _normalizedMobile = identity.card.mobile;
-    _isMobileValid = null;
-    _hasTouchedMobile = false;
-    _initialMobilePhoneNumber = _parseInitialMobilePhoneNumber(
+    final initialPhoneNumber = _parseInitialMobilePhoneNumber(
       identity.card.mobile,
     );
+    _storedMobile = initialPhoneNumber?.phoneNumber ?? identity.card.mobile;
+    _normalizedMobile = initialPhoneNumber?.phoneNumber;
+    _isMobileValid = null;
+    _hasTouchedMobile = false;
+    _initialMobilePhoneNumber = initialPhoneNumber;
 
     return identity;
   }

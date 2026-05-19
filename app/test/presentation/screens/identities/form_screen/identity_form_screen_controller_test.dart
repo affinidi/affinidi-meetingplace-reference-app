@@ -63,6 +63,72 @@ void main() {
     });
 
     test(
+      'does not mark mobile as touched when library normalizes a stored '
+      'formatted number',
+      () {
+        // Stored with hyphens; library returns digits-only E.164
+        final identity = FakeIdentities.primaryIdentity.copyWith(
+          card: FakeIdentities.primaryIdentity.card.copyWith(
+            mobile: '+1-234-567-890',
+          ),
+        );
+        final service = _FakeIdentitiesService([identity]);
+        final container = makeContainer(service);
+        final provider = identityFormScreenControllerProvider(identity.id);
+        final controller = container.read(provider.notifier);
+
+        container.read(provider);
+        controller.updateMobile(
+          PhoneNumber(phoneNumber: '+1234567890', isoCode: 'US'),
+        );
+
+        expect(controller.hasTouchedMobile, isFalse);
+      },
+    );
+
+    testWidgets(
+      'does not mark mobile as touched after both init callbacks for a '
+      'stored formatted number',
+      (tester) async {
+        final identity = FakeIdentities.primaryIdentity.copyWith(
+          card: FakeIdentities.primaryIdentity.card.copyWith(
+            mobile: '+1-234-567-890',
+          ),
+        );
+        final service = _FakeIdentitiesService([identity]);
+        final container = makeContainer(service);
+        final provider = identityFormScreenControllerProvider(identity.id);
+        final subscription = container.listen(provider, (_, _) {});
+        final controller = container.read(provider.notifier);
+        final formKey = GlobalKey<FormState>();
+
+        addTearDown(subscription.close);
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: Form(key: formKey, child: const SizedBox.shrink()),
+              ),
+            ),
+          ),
+        );
+
+        // Simulate both callbacks the widget fires when it pre-populates:
+        // onInputChanged fires first, then onInputValidated.
+        controller.updateMobile(
+          PhoneNumber(phoneNumber: '+1234567890', isoCode: 'US'),
+        );
+        controller.updateMobileValidation(true, formKey);
+
+        expect(controller.hasTouchedMobile, isFalse);
+      },
+    );
+
+    test(
       'preserves untouched stored mobile when saving unrelated edits',
       () async {
         final identity = FakeIdentities.primaryIdentity.copyWith(
