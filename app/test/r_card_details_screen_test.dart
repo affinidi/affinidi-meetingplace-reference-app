@@ -167,17 +167,15 @@ void main() {
     testWidgets(
       '"Chat with" button is enabled when card has a matching contact',
       (tester) async {
-        // otherPartyPermanentChannelDid matches
-        // FakeContacts.individualContact.channelDid
+        // issuerDid matches FakeContacts.individualContact.channelDid
+        // so getContactByChannelDid(card.issuerDid) returns the contact.
         final card = RCard(
           subjectDid: aliceSubjectDid,
           vcBlob: aliceVcBlob,
-          issuerDid: issuerDid,
+          issuerDid: FakeContacts.individualContact.channelDid!,
           version: 1,
           issuanceDate: DateTime(2024),
           receivedAt: DateTime(2024),
-          otherPartyPermanentChannelDid:
-              FakeContacts.individualContact.channelDid,
         );
 
         await navigateToLocation(
@@ -285,12 +283,10 @@ void main() {
       final card = RCard(
         subjectDid: aliceSubjectDid,
         vcBlob: aliceVcBlob,
-        issuerDid: issuerDid,
+        issuerDid: FakeContacts.individualContact.channelDid!,
         version: 1,
         issuanceDate: DateTime(2024),
         receivedAt: DateTime(2024),
-        otherPartyPermanentChannelDid:
-            FakeContacts.individualContact.channelDid,
       );
 
       await navigateToLocation(
@@ -321,17 +317,15 @@ void main() {
 
     testWidgets('"Chat with" pops instead of pushing when chat screen '
         'is directly below in nav stack', (tester) async {
-      // Setup: a card with otherPartyPermanentChannelDid so the
+      // Setup: a card with issuerDid matching the contact's channelDid so the
       // "Go to R-Card" link and "Chat with" button both work.
       final card = RCard(
         subjectDid: aliceSubjectDid,
         vcBlob: aliceVcBlob,
-        issuerDid: issuerDid,
+        issuerDid: FakeContacts.individualContact.channelDid!,
         version: 1,
         issuanceDate: DateTime(2024),
         receivedAt: DateTime(2024),
-        otherPartyPermanentChannelDid:
-            FakeContacts.individualContact.channelDid,
       );
 
       final chatSdk = FakeChatSdk();

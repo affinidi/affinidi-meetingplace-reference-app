@@ -136,6 +136,7 @@
 	"generalPhoto": "Foto",
 	"generalReject": "Ablehnen",
 	"generalSearch": "Suchen",
+	"generalVerify": "Bestätigen",
 	"generateRandomPhraseHelperDisabled": "Die von Ihnen eingegebene benutzerdefinierte Phrase wird verwendet, um diese Einladung zur Verbindung eindeutig zu identifizieren. Es muss einzigartig im Meeting Place-Universum sein.",
 	"generateRandomPhraseHelperEnabled": "Generieren einer zufälligen Phrase",
 	"genericPublishError": "Fehler beim Veröffentlichen des Angebots",
@@ -425,7 +426,7 @@
 			"name": { "type": "String" }
 		}
 	},
-	"vrcDoLater": "VRC-Austausch pausiert. Tippe auf + und wähle 'Verifiable Relationship Credential' um fortzufahren.",
+	"vrcDoLater": "VRC-Austausch pausiert. Tippe auf + und wähle 'Überprüfbarer Beziehungsnachweis' um fortzufahren.",
 	"vrcExchangeCompleted": "Du hast deine Beziehung erfolgreich verifiziert",
 	"vrcVerifyPrompt": "Möchtest du deine Beziehung mit {name} verifizieren? Jeder VRC-Austausch erhöht deinen Vertrauensscore.",
 	"@vrcVerifyPrompt": {

@@ -7,7 +7,6 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contact_card/contact_card.dart' as domain;
@@ -21,7 +20,6 @@ import '../../../infrastructure/extensions/did_extensions.dart';
 import '../../../infrastructure/extensions/list_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
-import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachment.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -30,11 +28,9 @@ import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/providers/relationship_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
-import '../connections_service/connections_service.dart';
 import '../contacts_service/contacts_service.dart';
 import '../identities_service/identities_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
-import '../vrc_service/vrc_service.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
 import 'chat_service_state.dart';
@@ -42,6 +38,9 @@ import 'delegates/chat_concierge_messenger.dart';
 import 'delegates/chat_group_manager.dart';
 import 'delegates/interfaces/concierge_messaging.dart';
 import 'delegates/interfaces/group_managing.dart';
+import 'delegates/r_card_manager.dart';
+import 'delegates/vdip_manager.dart';
+import 'delegates/vrc_manager.dart';
 import 'handlers/chat_message_protocol_handler.dart';
 import 'handlers/contact_card_protocol_handler.dart';
 import 'handlers/effect_protocol_handler.dart';
@@ -60,21 +59,20 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   static const _presenceGracePeriodSeconds = 1;
 
   late AppLogger _logger;
-  late String _channelDid;
+  late String _otherPartyPermanentDid;
+  late VdipManager _vdipManager;
 
   MeetingPlaceChatSDK? _chatSDK;
   String? _chatId;
   bool _isGroupChat = false;
-  bool _isConnectionInitiator = false;
   String? _otherPartyFirstName;
   ChatStream? _chatStreamRef;
-  StreamSubscription? _rCardSubscription;
-  StreamSubscription? _vrcRequestSubscription;
-  StreamSubscription? _vrcSubscription;
 
   late ConciergeMessaging _conciergeMessenger;
   late GroupManaging _groupManager;
   late ChatProtocolRouter _router;
+  late RCardManager _rCardManager;
+  late VrcManager _vrcManager;
 
   TimedAction? _presenceTimedAction;
   TimedAction? _typingTimedAction;
@@ -91,8 +89,33 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   ChatServiceState build(String channelDid) {
-    _channelDid = channelDid;
+    _otherPartyPermanentDid = channelDid;
     _logger = ref.read(appLoggerProvider);
+    _rCardManager = RCardManager(
+      ref: ref,
+      otherPartyPermanentDid: channelDid,
+      logger: _logger,
+      getChatSdk: () => _chatSDK,
+      upsertChatItem: _upsertChatItem,
+    );
+    _vrcManager = VrcManager(
+      ref: ref,
+      getChatId: () => _chatId,
+      logger: _logger,
+      getChatSdk: () => _chatSDK,
+      getMessages: () => state.messages,
+      upsertChatItem: _upsertChatItem,
+      removeChatItem: _removeChatItem,
+    );
+    _vdipManager = VdipManager(
+      ref: ref,
+      otherPartyPermanentDid: channelDid,
+      logger: _logger,
+      getChatSdk: () => _chatSDK,
+      getMessages: () => state.messages,
+      persistLocalEventMessage: _vrcManager.persistLocalEventMessage,
+      onVrcRequestReceived: _vrcManager.onVrcRequestReceived,
+    );
 
     _groupManager = ChatGroupManager(ref: ref);
     _setupChatProtocolRouter();
@@ -110,10 +133,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     ref.onDispose(() {
       _presenceTimedAction?.cancel();
       _typingTimedAction?.cancel();
-      _rCardSubscription?.cancel();
+      _rCardManager.cancelSubscription();
       _chatStreamRef?.dispose();
       _chatStreamRef = null;
-      unawaited(_cancelVrcSubscriptions());
+      unawaited(_vdipManager.cancelSubscriptions());
       _chatSDK?.endChatSession();
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
@@ -156,232 +179,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   // ---------------------------------------------------------------------------
-  // VDIP
-  // ---------------------------------------------------------------------------
-
-  /// Resolves the SDK channel and the other party's permanent DID for
-  /// [_channelDid]. Returns null if either cannot be determined.
-  Future<({Channel channel, String otherPartyDid})?> _resolveChannel() async {
-    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
-      _channelDid,
-    );
-    if (channel == null) return null;
-    final otherPartyDid = channel.otherPartyPermanentChannelDid;
-    if (otherPartyDid == null || otherPartyDid.isEmpty) return null;
-    return (channel: channel, otherPartyDid: otherPartyDid);
-  }
-
-  Future<void> _cancelVrcSubscriptions() async {
-    await _vrcRequestSubscription?.cancel();
-    await _vrcSubscription?.cancel();
-    _vrcRequestSubscription = null;
-    _vrcSubscription = null;
-  }
-
-  Future<void> _subscribeToVdipMessages() async {
-    await _cancelVrcSubscriptions();
-    final resolved = await _resolveChannel();
-    if (resolved == null) return;
-    final (:channel, :otherPartyDid) = resolved;
-
-    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
-    _isConnectionInitiator = channel.isConnectionInitiator;
-
-    _vrcRequestSubscription = relationshipSdk.receivedVrcRequests
-        .where((request) => request.senderDid == otherPartyDid)
-        .listen((request) {
-          // Clear the pending cache: this live delivery supersedes any cached
-          // event, preventing a double-handle on the next session open.
-          relationshipSdk.consumePendingVrcRequest(otherPartyDid);
-          unawaited(
-            _handleReceivedVrcRequest(request, channel, relationshipSdk),
-          );
-        });
-
-    _vrcSubscription = relationshipSdk.receivedVrcs
-        .where((receivedVrc) => receivedVrc.senderDid == otherPartyDid)
-        .listen((receivedVrc) {
-          relationshipSdk.consumePendingVrc(otherPartyDid);
-          unawaited(_handleReceivedVrc(receivedVrc.vcBlob, relationshipSdk));
-        });
-  }
-
-  /// Replays any VRC events that were dispatched before this chat session
-  /// was opened (e.g. the remote party sent a request while the local user
-  /// was offline). Must be called AFTER [_chatId] is set so that
-  /// [_onVrcRequestReceived] can persist the concierge message.
-  Future<void> _replayPendingVdipEvents() async {
-    final resolved = await _resolveChannel();
-    if (resolved == null) return;
-    final (:channel, :otherPartyDid) = resolved;
-
-    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
-
-    final pendingRequest = relationshipSdk.consumePendingVrcRequest(
-      otherPartyDid,
-    );
-    if (pendingRequest != null) {
-      await _handleReceivedVrcRequest(pendingRequest, channel, relationshipSdk);
-    }
-
-    final pendingVrc = relationshipSdk.consumePendingVrc(otherPartyDid);
-    if (pendingVrc != null) {
-      await _handleReceivedVrc(pendingVrc.vcBlob, relationshipSdk);
-    }
-  }
-
-  bool get _hasVrcExchangeCompleted => state.messages.any(
-    (message) =>
-        message is EventMessage &&
-        message.eventType == EventMessageType.fromJson('vrcExchangeCompleted'),
-  );
-
-  bool get _hasVrcExchangeInitiated => state.messages.any(
-    (message) =>
-        message is EventMessage &&
-        message.eventType == EventMessageType.fromJson('vrcExchangeInitiated'),
-  );
-
-  bool get _hasVrcRequestReceived => state.messages.any(
-    (message) =>
-        message is EventMessage &&
-        message.eventType == EventMessageType.fromJson('vrcRequestReceived'),
-  );
-
-  String? get _vrcInitiatorIdentityDid {
-    final event = state.messages.whereType<EventMessage>().firstWhereOrNull(
-      (message) =>
-          message.eventType ==
-          EventMessageType.fromJson('vrcExchangeInitiated'),
-    );
-    return event?.data['identityDid'] as String?;
-  }
-
-  String? get _vrcInitiatorIdentityName {
-    final event = state.messages.whereType<EventMessage>().firstWhereOrNull(
-      (message) =>
-          message.eventType ==
-          EventMessageType.fromJson('vrcExchangeInitiated'),
-    );
-    return event?.data['identityName'] as String?;
-  }
-
-  Future<void> _handleReceivedVrcRequest(
-    ReceivedVrcRequest request,
-    Channel channel,
-    MeetingPlaceRelationshipSDK relationshipSdk,
-  ) async {
-    final outcome = await relationshipSdk.handleReceivedVrcRequest(
-      channelDid: _channelDid,
-      request: request,
-      hasVrcExchangeInitiated: _hasVrcExchangeInitiated,
-      isConnectionInitiator: channel.isConnectionInitiator,
-      localIdentityDid: _vrcInitiatorIdentityDid,
-      localIdentityName: _vrcInitiatorIdentityName,
-      // Show the auto-issued VRC card (simultaneous-request owner path).
-      onVrcSent: (sentVcBlob) => unawaited(
-        _chatSDK?.createChatMessageFromIssuedCredential(
-          attachments: [VrcAttachment(vcBlob: sentVcBlob).toAttachment()],
-        ),
-      ),
-    );
-
-    switch (outcome) {
-      case VrcRequestReceivedOutcome.prompt:
-        await _onVrcRequestReceived(
-          _channelDid,
-          request.identityDid,
-          request.identityName,
-        );
-      case VrcRequestReceivedOutcome.issued:
-        await _onVrcRequestReceived(
-          _channelDid,
-          request.identityDid,
-          request.identityName,
-          shouldPromptForAction: false,
-        );
-        _logger.info(
-          'Handled simultaneous VRC request by issuing immediately',
-          name: _logKey,
-        );
-      case VrcRequestReceivedOutcome.waiting:
-        await _onVrcRequestReceived(
-          _channelDid,
-          request.identityDid,
-          request.identityName,
-          shouldPromptForAction: false,
-        );
-        _logger.info(
-          'Handled simultaneous VRC request by waiting for peer VRC',
-          name: _logKey,
-        );
-    }
-  }
-
-  Future<void> _handleReceivedVrc(
-    String vcBlob,
-    MeetingPlaceRelationshipSDK relationshipSdk,
-  ) async {
-    await ref.read(vrcServiceProvider.notifier).saveVrc(vcBlob, _channelDid);
-
-    // Show the received VRC card immediately as an incoming attachment.
-    await _chatSDK?.createChatMessageFromRequestCredential(
-      attachments: [VrcAttachment(vcBlob: vcBlob).toAttachment()],
-    );
-
-    final outcome = await relationshipSdk.handleReceivedVrc(
-      channelDid: _channelDid,
-      vcBlob: vcBlob,
-      hasVrcExchangeCompleted: _hasVrcExchangeCompleted,
-      hasVrcExchangeInitiated: _hasVrcExchangeInitiated,
-      hasVrcRequestReceived: _hasVrcRequestReceived,
-      isConnectionInitiator: _isConnectionInitiator,
-      localIdentityDid: _vrcInitiatorIdentityDid,
-      localIdentityName: _vrcInitiatorIdentityName,
-      // Show the reciprocated VRC card as an outgoing attachment.
-      onVrcSent: (sentVcBlob) => unawaited(
-        _chatSDK?.createChatMessageFromIssuedCredential(
-          attachments: [VrcAttachment(vcBlob: sentVcBlob).toAttachment()],
-        ),
-      ),
-    );
-
-    switch (outcome) {
-      case VrcReceivedOutcome.reciprocated:
-      case VrcReceivedOutcome.completed:
-        await persistLocalEventMessage(
-          EventMessageType.fromJson('vrcExchangeCompleted'),
-        );
-        _logger.info(
-          'VRC exchange completed (outcome: $outcome)',
-          name: _logKey,
-        );
-        final identityDid =
-            _vrcInitiatorIdentityDid ??
-            ref
-                .read(vrcServiceProvider)
-                .firstWhereOrNull((v) => v.channelId == _channelDid)
-                ?.holderIdentityDid;
-        final identity = identityDid != null
-            ? ref
-                  .read(identitiesServiceProvider)
-                  .identities
-                  .firstWhereOrNull((i) => i.did == identityDid)
-            : null;
-        if (identity != null) {
-          unawaited(
-            ref
-                .read(connectionsServiceProvider.notifier)
-                .updatePublishedOffersScore(identity),
-          );
-        }
-      case VrcReceivedOutcome.ignored:
-        break;
-    }
-  }
-
-  // ---------------------------------------------------------------------------
   // Session management
   // ---------------------------------------------------------------------------
 
@@ -390,7 +187,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
     final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
-      _channelDid,
+      _otherPartyPermanentDid,
     );
     if (channel == null) return;
 
@@ -399,7 +196,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _isGroupChat =
         ref
             .read(contactsServiceProvider)
-            .getContactByChannelDid(_channelDid)
+            .getContactByChannelDid(_otherPartyPermanentDid)
             ?.isGroup ??
         false;
 
@@ -422,13 +219,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _chatStreamRef?.dispose();
     _chatStreamRef = null;
 
-    await _rCardSubscription?.cancel();
-    _rCardSubscription = null;
-
     await _ensureChatSdkInitialized();
     if (_chatSDK == null) return;
 
-    await _subscribeToVdipMessages();
+    await _vdipManager.subscribe();
 
     try {
       final chatSession = await _chatSDK!.startChatSession();
@@ -440,7 +234,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       } else {
         _chatStreamRef = chatStream
           ..listen(
-            (data) => _onChannelMessagesData(data, _channelDid),
+            (data) => _onChannelMessagesData(data, _otherPartyPermanentDid),
             onError: (Object error, StackTrace stackTrace) {
               _logger.error(
                 'Error in chat stream subscription',
@@ -450,13 +244,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
               );
             },
           );
-
-        // Replay any VRC events that fired before the chat was opened
-        // (e.g. while the user was offline). Must run AFTER the stream
-        // listener is attached so that messages pushed via chatStream
-        // reach the UI immediately instead of going into the event buffer
-        // and never being flushed.
-        await _replayPendingVdipEvents();
       }
 
       final dbMessageIds = {
@@ -473,10 +260,23 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       ].sortedBy((item) => item.dateCreated).reversed.toList();
       state = state.copyWith(messages: messages, isInitialized: true);
 
+      // Replay any VRC events that fired before the chat was opened
+      // (e.g. while the user was offline). Must run AFTER:
+      // 1. The stream listener is attached — so messages pushed via
+      //    chatStream reach the UI immediately.
+      // 2. state.messages is updated with the loaded chat history — so
+      //    _hasVrcExchangeInitiated, _vrcInitiatorIdentityDid and related
+      //    flags correctly reflect the persisted exchange state. Without
+      //    this ordering, the reciprocation step is skipped because the
+      //    initiator's state appears empty on a cold start.
+      if (_chatStreamRef != null) {
+        await _vdipManager.replayPending();
+      }
+
       await _resetBadgeCount();
       unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
-      unawaited(_subscribeToIncomingRCards());
+      unawaited(_rCardManager.subscribeToIncomingRCards());
       _logger.info('Chat session started', name: _logKey);
     } catch (error, stackTrace) {
       _logger.error(
@@ -528,59 +328,13 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _chatStreamRef?.dispose();
     _chatStreamRef = null;
     _chatSDK?.endChatSession();
-    _rCardSubscription?.cancel();
-    _rCardSubscription = null;
-    unawaited(_cancelVrcSubscriptions());
+    _rCardManager.cancelSubscription();
+    unawaited(_vdipManager.cancelSubscriptions());
   }
 
   @override
-  Future<void> sendRCardFromPlugin(Identity identity) async {
-    try {
-      final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
-        _channelDid,
-      );
-      if (channel == null) {
-        _logger.warning(
-          'sendRCardFromPlugin: channel not found for $_channelDid',
-          name: _logKey,
-        );
-        return;
-      }
-
-      final channelDid = channel.permanentChannelDid;
-      final otherDid = channel.otherPartyPermanentChannelDid;
-      if (channelDid == null || otherDid == null) return;
-
-      final didManager = await coreSdk.getDidManager(channelDid);
-      final relationshipSDK = await ref.read(relationshipSdkProvider.future);
-      final rCard = await relationshipSDK.sendRCard(
-        channel: channel,
-        subjectDid: identity.did,
-        card: RCardSubject(
-          firstName: identity.card.firstName,
-          lastName: identity.card.lastName,
-          email: identity.card.email,
-          phone: identity.card.mobile,
-        ),
-        issuerDidManager: didManager,
-      );
-
-      final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
-      final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(vcJson);
-      await _chatSDK?.createAttachmentMessage(
-        attachments: attachments,
-        senderDid: channelDid,
-      );
-    } catch (error, stackTrace) {
-      _logger.error(
-        'Failed to send R-Card from plugin',
-        error: error,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-    }
-  }
+  Future<void> sendRCardFromPlugin(Identity identity) =>
+      _rCardManager.sendRCardFromPlugin(identity);
 
   @override
   Future<void> sendTextMessage(
@@ -608,7 +362,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
     await _conciergeMessenger.sendChatContactDetailsUpdate(message);
-    await _sendProfileUpdateWithRCard(message);
+    await _rCardManager.sendProfileUpdateWithRCard(message);
   }
 
   @override
@@ -658,7 +412,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<void> _resetBadgeCount() async {
     await ref
         .read(contactsServiceProvider.notifier)
-        .resetContactBadgeCount(_channelDid);
+        .resetContactBadgeCount(_otherPartyPermanentDid);
   }
 
   Future<void> _sendProfileUpdateWithRCard(ConciergeMessage message) async {
@@ -885,7 +639,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           ? _otherPartyFirstName
           : ref
                 .read(contactsServiceProvider)
-                .getContactByChannelDid(_channelDid)
+                .getContactByChannelDid(_otherPartyPermanentDid)
                 ?.card
                 .firstName;
     }
@@ -965,140 +719,21 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _logger.info('Updated other party contact card', name: _logKey);
   }
 
-  /// Triggered when a peer sends a VRC exchange request.
-  ///
-  /// Injects an [EventMessage] (vrcRequestReceived) and a
-  /// [ConciergeMessage] (permissionToVerifyRelationship) into the local
-  /// message list so the user is prompted to start or defer the exchange.
-  Future<void> _onVrcRequestReceived(
-    String channelDid,
-    String? identityDid,
-    String? identityName, {
-    bool shouldPromptForAction = true,
-  }) async {
-    final chatId = _chatId;
-    if (chatId == null) {
-      _logger.warning(
-        'Cannot persist VRC request: chatId not yet known',
-        name: _logKey,
-      );
-      return;
-    }
-
-    // Guard: skip if VRC already exists for this channel.
-    final hasVrc = await ref
-        .read(vrcServiceProvider.notifier)
-        .hasVrcInChannel(channelDid);
-    if (hasVrc) {
-      _logger.warning(
-        'VRC already exists, skipping concierge UI',
-        name: _logKey,
-      );
-      return;
-    }
-
-    final now = DateTime.now();
-    final data = <String, dynamic>{};
-    if (identityDid != null) data['identityDid'] = identityDid;
-    if (identityName != null) data['identityName'] = identityName;
-
-    final eventMessage = EventMessage(
-      chatId: chatId,
-      messageId: const Uuid().v4(),
-      senderDid: channelDid,
-      isFromMe: false,
-      dateCreated: now,
-      status: ChatItemStatus.received,
-      eventType: EventMessageType.fromJson('vrcRequestReceived'),
-      data: data,
-    );
-    final repository = await ref.read(chatRepositoryProvider.future);
-    await repository.createMessage(eventMessage);
-    _upsertChatItem(eventMessage);
-
-    if (!shouldPromptForAction) {
-      _logger.info(
-        'Persisted VRC request event without concierge for channel $channelDid',
-        name: _logKey,
-      );
-      return;
-    }
-
-    final conciergeMessage = ConciergeMessage(
-      chatId: chatId,
-      messageId: const Uuid().v4(),
-      senderDid: channelDid,
-      isFromMe: false,
-      // Place the concierge prompt after the event notice
-      dateCreated: now.add(const Duration(milliseconds: 1)),
-      status: ChatItemStatus.userInput,
-      conciergeType: ConciergeMessageType.fromJson(
-        'permissionToVerifyRelationship',
-      ),
-      data: const {},
-    );
-    await repository.createMessage(conciergeMessage);
-    _upsertChatItem(conciergeMessage);
-    _logger.info(
-      'Persisted and injected VRC request concierge for channel $channelDid',
-      name: _logKey,
-    );
-  }
-
   @override
   Future<void> persistLocalEventMessage(
     EventMessageType eventType, {
     Map<String, dynamic> data = const {},
-  }) async {
-    final chatId = _chatId;
-    if (chatId == null) {
-      _logger.warning(
-        'Cannot persist local event: chatId not yet known',
-        name: _logKey,
-      );
-      return;
-    }
-    final eventMessage = EventMessage(
-      chatId: chatId,
-      messageId:
-          'local_${eventType.value}_${DateTime.now().millisecondsSinceEpoch}',
-      senderDid: '',
-      isFromMe: false,
-      dateCreated: DateTime.now(),
-      status: ChatItemStatus.sent,
-      eventType: eventType,
-      data: data,
-    );
-    final repository = await ref.read(chatRepositoryProvider.future);
-    await repository.createMessage(eventMessage);
-    _upsertChatItem(eventMessage);
-  }
+  }) => _vrcManager.persistLocalEventMessage(eventType, data: data);
 
   @override
-  Future<void> dismissVrcConciergeMessages() async {
-    final repository = await ref.read(chatRepositoryProvider.future);
-    final toRemove = state.messages
-        .whereType<ConciergeMessage>()
-        .where(
-          (m) =>
-              m.conciergeType ==
-              ConciergeMessageType.fromJson('permissionToVerifyRelationship'),
-        )
-        .toList();
-
-    for (final msg in toRemove) {
-      msg.status = ChatItemStatus.confirmed;
-      await repository.updateMesssage(msg);
-      _removeChatItem(msg);
-    }
-  }
+  Future<void> dismissVrcConciergeMessages() =>
+      _vrcManager.dismissVrcConciergeMessages();
 
   @override
-  Future<void> showSentVrcAttachment(String vcBlob) async {
-    await _chatSDK?.createChatMessageFromIssuedCredential(
-      attachments: [VrcAttachment(vcBlob: vcBlob).toAttachment()],
-    );
-  }
+  Future<void> showSentVrcAttachment({
+    required String vcBlob,
+    required String senderDid,
+  }) => _vrcManager.showSentVrcAttachment(vcBlob: vcBlob, senderDid: senderDid);
 
   void _removeChatItem(ChatItem item) {
     final messages = state.messages
@@ -1134,7 +769,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           ? _otherPartyFirstName
           : ref
                 .read(contactsServiceProvider)
-                .getContactByChannelDid(_channelDid)
+                .getContactByChannelDid(_otherPartyPermanentDid)
                 ?.card
                 .firstName;
     }

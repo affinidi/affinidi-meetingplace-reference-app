@@ -10,9 +10,9 @@ import '../../../application/services/identities_service/identities_service.dart
 import '../../../domain/models/contact_card/contact_card.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vrc/vrc_credential.dart';
-import '../../../infrastructure/extensions/attachment_vrc_extensions.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../../infrastructure/extensions/vrc_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../presentation/screens/chat/widgets/credential_attachment_widget.dart';
 import '../../../presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
@@ -112,7 +112,6 @@ class _VrcAttachmentWidget extends ConsumerWidget {
         orElse: () => false,
       ),
       child: CredentialAttachmentWidget(
-        isFromMe: _isFromMe,
         onTap: () {
           verificationState.maybeWhen(
             success: (credential) => _openDetails(context, credential),

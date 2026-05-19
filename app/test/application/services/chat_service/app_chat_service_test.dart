@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,9 +16,11 @@ import 'package:mpx_flutter_reference_app/infrastructure/configuration/environme
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/relationship_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
@@ -25,6 +28,7 @@ import 'package:ssi/ssi.dart';
 
 import '../../../fakes/fake_app_badge_service.dart';
 import '../../../fakes/fake_channels.dart';
+import '../../../fakes/fake_chat_repository.dart';
 import '../../../fakes/fake_chat_sdk.dart';
 import '../../../fakes/fake_contacts.dart';
 import '../../../fakes/fake_contacts_service.dart';
@@ -32,8 +36,10 @@ import '../../../fakes/fake_environment.dart';
 import '../../../fakes/fake_groups.dart';
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_meeting_place_sdk.dart';
-import '../../../fakes/fake_vrc_repository.dart';
+import '../../../fakes/fake_r_card_repository.dart';
+import '../../../fakes/fake_relationship_sdk.dart';
 import '../../../fakes/fake_secure_storage.dart';
+import '../../../fakes/fake_vrc_repository.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -65,7 +71,7 @@ void main() {
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
-            (ref) async => _FakeRCardRepository(),
+            (ref) async => FakeNoOpRCardRepository(),
           ),
           vrcRepositoryProvider.overrideWith(
             (ref) async => FakeNoOpVrcRepository(),
@@ -291,7 +297,7 @@ void main() {
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
-            (ref) async => _FakeRCardRepository(),
+            (ref) async => FakeNoOpRCardRepository(),
           ),
           vrcRepositoryProvider.overrideWith(
             (ref) async => FakeNoOpVrcRepository(),
@@ -425,7 +431,7 @@ void main() {
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
-            (ref) async => _FakeRCardRepository(),
+            (ref) async => FakeNoOpRCardRepository(),
           ),
           vrcRepositoryProvider.overrideWith(
             (ref) async => FakeNoOpVrcRepository(),
@@ -564,7 +570,7 @@ void main() {
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
-            (ref) async => _FakeRCardRepository(),
+            (ref) async => FakeNoOpRCardRepository(),
           ),
           vrcRepositoryProvider.overrideWith(
             (ref) async => FakeNoOpVrcRepository(),
@@ -664,6 +670,166 @@ void main() {
       expect(fakeChatSdk.sessionEnded, isTrue);
     });
   });
+
+  group('ChatSessionService - VRC Replay Ordering', () {
+    late ProviderContainer container;
+    late ChatSessionService chatService;
+    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeChatSdk fakeChatSdk;
+    late DidKeyManager peerDidManager;
+    late DidKeyManager localDidManager;
+    late String peerDid;
+    late String localIdentityDid;
+    late String peerVcBlob;
+
+    final testContact = FakeContacts.individualContact;
+    final channelDid = testContact.channelDid!;
+
+    Channel makeChannel() => Channel(
+      offerLink: 'test-offer-link',
+      publishOfferDid: 'did:key:publisher',
+      mediatorDid: 'did:key:mediator',
+      status: ChannelStatus.inaugurated,
+      contactCard: FakeContacts.individualContact.card.toSdkContactCard(),
+      outboundMessageId: 'msg-1',
+      acceptOfferDid: 'did:key:accept',
+      permanentChannelDid: localIdentityDid,
+      otherPartyPermanentChannelDid: channelDid,
+      type: ChannelType.individual,
+      isConnectionInitiator: true,
+    );
+
+    setUpAll(() async {
+      final peerWallet = PersistentWallet(InMemoryKeyStore());
+      peerDidManager = DidKeyManager(
+        wallet: peerWallet,
+        store: InMemoryDidStore(),
+      );
+      await peerWallet.generateKey().then(
+        (kp) => peerDidManager.addVerificationMethod(kp.id),
+      );
+      peerDid = (await peerDidManager.getDidDocument()).id;
+
+      final localWallet = PersistentWallet(InMemoryKeyStore());
+      localDidManager = DidKeyManager(
+        wallet: localWallet,
+        store: InMemoryDidStore(),
+      );
+      await localWallet.generateKey().then(
+        (kp) => localDidManager.addVerificationMethod(kp.id),
+      );
+      localIdentityDid = (await localDidManager.getDidDocument()).id;
+
+      final vc = await CredentialBuilder.buildVrc(
+        issuerDid: peerDid,
+        subject: VrcCredentialSubject(
+          from: VrcParty(did: peerDid, name: 'Bob'),
+          to: VrcParty(did: localIdentityDid, name: 'Alice'),
+        ),
+        issuerDidManager: peerDidManager,
+      );
+      peerVcBlob = jsonEncode(vc.toJson());
+    });
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      fakeChatSdk.sessionMessages = [
+        EventMessage(
+          chatId: 'fake-chat-id',
+          messageId: 'vrc-initiated-event-id',
+          senderDid: localIdentityDid,
+          isFromMe: true,
+          dateCreated: DateTime.now().subtract(const Duration(hours: 1)),
+          status: ChatItemStatus.confirmed,
+          eventType: EventMessageType.fromJson('vrcExchangeInitiated'),
+          data: {'identityDid': localIdentityDid, 'identityName': 'Alice'},
+        ),
+      ];
+
+      fakeCoreSdk = FakeMeetingPlaceSDK(channels: {channelDid: makeChannel()});
+      fakeCoreSdk.setFakeDidManager(localDidManager);
+
+      final pendingVrc = VrcIssuance(
+        senderDid: peerDid,
+        vcBlob: peerVcBlob,
+        parsedCredential: UniversalParser.parse(peerVcBlob),
+      );
+
+      container = ProviderContainer(
+        overrides: [
+          meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
+          chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+          contactsServiceProvider.overrideWith(FakeContactsService.new),
+          environmentProvider.overrideWithValue(FakeEnvironment()),
+          appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpRCardRepository(),
+          ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
+          ),
+          networkConnectivityServiceProvider.overrideWith(
+            _FakeNetworkConnectivityService.new,
+          ),
+          chatRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpChatRepository(),
+          ),
+          relationshipSdkProvider.overrideWith((ref) async {
+            final coreSDK = await ref.read(meetingPlaceSdkProvider.future);
+            final rCardRepo = await ref.read(rCardsRepositoryProvider.future);
+            final vrcRepo = await ref.read(vrcRepositoryProvider.future);
+            return StubRelationshipSdk(
+              coreSDK: coreSDK,
+              rCardRepository: rCardRepo,
+              vrcRepository: vrcRepo,
+              pendingVrc: pendingVrc,
+            );
+          }),
+        ],
+      );
+      container.listen(
+        chatSessionServiceProvider(channelDid),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      chatService = container.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
+    });
+
+    tearDown(() => container.dispose());
+
+    test(
+      'reciprocates VRC when state.messages is populated before replay runs',
+      () async {
+        await chatService.startChatSession();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(
+          fakeChatSdk.createAttachmentMessageCalls
+              .where((c) => c.senderDid == localIdentityDid)
+              .toList(),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('shows incoming VRC chat item when pending VRC is replayed '
+        'on session open', () async {
+      await chatService.startChatSession();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(
+        fakeChatSdk.createAttachmentMessageCalls
+            .where((c) => c.senderDid == channelDid)
+            .toList(),
+        hasLength(1),
+      );
+    });
+  });
 }
 
 class _FakeNetworkConnectivityService extends NetworkConnectivityService {
@@ -671,24 +837,4 @@ class _FakeNetworkConnectivityService extends NetworkConnectivityService {
   NetworkConnectivityServiceState build() {
     return const NetworkConnectivityServiceState(isConnected: true);
   }
-}
-
-class _FakeRCardRepository implements RCardRepository {
-  @override
-  Future<void> deleteBySubjectDid(String subjectDid) async {}
-
-  @override
-  Future<RCard?> getBySubjectDid(String subjectDid) async => null;
-
-  @override
-  Future<List<RCard>> listAll() async => const [];
-
-  @override
-  Future<void> updateNotes(String subjectDid, String? notes) async {}
-
-  @override
-  Future<void> upsert(RCard rCard) async {}
-
-  @override
-  Stream<List<RCard>> watchAll() => const Stream.empty();
 }

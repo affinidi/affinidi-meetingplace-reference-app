@@ -136,6 +136,7 @@
 	"generalPhoto": "Foto",
 	"generalReject": "RECHAZAR",
 	"generalSearch": "Buscar",
+	"generalVerify": "Confirmar",
 	"generateRandomPhraseHelperDisabled": "La frase personalizada que ingrese se utilizará para identificar de manera única esta invitación a conectarse. Debe ser único en el universo de Meeting Place.",
 	"generateRandomPhraseHelperEnabled": "Generar una frase aleatoria",
 	"genericPublishError": "No se pudo publicar la oferta",
@@ -425,7 +426,7 @@
 			"name": { "type": "String" }
 		}
 	},
-	"vrcDoLater": "El intercambio de VRC está en pausa. Toca + y selecciona 'Verifiable Relationship Credential' para continuar.",
+	"vrcDoLater": "El intercambio de VRC está en pausa. Toca + y selecciona 'Credencial de Relación Verificable' para continuar.",
 	"vrcExchangeCompleted": "Has verificado tu relación con éxito",
 	"vrcVerifyPrompt": "¿Deseas verificar tu relación con {name}? Cada intercambio de VRC aumenta tu puntuación de confianza.",
 	"@vrcVerifyPrompt": {

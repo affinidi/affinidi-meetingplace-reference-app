@@ -60,5 +60,8 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   ///
   /// Intended to be called after the VDIP issuance has completed so the
   /// sender sees the credential tile immediately (isFromMe: true).
-  Future<void> showSentVrcAttachment(String vcBlob);
+  Future<void> showSentVrcAttachment({
+    required String vcBlob,
+    required String senderDid,
+  });
 }

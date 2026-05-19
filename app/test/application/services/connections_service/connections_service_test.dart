@@ -7,7 +7,6 @@ import 'package:mpx_flutter_reference_app/application/services/connections_servi
 import 'package:mpx_flutter_reference_app/application/services/control_plane_service/control_plane_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/control_plane_service/control_plane_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vrc_service/vrc_service.dart';
-import 'package:mpx_flutter_reference_app/domain/models/vrc/vrc_credential.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -16,6 +15,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_s
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_meeting_place_sdk.dart';
 import '../../../fakes/fake_secure_storage.dart';
+import '../../../fakes/fake_vrc_service.dart';
 
 ConnectionOffer _makeOffer({
   required String mnemonic,
@@ -48,18 +48,6 @@ class _FakeControlPlaneService extends ControlPlaneService {
   ControlPlaneServiceState build() => const ControlPlaneServiceState();
 }
 
-class _FakeVrcService extends VrcService {
-  _FakeVrcService(this._count);
-
-  final int _count;
-
-  @override
-  List<VrcCredential> build() => const [];
-
-  @override
-  Future<int> countVrcsByDid(String did) async => _count;
-}
-
 ProviderContainer _makeContainer({
   required FakeMeetingPlaceSDK fakeSdk,
   int vrcCount = 0,
@@ -68,7 +56,7 @@ ProviderContainer _makeContainer({
     overrides: [
       meetingPlaceSdkProvider.overrideWith((ref) async => fakeSdk),
       controlPlaneServiceProvider.overrideWith(_FakeControlPlaneService.new),
-      vrcServiceProvider.overrideWith(() => _FakeVrcService(vrcCount)),
+      vrcServiceProvider.overrideWith(() => FakeVrcService(vrcCount: vrcCount)),
       secureStorageProvider.overrideWith((ref) async => FakeSecureStorage()),
     ],
   );

@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/identity_picker/identity_picker.dart';
 
 import 'fakes/fake_cache_manager.dart';
 import 'fakes/fake_channels.dart';
@@ -354,5 +357,87 @@ void main() {
       final l10n = await getL10n();
       expect(find.text(l10n.rCardsExchanged), findsOneWidget);
     });
+  });
+  group('_SelectRCardIdentityScreen — identity picker defaults', () {
+    Future<void> openSelectIdentityScreen(
+      WidgetTester tester, {
+      required List<Identity> identities,
+    }) async {
+      await navigateToLocation(
+        tester,
+        '/contacts/$contactId/chat',
+        identities: identities,
+        mediators: [],
+        contacts: [FakeContacts.individualContact],
+        meetingPlaceChatSDK: FakeChatSdk(),
+        attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        rCardsServiceFactory: () => FakeRCardsService(const []),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('chat_add_media_button')));
+      await tester.pumpAndSettle();
+      final l10n = await getL10n();
+      await tester.tap(find.text(l10n.genRCard));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'pre-selects primary identity by default when no current identity is set',
+      (tester) async {
+        await openSelectIdentityScreen(
+          tester,
+          identities: [
+            FakeIdentities.primaryIdentity,
+            FakeIdentities.secondaryIdentity,
+          ],
+        );
+
+        final picker = tester.widget<IdentityPicker>(
+          find.byKey(const ValueKey('rcard_identity_picker')),
+        );
+        expect(picker.initialCardIndex, 0);
+      },
+    );
+
+    testWidgets(
+      'pre-selects current identity when it differs from the primary',
+      (tester) async {
+        await navigateToLocation(
+          tester,
+          '/contacts/$contactId/chat',
+          identities: [
+            FakeIdentities.primaryIdentity,
+            FakeIdentities.secondaryIdentity,
+          ],
+          mediators: [],
+          contacts: [FakeContacts.individualContact],
+          meetingPlaceChatSDK: FakeChatSdk(),
+          attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+          rCardsServiceFactory: () => FakeRCardsService(const []),
+        );
+        await tester.pumpAndSettle();
+
+        // Switch current identity to secondary before opening the R-Card screen
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(Scaffold).first),
+        );
+        container
+            .read(identitiesServiceProvider.notifier)
+            .setCurrentIdentityById(FakeIdentities.secondaryIdentity.id);
+        await tester.pump();
+
+        await tester.tap(find.byKey(const Key('chat_add_media_button')));
+        await tester.pumpAndSettle();
+        final l10n = await getL10n();
+        await tester.tap(find.text(l10n.genRCard));
+        await tester.pumpAndSettle();
+
+        final picker = tester.widget<IdentityPicker>(
+          find.byKey(const ValueKey('rcard_identity_picker')),
+        );
+        // Secondary identity is at index 1; the picker must open on it
+        expect(picker.initialCardIndex, 1);
+      },
+    );
   });
 }

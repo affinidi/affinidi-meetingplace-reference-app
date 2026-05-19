@@ -1,6 +1,9 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/identity_picker/identity_picker.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
@@ -169,5 +172,65 @@ void main() {
 
       expect(find.text(otherPartyEmail), findsOneWidget);
     });
+  });
+
+  group('SelectVrcIdentityScreen — identity picker defaults', () {
+    Future<void> navigateToChatWithTwoIdentities(WidgetTester tester) async {
+      await navigateToLocation(
+        tester,
+        '/contacts/individual-contact-id/chat',
+        identities: [
+          FakeIdentities.primaryIdentity,
+          FakeIdentities.secondaryIdentity,
+        ],
+        contacts: [FakeContacts.individualContact],
+        meetingPlaceChatSDK: FakeChatSdk(),
+        connectivity: FakeConnectivity(
+          initialConnectivityToReturn: [ConnectivityResult.wifi],
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'pre-selects primary identity by default when no current identity is set',
+      (tester) async {
+        final l10n = await getL10n();
+
+        await navigateToChatWithTwoIdentities(tester);
+        await tester.tap(find.text(l10n.generateVrc));
+        await tester.pumpAndSettle();
+
+        final picker = tester.widget<IdentityPicker>(
+          find.byKey(const ValueKey('vrc_identity_picker')),
+        );
+        expect(picker.initialCardIndex, 0);
+      },
+    );
+
+    testWidgets(
+      'pre-selects current identity when it differs from the primary',
+      (tester) async {
+        final l10n = await getL10n();
+
+        await navigateToChatWithTwoIdentities(tester);
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(Scaffold).first),
+        );
+        container
+            .read(identitiesServiceProvider.notifier)
+            .setCurrentIdentityById(FakeIdentities.secondaryIdentity.id);
+        await tester.pump();
+
+        await tester.tap(find.text(l10n.generateVrc));
+        await tester.pumpAndSettle();
+
+        final picker = tester.widget<IdentityPicker>(
+          find.byKey(const ValueKey('vrc_identity_picker')),
+        );
+        expect(picker.initialCardIndex, 1);
+      },
+    );
   });
 }

@@ -1688,7 +1688,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get generateVrc => 'Jetzt starten';
 
   @override
-  String get generalVerify => 'Confirm';
+  String get generalVerify => 'Bestätigen';
 
   @override
   String get doLater => 'Später';
@@ -1703,7 +1703,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get vrcDoLater =>
-      'VRC-Austausch pausiert. Tippe auf + und wähle \'Verifiable Relationship Credential\' um fortzufahren.';
+      'VRC-Austausch pausiert. Tippe auf + und wähle \'Überprüfbarer Beziehungsnachweis\' um fortzufahren.';
 
   @override
   String get vrcExchangeCompleted =>

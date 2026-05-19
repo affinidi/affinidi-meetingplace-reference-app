@@ -112,7 +112,6 @@ class ChatScreen extends HookConsumerWidget {
           );
       if (identity == null || !context.mounted) return;
       await controller.selectIdentityAndApproveVrcExchange(
-        null,
         identity: identity,
         role: role,
       );

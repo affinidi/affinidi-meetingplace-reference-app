@@ -1073,7 +1073,7 @@ void main() {
         (i) => Vrc(
           id: 'vrc-$i',
           vcBlob: 'blob-$i',
-          channelId: 'channel-$i',
+          referenceId: 'channel-$i',
           holderDid: holderDid ?? testIdentity.did,
           issuerDid: 'did:key:issuer-$i',
           issuedAt: DateTime(2024, 1, i + 1),

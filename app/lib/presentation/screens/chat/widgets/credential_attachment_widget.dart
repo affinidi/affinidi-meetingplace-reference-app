@@ -3,13 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 
 class CredentialAttachmentWidget extends StatelessWidget {
-  const CredentialAttachmentWidget({
-    super.key,
-    required this.isFromMe,
-    required this.onTap,
-  });
+  const CredentialAttachmentWidget({super.key, required this.onTap});
 
-  final bool isFromMe;
   final VoidCallback? onTap;
 
   static const double height = 90.0;

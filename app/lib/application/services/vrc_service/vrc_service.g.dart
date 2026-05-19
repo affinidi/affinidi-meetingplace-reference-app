@@ -6,14 +6,13 @@ part of 'vrc_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$vrcServiceHash() => r'1a968c5d075a043a58506cc804da93df6b4fa8bf';
+String _$vrcServiceHash() => r'c97796770d277dbcf29533ede40a7c06c4200f1d';
 
 /// Service that manages Verifiable Relationship Credentials (VRC).
 ///
 /// Responsibilities:
 /// - Exposes all stored [VrcCredential]s as live state for the UI.
 /// - Provides methods to save, delete, and query VRCs.
-/// - Emits [VrcEvent]s on a broadcast stream for interested listeners.
 ///
 /// Copied from [VrcService].
 @ProviderFor(VrcService)

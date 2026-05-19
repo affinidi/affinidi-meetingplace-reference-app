@@ -4,8 +4,9 @@ import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/vrc/vrc_credential.dart';
+import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/relationship_sdk_provider.dart';
-import 'vrc_event.dart';
 
 part 'vrc_service.g.dart';
 
@@ -14,47 +15,54 @@ part 'vrc_service.g.dart';
 /// Responsibilities:
 /// - Exposes all stored [VrcCredential]s as live state for the UI.
 /// - Provides methods to save, delete, and query VRCs.
-/// - Emits [VrcEvent]s on a broadcast stream for interested listeners.
 @Riverpod(keepAlive: true)
 class VrcService extends _$VrcService {
-  final _eventController = StreamController<VrcEvent>.broadcast();
+  static const _logKey = 'VRCSVC';
 
-  Stream<VrcEvent> get events => _eventController.stream;
+  var _disposed = false;
+
+  late final AppLogger _logger = ref.read(appLoggerProvider);
 
   @override
   List<VrcCredential> build() {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
     unawaited(Future(_init));
-
-    ref.onDispose(_eventController.close);
 
     return const [];
   }
 
   Future<void> _init() async {
+    if (_disposed) return;
     await _fetchVrcs();
   }
 
   Future<void> _fetchVrcs() async {
+    if (_disposed) return;
     final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+    if (_disposed) return;
     final vrcs = await relationshipSdk.listVrcs();
+    if (_disposed) return;
     state = vrcs.map(_toVrcCredential).toList();
   }
 
-  Future<void> saveVrc(String rawVc, String channelId) async {
+  Future<void> saveVrc(String rawVc, String referenceId) async {
     final relationshipSdk = await ref.read(relationshipSdkProvider.future);
-    final vrc = await relationshipSdk.storeVrc(
-      vcBlob: rawVc,
-      channelId: channelId,
-      verifiedAt: DateTime.now(),
-    );
-
-    if (vrc == null) return;
-
-    final credential = _toVrcCredential(vrc);
-
-    state = (await relationshipSdk.listVrcs()).map(_toVrcCredential).toList();
-
-    _eventController.add(VrcReceived(credential: credential));
+    try {
+      await relationshipSdk.storeVrc(
+        vcBlob: rawVc,
+        referenceId: referenceId,
+        verifiedAt: DateTime.now(),
+      );
+      state = (await relationshipSdk.listVrcs()).map(_toVrcCredential).toList();
+    } on MeetingPlaceRelationshipSDKException catch (error, stackTrace) {
+      _logger.error(
+        'Skipping VRC storage: $error',
+        name: _logKey,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   Future<void> deleteVrc(String id) async {
@@ -78,13 +86,13 @@ class VrcService extends _$VrcService {
     if (channelId == null) return false;
     final relationshipSdk = await ref.read(relationshipSdkProvider.future);
     final vrcs = await relationshipSdk.listVrcs();
-    return vrcs.any((v) => v.channelId == channelId);
+    return vrcs.any((v) => v.referenceId == channelId);
   }
 
   VrcCredential _toVrcCredential(Vrc vrc) => VrcCredential(
     id: vrc.id,
     vc: vrc.vcBlob,
-    channelId: vrc.channelId,
+    channelId: vrc.referenceId,
     holderIdentityDid: vrc.holderDid,
     issuerIdentityDid: vrc.issuerDid,
     issuedAt: vrc.issuedAt,

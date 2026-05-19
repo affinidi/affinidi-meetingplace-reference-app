@@ -42,7 +42,6 @@ class _ConciergeVrcChatItem extends ConsumerWidget {
       await ref
           .read(chatScreenControllerProvider(_contactId).notifier)
           .selectIdentityAndApproveVrcExchange(
-            _chatItem,
             identity: identity,
             role: VrcExchangeRole.responder,
           );
@@ -117,7 +116,7 @@ class _ConciergeVrcChatItem extends ConsumerWidget {
                   onPressed: () async {
                     await ref
                         .read(chatScreenControllerProvider(_contactId).notifier)
-                        .doLaterVrcExchangeFromConcierge(_chatItem);
+                        .doLaterVrcExchangeFromConcierge();
                   },
                   child: Text(
                     l10n.vrcDoLaterButton,

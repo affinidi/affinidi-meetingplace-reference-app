@@ -28,12 +28,16 @@ class SelectVrcIdentityScreenState
   @override
   Widget build(BuildContext context) {
     final identities = ref.watch(identitiesServiceProvider).identities;
+    final currentOrPrimary = ref.watch(
+      identitiesServiceProvider.currentIdentityOrPrimary,
+    );
     final cacheManager = ref.read(cacheManagerProvider);
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
 
-    // Pre-select first identity so the Send button is enabled immediately
-    _selected ??= identities.firstOrNull;
+    // Pre-select the current/primary identity so the Send button is enabled
+    // immediately and the picker opens on the identity the user last chose.
+    _selected ??= currentOrPrimary ?? identities.firstOrNull;
     final selectedIndex = _selected == null
         ? 0
         : identities.indexOf(_selected!);

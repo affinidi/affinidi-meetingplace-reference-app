@@ -1,5 +1,10 @@
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 
+class FakeNoOpChatRepository implements chat.ChatRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) async {}
+}
+
 class FakeInMemoryChatRepository implements chat.ChatRepository {
   final List<chat.ChatItem> createdMessages = [];
   final Map<String, chat.ChatItem> _store = {};

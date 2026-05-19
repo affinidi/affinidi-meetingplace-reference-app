@@ -49,11 +49,7 @@ class _VrcBanner extends ConsumerWidget {
       if (identity == null || !context.mounted) return;
       await ref
           .read(provider.notifier)
-          .selectIdentityAndApproveVrcExchange(
-            null,
-            identity: identity,
-            role: role,
-          );
+          .selectIdentityAndApproveVrcExchange(identity: identity, role: role);
     }
 
     return Container(

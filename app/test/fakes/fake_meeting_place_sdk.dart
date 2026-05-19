@@ -540,6 +540,7 @@ class _FakeOobStream implements OobStream {
 
 class _FakeVdipClient implements VdipClient {
   final List<Future<void> Function(PlainTextMessage)> _messageProcessors = [];
+  final List<Map<String, dynamic>> sendIssuedCredentialCalls = [];
 
   @override
   Stream<PlainTextMessage> get incomingMessages => const Stream.empty();
@@ -561,6 +562,18 @@ class _FakeVdipClient implements VdipClient {
     required VerifiableCredential credential,
   }) async {
     // no-op: credential issuance is not tested at the network level
+  }
+
+  @override
+  Future<void> sendIssuedCredential({
+    required String senderDid,
+    required String recipientDid,
+    required VdipIssuedCredentialBody body,
+  }) async {
+    sendIssuedCredentialCalls.add({
+      'senderDid': senderDid,
+      'recipientDid': recipientDid,
+    });
   }
 
   @override

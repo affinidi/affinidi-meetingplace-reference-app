@@ -1683,7 +1683,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get generateVrc => 'Empezar ahora';
 
   @override
-  String get generalVerify => 'Confirm';
+  String get generalVerify => 'Confirmar';
 
   @override
   String get doLater => 'Más tarde';
@@ -1698,7 +1698,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vrcDoLater =>
-      'El intercambio de VRC está en pausa. Toca + y selecciona \'Verifiable Relationship Credential\' para continuar.';
+      'El intercambio de VRC está en pausa. Toca + y selecciona \'Credencial de Relación Verificable\' para continuar.';
 
   @override
   String get vrcExchangeCompleted => 'Has verificado tu relación con éxito';

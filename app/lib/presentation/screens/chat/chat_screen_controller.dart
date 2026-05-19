@@ -24,6 +24,7 @@ import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/event_message_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
+import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
@@ -55,7 +56,9 @@ class ChatScreenController extends _$ChatScreenController
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
-  StreamSubscription<void>? _vrcPluginSub;
+  StreamSubscription<void>? _vrcPluginSubscription;
+  StreamSubscription<Identity>? _rCardPluginSubscription;
+  bool _rCardListenerSet = false;
 
   late final Map<String, ProviderSubscription<void>>
   _conciergeLoadingControllersSubscriptions = {};
@@ -85,6 +88,10 @@ class ChatScreenController extends _$ChatScreenController
       _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
       ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
         Future.microtask(() {
+          if (hasInitializedState) {
+            pendingState = state;
+          }
+
           var newEffect = pendingState.effect;
           if (next.effect != null && previous?.effect != next.effect) {
             newEffect = _mapEffect(next.effect!);
@@ -114,7 +121,7 @@ class ChatScreenController extends _$ChatScreenController
           final shouldHideBanner =
               hasVrcRequestConcierge &&
               !wasAlreadyPresent &&
-              state.shouldShowVrcBanner;
+              pendingState.shouldShowVrcBanner;
 
           final hasVrcExchangeInitiated = next.messages.any(
             (m) =>
@@ -135,28 +142,45 @@ class ChatScreenController extends _$ChatScreenController
                     chat.EventMessageType.fromJson('vrcExchangeCompleted'),
           );
 
-          state = state.copyWith(
+          pendingState = pendingState.copyWith(
             messages: next.messages,
             membersTyping: next.membersTyping,
             contactPresenceStatus: next.contactPresenceStatus,
             isActive: next.isActive,
             isInitialized: next.isInitialized,
-            group: next.group ?? state.group,
-            otherPartyCard: next.otherPartyCard ?? state.otherPartyCard,
+            group: next.group ?? pendingState.group,
+            otherPartyCard: next.otherPartyCard ?? pendingState.otherPartyCard,
             effect: newEffect,
             shouldShowVrcBanner:
                 (shouldHideBanner ||
                     hasVrcExchangeInitiated ||
                     hasVrcExchangeDoLater)
                 ? false
-                : state.shouldShowVrcBanner,
+                : pendingState.shouldShowVrcBanner,
             shouldEnableVrcAttachment:
                 (hasVrcExchangeInitiated || hasVrcExchangeCompleted)
                 ? false
-                : state.shouldEnableVrcAttachment,
+                : pendingState.shouldEnableVrcAttachment,
           );
+
+          if (hasInitializedState) {
+            state = pendingState;
+          }
         });
       }, fireImmediately: true);
+
+      if (!_rCardListenerSet) {
+        _rCardListenerSet = true;
+        final plugins = ref.read(availableAttachmentPluginsProvider);
+        final rCardPlugin = plugins
+            .whereType<RCardAttachmentsPlugin>()
+            .firstOrNull;
+        _rCardPluginSubscription = rCardPlugin?.onRCardFromAttachment.listen((
+          identity,
+        ) {
+          unawaited(_chatService?.sendRCardFromPlugin(identity));
+        });
+      }
     }
 
     ref.listen(
@@ -177,7 +201,8 @@ class ChatScreenController extends _$ChatScreenController
     _subscribeToVrcPlugin();
 
     ref.onDispose(() {
-      _vrcPluginSub?.cancel();
+      _vrcPluginSubscription?.cancel();
+      _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
       _rCardPluginSubscription?.cancel();
@@ -744,8 +769,7 @@ class ChatScreenController extends _$ChatScreenController
         .updateContact(updatedContact);
   }
 
-  Future<void> selectIdentityAndApproveVrcExchange(
-    chat.ConciergeMessage? chatItem, {
+  Future<void> selectIdentityAndApproveVrcExchange({
     required Identity identity,
     required VrcExchangeRole role,
   }) async {
@@ -784,7 +808,10 @@ class ChatScreenController extends _$ChatScreenController
           peerName: peerIdentityName,
         );
         if (sentVcBlob.isNotEmpty) {
-          await _chatService?.showSentVrcAttachment(sentVcBlob);
+          await _chatService?.showSentVrcAttachment(
+            vcBlob: sentVcBlob,
+            senderDid: channelDid,
+          );
         }
         await _chatService?.dismissVrcConciergeMessages();
 
@@ -803,9 +830,7 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  Future<void> doLaterVrcExchangeFromConcierge(
-    chat.ConciergeMessage chatItem,
-  ) async {
+  Future<void> doLaterVrcExchangeFromConcierge() async {
     await _chatService?.dismissVrcConciergeMessages();
     state = state.copyWith(
       shouldShowVrcBanner: false,
@@ -831,10 +856,10 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   void _subscribeToVrcPlugin() {
-    _vrcPluginSub?.cancel();
+    _vrcPluginSubscription?.cancel();
     final plugins = ref.read(availableAttachmentPluginsProvider);
     final vrcPlugin = plugins.whereType<VrcAttachmentsPlugin>().firstOrNull;
-    _vrcPluginSub = vrcPlugin?.onPick.listen((_) {
+    _vrcPluginSubscription = vrcPlugin?.onPick.listen((_) {
       state = state.copyWith(shouldStartVrcExchangeFromAttachment: true);
     });
   }
@@ -853,7 +878,9 @@ extension ChatScreenControllerProviderSelectors
         return state.offerName ?? '';
       }
 
-      return state.otherPartyCard?.firstName ?? '';
+      return state.otherPartyCard?.firstName ??
+          state.contact?.card.firstName ??
+          '';
     });
   }
 
@@ -865,7 +892,7 @@ extension ChatScreenControllerProviderSelectors
     return select((state) {
       if (state.contact?.isGroup ?? false) return null;
 
-      return state.otherPartyCard?.firstName;
+      return state.otherPartyCard?.firstName ?? state.contact?.card.firstName;
     });
   }
 

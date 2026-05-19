@@ -1,16 +1,14 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/vrc/vrc_credential.dart';
-import '../../../domain/models/vrc/vrc_credential_subject.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/credential/credential_card_components.dart';
 import '../../widgets/credential/credential_details_accordion.dart';
 import '../../widgets/credential/credential_details_screen_scaffold.dart';
+import 'vrc_details_screen_controller.dart';
 
 /// Displays the full details of a single Verifiable Relationship Credential.
 ///
@@ -58,34 +56,16 @@ class VrcDetailsScreen extends ConsumerWidget {
       );
     }
 
-    return _VrcDetailsContent(credential: displayCredential);
-  }
-}
+    final state = ref.watch(
+      vrcDetailsScreenControllerProvider(
+        credentialId,
+        vcBlob: displayCredential.vc,
+      ),
+    );
 
-class _VrcDetailsContent extends StatelessWidget {
-  const _VrcDetailsContent({required this.credential});
-
-  final VrcCredential credential;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final dateFormatter = DateFormat.yMd();
-
-    VrcCredentialSubject? subject;
-    var credentialTypes = <String>[];
-    try {
-      final raw = credential.vc.isNotEmpty
-          ? jsonDecode(credential.vc) as Map<String, dynamic>?
-          : null;
-      if (raw != null) {
-        final subjectData = _decodeSubject(credential.vc);
-        if (subjectData != null) {
-          subject = VrcCredentialSubject.fromJson(subjectData);
-        }
-        credentialTypes = (raw['type'] as List?)?.cast<String>() ?? [];
-      }
-    } catch (_) {}
+    final subject = state.subject;
+    final credentialTypes = state.credentialTypes;
 
     final issuerSubRows = <CredentialDetailRowData>[
       if (subject?.from.name.isNotEmpty == true)
@@ -95,7 +75,7 @@ class _VrcDetailsContent extends StatelessWidget {
         ),
       CredentialDetailRowData(
         label: l10n.generalDid,
-        value: credential.issuerIdentityDid,
+        value: displayCredential.issuerIdentityDid,
       ),
     ];
 
@@ -107,7 +87,7 @@ class _VrcDetailsContent extends StatelessWidget {
         ),
       CredentialDetailRowData(
         label: l10n.generalDid,
-        value: credential.holderIdentityDid,
+        value: displayCredential.holderIdentityDid,
       ),
     ];
 
@@ -129,7 +109,7 @@ class _VrcDetailsContent extends StatelessWidget {
         ),
       CredentialDetailRowData(
         label: l10n.vrcFieldIssuedAt,
-        value: dateFormatter.format(credential.issuedAt),
+        value: dateFormatter.format(displayCredential.issuedAt),
       ),
     ];
 
@@ -146,18 +126,5 @@ class _VrcDetailsContent extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Map<String, dynamic>? _decodeSubject(String vcJson) {
-    try {
-      final decoded = jsonDecode(vcJson) as Map<String, dynamic>?;
-      if (decoded == null) return null;
-      final subject = decoded['credentialSubject'];
-      if (subject is Map<String, dynamic>) return subject;
-      if (subject is List && subject.isNotEmpty) {
-        return subject.first as Map<String, dynamic>?;
-      }
-    } catch (_) {}
-    return null;
   }
 }
