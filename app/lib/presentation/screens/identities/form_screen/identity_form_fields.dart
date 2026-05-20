@@ -116,68 +116,72 @@ class IdentityFormFields extends ConsumerWidget {
               ),
             ],
             const Divider(),
-            ListTile(
-              leading: LabelIcon(
-                icon: Icons.phone,
-                iconColor: context.colorScheme.primary,
-                label: mobileField.label(context.l10n),
-              ),
-              title: Row(
-                children: [
-                  Text(
-                    mobileField.label(context.l10n),
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w900,
+            FocusTraversalOrder(
+              order: const NumericFocusOrder(4.0),
+              child: ListTile(
+                leading: LabelIcon(
+                  icon: Icons.phone,
+                  iconColor: context.colorScheme.primary,
+                  label: mobileField.label(context.l10n),
+                ),
+                title: Row(
+                  children: [
+                    Text(
+                      mobileField.label(context.l10n),
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: InternationalPhoneNumberInput(
-                      initialValue: initialMobilePhoneNumber,
-                      textFieldController: controller.controllerFor(
-                        mobileField,
-                      ),
-                      focusNode: controller.focusNodeFor(mobileField)!,
-                      keyboardAction: TextInputAction.next,
-                      selectorConfig: const SelectorConfig(
-                        setSelectorButtonAsPrefixIcon: true,
-                      ),
-                      inputDecoration: InputDecoration(
-                        hintText: context.l10n.enterMobile,
-                      ),
-                      textStyle: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
-                      ),
-                      selectorTextStyle: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onSurfaceVariant,
-                      ),
-                      onInputChanged: controller.updateMobile,
-                      onInputValidated: (isValid) {
-                        controller.updateMobileValidation(isValid, formKey);
-                      },
-                      onFieldSubmitted: (_) {
-                        controller.updateErrorVisibilityOnBlur(
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: InternationalPhoneNumberInput(
+                        initialValue: initialMobilePhoneNumber,
+                        textFieldController: controller.controllerFor(
                           mobileField,
-                          formKey,
-                        );
-                      },
-                      validator: (value) {
-                        if (!controller.shouldShowValidation(mobileField)) {
-                          return null;
-                        }
-                        return InputValidators.getValidator(
-                          context,
-                          InputType.phone,
-                          isPhoneValid: controller.isMobileValid,
-                          hasTouchedPhone: controller.hasTouchedMobile,
-                        ).call(value);
-                      },
+                        ),
+                        focusNode: controller.focusNodeFor(mobileField)!,
+                        keyboardAction: TextInputAction.next,
+                        selectorConfig: const SelectorConfig(
+                          setSelectorButtonAsPrefixIcon: true,
+                        ),
+                        inputDecoration: InputDecoration(
+                          hintText: context.l10n.enterMobile,
+                        ),
+                        textStyle: context.textTheme.bodyMedium?.copyWith(
+                          color: context.colorScheme.onSurfaceVariant,
+                        ),
+                        selectorTextStyle: context.textTheme.bodyMedium
+                            ?.copyWith(
+                              color: context.colorScheme.onSurfaceVariant,
+                            ),
+                        onInputChanged: controller.updateMobile,
+                        onInputValidated: (isValid) {
+                          controller.updateMobileValidation(isValid, formKey);
+                        },
+                        onFieldSubmitted: (_) {
+                          controller.updateErrorVisibilityOnBlur(
+                            mobileField,
+                            formKey,
+                          );
+                        },
+                        validator: (value) {
+                          if (!controller.shouldShowValidation(mobileField)) {
+                            return null;
+                          }
+                          return InputValidators.getValidator(
+                            context,
+                            InputType.phone,
+                            isPhoneValid: controller.isMobileValid,
+                            hasTouchedPhone: controller.hasTouchedMobile,
+                          ).call(value);
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
             ),
           ],
         ),
