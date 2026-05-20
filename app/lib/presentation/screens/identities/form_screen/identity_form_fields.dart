@@ -117,7 +117,7 @@ class IdentityFormFields extends ConsumerWidget {
             ],
             const Divider(),
             FocusTraversalOrder(
-              order: const NumericFocusOrder(4.0),
+              order: NumericFocusOrder((personaFields.length + 1).toDouble()),
               child: ListTile(
                 leading: LabelIcon(
                   icon: Icons.phone,

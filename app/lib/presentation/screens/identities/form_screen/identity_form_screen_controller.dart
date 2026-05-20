@@ -203,7 +203,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final isValidForSave = ContactCardFieldDefinitions.values.every((field) {
       if (field.key == ContactCardFieldKey.mobile) {
         final mobile = controllerFor(field).text.trim();
-        return mobile.isEmpty || !_hasTouchedMobile || _isMobileValid == true;
+        return !_mobileHasError(mobile);
       }
       return field.validator(ctx).call(controllerFor(field).text) == null;
     });
@@ -232,6 +232,9 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     return controllerFor(field).text;
   }
 
+  bool _mobileHasError(String mobile) =>
+      _hasTouchedMobile && mobile.isNotEmpty && _isMobileValid != true;
+
   void updateErrorVisibilityOnBlur(
     ContactCardFieldDefinition field,
     GlobalKey<FormState> formKey,
@@ -240,8 +243,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     final bool hasError;
     if (field.key == ContactCardFieldKey.mobile) {
       final mobile = controllerFor(field).text.trim();
-      hasError =
-          _hasTouchedMobile && mobile.isNotEmpty && _isMobileValid != true;
+      hasError = _mobileHasError(mobile);
     } else {
       final error = field.validator(ctx).call(_textFor(field));
       hasError = error != null;
@@ -260,8 +262,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       final bool hasError;
       if (field.key == ContactCardFieldKey.mobile) {
         final mobile = controllerFor(field).text.trim();
-        hasError =
-            _hasTouchedMobile && mobile.isNotEmpty && _isMobileValid != true;
+        hasError = _mobileHasError(mobile);
       } else {
         final error = field.validator(ctx).call(_textFor(field));
         hasError = error != null;
