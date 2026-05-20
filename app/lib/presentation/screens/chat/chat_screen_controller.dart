@@ -131,6 +131,7 @@ class ChatScreenController extends _$ChatScreenController
       case chat.Effect.hearts:
         return null;
     }
+    return null;
   }
 
   Future<void>? initializing;

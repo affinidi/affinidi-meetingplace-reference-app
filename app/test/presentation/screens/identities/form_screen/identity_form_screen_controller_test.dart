@@ -208,6 +208,100 @@ void main() {
         expect(controller.shouldShowValidation(mobileField), isFalse);
       },
     );
+
+    testWidgets(
+      'reverting to the stored mobile clears touched state and keeps save '
+      'enabled',
+      (tester) async {
+        final identity = FakeIdentities.primaryIdentity.copyWith(
+          card: FakeIdentities.primaryIdentity.card.copyWith(
+            mobile: '1744097123',
+          ),
+        );
+        final service = _FakeIdentitiesService([identity]);
+        final container = makeContainer(service);
+        final provider = identityFormScreenControllerProvider(identity.id);
+        final subscription = container.listen(provider, (_, _) {});
+        final controller = container.read(provider.notifier);
+        final formKey = GlobalKey<FormState>();
+
+        addTearDown(subscription.close);
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: Form(key: formKey, child: const SizedBox.shrink()),
+              ),
+            ),
+          ),
+        );
+
+        controller.controllerFor(mobileField).text = '+1';
+        controller.updateMobile(PhoneNumber(phoneNumber: '+1', isoCode: 'US'));
+        controller.updateMobileValidation(false, formKey);
+
+        expect(controller.hasTouchedMobile, isTrue);
+
+        controller.controllerFor(mobileField).text = '1744097123';
+        controller.updateMobile(
+          PhoneNumber(phoneNumber: '+11744097123', isoCode: 'US'),
+        );
+        controller.updateMobileValidation(false, formKey);
+
+        expect(controller.hasTouchedMobile, isFalse);
+        expect(container.read(provider).canSave, isTrue);
+      },
+    );
+
+    testWidgets('keeps valid mobile edits in draft state until explicit save', (
+      tester,
+    ) async {
+      final identity = FakeIdentities.primaryIdentity;
+      final service = _FakeIdentitiesService([identity]);
+      final container = makeContainer(service);
+      final provider = identityFormScreenControllerProvider(identity.id);
+      final subscription = container.listen(provider, (_, _) {});
+      final controller = container.read(provider.notifier);
+      final formKey = GlobalKey<FormState>();
+
+      addTearDown(subscription.close);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Form(key: formKey, child: const SizedBox.shrink()),
+            ),
+          ),
+        ),
+      );
+
+      controller.controllerFor(mobileField).text = '+10987654321';
+      controller.updateMobile(
+        PhoneNumber(phoneNumber: '+10987654321', isoCode: 'US'),
+      );
+      controller.updateMobileValidation(true, formKey);
+
+      expect(
+        container.read(provider).identity.card.mobile,
+        identity.card.mobile,
+      );
+
+      final saved = await controller.saveIdentity(
+        anonymousLabel: 'Anonymous',
+        mode: IdentityFormMode.edit,
+      );
+
+      expect(saved, isTrue);
+      expect(service.updatedIdentity?.card.mobile, '+10987654321');
+    });
   });
 }
 

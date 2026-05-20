@@ -143,7 +143,10 @@ class IdentityFormFields extends ConsumerWidget {
                         focusNode: controller.focusNodeFor(mobileField)!,
                         keyboardAction: TextInputAction.next,
                         selectorConfig: const SelectorConfig(
+                          selectorType: PhoneInputSelectorType.DROPDOWN,
                           setSelectorButtonAsPrefixIcon: true,
+                          trailingSpace: false,
+                          leadingPadding: 0,
                         ),
                         inputDecoration: InputDecoration(
                           hintText: context.l10n.enterMobile,

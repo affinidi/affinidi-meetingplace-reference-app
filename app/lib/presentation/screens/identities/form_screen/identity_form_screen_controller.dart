@@ -33,6 +33,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   GlobalKey<FormState>? _formKey;
   bool _focusListenersInitialized = false;
   String? _storedMobile;
+  String? _storedComparableMobile;
   String? _normalizedMobile;
   bool? _isMobileValid;
   bool _hasTouchedMobile = false;
@@ -100,6 +101,10 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       displayName: '',
     );
     _storedMobile = null;
+    _storedComparableMobile = null;
+    _normalizedMobile = null;
+    _isMobileValid = null;
+    _hasTouchedMobile = false;
     _initialMobilePhoneNumber = null;
     return Identity(id: uuid.v4(), did: '', card: newCard);
   }
@@ -129,10 +134,12 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       controllerFor(field).text = field.valueFrom(identity.card);
     }
     aliasController.text = identity.card.displayName;
-    final initialPhoneNumber = _parseInitialMobilePhoneNumber(
-      identity.card.mobile,
-    );
-    _storedMobile = initialPhoneNumber?.phoneNumber ?? identity.card.mobile;
+    final storedMobile = identity.card.mobile?.trim();
+    final initialPhoneNumber = _parseInitialMobilePhoneNumber(storedMobile);
+    _storedMobile = storedMobile;
+    _storedComparableMobile =
+        initialPhoneNumber?.phoneNumber ??
+        _normalizeComparableMobile(storedMobile);
     _normalizedMobile = initialPhoneNumber?.phoneNumber;
     _isMobileValid = null;
     _hasTouchedMobile = false;
@@ -149,9 +156,11 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   bool _didMobileChange(String? normalizedMobile, String mobile) {
+    final trimmedMobile = mobile.trim();
     final storedMobile = _storedMobile?.trim();
+    final storedComparableMobile = _storedComparableMobile?.trim();
 
-    if (mobile.isEmpty) {
+    if (trimmedMobile.isEmpty) {
       return storedMobile?.isNotEmpty ?? false;
     }
 
@@ -159,11 +168,31 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       return true;
     }
 
-    if (normalizedMobile == null) {
-      return true;
+    if (trimmedMobile == storedMobile) {
+      return false;
     }
 
-    return normalizedMobile != storedMobile;
+    final comparableMobile =
+        normalizedMobile ?? _normalizeComparableMobile(trimmedMobile);
+    if (comparableMobile != null && storedComparableMobile != null) {
+      return comparableMobile != storedComparableMobile;
+    }
+
+    return true;
+  }
+
+  String? _normalizeComparableMobile(String? mobile) {
+    final trimmedMobile = mobile?.trim() ?? '';
+    if (trimmedMobile.isEmpty) {
+      return null;
+    }
+
+    final digitsOnly = trimmedMobile.replaceAll(RegExp(r'\D'), '');
+    if (digitsOnly.isEmpty) {
+      return null;
+    }
+
+    return trimmedMobile.startsWith('+') ? '+$digitsOnly' : digitsOnly;
   }
 
   PhoneNumber? _parseInitialMobilePhoneNumber(String? mobile) {
@@ -315,12 +344,8 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       ContactCardFieldKey.mobile,
     );
     final mobile = controllerFor(mobileField).text.trim();
-
-    if (_didMobileChange(phoneNumber.phoneNumber, mobile)) {
-      _hasTouchedMobile = true;
-    }
-
     _normalizedMobile = phoneNumber.phoneNumber;
+    _hasTouchedMobile = _didMobileChange(_normalizedMobile, mobile);
   }
 
   void updateMobileValidation(bool isValid, GlobalKey<FormState> formKey) {
@@ -328,20 +353,12 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       ContactCardFieldKey.mobile,
     );
     final mobile = controllerFor(mobileField).text.trim();
-
-    if (_didMobileChange(_normalizedMobile, mobile)) {
-      _hasTouchedMobile = true;
-    }
+    _hasTouchedMobile = _didMobileChange(_normalizedMobile, mobile);
 
     _isMobileValid = mobile.isEmpty ? null : isValid;
 
     if (mobile.isEmpty) {
       _normalizedMobile = null;
-      _updateIdentityCard(state.identity.card.copyWith(mobile: null));
-    } else if (_isMobileValid == true && _normalizedMobile != null) {
-      _updateIdentityCard(
-        state.identity.card.copyWith(mobile: _normalizedMobile),
-      );
     }
 
     handleFieldChange(mobileField, formKey);
