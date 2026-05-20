@@ -344,6 +344,9 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final _fakeVdipClient = _FakeVdipClient();
 
   @override
+  Future<void> closeVdipStream() async {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
   }

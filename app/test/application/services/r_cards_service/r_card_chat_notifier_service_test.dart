@@ -62,8 +62,8 @@ void main() {
           version: 1,
           issuanceDate: DateTime(2024),
           receivedAt: DateTime(2024),
-          localChannelDid: FakeContacts.groupContact.channelDid,
-          contactChannelDid: 'did:key:other-party',
+          permanentChannelDid: FakeContacts.groupContact.channelDid,
+          otherPartyPermanentChannelDid: 'did:key:other-party',
         );
 
         fakeRelationshipSdk.emit(rCard);
@@ -83,8 +83,8 @@ void main() {
           version: 1,
           issuanceDate: DateTime(2024),
           receivedAt: DateTime(2024),
-          localChannelDid: FakeContacts.individualContact.channelDid,
-          contactChannelDid: 'did:key:other-party',
+          permanentChannelDid: FakeContacts.individualContact.channelDid,
+          otherPartyPermanentChannelDid: 'did:key:other-party',
         );
 
         fakeRelationshipSdk.emit(rCard);

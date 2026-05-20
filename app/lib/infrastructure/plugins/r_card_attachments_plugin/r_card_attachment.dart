@@ -83,6 +83,10 @@ extension AttachmentRCardX on Attachment {
   String? get rCardSubjectDid {
     final vcBlob = rCardVcBlob;
     if (vcBlob == null || vcBlob.isEmpty) return null;
-    return RCardSubject.fromVcBlob(vcBlob)?.id;
+    try {
+      return RCardSubject.fromVcBlob(vcBlob).id;
+    } on FormatException {
+      return null;
+    }
   }
 }

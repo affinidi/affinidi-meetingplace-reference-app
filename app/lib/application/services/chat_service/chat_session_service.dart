@@ -314,7 +314,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
       final didManager = await coreSdk.getDidManager(channelDid);
       final relationshipSDK = await ref.read(relationshipSdkProvider.future);
-      final vcBlob = await relationshipSDK.sendRCard(
+      final rCard = await relationshipSDK.sendRCard(
         channel: channel,
         subjectDid: identity.did,
         card: RCardSubject(
@@ -326,7 +326,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         issuerDidManager: didManager,
       );
 
-      final vcJson = jsonDecode(vcBlob) as Map<String, dynamic>;
+      final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
       final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(vcJson);
       await _chatSDK?.createChatMessageFromIssuedCredential(
         attachments: attachments,
@@ -444,7 +444,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
       final didManager = await coreSdk.getDidManager(channelDid);
       final relationshipSDK = await ref.read(relationshipSdkProvider.future);
-      final vcBlob = await relationshipSDK.sendRCard(
+      final rCard = await relationshipSDK.sendRCard(
         channel: channel,
         subjectDid: identity.did,
         card: RCardSubject(
@@ -475,7 +475,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       await chatRepository.updateMesssage(confirmedMessage);
       _upsertChatItem(confirmedMessage);
 
-      final vcJson = jsonDecode(vcBlob) as Map<String, dynamic>;
+      final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
       final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(
         vcJson,
         isUpdate: true,
