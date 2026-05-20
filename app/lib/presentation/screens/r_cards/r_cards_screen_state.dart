@@ -7,6 +7,8 @@ part 'r_cards_screen_state.freezed.dart';
 
 @Freezed(fromJson: false, toJson: false)
 abstract class RCardsScreenState with _$RCardsScreenState {
+  RCardsScreenState._();
+
   factory RCardsScreenState({
     @Default(RCardsScreenFilter.all) RCardsScreenFilter filter,
     @Default([]) List<RCard> cards,

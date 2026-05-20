@@ -208,8 +208,8 @@ return $default(_that.filter,_that.cards,_that.isSearchActive,_that.hasFilterApp
 /// @nodoc
 
 
-class _RCardsScreenState implements RCardsScreenState {
-   _RCardsScreenState({this.filter = RCardsScreenFilter.all, final  List<RCard> cards = const [], this.isSearchActive = false, this.hasFilterApplied = false}): _cards = cards;
+class _RCardsScreenState extends RCardsScreenState {
+   _RCardsScreenState({this.filter = RCardsScreenFilter.all, final  List<RCard> cards = const [], this.isSearchActive = false, this.hasFilterApplied = false}): _cards = cards,super._();
   
 
 @override@JsonKey() final  RCardsScreenFilter filter;
