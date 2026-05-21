@@ -40,18 +40,18 @@ class _RCardAttachmentWidget extends StatelessWidget {
     );
   }
 
-  void _openRCardDetails(BuildContext context) {
+  Future<void> _openRCardDetails(BuildContext context) async {
     final subjectDid = _attachment.rCardSubjectDid;
     if (subjectDid == null || subjectDid.isEmpty) return;
     final vcBlob = _attachment.rCardVcBlob;
     final route = RCardDetailsRoute(subjectDid: subjectDid);
     if (_isFromMe && vcBlob != null && vcBlob.isNotEmpty) {
-      context.push<void>(
+      await context.push<void>(
         route.location,
         extra: {'vcBlob': vcBlob, 'isFromMe': true},
       );
     } else {
-      route.push<void>(context);
+      await route.push<void>(context);
     }
   }
 }

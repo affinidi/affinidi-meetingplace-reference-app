@@ -13,14 +13,19 @@ class _SelectRCardIdentityScreenState
   Identity? _selected;
 
   @override
+  void initState() {
+    super.initState();
+    // Pre-select first identity so the Send button is enabled immediately.
+    _selected = ref.read(identitiesServiceProvider).identities.firstOrNull;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final identities = ref.watch(identitiesServiceProvider).identities;
     final cacheManager = ref.read(cacheManagerProvider);
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
 
-    // Pre-select first identity so the Send button is enabled immediately
-    _selected ??= identities.firstOrNull;
     final selectedIndex = _selected == null
         ? 0
         : identities.indexOf(_selected!);

@@ -46,7 +46,7 @@ extension AttachmentRCardX on Attachment {
       }
       return json;
     } catch (_) {
-      return json;
+      return null;
     }
   }
 
