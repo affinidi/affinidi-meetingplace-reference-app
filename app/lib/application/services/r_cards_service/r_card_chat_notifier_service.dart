@@ -18,11 +18,12 @@ part 'r_card_chat_notifier_service.g.dart';
 /// Global service that creates chat messages for R-Cards delivered via the
 /// DIDComm channel-inauguration (OOB) path.
 ///
-/// These R-Cards arrive on [MeetingPlaceRelationshipSDK.receivedRCards] with
-/// [RCard.permanentChannelDid] set (populated by
-/// `RCardChannelStreamManager`). When detected, this service persists an
-/// R-Card attachment message in the relevant chat so users see the
-/// "R-Cards have been exchanged." notice when they open the conversation.
+/// Listens on [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel], which
+/// surfaces the originating channel alongside each parsed R-Card. This
+/// channel context is used to:
+///   • skip group channels (R-Cards are individual-only),
+///   • build the stable chat message ID, and
+///   • set the sender DID correctly.
 ///
 /// VDIP-path R-Cards (explicit sends) are handled by [ChatSessionService] and
 /// are intentionally NOT processed here.
@@ -32,7 +33,7 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
 
   late final AppLogger _logger = ref.read(appLoggerProvider);
 
-  StreamSubscription<RCard>? _sub;
+  StreamSubscription<ChannelRCardEvent>? _sub;
 
   @override
   void build() {
@@ -45,8 +46,9 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
       final sdk = await ref.read(relationshipSdkProvider.future);
       final chatRepo = await ref.read(chatRepositoryProvider.future);
 
-      _sub = sdk.receivedRCards.listen(
-        (rCard) => unawaited(_onRCardReceived(rCard, chatRepo)),
+      _sub = sdk.receivedRCardsOnChannel.listen(
+        (ChannelRCardEvent event) =>
+            unawaited(_onRCardReceived(event, chatRepo)),
         onError: (Object error, StackTrace st) {
           _logger.error(
             'Error in R-Card chat notifier stream',
@@ -67,13 +69,15 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
   }
 
   Future<void> _onRCardReceived(
-    RCard rCard,
+    ChannelRCardEvent event,
     chat.ChatRepository chatRepo,
   ) async {
-    // Only handle inauguration-path R-Cards — those have
-    // permanentChannelDid set.
-    final localChannelDid = rCard.permanentChannelDid;
-    final theirChannelDid = rCard.otherPartyPermanentChannelDid;
+    final channel = event.channel;
+    final rCard = event.rCard;
+
+    // R-Cards are individual-only; skip group channels.
+    final localChannelDid = channel.permanentChannelDid;
+    final theirChannelDid = channel.otherPartyPermanentChannelDid;
     if (localChannelDid == null ||
         localChannelDid.isEmpty ||
         theirChannelDid == null ||
@@ -81,10 +85,9 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
       return;
     }
 
-    // R-Cards are individual-only; skip group channels.
     final contact = ref
         .read(contactsServiceProvider)
-        .getContactByChannelDid(localChannelDid);
+        .getContactByChannelDid(theirChannelDid);
     if (contact?.isGroup ?? false) return;
 
     final chatId = '$localChannelDid-$theirChannelDid';

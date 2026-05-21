@@ -31,6 +31,7 @@ import 'infrastructure/providers/mediators_repository_provider.dart';
 import 'infrastructure/providers/push_notification_messaging_provider.dart';
 import 'infrastructure/providers/r_cards_repository_provider.dart';
 import 'infrastructure/providers/shared_preferences_provider.dart';
+import 'infrastructure/providers/vrc_repository_provider.dart';
 import 'infrastructure/repositories/contacts_repository/contacts_repository_drift/contacts_repository_drift.dart';
 import 'infrastructure/repositories/identities_repository/identities_repository_drift/identities_repository_drift.dart';
 import 'infrastructure/repositories/mediators_repository/mediators_repository_drift/mediators_repository_drift.dart';
@@ -92,6 +93,7 @@ void main() async {
         identitiesRepositoryProvider.overrideWith(identitiesRepositoryDrift),
         mediatorsRepositoryProvider.overrideWith(mediatorsRepositoryDrift),
         rCardsRepositoryProvider.overrideWith(rCardsRepositoryDrift),
+        vrcRepositoryProvider.overrideWith(vrcRepositoryDrift),
         pushNotificationMessagingProvider.overrideWith(
           (ref) =>
               FirebasePushNotificationMessaging(FirebaseMessaging.instance)

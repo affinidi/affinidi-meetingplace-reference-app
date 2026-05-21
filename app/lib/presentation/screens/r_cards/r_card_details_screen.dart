@@ -305,7 +305,7 @@ class _RCardDetailsContent extends ConsumerWidget {
 
     final contact = ref
         .read(contactsServiceProvider)
-        .getContactByChannelDid(card.otherPartyPermanentChannelDid ?? '');
+        .getContactByCardDid(card.subjectDid);
 
     Future<void> openUrl(String url) async {
       await Clipboard.setData(ClipboardData(text: url));

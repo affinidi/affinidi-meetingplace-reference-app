@@ -328,8 +328,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
       final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
       final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(vcJson);
-      await _chatSDK?.createChatMessageFromIssuedCredential(
+      await _chatSDK?.createAttachmentMessage(
         attachments: attachments,
+        senderDid: channelDid,
       );
     } catch (error, stackTrace) {
       _logger.error(
@@ -480,8 +481,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         vcJson,
         isUpdate: true,
       );
-      await _chatSDK?.createChatMessageFromIssuedCredential(
+      await _chatSDK?.createAttachmentMessage(
         attachments: attachments,
+        senderDid: channelDid,
       );
     } catch (e, st) {
       _logger.error(
@@ -527,8 +529,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
       final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
       final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(vcJson);
-      await chatSDK.createChatMessageFromRequestCredential(
+      await chatSDK.createAttachmentMessage(
         attachments: attachments,
+        senderDid: otherDid,
       );
     } catch (error, stackTrace) {
       _logger.error(
