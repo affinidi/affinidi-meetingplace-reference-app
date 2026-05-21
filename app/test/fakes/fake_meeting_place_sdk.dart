@@ -98,6 +98,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     String? mediatorDid,
     String? metadata,
     String? externalRef,
+    int? score,
   }) async {
     // Record the call parameters
     _publishOfferCalls.add({
@@ -335,8 +336,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   }
 
   @override
-  Stream<(Channel, List<Attachment>)> get channelAttachments =>
-      const Stream.empty();
+  Stream<ChannelAttachmentEvent> get channelAttachments => const Stream.empty();
 
   @override
   VdipClient get vdip => _fakeVdipClient;

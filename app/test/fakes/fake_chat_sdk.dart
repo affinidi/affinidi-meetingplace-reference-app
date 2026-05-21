@@ -509,14 +509,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     _startedChatPresenceUpdates += 1;
   }
 
-  @override
   Future<void> createChatMessageFromIssuedCredential({
     required List<Attachment> attachments,
   }) async {
     createChatMessageFromIssuedCredentialCalls.add(attachments);
   }
 
-  @override
   Future<void> createChatMessageFromRequestCredential({
     required List<Attachment> attachments,
   }) async {

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import 'package:ssi/ssi.dart';
 
@@ -163,8 +164,12 @@ void main() {
     testWidgets(
       '"Chat with" button is enabled when card has a matching contact',
       (tester) async {
-        // otherPartyPermanentChannelDid matches
-        // FakeContacts.individualContact.channelDid
+        // card.subjectDid matches contact.card.did so the button is enabled.
+        final contactWithMatchingDid = FakeContacts.individualContact.copyWith(
+          card: FakeContacts.individualContact.card.copyWith(
+            did: aliceSubjectDid,
+          ),
+        );
         final card = RCard(
           subjectDid: aliceSubjectDid,
           vcBlob: aliceVcBlob,
@@ -172,8 +177,6 @@ void main() {
           version: 1,
           issuanceDate: DateTime(2024),
           receivedAt: DateTime(2024),
-          otherPartyPermanentChannelDid:
-              FakeContacts.individualContact.channelDid,
         );
 
         await navigateToLocation(
@@ -181,7 +184,7 @@ void main() {
           '/r-cards/${Uri.encodeComponent(aliceSubjectDid)}/details',
           identities: [FakeIdentities.primaryIdentity],
           mediators: [],
-          contacts: [FakeContacts.individualContact],
+          contacts: [contactWithMatchingDid],
           rCards: [card],
         );
         await tester.pumpAndSettle();
@@ -276,6 +279,11 @@ void main() {
     testWidgets('tapping "Chat with" navigates to the chat screen', (
       tester,
     ) async {
+      final contactWithMatchingDid = FakeContacts.individualContact.copyWith(
+        card: FakeContacts.individualContact.card.copyWith(
+          did: aliceSubjectDid,
+        ),
+      );
       final card = RCard(
         subjectDid: aliceSubjectDid,
         vcBlob: aliceVcBlob,
@@ -283,8 +291,6 @@ void main() {
         version: 1,
         issuanceDate: DateTime(2024),
         receivedAt: DateTime(2024),
-        otherPartyPermanentChannelDid:
-            FakeContacts.individualContact.channelDid,
       );
 
       await navigateToLocation(
@@ -292,7 +298,7 @@ void main() {
         '/r-cards/${Uri.encodeComponent(aliceSubjectDid)}/details',
         identities: [FakeIdentities.primaryIdentity],
         mediators: [],
-        contacts: [FakeContacts.individualContact],
+        contacts: [contactWithMatchingDid],
         rCards: [card],
       );
       await tester.pumpAndSettle();
@@ -314,8 +320,13 @@ void main() {
 
     testWidgets('"Chat with" pops instead of pushing when chat screen '
         'is directly below in nav stack', (tester) async {
-      // Setup: a card with otherPartyPermanentChannelDid so the
+      // Setup: a card whose subjectDid matches the contact's card.did so the
       // "Go to R-Card" link and "Chat with" button both work.
+      final contactWithMatchingDid = FakeContacts.individualContact.copyWith(
+        card: FakeContacts.individualContact.card.copyWith(
+          did: aliceSubjectDid,
+        ),
+      );
       final card = RCard(
         subjectDid: aliceSubjectDid,
         vcBlob: aliceVcBlob,
@@ -323,8 +334,6 @@ void main() {
         version: 1,
         issuanceDate: DateTime(2024),
         receivedAt: DateTime(2024),
-        otherPartyPermanentChannelDid:
-            FakeContacts.individualContact.channelDid,
       );
 
       final chatSdk = FakeChatSdk();
@@ -335,7 +344,7 @@ void main() {
         '/contacts/${FakeContacts.individualContact.id}/chat',
         identities: [FakeIdentities.primaryIdentity],
         mediators: [],
-        contacts: [FakeContacts.individualContact],
+        contacts: [contactWithMatchingDid],
         meetingPlaceChatSDK: chatSdk,
         rCards: [card],
       );
