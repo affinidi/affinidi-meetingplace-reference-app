@@ -67,7 +67,11 @@ class RCardsScreenController extends _$RCardsScreenController {
     _lastSearchQuery = '';
     final allCards = ref.read(rCardsServiceProvider);
     final filteredResults = _applyFilters(allCards);
-    state = state.copyWith(filter: filter, cards: filteredResults);
+    state = state.copyWith(
+      filter: filter,
+      cards: filteredResults,
+      hasFilterApplied: allCards.length != filteredResults.length,
+    );
   }
 
   List<RCard> _applyFilters(List<RCard> all) {

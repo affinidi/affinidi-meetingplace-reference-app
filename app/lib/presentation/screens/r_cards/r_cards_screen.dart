@@ -22,6 +22,7 @@ class RCardsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
+    final customColors = context.customColors;
     final provider = rCardsScreenControllerProvider;
     final controller = ref.read(provider.notifier);
 
@@ -30,6 +31,7 @@ class RCardsScreen extends HookConsumerWidget {
       provider.select((state) => state.isSearchActive),
     );
     final cards = ref.watch(provider.select((state) => state.cards));
+    final hasAnyCards = ref.watch(rCardsServiceProvider).isNotEmpty;
 
     final searchController = useTextEditingController();
 
@@ -73,7 +75,7 @@ class RCardsScreen extends HookConsumerWidget {
     final deckKey = 'r_cards_deck_${cards.length}_${filter.name}';
 
     return ColoredBox(
-      color: Colors.black,
+      color: colorScheme.surface,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,12 +97,14 @@ class RCardsScreen extends HookConsumerWidget {
                       child: TextField(
                         controller: searchController,
                         onChanged: controller.search,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: colorScheme.onSurface),
                         decoration: InputDecoration(
                           hintText: l10n.generalSearch,
-                          hintStyle: const TextStyle(color: Color(0xFFBDBDBD)),
+                          hintStyle: TextStyle(
+                            color: customColors.searchHintText,
+                          ),
                           filled: true,
-                          fillColor: const Color(0xFF1C1C1E),
+                          fillColor: customColors.searchFieldFill,
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -124,15 +128,15 @@ class RCardsScreen extends HookConsumerWidget {
                 ],
                 IconButton(
                   onPressed: controller.toggleSearch,
-                  icon: const Icon(Icons.search, color: Colors.white),
+                  icon: Icon(Icons.search, color: colorScheme.onSurface),
                 ),
                 IconButton(
-                  onPressed: cards.isNotEmpty ? exportAll : null,
+                  onPressed: hasAnyCards ? exportAll : null,
                   icon: Icon(
                     Icons.download_outlined,
-                    color: cards.isNotEmpty
-                        ? Colors.white
-                        : Colors.white.withValues(alpha: 0.5),
+                    color: hasAnyCards
+                        ? colorScheme.onSurface
+                        : colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
