@@ -4,7 +4,6 @@ import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
@@ -66,9 +65,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   void Function(StreamData data, String channelDid)? _zkpCallback;
 
-  /// Registers a callback that is invoked for every incoming message so the
-  /// presentation layer can handle ZKP attachments without coupling this
-  /// service to proof-flow logic.
+  @override
   void setZkpCallback(
     void Function(StreamData data, String channelDid)? callback,
   ) {
@@ -399,7 +396,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       if (chatItem is Message && !chatItem.isFromMe) {
         _clearMembersTypingActivity(data.plainTextMessage?.from);
       }
-      if (chatItem is Message && _messageHasZkpAttachments(chatItem)) {
+      if (chatItem is Message &&
+          LivenessZkpConciergeDeriver.messageHasZkpAttachments(chatItem)) {
         _syncHumanZkpNotices();
       }
     }
@@ -428,169 +426,15 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
               '';
   }
 
-  List<ConciergeMessage> _deriveHumanZkpConciergeMessages(
-    Message item,
-    String contactName,
-  ) {
-    return _deriveHumanZkpNotices(
-      item,
-      contactName,
-    ).map(LivenessZkpConciergeChatMapper.toConciergeMessage).toList();
-  }
-
-  List<LivenessZkpConciergeNotice> _deriveHumanZkpNotices(
-    Message item,
-    String contactName,
-  ) {
-    final out = <LivenessZkpConciergeNotice>[];
-    if (item.value.isNotEmpty || item.attachments.isEmpty) return out;
-
-    final hasRequest =
-        LivenessZkpAttachmentParser.tryParseRequestIn(item.attachments) != null;
-    final hasProof =
-        LivenessZkpAttachmentParser.tryParseProofIn(item.attachments) != null;
-
-    if (hasRequest && !item.isFromMe) {
-      out.add(
-        LivenessZkpConciergeMessages.humanZkpRequest(
-          chatId: item.chatId,
-          messageId: LivenessZkpConciergeIds.requestReceived(item.messageId),
-          dateCreated: item.dateCreated,
-          contactName: contactName,
-        ),
-      );
-    }
-
-    if (hasProof) {
-      if (item.isFromMe) {
-        out.add(
-          LivenessZkpConciergeMessages.humanZkpProofShared(
-            chatId: item.chatId,
-            messageId: LivenessZkpConciergeIds.proofShared(item.messageId),
-            dateCreated: item.dateCreated,
-          ),
-        );
-      } else {
-        out.add(
-          LivenessZkpConciergeMessages.humanZkpProofReceived(
-            chatId: item.chatId,
-            messageId: LivenessZkpConciergeIds.proofReceived(item.messageId),
-            dateCreated: item.dateCreated,
-            contactName: contactName,
-          ),
-        );
-      }
-    }
-
-    return out;
-  }
-
   List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
-    final contactName = _peerFirstNameForZkpUi();
-
-    Message? latestIncomingRequest;
-    Message? latestMyProof;
-    Message? latestTheirProof;
-
-    for (final item in existing) {
-      if (item is! Message || !_messageHasZkpAttachments(item)) continue;
-
-      final hasRequest =
-          LivenessZkpAttachmentParser.tryParseRequestIn(item.attachments) !=
-          null;
-      final hasProof =
-          LivenessZkpAttachmentParser.tryParseProofIn(item.attachments) != null;
-
-      if (hasRequest && !item.isFromMe) {
-        if (latestIncomingRequest == null ||
-            item.dateCreated.isAfter(latestIncomingRequest.dateCreated)) {
-          latestIncomingRequest = item;
-        }
-      }
-      if (hasProof && item.isFromMe) {
-        if (latestMyProof == null ||
-            item.dateCreated.isAfter(latestMyProof.dateCreated)) {
-          latestMyProof = item;
-        }
-      }
-      if (hasProof && !item.isFromMe) {
-        if (latestTheirProof == null ||
-            item.dateCreated.isAfter(latestTheirProof.dateCreated)) {
-          latestTheirProof = item;
-        }
-      }
-    }
-
-    final derived = <ConciergeMessage>[];
-
-    if (latestIncomingRequest != null) {
-      final fulfilledByMyProof =
-          latestMyProof != null &&
-          !latestMyProof.dateCreated.isBefore(
-            latestIncomingRequest.dateCreated,
-          );
-      if (!fulfilledByMyProof) {
-        derived.addAll(
-          _deriveHumanZkpConciergeMessages(latestIncomingRequest, contactName),
-        );
-      }
-    }
-    if (latestMyProof != null) {
-      derived.addAll(
-        _deriveHumanZkpConciergeMessages(latestMyProof, contactName),
-      );
-    }
-    if (latestTheirProof != null) {
-      derived.addAll(
-        _deriveHumanZkpConciergeMessages(latestTheirProof, contactName),
-      );
-    }
-
-    final latestRequestNoticeId = latestIncomingRequest == null
-        ? null
-        : LivenessZkpConciergeIds.requestReceived(
-            latestIncomingRequest.messageId,
-          );
-
-    final pausedNotices = existing.whereType<ConciergeMessage>().where(
-      (notice) =>
-          notice.conciergeType.value ==
-              LivenessZkpConciergeTypes.humanZkpPaused &&
-          (latestRequestNoticeId == null ||
-              notice.messageId ==
-                  LivenessZkpConciergeIds.paused(
-                    forRequestNoticeMessageId: latestRequestNoticeId,
-                  )),
+    return LivenessZkpConciergeDeriver.appendDerivedHumanZkpConciergeMessages(
+      existing,
+      contactName: _peerFirstNameForZkpUi(),
     );
-
-    final withoutHumanZkp = existing.where(
-      (item) => !_isHumanZkpConcierge(item),
-    );
-
-    return [
-      ...withoutHumanZkp,
-      ...pausedNotices,
-      ...derived,
-    ].sortedBy((item) => item.dateCreated).reversed.toList();
   }
 
   void _syncHumanZkpNotices() {
     state = state.copyWith(messages: _appendDerivedZkpNotices(state.messages));
-  }
-
-  bool _messageHasZkpAttachments(Message message) {
-    if (message.value.isNotEmpty || message.attachments.isEmpty) return false;
-
-    return message.attachments.any(
-      (attachment) =>
-          LivenessZkpAttachmentParser.matchesRequestFormat(attachment) ||
-          LivenessZkpAttachmentParser.matchesProofFormat(attachment),
-    );
-  }
-
-  bool _isHumanZkpConcierge(ChatItem item) {
-    if (item is! ConciergeMessage) return false;
-    return LivenessZkpConciergeTypes.isHumanZkpType(item.conciergeType.value);
   }
 
   // ---------------------------------------------------------------------------

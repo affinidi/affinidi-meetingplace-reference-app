@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart'
+    show LivenessProofPayload, LivenessZkpDIDCommAttachmentBuilder;
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/zkp_service/zkp_service.dart';
@@ -31,9 +32,8 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
       chatScreenControllerProvider(contactId).notifier,
     );
 
-    final attachments = LivenessZkpAttachmentBuilder.buildLivenessCheckRequest(
-      attachmentId: DateTime.now().millisecondsSinceEpoch.toString(),
-    );
+    final attachments =
+        LivenessZkpDIDCommAttachmentBuilder.buildLivenessCheckRequest();
 
     await chatController.sendMessageDirect(
       '',
@@ -79,13 +79,13 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
           name: _logKey,
         );
 
-        final attachments = LivenessZkpAttachmentBuilder.buildLivenessProof(
-          payload: LivenessProofPayload(
-            proof: result.proof,
-            publicSignals: result.publicSignals,
-          ),
-          attachmentId: DateTime.now().millisecondsSinceEpoch.toString(),
-        );
+        final attachments =
+            LivenessZkpDIDCommAttachmentBuilder.buildLivenessProof(
+              payload: LivenessProofPayload(
+                proof: result.proof,
+                publicSignals: result.publicSignals,
+              ),
+            );
 
         await ref
             .read(chatScreenControllerProvider(contactId).notifier)

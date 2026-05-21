@@ -3,8 +3,9 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show LivenessZkpConciergeChatMapper;
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+    show LivenessZkpConciergeChatMapper, LivenessZkpConciergeMessages;
+import 'package:meeting_place_relationship/meeting_place_relationship.dart'
+    show LivenessProofPayload, LivenessZkpAttachmentParser;
 
 import '../../../domain/models/contacts/contact.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';

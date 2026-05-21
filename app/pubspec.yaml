@@ -63,22 +63,22 @@ dependencies:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_chat
-      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+      ref: cd174094f99bff749f9ce63be7b4438496bda634
   meeting_place_core:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_core
-      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+      ref: cd174094f99bff749f9ce63be7b4438496bda634
   meeting_place_drift_repository:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_drift_repository
-      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+      ref: cd174094f99bff749f9ce63be7b4438496bda634
   meeting_place_relationship:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_relationship
-      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+      ref: cd174094f99bff749f9ce63be7b4438496bda634
   mobile_scanner: ^7.1.3
   mpx_app_core:
     path: ../packages/app-core
@@ -116,22 +116,22 @@ dependency_overrides:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_chat
-      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+      ref: cd174094f99bff749f9ce63be7b4438496bda634
   meeting_place_core:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_core
-      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+      ref: cd174094f99bff749f9ce63be7b4438496bda634
   meeting_place_drift_repository:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_drift_repository
-      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+      ref: cd174094f99bff749f9ce63be7b4438496bda634
   meeting_place_relationship:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_relationship
-      ref: 1fbb4d999e3f8b28d20ed7665c1a4fccb54c99f6
+      ref: cd174094f99bff749f9ce63be7b4438496bda634
 
 flutter:
   generate: true
