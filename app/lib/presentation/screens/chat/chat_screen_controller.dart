@@ -121,27 +121,17 @@ class ChatScreenController extends _$ChatScreenController
     messageTextController.addListener(_onMessageTextChanged);
 
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
-    final channelDidForDisposal = ref
-        .read(contactsServiceProvider)
-        .getContactById(contactId)
-        ?.channelDid;
 
     ref.onDispose(() {
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
       if (isZkpEnabled) {
-        try {
+        if (ref.exists(proofFlowControllerProvider(contactId))) {
           ref
               .read(proofFlowControllerProvider(contactId).notifier)
               .resetSession();
-        } catch (_) {}
-      }
-      if (channelDidForDisposal != null) {
-        try {
-          ref
-              .read(chatSessionServiceProvider(channelDidForDisposal).notifier)
-              .setZkpCallback(null);
-        } catch (_) {}
+        }
+        _chatService?.setZkpCallback(null);
       }
       _chatService?.pauseChat();
 

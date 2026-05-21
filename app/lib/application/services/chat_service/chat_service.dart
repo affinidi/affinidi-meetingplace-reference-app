@@ -37,4 +37,8 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   void clearEffect();
 
   void upsertChatItem(ChatItem item);
+
+  void setZkpCallback(
+    void Function(StreamData data, String channelDid)? callback,
+  );
 }
