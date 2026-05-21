@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart'
+    show LivenessZkpConciergeTypes;
 
 import '../zkp_paused_notice_widget.dart';
 import '../zkp_proof_received_notice_widget.dart';
