@@ -11,6 +11,7 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
 - [Core Concepts](#core-concepts)
 - [Preview](#preview)
 - [Key Features](#key-features)
+  - [Human ZKP demo flow](#human-zkp-demo-flow)
 - [Architecture Overview](#architecture-overview)
   - [Architectural Layers](#architectural-layers)
   - [Core Components](#core-components)
@@ -70,9 +71,25 @@ The reference application showcases the implementation of the Affinidi Meeting P
 
 - **Verified Identity** - show a proof of your identity using a verifiable credential as proof within the chat.
 
+- **Human ZKP (demo)** - request and verify that a contact is human using a zero-knowledge proof derived from a Liveness Credential (disabled by default; see [Human ZKP demo flow](#human-zkp-demo-flow)).
+
 - **Messaging Server** - use our messaging servers as your default server configuration or create your own managed messaging server.
 
 Refer to [the documentation](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/) to learn more about Affinidi Meeting Place SDK.
+
+### Human ZKP demo flow
+
+This reference app includes an optional **Human ZKP** demo. It is off by default. Enable it at build/run time with `--dart-define=ZKP_ENABLED=true` (this also exposes the **Credentials** tab for managing a Liveness Credential).
+
+**Happy path:** In a peer chat, open **+** → **Human Zero Knowledge Proof** to request proof from the contact. The peer fulfills the request (quick liveness check or an existing Liveness Credential), and a ZKP is exchanged over the channel. Concierge messages in the thread record the request and successful proof (for example, that the contact shared a proof confirming they are human, with no personal data shared). The requester then sees a verified indicator on the contact avatar.
+
+**Failure path:** If verification does not succeed, a Concierge message is shown in the chat, for example:
+
+> **Bob** failed to provide a Zero-Knowledge Proof confirming they are human.
+
+The message is attributed to **Concierge** and includes a **Human ZKP** badge below the text.
+
+![Human ZKP verification failure](assets/zkp/zkp-verification-failure.png)
 
 ## Architecture Overview
 
