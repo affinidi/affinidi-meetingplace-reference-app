@@ -1621,10 +1621,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get rCardFooterUpdateShared => 'R-Karten-Update wurde geteilt.';
 
   @override
-  String get rCardFooterUpdateSaved => 'R-Card update has been saved.';
+  String get rCardFooterUpdateSaved => 'R-Karten-Update wurde gespeichert.';
 
   @override
-  String get rCardsExchanged => 'R-Cards have been exchanged.';
+  String get rCardsExchanged => 'R-Karten ausgetauscht';
 
   @override
   String get goToRCard => 'Zur R-Karte';

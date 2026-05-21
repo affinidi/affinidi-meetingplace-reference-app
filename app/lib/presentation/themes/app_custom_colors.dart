@@ -16,6 +16,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? orange,
     Color? disabledGrey,
     Color? darkGrey,
+    Color? searchHintText,
+    Color? searchFieldFill,
   }) : _cyan = cyan,
        _purple = purple,
        _rose = rose,
@@ -28,7 +30,9 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
        _brown = brown,
        _orange = orange,
        _disabledGrey = disabledGrey,
-       _darkGrey = darkGrey;
+       _darkGrey = darkGrey,
+       _searchHintText = searchHintText,
+       _searchFieldFill = searchFieldFill;
 
   final Color? _cyan;
   final Color? _purple;
@@ -43,6 +47,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color? _orange;
   final Color? _disabledGrey;
   final Color? _darkGrey;
+  final Color? _searchHintText;
+  final Color? _searchFieldFill;
 
   Color get cyan => _cyan ?? Colors.cyan;
   Color get purple => _purple ?? Colors.purple;
@@ -59,6 +65,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   Color get disabledGrey =>
       _disabledGrey ?? const Color.fromARGB(100, 180, 180, 180);
   Color get darkGrey => _darkGrey ?? const Color.fromARGB(255, 49, 49, 51);
+  Color get searchHintText => _searchHintText ?? const Color(0xFFBDBDBD);
+  Color get searchFieldFill => _searchFieldFill ?? const Color(0xFF1C1C1E);
 
   @override
   AppCustomColors copyWith({
@@ -75,6 +83,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? orange,
     Color? disabledGrey,
     Color? darkGrey,
+    Color? searchHintText,
+    Color? searchFieldFill,
   }) {
     return AppCustomColors(
       cyan: cyan ?? _cyan,
@@ -90,6 +100,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
       orange: orange ?? _orange,
       disabledGrey: disabledGrey ?? _disabledGrey,
       darkGrey: darkGrey ?? _darkGrey,
+      searchHintText: searchHintText ?? _searchHintText,
+      searchFieldFill: searchFieldFill ?? _searchFieldFill,
     );
   }
 
@@ -110,6 +122,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
       orange: Color.lerp(_orange, other._orange, t),
       disabledGrey: Color.lerp(_disabledGrey, other._disabledGrey, t),
       darkGrey: Color.lerp(_darkGrey, other._darkGrey, t),
+      searchHintText: Color.lerp(_searchHintText, other._searchHintText, t),
+      searchFieldFill: Color.lerp(_searchFieldFill, other._searchFieldFill, t),
     );
   }
 }
