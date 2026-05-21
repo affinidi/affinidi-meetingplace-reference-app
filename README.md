@@ -11,7 +11,6 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
 - [Core Concepts](#core-concepts)
 - [Preview](#preview)
 - [Key Features](#key-features)
-  - [Human ZKP demo flow](#human-zkp-demo-flow)
 - [Architecture Overview](#architecture-overview)
   - [Architectural Layers](#architectural-layers)
   - [Core Components](#core-components)
@@ -70,8 +69,6 @@ The reference application showcases the implementation of the Affinidi Meeting P
 - **Secure Messaging** - communicate either in a peer-to-peer or group setting, like how most chat applications do, but with security and privacy built in.
 
 - **Verified Identity** - show a proof of your identity using a verifiable credential as proof within the chat.
-
-- **Human ZKP (demo)** - request and verify that a contact is human using a zero-knowledge proof derived from a Liveness Credential (disabled by default; see [Human ZKP demo flow](#human-zkp-demo-flow)).
 
 - **Messaging Server** - use our messaging servers as your default server configuration or create your own managed messaging server.
 
