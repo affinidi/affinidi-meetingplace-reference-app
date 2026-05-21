@@ -93,8 +93,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     }, fireImmediately: true);
 
     ref.onDispose(() {
-      _presenceTimedAction?.cancel();
-      _typingTimedAction?.cancel();
+      _presenceTimedAction?.dispose();
+      _typingTimedAction?.dispose();
       _messageSubscription?.dispose();
       _chatSDK?.endChatSession();
       _logger.info('ChatSessionService disposed', name: _logKey);
