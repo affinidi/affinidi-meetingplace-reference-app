@@ -236,6 +236,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       await _resetBadgeCount();
       unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
+      // TODO(Earl): remove this line once the VRC branch is merged —
+      // `await _vdipManager.subscribe()` will pre-warm the cache implicitly.
+      await ref.read(relationshipSdkProvider.future);
       unawaited(_subscribeToIncomingRCards());
 
       _logger.info('Chat session started', name: _logKey);

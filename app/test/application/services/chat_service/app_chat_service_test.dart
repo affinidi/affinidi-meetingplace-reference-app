@@ -18,6 +18,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_pro
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import 'package:ssi/ssi.dart';
 
@@ -30,6 +31,7 @@ import '../../../fakes/fake_environment.dart';
 import '../../../fakes/fake_groups.dart';
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_meeting_place_sdk.dart';
+import '../../../fakes/fake_vrc_repository.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -62,6 +64,9 @@ void main() {
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
             (ref) async => _FakeRCardRepository(),
+          ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
           ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
@@ -283,6 +288,9 @@ void main() {
           rCardsRepositoryProvider.overrideWith(
             (ref) async => _FakeRCardRepository(),
           ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -411,6 +419,9 @@ void main() {
           rCardsRepositoryProvider.overrideWith(
             (ref) async => _FakeRCardRepository(),
           ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -516,6 +527,9 @@ void main() {
           rCardsRepositoryProvider.overrideWith(
             (ref) async => _FakeRCardRepository(),
           ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -541,20 +555,14 @@ void main() {
 
     tearDown(() => container.dispose());
 
-    test(
-      'sendRCardFromPlugin calls createChatMessageFromIssuedCredential',
-      () async {
-        await chatService.startChatSession();
+    test('sendRCardFromPlugin calls createAttachmentMessage', () async {
+      await chatService.startChatSession();
 
-        await chatService.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
-        await Future<void>.delayed(const Duration(milliseconds: 50));
+      await chatService.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
 
-        expect(
-          fakeChatSdk.createChatMessageFromIssuedCredentialCalls,
-          hasLength(1),
-        );
-      },
-    );
+      expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
+    });
 
     test('sendRCardFromPlugin is a no-op when channel is not found', () async {
       final noChannelSdk = FakeMeetingPlaceSDK(channels: {});
@@ -574,7 +582,7 @@ void main() {
       await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      expect(fakeChatSdk.createChatMessageFromIssuedCredentialCalls, isEmpty);
+      expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
 
     test('sendRCardFromPlugin silently skips when channel '
@@ -605,7 +613,7 @@ void main() {
       await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      expect(fakeChatSdk.createChatMessageFromIssuedCredentialCalls, isEmpty);
+      expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
 
     test('pauseChat cancels rCard subscription without error', () async {
