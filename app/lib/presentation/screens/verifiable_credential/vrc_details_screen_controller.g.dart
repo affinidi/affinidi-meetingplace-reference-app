@@ -7,7 +7,7 @@ part of 'vrc_details_screen_controller.dart';
 // **************************************************************************
 
 String _$vrcDetailsScreenControllerHash() =>
-    r'29147ab08e0ae93813c1c9c5b0bffc65f0f7bb7b';
+    r'8d629bef40b7df61443593a41c471d18b463f200';
 
 /// Copied from Dart SDK
 class _SystemHash {

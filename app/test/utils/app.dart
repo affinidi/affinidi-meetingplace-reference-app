@@ -30,7 +30,6 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place
 import 'package:mpx_flutter_reference_app/infrastructure/providers/qr_code_view_factory_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/share_service_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/repositories/r_card_repository/r_card_repository_drift/r_cards_repository_drift.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
@@ -71,7 +70,6 @@ Future<void> startApp(
   List<Contact> contacts = const [],
   List<RCard> rCards = const [],
   List<Vrc> vrcs = const [],
-  List<AttachmentsPlugin>? attachmentPlugins,
   SecureStorage? secureStorage,
   ShareService? shareService,
   QrCodeViewFactory? qrCodeViewFactory,
@@ -308,37 +306,4 @@ Future<AppLocalizations> getL10n({
   Locale locale = const Locale('en', 'US'),
 }) async {
   return await AppLocalizations.delegate.load(locale);
-}
-
-class _FakeRCardRepository implements RCardRepository {
-  final Map<String, RCard> _cardsBySubjectDid = {};
-
-  @override
-  Future<void> deleteBySubjectDid(String subjectDid) async {
-    _cardsBySubjectDid.remove(subjectDid);
-  }
-
-  @override
-  Future<RCard?> getBySubjectDid(String subjectDid) async =>
-      _cardsBySubjectDid[subjectDid];
-
-  @override
-  Future<List<RCard>> listAll() async => _cardsBySubjectDid.values.toList();
-
-  @override
-  Future<void> updateNotes(String subjectDid, String? notes) async {
-    final card = _cardsBySubjectDid[subjectDid];
-    if (card == null) return;
-    _cardsBySubjectDid[subjectDid] = card.copyWith(notes: notes);
-  }
-
-  @override
-  Future<void> upsert(RCard rCard) async {
-    _cardsBySubjectDid[rCard.subjectDid] = rCard;
-  }
-
-  @override
-  Stream<List<RCard>> watchAll() async* {
-    yield _cardsBySubjectDid.values.toList();
-  }
 }

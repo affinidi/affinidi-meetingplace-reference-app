@@ -499,8 +499,9 @@ class ConnectionsService extends _$ConnectionsService {
       return null;
     }
 
-    final identity =
-        ref.read(identitiesServiceProvider).getIdentityById(externalRef);
+    final identity = ref
+        .read(identitiesServiceProvider)
+        .getIdentityById(externalRef);
     if (identity == null || identity.did.isEmpty) {
       _logger.warning(
         'Skipping R-Card attachment: no identity found for'
@@ -512,11 +513,8 @@ class ConnectionsService extends _$ConnectionsService {
 
     try {
       final didManager = await sdk.getDidManager(identity.did);
-      return RCardAttachmentBuilder.buildForPersona(
-        persona: PersonaDid(
-          did: identity.did,
-          name: identity.card.displayName,
-        ),
+      return RCardDIDCommAttachmentBuilder.build(
+        issuerDid: identity.did,
         card: RCardSubject(
           firstName: identity.card.firstName,
           lastName: identity.card.lastName,

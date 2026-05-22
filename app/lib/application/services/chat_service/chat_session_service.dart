@@ -5,7 +5,6 @@ import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
@@ -23,13 +22,10 @@ import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../infrastructure/providers/chat_repository_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../../../infrastructure/providers/relationship_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../contacts_service/contacts_service.dart';
-import '../identities_service/identities_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
@@ -413,128 +409,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     await ref
         .read(contactsServiceProvider.notifier)
         .resetContactBadgeCount(_otherPartyPermanentDid);
-  }
-
-  Future<void> _sendProfileUpdateWithRCard(ConciergeMessage message) async {
-    try {
-      final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
-        _channelDid,
-      );
-      if (channel == null) return;
-
-      final externalRef = channel.externalRef;
-      if (externalRef == null || externalRef.isEmpty) return;
-
-      final identity = ref
-          .read(identitiesServiceProvider)
-          .getIdentityById(externalRef);
-      if (identity == null || identity.did.isEmpty) return;
-
-      final channelDid = channel.permanentChannelDid;
-      if (channelDid == null || channelDid.isEmpty) return;
-
-      final otherDid = channel.otherPartyPermanentChannelDid;
-      if (otherDid == null || otherDid.isEmpty) return;
-
-      final didManager = await coreSdk.getDidManager(channelDid);
-      final relationshipSDK = await ref.read(relationshipSdkProvider.future);
-      final rCard = await relationshipSDK.sendRCard(
-        channel: channel,
-        subjectDid: identity.did,
-        card: RCardSubject(
-          firstName: identity.card.firstName,
-          lastName: identity.card.lastName,
-          email: identity.card.email,
-          phone: identity.card.mobile,
-        ),
-        issuerDidManager: didManager,
-      );
-
-      final confirmedMessage = ConciergeMessage(
-        chatId: message.chatId,
-        messageId: message.messageId,
-        senderDid: message.senderDid,
-        isFromMe: message.isFromMe,
-        dateCreated: message.dateCreated,
-        status: ChatItemStatus.confirmed,
-        conciergeType: message.conciergeType,
-        data: {
-          ...message.data,
-          'messageType': 'rCardUpdated',
-          'subjectDid': identity.did,
-        },
-      );
-
-      final chatRepository = await ref.read(chatRepositoryProvider.future);
-      await chatRepository.updateMesssage(confirmedMessage);
-      _upsertChatItem(confirmedMessage);
-
-      final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
-      final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(
-        vcJson,
-        isUpdate: true,
-      );
-      await _chatSDK?.createAttachmentMessage(
-        attachments: attachments,
-        senderDid: channelDid,
-      );
-    } catch (e, st) {
-      _logger.error(
-        'Failed to send profile update with R-Card',
-        error: e,
-        stackTrace: st,
-        name: _logKey,
-      );
-    }
-  }
-
-  Future<void> _subscribeToIncomingRCards() async {
-    final relationshipSDK = await ref.read(relationshipSdkProvider.future);
-
-    _rCardSubscription = relationshipSDK.receivedRCards.listen(
-      _onRCardReceived,
-      onError: (Object error, StackTrace stackTrace) {
-        _logger.error(
-          'Error in incoming R-Card stream',
-          error: error,
-          stackTrace: stackTrace,
-          name: _logKey,
-        );
-      },
-    );
-  }
-
-  Future<void> _onRCardReceived(RCard rCard) async {
-    try {
-      final chatSDK = _chatSDK;
-      if (chatSDK == null) return;
-
-      final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
-        _channelDid,
-      );
-      if (channel == null) return;
-
-      final otherDid = channel.otherPartyPermanentChannelDid;
-      if (otherDid == null) return;
-
-      if (rCard.issuerDid != otherDid) return;
-
-      final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
-      final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(vcJson);
-      await chatSDK.createAttachmentMessage(
-        attachments: attachments,
-        senderDid: otherDid,
-      );
-    } catch (error, stackTrace) {
-      _logger.error(
-        'Failed to surface incoming R-Card as chat tile',
-        error: error,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-    }
   }
 
   // ---------------------------------------------------------------------------

@@ -6,10 +6,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../configuration/environment.dart';
 import '../secure_storage/secure_storage.dart';
 import 'applications_documents_directory_provider.dart';
-
-import '../configuration/environment.dart';
-import '../secure_storage/secure_storage.dart';
-import 'applications_documents_directory_provider.dart';
 part 'r_cards_repository_provider.g.dart';
 
 final _receivedRCardDatabaseProvider = FutureProvider<RCardDatabase>((

@@ -164,9 +164,6 @@ class FakeRelationshipSdk extends MeetingPlaceRelationshipSDK {
   void emit(RCard rCard) => _controller.add(rCard);
   void emitOnChannel(ChannelRCardEvent event) => _channelController.add(event);
 
-  void emitOnChannel(Channel channel, RCard rCard) =>
-      _channelController.add(ChannelRCardEvent(channel: channel, rCard: rCard));
-
   Future<void> close() async {
     await _controller.close();
     await _channelController.close();

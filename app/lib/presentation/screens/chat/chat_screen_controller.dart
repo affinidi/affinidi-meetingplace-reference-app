@@ -205,7 +205,6 @@ class ChatScreenController extends _$ChatScreenController
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
-      _rCardPluginSubscription?.cancel();
       _chatService?.pauseChat();
 
       messageTextController.removeListener(_onMessageTextChanged);
