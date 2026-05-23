@@ -142,6 +142,7 @@ void main() {
 
     test('subscribeToIncomingRCards — incoming RCard from expected sender '
         'calls createAttachmentMessage', () async {
+      await manager.subscribeToIncomingRCards();
       stub.emitRCard(_makeRCard(issuerDid: otherPartyDid));
       await Future<void>.delayed(const Duration(milliseconds: 50));
 

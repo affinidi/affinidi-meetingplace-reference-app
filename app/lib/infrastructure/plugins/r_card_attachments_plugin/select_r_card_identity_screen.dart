@@ -15,8 +15,10 @@ class _SelectRCardIdentityScreenState
   @override
   void initState() {
     super.initState();
-    // Pre-select first identity so the Send button is enabled immediately.
-    _selected = ref.read(identitiesServiceProvider).identities.firstOrNull;
+    // Pre-select current/primary identity so the picker opens on the last chosen one.
+    _selected =
+        ref.read(identitiesServiceProvider.currentIdentityOrPrimary) ??
+        ref.read(identitiesServiceProvider).identities.firstOrNull;
   }
 
   @override

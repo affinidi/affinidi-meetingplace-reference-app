@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/application/services/vrc_service/vrc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vrc/vrc_credential.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_custom_colors.dart';
@@ -31,6 +34,7 @@ final _testCredential = VrcCredential(
 Future<void> _pump(WidgetTester tester) async {
   await tester.pumpWidget(
     ProviderScope(
+      overrides: [vrcServiceProvider.overrideWith(FakeVrcService.new)],
       child: _buildApp(
         home: VrcDetailsScreen(
           credentialId: _credentialId,
@@ -43,6 +47,10 @@ Future<void> _pump(WidgetTester tester) async {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  AppLogger.initialize(
+    File('${Directory.systemTemp.path}/vrc_details_test.log'),
+  );
   group('VrcDetailsScreen', () {
     testWidgets('shows the Secure Attachments title', (tester) async {
       final l10n = await getL10n();
@@ -82,7 +90,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
@@ -98,6 +106,7 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [vrcServiceProvider.overrideWith(FakeVrcService.new)],
           child: _buildApp(
             home: VrcDetailsScreen(
               credentialId: _credentialId,
@@ -123,6 +132,7 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [vrcServiceProvider.overrideWith(FakeVrcService.new)],
           child: _buildApp(
             home: VrcDetailsScreen(
               credentialId: _credentialId,
@@ -151,6 +161,7 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [vrcServiceProvider.overrideWith(FakeVrcService.new)],
           child: _buildApp(
             home: VrcDetailsScreen(
               credentialId: _credentialId,

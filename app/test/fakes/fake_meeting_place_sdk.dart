@@ -120,6 +120,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'mediatorDid': mediatorDid,
       'metadata': metadata,
       'externalRef': externalRef,
+      'score': score,
     });
 
     if (_publishOfferException != null) {
