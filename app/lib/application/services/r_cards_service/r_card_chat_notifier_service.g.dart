@@ -7,17 +7,16 @@ part of 'r_card_chat_notifier_service.dart';
 // **************************************************************************
 
 String _$rCardChatNotifierServiceHash() =>
-    r'c28c82489d74525cb05ff1e0ba4bd9cc6fbf9138';
+    r'f963421a1531d9eff39e8672d00dc753e7a10d53';
 
 /// Global service that creates chat messages for R-Cards delivered via the
 /// DIDComm channel-inauguration (OOB) path.
 ///
-/// Listens on [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel], which
-/// surfaces the originating channel alongside each parsed R-Card. This
-/// channel context is used to:
-///   • skip group channels (R-Cards are individual-only),
-///   • build the stable chat message ID, and
-///   • set the sender DID correctly.
+/// These R-Cards arrive on
+/// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+/// originating channel. When detected, this service persists an R-Card
+/// attachment message in the relevant chat so users see the
+/// "R-Cards have been exchanged." notice when they open the conversation.
 ///
 /// VDIP-path R-Cards (explicit sends) are handled by [ChatSessionService] and
 /// are intentionally NOT processed here.

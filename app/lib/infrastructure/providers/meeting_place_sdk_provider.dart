@@ -75,9 +75,7 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
                         .ensureInitialized();
 
                     final externalRef = channel.externalRef;
-                    if (externalRef == null || externalRef.isEmpty) {
-                      return null;
-                    }
+                    if (externalRef == null || externalRef.isEmpty) return null;
 
                     final identity = ref
                         .read(identitiesServiceProvider)

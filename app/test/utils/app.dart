@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_drift_repository/meeting_place_drift_repository.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/r_cards_service/r_cards_service.dart';
@@ -29,6 +30,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place
 import 'package:mpx_flutter_reference_app/infrastructure/providers/qr_code_view_factory_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/share_service_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
@@ -51,7 +53,7 @@ import '../fakes/fake_secure_storage.dart';
 
 Future<void> startApp(
   WidgetTester tester, {
-  MediaQueryData data = const MediaQueryData(),
+  MediaQueryData? data,
   Locale locale = const Locale('en', 'US'),
   bool isAuthenticated = true,
   bool hasNetworkConnection = true,
@@ -67,6 +69,7 @@ Future<void> startApp(
   required List<Mediator> mediators,
   List<Contact> contacts = const [],
   List<RCard> rCards = const [],
+  List<Vrc> vrcs = const [],
   SecureStorage? secureStorage,
   ShareService? shareService,
   QrCodeViewFactory? qrCodeViewFactory,
@@ -80,6 +83,35 @@ Future<void> startApp(
   });
   final sharedPreferences = await SharedPreferences.getInstance();
   final cacheManager = FakeCacheManager();
+  final effectiveEnvironment = FakeEnvironment();
+  final effectiveSecureStorage = secureStorage ?? FakeSecureStorage();
+  final documentsDirectory = Directory('/tmp');
+  final databasePassphrase = await effectiveSecureStorage
+      .provideDatabasePassphrase();
+  final rCardDatabase = RCardDatabase(
+    databaseName: 'mpx_received_rcards_db',
+    passphrase: databasePassphrase,
+    directory: documentsDirectory,
+    logStatements: effectiveEnvironment.isDatabaseLoggingEnabled,
+    inMemory: true,
+  );
+  final vrcDatabase = VrcDatabase(
+    databaseName: 'mpx_vrc_db',
+    passphrase: databasePassphrase,
+    directory: documentsDirectory,
+    logStatements: effectiveEnvironment.isDatabaseLoggingEnabled,
+    inMemory: true,
+  );
+  final rCardRepository = RCardRepositoryDrift(database: rCardDatabase);
+  final vrcRepository = VrcRepositoryDrift(database: vrcDatabase);
+  for (final vrc in vrcs) {
+    await vrcRepository.upsert(vrc);
+  }
+
+  addTearDown(() async {
+    await vrcDatabase.close();
+    await rCardDatabase.close();
+  });
 
   final app = ProviderScope(
     overrides: [
@@ -90,7 +122,7 @@ Future<void> startApp(
             AppInfo(versionName: 'Test', buildNumber: '1', version: '0.0.0'),
       ),
       applicationDocumentsDirectoryProvider.overrideWith(
-        (ref) async => Directory('/tmp'),
+        (ref) async => documentsDirectory,
       ),
       availableAttachmentPluginsProvider.overrideWith(
         (ref) =>
@@ -105,13 +137,14 @@ Future<void> startApp(
               RCardAttachmentsPlugin(
                 cacheManager: ref.read(cacheManagerProvider),
               ),
+              VrcAttachmentsPlugin(),
             ],
       ),
       localAuthProvider.overrideWith(
         (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated),
       ),
       chatRepositoryProvider.overrideWith(chatRepositoryInMemoryDrift),
-      environmentProvider.overrideWithValue(FakeEnvironment()),
+      environmentProvider.overrideWithValue(effectiveEnvironment),
       channelRepositoryProvider.overrideWith(channelRepositoryInMemoryDrift),
       connectionOfferRepositoryProvider.overrideWith(
         connectionOfferRepositoryInMemoryDrift,
@@ -126,18 +159,17 @@ Future<void> startApp(
         }
         return repo;
       }),
-      environmentProvider.overrideWith((ref) => FakeEnvironment()),
       pushNotificationMessagingProvider.overrideWith(
         (ref) => pushNotificationMessaging ?? FakePushNotificationMessaging(),
       ),
       groupsRepositoryProvider.overrideWith(groupsRepositoryInMemoryDrift),
       rCardsRepositoryProvider.overrideWith((ref) async {
-        final repo = _FakeRCardRepository();
         for (final card in rCards) {
-          await repo.upsert(card);
+          await rCardRepository.upsert(card);
         }
-        return repo;
+        return rCardRepository;
       }),
+      vrcRepositoryProvider.overrideWith((ref) async => vrcRepository),
       identitiesRepositoryProvider.overrideWith((ref) async {
         final repo = await identitiesRepositoryInMemoryDrift(ref);
         for (final identity in identities) {
@@ -194,9 +226,7 @@ Future<void> startApp(
             cameraPermissionStatus: cameraPermissionStatus,
           ),
         ),
-      secureStorageProvider.overrideWith(
-        (ref) async => secureStorage ?? FakeSecureStorage(),
-      ),
+      secureStorageProvider.overrideWith((ref) async => effectiveSecureStorage),
       sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       if (rCardsServiceFactory != null)
         rCardsServiceProvider.overrideWith(rCardsServiceFactory),
@@ -205,10 +235,12 @@ Future<void> startApp(
       if (qrCodeViewFactory != null)
         qrCodeViewFactoryProvider.overrideWith((ref) => qrCodeViewFactory),
     ],
-    child: MediaQuery(
-      data: data,
-      child: App(locale: locale),
-    ),
+    child: data == null
+        ? App(locale: locale)
+        : MediaQuery(
+            data: data,
+            child: App(locale: locale),
+          ),
   );
 
   await tester.pumpWidget(app);
@@ -223,6 +255,7 @@ Future<void> navigateToLocation(
   List<Mediator> mediators = const [],
   List<Contact> contacts = const [],
   List<RCard> rCards = const [],
+  List<Vrc> vrcs = const [],
   PushNotificationMessaging? pushNotificationMessaging,
   Connectivity? connectivity,
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
@@ -252,6 +285,7 @@ Future<void> navigateToLocation(
     mediators: mediators,
     contacts: contacts,
     rCards: rCards,
+    vrcs: vrcs,
     shareService: shareService,
     qrCodeViewFactory: qrCodeViewFactory,
     attachmentPlugins: attachmentPlugins,
@@ -272,37 +306,4 @@ Future<AppLocalizations> getL10n({
   Locale locale = const Locale('en', 'US'),
 }) async {
   return await AppLocalizations.delegate.load(locale);
-}
-
-class _FakeRCardRepository implements RCardRepository {
-  final Map<String, RCard> _cardsBySubjectDid = {};
-
-  @override
-  Future<void> deleteBySubjectDid(String subjectDid) async {
-    _cardsBySubjectDid.remove(subjectDid);
-  }
-
-  @override
-  Future<RCard?> getBySubjectDid(String subjectDid) async =>
-      _cardsBySubjectDid[subjectDid];
-
-  @override
-  Future<List<RCard>> listAll() async => _cardsBySubjectDid.values.toList();
-
-  @override
-  Future<void> updateNotes(String subjectDid, String? notes) async {
-    final card = _cardsBySubjectDid[subjectDid];
-    if (card == null) return;
-    _cardsBySubjectDid[subjectDid] = card.copyWith(notes: notes);
-  }
-
-  @override
-  Future<void> upsert(RCard rCard) async {
-    _cardsBySubjectDid[rCard.subjectDid] = rCard;
-  }
-
-  @override
-  Stream<List<RCard>> watchAll() async* {
-    yield _cardsBySubjectDid.values.toList();
-  }
 }

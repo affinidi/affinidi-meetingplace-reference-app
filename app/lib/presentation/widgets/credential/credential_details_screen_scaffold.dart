@@ -12,19 +12,25 @@ class CredentialDetailsScreenScaffold extends StatelessWidget {
     required this.title,
     required this.description,
     required this.credentialCard,
+    this.startColor,
+    this.endColor,
   });
 
   final String title;
   final String description;
   final Widget credentialCard;
+  final Color? startColor;
+  final Color? endColor;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final customColors = context.customColors;
+    final effectiveStartColor = startColor ?? customColors.fromMeColor;
+    final effectiveEndColor = endColor ?? customColors.fromMeDarkColor;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: colorScheme.primary,
+        backgroundColor: context.colorScheme.primary,
         foregroundColor: Colors.white,
         title: Text(title),
         centerTitle: true,
@@ -34,7 +40,11 @@ class CredentialDetailsScreenScaffold extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
           child: Column(
             children: [
-              _DescriptionBanner(description: description),
+              _DescriptionBanner(
+                description: description,
+                startColor: effectiveStartColor,
+                endColor: effectiveEndColor,
+              ),
               const SizedBox(height: 32),
               credentialCard,
             ],
@@ -46,18 +56,23 @@ class CredentialDetailsScreenScaffold extends StatelessWidget {
 }
 
 class _DescriptionBanner extends StatelessWidget {
-  const _DescriptionBanner({required this.description});
+  const _DescriptionBanner({
+    required this.description,
+    required this.startColor,
+    required this.endColor,
+  });
 
   final String description;
+  final Color startColor;
+  final Color endColor;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [colorScheme.primary, colorScheme.primaryContainer],
+          colors: [startColor, endColor],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),

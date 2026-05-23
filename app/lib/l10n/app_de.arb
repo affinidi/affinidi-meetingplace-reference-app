@@ -136,6 +136,7 @@
 	"generalPhoto": "Foto",
 	"generalReject": "Ablehnen",
 	"generalSearch": "Suchen",
+	"generalVerify": "Bestätigen",
 	"generateRandomPhraseHelperDisabled": "Die von Ihnen eingegebene benutzerdefinierte Phrase wird verwendet, um diese Einladung zur Verbindung eindeutig zu identifizieren. Es muss einzigartig im Meeting Place-Universum sein.",
 	"generateRandomPhraseHelperEnabled": "Generieren einer zufälligen Phrase",
 	"genericPublishError": "Fehler beim Veröffentlichen des Angebots",
@@ -392,5 +393,51 @@
 	"goToRCard": "Zur R-Karte",
 	"selectIdentityTitle": "Identität auswählen",
 	"selectIdentityInstruction": "Wische links oder rechts, um die Identität auszuwählen, die du für die R‑Karte verwenden möchtest",
-	"sendRCard": "R-Karte senden"
+	"sendRCard": "R-Karte senden",
+	"verifiableRelationshipCredential": "Überprüfbarer Beziehungsnachweis",
+	"vrcDetailsTitle": "Beziehungsnachweis",
+	"vrcSectionIssuer": "Aussteller",
+	"vrcSectionHolder": "Ausgestellt an",
+	"vrcSectionMetadata": "Nachweisdetails",
+	"vrcFieldDid": "DID",
+	"vrcFieldName": "Name",
+	"vrcFieldIssuedAt": "Ausgestellt am",
+	"vrcFieldVerifiedAt": "Verifiziert",
+	"vrcFieldTypes": "Typen",
+	"vrcDescription": "Dieser Nachweis bestätigt die Beziehung zwischen zwei Parteien.",
+	"selectIdentityToVerifyRelationshipWithName": "Wähle die Identität aus, die du verwenden möchtest, um deine Beziehung mit {name} zu bestätigen",
+	"@selectIdentityToVerifyRelationshipWithName": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"verifyRelationshipPrompt": "Bestätige deine Beziehung mit {firstName}, indem du eine Verifiable Relationship Credential (VRC) ausstellst. Jeder VRC-Austausch erhöht deinen Vertrauenswert.",
+	"@verifyRelationshipPrompt": {
+		"placeholders": {
+			"firstName": { "type": "String" }
+		}
+	},
+	"generateVrc": "Jetzt starten",
+	"doLater": "Später",
+	"vrcExchangeInitiated": "Du hast den VRC-Austausch eingeleitet.",
+	"vrcRequestReceived": "{name} hat den VRC-Austausch eingeleitet.",
+	"@vrcRequestReceived": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcDoLater": "VRC-Austausch pausiert. Tippe auf + und wähle 'Überprüfbarer Beziehungsnachweis' um fortzufahren.",
+	"vrcExchangeCompleted": "Du hast deine Beziehung erfolgreich verifiziert",
+	"vrcVerifyPrompt": "Möchtest du deine Beziehung mit {name} verifizieren? Jeder VRC-Austausch erhöht deinen Vertrauensscore.",
+	"@vrcVerifyPrompt": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcStartNow": "Jetzt starten",
+	"vrcDoLaterButton": "Später",
+	"vrcYesButton": "Ja",
+	"notShared": "Nicht geteilt",
+	"vrcResponderIntro": "{name} hat die folgende Persona zur Verifizierung der Beziehung ausgewählt:",
+	"sendVrc": "Beziehungsnachweis senden"
 }

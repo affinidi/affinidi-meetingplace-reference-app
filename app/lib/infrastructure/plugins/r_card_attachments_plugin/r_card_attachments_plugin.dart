@@ -33,7 +33,7 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
   final BaseCacheManager _cacheManager;
 
   @override
-  String get icon => '💳';
+  AttachmentPluginIcon get icon => const EmojiIcon('💳');
 
   @override
   bool get isPlatformSupported => true;

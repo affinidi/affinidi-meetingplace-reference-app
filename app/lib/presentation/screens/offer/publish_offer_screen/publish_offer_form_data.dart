@@ -14,6 +14,7 @@ abstract class PublishOfferFormData with _$PublishOfferFormData {
     required bool isSearchable,
     required String selectedMediatorDid,
     int? maxUsages,
+    int? score,
     String? selectedMediatorName,
     DateTime? expiryDate,
     String? customPhrase,

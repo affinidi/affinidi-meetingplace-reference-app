@@ -46,22 +46,25 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        color: colorScheme.primary,
+        color: context.colorScheme.primary,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.info_outline, color: colorScheme.onSurface, size: 12),
+          Icon(
+            Icons.info_outline,
+            color: context.colorScheme.onSurface,
+            size: 12,
+          ),
           const SizedBox(width: 4),
           Text(
             title,
             style: TextStyle(
-              color: colorScheme.onSurface,
+              color: context.colorScheme.onSurface,
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -101,23 +104,79 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 100,
+                child: Text(
+                  '${row.label}:',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  row.value,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (row.subRows != null && row.subRows!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 20),
+            child: Column(
+              children: row.subRows!
+                  .map(
+                    (subRow) =>
+                        _DetailSubRow(label: subRow.label, value: subRow.value),
+                  )
+                  .toList(),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _DetailSubRow extends StatelessWidget {
+  const _DetailSubRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 100,
+            width: 80,
             child: Text(
-              '${row.label}:',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
+              '$label:',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w400,
+                fontSize: 12,
               ),
             ),
           ),
           Expanded(
-            child: Text(row.value, style: const TextStyle(color: Colors.white)),
+            child: Text(
+              value,
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
           ),
         ],
       ),

@@ -10,6 +10,7 @@ import '../../../../application/services/connections_service/connections_service
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../application/services/mediator_service/mediator_service.dart';
 import '../../../../application/services/settings_service/settings_service.dart';
+import '../../../../application/services/vrc_service/vrc_service.dart';
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../domain/models/mediator/mediator_status.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
@@ -332,9 +333,14 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
       }
 
       // Reset expiryDate to null if not set
-      final updatedFormData = formData.hasExpiry
-          ? formData
-          : formData.copyWith(expiryDate: null);
+      final vrcCount = await ref
+          .read(vrcServiceProvider.notifier)
+          .countVrcsByDid(selectedIdentity.did);
+
+      final updatedFormData =
+          (formData.hasExpiry ? formData : formData.copyWith(expiryDate: null))
+              .copyWith(score: vrcCount);
+
       await ref
           .read(connectionsServiceProvider.notifier)
           .publishOffer(updatedFormData, identity: selectedIdentity);
