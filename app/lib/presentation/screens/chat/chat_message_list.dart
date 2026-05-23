@@ -9,11 +9,9 @@ class _ChatMessageList extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final rawMessages = ref.watch(provider.select((state) => state.messages));
-    final isInitiator = ref.watch(
-      provider.select((state) => state.hasVrcExchangeInitiated),
+    final sortedMessages = ref.watch(
+      provider.select((state) => state.messages),
     );
-    final sortedMessages = _vrcOrderedMessages(rawMessages, isInitiator);
     final indexOfLastMessageFromMe = ref.watch(
       provider.indexOfLastMessageFromMe,
     );
@@ -246,42 +244,6 @@ bool _isRCardOnlyMessage(chat.ChatItem chatItem) {
       (attachments.first.isRCard ||
           attachments.first.format == VrcAttachment.pluginFormat ||
           attachments.first.format == VrcRequestAttachment.pluginFormat);
-}
-
-List<chat.ChatItem> _vrcOrderedMessages(
-  List<chat.ChatItem> messages,
-  bool isInitiator,
-) {
-  final fromMeIdx = messages.indexWhere(
-    (m) =>
-        m is chat.Message &&
-        m.isFromMe &&
-        m.attachments.length == 1 &&
-        m.attachments.first.format == VrcAttachment.pluginFormat,
-  );
-  final fromThemIdx = messages.indexWhere(
-    (m) =>
-        m is chat.Message &&
-        !m.isFromMe &&
-        m.attachments.length == 1 &&
-        m.attachments.first.format == VrcAttachment.pluginFormat,
-  );
-
-  if (fromMeIdx == -1 || fromThemIdx == -1) return messages;
-
-  // Initiator wants isFromMe at higher index (TOP).
-  // Responder wants !isFromMe at higher index (TOP).
-  final wrongOrder = isInitiator
-      ? fromMeIdx < fromThemIdx
-      : fromThemIdx < fromMeIdx;
-
-  if (!wrongOrder) return messages;
-
-  final copy = List<chat.ChatItem>.from(messages);
-  final tmp = copy[fromMeIdx];
-  copy[fromMeIdx] = copy[fromThemIdx];
-  copy[fromThemIdx] = tmp;
-  return copy;
 }
 
 /// VRC request messages are protocol signals — never displayed in the chat.

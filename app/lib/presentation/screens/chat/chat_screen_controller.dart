@@ -807,9 +807,15 @@ class ChatScreenController extends _$ChatScreenController
           peerName: peerIdentityName,
         );
         if (sentVcBlob.isNotEmpty) {
+          final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+          final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+            channelDid,
+          );
+          final senderDid = channel?.permanentChannelDid;
+          if (senderDid == null || senderDid.isEmpty) return;
           await _chatService?.showSentVrcAttachment(
             vcBlob: sentVcBlob,
-            senderDid: channelDid,
+            senderDid: senderDid,
           );
         }
         await _chatService?.dismissVrcConciergeMessages();

@@ -146,9 +146,10 @@ class VdipManager {
     }
   }
 
-  /// Processes an incoming VRC request and notifies the caller via
-  /// onVrcRequestReceived with the appropriate shouldPromptForAction flag
-  /// derived from the SDK-determined [VrcRequestProcessingResult].
+  /// Calls the SDK to determine the VRC-request protocol outcome, then
+  /// calls onVrcRequestReceived with the appropriate shouldPromptForAction
+  /// flag. When the outcome is [VrcRequestProcessingResultIssued], the
+  /// outgoing VRC card is created from the blob returned in the result.
   Future<void> _handleReceivedVrcRequest(
     VrcRequest request,
     Channel channel,
@@ -162,34 +163,31 @@ class VdipManager {
       isConnectionInitiator: channel.isConnectionInitiator,
       issuerDid: messages.vrcInitiatorIdentityDid,
       issuerName: messages.vrcInitiatorIdentityName,
-      // Show the auto-issued VRC card (simultaneous-request owner path).
-      onVrcSent: (sentVcBlob) => unawaited(
-        _chatSdk?.createAttachmentMessage(
-          attachments: [VrcAttachment(vcBlob: sentVcBlob).toAttachment()],
-          senderDid: channel.permanentChannelDid ?? '',
-        ),
-      ),
     );
 
     switch (outcome) {
-      case VrcRequestProcessingResult.prompt:
+      case VrcRequestProcessingResultPromptRequired():
         await _onVrcRequestReceived(
           _otherPartyPermanentDid,
           request.identityDid,
           request.identityName,
         );
-      case VrcRequestProcessingResult.issued:
+      case VrcRequestProcessingResultIssued(:final sentVcBlob):
         await _onVrcRequestReceived(
           _otherPartyPermanentDid,
           request.identityDid,
           request.identityName,
           shouldPromptForAction: false,
         );
+        await _chatSdk?.createAttachmentMessage(
+          attachments: [VrcAttachment(vcBlob: sentVcBlob).toAttachment()],
+          senderDid: channel.permanentChannelDid ?? '',
+        );
         _logger.info(
           'Handled simultaneous VRC request by issuing immediately',
           name: _logKey,
         );
-      case VrcRequestProcessingResult.waiting:
+      case VrcRequestProcessingResultWaiting():
         await _onVrcRequestReceived(
           _otherPartyPermanentDid,
           request.identityDid,
@@ -203,26 +201,17 @@ class VdipManager {
     }
   }
 
-  /// Saves the received VRC, shows an incoming card, and—when the exchange is
-  /// not yet complete—calls back into the SDK to reciprocate or finalise the
-  /// exchange and persists the completion event.
+  /// Calls the SDK to determine the correct protocol outcome, then saves and
+  /// displays VRC cards based on the result. Returns without side effects when
+  /// the SDK returns [VrcProcessingResultIgnored] (exchange already complete).
+  /// On [VrcProcessingResultReciprocated], shows the incoming card first then
+  /// the outgoing card to guarantee deterministic display order.
   Future<void> _handleReceivedVrc(
     String vcBlob,
     MeetingPlaceRelationshipSDK relationshipSdk,
     Channel channel,
   ) async {
-    await _ref
-        .read(vrcServiceProvider.notifier)
-        .saveVrc(vcBlob, _otherPartyPermanentDid);
-
-    // Show the received VRC card immediately as an incoming attachment.
-    await _chatSdk?.createAttachmentMessage(
-      attachments: [VrcAttachment(vcBlob: vcBlob).toAttachment()],
-      senderDid: channel.otherPartyPermanentChannelDid ?? '',
-    );
-
     final messages = _getMessages();
-    if (messages.hasVrcExchangeCompleted) return;
 
     final outcome = await relationshipSdk.handleReceivedVrc(
       permanentChannelDid: _otherPartyPermanentDid,
@@ -230,50 +219,88 @@ class VdipManager {
       exchangeState: VrcExchangeState(
         hasVrcExchangeInitiated: messages.hasVrcExchangeInitiated,
         hasVrcRequestReceived: messages.hasVrcRequestReceived,
+        hasVrcExchangeCompleted: messages.hasVrcExchangeCompleted,
         isConnectionInitiator: _isConnectionInitiator,
       ),
       issuerDid: messages.vrcInitiatorIdentityDid,
       issuerName: messages.vrcInitiatorIdentityName,
-      // Show the reciprocated VRC card as an outgoing attachment.
-      onVrcSent: (sentVcBlob) => unawaited(
-        _chatSdk?.createAttachmentMessage(
-          attachments: [VrcAttachment(vcBlob: sentVcBlob).toAttachment()],
-          senderDid: channel.permanentChannelDid ?? '',
-        ),
-      ),
     );
 
     switch (outcome) {
-      case VrcProcessingResult.reciprocated:
-      case VrcProcessingResult.completed:
+      case VrcProcessingResultIgnored():
+        return;
+      case VrcProcessingResultCompleted():
+        await _ref
+            .read(vrcServiceProvider.notifier)
+            .saveVrc(vcBlob, _otherPartyPermanentDid);
+        await _chatSdk?.createAttachmentMessage(
+          attachments: [VrcAttachment(vcBlob: vcBlob).toAttachment()],
+          senderDid: channel.otherPartyPermanentChannelDid ?? '',
+        );
         await _persistLocalEventMessage(
           EventMessageType.fromJson('vrcExchangeCompleted'),
         );
         _logger.info(
-          'VRC exchange completed (outcome: $outcome)',
+          'VRC exchange completed (outcome: completed)',
           name: _logKey,
         );
-        final identityDid =
+        final completedIdentityDid =
             messages.vrcInitiatorIdentityDid ??
             _ref
                 .read(vrcServiceProvider)
                 .firstWhereOrNull((v) => v.channelId == _otherPartyPermanentDid)
                 ?.holderIdentityDid;
-        final identity = identityDid != null
+        final completedIdentity = completedIdentityDid != null
             ? _ref
                   .read(identitiesServiceProvider)
                   .identities
-                  .firstWhereOrNull((i) => i.did == identityDid)
+                  .firstWhereOrNull((i) => i.did == completedIdentityDid)
             : null;
-        if (identity != null) {
+        if (completedIdentity != null) {
           unawaited(
             _ref
                 .read(connectionsServiceProvider.notifier)
-                .updatePublishedOffersScore(identity),
+                .updatePublishedOffersScore(completedIdentity),
           );
         }
-      case VrcProcessingResult.ignored:
-        break;
+      case VrcProcessingResultReciprocated(:final sentVcBlob):
+        await _ref
+            .read(vrcServiceProvider.notifier)
+            .saveVrc(vcBlob, _otherPartyPermanentDid);
+        await _chatSdk?.createAttachmentMessage(
+          attachments: [VrcAttachment(vcBlob: vcBlob).toAttachment()],
+          senderDid: channel.otherPartyPermanentChannelDid ?? '',
+        );
+        await _chatSdk?.createAttachmentMessage(
+          attachments: [VrcAttachment(vcBlob: sentVcBlob).toAttachment()],
+          senderDid: channel.permanentChannelDid ?? '',
+        );
+        await _persistLocalEventMessage(
+          EventMessageType.fromJson('vrcExchangeCompleted'),
+        );
+        _logger.info(
+          'VRC exchange completed (outcome: reciprocated)',
+          name: _logKey,
+        );
+        final reciprocatedIdentityDid =
+            messages.vrcInitiatorIdentityDid ??
+            _ref
+                .read(vrcServiceProvider)
+                .firstWhereOrNull((v) => v.channelId == _otherPartyPermanentDid)
+                ?.holderIdentityDid;
+        final reciprocatedIdentity = reciprocatedIdentityDid != null
+            ? _ref
+                  .read(identitiesServiceProvider)
+                  .identities
+                  .firstWhereOrNull((i) => i.did == reciprocatedIdentityDid)
+            : null;
+        if (reciprocatedIdentity != null) {
+          unawaited(
+            _ref
+                .read(connectionsServiceProvider.notifier)
+                .updatePublishedOffersScore(reciprocatedIdentity),
+          );
+        }
     }
   }
 }

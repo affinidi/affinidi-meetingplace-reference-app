@@ -46,8 +46,8 @@ class StubVdipRelationshipSdk extends MeetingPlaceRelationshipSDK {
   VrcIssuance? pendingVrc;
 
   VrcRequestProcessingResult nextRequestResult =
-      VrcRequestProcessingResult.prompt;
-  VrcProcessingResult nextVrcResult = VrcProcessingResult.ignored;
+      const VrcRequestProcessingResultPromptRequired();
+  VrcProcessingResult nextVrcResult = const VrcProcessingResultIgnored();
 
   @override
   Stream<VrcRequest> get receivedVrcRequests => _requestCtrl.stream;
@@ -77,7 +77,6 @@ class StubVdipRelationshipSdk extends MeetingPlaceRelationshipSDK {
     required bool isConnectionInitiator,
     String? issuerDid,
     String? issuerName,
-    void Function(String vcBlob)? onVrcSent,
   }) async => nextRequestResult;
 
   @override
@@ -87,7 +86,6 @@ class StubVdipRelationshipSdk extends MeetingPlaceRelationshipSDK {
     required VrcExchangeState exchangeState,
     String? issuerDid,
     String? issuerName,
-    void Function(String vcBlob)? onVrcSent,
   }) async => nextVrcResult;
 
   void emitRequest(VrcRequest r) => _requestCtrl.add(r);

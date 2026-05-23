@@ -139,7 +139,7 @@ void main() {
 
     test('subscribe — prompt outcome calls onVrcRequestReceived '
         'with shouldPromptForAction true', () async {
-      stub.nextRequestResult = VrcRequestProcessingResult.prompt;
+      stub.nextRequestResult = const VrcRequestProcessingResultPromptRequired();
       await manager.subscribe();
 
       stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
@@ -151,7 +151,9 @@ void main() {
 
     test('subscribe — issued outcome calls onVrcRequestReceived '
         'with shouldPromptForAction false', () async {
-      stub.nextRequestResult = VrcRequestProcessingResult.issued;
+      stub.nextRequestResult = const VrcRequestProcessingResultIssued(
+        'stub-vc-blob',
+      );
       await manager.subscribe();
 
       stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
@@ -161,9 +163,28 @@ void main() {
       expect(onVrcRequestReceivedShouldPrompt, [false]);
     });
 
+    test(
+      'subscribe — issued outcome creates outgoing attachment card',
+      () async {
+        stub.nextRequestResult = const VrcRequestProcessingResultIssued(
+          'stub-sent-vc-blob',
+        );
+        await manager.subscribe();
+
+        stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
+        expect(
+          fakeChatSdk.createAttachmentMessageCalls.first.senderDid,
+          localPermanentDid,
+        );
+      },
+    );
+
     test('subscribe — waiting outcome calls onVrcRequestReceived '
         'with shouldPromptForAction false', () async {
-      stub.nextRequestResult = VrcRequestProcessingResult.waiting;
+      stub.nextRequestResult = const VrcRequestProcessingResultWaiting();
       await manager.subscribe();
 
       stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
@@ -182,16 +203,58 @@ void main() {
       expect(onVrcRequestReceivedDids, isEmpty);
     });
 
-    test('subscribe — incoming VRC shows card and does not persist '
-        'event on ignored outcome', () async {
-      stub.nextVrcResult = VrcProcessingResult.ignored;
+    test(
+      'subscribe — does not show card or persist event on ignored outcome',
+      () async {
+        stub.nextVrcResult = const VrcProcessingResultIgnored();
+        await manager.subscribe();
+
+        stub.emitVrc(vrcIssuance);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
+        expect(persistedEvents, isEmpty);
+      },
+    );
+
+    test('subscribe — completed outcome shows incoming card and persists'
+        ' exchange event', () async {
+      stub.nextVrcResult = const VrcProcessingResultCompleted();
       await manager.subscribe();
 
       stub.emitVrc(vrcIssuance);
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
-      expect(persistedEvents, isEmpty);
+      expect(
+        fakeChatSdk.createAttachmentMessageCalls.first.senderDid,
+        otherPartyPermanentDid,
+      );
+      expect(persistedEvents, hasLength(1));
+    });
+
+    test('subscribe — reciprocated outcome shows incoming then outgoing card'
+        ' in order', () async {
+      stub.nextVrcResult = const VrcProcessingResultReciprocated(
+        'stub-sent-vc-blob',
+      );
+      await manager.subscribe();
+
+      stub.emitVrc(vrcIssuance);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(2));
+      expect(
+        fakeChatSdk.createAttachmentMessageCalls[0].senderDid,
+        otherPartyPermanentDid,
+        reason: 'incoming card must appear first',
+      );
+      expect(
+        fakeChatSdk.createAttachmentMessageCalls[1].senderDid,
+        localPermanentDid,
+        reason: 'outgoing card must appear second',
+      );
+      expect(persistedEvents, hasLength(1));
     });
 
     test('subscribe — filters out VRCs from other senders', () async {
@@ -221,6 +284,7 @@ void main() {
     test(
       'replayPending — replays pending VRC and shows incoming card',
       () async {
+        stub.nextVrcResult = const VrcProcessingResultCompleted();
         stub.pendingVrc = vrcIssuance;
         await manager.subscribe();
         await manager.replayPending();
