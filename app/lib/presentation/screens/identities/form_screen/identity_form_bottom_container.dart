@@ -60,9 +60,11 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
       spacing: 20,
       children: [
         ElevatedLoadingButton(
-          onPressed: canDelete ? handleDelete : null,
+          onPressed: canDelete ? handleDelete : context.pop,
           color: context.colorScheme.error,
-          child: Text(context.l10n.generalDelete),
+          child: Text(
+            canDelete ? context.l10n.generalDelete : context.l10n.generalCancel,
+          ),
         ),
         ElevatedLoadingButton(
           onPressed: canSave ? handleSave : null,

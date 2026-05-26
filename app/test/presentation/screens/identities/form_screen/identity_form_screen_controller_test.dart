@@ -302,6 +302,133 @@ void main() {
       expect(saved, isTrue);
       expect(service.updatedIdentity?.card.mobile, '+10987654321');
     });
+
+    group('initialMobilePhoneNumber', () {
+      test('is null when identity has no mobile', () {
+        final identity = FakeIdentities.primaryIdentity.copyWith(
+          card: FakeIdentities.primaryIdentity.card.copyWith(mobile: null),
+        );
+        final service = _FakeIdentitiesService([identity]);
+        final container = makeContainer(service);
+        final controller = container.read(
+          identityFormScreenControllerProvider(identity.id).notifier,
+        );
+
+        container.read(identityFormScreenControllerProvider(identity.id));
+
+        expect(controller.initialMobilePhoneNumber, isNull);
+      });
+
+      test('is null when identity has an empty mobile', () {
+        final identity = FakeIdentities.primaryIdentity.copyWith(
+          card: FakeIdentities.primaryIdentity.card.copyWith(mobile: ''),
+        );
+        final service = _FakeIdentitiesService([identity]);
+        final container = makeContainer(service);
+        final controller = container.read(
+          identityFormScreenControllerProvider(identity.id).notifier,
+        );
+
+        container.read(identityFormScreenControllerProvider(identity.id));
+
+        expect(controller.initialMobilePhoneNumber, isNull);
+      });
+
+      test('is null when mobile has no leading plus', () {
+        final identity = FakeIdentities.primaryIdentity.copyWith(
+          card: FakeIdentities.primaryIdentity.card.copyWith(
+            mobile: '1234567890',
+          ),
+        );
+        final service = _FakeIdentitiesService([identity]);
+        final container = makeContainer(service);
+        final controller = container.read(
+          identityFormScreenControllerProvider(identity.id).notifier,
+        );
+
+        container.read(identityFormScreenControllerProvider(identity.id));
+
+        expect(controller.initialMobilePhoneNumber, isNull);
+      });
+
+      test('returns parsed PhoneNumber for a valid E.164 mobile', () {
+        final service = _FakeIdentitiesService([
+          FakeIdentities.primaryIdentity,
+        ]);
+        final container = makeContainer(service);
+        final controller = container.read(
+          identityFormScreenControllerProvider(
+            FakeIdentities.primaryIdentity.id,
+          ).notifier,
+        );
+
+        container.read(
+          identityFormScreenControllerProvider(
+            FakeIdentities.primaryIdentity.id,
+          ),
+        );
+
+        final result = controller.initialMobilePhoneNumber;
+        expect(result, isNotNull);
+        expect(result!.phoneNumber, '+1234567890');
+        expect(result.isoCode, anyOf('US', 'CA'));
+      });
+
+      test('normalizes a formatted number with hyphens', () {
+        final identity = FakeIdentities.primaryIdentity.copyWith(
+          card: FakeIdentities.primaryIdentity.card.copyWith(
+            mobile: '+1-234-567-890',
+          ),
+        );
+        final service = _FakeIdentitiesService([identity]);
+        final container = makeContainer(service);
+        final controller = container.read(
+          identityFormScreenControllerProvider(identity.id).notifier,
+        );
+
+        container.read(identityFormScreenControllerProvider(identity.id));
+
+        final result = controller.initialMobilePhoneNumber;
+        expect(result, isNotNull);
+        expect(result!.phoneNumber, '+1234567890');
+      });
+
+      test('normalizes a number with surrounding whitespace', () {
+        final identity = FakeIdentities.primaryIdentity.copyWith(
+          card: FakeIdentities.primaryIdentity.card.copyWith(
+            mobile: '  +1234567890  ',
+          ),
+        );
+        final service = _FakeIdentitiesService([identity]);
+        final container = makeContainer(service);
+        final controller = container.read(
+          identityFormScreenControllerProvider(identity.id).notifier,
+        );
+
+        container.read(identityFormScreenControllerProvider(identity.id));
+
+        final result = controller.initialMobilePhoneNumber;
+        expect(result, isNotNull);
+        expect(result!.phoneNumber, '+1234567890');
+      });
+
+      test('is null for an unrecognized country prefix', () {
+        final identity = FakeIdentities.primaryIdentity.copyWith(
+          card: FakeIdentities.primaryIdentity.card.copyWith(
+            mobile: '+9991234567',
+          ),
+        );
+        final service = _FakeIdentitiesService([identity]);
+        final container = makeContainer(service);
+        final controller = container.read(
+          identityFormScreenControllerProvider(identity.id).notifier,
+        );
+
+        container.read(identityFormScreenControllerProvider(identity.id));
+
+        expect(controller.initialMobilePhoneNumber, isNull);
+      });
+    });
   });
 }
 
