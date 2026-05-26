@@ -80,6 +80,7 @@ dependencies:
   skeletonizer: ^2.1.3
   smooth_page_indicator: ^1.2.1
   sqlite3: ^2.9.0
+  sqflite_sqlcipher: ^3.4.0
   ssi: ^3.3.0
   stack_trace: ^1.12.1
   synchronized: ^3.4.0
