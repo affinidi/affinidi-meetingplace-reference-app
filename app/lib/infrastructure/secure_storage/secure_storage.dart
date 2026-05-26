@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ssi/ssi.dart' hide KeyPair;
 
 import '../providers/app_logger_provider.dart';

@@ -35,13 +35,13 @@ class _ContactsLayout extends ConsumerWidget {
       if (isChatAvailable) {
         final container = ProviderScope.containerOf(context);
         final provider = chatScreenControllerProvider(contact.id);
-        final element = container.readProviderElement(provider);
-
-        final link = (element as AutoDisposeNotifierProviderElement)
-            .keepAlive();
-        await ref.read(provider.notifier).initialize();
-        await ChatRoute(contactId: contact.id).push<void>(context);
-        link.close();
+        final sub = container.listen(provider, (_, _) {});
+        try {
+          await ref.read(provider.notifier).initialize();
+          await ChatRoute(contactId: contact.id).push<void>(context);
+        } finally {
+          sub.close();
+        }
         return;
       }
 

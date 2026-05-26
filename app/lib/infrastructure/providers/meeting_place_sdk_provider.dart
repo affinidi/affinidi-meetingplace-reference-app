@@ -1,5 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ssi/ssi.dart';
 
 import '../../application/services/settings_service/settings_service.dart';

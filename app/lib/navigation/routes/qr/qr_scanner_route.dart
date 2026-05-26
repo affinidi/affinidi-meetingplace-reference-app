@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class OOBScanQrRoute extends GoRouteData with _$OOBScanQrRoute {
+class OOBScanQrRoute extends GoRouteData with $OOBScanQrRoute {
   const OOBScanQrRoute();
 
   static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;

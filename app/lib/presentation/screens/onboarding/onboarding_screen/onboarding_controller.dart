@@ -10,6 +10,7 @@ part 'onboarding_controller.g.dart';
 @riverpod
 class OnboardingController extends _$OnboardingController {
   final PageController pageController = PageController();
+  List<VideoPlayerController> _videoControllers = [];
 
   static const _videoAssets = [
     'assets/videos/welcome1-small.mp4',
@@ -43,6 +44,7 @@ class OnboardingController extends _$OnboardingController {
 
       await videoPlayerControllers.first.play();
 
+      _videoControllers = videoPlayerControllers;
       state = state.copyWith(
         videoPlayerControllers: videoPlayerControllers,
         currentPage: 0,
@@ -71,8 +73,9 @@ class OnboardingController extends _$OnboardingController {
 
   void _dispose() {
     pageController.dispose();
-    for (final videoPlayerController in state.videoPlayerControllers) {
+    for (final videoPlayerController in _videoControllers) {
       videoPlayerController.dispose();
     }
+    _videoControllers = [];
   }
 }

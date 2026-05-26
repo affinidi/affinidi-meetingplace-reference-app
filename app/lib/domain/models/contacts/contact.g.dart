@@ -41,12 +41,13 @@ abstract class _$ContactCWProxy {
 
   Contact notificationBannerDismissed(bool notificationBannerDismissed);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Contact(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Contact(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// Contact(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   Contact call({
     String? channelDid,
     String? channelDidSha256,
@@ -68,77 +69,79 @@ abstract class _$ContactCWProxy {
   });
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfContact.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfContact.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfContact.copyWith(...)` or call `instanceOfContact.copyWith.fieldName(value)` for a single field.
 class _$ContactCWProxyImpl implements _$ContactCWProxy {
   const _$ContactCWProxyImpl(this._value);
 
   final Contact _value;
 
   @override
-  Contact channelDid(String? channelDid) => this(channelDid: channelDid);
+  Contact channelDid(String? channelDid) => call(channelDid: channelDid);
 
   @override
   Contact channelDidSha256(String? channelDidSha256) =>
-      this(channelDidSha256: channelDidSha256);
+      call(channelDidSha256: channelDidSha256);
 
   @override
-  Contact offerLink(String offerLink) => this(offerLink: offerLink);
+  Contact offerLink(String offerLink) => call(offerLink: offerLink);
 
   @override
-  Contact card(ContactCard card) => this(card: card);
+  Contact card(ContactCard card) => call(card: card);
 
   @override
-  Contact type(ContactType type) => this(type: type);
+  Contact type(ContactType type) => call(type: type);
 
   @override
-  Contact status(ContactStatus status) => this(status: status);
+  Contact status(ContactStatus status) => call(status: status);
 
   @override
-  Contact mediatorDid(String mediatorDid) => this(mediatorDid: mediatorDid);
+  Contact mediatorDid(String mediatorDid) => call(mediatorDid: mediatorDid);
 
   @override
-  Contact origin(ContactOrigin origin) => this(origin: origin);
+  Contact origin(ContactOrigin origin) => call(origin: origin);
 
   @override
-  Contact category(ContactCategory category) => this(category: category);
+  Contact category(ContactCategory category) => call(category: category);
 
   @override
   Contact otherPartyCard(ContactCard? otherPartyCard) =>
-      this(otherPartyCard: otherPartyCard);
+      call(otherPartyCard: otherPartyCard);
 
   @override
-  Contact displayName(String? displayName) => this(displayName: displayName);
+  Contact displayName(String? displayName) => call(displayName: displayName);
 
   @override
   Contact badgeUpdateInProgress(bool badgeUpdateInProgress) =>
-      this(badgeUpdateInProgress: badgeUpdateInProgress);
+      call(badgeUpdateInProgress: badgeUpdateInProgress);
 
   @override
-  Contact badgeCount(int badgeCount) => this(badgeCount: badgeCount);
+  Contact badgeCount(int badgeCount) => call(badgeCount: badgeCount);
 
   @override
   Contact currentMessageSeqNo(int currentMessageSeqNo) =>
-      this(currentMessageSeqNo: currentMessageSeqNo);
+      call(currentMessageSeqNo: currentMessageSeqNo);
 
   @override
   Contact hasBeenOpened(bool hasBeenOpened) =>
-      this(hasBeenOpened: hasBeenOpened);
+      call(hasBeenOpened: hasBeenOpened);
 
   @override
   Contact lastKeepAliveMessage(DateTime? lastKeepAliveMessage) =>
-      this(lastKeepAliveMessage: lastKeepAliveMessage);
+      call(lastKeepAliveMessage: lastKeepAliveMessage);
 
   @override
   Contact notificationBannerDismissed(bool notificationBannerDismissed) =>
-      this(notificationBannerDismissed: notificationBannerDismissed);
+      call(notificationBannerDismissed: notificationBannerDismissed);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `Contact(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Contact(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// Contact(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   Contact call({
     Object? channelDid = const $CopyWithPlaceholder(),
     Object? channelDidSha256 = const $CopyWithPlaceholder(),
@@ -168,32 +171,33 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.channelDidSha256
           // ignore: cast_nullable_to_non_nullable
           : channelDidSha256 as String?,
-      offerLink: offerLink == const $CopyWithPlaceholder()
+      offerLink: offerLink == const $CopyWithPlaceholder() || offerLink == null
           ? _value.offerLink
           // ignore: cast_nullable_to_non_nullable
           : offerLink as String,
-      card: card == const $CopyWithPlaceholder()
+      card: card == const $CopyWithPlaceholder() || card == null
           ? _value.card
           // ignore: cast_nullable_to_non_nullable
           : card as ContactCard,
       dateAdded: _value.dateAdded,
-      type: type == const $CopyWithPlaceholder()
+      type: type == const $CopyWithPlaceholder() || type == null
           ? _value.type
           // ignore: cast_nullable_to_non_nullable
           : type as ContactType,
-      status: status == const $CopyWithPlaceholder()
+      status: status == const $CopyWithPlaceholder() || status == null
           ? _value.status
           // ignore: cast_nullable_to_non_nullable
           : status as ContactStatus,
-      mediatorDid: mediatorDid == const $CopyWithPlaceholder()
+      mediatorDid:
+          mediatorDid == const $CopyWithPlaceholder() || mediatorDid == null
           ? _value.mediatorDid
           // ignore: cast_nullable_to_non_nullable
           : mediatorDid as String,
-      origin: origin == const $CopyWithPlaceholder()
+      origin: origin == const $CopyWithPlaceholder() || origin == null
           ? _value.origin
           // ignore: cast_nullable_to_non_nullable
           : origin as ContactOrigin,
-      category: category == const $CopyWithPlaceholder()
+      category: category == const $CopyWithPlaceholder() || category == null
           ? _value.category
           // ignore: cast_nullable_to_non_nullable
           : category as ContactCategory,
@@ -206,19 +210,24 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           // ignore: cast_nullable_to_non_nullable
           : displayName as String?,
       badgeUpdateInProgress:
-          badgeUpdateInProgress == const $CopyWithPlaceholder()
+          badgeUpdateInProgress == const $CopyWithPlaceholder() ||
+              badgeUpdateInProgress == null
           ? _value.badgeUpdateInProgress
           // ignore: cast_nullable_to_non_nullable
           : badgeUpdateInProgress as bool,
-      badgeCount: badgeCount == const $CopyWithPlaceholder()
+      badgeCount:
+          badgeCount == const $CopyWithPlaceholder() || badgeCount == null
           ? _value.badgeCount
           // ignore: cast_nullable_to_non_nullable
           : badgeCount as int,
-      currentMessageSeqNo: currentMessageSeqNo == const $CopyWithPlaceholder()
+      currentMessageSeqNo:
+          currentMessageSeqNo == const $CopyWithPlaceholder() ||
+              currentMessageSeqNo == null
           ? _value.currentMessageSeqNo
           // ignore: cast_nullable_to_non_nullable
           : currentMessageSeqNo as int,
-      hasBeenOpened: hasBeenOpened == const $CopyWithPlaceholder()
+      hasBeenOpened:
+          hasBeenOpened == const $CopyWithPlaceholder() || hasBeenOpened == null
           ? _value.hasBeenOpened
           // ignore: cast_nullable_to_non_nullable
           : hasBeenOpened as bool,
@@ -227,7 +236,8 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           // ignore: cast_nullable_to_non_nullable
           : lastKeepAliveMessage as DateTime?,
       notificationBannerDismissed:
-          notificationBannerDismissed == const $CopyWithPlaceholder()
+          notificationBannerDismissed == const $CopyWithPlaceholder() ||
+              notificationBannerDismissed == null
           ? _value.notificationBannerDismissed
           // ignore: cast_nullable_to_non_nullable
           : notificationBannerDismissed as bool,
@@ -236,7 +246,8 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
 }
 
 extension $ContactCopyWith on Contact {
-  /// Returns a callable class that can be used as follows: `instanceOfContact.copyWith(...)` or like so:`instanceOfContact.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfContact.copyWith(...)` or `instanceOfContact.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$ContactCWProxy get copyWith => _$ContactCWProxyImpl(this);
 }

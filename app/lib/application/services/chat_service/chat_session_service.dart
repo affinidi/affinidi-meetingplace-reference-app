@@ -93,8 +93,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     }, fireImmediately: true);
 
     ref.onDispose(() {
-      _presenceTimedAction?.cancel();
-      _typingTimedAction?.cancel();
+      _presenceTimedAction?.dispose();
+      _typingTimedAction?.dispose();
       _messageSubscription?.dispose();
       _chatSDK?.endChatSession();
       _logger.info('ChatSessionService disposed', name: _logKey);
@@ -348,6 +348,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<void> resetBadgeCount() => _resetBadgeCount();
 
   void _toggleChatLoading(bool isLoading) {
+    if (!ref.mounted) return;
     state = state.copyWith(isActive: isLoading);
   }
 
@@ -534,7 +535,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     if (currentGroup == null) return;
 
     final refreshedGroup = await _groupManager.refreshGroup(currentGroup.id);
-    if (refreshedGroup == null) return;
+    if (!ref.mounted || refreshedGroup == null) return;
 
     state = state.copyWith(group: refreshedGroup);
   }

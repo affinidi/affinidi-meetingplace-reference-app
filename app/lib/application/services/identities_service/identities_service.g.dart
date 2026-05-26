@@ -6,6 +6,71 @@ part of 'identities_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Service responsible for managing identities and the current contact card.
+///
+/// This service provides functionality to:
+/// - Load and persist identities via a repository
+/// - Add, update and delete identities
+/// - Resolve and manage the currently selected identity
+/// - Expose the current contact card derived from the selected identity
+///
+/// The service initializes by loading identities and keeps the current identity
+/// in sync with environment defaults and repository state.
+
+@ProviderFor(IdentitiesService)
+final identitiesServiceProvider = IdentitiesServiceProvider._();
+
+/// Service responsible for managing identities and the current contact card.
+///
+/// This service provides functionality to:
+/// - Load and persist identities via a repository
+/// - Add, update and delete identities
+/// - Resolve and manage the currently selected identity
+/// - Expose the current contact card derived from the selected identity
+///
+/// The service initializes by loading identities and keeps the current identity
+/// in sync with environment defaults and repository state.
+final class IdentitiesServiceProvider
+    extends $NotifierProvider<IdentitiesService, IdentitiesServiceState> {
+  /// Service responsible for managing identities and the current contact card.
+  ///
+  /// This service provides functionality to:
+  /// - Load and persist identities via a repository
+  /// - Add, update and delete identities
+  /// - Resolve and manage the currently selected identity
+  /// - Expose the current contact card derived from the selected identity
+  ///
+  /// The service initializes by loading identities and keeps the current identity
+  /// in sync with environment defaults and repository state.
+  IdentitiesServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'identitiesServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$identitiesServiceHash();
+
+  @$internal
+  @override
+  IdentitiesService create() => IdentitiesService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(IdentitiesServiceState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<IdentitiesServiceState>(value),
+    );
+  }
+}
+
 String _$identitiesServiceHash() => r'db4e472f39c31f60ff38243990f714c6776bb23b';
 
 /// Service responsible for managing identities and the current contact card.
@@ -18,20 +83,22 @@ String _$identitiesServiceHash() => r'db4e472f39c31f60ff38243990f714c6776bb23b';
 ///
 /// The service initializes by loading identities and keeps the current identity
 /// in sync with environment defaults and repository state.
-///
-/// Copied from [IdentitiesService].
-@ProviderFor(IdentitiesService)
-final identitiesServiceProvider =
-    NotifierProvider<IdentitiesService, IdentitiesServiceState>.internal(
-      IdentitiesService.new,
-      name: r'identitiesServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$identitiesServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$IdentitiesService = Notifier<IdentitiesServiceState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$IdentitiesService extends $Notifier<IdentitiesServiceState> {
+  IdentitiesServiceState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<IdentitiesServiceState, IdentitiesServiceState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<IdentitiesServiceState, IdentitiesServiceState>,
+              IdentitiesServiceState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

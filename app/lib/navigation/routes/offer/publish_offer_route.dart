@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class PublishOfferRoute extends GoRouteData with _$PublishOfferRoute {
+class PublishOfferRoute extends GoRouteData with $PublishOfferRoute {
   PublishOfferRoute({required this.identityId});
 
   static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;

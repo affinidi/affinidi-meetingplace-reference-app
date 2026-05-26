@@ -262,8 +262,7 @@ class MediatorService extends _$MediatorService {
       await ref.read(mediatorsRepositoryProvider.future);
 }
 
-extension MediatorServiceProviderSelectors
-    on NotifierProvider<MediatorService, MediatorServiceState> {
+extension MediatorServiceProviderSelectors on MediatorServiceProvider {
   ProviderListenable<List<Mediator>> get filteredMediators => select((state) {
     return state.mediators
         .where((mediator) => mediator.status != MediatorStatus.deleted)

@@ -123,7 +123,7 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
 }
 
 extension ConnectionsScreenControllerProviderSelectors
-    on NotifierProvider<ConnectionsScreenController, ConnectionsScreenState> {
+    on ConnectionsScreenControllerProvider {
   ProviderListenable<bool> get hasConnections => select(
     (state) => state.connections.any(
       (connection) => connection.status != ConnectionOfferStatus.deleted,

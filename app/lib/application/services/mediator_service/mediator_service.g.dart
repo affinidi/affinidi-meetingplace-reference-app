@@ -6,6 +6,71 @@ part of 'mediator_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Service to manage mediators: loading, adding, renaming, and removing.
+///
+/// This service provides a centralized interface for mediator operations
+/// including fetching default and custom mediators, adding new custom
+/// mediators with auto-generated names, renaming existing mediators,
+/// removing mediators, resolving mediator DIDs from URLs, and finding
+/// mediators by creation time and DID.
+///
+/// The service maintains state through Riverpod and persists custom
+/// mediators using a repository layer with secure storage backing.
+
+@ProviderFor(MediatorService)
+final mediatorServiceProvider = MediatorServiceProvider._();
+
+/// Service to manage mediators: loading, adding, renaming, and removing.
+///
+/// This service provides a centralized interface for mediator operations
+/// including fetching default and custom mediators, adding new custom
+/// mediators with auto-generated names, renaming existing mediators,
+/// removing mediators, resolving mediator DIDs from URLs, and finding
+/// mediators by creation time and DID.
+///
+/// The service maintains state through Riverpod and persists custom
+/// mediators using a repository layer with secure storage backing.
+final class MediatorServiceProvider
+    extends $NotifierProvider<MediatorService, MediatorServiceState> {
+  /// Service to manage mediators: loading, adding, renaming, and removing.
+  ///
+  /// This service provides a centralized interface for mediator operations
+  /// including fetching default and custom mediators, adding new custom
+  /// mediators with auto-generated names, renaming existing mediators,
+  /// removing mediators, resolving mediator DIDs from URLs, and finding
+  /// mediators by creation time and DID.
+  ///
+  /// The service maintains state through Riverpod and persists custom
+  /// mediators using a repository layer with secure storage backing.
+  MediatorServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mediatorServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$mediatorServiceHash();
+
+  @$internal
+  @override
+  MediatorService create() => MediatorService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MediatorServiceState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MediatorServiceState>(value),
+    );
+  }
+}
+
 String _$mediatorServiceHash() => r'59ab60881a851487557792f56781515f633037c4';
 
 /// Service to manage mediators: loading, adding, renaming, and removing.
@@ -18,20 +83,21 @@ String _$mediatorServiceHash() => r'59ab60881a851487557792f56781515f633037c4';
 ///
 /// The service maintains state through Riverpod and persists custom
 /// mediators using a repository layer with secure storage backing.
-///
-/// Copied from [MediatorService].
-@ProviderFor(MediatorService)
-final mediatorServiceProvider =
-    NotifierProvider<MediatorService, MediatorServiceState>.internal(
-      MediatorService.new,
-      name: r'mediatorServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$mediatorServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$MediatorService = Notifier<MediatorServiceState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$MediatorService extends $Notifier<MediatorServiceState> {
+  MediatorServiceState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<MediatorServiceState, MediatorServiceState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<MediatorServiceState, MediatorServiceState>,
+              MediatorServiceState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

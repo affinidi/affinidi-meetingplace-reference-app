@@ -134,8 +134,7 @@ class IdentitiesService extends _$IdentitiesService {
       await ref.read(identitiesRepositoryProvider.future);
 }
 
-extension IdentitiesServiceSelectors
-    on NotifierProvider<IdentitiesService, IdentitiesServiceState> {
+extension IdentitiesServiceSelectors on IdentitiesServiceProvider {
   ProviderListenable<Identity?> get currentIdentityOrPrimary {
     return select(
       (state) =>

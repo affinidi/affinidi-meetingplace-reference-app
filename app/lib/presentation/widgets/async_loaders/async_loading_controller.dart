@@ -2,16 +2,16 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 /// Use this controller to execute a future and check its statuses like
 /// loading, error and completion.
-class AsyncLoadingController extends AutoDisposeNotifier<AsyncValue<void>> {
+class AsyncLoadingController extends Notifier<AsyncValue<void>> {
   /// Creates an [AsyncLoadingController].
   AsyncLoadingController() : super();
 
-  static AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
-  provider(String name) =>
-      NotifierProvider.autoDispose<AsyncLoadingController, AsyncValue<void>>(
-        AsyncLoadingController.new,
-        name: name,
-      );
+  static NotifierProvider<AsyncLoadingController, AsyncValue<void>> provider(
+    String name,
+  ) => NotifierProvider.autoDispose<AsyncLoadingController, AsyncValue<void>>(
+    AsyncLoadingController.new,
+    name: name,
+  );
 
   @override
   AsyncValue<void> build() {

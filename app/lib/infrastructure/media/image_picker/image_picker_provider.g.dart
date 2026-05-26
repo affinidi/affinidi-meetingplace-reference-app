@@ -6,22 +6,46 @@ part of 'image_picker_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$imagePickerHash() => r'7877699a862be48e962306635347623c45e91971';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [imagePicker].
 @ProviderFor(imagePicker)
-final imagePickerProvider = AutoDisposeProvider<ImagePicker>.internal(
-  imagePicker,
-  name: r'imagePickerProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$imagePickerHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final imagePickerProvider = ImagePickerProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ImagePickerRef = AutoDisposeProviderRef<ImagePicker>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class ImagePickerProvider
+    extends $FunctionalProvider<ImagePicker, ImagePicker, ImagePicker>
+    with $Provider<ImagePicker> {
+  ImagePickerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'imagePickerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$imagePickerHash();
+
+  @$internal
+  @override
+  $ProviderElement<ImagePicker> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ImagePicker create(Ref ref) {
+    return imagePicker(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ImagePicker value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ImagePicker>(value),
+    );
+  }
+}
+
+String _$imagePickerHash() => r'7877699a862be48e962306635347623c45e91971';

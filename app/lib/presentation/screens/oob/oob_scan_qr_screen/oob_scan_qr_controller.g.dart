@@ -6,22 +6,58 @@ part of 'oob_scan_qr_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(OobScanQrController)
+final oobScanQrControllerProvider = OobScanQrControllerProvider._();
+
+final class OobScanQrControllerProvider
+    extends $NotifierProvider<OobScanQrController, OobScanQrState> {
+  OobScanQrControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'oobScanQrControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$oobScanQrControllerHash();
+
+  @$internal
+  @override
+  OobScanQrController create() => OobScanQrController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(OobScanQrState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<OobScanQrState>(value),
+    );
+  }
+}
+
 String _$oobScanQrControllerHash() =>
     r'b44d3b2ad49b0378ac7187f84e8ad944410eacb0';
 
-/// See also [OobScanQrController].
-@ProviderFor(OobScanQrController)
-final oobScanQrControllerProvider =
-    AutoDisposeNotifierProvider<OobScanQrController, OobScanQrState>.internal(
-      OobScanQrController.new,
-      name: r'oobScanQrControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$oobScanQrControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$OobScanQrController = AutoDisposeNotifier<OobScanQrState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$OobScanQrController extends $Notifier<OobScanQrState> {
+  OobScanQrState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<OobScanQrState, OobScanQrState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<OobScanQrState, OobScanQrState>,
+              OobScanQrState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

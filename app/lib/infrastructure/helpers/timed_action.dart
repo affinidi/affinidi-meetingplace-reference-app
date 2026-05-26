@@ -38,6 +38,12 @@ class TimedAction {
     _timer = null;
   }
 
+  /// Cancels the running timer without invoking callbacks.
+  void dispose() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
   /// Completes the action, cancels the timer,
   /// and invokes [_onComplete] if provided.
   void _complete() {

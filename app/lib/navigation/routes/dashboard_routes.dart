@@ -169,7 +169,7 @@ class SettingsBranchData extends StatefulShellBranchData {
 }
 
 // Main tabs
-class ContactsRoute extends GoRouteData with _$ContactsRoute {
+class ContactsRoute extends GoRouteData with $ContactsRoute {
   const ContactsRoute();
 
   @override
@@ -177,7 +177,7 @@ class ContactsRoute extends GoRouteData with _$ContactsRoute {
       const ContactsScreen();
 }
 
-class ConnectionsRoute extends GoRouteData with _$ConnectionsRoute {
+class ConnectionsRoute extends GoRouteData with $ConnectionsRoute {
   const ConnectionsRoute();
 
   @override
@@ -185,7 +185,7 @@ class ConnectionsRoute extends GoRouteData with _$ConnectionsRoute {
       const ConnectionsScreen();
 }
 
-class IdentitiesRoute extends GoRouteData with _$IdentitiesRoute {
+class IdentitiesRoute extends GoRouteData with $IdentitiesRoute {
   const IdentitiesRoute();
 
   @override
@@ -193,7 +193,7 @@ class IdentitiesRoute extends GoRouteData with _$IdentitiesRoute {
       const IdentitiesScreen();
 }
 
-class SettingsRoute extends GoRouteData with _$SettingsRoute {
+class SettingsRoute extends GoRouteData with $SettingsRoute {
   const SettingsRoute();
 
   @override

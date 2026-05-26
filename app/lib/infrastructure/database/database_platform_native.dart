@@ -19,29 +19,52 @@ class DatabasePlatform {
     required Directory directory,
   }) async {
     final dbPath = p.join(directory.path, databaseName);
+    final escapedPassphrase = passphrase.replaceAll("'", "''");
 
     final sqliteDb = sqlite3.open(dbPath);
-    sqliteDb.execute("PRAGMA key = '$passphrase';");
 
-    final cipherVersion = sqliteDb.select('PRAGMA cipher_version;');
-    if (cipherVersion.isEmpty) {
-      throw UnsupportedError('SQLCipher not available');
+    // PRAGMA cipher is sqlite3mc-specific and replaces the old
+    // PRAGMA cipher_version check that only worked with SQLCipher.
+    final cipherCheck = sqliteDb.select('PRAGMA cipher;');
+    if (cipherCheck.isEmpty) {
+      sqliteDb.close();
+      throw UnsupportedError('Database encryption support not available');
     }
 
-    sqliteDb.select('SELECT count(*) FROM sqlite_master;');
+    // Try default sqlite3mc cipher first — used for new databases and
+    // databases already created with the current sqlite3mc build.
+    try {
+      sqliteDb.execute("PRAGMA key = '$escapedPassphrase';");
+      sqliteDb.select('SELECT count(*) FROM sqlite_master;');
+      return NativeDatabase.opened(
+        sqliteDb,
+        logStatements: Environment.instance.isDatabaseLoggingEnabled,
+      );
+    } on SqliteException {
+      sqliteDb.close();
+    }
 
-    return NativeDatabase.opened(
-      sqliteDb,
-      logStatements: Environment.instance.isDatabaseLoggingEnabled,
-    );
+    // Default cipher failed — database was created with SQLCipher.
+    // Reopen in compatibility mode (legacy only for migration).
+    final legacyDb = sqlite3.open(dbPath);
+    try {
+      legacyDb.execute("PRAGMA cipher = 'sqlcipher';");
+      legacyDb.execute('PRAGMA legacy = 4;');
+      legacyDb.execute("PRAGMA key = '$escapedPassphrase';");
+      legacyDb.select('SELECT count(*) FROM sqlite_master;');
+      return NativeDatabase.opened(
+        legacyDb,
+        logStatements: Environment.instance.isDatabaseLoggingEnabled,
+      );
+    } catch (_) {
+      legacyDb.close();
+      rethrow;
+    }
   }
 
   /// Creates an in-memory database for native platform using SQLite
-  static Future<QueryExecutor> createInMemoryDatabase({
-    required String passphrase,
-  }) async {
+  static Future<QueryExecutor> createInMemoryDatabase() async {
     final sqliteDb = sqlite3.openInMemory();
-    sqliteDb.execute("PRAGMA key = '$passphrase';");
 
     return NativeDatabase.opened(
       sqliteDb,
@@ -78,9 +101,7 @@ LazyDatabase openConnection({
 }) {
   return LazyDatabase(() async {
     if (inMemory) {
-      final database = await DatabasePlatform.createInMemoryDatabase(
-        passphrase: passphrase,
-      );
+      final database = await DatabasePlatform.createInMemoryDatabase();
       return database;
     }
 

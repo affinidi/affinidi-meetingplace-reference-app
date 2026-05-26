@@ -6,6 +6,71 @@ part of 'contacts_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Service responsible for managing contacts derived from channels and offers.
+///
+/// This service provides functionality to:
+/// - Create contacts from invitation accepted events and approved offers
+/// - Update contacts when a channel is inaugurated
+/// - Persist, fetch, add, update and delete contacts via a repository
+/// - Maintain contact-specific state such as badge counts and card updates
+///
+/// The service listens to control plane events to automatically create/update
+/// contacts and exposes streams for processing and contact-card updates.
+
+@ProviderFor(ContactsService)
+final contactsServiceProvider = ContactsServiceProvider._();
+
+/// Service responsible for managing contacts derived from channels and offers.
+///
+/// This service provides functionality to:
+/// - Create contacts from invitation accepted events and approved offers
+/// - Update contacts when a channel is inaugurated
+/// - Persist, fetch, add, update and delete contacts via a repository
+/// - Maintain contact-specific state such as badge counts and card updates
+///
+/// The service listens to control plane events to automatically create/update
+/// contacts and exposes streams for processing and contact-card updates.
+final class ContactsServiceProvider
+    extends $NotifierProvider<ContactsService, ContactsServiceState> {
+  /// Service responsible for managing contacts derived from channels and offers.
+  ///
+  /// This service provides functionality to:
+  /// - Create contacts from invitation accepted events and approved offers
+  /// - Update contacts when a channel is inaugurated
+  /// - Persist, fetch, add, update and delete contacts via a repository
+  /// - Maintain contact-specific state such as badge counts and card updates
+  ///
+  /// The service listens to control plane events to automatically create/update
+  /// contacts and exposes streams for processing and contact-card updates.
+  ContactsServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'contactsServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$contactsServiceHash();
+
+  @$internal
+  @override
+  ContactsService create() => ContactsService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ContactsServiceState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ContactsServiceState>(value),
+    );
+  }
+}
+
 String _$contactsServiceHash() => r'9166b1cbc5b1d0534aaf34eddd13e258760766d9';
 
 /// Service responsible for managing contacts derived from channels and offers.
@@ -18,20 +83,21 @@ String _$contactsServiceHash() => r'9166b1cbc5b1d0534aaf34eddd13e258760766d9';
 ///
 /// The service listens to control plane events to automatically create/update
 /// contacts and exposes streams for processing and contact-card updates.
-///
-/// Copied from [ContactsService].
-@ProviderFor(ContactsService)
-final contactsServiceProvider =
-    NotifierProvider<ContactsService, ContactsServiceState>.internal(
-      ContactsService.new,
-      name: r'contactsServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$contactsServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$ContactsService = Notifier<ContactsServiceState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$ContactsService extends $Notifier<ContactsServiceState> {
+  ContactsServiceState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<ContactsServiceState, ContactsServiceState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<ContactsServiceState, ContactsServiceState>,
+              ContactsServiceState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

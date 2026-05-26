@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class IdentityFormRoute extends GoRouteData with _$IdentityFormRoute {
+class IdentityFormRoute extends GoRouteData with $IdentityFormRoute {
   const IdentityFormRoute({this.identityId});
 
   final String? identityId;

@@ -6,25 +6,59 @@ part of 'find_offer_screen_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(FindOfferScreenController)
+final findOfferScreenControllerProvider = FindOfferScreenControllerProvider._();
+
+final class FindOfferScreenControllerProvider
+    extends $NotifierProvider<FindOfferScreenController, FindOfferScreenState> {
+  FindOfferScreenControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'findOfferScreenControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$findOfferScreenControllerHash();
+
+  @$internal
+  @override
+  FindOfferScreenController create() => FindOfferScreenController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FindOfferScreenState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FindOfferScreenState>(value),
+    );
+  }
+}
+
 String _$findOfferScreenControllerHash() =>
     r'289a6658b078c6fdf3723fa05b9794efbc01ebba';
 
-/// See also [FindOfferScreenController].
-@ProviderFor(FindOfferScreenController)
-final findOfferScreenControllerProvider =
-    AutoDisposeNotifierProvider<
-      FindOfferScreenController,
-      FindOfferScreenState
-    >.internal(
-      FindOfferScreenController.new,
-      name: r'findOfferScreenControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$findOfferScreenControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$FindOfferScreenController = AutoDisposeNotifier<FindOfferScreenState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$FindOfferScreenController
+    extends $Notifier<FindOfferScreenState> {
+  FindOfferScreenState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<FindOfferScreenState, FindOfferScreenState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<FindOfferScreenState, FindOfferScreenState>,
+              FindOfferScreenState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

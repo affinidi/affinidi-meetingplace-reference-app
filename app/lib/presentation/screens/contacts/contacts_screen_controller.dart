@@ -232,8 +232,7 @@ class ContactsScreenController extends _$ContactsScreenController {
   }
 }
 
-extension ContactsScreenControllerSelector
-    on NotifierProvider<ContactsScreenController, ContactsScreenState> {
+extension ContactsScreenControllerSelector on ContactsScreenControllerProvider {
   ProviderListenable<bool> get hasContacts =>
       select((state) => state.contacts.isNotEmpty);
   ProviderListenable<bool> get hasAnySelectedContacts =>

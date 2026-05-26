@@ -52,7 +52,7 @@ class ChatScreenController extends _$ChatScreenController
   _conciergeLoadingControllersSubscriptions = {};
   late final Map<
     String,
-    AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
+    NotifierProvider<AsyncLoadingController, AsyncValue<void>>
   >
   _conciergeLoadingControllers = {};
 
@@ -224,7 +224,7 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
+  NotifierProvider<AsyncLoadingController, AsyncValue<void>>
   _addConciergeSubscriptionIfNeeded(String id) {
     var existing = _conciergeLoadingControllers[id];
     if (existing == null) {
@@ -238,24 +238,24 @@ class ChatScreenController extends _$ChatScreenController
     return existing;
   }
 
-  AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
+  NotifierProvider<AsyncLoadingController, AsyncValue<void>>
   conciergeApproveLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded('approve_${message.messageId}');
   }
 
-  AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
+  NotifierProvider<AsyncLoadingController, AsyncValue<void>>
   conciergeRejectLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded('reject_${message.messageId}');
   }
 
-  AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
+  NotifierProvider<AsyncLoadingController, AsyncValue<void>>
   conciergeSendProfileLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded(
       'send_profile_${message.messageId}',
     );
   }
 
-  AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
+  NotifierProvider<AsyncLoadingController, AsyncValue<void>>
   conciergeAskLaterToSendProfileLoadingController(
     chat.ConciergeMessage message,
   ) {
@@ -264,7 +264,7 @@ class ChatScreenController extends _$ChatScreenController
     );
   }
 
-  AutoDisposeNotifierProvider<AsyncLoadingController, AsyncValue<void>>
+  NotifierProvider<AsyncLoadingController, AsyncValue<void>>
   conciergeCancelSendProfileLoadingController(chat.ConciergeMessage message) {
     return _addConciergeSubscriptionIfNeeded(
       'cancel_send_profile_${message.messageId}',
