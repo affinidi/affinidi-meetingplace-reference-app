@@ -7,7 +7,7 @@ part of 'chat_screen_controller.dart';
 // **************************************************************************
 
 String _$chatScreenControllerHash() =>
-    r'ad48b0f9e225a029183daa69cf329e2b92b79a82';
+    r'8c421ac695fbcc11d206ab54cc5d3820d96d005e';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -37,10 +37,6 @@ abstract class _$ChatScreenController
   ChatScreenState build(String contactId);
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> 464577c (fix: align with transport-agnostic type changes on SDK (#112))
->>>>>>> 0452086 (fix: align with transport-agnostic type changes on SDK (#112))
 /// Controller class for managing the state and logic of the chat screen.
 ///
 /// Extends [_$ChatScreenController] to provide reactive state management

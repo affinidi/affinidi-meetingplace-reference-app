@@ -40,6 +40,8 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
     );
     logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
+    final matrixConfig = await ref.read(matrixConfigProvider.future);
+
     final sdk = await MeetingPlaceCoreSDK.create(
       wallet: wallet,
       repositoryConfig: RepositoryConfig(
@@ -50,9 +52,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
         groupRepository: await ref.read(groupsRepositoryProvider.future),
         keyRepository: secureStorage,
       ),
-      mediatorDid: initialMediatorDid,
-      controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
-      matrixConfig: await ref.read(matrixConfigProvider.future),
+      config: matrixConfig,
       logger: logger,
     );
 
