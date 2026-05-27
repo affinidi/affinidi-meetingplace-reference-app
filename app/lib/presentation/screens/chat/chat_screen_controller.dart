@@ -569,49 +569,49 @@ class ChatScreenController extends _$ChatScreenController
     state = state.copyWith(isActive: false);
   }
 
-  /// Sends an attachment in the chat.
+  /// Sends an attachment in the chat via media upload.
   ///
-  /// This method handles the process of sending an attachment, such as an
-  /// image or file, to the chat. It performs necessary validations and updates
-  /// the chat state accordingly.
-  ///
-  /// Returns a [Future] that completes when the attachment has been sent.
+  /// Uploads each attachment to the Matrix homeserver with E2EE, then sends
+  /// a media message containing the mxc:// reference. The recipient downloads
+  /// and decrypts the media from the homeserver.
   Future<void> sendAttachment(
     String text,
     List<MessageAttachment> messageAttachment,
   ) async {
     messageTextController.clear();
-    unawaited(
-      _chatService?.sendTextMessage(
-        text,
-        attachments: messageAttachment.map((a) => a.toAttachment()).toList(),
-      ),
-    );
     _sendChatActivityTimedAction?.cancel();
+
+    for (final attachment in messageAttachment) {
+      final chatAttachment = attachment.toAttachment();
+      final base64Data = chatAttachment.data?.base64;
+      if (base64Data == null) continue;
+
+      final fileBytes = base64.decode(base64Data);
+      final contentType =
+          chatAttachment.mediaType ?? 'application/octet-stream';
+
+      unawaited(
+        _chatService?.sendMediaMessage(
+          fileBytes,
+          contentType: contentType,
+          filename: chatAttachment.filename,
+          caption: text.isNotEmpty ? text : null,
+        ),
+      );
+    }
   }
 
   /// Loads an image attachment into the chat screen.
   ///
-  /// This method handles the process of displaying or processing an image
-  /// attachment provided by the [attachment] parameter. It may involve
-  /// updating the UI, storing the attachment, or triggering further actions
-  /// related to the image.
-  ///
-  /// [attachment] - The image attachment to be loaded.
+  /// Handles both legacy base64-encoded attachments and hosted media
+  /// attachments (downloaded from mxc:// URI via the SDK).
   void loadImageAttachment(ChatAttachment attachment) {
-    final attachmentId = attachment.id;
+    final firstLink = attachment.data?.links?.firstOrNull;
+    final attachmentId =
+        attachment.id ?? attachment.data?.hash ?? firstLink?.toString();
     if (attachmentId == null) {
       _logger.info(
         'Attachment cannot be displayed as it does not have an id',
-        name: _logKey,
-      );
-      return;
-    }
-
-    final attachmentData = attachment.data?.base64;
-    if (attachmentData == null) {
-      _logger.info(
-        'Attachment cannot be displayed as it does not have data',
         name: _logKey,
       );
       return;
@@ -621,8 +621,38 @@ class ChatScreenController extends _$ChatScreenController
     final existingData = attachmentsDataCache[attachmentId];
     if (existingData != null) return;
 
-    attachmentsDataCache[attachmentId] = base64.decode(attachmentData);
-    state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
+    final attachmentData = attachment.data?.base64;
+    if (attachmentData != null) {
+      attachmentsDataCache[attachmentId] = base64.decode(attachmentData);
+      state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
+      return;
+    }
+
+    final links = attachment.data?.links;
+    if (links != null && links.isNotEmpty) {
+      _downloadAndCacheAttachment(attachmentId, attachment);
+    }
+  }
+
+  Future<void> _downloadAndCacheAttachment(
+    String cacheKey,
+    ChatAttachment attachment,
+  ) async {
+    try {
+      final bytes = await _chatService?.downloadMedia(attachment);
+      if (bytes == null) return;
+
+      final attachmentsDataCache = Map.of(state.attachmentsDataCache);
+      attachmentsDataCache[cacheKey] = bytes;
+      state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Failed to download media attachment',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    }
   }
 
   Future<void> _restoreUnsentMessage() async {

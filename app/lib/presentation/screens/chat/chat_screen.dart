@@ -37,6 +37,7 @@ import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/bottom_sheet_menu.dart';
 import '../../widgets/info_banner.dart';
 import '../../widgets/profile_circle_avatar.dart';
+import '../media/image_view_screen/image_view_screen.dart';
 import 'chat_activity_progress_indicator.dart';
 import 'chat_items/chat_encryption_notice.dart';
 import 'chat_items/group_deleted_chat_item.dart';

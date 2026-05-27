@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    show AttachmentFormat;
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
@@ -34,6 +38,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   int removeMemberCallCount = 0;
 
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
+  final List<Map<String, dynamic>> sendMediaMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
   final List<Map<String, dynamic>> reactOnMessageCalls = [];
   final List<Map<String, dynamic>> approveConnectionRequestCalls = [];
@@ -433,6 +438,61 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     );
 
     return message;
+  }
+
+  @override
+  Future<Message> sendMediaMessage(
+    Uint8List fileBytes, {
+    required String contentType,
+    String? filename,
+    String? caption,
+  }) async {
+    sendMediaMessageCalls.add({
+      'fileBytes': fileBytes,
+      'contentType': contentType,
+      'filename': filename,
+      'caption': caption,
+    });
+
+    // Provide both links (Matrix URI) and base64 (for test rendering)
+    final fakeUri = Uri.parse('mxc://fake-homeserver/fake-media-id');
+    final base64Data = base64Encode(fileBytes);
+    final attachment = ChatAttachment(
+      mediaType: contentType,
+      filename: filename,
+      format: AttachmentFormat.hostedMedia.value,
+      data: ChatAttachmentData(links: [fakeUri], base64: base64Data),
+    );
+
+    final message = Message(
+      chatId: 'fake-chat-id',
+      messageId: 'msg-media-${DateTime.now().millisecondsSinceEpoch}',
+      value: caption ?? '',
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.queued,
+      isFromMe: true,
+      senderDid: 'fake-sender-did',
+      attachments: [attachment],
+    );
+
+    return message;
+  }
+
+  @override
+  Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
+    final base64Data = attachment.data?.base64;
+    if (base64Data != null && base64Data.isNotEmpty) {
+      return base64Decode(base64Data);
+    }
+
+    if (sendMediaMessageCalls.isNotEmpty) {
+      final fileBytes = sendMediaMessageCalls.last['fileBytes'];
+      if (fileBytes is Uint8List) {
+        return fileBytes;
+      }
+    }
+
+    throw StateError('No media bytes available in FakeChatSdk');
   }
 
   @override

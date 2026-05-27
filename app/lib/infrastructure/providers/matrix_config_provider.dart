@@ -3,7 +3,6 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_sqlcipher/sqflite.dart' as sqlite;
 
-import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
 import '../secure_storage/secure_storage.dart';
 import 'applications_documents_directory_provider.dart';
@@ -17,7 +16,6 @@ import 'applications_documents_directory_provider.dart';
 ///   in the application documents directory
 final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
   final environment = ref.read(environmentProvider);
-  final settingsState = ref.read(settingsServiceProvider);
   final homeserver = environment.matrixHomeserver;
   final directory = await ref.read(
     applicationDocumentsDirectoryProvider.future,
@@ -27,8 +25,6 @@ final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
   final passphrase = await secureStorage.provideDatabasePassphrase();
 
   return MatrixConfig(
-    mediatorDid: settingsState.selectedMediatorDid,
-    controlPlaneDid: environment.controlPlaneDid,
     homeserver: Uri.parse(homeserver),
     databaseFactory: CallbackMatrixDatabaseFactory(
       openDatabase: (context) async {
@@ -39,7 +35,7 @@ final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
           p.join(directory.path, 'matrix_$safeDatabaseName.sqlite'),
           password: passphrase,
         );
-        return MatrixSdkDatabase.init(context.databaseName, database: db);
+        return db;
       },
     ),
   );

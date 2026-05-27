@@ -1,9 +1,13 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:camera/camera.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
@@ -99,17 +103,27 @@ Future<void> verifyMessageWithAttachmentSent(
   String message,
   String contactName,
 ) async {
-  expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
-  final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
-  expect(sendCall['text'], message);
-  expect(sendCall['attachments'], isA<List<ChatAttachment>>());
-  expect((sendCall['attachments'] as List).length, 1);
+  expect(meetingPlaceChatSDK.sendMediaMessageCalls, hasLength(1));
+  final sendCall = meetingPlaceChatSDK.sendMediaMessageCalls.first;
+  expect(sendCall['caption'], message);
+  expect(sendCall['fileBytes'], isNotNull);
+  expect(sendCall['contentType'], startsWith('image/'));
 
-  final attachments = sendCall['attachments'] as List<ChatAttachment>;
+  // Simulate the message coming back through the stream with base64 data
+  final fileBytes = sendCall['fileBytes'] as Uint8List;
+  final base64Data = base64Encode(fileBytes);
+  final fakeUri = Uri.parse('mxc://fake-homeserver/fake-media-id');
+  final attachment = ChatAttachment(
+    mediaType: sendCall['contentType'] as String,
+    filename: sendCall['filename'] as String?,
+    format: AttachmentFormat.hostedMedia.value,
+    data: ChatAttachmentData(links: [fakeUri], base64: base64Data),
+  );
+
   meetingPlaceChatSDK.simulateIncomingTextMessage(
     text: message,
     recipientDid: FakeChannels.individualChannel.permanentChannelDid!,
-    attachments: attachments,
+    attachments: [attachment],
   );
   await tester.pumpAndSettle();
 
