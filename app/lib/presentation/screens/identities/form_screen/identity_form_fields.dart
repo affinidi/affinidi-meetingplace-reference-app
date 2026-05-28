@@ -143,11 +143,10 @@ class IdentityFormFields extends ConsumerWidget {
                         focusNode: controller.focusNodeFor(mobileField)!,
                         keyboardAction: TextInputAction.next,
                         selectorConfig: const SelectorConfig(
-                          selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                          selectorType: PhoneInputSelectorType.DIALOG,
                           setSelectorButtonAsPrefixIcon: true,
                           trailingSpace: false,
                           leadingPadding: 0,
-                          useBottomSheetSafeArea: true,
                         ),
                         locale: Localizations.localeOf(context).languageCode,
                         searchBoxDecoration: InputDecoration(
