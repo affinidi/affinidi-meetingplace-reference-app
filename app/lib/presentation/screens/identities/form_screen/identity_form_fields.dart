@@ -181,6 +181,10 @@ class IdentityFormFields extends ConsumerWidget {
                               mobileField,
                               formKey,
                             );
+                            if (mobileField.textInputAction ==
+                                TextInputAction.next) {
+                              FocusScope.of(context).nextFocus();
+                            }
                           },
                           validator: (value) {
                             if (!controller.shouldShowValidation(mobileField)) {
@@ -225,6 +229,15 @@ class _PersonaField extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = identityFormScreenControllerProvider(identityId);
     final controller = ref.read(provider.notifier);
+    void handleFieldSubmitted(String _) {
+      controller.updateErrorVisibilityOnBlur(field, formKey);
+
+      if (field.textInputAction != TextInputAction.next) {
+        return;
+      }
+
+      FocusScope.of(context).nextFocus();
+    }
 
     String? validateField(BuildContext context, String? value) {
       if (field.shouldValidateOnBlur &&
@@ -248,7 +261,7 @@ class _PersonaField extends ConsumerWidget {
       keyboardType: field.keyboardType,
       onChanged: (value) => controller.updateField(field, value, formKey),
       onFieldSubmitted: field.shouldValidateOnBlur
-          ? (_) => controller.updateErrorVisibilityOnBlur(field, formKey)
+          ? handleFieldSubmitted
           : null,
       validator: (value) => validateField(context, value),
       textInputAction: field.textInputAction,
