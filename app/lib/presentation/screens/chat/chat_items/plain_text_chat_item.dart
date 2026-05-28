@@ -104,12 +104,18 @@ class _PlainTextChatItem extends ConsumerWidget {
         emojiCount <= _maximumEmojisForLargeScale;
     final attachments = chatItem.attachments;
 
+    final hasMedia = attachments.isNotEmpty;
+    // Suppress raw msgtype values (e.g. "m.image") that leak from the
+    // protocol layer — they are not meaningful user-facing text.
+    final isRawMsgType = chatItem.value.startsWith('m.');
+    final showText = chatItem.value.isNotEmpty && !isRawMsgType;
+
     return GestureDetector(
       onLongPress: onLongPress,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (attachments.isNotEmpty)
+          if (hasMedia)
             ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
@@ -124,9 +130,9 @@ class _PlainTextChatItem extends ConsumerWidget {
                 );
               },
             ),
-          if (chatItem.value.isNotEmpty)
+          if (showText)
             Padding(
-              padding: EdgeInsets.all(attachments.isEmpty ? 0 : 8),
+              padding: EdgeInsets.all(hasMedia ? 8.0 : 0),
               child: _TextMessage(
                 text: chatItem.value,
                 shouldScaleEmojis: shouldScaleEmojis,
