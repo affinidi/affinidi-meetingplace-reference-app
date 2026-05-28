@@ -16,7 +16,7 @@ import '../../../widgets/profile_picture.dart';
 import '../../media/media_screen/media_screen.dart';
 import 'identity_form_screen_controller.dart';
 
-class IdentityFormFields extends ConsumerWidget {
+class IdentityFormFields extends ConsumerStatefulWidget {
   IdentityFormFields(
     this.identityId, {
     required this.formKey,
@@ -28,8 +28,75 @@ class IdentityFormFields extends ConsumerWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final provider = identityFormScreenControllerProvider(identityId);
+  ConsumerState<IdentityFormFields> createState() => _IdentityFormFieldsState();
+}
+
+class _IdentityFormFieldsState extends ConsumerState<IdentityFormFields> {
+  final _phoneInputKey = GlobalKey();
+  FocusNode? _emailFocusNodeRef;
+  VoidCallback? _emailFocusListener;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _setupEmailFocusListener(),
+    );
+  }
+
+  void _setupEmailFocusListener() {
+    final provider = identityFormScreenControllerProvider(widget.identityId);
+    final controller = ref.read(provider.notifier);
+    final emailField = ContactCardFieldDefinitions.byKey(
+      ContactCardFieldKey.email,
+    );
+    final emailFocusNode = controller.focusNodeFor(emailField);
+    if (emailFocusNode == null) return;
+
+    _emailFocusListener = () {
+      if (!emailFocusNode.hasFocus) _maybeOpenPhoneSelector(controller);
+    };
+    emailFocusNode.addListener(_emailFocusListener!);
+    _emailFocusNodeRef = emailFocusNode;
+  }
+
+  void _maybeOpenPhoneSelector(IdentityFormScreenController controller) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final mobileField = ContactCardFieldDefinitions.byKey(
+        ContactCardFieldKey.mobile,
+      );
+      if (controller.focusNodeFor(mobileField)?.hasFocus != true) return;
+      _triggerPhoneSelector();
+    });
+  }
+
+  void _triggerPhoneSelector() {
+    final ctx = _phoneInputKey.currentContext;
+    if (ctx == null) return;
+    void findAndTap(Element el) {
+      if (el.widget is MaterialButton &&
+          el.widget.key == const Key('intl_dropdown_key')) {
+        (el.widget as MaterialButton).onPressed?.call();
+        return;
+      }
+      el.visitChildElements(findAndTap);
+    }
+
+    (ctx as Element).visitChildElements(findAndTap);
+  }
+
+  @override
+  void dispose() {
+    if (_emailFocusNodeRef != null && _emailFocusListener != null) {
+      _emailFocusNodeRef!.removeListener(_emailFocusListener!);
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = identityFormScreenControllerProvider(widget.identityId);
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
@@ -42,9 +109,9 @@ class IdentityFormFields extends ConsumerWidget {
     final initialMobilePhoneNumber = controller.initialMobilePhoneNumber;
 
     return Form(
-      key: formKey,
+      key: widget.formKey,
       child: FormCard(
-        title: title,
+        title: widget.title,
         child: Column(
           children: [
             GestureDetector(
@@ -109,9 +176,9 @@ class IdentityFormFields extends ConsumerWidget {
             for (var index = 0; index < personaFields.length; index++) ...[
               const Divider(),
               _PersonaField(
-                identityId: identityId,
+                identityId: widget.identityId,
                 field: personaFields[index],
-                formKey: formKey,
+                formKey: widget.formKey,
                 traversalOrder: (index + 1).toDouble(),
               ),
             ],
@@ -135,55 +202,69 @@ class IdentityFormFields extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: InternationalPhoneNumberInput(
-                        initialValue: initialMobilePhoneNumber,
-                        textFieldController: controller.controllerFor(
-                          mobileField,
-                        ),
-                        focusNode: controller.focusNodeFor(mobileField)!,
-                        keyboardAction: TextInputAction.next,
-                        selectorConfig: const SelectorConfig(
-                          selectorType: PhoneInputSelectorType.DIALOG,
-                          setSelectorButtonAsPrefixIcon: true,
-                          trailingSpace: false,
-                          leadingPadding: 0,
-                        ),
-                        locale: Localizations.localeOf(context).languageCode,
-                        searchBoxDecoration: InputDecoration(
-                          hintText: context.l10n.filter,
-                          prefixIcon: const Icon(Icons.search),
-                        ),
-                        inputDecoration: InputDecoration(
-                          hintText: context.l10n.enterMobile,
-                        ),
-                        textStyle: context.textTheme.bodyMedium?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
-                        ),
-                        selectorTextStyle: context.textTheme.bodyMedium
-                            ?.copyWith(
-                              color: context.colorScheme.onSurfaceVariant,
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          dialogTheme: Theme.of(context).dialogTheme.copyWith(
+                            constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.sizeOf(context).height * 0.5,
                             ),
-                        onInputChanged: controller.updateMobile,
-                        onInputValidated: (isValid) {
-                          controller.updateMobileValidation(isValid, formKey);
-                        },
-                        onFieldSubmitted: (_) {
-                          controller.updateErrorVisibilityOnBlur(
+                          ),
+                        ),
+                        child: InternationalPhoneNumberInput(
+                          key: _phoneInputKey,
+                          initialValue: initialMobilePhoneNumber,
+                          textFieldController: controller.controllerFor(
                             mobileField,
-                            formKey,
-                          );
-                        },
-                        validator: (value) {
-                          if (!controller.shouldShowValidation(mobileField)) {
-                            return null;
-                          }
-                          return InputValidators.getValidator(
-                            context,
-                            InputType.phone,
-                            isPhoneValid: controller.isMobileValid,
-                            hasTouchedPhone: controller.hasTouchedMobile,
-                          ).call(value);
-                        },
+                          ),
+                          focusNode: controller.focusNodeFor(mobileField)!,
+                          keyboardAction: TextInputAction.next,
+                          selectorConfig: const SelectorConfig(
+                            selectorType: PhoneInputSelectorType.DIALOG,
+                            setSelectorButtonAsPrefixIcon: true,
+                            trailingSpace: false,
+                            leadingPadding: 0,
+                          ),
+                          locale: Localizations.localeOf(context).languageCode,
+                          searchBoxDecoration: InputDecoration(
+                            hintText: context.l10n.filter,
+                            prefixIcon: const Icon(Icons.search),
+                          ),
+                          inputDecoration: InputDecoration(
+                            hintText: context.l10n.enterMobile,
+                          ),
+                          textStyle: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                          selectorTextStyle: context.textTheme.bodyMedium
+                              ?.copyWith(
+                                color: context.colorScheme.onSurfaceVariant,
+                              ),
+                          onInputChanged: controller.updateMobile,
+                          onInputValidated: (isValid) {
+                            controller.updateMobileValidation(
+                              isValid,
+                              widget.formKey,
+                            );
+                          },
+                          onFieldSubmitted: (_) {
+                            controller.updateErrorVisibilityOnBlur(
+                              mobileField,
+                              widget.formKey,
+                            );
+                          },
+                          validator: (value) {
+                            if (!controller.shouldShowValidation(mobileField)) {
+                              return null;
+                            }
+                            return InputValidators.getValidator(
+                              context,
+                              InputType.phone,
+                              isPhoneValid: controller.isMobileValid,
+                              hasTouchedPhone: controller.hasTouchedMobile,
+                            ).call(value);
+                          },
+                        ),
                       ),
                     ),
                   ],

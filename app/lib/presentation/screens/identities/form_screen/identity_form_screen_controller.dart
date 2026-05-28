@@ -105,7 +105,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     _normalizedMobile = null;
     _isMobileValid = null;
     _hasTouchedMobile = false;
-    _initialMobilePhoneNumber = null;
+    _initialMobilePhoneNumber = _localePhoneNumber();
     return Identity(id: uuid.v4(), did: '', card: newCard);
   }
 
@@ -143,7 +143,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     _normalizedMobile = initialPhoneNumber?.phoneNumber;
     _isMobileValid = null;
     _hasTouchedMobile = false;
-    _initialMobilePhoneNumber = initialPhoneNumber;
+    _initialMobilePhoneNumber = initialPhoneNumber ?? _localePhoneNumber();
 
     return identity;
   }
@@ -193,6 +193,12 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     }
 
     return trimmedMobile.startsWith('+') ? '+$digitsOnly' : digitsOnly;
+  }
+
+  PhoneNumber? _localePhoneNumber() {
+    final countryCode =
+        WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+    return countryCode != null ? PhoneNumber(isoCode: countryCode) : null;
   }
 
   PhoneNumber? _parseInitialMobilePhoneNumber(String? mobile) {
