@@ -16,7 +16,7 @@ import '../../../widgets/profile_picture.dart';
 import '../../media/media_screen/media_screen.dart';
 import 'identity_form_screen_controller.dart';
 
-class IdentityFormFields extends ConsumerStatefulWidget {
+class IdentityFormFields extends ConsumerWidget {
   IdentityFormFields(
     this.identityId, {
     required this.formKey,
@@ -28,75 +28,8 @@ class IdentityFormFields extends ConsumerStatefulWidget {
   final String title;
 
   @override
-  ConsumerState<IdentityFormFields> createState() => _IdentityFormFieldsState();
-}
-
-class _IdentityFormFieldsState extends ConsumerState<IdentityFormFields> {
-  final _phoneInputKey = GlobalKey();
-  FocusNode? _emailFocusNodeRef;
-  VoidCallback? _emailFocusListener;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _setupEmailFocusListener(),
-    );
-  }
-
-  void _setupEmailFocusListener() {
-    final provider = identityFormScreenControllerProvider(widget.identityId);
-    final controller = ref.read(provider.notifier);
-    final emailField = ContactCardFieldDefinitions.byKey(
-      ContactCardFieldKey.email,
-    );
-    final emailFocusNode = controller.focusNodeFor(emailField);
-    if (emailFocusNode == null) return;
-
-    _emailFocusListener = () {
-      if (!emailFocusNode.hasFocus) _maybeOpenPhoneSelector(controller);
-    };
-    emailFocusNode.addListener(_emailFocusListener!);
-    _emailFocusNodeRef = emailFocusNode;
-  }
-
-  void _maybeOpenPhoneSelector(IdentityFormScreenController controller) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final mobileField = ContactCardFieldDefinitions.byKey(
-        ContactCardFieldKey.mobile,
-      );
-      if (controller.focusNodeFor(mobileField)?.hasFocus != true) return;
-      _triggerPhoneSelector();
-    });
-  }
-
-  void _triggerPhoneSelector() {
-    final ctx = _phoneInputKey.currentContext;
-    if (ctx == null) return;
-    void findAndTap(Element el) {
-      if (el.widget is MaterialButton &&
-          el.widget.key == const Key('intl_dropdown_key')) {
-        (el.widget as MaterialButton).onPressed?.call();
-        return;
-      }
-      el.visitChildElements(findAndTap);
-    }
-
-    (ctx as Element).visitChildElements(findAndTap);
-  }
-
-  @override
-  void dispose() {
-    if (_emailFocusNodeRef != null && _emailFocusListener != null) {
-      _emailFocusNodeRef!.removeListener(_emailFocusListener!);
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = identityFormScreenControllerProvider(widget.identityId);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = identityFormScreenControllerProvider(identityId);
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
@@ -109,9 +42,9 @@ class _IdentityFormFieldsState extends ConsumerState<IdentityFormFields> {
     final initialMobilePhoneNumber = controller.initialMobilePhoneNumber;
 
     return Form(
-      key: widget.formKey,
+      key: formKey,
       child: FormCard(
-        title: widget.title,
+        title: title,
         child: Column(
           children: [
             GestureDetector(
@@ -176,9 +109,9 @@ class _IdentityFormFieldsState extends ConsumerState<IdentityFormFields> {
             for (var index = 0; index < personaFields.length; index++) ...[
               const Divider(),
               _PersonaField(
-                identityId: widget.identityId,
+                identityId: identityId,
                 field: personaFields[index],
-                formKey: widget.formKey,
+                formKey: formKey,
                 traversalOrder: (index + 1).toDouble(),
               ),
             ],
@@ -207,12 +140,11 @@ class _IdentityFormFieldsState extends ConsumerState<IdentityFormFields> {
                           dialogTheme: Theme.of(context).dialogTheme.copyWith(
                             constraints: BoxConstraints(
                               maxHeight:
-                                  MediaQuery.sizeOf(context).height * 0.5,
+                                  MediaQuery.sizeOf(context).height * 0.7,
                             ),
                           ),
                         ),
                         child: InternationalPhoneNumberInput(
-                          key: _phoneInputKey,
                           initialValue: initialMobilePhoneNumber,
                           textFieldController: controller.controllerFor(
                             mobileField,
@@ -242,15 +174,12 @@ class _IdentityFormFieldsState extends ConsumerState<IdentityFormFields> {
                               ),
                           onInputChanged: controller.updateMobile,
                           onInputValidated: (isValid) {
-                            controller.updateMobileValidation(
-                              isValid,
-                              widget.formKey,
-                            );
+                            controller.updateMobileValidation(isValid, formKey);
                           },
                           onFieldSubmitted: (_) {
                             controller.updateErrorVisibilityOnBlur(
                               mobileField,
-                              widget.formKey,
+                              formKey,
                             );
                           },
                           validator: (value) {

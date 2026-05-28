@@ -9,6 +9,7 @@ import '../../../../domain/models/contact_card/contact_card_field_definition.dar
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
+import '../../../../infrastructure/plugins/device_region_plugin/device_region_plugin.dart';
 import 'identity_form_mode.dart';
 import 'identity_form_screen_state.dart';
 
@@ -196,8 +197,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   PhoneNumber? _localePhoneNumber() {
-    final countryCode =
-        WidgetsBinding.instance.platformDispatcher.locale.countryCode;
+    final countryCode = DeviceRegionPlugin.regionCode;
     return countryCode != null ? PhoneNumber(isoCode: countryCode) : null;
   }
 

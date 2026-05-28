@@ -32,6 +32,22 @@ import FirebaseMessaging
     func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
         GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
         NSLog("AppDelegate: Registered plugins with implicit Flutter engine")
+
+        let registrar = engineBridge.pluginRegistry.registrar(
+            forPlugin: "DeviceRegionPlugin"
+        )
+        guard let messenger = registrar?.messenger() else { return }
+        let channel = FlutterMethodChannel(
+            name: "com.example.meetingplace/device_region",
+            binaryMessenger: messenger
+        )
+        channel.setMethodCallHandler { (call, result) in
+            if call.method == "getRegionCode" {
+                result(Locale.current.region?.identifier)
+            } else {
+                result(FlutterMethodNotImplemented)
+            }
+        }
     }
     
     override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
