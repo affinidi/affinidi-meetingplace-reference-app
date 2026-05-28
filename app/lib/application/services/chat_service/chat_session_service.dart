@@ -51,7 +51,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late AppLogger _logger;
   late String _channelDid;
 
-  MeetingPlaceChatSDK? _chatSDK;
+  ChatSDK? _chatSDK;
   bool _isGroupChat = false;
   String? _otherPartyFirstName;
   ChatStream? _messageSubscription;
