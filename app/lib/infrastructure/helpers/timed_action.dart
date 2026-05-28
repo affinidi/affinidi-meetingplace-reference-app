@@ -3,38 +3,31 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 /// A utility class for executing a timed action with optional
-/// cancel and completion callbacks.
+/// completion callback.
 class TimedAction {
   /// Creates a [TimedAction].
   ///
   /// [onRun] is executed immediately when [start] is called.
-  /// [onCancel] is invoked if [cancel] is called before completion.
   /// [onComplete] is invoked once the timer finishes.
   TimedAction({
     required void Function(List<dynamic>? args) onRun,
-    VoidCallback? onCancel,
     VoidCallback? onComplete,
     required Duration duration,
   }) : _duration = duration,
-       _onCancel = onCancel,
        _onComplete = onComplete,
        _execute = onRun;
 
   Timer? _timer;
   final void Function(List<dynamic>? args) _execute;
-  final VoidCallback? _onCancel;
   final VoidCallback? _onComplete;
   final Duration _duration;
 
-  /// Cancels the running timer and invokes [_onCancel] if provided.
+  /// Cancels the running timer. No callbacks are invoked.
+  ///
+  /// Any side-effects on cancellation (e.g. clearing UI state) are the
+  /// caller's responsibility.
   void cancel() {
-    if (_timer == null) {
-      return;
-    }
-
-    _onCancel?.call();
-
-    _timer!.cancel();
+    _timer?.cancel();
     _timer = null;
   }
 
