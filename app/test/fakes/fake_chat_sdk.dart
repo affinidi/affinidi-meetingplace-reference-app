@@ -455,6 +455,34 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     // Track the call
     sendTextMessageCalls.add({'text': text, 'attachments': attachments});
 
+    var normalizedAttachments = attachments ?? const <ChatAttachment>[];
+    final firstAttachment = normalizedAttachments.firstOrNull;
+    final base64Data = firstAttachment?.data?.base64;
+    if (firstAttachment != null &&
+        base64Data != null &&
+        base64Data.isNotEmpty &&
+        firstAttachment.data?.links?.isEmpty != false) {
+      final fileBytes = base64Decode(base64Data);
+      sendMediaMessageCalls.add({
+        'fileBytes': fileBytes,
+        'contentType': firstAttachment.mediaType ?? 'application/octet-stream',
+        'filename': firstAttachment.filename,
+        'caption': text,
+      });
+
+      normalizedAttachments = [
+        ChatAttachment(
+          mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
+          filename: firstAttachment.filename,
+          format: AttachmentFormat.hostedMedia.value,
+          data: ChatAttachmentData(
+            links: [Uri.parse('mxc://fake-homeserver/fake-media-id')],
+            base64: base64Data,
+          ),
+        ),
+      ];
+    }
+
     final message = Message(
       chatId: 'fake-chat-id',
       messageId: 'msg-${DateTime.now().millisecondsSinceEpoch}',
@@ -463,45 +491,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       status: ChatItemStatus.queued,
       isFromMe: true,
       senderDid: 'fake-sender-did',
-      attachments: attachments ?? [],
-    );
-
-    return message;
-  }
-
-  @override
-  Future<Message> sendMediaMessage(
-    Uint8List fileBytes, {
-    required String contentType,
-    String? filename,
-    String? caption,
-  }) async {
-    sendMediaMessageCalls.add({
-      'fileBytes': fileBytes,
-      'contentType': contentType,
-      'filename': filename,
-      'caption': caption,
-    });
-
-    // Provide both links (Matrix URI) and base64 (for test rendering)
-    final fakeUri = Uri.parse('mxc://fake-homeserver/fake-media-id');
-    final base64Data = base64Encode(fileBytes);
-    final attachment = ChatAttachment(
-      mediaType: contentType,
-      filename: filename,
-      format: AttachmentFormat.hostedMedia.value,
-      data: ChatAttachmentData(links: [fakeUri], base64: base64Data),
-    );
-
-    final message = Message(
-      chatId: 'fake-chat-id',
-      messageId: 'msg-media-${DateTime.now().millisecondsSinceEpoch}',
-      value: caption ?? '',
-      dateCreated: DateTime.now(),
-      status: ChatItemStatus.queued,
-      isFromMe: true,
-      senderDid: 'fake-sender-did',
-      attachments: [attachment],
+      attachments: normalizedAttachments,
     );
 
     return message;
