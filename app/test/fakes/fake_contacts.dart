@@ -225,6 +225,40 @@ class FakeContacts {
     notificationBannerDismissed: individualContact.notificationBannerDismissed,
   );
 
+  /// A contact where channelDid and card.did are different.
+  ///
+  /// Represents the auto-exchange R-Card path: the R-Card issuerDid is the
+  /// sender's identity DID (matching card.did), not the channel DID.
+  static final autoExchangeContact = Contact(
+    id: 'auto-exchange-contact-id',
+    channelDid: 'did:key:auto-exchange-channel',
+    channelDidSha256: 'auto-exchange-channel-sha256',
+    offerLink: 'auto-exchange-offer-link',
+    card: ContactCard(
+      id: 'auto-exchange-card-id',
+      did: 'did:key:auto-exchange-identity',
+      type: ContactCardType.individual.value,
+      firstName: 'Bob',
+      lastName: 'Auto',
+      displayName: 'Display Bob Auto',
+    ),
+    otherPartyCard: ContactCard(
+      id: 'auto-exchange-other-party-card-id',
+      did: 'did:key:auto-exchange-channel',
+      type: ContactCardType.individual.value,
+      firstName: 'Alice',
+      displayName: 'Display Alice Auto',
+    ),
+    dateAdded: DateTime(2025, 3, 1),
+    type: ContactType.individual,
+    status: ContactStatus.active,
+    mediatorDid: 'did:key:mediator',
+    origin: ContactOrigin.individualOfferPublished,
+    category: ContactCategory.person,
+    displayName: 'Display Bob Auto',
+    hasBeenOpened: true,
+  );
+
   static sdk.ContactCard get sdkContactCard {
     final card = individualContact.card;
     return sdk.ContactCard(

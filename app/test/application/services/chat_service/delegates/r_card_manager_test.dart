@@ -123,7 +123,6 @@ void main() {
     test('cancelSubscription — safe to call before subscribe', () {
       expect(() => manager.cancelSubscription(), returnsNormally);
     });
-
     test('cancelSubscription — safe to call twice after subscribe', () async {
       await manager.subscribeToIncomingRCards();
       manager.cancelSubscription();
@@ -211,6 +210,25 @@ void main() {
       await manager.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
 
       expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
+    });
+
+    test(
+      'replayPendingRCard — delivers pending R-Card from cache as chat tile',
+      () async {
+        stub.pendingRCard = _makeRCard(issuerDid: otherPartyDid);
+        await manager.subscribeToIncomingRCards();
+        await manager.replayPendingRCard();
+
+        expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
+      },
+    );
+
+    test('replayPendingRCard — no-ops when pending cache is empty', () async {
+      // pendingRCard is null by default
+      await manager.subscribeToIncomingRCards();
+      await manager.replayPendingRCard();
+
+      expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
 
     test('sendRCardFromPlugin — no-op when channel is not found', () async {

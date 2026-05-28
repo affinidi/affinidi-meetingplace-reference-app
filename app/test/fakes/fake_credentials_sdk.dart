@@ -26,6 +26,9 @@ class StubCredentialsSdk extends MeetingPlaceCredentialsSDK {
     _pendingVrc = null;
     return vrc;
   }
+
+  @override
+  RCard? consumePendingRCard(String senderDid) => null;
 }
 
 /// A controllable [MeetingPlaceCredentialsSDK] stub for [VdipManager] tests.
@@ -70,6 +73,9 @@ class StubVdipCredentialsSdk extends MeetingPlaceCredentialsSDK {
   }
 
   @override
+  RCard? consumePendingRCard(String senderDid) => null;
+
+  @override
   Future<VrcRequestProcessingResult> handleReceivedVrcRequest({
     required String permanentChannelDid,
     required VrcRequest request,
@@ -110,8 +116,17 @@ class StubRCardCredentialsSdk extends MeetingPlaceCredentialsSDK {
 
   final _rCardsCtrl = StreamController<RCard>.broadcast();
 
+  RCard? pendingRCard;
+
   @override
   Stream<RCard> get receivedRCards => _rCardsCtrl.stream;
+
+  @override
+  RCard? consumePendingRCard(String senderDid) {
+    final r = pendingRCard;
+    pendingRCard = null;
+    return r;
+  }
 
   @override
   Future<RCard> sendRCard({

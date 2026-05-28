@@ -305,7 +305,9 @@ class _RCardDetailsContent extends ConsumerWidget {
     final cacheManager = ref.read(cacheManagerProvider);
 
     final contactsService = ref.read(contactsServiceProvider);
-    final contact = contactsService.getContactByChannelDid(card.issuerDid);
+    final contact =
+        contactsService.getContactByChannelDid(card.issuerDid) ??
+        contactsService.getContactByCardDid(card.issuerDid);
 
     Future<void> openUrl(String url) async {
       await Clipboard.setData(ClipboardData(text: url));

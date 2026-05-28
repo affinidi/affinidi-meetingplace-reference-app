@@ -44,6 +44,19 @@ class RCardManager {
     _subscription = null;
   }
 
+  /// Consumes any R-Card that arrived from the other party while no
+  /// subscription was active, and surfaces it as a chat attachment.
+  ///
+  /// Must be called AFTER [subscribeToIncomingRCards] so that the
+  /// subscription is live before replay runs.
+  Future<void> replayPendingRCard() async {
+    final credentialsSDK = await _ref.read(credentialsSdkProvider.future);
+    final pending = credentialsSDK.consumePendingRCard(_otherPartyPermanentDid);
+    if (pending != null) {
+      await _onRCardReceived(pending);
+    }
+  }
+
   /// Subscribes to incoming R-Cards from the credentials SDK and surfaces
   /// each received card as a chat attachment.
   Future<void> subscribeToIncomingRCards() async {

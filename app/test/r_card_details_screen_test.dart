@@ -235,6 +235,44 @@ void main() {
       },
     );
 
+    testWidgets(
+      '"Chat with" button is enabled when issuerDid matches contact.card.did '
+      '(auto-exchange path)',
+      (tester) async {
+        // Auto-exchanged R-Card: issuerDid = identity DID.
+        // getContactByChannelDid fails (wrong DID type).
+        // getContactByCardDid succeeds on card.did match.
+        const autoIdentityDid = 'did:key:auto-exchange-identity';
+        final card = RCard(
+          subjectDid: aliceSubjectDid,
+          vcBlob: aliceVcBlob,
+          issuerDid: autoIdentityDid,
+          version: 1,
+          issuanceDate: DateTime(2024),
+          receivedAt: DateTime(2024),
+        );
+
+        await navigateToLocation(
+          tester,
+          '/r-cards/${Uri.encodeComponent(aliceSubjectDid)}/details',
+          identities: [FakeIdentities.primaryIdentity],
+          mediators: [],
+          contacts: [FakeContacts.autoExchangeContact],
+          rCards: [card],
+          rCardsServiceFactory: () => FakeRCardsService([card]),
+        );
+        await tester.pumpAndSettle();
+
+        final chatButton = tester.widget<TextButton>(
+          find.ancestor(
+            of: find.textContaining('Chat with'),
+            matching: find.byType(TextButton),
+          ),
+        );
+        expect(chatButton.onPressed, isNotNull);
+      },
+    );
+
     testWidgets('export icon calls exportSingleAsVcf on the service notifier', (
       tester,
     ) async {

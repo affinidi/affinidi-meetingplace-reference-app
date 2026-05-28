@@ -18,39 +18,38 @@ dependency_overrides:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: b8e94c6d72125c2db2f9e2e49229c9da2829f03d
+      ref: 67b5906515ae4fd617015b5255ce99661496010a
       path: packages/meeting_place_chat
   meeting_place_control_plane:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_control_plane
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: b8e94c6d72125c2db2f9e2e49229c9da2829f03d
+      ref: 67b5906515ae4fd617015b5255ce99661496010a
       path: packages/meeting_place_control_plane
   meeting_place_core:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_core
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: b8e94c6d72125c2db2f9e2e49229c9da2829f03d
+      ref: 67b5906515ae4fd617015b5255ce99661496010a
       path: packages/meeting_place_core
   meeting_place_credentials:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_credentials
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: b8e94c6d72125c2db2f9e2e49229c9da2829f03d
+      ref: 67b5906515ae4fd617015b5255ce99661496010a
       path: packages/meeting_place_credentials
   meeting_place_drift_repository:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: b8e94c6d72125c2db2f9e2e49229c9da2829f03d
+      ref: 67b5906515ae4fd617015b5255ce99661496010a
       path: packages/meeting_place_drift_repository
   meeting_place_mediator:
     # path: ../../MPX_OSS/affinidi-meetingplace-sdk-dart/packages/meeting_place_mediator
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: b8e94c6d72125c2db2f9e2e49229c9da2829f03d
+      ref: 67b5906515ae4fd617015b5255ce99661496010a
       path: packages/meeting_place_mediator
-  meta: ^1.18.2
   test_api: ^0.7.12
 
 hooks:
