@@ -24,6 +24,7 @@ class GalleryImageAttachment implements MessageAttachment {
     id: const Uuid().v4(),
     mediaType: _mediaType,
     format: _pluginName,
+    filename: 'IMG_${clock.now().millisecondsSinceEpoch}.jpg',
     lastModifiedTime: clock.now(),
     data: ChatAttachmentData(base64: _base64),
   );
