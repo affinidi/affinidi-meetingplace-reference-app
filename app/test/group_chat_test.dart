@@ -35,7 +35,7 @@ const _mockCameras = [
 Future<void> navigateToGroupChatScreen(
   WidgetTester tester, {
   required String contactId,
-  MeetingPlaceChatSDK? meetingPlaceChatSDK,
+  ChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
   FakeSecureStorage? secureStorage,

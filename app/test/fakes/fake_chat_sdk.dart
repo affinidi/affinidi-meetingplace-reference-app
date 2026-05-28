@@ -8,7 +8,7 @@ import 'package:meeting_place_core/meeting_place_core.dart'
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
-class FakeChatSdk implements MeetingPlaceChatSDK {
+class FakeChatSdk implements ChatSDK {
   int _chatSessionStartedCalls = 0;
   int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =
@@ -363,9 +363,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
-  Future<void> endChatSession() async {
+  void endChatSession() {
     sessionEnded = true;
   }
+
+  @override
+  Future<List<ChatItem>> get messages async => const <ChatItem>[];
 
   @override
   Future<void> reactOnMessage(
@@ -498,6 +501,14 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   @override
   Future<void> startChatPresenceUpdates() async {
     _startedChatPresenceUpdates += 1;
+  }
+
+  @override
+  Future<void> editTextMessage(Message message, String newText) async {}
+
+  @override
+  Future<ChatItem?> getMessageById(String messageId) async {
+    return null;
   }
 
   @override
