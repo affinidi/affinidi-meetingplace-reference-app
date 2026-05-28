@@ -315,25 +315,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
-  Future<Message> sendMediaMessage(
-    Uint8List fileBytes, {
-    required String contentType,
-    String? filename,
-    String? caption,
-  }) async {
-    final sdk = _chatSDK;
-    if (sdk == null) {
-      throw StateError('Chat SDK not initialized');
-    }
-    return sdk.sendMediaMessage(
-      fileBytes,
-      contentType: contentType,
-      filename: filename,
-      caption: caption,
-    );
-  }
-
-  @override
   Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
     final sdk = _chatSDK;
     if (sdk == null) {

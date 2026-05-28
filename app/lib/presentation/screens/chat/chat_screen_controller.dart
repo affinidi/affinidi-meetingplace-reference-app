@@ -583,20 +583,9 @@ class ChatScreenController extends _$ChatScreenController
 
     for (final attachment in messageAttachment) {
       final chatAttachment = attachment.toAttachment();
-      final base64Data = chatAttachment.data?.base64;
-      if (base64Data == null) continue;
-
-      final fileBytes = base64.decode(base64Data);
-      final contentType =
-          chatAttachment.mediaType ?? 'application/octet-stream';
 
       unawaited(
-        _chatService?.sendMediaMessage(
-          fileBytes,
-          contentType: contentType,
-          filename: chatAttachment.filename,
-          caption: text.isNotEmpty ? text : null,
-        ),
+        _chatService?.sendTextMessage(text, attachments: [chatAttachment]),
       );
     }
   }

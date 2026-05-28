@@ -69,9 +69,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
         groupRepository: await ref.read(groupsRepositoryProvider.future),
         keyRepository: secureStorage,
       ),
-      mediatorDid: initialMediatorDid,
-      controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
-      matrixConfig: matrixConfig,
+      config: matrixConfig,
       logger: logger,
     );
 
