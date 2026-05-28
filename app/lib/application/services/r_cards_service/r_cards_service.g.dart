@@ -12,7 +12,7 @@ part of 'r_cards_service.dart';
 ///
 /// Responsibilities:
 /// - Exposes all stored [RCard]s as live state for the UI.
-/// - Delegates all persistence operations to [MeetingPlaceRelationshipSDK]
+/// - Delegates all persistence operations to [MeetingPlaceCredentialsSDK]
 ///   so consumers only need one dependency for the full R-Card feature.
 
 @ProviderFor(RCardsService)
@@ -22,7 +22,7 @@ final rCardsServiceProvider = RCardsServiceProvider._();
 ///
 /// Responsibilities:
 /// - Exposes all stored [RCard]s as live state for the UI.
-/// - Delegates all persistence operations to [MeetingPlaceRelationshipSDK]
+/// - Delegates all persistence operations to [MeetingPlaceCredentialsSDK]
 ///   so consumers only need one dependency for the full R-Card feature.
 final class RCardsServiceProvider
     extends $NotifierProvider<RCardsService, List<RCard>> {
@@ -30,7 +30,7 @@ final class RCardsServiceProvider
   ///
   /// Responsibilities:
   /// - Exposes all stored [RCard]s as live state for the UI.
-  /// - Delegates all persistence operations to [MeetingPlaceRelationshipSDK]
+  /// - Delegates all persistence operations to [MeetingPlaceCredentialsSDK]
   ///   so consumers only need one dependency for the full R-Card feature.
   RCardsServiceProvider._()
     : super(
@@ -59,13 +59,13 @@ final class RCardsServiceProvider
   }
 }
 
-String _$rCardsServiceHash() => r'07a5f8a714c5f171ad583092cfee9b86ea87d420';
+String _$rCardsServiceHash() => r'e2969909150c50523c0b03503aa55a68f41e124f';
 
 /// Service that drives the R-Card feature.
 ///
 /// Responsibilities:
 /// - Exposes all stored [RCard]s as live state for the UI.
-/// - Delegates all persistence operations to [MeetingPlaceRelationshipSDK]
+/// - Delegates all persistence operations to [MeetingPlaceCredentialsSDK]
 ///   so consumers only need one dependency for the full R-Card feature.
 
 abstract class _$RCardsService extends $Notifier<List<RCard>> {

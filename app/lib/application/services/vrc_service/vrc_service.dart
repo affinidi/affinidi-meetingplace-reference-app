@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/vrc/vrc_credential.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../infrastructure/providers/relationship_sdk_provider.dart';
+import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 
 part 'vrc_service.g.dart';
 
@@ -39,23 +39,23 @@ class VrcService extends _$VrcService {
 
   Future<void> _fetchVrcs() async {
     if (_disposed) return;
-    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+    final credentialsSdk = await ref.read(credentialsSdkProvider.future);
     if (_disposed) return;
-    final vrcs = await relationshipSdk.listVrcs();
+    final vrcs = await credentialsSdk.listVrcs();
     if (_disposed) return;
     state = vrcs.map(_toVrcCredential).toList();
   }
 
   Future<void> saveVrc(String rawVc, String referenceId) async {
-    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+    final credentialsSdk = await ref.read(credentialsSdkProvider.future);
     try {
-      await relationshipSdk.storeVrc(
+      await credentialsSdk.storeVrc(
         vcBlob: rawVc,
         referenceId: referenceId,
         verifiedAt: DateTime.now(),
       );
-      state = (await relationshipSdk.listVrcs()).map(_toVrcCredential).toList();
-    } on MeetingPlaceRelationshipSDKException catch (error, stackTrace) {
+      state = (await credentialsSdk.listVrcs()).map(_toVrcCredential).toList();
+    } on MeetingPlaceCredentialsSDKException catch (error, stackTrace) {
       _logger.error(
         'Skipping VRC storage: $error',
         name: _logKey,
@@ -66,26 +66,26 @@ class VrcService extends _$VrcService {
   }
 
   Future<void> deleteVrc(String id) async {
-    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
-    await relationshipSdk.deleteVrc(id);
-    state = (await relationshipSdk.listVrcs()).map(_toVrcCredential).toList();
+    final credentialsSdk = await ref.read(credentialsSdkProvider.future);
+    await credentialsSdk.deleteVrc(id);
+    state = (await credentialsSdk.listVrcs()).map(_toVrcCredential).toList();
   }
 
   Future<List<VrcCredential>> listVrcsByDid(String did) async {
-    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
-    final vrcs = await relationshipSdk.listVrcsByHolderDid(did);
+    final credentialsSdk = await ref.read(credentialsSdkProvider.future);
+    final vrcs = await credentialsSdk.listVrcsByHolderDid(did);
     return vrcs.map(_toVrcCredential).toList();
   }
 
   Future<int> countVrcsByDid(String did) async {
-    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
-    return relationshipSdk.countVrcsByHolderDid(did);
+    final credentialsSdk = await ref.read(credentialsSdkProvider.future);
+    return credentialsSdk.countVrcsByHolderDid(did);
   }
 
   Future<bool> hasVrcInChannel(String? channelId) async {
     if (channelId == null) return false;
-    final relationshipSdk = await ref.read(relationshipSdkProvider.future);
-    final vrcs = await relationshipSdk.listVrcs();
+    final credentialsSdk = await ref.read(credentialsSdkProvider.future);
+    final vrcs = await credentialsSdk.listVrcs();
     return vrcs.any((v) => v.referenceId == channelId);
   }
 

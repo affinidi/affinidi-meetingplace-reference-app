@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'relationship_sdk_provider.dart';
+part of 'credentials_sdk_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -8,72 +8,72 @@ part of 'relationship_sdk_provider.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
+/// Provides the `MeetingPlaceCredentialsSDK` instance backed by the
 /// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
 ///
 /// Injects the [RCardRepository] from [rCardsRepositoryProvider]
 /// so that every incoming R-Card is automatically persisted in the local
 /// encrypted database.
 ///
-/// Keep-alive ensures the relationship SDK is initialized once and shared
+/// Keep-alive ensures the credentials SDK is initialized once and shared
 /// across the app lifetime.
 
-@ProviderFor(relationshipSdk)
-final relationshipSdkProvider = RelationshipSdkProvider._();
+@ProviderFor(credentialsSdk)
+final credentialsSdkProvider = CredentialsSdkProvider._();
 
-/// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
+/// Provides the `MeetingPlaceCredentialsSDK` instance backed by the
 /// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
 ///
 /// Injects the [RCardRepository] from [rCardsRepositoryProvider]
 /// so that every incoming R-Card is automatically persisted in the local
 /// encrypted database.
 ///
-/// Keep-alive ensures the relationship SDK is initialized once and shared
+/// Keep-alive ensures the credentials SDK is initialized once and shared
 /// across the app lifetime.
 
-final class RelationshipSdkProvider
+final class CredentialsSdkProvider
     extends
         $FunctionalProvider<
-          AsyncValue<MeetingPlaceRelationshipSDK>,
-          MeetingPlaceRelationshipSDK,
-          FutureOr<MeetingPlaceRelationshipSDK>
+          AsyncValue<MeetingPlaceCredentialsSDK>,
+          MeetingPlaceCredentialsSDK,
+          FutureOr<MeetingPlaceCredentialsSDK>
         >
     with
-        $FutureModifier<MeetingPlaceRelationshipSDK>,
-        $FutureProvider<MeetingPlaceRelationshipSDK> {
-  /// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
+        $FutureModifier<MeetingPlaceCredentialsSDK>,
+        $FutureProvider<MeetingPlaceCredentialsSDK> {
+  /// Provides the `MeetingPlaceCredentialsSDK` instance backed by the
   /// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
   ///
   /// Injects the [RCardRepository] from [rCardsRepositoryProvider]
   /// so that every incoming R-Card is automatically persisted in the local
   /// encrypted database.
   ///
-  /// Keep-alive ensures the relationship SDK is initialized once and shared
+  /// Keep-alive ensures the credentials SDK is initialized once and shared
   /// across the app lifetime.
-  RelationshipSdkProvider._()
+  CredentialsSdkProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'relationshipSdkProvider',
+        name: r'credentialsSdkProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$relationshipSdkHash();
+  String debugGetCreateSourceHash() => _$credentialsSdkHash();
 
   @$internal
   @override
-  $FutureProviderElement<MeetingPlaceRelationshipSDK> $createElement(
+  $FutureProviderElement<MeetingPlaceCredentialsSDK> $createElement(
     $ProviderPointer pointer,
   ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<MeetingPlaceRelationshipSDK> create(Ref ref) {
-    return relationshipSdk(ref);
+  FutureOr<MeetingPlaceCredentialsSDK> create(Ref ref) {
+    return credentialsSdk(ref);
   }
 }
 
-String _$relationshipSdkHash() => r'58aed20a8830106186da02ab0f789c3ef2d44dbb';
+String _$credentialsSdkHash() => r'b4c10d0ca19b632768b91bcfc80ad5f797475895';

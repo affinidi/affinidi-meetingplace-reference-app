@@ -3,13 +3,13 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../infrastructure/providers/chat_repository_provider.dart';
+import '../../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../../../../infrastructure/providers/relationship_sdk_provider.dart';
 import '../../identities_service/identities_service.dart';
 
 /// Manages outgoing and incoming R-Card operations for a single chat channel.
@@ -44,11 +44,11 @@ class RCardManager {
     _subscription = null;
   }
 
-  /// Subscribes to incoming R-Cards from the relationship SDK and surfaces
+  /// Subscribes to incoming R-Cards from the credentials SDK and surfaces
   /// each received card as a chat attachment.
   Future<void> subscribeToIncomingRCards() async {
-    final relationshipSDK = await _ref.read(relationshipSdkProvider.future);
-    _subscription = relationshipSDK.receivedRCards.listen(
+    final credentialsSDK = await _ref.read(credentialsSdkProvider.future);
+    _subscription = credentialsSDK.receivedRCards.listen(
       _onRCardReceived,
       onError: (Object error, StackTrace stackTrace) {
         _logger.error(
@@ -82,8 +82,8 @@ class RCardManager {
       if (channelDid == null || otherDid == null) return;
 
       final didManager = await coreSdk.getDidManager(channelDid);
-      final relationshipSDK = await _ref.read(relationshipSdkProvider.future);
-      final rCard = await relationshipSDK.sendRCard(
+      final credentialsSDK = await _ref.read(credentialsSdkProvider.future);
+      final rCard = await credentialsSDK.sendRCard(
         channel: channel,
         subjectDid: identity.did,
         card: RCardSubject(
@@ -137,8 +137,8 @@ class RCardManager {
       if (otherDid == null || otherDid.isEmpty) return;
 
       final didManager = await coreSdk.getDidManager(channelDid);
-      final relationshipSDK = await _ref.read(relationshipSdkProvider.future);
-      final rCard = await relationshipSDK.sendRCard(
+      final credentialsSDK = await _ref.read(credentialsSdkProvider.future);
+      final rCard = await credentialsSDK.sendRCard(
         channel: channel,
         subjectDid: identity.did,
         card: RCardSubject(

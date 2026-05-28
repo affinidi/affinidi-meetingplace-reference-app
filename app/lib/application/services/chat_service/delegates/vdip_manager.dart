@@ -4,13 +4,13 @@ import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 
 import '../../../../infrastructure/extensions/vrc_extensions.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachment.dart';
+import '../../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../../../../infrastructure/providers/relationship_sdk_provider.dart';
 import '../../connections_service/connections_service.dart';
 import '../../identities_service/identities_service.dart';
 import '../../vrc_service/vrc_service.dart';
@@ -94,26 +94,26 @@ class VdipManager {
     }
     final (:channel, :otherPartyDid) = resolved;
 
-    final relationshipSdk = await _ref.read(relationshipSdkProvider.future);
+    final credentialsSdk = await _ref.read(credentialsSdkProvider.future);
     _isConnectionInitiator = channel.isConnectionInitiator;
 
-    _vrcRequestSubscription = relationshipSdk.receivedVrcRequests
+    _vrcRequestSubscription = credentialsSdk.receivedVrcRequests
         .where((request) => request.senderDid == otherPartyDid)
         .listen((request) {
           // Clear the pending cache: this live delivery supersedes any cached
           // event, preventing a double-handle on the next session open.
-          relationshipSdk.consumePendingVrcRequest(otherPartyDid);
+          credentialsSdk.consumePendingVrcRequest(otherPartyDid);
           unawaited(
-            _handleReceivedVrcRequest(request, channel, relationshipSdk),
+            _handleReceivedVrcRequest(request, channel, credentialsSdk),
           );
         });
 
-    _vrcSubscription = relationshipSdk.receivedVrcs
+    _vrcSubscription = credentialsSdk.receivedVrcs
         .where((receivedVrc) => receivedVrc.senderDid == otherPartyDid)
         .listen((receivedVrc) {
-          relationshipSdk.consumePendingVrc(otherPartyDid);
+          credentialsSdk.consumePendingVrc(otherPartyDid);
           unawaited(
-            _handleReceivedVrc(receivedVrc.vcBlob, relationshipSdk, channel),
+            _handleReceivedVrc(receivedVrc.vcBlob, credentialsSdk, channel),
           );
         });
   }
@@ -131,18 +131,18 @@ class VdipManager {
     }
     final (:channel, :otherPartyDid) = resolved;
 
-    final relationshipSdk = await _ref.read(relationshipSdkProvider.future);
+    final credentialsSdk = await _ref.read(credentialsSdkProvider.future);
 
-    final pendingRequest = relationshipSdk.consumePendingVrcRequest(
+    final pendingRequest = credentialsSdk.consumePendingVrcRequest(
       otherPartyDid,
     );
     if (pendingRequest != null) {
-      await _handleReceivedVrcRequest(pendingRequest, channel, relationshipSdk);
+      await _handleReceivedVrcRequest(pendingRequest, channel, credentialsSdk);
     }
 
-    final pendingVrc = relationshipSdk.consumePendingVrc(otherPartyDid);
+    final pendingVrc = credentialsSdk.consumePendingVrc(otherPartyDid);
     if (pendingVrc != null) {
-      await _handleReceivedVrc(pendingVrc.vcBlob, relationshipSdk, channel);
+      await _handleReceivedVrc(pendingVrc.vcBlob, credentialsSdk, channel);
     }
   }
 
@@ -153,10 +153,10 @@ class VdipManager {
   Future<void> _handleReceivedVrcRequest(
     VrcRequest request,
     Channel channel,
-    MeetingPlaceRelationshipSDK relationshipSdk,
+    MeetingPlaceCredentialsSDK credentialsSdk,
   ) async {
     final messages = _getMessages();
-    final outcome = await relationshipSdk.handleReceivedVrcRequest(
+    final outcome = await credentialsSdk.handleReceivedVrcRequest(
       permanentChannelDid: _otherPartyPermanentDid,
       request: request,
       hasVrcExchangeInitiated: messages.hasVrcExchangeInitiated,
@@ -208,12 +208,12 @@ class VdipManager {
   /// the outgoing card to guarantee deterministic display order.
   Future<void> _handleReceivedVrc(
     String vcBlob,
-    MeetingPlaceRelationshipSDK relationshipSdk,
+    MeetingPlaceCredentialsSDK credentialsSdk,
     Channel channel,
   ) async {
     final messages = _getMessages();
 
-    final outcome = await relationshipSdk.handleReceivedVrc(
+    final outcome = await credentialsSdk.handleReceivedVrc(
       permanentChannelDid: _otherPartyPermanentDid,
       vcBlob: vcBlob,
       exchangeState: VrcExchangeState(

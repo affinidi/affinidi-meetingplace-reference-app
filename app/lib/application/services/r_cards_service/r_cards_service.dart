@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cross_file/cross_file.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../infrastructure/providers/relationship_sdk_provider.dart';
+import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 
 part 'r_cards_service.g.dart';
 
@@ -18,7 +18,7 @@ part 'r_cards_service.g.dart';
 ///
 /// Responsibilities:
 /// - Exposes all stored [RCard]s as live state for the UI.
-/// - Delegates all persistence operations to [MeetingPlaceRelationshipSDK]
+/// - Delegates all persistence operations to [MeetingPlaceCredentialsSDK]
 ///   so consumers only need one dependency for the full R-Card feature.
 @Riverpod(keepAlive: true)
 class RCardsService extends _$RCardsService {
@@ -40,7 +40,7 @@ class RCardsService extends _$RCardsService {
   }
 
   Future<void> _startWatching() async {
-    final sdk = await ref.read(relationshipSdkProvider.future);
+    final sdk = await ref.read(credentialsSdkProvider.future);
 
     await _watchSubscription?.cancel();
     _watchSubscription = sdk.watchReceivedRCards().listen(
@@ -57,7 +57,7 @@ class RCardsService extends _$RCardsService {
   }
 
   Future<XFile> exportAllAsVcf() async {
-    final sdk = await ref.read(relationshipSdkProvider.future);
+    final sdk = await ref.read(credentialsSdkProvider.future);
     final cards = await sdk.listReceivedRCards();
 
     final blocks = cards.map(_toVCard).whereType<String>().join();
@@ -72,12 +72,12 @@ class RCardsService extends _$RCardsService {
   }
 
   Future<void> deleteBySubjectDid(String subjectDid) async {
-    final sdk = await ref.read(relationshipSdkProvider.future);
+    final sdk = await ref.read(credentialsSdkProvider.future);
     await sdk.deleteReceivedRCard(subjectDid);
   }
 
   Future<void> updateNotes(String subjectDid, String? notes) async {
-    final sdk = await ref.read(relationshipSdkProvider.future);
+    final sdk = await ref.read(credentialsSdkProvider.future);
     await sdk.updateReceivedRCardNotes(subjectDid, notes);
   }
 

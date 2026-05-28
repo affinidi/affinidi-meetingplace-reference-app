@@ -12,7 +12,7 @@ part of 'r_card_chat_notifier_service.dart';
 /// DIDComm channel-inauguration (OOB) path.
 ///
 /// These R-Cards arrive on
-/// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+/// [MeetingPlaceCredentialsSDK.receivedRCardsOnChannel] carrying the
 /// originating channel. When detected, this service persists an R-Card
 /// attachment message in the relevant chat so users see the
 /// "R-Cards have been exchanged." notice when they open the conversation.
@@ -27,7 +27,7 @@ final rCardChatNotifierServiceProvider = RCardChatNotifierServiceProvider._();
 /// DIDComm channel-inauguration (OOB) path.
 ///
 /// These R-Cards arrive on
-/// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+/// [MeetingPlaceCredentialsSDK.receivedRCardsOnChannel] carrying the
 /// originating channel. When detected, this service persists an R-Card
 /// attachment message in the relevant chat so users see the
 /// "R-Cards have been exchanged." notice when they open the conversation.
@@ -40,7 +40,7 @@ final class RCardChatNotifierServiceProvider
   /// DIDComm channel-inauguration (OOB) path.
   ///
   /// These R-Cards arrive on
-  /// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+  /// [MeetingPlaceCredentialsSDK.receivedRCardsOnChannel] carrying the
   /// originating channel. When detected, this service persists an R-Card
   /// attachment message in the relevant chat so users see the
   /// "R-Cards have been exchanged." notice when they open the conversation.
@@ -75,13 +75,13 @@ final class RCardChatNotifierServiceProvider
 }
 
 String _$rCardChatNotifierServiceHash() =>
-    r'f963421a1531d9eff39e8672d00dc753e7a10d53';
+    r'073279be13f3f3d5547e7c4dfb5c7b44c6213321';
 
 /// Global service that creates chat messages for R-Cards delivered via the
 /// DIDComm channel-inauguration (OOB) path.
 ///
 /// These R-Cards arrive on
-/// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+/// [MeetingPlaceCredentialsSDK.receivedRCardsOnChannel] carrying the
 /// originating channel. When detected, this service persists an R-Card
 /// attachment message in the relevant chat so users see the
 /// "R-Cards have been exchanged." notice when they open the conversation.

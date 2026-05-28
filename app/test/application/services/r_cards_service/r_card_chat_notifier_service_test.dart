@@ -2,37 +2,37 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/r_cards_service/r_card_chat_notifier_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_repository_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/credentials_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/relationship_sdk_provider.dart';
 
 import '../../../fakes/fake_channels.dart';
 import '../../../fakes/fake_chat_repository.dart';
 import '../../../fakes/fake_contacts_service.dart';
+import '../../../fakes/fake_credentials_sdk.dart';
 import '../../../fakes/fake_r_card_repository.dart';
-import '../../../fakes/fake_relationship_sdk.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
 
   group('RCardChatNotifierService — group channel guard', () {
-    late FakeRelationshipSdk fakeRelationshipSdk;
+    late FakeCredentialsSdk fakeCredentialsSdk;
     late FakeInMemoryChatRepository fakeChatRepo;
     late ProviderContainer container;
 
     setUp(() async {
-      fakeRelationshipSdk = FakeRelationshipSdk();
+      fakeCredentialsSdk = FakeCredentialsSdk();
       fakeChatRepo = FakeInMemoryChatRepository();
 
       container = ProviderContainer(
         overrides: [
-          relationshipSdkProvider.overrideWith(
-            (ref) async => fakeRelationshipSdk,
+          credentialsSdkProvider.overrideWith(
+            (ref) async => fakeCredentialsSdk,
           ),
           chatRepositoryProvider.overrideWith((ref) async => fakeChatRepo),
           rCardsRepositoryProvider.overrideWith(
@@ -49,7 +49,7 @@ void main() {
 
     tearDown(() async {
       container.dispose();
-      await fakeRelationshipSdk.close();
+      await fakeCredentialsSdk.close();
     });
 
     test(
@@ -64,7 +64,7 @@ void main() {
           receivedAt: DateTime(2024),
         );
 
-        fakeRelationshipSdk.emitOnChannel(
+        fakeCredentialsSdk.emitOnChannel(
           ChannelRCardEvent(channel: FakeChannels.groupChannel, rCard: rCard),
         );
         await Future<void>.delayed(Duration.zero);
@@ -85,7 +85,7 @@ void main() {
           receivedAt: DateTime(2024),
         );
 
-        fakeRelationshipSdk.emitOnChannel(
+        fakeCredentialsSdk.emitOnChannel(
           ChannelRCardEvent(
             channel: FakeChannels.individualChannel,
             rCard: rCard,

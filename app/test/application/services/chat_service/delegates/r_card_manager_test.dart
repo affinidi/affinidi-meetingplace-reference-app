@@ -5,21 +5,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/delegates/r_card_manager.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_repository_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/credentials_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/relationship_sdk_provider.dart';
 
 import '../../../../fakes/fake_chat_repository.dart';
 import '../../../../fakes/fake_chat_sdk.dart';
+import '../../../../fakes/fake_credentials_sdk.dart';
 import '../../../../fakes/fake_identities.dart';
 import '../../../../fakes/fake_meeting_place_sdk.dart';
 import '../../../../fakes/fake_r_card_repository.dart';
-import '../../../../fakes/fake_relationship_sdk.dart';
 import '../../../../fakes/fake_vrc_repository.dart';
 
 final _refProvider = Provider<Ref>((ref) => ref);
@@ -57,7 +57,7 @@ void main() {
 
     late ProviderContainer container;
     late FakeMeetingPlaceSDK fakeCoreSdk;
-    late StubRCardRelationshipSdk stub;
+    late StubRCardCredentialsSdk stub;
     late FakeChatSdk fakeChatSdk;
     late FakeInMemoryChatRepository fakeRepo;
     late RCardManager manager;
@@ -85,7 +85,7 @@ void main() {
         },
       );
 
-      stub = StubRCardRelationshipSdk(
+      stub = StubRCardCredentialsSdk(
         coreSDK: fakeCoreSdk,
         rCardRepository: FakeNoOpRCardRepository(),
         vrcRepository: FakeNoOpVrcRepository(),
@@ -94,7 +94,7 @@ void main() {
       container = ProviderContainer(
         overrides: [
           meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
-          relationshipSdkProvider.overrideWith((ref) async => stub),
+          credentialsSdkProvider.overrideWith((ref) async => stub),
           chatRepositoryProvider.overrideWith((ref) async => fakeRepo),
           identitiesServiceProvider.overrideWith(
             () => _FakeIdentitiesService(
@@ -182,7 +182,7 @@ void main() {
           meetingPlaceSdkProvider.overrideWith(
             (ref) async => FakeMeetingPlaceSDK(channels: {}),
           ),
-          relationshipSdkProvider.overrideWith((ref) async => stub),
+          credentialsSdkProvider.overrideWith((ref) async => stub),
           chatRepositoryProvider.overrideWith((ref) async => fakeRepo),
           identitiesServiceProvider.overrideWith(
             () => _FakeIdentitiesService(IdentitiesServiceState()),
@@ -219,7 +219,7 @@ void main() {
           meetingPlaceSdkProvider.overrideWith(
             (ref) async => FakeMeetingPlaceSDK(channels: {}),
           ),
-          relationshipSdkProvider.overrideWith((ref) async => stub),
+          credentialsSdkProvider.overrideWith((ref) async => stub),
           chatRepositoryProvider.overrideWith((ref) async => fakeRepo),
           identitiesServiceProvider.overrideWith(
             () => _FakeIdentitiesService(IdentitiesServiceState()),
@@ -277,7 +277,7 @@ void main() {
             meetingPlaceSdkProvider.overrideWith(
               (ref) async => FakeMeetingPlaceSDK(channels: {}),
             ),
-            relationshipSdkProvider.overrideWith((ref) async => stub),
+            credentialsSdkProvider.overrideWith((ref) async => stub),
             chatRepositoryProvider.overrideWith((ref) async => fakeRepo),
             identitiesServiceProvider.overrideWith(
               () => _FakeIdentitiesService(IdentitiesServiceState()),
@@ -335,7 +335,7 @@ void main() {
                 },
               ),
             ),
-            relationshipSdkProvider.overrideWith((ref) async => stub),
+            credentialsSdkProvider.overrideWith((ref) async => stub),
             chatRepositoryProvider.overrideWith((ref) async => fakeRepo),
             identitiesServiceProvider.overrideWith(
               () => _FakeIdentitiesService(IdentitiesServiceState()),

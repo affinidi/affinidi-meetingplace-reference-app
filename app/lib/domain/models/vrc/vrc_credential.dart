@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart'
-    show RelationshipCredentialConstants, VrcConstants;
+import 'package:meeting_place_credentials/meeting_place_credentials.dart'
+    show CredentialsSDKConstants, VrcConstants;
 import 'package:ssi/ssi.dart';
 
 import 'vrc_credential_subject.dart';
@@ -40,9 +40,7 @@ extension ParsedVerifiableCredentialVrcExtension on ParsedVerifiableCredential {
   }
 
   bool get isCredentialVrc {
-    return type.contains(
-          RelationshipCredentialConstants.typeVerifiableCredential,
-        ) &&
+    return type.contains(CredentialsSDKConstants.typeVerifiableCredential) &&
         type.contains(VrcConstants.typeRelationshipCredential);
   }
 }

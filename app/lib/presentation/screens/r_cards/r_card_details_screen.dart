@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
@@ -304,9 +304,8 @@ class _RCardDetailsContent extends ConsumerWidget {
 
     final cacheManager = ref.read(cacheManagerProvider);
 
-    final contact = ref
-        .read(contactsServiceProvider)
-        .getContactByChannelDid(card.issuerDid);
+    final contactsService = ref.read(contactsServiceProvider);
+    final contact = contactsService.getContactByChannelDid(card.issuerDid);
 
     Future<void> openUrl(String url) async {
       await Clipboard.setData(ClipboardData(text: url));

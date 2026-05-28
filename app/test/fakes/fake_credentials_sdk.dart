@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/delegates/vdip_manager.dart'
     show VdipManager;
 
@@ -10,8 +10,8 @@ import 'fake_meeting_place_sdk.dart';
 import 'fake_r_card_repository.dart';
 import 'fake_vrc_repository.dart';
 
-class StubRelationshipSdk extends MeetingPlaceRelationshipSDK {
-  StubRelationshipSdk({
+class StubCredentialsSdk extends MeetingPlaceCredentialsSDK {
+  StubCredentialsSdk({
     required super.coreSDK,
     required super.rCardRepository,
     required super.vrcRepository,
@@ -28,12 +28,12 @@ class StubRelationshipSdk extends MeetingPlaceRelationshipSDK {
   }
 }
 
-/// A controllable [MeetingPlaceRelationshipSDK] stub for [VdipManager] tests.
+/// A controllable [MeetingPlaceCredentialsSDK] stub for [VdipManager] tests.
 /// Supports broadcasting events via [emitRequest]/[emitVrc] and configuring
 /// the processing results returned by [handleReceivedVrcRequest] and
 /// [handleReceivedVrc].
-class StubVdipRelationshipSdk extends MeetingPlaceRelationshipSDK {
-  StubVdipRelationshipSdk({
+class StubVdipCredentialsSdk extends MeetingPlaceCredentialsSDK {
+  StubVdipCredentialsSdk({
     required super.coreSDK,
     required super.rCardRepository,
     required super.vrcRepository,
@@ -94,15 +94,15 @@ class StubVdipRelationshipSdk extends MeetingPlaceRelationshipSDK {
   Future<void> dispose() async {
     await _requestCtrl.close();
     await _vrcCtrl.close();
-    await closeRelationshipStreams();
+    await closeCredentialStreams();
   }
 }
 
-/// A controllable [MeetingPlaceRelationshipSDK] stub for RCardManager tests.
+/// A controllable [MeetingPlaceCredentialsSDK] stub for RCardManager tests.
 /// Supports broadcasting events via [emitRCard] and configuring the [RCard]
 /// returned by [sendRCard].
-class StubRCardRelationshipSdk extends MeetingPlaceRelationshipSDK {
-  StubRCardRelationshipSdk({
+class StubRCardCredentialsSdk extends MeetingPlaceCredentialsSDK {
+  StubRCardCredentialsSdk({
     required super.coreSDK,
     required super.rCardRepository,
     required super.vrcRepository,
@@ -137,12 +137,12 @@ class StubRCardRelationshipSdk extends MeetingPlaceRelationshipSDK {
 
   Future<void> dispose() async {
     await _rCardsCtrl.close();
-    await closeRelationshipStreams();
+    await closeCredentialStreams();
   }
 }
 
-class FakeRelationshipSdk extends MeetingPlaceRelationshipSDK {
-  FakeRelationshipSdk()
+class FakeCredentialsSdk extends MeetingPlaceCredentialsSDK {
+  FakeCredentialsSdk()
     : super(
         coreSDK: FakeMeetingPlaceSDK(),
         rCardRepository: FakeNoOpRCardRepository(),
@@ -165,6 +165,6 @@ class FakeRelationshipSdk extends MeetingPlaceRelationshipSDK {
   Future<void> close() async {
     await _controller.close();
     await _channelController.close();
-    await closeRelationshipStreams();
+    await closeCredentialStreams();
   }
 }

@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_repository_provider.dart';
-import '../../../infrastructure/providers/relationship_sdk_provider.dart';
+import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../chat_service/chat_session_service.dart' show ChatSessionService;
 import '../contacts_service/contacts_service.dart';
 
@@ -19,7 +19,7 @@ part 'r_card_chat_notifier_service.g.dart';
 /// DIDComm channel-inauguration (OOB) path.
 ///
 /// These R-Cards arrive on
-/// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+/// [MeetingPlaceCredentialsSDK.receivedRCardsOnChannel] carrying the
 /// originating channel. When detected, this service persists an R-Card
 /// attachment message in the relevant chat so users see the
 /// "R-Cards have been exchanged." notice when they open the conversation.
@@ -42,7 +42,7 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
 
   Future<void> _init() async {
     try {
-      final sdk = await ref.read(relationshipSdkProvider.future);
+      final sdk = await ref.read(credentialsSdkProvider.future);
       final chatRepo = await ref.read(chatRepositoryProvider.future);
 
       _sub = sdk.receivedRCardsOnChannel.listen(

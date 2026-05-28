@@ -56,7 +56,7 @@ final class VrcServiceProvider
   }
 }
 
-String _$vrcServiceHash() => r'c97796770d277dbcf29533ede40a7c06c4200f1d';
+String _$vrcServiceHash() => r'4fc1d3bd8ca0a86f5d2b63ef4b1b37e8a30f8ed1';
 
 /// Service that manages Verifiable Relationship Credentials (VRC).
 ///

@@ -14,7 +14,7 @@ import '../../application/services/r_cards_service/r_card_chat_notifier_service.
 import '../../application/services/settings_service/settings_service.dart';
 import '../../application/services/vrc_service/vrc_service.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
-import '../../infrastructure/providers/relationship_sdk_provider.dart';
+import '../../infrastructure/providers/credentials_sdk_provider.dart';
 
 part 'app_controller.g.dart';
 
@@ -28,8 +28,8 @@ class AppController extends _$AppController with WidgetsBindingObserver {
       authenticationServiceProvider.select((state) => state.isAuthenticated),
       (prev, next) async {
         if (!next) {
-          final sdk = ref.read(relationshipSdkProvider).asData?.value;
-          await sdk?.closeRelationshipStreams();
+          final sdk = ref.read(credentialsSdkProvider).asData?.value;
+          await sdk?.closeCredentialStreams();
           return;
         }
         if (next) {

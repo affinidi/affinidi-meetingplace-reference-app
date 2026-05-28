@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
-import 'package:meeting_place_relationship/meeting_place_relationship.dart'
+import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -28,8 +28,8 @@ import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachm
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
+import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../../../infrastructure/providers/relationship_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
@@ -773,12 +773,12 @@ class ChatScreenController extends _$ChatScreenController
     required VrcExchangeRole role,
   }) async {
     try {
-      final relationshipSdk = await ref.read(relationshipSdkProvider.future);
+      final credentialsSdk = await ref.read(credentialsSdkProvider.future);
 
       if (role == VrcExchangeRole.initiator) {
         final channelDid = state.contact?.channelDid;
         if (channelDid == null) return;
-        await relationshipSdk.requestVrcExchange(
+        await credentialsSdk.requestVrcExchange(
           channelDid: channelDid,
           identityDid: identity.did,
           identityName: identity.card.displayName,
@@ -799,7 +799,7 @@ class ChatScreenController extends _$ChatScreenController
         final peerIdentityName = state.vrcRequestIdentityName ?? '';
         final channelDid = state.contact?.channelDid;
         if (channelDid == null) return;
-        final sentVcBlob = await relationshipSdk.sendVrc(
+        final sentVcBlob = await credentialsSdk.sendVrc(
           channelDid: channelDid,
           issuerDid: identity.did,
           issuerName: identity.card.displayName,

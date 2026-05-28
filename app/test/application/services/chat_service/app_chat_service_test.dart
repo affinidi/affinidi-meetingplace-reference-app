@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
@@ -18,9 +18,9 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/credentials_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/relationship_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
@@ -32,12 +32,12 @@ import '../../../fakes/fake_chat_repository.dart';
 import '../../../fakes/fake_chat_sdk.dart';
 import '../../../fakes/fake_contacts.dart';
 import '../../../fakes/fake_contacts_service.dart';
+import '../../../fakes/fake_credentials_sdk.dart';
 import '../../../fakes/fake_environment.dart';
 import '../../../fakes/fake_groups.dart';
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_meeting_place_sdk.dart';
 import '../../../fakes/fake_r_card_repository.dart';
-import '../../../fakes/fake_relationship_sdk.dart';
 import '../../../fakes/fake_secure_storage.dart';
 import '../../../fakes/fake_vrc_repository.dart';
 
@@ -834,11 +834,11 @@ void main() {
           chatRepositoryProvider.overrideWith(
             (ref) async => FakeNoOpChatRepository(),
           ),
-          relationshipSdkProvider.overrideWith((ref) async {
+          credentialsSdkProvider.overrideWith((ref) async {
             final coreSDK = await ref.read(meetingPlaceSdkProvider.future);
             final rCardRepo = await ref.read(rCardsRepositoryProvider.future);
             final vrcRepo = await ref.read(vrcRepositoryProvider.future);
-            return StubRelationshipSdk(
+            return StubCredentialsSdk(
               coreSDK: coreSDK,
               rCardRepository: rCardRepo,
               vrcRepository: vrcRepo,

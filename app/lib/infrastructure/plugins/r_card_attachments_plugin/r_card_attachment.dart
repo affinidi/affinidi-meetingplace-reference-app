@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:clock/clock.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:uuid/uuid.dart';
 
