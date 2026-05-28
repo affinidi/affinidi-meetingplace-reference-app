@@ -145,7 +145,7 @@ void main() {
 
     test('ends session and cancels subscription on pauseChat', () async {
       await chatService.startChatSession();
-      chatService.pauseChat();
+      await chatService.pauseChat();
       expect(fakeChatSdk.sessionEnded, true);
     });
 
@@ -195,8 +195,8 @@ void main() {
 
     test('pauseChat can be called multiple times safely', () async {
       await chatService.startChatSession();
-      chatService.pauseChat();
-      chatService.pauseChat();
+      await chatService.pauseChat();
+      await chatService.pauseChat();
       expect(fakeChatSdk.sessionEnded, true);
     });
 
