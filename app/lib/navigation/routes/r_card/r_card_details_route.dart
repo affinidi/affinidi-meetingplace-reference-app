@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class RCardDetailsRoute extends GoRouteData with _$RCardDetailsRoute {
+class RCardDetailsRoute extends GoRouteData with $RCardDetailsRoute {
   const RCardDetailsRoute({required this.subjectDid});
 
   final String subjectDid;

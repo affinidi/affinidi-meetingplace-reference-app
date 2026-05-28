@@ -110,29 +110,23 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       navigatorKey: RCardsBranchData.$navigatorKey,
       restorationScopeId: RCardsBranchData.$restorationScopeId,
-
       routes: [
         GoRouteData.$route(
           path: '/r-cards',
           name: 'rCards',
-
-          factory: _$RCardsRoute._fromState,
+          factory: $RCardsRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: ':subjectDid/details',
               name: 'rCardDetails',
-
               parentNavigatorKey: RCardDetailsRoute.$parentNavigatorKey,
-
-              factory: _$RCardDetailsRoute._fromState,
+              factory: $RCardDetailsRoute._fromState,
             ),
             GoRouteData.$route(
               path: ':credentialId/vrc-details',
               name: 'vrcDetails',
-
               parentNavigatorKey: VrcDetailsRoute.$parentNavigatorKey,
-
-              factory: _$VrcDetailsRoute._fromState,
+              factory: $VrcDetailsRoute._fromState,
             ),
           ],
         ),
@@ -447,7 +441,7 @@ mixin $IdentityFormRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$RCardsRoute on GoRouteData {
+mixin $RCardsRoute on GoRouteData {
   static RCardsRoute _fromState(GoRouterState state) => const RCardsRoute();
 
   @override
@@ -467,7 +461,7 @@ mixin _$RCardsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$RCardDetailsRoute on GoRouteData {
+mixin $RCardDetailsRoute on GoRouteData {
   static RCardDetailsRoute _fromState(GoRouterState state) =>
       RCardDetailsRoute(subjectDid: state.pathParameters['subjectDid']!);
 
@@ -492,7 +486,7 @@ mixin _$RCardDetailsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$VrcDetailsRoute on GoRouteData {
+mixin $VrcDetailsRoute on GoRouteData {
   static VrcDetailsRoute _fromState(GoRouterState state) =>
       VrcDetailsRoute(credentialId: state.pathParameters['credentialId']!);
 
@@ -517,7 +511,7 @@ mixin _$VrcDetailsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$SettingsRoute on GoRouteData {
+mixin $SettingsRoute on GoRouteData {
   static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
 
   @override

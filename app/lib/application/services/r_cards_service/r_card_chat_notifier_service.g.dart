@@ -6,6 +6,74 @@ part of 'r_card_chat_notifier_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Global service that creates chat messages for R-Cards delivered via the
+/// DIDComm channel-inauguration (OOB) path.
+///
+/// These R-Cards arrive on
+/// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+/// originating channel. When detected, this service persists an R-Card
+/// attachment message in the relevant chat so users see the
+/// "R-Cards have been exchanged." notice when they open the conversation.
+///
+/// VDIP-path R-Cards (explicit sends) are handled by [ChatSessionService] and
+/// are intentionally NOT processed here.
+
+@ProviderFor(RCardChatNotifierService)
+final rCardChatNotifierServiceProvider = RCardChatNotifierServiceProvider._();
+
+/// Global service that creates chat messages for R-Cards delivered via the
+/// DIDComm channel-inauguration (OOB) path.
+///
+/// These R-Cards arrive on
+/// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+/// originating channel. When detected, this service persists an R-Card
+/// attachment message in the relevant chat so users see the
+/// "R-Cards have been exchanged." notice when they open the conversation.
+///
+/// VDIP-path R-Cards (explicit sends) are handled by [ChatSessionService] and
+/// are intentionally NOT processed here.
+final class RCardChatNotifierServiceProvider
+    extends $NotifierProvider<RCardChatNotifierService, void> {
+  /// Global service that creates chat messages for R-Cards delivered via the
+  /// DIDComm channel-inauguration (OOB) path.
+  ///
+  /// These R-Cards arrive on
+  /// [MeetingPlaceRelationshipSDK.receivedRCardsOnChannel] carrying the
+  /// originating channel. When detected, this service persists an R-Card
+  /// attachment message in the relevant chat so users see the
+  /// "R-Cards have been exchanged." notice when they open the conversation.
+  ///
+  /// VDIP-path R-Cards (explicit sends) are handled by [ChatSessionService] and
+  /// are intentionally NOT processed here.
+  RCardChatNotifierServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'rCardChatNotifierServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$rCardChatNotifierServiceHash();
+
+  @$internal
+  @override
+  RCardChatNotifierService create() => RCardChatNotifierService();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
 String _$rCardChatNotifierServiceHash() =>
     r'f963421a1531d9eff39e8672d00dc753e7a10d53';
 
@@ -20,20 +88,21 @@ String _$rCardChatNotifierServiceHash() =>
 ///
 /// VDIP-path R-Cards (explicit sends) are handled by [ChatSessionService] and
 /// are intentionally NOT processed here.
-///
-/// Copied from [RCardChatNotifierService].
-@ProviderFor(RCardChatNotifierService)
-final rCardChatNotifierServiceProvider =
-    NotifierProvider<RCardChatNotifierService, void>.internal(
-      RCardChatNotifierService.new,
-      name: r'rCardChatNotifierServiceProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$rCardChatNotifierServiceHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$RCardChatNotifierService = Notifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$RCardChatNotifierService extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
@@ -9,9 +10,17 @@ import '../../painting/cached_base64_image.dart';
 import '../../widgets/cards/r_card_header_card.dart';
 import 'r_card_details_screen.dart' show RCardDetailsScreen;
 
+part 'r_cards_deck.g.dart';
+
 /// Provider used to trigger the "return" animation when navigating back
 /// from [RCardDetailsScreen].
-final returningCardProvider = StateProvider<String?>((ref) => null);
+@riverpod
+class ReturningCard extends _$ReturningCard {
+  @override
+  String? build() => null;
+
+  void set(String? value) => state = value;
+}
 
 class RCardsDeck extends ConsumerStatefulWidget {
   const RCardsDeck({
@@ -192,7 +201,7 @@ class _RCardsDeckState extends ConsumerState<RCardsDeck>
       if (!mounted) return;
       _lastReturningCard = null;
       setState(() => _returningIndex = null);
-      ref.read(returningCardProvider.notifier).state = null;
+      ref.read(returningCardProvider.notifier).set(null);
     });
   }
 

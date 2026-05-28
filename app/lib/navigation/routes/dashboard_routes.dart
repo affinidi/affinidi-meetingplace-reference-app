@@ -232,7 +232,7 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
       const SettingsScreen();
 }
 
-class RCardsRoute extends GoRouteData with _$RCardsRoute {
+class RCardsRoute extends GoRouteData with $RCardsRoute {
   const RCardsRoute();
 
   @override

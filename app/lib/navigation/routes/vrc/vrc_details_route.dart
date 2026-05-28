@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class VrcDetailsRoute extends GoRouteData with _$VrcDetailsRoute {
+class VrcDetailsRoute extends GoRouteData with $VrcDetailsRoute {
   const VrcDetailsRoute({required this.credentialId});
 
   final String credentialId;

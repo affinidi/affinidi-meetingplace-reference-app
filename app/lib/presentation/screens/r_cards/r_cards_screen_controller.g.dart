@@ -6,22 +6,58 @@ part of 'r_cards_screen_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(RCardsScreenController)
+final rCardsScreenControllerProvider = RCardsScreenControllerProvider._();
+
+final class RCardsScreenControllerProvider
+    extends $NotifierProvider<RCardsScreenController, RCardsScreenState> {
+  RCardsScreenControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'rCardsScreenControllerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$rCardsScreenControllerHash();
+
+  @$internal
+  @override
+  RCardsScreenController create() => RCardsScreenController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RCardsScreenState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RCardsScreenState>(value),
+    );
+  }
+}
+
 String _$rCardsScreenControllerHash() =>
     r'12d13e9f49c656a544c185060bb003fd6304aea9';
 
-/// See also [RCardsScreenController].
-@ProviderFor(RCardsScreenController)
-final rCardsScreenControllerProvider =
-    NotifierProvider<RCardsScreenController, RCardsScreenState>.internal(
-      RCardsScreenController.new,
-      name: r'rCardsScreenControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$rCardsScreenControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
-
-typedef _$RCardsScreenController = Notifier<RCardsScreenState>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$RCardsScreenController extends $Notifier<RCardsScreenState> {
+  RCardsScreenState build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<RCardsScreenState, RCardsScreenState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<RCardsScreenState, RCardsScreenState>,
+              RCardsScreenState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}

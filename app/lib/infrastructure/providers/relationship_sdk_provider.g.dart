@@ -6,7 +6,20 @@ part of 'relationship_sdk_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$relationshipSdkHash() => r'58aed20a8830106186da02ab0f789c3ef2d44dbb';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
+/// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
+///
+/// Injects the [RCardRepository] from [rCardsRepositoryProvider]
+/// so that every incoming R-Card is automatically persisted in the local
+/// encrypted database.
+///
+/// Keep-alive ensures the relationship SDK is initialized once and shared
+/// across the app lifetime.
+
+@ProviderFor(relationshipSdk)
+final relationshipSdkProvider = RelationshipSdkProvider._();
 
 /// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
 /// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
@@ -17,22 +30,50 @@ String _$relationshipSdkHash() => r'58aed20a8830106186da02ab0f789c3ef2d44dbb';
 ///
 /// Keep-alive ensures the relationship SDK is initialized once and shared
 /// across the app lifetime.
-///
-/// Copied from [relationshipSdk].
-@ProviderFor(relationshipSdk)
-final relationshipSdkProvider =
-    FutureProvider<MeetingPlaceRelationshipSDK>.internal(
-      relationshipSdk,
-      name: r'relationshipSdkProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$relationshipSdkHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RelationshipSdkRef = FutureProviderRef<MeetingPlaceRelationshipSDK>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class RelationshipSdkProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<MeetingPlaceRelationshipSDK>,
+          MeetingPlaceRelationshipSDK,
+          FutureOr<MeetingPlaceRelationshipSDK>
+        >
+    with
+        $FutureModifier<MeetingPlaceRelationshipSDK>,
+        $FutureProvider<MeetingPlaceRelationshipSDK> {
+  /// Provides the `MeetingPlaceRelationshipSDK` instance backed by the
+  /// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
+  ///
+  /// Injects the [RCardRepository] from [rCardsRepositoryProvider]
+  /// so that every incoming R-Card is automatically persisted in the local
+  /// encrypted database.
+  ///
+  /// Keep-alive ensures the relationship SDK is initialized once and shared
+  /// across the app lifetime.
+  RelationshipSdkProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'relationshipSdkProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$relationshipSdkHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<MeetingPlaceRelationshipSDK> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<MeetingPlaceRelationshipSDK> create(Ref ref) {
+    return relationshipSdk(ref);
+  }
+}
+
+String _$relationshipSdkHash() => r'58aed20a8830106186da02ab0f789c3ef2d44dbb';

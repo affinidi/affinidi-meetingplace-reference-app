@@ -6,194 +6,112 @@ part of 'vrc_details_screen_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$vrcDetailsScreenControllerHash() =>
-    r'8d629bef40b7df61443593a41c471d18b463f200';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$VrcDetailsScreenController
-    extends BuildlessAutoDisposeNotifier<VrcDetailsScreenState> {
-  late final String credentialId;
-  late final String? vcBlob;
-
-  VrcDetailsScreenState build(String credentialId, {String? vcBlob});
-}
-
-/// See also [VrcDetailsScreenController].
 @ProviderFor(VrcDetailsScreenController)
-const vrcDetailsScreenControllerProvider = VrcDetailsScreenControllerFamily();
+final vrcDetailsScreenControllerProvider = VrcDetailsScreenControllerFamily._();
 
-/// See also [VrcDetailsScreenController].
-class VrcDetailsScreenControllerFamily extends Family<VrcDetailsScreenState> {
-  /// See also [VrcDetailsScreenController].
-  const VrcDetailsScreenControllerFamily();
-
-  /// See also [VrcDetailsScreenController].
-  VrcDetailsScreenControllerProvider call(
-    String credentialId, {
-    String? vcBlob,
-  }) {
-    return VrcDetailsScreenControllerProvider(credentialId, vcBlob: vcBlob);
-  }
-
-  @override
-  VrcDetailsScreenControllerProvider getProviderOverride(
-    covariant VrcDetailsScreenControllerProvider provider,
-  ) {
-    return call(provider.credentialId, vcBlob: provider.vcBlob);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'vrcDetailsScreenControllerProvider';
-}
-
-/// See also [VrcDetailsScreenController].
-class VrcDetailsScreenControllerProvider
+final class VrcDetailsScreenControllerProvider
     extends
-        AutoDisposeNotifierProviderImpl<
-          VrcDetailsScreenController,
-          VrcDetailsScreenState
-        > {
-  /// See also [VrcDetailsScreenController].
-  VrcDetailsScreenControllerProvider(String credentialId, {String? vcBlob})
-    : this._internal(
-        () => VrcDetailsScreenController()
-          ..credentialId = credentialId
-          ..vcBlob = vcBlob,
-        from: vrcDetailsScreenControllerProvider,
-        name: r'vrcDetailsScreenControllerProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$vrcDetailsScreenControllerHash,
-        dependencies: VrcDetailsScreenControllerFamily._dependencies,
-        allTransitiveDependencies:
-            VrcDetailsScreenControllerFamily._allTransitiveDependencies,
-        credentialId: credentialId,
-        vcBlob: vcBlob,
-      );
-
-  VrcDetailsScreenControllerProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.credentialId,
-    required this.vcBlob,
-  }) : super.internal();
-
-  final String credentialId;
-  final String? vcBlob;
+        $NotifierProvider<VrcDetailsScreenController, VrcDetailsScreenState> {
+  VrcDetailsScreenControllerProvider._({
+    required VrcDetailsScreenControllerFamily super.from,
+    required (String, {String? vcBlob}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'vrcDetailsScreenControllerProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
-  VrcDetailsScreenState runNotifierBuild(
-    covariant VrcDetailsScreenController notifier,
-  ) {
-    return notifier.build(credentialId, vcBlob: vcBlob);
+  String debugGetCreateSourceHash() => _$vrcDetailsScreenControllerHash();
+
+  @override
+  String toString() {
+    return r'vrcDetailsScreenControllerProvider'
+        ''
+        '$argument';
   }
 
+  @$internal
   @override
-  Override overrideWith(VrcDetailsScreenController Function() create) {
-    return ProviderOverride(
+  VrcDetailsScreenController create() => VrcDetailsScreenController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VrcDetailsScreenState value) {
+    return $ProviderOverride(
       origin: this,
-      override: VrcDetailsScreenControllerProvider._internal(
-        () => create()
-          ..credentialId = credentialId
-          ..vcBlob = vcBlob,
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        credentialId: credentialId,
-        vcBlob: vcBlob,
-      ),
+      providerOverride: $SyncValueProvider<VrcDetailsScreenState>(value),
     );
-  }
-
-  @override
-  AutoDisposeNotifierProviderElement<
-    VrcDetailsScreenController,
-    VrcDetailsScreenState
-  >
-  createElement() {
-    return _VrcDetailsScreenControllerProviderElement(this);
   }
 
   @override
   bool operator ==(Object other) {
     return other is VrcDetailsScreenControllerProvider &&
-        other.credentialId == credentialId &&
-        other.vcBlob == vcBlob;
+        other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, credentialId.hashCode);
-    hash = _SystemHash.combine(hash, vcBlob.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin VrcDetailsScreenControllerRef
-    on AutoDisposeNotifierProviderRef<VrcDetailsScreenState> {
-  /// The parameter `credentialId` of this provider.
-  String get credentialId;
+String _$vrcDetailsScreenControllerHash() =>
+    r'8d629bef40b7df61443593a41c471d18b463f200';
 
-  /// The parameter `vcBlob` of this provider.
-  String? get vcBlob;
-}
-
-class _VrcDetailsScreenControllerProviderElement
-    extends
-        AutoDisposeNotifierProviderElement<
+final class VrcDetailsScreenControllerFamily extends $Family
+    with
+        $ClassFamilyOverride<
           VrcDetailsScreenController,
-          VrcDetailsScreenState
-        >
-    with VrcDetailsScreenControllerRef {
-  _VrcDetailsScreenControllerProviderElement(super.provider);
+          VrcDetailsScreenState,
+          VrcDetailsScreenState,
+          VrcDetailsScreenState,
+          (String, {String? vcBlob})
+        > {
+  VrcDetailsScreenControllerFamily._()
+    : super(
+        retry: null,
+        name: r'vrcDetailsScreenControllerProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  VrcDetailsScreenControllerProvider call(
+    String credentialId, {
+    String? vcBlob,
+  }) => VrcDetailsScreenControllerProvider._(
+    argument: (credentialId, vcBlob: vcBlob),
+    from: this,
+  );
 
   @override
-  String get credentialId =>
-      (origin as VrcDetailsScreenControllerProvider).credentialId;
-  @override
-  String? get vcBlob => (origin as VrcDetailsScreenControllerProvider).vcBlob;
+  String toString() => r'vrcDetailsScreenControllerProvider';
 }
 
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+abstract class _$VrcDetailsScreenController
+    extends $Notifier<VrcDetailsScreenState> {
+  late final _$args = ref.$arg as (String, {String? vcBlob});
+  String get credentialId => _$args.$1;
+  String? get vcBlob => _$args.vcBlob;
+
+  VrcDetailsScreenState build(String credentialId, {String? vcBlob});
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<VrcDetailsScreenState, VrcDetailsScreenState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<VrcDetailsScreenState, VrcDetailsScreenState>,
+              VrcDetailsScreenState,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, () => build(_$args.$1, vcBlob: _$args.vcBlob));
+  }
+}

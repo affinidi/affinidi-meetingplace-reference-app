@@ -94,7 +94,7 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
 
         if (currentCard != null) {
           Future(() {
-            ref.read(returningCardProvider.notifier).state = currentCard;
+            ref.read(returningCardProvider.notifier).set(currentCard);
           });
         }
       }
@@ -143,8 +143,9 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
         if (didPop && !useVirtualCard) {
           Future(() {
             if (_currentIndex >= 0 && _currentIndex < displayCards.length) {
-              ref.read(returningCardProvider.notifier).state =
-                  displayCards[_currentIndex].subjectDid;
+              ref
+                  .read(returningCardProvider.notifier)
+                  .set(displayCards[_currentIndex].subjectDid);
             }
           });
         }

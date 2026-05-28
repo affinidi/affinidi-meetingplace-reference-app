@@ -28,7 +28,7 @@ class AppController extends _$AppController with WidgetsBindingObserver {
       authenticationServiceProvider.select((state) => state.isAuthenticated),
       (prev, next) async {
         if (!next) {
-          final sdk = ref.read(relationshipSdkProvider).valueOrNull;
+          final sdk = ref.read(relationshipSdkProvider).asData?.value;
           await sdk?.closeRelationshipStreams();
           return;
         }
