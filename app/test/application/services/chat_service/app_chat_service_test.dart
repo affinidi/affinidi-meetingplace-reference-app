@@ -384,6 +384,63 @@ void main() {
       },
     );
 
+    test('clears membersTyping immediately when a new typing event replaces the'
+        ' active timer', () async {
+      await chatService.startChatSession();
+
+      fakeChatSdk.simulateIncomingContactCardUpdate(
+        contactDid: 'did:key:other-party',
+        card: FakeContacts.individualContact.otherPartyCard!,
+        recipientDid: channelDid,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+
+      // First typing event — timer starts, membersTyping is populated.
+      fakeChatSdk.simulateIncomingTypingActivity(
+        senderDid: 'did:key:other-party',
+        createdTime: DateTime.now(),
+        recipientDid: channelDid,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      expect(serviceState().membersTyping, isNotEmpty);
+
+      // Second typing event — previous timer is cancelled, state must be
+      // cleared synchronously before the new timer populates it again.
+      fakeChatSdk.simulateIncomingTypingActivity(
+        senderDid: 'did:key:other-party',
+        createdTime: DateTime.now(),
+        recipientDid: channelDid,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      expect(serviceState().membersTyping, isNotEmpty);
+    });
+
+    test(
+      'disposing provider while typing timer is active does not throw',
+      () async {
+        await chatService.startChatSession();
+
+        fakeChatSdk.simulateIncomingContactCardUpdate(
+          contactDid: 'did:key:other-party',
+          card: FakeContacts.individualContact.otherPartyCard!,
+          recipientDid: channelDid,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+
+        fakeChatSdk.simulateIncomingTypingActivity(
+          senderDid: 'did:key:other-party',
+          createdTime: DateTime.now(),
+          recipientDid: channelDid,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(serviceState().membersTyping, isNotEmpty);
+
+        // Disposing while the timer is still running must not throw the
+        // Riverpod 3.x "Cannot modify providers inside life-cycles" assertion.
+        expect(() => container.dispose(), returnsNormally);
+      },
+    );
+
     test('updates effect in state when receiving effect', () async {
       await chatService.startChatSession();
 

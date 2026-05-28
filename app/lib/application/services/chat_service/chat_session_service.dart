@@ -526,6 +526,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
 
     _typingTimedAction?.cancel();
+    state = state.copyWith(membersTyping: []);
     _typingTimedAction = TimedAction(
       onRun: (args) {
         var memberNames = <String>[];
@@ -546,10 +547,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           '_onTypingMember onRun: membersTyping updated: $memberNames',
           name: _logKey,
         );
-      },
-      onCancel: () {
-        state = state.copyWith(membersTyping: []);
-        _logger.info('_onTypingMember onCancel', name: _logKey);
       },
       onComplete: () {
         state = state.copyWith(membersTyping: []);
