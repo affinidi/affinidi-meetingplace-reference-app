@@ -1474,6 +1474,22 @@
 	"@livenessCheckDemoModeNote": {
 		"type": "text"
 	},
+	"livenessCheckAwsMode": "Liveness Check (AWS)",
+	"@livenessCheckAwsMode": {
+		"type": "text"
+	},
+	"noLivenessCredentialFoundAws": "No Liveness Credential was found.\n\nTap Generate credential to run AWS Face Liveness, then issue a liveness credential for your ZKP.",
+	"@noLivenessCredentialFoundAws": {
+		"type": "text"
+	},
+	"livenessCheckAwsModeNote": "You will complete an AWS Rekognition Face Liveness check on this device before the credential is issued.",
+	"@livenessCheckAwsModeNote": {
+		"type": "text"
+	},
+	"livenessCheckAwsInProgressNote": "Completing liveness verification and issuing your credential.",
+	"@livenessCheckAwsInProgressNote": {
+		"type": "text"
+	},
 	"livenessCheckInProgress": "Liveness Check in progress...",
 	"@livenessCheckInProgress": {
 		"type": "text"

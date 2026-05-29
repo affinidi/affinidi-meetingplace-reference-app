@@ -2,27 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
-	 <key>UIApplicationSupportsMultipleScenes</key>
-	 <false/>
-	 <key>UISceneConfigurations</key>
-	 <dict>
-	 <key>UIWindowSceneSessionRoleApplication</key>
-	   <array>
-	     <dict>
-	       <key>UISceneClassName</key>
-	       <string>UIWindowScene</string>
-	       <key>UISceneDelegateClassName</key>
-	       <string>FlutterSceneDelegate</string>
-	       <key>UISceneConfigurationName</key>
-	       <string>flutter</string>
-	       <key>UISceneStoryboardFile</key>
-	       <string>Main</string>
-	     </dict>
-	   </array>
-	  </dict>
-	</dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -57,12 +36,33 @@
 	<string>We use the microphone so you can record audio and send it as message attachments.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We use your photo library so you can select images as profile pictures and attach them to your messages.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>remote-notification</string>
 		<string>fetch</string>
+		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

@@ -2254,6 +2254,30 @@ abstract class AppLocalizations {
   /// **'This reference app runs in demo mode and does not perform a real liveness check.'**
   String get livenessCheckDemoModeNote;
 
+  /// No description provided for @livenessCheckAwsMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Check (AWS)'**
+  String get livenessCheckAwsMode;
+
+  /// No description provided for @noLivenessCredentialFoundAws.
+  ///
+  /// In en, this message translates to:
+  /// **'No Liveness Credential was found.\n\nTap Generate credential to run AWS Face Liveness, then issue a liveness credential for your ZKP.'**
+  String get noLivenessCredentialFoundAws;
+
+  /// No description provided for @livenessCheckAwsModeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You will complete an AWS Rekognition Face Liveness check on this device before the credential is issued.'**
+  String get livenessCheckAwsModeNote;
+
+  /// No description provided for @livenessCheckAwsInProgressNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Completing liveness verification and issuing your credential.'**
+  String get livenessCheckAwsInProgressNote;
+
   /// No description provided for @livenessCheckInProgress.
   ///
   /// In en, this message translates to:

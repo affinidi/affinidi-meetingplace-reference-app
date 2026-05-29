@@ -78,6 +78,20 @@ class Environment {
       const bool.fromEnvironment('BIOMETRICS_ENABLED', defaultValue: true);
   bool get zkpEnabled =>
       const bool.fromEnvironment('ZKP_ENABLED', defaultValue: false);
+  bool get awsLivenessDirectEnabled => const bool.fromEnvironment(
+    'AWS_LIVENESS_DIRECT_ENABLED',
+    defaultValue: false,
+  );
+  String get awsRegion => const String.fromEnvironment('AWS_REGION');
+  String get awsIdentityPoolId =>
+      const String.fromEnvironment('AWS_IDENTITY_POOL_ID');
+  double get awsLivenessThreshold {
+    final value = const String.fromEnvironment(
+      'AWS_LIVENESS_THRESHOLD',
+      defaultValue: '80.0',
+    );
+    return double.tryParse(value) ?? 80.0;
+  }
 
   String get appVersionName =>
       const String.fromEnvironment('APP_VERSION_NAME', defaultValue: '');

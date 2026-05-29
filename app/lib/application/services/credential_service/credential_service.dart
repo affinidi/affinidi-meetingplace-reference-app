@@ -1,16 +1,18 @@
 import 'dart:math';
 
-import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
 import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../domain/repositories/liveness_credentials_repository.dart';
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/liveness_credentials_repository_provider.dart';
+import 'aws_amplify_bootstrap.dart';
 import '../zkp_service/zkp_constants.dart';
 import 'credential_service_state.dart';
+import 'liveness_evidence_source.dart';
 
 final credentialServiceProvider =
     StateNotifierProvider<CredentialService, CredentialServiceState>((ref) {
@@ -28,6 +30,23 @@ class LivenessCredentialSessionMissingException implements Exception {
 
   @override
   String toString() => message;
+}
+
+class LivenessEvidenceThresholdNotMetException implements Exception {
+  const LivenessEvidenceThresholdNotMetException({
+    required this.providerId,
+    required this.score,
+    required this.threshold,
+  });
+
+  final String providerId;
+  final double score;
+  final double threshold;
+
+  @override
+  String toString() =>
+      'Liveness evidence did not meet threshold: '
+      '$providerId score=$score threshold=$threshold';
 }
 
 class CredentialService extends StateNotifier<CredentialServiceState> {
@@ -52,10 +71,12 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
   Future<void> issueLivenessCredential({
     required String identityId,
     required String holderDid,
+    LivenessEvidence? evidence,
   }) async {
     await createLivenessCredential(
       identityId: identityId,
       holderDid: holderDid,
+      evidence: evidence,
     );
   }
 
@@ -83,6 +104,7 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
   Future<CredentialCreationResult> createLivenessCredential({
     required String identityId,
     required String holderDid,
+    LivenessEvidence? evidence,
   }) async {
     await ensureInitialized();
     try {
@@ -90,6 +112,26 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
         'Creating liveness credential for identity $identityId',
         name: _logKey,
       );
+
+      final environment = ref.read(environmentProvider);
+      if (environment.awsLivenessDirectEnabled && evidence == null) {
+        throw const AwsLivenessConfigurationException(
+          'Complete AWS Face Liveness before issuing credential.',
+        );
+      }
+
+      final resolvedEvidence =
+          evidence ??
+          await ref
+              .read(livenessEvidenceSourceProvider)
+              .getEvidence(holderDid: holderDid);
+      if (!resolvedEvidence.isLive) {
+        throw LivenessEvidenceThresholdNotMetException(
+          providerId: resolvedEvidence.providerId,
+          score: resolvedEvidence.livenessScore,
+          threshold: resolvedEvidence.livenessThreshold,
+        );
+      }
 
       final crypto = RustEddsaHelperFfi();
 
@@ -106,7 +148,7 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
         privateKeyHex: holderPrivateKeyHex,
       );
 
-      final now = clock.now();
+      final now = resolvedEvidence.checkedAt.toUtc();
       final header = <String, Object?>{
         'version': '1',
         'issued_at': now.millisecondsSinceEpoch ~/ 1000,

@@ -4,6 +4,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/credential_service/credential_service.dart';
 import '../../../application/services/credential_service/credential_service_state.dart';
+import '../../../application/services/credential_service/liveness_evidence_source.dart';
+import '../../../infrastructure/configuration/environment.dart';
+import 'aws_face_liveness_flow_screen.dart';
 import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
@@ -80,6 +83,21 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     final identity = _proofIdentity;
     if (identity == null || identity.did.isEmpty) return;
 
+    final environment = ref.read(environmentProvider);
+    LivenessEvidence? evidence;
+    if (environment.awsLivenessDirectEnabled) {
+      evidence = await Navigator.of(context).push<LivenessEvidence>(
+        MaterialPageRoute(
+          builder: (context) => AwsFaceLivenessFlowScreen(
+            region: environment.awsRegion,
+            identityPoolId: environment.awsIdentityPoolId,
+            threshold: environment.awsLivenessThreshold,
+          ),
+        ),
+      );
+      if (!mounted || evidence == null) return;
+    }
+
     setState(() => _currentStep = _FlowStep.generatingVC);
 
     try {
@@ -88,12 +106,22 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
           .issueLivenessCredential(
             identityId: identity.id,
             holderDid: identity.did,
+            evidence: evidence,
           );
       if (!mounted) return;
       setState(() => _currentStep = _FlowStep.vcGenerated);
-    } catch (_) {
+    } on LivenessEvidenceThresholdNotMetException catch (error) {
       if (!mounted) return;
       setState(() => _currentStep = _FlowStep.vcNotFound);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _currentStep = _FlowStep.vcNotFound);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 
@@ -133,6 +161,9 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
   @override
   Widget build(BuildContext context) {
     final credential = _identityCredential;
+    final useAwsLiveness = ref.watch(
+      environmentProvider.select((env) => env.awsLivenessDirectEnabled),
+    );
 
     final String appBarTitle;
     final VoidCallback? onBack;
@@ -140,7 +171,9 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     switch (_currentStep) {
       case _FlowStep.vcNotFound:
       case _FlowStep.generatingVC:
-        appBarTitle = context.l10n.livenessCheckDemoMode;
+        appBarTitle = useAwsLiveness
+            ? context.l10n.livenessCheckAwsMode
+            : context.l10n.livenessCheckDemoMode;
         onBack = _currentStep == _FlowStep.vcNotFound ? _pauseAndPop : null;
       default:
         appBarTitle = context.l10n.livenessCredentialRequest;
@@ -152,8 +185,11 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
       _FlowStep.vcNotFound => VcNotFoundStepView(
         onCancel: _pauseAndPop,
         onGenerate: _handleGenerateCredential,
+        useAwsLiveness: useAwsLiveness,
       ),
-      _FlowStep.generatingVC => const GeneratingVcStepView(),
+      _FlowStep.generatingVC => GeneratingVcStepView(
+        useAwsLiveness: useAwsLiveness,
+      ),
       _FlowStep.vcGenerated => VcGeneratedStepView(
         identityId: _proofIdentity?.id,
         onDoLater: _pauseAndPop,
@@ -179,6 +215,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
       _FlowStep.foundVC => VcNotFoundStepView(
         onCancel: _pauseAndPop,
         onGenerate: _handleGenerateCredential,
+        useAwsLiveness: useAwsLiveness,
       ),
     };
 

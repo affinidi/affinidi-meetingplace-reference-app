@@ -1518,6 +1518,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'This reference app runs in demo mode and does not perform a real liveness check.';
 
   @override
+  String get livenessCheckAwsMode => 'Liveness Check (AWS)';
+
+  @override
+  String get noLivenessCredentialFoundAws =>
+      'No Liveness Credential was found.\n\nTap Generate credential to run AWS Face Liveness, then issue a liveness credential for your ZKP.';
+
+  @override
+  String get livenessCheckAwsModeNote =>
+      'You will complete an AWS Rekognition Face Liveness check on this device before the credential is issued.';
+
+  @override
+  String get livenessCheckAwsInProgressNote =>
+      'Completing liveness verification and issuing your credential.';
+
+  @override
   String get livenessCheckInProgress => 'Liveness Check in progress...';
 
   @override

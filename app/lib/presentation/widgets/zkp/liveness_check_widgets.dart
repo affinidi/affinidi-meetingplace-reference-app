@@ -99,10 +99,12 @@ class VcNotFoundStepView extends StatelessWidget {
     super.key,
     required this.onCancel,
     required this.onGenerate,
+    this.useAwsLiveness = false,
   });
 
   final VoidCallback onCancel;
   final VoidCallback onGenerate;
+  final bool useAwsLiveness;
 
   @override
   Widget build(BuildContext context) {
@@ -122,14 +124,20 @@ class VcNotFoundStepView extends StatelessWidget {
           ),
           const SizedBox(height: 22),
           Text(
-            context.l10n.noLivenessCredentialFound,
+            useAwsLiveness
+                ? context.l10n.noLivenessCredentialFoundAws
+                : context.l10n.noLivenessCredentialFound,
             style: textTheme.bodyLarge?.copyWith(
               color: colorScheme.onSurface,
               fontWeight: FontWeight.w400,
             ),
           ),
           const SizedBox(height: 24),
-          ZkpInfoBanner(message: context.l10n.livenessCheckDemoModeNote),
+          ZkpInfoBanner(
+            message: useAwsLiveness
+                ? context.l10n.livenessCheckAwsModeNote
+                : context.l10n.livenessCheckDemoModeNote,
+          ),
           const Spacer(),
           Row(
             children: [
@@ -173,7 +181,9 @@ class VcNotFoundStepView extends StatelessWidget {
 }
 
 class GeneratingVcStepView extends StatelessWidget {
-  const GeneratingVcStepView({super.key});
+  const GeneratingVcStepView({super.key, this.useAwsLiveness = false});
+
+  final bool useAwsLiveness;
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +208,11 @@ class GeneratingVcStepView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            ZkpInfoBanner(message: context.l10n.livenessCheckSimulatedFlow),
+            ZkpInfoBanner(
+              message: useAwsLiveness
+                  ? context.l10n.livenessCheckAwsInProgressNote
+                  : context.l10n.livenessCheckSimulatedFlow,
+            ),
             const Spacer(),
           ],
         ),

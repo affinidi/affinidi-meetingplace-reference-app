@@ -1556,6 +1556,21 @@ class AppLocalizationsDe extends AppLocalizations {
       'Diese Referenz-App läuft im Demo-Modus und führt keine echte Liveness-Prüfung durch.';
 
   @override
+  String get livenessCheckAwsMode => 'Liveness-Prüfung (AWS)';
+
+  @override
+  String get noLivenessCredentialFoundAws =>
+      'Keine Liveness-Credential gefunden.\n\nTippen Sie auf Credential generieren, um AWS Face Liveness auszuführen und anschließend eine Liveness-Credential für Ihren ZKP auszustellen.';
+
+  @override
+  String get livenessCheckAwsModeNote =>
+      'Sie führen auf diesem Gerät eine AWS Rekognition Face-Liveness-Prüfung durch, bevor die Credential ausgestellt wird.';
+
+  @override
+  String get livenessCheckAwsInProgressNote =>
+      'Liveness-Prüfung wird abgeschlossen und Ihre Credential wird ausgestellt.';
+
+  @override
   String get livenessCheckInProgress => 'Liveness-Prüfung läuft...';
 
   @override

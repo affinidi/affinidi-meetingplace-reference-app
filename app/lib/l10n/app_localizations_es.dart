@@ -1549,6 +1549,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'Esta aplicación de referencia se ejecuta en modo de demostración y no realiza una verificación de detección de vida real.';
 
   @override
+  String get livenessCheckAwsMode => 'Verificación de detección de vida (AWS)';
+
+  @override
+  String get noLivenessCredentialFoundAws =>
+      'No se encontró ninguna credencial de detección de vida.\n\nPulse Generar credencial para ejecutar AWS Face Liveness y emitir una credencial para su ZKP.';
+
+  @override
+  String get livenessCheckAwsModeNote =>
+      'Completará una verificación AWS Rekognition Face Liveness en este dispositivo antes de emitir la credencial.';
+
+  @override
+  String get livenessCheckAwsInProgressNote =>
+      'Completando la verificación de detección de vida y emitiendo su credencial.';
+
+  @override
   String get livenessCheckInProgress =>
       'Verificación de detección de vida en progreso...';
 
