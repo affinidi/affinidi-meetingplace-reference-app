@@ -2,17 +2,16 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
 import '../../../domain/models/credentials/liveness_credential_record.dart';
+import 'liveness_credential_session.dart';
 
 part 'credential_service_state.freezed.dart';
 
-/// State for credential service
 @Freezed(fromJson: false, toJson: false)
 abstract class CredentialServiceState with _$CredentialServiceState {
   const factory CredentialServiceState({
     @Default({}) Map<String, LivenessCredentialRecord> credentialsByIdentityId,
     @Default({})
     Map<String, SessionCredentialMaterial> sessionMaterialByIdentityId,
-
     CredentialData? latestCredential,
   }) = _CredentialServiceState;
 }
@@ -31,12 +30,11 @@ class SessionCredentialMaterial {
   final String issuerAy;
 }
 
-/// Data class representing a credential and its metadata
 @Freezed(fromJson: false, toJson: false)
 abstract class CredentialData with _$CredentialData {
   const factory CredentialData({
     required String identityId,
-    required SignedVcDocument document,
+    required String w3cCredentialJson,
     required String issuerName,
     required DateTime issuedAt,
     required DateTime expiresAt,
@@ -54,9 +52,12 @@ extension CredentialServiceStateX on CredentialServiceState {
   LivenessCredentialRecord? credentialFor(String identityId) =>
       credentialsByIdentityId[identityId];
 
-  bool hasCredentialFor(String identityId) =>
-      credentialsByIdentityId.containsKey(identityId);
+  bool hasCredentialFor(String identityId) {
+    final record = credentialsByIdentityId[identityId];
+    return record != null && record.hasW3cCredential;
+  }
 
   bool hasSessionMaterialFor(String identityId) =>
-      sessionMaterialByIdentityId.containsKey(identityId);
+      sessionMaterialByIdentityId.containsKey(identityId) ||
+      sessionMaterialFromRecord(credentialsByIdentityId[identityId]) != null;
 }
