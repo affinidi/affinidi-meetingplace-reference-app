@@ -44,7 +44,7 @@ final chatSdkProvider = AutoDisposeFutureProvider.family<ChatSDK, Channel>((
       channel,
       coreSDK: coreSDK,
       chatRepository: await ref.read(chatRepositoryProvider.future),
-      options: MeetingPlaceChatSDKOptions(
+      options: ChatSDKOptions(
         chatActivityExpiry: Duration(
           seconds: environment.chatActivityExpiresInSeconds,
         ),

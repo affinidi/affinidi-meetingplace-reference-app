@@ -96,7 +96,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _presenceTimedAction?.cancel();
       _typingTimedAction?.cancel();
       _messageSubscription?.dispose();
-      unawaited(_chatSDK?.endChatSession());
+      _chatSDK?.endChatSession();
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
 
@@ -303,7 +303,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _chatSDK = null;
     _messageSubscription?.dispose();
     _messageSubscription = null;
-    await sdk?.endChatSession();
+    sdk?.endChatSession();
   }
 
   @override

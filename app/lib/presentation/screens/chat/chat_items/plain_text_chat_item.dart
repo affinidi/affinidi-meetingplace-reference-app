@@ -147,11 +147,7 @@ class _AttachmentWidget extends HookConsumerWidget {
        _attachment = attachment,
        _isFromMe = isFromMe,
        _chatItemColor = chatItemColor,
-       super(key: ValueKey(_attachmentKey(attachment)));
-
-  static String _attachmentKey(chat.ChatAttachment a) =>
-      'chat_attachment_'
-      '${a.id ?? a.data?.hash ?? a.data?.links?.firstOrNull}';
+       super(key: ValueKey(attachmentCacheKey(attachment)));
 
   final String _contactId;
   final chat.ChatAttachment _attachment;
@@ -183,7 +179,7 @@ class _AttachmentWidget extends HookConsumerWidget {
   }
 }
 
-class _HostedMediaWidget extends ConsumerStatefulWidget {
+class _HostedMediaWidget extends ConsumerWidget {
   const _HostedMediaWidget({
     required String contactId,
     required chat.ChatAttachment attachment,
@@ -194,40 +190,12 @@ class _HostedMediaWidget extends ConsumerStatefulWidget {
   final chat.ChatAttachment _attachment;
 
   @override
-  ConsumerState<_HostedMediaWidget> createState() => _HostedMediaWidgetState();
-}
-
-class _HostedMediaWidgetState extends ConsumerState<_HostedMediaWidget> {
-  bool _downloadTriggered = false;
-
-  String get _cacheKey =>
-      widget._attachment.id ??
-      widget._attachment.data?.hash ??
-      widget._attachment.data?.links?.firstOrNull?.toString() ??
-      '';
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _triggerDownload();
-    });
-  }
-
-  void _triggerDownload() {
-    if (_downloadTriggered) return;
-    _downloadTriggered = true;
-
-    final provider = chatScreenControllerProvider(widget._contactId);
-    ref.read(provider.notifier).loadImageAttachment(widget._attachment);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = chatScreenControllerProvider(widget._contactId);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = chatScreenControllerProvider(_contactId);
     final cachedBytes = ref.watch(
-      provider.select((s) => s.attachmentsDataCache[_cacheKey]),
+      provider.select(
+        (s) => s.attachmentsDataCache[attachmentCacheKey(_attachment)],
+      ),
     );
 
     if (cachedBytes == null) {

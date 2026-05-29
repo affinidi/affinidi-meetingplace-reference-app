@@ -45,6 +45,7 @@ class FakeChatSdk implements ChatSDK {
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
+  final Map<String, Uint8List> _downloadedMedia = {};
 
   int get startChatSessionCallCount => _chatSessionStartedCalls;
   int get startedChatPresenceUpdatesCount => _startedChatPresenceUpdates;
@@ -437,22 +438,24 @@ class FakeChatSdk implements ChatSDK {
         base64Data.isNotEmpty &&
         firstAttachment.data?.links?.isEmpty != false) {
       final fileBytes = base64Decode(base64Data);
+      final mediaUri = Uri.parse(
+        'mxc://fake-homeserver/fake-media-${sendMediaMessageCalls.length}',
+      );
       sendMediaMessageCalls.add({
         'fileBytes': fileBytes,
         'contentType': firstAttachment.mediaType ?? 'application/octet-stream',
         'filename': firstAttachment.filename,
         'caption': text,
+        'mxcUri': mediaUri,
       });
+      _downloadedMedia[mediaUri.toString()] = fileBytes;
 
       normalizedAttachments = [
         ChatAttachment(
           mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
           filename: firstAttachment.filename,
           format: AttachmentFormat.hostedMedia.value,
-          data: ChatAttachmentData(
-            links: [Uri.parse('mxc://fake-homeserver/fake-media-id')],
-            base64: base64Data,
-          ),
+          data: ChatAttachmentData(links: [mediaUri], base64: base64Data),
         ),
       ];
     }
@@ -478,11 +481,10 @@ class FakeChatSdk implements ChatSDK {
       return base64Decode(base64Data);
     }
 
-    if (sendMediaMessageCalls.isNotEmpty) {
-      final fileBytes = sendMediaMessageCalls.last['fileBytes'];
-      if (fileBytes is Uint8List) {
-        return fileBytes;
-      }
+    final mediaUri = attachment.data?.links?.firstOrNull?.toString();
+    if (mediaUri != null) {
+      final fileBytes = _downloadedMedia[mediaUri];
+      if (fileBytes != null) return fileBytes;
     }
 
     throw StateError('No media bytes available in FakeChatSdk');
