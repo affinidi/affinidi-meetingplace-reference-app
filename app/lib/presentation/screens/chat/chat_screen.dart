@@ -38,6 +38,7 @@ import '../../widgets/bottom_sheet_menu.dart';
 import '../../widgets/info_banner.dart';
 import '../../widgets/profile_circle_avatar.dart';
 import '../media/image_view_screen/image_view_screen.dart';
+import 'attachment_cache_key.dart';
 import 'chat_activity_progress_indicator.dart';
 import 'chat_items/chat_encryption_notice.dart';
 import 'chat_items/group_deleted_chat_item.dart';

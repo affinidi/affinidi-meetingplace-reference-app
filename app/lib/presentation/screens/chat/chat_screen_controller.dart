@@ -24,6 +24,7 @@ import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
+import 'attachment_cache_key.dart';
 import 'chat_screen_state.dart';
 
 part 'chat_screen_controller.g.dart';
@@ -47,6 +48,7 @@ class ChatScreenController extends _$ChatScreenController
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
+  final Set<String> _attachmentsLoading = {};
 
   late final Map<String, ProviderSubscription<void>>
   _conciergeLoadingControllersSubscriptions = {};
@@ -85,6 +87,7 @@ class ChatScreenController extends _$ChatScreenController
           otherPartyCard: next.otherPartyCard ?? state.otherPartyCard,
           effect: newEffect,
         );
+        _preloadHostedMediaAttachments(next.messages);
       });
     }
 
@@ -633,11 +636,12 @@ class ChatScreenController extends _$ChatScreenController
     messageTextController.clear();
     _sendChatActivityTimedAction?.cancel();
 
-    for (final attachment in messageAttachment) {
+    for (final (index, attachment) in messageAttachment.indexed) {
       final chatAttachment = attachment.toAttachment();
+      final caption = index == 0 ? text : '';
 
       unawaited(
-        _chatService?.sendTextMessage(text, attachments: [chatAttachment]),
+        _chatService?.sendTextMessage(caption, attachments: [chatAttachment]),
       );
     }
   }
@@ -647,16 +651,7 @@ class ChatScreenController extends _$ChatScreenController
   /// Handles both legacy base64-encoded attachments and hosted media
   /// attachments (downloaded from mxc:// URI via the SDK).
   void loadImageAttachment(ChatAttachment attachment) {
-    final firstLink = attachment.data?.links?.firstOrNull;
-    final attachmentId =
-        attachment.id ?? attachment.data?.hash ?? firstLink?.toString();
-    if (attachmentId == null) {
-      _logger.info(
-        'Attachment cannot be displayed as it does not have an id',
-        name: _logKey,
-      );
-      return;
-    }
+    final attachmentId = attachmentCacheKey(attachment);
 
     final attachmentsDataCache = Map.of(state.attachmentsDataCache);
     final existingData = attachmentsDataCache[attachmentId];
@@ -675,13 +670,32 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
+  void _preloadHostedMediaAttachments(List<chat.ChatItem> messages) {
+    for (final message in messages.whereType<chat.Message>()) {
+      for (final attachment in message.attachments) {
+        if (attachment.format == AttachmentFormat.hostedMedia.value) {
+          loadImageAttachment(attachment);
+        }
+      }
+    }
+  }
+
   Future<void> _downloadAndCacheAttachment(
     String cacheKey,
     ChatAttachment attachment,
   ) async {
+    if (_attachmentsLoading.contains(cacheKey)) return;
+    _attachmentsLoading.add(cacheKey);
+
     try {
       final bytes = await _chatService?.downloadMedia(attachment);
-      if (bytes == null) return;
+      if (bytes == null) {
+        _logger.warning(
+          'Chat service unavailable, skipping media download',
+          name: _logKey,
+        );
+        return;
+      }
 
       final attachmentsDataCache = Map.of(state.attachmentsDataCache);
       attachmentsDataCache[cacheKey] = bytes;
@@ -693,6 +707,8 @@ class ChatScreenController extends _$ChatScreenController
         stackTrace: stackTrace,
         name: _logKey,
       );
+    } finally {
+      _attachmentsLoading.remove(cacheKey);
     }
   }
 

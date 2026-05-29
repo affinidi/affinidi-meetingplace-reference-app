@@ -9,11 +9,11 @@ import 'app_logger_provider.dart';
 import 'chat_repository_provider.dart';
 import 'meeting_place_sdk_provider.dart';
 
-/// A provider that initializes and supplies a [ChatSDK] instance
+/// A provider that initializes and supplies a [MeetingPlaceChatSDK] instance
 /// for a given [Channel].
 ///
 /// This provider:
-/// - Sets up the [ChatSDK] with the correct channel, repository,
+/// - Sets up the [MeetingPlaceChatSDK] with the correct channel, repository,
 ///   and identity ContactCard
 /// - Configures chat activity expiration and presence send intervals from
 ///   environment settings
