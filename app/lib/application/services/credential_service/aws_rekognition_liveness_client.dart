@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 
 import 'package:aws_common/aws_common.dart';
@@ -52,6 +54,8 @@ class AwsRekognitionLivenessClient {
     );
 
     final status = response['Status']?.toString();
+    print('[AwsRekognition] GetFaceLivenessSessionResults response: $response');
+    print('[AwsRekognition] Status: $status');
     if (status != 'SUCCEEDED') {
       throw AwsLivenessConfigurationException(
         'Face liveness session did not succeed '
@@ -66,6 +70,8 @@ class AwsRekognitionLivenessClient {
         'Face liveness response did not include Confidence.',
       ),
     };
+
+    print('[AwsRekognition] Confidence score: $score, threshold: $threshold, isLive: ${score >= threshold}');
 
     return LivenessEvidence(
       providerId: _providerId,

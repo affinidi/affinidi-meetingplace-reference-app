@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-androidliveness-dev-a986a-authRole",
+      "UnauthRoleArn": "arn:aws:iam::537124933092:role/amplify-androidliveness-dev-a986a-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::537124933092:role/amplify-androidliveness-dev-a986a-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-androidliveness-dev-a986a-deployment",
+      "UnauthRoleName": "amplify-androidliveness-dev-a986a-unauthRole",
+      "StackName": "amplify-androidliveness-dev-a986a",
+      "StackId": "arn:aws:cloudformation:us-east-1:537124933092:stack/amplify-androidliveness-dev-a986a/60406460-186d-11f0-a6aa-0affecf8f055",
+      "AmplifyAppId": "d285xxwx1i972c"
+    },
+    "categories": {
+      "auth": {
+        "androidliveness3bf238533bf23853": {}
+      }
+    }
+  }
+}

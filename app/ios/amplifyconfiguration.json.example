@@ -8,9 +8,15 @@
         "CredentialsProvider": {
           "CognitoIdentity": {
             "Default": {
-              "PoolId": "us-east-2:REPLACE_WITH_IDENTITY_POOL_ID",
-              "Region": "us-east-2"
+              "PoolId": "us-east-1:REPLACE_WITH_IDENTITY_POOL_ID",
+              "Region": "us-east-1"
             }
+          }
+        },
+        "CognitoIdentity": {
+          "Default": {
+            "PoolId": "us-east-1:REPLACE_WITH_IDENTITY_POOL_ID",
+            "Region": "us-east-1"
           }
         }
       }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2023 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License").
+  ~ You may not use this file except in compliance with the License.
+  ~ A copy of the License is located at
+  ~
+  ~  http://aws.amazon.com/apache2.0
+  ~
+  ~ or in the "license" file accompanying this file. This file is distributed
+  ~ on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+  ~ express or implied. See the License for the specific language governing
+  ~ permissions and limitations under the License.
+  -->
+
+<resources>
+    <string name="amplify_ui_liveness_get_ready_center_face_label">Centralize seu rosto</string>
+    <string name="amplify_ui_liveness_get_ready_photosensitivity_title">Aviso de fotossensibilidade</string>
+    <string name="amplify_ui_liveness_get_ready_photosensitivity_description">Esta verificação exibe cores diferentes. Tenha cuidado se você for sensível à luz.</string>
+    <string name="amplify_ui_liveness_get_ready_a11y_photosensitivity_icon_content_description">Informações sobre fotossensibilidade</string>
+    <string name="amplify_ui_liveness_get_ready_photosensitivity_dialog_title">Aviso de fotossensibilidade</string>
+    <string name="amplify_ui_liveness_get_ready_photosensitivity_dialog_description">Algumas pessoas podem ter crises epilépticas ao serem expostas a luzes coloridas. Tenha cuidado se você ou alguém da sua família tiver epilepsia.</string>
+    <string name="amplify_ui_liveness_get_ready_photosensitivity_dialog_dismiss">Entendi</string>
+    <string name="amplify_ui_liveness_get_ready_begin_check">Iniciar verificação por vídeo</string>
+    <string name="amplify_ui_liveness_challenge_recording_indicator_label">GRAVANDO</string>
+    <string name="amplify_ui_liveness_challenge_instruction_hold_face_during_freshness">Mantenha-se imóvel</string>
+    <string name="amplify_ui_liveness_challenge_instruction_move_face_further">Afaste-se</string>
+    <string name="amplify_ui_liveness_challenge_instruction_move_face_closer">Aproxime-se</string>
+    <string name="amplify_ui_liveness_challenge_instruction_move_face">Posicione o rosto em frente à câmera</string>
+    <string name="amplify_ui_liveness_challenge_instruction_multiple_faces_detected">Apenas um rosto por verificação</string>
+    <string name="amplify_ui_liveness_challenge_connecting">Conectando</string>
+    <string name="amplify_ui_liveness_challenge_verifying">Verificando</string>
+    <string name="amplify_ui_liveness_challenge_a11y_cancel_content_description">Cancelar verificação</string>
+</resources>

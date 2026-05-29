@@ -3,6 +3,8 @@ import Flutter
 import Firebase
 import FirebaseCore
 import FirebaseMessaging
+import Amplify
+import AWSCognitoAuthPlugin
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -10,6 +12,8 @@ import FirebaseMessaging
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        configureAmplifyForFaceLiveness()
+
         NSLog("AppDelegate: Starting Firebase configuration...")
         FirebaseApp.configure()
         NSLog("AppDelegate: Firebase configured successfully")
@@ -27,6 +31,33 @@ import FirebaseMessaging
         }
         
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    private func configureAmplifyForFaceLiveness() {
+        Amplify.Logging.logLevel = .verbose
+
+        do {
+            try Amplify.add(plugin: AWSCognitoAuthPlugin())
+        } catch {
+            NSLog("AppDelegate: Amplify auth plugin add skipped: %@", String(describing: error))
+        }
+
+        do {
+            try Amplify.configure()
+            NSLog("AppDelegate: Amplify configured for Face Liveness")
+        } catch {
+            NSLog("AppDelegate: Amplify configure failed: %@", String(describing: error))
+            return
+        }
+
+        Task {
+            do {
+                let session = try await Amplify.Auth.fetchAuthSession()
+                NSLog("AppDelegate: Amplify auth session ready (isSignedIn=%@)", String(describing: session.isSignedIn))
+            } catch {
+                NSLog("AppDelegate: Amplify auth session failed: %@", String(describing: error))
+            }
+        }
     }
 
     func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {

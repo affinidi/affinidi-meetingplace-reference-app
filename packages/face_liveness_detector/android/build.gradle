@@ -1,0 +1,103 @@
+group = "br.com.webeleven.rekognitionFaceLiveness.rekognition_face_liveness"
+version = "1.0-SNAPSHOT"
+
+buildscript {
+    ext.kotlin_version = "2.2.0"
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.1.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("org.jetbrains.kotlin:compose-compiler-gradle-plugin:$kotlin_version")
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "org.jetbrains.kotlin.plugin.compose"
+
+android {
+    namespace = "br.com.webeleven.rekognitionFaceLiveness.rekognition_face_liveness"
+
+    compileSdk = 35
+
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+        test.java.srcDirs += "src/test/kotlin"
+    }
+
+    defaultConfig {
+        minSdk = 24
+    }
+
+    dependencies {
+        testImplementation("org.jetbrains.kotlin:kotlin-test")
+        testImplementation("org.mockito:mockito-core:5.0.0")
+    }
+
+    testOptions {
+        unitTests.all {
+            useJUnitPlatform()
+
+            testLogging {
+               events "passed", "skipped", "failed", "standardOut", "standardError"
+               outputs.upToDateWhen {false}
+               showStandardStreams = true
+            }
+        }
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+    }
+}
+
+dependencies {
+    // Amplify core dependency
+    implementation 'com.amplifyframework:core:2.33.0'
+
+    // Support for Java 8 features
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+
+    // FaceLivenessDetector dependency
+    implementation 'com.amplifyframework.ui:liveness:1.10.0'
+
+    // Amplify Auth dependency with all required modules
+    implementation 'com.amplifyframework:aws-auth-cognito:2.33.0'
+    implementation 'com.amplifyframework:core-kotlin:2.33.0'
+    implementation 'com.amplifyframework:aws-api:2.33.0'
+    
+    // AWS Android SDK core for BasicSessionCredentials
+    implementation 'com.amazonaws:aws-android-sdk-core:2.69.0'
+    
+    // Coroutines for background processing
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+
+    // Material3 dependency for theming FaceLivenessDetector
+    implementation 'androidx.compose.material3:material3:1.3.1'
+
+    implementation("androidx.appcompat:appcompat:1.4.1")
+}
