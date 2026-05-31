@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show LivenessZkpConciergeChatMapper, LivenessZkpConciergeMessages;
+    show
+        LivenessZkpConciergeChatMapper,
+        LivenessZkpConciergeIds,
+        LivenessZkpConciergeMessages;
 import 'package:meeting_place_relationship/meeting_place_relationship.dart'
     show LivenessProofPayload, LivenessZkpAttachmentParser;
 
@@ -80,11 +83,32 @@ class ChatZkpHandler {
       return;
     }
 
-    unawaited(
-      ref
+    unawaited(() async {
+      final isVerified = await ref
           .read(proofFlowControllerProvider(contact.id).notifier)
-          .onProofReceived(proofPayload),
-    );
+          .onProofReceived(proofPayload);
+
+      if (!isVerified) {
+        logger.info(
+          '  Proof verification failed; badge notice not added',
+          name: logKey,
+        );
+        return;
+      }
+
+      final contactName = contact.card.firstName.isNotEmpty
+          ? contact.card.firstName
+          : contact.card.displayName;
+      final notice = LivenessZkpConciergeMessages.humanZkpProofReceived(
+        chatId: chatItem.chatId,
+        messageId: LivenessZkpConciergeIds.proofReceived(chatItem.messageId),
+        dateCreated: chatItem.dateCreated,
+        contactName: contactName,
+      );
+      onUpsertChatItem(
+        LivenessZkpConciergeChatMapper.toConciergeMessage(notice),
+      );
+    }());
   }
 
   Future<void> insertZkpPausedNotice({String? pausedForNoticeMessageId}) async {

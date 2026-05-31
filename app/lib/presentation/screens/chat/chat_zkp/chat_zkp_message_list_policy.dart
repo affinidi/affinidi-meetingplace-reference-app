@@ -23,14 +23,9 @@ sealed class ChatZkpMessageListPolicy {
   static bool hasVerifiedProof(List<chat.ChatItem> messages) {
     return messages.any(
       (item) =>
-          (item is chat.ConciergeMessage &&
-              item.conciergeType.value ==
-                  LivenessZkpConciergeTypes.humanZkpProofReceived) ||
-          (item is chat.Message &&
-              !item.isFromMe &&
-              item.attachments.any(
-                LivenessZkpAttachmentParser.matchesProofFormat,
-              )),
+          item is chat.ConciergeMessage &&
+          item.conciergeType.value ==
+              LivenessZkpConciergeTypes.humanZkpProofReceived,
     );
   }
 

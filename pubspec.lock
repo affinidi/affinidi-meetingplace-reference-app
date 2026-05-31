@@ -1224,11 +1224,9 @@ packages:
   meeting_place_relationship:
     dependency: "direct overridden"
     description:
-      path: "packages/meeting_place_relationship"
-      ref: cd174094f99bff749f9ce63be7b4438496bda634
-      resolved-ref: cd174094f99bff749f9ce63be7b4438496bda634
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship"
+      relative: true
+    source: path
     version: "0.0.1-dev.1"
   melos:
     dependency: "direct dev"

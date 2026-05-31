@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'dart:math';
 
-import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
 import '../../../domain/models/credentials/liveness_credential_record.dart';
@@ -9,8 +10,14 @@ import '../../../domain/repositories/liveness_credentials_repository.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/liveness_credentials_repository_provider.dart';
+import '../../../infrastructure/providers/liveness_evidence_source_provider.dart';
 import '../zkp_service/zkp_constants.dart';
 import 'credential_service_state.dart';
+import 'liveness_credential_session.dart';
+import 'liveness_errors.dart';
+import 'liveness_issuer_service.dart';
+import 'liveness_vc_zkp_adapter.dart';
+import 'liveness_w3c_credential_validation.dart';
 
 final credentialServiceProvider =
     StateNotifierProvider<CredentialService, CredentialServiceState>((ref) {
@@ -32,11 +39,13 @@ class LivenessCredentialSessionMissingException implements Exception {
 
 class CredentialService extends StateNotifier<CredentialServiceState> {
   CredentialService({required this.ref})
-    : super(const CredentialServiceState()) {
+    : _issuanceService = const LivenessVcIssuanceService(),
+      super(const CredentialServiceState()) {
     _logger = ref.read(appLoggerProvider);
   }
 
   final Ref ref;
+  final LivenessVcIssuanceService _issuanceService;
   late final AppLogger _logger;
   static const _logKey = 'CredentialService';
 
@@ -52,29 +61,30 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
   Future<void> issueLivenessCredential({
     required String identityId,
     required String holderDid,
+    LivenessEvidence? evidence,
   }) async {
     await createLivenessCredential(
       identityId: identityId,
       holderDid: holderDid,
+      evidence: evidence,
     );
   }
 
   Future<CredentialCreationResult> prepareCredentialForProof({
     required String identityId,
-    required String holderDid,
   }) async {
     await ensureInitialized();
-    final session = state.sessionMaterialByIdentityId[identityId];
+    final session = _sessionForIdentity(identityId);
     if (session != null) {
       _logger.info(
-        'Using in-session liveness credential for $identityId',
+        'Using liveness credential session material for $identityId',
         name: _logKey,
       );
       return _resultFromSession(session);
     }
 
     _logger.info(
-      'No in-session VC for $identityId; proof requires explicit re-issue',
+      'No ZKP session material for $identityId; re-issue liveness credential',
       name: _logKey,
     );
     throw const LivenessCredentialSessionMissingException();
@@ -83,6 +93,7 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
   Future<CredentialCreationResult> createLivenessCredential({
     required String identityId,
     required String holderDid,
+    LivenessEvidence? evidence,
   }) async {
     await ensureInitialized();
     try {
@@ -91,60 +102,76 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
         name: _logKey,
       );
 
-      final crypto = RustEddsaHelperFfi();
+      final resolvedEvidence =
+          evidence ??
+          await ref
+              .read(livenessEvidenceSourceProvider)
+              .getEvidence(holderDid: holderDid);
+      if (!resolvedEvidence.isLive) {
+        throw LivenessEvidenceThresholdNotMetException(
+          providerId: resolvedEvidence.providerId,
+          score: resolvedEvidence.livenessScore,
+          threshold: resolvedEvidence.livenessThreshold,
+        );
+      }
+
+      final issuerManager = await ref
+          .read(livenessIssuerServiceProvider)
+          .getIssuerDidManager();
+      final issuerDocument = await issuerManager.getDidDocument();
+      final issuerDid = issuerDocument.id;
+
+      final w3cCredential = await _issuanceService.issue(
+        issuerDid: issuerDid,
+        holderDid: holderDid,
+        issuerDidManager: issuerManager,
+        evidence: resolvedEvidence,
+        validFor: ZkpConstants.vcExpiryDuration,
+      );
+
+      validateIssuedW3cLivenessCredential(
+        credential: w3cCredential,
+        holderDid: holderDid,
+        evidence: resolvedEvidence,
+      );
+
+      final w3cCredentialJson = jsonEncode(w3cCredential.toJson());
 
       final issuerPrivateKeyHex = _randomPrivateKeyHex();
       final holderPrivateKeyHex = _randomPrivateKeyHex();
 
-      final issuerPub = await crypto.signDigest(
-        msgHash: '1',
-        privateKeyHex: issuerPrivateKeyHex,
-      );
-
-      final holderPub = await crypto.signDigest(
-        msgHash: '1',
-        privateKeyHex: holderPrivateKeyHex,
-      );
-
-      final now = clock.now();
-      final header = <String, Object?>{
-        'version': '1',
-        'issued_at': now.millisecondsSinceEpoch ~/ 1000,
-        'expires_at':
-            now.add(ZkpConstants.vcExpiryDuration).millisecondsSinceEpoch ~/
-            1000,
-        'issuer': ZkpConstants.vcIssuerName,
-        'holderAx': holderPub.ax,
-        'holderAy': holderPub.ay,
-        'schema': ZkpConstants.livenessSchemaVersion,
-      };
-
-      final disclosures = <Disclosure>[
-        Disclosure(field: 'did', value: holderDid),
-      ];
-
-      final issuer = VcIssuer(crypto: crypto);
-      final document = await issuer.createSignedDocument(
-        header: header,
-        disclosures: disclosures,
+      final zkpMaterial = await LivenessVcZkpAdapter.buildSignedDocumentFromW3c(
+        w3cCredential: w3cCredential,
+        issuerDid: issuerDid,
+        holderPrivateKeyHex: holderPrivateKeyHex,
         issuerPrivateKeyHex: issuerPrivateKeyHex,
       );
+
+      final now = resolvedEvidence.checkedAt.toUtc();
+      final expiresAt = now.add(ZkpConstants.vcExpiryDuration);
 
       final metadata = LivenessCredentialRecord(
         identityId: identityId,
         issuedToDid: holderDid,
-        issuerName: ZkpConstants.vcIssuerName,
+        issuerName: issuerDid,
+        issuerDid: issuerDid,
         issuedAt: now,
-        expiresAt: now.add(ZkpConstants.vcExpiryDuration),
+        expiresAt: expiresAt,
+        livenessProvider: resolvedEvidence.providerId,
+        w3cCredentialJson: w3cCredentialJson,
+        zkpSignedDocumentJson: jsonEncode(zkpMaterial.document.toJson()),
+        zkpHolderPrivateKeyHex: zkpMaterial.holderPrivateKeyHex,
+        zkpIssuerAx: zkpMaterial.issuerPub.ax,
+        zkpIssuerAy: zkpMaterial.issuerPub.ay,
       );
 
       await _upsertRecord(metadata);
 
       final session = SessionCredentialMaterial(
-        document: document,
-        holderPrivateKeyHex: holderPrivateKeyHex,
-        issuerAx: issuerPub.ax,
-        issuerAy: issuerPub.ay,
+        document: zkpMaterial.document,
+        holderPrivateKeyHex: zkpMaterial.holderPrivateKeyHex,
+        issuerAx: zkpMaterial.issuerPub.ax,
+        issuerAy: zkpMaterial.issuerPub.ay,
       );
 
       state = state.copyWith(
@@ -154,21 +181,25 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
         },
         latestCredential: CredentialData(
           identityId: identityId,
-          document: document,
-          issuerName: ZkpConstants.vcIssuerName,
+          w3cCredentialJson: w3cCredentialJson,
+          issuerName: issuerDid,
           issuedAt: now,
-          expiresAt: now.add(ZkpConstants.vcExpiryDuration),
+          expiresAt: expiresAt,
           holderDid: holderDid,
         ),
       );
 
-      _logger.info('Liveness credential created successfully', name: _logKey);
+      _logger.info(
+        'Liveness W3C credential validated, converted to vc_zkp '
+        'signed document, and stored successfully',
+        name: _logKey,
+      );
 
       return CredentialCreationResult(
-        document: document,
-        issuerPub: issuerPub,
-        holderPub: holderPub,
-        holderPrivateKeyHex: holderPrivateKeyHex,
+        document: zkpMaterial.document,
+        issuerPub: zkpMaterial.issuerPub,
+        holderPub: zkpMaterial.holderPub,
+        holderPrivateKeyHex: zkpMaterial.holderPrivateKeyHex,
       );
     } catch (e, stackTrace) {
       _logger.error(
@@ -193,6 +224,12 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
       sessionMaterialByIdentityId: sessionMaterial,
       latestCredential: clearLatest ? null : state.latestCredential,
     );
+  }
+
+  SessionCredentialMaterial? _sessionForIdentity(String identityId) {
+    final inMemory = state.sessionMaterialByIdentityId[identityId];
+    if (inMemory != null) return inMemory;
+    return sessionMaterialFromRecord(state.credentialsByIdentityId[identityId]);
   }
 
   CredentialCreationResult _resultFromSession(
@@ -238,9 +275,22 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
   Future<void> _reloadFromStorage() async {
     final repository = await _ensureRepository();
     final records = await repository.list();
+    final credentialsByIdentityId = {
+      for (final record in records) record.identityId: record,
+    };
+    final hydratedSessions = <String, SessionCredentialMaterial>{};
+    for (final record in records) {
+      final session = sessionMaterialFromRecord(record);
+      if (session != null) {
+        hydratedSessions[record.identityId] = session;
+      }
+    }
+
     state = state.copyWith(
-      credentialsByIdentityId: {
-        for (final record in records) record.identityId: record,
+      credentialsByIdentityId: credentialsByIdentityId,
+      sessionMaterialByIdentityId: {
+        ...hydratedSessions,
+        ...state.sessionMaterialByIdentityId,
       },
     );
   }
@@ -250,9 +300,9 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
     final bytes = List.generate(32, (_) => random.nextInt(256));
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
+
 }
 
-/// Cryptographic material for one liveness VC, used when generating ZKPs.
 class CredentialCreationResult {
   const CredentialCreationResult({
     required this.document,

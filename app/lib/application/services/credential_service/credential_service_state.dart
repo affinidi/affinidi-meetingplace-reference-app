@@ -36,7 +36,7 @@ class SessionCredentialMaterial {
 abstract class CredentialData with _$CredentialData {
   const factory CredentialData({
     required String identityId,
-    required SignedVcDocument document,
+    required String w3cCredentialJson,
     required String issuerName,
     required DateTime issuedAt,
     required DateTime expiresAt,

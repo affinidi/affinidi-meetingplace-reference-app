@@ -8,6 +8,8 @@ part of 'chat_session_service.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+String _$chatSessionServiceHash() =>
+    r'417eb177fe0f4dbb8a464943526e3cfd050ec15f';
 
 @ProviderFor(ChatSessionService)
 final chatSessionServiceProvider = ChatSessionServiceFamily._();

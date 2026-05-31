@@ -67,7 +67,7 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
 
     final generation = await ref
         .read(zkpServiceProvider)
-        .generateProof(identityId: identity.id, holderDid: identity.did);
+        .generateProof(identityId: identity.id);
 
     switch (generation) {
       case ZkpProofGenerationFailure(:final error):
@@ -99,12 +99,12 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
     }
   }
 
-  Future<void> onProofReceived(LivenessProofPayload payload) async {
+  Future<bool> onProofReceived(LivenessProofPayload payload) async {
     _logger.info('Proof received from contact: $contactId', name: _logKey);
-    await _verifyProof(payload);
+    return _verifyProof(payload);
   }
 
-  Future<void> _verifyProof(LivenessProofPayload payload) async {
+  Future<bool> _verifyProof(LivenessProofPayload payload) async {
     _logger.info(
       'Starting proof verification for contact: $contactId',
       name: _logKey,
@@ -127,5 +127,7 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
       isVerifyingProof: false,
       verificationError: verification.isValid ? null : verification.error,
     );
+
+    return verification.isValid;
   }
 }

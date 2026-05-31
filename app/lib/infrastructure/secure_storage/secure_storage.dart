@@ -295,6 +295,14 @@ class SecureStorage implements KeyRepository, KeyStore {
   Future<void> clearLivenessCredentials() async {
     await _secureStorage.delete(key: 'zkp_liveness_credentials');
   }
+
+  Future<String?> readLivenessIssuerDid() async {
+    return _secureStorage.read(key: 'liveness_issuer_did');
+  }
+
+  Future<void> writeLivenessIssuerDid(String did) async {
+    await _secureStorage.write(key: 'liveness_issuer_did', value: did);
+  }
 }
 
 /// Provides a configured [SecureStorage] instance.
