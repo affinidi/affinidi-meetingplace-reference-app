@@ -148,6 +148,21 @@ class FakeSecureStorage extends SecureStorage {
   }
 
   @override
+  Future<String?> readLivenessCredentials() async {
+    return _storedKeys['zkp_liveness_credentials'];
+  }
+
+  @override
+  Future<void> writeLivenessCredentials(String json) async {
+    _storedKeys['zkp_liveness_credentials'] = json;
+  }
+
+  @override
+  Future<void> clearLivenessCredentials() async {
+    _storedKeys.remove('zkp_liveness_credentials');
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
   }

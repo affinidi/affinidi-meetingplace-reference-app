@@ -31,7 +31,7 @@ class LivenessCredentialDetailsTable extends StatelessWidget {
 
     final rows = [
       CredentialDetailRowData(label: l10n.types, value: _credentialTypes),
-      CredentialDetailRowData(label: l10n.issuer, value: record.issuerName),
+      CredentialDetailRowData(label: l10n.issuer, value: record.displayIssuer),
       CredentialDetailRowData(label: l10n.issuedOn, value: issuedOn),
       CredentialDetailRowData(label: l10n.issuedTo, value: record.issuedToDid),
       CredentialDetailRowData(label: l10n.human, value: 'Yes'),

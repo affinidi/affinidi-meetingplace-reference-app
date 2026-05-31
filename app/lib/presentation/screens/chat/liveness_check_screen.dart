@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:meeting_place_relationship/meeting_place_relationship.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/credential_service/credential_service.dart';
 import '../../../application/services/credential_service/credential_service_state.dart';
+import '../../../application/services/credential_service/liveness_errors.dart';
 import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/providers/liveness_check_provider.dart';
 import '../../widgets/zkp/liveness_check_widgets.dart';
 import '../credentials/credential_details_screen.dart';
 import 'chat_screen_controller.dart';
@@ -80,6 +83,16 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
     final identity = _proofIdentity;
     if (identity == null || identity.did.isEmpty) return;
 
+    final interactiveProvider = ref.read(livenessCheckProviderProvider);
+    LivenessEvidence? evidence;
+    if (interactiveProvider != null) {
+      evidence = await interactiveProvider.collectEvidence(
+        context: context,
+        holderDid: identity.did,
+      );
+      if (!mounted || evidence == null) return;
+    }
+
     setState(() => _currentStep = _FlowStep.generatingVC);
 
     try {
@@ -88,12 +101,22 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
           .issueLivenessCredential(
             identityId: identity.id,
             holderDid: identity.did,
+            evidence: evidence,
           );
       if (!mounted) return;
       setState(() => _currentStep = _FlowStep.vcGenerated);
-    } catch (_) {
+    } on LivenessEvidenceThresholdNotMetException catch (error) {
       if (!mounted) return;
       setState(() => _currentStep = _FlowStep.vcNotFound);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _currentStep = _FlowStep.vcNotFound);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 

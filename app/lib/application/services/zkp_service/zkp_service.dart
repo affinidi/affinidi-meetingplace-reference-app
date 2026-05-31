@@ -57,7 +57,6 @@ class ZkpService {
   /// Generate a Zero-Knowledge Proof from a Liveness VC in the current session
   Future<ZkpProofGenerationResult> generateProof({
     required String identityId,
-    required String holderDid,
   }) async {
     _logger.info('Starting ZKP proof generation', name: _logKey);
 
@@ -69,7 +68,6 @@ class ZkpService {
       final credentialResult = await credentialService
           .prepareCredentialForProof(
             identityId: identityId,
-            holderDid: holderDid,
           );
 
       final document = credentialResult.document;

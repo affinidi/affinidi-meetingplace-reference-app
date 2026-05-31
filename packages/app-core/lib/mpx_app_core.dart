@@ -5,3 +5,4 @@ export '/src/interfaces/attachments/attachment_plugin.dart';
 export 'src/interfaces/attachments/attachment_plugin_icon.dart';
 export 'src/interfaces/attachments/attachment_plugin_pick_result.dart';
 export 'src/interfaces/attachments/message_attachment.dart';
+export 'src/interfaces/liveness/liveness_check_provider.dart';

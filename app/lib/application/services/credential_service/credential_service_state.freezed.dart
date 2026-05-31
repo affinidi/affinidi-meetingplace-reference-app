@@ -14,8 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CredentialServiceState {
 
- Map<String, LivenessCredentialRecord> get credentialsByIdentityId; Map<String, SessionCredentialMaterial> get sessionMaterialByIdentityId;/// In-memory copy of the most recently issued VC (not reloaded on startup).
- CredentialData? get latestCredential;
+ Map<String, LivenessCredentialRecord> get credentialsByIdentityId; Map<String, SessionCredentialMaterial> get sessionMaterialByIdentityId; CredentialData? get latestCredential;
 /// Create a copy of CredentialServiceState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -238,7 +237,6 @@ class _CredentialServiceState implements CredentialServiceState {
   return EqualUnmodifiableMapView(_sessionMaterialByIdentityId);
 }
 
-/// In-memory copy of the most recently issued VC (not reloaded on startup).
 @override final  CredentialData? latestCredential;
 
 /// Create a copy of CredentialServiceState
@@ -315,7 +313,7 @@ $CredentialDataCopyWith<$Res>? get latestCredential {
 /// @nodoc
 mixin _$CredentialData {
 
- String get identityId; SignedVcDocument get document; String get issuerName; DateTime get issuedAt; DateTime get expiresAt; String get holderDid;
+ String get identityId; String get w3cCredentialJson; String get issuerName; DateTime get issuedAt; DateTime get expiresAt; String get holderDid;
 /// Create a copy of CredentialData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -326,16 +324,16 @@ $CredentialDataCopyWith<CredentialData> get copyWith => _$CredentialDataCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CredentialData&&(identical(other.identityId, identityId) || other.identityId == identityId)&&(identical(other.document, document) || other.document == document)&&(identical(other.issuerName, issuerName) || other.issuerName == issuerName)&&(identical(other.issuedAt, issuedAt) || other.issuedAt == issuedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.holderDid, holderDid) || other.holderDid == holderDid));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CredentialData&&(identical(other.identityId, identityId) || other.identityId == identityId)&&(identical(other.w3cCredentialJson, w3cCredentialJson) || other.w3cCredentialJson == w3cCredentialJson)&&(identical(other.issuerName, issuerName) || other.issuerName == issuerName)&&(identical(other.issuedAt, issuedAt) || other.issuedAt == issuedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.holderDid, holderDid) || other.holderDid == holderDid));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,identityId,document,issuerName,issuedAt,expiresAt,holderDid);
+int get hashCode => Object.hash(runtimeType,identityId,w3cCredentialJson,issuerName,issuedAt,expiresAt,holderDid);
 
 @override
 String toString() {
-  return 'CredentialData(identityId: $identityId, document: $document, issuerName: $issuerName, issuedAt: $issuedAt, expiresAt: $expiresAt, holderDid: $holderDid)';
+  return 'CredentialData(identityId: $identityId, w3cCredentialJson: $w3cCredentialJson, issuerName: $issuerName, issuedAt: $issuedAt, expiresAt: $expiresAt, holderDid: $holderDid)';
 }
 
 
@@ -346,7 +344,7 @@ abstract mixin class $CredentialDataCopyWith<$Res>  {
   factory $CredentialDataCopyWith(CredentialData value, $Res Function(CredentialData) _then) = _$CredentialDataCopyWithImpl;
 @useResult
 $Res call({
- String identityId, SignedVcDocument document, String issuerName, DateTime issuedAt, DateTime expiresAt, String holderDid
+ String identityId, String w3cCredentialJson, String issuerName, DateTime issuedAt, DateTime expiresAt, String holderDid
 });
 
 
@@ -363,11 +361,11 @@ class _$CredentialDataCopyWithImpl<$Res>
 
 /// Create a copy of CredentialData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? identityId = null,Object? document = null,Object? issuerName = null,Object? issuedAt = null,Object? expiresAt = null,Object? holderDid = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? identityId = null,Object? w3cCredentialJson = null,Object? issuerName = null,Object? issuedAt = null,Object? expiresAt = null,Object? holderDid = null,}) {
   return _then(_self.copyWith(
 identityId: null == identityId ? _self.identityId : identityId // ignore: cast_nullable_to_non_nullable
-as String,document: null == document ? _self.document : document // ignore: cast_nullable_to_non_nullable
-as SignedVcDocument,issuerName: null == issuerName ? _self.issuerName : issuerName // ignore: cast_nullable_to_non_nullable
+as String,w3cCredentialJson: null == w3cCredentialJson ? _self.w3cCredentialJson : w3cCredentialJson // ignore: cast_nullable_to_non_nullable
+as String,issuerName: null == issuerName ? _self.issuerName : issuerName // ignore: cast_nullable_to_non_nullable
 as String,issuedAt: null == issuedAt ? _self.issuedAt : issuedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,expiresAt: null == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
 as DateTime,holderDid: null == holderDid ? _self.holderDid : holderDid // ignore: cast_nullable_to_non_nullable
@@ -456,10 +454,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String identityId,  SignedVcDocument document,  String issuerName,  DateTime issuedAt,  DateTime expiresAt,  String holderDid)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String identityId,  String w3cCredentialJson,  String issuerName,  DateTime issuedAt,  DateTime expiresAt,  String holderDid)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CredentialData() when $default != null:
-return $default(_that.identityId,_that.document,_that.issuerName,_that.issuedAt,_that.expiresAt,_that.holderDid);case _:
+return $default(_that.identityId,_that.w3cCredentialJson,_that.issuerName,_that.issuedAt,_that.expiresAt,_that.holderDid);case _:
   return orElse();
 
 }
@@ -477,10 +475,10 @@ return $default(_that.identityId,_that.document,_that.issuerName,_that.issuedAt,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String identityId,  SignedVcDocument document,  String issuerName,  DateTime issuedAt,  DateTime expiresAt,  String holderDid)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String identityId,  String w3cCredentialJson,  String issuerName,  DateTime issuedAt,  DateTime expiresAt,  String holderDid)  $default,) {final _that = this;
 switch (_that) {
 case _CredentialData():
-return $default(_that.identityId,_that.document,_that.issuerName,_that.issuedAt,_that.expiresAt,_that.holderDid);case _:
+return $default(_that.identityId,_that.w3cCredentialJson,_that.issuerName,_that.issuedAt,_that.expiresAt,_that.holderDid);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -497,10 +495,10 @@ return $default(_that.identityId,_that.document,_that.issuerName,_that.issuedAt,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String identityId,  SignedVcDocument document,  String issuerName,  DateTime issuedAt,  DateTime expiresAt,  String holderDid)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String identityId,  String w3cCredentialJson,  String issuerName,  DateTime issuedAt,  DateTime expiresAt,  String holderDid)?  $default,) {final _that = this;
 switch (_that) {
 case _CredentialData() when $default != null:
-return $default(_that.identityId,_that.document,_that.issuerName,_that.issuedAt,_that.expiresAt,_that.holderDid);case _:
+return $default(_that.identityId,_that.w3cCredentialJson,_that.issuerName,_that.issuedAt,_that.expiresAt,_that.holderDid);case _:
   return null;
 
 }
@@ -512,11 +510,11 @@ return $default(_that.identityId,_that.document,_that.issuerName,_that.issuedAt,
 
 
 class _CredentialData implements CredentialData {
-  const _CredentialData({required this.identityId, required this.document, required this.issuerName, required this.issuedAt, required this.expiresAt, required this.holderDid});
+  const _CredentialData({required this.identityId, required this.w3cCredentialJson, required this.issuerName, required this.issuedAt, required this.expiresAt, required this.holderDid});
   
 
 @override final  String identityId;
-@override final  SignedVcDocument document;
+@override final  String w3cCredentialJson;
 @override final  String issuerName;
 @override final  DateTime issuedAt;
 @override final  DateTime expiresAt;
@@ -532,16 +530,16 @@ _$CredentialDataCopyWith<_CredentialData> get copyWith => __$CredentialDataCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CredentialData&&(identical(other.identityId, identityId) || other.identityId == identityId)&&(identical(other.document, document) || other.document == document)&&(identical(other.issuerName, issuerName) || other.issuerName == issuerName)&&(identical(other.issuedAt, issuedAt) || other.issuedAt == issuedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.holderDid, holderDid) || other.holderDid == holderDid));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CredentialData&&(identical(other.identityId, identityId) || other.identityId == identityId)&&(identical(other.w3cCredentialJson, w3cCredentialJson) || other.w3cCredentialJson == w3cCredentialJson)&&(identical(other.issuerName, issuerName) || other.issuerName == issuerName)&&(identical(other.issuedAt, issuedAt) || other.issuedAt == issuedAt)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.holderDid, holderDid) || other.holderDid == holderDid));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,identityId,document,issuerName,issuedAt,expiresAt,holderDid);
+int get hashCode => Object.hash(runtimeType,identityId,w3cCredentialJson,issuerName,issuedAt,expiresAt,holderDid);
 
 @override
 String toString() {
-  return 'CredentialData(identityId: $identityId, document: $document, issuerName: $issuerName, issuedAt: $issuedAt, expiresAt: $expiresAt, holderDid: $holderDid)';
+  return 'CredentialData(identityId: $identityId, w3cCredentialJson: $w3cCredentialJson, issuerName: $issuerName, issuedAt: $issuedAt, expiresAt: $expiresAt, holderDid: $holderDid)';
 }
 
 
@@ -552,7 +550,7 @@ abstract mixin class _$CredentialDataCopyWith<$Res> implements $CredentialDataCo
   factory _$CredentialDataCopyWith(_CredentialData value, $Res Function(_CredentialData) _then) = __$CredentialDataCopyWithImpl;
 @override @useResult
 $Res call({
- String identityId, SignedVcDocument document, String issuerName, DateTime issuedAt, DateTime expiresAt, String holderDid
+ String identityId, String w3cCredentialJson, String issuerName, DateTime issuedAt, DateTime expiresAt, String holderDid
 });
 
 
@@ -569,11 +567,11 @@ class __$CredentialDataCopyWithImpl<$Res>
 
 /// Create a copy of CredentialData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? identityId = null,Object? document = null,Object? issuerName = null,Object? issuedAt = null,Object? expiresAt = null,Object? holderDid = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? identityId = null,Object? w3cCredentialJson = null,Object? issuerName = null,Object? issuedAt = null,Object? expiresAt = null,Object? holderDid = null,}) {
   return _then(_CredentialData(
 identityId: null == identityId ? _self.identityId : identityId // ignore: cast_nullable_to_non_nullable
-as String,document: null == document ? _self.document : document // ignore: cast_nullable_to_non_nullable
-as SignedVcDocument,issuerName: null == issuerName ? _self.issuerName : issuerName // ignore: cast_nullable_to_non_nullable
+as String,w3cCredentialJson: null == w3cCredentialJson ? _self.w3cCredentialJson : w3cCredentialJson // ignore: cast_nullable_to_non_nullable
+as String,issuerName: null == issuerName ? _self.issuerName : issuerName // ignore: cast_nullable_to_non_nullable
 as String,issuedAt: null == issuedAt ? _self.issuedAt : issuedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,expiresAt: null == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
 as DateTime,holderDid: null == holderDid ? _self.holderDid : holderDid // ignore: cast_nullable_to_non_nullable

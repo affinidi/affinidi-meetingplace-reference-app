@@ -122,10 +122,7 @@ dependency_overrides:
       path: packages/meeting_place_drift_repository
       ref: cd174094f99bff749f9ce63be7b4438496bda634
   meeting_place_relationship:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_relationship
-      ref: cd174094f99bff749f9ce63be7b4438496bda634
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship
 
 flutter:
   generate: true
