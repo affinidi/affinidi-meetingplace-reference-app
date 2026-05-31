@@ -22,6 +22,17 @@ With the use of Affinidi Meeting Place SDK, you can build a messaging appplicati
 - [Environment Variables](#environment-variables)
   - [Required Environment Variables](#required-environment-variables)
   - [Optional Environment Variables](#optional-environment-variables)
+- [Liveness Credential pipeline](#liveness-credential-pipeline)
+  - [Modular architecture](#modular-architecture)
+  - [End-to-end flow](#end-to-end-flow)
+- [AWS Rekognition Face Liveness setup](#aws-rekognition-face-liveness-setup)
+  - [Overview](#overview)
+  - [AWS prerequisites](#aws-prerequisites)
+  - [AWS console setup](#aws-console-setup)
+  - [Amplify configuration](#amplify-configuration)
+  - [Native platform setup](#native-platform-setup)
+  - [Session lifecycle](#session-lifecycle)
+  - [Troubleshooting](#aws-troubleshooting)
 - [VSCode Configuration](#vscode-configuration)
 - [Run App on Simulator](#run-app-on-simulator)
 - [Troubleshooting](#troubleshooting)
@@ -76,9 +87,11 @@ Refer to [the documentation](https://docs.affinidi.com/products/affinidi-messagi
 
 ### Human ZKP demo flow
 
-This reference app includes an optional **Human ZKP** demo. It is off by default. Enable it at build/run time with `--dart-define=ZKP_ENABLED=true` (this also exposes the **Credentials** tab for managing a Liveness Credential).
+This reference app includes an optional **Human ZKP** demo. It is off by default. Enable it at build/run time with `ZKP_ENABLED=true` (this also exposes the **Credentials** tab for managing a Liveness Credential).
 
-**Happy path:** In a peer chat, open **+** → **Human Zero Knowledge Proof** to request proof from the contact. The peer fulfills the request (quick liveness check or an existing Liveness Credential), and a ZKP is exchanged over the channel. Concierge messages in the thread record the request and successful proof (for example, that the contact shared a proof confirming they are human, with no personal data shared). The requester then sees a verified indicator on the contact avatar.
+The demo uses synthetic liveness evidence to exercise the full **LivenessCredential → ZKP** pipeline without a camera or third-party liveness service. To connect a real provider such as AWS Rekognition, implement the pluggable evidence layer described in [Liveness Credential pipeline](#liveness-credential-pipeline) and follow [AWS Rekognition Face Liveness setup](#aws-rekognition-face-liveness-setup) for the AWS-side configuration.
+
+**Happy path:** In a peer chat, open **+** → **Human Zero Knowledge Proof** to request proof from the contact. The peer fulfills the request, a **LivenessCredential** is issued, and a ZKP is exchanged over the channel. Concierge messages in the thread record the request and successful proof (for example, that the contact shared a proof confirming they are human, with no personal data shared). The requester then sees a verified indicator on the contact avatar.
 
 **Failure path:** If verification does not succeed, a Concierge message is shown in the chat, for example:
 
@@ -341,9 +354,261 @@ MARKETPLACE_QR_PREFIX=""                         # Default: ""
 # Set this value to distinguish between multiple OOB flows and prevent QR code validation from one flow interfering with another.
 # Values are not predefined and can be any string. For example: `oss-app-main-oob-flow`.
 DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: ""
+
+# Human ZKP & Liveness Credential (defaults shown)
+ZKP_ENABLED="false"                              # Default: false — enables Human ZKP demo and Credentials tab
 ```
 
 > **NOTE:** You can find all available configuration options and their default values in `lib/infrastructure/configuration/environment.dart`.
+
+## Liveness Credential pipeline
+
+The reference app demonstrates a **Liveness VC → ZKP** flow using synthetic evidence. The design is modular so any liveness provider (AWS Rekognition, Azure, Onfido, etc.) can supply evidence and reuse the same credential and proof layers.
+
+### Modular architecture
+
+| Layer | Responsibility | Key types |
+|-------|----------------|-----------|
+| **Evidence** | Collect a liveness result from a provider | `LivenessEvidence`, `LivenessEvidenceSource` |
+| **Credential** | Issue a signed W3C `LivenessCredential` from evidence | `LivenessCredentialBuilder`, `LivenessCredentialSubject`, `CredentialService` |
+| **ZKP** | Convert the W3C VC into a `vc_zkp` signed document and generate a Groth16 proof | `LivenessVcZkpAdapter`, `ZkpService` |
+
+To connect a real liveness provider, implement `LivenessEvidenceSource` (or pass `LivenessEvidence` directly into `CredentialService.createLivenessCredential`). Everything from credential issuance onward is provider-agnostic.
+
+The issued W3C credential uses type `LivenessCredential` with provider-neutral claims in `credentialSubject`:
+
+- `livenessProvider` — e.g. `aws_rekognition`
+- `livenessSessionId` — provider transaction / session ID
+- `livenessScore`, `livenessThreshold`, `livenessPassed`, `checkedAt`
+
+### End-to-end flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant App
+    participant Provider as Liveness provider
+    participant VC as CredentialService
+    participant ZKP as ZkpService
+    participant Chat as DIDComm Chat
+
+    User->>App: Fulfill Human ZKP request
+    App->>Provider: Run liveness check
+    Provider-->>App: LivenessEvidence
+    App->>VC: Build & sign W3C LivenessCredential
+    VC->>VC: Convert to vc_zkp signed document
+    User->>App: Generate proof
+    App->>ZKP: Groth16 proof (SimpleVCProof circuit)
+    App->>Chat: Send LivenessProofPayload attachment
+```
+
+## AWS Rekognition Face Liveness setup
+
+This section documents everything required to configure **Amazon Rekognition Face Liveness** for use with a Flutter app via the [`face_liveness_detector`](packages/face_liveness_detector/README.md) plugin. An end-to-end proof-of-concept validated this flow against the Liveness Credential pipeline above; the AWS integration itself is not part of the reference app and should be implemented in your own project or SDK layer.
+
+### Overview
+
+AWS Face Liveness works in three steps:
+
+1. **Create session** — call `CreateFaceLivenessSession` to obtain a `sessionId`.
+2. **Camera challenge** — present the native Amplify Face Liveness UI, which streams video to Rekognition for the given session.
+3. **Fetch results** — call `GetFaceLivenessSessionResults` to read the session status and confidence score.
+
+Authentication uses a **Cognito Identity Pool** with guest (unauthenticated) access. No user sign-in is required — the mobile client obtains temporary AWS credentials and calls Rekognition directly, or via a backend you control.
+
+### AWS prerequisites
+
+1. An **AWS account** with [Amazon Rekognition Face Liveness](https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html) available in your chosen region (e.g. `us-east-1`).
+2. A **Cognito Identity Pool** with **Enable access to unauthenticated identities** turned on.
+3. An **IAM policy** on the unauthenticated role granting Rekognition Face Liveness API access:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "rekognition:CreateFaceLivenessSession",
+        "rekognition:GetFaceLivenessSessionResults"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+4. Note your **Identity Pool ID** (format `region:uuid`) and **region** — both are required for Amplify configuration.
+
+For a guided walkthrough, see the [AWS Amplify Face Liveness quick start](https://ui.docs.amplify.aws/swift/connected-components/liveness#quick-start).
+
+### AWS console setup
+
+1. Open **Amazon Cognito** → **Identity pools** → **Create identity pool**.
+2. Enable **Guest access** (unauthenticated identities).
+3. Create or select the IAM role for unauthenticated users and attach the Rekognition policy above.
+4. Copy the **Identity pool ID** (e.g. `us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).
+5. Confirm Face Liveness is supported in your region.
+
+**Alternative — Amplify CLI:**
+
+```bash
+amplify init
+amplify add auth    # choose Identity Pool with unauthenticated access
+amplify push
+```
+
+A reference Amplify project lives at `packages/face_liveness_detector/example/android/amplify/`.
+
+### Amplify configuration
+
+The native Face Liveness UI reads Amplify config from platform-specific files. Both must reference the same Identity Pool ID and region.
+
+**`amplifyconfiguration.json`:**
+
+```json
+{
+  "auth": {
+    "plugins": {
+      "awsCognitoAuthPlugin": {
+        "IdentityManager": { "Default": {} },
+        "CredentialsProvider": {
+          "CognitoIdentity": {
+            "Default": {
+              "PoolId": "us-east-1:REPLACE_WITH_IDENTITY_POOL_ID",
+              "Region": "us-east-1"
+            }
+          }
+        },
+        "CognitoIdentity": {
+          "Default": {
+            "PoolId": "us-east-1:REPLACE_WITH_IDENTITY_POOL_ID",
+            "Region": "us-east-1"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**File locations:**
+
+| Platform | Path |
+|----------|------|
+| iOS | `ios/amplifyconfiguration.json` and `ios/awsconfiguration.json` — add both to the Xcode Runner target |
+| Android | `android/app/src/main/res/raw/amplifyconfiguration.json` |
+
+Example templates are in `packages/face_liveness_detector/example/ios/` and the [package README](packages/face_liveness_detector/README.md).
+
+If your integration also calls Rekognition from Dart (session create / results fetch), configure Amplify Auth separately with the same pool ID and region — either programmatically or via the same JSON files.
+
+### Native platform setup
+
+#### iOS
+
+1. Place `amplifyconfiguration.json` and `awsconfiguration.json` in the `ios/` directory and add them to the Xcode Runner target.
+2. Add Swift Package dependencies to the Runner target:
+   - [amplify-swift](https://github.com/aws-amplify/amplify-swift) `2.46.1+` — products: `Amplify`, `AWSCognitoAuthPlugin`
+   - [amplify-ui-swift-liveness](https://github.com/aws-amplify/amplify-ui-swift-liveness) `1.3.5+` — product: `FaceLiveness`
+3. Call `Amplify.configure()` during app startup (before presenting the liveness widget).
+4. Declare camera usage in `Info.plist`:
+
+   ```xml
+   <key>NSCameraUsageDescription</key>
+   <string>Camera access is required for face liveness verification.</string>
+   ```
+
+5. Minimum deployment target: iOS 13.0+ (16.0+ recommended).
+
+See [`packages/face_liveness_detector/ios/setup_dependencies.md`](packages/face_liveness_detector/ios/setup_dependencies.md) for detailed Xcode steps.
+
+#### Android
+
+1. Place `amplifyconfiguration.json` in `android/app/src/main/res/raw/`.
+2. Set `minSdkVersion` to at least **24** and `compileSdkVersion` to **35**.
+3. Extend `FlutterFragmentActivity` instead of `FlutterActivity`:
+
+   ```kotlin
+   import io.flutter.embedding.android.FlutterFragmentActivity
+
+   class MainActivity : FlutterFragmentActivity()
+   ```
+
+4. Declare camera permission in `AndroidManifest.xml`:
+
+   ```xml
+   <uses-permission android:name="android.permission.CAMERA"/>
+   ```
+
+5. The `face_liveness_detector` plugin configures Amplify on attach and pulls in the native Amplify Face Liveness dependencies.
+
+> **NOTE:** Use a **physical device** for Face Liveness. The camera challenge does not work reliably on emulators or simulators.
+
+### Session lifecycle
+
+Once AWS and native setup are complete, integrate the liveness check in your app:
+
+1. **Create a session** — from your backend or directly from the client using temporary Cognito credentials:
+
+   ```
+   RekognitionService.CreateFaceLivenessSession
+   → { "SessionId": "..." }
+   ```
+
+2. **Run the camera challenge** — pass the session ID and region to the Flutter widget:
+
+   ```dart
+   FaceLivenessDetector(
+     sessionId: sessionId,
+     region: 'us-east-1',
+     onComplete: () { /* fetch results */ },
+     onError: (code) { /* handle error */ },
+   )
+   ```
+
+3. **Fetch results** — after `onComplete`, call:
+
+   ```
+   RekognitionService.GetFaceLivenessSessionResults
+   → { "Status": "SUCCEEDED", "Confidence": 95.3, ... }
+   ```
+
+4. **Map to evidence** — convert the result into provider-neutral evidence for your credential layer:
+
+   | Field | AWS source |
+   |-------|------------|
+   | `providerId` | `"aws_rekognition"` |
+   | `providerTransactionId` | `SessionId` |
+   | `livenessScore` | `Confidence` |
+   | `livenessThreshold` | your configured minimum (e.g. `80.0`) |
+   | `checkedAt` | timestamp when results were fetched |
+
+A working Flutter example with backend session creation is in `packages/face_liveness_detector/example/`.
+
+### AWS troubleshooting
+
+**`AccessDeniedException` or HTTP 403 on Rekognition calls**
+
+The Cognito unauthenticated IAM role is missing Rekognition permissions. Attach `rekognition:CreateFaceLivenessSession` and `rekognition:GetFaceLivenessSessionResults` to the role. See [AWS prerequisites](#aws-prerequisites).
+
+---
+
+**Native liveness widget fails / `Amplify configure failed`**
+
+Amplify config files are missing, not in the correct location, or contain the wrong Identity Pool ID / region. Verify file paths in [Amplify configuration](#amplify-configuration) and that iOS Swift Package dependencies are resolved.
+
+---
+
+**`Status` is not `SUCCEEDED` or confidence below threshold**
+
+The user did not complete the challenge successfully. Retry on a physical device with good lighting. Typical production thresholds are 80–90.
+
+---
+
+**`No such module 'FaceLiveness'` (iOS)**
+
+Clean the build folder, re-add Swift Package dependencies, and confirm both Amplify packages are linked to the Runner target. See [`setup_dependencies.md`](packages/face_liveness_detector/ios/setup_dependencies.md).
 
 ## VSCode Configuration
 
