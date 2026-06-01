@@ -5,6 +5,7 @@ import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show LivenessProofPayload, LivenessZkpDIDCommAttachmentBuilder;
 
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/zkp_service/zkp_challenge_nonce.dart';
 import '../../../application/services/zkp_service/zkp_service.dart';
 import '../../../application/services/zkp_service/zkp_service_state.dart';
 import '../../../domain/models/contacts/contact_status.dart';
@@ -63,6 +64,10 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
   late final AppLogger _logger;
   static const _logKey = 'ProofFlowController';
 
+  void setVerifierChallengeNonce(List<int> challengeNonce) {
+    state = state.copyWith(verifierChallengeNonce: challengeNonce);
+  }
+
   Future<bool> requestLivenessCheck() async {
     if (!readIsZkpChannelReady(ref, contactId)) {
       _logger.warning(
@@ -76,8 +81,11 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
       chatScreenControllerProvider(contactId).notifier,
     );
 
+    final challengeNonce = generateZkpChallengeNonce();
     final attachments =
-        LivenessZkpDIDCommAttachmentBuilder.buildLivenessCheckRequest();
+        LivenessZkpDIDCommAttachmentBuilder.buildLivenessCheckRequest(
+          challengeNonceHex: zkpChallengeNonceToHex(challengeNonce),
+        );
 
     try {
       await chatController.sendMessageDirect(
@@ -120,9 +128,16 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
       name: _logKey,
     );
 
-    final generation = await ref
-        .read(zkpServiceProvider)
-        .generateProof(identityId: identity.id);
+    final challengeNonce = state.verifierChallengeNonce;
+    if (challengeNonce == null ||
+        challengeNonce.length != zkpChallengeNonceByteLength) {
+      return 'No liveness challenge from verifier. Ask them to send a new request.';
+    }
+
+    final generation = await ref.read(zkpServiceProvider).generateProof(
+          identityId: identity.id,
+          challengeNonce: challengeNonce,
+        );
 
     switch (generation) {
       case ZkpProofGenerationFailure(:final error):
@@ -164,6 +179,7 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
       'Starting proof verification for contact: $contactId',
       name: _logKey,
     );
+    if (!mounted) return false;
     state = state.copyWith(
       isVerifyingProof: true,
       clearVerificationError: true,
@@ -178,10 +194,12 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
 
     _logger.info('Verification result: ${verification.isValid}', name: _logKey);
 
-    state = state.copyWith(
-      isVerifyingProof: false,
-      verificationError: verification.isValid ? null : verification.error,
-    );
+    if (mounted) {
+      state = state.copyWith(
+        isVerifyingProof: false,
+        verificationError: verification.isValid ? null : verification.error,
+      );
+    }
     return verification.isValid;
   }
 }

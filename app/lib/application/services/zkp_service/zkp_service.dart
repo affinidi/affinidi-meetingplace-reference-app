@@ -12,6 +12,7 @@ import 'package:vc_zkp/vc_zkp.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../credential_service/credential_service.dart';
+import 'zkp_challenge_nonce.dart';
 import 'zkp_service_state.dart';
 
 final zkpServiceProvider = Provider<ZkpService>(
@@ -54,9 +55,30 @@ class ZkpService {
     }
   }
 
-  /// Generate a Zero-Knowledge Proof from a Liveness VC in the current session
+  /// Poseidon hash of [challengeNonce] for circuit challenge binding.
+  Future<String> challengeDigestFromNonce(List<int> challengeNonce) async {
+    if (challengeNonce.length != zkpChallengeNonceByteLength) {
+      throw ArgumentError(
+        'challenge nonce must be $zkpChallengeNonceByteLength bytes',
+      );
+    }
+    final challengeNonceHex = challengeNonce
+        .map((b) => b.toRadixString(16).padLeft(2, '0'))
+        .join();
+    final challengeNonceBi = BigInt.parse(challengeNonceHex, radix: 16);
+    final crypto = RustEddsaHelperFfi();
+    return crypto.poseidonHashFieldElements(<String>[
+      '1',
+      challengeNonceBi.toString(),
+    ]);
+  }
+
+  /// Generate a Zero-Knowledge Proof from a Liveness VC in the current session.
+  ///
+  /// [challengeNonce] is issued by the verifier in the liveness check request.
   Future<ZkpProofGenerationResult> generateProof({
     required String identityId,
+    required List<int> challengeNonce,
   }) async {
     _logger.info('Starting ZKP proof generation', name: _logKey);
 
@@ -66,9 +88,7 @@ class ZkpService {
       _logger.info('  Step 1/5: Preparing liveness credential', name: _logKey);
       final credentialService = _ref.read(credentialServiceProvider.notifier);
       final credentialResult = await credentialService
-          .prepareCredentialForProof(
-            identityId: identityId,
-          );
+          .prepareCredentialForProof(identityId: identityId);
 
       final document = credentialResult.document;
       final issuerPub = credentialResult.issuerPub;
@@ -81,18 +101,7 @@ class ZkpService {
       final holderInputs = await holder.prepareForCircuit(document);
 
       _logger.info('  Step 3/5: Generating challenge signature', name: _logKey);
-      final challengeNonce = List<int>.generate(
-        32,
-        (_) => Random.secure().nextInt(256),
-      );
-      final challengeNonceHex = challengeNonce
-          .map((b) => b.toRadixString(16).padLeft(2, '0'))
-          .join();
-      final challengeNonceBi = BigInt.parse(challengeNonceHex, radix: 16);
-      final challengeDigest = await crypto.poseidonHashFieldElements(<String>[
-        '1',
-        challengeNonceBi.toString(),
-      ]);
+      final challengeDigest = await challengeDigestFromNonce(challengeNonce);
 
       final challengeSig = await holder.signPreparedDigest(
         digest: challengeDigest,
@@ -136,13 +145,12 @@ class ZkpService {
         );
       }
 
-      final zkeyBytes = await rootBundle.load(_zkeyAsset);
       final tempDir = await getTemporaryDirectory();
       final zkeyFile = File('${tempDir.path}/SimpleVCProof.groth16.zkey');
       if (!zkeyFile.existsSync()) {
-        await zkeyFile.create(recursive: true);
+        final zkeyBytes = await rootBundle.load(_zkeyAsset);
+        await zkeyFile.writeAsBytes(zkeyBytes.buffer.asUint8List());
       }
-      await zkeyFile.writeAsBytes(zkeyBytes.buffer.asUint8List());
 
       _logger.info('  Step 5/5: Generating ZKP proof', name: _logKey);
       final proof = await Rapidsnark().groth16Prove(

@@ -242,20 +242,8 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
 
     return CredentialCreationResult(
       document: document,
-      issuerPub: EddsaSignatureResult(
-        ax: session.issuerAx,
-        ay: session.issuerAy,
-        r8x: '0',
-        r8y: '0',
-        s: '0',
-      ),
-      holderPub: EddsaSignatureResult(
-        ax: holderAx,
-        ay: holderAy,
-        r8x: '0',
-        r8y: '0',
-        s: '0',
-      ),
+      issuerPub: BabyJubPublicKey(ax: session.issuerAx, ay: session.issuerAy),
+      holderPub: BabyJubPublicKey(ax: holderAx, ay: holderAy),
       holderPrivateKeyHex: session.holderPrivateKeyHex,
     );
   }
@@ -312,7 +300,7 @@ class CredentialCreationResult {
   });
 
   final SignedVcDocument document;
-  final EddsaSignatureResult issuerPub;
-  final EddsaSignatureResult holderPub;
+  final BabyJubPublicKey issuerPub;
+  final BabyJubPublicKey holderPub;
   final String holderPrivateKeyHex;
 }
