@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -22,7 +21,7 @@ part 'identity_form_app_bar.dart';
 part 'identity_form_bottom_container.dart';
 part 'identity_form_section.dart';
 
-class IdentityFormScreen extends HookConsumerWidget {
+class IdentityFormScreen extends ConsumerWidget {
   IdentityFormScreen({super.key, this.identityId});
 
   final String? identityId;
@@ -38,21 +37,8 @@ class IdentityFormScreen extends HookConsumerWidget {
 
     final provider = identityFormScreenControllerProvider(identityId);
     final controller = ref.read(provider.notifier);
-    final anonymousLabel = context.l10n.anonymous;
 
     ref.keepAround(provider);
-
-    useEffect(() {
-      // Save identity on screen exit
-      return () {
-        Future(() async {
-          await controller.saveIdentity(
-            anonymousLabel: anonymousLabel,
-            mode: mode,
-          );
-        });
-      };
-    }, [identityId]);
 
     return Scaffold(
       appBar: _IdentityFormAppBar(identityId, mode: mode),
