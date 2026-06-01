@@ -211,7 +211,7 @@ class IdentitiesRoute extends GoRouteData with $IdentitiesRoute {
       const IdentitiesScreen();
 }
 
-class RCardsRoute extends GoRouteData with _$RCardsRoute {
+class RCardsRoute extends GoRouteData with $RCardsRoute {
   const RCardsRoute();
 
   @override
@@ -219,7 +219,7 @@ class RCardsRoute extends GoRouteData with _$RCardsRoute {
       const RCardsPlaceholderScreen();
 }
 
-class CredentialsRoute extends GoRouteData with _$CredentialsRoute {
+class CredentialsRoute extends GoRouteData with $CredentialsRoute {
   const CredentialsRoute();
 
   @override
