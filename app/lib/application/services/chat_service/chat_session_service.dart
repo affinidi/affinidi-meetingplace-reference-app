@@ -95,7 +95,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _presenceTimedAction?.cancel();
       _typingTimedAction?.cancel();
       _messageSubscription?.dispose();
-      _chatSDK?.endChatSession();
+      unawaited(_chatSDK?.endChatSession());
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
 
@@ -186,6 +186,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       unawaited(
         _chatSDK!.chatStreamSubscription.then(
           (chatStream) {
+            if (_chatSDK == null) {
+              // pauseChat ran while we were waiting for the transport
+              // subscription. Drop the listener attachment to avoid leaking
+              // a subscription that has no disposal path.
+              return;
+            }
             if (chatStream == null) {
               _logger.warning('Chat stream is null', name: _logKey);
               return;
@@ -270,12 +276,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _groupManager.refreshGroup(groupId);
 
   @override
-  void pauseChat() {
+  Future<void> pauseChat() async {
     final sdk = _chatSDK;
     _chatSDK = null;
     _messageSubscription?.dispose();
     _messageSubscription = null;
-    sdk?.endChatSession();
+    await sdk?.endChatSession();
   }
 
   @override

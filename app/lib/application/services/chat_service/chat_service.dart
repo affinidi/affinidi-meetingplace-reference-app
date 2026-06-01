@@ -19,7 +19,7 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   int get chatPresenceIntervalInSeconds;
 
   Future<void> startChatSession();
-  void pauseChat();
+  Future<void> pauseChat();
 
   Future<String?> restoreUnsentMessage(String contactId);
   Future<ContactPresenceStatus> calculateContactPresenceStatus(
