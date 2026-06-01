@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/credential_service/credential_service.dart';

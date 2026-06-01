@@ -437,7 +437,7 @@ packages:
     dependency: transitive
     description:
       name: cupertino_icons
-      sha256: "41e005c33bd814be4d3096aff55b1908d419fde52ca656c8c47719ec745873cd"
+      sha256: ba631d1c7f7bef6b729a622b7b752645a2d076dba9976925b8f25725a30e1ee6
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
@@ -1065,10 +1065,10 @@ packages:
     dependency: transitive
     description:
       name: json_annotation
-      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
+      sha256: "2a743920d81b7910627f68ee2c9ac1fc0bfee32b9fc3403587d7c6791ca12f80"
       url: "https://pub.dev"
     source: hosted
-    version: "4.9.0"
+    version: "4.12.0"
   json_ld_processor:
     dependency: transitive
     description:
@@ -1081,10 +1081,10 @@ packages:
     dependency: transitive
     description:
       name: json_serializable
-      sha256: c50ef5fc083d5b5e12eef489503ba3bf5ccc899e487d691584699b4bdefeea8c
+      sha256: ffcd10cde35a93b2abbbcc26bd9971f4ca93763e8abe78d855e3c4177797e501
       url: "https://pub.dev"
     source: hosted
-    version: "6.9.5"
+    version: "6.14.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -1184,11 +1184,10 @@ packages:
   meeting_place_chat:
     dependency: "direct overridden"
     description:
-      name: meeting_place_chat
-      sha256: "2bca07a2f44659fbbc0238cf1c847e12da361daf12bf09e7e888f27aaf5fd670"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.35"
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat"
+      relative: true
+    source: path
+    version: "0.0.1-dev.39"
   meeting_place_control_plane:
     dependency: "direct overridden"
     description:
@@ -1199,19 +1198,24 @@ packages:
   meeting_place_core:
     dependency: "direct overridden"
     description:
-      name: meeting_place_core
-      sha256: af794a18dd6014eca9b46f1bc41b40b24bfe67eebc51c7043a7cb50d82a23d0f
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.33"
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_core"
+      relative: true
+    source: path
+    version: "0.0.1-dev.36"
+  meeting_place_credentials:
+    dependency: "direct overridden"
+    description:
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_credentials"
+      relative: true
+    source: path
+    version: "0.0.1-dev.1"
   meeting_place_drift_repository:
     dependency: "direct overridden"
     description:
-      name: meeting_place_drift_repository
-      sha256: "2707a9e938f8ffa3f03f695a883ed2b242dc8ea4309524137530b89af38cbe8d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.36"
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository"
+      relative: true
+    source: path
+    version: "0.0.1-dev.40"
   meeting_place_mediator:
     dependency: transitive
     description:
@@ -1220,13 +1224,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.1-dev.15"
-  meeting_place_relationship:
-    dependency: "direct overridden"
-    description:
-      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship"
-      relative: true
-    source: path
-    version: "0.0.1-dev.1"
   melos:
     dependency: "direct dev"
     description:

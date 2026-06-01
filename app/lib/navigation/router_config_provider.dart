@@ -25,6 +25,11 @@ String? returnUrl;
 /// Logger key for this router configuration.
 const logKey = 'routerConfigProvider';
 
+final routerConfigProvider = Provider<GoRouter>(
+  routerConfig,
+  name: 'routerConfigProvider',
+);
+
 Future<bool> _shouldRedirectToIdentities(Ref ref) async {
   await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
   final identitiesState = ref.read(identitiesServiceProvider);

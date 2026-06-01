@@ -8,37 +8,6 @@ part of 'chat_screen_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-String _$chatScreenControllerHash() =>
-    r'2d2d91861de56af3dc98da647f0cb3637731d103';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
-abstract class _$ChatScreenController
-    extends BuildlessAutoDisposeNotifier<ChatScreenState> {
-  late final String contactId;
-
-  ChatScreenState build(String contactId);
-}
-
 /// Controller class for managing the state and logic of the chat screen.
 ///
 /// Extends [_$ChatScreenController] to provide reactive state management
@@ -105,7 +74,7 @@ final class ChatScreenControllerProvider
 }
 
 String _$chatScreenControllerHash() =>
-    r'388723e7efb679c922c48e2a89a0b91bb11b5c34';
+    r'7e22975d90084c6639baea8df75c48315e099fd2';
 
 /// Controller class for managing the state and logic of the chat screen.
 ///

@@ -75,8 +75,8 @@ dependencies:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_drift_repository
       ref: cd174094f99bff749f9ce63be7b4438496bda634
-  meeting_place_relationship:
-    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship
+  meeting_place_credentials:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_credentials
   mobile_scanner: ^7.1.3
   mpx_app_core:
     path: ../packages/app-core
@@ -122,8 +122,8 @@ dependency_overrides:
     path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_core
   meeting_place_drift_repository:
     path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
-  meeting_place_relationship:
-    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship
+  meeting_place_credentials:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_credentials
 
 flutter:
   generate: true
