@@ -1439,5 +1439,21 @@
 	"removeMemberNotSupported": "Removing members isn't supported yet.",
 	"@removeMemberNotSupported": {
 		"type": "text"
+	},
+	"generalVideo": "Video",
+	"@generalVideo": {
+		"description": "Label for the video attachment plugin"
+	},
+	"generalDocument": "Document",
+	"@generalDocument": {
+		"description": "Label for the document attachment plugin"
+	},
+	"documentTapToDownload": "Tap to download",
+	"@documentTapToDownload": {
+		"description": "Hint shown on document attachment before download"
+	},
+	"videoLoadingError": "Unable to play video",
+	"@videoLoadingError": {
+		"description": "Error shown when video cannot be played"
 	}
 }

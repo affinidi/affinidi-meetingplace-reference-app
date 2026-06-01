@@ -34,6 +34,7 @@ dependencies:
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
   drift: ^2.28.1
+  file_picker: ^8.0.0
   firebase_core: ^4.0.0
   firebase_messaging: ^16.0.0
   flutter:

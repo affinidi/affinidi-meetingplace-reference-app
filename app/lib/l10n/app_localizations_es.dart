@@ -1516,4 +1516,16 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get removeMemberNotSupported =>
       'Removing members isn\'t supported yet.';
+
+  @override
+  String get generalVideo => 'Video';
+
+  @override
+  String get generalDocument => 'Document';
+
+  @override
+  String get documentTapToDownload => 'Tap to download';
+
+  @override
+  String get videoLoadingError => 'Unable to play video';
 }

@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -24,6 +29,8 @@ import '../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
+import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/plugins/media_category.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
@@ -57,6 +64,7 @@ part 'chat_items/concierge_update_profile_request_chat_item.dart';
 part 'chat_items/plain_text_chat_item.dart';
 part 'chat_items/reaction_picker_chat_item.dart';
 part 'chat_items/unknown_chat_item.dart';
+part 'chat_items/video_player_screen.dart';
 part 'chat_media_options.dart';
 part 'chat_message_list.dart';
 part 'chat_text_entry.dart';
