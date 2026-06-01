@@ -36,7 +36,10 @@ import FirebaseMessaging
         let registrar = engineBridge.pluginRegistry.registrar(
             forPlugin: "DeviceRegionPlugin"
         )
-        guard let messenger = registrar?.messenger() else { return }
+        guard let messenger = registrar?.messenger() else {
+            NSLog("AppDelegate: DeviceRegionPlugin - failed to get messenger from registrar")
+            return
+        }
         let channel = FlutterMethodChannel(
             name: "com.example.meetingplace/device_region",
             binaryMessenger: messenger

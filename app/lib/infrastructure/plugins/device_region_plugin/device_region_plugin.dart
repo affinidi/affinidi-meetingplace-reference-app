@@ -27,7 +27,7 @@ class DeviceRegionPlugin {
   static Future<String?> _fetchRegionCode() async {
     try {
       final result = await _channel.invokeMethod<String>('getRegionCode');
-      if (result != null && result.length == 2) {
+      if (result != null && RegExp(r'^[A-Za-z]{2}$').hasMatch(result)) {
         return result.toUpperCase();
       }
       return null;
