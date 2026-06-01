@@ -45,7 +45,7 @@ final chatSdkProvider =
           channel,
           coreSDK: coreSDK,
           chatRepository: await ref.read(chatRepositoryProvider.future),
-          options: ChatSDKOptions(
+          options: MeetingPlaceChatSDKOptions(
             chatActivityExpiry: Duration(
               seconds: environment.chatActivityExpiresInSeconds,
             ),
