@@ -133,7 +133,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _chatStreamRef?.dispose();
       _chatStreamRef = null;
       unawaited(_vdipManager.cancelSubscriptions());
-      _chatSDK?.endChatSession();
+      unawaited(_chatSDK?.endChatSession());
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
 
@@ -237,23 +237,34 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       final chatSession = await _chatSDK!.startChatSession();
       _chatId = chatSession.id;
 
-      final chatStream = await _chatSDK!.chatStreamSubscription;
-      if (chatStream == null) {
-        _logger.warning('Chat stream is null', name: _logKey);
-      } else {
-        _chatStreamRef = chatStream
-          ..listen(
-            (data) => _onChannelMessagesData(data, _otherPartyPermanentDid),
-            onError: (Object error, StackTrace stackTrace) {
-              _logger.error(
-                'Error in chat stream subscription',
-                error: error,
-                stackTrace: stackTrace,
-                name: _logKey,
-              );
-            },
-          );
-      }
+      unawaited(
+        _chatSDK!.chatStreamSubscription.then((chatStream) {
+          if (_chatSDK == null) {
+            // pauseChat ran while we were waiting for the transport
+            // subscription. Drop the listener attachment to avoid leaking
+            // a subscription that has no disposal path.
+            return;
+          }
+
+          if (chatStream == null) {
+            _logger.warning('Chat stream is null', name: _logKey);
+            return;
+          }
+
+          _chatStreamRef = chatStream
+            ..listen(
+              (data) => _onChannelMessagesData(data, _otherPartyPermanentDid),
+              onError: (Object error, StackTrace stackTrace) {
+                _logger.error(
+                  'Error in chat stream subscription',
+                  error: error,
+                  stackTrace: stackTrace,
+                  name: _logKey,
+                );
+              },
+            );
+        }),
+      );
 
       final dbMessageIds = {
         EncryptionNotice().messageId,
@@ -338,12 +349,16 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _groupManager.refreshGroup(groupId);
 
   @override
-  void pauseChat() {
+  Future<void> pauseChat() async {
     _chatStreamRef?.dispose();
     _chatStreamRef = null;
-    _chatSDK?.endChatSession();
+
+    final sdk = _chatSDK;
+    _chatSDK = null;
+
     _rCardManager.cancelSubscription();
     unawaited(_vdipManager.cancelSubscriptions());
+    await sdk?.endChatSession();
   }
 
   @override

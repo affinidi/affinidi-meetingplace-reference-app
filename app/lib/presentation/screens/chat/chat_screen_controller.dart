@@ -230,7 +230,7 @@ class ChatScreenController extends _$ChatScreenController
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
-      _chatService?.pauseChat();
+      unawaited(_chatService?.pauseChat());
 
       messageTextController.removeListener(_onMessageTextChanged);
       messageTextController.dispose();
@@ -336,7 +336,7 @@ class ChatScreenController extends _$ChatScreenController
 
     _logger.info('Pausing chat session', name: _logKey);
     _isPaused = true;
-    _chatService?.pauseChat();
+    unawaited(_chatService?.pauseChat());
   }
 
   void _onMessageTextChanged() {
