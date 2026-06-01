@@ -106,6 +106,10 @@ class _ChatMediaOptions extends ConsumerWidget {
       Navigator.of(context).pop();
     }
 
+    final zkpChannelReady = isZkpEnabled
+        ? ref.watch(zkpChannelReadyProvider(_contactId))
+        : false;
+
     final items = <_ChatMediaOptionItem>[
       ...availableAttachmentPlugins.map((plugin) {
         final supported = plugin.isPlatformSupported;
@@ -139,14 +143,15 @@ class _ChatMediaOptions extends ConsumerWidget {
         _ChatMediaOptionItem(
           icon: Icons.verified_user,
           label: context.l10n.humanZeroKnowledgeProof,
-          onTap: () {
-            ref
-                .read(proofFlowControllerProvider(_contactId).notifier)
-                .requestLivenessCheck();
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
-          },
+          onTap: zkpChannelReady
+              ? () async {
+                  final sent = await ref
+                      .read(proofFlowControllerProvider(_contactId).notifier)
+                      .requestLivenessCheck();
+                  if (!context.mounted || !sent) return;
+                  Navigator.of(context).pop();
+                }
+              : null,
         ),
     ];
 

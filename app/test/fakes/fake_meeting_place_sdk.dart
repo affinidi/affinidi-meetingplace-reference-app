@@ -92,6 +92,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     String? mediatorDid,
     String? metadata,
     String? externalRef,
+    int? score,
   }) async {
     // Record the call parameters
     _publishOfferCalls.add({
@@ -105,6 +106,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'mediatorDid': mediatorDid,
       'metadata': metadata,
       'externalRef': externalRef,
+      'score': score,
     });
 
     if (_publishOfferException != null) {

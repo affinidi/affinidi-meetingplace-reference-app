@@ -432,9 +432,11 @@ class ChatScreenController extends _$ChatScreenController
       return;
     }
 
-    unawaited(
-      _chatService?.sendTextMessage(trimmedMessage, attachments: attachments),
-    );
+    await (_chatService?.sendTextMessage(
+          trimmedMessage,
+          attachments: attachments,
+        ) ??
+        Future<void>.value());
   }
 
   Future<void> sendChatActivity() async {

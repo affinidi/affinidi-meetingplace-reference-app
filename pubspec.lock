@@ -1190,13 +1190,12 @@ packages:
     source: hosted
     version: "0.0.1-dev.35"
   meeting_place_control_plane:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_control_plane
-      sha256: "8f7a8808bac14b4781fcce16df7762d54e254e3283aecf77194e51ae9d6d2af1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.16"
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_control_plane"
+      relative: true
+    source: path
+    version: "0.0.1-dev.17"
   meeting_place_core:
     dependency: "direct overridden"
     description:
