@@ -8,9 +8,9 @@ import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     LivenessZkpDIDCommAttachmentBuilder;
 
 import '../../../application/services/contacts_service/contacts_service.dart';
-import '../../../application/services/zkp_service/zkp_challenge_nonce.dart';
 import '../../../application/services/zkp_service/zkp_service.dart';
 import '../../../application/services/zkp_service/zkp_service_state.dart';
+import '../../../domain/models/zkp/zkp_challenge_nonce.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
