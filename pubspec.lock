@@ -1174,7 +1174,7 @@ packages:
     source: hosted
     version: "0.0.1-dev.43"
   meeting_place_control_plane:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: meeting_place_control_plane
       sha256: baef5dc7e66b49694b898973fc252d94170477a22910855577dc8a2426bc6c3d

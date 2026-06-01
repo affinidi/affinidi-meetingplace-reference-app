@@ -107,20 +107,13 @@ dev_dependencies:
 
 dependency_overrides:
   meeting_place_chat:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_chat
-      ref: cd174094f99bff749f9ce63be7b4438496bda634
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
+  meeting_place_control_plane:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_control_plane
   meeting_place_core:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_core
-      ref: cd174094f99bff749f9ce63be7b4438496bda634
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_core
   meeting_place_drift_repository:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_drift_repository
-      ref: cd174094f99bff749f9ce63be7b4438496bda634
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
   meeting_place_relationship:
     path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship
 

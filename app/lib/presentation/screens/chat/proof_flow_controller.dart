@@ -6,10 +6,45 @@ import 'package:meeting_place_relationship/meeting_place_relationship.dart'
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/zkp_service/zkp_service.dart';
 import '../../../application/services/zkp_service/zkp_service_state.dart';
+import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'chat_screen_controller.dart';
 import 'proof_flow_state.dart';
+
+bool isZkpChannelReady(Ref ref, String contactId) {
+  final contact = ref.watch(
+    contactsServiceProvider.select((state) => state.getContactById(contactId)),
+  );
+  if (contact == null) return false;
+
+  final isEstablishedContact =
+      contact.status == ContactStatus.active ||
+      contact.status == ContactStatus.approved;
+  if (!isEstablishedContact) return false;
+
+  return ref.watch(
+    chatScreenControllerProvider(
+      contactId,
+    ).select((state) => state.isInitialized),
+  );
+}
+
+bool readIsZkpChannelReady(Ref ref, String contactId) {
+  final contact = ref.read(contactsServiceProvider).getContactById(contactId);
+  if (contact == null) return false;
+
+  final isEstablishedContact =
+      contact.status == ContactStatus.active ||
+      contact.status == ContactStatus.approved;
+  if (!isEstablishedContact) return false;
+
+  return ref.read(chatScreenControllerProvider(contactId)).isInitialized;
+}
+
+final zkpChannelReadyProvider = Provider.autoDispose.family<bool, String>(
+  isZkpChannelReady,
+);
 
 final proofFlowControllerProvider = StateNotifierProvider.autoDispose
     .family<ProofFlowController, ProofFlowState, String>((ref, contactId) {
@@ -27,7 +62,15 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
   late final AppLogger _logger;
   static const _logKey = 'ProofFlowController';
 
-  Future<void> requestLivenessCheck() async {
+  Future<bool> requestLivenessCheck() async {
+    if (!readIsZkpChannelReady(ref, contactId)) {
+      _logger.warning(
+        'ZKP request blocked: connection not established for contact $contactId',
+        name: _logKey,
+      );
+      return false;
+    }
+
     final chatController = ref.read(
       chatScreenControllerProvider(contactId).notifier,
     );
@@ -35,10 +78,21 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
     final attachments =
         LivenessZkpDIDCommAttachmentBuilder.buildLivenessCheckRequest();
 
-    await chatController.sendMessageDirect(
-      '',
-      attachments: List<chat.Attachment>.from(attachments),
-    );
+    try {
+      await chatController.sendMessageDirect(
+        '',
+        attachments: List<chat.Attachment>.from(attachments),
+      );
+      return true;
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to send liveness check request',
+        name: _logKey,
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
   }
 
   void resetSession() {
@@ -127,7 +181,6 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
       isVerifyingProof: false,
       verificationError: verification.isValid ? null : verification.error,
     );
-
     return verification.isValid;
   }
 }
