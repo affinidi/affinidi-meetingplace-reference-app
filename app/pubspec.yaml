@@ -47,6 +47,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   flutter_secure_storage: ^9.2.4
   flutter_svg: ^2.0.9
+  flutter_vodozemac: ^0.5.0
   form_field_validator: ^1.1.0
   freezed: ^3.1.0
   freezed_annotation: ^3.1.0
