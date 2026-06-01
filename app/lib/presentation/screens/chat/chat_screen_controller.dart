@@ -208,6 +208,7 @@ class ChatScreenController extends _$ChatScreenController
       (previous, next) {
         if (next == null) return;
         Future.microtask(() {
+          if (!ref.mounted) return;
           state = state.copyWith(contact: next);
         });
       },
@@ -286,15 +287,19 @@ class ChatScreenController extends _$ChatScreenController
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!ref.mounted) return;
+
     _logger.info('didChangeAppLifecycleState: $state', name: _logKey);
     switch (state) {
       case AppLifecycleState.resumed:
         _chatResumingLock.synchronized(() async {
+          if (!ref.mounted) return;
           await _resumeChatSession();
         });
         break;
       case AppLifecycleState.paused:
         _chatResumingLock.synchronized(() async {
+          if (!ref.mounted) return;
           _pauseChatSession();
         });
         break;
@@ -304,6 +309,7 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   Future<void> _resumeChatSession() async {
+    if (!ref.mounted) return;
     if (!_isPaused) return;
 
     _logger.info('Resuming chat session', name: _logKey);
@@ -315,6 +321,7 @@ class ChatScreenController extends _$ChatScreenController
 
     try {
       await _chatService?.startChatSession();
+      if (!ref.mounted) return;
       _isPaused = false;
     } catch (e, st) {
       _logger.error(

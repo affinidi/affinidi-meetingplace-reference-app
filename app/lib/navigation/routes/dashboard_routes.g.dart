@@ -113,6 +113,7 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
       routes: [
         GoRouteData.$route(
           path: '/r-cards',
+<<<<<<< HEAD
           name: 'rCards',
           factory: $RCardsRoute._fromState,
           routes: [
@@ -132,12 +133,26 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
       navigatorKey: CredentialsBranchData.$navigatorKey,
       restorationScopeId: CredentialsBranchData.$restorationScopeId,
 
+=======
+          name: 'r-cards',
+          factory: $RCardsRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      navigatorKey: CredentialsBranchData.$navigatorKey,
+      restorationScopeId: CredentialsBranchData.$restorationScopeId,
+>>>>>>> 6d4e230 (fix: verifier challenge)
       routes: [
         GoRouteData.$route(
           path: '/credentials',
           name: 'credentials',
+<<<<<<< HEAD
 
           factory: _$CredentialsRoute._fromState,
+=======
+          factory: $CredentialsRoute._fromState,
+>>>>>>> 6d4e230 (fix: verifier challenge)
         ),
       ],
     ),
@@ -459,7 +474,11 @@ mixin $RCardsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
+<<<<<<< HEAD
 mixin _$CredentialsRoute on GoRouteData {
+=======
+mixin $CredentialsRoute on GoRouteData {
+>>>>>>> 6d4e230 (fix: verifier challenge)
   static CredentialsRoute _fromState(GoRouterState state) =>
       const CredentialsRoute();
 
@@ -479,6 +498,7 @@ mixin _$CredentialsRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
+<<<<<<< HEAD
 
 mixin $RCardDetailsRoute on GoRouteData {
   static RCardDetailsRoute _fromState(GoRouterState state) =>
@@ -550,3 +570,5 @@ mixin _$SettingsRoute on GoRouteData {
   @override
   void replace(BuildContext context) => context.replace(location);
 }
+=======
+>>>>>>> 6d4e230 (fix: verifier challenge)

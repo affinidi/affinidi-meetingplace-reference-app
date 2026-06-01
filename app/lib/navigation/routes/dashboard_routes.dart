@@ -224,7 +224,15 @@ class IdentitiesRoute extends GoRouteData with $IdentitiesRoute {
       const IdentitiesScreen();
 }
 
-class CredentialsRoute extends GoRouteData with _$CredentialsRoute {
+class RCardsRoute extends GoRouteData with $RCardsRoute {
+  const RCardsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RCardsPlaceholderScreen();
+}
+
+class CredentialsRoute extends GoRouteData with $CredentialsRoute {
   const CredentialsRoute();
 
   @override

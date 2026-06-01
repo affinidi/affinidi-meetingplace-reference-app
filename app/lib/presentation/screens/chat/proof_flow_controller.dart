@@ -2,7 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
-    show LivenessProofPayload, LivenessZkpDIDCommAttachmentBuilder;
+  show
+    LivenessProofPayload,
+    LivenessZkpAttachmentParser,
+    LivenessZkpDIDCommAttachmentBuilder;
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/zkp_service/zkp_challenge_nonce.dart';
@@ -71,7 +74,8 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
   Future<bool> requestLivenessCheck() async {
     if (!readIsZkpChannelReady(ref, contactId)) {
       _logger.warning(
-        'ZKP request blocked: connection not established for contact $contactId',
+        'ZKP request blocked: connection not established '
+        'for contact $contactId',
         name: _logKey,
       );
       return false;
@@ -128,10 +132,16 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
       name: _logKey,
     );
 
-    final challengeNonce = state.verifierChallengeNonce;
+    var challengeNonce = state.verifierChallengeNonce;
+    challengeNonce ??= _findVerifierChallengeNonceFromChatHistory();
+    if (challengeNonce != null && mounted) {
+      state = state.copyWith(verifierChallengeNonce: challengeNonce);
+    }
+
     if (challengeNonce == null ||
         challengeNonce.length != zkpChallengeNonceByteLength) {
-      return 'No liveness challenge from verifier. Ask them to send a new request.';
+      return 'No liveness challenge from verifier. '
+          'Ask them to send a new request.';
     }
 
     final generation = await ref.read(zkpServiceProvider).generateProof(
@@ -167,6 +177,30 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
         _logger.info('Proof sent to contact successfully', name: _logKey);
         return null;
     }
+  }
+
+  List<int>? _findVerifierChallengeNonceFromChatHistory() {
+    final messages = ref.read(chatScreenControllerProvider(contactId)).messages;
+
+    for (final item in messages.reversed) {
+      if (item is! chat.Message || item.isFromMe) continue;
+
+      final payload = LivenessZkpAttachmentParser.tryParseRequestIn(
+        item.attachments,
+      );
+      if (payload == null) continue;
+
+      final challengeNonce = payload.challengeNonceBytes;
+      if (challengeNonce.length != zkpChallengeNonceByteLength) continue;
+
+      _logger.info(
+        'Recovered verifier challenge nonce from chat history',
+        name: _logKey,
+      );
+      return challengeNonce;
+    }
+
+    return null;
   }
 
   Future<bool> onProofReceived(LivenessProofPayload payload) async {
