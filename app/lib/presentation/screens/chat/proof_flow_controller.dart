@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
-import 'package:meeting_place_relationship/meeting_place_relationship.dart'
+import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show LivenessProofPayload, LivenessZkpDIDCommAttachmentBuilder;
 
 import '../../../application/services/contacts_service/contacts_service.dart';

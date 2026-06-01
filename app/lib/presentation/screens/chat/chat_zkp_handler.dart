@@ -7,7 +7,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart'
         LivenessZkpConciergeChatMapper,
         LivenessZkpConciergeIds,
         LivenessZkpConciergeMessages;
-import 'package:meeting_place_relationship/meeting_place_relationship.dart'
+import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show LivenessProofPayload, LivenessZkpAttachmentParser;
 
 import '../../../domain/models/contacts/contact.dart';

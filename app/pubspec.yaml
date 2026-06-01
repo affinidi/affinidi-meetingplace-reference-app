@@ -114,8 +114,8 @@ dependency_overrides:
     path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_core
   meeting_place_drift_repository:
     path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
-  meeting_place_relationship:
-    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_relationship
+  meeting_place_credentials:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_credentials
 
 flutter:
   generate: true

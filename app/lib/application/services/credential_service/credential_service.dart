@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
 import '../../../domain/models/credentials/liveness_credential_record.dart';
@@ -300,7 +301,6 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
     final bytes = List.generate(32, (_) => random.nextInt(256));
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
-
 }
 
 class CredentialCreationResult {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_relationship/meeting_place_relationship.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/liveness_errors.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/liveness_w3c_credential_validation.dart';
 import 'package:ssi/ssi.dart';
