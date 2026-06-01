@@ -9,10 +9,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
+import '../../../domain/models/zkp/zkp_challenge_nonce.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../credential_service/credential_service.dart';
-import 'zkp_challenge_nonce.dart';
 import 'zkp_service_state.dart';
 
 final zkpServiceProvider = Provider<ZkpService>(

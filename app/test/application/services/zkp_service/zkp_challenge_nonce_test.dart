@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mpx_flutter_reference_app/application/services/zkp_service/zkp_challenge_nonce.dart';
+import 'package:mpx_flutter_reference_app/domain/models/zkp/zkp_challenge_nonce.dart';
 
 void main() {
   group('generateZkpChallengeNonce', () {

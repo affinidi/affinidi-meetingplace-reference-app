@@ -886,12 +886,6 @@ packages:
     source: hosted
     version: "2.0.2"
   hooks_riverpod:
-    dependency: transitive
-    description:
-      name: hooks_riverpod
-      sha256: a217bbfaf32e43f925a545ba48470e59de4e7f21cc92920bc7944e4b450c1aba
-      url: "https://pub.dev"
-    source: hosted
     version: "3.3.2-dev.2"
   html:
     dependency: transitive
@@ -1301,6 +1295,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  objective_c:
+    dependency: transitive
+    description:
+      name: objective_c
+      sha256: "100a1c87616ab6ed41ec263b083c0ef3261ee6cd1dc3b0f35f8ddfa4f996fe52"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.3.0"
   one_of:
     dependency: transitive
     description:
