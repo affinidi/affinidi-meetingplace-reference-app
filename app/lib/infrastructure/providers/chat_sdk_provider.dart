@@ -55,6 +55,9 @@ final chatSdkProvider =
             chatPresenceExpiry: Duration(
               seconds: environment.chatPresenceIntervalInSeconds,
             ),
+            deleteMessageWindow: Duration(
+              seconds: environment.deleteMessageWindowInSeconds,
+            ),
           ),
           card: sdkContactCard,
           logger: logger,

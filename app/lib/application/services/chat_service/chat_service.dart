@@ -18,6 +18,10 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   int get secondsToShowChatActivityIndicator;
   int get chatPresenceIntervalInSeconds;
 
+  /// Maximum age at which the original sender can still delete a message
+  /// for everyone. Mirrors the SDK's `deleteMessageWindow` option.
+  Duration get deleteMessageWindow;
+
   Future<void> startChatSession();
   Future<void> pauseChat();
 
@@ -36,6 +40,7 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
 
   Future<void> sendChatActivity();
   Future<void> reactOnMessage(Message message, {required String reaction});
+  Future<void> deleteMessage(Message message, {bool localOnly = false});
   Future<void> sendEffect(Effect effectType);
 
   Future<void> updateContactSequenceNumber(String channelDid);

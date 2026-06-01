@@ -71,6 +71,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   int get chatPresenceIntervalInSeconds =>
       ref.read(environmentProvider).chatPresenceIntervalInSeconds;
 
+  @override
+  Duration get deleteMessageWindow => Duration(
+    seconds: ref.read(environmentProvider).deleteMessageWindowInSeconds,
+  );
+
   bool get isGroupChat => _isGroupChat;
 
   @override
@@ -344,6 +349,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     required String reaction,
   }) async {
     await _chatSDK?.reactOnMessage(message, reaction: reaction);
+  }
+
+  @override
+  Future<void> deleteMessage(Message message, {bool localOnly = false}) async {
+    await _chatSDK?.deleteMessage(message, localOnly: localOnly);
   }
 
   @override

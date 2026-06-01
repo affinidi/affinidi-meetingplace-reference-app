@@ -908,6 +908,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get messageCopiedClipboard => 'Message copied to clipboard';
 
   @override
+  String get chatMessageActionDelete => 'Delete for everyone';
+
+  @override
+  String get chatMessageActionDeleteLocal => 'Delete for me';
+
+  @override
+  String get chatMessageActionCopy => 'Copy message';
+
+  @override
+  String get chatMessageDeletedTombstone => 'This message was deleted';
+
+  @override
+  String get chatMessageDeletedLocallyTombstone => 'You deleted this message';
+
+  @override
+  String get chatMessageDeleteFailed => 'Could not delete message';
+
+  @override
   String chatItemStatus(String status) {
     String _temp0 = intl.Intl.selectLogic(status, {
       'queued': 'Queued',

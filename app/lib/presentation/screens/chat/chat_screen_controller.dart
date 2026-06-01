@@ -535,6 +535,38 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
+  /// Maximum age at which the original sender can still delete their own
+  /// message for everyone. Defers to the chat service (SDK option, falling
+  /// back to the environment-configured default before the SDK is ready).
+  Duration get deleteMessageWindow =>
+      _chatService?.deleteMessageWindow ?? Duration.zero;
+
+  /// Deletes a previously-sent message.
+  ///
+  /// When [localOnly] is true the message is hidden only for the current user
+  /// and no wire traffic is generated. Otherwise the SDK broadcasts a
+  /// redaction so all participants drop the message, subject to the
+  /// sender-only / delivery / `deleteMessageWindow` rules enforced by the SDK.
+  Future<void> deleteMessage(String messageId, {bool localOnly = false}) async {
+    try {
+      _showActivity();
+      final message =
+          state.messages.firstWhereOrNull((m) => m.messageId == messageId)
+              as chat.Message?;
+
+      if (message == null) {
+        throw AppException(
+          'Unable to find message with id $messageId',
+          code: AppExceptionType.missingMessage.name,
+        );
+      }
+
+      await _chatService?.deleteMessage(message, localOnly: localOnly);
+    } finally {
+      _hideActivity();
+    }
+  }
+
   /// Sends a [ScreenEffect] to the chat screen.
   ///
   /// This method handles the logic for triggering a visual or interactive
