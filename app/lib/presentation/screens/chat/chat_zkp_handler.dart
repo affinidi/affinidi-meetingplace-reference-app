@@ -8,7 +8,10 @@ import 'package:meeting_place_chat/meeting_place_chat.dart'
         LivenessZkpConciergeIds,
         LivenessZkpConciergeMessages;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
-    show LivenessProofPayload, LivenessZkpAttachmentParser;
+    show
+        LivenessCheckRequestPayload,
+        LivenessProofPayload,
+        LivenessZkpAttachmentParser;
 
 import '../../../domain/models/contacts/contact.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
@@ -38,8 +41,11 @@ class ChatZkpHandler {
     final attachments = plainTextMessage.attachments;
     if (attachments == null || attachments.isEmpty) return;
 
-    if (LivenessZkpAttachmentParser.tryParseRequestIn(attachments) != null) {
-      _handleLivenessRequest(channelDid, data);
+    final requestPayload = LivenessZkpAttachmentParser.tryParseRequestIn(
+      attachments,
+    );
+    if (requestPayload != null) {
+      _handleLivenessRequest(channelDid, data, requestPayload);
       return;
     }
 
@@ -51,12 +57,20 @@ class ChatZkpHandler {
     }
   }
 
-  void _handleLivenessRequest(String channelDid, chat.StreamData data) {
+  void _handleLivenessRequest(
+    String channelDid,
+    chat.StreamData data,
+    LivenessCheckRequestPayload requestPayload,
+  ) {
     final contact = getContact();
     if (contact == null || contact.channelDid != channelDid) return;
 
     final chatItem = data.chatItem;
     if (chatItem == null || chatItem.isFromMe) return;
+
+    ref
+        .read(proofFlowControllerProvider(contact.id).notifier)
+        .setVerifierChallengeNonce(requestPayload.challengeNonceBytes);
 
     logger.info('Liveness request received from $channelDid', name: logKey);
   }
@@ -84,30 +98,39 @@ class ChatZkpHandler {
     }
 
     unawaited(() async {
-      final isVerified = await ref
-          .read(proofFlowControllerProvider(contact.id).notifier)
-          .onProofReceived(proofPayload);
+      try {
+        final isVerified = await ref
+            .read(proofFlowControllerProvider(contact.id).notifier)
+            .onProofReceived(proofPayload);
 
-      if (!isVerified) {
-        logger.info(
-          '  Proof verification failed; badge notice not added',
-          name: logKey,
+        if (!isVerified) {
+          logger.info(
+            '  Proof verification failed; badge notice not added',
+            name: logKey,
+          );
+          return;
+        }
+
+        final contactName = contact.card.firstName.isNotEmpty
+            ? contact.card.firstName
+            : contact.card.displayName;
+        final notice = LivenessZkpConciergeMessages.humanZkpProofReceived(
+          chatId: chatItem.chatId,
+          messageId: LivenessZkpConciergeIds.proofReceived(chatItem.messageId),
+          dateCreated: chatItem.dateCreated,
+          contactName: contactName,
         );
-        return;
+        onUpsertChatItem(
+          LivenessZkpConciergeChatMapper.toConciergeMessage(notice),
+        );
+      } catch (error, stackTrace) {
+        logger.error(
+          'Unexpected error while verifying liveness proof',
+          name: logKey,
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
-
-      final contactName = contact.card.firstName.isNotEmpty
-          ? contact.card.firstName
-          : contact.card.displayName;
-      final notice = LivenessZkpConciergeMessages.humanZkpProofReceived(
-        chatId: chatItem.chatId,
-        messageId: LivenessZkpConciergeIds.proofReceived(chatItem.messageId),
-        dateCreated: chatItem.dateCreated,
-        contactName: contactName,
-      );
-      onUpsertChatItem(
-        LivenessZkpConciergeChatMapper.toConciergeMessage(notice),
-      );
     }());
   }
 

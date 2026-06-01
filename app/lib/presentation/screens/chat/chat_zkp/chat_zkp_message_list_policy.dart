@@ -106,14 +106,9 @@ final class _Enabled extends ChatZkpMessageListPolicy {
           .toSet(),
       _hasSharedProof = messages.any(
         (m) =>
-            (m is chat.ConciergeMessage &&
-                m.conciergeType.value ==
-                    LivenessZkpConciergeTypes.humanZkpProofShared) ||
-            (m is chat.Message &&
-                m.isFromMe &&
-                m.attachments.any(
-                  LivenessZkpAttachmentParser.matchesProofFormat,
-                )),
+            m is chat.ConciergeMessage &&
+            m.conciergeType.value ==
+                LivenessZkpConciergeTypes.humanZkpProofShared,
       );
 
   final Set<String> _pausedNoticeMessageIds;

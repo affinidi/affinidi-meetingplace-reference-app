@@ -12,8 +12,8 @@ class LivenessVcZkpMaterial {
   });
 
   final SignedVcDocument document;
-  final EddsaSignatureResult issuerPub;
-  final EddsaSignatureResult holderPub;
+  final BabyJubPublicKey issuerPub;
+  final BabyJubPublicKey holderPub;
   final String holderPrivateKeyHex;
 }
 
@@ -30,13 +30,12 @@ abstract final class LivenessVcZkpAdapter {
     required String issuerPrivateKeyHex,
   }) async {
     final crypto = RustEddsaHelperFfi();
+    final keyDerivation = VcKeyDerivation(crypto: crypto);
 
-    final issuerPub = await crypto.signDigest(
-      msgHash: '1',
+    final issuerPub = await keyDerivation.derivePublicKey(
       privateKeyHex: issuerPrivateKeyHex,
     );
-    final holderPub = await crypto.signDigest(
-      msgHash: '1',
+    final holderPub = await keyDerivation.derivePublicKey(
       privateKeyHex: holderPrivateKeyHex,
     );
 
