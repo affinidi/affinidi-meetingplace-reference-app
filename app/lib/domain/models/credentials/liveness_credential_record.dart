@@ -54,8 +54,7 @@ class LivenessCredentialRecord {
 
   /// Issuer shown in UI — prefers persisted [issuerDid], falls back to legacy
   /// [issuerName] for credentials issued before issuer DID was stored.
-  String get displayIssuer =>
-      issuerDid.isNotEmpty ? issuerDid : issuerName;
+  String get displayIssuer => issuerDid.isNotEmpty ? issuerDid : issuerName;
 
   Map<String, Object?> toJson() => {
     'identityId': identityId,

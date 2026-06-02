@@ -2,16 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
-  show
-    LivenessProofPayload,
-    LivenessZkpAttachmentParser,
-    LivenessZkpDIDCommAttachmentBuilder;
+    show
+        LivenessProofPayload,
+        LivenessZkpAttachmentParser,
+        LivenessZkpDIDCommAttachmentBuilder;
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/zkp_service/zkp_service.dart';
 import '../../../application/services/zkp_service/zkp_service_state.dart';
-import '../../../domain/models/zkp/zkp_challenge_nonce.dart';
 import '../../../domain/models/contacts/contact_status.dart';
+import '../../../domain/models/zkp/zkp_challenge_nonce.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'chat_screen_controller.dart';
@@ -144,10 +144,9 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
           'Ask them to send a new request.';
     }
 
-    final generation = await ref.read(zkpServiceProvider).generateProof(
-          identityId: identity.id,
-          challengeNonce: challengeNonce,
-        );
+    final generation = await ref
+        .read(zkpServiceProvider)
+        .generateProof(identityId: identity.id, challengeNonce: challengeNonce);
 
     switch (generation) {
       case ZkpProofGenerationFailure(:final error):

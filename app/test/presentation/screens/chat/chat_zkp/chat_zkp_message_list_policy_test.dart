@@ -57,36 +57,37 @@ void main() {
       expect(ChatZkpMessageListPolicy.hasVerifiedProof(messages), isFalse);
     });
 
-    test('returns false for proof attachment messages without verified concierge',
-        () {
-      const payload = LivenessProofPayload(proof: 'p', publicSignals: 's');
-      final proofMessage = Message(
-        chatId: chatId,
-        messageId: 'proof-msg-1',
-        senderDid: 'did:peer',
-        isFromMe: false,
-        dateCreated: when,
-        status: ChatItemStatus.confirmed,
-        value: '',
-        attachments: [
-          Attachment(
-            id: 'att-proof',
-            mediaType: 'application/json',
-            format: LivenessZkpProtocol.livenessProofFormat,
-            lastModifiedTime: when,
-            data: AttachmentData(
-              json:
-                  '{"type":"liveness_proof","proof":"p","publicSignals":"s"}',
+    test(
+      'returns false for proof attachment messages without verified concierge',
+      () {
+        final proofMessage = Message(
+          chatId: chatId,
+          messageId: 'proof-msg-1',
+          senderDid: 'did:peer',
+          isFromMe: false,
+          dateCreated: when,
+          status: ChatItemStatus.confirmed,
+          value: '',
+          attachments: [
+            Attachment(
+              id: 'att-proof',
+              mediaType: 'application/json',
+              format: LivenessZkpProtocol.livenessProofFormat,
+              lastModifiedTime: when,
+              data: AttachmentData(
+                json:
+                    '{"type":"liveness_proof","proof":"p","publicSignals":"s"}',
+              ),
             ),
-          ),
-        ],
-      );
+          ],
+        );
 
-      expect(
-        ChatZkpMessageListPolicy.hasVerifiedProof([proofMessage]),
-        isFalse,
-      );
-    });
+        expect(
+          ChatZkpMessageListPolicy.hasVerifiedProof([proofMessage]),
+          isFalse,
+        );
+      },
+    );
 
     test('returns false for plain text messages', () {
       final message = Message(

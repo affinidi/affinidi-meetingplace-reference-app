@@ -36,10 +36,10 @@ void main() {
         overrides: [
           meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
           pushNotificationsHandlerProvider.overrideWith(
-            () => _FakePushNotificationsHandler(),
+            _FakePushNotificationsHandler.new,
           ),
           networkConnectivityServiceProvider.overrideWith(
-            () => _FakeNetworkConnectivityService(),
+            _FakeNetworkConnectivityService.new,
           ),
         ],
       );
@@ -49,7 +49,9 @@ void main() {
         (previous, next) {},
         fireImmediately: true,
       );
-      controlPlaneService = container.read(controlPlaneServiceProvider.notifier);
+      controlPlaneService = container.read(
+        controlPlaneServiceProvider.notifier,
+      );
 
       await container.read(meetingPlaceSdkProvider.future);
       await Future<void>.delayed(Duration.zero);

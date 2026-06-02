@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/credential_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/credential_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/liveness_errors.dart';
@@ -27,7 +26,7 @@ void main() {
       container = ProviderContainer(
         overrides: credentialServiceTestOverrides(
           issuerManager: issuerManager,
-        ),
+        ).cast(),
       );
     });
 
@@ -111,10 +110,11 @@ void main() {
       );
 
       expect(
-        container.read(credentialServiceProvider).hasCredentialFor('identity-1'),
+        container
+            .read(credentialServiceProvider)
+            .hasCredentialFor('identity-1'),
         isFalse,
       );
     });
-
   });
 }

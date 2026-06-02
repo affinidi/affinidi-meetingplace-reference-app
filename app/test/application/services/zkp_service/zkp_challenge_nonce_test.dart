@@ -4,7 +4,10 @@ import 'package:mpx_flutter_reference_app/domain/models/zkp/zkp_challenge_nonce.
 void main() {
   group('generateZkpChallengeNonce', () {
     test('returns 32 bytes', () {
-      expect(generateZkpChallengeNonce(), hasLength(zkpChallengeNonceByteLength));
+      expect(
+        generateZkpChallengeNonce(),
+        hasLength(zkpChallengeNonceByteLength),
+      );
     });
   });
 
