@@ -2,11 +2,16 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/matrix_config_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/shared_preferences_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../fakes/fake_environment.dart';
 import '../fakes/fake_secure_storage.dart';
 
 void main() {
@@ -114,5 +119,58 @@ void main() {
       // provider threw, i.e., before MeetingPlaceCoreSDK.create() could run.
       expect(callLog, equals(['fvod.init completed']));
     });
+
+    test(
+      'proceeds past vodozemac init when it succeeds',
+      () async {
+        final callLog = <String>[];
+
+        SharedPreferences.setMockInitialValues({});
+        final sharedPreferences = await SharedPreferences.getInstance();
+
+        // When vodozemacInit succeeds, the provider must continue into the
+        // next bootstrap step. We detect that by injecting a sentinel error
+        // at matrixConfigProvider — the only way the sentinel can surface is
+        // if execution flowed past the awaited vodozemacInit.
+        final container = ProviderContainer(
+          overrides: [
+            appLoggerProvider.overrideWithValue(AppLogger.instance),
+            environmentProvider.overrideWithValue(FakeEnvironment()),
+            sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+            secureStorageProvider.overrideWith(
+              (ref) async => FakeSecureStorage(),
+            ),
+            vodozemacInitProvider.overrideWith((ref) async {
+              callLog.add('fvod.init completed');
+            }),
+            matrixConfigProvider.overrideWith((ref) async {
+              callLog.add('matrixConfig reached');
+              throw Exception('sentinel – proceeded past vodozemac');
+            }),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await expectLater(
+          container.read(meetingPlaceSdkProvider.future),
+          throwsA(
+            isA<Exception>().having(
+              (e) => e.toString(),
+              'message',
+              contains('proceeded past vodozemac'),
+            ),
+          ),
+        );
+
+        expect(
+          callLog,
+          equals(['fvod.init completed', 'matrixConfig reached']),
+        );
+
+        // Drain settingsService background microtask before container
+        // dispose so it doesn't read from a disposed container.
+        await pumpEventQueue();
+      },
+    );
   });
 }
