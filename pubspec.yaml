@@ -15,8 +15,6 @@ dev_dependencies:
   melos: ^7.1.1
 
 dependency_overrides:
-  meta: 1.17.0
-  test_api: ^0.7.12
   meeting_place_chat:
     # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
     git:
@@ -47,6 +45,8 @@ dependency_overrides:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_mediator
       ref: 19601ad2647ba00e10ab9bea6f2de9782d21b5c6
+  meta: 1.17.0
+  test_api: ^0.7.12
 
 melos:
   scripts:

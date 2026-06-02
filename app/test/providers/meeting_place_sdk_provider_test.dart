@@ -18,7 +18,7 @@ void main() {
 
   group('meetingPlaceSdkProvider bootstrap ordering', () {
     test(
-      'fails with vodozemac error before SDK is created when fvod.init() throws',
+      '''fails with vodozemac error before SDK is created when fvod.init() throws''',
       () async {
         final callLog = <String>[];
         final initError = Exception('vodozemac failed to initialize');
@@ -49,7 +49,8 @@ void main() {
           ),
         );
 
-        // vodozemac init was called exactly once and no further progress was made
+        // vodozemac init was called exactly once and no further progress was
+        // made
         expect(callLog, equals(['fvod.init called']));
       },
     );
