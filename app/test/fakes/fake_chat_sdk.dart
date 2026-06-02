@@ -20,6 +20,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   bool sessionEnded = false;
   String? lastEffectSent;
   bool shouldThrowOnStartSession = false;
+  String? lastRemovedMemberDid;
+  int removeMemberCallCount = 0;
 
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
@@ -389,6 +391,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   Future<void> rejectConnectionRequest(ConciergeMessage message) async {
     lastRejectedConnection = message;
     rejectConnectionRequestCalls.add({'message': message});
+  }
+
+  @override
+  Future<void> removeMember(String memberDid) async {
+    lastRemovedMemberDid = memberDid;
+    removeMemberCallCount++;
   }
 
   @override

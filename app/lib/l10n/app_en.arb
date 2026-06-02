@@ -1405,5 +1405,26 @@
 	"cameraAccessDenied": "Camera access denied or unavailable.",
 	"cameraOpenSettings": "Open Settings",
 	"cameraNotAvailable": "Camera not available",
-	"goBack": "Go Back"
+	"goBack": "Go Back",
+	"removeMemberDialogTitle": "Remove member",
+	"@removeMemberDialogTitle": {
+		"type": "text"
+	},
+	"removeMemberDialogBody": "Remove {name} from this group? They will no longer receive messages.",
+	"@removeMemberDialogBody": {
+		"type": "text",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"removeMemberConfirm": "Remove",
+	"@removeMemberConfirm": {
+		"type": "text"
+	},
+	"removeMemberNotSupported": "Removing members isn't supported yet.",
+	"@removeMemberNotSupported": {
+		"type": "text"
+	}
 }

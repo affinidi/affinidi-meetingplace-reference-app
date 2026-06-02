@@ -2151,6 +2151,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Back'**
   String get goBack;
+
+  /// No description provided for @removeMemberDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member'**
+  String get removeMemberDialogTitle;
+
+  /// No description provided for @removeMemberDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from this group? They will no longer receive messages.'**
+  String removeMemberDialogBody(String name);
+
+  /// No description provided for @removeMemberConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeMemberConfirm;
+
+  /// No description provided for @removeMemberNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing members isn\'t supported yet.'**
+  String get removeMemberNotSupported;
 }
 
 class _AppLocalizationsDelegate
