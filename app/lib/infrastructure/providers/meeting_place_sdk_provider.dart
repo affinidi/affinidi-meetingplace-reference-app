@@ -15,10 +15,14 @@ import 'matrix_config_provider.dart';
 
 /// Initializes the vodozemac cryptographic library.
 ///
-/// Exposed as a provider so it can be overridden in tests to verify
-/// that encryption bootstrap always completes before SDK creation.
+/// Cached at module scope so the native init runs at most once per
+/// process even if the [ProviderContainer] is recreated (hot restart,
+/// tests). Exposed as a provider so it can be overridden in tests to
+/// verify that encryption bootstrap always completes before SDK creation.
+final Future<void> _vodozemacInit = fvod.init();
+
 final vodozemacInitProvider = FutureProvider<void>(
-  (ref) => fvod.init(),
+  (ref) => _vodozemacInit,
   name: 'vodozemacInitProvider',
 );
 

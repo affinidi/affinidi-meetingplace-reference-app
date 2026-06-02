@@ -11,7 +11,9 @@ import '../fakes/fake_secure_storage.dart';
 
 void main() {
   setUpAll(() {
-    AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
+    AppLogger.initialize(
+      File('${Directory.systemTemp.path}/app_debug_test.log'),
+    );
   });
 
   group('meetingPlaceSdkProvider bootstrap ordering', () {
@@ -28,12 +30,10 @@ void main() {
               (ref) async => FakeSecureStorage(),
             ),
             // Simulate vodozemac init failure
-            vodozemacInitProvider.overrideWith(
-              (ref) async {
-                callLog.add('fvod.init called');
-                throw initError;
-              },
-            ),
+            vodozemacInitProvider.overrideWith((ref) async {
+              callLog.add('fvod.init called');
+              throw initError;
+            }),
           ],
         );
         addTearDown(container.dispose);
@@ -65,9 +65,7 @@ void main() {
             secureStorageProvider.overrideWith(
               (ref) async => FakeSecureStorage(),
             ),
-            vodozemacInitProvider.overrideWith(
-              (ref) async => throw initError,
-            ),
+            vodozemacInitProvider.overrideWith((ref) async => throw initError),
           ],
         );
         addTearDown(container.dispose);
@@ -79,46 +77,41 @@ void main() {
       },
     );
 
-    test(
-      'vodozemacInitProvider completes before SDK init proceeds',
-      () async {
-        final callLog = <String>[];
+    test('vodozemacInitProvider completes before SDK init proceeds', () async {
+      final callLog = <String>[];
 
-        // We verify ordering by controlling when vodozemacInit resolves:
-        // if the provider threw after a delay, MeetingPlaceCoreSDK.create()
-        // must not have been reached before the throw propagates.
-        final container = ProviderContainer(
-          overrides: [
-            appLoggerProvider.overrideWithValue(AppLogger.instance),
-            secureStorageProvider.overrideWith(
-              (ref) async => FakeSecureStorage(),
-            ),
-            vodozemacInitProvider.overrideWith(
-              (ref) async {
-                await Future<void>.delayed(const Duration(milliseconds: 10));
-                callLog.add('fvod.init completed');
-                throw Exception('sentinel – stop after init');
-              },
-            ),
-          ],
-        );
-        addTearDown(container.dispose);
-
-        await expectLater(
-          container.read(meetingPlaceSdkProvider.future),
-          throwsA(
-            isA<Exception>().having(
-              (e) => e.toString(),
-              'message',
-              contains('sentinel'),
-            ),
+      // We verify ordering by controlling when vodozemacInit resolves:
+      // if the provider threw after a delay, MeetingPlaceCoreSDK.create()
+      // must not have been reached before the throw propagates.
+      final container = ProviderContainer(
+        overrides: [
+          appLoggerProvider.overrideWithValue(AppLogger.instance),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
           ),
-        );
+          vodozemacInitProvider.overrideWith((ref) async {
+            await Future<void>.delayed(const Duration(milliseconds: 10));
+            callLog.add('fvod.init completed');
+            throw Exception('sentinel – stop after init');
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
 
-        // The log proves fvod.init ran (and completed its body) before the
-        // provider threw, i.e., before MeetingPlaceCoreSDK.create() could run.
-        expect(callLog, equals(['fvod.init completed']));
-      },
-    );
+      await expectLater(
+        container.read(meetingPlaceSdkProvider.future),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('sentinel'),
+          ),
+        ),
+      );
+
+      // The log proves fvod.init ran (and completed its body) before the
+      // provider threw, i.e., before MeetingPlaceCoreSDK.create() could run.
+      expect(callLog, equals(['fvod.init completed']));
+    });
   });
 }
