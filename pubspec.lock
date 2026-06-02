@@ -848,6 +848,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_vodozemac:
+    dependency: transitive
+    description:
+      name: flutter_vodozemac
+      sha256: ef4c3580a7f2fe8eebb7602c6cba593a42b4a5e5466c372a022f77ccc14914a5
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -1981,6 +1989,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.0"
+  sqlcipher_flutter_libs:
+    dependency: transitive
+    description:
+      name: sqlcipher_flutter_libs
+      sha256: dd1fcc74d5baf3c36ad53e2652b2d06c9f8747494a3ccde0076e88b159dfe622
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.8"
   sqlite3:
     dependency: transitive
     description:
