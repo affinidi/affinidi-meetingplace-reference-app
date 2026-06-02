@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
 import 'package:meeting_place_core/meeting_place_core.dart';
@@ -20,6 +21,7 @@ import 'matrix_config_provider.dart';
 /// verify that encryption bootstrap always completes before SDK creation.
 final Future<void> _vodozemacInit = fvod.init();
 
+@visibleForTesting
 final vodozemacInitProvider = FutureProvider<void>(
   (ref) => _vodozemacInit,
   name: 'vodozemacInitProvider',
