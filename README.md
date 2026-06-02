@@ -1,113 +1,81 @@
-# Affinidi Meeting Place - Reference App for Flutter
 
-This reference application demonstrates the sample usage of the **[Affinidi Meeting Place Core](https://pub.dev/packages/meeting_place_core)** and **[Chat](https://pub.dev/packages/meeting_place_chat)** SDK together with sample integrations (state management, services, infrastructure) in a real Flutter project.
+# Affinidi Meeting Place — Flutter Reference App
 
-With the use of Affinidi Meeting Place SDK, you can build a messaging appplication that provides a safe and secure method for discovering, connecting, and communicating with others (individuals, businesses, and AI agents) using Decentralised Identifiers (DIDs) and DIDComm v2.1 protocol.
+A production-ready reference app showing how to build a secure, privacy-first messaging application using the **[Affinidi Meeting Place Core](https://pub.dev/packages/meeting_place_core)** and **[Chat](https://pub.dev/packages/meeting_place_chat)** SDKs; with **Decentralised Identifiers (DIDs)**, **DIDComm v2.1** messaging, and a working **Human ZKP demo** built in.
 
-> **IMPORTANT:** This project does not collect or process any personal data. However, when used as part of a broader system or application that handles personally identifiable information (PII), users are responsible for ensuring that any such use complies with applicable privacy laws and data protection obligations.
+> **Privacy notice:** This project does not collect or process any personal data. If you integrate it into a broader system that handles personally identifiable information (PII), you are responsible for complying with all applicable privacy laws and data-protection obligations.
 
 ## Table of Contents
 
-- [Core Concepts](#core-concepts)
-- [Preview](#preview)
-- [Key Features](#key-features)
-- [Architecture Overview](#architecture-overview)
-  - [Architectural Layers](#architectural-layers)
-  - [Core Components](#core-components)
-  - [Access Rules and Data Flow](#access-rules-and-data-flow)
-  - [Affinidi Meeting Place SDK Integration](#affinidi-meeting-place-sdk-integration)
-  - [Chat Screen Architecture](#chat-screen-architecture)
-- [Requirements](#requirements)
-- [Getting started](#getting-started)
-- [Environment Variables](#environment-variables)
-  - [Required Environment Variables](#required-environment-variables)
-  - [Optional Environment Variables](#optional-environment-variables)
-- [Liveness Credential pipeline](#liveness-credential-pipeline)
-  - [Modular architecture](#modular-architecture)
-  - [End-to-end flow](#end-to-end-flow)
-- [AWS Rekognition Face Liveness setup](#aws-rekognition-face-liveness-setup)
-  - [Overview](#overview)
-  - [AWS prerequisites](#aws-prerequisites)
-  - [AWS console setup](#aws-console-setup)
-  - [Amplify configuration](#amplify-configuration)
-  - [Native platform setup](#native-platform-setup)
-  - [Session lifecycle](#session-lifecycle)
-  - [Troubleshooting](#aws-troubleshooting)
-- [VSCode Configuration](#vscode-configuration)
-- [Run App on Simulator](#run-app-on-simulator)
-- [Troubleshooting](#troubleshooting)
-- [Support \& Feedback](#support--feedback)
-  - [Reporting Technical Issues](#reporting-technical-issues)
-- [Contributing](#contributing)
-      - [Connect to Control Plane API](#connect-to-control-plane-api)
-      - [Connect to DIDComm Mediator](#connect-to-didcomm-mediator)
-      - [Enable Push Notifications](#enable-push-notifications)
-        - [Firebase iOS App](#firebase-ios-app)
-        - [Firebase Android App](#firebase-android-app)
-    - [Optional Environment Variables](#optional-environment-variables)
-  - [VSCode Configuration](#vscode-configuration)
-  - [Run App on Simulator](#run-app-on-simulator)
-  - [Troubleshooting](#troubleshooting)
-    - [Firebase Configuration Issues](#firebase-configuration-issues)
-  - [Support \& Feedback](#support--feedback)
-    - [Reporting Technical Issues](#reporting-technical-issues)
-  - [Contributing](#contributing)
+1. [Core Concepts](#core-concepts)
+2. [Preview](#preview)
+3. [Key Features](#key-features)
+4. [Architecture Overview](#architecture-overview)
+5. [Feature Demonstrations](#feature-demos)
+6. [Requirements](#requirements)
+7. [Getting Started](#getting-started)
+8. [Environment Variables](#environment-variables)
+9. [VSCode Configuration](#vscode-configuration)
+10. [Run App on Simulator](#run-app-on-simulator)
+11. [Git Hooks](#git-hooks)
+12. [Troubleshooting](#troubleshooting)
+13. [Support & Feedback](#support--feedback)
+14. [Contributing](#contributing)
+
+---
 
 ## Core Concepts
 
-- **Decentralised Identifier (DID):** A globally unique identifier that enables secure interactions. The DID is the cornerstone of Self-Sovereign Identity (SSI), a concept that empowers individuals or entities to control their digital identities. DID has different methods to prove control of digital identity.
+Familiarise yourself with these key terms before diving into the code.
 
-- **Verifiable Credential (VC):** A digital representation of a claim created by the issuer about the subject (e.g., Individual). VC is cryptographically signed and verifiable.
-
-- **Messaging Server (Mediator):** A service that handles and routes messages securely between parties (e.g., users, businesses, other mediators, or even AI agents). The mediators process the message without being able to access the message’s content intended for the recipient.
-
-- **Invitation:** A ContactCard containing information about the invitation, such as name, description, and validity. It also includes a unique phrase or mnemonic that a user can publish to allow others to initiate a connection request. It serves as an entry point for users who wish to connect with you securely.
-
-- **Channel:** A secure connection that forms once an invitation to connect is accepted and finalised by the offerer. Each channels creates its own DID as an identifier along with the DID of each participants.
+<table>
+<thead>
+<tr><th>Term</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td colspan="2"><strong>Core SDK</strong></td></tr>
+<tr><td><strong>Decentralised Identifier (DID)</strong></td><td>A globally unique identifier that enables secure, self-sovereign identity interactions. The owner controls the DID without relying on a central authority.</td></tr>
+<tr><td><strong>Verifiable Credential (VC)</strong></td><td>A cryptographically signed digital claim about a subject (e.g. a person or organisation), issued by a trusted issuer and verifiable by anyone.</td></tr>
+<tr><td><strong>Messaging Server (Mediator)</strong></td><td>A routing service that securely relays messages between parties; individuals, businesses, or AI agents, without being able to read message content.</td></tr>
+<tr><td><strong>Invitation</strong></td><td>A <code>ContactCard</code> containing a name, description, validity period, and a unique mnemonic phrase. Publish one so others can initiate a secure connection request with you.</td></tr>
+<tr><td><strong>Channel</strong></td><td>A secure, bilateral connection formed once an invitation is accepted. Each channel has its own DID, separate from each participant's primary DID.</td></tr>
+<tr><td><strong>Relationship Card (R-Card)</strong></td><td>A signed contact credential containing your name, email, phone, and company. Sent automatically when a channel opens and stored in the Credentials tab. Exportable to vCard 3.0.</td></tr>
+<tr><td><strong>Verifiable Relationship Credential (VRC)</strong></td><td>A mutual "verified relationship" credential between two DIDs, exchanged via a two step handshake in chat. Both participants receive a signed copy stored in the Credentials tab.</td></tr>
+<tr><td colspan="2"><strong>ZKP Feature (opt-in)</strong></td></tr>
+<tr><td><strong>Zero Knowledge Proof (ZKP)</strong></td><td>A cryptographic method that lets one party prove a fact to another without revealing underlying personal data. Used in this app to prove "humanness" via a Liveness Credential. Enable with <code>ZKP_ENABLED=true</code>.</td></tr>
+</tbody>
+</table>
 
 ## Preview
 
-The reference application showcases the implementation of the Affinidi Meeting Place Core and Chat SDKs, including the best practices. It showcases the core functionalities and capabilities of a secure and private messaging application, where you can set up your primary identity, create connection offers, and send messages, which include peer-to-peer and group messaging.
+The reference app showcases the core capabilities of a secure, private messaging application - identity setup, connection offers, peer-to-peer messaging, and group messaging, all built on best practices from the Affinidi Meeting Place SDK.
 
-![screenshots](assets/docs/meetingplace-screenshot.png)
+![App preview screenshots](assets/docs/meetingplace-screenshot.png)
 
 ## Key Features
 
-- **Multiple Identities** - set up your primary identity to serve as your main professional or personal profile. Additionally, create aliases tailored to specific scenarios or communication needs (for example, a hobbyist or community profile).
+| Feature | Description |
+|---------|-------------|
+| **Multiple Identities** | Set a primary identity for your main profile, plus create aliases for specific contexts (e.g. a hobbyist persona or professional profile). |
+| **Connect with Invitations** | Create and publish invitations with custom options: a custom phrase, a usage limit, or an expiry date. |
+| **Secure Messaging** | Peer-to-peer and group messaging with end-to-end privacy built in. |
+| **Verified Identity (R-Card and VRC)** | Share your R-Card (a signed digital contact card) in any chat, or initiate a mutual VRC exchange to create a verifiable record of your relationship. See [Feature Demonstrations](#feature-demos). |
+| **Messaging Server** | Use the Affinidi-hosted messaging server or bring your own managed mediator. |
+| **Human ZKP Demo** | Prove a contact is human using a Zero Knowledge Proof; no biometric data or personal information is shared. See [Feature Demonstrations](#feature-demos). |
 
-- **Connect with Invitations** - create and publish invitations for other users to find and connect with you, whether it's peer-to-peer or in a group setting. You can create invites with custom setup options, such as using a custom phrase, specifying the number of invite uses, or setting an expiry, for a more secure setup.
-
-- **Secure Messaging** - communicate either in a peer-to-peer or group setting, like how most chat applications do, but with security and privacy built in.
-
-- **Verified Identity** - show a proof of your identity using a verifiable credential as proof within the chat.
-
-- **Messaging Server** - use our messaging servers as your default server configuration or create your own managed messaging server.
-
-Refer to [the documentation](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/) to learn more about Affinidi Meeting Place SDK.
-
-### Human ZKP demo flow
-
-This reference app includes an optional **Human ZKP** demo. It is off by default. Enable it at build/run time with `ZKP_ENABLED=true` (this also exposes the **Credentials** tab for managing a Liveness Credential).
-
-The demo uses synthetic liveness evidence to exercise the full **LivenessCredential → ZKP** pipeline without a camera or third-party liveness service. To connect a real provider such as AWS Rekognition, implement the pluggable evidence layer described in [Liveness Credential pipeline](#liveness-credential-pipeline) and follow [AWS Rekognition Face Liveness setup](#aws-rekognition-face-liveness-setup) for the AWS-side configuration.
-
-**Happy path:** In a peer chat, open **+** → **Human Zero Knowledge Proof** to request proof from the contact. The peer fulfills the request, a **LivenessCredential** is issued, and a ZKP is exchanged over the channel. Concierge messages in the thread record the request and successful proof (for example, that the contact shared a proof confirming they are human, with no personal data shared). The requester then sees a verified indicator on the contact avatar.
-
-**Failure path:** If verification does not succeed, a Concierge message is shown in the chat, for example:
-
-> **Bob** failed to provide a Zero-Knowledge Proof confirming they are human.
-
-The message is attributed to **Concierge** and includes a **Human ZKP** badge below the text.
-
-![Human ZKP verification failure](assets/zkp/zkp-verification-failure.png)
+For full SDK documentation, see the [Affinidi Meeting Place SDK docs](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/).
 
 ## Architecture Overview
 
-The architecture is organised into distinct layers, each with specific responsibilities to ensure maintainability, testability, and separation of concerns.
+The app uses a clean, four layer architecture. Each layer has one job and can only talk to the layer below it.
 
 ### Architectural Layers
 
-![Reference App Arch](./assets/docs/reference-app-arch-diagram.png)
+![Reference App Architecture](./assets/docs/reference-app-arch-diagram.png)
+
+```
+Presentation Layer → Application Layer → Domain Layer → Infrastructure Layer
+```
 
 ### Core Components
 
@@ -133,280 +101,107 @@ The architecture is organised into distinct layers, each with specific responsib
 - **External Services**: Firebase messaging, biometrics, secure storage, media handling.
 - **Configuration**: Environment settings and app configuration.
 
-> To add a new profile field (e.g. a new contact attribute), see the [Adding Profile Fields guide](doc/ADDING_PROFILE_FIELDS.md).
 
-### Access Rules and Data Flow
+### Access Rules
 
-The architecture enforces strict access rules to maintain separation of concerns:
+Layers can only access the layer directly below them, never skip a level.
 
-#### Screens (Presentation Layer)
-- **Responsibility**: Display UI and handle user interactions only.
-- **Access**: Can only access **Controllers** for state changes.
-- **Restrictions**: No direct access to services or infrastructure.
+| Layer | Responsibility | Can access |
+|-------|----------------|------------|
+| **Screens** (Presentation) | Display UI, handle user input | Controllers only |
+| **Controllers** (State management) | Manage state, coordinate UI ↔ business logic | Services, infrastructure providers |
+| **Services** (Application) | Implement business logic and use cases | Repository interfaces, infrastructure providers |
 
-#### Controllers (State Management)
-- **Responsibility**: Manage application state and coordinate between UI and business logic.
-- **Access**: Can access **Services** and **Infrastructure Providers**.
-- **Pattern**: Implemented as Riverpod StateNotifiers/Providers.
+### SDK Integration
 
-#### Services (Application Layer)
-- **Responsibility**: Implement business logic and use cases.
-- **Access**: Can access **Repository interfaces** from the Domain layer and **Infrastructure Providers**.
-
-```mermaid
-graph LR
-    Screen["Screen<br/>(Display UI)"] 
-    Controller["Controller(UI Logic)<br/>(UI State Management)"]
-    Service["Service<br/>(App Business Logic)<br/>(App State Management)"]
-    RepoInterface["Repository Interface<br/>(Domain Contract)"]
-    RepoImpl["Repository Implementation<br/>(Infrastructure Implementation)"]
-
-    Screen --> Controller
-    Controller --> Service
-    Service --> RepoInterface
-    RepoInterface --> RepoImpl
-
-    classDef presentation fill:#040822,color:white,stroke:#85fbfd,stroke-width:1px
-    classDef application fill:#040822,color:white,stroke:#3464fd,stroke-width:1px
-    classDef domain fill:#040822,color:white,stroke:#cdced3,stroke-width:1px
-    classDef infrastructure fill:#040822,color:white,stroke:#cdced3,stroke-width:1px
-
-    class Screen,Controller presentation
-    class Service application
-    class RepoInterface domain
-    class RepoImpl infrastructure
-```
-
-This ensures that:
-
-- UI components remain pure and testable.
-- Business logic is isolated from infrastructure concerns.
-- Dependencies flow inward toward the domain core.
-- Each layer has a single, well-defined responsibility.
-
-### Affinidi Meeting Place SDK Integration
-
-The app integrates with Affinidi Meeting Place using:
-
-- **Core SDK**: Handles DID management and DIDComm messaging.
-- **Chat SDK**: Provides messaging capabilities.
-- **Repository Pattern**: Abstracts SDK interactions behind domain interfaces.
-- **Provider Pattern**: Manages SDK instances through dependency injection.
-
-This architecture ensures that the Affinidi SDK integration is properly abstracted and can be easily maintained or replaced if needed.
+| Component | What it does |
+|-----------|--------------|
+| **Core SDK** | DID management and DIDComm messaging |
+| **Chat SDK** | Messaging capabilities |
+| **Repository pattern** | Wraps SDK calls behind domain interfaces; swap the SDK without touching UI or business logic |
+| **Riverpod providers** | Injects SDK instances throughout the app |
 
 ### Chat Screen Architecture
 
-The chat screen follows the same layered architecture, with clear separation between presentation, application, and SDK concerns. The diagram below shows the component breakdown of the chat screen.
-
 ![Chat Screen Architecture](./assets/docs/chat_screen_architecture.png)
 
-> The source diagram is available at [`assets/docs/chat_screen_architecture.puml`](./assets/docs/chat_screen_architecture.puml).
+Source diagram: [`assets/docs/chat_screen_architecture.puml`](./assets/docs/chat_screen_architecture.puml)
 
-## Requirements
+<h2 id="feature-demos">Feature Demonstrations</h2>
 
-- Flutter 3.41.4
-- Dart SDK ^3.9.2
+Each tab below documents one interactive feature built into this reference app. Adding a new feature demo = adding a new tab. The page length stays constant regardless of how many demos are included.
 
-## Getting started
+<details open id="panel-zkp">
+<summary><strong>Human ZKP Demo</strong></summary>
 
-Set up your environment to run the Meeting Place application.
+<h3 id="zkp-what">What is a Zero Knowledge Proof?</h3>
 
-#### Activate Melos
+A **Zero-Knowledge Proof (ZKP)** lets one party prove a fact to another without revealing the underlying data. In this app, the fact being proved is: *"I am a real human."* The proof is derived from a **Liveness Credential**; a signed Verifiable Credential issued after a liveness check and packaged as a compact **Groth16 ZKP** that can be verified instantly by the other party.
 
-```bash
-dart pub global activate melos && export PATH="$PATH":"$HOME/.pub-cache/bin"
-```
+<h3 id="zkp-enable">Enabling the demo</h3>
 
-> **NOTE:** Add the `export PATH="$PATH":"$HOME/.pub-cache/bin"` into your shell configuration file, like `~/.zshrc` or `~/.bashrc` to apply the new `PATH` permanently into your terminal.
-
-#### Install Dependencies
+The Human ZKP demo is **off by default**. Enable it at build or run time:
 
 ```bash
-melos pubget
+ZKP_ENABLED=true
 ```
 
-#### Generate Models
+> Setting `ZKP_ENABLED=true` also unlocks the **Credentials** tab, where you can inspect and manage Liveness Credentials.
 
-To generate models, run the following command in your terminal:
+> Out of the box the demo uses **synthetic liveness evidence**, no camera or third-party service needed. To connect a real face detection service, see [Using a real liveness provider](#zkp-real-provider).
 
-```bash
-melos gen
-```
+<h3 id="zkp-happy">Happy path</h3>
 
-#### Generate Localised Strings
+The screenshots below show the full flow from the requester's side.
 
-To generate localised strings from arb files, run the following command in your terminal:
+<table>
+<tr>
+<td align="center" width="25%"><strong>Open chat</strong><br><sub>Start a peer-to-peer conversation</sub></td>
+<td align="center" width="25%"><strong>Send ZKP request</strong><br><sub>Tap <b>'+'</b>to start Human ZKP flow</sub></td>
+<td align="center" width="25%"><strong>Contact completes liveness</strong></td>
+<td align="center" width="25%"><strong>ZKP sent and verified</strong></td>
+</tr>
+</table>
 
-```bash
-melos strings
-```
+<table>
+<tr>
+<td align="center" width="25%"><img src="assets/zkp/open-chat.png" alt="Step 1" width="180" /><br><sub>Step 1</sub></td>
+<td align="center" width="25%"><img src="assets/zkp/send-zkp-request.png" alt="Step 2" width="180" /><br><sub>Step 2</sub></td>
+<td align="center" width="25%"><img src="assets/zkp/complete-liveness.png" alt="Step 3" width="180" /><br><sub>Step 3</sub></td>
+<td align="center" width="25%"><img src="assets/zkp/zkp-sent.png" alt="Step 4" width="180" /><br><sub>Step 4</sub></td>
+</tr>
+</table>
 
-## Environment Variables
+<h3 id="zkp-fail">Failure path</h3>
 
-The Meeting Place reference app provides a `.example.env` template to populate the required variables and quickly setup the app.
+If verification fails, a **Concierge message** appears in the thread with a Human ZKP badge:
 
-To prepare the env variable, copy the environment file from the template.
+<blockquote>
+<p><em>"Bob failed to provide a Zero Knowledge Proof confirming they are human."</em></p>
+</blockquote>
 
-```bash
-mkdir -p configurations && cp templates/.example.env configurations/.env
-```
-> **NOTE:** Execute the command inside the root folder of the reference app.
+<p align="center">
+<img src="assets/zkp/zkp-verification-failure.png" alt="ZKP verification failure" width="220" />
+</p>
 
-Most environment variables have sensible defaults defined in the application. You only need to provide values specific to your setup or when you want to override the defaults.
+<h3 id="zkp-real-provider">Using a real liveness provider</h3>
 
-### Required Environment Variables
+The liveness check in this reference app is **mocked with synthetic evidence**; it exercises the full **Liveness Credential → ZKP pipeline** end-to-end without a camera or third-party account, so you can run the demo immediately after cloning.
 
-The following variables **must** be provided in your `configurations/.env` file.
+The detailed pipeline architecture, provider integration guide, and AWS Rekognition setup instructions live in the **[Credentials SDK documentation](https://github.com/affinidi/affinidi-meetingplace-sdk-dart/blob/main/meeting-place-credentials.html#provider-setup)** — not here. That keeps provider setup accurate as the SDK evolves.
 
-#### Connect to Control Plane API
+> **Recommended provider — AWS Rekognition Face Liveness.** Our team has end-to-end validated this integration against the Liveness Credential pipeline. See [Credentials SDK; Provider Setup](https://github.com/affinidi/affinidi-meetingplace-sdk-dart/blob/main/meeting-place-credentials.html#provider-setup).
 
-The Control Plane API enables discovery and secure channel creation using DIDComm v2.1. Participants can publish a connection offer or invitation with one of their identities (e.g., gaming persona) for direct or group chat.
+> **Prefer a different service?** The pipeline is provider-agnostic. Azure Face API, Onfido, or any custom liveness solution will work, implement `LivenessEvidenceSource` and the credential and ZKP layers require zero changes.
 
-To create an instance of Control Plane API locally, follow the guide from the [Control Plane API for Dart](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/deployment-options/control-plane-open-sourced/) open source project.
+<ul>
+<li>
+<details>
+<summary id="aws-rekognition-face-liveness-setup">AWS Rekognition Face Liveness setup</summary>
 
-After setting up the API server, copy the `CONTROL_PLANE_DID` containing the `did:web` value from the env file.
+This section documents everything required to configure **Amazon Rekognition Face Liveness** for use with a Flutter app via the [`face_liveness_detector`](https://github.com/affinidi/affinidi-meetingplace-reference-app/blob/main/packages/face_liveness_detector/README.md) plugin. An end-to-end proof-of-concept validated this flow against the Liveness Credential pipeline above. The AWS integration itself is not part of the reference app and should be implemented in your own project or SDK layer.
 
-```bash
-# Required for MeetingPlaceCoreSDK functionality
-# YourControl Plane DID
-CONTROL_PLANE_DID=""
-```
-
-The `did:web` value can differ depending on your domain hosting the Control Plane API.
-
-#### Connect to DIDComm Mediator
-
-The DIDComm Mediator is a messaging server that routes messages securely between parties, such as individuals, businesses, or AI agents. Mediators cannot access message content.
-
-To create an instance of DIDComm Mediator locally, follow the guide from the [DIDComm Mediator](https://docs.affinidi.com/products/affinidi-messaging/didcomm-mediator/deployment-options/mediator-open-sourced/) open source project.
-
-Setting up DIDComm Mediator generates the Mediator DID that you can use to populate the `DEFAULT_MEDIATOR_DID` env variable.
-
-```bash
-# Required for MeetingPlaceCoreSDK functionality
-# Your Mediator DID
-DEFAULT_MEDIATOR_DID=""
-```
-
-#### Enable Push Notifications
-
-To enable push notification, create a [Firebase](https://firebase.google.com/docs/projects/learn-more) project. After creating the project, follows the steps below:
-
-##### Firebase iOS App
-
-1. [Create an iOS app](https://firebase.google.com/docs/ios/setup#register-app) from your Firebase project.
-2. Download the `GoogleService-Info.plist` from the iOS app settings.
-3. Copy the downloaded `GoogleService-Info.plist` into the `app/ios/Runner` folder of the Meeting Place reference app.
-
-> **NOTE:** Skip other steps, you only need to generate and download the `GoogleService-Info.plist` file.
-
-##### Firebase Android App
-
-1. [Create an Android app](https://firebase.google.com/docs/android/setup#register-app) from your Firebase project.
-2. Download the `google-services.json` from the iOS app settings.
-3. Copy the downloaded `google-services.json` into the `app/android/app` folder of the Meeting Place reference app.
-
-> **NOTE:** Skip other steps, you only need to generate and download the `google-services.json` file.
-
-After setting up the Firebase apps, populate the Firebase-related environment variables that can be found in the Firebase console or in the downloaded files.
-
-```bash
-# Required for Firebase integration
-FIREBASE_MESSAGING_SENDER_ID=""
-FIREBASE_PROJECT_ID=""
-FIREBASE_STORAGE_BUCKET=""
-
-FIREBASE_IOS_APIKEY=""
-FIREBASE_IOS_APP_ID=""
-FIREBASE_IOS_BUNDLE_ID=""
-
-FIREBASE_ANDROID_APIKEY=""
-FIREBASE_ANDROID_APP_ID=""
-```
-
-### Optional Environment Variables
-
-The following variables have default values but can be customized:
-
-```bash
-# App configuration (defaults shown)
-APP_VERSION_NAME=""                              # Default: ""
-BIOMETRICS_ENABLED="true"                        # Default: true
-DATABASE_LOGGING_ENABLED="false"                 # Default: false (debug mode only)
-FOREGROUND_NOTIFICATIONS_ENABLED="false"         # Default: false
-TAPS_TO_UNLOCK_DEBUG="7"                         # Default: 7
-
-# Chat settings (defaults shown)
-CHAT_ACTIVITY_EXPIRES_IN_SECONDS="3"             # Default: 3
-CHAT_PRESENCE_SEND_INTERVAL_IN_SECONDS="60"      # Default: 60
-CHAT_IMAGE_MAX_SIZE="800"                        # Default: 800
-CHAT_IMAGE_QUALITY_PERCENT="80"                  # Default: 80
-
-# Profile settings (defaults shown)
-PROFILE_IMAGE_MAX_SIZE="100"                     # Default: 100
-PROFILE_IMAGE_QUALITY_PERCENT="80"               # Default: 80
-
-# Marketplace
-MARKETPLACE_QR_PREFIX=""                         # Default: ""
-
-# Out-of-Band (OOB) Flow Configuration
-# Set this value to distinguish between multiple OOB flows and prevent QR code validation from one flow interfering with another.
-# Values are not predefined and can be any string. For example: `oss-app-main-oob-flow`.
-DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: ""
-
-# Human ZKP & Liveness Credential (defaults shown)
-ZKP_ENABLED="false"                              # Default: false — enables Human ZKP demo and Credentials tab
-```
-
-> **NOTE:** You can find all available configuration options and their default values in `lib/infrastructure/configuration/environment.dart`.
-
-## Liveness Credential pipeline
-
-The reference app demonstrates a **Liveness VC → ZKP** flow using synthetic evidence. The design is modular so any liveness provider (AWS Rekognition, Azure, Onfido, etc.) can supply evidence and reuse the same credential and proof layers.
-
-### Modular architecture
-
-| Layer | Responsibility | Key types |
-|-------|----------------|-----------|
-| **Evidence** | Collect a liveness result from a provider | `LivenessEvidence`, `LivenessEvidenceSource` |
-| **Credential** | Issue a signed W3C `LivenessCredential` from evidence | `LivenessCredentialBuilder`, `LivenessCredentialSubject`, `CredentialService` |
-| **ZKP** | Convert the W3C VC into a `vc_zkp` signed document and generate a Groth16 proof | `LivenessVcZkpAdapter`, `ZkpService` |
-
-To connect a real liveness provider, implement `LivenessEvidenceSource` (or pass `LivenessEvidence` directly into `CredentialService.createLivenessCredential`). Everything from credential issuance onward is provider-agnostic.
-
-The issued W3C credential uses type `LivenessCredential` with provider-neutral claims in `credentialSubject`:
-
-- `livenessProvider` — e.g. `aws_rekognition`
-- `livenessSessionId` — provider transaction / session ID
-- `livenessScore`, `livenessThreshold`, `livenessPassed`, `checkedAt`
-
-### End-to-end flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant App
-    participant Provider as Liveness provider
-    participant VC as CredentialService
-    participant ZKP as ZkpService
-    participant Chat as DIDComm Chat
-
-    User->>App: Fulfill Human ZKP request
-    App->>Provider: Run liveness check
-    Provider-->>App: LivenessEvidence
-    App->>VC: Build & sign W3C LivenessCredential
-    VC->>VC: Convert to vc_zkp signed document
-    User->>App: Generate proof
-    App->>ZKP: Groth16 proof (SimpleVCProof circuit)
-    App->>Chat: Send LivenessProofPayload attachment
-```
-
-## AWS Rekognition Face Liveness setup
-
-This section documents everything required to configure **Amazon Rekognition Face Liveness** for use with a Flutter app via the [`face_liveness_detector`](packages/face_liveness_detector/README.md) plugin. An end-to-end proof-of-concept validated this flow against the Liveness Credential pipeline above; the AWS integration itself is not part of the reference app and should be implemented in your own project or SDK layer.
-
-### Overview
+#### Overview
 
 AWS Face Liveness works in three steps:
 
@@ -414,43 +209,43 @@ AWS Face Liveness works in three steps:
 2. **Camera challenge** — present the native Amplify Face Liveness UI, which streams video to Rekognition for the given session.
 3. **Fetch results** — call `GetFaceLivenessSessionResults` to read the session status and confidence score.
 
-Authentication uses a **Cognito Identity Pool** with guest (unauthenticated) access. No user sign-in is required — the mobile client obtains temporary AWS credentials and calls Rekognition directly, or via a backend you control.
+Authentication uses a **Cognito Identity Pool** with guest (unauthenticated) access. No user sign-in is required. The mobile client obtains temporary AWS credentials and calls Rekognition directly, or via a backend you control.
 
-### AWS prerequisites
+#### AWS prerequisites
 
-1. An **AWS account** with [Amazon Rekognition Face Liveness](https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html) available in your chosen region (e.g. `us-east-1`).
+1. An **AWS account** with [Amazon Rekognition Face Liveness](https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html) available in your chosen region (for example, `us-east-1`).
 2. A **Cognito Identity Pool** with **Enable access to unauthenticated identities** turned on.
 3. An **IAM policy** on the unauthenticated role granting Rekognition Face Liveness API access:
 
 ```json
 {
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "rekognition:CreateFaceLivenessSession",
-        "rekognition:GetFaceLivenessSessionResults"
-      ],
-      "Resource": "*"
-    }
-  ]
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"rekognition:CreateFaceLivenessSession",
+				"rekognition:GetFaceLivenessSessionResults"
+			],
+			"Resource": "*"
+		}
+	]
 }
 ```
 
-4. Note your **Identity Pool ID** (format `region:uuid`) and **region** — both are required for Amplify configuration.
+4. Note your **Identity Pool ID** (format `region:uuid`) and **region**. Both are required for Amplify configuration.
 
 For a guided walkthrough, see the [AWS Amplify Face Liveness quick start](https://ui.docs.amplify.aws/swift/connected-components/liveness#quick-start).
 
-### AWS console setup
+#### AWS console setup
 
 1. Open **Amazon Cognito** → **Identity pools** → **Create identity pool**.
 2. Enable **Guest access** (unauthenticated identities).
 3. Create or select the IAM role for unauthenticated users and attach the Rekognition policy above.
-4. Copy the **Identity pool ID** (e.g. `us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).
+4. Copy the **Identity pool ID** (for example, `us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).
 5. Confirm Face Liveness is supported in your region.
 
-**Alternative — Amplify CLI:**
+**Alternative: Amplify CLI**
 
 ```bash
 amplify init
@@ -460,7 +255,7 @@ amplify push
 
 A reference Amplify project lives at `packages/face_liveness_detector/example/android/amplify/`.
 
-### Amplify configuration
+#### Amplify configuration
 
 The native Face Liveness UI reads Amplify config from platform-specific files. Both must reference the same Identity Pool ID and region.
 
@@ -468,27 +263,27 @@ The native Face Liveness UI reads Amplify config from platform-specific files. B
 
 ```json
 {
-  "auth": {
-    "plugins": {
-      "awsCognitoAuthPlugin": {
-        "IdentityManager": { "Default": {} },
-        "CredentialsProvider": {
-          "CognitoIdentity": {
-            "Default": {
-              "PoolId": "us-east-1:REPLACE_WITH_IDENTITY_POOL_ID",
-              "Region": "us-east-1"
-            }
-          }
-        },
-        "CognitoIdentity": {
-          "Default": {
-            "PoolId": "us-east-1:REPLACE_WITH_IDENTITY_POOL_ID",
-            "Region": "us-east-1"
-          }
-        }
-      }
-    }
-  }
+	"auth": {
+		"plugins": {
+			"awsCognitoAuthPlugin": {
+				"IdentityManager": { "Default": {} },
+				"CredentialsProvider": {
+					"CognitoIdentity": {
+						"Default": {
+							"PoolId": "us-east-1:REPLACE_WITH_IDENTITY_POOL_ID",
+							"Region": "us-east-1"
+						}
+					}
+				},
+				"CognitoIdentity": {
+					"Default": {
+						"PoolId": "us-east-1:REPLACE_WITH_IDENTITY_POOL_ID",
+						"Region": "us-east-1"
+					}
+				}
+			}
+		}
+	}
 }
 ```
 
@@ -496,180 +291,372 @@ The native Face Liveness UI reads Amplify config from platform-specific files. B
 
 | Platform | Path |
 |----------|------|
-| iOS | `ios/amplifyconfiguration.json` and `ios/awsconfiguration.json` — add both to the Xcode Runner target |
+| iOS | `ios/amplifyconfiguration.json` and `ios/awsconfiguration.json` (add both to the Xcode Runner target) |
 | Android | `android/app/src/main/res/raw/amplifyconfiguration.json` |
 
-Example templates are in `packages/face_liveness_detector/example/ios/` and the [package README](packages/face_liveness_detector/README.md).
+Example templates are in `packages/face_liveness_detector/example/ios/` and the [package README](https://github.com/affinidi/affinidi-meetingplace-reference-app/blob/main/packages/face_liveness_detector/README.md).
 
-If your integration also calls Rekognition from Dart (session create / results fetch), configure Amplify Auth separately with the same pool ID and region — either programmatically or via the same JSON files.
+If your integration also calls Rekognition from Dart (session creation and results fetch), configure Amplify Auth separately with the same pool ID and region, either programmatically or via the same JSON files.
 
-### Native platform setup
+#### Native platform setup
 
-#### iOS
+##### iOS
 
 1. Place `amplifyconfiguration.json` and `awsconfiguration.json` in the `ios/` directory and add them to the Xcode Runner target.
 2. Add Swift Package dependencies to the Runner target:
-   - [amplify-swift](https://github.com/aws-amplify/amplify-swift) `2.46.1+` — products: `Amplify`, `AWSCognitoAuthPlugin`
-   - [amplify-ui-swift-liveness](https://github.com/aws-amplify/amplify-ui-swift-liveness) `1.3.5+` — product: `FaceLiveness`
+	 - [amplify-swift](https://github.com/aws-amplify/amplify-swift) `2.46.1+` with products `Amplify` and `AWSCognitoAuthPlugin`
+	 - [amplify-ui-swift-liveness](https://github.com/aws-amplify/amplify-ui-swift-liveness) `1.3.5+` with product `FaceLiveness`
 3. Call `Amplify.configure()` during app startup (before presenting the liveness widget).
 4. Declare camera usage in `Info.plist`:
 
-   ```xml
-   <key>NSCameraUsageDescription</key>
-   <string>Camera access is required for face liveness verification.</string>
-   ```
+```xml
+<key>NSCameraUsageDescription</key>
+<string>Camera access is required for face liveness verification.</string>
+```
 
 5. Minimum deployment target: iOS 13.0+ (16.0+ recommended).
 
-See [`packages/face_liveness_detector/ios/setup_dependencies.md`](packages/face_liveness_detector/ios/setup_dependencies.md) for detailed Xcode steps.
+See [`packages/face_liveness_detector/ios/setup_dependencies.md`](https://github.com/affinidi/affinidi-meetingplace-reference-app/blob/main/packages/face_liveness_detector/ios/setup_dependencies.md) for detailed Xcode steps.
 
-#### Android
+##### Android
 
 1. Place `amplifyconfiguration.json` in `android/app/src/main/res/raw/`.
 2. Set `minSdkVersion` to at least **24** and `compileSdkVersion` to **35**.
 3. Extend `FlutterFragmentActivity` instead of `FlutterActivity`:
 
-   ```kotlin
-   import io.flutter.embedding.android.FlutterFragmentActivity
+```kotlin
+import io.flutter.embedding.android.FlutterFragmentActivity
 
-   class MainActivity : FlutterFragmentActivity()
-   ```
+class MainActivity : FlutterFragmentActivity()
+```
 
 4. Declare camera permission in `AndroidManifest.xml`:
 
-   ```xml
-   <uses-permission android:name="android.permission.CAMERA"/>
-   ```
+```xml
+<uses-permission android:name="android.permission.CAMERA" />
+```
 
 5. The `face_liveness_detector` plugin configures Amplify on attach and pulls in the native Amplify Face Liveness dependencies.
 
-> **NOTE:** Use a **physical device** for Face Liveness. The camera challenge does not work reliably on emulators or simulators.
+> Use a **physical device** for Face Liveness. The camera challenge does not work reliably on emulators or simulators.
 
-### Session lifecycle
+#### Session lifecycle
 
 Once AWS and native setup are complete, integrate the liveness check in your app:
 
 1. **Create a session** — from your backend or directly from the client using temporary Cognito credentials:
 
-   ```
-   RekognitionService.CreateFaceLivenessSession
-   → { "SessionId": "..." }
-   ```
+```text
+RekognitionService.CreateFaceLivenessSession
+-> { "SessionId": "..." }
+```
 
 2. **Run the camera challenge** — pass the session ID and region to the Flutter widget:
 
-   ```dart
-   FaceLivenessDetector(
-     sessionId: sessionId,
-     region: 'us-east-1',
-     onComplete: () { /* fetch results */ },
-     onError: (code) { /* handle error */ },
-   )
-   ```
+```dart
+FaceLivenessDetector(
+	sessionId: sessionId,
+	region: 'us-east-1',
+	onComplete: () { /* fetch results */ },
+	onError: (code) { /* handle error */ },
+)
+```
 
 3. **Fetch results** — after `onComplete`, call:
 
-   ```
-   RekognitionService.GetFaceLivenessSessionResults
-   → { "Status": "SUCCEEDED", "Confidence": 95.3, ... }
-   ```
+```text
+RekognitionService.GetFaceLivenessSessionResults
+-> { "Status": "SUCCEEDED", "Confidence": 95.3, ... }
+```
 
 4. **Map to evidence** — convert the result into provider-neutral evidence for your credential layer:
 
-   | Field | AWS source |
-   |-------|------------|
-   | `providerId` | `"aws_rekognition"` |
-   | `providerTransactionId` | `SessionId` |
-   | `livenessScore` | `Confidence` |
-   | `livenessThreshold` | your configured minimum (e.g. `80.0`) |
-   | `checkedAt` | timestamp when results were fetched |
+| Field | AWS source |
+|-------|------------|
+| `providerId` | `"aws_rekognition"` |
+| `providerTransactionId` | `SessionId` |
+| `livenessScore` | `Confidence` |
+| `livenessThreshold` | Your configured minimum (for example, `80.0`) |
+| `checkedAt` | Timestamp when results were fetched |
 
 A working Flutter example with backend session creation is in `packages/face_liveness_detector/example/`.
 
-### AWS troubleshooting
+</details>
+</li>
+</ul>
 
-**`AccessDeniedException` or HTTP 403 on Rekognition calls**
+</details>
 
-The Cognito unauthenticated IAM role is missing Rekognition permissions. Attach `rekognition:CreateFaceLivenessSession` and `rekognition:GetFaceLivenessSessionResults` to the role. See [AWS prerequisites](#aws-prerequisites).
+<details id="panel-vrc">
+<summary><strong>R-Card and VRC Demo</strong></summary>
 
----
+<h3 id="vrc-what">What are R-Cards and VRCs?</h3>
 
-**Native liveness widget fails / `Amplify configure failed`**
+The Meeting Place app includes a built-in credential exchange system powered by the **Credentials SDK**. Two types of verifiable credentials are supported:
 
-Amplify config files are missing, not in the correct location, or contain the wrong Identity Pool ID / region. Verify file paths in [Amplify configuration](#amplify-configuration) and that iOS Swift Package dependencies are resolved.
+| Credential | What it encodes | How it is exchanged |
+|------------|-----------------|---------------------|
+| **Relationship Card (R-Card)** | Your contact information: name, email, phone, company. Signed as a jCard Verifiable Credential (RFC 7095). Exportable to vCard 3.0. | Sent automatically when a channel first opens (inauguration), or shared manually from the chat action menu. |
+| **Verifiable Relationship Credential (VRC)** | A mutual "verified relationship" credential encoding the DIDs of both participants and the timestamp of the exchange. | Two-step VDIP handshake: one side requests, the other reciprocates. Both participants receive a signed copy. |
 
----
+> R-Card and VRC exchange requires no feature flags. Any open channel can exchange credentials. The **Credentials** tab shows all stored R-Cards and VRCs on this device.
 
-**`Status` is not `SUCCEEDED` or confidence below threshold**
+> **Integrating into your own app?** See the [Credentials SDK documentation](https://github.com/affinidi/affinidi-meetingplace-sdk-dart/blob/main/meeting-place-credentials.html#rcard-vrc) for the operations API, repository interfaces, and data models.
 
-The user did not complete the challenge successfully. Retry on a physical device with good lighting. Typical production thresholds are 80–90.
+<h3 id="vrc-rcard">R-Card exchange</h3>
 
----
+An R-Card is your verifiable digital contact card. The app supports two R-Card flows: automatic sharing when a channel opens, and manual sharing from the chat action menu.
 
-**`No such module 'FaceLiveness'` (iOS)**
+<h4>Automatic flow</h4>
 
-Clean the build folder, re-add Swift Package dependencies, and confirm both Amplify packages are linked to the Runner target. See [`setup_dependencies.md`](packages/face_liveness_detector/ios/setup_dependencies.md).
+The app automatically sends your R-Card to a new contact when a channel is first opened.
+
+<table>
+<tr>
+<td align="center" width="33%"><strong>Open a channel</strong></td>
+<td align="center" width="33%"><strong>R-Card sent automatically</strong></td>
+<td align="center" width="33%"><strong>Contact receives it and saves it</strong></td>
+</tr>
+<tr>
+<td align="center" width="33%"><img src="assets/rcard/rcard-automatic.png" alt="R-Card sent automatically" /></td>
+<td align="center" width="33%"><img src="assets/rcard/rcard-info.png" alt="R-Card received in thread" /></td>
+<td align="center" width="33%"><img src="assets/rcard/rcard-tab.png" alt="R-Card saved to credentials" /></td>
+</tr>
+</table>
+
+<h4>Manual flow</h4>
+
+You can also share an R-Card at any time from the chat action menu by tapping **+** and selecting **Share R-Card**.
+
+<table>
+<tr>
+<td align="center" width="33%"><strong>Open chat action menu</strong></td>
+<td align="center" width="33%"><strong>Select the R-Card you want to share</strong></td>
+<td align="center" width="33%"><strong>Both parties see it in chat</strong></td>
+</tr>
+<tr>
+<td align="center" width="33%"><img src="assets/rcard/rcard-manual.png" alt="R-Card sent manually" /></td>
+<td align="center" width="33%"><img src="assets/rcard/select-rcard.png" alt="Select the R-Card you want to share" /></td>
+<td align="center" width="33%"><img src="assets/rcard/rcard-shared-screen.png" alt="Both parties see it in chat" /></td>
+</tr>
+</table>
+
+<h3 id="vrc-exchange">VRC exchange</h3>
+
+A VRC is a mutual "verified relationship" credential. Unlike an R-Card, a VRC requires both participants to act: one side initiates a request, and the other reciprocates.
+
+> VRCs establish a trusted record of a relationship that exists independently of any messaging platform. The credential can be verified by anyone without contacting a central authority.
+
+<table>
+<tr>
+<td align="center" width="20%"><strong>Initiate request</strong></td>
+<td align="center" width="20%"><strong>Request sent</strong></td>
+<td align="center" width="20%"><strong>Contact prompted</strong></td>
+<td align="center" width="20%"><strong>Both sides sign</strong></td>
+</tr>
+<tr>
+<td align="center" width="20%"><img src="assets/vrc/initiate-request.png" alt="Initiate request" /></td>
+<td align="center" width="20%"><img src="assets/vrc/request-sent.png" alt="Request sent" /></td>
+<td align="center" width="20%"><img src="assets/vrc/contact-prompted.png" alt="Contact prompted" /></td>
+<td align="center" width="20%"><img src="assets/vrc/chat-screen-vrc.png" alt="Both sides sign" /></td>
+</tr>
+</table>
+
+</details>
+
+</details>
+
+## Requirements
+
+| Dependency | Version |
+|------------|---------|
+| **Flutter** | `3.41.4` |
+| **Dart SDK** | `^3.9.2` |
+
+## Getting Started
+
+Set up your environment to run the Meeting Place application.
+
+### Step 1: Activate Melos
+
+```bash
+dart pub global activate melos && export PATH="$PATH":"$HOME/.pub-cache/bin"
+```
+
+> Add the `export PATH="$PATH":"$HOME/.pub-cache/bin"` line to your shell config (`~/.zshrc` or `~/.bashrc`) so it persists across terminal sessions.
+
+### Step 2: Install dependencies
+
+```bash
+melos pubget
+```
+
+### Step 3: Generate models
+
+```bash
+melos gen
+```
+
+### Step 4: Generate localised strings
+
+```bash
+melos strings
+```
+
+### Step 5: Configure environment variables
+
+See [Environment Variables](#environment-variables) for the full setup.
+
+## Environment Variables
+
+The app uses a `.env` file for configuration. A template is provided.
+
+```bash
+mkdir -p configurations && cp templates/.example.env configurations/.env
+```
+
+> Run this from the **root folder** of the reference app. Most variables have sensible defaults, only supply values specific to your setup.
+
+### Required Environment Variables
+
+#### Connect to Control Plane API
+
+The Control Plane API enables identity discovery and secure channel creation over DIDComm v2.1. To run it locally, follow the [Control Plane API for Dart](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/deployment-options/control-plane-open-sourced/) guide.
+
+```bash
+# Your Control Plane DID (did:web value from your API server)
+CONTROL_PLANE_DID=""
+```
+
+#### Connect to DIDComm Mediator
+
+The DIDComm Mediator routes messages between parties without reading their content. Follow the [DIDComm Mediator](https://docs.affinidi.com/products/affinidi-messaging/didcomm-mediator/deployment-options/mediator-open-sourced/) guide to set it up.
+
+```bash
+# Your Mediator DID
+DEFAULT_MEDIATOR_DID=""
+```
+
+#### Enable push notifications
+
+Create a [Firebase](https://firebase.google.com/docs/projects/learn-more) project, then:
+
+> **Firebase iOS app**
+> 1. [Create an iOS app](https://firebase.google.com/docs/ios/setup#register-app) in your Firebase project.
+> 2. Download `GoogleService-Info.plist` from the iOS app settings.
+> 3. Copy it to `app/ios/Runner/`. You only need the file, skip the other Firebase setup steps.
+
+> **Firebase Android app**
+> 1. [Create an Android app](https://firebase.google.com/docs/android/setup#register-app) in your Firebase project.
+> 2. Download `google-services.json` from the Android app settings.
+> 3. Copy it to `app/android/app/`. You only need the file, skip the other Firebase setup steps.
+
+```bash
+# Firebase - shared
+FIREBASE_MESSAGING_SENDER_ID=""
+FIREBASE_PROJECT_ID=""
+FIREBASE_STORAGE_BUCKET=""
+
+# Firebase - iOS
+FIREBASE_IOS_APIKEY=""
+FIREBASE_IOS_APP_ID=""
+FIREBASE_IOS_BUNDLE_ID=""
+
+# Firebase - Android
+FIREBASE_ANDROID_APIKEY=""
+FIREBASE_ANDROID_APP_ID=""
+```
+
+### Optional Environment Variables
+
+These variables have defaults. Override them only when needed.
+
+```bash
+# App configuration
+APP_VERSION_NAME=""                              # Default: ""
+BIOMETRICS_ENABLED="true"                        # Default: true
+DATABASE_LOGGING_ENABLED="false"                 # Default: false (debug builds only)
+FOREGROUND_NOTIFICATIONS_ENABLED="false"         # Default: false
+TAPS_TO_UNLOCK_DEBUG="7"                         # Default: 7
+
+# Chat settings
+CHAT_ACTIVITY_EXPIRES_IN_SECONDS="3"             # Default: 3
+CHAT_PRESENCE_SEND_INTERVAL_IN_SECONDS="60"      # Default: 60
+CHAT_IMAGE_MAX_SIZE="800"                        # Default: 800 px
+CHAT_IMAGE_QUALITY_PERCENT="80"                  # Default: 80%
+
+# Profile settings
+PROFILE_IMAGE_MAX_SIZE="100"                     # Default: 100 px
+PROFILE_IMAGE_QUALITY_PERCENT="80"               # Default: 80%
+
+# Marketplace
+MARKETPLACE_QR_PREFIX=""                         # Default: ""
+
+# Out-of-Band (OOB) flow: distinguishes multiple OOB flows so QR validation does not interfere across flows
+DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: "" (e.g. "oss-app-main-oob-flow")
+
+# Human ZKP & Liveness Credential
+ZKP_ENABLED="false"                              # Default: false — enables Human ZKP demo + Credentials tab
+```
+
+> All configuration options and their defaults are defined in `lib/infrastructure/configuration/environment.dart`.
 
 ## VSCode Configuration
-
-If you are using VS Code as your IDE, you can quickly set up your launch configuration for this project:
 
 ```bash
 mkdir -p .vscode && cp templates/.example.launch.json .vscode/launch.json
 ```
 
-This pre-defined configuration is set up to point to the appropriate environment file for your project. You can further customize this file to add or modify device IDs, change environment files, or extend it to suit your development needs.
+This configuration points to the correct environment file automatically. Edit `launch.json` to change device IDs, environment files, or other launch parameters.
 
 ## Run App on Simulator
 
-Refer to Flutter's [Get Started](https://docs.flutter.dev/get-started/install) page to learn more about setting up your environment to run the Flutter application on simulators.
+Refer to the [Flutter Get Started guide](https://docs.flutter.dev/get-started/install) for setting up your environment to run the app on an iOS Simulator or Android Emulator.
+
+> **For Face Liveness testing, use a physical device.** The camera challenge does not work on simulators or emulators.
 
 ## Git Hooks
 
-To ensure code quality before committing, set up the pre-commit hook:
+Automatically run code analysis before every commit:
 
 ```sh
 cp templates/.example.pre-commit .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
 
-This will automatically run `melos run analyze` before every commit and block the commit if there are any issues.
-**Note:** The hook file must be named `pre-commit` (no extension) in `.git/hooks`.
+This runs `melos run analyze` before each commit and blocks it if any issues are found.
+
+> The file **must** be named `pre-commit` (no extension) inside `.git/hooks/`.
 
 ## Troubleshooting
 
-### Firebase Configuration Issues
+### Firebase: duplicate app error
 
-**Error:** `FirebaseException ([core/duplicate-app] A Firebase App named "[DEFAULT]" already exists)`
+> `FirebaseException ([core/duplicate-app] A Firebase App named "[DEFAULT]" already exists)`
 
-**Cause:** This error occurs when there's a mismatch between your Firebase configuration files and the environment variables in `configurations/.env`.
+**Cause:** The Firebase configuration files and the environment variables in `configurations/.env` do not match.
 
-**Solution:** Ensure the following values match:
+**Solution:** Ensure the following values are consistent across files:
 
-1. Values in `google-services.json` (Android) must match `FIREBASE_ANDROID_*` variables in `.env`.
-2. Values in `GoogleService-Info.plist` (iOS or macOS) must match `FIREBASE_IOS_*` variables in `.env`.
-3. Common values like `FIREBASE_PROJECT_ID`, `FIREBASE_MESSAGING_SENDER_ID`, and `FIREBASE_STORAGE_BUCKET` must match across both platform files.
+| Config file | `.env` variable prefix |
+|-------------|------------------------|
+| `google-services.json` (Android) | `FIREBASE_ANDROID_*` |
+| `GoogleService-Info.plist` (iOS / macOS) | `FIREBASE_IOS_*` |
+| Both files | `FIREBASE_PROJECT_ID`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_STORAGE_BUCKET` |
 
-**Reference:** See [Firebase duplicate-app](https://github.com/firebase/flutterfire/blob/main/packages/firebase_core/firebase_core_platform_interface/lib/src/firebase_core_exceptions.dart#L20-L25) error definition.
+See also: [Firebase duplicate app error reference](https://github.com/firebase/flutterfire/blob/main/packages/firebase_core/firebase_core_platform_interface/lib/src/firebase_core_exceptions.dart#L20-L25).
+
+For AWS Rekognition integration issues, refer to the [Credentials SDK: Provider Setup](https://github.com/affinidi/affinidi-meetingplace-sdk-dart/blob/main/meeting-place-credentials.html#provider-setup) guide.
 
 ## Support & Feedback
 
-If you face any issues or have suggestions, please don't hesitate to contact us using [this link](https://share.hsforms.com/1i-4HKZRXSsmENzXtPdIG4g8oa2v).
+If you face any issues or have suggestions, [contact us here](https://share.hsforms.com/1afnezgGiQTmkfIT5oxWc8Qea58c).
 
-### Reporting Technical Issues
+### Reporting technical issues
 
-If you have a technical issue with the project's codebase, you can also create an issue directly in GitHub.
-
-1. Ensure the bug was not already reported by searching on GitHub under
-   [Issues](https://github.com/affinidi/affinidi-meetingplace-reference-app/issues).
-
-2. If you're unable to find an open issue addressing the problem,
-   [open a new one](https://github.com/affinidi/affinidi-meetingplace-reference-app/issues/new).
-   Be sure to include a **title and clear description**, as much relevant information as possible,
-   and a **code sample** or an **executable test case** demonstrating the expected behaviour that is not occurring.
+1. Search [GitHub Issues](https://github.com/affinidi/affinidi-meetingplace-reference-app/issues) to check if the bug has already been reported.
+2. If not, [open a new issue](https://github.com/affinidi/affinidi-meetingplace-reference-app/issues/new). Include a clear title and description, steps to reproduce, and a code sample demonstrating the unexpected behaviour.
 
 ## Contributing
 
-Want to contribute?
-
-Head over to our [CONTRIBUTING](https://github.com/affinidi/affinidi-meetingplace-reference-app/blob/main/CONTRIBUTING.md) guidelines.
+Want to contribute? Head over to our [CONTRIBUTING](https://github.com/affinidi/affinidi-meetingplace-reference-app/blob/main/CONTRIBUTING.md) guidelines.
