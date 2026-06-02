@@ -57,7 +57,7 @@ class _ChatMessageActions extends ConsumerWidget {
       try {
         await controller.deleteMessage(
           _message.messageId,
-          localOnly: localOnly,
+          deleteForMeOnly: localOnly,
         );
       } catch (_) {
         if (!context.mounted) return;

@@ -352,8 +352,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
-  Future<void> deleteMessage(Message message, {bool localOnly = false}) async {
-    await _chatSDK?.deleteMessage(message, localOnly: localOnly);
+  Future<void> deleteMessage(
+    Message message, {
+    bool deleteForMeOnly = false,
+  }) async {
+    await _chatSDK?.deleteMessage(message, localOnly: deleteForMeOnly);
   }
 
   @override

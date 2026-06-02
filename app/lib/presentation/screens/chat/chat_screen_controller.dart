@@ -543,11 +543,14 @@ class ChatScreenController extends _$ChatScreenController
 
   /// Deletes a previously-sent message.
   ///
-  /// When [localOnly] is true the message is hidden only for the current user
+  /// When [deleteForMeOnly] is true the message is hidden only for the current user
   /// and no wire traffic is generated. Otherwise the SDK broadcasts a
   /// redaction so all participants drop the message, subject to the
   /// sender-only / delivery / `deleteMessageWindow` rules enforced by the SDK.
-  Future<void> deleteMessage(String messageId, {bool localOnly = false}) async {
+  Future<void> deleteMessage(
+    String messageId, {
+    bool deleteForMeOnly = false,
+  }) async {
     try {
       _showActivity();
       final message =
@@ -561,7 +564,10 @@ class ChatScreenController extends _$ChatScreenController
         );
       }
 
-      await _chatService?.deleteMessage(message, localOnly: localOnly);
+      await _chatService?.deleteMessage(
+        message,
+        deleteForMeOnly: deleteForMeOnly,
+      );
     } finally {
       _hideActivity();
     }
