@@ -231,6 +231,26 @@ void main() {
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
 
+    test(
+      'subscribeToIncomingRCards — drains pending cache after live delivery '
+      'so replayPendingRCard does not create a duplicate chat item',
+      () async {
+        stub.pendingRCard = _makeRCard(issuerDid: otherPartyDid);
+
+        await manager.subscribeToIncomingRCards();
+
+        stub.emitRCard(_makeRCard(issuerDid: otherPartyDid));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
+
+        expect(stub.pendingRCard, isNull);
+
+        await manager.replayPendingRCard();
+        expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
+      },
+    );
+
     test('sendRCardFromPlugin — no-op when channel is not found', () async {
       final emptyContainer = ProviderContainer(
         overrides: [

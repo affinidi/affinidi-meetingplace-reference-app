@@ -217,6 +217,12 @@ class RCardManager {
 
       if (rCard.issuerDid != otherDid) return;
 
+      // Drain the pending cache so replayPendingRCard() does not re-deliver
+      // this card when the chat screen is re-entered after the live stream
+      // already delivered it.
+      final credentialsSDK = await _ref.read(credentialsSdkProvider.future);
+      credentialsSDK.consumePendingRCard(_otherPartyPermanentDid);
+
       final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
       final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(vcJson);
       await chatSdk.createAttachmentMessage(
