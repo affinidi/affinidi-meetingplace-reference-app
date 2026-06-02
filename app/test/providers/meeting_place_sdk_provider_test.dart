@@ -120,57 +120,51 @@ void main() {
       expect(callLog, equals(['fvod.init completed']));
     });
 
-    test(
-      'proceeds past vodozemac init when it succeeds',
-      () async {
-        final callLog = <String>[];
+    test('proceeds past vodozemac init when it succeeds', () async {
+      final callLog = <String>[];
 
-        SharedPreferences.setMockInitialValues({});
-        final sharedPreferences = await SharedPreferences.getInstance();
+      SharedPreferences.setMockInitialValues({});
+      final sharedPreferences = await SharedPreferences.getInstance();
 
-        // When vodozemacInit succeeds, the provider must continue into the
-        // next bootstrap step. We detect that by injecting a sentinel error
-        // at matrixConfigProvider — the only way the sentinel can surface is
-        // if execution flowed past the awaited vodozemacInit.
-        final container = ProviderContainer(
-          overrides: [
-            appLoggerProvider.overrideWithValue(AppLogger.instance),
-            environmentProvider.overrideWithValue(FakeEnvironment()),
-            sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-            secureStorageProvider.overrideWith(
-              (ref) async => FakeSecureStorage(),
-            ),
-            vodozemacInitProvider.overrideWith((ref) async {
-              callLog.add('fvod.init completed');
-            }),
-            matrixConfigProvider.overrideWith((ref) async {
-              callLog.add('matrixConfig reached');
-              throw Exception('sentinel – proceeded past vodozemac');
-            }),
-          ],
-        );
-        addTearDown(container.dispose);
-
-        await expectLater(
-          container.read(meetingPlaceSdkProvider.future),
-          throwsA(
-            isA<Exception>().having(
-              (e) => e.toString(),
-              'message',
-              contains('proceeded past vodozemac'),
-            ),
+      // When vodozemacInit succeeds, the provider must continue into the
+      // next bootstrap step. We detect that by injecting a sentinel error
+      // at matrixConfigProvider — the only way the sentinel can surface is
+      // if execution flowed past the awaited vodozemacInit.
+      final container = ProviderContainer(
+        overrides: [
+          appLoggerProvider.overrideWithValue(AppLogger.instance),
+          environmentProvider.overrideWithValue(FakeEnvironment()),
+          sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
           ),
-        );
+          vodozemacInitProvider.overrideWith((ref) async {
+            callLog.add('fvod.init completed');
+          }),
+          matrixConfigProvider.overrideWith((ref) async {
+            callLog.add('matrixConfig reached');
+            throw Exception('sentinel – proceeded past vodozemac');
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
 
-        expect(
-          callLog,
-          equals(['fvod.init completed', 'matrixConfig reached']),
-        );
+      await expectLater(
+        container.read(meetingPlaceSdkProvider.future),
+        throwsA(
+          isA<Exception>().having(
+            (e) => e.toString(),
+            'message',
+            contains('proceeded past vodozemac'),
+          ),
+        ),
+      );
 
-        // Drain settingsService background microtask before container
-        // dispose so it doesn't read from a disposed container.
-        await pumpEventQueue();
-      },
-    );
+      expect(callLog, equals(['fvod.init completed', 'matrixConfig reached']));
+
+      // Drain settingsService background microtask before container
+      // dispose so it doesn't read from a disposed container.
+      await pumpEventQueue();
+    });
   });
 }
