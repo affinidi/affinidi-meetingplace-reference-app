@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ssi/ssi.dart';
 
 import '../../application/services/settings_service/settings_service.dart';
@@ -10,6 +12,20 @@ import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
 import 'group_repository_provider.dart';
 import 'matrix_config_provider.dart';
+
+/// Initializes the vodozemac cryptographic library.
+///
+/// Cached at module scope so the native init runs at most once per
+/// process even if the [ProviderContainer] is recreated (hot restart,
+/// tests). Exposed as a provider so it can be overridden in tests to
+/// verify that encryption bootstrap always completes before SDK creation.
+final Future<void> _vodozemacInit = fvod.init();
+
+@visibleForTesting
+final vodozemacInitProvider = FutureProvider<void>(
+  (ref) => _vodozemacInit,
+  name: 'vodozemacInitProvider',
+);
 
 /// A provider that initializes and supplies the [MeetingPlaceCoreSDK]
 /// instance.
@@ -29,6 +45,7 @@ final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
   final secureStorage = await ref.read(secureStorageProvider.future);
 
   try {
+    await ref.read(vodozemacInitProvider.future);
     final wallet = PersistentWallet(secureStorage);
     final settingsState = ref.read(settingsServiceProvider);
     final initialMediatorDid = settingsState.selectedMediatorDid;
