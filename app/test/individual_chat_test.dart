@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:camera/camera.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -121,15 +118,14 @@ Future<void> verifyMessageWithAttachmentSent(
   expect(sendCall['fileBytes'], isNotNull);
   expect(sendCall['contentType'], startsWith('image/'));
 
-  // Simulate the message coming back through the stream with base64 data
-  final fileBytes = sendCall['fileBytes'] as Uint8List;
-  final base64Data = base64Encode(fileBytes);
-  final fakeUri = Uri.parse('mxc://fake-homeserver/fake-media-id');
+  // Simulate the message coming back through the stream as a hosted media
+  // attachment — links-only so the download path is exercised.
+  final mxcUri = sendCall['mxcUri'] as Uri;
   final attachment = ChatAttachment(
     mediaType: sendCall['contentType'] as String,
     filename: sendCall['filename'] as String?,
     format: AttachmentFormat.hostedMedia.value,
-    data: ChatAttachmentData(links: [fakeUri], base64: base64Data),
+    data: ChatAttachmentData(links: [mxcUri]),
   );
 
   meetingPlaceChatSDK.simulateIncomingTextMessage(

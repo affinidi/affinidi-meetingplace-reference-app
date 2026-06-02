@@ -105,9 +105,10 @@ class _PlainTextChatItem extends ConsumerWidget {
     final attachments = chatItem.attachments;
 
     final hasMedia = attachments.isNotEmpty;
-    // Suppress raw msgtype values (e.g. "m.image") that leak from the
-    // protocol layer — they are not meaningful user-facing text.
-    final isRawMsgType = chatItem.value.startsWith('m.');
+    // Suppress raw Matrix msgtype values (e.g. "m.image", "m.video") that
+    // leak from the protocol layer — they are not meaningful user-facing text.
+    // Match only the protocol namespace pattern: m.<lowercase-word-chars>.
+    final isRawMsgType = RegExp(r'^m\.[a-z_.]+$').hasMatch(chatItem.value);
     final showText = chatItem.value.isNotEmpty && !isRawMsgType;
 
     return GestureDetector(
