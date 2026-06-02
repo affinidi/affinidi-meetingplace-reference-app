@@ -207,6 +207,14 @@ class _HostedMediaWidget extends ConsumerWidget {
       );
     }
 
+    if (cachedBytes.isEmpty) {
+      return const SizedBox(
+        height: 200,
+        width: 200,
+        child: Center(child: Icon(Icons.broken_image_outlined)),
+      );
+    }
+
     return SizedBox(
       height: 200,
       width: 200,

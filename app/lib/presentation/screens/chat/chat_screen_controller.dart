@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -642,6 +643,9 @@ class ChatScreenController extends _$ChatScreenController
           'Chat service unavailable, skipping media download',
           name: _logKey,
         );
+        final failedCache = Map.of(state.attachmentsDataCache);
+        failedCache[cacheKey] = Uint8List(0);
+        state = state.copyWith(attachmentsDataCache: failedCache);
         return;
       }
 
@@ -655,6 +659,9 @@ class ChatScreenController extends _$ChatScreenController
         stackTrace: stackTrace,
         name: _logKey,
       );
+      final failedCache = Map.of(state.attachmentsDataCache);
+      failedCache[cacheKey] = Uint8List(0);
+      state = state.copyWith(attachmentsDataCache: failedCache);
     } finally {
       _attachmentsLoading.remove(cacheKey);
     }
