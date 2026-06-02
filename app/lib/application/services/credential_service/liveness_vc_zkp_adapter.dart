@@ -52,8 +52,8 @@ abstract final class LivenessVcZkpAdapter {
       'issued_at': issuedAt.millisecondsSinceEpoch ~/ 1000,
       'expires_at':
           (validUntil ?? issuedAt.add(ZkpConstants.vcExpiryDuration))
-                  .millisecondsSinceEpoch ~/
-              1000,
+              .millisecondsSinceEpoch ~/
+          1000,
       'issuer': issuerDid,
       'holderAx': holderPub.ax,
       'holderAy': holderPub.ay,

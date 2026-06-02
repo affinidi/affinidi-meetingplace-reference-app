@@ -1,5 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/credential_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/liveness_vc_zkp_adapter.dart';
 import 'package:ssi/ssi.dart';

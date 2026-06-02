@@ -43,9 +43,7 @@ void main() {
     test('upsert replaces record for the same identity', () async {
       await repository.upsert(sampleRecord());
       await repository.upsert(
-        sampleRecord().copyWithReplacement(
-          w3cCredentialJson: '{"id":"vc-2"}',
-        ),
+        sampleRecord().copyWithReplacement(w3cCredentialJson: '{"id":"vc-2"}'),
       );
 
       final records = await repository.list();
@@ -76,9 +74,7 @@ void main() {
 }
 
 extension on LivenessCredentialRecord {
-  LivenessCredentialRecord copyWithReplacement({
-    String? w3cCredentialJson,
-  }) {
+  LivenessCredentialRecord copyWithReplacement({String? w3cCredentialJson}) {
     return LivenessCredentialRecord(
       identityId: identityId,
       issuedToDid: issuedToDid,
