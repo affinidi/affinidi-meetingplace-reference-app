@@ -6,16 +6,19 @@ import 'package:vc_zkp/vc_zkp.dart';
 void main() {
   group('LivenessVcZkpAdapter', () {
     test(
-      'buildSignedDocumentFromW3c produces verifiable signed document',
+      'builds and verifies a ZKP document from a signed W3C credential',
       () async {
+        final checkedAt = DateTime.now().toUtc().subtract(
+          const Duration(minutes: 1),
+        );
         final w3c = VcDataModelV2(
           context: JsonLdContext.fromJson([
             'https://www.w3.org/ns/credentials/v2',
           ]),
           issuer: Issuer.uri('did:example:issuer'),
           type: {'VerifiableCredential', 'LivenessCredential'},
-          validFrom: DateTime.utc(2026, 5, 29, 12),
-          validUntil: DateTime.utc(2026, 6, 3, 12),
+          validFrom: checkedAt.subtract(const Duration(minutes: 1)),
+          validUntil: checkedAt.add(const Duration(days: 5)),
           credentialSubject: [
             CredentialSubject.fromJson({
               'id': 'did:example:holder',
@@ -24,7 +27,7 @@ void main() {
               'livenessScore': 99,
               'livenessThreshold': 80,
               'livenessPassed': true,
-              'checkedAt': '2026-05-29T12:00:00.000Z',
+              'checkedAt': checkedAt.toIso8601String(),
             }),
           ],
         );

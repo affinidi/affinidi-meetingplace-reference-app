@@ -15,12 +15,13 @@ import '../../../fakes/fake_secure_storage.dart';
 LivenessEvidence passingLivenessEvidence({
   String holderSessionId = 'session-abc',
 }) {
+  final checkedAt = DateTime.now().toUtc().subtract(const Duration(minutes: 1));
   return LivenessEvidence(
     providerId: 'demo_liveness',
     providerTransactionId: holderSessionId,
     livenessScore: 99,
     livenessThreshold: 80,
-    checkedAt: DateTime.utc(2026, 5, 29, 12),
+    checkedAt: checkedAt,
   );
 }
 
@@ -59,6 +60,14 @@ void initializeCredentialServiceTests() {
   AppLogger.initialize(
     File('${Directory.systemTemp.path}/credential_service_test.log'),
   );
+}
+
+DateTime testLivenessValidFrom(DateTime checkedAt) {
+  return checkedAt.subtract(const Duration(minutes: 1));
+}
+
+DateTime testLivenessValidUntil(DateTime checkedAt) {
+  return checkedAt.add(const Duration(days: 5));
 }
 
 List<Object?> credentialServiceTestOverrides({
