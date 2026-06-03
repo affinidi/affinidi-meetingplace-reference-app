@@ -1529,13 +1529,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get generalVideo => 'Video';
 
   @override
-  String get generalDocument => 'Document';
+  String get generalDocument => 'Dokument';
 
   @override
-  String get documentTapToDownload => 'Tap to download';
+  String get documentTapToDownload => 'Zum Herunterladen tippen';
 
   @override
-  String get videoLoadingError => 'Unable to play video';
+  String get videoLoadingError => 'Video kann nicht abgespielt werden';
 
   @override
   String get mediaTapToRetry => 'Zum Wiederholen tippen';

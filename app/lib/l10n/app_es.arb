@@ -354,5 +354,9 @@
 	"debugPanelShareLogs": "Compartir registros",
 	"mediaTapToRetry": "Toca para reintentar",
 	"mediaDownloadFailedTapToRetry": "Descarga fallida. Toca para reintentar",
-	"attachmentTooLarge": "El archivo adjunto es demasiado grande. Tamaño máximo: {maxMb} MB."
+	"attachmentTooLarge": "El archivo adjunto es demasiado grande. Tamaño máximo: {maxMb} MB.",
+	"generalVideo": "Vídeo",
+	"generalDocument": "Documento",
+	"documentTapToDownload": "Toca para descargar",
+	"videoLoadingError": "No se puede reproducir el vídeo"
 }
