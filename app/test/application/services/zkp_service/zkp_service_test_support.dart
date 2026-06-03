@@ -30,8 +30,7 @@ final _sampleW3cCredential = VcDataModelV2(
   context: JsonLdContext.fromJson(['https://www.w3.org/ns/credentials/v2']),
   issuer: Issuer.uri('did:example:issuer'),
   type: {'VerifiableCredential', 'LivenessCredential'},
-  validFrom: DateTime.utc(2026, 5, 29, 12),
-  validUntil: DateTime.utc(2026, 6, 3, 12),
+  validFrom: DateTime.now().toUtc().subtract(const Duration(minutes: 2)),
   credentialSubject: [
     CredentialSubject.fromJson({
       'id': 'did:example:holder',
@@ -40,7 +39,10 @@ final _sampleW3cCredential = VcDataModelV2(
       'livenessScore': 99,
       'livenessThreshold': 80,
       'livenessPassed': true,
-      'checkedAt': '2026-05-29T12:00:00.000Z',
+      'checkedAt': DateTime.now()
+          .toUtc()
+          .subtract(const Duration(minutes: 1))
+          .toIso8601String(),
     }),
   ],
 );
