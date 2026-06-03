@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,6 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: _allowedExtensions,
-      withData: true,
     );
 
     if (result == null || result.files.isEmpty) return null;
@@ -54,8 +54,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
       return null;
     }
 
-    final bytes = file.bytes;
-    if (bytes == null) return null;
+    final path = file.path;
+    if (path == null) return null;
+    final bytes = await File(path).readAsBytes();
 
     final base64Data = base64.encode(bytes);
     final mimeType =
