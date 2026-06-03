@@ -52,6 +52,7 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
           pluginName: _pluginName,
           mimeType: mimeType,
           filename: filename,
+          byteCount: bytes.length,
         ),
       ],
     );
