@@ -15,6 +15,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';

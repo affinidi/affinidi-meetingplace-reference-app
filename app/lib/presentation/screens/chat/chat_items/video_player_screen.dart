@@ -24,9 +24,10 @@ class _VideoPlayerScreenState extends State<_VideoPlayerScreen> {
   Future<void> _initializePlayer() async {
     try {
       final tempDir = await getTemporaryDirectory();
-      final filename =
-          widget.filename ?? 'video_${clock.now().millisecondsSinceEpoch}.mp4';
-      final file = File('${tempDir.path}/$filename');
+      final safeName = path.basename(
+        widget.filename ?? 'video_${clock.now().millisecondsSinceEpoch}.mp4',
+      );
+      final file = File('${tempDir.path}/$safeName');
       await file.writeAsBytes(widget.videoBytes);
 
       final controller = VideoPlayerController.file(file);

@@ -462,8 +462,8 @@ class _HostedDocumentWidget extends StatelessWidget {
 
     try {
       final tempDir = await getTemporaryDirectory();
-      final filename = _attachment.filename ?? 'document';
-      final file = File('${tempDir.path}/$filename');
+      final safeName = path.basename(_attachment.filename ?? 'document');
+      final file = File('${tempDir.path}/$safeName');
       await file.writeAsBytes(_cachedBytes);
       await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
     } catch (e, stackTrace) {
