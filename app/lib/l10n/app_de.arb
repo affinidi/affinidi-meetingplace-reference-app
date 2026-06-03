@@ -351,5 +351,7 @@
 	"chatNotificationsWhyNote": "Sie sehen neue Nachrichten nur, wenn Sie sich im Chat befinden. Es wird keine Abzeichenaktualisierungen oder Benachrichtigungen geben, die Sie darüber informieren, dass neue Nachrichten eingegangen sind, selbst wenn die App geöffnet ist.",
 	"chatNotificationsWhyTitle": "Warum keine Push-Benachrichtigungen?",
 	"goBack": "Zurück gehen",
-	"debugPanelShareLogs": "Protokolle teilen"
+	"debugPanelShareLogs": "Protokolle teilen",
+	"mediaTapToRetry": "Zum Wiederholen tippen",
+	"mediaDownloadFailedTapToRetry": "Download fehlgeschlagen. Zum Wiederholen tippen"
 }

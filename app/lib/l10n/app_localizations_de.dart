@@ -1536,4 +1536,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get videoLoadingError => 'Unable to play video';
+
+  @override
+  String get mediaTapToRetry => 'Zum Wiederholen tippen';
+
+  @override
+  String get mediaDownloadFailedTapToRetry =>
+      'Download fehlgeschlagen. Zum Wiederholen tippen';
 }

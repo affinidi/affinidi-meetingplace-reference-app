@@ -2211,6 +2211,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to play video'**
   String get videoLoadingError;
+
+  /// Action label shown over a failed media attachment download, prompting the user to retry
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to retry'**
+  String get mediaTapToRetry;
+
+  /// Status label shown on a document attachment when its download fails, prompting the user to retry
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed. Tap to retry'**
+  String get mediaDownloadFailedTapToRetry;
 }
 
 class _AppLocalizationsDelegate

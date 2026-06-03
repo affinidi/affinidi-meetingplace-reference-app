@@ -189,11 +189,15 @@ class _HostedMediaWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
+    final cacheKey = attachmentCacheKey(_attachment);
     final cachedBytes = ref.watch(
-      provider.select(
-        (s) => s.attachmentsDataCache[attachmentCacheKey(_attachment)],
-      ),
+      provider.select((s) => s.attachmentsDataCache[cacheKey]),
     );
+    final hasFailed = ref.watch(
+      provider.select((s) => s.failedAttachmentDownloads.contains(cacheKey)),
+    );
+    void onRetry() =>
+        ref.read(provider.notifier).retryAttachmentDownload(_attachment);
 
     final category = mediaCategoryFromMimeType(_attachment.mediaType);
 
@@ -202,40 +206,51 @@ class _HostedMediaWidget extends ConsumerWidget {
         return _HostedVideoWidget(
           attachment: _attachment,
           cachedBytes: cachedBytes,
+          hasFailed: hasFailed,
+          onRetry: onRetry,
         );
       case MediaCategory.audio:
       case MediaCategory.document:
         return _HostedDocumentWidget(
           attachment: _attachment,
           cachedBytes: cachedBytes,
+          hasFailed: hasFailed,
+          onRetry: onRetry,
         );
       case MediaCategory.image:
-        return _HostedImageWidget(cachedBytes: cachedBytes);
+        return _HostedImageWidget(
+          cachedBytes: cachedBytes,
+          hasFailed: hasFailed,
+          onRetry: onRetry,
+        );
     }
   }
 }
 
 class _HostedImageWidget extends StatelessWidget {
-  const _HostedImageWidget({required Uint8List? cachedBytes})
-    : _cachedBytes = cachedBytes;
+  const _HostedImageWidget({
+    required Uint8List? cachedBytes,
+    required bool hasFailed,
+    required VoidCallback onRetry,
+  }) : _cachedBytes = cachedBytes,
+       _hasFailed = hasFailed,
+       _onRetry = onRetry;
 
   final Uint8List? _cachedBytes;
+  final bool _hasFailed;
+  final VoidCallback _onRetry;
 
   @override
   Widget build(BuildContext context) {
+    if (_hasFailed) {
+      return _MediaDownloadRetryBox(onRetry: _onRetry);
+    }
+
     if (_cachedBytes == null) {
       return const SizedBox(
         height: 200,
         width: 200,
         child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (_cachedBytes!.isEmpty) {
-      return const SizedBox(
-        height: 200,
-        width: 200,
-        child: Center(child: Icon(Icons.broken_image_outlined)),
       );
     }
 
@@ -268,27 +283,29 @@ class _HostedVideoWidget extends StatelessWidget {
   const _HostedVideoWidget({
     required chat.ChatAttachment attachment,
     required Uint8List? cachedBytes,
+    required bool hasFailed,
+    required VoidCallback onRetry,
   }) : _attachment = attachment,
-       _cachedBytes = cachedBytes;
+       _cachedBytes = cachedBytes,
+       _hasFailed = hasFailed,
+       _onRetry = onRetry;
 
   final chat.ChatAttachment _attachment;
   final Uint8List? _cachedBytes;
+  final bool _hasFailed;
+  final VoidCallback _onRetry;
 
   @override
   Widget build(BuildContext context) {
+    if (_hasFailed) {
+      return _MediaDownloadRetryBox(onRetry: _onRetry);
+    }
+
     if (_cachedBytes == null) {
       return const SizedBox(
         height: 200,
         width: 200,
         child: Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (_cachedBytes!.isEmpty) {
-      return const SizedBox(
-        height: 200,
-        width: 200,
-        child: Center(child: Icon(Icons.broken_image_outlined)),
       );
     }
 
@@ -330,24 +347,31 @@ class _HostedDocumentWidget extends StatelessWidget {
   const _HostedDocumentWidget({
     required chat.ChatAttachment attachment,
     required Uint8List? cachedBytes,
+    required bool hasFailed,
+    required VoidCallback onRetry,
   }) : _attachment = attachment,
-       _cachedBytes = cachedBytes;
+       _cachedBytes = cachedBytes,
+       _hasFailed = hasFailed,
+       _onRetry = onRetry;
 
   final chat.ChatAttachment _attachment;
   final Uint8List? _cachedBytes;
+  final bool _hasFailed;
+  final VoidCallback _onRetry;
 
   @override
   Widget build(BuildContext context) {
     final filename = _attachment.filename ?? 'Document';
     final size = _attachment.byteCount;
     final sizeLabel = size != null ? _formatFileSize(size) : '';
-    final isLoaded = _cachedBytes != null && _cachedBytes!.isNotEmpty;
-    final hasFailed = _cachedBytes != null && _cachedBytes!.isEmpty;
+    final isLoaded = _cachedBytes != null && _cachedBytes.isNotEmpty;
 
     return SizedBox(
       width: 220,
       child: GestureDetector(
-        onTap: isLoaded ? () => _openDocument(context) : null,
+        onTap: isLoaded
+            ? () => _openDocument(context)
+            : (_hasFailed ? _onRetry : null),
         child: Card(
           color: Colors.grey.shade900,
           clipBehavior: Clip.hardEdge,
@@ -388,7 +412,7 @@ class _HostedDocumentWidget extends StatelessWidget {
                             fontSize: 11,
                           ),
                         ),
-                      if (!isLoaded && !hasFailed)
+                      if (!isLoaded && !_hasFailed)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
@@ -399,12 +423,12 @@ class _HostedDocumentWidget extends StatelessWidget {
                             ),
                           ),
                         ),
-                      if (hasFailed)
-                        const Padding(
-                          padding: EdgeInsets.only(top: 4),
+                      if (_hasFailed)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            'Download failed',
-                            style: TextStyle(
+                            context.l10n.mediaDownloadFailedTapToRetry,
+                            style: const TextStyle(
                               color: Colors.redAccent,
                               fontSize: 10,
                             ),
@@ -413,13 +437,13 @@ class _HostedDocumentWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (!isLoaded && !hasFailed)
+                if (!isLoaded && !_hasFailed)
                   const SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                if (hasFailed)
+                if (_hasFailed)
                   const Icon(
                     Icons.error_outline,
                     color: Colors.redAccent,
@@ -481,5 +505,39 @@ class _HostedDocumentWidget extends StatelessWidget {
       return '${(bytes / 1024).toStringAsFixed(1)} KB';
     }
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
+}
+
+class _MediaDownloadRetryBox extends StatelessWidget {
+  const _MediaDownloadRetryBox({required VoidCallback onRetry})
+    : _onRetry = onRetry;
+
+  final VoidCallback _onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 200,
+      width: 200,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _onRetry,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.broken_image_outlined, size: 32),
+              const SizedBox(height: 8),
+              const Icon(Icons.refresh, size: 20),
+              const SizedBox(height: 4),
+              Text(
+                context.l10n.mediaTapToRetry,
+                style: const TextStyle(fontSize: 11),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -351,5 +351,7 @@
 	"chatNotificationsWhyNote": "Solo verás mensajes nuevos cuando estés en el chat. No habrá actualizaciones de insignias ni notificaciones que te informen que han llegado mensajes nuevos, incluso si la aplicación está abierta.",
 	"chatNotificationsWhyTitle": "¿Por qué no hay notificaciones push?",
 	"goBack": "Volver",
-	"debugPanelShareLogs": "Compartir registros"
+	"debugPanelShareLogs": "Compartir registros",
+	"mediaTapToRetry": "Toca para reintentar",
+	"mediaDownloadFailedTapToRetry": "Descarga fallida. Toca para reintentar"
 }

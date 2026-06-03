@@ -30,6 +30,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     ContactPresenceStatus contactPresenceStatus,
     ScreenEffect? effect,
     @Default({}) Map<String, Uint8List> attachmentsDataCache,
+    @Default({}) Set<String> failedAttachmentDownloads,
     String? notificationToken,
   }) = _ChatScreenState;
 

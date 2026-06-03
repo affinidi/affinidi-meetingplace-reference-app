@@ -1528,4 +1528,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get videoLoadingError => 'Unable to play video';
+
+  @override
+  String get mediaTapToRetry => 'Toca para reintentar';
+
+  @override
+  String get mediaDownloadFailedTapToRetry =>
+      'Descarga fallida. Toca para reintentar';
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -604,9 +603,19 @@ class ChatScreenController extends _$ChatScreenController
         state = state.copyWith(attachmentsDataCache: updatedCache);
       }
 
-      unawaited(
-        _chatService?.sendTextMessage(caption, attachments: [chatAttachment]),
-      );
+      try {
+        await _chatService?.sendTextMessage(
+          caption,
+          attachments: [chatAttachment],
+        );
+      } catch (e, st) {
+        _logger.error(
+          'Failed to send attachment ${index + 1}',
+          error: e,
+          stackTrace: st,
+          name: _logKey,
+        );
+      }
     }
   }
 
@@ -636,6 +645,19 @@ class ChatScreenController extends _$ChatScreenController
     _downloadAndCacheAttachment(attachmentId, attachment);
   }
 
+  /// Retries a previously failed attachment download. Clears the failed flag
+  /// and re-runs the download flow so the UI can show progress again.
+  void retryAttachmentDownload(ChatAttachment attachment) {
+    final attachmentId = attachmentCacheKey(attachment);
+    if (_attachmentsLoading.contains(attachmentId)) return;
+    if (!state.failedAttachmentDownloads.contains(attachmentId)) return;
+
+    final failed = Set.of(state.failedAttachmentDownloads)
+      ..remove(attachmentId);
+    state = state.copyWith(failedAttachmentDownloads: failed);
+    unawaited(_downloadAndCacheAttachment(attachmentId, attachment));
+  }
+
   void _preloadHostedMediaAttachments(List<chat.ChatItem> messages) {
     for (final message in messages.whereType<chat.Message>()) {
       for (final attachment in message.attachments) {
@@ -660,9 +682,7 @@ class ChatScreenController extends _$ChatScreenController
           'Chat service unavailable, skipping media download',
           name: _logKey,
         );
-        final failedCache = Map.of(state.attachmentsDataCache);
-        failedCache[cacheKey] = Uint8List(0);
-        state = state.copyWith(attachmentsDataCache: failedCache);
+        _markAttachmentDownloadFailed(cacheKey);
         return;
       }
 
@@ -676,12 +696,15 @@ class ChatScreenController extends _$ChatScreenController
         stackTrace: stackTrace,
         name: _logKey,
       );
-      final failedCache = Map.of(state.attachmentsDataCache);
-      failedCache[cacheKey] = Uint8List(0);
-      state = state.copyWith(attachmentsDataCache: failedCache);
+      _markAttachmentDownloadFailed(cacheKey);
     } finally {
       _attachmentsLoading.remove(cacheKey);
     }
+  }
+
+  void _markAttachmentDownloadFailed(String cacheKey) {
+    final failed = Set.of(state.failedAttachmentDownloads)..add(cacheKey);
+    state = state.copyWith(failedAttachmentDownloads: failed);
   }
 
   Future<void> _restoreUnsentMessage() async {
