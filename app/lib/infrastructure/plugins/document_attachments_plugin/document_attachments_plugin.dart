@@ -38,7 +38,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   Future<AttachmentPluginPickResult?> pickAttachments(
     BuildContext context,
   ) async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: _allowedExtensions,
       withData: true,
