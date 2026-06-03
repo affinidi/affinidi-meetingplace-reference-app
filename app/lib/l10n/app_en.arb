@@ -1463,5 +1463,15 @@
 	"mediaDownloadFailedTapToRetry": "Download failed. Tap to retry",
 	"@mediaDownloadFailedTapToRetry": {
 		"description": "Status label shown on a document attachment when its download fails, prompting the user to retry"
+	},
+	"attachmentTooLarge": "Attachment is too large. Maximum size is {maxMb} MB.",
+	"@attachmentTooLarge": {
+		"description": "Snackbar shown when a picked attachment exceeds the byte-size cap",
+		"placeholders": {
+			"maxMb": {
+				"type": "int",
+				"example": "25"
+			}
+		}
 	}
 }

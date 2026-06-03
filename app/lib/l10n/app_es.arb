@@ -353,5 +353,6 @@
 	"goBack": "Volver",
 	"debugPanelShareLogs": "Compartir registros",
 	"mediaTapToRetry": "Toca para reintentar",
-	"mediaDownloadFailedTapToRetry": "Descarga fallida. Toca para reintentar"
+	"mediaDownloadFailedTapToRetry": "Descarga fallida. Toca para reintentar",
+	"attachmentTooLarge": "El archivo adjunto es demasiado grande. Tamaño máximo: {maxMb} MB."
 }

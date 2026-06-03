@@ -13,6 +13,11 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
 
   static const _pluginName = 'mpx_document_attachment_plugin';
 
+  /// Hard upper bound on raw document bytes accepted from the picker.
+  /// Above this the file is rejected before being base64-encoded, which would
+  /// otherwise inflate the in-memory footprint by roughly 33 percent.
+  static const _maxBytes = 25 * 1024 * 1024;
+
   static const _allowedExtensions = [
     'pdf',
     'doc',
@@ -42,6 +47,13 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
     if (result == null || result.files.isEmpty) return null;
 
     final file = result.files.first;
+    if (file.size > _maxBytes) {
+      if (context.mounted) {
+        _showTooLargeSnackBar(context);
+      }
+      return null;
+    }
+
     final bytes = file.bytes;
     if (bytes == null) return null;
 
@@ -60,6 +72,13 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
           byteCount: bytes.length,
         ),
       ],
+    );
+  }
+
+  void _showTooLargeSnackBar(BuildContext context) {
+    final maxMb = _maxBytes ~/ (1024 * 1024);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.attachmentTooLarge(maxMb))),
     );
   }
 

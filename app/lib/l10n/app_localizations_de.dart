@@ -1543,4 +1543,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get mediaDownloadFailedTapToRetry =>
       'Download fehlgeschlagen. Zum Wiederholen tippen';
+
+  @override
+  String attachmentTooLarge(int maxMb) {
+    return 'Anhang ist zu groß. Maximale Größe: $maxMb MB.';
+  }
 }

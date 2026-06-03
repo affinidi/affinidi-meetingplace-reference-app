@@ -2223,6 +2223,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Download failed. Tap to retry'**
   String get mediaDownloadFailedTapToRetry;
+
+  /// Snackbar shown when a picked attachment exceeds the byte-size cap
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment is too large. Maximum size is {maxMb} MB.'**
+  String attachmentTooLarge(int maxMb);
 }
 
 class _AppLocalizationsDelegate

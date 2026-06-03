@@ -13,6 +13,12 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
 
   static const _pluginName = 'mpx_video_attachment_plugin';
 
+  /// Hard upper bound on raw video bytes accepted from the picker.
+  /// Above this the file is rejected before being loaded into memory or
+  /// base64-encoded, which would otherwise risk an OOM kill on lower-memory
+  /// devices.
+  static const _maxBytes = 25 * 1024 * 1024;
+
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
     BuildContext context,
@@ -24,6 +30,14 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
     );
 
     if (video == null) return null;
+
+    final sizeBytes = await video.length();
+    if (sizeBytes > _maxBytes) {
+      if (context.mounted) {
+        _showTooLargeSnackBar(context);
+      }
+      return null;
+    }
 
     final bytes = await video.readAsBytes();
     final base64Data = base64.encode(bytes);
@@ -40,6 +54,13 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
           filename: filename,
         ),
       ],
+    );
+  }
+
+  void _showTooLargeSnackBar(BuildContext context) {
+    final maxMb = _maxBytes ~/ (1024 * 1024);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.attachmentTooLarge(maxMb))),
     );
   }
 
