@@ -52,7 +52,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late AppLogger _logger;
   late String _channelDid;
 
-  ChatSDK? _chatSDK;
+  MeetingPlaceChatSDK? _chatSDK;
   bool _isGroupChat = false;
   String? _otherPartyFirstName;
   ChatStream? _messageSubscription;
@@ -96,7 +96,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _presenceTimedAction?.cancel();
       _typingTimedAction?.cancel();
       _messageSubscription?.dispose();
-      _chatSDK?.endChatSession();
+      unawaited(_chatSDK?.endChatSession());
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
 
@@ -303,7 +303,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _chatSDK = null;
     _messageSubscription?.dispose();
     _messageSubscription = null;
-    sdk?.endChatSession();
+    await sdk?.endChatSession();
   }
 
   @override
@@ -311,7 +311,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String message, {
     List<ChatAttachment>? attachments,
   }) async {
-    await _chatSDK?.sendTextMessage(message, attachments: attachments);
+    await _chatSDK?.sendTextMessage(
+      message,
+      attachments: attachments ?? const [],
+    );
   }
 
   @override

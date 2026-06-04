@@ -32,7 +32,7 @@ const _mockCameras = [
 Future<void> navigateToGroupChatScreen(
   WidgetTester tester, {
   required String contactId,
-  ChatSDK? meetingPlaceChatSDK,
+  MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? mockCameras,
   FakeSecureStorage? secureStorage,
@@ -275,7 +275,7 @@ void main() {
         expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
         final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
         expect(sendCall['text'], testMessage);
-        expect(sendCall['attachments'], isNull);
+        expect(sendCall['attachments'], isEmpty);
 
         // Simulate the message appearing in the UI
         meetingPlaceChatSDK.simulateIncomingTextMessage(
