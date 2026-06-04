@@ -290,7 +290,6 @@ void main() {
 
     test('adds chatItem to state when receiving message', () async {
       await chatService.startChatSession();
-      await Future<void>.delayed(const Duration(milliseconds: 1));
 
       fakeChatSdk.simulateIncomingTextMessage(
         text: 'test message',
@@ -311,7 +310,6 @@ void main() {
       'updates contactPresenceStatus in state when receiving presence',
       () async {
         await chatService.startChatSession();
-        await Future<void>.delayed(const Duration(milliseconds: 1));
 
         fakeChatSdk.simulateIncomingPresenceMessage(
           timestamp: DateTime.now().toIso8601String(),
@@ -330,7 +328,6 @@ void main() {
       'updates membersTyping in state when receiving typing activity',
       () async {
         await chatService.startChatSession();
-        await Future<void>.delayed(const Duration(milliseconds: 1));
 
         // Simulate contact card update to set otherPartyCard in state
         fakeChatSdk.simulateIncomingContactCardUpdate(
@@ -355,7 +352,6 @@ void main() {
 
     test('updates effect in state when receiving effect', () async {
       await chatService.startChatSession();
-      await Future<void>.delayed(const Duration(milliseconds: 1));
 
       fakeChatSdk.simulateIncomingEffectMessage(
         effectName: Effect.confetti.name,
@@ -368,7 +364,6 @@ void main() {
 
     test('clearEffect resets effect in state', () async {
       await chatService.startChatSession();
-      await Future<void>.delayed(const Duration(milliseconds: 1));
 
       fakeChatSdk.simulateIncomingEffectMessage(
         effectName: Effect.confetti.name,
@@ -439,7 +434,6 @@ void main() {
       'updates otherPartyCard in state when receiving contact card update',
       () async {
         await chatService.startChatSession();
-        await Future<void>.delayed(const Duration(milliseconds: 1));
 
         final updatedCard = FakeContacts.individualContact.card.copyWith(
           firstName: 'Updated Alice',
