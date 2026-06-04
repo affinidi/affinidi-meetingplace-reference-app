@@ -90,6 +90,9 @@ class _GroupMembersList extends ConsumerWidget {
     final provider = connectionDetailsScreenControllerProvider(_contactId);
     final contact = ref.watch(provider.select((state) => state.contact));
     final members = ref.watch(provider.members);
+    final isOwner = ref.watch(
+      provider.select((state) => state.connection?.ownedByMe ?? false),
+    );
     final isDebugMode = ref.watch(
       provider.select((state) => state.isDebugMode),
     );
@@ -116,6 +119,9 @@ class _GroupMembersList extends ConsumerWidget {
       itemBuilder: (context, index) {
         final member = members[index];
         final isDeleted = member.status == GroupMemberStatus.deleted;
+        final isSelf = member.did == contact?.channelDid;
+        final isAdmin = member.membershipType == GroupMembershipType.admin;
+        final canRemove = isOwner && !isDeleted && !isSelf && !isAdmin;
 
         return ListTile(
           leading: ClipRRect(
@@ -127,7 +133,7 @@ class _GroupMembersList extends ConsumerWidget {
               child: _GroupMemberIcon(
                 memberDid: member.did,
                 myDid: contact?.channelDid,
-                isAdmin: member.membershipType == GroupMembershipType.admin,
+                isAdmin: isAdmin,
               ),
             ),
           ),
@@ -159,6 +165,16 @@ class _GroupMembersList extends ConsumerWidget {
               ),
             ],
           ),
+          trailing: canRemove
+              ? IconButton(
+                  icon: const Icon(Icons.person_remove_outlined),
+                  onPressed: () => _RemoveMemberDialog.show(
+                    context,
+                    contactId: _contactId,
+                    member: member,
+                  ),
+                )
+              : null,
         );
       },
       separatorBuilder: (context, index) => const Divider(),

@@ -1,6 +1,7 @@
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
+import 'fake_contacts.dart';
 import 'fake_identities.dart';
 
 class FakeConnectionOffers {
@@ -53,5 +54,23 @@ class FakeConnectionOffers {
     ownedByMe: false,
     createdAt: DateTime(2024, 6, 1),
     offerDescription: 'Join our group chat',
+  );
+
+  static GroupConnectionOffer get groupOfferOwnedByMe => GroupConnectionOffer(
+    groupId: 'group-id',
+    groupDid: 'group-did',
+    offerName: 'My Group',
+    offerLink: FakeContacts.groupContact.offerLink,
+    mnemonic: 'my-group-passphrase',
+    publishOfferDid: 'did:peer:group-owner',
+    mediatorDid: 'did:peer:mediator123',
+    offerDescription: 'My owned group',
+    oobInvitationMessage:
+        '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
+    type: ConnectionOfferType.meetingPlaceInvitation,
+    status: ConnectionOfferStatus.finalised,
+    contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
+    ownedByMe: true,
+    createdAt: DateTime(2024, 6, 1),
   );
 }

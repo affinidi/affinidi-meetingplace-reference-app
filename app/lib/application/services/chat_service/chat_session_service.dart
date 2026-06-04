@@ -276,6 +276,23 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _groupManager.refreshGroup(groupId);
 
   @override
+  Future<void> removeMember({
+    required String groupId,
+    required String memberDid,
+  }) async {
+    await _ensureChatSdkInitialized();
+    if (!_isGroupChat) {
+      _logger.error(
+        'Attempted to remove member from non-group chat',
+        name: _logKey,
+      );
+      return;
+    }
+
+    await _chatSDK?.removeMember(memberDid);
+  }
+
+  @override
   Future<void> pauseChat() async {
     final sdk = _chatSDK;
     _chatSDK = null;

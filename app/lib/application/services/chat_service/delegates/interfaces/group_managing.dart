@@ -6,4 +6,8 @@ import '../../../../../domain/models/contacts/contact.dart';
 abstract class GroupManaging {
   Future<Group?> refreshGroup(String groupId);
   Future<void> updateGroupContactPendingStatus(Contact contact, Group group);
+  Future<void> removeMember({
+    required String groupId,
+    required String memberDid,
+  });
 }

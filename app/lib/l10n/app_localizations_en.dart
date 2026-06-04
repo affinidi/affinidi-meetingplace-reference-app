@@ -1457,4 +1457,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goBack => 'Go Back';
+
+  @override
+  String get removeMemberDialogTitle => 'Remove member';
+
+  @override
+  String removeMemberDialogBody(String name) {
+    return 'Remove $name from this group? They will no longer receive messages.';
+  }
+
+  @override
+  String get removeMemberConfirm => 'Remove';
+
+  @override
+  String get removeMemberNotSupported =>
+      'Removing members isn\'t supported yet.';
 }
