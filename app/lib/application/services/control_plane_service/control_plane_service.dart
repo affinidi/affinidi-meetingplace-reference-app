@@ -205,14 +205,12 @@ class ControlPlaneService extends _$ControlPlaneService
   /// - Invitation accepted -> onInvitationAccepted / onGroupInvitationAccepted
   /// - Offer finalised -> onConnectionOfferApproved (only for inaugurated
   ///  channels)
-  /// - Channel activity -> onChannelInaugurated (only for inaugurated channels;
-  ///   pre-inauguration activity is ignored)
+  /// - Channel activity -> onChannelInaugurated (only for inaugurated channels
   ///
   /// [event] - The control plane stream event received from the SDK.
   ///
   /// Throws:
-  /// - [AppException] when finalised events are received for non-inaugurated
-  ///   channels.
+  /// - [AppException] when finalised/activity events are received for non-inaugurated channels.
   void _handleControlPlaneEvent(ControlPlaneStreamEvent event) {
     final channel = event.channel;
     _logger.info(
@@ -277,10 +275,14 @@ class ControlPlaneService extends _$ControlPlaneService
         );
         _channelActivityController.add(channel);
       } else {
-        _logger.warning(
-          'Ignoring channel activity for non-inaugurated channel: '
+        _logger.error(
+          'Received channel activity for non-inaugurated channel: '
           '${channel.permanentChannelDid}',
           name: _logKey,
+        );
+        throw AppException(
+          'Received channel activity for a non-inaugurated channel',
+          code: AppExceptionType.other.name,
         );
       }
       return;

@@ -106,31 +106,12 @@ dev_dependencies:
   riverpod_generator: ^4.0.4-dev.3
 
 dependency_overrides:
-  meeting_place_chat:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_chat
-      ref: f1392d2b56290967a07ce8d4d1605c5743ced433
-  meeting_place_control_plane:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_control_plane
-      ref: f1392d2b56290967a07ce8d4d1605c5743ced433
-  meeting_place_core:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_core
-      ref: f1392d2b56290967a07ce8d4d1605c5743ced433
-  meeting_place_credentials:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_credentials
-      ref: f1392d2b56290967a07ce8d4d1605c5743ced433
-  meeting_place_drift_repository:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_drift_repository
-      ref: f1392d2b56290967a07ce8d4d1605c5743ced433
+  meeting_place_chat: ^0.0.1-dev.41
+  meeting_place_control_plane: ^0.0.1-dev.19
+  meeting_place_core: ^0.0.1-dev.38
+  meeting_place_credentials: ^0.0.1-dev.1
+  meeting_place_drift_repository: ^0.0.1-dev.42
+  meeting_place_mediator: ^0.0.1-dev.15
 
 flutter:
   generate: true
