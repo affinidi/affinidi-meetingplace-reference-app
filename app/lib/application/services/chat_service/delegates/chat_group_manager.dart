@@ -38,4 +38,13 @@ class ChatGroupManager implements GroupManaging {
           ),
         );
   }
+
+  @override
+  Future<void> removeMember({
+    required String groupId,
+    required String memberDid,
+  }) async {
+    final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
+    await coreSdk.removeMemberFromGroup(groupId: groupId, memberDid: memberDid);
+  }
 }

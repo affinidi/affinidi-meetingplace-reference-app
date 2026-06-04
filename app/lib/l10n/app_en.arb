@@ -1414,6 +1414,7 @@
 	"cameraOpenSettings": "Open Settings",
 	"cameraNotAvailable": "Camera not available",
 	"goBack": "Go Back",
+<<<<<<< HEAD
 	"rCardsPanelSubtitle": "Relationship cards received from your contacts",
 	"rCardsEmpty": "R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.",
 	"rCardsFilterLabel": "{filter, select, all{All} nonAnonymous{Non-anonymous} other{}}",
@@ -1443,12 +1444,20 @@
 	"rCardDeletePrompt": "Are you sure you want to delete this R-Card? This action cannot be undone.",
 	"rCardChatWith": "Chat with {name}",
 	"@rCardChatWith": {
+	"removeMemberDialogTitle": "Remove member",
+	"@removeMemberDialogTitle": {
+		"type": "text"
+	},
+	"removeMemberDialogBody": "Remove {name} from this group? They will no longer receive messages.",
+	"@removeMemberDialogBody": {
+		"type": "text",
 		"placeholders": {
 			"name": {
 				"type": "String"
 			}
 		}
 	},
+<<<<<<< HEAD
 	"rCardFieldIssuerDid": "Issuer DID",
 	"rCardFieldReceivedAt": "Received",
 	"rCardFieldIssuedAt": "Issued",
@@ -1725,6 +1734,12 @@
 	},
 	"zkpProofAlreadyShared": "ZKP Proof already shared",
 	"@zkpProofAlreadyShared": {
+	"removeMemberConfirm": "Remove",
+	"@removeMemberConfirm": {
+		"type": "text"
+	},
+	"removeMemberNotSupported": "Removing members isn't supported yet.",
+	"@removeMemberNotSupported": {
 		"type": "text"
 	}
 }
