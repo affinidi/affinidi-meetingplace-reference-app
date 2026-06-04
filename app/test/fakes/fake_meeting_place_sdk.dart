@@ -94,6 +94,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     required ContactCard contactCard,
     required SDKConnectionOfferType type,
     required String offerDescription,
+    required ChannelTransport transport,
     String? customPhrase,
     DateTime? validUntil,
     int? maximumUsage,
@@ -115,7 +116,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'metadata': metadata,
       'externalRef': externalRef,
       'score': score,
-      'transport': ChannelTransport.didcomm,
+      'transport': transport,
     });
 
     if (_publishOfferException != null) {
