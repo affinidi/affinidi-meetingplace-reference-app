@@ -4,9 +4,10 @@ import 'interfaces/concierge_messaging.dart';
 
 /// Handles concierge-related SDK interactions.
 class ChatConciergeMessenger implements ConciergeMessaging {
-  ChatConciergeMessenger({required ChatSDK chatSdk}) : _chatSdk = chatSdk;
+  ChatConciergeMessenger({required MeetingPlaceChatSDK chatSdk})
+    : _chatSdk = chatSdk;
 
-  final ChatSDK _chatSdk;
+  final MeetingPlaceChatSDK _chatSdk;
 
   @override
   Future<void> approveConnectionRequest(ConciergeMessage message) async {

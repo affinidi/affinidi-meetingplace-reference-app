@@ -60,7 +60,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late AppLogger _logger;
   late String _channelDid;
 
-  ChatSDK? _chatSDK;
+  MeetingPlaceChatSDK? _chatSDK;
   bool _isGroupChat = false;
   String? _otherPartyFirstName;
   ChatStream? _messageSubscription;
@@ -329,7 +329,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String message, {
     List<ChatAttachment>? attachments,
   }) async {
-    await _chatSDK?.sendTextMessage(message, attachments: attachments);
+    await _chatSDK?.sendTextMessage(
+      message,
+      attachments: attachments ?? const [],
+    );
   }
 
   @override
