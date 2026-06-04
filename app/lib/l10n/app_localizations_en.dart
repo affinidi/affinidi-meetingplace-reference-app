@@ -40,6 +40,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createGroupChatOffer => 'Group chat';
 
   @override
+  String get chatTransport => 'Chat transport';
+
+  @override
+  String transportLabel(String transport) {
+    String _temp0 = intl.Intl.selectLogic(transport, {
+      'didcomm': 'DIDComm',
+      'matrix': 'Matrix',
+      'other': '$transport',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get groupOfferHelperText =>
       'The invitation will represent a group chat for multiple contacts to join and chat. You still have control over who can join the group chat.';
 

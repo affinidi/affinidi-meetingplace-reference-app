@@ -32,6 +32,19 @@
 	"@createGroupChatOffer": {
 		"type": "text"
 	},
+	"chatTransport": "Chat transport",
+	"@chatTransport": {
+		"type": "text"
+	},
+	"transportLabel": "{transport, select, didcomm{DIDComm} matrix{Matrix} other{{transport}}}",
+	"@transportLabel": {
+		"type": "text",
+		"placeholders": {
+			"transport": {
+				"type": "String"
+			}
+		}
+	},
 	"groupOfferHelperText": "The invitation will represent a group chat for multiple contacts to join and chat. You still have control over who can join the group chat.",
 	"@groupOfferHelperText": {
 		"type": "text"

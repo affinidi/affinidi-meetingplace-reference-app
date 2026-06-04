@@ -7,7 +7,7 @@ part of 'publish_offer_screen_controller.dart';
 // **************************************************************************
 
 String _$publishOfferScreenControllerHash() =>
-    r'e441ae726742fb74215da3a435ac07878922f7c6';
+    r'bd2477d51ec503a4fdb4d041df75ba90389f9936';
 
 /// Copied from Dart SDK
 class _SystemHash {
