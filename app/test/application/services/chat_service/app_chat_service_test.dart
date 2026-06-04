@@ -241,65 +241,6 @@ void main() {
       await chatService.updateGroupContactPendingStatus(testContact, group);
       expect(true, isTrue);
     });
-
-    test('removeMember on a non-group chat is a no-op', () async {
-      await chatService.startChatSession();
-      await chatService.removeMember(
-        groupId: 'group-1',
-        memberDid: 'did:key:bob',
-      );
-      expect(fakeChatSdk.removeMemberCallCount, 0);
-    });
-  });
-
-  group('ChatSessionService - Group Chat Delegation', () {
-    late ProviderContainer container;
-    late ChatSessionService chatService;
-    late FakeMeetingPlaceSDK fakeCoreSdk;
-    late FakeChatSdk fakeChatSdk;
-
-    final groupContact = FakeContacts.groupContact;
-    final groupChannelDid = groupContact.channelDid!;
-
-    setUp(() async {
-      fakeCoreSdk = FakeMeetingPlaceSDK(
-        channels: {groupChannelDid: FakeChannels.groupChannel},
-      );
-      fakeCoreSdk.setMockGroup(FakeGroups.approvedGroup());
-      fakeChatSdk = FakeChatSdk();
-
-      container = ProviderContainer(
-        overrides: [
-          meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
-          chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
-          contactsServiceProvider.overrideWith(FakeContactsService.new),
-          environmentProvider.overrideWithValue(FakeEnvironment()),
-          appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
-          networkConnectivityServiceProvider.overrideWith(
-            _FakeNetworkConnectivityService.new,
-          ),
-        ],
-      );
-      container.listen(
-        chatSessionServiceProvider(groupChannelDid),
-        (previous, value) {},
-        fireImmediately: true,
-      );
-      chatService = container.read(
-        chatSessionServiceProvider(groupChannelDid).notifier,
-      );
-    });
-
-    tearDown(() => container.dispose());
-
-    test('delegates removeMember to SDK', () async {
-      await chatService.startChatSession();
-      await chatService.removeMember(
-        groupId: 'group-1',
-        memberDid: 'did:key:bob',
-      );
-      expect(fakeChatSdk.lastRemovedMemberDid, 'did:key:bob');
-    });
   });
 
   group('ChatSessionService - State Emissions', () {

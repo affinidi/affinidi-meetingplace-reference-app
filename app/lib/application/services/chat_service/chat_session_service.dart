@@ -280,6 +280,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     required String groupId,
     required String memberDid,
   }) async {
+    await _ensureChatSdkInitialized();
     if (!_isGroupChat) {
       _logger.error(
         'Attempted to remove member from non-group chat',
