@@ -17,6 +17,8 @@ import 'infrastructure/firebase_messaging/firebase_push_notification_messaging.d
 import 'infrastructure/loggers/app_logger/app_logger.dart';
 import 'infrastructure/loggers/error_logger/error_logger.dart';
 import 'infrastructure/loggers/riverpod_provider_logger/provider_debug_logger.dart';
+import 'infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
+import 'infrastructure/plugins/audio_attachments_plugin/local_voice_attachment_store.dart';
 import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
 import 'infrastructure/plugins/device_region_plugin/device_region_plugin.dart';
 import 'infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
@@ -102,8 +104,16 @@ void main() async {
               cacheManager: ref.read(cacheManagerProvider),
             ),
             VrcAttachmentsPlugin(),
-            VideoAttachmentsPlugin(),
-            DocumentAttachmentsPlugin(),
+            VideoAttachmentsPlugin(
+              cacheManager: ref.read(cacheManagerProvider),
+            ),
+            DocumentAttachmentsPlugin(
+              cacheManager: ref.read(cacheManagerProvider),
+            ),
+            AudioAttachmentsPlugin(
+              cacheManager: ref.read(cacheManagerProvider),
+              localVoiceStore: ref.read(localVoiceAttachmentStoreProvider),
+            ),
           ],
         ),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),

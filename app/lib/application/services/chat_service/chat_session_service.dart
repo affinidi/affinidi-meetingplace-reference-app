@@ -872,4 +872,3 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     state = state.copyWith(membersTyping: memberNames);
   }
 }
-

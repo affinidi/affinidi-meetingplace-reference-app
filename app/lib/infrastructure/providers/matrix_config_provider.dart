@@ -112,4 +112,3 @@ final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
     ),
   );
 });
-
