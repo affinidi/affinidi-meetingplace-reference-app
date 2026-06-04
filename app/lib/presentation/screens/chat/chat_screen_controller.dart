@@ -1229,4 +1229,3 @@ extension _ChatScreenStateExtensions on ChatScreenState {
     );
   }
 }
-

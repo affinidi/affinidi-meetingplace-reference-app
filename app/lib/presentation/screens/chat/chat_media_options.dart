@@ -7,7 +7,7 @@ const _kAttachmentPluginIcons = <String, IconData>{
 };
 
 bool _isHiddenAttachmentIcon(AttachmentPluginIcon icon) => switch (icon) {
-  EmojiIcon(:final emoji) => emoji.startsWith('🎬'),
+  EmojiIcon(:final emoji) => emoji.startsWith('🎬') || emoji.startsWith('🎤'),
   _ => false,
 };
 

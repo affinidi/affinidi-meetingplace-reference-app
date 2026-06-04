@@ -421,166 +421,23 @@ class _VoiceInputPill extends StatelessWidget {
   }
 }
 
-class _HostedAudioWidget extends HookWidget {
-  const _HostedAudioWidget({
-    required this._attachment,
-    required this._cachedBytes,
-    required this._hasFailed,
-    required this._onRetry,
-    required this._onDownload,
-    required this._isFromMe,
-    required this._chatItemColor,
-    required this._senderAvatar,
-  });
-
-  final chat.ChatAttachment _attachment;
-  final Uint8List? _cachedBytes;
-  final bool _hasFailed;
-  final bool Function() _onRetry;
-  final bool Function() _onDownload;
-  final bool _isFromMe;
-  final Color _chatItemColor;
-  final ImageProvider<Object>? _senderAvatar;
-
-  @override
-  Widget build(BuildContext context) {
-    final cachedBytes = _cachedBytes;
-    final levels = _levelsForHostedVoice(_attachment, cachedBytes);
-    final durationMs =
-        chat.VoiceMessageMetadata.of(_attachment)?.durationMs ?? 0;
-
-    // Set when the user taps play before the clip is cached, so the download
-    // is kicked off and playback starts automatically once the bytes arrive.
-    final playRequested = useState(false);
-
-    if (cachedBytes == null) {
-      // While a requested download is still in flight (and has not failed),
-      // show a spinner instead of an inert play button.
-      final isLoading = playRequested.value && !_hasFailed;
-
-      void onPressed() {
-        if (_hasFailed) {
-          if (_onRetry()) playRequested.value = true;
-          return;
-        }
-        if (playRequested.value) return;
-        if (_onDownload()) playRequested.value = true;
-      }
-
-      return _VoiceMessageBubble(
-        isFromMe: _isFromMe,
-        chatItemColor: _chatItemColor,
-        isPlaying: false,
-        isLoading: isLoading,
-        duration: Duration(milliseconds: durationMs),
-        levels: levels,
-        progress: 0,
-        onPressed: onPressed,
-        senderAvatar: _senderAvatar,
-      );
+Future<AudioEncoder?> _supportedVoiceEncoder(AudioRecorder recorder) async {
+  for (final encoder in const [AudioEncoder.wav, AudioEncoder.aacLc]) {
+    if (await recorder.isEncoderSupported(encoder)) {
+      return encoder;
     }
-
-    return _VoicePlayer(
-      bytes: cachedBytes,
-      mediaType: _attachment.mediaType,
-      initialDuration: Duration(milliseconds: durationMs),
-      autoPlay: playRequested.value,
-      onAutoPlayed: () => playRequested.value = false,
-      builder: (context, state) => _VoiceMessageBubble(
-        isFromMe: _isFromMe,
-        chatItemColor: _chatItemColor,
-        isPlaying: state.isPlaying,
-        duration: state.duration,
-        levels: levels,
-        progress: state.progress,
-        onPressed: state.toggle,
-        senderAvatar: _senderAvatar,
-      ),
-    );
   }
+  return null;
 }
 
-class _VoiceMessageBubble extends StatelessWidget {
-  const _VoiceMessageBubble({
-    required this._isFromMe,
-    required this._chatItemColor,
-    required this._isPlaying,
-    required this._duration,
-    required this._levels,
-    required this._progress,
-    required this._onPressed,
-    required this._senderAvatar,
-    this._isLoading = false,
-  });
+String _voiceMessageMediaType(AudioEncoder encoder) {
+  return encoder == AudioEncoder.wav
+      ? _voiceMessageMimeTypeWav
+      : _voiceMessageMimeTypeMp4;
+}
 
-  final bool _isFromMe;
-  final Color _chatItemColor;
-  final bool _isPlaying;
-  final Duration _duration;
-  final List<double> _levels;
-  final double _progress;
-  final VoidCallback _onPressed;
-  final ImageProvider<Object>? _senderAvatar;
-  final bool _isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 260,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: _chatItemColor,
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Row(
-        children: [
-          ProfileCircleAvatar(
-            key: const Key('voice_sender_avatar'),
-            radius: 28,
-            image: _senderAvatar,
-            child: Icon(
-              _isFromMe ? Icons.person : Icons.person_outline,
-              color: Colors.white,
-              size: 30,
-            ),
-          ),
-          const SizedBox(width: 12),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-            onPressed: _isLoading ? null : _onPressed,
-            icon: _isLoading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Icon(
-                    _isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-          ),
-          Expanded(
-            child: _VoiceProgressDots(
-              levels: _levels,
-              progress: _progress,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            _formatVoiceDuration(_duration),
-            style: const TextStyle(color: Colors.white, fontSize: 13),
-          ),
-        ],
-      ),
-    );
-  }
+String _voiceMessageFileExtension(AudioEncoder encoder) {
+  return encoder == AudioEncoder.wav ? 'wav' : 'm4a';
 }
 
 class _VoicePlayerState {
@@ -599,29 +456,23 @@ class _VoicePlayerState {
 
 class _VoicePlayer extends HookWidget {
   const _VoicePlayer({
-    required this._initialDuration,
-    required this._builder,
-    this._filePath,
-    this._bytes,
-    this._mediaType,
-    this._autoPlay = false,
-    this._onAutoPlayed,
+    required this.initialDuration,
+    required this.builder,
+    this.filePath,
+    this.mediaType,
   });
 
-  final String? _filePath;
-  final Uint8List? _bytes;
-  final String? _mediaType;
-  final Duration _initialDuration;
-  final bool _autoPlay;
-  final VoidCallback? _onAutoPlayed;
-  final Widget Function(BuildContext context, _VoicePlayerState state) _builder;
+  final String? filePath;
+  final String? mediaType;
+  final Duration initialDuration;
+  final Widget Function(BuildContext context, _VoicePlayerState state) builder;
 
   @override
   Widget build(BuildContext context) {
     final player = useMemoized(AudioPlayer.new);
     final isPlaying = useState(false);
     final position = useState(Duration.zero);
-    final duration = useState(_initialDuration);
+    final duration = useState(initialDuration);
 
     useEffect(() {
       final subscriptions = <StreamSubscription<Object?>>[
@@ -656,34 +507,11 @@ class _VoicePlayer extends HookWidget {
       }
 
       await player.stop();
-      final bytes = _bytes;
-      if (bytes != null) {
-        await player.play(BytesSource(bytes, mimeType: _mediaType));
-        return;
-      }
-
-      final filePath = _filePath;
-      if (filePath != null) {
-        await player.play(DeviceFileSource(filePath, mimeType: _mediaType));
+      final path = filePath;
+      if (path != null) {
+        await player.play(DeviceFileSource(path, mimeType: mediaType));
       }
     }
-
-    // Starts playback once the bytes become available when the user tapped
-    // play while the clip was still downloading.
-    final hasAutoPlayed = useRef(false);
-    useEffect(() {
-      if (_autoPlay && !hasAutoPlayed.value) {
-        hasAutoPlayed.value = true;
-        // The effect runs synchronously during build; defer the playback start
-        // and the parent state reset to the next frame so we don't mutate the
-        // parent widget's state while it is still building.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          unawaited(togglePlayback());
-          _onAutoPlayed?.call();
-        });
-      }
-      return null;
-    }, [_autoPlay]);
 
     final durationMs = duration.value.inMilliseconds;
     final progress = durationMs <= 0
@@ -692,7 +520,7 @@ class _VoicePlayer extends HookWidget {
               .clamp(0.0, 1.0)
               .toDouble();
 
-    return _builder(
+    return builder(
       context,
       _VoicePlayerState(
         isPlaying: isPlaying.value,
@@ -705,10 +533,10 @@ class _VoicePlayer extends HookWidget {
 }
 
 class _VoiceControlButton extends StatelessWidget {
-  const _VoiceControlButton({required this._icon, required this._onPressed});
+  const _VoiceControlButton({required this.icon, required this.onPressed});
 
-  final IconData _icon;
-  final VoidCallback _onPressed;
+  final IconData icon;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -719,8 +547,8 @@ class _VoiceControlButton extends StatelessWidget {
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
         style: IconButton.styleFrom(backgroundColor: Colors.white),
-        onPressed: _onPressed,
-        icon: Icon(_icon, color: context.colorScheme.primary, size: 20),
+        onPressed: onPressed,
+        icon: Icon(icon, color: context.colorScheme.primary, size: 20),
       ),
     );
   }
@@ -728,14 +556,14 @@ class _VoiceControlButton extends StatelessWidget {
 
 class _VoiceProgressDots extends StatelessWidget {
   const _VoiceProgressDots({
-    required this._levels,
-    required this._progress,
-    required this._color,
+    required this.levels,
+    required this.progress,
+    required this.color,
   });
 
-  final List<double> _levels;
-  final double? _progress;
-  final Color _color;
+  final List<double> levels;
+  final double? progress;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -751,9 +579,9 @@ class _VoiceProgressDots extends StatelessWidget {
           child: CustomPaint(
             key: const Key('voice_waveform_paint'),
             painter: _VoiceProgressDotsPainter(
-              levels: _levels,
-              progress: _progress,
-              color: _color,
+              levels: levels,
+              progress: progress,
+              color: color,
             ),
           ),
         );
@@ -769,31 +597,33 @@ const _voiceWaveformDotMaxRadius = 7.5;
 
 class _VoiceProgressDotsPainter extends CustomPainter {
   const _VoiceProgressDotsPainter({
-    required this._levels,
-    required this._progress,
-    required this._color,
+    required this.levels,
+    required this.progress,
+    required this.color,
   });
 
-  final List<double> _levels;
-  final double? _progress;
-  final Color _color;
+  final List<double> levels;
+  final double? progress;
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (size.width <= 0 || size.height <= 0) return;
 
     final dotCount = math.max(12, math.min(48, (size.width / 7).floor()));
-    final playedPaint = Paint()..color = _color;
-    final remainingPaint = Paint()..color = _color.withValues(alpha: 0.55);
-    final markerPaint = Paint()..color = _color;
+    final playedPaint = Paint()..color = color;
+    final remainingPaint = Paint()..color = color.withValues(alpha: 0.55);
+    final markerPaint = Paint()..color = color;
     final drawableWidth = math.max(
       0.0,
       size.width - (_voiceWaveformDotMaxRadius * 2),
     );
     final spacing = drawableWidth / (dotCount - 1);
     final centerY = size.height / 2;
-    final progress = _progress?.clamp(0.0, 1.0).toDouble();
-    final progressX = progress == null ? null : size.width * progress;
+    final clampedProgress = progress?.clamp(0.0, 1.0).toDouble();
+    final progressX = clampedProgress == null
+        ? null
+        : size.width * clampedProgress;
 
     for (var i = 0; i < dotCount; i++) {
       final x = _voiceWaveformDotMaxRadius + (i * spacing);
@@ -813,26 +643,26 @@ class _VoiceProgressDotsPainter extends CustomPainter {
   }
 
   double _levelAt(int index, int dotCount) {
-    if (_levels.isEmpty) {
+    if (levels.isEmpty) {
       return _defaultVoiceLevels[index % _defaultVoiceLevels.length];
     }
-    final start = (index * _levels.length / dotCount).floor();
+    final start = (index * levels.length / dotCount).floor();
     final end = math.min(
-      _levels.length,
-      math.max(start + 1, ((index + 1) * _levels.length / dotCount).ceil()),
+      levels.length,
+      math.max(start + 1, ((index + 1) * levels.length / dotCount).ceil()),
     );
     var level = 0.0;
     for (var i = start; i < end; i++) {
-      level = math.max(level, _levels[i]);
+      level = math.max(level, levels[i]);
     }
     return level.clamp(0.0, 1.0).toDouble();
   }
 
   @override
   bool shouldRepaint(covariant _VoiceProgressDotsPainter oldDelegate) {
-    return oldDelegate._levels != _levels ||
-        oldDelegate._progress != _progress ||
-        oldDelegate._color != _color;
+    return oldDelegate.levels != levels ||
+        oldDelegate.progress != progress ||
+        oldDelegate.color != color;
   }
 }
 
@@ -857,30 +687,18 @@ List<int> _waveformFromLevels(List<double> levels) {
       .toList(growable: false);
 }
 
-List<double> _levelsForHostedVoice(
-  chat.ChatAttachment attachment,
-  Uint8List? bytes,
-) {
-  final waveform = chat.VoiceMessageMetadata.of(attachment)?.waveform;
-  if (!_hasWaveformShape(waveform) && bytes != null) {
-    final byteLevels = _levelsFromVoiceBytes(bytes, attachment.mediaType);
-    if (byteLevels.isNotEmpty) return byteLevels;
-  }
-  return _levelsFromWaveform(waveform);
-}
-
 Future<List<double>> _levelsFromVoiceFile(String path, String mediaType) async {
   if (mediaType != _voiceMessageMimeTypeWav) return const [];
 
   try {
-    final bytes = await File(path).readAsBytes();
-    return _levelsFromVoiceBytes(bytes, mediaType);
+    final fileBytes = await File(path).readAsBytes();
+    return _levelsFromVoiceBytes(fileBytes, mediaType);
   } catch (e, stackTrace) {
     AppLogger.instance.error(
       'Failed to extract voice waveform',
       error: e,
       stackTrace: stackTrace,
-      name: '_ChatTextEntry',
+      name: '_VoiceRecorder',
     );
     return const [];
   }
@@ -972,47 +790,9 @@ String _ascii(Uint8List bytes, int offset, int length) {
   return String.fromCharCodes(bytes.sublist(offset, offset + length));
 }
 
-List<double> _levelsFromWaveform(List<int>? waveform) {
-  if (waveform == null || waveform.isEmpty) return _defaultVoiceLevels;
-  return waveform
-      .map((level) => (level.clamp(0, 100) / 100).toDouble())
-      .toList(growable: false);
-}
-
-bool _hasWaveformShape(List<int>? waveform) {
-  if (waveform == null || waveform.length < 2) return false;
-  var min = 100;
-  var max = 0;
-  for (final level in waveform) {
-    final value = level.clamp(0, 100);
-    min = math.min(min, value);
-    max = math.max(max, value);
-  }
-  return max > min;
-}
-
 String _formatVoiceDuration(Duration duration) {
   final totalSeconds = duration.inSeconds;
   final minutes = totalSeconds ~/ 60;
   final seconds = totalSeconds % 60;
   return '$minutes:${seconds.toString().padLeft(2, '0')}';
-}
-
-Future<AudioEncoder?> _supportedVoiceEncoder(AudioRecorder recorder) async {
-  for (final encoder in const [AudioEncoder.wav, AudioEncoder.aacLc]) {
-    if (await recorder.isEncoderSupported(encoder)) {
-      return encoder;
-    }
-  }
-  return null;
-}
-
-String _voiceMessageMediaType(AudioEncoder encoder) {
-  return encoder == AudioEncoder.wav
-      ? _voiceMessageMimeTypeWav
-      : _voiceMessageMimeTypeMp4;
-}
-
-String _voiceMessageFileExtension(AudioEncoder encoder) {
-  return encoder == AudioEncoder.wav ? 'wav' : 'm4a';
 }

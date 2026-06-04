@@ -10,6 +10,8 @@ import 'package:meeting_place_core/meeting_place_core.dart'
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 
+import '../../fakes/fake_cache_manager.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -40,7 +42,7 @@ void main() {
     late DocumentAttachmentsPlugin plugin;
 
     setUp(() {
-      plugin = DocumentAttachmentsPlugin();
+      plugin = DocumentAttachmentsPlugin(cacheManager: FakeCacheManager());
     });
 
     group('supportsFormat', () {
