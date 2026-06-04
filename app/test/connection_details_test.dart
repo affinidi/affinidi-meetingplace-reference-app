@@ -90,5 +90,28 @@ void main() {
 
       expect(fakeChatSdk.removeMemberCallCount, 0);
     });
+
+    testWidgets('does not show remove button for the group admin/owner', (
+      tester,
+    ) async {
+      await navigateToLocation(
+        tester,
+        '/contacts/${groupContact.id}/connection-details',
+        identities: [FakeIdentities.primaryIdentity],
+        contacts: [groupContact],
+        meetingPlaceCoreSDK: buildCoreSdkWithGroup(),
+        meetingPlaceChatSDK: FakeChatSdk(),
+      );
+      await tester.pumpAndSettle();
+
+      final adminRemoveButton = find.descendant(
+        of: find.ancestor(
+          of: find.textContaining(FakeGroups.adminMemberFirstName),
+          matching: find.byType(ListTile),
+        ),
+        matching: find.byIcon(Icons.person_remove_outlined),
+      );
+      expect(adminRemoveButton, findsNothing);
+    });
   });
 }

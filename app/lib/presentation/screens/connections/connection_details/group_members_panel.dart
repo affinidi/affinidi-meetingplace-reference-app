@@ -120,7 +120,8 @@ class _GroupMembersList extends ConsumerWidget {
         final member = members[index];
         final isDeleted = member.status == GroupMemberStatus.deleted;
         final isSelf = member.did == contact?.channelDid;
-        final canRemove = isOwner && !isDeleted && !isSelf;
+        final isAdmin = member.membershipType == GroupMembershipType.admin;
+        final canRemove = isOwner && !isDeleted && !isSelf && !isAdmin;
 
         return ListTile(
           leading: ClipRRect(
@@ -132,7 +133,7 @@ class _GroupMembersList extends ConsumerWidget {
               child: _GroupMemberIcon(
                 memberDid: member.did,
                 myDid: contact?.channelDid,
-                isAdmin: member.membershipType == GroupMembershipType.admin,
+                isAdmin: isAdmin,
               ),
             ),
           ),

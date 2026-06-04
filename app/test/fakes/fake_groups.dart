@@ -4,6 +4,8 @@ import 'fake_contacts.dart';
 class FakeGroups {
   static const removableMemberDid = 'did:key:removable-member';
   static const removableMemberFirstName = 'Bob';
+  static const adminMemberDid = 'did:key:admin-member';
+  static const adminMemberFirstName = 'Carol';
 
   static sdk.Group approvedGroup() {
     return sdk.Group(
@@ -36,6 +38,24 @@ class FakeGroups {
             },
           ),
           publicKey: 'fake-public-key-2',
+        ),
+        sdk.GroupMember(
+          did: adminMemberDid,
+          dateAdded: DateTime.now(),
+          status: sdk.GroupMemberStatus.approved,
+          membershipType: sdk.GroupMembershipType.admin,
+          contactCard: sdk.ContactCard(
+            did: adminMemberDid,
+            type: FakeContacts.sdkContactCard.type,
+            contactInfo: {
+              'n': {
+                'given': adminMemberFirstName,
+                'surname': 'Owner',
+                'displayName': 'Display Carol',
+              },
+            },
+          ),
+          publicKey: 'fake-public-key-3',
         ),
       ],
       created: DateTime.now(),
