@@ -183,6 +183,19 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     try {
       final chatSession = await _chatSDK!.startChatSession();
 
+      final messages = [
+        EncryptionNotice(),
+        ...chatSession.messages,
+      ].sortedBy((item) => item.dateCreated).reversed.toList();
+      state = state.copyWith(messages: messages, isInitialized: true);
+
+      // Reset must be fully committed before the stream listener is attached.
+      // Buffered events flush as soon as the listener attaches and would
+      // otherwise race with this update on a stale Contact snapshot, causing
+      // a seqNo write to clobber badgeCount=0 back to its previous value.
+      await _resetBadgeCount();
+      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
+
       unawaited(
         _chatSDK!.chatStreamSubscription.then(
           (chatStream) {
@@ -219,15 +232,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           },
         ),
       );
-
-      final messages = [
-        EncryptionNotice(),
-        ...chatSession.messages,
-      ].sortedBy((item) => item.dateCreated).reversed.toList();
-      state = state.copyWith(messages: messages, isInitialized: true);
-
-      await _resetBadgeCount();
-      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
       _logger.info('Chat session started', name: _logKey);
     } catch (error, stackTrace) {
