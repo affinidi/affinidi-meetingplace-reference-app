@@ -165,7 +165,7 @@ class ChatScreenController extends _$ChatScreenController
         break;
       case AppLifecycleState.paused:
         _chatResumingLock.synchronized(() async {
-          _pauseChatSession();
+          await _pauseChatSession();
         });
         break;
       default:
@@ -196,12 +196,12 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  void _pauseChatSession() {
+  Future<void> _pauseChatSession() async {
     if (_isPaused) return;
 
     _logger.info('Pausing chat session', name: _logKey);
     _isPaused = true;
-    unawaited(_chatService?.pauseChat());
+    await _chatService?.pauseChat();
   }
 
   void _onMessageTextChanged() {
