@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
@@ -11,6 +12,16 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =
       StreamController<StreamData>.broadcast();
+  final List<StreamData> _bufferedEvents = [];
+  bool _hasListener = false;
+
+  void _emit(StreamData data) {
+    if (_hasListener) {
+      _streamController.add(data);
+    } else {
+      _bufferedEvents.add(data);
+    }
+  }
 
   bool chatActivitySent = false;
   ConciergeMessage? lastRejectedConnection;
@@ -32,7 +43,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
-  final List<({List<Attachment> attachments, String senderDid})>
+  final List<({List<ChatAttachment> attachments, String senderDid})>
   createAttachmentMessageCalls = [];
 
   int get startChatSessionCallCount => _chatSessionStartedCalls;
@@ -62,7 +73,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       createdTime: message.dateCreated,
     );
 
-    _streamController.add(StreamData(event: chatEvent, chatItem: message));
+    _emit(StreamData(event: chatEvent, chatItem: message));
   }
 
   /// Simulates an incoming concierge message for join group requests
@@ -102,9 +113,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       createdTime: conciergeMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(event: chatEvent, chatItem: conciergeMessage),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: conciergeMessage));
 
     return conciergeMessage;
   }
@@ -215,9 +224,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       createdTime: conciergeMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(event: chatEvent, chatItem: conciergeMessage),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: conciergeMessage));
 
     return conciergeMessage;
   }
@@ -260,7 +267,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       createdTime: eventMessage.dateCreated,
     );
 
-    _streamController.add(StreamData(event: chatEvent, chatItem: eventMessage));
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
 
     return eventMessage;
   }
@@ -303,7 +310,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       createdTime: eventMessage.dateCreated,
     );
 
-    _streamController.add(StreamData(event: chatEvent, chatItem: eventMessage));
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
 
     return eventMessage;
   }
@@ -334,7 +341,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       createdTime: eventMessage.dateCreated,
     );
 
-    _streamController.add(StreamData(event: chatEvent, chatItem: eventMessage));
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
 
     return eventMessage;
   }
@@ -369,7 +376,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String timestamp,
     required String recipientDid,
   }) {
-    _streamController.add(
+    _emit(
       StreamData(
         event: ChatPresenceEvent(timestamp: DateTime.parse(timestamp)),
       ),
@@ -381,7 +388,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required DateTime createdTime,
     required String recipientDid,
   }) {
-    _streamController.add(
+    _emit(
       StreamData(
         event: ChatActivityEvent(
           senderDid: senderDid,
@@ -396,15 +403,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String effectName,
     required String recipientDid,
   }) {
-    _streamController.add(
-      StreamData(event: ChatEffectEvent(effectName: effectName)),
-    );
+    _emit(StreamData(event: ChatEffectEvent(effectName: effectName)));
   }
 
   void simulateIncomingGroupDetailsUpdate({required String recipientDid}) {
-    _streamController.add(
-      StreamData(event: const ChatGroupDetailsUpdateEvent()),
-    );
+    _emit(StreamData(event: const ChatGroupDetailsUpdateEvent()));
   }
 
   void simulateIncomingContactCardUpdate({
@@ -412,7 +415,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required ContactCard card,
     required String recipientDid,
   }) {
-    _streamController.add(
+    _emit(
       StreamData(
         event: ChatContactDetailsUpdateEvent(
           senderDid: contactDid,
@@ -525,7 +528,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   @override
   Future<void> createAttachmentMessage({
-    required List<Attachment> attachments,
+    required List<ChatAttachment> attachments,
     required String senderDid,
   }) async {
     createAttachmentMessageCalls.add((
@@ -538,6 +541,77 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError(
       'Method ${invocation.memberName} not implemented in FakeChatSdk',
+    );
+  }
+}
+
+class FakeChat implements Chat {
+  @override
+  ChatStream? stream;
+
+  @override
+  List<ChatItem> get messages => [
+    ChatItem(
+      chatId: 'chatId',
+      messageId: 'messageId',
+      senderDid: 'senderDid',
+      isFromMe: true,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      type: ChatItemType.message,
+    ),
+  ];
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError(
+      'Method ${invocation.memberName} not implemented in FakeChat',
+    );
+  }
+}
+
+class _FakeChatStream implements ChatStream {
+  _FakeChatStream(
+    this._stream, {
+    required this.drainBuffer,
+    required this.onDispose,
+  });
+
+  final Stream<StreamData> _stream;
+  final void Function(void Function(StreamData) onData) drainBuffer;
+  final void Function() onDispose;
+  StreamSubscription<StreamData>? _subscription;
+
+  @override
+  ChatStream listen(
+    void Function(StreamData) onData, {
+    Function? onError,
+    void Function()? onDone,
+    bool? cancelOnError,
+  }) {
+    drainBuffer(onData);
+    _subscription = _stream.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+    return this;
+  }
+
+  @override
+  Stream<StreamData> get stream => _stream;
+
+  @override
+  Future<void> dispose() async {
+    await _subscription?.cancel();
+    onDispose();
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError(
+      'Method ${invocation.memberName} not implemented in _FakeChatStream',
     );
   }
 }

@@ -237,6 +237,19 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       final chatSession = await _chatSDK!.startChatSession();
       _chatId = chatSession.id;
 
+      final messages = [
+        EncryptionNotice(),
+        ...chatSession.messages,
+      ].sortedBy((item) => item.dateCreated).reversed.toList();
+      state = state.copyWith(messages: messages, isInitialized: true);
+
+      // Reset must be fully committed before the stream listener is attached.
+      // Buffered events flush as soon as the listener attaches and would
+      // otherwise race with this update on a stale Contact snapshot, causing
+      // a seqNo write to clobber badgeCount=0 back to its previous value.
+      await _resetBadgeCount();
+      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
+
       unawaited(
         _chatSDK!.chatStreamSubscription.then((chatStream) {
           if (_chatSDK == null) {
@@ -273,11 +286,13 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       final replayMessages = state.messages
           .where((m) => !dbMessageIds.contains(m.messageId))
           .toList();
+
       final baseMessages = [
         EncryptionNotice(),
         ...chatSession.messages,
         ...replayMessages,
       ].sortedBy((item) => item.dateCreated).reversed.toList();
+
       final messages = _appendDerivedZkpNotices(baseMessages);
       state = state.copyWith(messages: messages, isInitialized: true);
 
@@ -302,6 +317,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           (_) => _rCardManager.replayPendingRCard(),
         ),
       );
+
       _logger.info('Chat session started', name: _logKey);
     } catch (error, stackTrace) {
       _logger.error(
