@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/services/chat_service/chat_session_service.dart';
 import '../../../../application/services/connections_service/connections_service.dart';
 import '../../../../application/services/contacts_service/contacts_service.dart';
 import '../../../../application/services/identities_service/identities_service.dart';
@@ -250,6 +251,20 @@ class ConnectionDetailsScreenController
 
   Future<void> toggleShowQrView() async {
     state = state.copyWith(showQrView: !state.showQrView);
+  }
+
+  Future<void> removeMember(String memberDid) async {
+    final groupId = state.group?.id;
+    final channelDid = state.contact?.channelDid;
+    if (groupId == null || channelDid == null) return;
+
+    final chatService = ref.read(
+      chatSessionServiceProvider(channelDid).notifier,
+    );
+    await chatService.removeMember(groupId: groupId, memberDid: memberDid);
+
+    final updatedGroup = await chatService.refreshGroup(groupId);
+    state = state.copyWith(group: updatedGroup);
   }
 }
 

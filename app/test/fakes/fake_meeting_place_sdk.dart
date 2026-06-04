@@ -14,6 +14,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     this._acceptOobFlowException,
     this._isPhraseAvailable = true,
     Map<String, Channel>? channels,
+    List<ConnectionOffer>? connectionOffers,
     this.offerToFind,
     this.findOfferHasError = false,
     this._shouldTimeout = false,
@@ -114,6 +115,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'metadata': metadata,
       'externalRef': externalRef,
       'score': score,
+      'transport': ChannelTransport.didcomm,
     });
 
     if (_publishOfferException != null) {
