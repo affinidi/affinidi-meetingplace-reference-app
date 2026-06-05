@@ -107,36 +107,70 @@ class VdipManager {
 
       _vrcRequestSubscription = credentialsSdk.receivedVrcRequests
           .where((request) => request.senderDid == otherPartyDid)
-          .listen((request) {
-            unawaited(
-              _serializeEventHandling(() async {
-                // Clear the pending cache: this live delivery supersedes any
-                // cached event, preventing a double-handle on the next
-                // session open.
-                credentialsSdk.consumePendingVrcRequest(otherPartyDid);
-                await _handleReceivedVrcRequest(
-                  request,
-                  channel,
-                  credentialsSdk,
-                );
-              }),
-            );
-          });
+          .listen(
+            (request) {
+              unawaited(
+                _serializeEventHandling(() async {
+                  // Clear the pending cache: this live delivery supersedes any
+                  // cached event, preventing a double-handle on the next
+                  // session open.
+                  credentialsSdk.consumePendingVrcRequest(otherPartyDid);
+                  await _handleReceivedVrcRequest(
+                    request,
+                    channel,
+                    credentialsSdk,
+                  );
+                }).catchError((Object error, StackTrace stackTrace) {
+                  _logger.error(
+                    'VDIP request handling failed',
+                    error: error,
+                    stackTrace: stackTrace,
+                    name: _logKey,
+                  );
+                }),
+              );
+            },
+            onError: (Object error, StackTrace stackTrace) {
+              _logger.error(
+                'VDIP request stream failed',
+                error: error,
+                stackTrace: stackTrace,
+                name: _logKey,
+              );
+            },
+          );
 
       _vrcSubscription = credentialsSdk.receivedVrcs
           .where((receivedVrc) => receivedVrc.senderDid == otherPartyDid)
-          .listen((receivedVrc) {
-            unawaited(
-              _serializeEventHandling(() async {
-                credentialsSdk.consumePendingVrc(otherPartyDid);
-                await _handleReceivedVrc(
-                  receivedVrc.vcBlob,
-                  credentialsSdk,
-                  channel,
-                );
-              }),
-            );
-          });
+          .listen(
+            (receivedVrc) {
+              unawaited(
+                _serializeEventHandling(() async {
+                  credentialsSdk.consumePendingVrc(otherPartyDid);
+                  await _handleReceivedVrc(
+                    receivedVrc.vcBlob,
+                    credentialsSdk,
+                    channel,
+                  );
+                }).catchError((Object error, StackTrace stackTrace) {
+                  _logger.error(
+                    'VDIP VRC handling failed',
+                    error: error,
+                    stackTrace: stackTrace,
+                    name: _logKey,
+                  );
+                }),
+              );
+            },
+            onError: (Object error, StackTrace stackTrace) {
+              _logger.error(
+                'VDIP VRC stream failed',
+                error: error,
+                stackTrace: stackTrace,
+                name: _logKey,
+              );
+            },
+          );
     });
   }
 
