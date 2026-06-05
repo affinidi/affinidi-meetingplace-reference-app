@@ -253,8 +253,7 @@ class VdipManager {
         final completedIdentity = completedIdentityDid != null
             ? _ref
                   .read(identitiesServiceProvider)
-                  .identities
-                  .firstWhereOrNull((i) => i.did == completedIdentityDid)
+                  .getIdentityByDid(completedIdentityDid)
             : null;
         if (completedIdentity != null) {
           unawaited(
@@ -291,8 +290,7 @@ class VdipManager {
         final reciprocatedIdentity = reciprocatedIdentityDid != null
             ? _ref
                   .read(identitiesServiceProvider)
-                  .identities
-                  .firstWhereOrNull((i) => i.did == reciprocatedIdentityDid)
+                  .getIdentityByDid(reciprocatedIdentityDid)
             : null;
         if (reciprocatedIdentity != null) {
           unawaited(
