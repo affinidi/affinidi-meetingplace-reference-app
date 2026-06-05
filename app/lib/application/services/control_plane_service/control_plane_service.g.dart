@@ -108,7 +108,7 @@ final class ControlPlaneServiceProvider
 }
 
 String _$controlPlaneServiceHash() =>
-    r'06beb38a2f6d58f66c4fc373f71439173a5d3af5';
+    r'1d9b0ea123b16ebc5f51fa80c01534978e933868';
 
 /// Service responsible for processing control plane stream events and device
 ///  tokens.

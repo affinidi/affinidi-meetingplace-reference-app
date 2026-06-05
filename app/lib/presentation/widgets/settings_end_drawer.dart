@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/routes/route_paths.dart';
+import '../../navigation/tabs/tabs.dart';
 
 /// Right-side drawer with a shortcut to the Settings tab.
 class SettingsEndDrawer extends StatelessWidget {
@@ -16,7 +17,7 @@ class SettingsEndDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final title = l10n.tabsTitle('settings');
+    final title = l10n.tabsTitle(TabTitleKey.settings.name);
 
     return Drawer(
       backgroundColor: Colors.black,

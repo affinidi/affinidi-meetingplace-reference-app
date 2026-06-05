@@ -11,11 +11,11 @@ import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../../../presentation/screens/offer/publish_offer_screen/publish_offer_form_data.dart';
 import '../control_plane_service/control_plane_service.dart';
 import '../identities_service/identities_service.dart';
 import '../vrc_service/vrc_service.dart';
 import 'connections_service_state.dart';
+import 'publish_offer_request.dart';
 
 part 'connections_service.g.dart';
 
@@ -317,7 +317,7 @@ class ConnectionsService extends _$ConnectionsService {
   /// - `Future<void>` completes when publishing, refresh, and any group
   ///   announcement finish.
   Future<void> publishOffer(
-    PublishOfferFormData data, {
+    PublishOfferRequest data, {
     required Identity identity,
   }) async {
     _logger.info('Submitting offer: ${data.headline}', name: _logKey);

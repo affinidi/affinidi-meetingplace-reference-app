@@ -42,6 +42,7 @@ import 'handlers/effect_protocol_handler.dart';
 import 'handlers/group_details_protocol_handler.dart';
 import 'handlers/presence_protocol_handler.dart';
 import 'handlers/typing_protocol_handler.dart';
+import 'handlers/zkp_attachment_protocol_handler.dart';
 
 part 'chat_session_service.g.dart';
 
@@ -160,6 +161,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         ),
         ChatMessageProtocolHandler(
           onUpdateSequenceNumber: updateContactSequenceNumber,
+          logger: _logger,
+        ),
+        ZkpAttachmentProtocolHandler(
+          getOnZkpAttachment: () => _zkpCallback,
           logger: _logger,
         ),
         TypingProtocolHandler(
@@ -443,10 +448,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     await _router.route(data, channelDid);
 
-    if (data.plainTextMessage != null) {
-      _zkpCallback?.call(data, channelDid);
-    }
-
     final chatItem = data.chatItem;
     if (chatItem != null) {
       // VRC request messages are protocol signals; they must not appear as
@@ -490,11 +491,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     return _otherPartyFirstName?.isNotEmpty == true
         ? _otherPartyFirstName!
         : ref
-            .read(contactsServiceProvider)
-            .getContactByChannelDid(_otherPartyPermanentDid)
-            ?.card
-            .firstName ??
-            '';
+                  .read(contactsServiceProvider)
+                  .getContactByChannelDid(_otherPartyPermanentDid)
+                  ?.card
+                  .firstName ??
+              '';
   }
 
   List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {

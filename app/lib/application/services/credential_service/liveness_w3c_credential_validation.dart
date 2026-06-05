@@ -1,6 +1,7 @@
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:ssi/ssi.dart';
 
+import '../../../infrastructure/extensions/did_extensions.dart';
 import 'liveness_errors.dart';
 
 void validateIssuedW3cLivenessCredential({
@@ -52,8 +53,9 @@ void validateIssuedW3cLivenessCredential({
   final subjectDid = subject['id']?.toString() ?? '';
   if (subjectDid != holderDid) {
     throw InvalidLivenessW3cCredentialException(
-      'Issued W3C credential subject mismatch: expected $holderDid, '
-      'got $subjectDid.',
+      'Issued W3C credential subject mismatch: '
+      'expected ${holderDid.topAndTail()}, '
+      'got ${subjectDid.topAndTail()}.',
     );
   }
 

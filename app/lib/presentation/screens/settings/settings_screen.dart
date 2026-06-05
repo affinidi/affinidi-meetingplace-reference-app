@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../domain/models/mediator/mediator_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/route_paths.dart';
+import '../../../navigation/tabs/tabs.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../dialogs/settings/delete_mediator_dialog.dart';
 import '../../dialogs/settings/rename_mediator_dialog.dart';
@@ -72,7 +73,7 @@ class SettingsScreen extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SectionBanner(
-              title: l10n.tabsTitle('settings'),
+              title: l10n.tabsTitle(TabTitleKey.settings.name),
               subtitle: l10n.settingsScreenSubtitle,
               onClose: () {
                 final router = GoRouter.of(context);

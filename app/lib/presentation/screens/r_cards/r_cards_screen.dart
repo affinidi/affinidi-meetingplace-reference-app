@@ -83,10 +83,6 @@ class RCardsScreen extends HookConsumerWidget {
             SectionBanner(
               title: l10n.tabsTitle(Tabs.rCards.name),
               subtitle: l10n.rCardsPanelSubtitle,
-              icon: Icon(
-                Icons.credit_card_outlined,
-                color: colorScheme.onSurfaceVariant,
-              ),
             ),
             Row(
               children: [

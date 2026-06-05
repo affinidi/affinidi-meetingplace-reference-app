@@ -83,7 +83,7 @@ class _CredentialsListWidget extends HookConsumerWidget {
           labelPadding: const EdgeInsets.symmetric(horizontal: 10),
           tabAlignment: TabAlignment.start,
           controller: tabController,
-          tabs: const [TabBarTab(label: 'All')],
+          tabs: [TabBarTab(label: l10n.all)],
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

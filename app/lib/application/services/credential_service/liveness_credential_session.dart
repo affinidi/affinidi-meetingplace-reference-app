@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:vc_zkp/vc_zkp.dart';
 
 import '../../../domain/models/credentials/liveness_credential_record.dart';
-import 'credential_service_state.dart';
+import '../../../domain/models/credentials/session_credential_material.dart';
 
 SessionCredentialMaterial? sessionMaterialFromRecord(
   LivenessCredentialRecord? record,

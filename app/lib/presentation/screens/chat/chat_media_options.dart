@@ -135,9 +135,9 @@ class _ChatMediaOptions extends ConsumerWidget {
       }
     }
 
-    final zkpChannelReady = isZkpEnabled
-        ? ref.watch(zkpChannelReadyProvider(_contactId))
-        : false;
+    final zkpChannelReady =
+        isZkpEnabled &&
+        ProofFlowController.watchIsZkpChannelReady(ref, _contactId);
 
     final items = <_ChatMediaOptionItem>[
       ...availableAttachmentPlugins.map((plugin) {

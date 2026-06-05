@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import 'credential_card_components.dart';
 
 /// Displays credential field rows grouped under a titled section.

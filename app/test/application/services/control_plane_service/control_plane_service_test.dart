@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/control_plane_service/control_plane_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/exceptions/app_exception.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/firebase_messaging/push_notifications_handler.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
@@ -59,19 +61,69 @@ void main() {
 
     tearDown(() => container.dispose());
 
-    test('ignores channel activity before inauguration', () async {
+    test('throws on channel activity before inauguration', () async {
+      Object? capturedError;
       var emittedActivityCount = 0;
-      final subscription = controlPlaneService.onChannelActivity.listen((_) {
-        emittedActivityCount += 1;
-      });
-      addTearDown(subscription.cancel);
 
-      fakeCoreSdk.simulateChannelActivity(
-        _channelWithStatus(ChannelStatus.approved),
+      await runZonedGuarded(
+        () async {
+          final scopedFakeSdk = FakeMeetingPlaceSDK(
+            channels: {
+              FakeContacts.individualContact.channelDid!: _channelWithStatus(
+                ChannelStatus.inaugurated,
+              ),
+            },
+          );
+          final scopedContainer = ProviderContainer(
+            overrides: [
+              meetingPlaceSdkProvider.overrideWith(
+                (ref) async => scopedFakeSdk,
+              ),
+              pushNotificationsHandlerProvider.overrideWith(
+                _FakePushNotificationsHandler.new,
+              ),
+              networkConnectivityServiceProvider.overrideWith(
+                _FakeNetworkConnectivityService.new,
+              ),
+            ],
+          );
+          addTearDown(scopedContainer.dispose);
+
+          scopedContainer.listen(
+            controlPlaneServiceProvider,
+            (previous, next) {},
+            fireImmediately: true,
+          );
+          final scopedControlPlaneService = scopedContainer.read(
+            controlPlaneServiceProvider.notifier,
+          );
+
+          await scopedContainer.read(meetingPlaceSdkProvider.future);
+          await Future<void>.delayed(Duration.zero);
+
+          final subscription = scopedControlPlaneService.onChannelActivity
+              .listen((_) {
+                emittedActivityCount += 1;
+              });
+          addTearDown(subscription.cancel);
+
+          scopedFakeSdk.simulateChannelActivity(
+            _channelWithStatus(ChannelStatus.approved),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 1));
+        },
+        (error, stackTrace) {
+          capturedError = error;
+        },
       );
 
       await Future<void>.delayed(const Duration(milliseconds: 1));
 
+      expect(capturedError, isA<AppException>());
+      expect(
+        (capturedError as AppException).message,
+        'Received channel activity for a non-inaugurated channel',
+      );
       expect(emittedActivityCount, 0);
     });
 

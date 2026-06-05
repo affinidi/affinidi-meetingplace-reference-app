@@ -19,15 +19,15 @@ import 'proof_flow_controller.dart';
 
 class ChatZkpHandler {
   ChatZkpHandler({
-    required this.ref,
+    required Ref ref,
     required this.logger,
     required this.logKey,
     required this.isZkpEnabled,
     required this.getContact,
     required this.onUpsertChatItem,
-  });
+  }) : _ref = ref;
 
-  final Ref ref;
+  final Ref _ref;
   final AppLogger logger;
   final String logKey;
   final bool isZkpEnabled;
@@ -68,7 +68,7 @@ class ChatZkpHandler {
     final chatItem = data.chatItem;
     if (chatItem == null || chatItem.isFromMe) return;
 
-    ref
+    _ref
         .read(proofFlowControllerProvider(contact.id).notifier)
         .setVerifierChallengeNonce(requestPayload.challengeNonceBytes);
 
@@ -99,7 +99,7 @@ class ChatZkpHandler {
 
     unawaited(() async {
       try {
-        final isVerified = await ref
+        final isVerified = await _ref
             .read(proofFlowControllerProvider(contact.id).notifier)
             .onProofReceived(proofPayload);
 

@@ -1,31 +1,14 @@
-class ProofFlowState {
-  const ProofFlowState({
-    this.isVerifyingProof = false,
-    this.verificationError,
-    this.verifierChallengeNonce,
-  });
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  final bool isVerifyingProof;
-  final String? verificationError;
+part 'proof_flow_state.freezed.dart';
 
-  /// 32-byte challenge from the peer's liveness check request
-  final List<int>? verifierChallengeNonce;
-
-  ProofFlowState copyWith({
-    bool? isVerifyingProof,
+@Freezed(fromJson: false, toJson: false)
+abstract class ProofFlowState with _$ProofFlowState {
+  const factory ProofFlowState({
+    @Default(false) bool isVerifyingProof,
     String? verificationError,
+
+    /// 32-byte challenge from the peer's liveness check request
     List<int>? verifierChallengeNonce,
-    bool clearVerificationError = false,
-    bool clearVerifierChallengeNonce = false,
-  }) {
-    return ProofFlowState(
-      isVerifyingProof: isVerifyingProof ?? this.isVerifyingProof,
-      verificationError: clearVerificationError
-          ? null
-          : (verificationError ?? this.verificationError),
-      verifierChallengeNonce: clearVerifierChallengeNonce
-          ? null
-          : (verifierChallengeNonce ?? this.verifierChallengeNonce),
-    );
-  }
+  }) = _ProofFlowState;
 }

@@ -1744,6 +1744,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String trustedBy(int count) {
     return 'Trusted by $count';
   }
+
+  @override
   String get humanZkp => 'Human ZKP';
 
   @override
@@ -1753,16 +1755,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get livenessCredential => 'Liveness Credential';
 
   @override
-  String get verifiableCredential => 'Verifiable Credential';
-
-  @override
   String get verifiableCredentialWallet => 'Verifiable Credential wallet';
 
   @override
   String get noCredentialsYet => 'You don\'t have any credentials yet.';
 
   @override
-  String get credentialDetails => 'Credential Details';
+  String get all => 'Alle';
 
   @override
   String get generatingZeroKnowledgeProof =>
@@ -1812,10 +1811,12 @@ class AppLocalizationsDe extends AppLocalizations {
       'You can now continue to generate a Human Zero-Knowledge proof.';
 
   @override
-  String get doLater => 'Später';
+  String get livenessEvidenceThresholdNotMet =>
+      'Die Liveness-Prüfung hat den erforderlichen Schwellenwert nicht erreicht. Bitte versuchen Sie es erneut.';
 
   @override
-  String get verified => 'Verifiziert';
+  String get livenessCredentialSessionMissing =>
+      'Ihr Liveness-Nachweis ist in dieser App-Sitzung nicht verfügbar. Generieren Sie einen neuen Nachweis und versuchen Sie es erneut.';
 
   @override
   String get issuedTo => 'Ausgestellt an';
@@ -1871,6 +1872,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String zkpNoticeRequest(String contactName) {
-    return '$contactName hat einen Zero‑Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind. Sie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.';
+    return '$contactName hat einen Zero‑Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.';
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../screens/chat/liveness_credential_view_data.dart';
 import '../../screens/credentials/credential_details_screen.dart';
 import '../../themes/app_custom_colors.dart';
 import '../cards/credential_card.dart';
@@ -302,7 +302,7 @@ class VcDetailsStepView extends StatelessWidget {
     this.onCredentialTap,
   });
 
-  final LivenessCredentialRecord credential;
+  final LivenessCredentialViewData credential;
   final bool isGenerating;
   final VoidCallback onCancel;
   final VoidCallback? onBack;
@@ -370,7 +370,7 @@ class LivenessCredentialCard extends StatelessWidget {
     this.onTap,
   });
 
-  final LivenessCredentialRecord credential;
+  final LivenessCredentialViewData credential;
   final VoidCallback? onTap;
 
   @override

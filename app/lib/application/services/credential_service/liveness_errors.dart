@@ -7,6 +7,17 @@ class InvalidLivenessW3cCredentialException implements Exception {
   String toString() => message;
 }
 
+class LivenessCredentialSessionMissingException implements Exception {
+  const LivenessCredentialSessionMissingException();
+
+  static const message =
+      'Your liveness credential is not available in this app session. '
+      'Generate a new credential and try again.';
+
+  @override
+  String toString() => message;
+}
+
 class LivenessEvidenceThresholdNotMetException implements Exception {
   const LivenessEvidenceThresholdNotMetException({
     required this.providerId,

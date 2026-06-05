@@ -1,7 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:vc_zkp/vc_zkp.dart';
 
+import '../../../domain/models/credentials/credential_data.dart';
 import '../../../domain/models/credentials/liveness_credential_record.dart';
+import '../../../domain/models/credentials/session_credential_material.dart';
 
 part 'credential_service_state.freezed.dart';
 
@@ -17,33 +18,6 @@ abstract class CredentialServiceState with _$CredentialServiceState {
   }) = _CredentialServiceState;
 }
 
-class SessionCredentialMaterial {
-  const SessionCredentialMaterial({
-    required this.document,
-    required this.holderPrivateKeyHex,
-    required this.issuerAx,
-    required this.issuerAy,
-  });
-
-  final SignedVcDocument document;
-  final String holderPrivateKeyHex;
-  final String issuerAx;
-  final String issuerAy;
-}
-
-/// Data class representing a credential and its metadata
-@Freezed(fromJson: false, toJson: false)
-abstract class CredentialData with _$CredentialData {
-  const factory CredentialData({
-    required String identityId,
-    required String w3cCredentialJson,
-    required String issuerName,
-    required DateTime issuedAt,
-    required DateTime expiresAt,
-    required String holderDid,
-  }) = _CredentialData;
-}
-
 extension CredentialServiceStateX on CredentialServiceState {
   List<LivenessCredentialRecord> get credentials {
     final list = credentialsByIdentityId.values.toList();
@@ -57,6 +31,11 @@ extension CredentialServiceStateX on CredentialServiceState {
   bool hasCredentialFor(String identityId) =>
       credentialsByIdentityId.containsKey(identityId);
 
-  bool hasSessionMaterialFor(String identityId) =>
-      sessionMaterialByIdentityId.containsKey(identityId);
+  bool hasSessionMaterialFor(String identityId) {
+    final record = credentialsByIdentityId[identityId];
+    if (record == null) return false;
+    final isExpired = !record.expiresAt.toUtc().isAfter(DateTime.now().toUtc());
+    if (isExpired) return false;
+    return sessionMaterialByIdentityId.containsKey(identityId);
+  }
 }

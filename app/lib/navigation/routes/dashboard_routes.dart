@@ -199,6 +199,7 @@ class CredentialsBranchData extends StatefulShellBranchData {
   static const String $restorationScopeId =
       'credentialsBranchRestorationScopeId';
 }
+
 // Main tabs
 class ContactsRoute extends GoRouteData with $ContactsRoute {
   const ContactsRoute();
@@ -229,7 +230,7 @@ class RCardsRoute extends GoRouteData with $RCardsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const RCardsPlaceholderScreen();
+      const RCardsScreen();
 }
 
 class CredentialsRoute extends GoRouteData with $CredentialsRoute {
@@ -238,12 +239,4 @@ class CredentialsRoute extends GoRouteData with $CredentialsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const CredentialsScreen();
-}
-
-class RCardsRoute extends GoRouteData with $RCardsRoute {
-  const RCardsRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const RCardsScreen();
 }

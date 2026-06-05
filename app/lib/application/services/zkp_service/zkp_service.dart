@@ -13,6 +13,7 @@ import '../../../domain/models/zkp/zkp_challenge_nonce.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../credential_service/credential_service.dart';
+import '../credential_service/liveness_errors.dart';
 import 'zkp_service_state.dart';
 
 final zkpServiceProvider = Provider<ZkpService>(

@@ -2577,6 +2577,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trusted by {count}'**
   String trustedBy(int count);
+
   /// No description provided for @humanZkp.
   ///
   /// In en, this message translates to:
@@ -2595,12 +2596,6 @@ abstract class AppLocalizations {
   /// **'Liveness Credential'**
   String get livenessCredential;
 
-  /// No description provided for @verifiableCredential.
-  ///
-  /// In en, this message translates to:
-  /// **'Verifiable Credential'**
-  String get verifiableCredential;
-
   /// No description provided for @verifiableCredentialWallet.
   ///
   /// In en, this message translates to:
@@ -2613,11 +2608,11 @@ abstract class AppLocalizations {
   /// **'You don\'t have any credentials yet.'**
   String get noCredentialsYet;
 
-  /// No description provided for @credentialDetails.
+  /// No description provided for @all.
   ///
   /// In en, this message translates to:
-  /// **'Credential Details'**
-  String get credentialDetails;
+  /// **'All'**
+  String get all;
 
   /// No description provided for @generatingZeroKnowledgeProof.
   ///
@@ -2697,17 +2692,17 @@ abstract class AppLocalizations {
   /// **'You can now continue to generate a Human Zero-Knowledge proof.'**
   String get mockLivenessCredentialNext;
 
-  /// No description provided for @doLater.
+  /// No description provided for @livenessEvidenceThresholdNotMet.
   ///
   /// In en, this message translates to:
-  /// **'Do later'**
-  String get doLater;
+  /// **'Liveness check did not meet the required threshold. Please try again.'**
+  String get livenessEvidenceThresholdNotMet;
 
-  /// No description provided for @verified.
+  /// No description provided for @livenessCredentialSessionMissing.
   ///
   /// In en, this message translates to:
-  /// **'Verified'**
-  String get verified;
+  /// **'Your liveness credential is not available in this app session. Generate a new credential and try again.'**
+  String get livenessCredentialSessionMissing;
 
   /// No description provided for @issuedTo.
   ///

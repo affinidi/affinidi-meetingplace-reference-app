@@ -129,7 +129,7 @@ class _ChatMessageList extends HookConsumerWidget {
                         child: Column(
                           crossAxisAlignment:
                               (chatItem is EncryptionNotice ||
-                              chatItem is chat.ConciergeMessage)
+                                  chatItem is chat.ConciergeMessage)
                               ? CrossAxisAlignment.center
                               : chatItem.isFromMe
                               ? CrossAxisAlignment.end
@@ -293,17 +293,17 @@ class _RCardBubble extends StatelessWidget {
         chatItem is EncryptionNotice ||
             chatItem is chat.ConciergeMessage ||
             chatItem is chat.EventMessage
-            ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
-            : EdgeInsets.fromLTRB(
-                (chatItem.isFromMe) ? 60 : 0,
-                8,
-                (chatItem.isFromMe) ? 0 : 60,
-                (selectedReactionIndex == index ||
-                        chatItem is chat.Message &&
-                            (chatItem as chat.Message).reactions.isNotEmpty)
-                    ? 0
-                    : 8,
-              );
+        ? const EdgeInsets.fromLTRB(20, 8, 20, 8)
+        : EdgeInsets.fromLTRB(
+            (chatItem.isFromMe) ? 60 : 0,
+            8,
+            (chatItem.isFromMe) ? 0 : 60,
+            (selectedReactionIndex == index ||
+                    chatItem is chat.Message &&
+                        (chatItem as chat.Message).reactions.isNotEmpty)
+                ? 0
+                : 8,
+          );
 
     final bubble = Container(
       margin: margin,

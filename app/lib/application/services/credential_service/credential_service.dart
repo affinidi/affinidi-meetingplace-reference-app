@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:vc_zkp/vc_zkp.dart';
 
+import '../../../domain/models/credentials/credential_data.dart';
 import '../../../domain/models/credentials/liveness_credential_record.dart';
+import '../../../domain/models/credentials/session_credential_material.dart';
 import '../../../domain/repositories/liveness_credentials_repository.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -27,25 +29,15 @@ final credentialServiceProvider =
       return service;
     });
 
-class LivenessCredentialSessionMissingException implements Exception {
-  const LivenessCredentialSessionMissingException();
-
-  static const message =
-      'Your liveness credential is not available in this app session. '
-      'Generate a new credential and try again.';
-
-  @override
-  String toString() => message;
-}
-
 class CredentialService extends StateNotifier<CredentialServiceState> {
-  CredentialService({required this.ref})
-    : _issuanceService = const LivenessVcIssuanceService(),
+  CredentialService({required Ref ref})
+    : _ref = ref,
+      _issuanceService = const LivenessVcIssuanceService(),
       super(const CredentialServiceState()) {
-    _logger = ref.read(appLoggerProvider);
+    _logger = _ref.read(appLoggerProvider);
   }
 
-  final Ref ref;
+  final Ref _ref;
   final LivenessVcIssuanceService _issuanceService;
   late final AppLogger _logger;
   static const _logKey = 'CredentialService';
@@ -105,7 +97,7 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
 
       final resolvedEvidence =
           evidence ??
-          await ref
+          await _ref
               .read(livenessEvidenceSourceProvider)
               .getEvidence(holderDid: holderDid);
       if (!resolvedEvidence.isLive) {
@@ -116,7 +108,7 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
         );
       }
 
-      final issuerManager = await ref
+      final issuerManager = await _ref
           .read(livenessIssuerServiceProvider)
           .getIssuerDidManager();
       final issuerDocument = await issuerManager.getDidDocument();
@@ -228,9 +220,25 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
   }
 
   SessionCredentialMaterial? _sessionForIdentity(String identityId) {
+    final record = state.credentialsByIdentityId[identityId];
+    if (record == null) return null;
+
+    if (_isCredentialExpired(record.expiresAt)) {
+      final trimmedSessions = Map<String, SessionCredentialMaterial>.from(
+        state.sessionMaterialByIdentityId,
+      )..remove(identityId);
+      state = state.copyWith(sessionMaterialByIdentityId: trimmedSessions);
+      return null;
+    }
+
     final inMemory = state.sessionMaterialByIdentityId[identityId];
     if (inMemory != null) return inMemory;
-    return sessionMaterialFromRecord(state.credentialsByIdentityId[identityId]);
+    return sessionMaterialFromRecord(record);
+  }
+
+  bool _isCredentialExpired(DateTime expiresAt) {
+    final nowUtc = DateTime.now().toUtc();
+    return !expiresAt.toUtc().isAfter(nowUtc);
   }
 
   CredentialCreationResult _resultFromSession(
@@ -249,7 +257,7 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
   }
 
   Future<LivenessCredentialsRepository> _ensureRepository() async {
-    _repository ??= await ref.read(
+    _repository ??= await _ref.read(
       livenessCredentialsRepositoryProvider.future,
     );
     return _repository!;
@@ -269,6 +277,7 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
     };
     final hydratedSessions = <String, SessionCredentialMaterial>{};
     for (final record in records) {
+      if (_isCredentialExpired(record.expiresAt)) continue;
       final session = sessionMaterialFromRecord(record);
       if (session != null) {
         hydratedSessions[record.identityId] = session;

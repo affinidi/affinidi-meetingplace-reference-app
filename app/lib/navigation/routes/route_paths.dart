@@ -30,7 +30,6 @@ class RoutePaths {
   static const oobScanQr = 'oob-scan-qr';
 
   // R-Cards
-  static const rCards = '/r-cards';
   static const rCardDetails = ':subjectDid/details';
 
   // VRC

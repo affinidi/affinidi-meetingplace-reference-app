@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../themes/app_custom_colors.dart';
+
 class CredentialCard extends StatelessWidget {
   const CredentialCard({
     super.key,
@@ -14,24 +16,30 @@ class CredentialCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
         height: 208,
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFF0368C0), width: 1),
+            border: Border.all(color: colorScheme.primary, width: 1),
             borderRadius: BorderRadius.circular(16),
-            gradient: const LinearGradient(
-              begin: Alignment(-0.5, -0.866),
-              end: Alignment(0.5, 0.866),
-              colors: [Color(0xFF040822), Color(0xFF0368C0)],
-              stops: [0.5705, 0.9362],
+            gradient: LinearGradient(
+              begin: const Alignment(-0.5, -0.866),
+              end: const Alignment(0.5, 0.866),
+              colors: [
+                customColors.credentialCardGradientStart,
+                colorScheme.primary,
+              ],
+              stops: const [0.5705, 0.9362],
             ),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x40000000),
-                offset: Offset(0, 25),
+                color: customColors.credentialCardShadow,
+                offset: const Offset(0, 25),
                 blurRadius: 50,
                 spreadRadius: -12,
               ),

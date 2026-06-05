@@ -1708,6 +1708,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String trustedBy(int count) {
     return 'Trusted by $count';
   }
+
+  @override
   String get humanZkp => 'Human ZKP';
 
   @override
@@ -1717,16 +1719,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get livenessCredential => 'Liveness Credential';
 
   @override
-  String get verifiableCredential => 'Verifiable Credential';
-
-  @override
   String get verifiableCredentialWallet => 'Verifiable Credential wallet';
 
   @override
   String get noCredentialsYet => 'You don\'t have any credentials yet.';
 
   @override
-  String get credentialDetails => 'Credential Details';
+  String get all => 'All';
 
   @override
   String get generatingZeroKnowledgeProof =>
@@ -1775,10 +1774,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can now continue to generate a Human Zero-Knowledge proof.';
 
   @override
-  String get doLater => 'Do later';
+  String get livenessEvidenceThresholdNotMet =>
+      'Liveness check did not meet the required threshold. Please try again.';
 
   @override
-  String get verified => 'Verified';
+  String get livenessCredentialSessionMissing =>
+      'Your liveness credential is not available in this app session. Generate a new credential and try again.';
 
   @override
   String get issuedTo => 'Issued to';

@@ -146,7 +146,9 @@ class _ZkpBadge extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isFromMe ? colorScheme.primary : const Color(0xFF2E3035),
+            color: isFromMe
+                ? colorScheme.primary
+                : colorScheme.surfaceContainerHigh,
             width: 4,
           ),
         ),
@@ -157,9 +159,9 @@ class _ZkpBadge extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0x4D0368C0),
+                color: colorScheme.primary.withAlpha(77),
               ),
               child: const Icon(
                 Icons.how_to_reg,

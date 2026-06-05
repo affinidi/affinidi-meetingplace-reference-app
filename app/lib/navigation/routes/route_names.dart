@@ -3,7 +3,7 @@ class RouteNames {
   static const contacts = 'contacts';
   static const connections = 'connections';
   static const identities = 'identities';
-  static const rCards = 'r-cards';
+  static const rCards = 'rCards';
   static const credentials = 'credentials';
   static const settings = 'settings';
 
@@ -40,7 +40,6 @@ class RouteNames {
   static const splash = 'splash';
 
   // R-Cards
-  static const rCards = 'rCards';
   static const rCardDetails = 'rCardDetails';
 
   // VRC

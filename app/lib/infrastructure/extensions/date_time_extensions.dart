@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import '../../l10n/app_localizations.dart';
 
 /// Helpers to produce human-friendly "time ago" strings localized via l10n.
@@ -38,5 +40,10 @@ extension DateTimeExtension on DateTime {
     }
 
     return l10n.timeAgoJustNow;
+  }
+
+  /// Format date in the design-required style, e.g. `17 April 2026`.
+  String credentialIssuedOn(AppLocalizations l10n) {
+    return DateFormat('d MMMM y', l10n.localeName).format(this);
   }
 }

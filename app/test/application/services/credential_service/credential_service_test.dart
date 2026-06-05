@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/credential_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/credential_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/liveness_errors.dart';
@@ -114,6 +115,34 @@ void main() {
             .read(credentialServiceProvider)
             .hasCredentialFor('identity-1'),
         isFalse,
+      );
+    });
+
+    test('rejects expired credential session for proof preparation', () async {
+      const identityId = 'identity-expired';
+      const holderDid = 'did:example:holder-expired';
+      final expiredEvidence = LivenessEvidence(
+        providerId: 'demo_liveness',
+        providerTransactionId: 'session-expired',
+        livenessScore: 99,
+        livenessThreshold: 80,
+        checkedAt: DateTime.now().toUtc().subtract(const Duration(days: 6)),
+      );
+
+      final notifier = await service();
+      await notifier.createLivenessCredential(
+        identityId: identityId,
+        holderDid: holderDid,
+        evidence: expiredEvidence,
+      );
+
+      final state = container.read(credentialServiceProvider);
+      expect(state.hasCredentialFor(identityId), isTrue);
+      expect(state.hasSessionMaterialFor(identityId), isFalse);
+
+      await expectLater(
+        notifier.prepareCredentialForProof(identityId: identityId),
+        throwsA(isA<LivenessCredentialSessionMissingException>()),
       );
     });
   });

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/extensions/date_time_extensions.dart';
+import '../../screens/chat/liveness_credential_view_data.dart';
 import '../zkp/credential/credential_detail_row.dart';
 
 /// Standard field order for liveness credential detail views.
@@ -15,7 +15,7 @@ class LivenessCredentialDetailsTable extends StatelessWidget {
     this.dividerColor,
   });
 
-  final LivenessCredentialRecord record;
+  final LivenessCredentialViewData record;
   final double labelWidth;
   final bool lightTheme;
   final Color? dividerColor;
@@ -27,7 +27,7 @@ class LivenessCredentialDetailsTable extends StatelessWidget {
     final l10n = context.l10n;
     final colorScheme = Theme.of(context).colorScheme;
     final divider = dividerColor ?? colorScheme.primary;
-    final issuedOn = DateFormat('d MMMM y').format(record.issuedAt);
+    final issuedOn = record.issuedAt.credentialIssuedOn(l10n);
 
     final rows = [
       CredentialDetailRowData(label: l10n.types, value: _credentialTypes),

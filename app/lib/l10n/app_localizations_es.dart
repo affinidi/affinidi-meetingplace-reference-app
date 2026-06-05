@@ -18,7 +18,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'contacts': 'Canales',
       'identities': 'Identidades',
       'rCards': 'Tarjetas-R',
-      'credentials': 'Credenciales',
       'settings': 'Configuración',
       'other': 'Inválido',
     });
@@ -1738,6 +1737,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String trustedBy(int count) {
     return 'Trusted by $count';
   }
+
+  @override
   String get humanZkp => 'Human ZKP';
 
   @override
@@ -1747,16 +1748,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get livenessCredential => 'Liveness Credential';
 
   @override
-  String get verifiableCredential => 'Verifiable Credential';
-
-  @override
   String get verifiableCredentialWallet => 'Verifiable Credential wallet';
 
   @override
   String get noCredentialsYet => 'You don\'t have any credentials yet.';
 
   @override
-  String get credentialDetails => 'Credential Details';
+  String get all => 'Todos';
 
   @override
   String get generatingZeroKnowledgeProof =>
@@ -1808,10 +1806,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'You can now continue to generate a Human Zero-Knowledge proof.';
 
   @override
-  String get doLater => 'Más tarde';
+  String get livenessEvidenceThresholdNotMet =>
+      'La verificación de detección de vida no alcanzó el umbral requerido. Inténtelo de nuevo.';
 
   @override
-  String get verified => 'Verificado';
+  String get livenessCredentialSessionMissing =>
+      'Su credencial de detección de vida no está disponible en esta sesión de la aplicación. Genere una nueva credencial e inténtelo de nuevo.';
 
   @override
   String get issuedTo => 'Emitido a';
@@ -1867,6 +1867,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String zkpNoticeRequest(String contactName) {
-    return '$contactName ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano. Puedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.';
+    return '$contactName ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.';
   }
 }

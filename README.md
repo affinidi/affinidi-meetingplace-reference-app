@@ -146,9 +146,47 @@ The Human ZKP demo is **off by default**. Enable it at build or run time:
 ZKP_ENABLED=true
 ```
 
+#### Required dependencies and assets for opt-in
+
+If you want to opt in to the Human ZKP flow in your own app, ensure these
+dependencies and assets are present.
+
+Required libraries:
+
+- `circom_witnesscalc`
+- `flutter_rapidsnark`
+- `meeting_place_credentials`
+- `vc_zkp`
+
+Required assets:
+
+- `assets/zkp/SimpleVCProof.groth16.zkey`
+- `assets/zkp/SimpleVCProof.wcd`
+- `assets/zkp/SimpleVCProof.groth16.vkey.json`
+
+And in `pubspec.yaml`, include:
+
+```yaml
+flutter:
+	assets:
+		- assets/zkp/
+```
+
 > Setting `ZKP_ENABLED=true` also unlocks the **Credentials** tab, where you can inspect and manage Liveness Credentials.
 
 > Out of the box the demo uses **synthetic liveness evidence**, no camera or third-party service needed. To connect a real face detection service, see [Using a real liveness provider](#zkp-real-provider).
+
+#### Binary size impact
+
+This demo currently ships Groth16 proving assets inside the app bundle for offline-first proof generation:
+
+- `assets/zkp/SimpleVCProof.groth16.zkey`
+- `assets/zkp/SimpleVCProof.wcd`
+- `assets/zkp/SimpleVCProof.groth16.vkey.json`
+
+Total ZKP proving assets: (~7.28 MiB), which increases install artifact size by roughly this amount before platform-level compression.
+
+We intentionally keep these files bundled in the reference app to ensure deterministic, offline demo behavior and avoid first-run network/setup failures. Production apps can move the `.zkey` to first-use download plus on-device cache if minimizing initial binary size is a higher priority than offline readiness.
 
 <h3 id="zkp-happy">Happy path</h3>
 

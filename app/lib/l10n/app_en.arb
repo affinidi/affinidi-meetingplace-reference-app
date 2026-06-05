@@ -1532,6 +1532,7 @@
 		"placeholders": {
 			"count": { "type": "int" }
 		}
+	},
 	"humanZkp": "Human ZKP",
 	"@humanZkp": {
 		"type": "text"
@@ -1544,7 +1545,6 @@
 	"@livenessCredential": {
 		"type": "text"
 	},
-	"verifiableCredential": "Verifiable Credential",
 	"@verifiableCredential": {
 		"type": "text"
 	},
@@ -1556,7 +1556,10 @@
 	"@noCredentialsYet": {
 		"type": "text"
 	},
-	"credentialDetails": "Credential Details",
+	"all": "All",
+	"@all": {
+		"type": "text"
+	},
 	"@credentialDetails": {
 		"type": "text"
 	},
@@ -1612,11 +1615,17 @@
 	"@mockLivenessCredentialNext": {
 		"type": "text"
 	},
-	"doLater": "Do later",
+	"livenessEvidenceThresholdNotMet": "Liveness check did not meet the required threshold. Please try again.",
+	"@livenessEvidenceThresholdNotMet": {
+		"type": "text"
+	},
+	"livenessCredentialSessionMissing": "Your liveness credential is not available in this app session. Generate a new credential and try again.",
+	"@livenessCredentialSessionMissing": {
+		"type": "text"
+	},
 	"@doLater": {
 		"type": "text"
 	},
-	"verified": "Verified",
 	"@verified": {
 		"type": "text"
 	},

@@ -5,9 +5,9 @@ import 'package:intl/intl.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/vrc/vrc_credential.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../widgets/credential/credential_card_components.dart';
-import '../../widgets/credential/credential_details_accordion.dart';
-import '../../widgets/credential/credential_details_screen_scaffold.dart';
+import '../../widgets/zkp/credential/credential_card_components.dart';
+import '../../widgets/zkp/credential/credential_details_accordion.dart';
+import '../../widgets/zkp/credential/credential_details_screen_scaffold.dart';
 import 'vrc_details_screen_controller.dart';
 
 /// Displays the full details of a single Verifiable Relationship Credential.

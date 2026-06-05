@@ -17,6 +17,8 @@ enum _Key {
   databasePassphrase,
   pushNotificationToken,
   showMeetingPlaceQr,
+  zkpLivenessCredentials,
+  livenessIssuerDid,
 }
 
 /// Secure storage wrapper implementing [KeyRepository] and [KeyStore].
@@ -283,25 +285,28 @@ class SecureStorage implements KeyRepository, KeyStore {
 
   /// Reads persisted liveness credential metadata (JSON array).
   Future<String?> readLivenessCredentials() async {
-    return _secureStorage.read(key: 'zkp_liveness_credentials');
+    return _secureStorage.read(key: _Key.zkpLivenessCredentials.name);
   }
 
   /// Persists liveness credential metadata (JSON array).
   Future<void> writeLivenessCredentials(String json) async {
-    await _secureStorage.write(key: 'zkp_liveness_credentials', value: json);
+    await _secureStorage.write(
+      key: _Key.zkpLivenessCredentials.name,
+      value: json,
+    );
   }
 
   /// Clears all persisted liveness credential metadata.
   Future<void> clearLivenessCredentials() async {
-    await _secureStorage.delete(key: 'zkp_liveness_credentials');
+    await _secureStorage.delete(key: _Key.zkpLivenessCredentials.name);
   }
 
   Future<String?> readLivenessIssuerDid() async {
-    return _secureStorage.read(key: 'liveness_issuer_did');
+    return _secureStorage.read(key: _Key.livenessIssuerDid.name);
   }
 
   Future<void> writeLivenessIssuerDid(String did) async {
-    await _secureStorage.write(key: 'liveness_issuer_did', value: did);
+    await _secureStorage.write(key: _Key.livenessIssuerDid.name, value: did);
   }
 }
 

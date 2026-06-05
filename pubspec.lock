@@ -301,10 +301,10 @@ packages:
     dependency: transitive
     description:
       name: code_assets
-      sha256: bf394f466ba9205f1812a0433b392d6af280f155f56651eda7c18cc32ed493b8
+      sha256: "83ccdaa064c980b5596c35dd64a8d3ecc68620174ab9b90b6343b753aa721687"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.1"
+    version: "1.0.0"
   code_builder:
     dependency: transitive
     description:
@@ -881,11 +881,17 @@ packages:
     dependency: transitive
     description:
       name: hooks
-      sha256: "9a62a50b50b769a737bc0a8ff381f333529df3ab746b2f6b02e83760231455ba"
+      sha256: "025f060e86d2d4c3c47b56e33caf7f93bf9283340f26d23424ebcfccf34f621e"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
+    version: "1.0.3"
   hooks_riverpod:
+    dependency: transitive
+    description:
+      name: hooks_riverpod
+      sha256: a217bbfaf32e43f925a545ba48470e59de4e7f21cc92920bc7944e4b450c1aba
+      url: "https://pub.dev"
+    source: hosted
     version: "3.3.2-dev.2"
   html:
     dependency: transitive
@@ -1160,7 +1166,7 @@ packages:
     source: hosted
     version: "0.13.0"
   meeting_place_chat:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: meeting_place_chat
       sha256: e2e1ea5dcf8dc59bb42dcb151644490035fc130cd33ca287db8b8edda6a753ee
@@ -1168,7 +1174,7 @@ packages:
     source: hosted
     version: "0.0.1-dev.43"
   meeting_place_control_plane:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: meeting_place_control_plane
       sha256: baef5dc7e66b49694b898973fc252d94170477a22910855577dc8a2426bc6c3d
@@ -1176,7 +1182,7 @@ packages:
     source: hosted
     version: "0.0.1-dev.19"
   meeting_place_core:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: meeting_place_core
       sha256: fa36db660250f4f63390f551478486ff4ef80768c2a061184e83d6caa27a7773
@@ -1192,7 +1198,7 @@ packages:
     source: hosted
     version: "0.0.1-dev.3"
   meeting_place_drift_repository:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: meeting_place_drift_repository
       sha256: "13fc017de93cb74cf976dc40272035d6fc84e2c1a130d0f755bf7495f8feb142"
@@ -1200,7 +1206,7 @@ packages:
     source: hosted
     version: "0.0.1-dev.44"
   meeting_place_mediator:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: meeting_place_mediator
       sha256: "78585d43e0e06405539e1da9a432b5328222bc98e63adb35c27d1b218f6ccffb"
@@ -1267,10 +1273,10 @@ packages:
     dependency: transitive
     description:
       name: native_toolchain_c
-      sha256: f59351d28f49520cd3a74eb1f41c5f19ae15e53c65a3231d14af672e46510a96
+      sha256: "6ba77bb18063eebe9de401f5e6437e95e1438af0a87a3a39084fbd37c90df572"
       url: "https://pub.dev"
     source: hosted
-    version: "0.19.1"
+    version: "0.17.6"
   ninja_asn1:
     dependency: transitive
     description:

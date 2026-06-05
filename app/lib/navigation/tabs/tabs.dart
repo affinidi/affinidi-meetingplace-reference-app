@@ -28,3 +28,12 @@ enum Tabs {
     }
   }
 }
+
+enum TabTitleKey {
+  connections,
+  contacts,
+  identities,
+  rCards,
+  credentials,
+  settings,
+}

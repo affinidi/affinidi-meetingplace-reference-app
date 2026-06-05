@@ -7,6 +7,7 @@ import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/cards/credential_card.dart';
 import '../../widgets/credentials/liveness_credential_details_table.dart';
+import '../chat/liveness_credential_view_data.dart';
 
 class CredentialDetailsScreen extends ConsumerWidget {
   const CredentialDetailsScreen({
@@ -83,10 +84,17 @@ class _DetailsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final credentialViewData = LivenessCredentialViewData(
+      identityId: record.identityId,
+      issuedToDid: record.issuedToDid,
+      displayIssuer: record.displayIssuer,
+      issuedAt: record.issuedAt,
+    );
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      child: LivenessCredentialDetailsTable(record: record),
+      child: LivenessCredentialDetailsTable(record: credentialViewData),
     );
   }
 }

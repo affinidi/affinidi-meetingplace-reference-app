@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/credential_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/credential_service/liveness_errors.dart';
 import 'package:mpx_flutter_reference_app/application/services/zkp_service/zkp_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/zkp_service/zkp_service_state.dart';
 import 'package:mpx_flutter_reference_app/domain/models/zkp/zkp_challenge_nonce.dart';
