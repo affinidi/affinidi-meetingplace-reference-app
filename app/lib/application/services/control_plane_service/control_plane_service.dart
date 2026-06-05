@@ -6,8 +6,6 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
-import '../../../infrastructure/exceptions/app_exception.dart';
-import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/firebase_messaging/push_notifications_handler.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -209,9 +207,9 @@ class ControlPlaneService extends _$ControlPlaneService
   ///
   /// [event] - The control plane stream event received from the SDK.
   ///
-  /// Throws:
-  /// - [AppException] when finalised/activity events are received for non-inaugurated channels.
-  void _handleControlPlaneEvent(ControlPlaneStreamEvent event) {
+  /// Resolves potential stale event payloads by reconciling channel status
+  /// with the SDK before routing events that require inaugurated channels.
+  void _handleControlPlaneEvent(ControlPlaneStreamEvent event) async {
     final channel = event.channel;
     _logger.info(
       'Handling event of type ${event.type.name} - '
@@ -245,48 +243,103 @@ class ControlPlaneService extends _$ControlPlaneService
 
     if (event.type == ControlPlaneEventType.OfferFinalised ||
         event.type == ControlPlaneEventType.GroupMembershipFinalised) {
-      if (channel.status == ChannelStatus.inaugurated) {
+      final inauguratedChannel = await _resolveInauguratedChannel(
+        channel,
+        event.type,
+      );
+      if (inauguratedChannel != null) {
         _logger.info(
           'Connection offer approved and finalized for channel: '
-          '${channel.permanentChannelDid}',
+          '${inauguratedChannel.permanentChannelDid}',
           name: _logKey,
         );
-        _connectionOfferApprovedController.add(channel);
+        _connectionOfferApprovedController.add(inauguratedChannel);
       } else {
         _logger.error(
-          'Received a finalised offer for a non-inaugurated channel: '
+          'Received a finalised offer for a channel that is not inaugurated yet: '
           '${channel.permanentChannelDid}',
           name: _logKey,
-        );
-        throw AppException(
-          'Received a finalised offer for a non-inaugurated channel',
-          code: AppExceptionType.other.name,
         );
       }
       return;
     }
 
     if (event.type == ControlPlaneEventType.ChannelActivity) {
-      if (channel.status == ChannelStatus.inaugurated) {
+      final inauguratedChannel = await _resolveInauguratedChannel(
+        channel,
+        event.type,
+      );
+      if (inauguratedChannel != null) {
         _logger.info(
           'Channel activity detected for inaugurated channel: '
-          '${channel.permanentChannelDid}',
+          '${inauguratedChannel.permanentChannelDid}',
           name: _logKey,
         );
-        _channelActivityController.add(channel);
+        _channelActivityController.add(inauguratedChannel);
       } else {
         _logger.error(
-          'Received channel activity for non-inaugurated channel: '
+          'Received channel activity for channel that is not inaugurated yet: '
           '${channel.permanentChannelDid}',
           name: _logKey,
-        );
-        throw AppException(
-          'Received channel activity for a non-inaugurated channel',
-          code: AppExceptionType.other.name,
         );
       }
       return;
     }
+  }
+
+  Future<Channel?> _resolveInauguratedChannel(
+    Channel channel,
+    ControlPlaneEventType eventType,
+  ) async {
+    if (channel.status == ChannelStatus.inaugurated) {
+      return channel;
+    }
+
+    if (_sdk == null) {
+      _logger.error(
+        'Cannot reconcile $eventType status, SDK is not initialized',
+        name: _logKey,
+      );
+      return null;
+    }
+
+    final refreshedChannel = await _tryRefreshChannel(channel);
+    if (refreshedChannel?.status == ChannelStatus.inaugurated) {
+      _logger.info(
+        'Resolved stale $eventType payload to inaugurated channel: '
+        '${refreshedChannel?.permanentChannelDid}',
+        name: _logKey,
+      );
+      return refreshedChannel;
+    }
+
+    return null;
+  }
+
+  Future<Channel?> _tryRefreshChannel(Channel channel) async {
+    try {
+      if (channel.otherPartyPermanentChannelDid != null) {
+        final byOtherPartyDid = await _sdk!.getChannelByOtherPartyPermanentDid(
+          channel.otherPartyPermanentChannelDid!,
+        );
+        if (byOtherPartyDid != null) {
+          return byOtherPartyDid;
+        }
+      }
+
+      if (channel.permanentChannelDid != null) {
+        return await _sdk!.getChannelByDid(channel.permanentChannelDid!);
+      }
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to refresh channel from SDK while reconciling status',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    }
+
+    return null;
   }
 
   /// Handle app resume: clear badges and optionally process control plane

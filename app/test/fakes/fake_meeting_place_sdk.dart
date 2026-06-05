@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:ssi/ssi.dart';
 import 'package:ssi/src/did/did_document/did_document.dart';
 
 import 'fake_publish_offer_result.dart';
@@ -52,6 +53,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   int get tokenRegistrationsAttempts => _tokenRegistrationsAttempts;
 
   Group? _mockGroup;
+  DidManager? _fakeDidManager;
 
   @override
   Future<Device> registerForPushNotifications(String deviceToken) async {
@@ -86,6 +88,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     required ContactCard contactCard,
     required SDKConnectionOfferType type,
     required String offerDescription,
+    int? score,
     String? customPhrase,
     DateTime? validUntil,
     int? maximumUsage,
@@ -99,6 +102,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'contactCard': contactCard.toJson(),
       'type': type,
       'offerDescription': offerDescription,
+      'score': score,
       'customPhrase': customPhrase,
       'validUntil': validUntil,
       'maximumUsage': maximumUsage,
@@ -158,6 +162,23 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
 
   @override
   Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
+    final channel = _channels[channelDid];
+    return channel;
+  }
+
+  @override
+  Future<DidManager> getDidManager(String did) async {
+    if (_fakeDidManager != null) return _fakeDidManager!;
+    final wallet = PersistentWallet(InMemoryKeyStore());
+    final manager = DidKeyManager(wallet: wallet, store: InMemoryDidStore());
+    final keyPair = await wallet.generateKey();
+    await manager.addVerificationMethod(keyPair.id);
+    _fakeDidManager = manager;
+    return manager;
+  }
+
+  @override
+  Future<Channel?> getChannelByDid(String channelDid) async {
     final channel = _channels[channelDid];
     return channel;
   }
