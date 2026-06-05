@@ -6,8 +6,13 @@ part of 'publish_offer_screen_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+<<<<<<< HEAD
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+=======
+String _$publishOfferScreenControllerHash() =>
+    r'bd2477d51ec503a4fdb4d041df75ba90389f9936';
+>>>>>>> 5e6ffdbc (feat: add 1:1 chat transport selection gated by build-time env var (#127))
 
 @ProviderFor(PublishOfferScreenController)
 final publishOfferScreenControllerProvider =

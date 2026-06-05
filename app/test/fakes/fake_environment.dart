@@ -1,3 +1,4 @@
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/firebase_environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/image_config.dart';
@@ -11,6 +12,10 @@ class FakeEnvironment implements Environment {
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
     this._defaultMediators = const {},
+    this.enabledIndividualChatTransports = const [
+      ChannelTransport.didcomm,
+      ChannelTransport.matrix,
+    ],
   }) : defaultMediatorDid =
            defaultMediatorDid ?? FakeMediators.defaultMediator.mediatorDid;
 
@@ -29,6 +34,9 @@ class FakeEnvironment implements Environment {
 
   @override
   final int maxOfferUsages;
+
+  @override
+  final List<ChannelTransport> enabledIndividualChatTransports;
 
   @override
   int get maxLogMemoryEntries => 1000;
