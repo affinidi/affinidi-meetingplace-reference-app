@@ -88,7 +88,9 @@ class ChatScreenController extends _$ChatScreenController
           otherPartyCard: next.otherPartyCard ?? state.otherPartyCard,
           effect: newEffect,
         );
-        _preloadHostedMediaAttachments(next.messages);
+        if (!identical(previous?.messages, next.messages)) {
+          _preloadHostedMediaAttachments(next.messages);
+        }
       });
     }
 
