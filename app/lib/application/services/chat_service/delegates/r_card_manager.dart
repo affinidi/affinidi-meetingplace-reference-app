@@ -41,7 +41,7 @@ class RCardManager {
 
   /// Cancels the incoming R-Card stream subscription.
   void cancelSubscription() {
-    _subscription?.cancel();
+    unawaited(_subscription?.cancel());
     _subscription = null;
   }
 
