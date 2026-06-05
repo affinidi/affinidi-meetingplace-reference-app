@@ -336,12 +336,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
-  Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
+  Future<Uint8List> downloadMedia(Message message) async {
     final sdk = _chatSDK;
     if (sdk == null) {
       throw StateError('Chat SDK not initialized');
     }
-    return sdk.downloadMedia(attachment);
+    return sdk.downloadMedia(message);
   }
 
   @override

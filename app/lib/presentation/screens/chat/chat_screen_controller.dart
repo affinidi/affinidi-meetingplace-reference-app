@@ -652,8 +652,8 @@ class ChatScreenController extends _$ChatScreenController
   /// Loads an image attachment into the chat screen.
   ///
   /// Handles both legacy base64-encoded attachments and hosted media
-  /// attachments (downloaded from mxc:// URI via the SDK).
-  void loadImageAttachment(ChatAttachment attachment) {
+  /// attachments (downloaded by the SDK via the parent message).
+  void loadImageAttachment(chat.Message message, ChatAttachment attachment) {
     final attachmentId = attachmentCacheKey(attachment);
 
     final attachmentsDataCache = Map.of(state.attachmentsDataCache);
@@ -667,17 +667,19 @@ class ChatScreenController extends _$ChatScreenController
       return;
     }
 
-    final links = attachment.data?.links;
-    if (links != null && links.isNotEmpty) {
-      _downloadAndCacheAttachment(attachmentId, attachment);
-    }
+    // Outgoing hosted-media messages are pushed optimistically without a
+    // transportId until the upload completes; downloading then would fail
+    // and poison the cache. Skip and wait for the post-upload state push.
+    if (message.transportId == null) return;
+
+    _downloadAndCacheAttachment(attachmentId, message);
   }
 
   void _preloadHostedMediaAttachments(List<chat.ChatItem> messages) {
     for (final message in messages.whereType<chat.Message>()) {
       for (final attachment in message.attachments) {
         if (attachment.format == AttachmentFormat.hostedMedia.value) {
-          loadImageAttachment(attachment);
+          loadImageAttachment(message, attachment);
         }
       }
     }
@@ -685,13 +687,13 @@ class ChatScreenController extends _$ChatScreenController
 
   Future<void> _downloadAndCacheAttachment(
     String cacheKey,
-    ChatAttachment attachment,
+    chat.Message message,
   ) async {
     if (_attachmentsLoading.contains(cacheKey)) return;
     _attachmentsLoading.add(cacheKey);
 
     try {
-      final bytes = await _chatService?.downloadMedia(attachment);
+      final bytes = await _chatService?.downloadMedia(message);
       if (bytes == null) {
         _logger.warning(
           'Chat service unavailable, skipping media download',

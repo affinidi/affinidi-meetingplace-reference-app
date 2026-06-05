@@ -40,7 +40,7 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
     List<ChatAttachment>? attachments,
   });
 
-  Future<Uint8List> downloadMedia(ChatAttachment attachment);
+  Future<Uint8List> downloadMedia(Message message);
 
   Future<void> sendChatActivity();
   Future<void> reactOnMessage(Message message, {required String reaction});

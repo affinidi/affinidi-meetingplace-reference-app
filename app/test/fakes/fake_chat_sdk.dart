@@ -66,7 +66,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       isFromMe: false,
       senderDid: 'fake-sender-did',
       attachments: attachments ?? [],
-    );
+    )..transportId =
+        'fake-transport-incoming-${DateTime.now().microsecondsSinceEpoch}';
 
     final chatEvent = UnhandledChatEvent(
       type: 'https://affinidi.com/chat/1.0/message',
@@ -504,7 +505,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
-  Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
+  Future<Uint8List> downloadMedia(Message message) async {
+    final attachment = message.attachments.firstOrNull;
+    if (attachment == null) {
+      throw StateError('Message has no attachments in FakeChatSdk');
+    }
+
     final base64Data = attachment.data?.base64;
     if (base64Data != null && base64Data.isNotEmpty) {
       return base64Decode(base64Data);
