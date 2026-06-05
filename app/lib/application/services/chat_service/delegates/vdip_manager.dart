@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../../../../infrastructure/extensions/vrc_extensions.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
@@ -56,11 +57,16 @@ class VdipManager {
   MeetingPlaceChatSDK? get _chatSdk => _getChatSdk();
 
   bool _isConnectionInitiator = false;
+  final Lock _subscriptionLock = Lock();
   StreamSubscription<dynamic>? _vrcRequestSubscription;
   StreamSubscription<dynamic>? _vrcSubscription;
 
   /// Cancels all active VDIP stream subscriptions.
   Future<void> cancelSubscriptions() async {
+    await _subscriptionLock.synchronized(_cancelActiveSubscriptions);
+  }
+
+  Future<void> _cancelActiveSubscriptions() async {
     await _vrcRequestSubscription?.cancel();
     await _vrcSubscription?.cancel();
     _vrcRequestSubscription = null;
@@ -83,39 +89,41 @@ class VdipManager {
 
   /// Subscribes to incoming VRC requests and VRCs for this channel.
   Future<void> subscribe() async {
-    await cancelSubscriptions();
-    final resolved = await _resolveChannel();
-    if (resolved == null) {
-      _logger.warning(
-        'Cannot subscribe to VDIP: channel or permanent DID not found',
-        name: _logKey,
-      );
-      return;
-    }
-    final (:channel, :otherPartyDid) = resolved;
+    await _subscriptionLock.synchronized(() async {
+      await _cancelActiveSubscriptions();
+      final resolved = await _resolveChannel();
+      if (resolved == null) {
+        _logger.warning(
+          'Cannot subscribe to VDIP: channel or permanent DID not found',
+          name: _logKey,
+        );
+        return;
+      }
+      final (:channel, :otherPartyDid) = resolved;
 
-    final credentialsSdk = await _ref.read(credentialsSdkProvider.future);
-    _isConnectionInitiator = channel.isConnectionInitiator;
+      final credentialsSdk = await _ref.read(credentialsSdkProvider.future);
+      _isConnectionInitiator = channel.isConnectionInitiator;
 
-    _vrcRequestSubscription = credentialsSdk.receivedVrcRequests
-        .where((request) => request.senderDid == otherPartyDid)
-        .listen((request) {
-          // Clear the pending cache: this live delivery supersedes any cached
-          // event, preventing a double-handle on the next session open.
-          credentialsSdk.consumePendingVrcRequest(otherPartyDid);
-          unawaited(
-            _handleReceivedVrcRequest(request, channel, credentialsSdk),
-          );
-        });
+      _vrcRequestSubscription = credentialsSdk.receivedVrcRequests
+          .where((request) => request.senderDid == otherPartyDid)
+          .listen((request) {
+            // Clear the pending cache: this live delivery supersedes any cached
+            // event, preventing a double-handle on the next session open.
+            credentialsSdk.consumePendingVrcRequest(otherPartyDid);
+            unawaited(
+              _handleReceivedVrcRequest(request, channel, credentialsSdk),
+            );
+          });
 
-    _vrcSubscription = credentialsSdk.receivedVrcs
-        .where((receivedVrc) => receivedVrc.senderDid == otherPartyDid)
-        .listen((receivedVrc) {
-          credentialsSdk.consumePendingVrc(otherPartyDid);
-          unawaited(
-            _handleReceivedVrc(receivedVrc.vcBlob, credentialsSdk, channel),
-          );
-        });
+      _vrcSubscription = credentialsSdk.receivedVrcs
+          .where((receivedVrc) => receivedVrc.senderDid == otherPartyDid)
+          .listen((receivedVrc) {
+            credentialsSdk.consumePendingVrc(otherPartyDid);
+            unawaited(
+              _handleReceivedVrc(receivedVrc.vcBlob, credentialsSdk, channel),
+            );
+          });
+    });
   }
 
   /// Replays cached VRC requests and VRCs that arrived before this session

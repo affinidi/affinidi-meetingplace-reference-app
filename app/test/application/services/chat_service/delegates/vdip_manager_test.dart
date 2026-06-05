@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -28,6 +29,7 @@ void main() {
 
   group('VdipManager', () {
     late ProviderContainer container;
+    late FakeMeetingPlaceSDK fakeCoreSdk;
     late StubVdipCredentialsSdk stub;
     late FakeChatSdk fakeChatSdk;
     late VdipManager manager;
@@ -77,7 +79,7 @@ void main() {
       persistedEvents = [];
       fakeChatSdk = FakeChatSdk();
 
-      final fakeCoreSdk = FakeMeetingPlaceSDK(
+      fakeCoreSdk = FakeMeetingPlaceSDK(
         channels: {
           otherPartyPermanentDid: Channel(
             permanentChannelDid: localPermanentDid,
@@ -321,6 +323,62 @@ void main() {
 
       expect(onVrcRequestReceivedDids, isEmpty);
     });
+
+    test(
+      'subscribe — concurrent calls should not install duplicate listeners',
+      () async {
+        final delayedCredentials = Completer<MeetingPlaceCredentialsSDK>();
+        final overlappingContainer = ProviderContainer(
+          overrides: [
+            meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
+            credentialsSdkProvider.overrideWith(
+              (ref) => delayedCredentials.future,
+            ),
+            vrcRepositoryProvider.overrideWith(
+              (ref) async => FakeNoOpVrcRepository(),
+            ),
+            rCardsRepositoryProvider.overrideWith(
+              (ref) async => FakeNoOpRCardRepository(),
+            ),
+          ],
+        );
+        addTearDown(overlappingContainer.dispose);
+
+        final overlappingManager = VdipManager(
+          ref: overlappingContainer.read(_refProvider),
+          otherPartyPermanentDid: otherPartyPermanentDid,
+          logger: AppLogger.instance,
+          getChatSdk: () => fakeChatSdk,
+          getMessages: () => messages,
+          persistLocalEventMessage: (type) async => persistedEvents.add(type),
+          onVrcRequestReceived:
+              (
+                did,
+                identityDid,
+                identityName, {
+                shouldPromptForAction = true,
+              }) async {
+                onVrcRequestReceivedDids.add(did);
+                onVrcRequestReceivedShouldPrompt.add(shouldPromptForAction);
+              },
+        );
+
+        final firstSubscribe = overlappingManager.subscribe();
+        final secondSubscribe = overlappingManager.subscribe();
+
+        delayedCredentials.complete(stub);
+        await Future.wait([firstSubscribe, secondSubscribe]);
+
+        stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(
+          onVrcRequestReceivedDids,
+          [otherPartyPermanentDid],
+          reason: 'a single request should not be delivered twice',
+        );
+      },
+    );
 
     test(
       'subscribe — completes without error when channel is not found',
