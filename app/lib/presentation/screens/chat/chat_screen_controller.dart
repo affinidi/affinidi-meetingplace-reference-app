@@ -543,8 +543,8 @@ class ChatScreenController extends _$ChatScreenController
 
   /// Deletes a previously-sent message.
   ///
-  /// When [deleteForMeOnly] is true the message is hidden only for the current user
-  /// and no wire traffic is generated. Otherwise the SDK broadcasts a
+  /// When [deleteForMeOnly] is true the message is hidden only for the current
+  /// user and no wire traffic is generated. Otherwise the SDK broadcasts a
   /// redaction so all participants drop the message, subject to the
   /// sender-only / delivery / `deleteMessageWindow` rules enforced by the SDK.
   Future<void> deleteMessage(
