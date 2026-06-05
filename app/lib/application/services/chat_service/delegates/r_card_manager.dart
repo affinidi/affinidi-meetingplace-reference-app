@@ -6,6 +6,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 
 import '../../../../domain/models/identity/identity.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../infrastructure/providers/chat_repository_provider.dart';
 import '../../../../infrastructure/providers/credentials_sdk_provider.dart';
@@ -99,12 +100,7 @@ class RCardManager {
       final rCard = await credentialsSDK.sendRCard(
         channel: channel,
         subjectDid: identity.did,
-        card: RCardSubject(
-          firstName: identity.card.firstName,
-          lastName: identity.card.lastName,
-          email: identity.card.email,
-          phone: identity.card.mobile,
-        ),
+        card: identity.card.toRCardSubject(),
         issuerDidManager: didManager,
       );
 
@@ -154,12 +150,7 @@ class RCardManager {
       final rCard = await credentialsSDK.sendRCard(
         channel: channel,
         subjectDid: identity.did,
-        card: RCardSubject(
-          firstName: identity.card.firstName,
-          lastName: identity.card.lastName,
-          email: identity.card.email,
-          phone: identity.card.mobile,
-        ),
+        card: identity.card.toRCardSubject(),
         issuerDidManager: didManager,
       );
 

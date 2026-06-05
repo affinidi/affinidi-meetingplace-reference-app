@@ -6,6 +6,7 @@ import 'package:ssi/ssi.dart';
 
 import '../../application/services/identities_service/identities_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
+import '../extensions/contact_card_extensions.dart';
 import '../configuration/environment.dart';
 import '../secure_storage/secure_storage.dart';
 import 'app_logger_provider.dart';
@@ -86,12 +87,7 @@ final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
 
                     return RCardDIDCommAttachmentBuilder.build(
                       issuerDid: identity.did,
-                      card: RCardSubject(
-                        firstName: identity.card.firstName,
-                        lastName: identity.card.lastName,
-                        email: identity.card.email,
-                        phone: identity.card.mobile,
-                      ),
+                      card: identity.card.toRCardSubject(),
                       issuerDidManager: didManager,
                     );
                   } catch (_) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:uuid/uuid.dart' as uuid;
 
 import '../../domain/models/contact_card/contact_card.dart';
@@ -148,6 +149,13 @@ extension ContactCardExtensions on ContactCard {
 
     return sdk.ContactCard(did: did, type: type, contactInfo: contactInfo);
   }
+
+  RCardSubject toRCardSubject() => RCardSubject(
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phone: mobile,
+  );
 }
 
 /// Extension methods on SDK ContactCard for convenient access to fields.
