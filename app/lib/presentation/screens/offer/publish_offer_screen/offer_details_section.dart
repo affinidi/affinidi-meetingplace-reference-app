@@ -7,17 +7,102 @@ class _OfferDetailsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
+    final isGroupOffer = ref.watch(
+      provider.select((state) => state.formData.isGroupOffer),
+    );
+    final showTransportPicker =
+        ref.watch(environmentProvider).enabledIndividualChatTransports.length >
+        1;
+
     return FormCard(
       title: context.l10n.connectionOfferDetails,
       child: Column(
         children: [
           _GroupOffer(_identityId),
+          if (!isGroupOffer && showTransportPicker) ...[
+            const Divider(),
+            _TransportPicker(_identityId),
+          ],
           const Divider(),
           _OfferPhrase(_identityId),
           const Divider(),
           _HeadLine(_identityId),
           const Divider(),
           _Description(_identityId),
+        ],
+      ),
+    );
+  }
+}
+
+class _TransportPicker extends ConsumerWidget {
+  _TransportPicker(String identityId) : _identityId = identityId;
+
+  final String _identityId;
+
+  IconData? _iconFor(ChannelTransport transport) {
+    switch (transport) {
+      case ChannelTransport.didcomm:
+        return Icons.shield_outlined;
+      case ChannelTransport.matrix:
+        return Icons.forum_outlined;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = publishOfferScreenControllerProvider(
+      _identityId,
+      context.l10n,
+    );
+    final controller = ref.read(provider.notifier);
+    final transport = ref.watch(
+      provider.select((state) => state.formData.transport),
+    );
+    final enabledTransports = ref
+        .watch(environmentProvider)
+        .enabledIndividualChatTransports;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.swap_horiz, color: context.colorScheme.secondary),
+              const SizedBox(width: 16),
+              Text(
+                context.l10n.chatTransport,
+                style: context.textTheme.bodyLarge,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: SegmentedButton<ChannelTransport>(
+              showSelectedIcon: false,
+              segments: [
+                for (final t in enabledTransports)
+                  ButtonSegment(
+                    value: t,
+                    label: Text(context.l10n.transportLabel(t.name)),
+                    icon: switch (_iconFor(t)) {
+                      final icon? => Icon(icon),
+                      _ => null,
+                    },
+                  ),
+              ],
+              selected: {transport},
+              onSelectionChanged: (selection) =>
+                  controller.selectTransport(selection.first),
+            ),
+          ),
         ],
       ),
     );

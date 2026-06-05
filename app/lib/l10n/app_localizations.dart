@@ -148,6 +148,18 @@ abstract class AppLocalizations {
   /// **'Group chat'**
   String get createGroupChatOffer;
 
+  /// No description provided for @chatTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat transport'**
+  String get chatTransport;
+
+  /// No description provided for @transportLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{transport, select, didcomm{DIDComm} matrix{Matrix} other{{transport}}}'**
+  String transportLabel(String transport);
+
   /// No description provided for @groupOfferHelperText.
   ///
   /// In en, this message translates to:

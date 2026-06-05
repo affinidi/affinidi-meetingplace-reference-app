@@ -6,6 +6,7 @@ part of 'connections_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
+<<<<<<< HEAD
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Service responsible for managing connection offers and channels.
@@ -22,6 +23,10 @@ part of 'connections_service.dart';
 
 @ProviderFor(ConnectionsService)
 final connectionsServiceProvider = ConnectionsServiceProvider._();
+=======
+String _$connectionsServiceHash() =>
+    r'0fe8b02bbcc0f44b0e051eab8f734ae277aed397';
+>>>>>>> 5e6ffdbc (feat: add 1:1 chat transport selection gated by build-time env var (#127))
 
 /// Service responsible for managing connection offers and channels.
 ///

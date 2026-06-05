@@ -338,6 +338,7 @@ class ConnectionsService extends _$ConnectionsService {
         mediatorDid: data.selectedMediatorDid,
         externalRef: identity.id,
         score: data.score,
+        transport: isGroupOffer ? ChannelTransport.matrix : data.transport,
       );
 
       _logger.info('Offer registered successfully', name: _logKey);

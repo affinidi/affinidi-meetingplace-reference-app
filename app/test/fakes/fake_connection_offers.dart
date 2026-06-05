@@ -56,7 +56,7 @@ class FakeConnectionOffers {
     ownedByMe: false,
     createdAt: DateTime(2024, 6, 1),
     offerDescription: 'Join our group chat',
-    transport: ChannelTransport.didcomm,
+    transport: ChannelTransport.matrix,
   );
 
   static GroupConnectionOffer get groupOfferOwnedByMe => GroupConnectionOffer(
