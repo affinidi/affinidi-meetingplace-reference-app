@@ -47,6 +47,9 @@ class StubVdipCredentialsSdk extends MeetingPlaceCredentialsSDK {
 
   VrcRequest? pendingRequest;
   VrcIssuance? pendingVrc;
+  final List<VrcExchangeState> handledVrcExchangeStates = [];
+  Completer<void>? firstVrcHandlerStarted;
+  Completer<void>? allowFirstVrcHandlerToContinue;
 
   VrcRequestProcessingResult nextRequestResult =
       const VrcRequestProcessingResultPromptRequired();
@@ -92,7 +95,14 @@ class StubVdipCredentialsSdk extends MeetingPlaceCredentialsSDK {
     required VrcExchangeState exchangeState,
     String? issuerDid,
     String? issuerName,
-  }) async => nextVrcResult;
+  }) async {
+    handledVrcExchangeStates.add(exchangeState);
+    if (handledVrcExchangeStates.length == 1) {
+      firstVrcHandlerStarted?.complete();
+      await allowFirstVrcHandlerToContinue?.future;
+    }
+    return nextVrcResult;
+  }
 
   void emitRequest(VrcRequest r) => _requestCtrl.add(r);
   void emitVrc(VrcIssuance v) => _vrcCtrl.add(v);

@@ -58,6 +58,7 @@ class VdipManager {
 
   bool _isConnectionInitiator = false;
   final Lock _subscriptionLock = Lock();
+  final Lock _eventHandlingLock = Lock();
   StreamSubscription<dynamic>? _vrcRequestSubscription;
   StreamSubscription<dynamic>? _vrcSubscription;
 
@@ -107,23 +108,40 @@ class VdipManager {
       _vrcRequestSubscription = credentialsSdk.receivedVrcRequests
           .where((request) => request.senderDid == otherPartyDid)
           .listen((request) {
-            // Clear the pending cache: this live delivery supersedes any cached
-            // event, preventing a double-handle on the next session open.
-            credentialsSdk.consumePendingVrcRequest(otherPartyDid);
             unawaited(
-              _handleReceivedVrcRequest(request, channel, credentialsSdk),
+              _serializeEventHandling(() async {
+                // Clear the pending cache: this live delivery supersedes any
+                // cached event, preventing a double-handle on the next
+                // session open.
+                credentialsSdk.consumePendingVrcRequest(otherPartyDid);
+                await _handleReceivedVrcRequest(
+                  request,
+                  channel,
+                  credentialsSdk,
+                );
+              }),
             );
           });
 
       _vrcSubscription = credentialsSdk.receivedVrcs
           .where((receivedVrc) => receivedVrc.senderDid == otherPartyDid)
           .listen((receivedVrc) {
-            credentialsSdk.consumePendingVrc(otherPartyDid);
             unawaited(
-              _handleReceivedVrc(receivedVrc.vcBlob, credentialsSdk, channel),
+              _serializeEventHandling(() async {
+                credentialsSdk.consumePendingVrc(otherPartyDid);
+                await _handleReceivedVrc(
+                  receivedVrc.vcBlob,
+                  credentialsSdk,
+                  channel,
+                );
+              }),
             );
           });
     });
+  }
+
+  Future<void> _serializeEventHandling(Future<void> Function() action) {
+    return _eventHandlingLock.synchronized(action);
   }
 
   /// Replays cached VRC requests and VRCs that arrived before this session
@@ -145,12 +163,17 @@ class VdipManager {
       otherPartyDid,
     );
     if (pendingRequest != null) {
-      await _handleReceivedVrcRequest(pendingRequest, channel, credentialsSdk);
+      await _serializeEventHandling(
+        () =>
+            _handleReceivedVrcRequest(pendingRequest, channel, credentialsSdk),
+      );
     }
 
     final pendingVrc = credentialsSdk.consumePendingVrc(otherPartyDid);
     if (pendingVrc != null) {
-      await _handleReceivedVrc(pendingVrc.vcBlob, credentialsSdk, channel);
+      await _serializeEventHandling(
+        () => _handleReceivedVrc(pendingVrc.vcBlob, credentialsSdk, channel),
+      );
     }
   }
 

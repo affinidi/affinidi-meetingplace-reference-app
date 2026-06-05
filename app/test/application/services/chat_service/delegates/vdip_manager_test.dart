@@ -274,6 +274,83 @@ void main() {
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
 
+    test('subscribe — should not start a second VRC handler before the first '
+        'finishes', () async {
+      final firstVrcHandlerStarted = Completer<void>();
+      final allowFirstVrcHandlerToContinue = Completer<void>();
+      addTearDown(() {
+        if (!allowFirstVrcHandlerToContinue.isCompleted) {
+          allowFirstVrcHandlerToContinue.complete();
+        }
+      });
+
+      stub
+        ..nextVrcResult = const VrcProcessingResultCompleted()
+        ..firstVrcHandlerStarted = firstVrcHandlerStarted
+        ..allowFirstVrcHandlerToContinue = allowFirstVrcHandlerToContinue;
+
+      final managerWithPersistedMessages = VdipManager(
+        ref: container.read(_refProvider),
+        otherPartyPermanentDid: otherPartyPermanentDid,
+        logger: AppLogger.instance,
+        getChatSdk: () => fakeChatSdk,
+        getMessages: () => messages,
+        persistLocalEventMessage: (type) async {
+          persistedEvents.add(type);
+          messages = [
+            ...messages,
+            EventMessage(
+              chatId: 'test-chat',
+              messageId: 'event-${persistedEvents.length}',
+              senderDid: otherPartyPermanentDid,
+              isFromMe: false,
+              dateCreated: DateTime.now(),
+              status: ChatItemStatus.received,
+              eventType: type,
+              data: const {},
+            ),
+          ];
+        },
+        onVrcRequestReceived:
+            (
+              did,
+              identityDid,
+              identityName, {
+              shouldPromptForAction = true,
+            }) async {
+              onVrcRequestReceivedDids.add(did);
+            },
+      );
+
+      await managerWithPersistedMessages.subscribe();
+
+      stub.emitVrc(vrcIssuance);
+      await firstVrcHandlerStarted.future;
+
+      stub.emitVrc(vrcIssuance);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(
+        stub.handledVrcExchangeStates,
+        hasLength(1),
+        reason:
+            'the second VRC should not start until the first one finishes '
+            'persisting exchange completion state',
+      );
+
+      allowFirstVrcHandlerToContinue.complete();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(stub.handledVrcExchangeStates, hasLength(2));
+      expect(
+        stub.handledVrcExchangeStates[1].hasVrcExchangeCompleted,
+        isTrue,
+        reason:
+            'the second VRC should observe the completed exchange state '
+            'written by the first handler',
+      );
+    });
+
     test('replayPending — replays pending VRC request '
         'and calls onVrcRequestReceived', () async {
       stub.pendingRequest = VrcRequest(senderDid: otherPartyPermanentDid);
