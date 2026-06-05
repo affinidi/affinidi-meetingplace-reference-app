@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'firebase_environment.dart';
@@ -108,6 +110,14 @@ class Environment {
   );
   Map<String, String> get defaultMediators => _defaultMediators;
 
+  List<ChannelTransport> get enabledIndividualChatTransports =>
+      _parseEnabledIndividualChatTransports(
+        const String.fromEnvironment(
+          'ENABLED_INDIVIDUAL_CHAT_TRANSPORTS',
+          defaultValue: '["didcomm"]',
+        ),
+      );
+
   /// The type to use for direct interactive OOB flows, sourced from the
   /// `DIRECT_INTERACTIVE_OOB_TYPE` compile-time environment variable. If the
   /// variable is not set or is empty, this will return `null`.
@@ -123,3 +133,30 @@ class Environment {
 Provider<Environment> environmentProvider = Provider<Environment>((ref) {
   return Environment.instance;
 }, name: 'environmentProvider');
+
+List<ChannelTransport> _parseEnabledIndividualChatTransports(String raw) {
+  const fallback = [ChannelTransport.didcomm];
+  final decoded = raw.isEmpty ? null : _tryJsonDecode(raw);
+  if (decoded is! List) return fallback;
+
+  final transports = decoded
+      .whereType<String>()
+      .map(
+        (token) => ChannelTransport.values.firstWhereOrNull(
+          (t) => t.name.toLowerCase() == token.toLowerCase(),
+        ),
+      )
+      .nonNulls
+      .toSet()
+      .toList();
+
+  return transports.isEmpty ? fallback : transports;
+}
+
+Object? _tryJsonDecode(String raw) {
+  try {
+    return jsonDecode(raw);
+  } on FormatException {
+    return null;
+  }
+}

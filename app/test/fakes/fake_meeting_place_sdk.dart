@@ -95,6 +95,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     String? mediatorDid,
     String? metadata,
     String? externalRef,
+    ChannelTransport transport = ChannelTransport.didcomm,
   }) async {
     // Record the call parameters
     _publishOfferCalls.add({
