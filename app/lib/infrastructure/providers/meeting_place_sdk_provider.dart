@@ -6,8 +6,8 @@ import 'package:ssi/ssi.dart';
 
 import '../../application/services/identities_service/identities_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
-import '../extensions/contact_card_extensions.dart';
 import '../configuration/environment.dart';
+import '../extensions/contact_card_extensions.dart';
 import '../secure_storage/secure_storage.dart';
 import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
