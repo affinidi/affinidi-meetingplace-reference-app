@@ -20,31 +20,31 @@ dependency_overrides:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_chat
-      ref: 635da0cb13e28c6345df40e22337d2a9dcd6704b
+      ref: 7dea8bdf1f35c5d0c8db1bc9dcc1d941841fb12b
   meeting_place_control_plane:
     # path: ../affinidi-meetingplace-sdk-dart/.worktrees/user-media-upload/packages/meeting_place_control_plane
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_control_plane
-      ref: 635da0cb13e28c6345df40e22337d2a9dcd6704b
+      ref: 7dea8bdf1f35c5d0c8db1bc9dcc1d941841fb12b
   meeting_place_core:
     # path: ../affinidi-meetingplace-sdk-dart/.worktrees/user-media-upload/packages/meeting_place_core
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_core
-      ref: 635da0cb13e28c6345df40e22337d2a9dcd6704b
+      ref: 7dea8bdf1f35c5d0c8db1bc9dcc1d941841fb12b
   meeting_place_drift_repository:
     # path: ../affinidi-meetingplace-sdk-dart/.worktrees/user-media-upload/packages/meeting_place_drift_repository
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_drift_repository
-      ref: 635da0cb13e28c6345df40e22337d2a9dcd6704b
+      ref: 7dea8bdf1f35c5d0c8db1bc9dcc1d941841fb12b
   meeting_place_mediator:
     # path: ../affinidi-meetingplace-sdk-dart/.worktrees/user-media-upload/packages/meeting_place_mediator
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_mediator
-      ref: 635da0cb13e28c6345df40e22337d2a9dcd6704b
+      ref: 7dea8bdf1f35c5d0c8db1bc9dcc1d941841fb12b
   meta: 1.17.0
   test_api: ^0.7.12
 

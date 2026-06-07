@@ -21,7 +21,6 @@ class FakeConnectionOffers {
     offerDescription: 'Test offer description',
     expiresAt: DateTime(2025, 12, 31),
     maximumUsage: 10,
-    transport: ChannelTransport.didcomm,
   );
 
   static ConnectionOffer get expiredOffer => ConnectionOffer(
@@ -39,7 +38,6 @@ class FakeConnectionOffers {
     createdAt: DateTime(2023, 1, 1),
     offerDescription: 'This offer has expired',
     expiresAt: DateTime(2023, 12, 31),
-    transport: ChannelTransport.didcomm,
   );
 
   static ConnectionOffer get groupOffer => ConnectionOffer(
@@ -56,7 +54,6 @@ class FakeConnectionOffers {
     ownedByMe: false,
     createdAt: DateTime(2024, 6, 1),
     offerDescription: 'Join our group chat',
-    transport: ChannelTransport.matrix,
   );
 
   static GroupConnectionOffer get groupOfferOwnedByMe => GroupConnectionOffer(
@@ -75,6 +72,5 @@ class FakeConnectionOffers {
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: true,
     createdAt: DateTime(2024, 6, 1),
-    transport: ChannelTransport.matrix,
   );
 }

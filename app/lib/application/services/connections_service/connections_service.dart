@@ -329,7 +329,6 @@ class ConnectionsService extends _$ConnectionsService {
         maximumUsage: data.maxUsages,
         mediatorDid: data.selectedMediatorDid,
         externalRef: identity.id,
-        transport: isGroupOffer ? ChannelTransport.matrix : data.transport,
       );
 
       _logger.info('Offer registered successfully', name: _logKey);
