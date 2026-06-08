@@ -351,6 +351,7 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
         expiryDate: updatedFormData.expiryDate,
         maxUsages: updatedFormData.maxUsages,
         customPhrase: updatedFormData.customPhrase,
+        score: updatedFormData.score,
       );
 
       await ref

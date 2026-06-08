@@ -7,6 +7,7 @@ import '../../../application/services/credential_service/credential_service_stat
 import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/tabs/tabs.dart';
+import '../../widgets/cards/animated_stacked_card_deck.dart';
 import '../../widgets/cards/credential_card.dart';
 import '../../widgets/section_banner.dart';
 import '../../widgets/tab_bar_tab.dart';
@@ -86,27 +87,26 @@ class _CredentialsListWidget extends HookConsumerWidget {
           tabs: [TabBarTab(label: l10n.all)],
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (final record in credentials) ...[
-                CredentialCard(
-                  topLeftText: l10n.livenessCredential,
-                  bottomLeftText: l10n.verifiableCredential,
-                  onTap: () {
-                    Navigator.of(context).push<void>(
-                      MaterialPageRoute<void>(
-                        builder: (context) => CredentialDetailsScreen(
-                          identityId: record.identityId,
-                        ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: AnimatedStackedCardDeck<LivenessCredentialRecord>(
+            items: credentials,
+            cardHeight: 208.0,
+            overlapOffset: 60.0,
+            cardBuilder: (context, credential, index, fadeAnimation) {
+              return CredentialCard(
+                topLeftText: l10n.livenessCredential,
+                bottomLeftText: l10n.verifiableCredential,
+                onTap: () {
+                  Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (context) => CredentialDetailsScreen(
+                        identityId: credential.identityId,
                       ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-              ],
-            ],
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ),
       ],

@@ -177,7 +177,7 @@ class _ChatMediaOptions extends ConsumerWidget {
       ),
       if (isZkpEnabled)
         _ChatMediaOptionItem(
-          icon: const MaterialIcon(Icons.verified_user),
+          icon: const MaterialIcon(Icons.how_to_reg, color: Colors.white),
           label: context.l10n.humanZeroKnowledgeProof,
           onTap: zkpChannelReady
               ? () async {

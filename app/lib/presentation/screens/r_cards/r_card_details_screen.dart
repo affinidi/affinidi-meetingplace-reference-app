@@ -17,8 +17,8 @@ import '../../painting/cached_base64_image.dart';
 import '../../widgets/cards/r_card_header_card.dart';
 import '../../widgets/images/default_profile_image.dart';
 import 'r_card_notes_sheet.dart';
-import 'r_cards_deck.dart' show returningCardProvider;
 import 'r_cards_screen_controller.dart';
+import 'returning_card_provider.dart';
 
 class RCardDetailsScreen extends ConsumerStatefulWidget {
   const RCardDetailsScreen({

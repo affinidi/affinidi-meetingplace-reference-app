@@ -8,10 +8,13 @@ import '../../../infrastructure/biometrics/local_auth_provider.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_repository_provider.dart';
+import '../../../presentation/screens/connections/connections_screen_controller.dart';
+import '../../../presentation/screens/contacts/contacts_screen_controller.dart';
+import '../../../presentation/screens/identities/identities_screen_controller.dart';
+import '../../../presentation/screens/settings/settings_screen_controller.dart';
 import '../connections_service/connections_service.dart';
 import '../contacts_service/contacts_service.dart';
 import '../identities_service/identities_service.dart';
-import '../settings_service/settings_service.dart';
 import 'authentication_state.dart';
 
 part 'authentication_service.g.dart';
@@ -36,19 +39,23 @@ class AuthenticationService extends _$AuthenticationService {
   }
 
   /// It preloads all identities to ensure fast access after authentication.
-  /// Initializes application services used by tab screens so data is ready
-  /// when presentation controllers mount.
+  /// Initializes controllers of all screens used in tabbar for them to be ready
+  /// as soon as authentication is successful.
   Future<void> _warmup() async {
     unawaited(ref.read(chatRepositoryProvider.future));
 
     await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
+    ref.read(identitiesScreenControllerProvider);
 
     await ref.read(contactsServiceProvider.notifier).ensureInitialized();
+    ref.read(contactsScreenControllerProvider.notifier);
 
     await ref.read(connectionsServiceProvider.notifier).ensureInitialized();
+    ref.read(connectionsScreenControllerProvider);
 
-    // Touch provider so settings restoration starts eagerly.
-    ref.read(settingsServiceProvider);
+    await ref
+        .read(settingsScreenControllerProvider.notifier)
+        .ensureInitialized();
   }
 
   /// Triggers the authentication flow.

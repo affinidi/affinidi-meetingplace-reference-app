@@ -461,27 +461,6 @@ mixin $RCardsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $CredentialsRoute on GoRouteData {
-  static CredentialsRoute _fromState(GoRouterState state) =>
-      const CredentialsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/credentials');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
 mixin $RCardDetailsRoute on GoRouteData {
   static RCardDetailsRoute _fromState(GoRouterState state) =>
       RCardDetailsRoute(subjectDid: state.pathParameters['subjectDid']!);
@@ -517,6 +496,27 @@ mixin $VrcDetailsRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/r-cards/${Uri.encodeComponent(_self.credentialId)}/vrc-details',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $CredentialsRoute on GoRouteData {
+  static CredentialsRoute _fromState(GoRouterState state) =>
+      const CredentialsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/credentials');
 
   @override
   void go(BuildContext context) => context.go(location);

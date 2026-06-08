@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'r_cards_deck.dart';
+part of 'returning_card_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
