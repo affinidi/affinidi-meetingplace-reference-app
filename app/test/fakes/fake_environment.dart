@@ -93,6 +93,9 @@ class FakeEnvironment implements Environment {
   int get chatPresenceIntervalInSeconds => 60;
 
   @override
+  int get deleteMessageWindowInSeconds => 120;
+
+  @override
   int get extraDelayAtLaunchInMilliseconds => 0;
 
   @override

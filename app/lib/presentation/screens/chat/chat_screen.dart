@@ -56,6 +56,7 @@ part 'chat_items/plain_text_chat_item.dart';
 part 'chat_items/reaction_picker_chat_item.dart';
 part 'chat_items/unknown_chat_item.dart';
 part 'chat_media_options.dart';
+part 'chat_message_actions.dart';
 part 'chat_message_list.dart';
 part 'chat_text_entry.dart';
 part 'chat_typing_activity_indicator.dart';
