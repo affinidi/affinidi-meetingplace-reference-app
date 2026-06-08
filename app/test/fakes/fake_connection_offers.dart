@@ -79,6 +79,5 @@ class FakeConnectionOffers {
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: true,
     createdAt: DateTime(2024, 6, 1),
-    transport: ChannelTransport.matrix,
   );
 }

@@ -446,8 +446,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       final mediaUri = Uri.parse(
         'mxc://fake-homeserver/fake-media-${sendMediaMessageCalls.length}',
       );
-      final transportId =
-          'fake-event-${DateTime.now().microsecondsSinceEpoch}';
+      final transportId = 'fake-event-${DateTime.now().microsecondsSinceEpoch}';
       sendMediaMessageCalls.add({
         'fileBytes': fileBytes,
         'contentType': firstAttachment.mediaType ?? 'application/octet-stream',
