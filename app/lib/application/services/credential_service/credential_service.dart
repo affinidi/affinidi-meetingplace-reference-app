@@ -233,7 +233,18 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
 
     final inMemory = state.sessionMaterialByIdentityId[identityId];
     if (inMemory != null) return inMemory;
-    return sessionMaterialFromRecord(record);
+    return sessionMaterialFromRecord(
+      record,
+      onParseError: (error, stackTrace) {
+        _logger.error(
+          'Failed to parse persisted ZKP session material for identity '
+          '${record.identityId}',
+          error: error,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      },
+    );
   }
 
   bool _isCredentialExpired(DateTime expiresAt) {
@@ -278,7 +289,18 @@ class CredentialService extends StateNotifier<CredentialServiceState> {
     final hydratedSessions = <String, SessionCredentialMaterial>{};
     for (final record in records) {
       if (_isCredentialExpired(record.expiresAt)) continue;
-      final session = sessionMaterialFromRecord(record);
+      final session = sessionMaterialFromRecord(
+        record,
+        onParseError: (error, stackTrace) {
+          _logger.error(
+            'Failed to parse persisted ZKP session material for identity '
+            '${record.identityId} during storage hydration',
+            error: error,
+            stackTrace: stackTrace,
+            name: _logKey,
+          );
+        },
+      );
       if (session != null) {
         hydratedSessions[record.identityId] = session;
       }

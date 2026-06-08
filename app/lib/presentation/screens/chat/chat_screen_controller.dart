@@ -103,9 +103,7 @@ class ChatScreenController extends _$ChatScreenController
         channelDid,
         onZkpAttachment: _zkpHandler.handleZkpAttachment,
       );
-      final sessionService = ref.read(
-        chatSessionProvider.notifier,
-      );
+      final sessionService = ref.read(chatSessionProvider.notifier);
       _chatService = sessionService;
       ref.listen(chatSessionProvider, (previous, next) {
         Future.microtask(() {
