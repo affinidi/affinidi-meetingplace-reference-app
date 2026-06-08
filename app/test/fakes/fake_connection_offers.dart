@@ -18,6 +18,7 @@ class FakeConnectionOffers {
     contactCard: FakeIdentities.secondaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
     createdAt: DateTime(2024, 1, 1),
+    transport: ChannelTransport.matrix,
     offerDescription: 'Test offer description',
     expiresAt: DateTime(2025, 12, 31),
     maximumUsage: 10,
@@ -36,6 +37,7 @@ class FakeConnectionOffers {
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
     createdAt: DateTime(2023, 1, 1),
+    transport: ChannelTransport.matrix,
     offerDescription: 'This offer has expired',
     expiresAt: DateTime(2023, 12, 31),
   );
@@ -53,6 +55,7 @@ class FakeConnectionOffers {
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
     createdAt: DateTime(2024, 6, 1),
+    transport: ChannelTransport.matrix,
     offerDescription: 'Join our group chat',
   );
 
@@ -72,5 +75,6 @@ class FakeConnectionOffers {
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: true,
     createdAt: DateTime(2024, 6, 1),
+    transport: ChannelTransport.matrix,
   );
 }
