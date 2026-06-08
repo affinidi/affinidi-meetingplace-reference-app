@@ -107,14 +107,15 @@ Future<void> verifyMessageWithAttachmentSent(
   expect(sendCall['contentType'], startsWith('image/'));
 
   // Simulate the message coming back through the stream as a hosted media
-  // attachment — links-only so the download path is exercised.
+  // attachment — transportId-only so the download path is exercised.
   final mxcUri = sendCall['mxcUri'] as Uri;
+  final transportId = sendCall['transportId'] as String;
   final attachment = ChatAttachment(
     mediaType: sendCall['contentType'] as String,
     filename: sendCall['filename'] as String?,
     format: AttachmentFormat.hostedMedia.value,
     data: ChatAttachmentData(links: [mxcUri]),
-  );
+  )..transportId = transportId;
 
   meetingPlaceChatSDK.simulateIncomingTextMessage(
     text: message,

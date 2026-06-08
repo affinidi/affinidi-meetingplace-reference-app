@@ -66,8 +66,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       isFromMe: false,
       senderDid: 'fake-sender-did',
       attachments: attachments ?? [],
-    )..transportId =
-        'fake-transport-incoming-${DateTime.now().microsecondsSinceEpoch}';
+    );
 
     final chatEvent = UnhandledChatEvent(
       type: 'https://affinidi.com/chat/1.0/message',
@@ -471,14 +470,16 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       final mediaUri = Uri.parse(
         'mxc://fake-homeserver/fake-media-${sendMediaMessageCalls.length}',
       );
+      final transportId = 'fake-event-${DateTime.now().microsecondsSinceEpoch}';
       sendMediaMessageCalls.add({
         'fileBytes': fileBytes,
         'contentType': firstAttachment.mediaType ?? 'application/octet-stream',
         'filename': firstAttachment.filename,
         'caption': text,
         'mxcUri': mediaUri,
+        'transportId': transportId,
       });
-      _downloadedMedia[mediaUri.toString()] = fileBytes;
+      _downloadedMedia[transportId] = fileBytes;
 
       normalizedAttachments = [
         ChatAttachment(
@@ -486,7 +487,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
           filename: firstAttachment.filename,
           format: AttachmentFormat.hostedMedia.value,
           data: ChatAttachmentData(links: [mediaUri], base64: base64Data),
-        ),
+        )..transportId = transportId,
       ];
     }
 
@@ -505,20 +506,15 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
-  Future<Uint8List> downloadMedia(Message message) async {
-    final attachment = message.attachments.firstOrNull;
-    if (attachment == null) {
-      throw StateError('Message has no attachments in FakeChatSdk');
-    }
-
+  Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
     final base64Data = attachment.data?.base64;
     if (base64Data != null && base64Data.isNotEmpty) {
       return base64Decode(base64Data);
     }
 
-    final mediaUri = attachment.data?.links?.firstOrNull?.toString();
-    if (mediaUri != null) {
-      final fileBytes = _downloadedMedia[mediaUri];
+    final transportId = attachment.transportId;
+    if (transportId != null) {
+      final fileBytes = _downloadedMedia[transportId];
       if (fileBytes != null) return fileBytes;
     }
 
