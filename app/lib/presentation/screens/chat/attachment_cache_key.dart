@@ -19,6 +19,8 @@ String attachmentCacheKey(chat.ChatAttachment attachment) {
     attachment.mediaType,
     attachment.description,
     attachment.byteCount?.toString(),
+    attachment.mediaKind?.value,
+    attachment.durationMs?.toString(),
     attachment.data?.json,
   ].whereType<String>().where((part) => part.isNotEmpty).toList();
 

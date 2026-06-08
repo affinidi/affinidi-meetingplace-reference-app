@@ -1,12 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -50,6 +54,7 @@ class ChatScreenController extends _$ChatScreenController
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
   final Set<String> _attachmentsLoading = {};
+  final Map<String, _LocalVoiceMessageData> _localVoiceMessages = {};
 
   late final Map<String, ProviderSubscription<void>>
   _conciergeLoadingControllersSubscriptions = {};
@@ -78,8 +83,9 @@ class ChatScreenController extends _$ChatScreenController
           newEffect = null;
         }
 
+        final messages = _withLocalVoiceMetadata(next.messages);
         state = state.copyWith(
-          messages: next.messages,
+          messages: messages,
           membersTyping: next.membersTyping,
           contactPresenceStatus: next.contactPresenceStatus,
           isActive: next.isActive,
@@ -89,7 +95,7 @@ class ChatScreenController extends _$ChatScreenController
           effect: newEffect,
         );
         if (!identical(previous?.messages, next.messages)) {
-          _preloadHostedMediaAttachments(next.messages);
+          _preloadHostedMediaAttachments(messages);
         }
       });
     }
@@ -620,6 +626,77 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
+  Future<bool> sendVoiceMessage({
+    required String filePath,
+    required String mediaType,
+    required Duration duration,
+    required List<int> waveform,
+  }) async {
+    messageTextController.clear();
+    _sendChatActivityTimedAction?.cancel();
+
+    final chatService = _chatService;
+    if (chatService == null) {
+      _logger.warning('Chat service unavailable', name: _logKey);
+      return false;
+    }
+
+    late final Uint8List bytes;
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) {
+        _logger.warning('Voice message file missing', name: _logKey);
+        return false;
+      }
+
+      bytes = await file.readAsBytes();
+      if (bytes.isEmpty) {
+        _logger.warning('Voice message file is empty', name: _logKey);
+        return false;
+      }
+    } catch (e, st) {
+      _logger.error(
+        'Failed to read voice message file',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+      return false;
+    }
+
+    final now = clock.now();
+    final attachment = ChatAttachment.voiceMessage(
+      base64: base64.encode(bytes),
+      durationMs: duration.inMilliseconds,
+      waveform: waveform,
+      filename: path.basename(filePath),
+      mediaType: mediaType,
+      format: AttachmentFormat.hostedMedia.value,
+      lastModifiedTime: now,
+      byteCount: bytes.length,
+    );
+    _cacheLocalVoiceMessage(
+      attachment,
+      bytes,
+      durationMs: duration.inMilliseconds,
+      waveform: waveform,
+    );
+
+    try {
+      await chatService.sendTextMessage('', attachments: [attachment]);
+      return true;
+    } catch (e, st) {
+      _removeLocalVoiceMessage(attachment);
+      _logger.error(
+        'Failed to send voice message',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+      return false;
+    }
+  }
+
   /// Loads a media attachment into the chat screen.
   ///
   /// Handles both legacy base64-encoded attachments and hosted media
@@ -633,8 +710,13 @@ class ChatScreenController extends _$ChatScreenController
 
     final attachmentData = attachment.data?.base64;
     if (attachmentData != null) {
-      attachmentsDataCache[attachmentId] = base64.decode(attachmentData);
-      state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
+      _cacheAttachmentBytes(attachmentId, base64.decode(attachmentData));
+      return true;
+    }
+
+    final localVoiceMessage = _localVoiceMessageFor(attachment);
+    if (localVoiceMessage != null) {
+      _cacheAttachmentBytes(attachmentId, localVoiceMessage.bytes);
       return true;
     }
 
@@ -666,7 +748,9 @@ class ChatScreenController extends _$ChatScreenController
       for (final attachment in message.attachments) {
         if (attachment.format == AttachmentFormat.hostedMedia.value) {
           final category = mediaCategoryFromMimeType(attachment.mediaType);
-          if (category == MediaCategory.image) {
+          final isVoice =
+              attachment.mediaKind == chat.AttachmentMediaKind.voice;
+          if (category == MediaCategory.image || isVoice) {
             loadMediaAttachment(attachment);
           }
         }
@@ -676,7 +760,7 @@ class ChatScreenController extends _$ChatScreenController
 
   Future<void> _downloadAndCacheAttachment(
     String cacheKey,
-    ChatAttachment attachment,
+    chat.ChatAttachment attachment,
   ) async {
     if (_attachmentsLoading.contains(cacheKey)) return;
     _attachmentsLoading.add(cacheKey);
@@ -692,9 +776,7 @@ class ChatScreenController extends _$ChatScreenController
         return;
       }
 
-      final attachmentsDataCache = Map.of(state.attachmentsDataCache);
-      attachmentsDataCache[cacheKey] = bytes;
-      state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
+      _cacheAttachmentBytes(cacheKey, bytes);
     } catch (e, stackTrace) {
       _logger.error(
         'Failed to download media attachment',
@@ -711,6 +793,125 @@ class ChatScreenController extends _$ChatScreenController
   void _markAttachmentDownloadFailed(String cacheKey) {
     final failed = Set.of(state.failedAttachmentDownloads)..add(cacheKey);
     state = state.copyWith(failedAttachmentDownloads: failed);
+  }
+
+  void _cacheLocalVoiceMessage(
+    chat.ChatAttachment attachment,
+    Uint8List bytes, {
+    required int durationMs,
+    required List<int> waveform,
+  }) {
+    _cacheAttachmentBytes(attachmentCacheKey(attachment), bytes);
+    final key = _localVoiceMessageKey(attachment);
+    if (key != null) {
+      _localVoiceMessages[key] = _LocalVoiceMessageData(
+        bytes: bytes,
+        durationMs: durationMs,
+        waveform: waveform,
+      );
+    }
+  }
+
+  _LocalVoiceMessageData? _localVoiceMessageFor(
+    chat.ChatAttachment attachment,
+  ) {
+    final key = _localVoiceMessageKey(attachment);
+    if (key == null) return null;
+    return _localVoiceMessages[key];
+  }
+
+  void _removeLocalVoiceMessage(chat.ChatAttachment attachment) {
+    final key = _localVoiceMessageKey(attachment);
+    if (key != null) {
+      _localVoiceMessages.remove(key);
+    }
+  }
+
+  String? _localVoiceMessageKey(chat.ChatAttachment attachment) {
+    final filename = attachment.filename;
+    final mediaType = attachment.mediaType;
+    if (filename == null || mediaType == null) return null;
+    return '$filename|$mediaType';
+  }
+
+  List<chat.ChatItem> _withLocalVoiceMetadata(List<chat.ChatItem> messages) {
+    var didChange = false;
+    final nextMessages = messages
+        .map((item) {
+          if (item is! chat.Message || !item.isFromMe) return item;
+
+          var messageDidChange = false;
+          final nextAttachments = item.attachments
+              .map((attachment) {
+                if (!_isVoiceAttachment(attachment)) return attachment;
+                final localVoiceMessage = _localVoiceMessageFor(attachment);
+                if (localVoiceMessage == null) return attachment;
+                if (attachment.waveform?.isNotEmpty == true &&
+                    attachment.durationMs != null &&
+                    attachment.mediaKind == chat.AttachmentMediaKind.voice) {
+                  return attachment;
+                }
+
+                messageDidChange = true;
+                didChange = true;
+                return chat.ChatAttachment(
+                  id: attachment.id,
+                  description: attachment.description,
+                  filename: attachment.filename,
+                  mediaType: attachment.mediaType,
+                  format: attachment.format,
+                  lastModifiedTime: attachment.lastModifiedTime,
+                  data: attachment.data,
+                  byteCount: attachment.byteCount,
+                  transportId: attachment.transportId,
+                  mediaKind:
+                      attachment.mediaKind ?? chat.AttachmentMediaKind.voice,
+                  durationMs:
+                      attachment.durationMs ?? localVoiceMessage.durationMs,
+                  waveform: attachment.waveform?.isNotEmpty == true
+                      ? attachment.waveform
+                      : localVoiceMessage.waveform,
+                );
+              })
+              .toList(growable: false);
+
+          if (!messageDidChange) return item;
+          return chat.Message(
+            chatId: item.chatId,
+            messageId: item.messageId,
+            senderDid: item.senderDid,
+            isFromMe: item.isFromMe,
+            dateCreated: item.dateCreated,
+            status: item.status,
+            type: item.type,
+            value: item.value,
+            attachments: nextAttachments,
+            reactions: item.reactions,
+            editedAt: item.editedAt,
+            transportId: item.transportId,
+            isDeleted: item.isDeleted,
+            isDeletedLocally: item.isDeletedLocally,
+          );
+        })
+        .toList(growable: false);
+
+    return didChange ? nextMessages : messages;
+  }
+
+  bool _isVoiceAttachment(chat.ChatAttachment attachment) {
+    if (attachment.mediaKind == chat.AttachmentMediaKind.voice) return true;
+    return attachment.mediaType?.toLowerCase().startsWith('audio/') ?? false;
+  }
+
+  void _cacheAttachmentBytes(String cacheKey, List<int> bytes) {
+    final attachmentsDataCache = Map.of(state.attachmentsDataCache);
+    final failedDownloads = Set.of(state.failedAttachmentDownloads)
+      ..remove(cacheKey);
+    attachmentsDataCache[cacheKey] = Uint8List.fromList(bytes);
+    state = state.copyWith(
+      attachmentsDataCache: attachmentsDataCache,
+      failedAttachmentDownloads: failedDownloads,
+    );
   }
 
   Future<void> _restoreUnsentMessage() async {
@@ -732,6 +933,18 @@ class ChatScreenController extends _$ChatScreenController
         .read(contactsServiceProvider.notifier)
         .updateContact(updatedContact);
   }
+}
+
+class _LocalVoiceMessageData {
+  const _LocalVoiceMessageData({
+    required this.bytes,
+    required this.durationMs,
+    required this.waveform,
+  });
+
+  final Uint8List bytes;
+  final int durationMs;
+  final List<int> waveform;
 }
 
 extension ChatScreenControllerProviderSelectors

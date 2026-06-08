@@ -56,6 +56,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String recipientDid,
     List<ChatAttachment>? attachments,
   }) {
+    final transportId =
+        'fake-transport-incoming-${DateTime.now().microsecondsSinceEpoch}';
+    for (final attachment in attachments ?? const <ChatAttachment>[]) {
+      attachment.transportId ??= transportId;
+    }
     final message = Message(
       chatId: 'fake-chat-id',
       messageId: 'msg-incoming-${DateTime.now().millisecondsSinceEpoch}',
@@ -451,6 +456,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
         'mxcUri': mediaUri,
         'transportId': transportId,
       });
+      _downloadedMedia[mediaUri.toString()] = fileBytes;
       _downloadedMedia[transportId] = fileBytes;
 
       normalizedAttachments = [
@@ -458,8 +464,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
           mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
           filename: firstAttachment.filename,
           format: AttachmentFormat.hostedMedia.value,
+          mediaKind: firstAttachment.mediaKind,
+          durationMs: firstAttachment.durationMs,
+          waveform: firstAttachment.waveform,
+          transportId: transportId,
           data: ChatAttachmentData(links: [mediaUri], base64: base64Data),
-        )..transportId = transportId,
+        ),
       ];
     }
 
@@ -487,6 +497,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     final transportId = attachment.transportId;
     if (transportId != null) {
       final fileBytes = _downloadedMedia[transportId];
+      if (fileBytes != null) return fileBytes;
+    }
+
+    final mediaUri = attachment.data?.links?.firstOrNull?.toString();
+    if (mediaUri != null) {
+      final fileBytes = _downloadedMedia[mediaUri];
       if (fileBytes != null) return fileBytes;
     }
 

@@ -358,5 +358,8 @@
 	"generalVideo": "Video",
 	"generalDocument": "Dokument",
 	"documentTapToDownload": "Zum Herunterladen tippen",
-	"videoLoadingError": "Video kann nicht abgespielt werden"
+	"videoLoadingError": "Video kann nicht abgespielt werden",
+	"voiceMessagePermissionDenied": "Zum Aufnehmen von Sprachnachrichten ist Mikrofonzugriff erforderlich.",
+	"voiceMessageRecordingFailed": "Sprachaufnahme kann nicht gestartet werden.",
+	"voiceMessageSendFailed": "Sprachnachricht kann nicht gesendet werden."
 }

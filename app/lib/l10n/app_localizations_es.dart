@@ -1540,4 +1540,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String attachmentTooLarge(int maxMb) {
     return 'El archivo adjunto es demasiado grande. Tamaño máximo: $maxMb MB.';
   }
+
+  @override
+  String get voiceMessagePermissionDenied =>
+      'Se requiere permiso de micrófono para grabar mensajes de voz.';
+
+  @override
+  String get voiceMessageRecordingFailed =>
+      'No se puede iniciar la grabación de voz.';
+
+  @override
+  String get voiceMessageSendFailed => 'No se puede enviar el mensaje de voz.';
 }

@@ -23,6 +23,7 @@ environment:
 
 dependencies:
   app_badge_plus: ^1.2.3
+  audioplayers: ^6.7.1
   camera: ^0.11.2
   clear_all_notifications: ^1.0.0
   clock: any
@@ -71,6 +72,7 @@ dependencies:
   permission_handler: ^12.0.1
   pie_menu: ^3.3.0
   qr_flutter: ^4.1.0
+  record: ^6.2.1
   riverpod_annotation: ^2.6.1
   share_plus: ^12.0.1
   shared_preferences: ^2.5.3

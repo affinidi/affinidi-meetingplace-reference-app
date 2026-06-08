@@ -1508,4 +1508,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String attachmentTooLarge(int maxMb) {
     return 'Attachment is too large. Maximum size is $maxMb MB.';
   }
+
+  @override
+  String get voiceMessagePermissionDenied =>
+      'Microphone permission is required to record voice messages.';
+
+  @override
+  String get voiceMessageRecordingFailed => 'Unable to start voice recording.';
+
+  @override
+  String get voiceMessageSendFailed => 'Unable to send voice message.';
 }

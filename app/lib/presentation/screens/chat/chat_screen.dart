@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -17,6 +18,8 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
@@ -70,6 +73,7 @@ part 'chat_media_options.dart';
 part 'chat_message_list.dart';
 part 'chat_text_entry.dart';
 part 'chat_typing_activity_indicator.dart';
+part 'chat_voice_message.dart';
 part 'notifications_unavailable_warning.dart';
 part 'reactions.dart';
 

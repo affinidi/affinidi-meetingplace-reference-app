@@ -14,6 +14,7 @@ class FakeConnectionOffers {
     oobInvitationMessage:
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
+    transport: ChannelTransport.didcomm,
     status: ConnectionOfferStatus.published,
     contactCard: FakeIdentities.secondaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
@@ -33,6 +34,7 @@ class FakeConnectionOffers {
     oobInvitationMessage:
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
+    transport: ChannelTransport.didcomm,
     status: ConnectionOfferStatus.published,
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
@@ -51,6 +53,7 @@ class FakeConnectionOffers {
     oobInvitationMessage:
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
+    transport: ChannelTransport.matrix,
     status: ConnectionOfferStatus.published,
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
@@ -71,6 +74,7 @@ class FakeConnectionOffers {
     oobInvitationMessage:
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
+    transport: ChannelTransport.matrix,
     status: ConnectionOfferStatus.finalised,
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: true,

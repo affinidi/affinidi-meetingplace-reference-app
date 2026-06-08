@@ -145,7 +145,6 @@ class _AttachmentWidget extends HookConsumerWidget {
        _isFromMe = isFromMe,
        _chatItemColor = chatItemColor,
        super(key: ValueKey(attachmentCacheKey(attachment)));
-
   final String _contactId;
   final chat.ChatAttachment _attachment;
   final bool _isFromMe;
@@ -153,11 +152,18 @@ class _AttachmentWidget extends HookConsumerWidget {
 
   bool get _isHostedMedia =>
       _attachment.format == AttachmentFormat.hostedMedia.value;
+  bool get _isVoiceMessage =>
+      _attachment.mediaKind == chat.AttachmentMediaKind.voice;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (_isHostedMedia) {
-      return _HostedMediaWidget(contactId: _contactId, attachment: _attachment);
+    if (_isHostedMedia || _isVoiceMessage) {
+      return _HostedMediaWidget(
+        contactId: _contactId,
+        attachment: _attachment,
+        isFromMe: _isFromMe,
+        chatItemColor: _chatItemColor,
+      );
     }
 
     final plugins = ref.read(availableAttachmentPluginsProvider);
@@ -180,11 +186,17 @@ class _HostedMediaWidget extends ConsumerWidget {
   const _HostedMediaWidget({
     required String contactId,
     required chat.ChatAttachment attachment,
+    required bool isFromMe,
+    required Color chatItemColor,
   }) : _contactId = contactId,
-       _attachment = attachment;
+       _attachment = attachment,
+       _isFromMe = isFromMe,
+       _chatItemColor = chatItemColor;
 
   final String _contactId;
   final chat.ChatAttachment _attachment;
+  final bool _isFromMe;
+  final Color _chatItemColor;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -202,6 +214,16 @@ class _HostedMediaWidget extends ConsumerWidget {
         ref.read(provider.notifier).loadMediaAttachment(_attachment);
 
     final category = mediaCategoryFromMimeType(_attachment.mediaType);
+    if (_attachment.mediaKind == chat.AttachmentMediaKind.voice) {
+      return _HostedAudioWidget(
+        attachment: _attachment,
+        cachedBytes: cachedBytes,
+        hasFailed: hasFailed,
+        onRetry: onRetry,
+        isFromMe: _isFromMe,
+        chatItemColor: _chatItemColor,
+      );
+    }
 
     switch (category) {
       case MediaCategory.video:
@@ -213,6 +235,14 @@ class _HostedMediaWidget extends ConsumerWidget {
           onDownload: onDownload,
         );
       case MediaCategory.audio:
+        return _HostedAudioWidget(
+          attachment: _attachment,
+          cachedBytes: cachedBytes,
+          hasFailed: hasFailed,
+          onRetry: onRetry,
+          isFromMe: _isFromMe,
+          chatItemColor: _chatItemColor,
+        );
       case MediaCategory.document:
         return _HostedDocumentWidget(
           attachment: _attachment,

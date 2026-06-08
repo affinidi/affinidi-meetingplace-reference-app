@@ -2229,6 +2229,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Attachment is too large. Maximum size is {maxMb} MB.'**
   String attachmentTooLarge(int maxMb);
+
+  /// Snackbar shown when voice-message recording cannot start because microphone permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission is required to record voice messages.'**
+  String get voiceMessagePermissionDenied;
+
+  /// Snackbar shown when voice-message recording fails to start
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to start voice recording.'**
+  String get voiceMessageRecordingFailed;
+
+  /// Snackbar shown when a recorded voice message could not be sent
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to send voice message.'**
+  String get voiceMessageSendFailed;
 }
 
 class _AppLocalizationsDelegate

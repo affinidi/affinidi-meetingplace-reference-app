@@ -114,6 +114,7 @@ Future<void> verifyMessageWithAttachmentSent(
     mediaType: sendCall['contentType'] as String,
     filename: sendCall['filename'] as String?,
     format: AttachmentFormat.hostedMedia.value,
+    transportId: sendCall['transportId'] as String?,
     data: ChatAttachmentData(links: [mxcUri]),
   )..transportId = transportId;
 

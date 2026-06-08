@@ -1548,4 +1548,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String attachmentTooLarge(int maxMb) {
     return 'Anhang ist zu groß. Maximale Größe: $maxMb MB.';
   }
+
+  @override
+  String get voiceMessagePermissionDenied =>
+      'Zum Aufnehmen von Sprachnachrichten ist Mikrofonzugriff erforderlich.';
+
+  @override
+  String get voiceMessageRecordingFailed =>
+      'Sprachaufnahme kann nicht gestartet werden.';
+
+  @override
+  String get voiceMessageSendFailed =>
+      'Sprachnachricht kann nicht gesendet werden.';
 }
