@@ -7,6 +7,11 @@ String attachmentCacheKey(chat.ChatAttachment attachment) {
     return 'chat_attachment_$id';
   }
 
+  final transportId = attachment.transportId;
+  if (transportId != null && transportId.isNotEmpty) {
+    return 'chat_attachment_transport_$transportId';
+  }
+
   final parts = <String?>[
     attachment.data?.hash,
     attachment.data?.links?.firstOrNull?.toString(),
