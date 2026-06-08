@@ -10,8 +10,8 @@ class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
   const ZkpRequestReceivedNoticeWidget({
     super.key,
     required this.chatItem,
-    required String contactId,
-  }) : _contactId = contactId;
+    required this._contactId,
+  });
 
   final chat.ConciergeMessage chatItem;
   final String _contactId;

@@ -2,10 +2,9 @@ part of '../chat_screen.dart';
 
 class _ReactionPickerChatItem extends StatelessWidget {
   const _ReactionPickerChatItem({
-    required chat.Message chatItem,
-    required String contactId,
-  }) : _chatItem = chatItem,
-       _contactId = contactId;
+    required this._chatItem,
+    required this._contactId,
+  });
 
   final chat.Message _chatItem;
   final String _contactId;

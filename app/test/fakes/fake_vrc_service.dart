@@ -3,11 +3,10 @@ import 'package:mpx_flutter_reference_app/domain/models/vrc/vrc_credential.dart'
 
 class FakeVrcService extends VrcService {
   FakeVrcService({
-    List<VrcCredential> credentials = const [],
+    this._credentials = const [],
     this.hasVrc = false,
-    int? vrcCount,
-  }) : _credentials = credentials,
-       _vrcCount = vrcCount;
+    this._vrcCount,
+  });
 
   final List<VrcCredential> _credentials;
   final int? _vrcCount;

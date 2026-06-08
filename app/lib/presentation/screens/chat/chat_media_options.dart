@@ -15,7 +15,7 @@ class _ChatMediaOptionItem {
 }
 
 class _ChatMediaOption extends StatelessWidget {
-  const _ChatMediaOption({required _ChatMediaOptionItem item}) : _item = item;
+  const _ChatMediaOption({required this._item});
 
   final _ChatMediaOptionItem _item;
 
@@ -68,7 +68,7 @@ class _ChatMediaOption extends StatelessWidget {
 }
 
 class _ChatMediaOptions extends ConsumerWidget {
-  _ChatMediaOptions({required String contactId}) : _contactId = contactId;
+  _ChatMediaOptions({required this._contactId});
 
   static Future<void> show({
     required BuildContext context,

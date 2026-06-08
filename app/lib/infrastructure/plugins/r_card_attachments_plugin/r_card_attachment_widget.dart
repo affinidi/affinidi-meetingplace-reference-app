@@ -2,14 +2,11 @@ part of 'r_card_attachments_plugin.dart';
 
 class _RCardAttachmentWidget extends StatelessWidget {
   const _RCardAttachmentWidget({
-    required Attachment attachment,
-    required BaseCacheManager cacheManager,
-    required Color chatItemColor,
-    required bool isFromMe,
-  }) : _attachment = attachment,
-       _cacheManager = cacheManager,
-       _chatItemColor = chatItemColor,
-       _isFromMe = isFromMe;
+    required this._attachment,
+    required this._cacheManager,
+    required this._chatItemColor,
+    required this._isFromMe,
+  });
 
   final Attachment _attachment;
   final BaseCacheManager _cacheManager;

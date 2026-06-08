@@ -4,10 +4,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 class FakeConnectivity implements Connectivity {
   FakeConnectivity({
-    List<ConnectivityResult> initialConnectivityToReturn = const [
-      ConnectivityResult.none,
-    ],
-  }) : _initialConnectivityToReturn = initialConnectivityToReturn;
+    this._initialConnectivityToReturn = const [ConnectivityResult.none],
+  });
 
   final List<ConnectivityResult> _initialConnectivityToReturn;
 

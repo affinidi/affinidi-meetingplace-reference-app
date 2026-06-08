@@ -2,11 +2,9 @@ part of '../chat_screen.dart';
 
 class ConciergeJoinGroupRequestChatItem extends ConsumerWidget {
   ConciergeJoinGroupRequestChatItem({
-    required chat.ConciergeMessage chatItem,
-    required String contactId,
-  }) : _chatItem = chatItem,
-       _contactId = contactId,
-       super(key: ValueKey('chat_concierge_join_${chatItem.messageId}'));
+    required this._chatItem,
+    required this._contactId,
+  }) : super(key: ValueKey('chat_concierge_join_${_chatItem.messageId}'));
 
   final chat.ConciergeMessage _chatItem;
   final String _contactId;

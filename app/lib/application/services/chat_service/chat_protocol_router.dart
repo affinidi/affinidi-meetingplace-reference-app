@@ -10,8 +10,7 @@ import 'handlers/interfaces/chat_protocol_handler.dart';
 /// and `PresenceProtocolHandler`). To add support for a new protocol type,
 /// create a `ChatProtocolHandler` and register it here.
 class ChatProtocolRouter {
-  ChatProtocolRouter({required List<ChatProtocolHandler> handlers})
-    : _handlers = handlers;
+  ChatProtocolRouter({required this._handlers});
 
   final List<ChatProtocolHandler> _handlers;
 

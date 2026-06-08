@@ -16,16 +16,12 @@ import '../../identities_service/identities_service.dart';
 /// Manages outgoing and incoming R-Card operations for a single chat channel.
 class RCardManager {
   RCardManager({
-    required Ref ref,
-    required String otherPartyPermanentDid,
-    required AppLogger logger,
-    required MeetingPlaceChatSDK? Function() getChatSdk,
-    required void Function(ChatItem) upsertChatItem,
-  }) : _ref = ref,
-       _otherPartyPermanentDid = otherPartyPermanentDid,
-       _logger = logger,
-       _getChatSdk = getChatSdk,
-       _upsertChatItem = upsertChatItem;
+    required this._ref,
+    required this._otherPartyPermanentDid,
+    required this._logger,
+    required this._getChatSdk,
+    required this._upsertChatItem,
+  });
 
   static const _logKey = 'RCARD';
 

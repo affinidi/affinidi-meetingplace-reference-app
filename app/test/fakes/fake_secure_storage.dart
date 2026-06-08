@@ -7,17 +7,13 @@ import 'package:ssi/ssi.dart' show StoredKey;
 
 class FakeSecureStorage extends SecureStorage {
   FakeSecureStorage({
-    bool? debugMode,
-    String passphrase = 'test_passphrase',
+    this._debugMode,
+    this._passphrase = 'test_passphrase',
     String unsentMessages = 'test_passphrase',
-    String? preferredMediatorDid,
-    bool? shouldShowMeetingPlaceQR,
-    int? savingPushTokenDuration,
-  }) : _debugMode = debugMode,
-       _passphrase = passphrase,
-       _preferredMediatorDid = preferredMediatorDid,
-       _shouldShowMeetingPlaceQR = shouldShowMeetingPlaceQR,
-       _savingPushTokenDuration = savingPushTokenDuration;
+    this._preferredMediatorDid,
+    this._shouldShowMeetingPlaceQR,
+    this._savingPushTokenDuration,
+  });
 
   final bool? _debugMode;
   final String _passphrase;

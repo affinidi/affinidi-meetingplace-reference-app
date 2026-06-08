@@ -3,13 +3,10 @@ part of '../chat_screen.dart';
 class _PlainTextChatItem extends ConsumerWidget {
   _PlainTextChatItem({
     required chat.Message chatItem,
-    required String contactId,
-    required int index,
-    required Color chatItemColor,
+    required this._contactId,
+    required this._index,
+    required this._chatItemColor,
   }) : _chatItem = chatItem,
-       _contactId = contactId,
-       _index = index,
-       _chatItemColor = chatItemColor,
        super(key: ValueKey('chat_message_${chatItem.messageId}'));
 
   final chat.Message _chatItem;
@@ -104,9 +101,7 @@ class _PlainTextChatItem extends ConsumerWidget {
 }
 
 class _TextMessage extends StatelessWidget {
-  const _TextMessage({required String text, required bool shouldScaleEmojis})
-    : _text = text,
-      _shouldScaleEmojis = shouldScaleEmojis;
+  const _TextMessage({required this._text, required this._shouldScaleEmojis});
 
   final String _text;
   final bool _shouldScaleEmojis;
@@ -137,11 +132,9 @@ class _AttachmentWidget extends HookConsumerWidget {
   _AttachmentWidget({
     required String contactId,
     required chat.Attachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
+    required this._isFromMe,
+    required this._chatItemColor,
   }) : _attachment = attachment,
-       _isFromMe = isFromMe,
-       _chatItemColor = chatItemColor,
        super(key: ValueKey('chat_attachment_${attachment.id!}'));
 
   final chat.Attachment _attachment;

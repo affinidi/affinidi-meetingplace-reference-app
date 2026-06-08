@@ -3,14 +3,11 @@ part of 'chat_screen.dart';
 class ChatItem extends StatelessWidget {
   const ChatItem({
     super.key,
-    required chat.ChatItem chatItem,
-    required int index,
-    required String contactId,
-    required Color chatItemColor,
-  }) : _index = index,
-       _chatItem = chatItem,
-       _contactId = contactId,
-       _chatItemColor = chatItemColor;
+    required this._chatItem,
+    required this._index,
+    required this._contactId,
+    required this._chatItemColor,
+  });
 
   final chat.ChatItem _chatItem;
   final int _index;

@@ -8,9 +8,7 @@ import 'package:uuid/uuid.dart';
 /// into a standard [Attachment] object with JPEG media type and generated
 /// UUID identifier.
 class GalleryImageAttachment implements MessageAttachment {
-  GalleryImageAttachment({required String base64, required String pluginName})
-    : _base64 = base64,
-      _pluginName = pluginName;
+  GalleryImageAttachment({required this._base64, required this._pluginName});
 
   final String _base64;
   final String _pluginName;

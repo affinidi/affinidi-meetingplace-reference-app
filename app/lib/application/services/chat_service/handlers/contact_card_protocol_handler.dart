@@ -15,17 +15,12 @@ import 'interfaces/chat_protocol_handler.dart';
 /// contact update in a group context triggers a full group refresh.
 class ContactCardProtocolHandler implements ChatProtocolHandler {
   ContactCardProtocolHandler({
-    required Ref ref,
-    required bool Function() isGroupChat,
-    required void Function(StreamData data, String channelDid)
-    onGroupDetailsUpdated,
-    required void Function(domain.ContactCard card) onOtherPartyCardUpdated,
-    required AppLogger logger,
-  }) : _ref = ref,
-       _isGroupChat = isGroupChat,
-       _onGroupDetailsUpdated = onGroupDetailsUpdated,
-       _onOtherPartyCardUpdated = onOtherPartyCardUpdated,
-       _logger = logger;
+    required this._ref,
+    required this._isGroupChat,
+    required this._onGroupDetailsUpdated,
+    required this._onOtherPartyCardUpdated,
+    required this._logger,
+  });
 
   static const _logKey = 'CONTACTCARDPROTOCOLHANDLER';
 

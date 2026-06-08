@@ -11,20 +11,14 @@ import '../../vrc_service/vrc_service.dart';
 /// local event messages, concierge prompt lifecycle, and VRC card display.
 class VrcManager {
   VrcManager({
-    required Ref ref,
-    required String? Function() getChatId,
-    required AppLogger logger,
-    required MeetingPlaceChatSDK? Function() getChatSdk,
-    required List<ChatItem> Function() getMessages,
-    required void Function(ChatItem) upsertChatItem,
-    required void Function(ChatItem) removeChatItem,
-  }) : _ref = ref,
-       _getChatId = getChatId,
-       _logger = logger,
-       _getChatSdk = getChatSdk,
-       _getMessages = getMessages,
-       _upsertChatItem = upsertChatItem,
-       _removeChatItem = removeChatItem;
+    required this._ref,
+    required this._getChatId,
+    required this._logger,
+    required this._getChatSdk,
+    required this._getMessages,
+    required this._upsertChatItem,
+    required this._removeChatItem,
+  });
 
   static const _logKey = 'VRCMSG';
 

@@ -7,16 +7,12 @@ import '../../../themes/app_custom_colors.dart';
 class ConciergeMessage extends StatelessWidget {
   const ConciergeMessage({
     super.key,
-    required DateTime dateCreated,
-    required String message,
-    Color? backgroundColor,
-    bool fullWidth = false,
-    List<Widget>? actions,
-  }) : _dateCreated = dateCreated,
-       _message = message,
-       _backgroundColor = backgroundColor,
-       _fullWidth = fullWidth,
-       _actions = actions;
+    required this._dateCreated,
+    required this._message,
+    this._backgroundColor,
+    this._fullWidth = false,
+    this._actions,
+  });
 
   final DateTime _dateCreated;
   final String _message;

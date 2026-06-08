@@ -6,8 +6,7 @@ import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import 'concierge_message.dart';
 
 class GroupDeletedChatItem extends StatelessWidget {
-  const GroupDeletedChatItem({super.key, required EventMessage chatItem})
-    : _chatItem = chatItem;
+  const GroupDeletedChatItem({super.key, required this._chatItem});
 
   final EventMessage _chatItem;
   @override

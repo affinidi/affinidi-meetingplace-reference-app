@@ -66,10 +66,8 @@ final livenessCheckScreenControllerProvider = StateNotifierProvider.autoDispose
 
 class LivenessCheckScreenController
     extends StateNotifier<LivenessCheckScreenState> {
-  LivenessCheckScreenController({required Ref ref, required String contactId})
-    : _ref = ref,
-      _contactId = contactId,
-      super(const LivenessCheckScreenState());
+  LivenessCheckScreenController({required this._ref, required this._contactId})
+    : super(const LivenessCheckScreenState());
 
   final Ref _ref;
   final String _contactId;

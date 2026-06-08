@@ -25,9 +25,8 @@ class MediatorsDatabase extends _$MediatorsDatabase {
     required String passphrase,
     required bool inMemory,
     required Directory directory,
-    required Map<String, String> defaultMediators,
-  }) : _defaultMediators = defaultMediators,
-       super(
+    required this._defaultMediators,
+  }) : super(
          openConnection(
            databaseName: databaseName,
            passphrase: passphrase,

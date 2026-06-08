@@ -18,10 +18,9 @@ import 'accept_offer_screen_controller.dart';
 class AcceptOfferScreen extends ConsumerWidget {
   AcceptOfferScreen({
     super.key,
-    required String mnemonic,
-    required String identityId,
-  }) : _mnemonic = mnemonic,
-       _identityId = identityId;
+    required this._mnemonic,
+    required this._identityId,
+  });
 
   final String _mnemonic;
   final String _identityId;
@@ -76,7 +75,7 @@ class AcceptOfferScreen extends ConsumerWidget {
 }
 
 class _Loader extends ConsumerWidget {
-  _Loader({required String mnemonic}) : _mnemonic = mnemonic;
+  _Loader({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -100,7 +99,7 @@ class _Loader extends ConsumerWidget {
 }
 
 class _Header extends ConsumerWidget {
-  const _Header({required String mnemonic}) : _mnemonic = mnemonic;
+  const _Header({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -169,7 +168,7 @@ class _ProfilePictureWithScore extends ConsumerWidget {
 }
 
 class _PublisherAlias extends ConsumerWidget {
-  _PublisherAlias({required String mnemonic}) : _mnemonic = mnemonic;
+  _PublisherAlias({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -193,7 +192,7 @@ class _PublisherAlias extends ConsumerWidget {
 }
 
 class _OfferName extends ConsumerWidget {
-  const _OfferName({required String mnemonic}) : _mnemonic = mnemonic;
+  const _OfferName({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -219,7 +218,7 @@ class _OfferName extends ConsumerWidget {
 }
 
 class _ErrorSection extends ConsumerWidget {
-  _ErrorSection({required String mnemonic}) : _mnemonic = mnemonic;
+  _ErrorSection({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -246,7 +245,7 @@ class _ErrorSection extends ConsumerWidget {
 }
 
 class _ContactDetailsPanel extends StatelessWidget {
-  _ContactDetailsPanel({required String mnemonic}) : _mnemonic = mnemonic;
+  _ContactDetailsPanel({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -260,7 +259,7 @@ class _ContactDetailsPanel extends StatelessWidget {
 }
 
 class _ContactCardView extends ConsumerWidget {
-  _ContactCardView({required String mnemonic}) : _mnemonic = mnemonic;
+  _ContactCardView({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -280,9 +279,7 @@ class _ContactCardView extends ConsumerWidget {
 }
 
 class _AliasPicker extends HookConsumerWidget {
-  _AliasPicker({required String mnemonic, required String identityId})
-    : _mnemonic = mnemonic,
-      _identityId = identityId;
+  _AliasPicker({required this._mnemonic, required this._identityId});
 
   final String _mnemonic;
   final String _identityId;
@@ -337,7 +334,7 @@ class _AliasPicker extends HookConsumerWidget {
 }
 
 class _ActionBar extends ConsumerWidget {
-  _ActionBar({required String mnemonic}) : _mnemonic = mnemonic;
+  _ActionBar({required this._mnemonic});
 
   final String _mnemonic;
 

@@ -9,7 +9,7 @@ import 'interfaces/group_managing.dart';
 
 /// Handles group management SDK and contacts interactions.
 class ChatGroupManager implements GroupManaging {
-  ChatGroupManager({required Ref ref}) : _ref = ref;
+  ChatGroupManager({required this._ref});
 
   final Ref _ref;
 

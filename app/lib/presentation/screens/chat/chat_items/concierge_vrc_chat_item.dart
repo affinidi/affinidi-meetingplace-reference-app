@@ -2,10 +2,9 @@ part of '../chat_screen.dart';
 
 class _ConciergeVrcChatItem extends ConsumerWidget {
   const _ConciergeVrcChatItem({
-    required chat.ConciergeMessage chatItem,
-    required String contactId,
-  }) : _chatItem = chatItem,
-       _contactId = contactId;
+    required this._chatItem,
+    required this._contactId,
+  });
 
   final chat.ConciergeMessage _chatItem;
   final String _contactId;

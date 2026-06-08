@@ -5,7 +5,7 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:uuid/uuid.dart';
 
 class VrcAttachment implements MessageAttachment {
-  VrcAttachment({required String vcBlob}) : _vcBlob = vcBlob;
+  VrcAttachment({required this._vcBlob});
 
   static const pluginFormat = 'mpx_vrc_attachment_plugin';
 

@@ -28,20 +28,14 @@ typedef VrcRequestReceivedCallback =
 /// VRC-capable channel.
 class VdipManager {
   VdipManager({
-    required Ref ref,
-    required String otherPartyPermanentDid,
-    required AppLogger logger,
-    required MeetingPlaceChatSDK? Function() getChatSdk,
-    required List<ChatItem> Function() getMessages,
-    required Future<void> Function(EventMessageType) persistLocalEventMessage,
-    required VrcRequestReceivedCallback onVrcRequestReceived,
-  }) : _ref = ref,
-       _otherPartyPermanentDid = otherPartyPermanentDid,
-       _logger = logger,
-       _getChatSdk = getChatSdk,
-       _getMessages = getMessages,
-       _persistLocalEventMessage = persistLocalEventMessage,
-       _onVrcRequestReceived = onVrcRequestReceived;
+    required this._ref,
+    required this._otherPartyPermanentDid,
+    required this._logger,
+    required this._getChatSdk,
+    required this._getMessages,
+    required this._persistLocalEventMessage,
+    required this._onVrcRequestReceived,
+  });
 
   static const _logKey = 'VDIP';
 

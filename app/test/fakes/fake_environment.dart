@@ -9,9 +9,8 @@ class FakeEnvironment implements Environment {
     this.controlPlaneDid = 'did:test:control-plane',
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
-    Map<String, String> defaultMediators = const {},
-  }) : _defaultMediators = defaultMediators,
-       defaultMediatorDid =
+    this._defaultMediators = const {},
+  }) : defaultMediatorDid =
            defaultMediatorDid ?? FakeMediators.defaultMediator.mediatorDid;
 
   final Map<String, String> _defaultMediators;
