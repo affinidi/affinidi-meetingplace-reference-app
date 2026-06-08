@@ -2,8 +2,12 @@ import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 
 String attachmentCacheKey(chat.ChatAttachment attachment) {
+  final id = attachment.id;
+  if (id != null && id.isNotEmpty) {
+    return 'chat_attachment_$id';
+  }
+
   final parts = <String?>[
-    attachment.id,
     attachment.data?.hash,
     attachment.data?.links?.firstOrNull?.toString(),
     attachment.filename,
