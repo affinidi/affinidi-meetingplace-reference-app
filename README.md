@@ -229,8 +229,8 @@ A VRC is a mutual "verified relationship" credential. Unlike an R-Card, a VRC re
 
 | Dependency | Version |
 |------------|---------|
-| **Flutter** | `3.41.4` |
-| **Dart SDK** | `^3.9.2` |
+| **Flutter** | `3.44.1` |
+| **Dart SDK** | `^3.12.0` |
 
 ## Getting Started
 
