@@ -73,15 +73,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   TimedAction? _presenceTimedAction;
   TimedAction? _typingTimedAction;
 
-  void Function(StreamData data, String channelDid)? _zkpCallback;
-
-  @override
-  void setZkpCallback(
-    void Function(StreamData data, String channelDid)? callback,
-  ) {
-    _zkpCallback = callback;
-  }
-
   @override
   int get secondsToShowChatActivityIndicator =>
       ref.read(environmentProvider).chatActivityExpiresInSeconds;
@@ -93,7 +84,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   bool get isGroupChat => _isGroupChat;
 
   @override
-  ChatServiceState build(String channelDid) {
+  ChatServiceState build(
+    String channelDid, {
+    void Function(StreamData data, String channelDid)? onZkpAttachment,
+  }) {
     _otherPartyPermanentDid = channelDid;
     _logger = ref.read(appLoggerProvider);
     _rCardManager = RCardManager(
@@ -123,7 +117,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
 
     _groupManager = ChatGroupManager(ref: ref);
-    _setupChatProtocolRouter();
+    _setupChatProtocolRouter(onZkpAttachment);
 
     ref.listen(networkConnectivityServiceProvider, (previous, next) {
       if (previous?.isConnected == false && next.isConnected) {
@@ -143,14 +137,15 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _chatStreamRef = null;
       unawaited(_vdipManager.cancelSubscriptions());
       _chatSDK?.endChatSession();
-      _zkpCallback = null;
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
 
     return ChatServiceState();
   }
 
-  void _setupChatProtocolRouter() {
+  void _setupChatProtocolRouter(
+    void Function(StreamData data, String channelDid)? onZkpAttachment,
+  ) {
     final env = ref.read(environmentProvider);
     _router = ChatProtocolRouter(
       handlers: [
@@ -164,7 +159,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           logger: _logger,
         ),
         ZkpAttachmentProtocolHandler(
-          getOnZkpAttachment: () => _zkpCallback,
+          getOnZkpAttachment: () => onZkpAttachment,
           logger: _logger,
         ),
         TypingProtocolHandler(

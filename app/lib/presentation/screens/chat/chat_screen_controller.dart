@@ -99,12 +99,15 @@ class ChatScreenController extends _$ChatScreenController
     var hasInitializedState = false;
 
     if (channelDid != null) {
+      final chatSessionProvider = chatSessionServiceProvider(
+        channelDid,
+        onZkpAttachment: _zkpHandler.handleZkpAttachment,
+      );
       final sessionService = ref.read(
-        chatSessionServiceProvider(channelDid).notifier,
+        chatSessionProvider.notifier,
       );
       _chatService = sessionService;
-      sessionService.setZkpCallback(_zkpHandler.handleZkpAttachment);
-      ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
+      ref.listen(chatSessionProvider, (previous, next) {
         Future.microtask(() {
           if (hasInitializedState) {
             pendingState = state;
@@ -230,7 +233,6 @@ class ChatScreenController extends _$ChatScreenController
               .read(proofFlowControllerProvider(contactId).notifier)
               .resetSession();
         }
-        _chatService?.setZkpCallback(null);
       }
       _chatService?.pauseChat();
 

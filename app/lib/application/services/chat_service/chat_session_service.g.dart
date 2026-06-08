@@ -16,7 +16,11 @@ final class ChatSessionServiceProvider
     extends $NotifierProvider<ChatSessionService, ChatServiceState> {
   ChatSessionServiceProvider._({
     required ChatSessionServiceFamily super.from,
-    required String super.argument,
+    required (
+      String, {
+      void Function(StreamData data, String channelDid)? onZkpAttachment,
+    })
+    super.argument,
   }) : super(
          retry: null,
          name: r'chatSessionServiceProvider',
@@ -32,7 +36,7 @@ final class ChatSessionServiceProvider
   String toString() {
     return r'chatSessionServiceProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -59,7 +63,7 @@ final class ChatSessionServiceProvider
 }
 
 String _$chatSessionServiceHash() =>
-    r'b15ccbcddc9ffd6e3157aa5906829f2615e921e7';
+    r'cef9cbcdf00139a54b151a7f1641b6cbc0a39b32';
 
 final class ChatSessionServiceFamily extends $Family
     with
@@ -68,7 +72,10 @@ final class ChatSessionServiceFamily extends $Family
           ChatServiceState,
           ChatServiceState,
           ChatServiceState,
-          String
+          (
+            String, {
+            void Function(StreamData data, String channelDid)? onZkpAttachment,
+          })
         > {
   ChatSessionServiceFamily._()
     : super(
@@ -79,18 +86,33 @@ final class ChatSessionServiceFamily extends $Family
         isAutoDispose: true,
       );
 
-  ChatSessionServiceProvider call(String channelDid) =>
-      ChatSessionServiceProvider._(argument: channelDid, from: this);
+  ChatSessionServiceProvider call(
+    String channelDid, {
+    void Function(StreamData data, String channelDid)? onZkpAttachment,
+  }) => ChatSessionServiceProvider._(
+    argument: (channelDid, onZkpAttachment: onZkpAttachment),
+    from: this,
+  );
 
   @override
   String toString() => r'chatSessionServiceProvider';
 }
 
 abstract class _$ChatSessionService extends $Notifier<ChatServiceState> {
-  late final _$args = ref.$arg as String;
-  String get channelDid => _$args;
+  late final _$args =
+      ref.$arg
+          as (
+            String, {
+            void Function(StreamData data, String channelDid)? onZkpAttachment,
+          });
+  String get channelDid => _$args.$1;
+  void Function(StreamData data, String channelDid)? get onZkpAttachment =>
+      _$args.onZkpAttachment;
 
-  ChatServiceState build(String channelDid);
+  ChatServiceState build(
+    String channelDid, {
+    void Function(StreamData data, String channelDid)? onZkpAttachment,
+  });
   @$mustCallSuper
   @override
   void runBuild() {
@@ -103,6 +125,9 @@ abstract class _$ChatSessionService extends $Notifier<ChatServiceState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    element.handleCreate(
+      ref,
+      () => build(_$args.$1, onZkpAttachment: _$args.onZkpAttachment),
+    );
   }
 }

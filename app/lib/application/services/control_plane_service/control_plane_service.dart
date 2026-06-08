@@ -205,7 +205,7 @@ class ControlPlaneService extends _$ControlPlaneService
   /// - Invitation accepted -> onInvitationAccepted / onGroupInvitationAccepted
   /// - Offer finalised -> onConnectionOfferApproved (only for inaugurated
   ///  channels)
-  /// - Channel activity -> onChannelInaugurated (only for inaugurated channels
+  /// - Channel activity -> onChannelInaugurated (only for inaugurated channels)
   ///
   /// [event] - The control plane stream event received from the SDK.
   ///
@@ -419,7 +419,7 @@ class _ControlPlaneEventsProcessor {
           name: _logKey,
         );
         completer.complete();
-        _shouldRunAgain = false;
+        rethrow;
       }
       await completer.future;
     } while (_shouldRunAgain);

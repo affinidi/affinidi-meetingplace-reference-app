@@ -65,7 +65,7 @@ final class PublishOfferScreenControllerProvider
 }
 
 String _$publishOfferScreenControllerHash() =>
-    r'bd8bef052ff13c437d1c8d2db0e487ab31701871';
+    r'e238cafedfd68d289dc193ae7eb7ddb5804bfc24';
 
 final class PublishOfferScreenControllerFamily extends $Family
     with
