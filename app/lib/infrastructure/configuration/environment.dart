@@ -99,6 +99,15 @@ class Environment {
     defaultValue: 60,
   );
 
+  /// Maximum age, in seconds, at which the original sender can still delete
+  /// one of their own messages for everyone. Passed to the chat SDK as
+  /// `MeetingPlaceChatSDKOptions.deleteMessageWindow`. Default matches the
+  /// SDK default (2 minutes).
+  int get deleteMessageWindowInSeconds => const int.fromEnvironment(
+    'DELETE_MESSAGE_WINDOW_IN_SECONDS',
+    defaultValue: 120,
+  );
+
   int get extraDelayAtLaunchInMilliseconds => const int.fromEnvironment(
     'EXTRA_DELAY_AT_LAUNCH_IN_MILLISECONDS',
     defaultValue: 500,

@@ -16,6 +16,7 @@ import '../../../infrastructure/extensions/chat_items_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/did_extensions.dart';
 import '../../../infrastructure/extensions/list_extensions.dart';
+import '../../../infrastructure/helpers/keyed_lock.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
@@ -54,6 +55,13 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   // Grace period to avoid blinking of presence indicator
   static const _presenceGracePeriodSeconds = 1;
 
+  // Serializes session lifecycle (init/teardown) per channel across notifier
+  // instances. ref.onDispose is `void`, so a freshly-built notifier needs a
+  // way to wait for the previous instance's still-in-flight endChatSession
+  // before constructing a new SDK. Locks are retained for the process
+  // lifetime; bound is the set of channels the user has opened.
+  static final _channelLocks = KeyedLock<String>();
+
   late AppLogger _logger;
   late String _otherPartyPermanentDid;
   late VdipManager _vdipManager;
@@ -80,6 +88,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   int get chatPresenceIntervalInSeconds =>
       ref.read(environmentProvider).chatPresenceIntervalInSeconds;
+
+  @override
+  Duration get deleteMessageWindow => Duration(
+    seconds: ref.read(environmentProvider).deleteMessageWindowInSeconds,
+  );
 
   bool get isGroupChat => _isGroupChat;
 
@@ -129,11 +142,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     ref.onDispose(() {
       _presenceTimedAction?.cancel();
       _typingTimedAction?.cancel();
-      _rCardManager.cancelSubscription();
-      _chatStreamRef?.dispose();
-      _chatStreamRef = null;
-      unawaited(_vdipManager.cancelSubscriptions());
-      unawaited(_chatSDK?.endChatSession());
+
+      unawaited(_disposeChatSession());
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
 
@@ -193,34 +203,37 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   Future<void> _ensureChatSdkInitialized() async {
     if (_chatSDK != null) return;
+    await _channelLocks.synchronized(_otherPartyPermanentDid, () async {
+      if (_chatSDK != null) return;
 
-    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
-      _otherPartyPermanentDid,
-    );
-    if (channel == null) return;
+      final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+        _otherPartyPermanentDid,
+      );
+      if (channel == null) return;
 
-    _chatSDK = await ref.read(chatSdkProvider(channel).future);
-    _conciergeMessenger = ChatConciergeMessenger(chatSdk: _chatSDK!);
-    _isGroupChat =
-        ref
-            .read(contactsServiceProvider)
-            .getContactByChannelDid(_otherPartyPermanentDid)
-            ?.isGroup ??
-        false;
+      _chatSDK = await ref.read(chatSdkProvider(channel).future);
+      _conciergeMessenger = ChatConciergeMessenger(chatSdk: _chatSDK!);
+      _isGroupChat =
+          ref
+              .read(contactsServiceProvider)
+              .getContactByChannelDid(_otherPartyPermanentDid)
+              ?.isGroup ??
+          false;
 
-    final srcCard = channel.otherPartyContactCard;
-    final initialCard = srcCard != null
-        ? ContactCardUtils.fromSdkContactCard(srcCard)
-        : null;
-    _otherPartyFirstName = initialCard?.firstName;
+      final srcCard = channel.otherPartyContactCard;
+      final initialCard = srcCard != null
+          ? ContactCardUtils.fromSdkContactCard(srcCard)
+          : null;
+      _otherPartyFirstName = initialCard?.firstName;
 
-    if (_isGroupChat) {
-      final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
-      if (group != null) {
-        state = state.copyWith(group: group);
+      if (_isGroupChat) {
+        final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
+        if (group != null) {
+          state = state.copyWith(group: group);
+        }
       }
-    }
+    });
   }
 
   @override
@@ -382,16 +395,24 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
-  Future<void> pauseChat() async {
-    _chatStreamRef?.dispose();
-    _chatStreamRef = null;
+  Future<void> pauseChat() => _disposeChatSession();
 
+  Future<void> _disposeChatSession() async {
     final sdk = _chatSDK;
     _chatSDK = null;
 
+    _chatStreamRef?.dispose();
+    _chatStreamRef = null;
+
     _rCardManager.cancelSubscription();
-    unawaited(_vdipManager.cancelSubscriptions());
-    await sdk?.endChatSession();
+    await _vdipManager.cancelSubscriptions();
+
+    if (sdk == null) return Future.value();
+
+    return _channelLocks.synchronized(
+      _otherPartyPermanentDid,
+      sdk.endChatSession,
+    );
   }
 
   @override
@@ -438,6 +459,14 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     required String reaction,
   }) async {
     await _chatSDK?.reactOnMessage(message, reaction: reaction);
+  }
+
+  @override
+  Future<void> deleteMessage(
+    Message message, {
+    bool deleteForMeOnly = false,
+  }) async {
+    await _chatSDK?.deleteMessage(message, localOnly: deleteForMeOnly);
   }
 
   @override

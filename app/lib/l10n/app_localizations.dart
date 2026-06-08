@@ -1324,6 +1324,42 @@ abstract class AppLocalizations {
   /// **'Message copied to clipboard'**
   String get messageCopiedClipboard;
 
+  /// No description provided for @chatMessageActionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for everyone'**
+  String get chatMessageActionDelete;
+
+  /// No description provided for @chatMessageActionDeleteLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for me'**
+  String get chatMessageActionDeleteLocal;
+
+  /// No description provided for @chatMessageActionCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy message'**
+  String get chatMessageActionCopy;
+
+  /// No description provided for @chatMessageDeletedTombstone.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted'**
+  String get chatMessageDeletedTombstone;
+
+  /// No description provided for @chatMessageDeletedLocallyTombstone.
+  ///
+  /// In en, this message translates to:
+  /// **'You deleted this message'**
+  String get chatMessageDeletedLocallyTombstone;
+
+  /// No description provided for @chatMessageDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete message'**
+  String get chatMessageDeleteFailed;
+
   /// No description provided for @chatItemStatus.
   ///
   /// In en, this message translates to:

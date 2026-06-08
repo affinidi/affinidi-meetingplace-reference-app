@@ -943,6 +943,26 @@ class AppLocalizationsDe extends AppLocalizations {
       'Nachricht in die Zwischenablage kopiert';
 
   @override
+  String get chatMessageActionDelete => 'Für alle löschen';
+
+  @override
+  String get chatMessageActionDeleteLocal => 'Für mich löschen';
+
+  @override
+  String get chatMessageActionCopy => 'Nachricht kopieren';
+
+  @override
+  String get chatMessageDeletedTombstone => 'Diese Nachricht wurde gelöscht';
+
+  @override
+  String get chatMessageDeletedLocallyTombstone =>
+      'Du hast diese Nachricht gelöscht';
+
+  @override
+  String get chatMessageDeleteFailed =>
+      'Nachricht konnte nicht gelöscht werden';
+
+  @override
   String chatItemStatus(String status) {
     String _temp0 = intl.Intl.selectLogic(status, {
       'queued': 'In Warteschlange',
