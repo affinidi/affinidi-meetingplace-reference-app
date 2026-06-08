@@ -17,6 +17,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'connections': 'Invitations',
       'contacts': 'Channels',
       'identities': 'Identities',
+      'rCards': 'R-Cards',
       'settings': 'Settings',
       'other': 'Invalid',
     });
@@ -285,6 +286,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generalDelete => 'Delete';
+
+  @override
+  String get generalSave => 'Save';
 
   @override
   String get generalDone => 'Done';
@@ -1457,4 +1461,245 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goBack => 'Go Back';
+
+  @override
+  String get rCardsPanelSubtitle =>
+      'Relationship cards received from your contacts';
+
+  @override
+  String get rCardsEmpty =>
+      'R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.';
+
+  @override
+  String rCardsFilterLabel(String filter) {
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'all': 'All',
+      'nonAnonymous': 'Non-anonymous',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get noRCardsFoundWithFilter =>
+      'No R-Cards found matching your search.';
+
+  @override
+  String get rCardDetailsTitle => 'R-Card Details';
+
+  @override
+  String get rCardSectionIdentity => 'Identity';
+
+  @override
+  String get rCardSectionMetadata => 'Credential Details';
+
+  @override
+  String get rCardFieldName => 'Name';
+
+  @override
+  String get rCardFieldEmail => 'Email';
+
+  @override
+  String get rCardFieldPhone => 'Phone';
+
+  @override
+  String get rCardFieldCompany => 'Company';
+
+  @override
+  String get rCardFieldPosition => 'Position';
+
+  @override
+  String get rCardFieldWebsite => 'Website';
+
+  @override
+  String get rCardFieldSocial => 'Social';
+
+  @override
+  String get rCardFieldSubjectDid => 'Subject DID';
+
+  @override
+  String get rCardAddNotes => 'Add notes';
+
+  @override
+  String get rCardUpdateNotes => 'Update notes';
+
+  @override
+  String get rCardNotesTitle => 'Notes';
+
+  @override
+  String get rCardNotesPlaceholder => 'Write your notes here...';
+
+  @override
+  String get rCardDeletePrompt =>
+      'Are you sure you want to delete this R-Card? This action cannot be undone.';
+
+  @override
+  String rCardChatWith(String name) {
+    return 'Chat with $name';
+  }
+
+  @override
+  String get rCardFieldIssuerDid => 'Issuer DID';
+
+  @override
+  String get rCardFieldReceivedAt => 'Received';
+
+  @override
+  String get rCardFieldIssuedAt => 'Issued';
+
+  @override
+  String get rCardTitle => 'R-Card';
+
+  @override
+  String get verifiableCredential => 'Verifiable Credential';
+
+  @override
+  String get verified => 'Verified';
+
+  @override
+  String get verifiableCredentialDescription =>
+      'Secured digital credentials that can be verified for authenticity';
+
+  @override
+  String get secureAttachmentsTitle => 'Secure Attachments';
+
+  @override
+  String get credentialDetails => 'Credential Details';
+
+  @override
+  String get genRCard => 'R-Card';
+
+  @override
+  String get rCardPickIdentitySubtitle =>
+      'Select the identity to share as an R-Card';
+
+  @override
+  String get rCardFooterSent => 'R-Card has been sent.';
+
+  @override
+  String get rCardFooterSaved => 'R-Card has been saved.';
+
+  @override
+  String get rCardFooterUpdateShared => 'R-Card update has been shared.';
+
+  @override
+  String get rCardFooterUpdateSaved => 'R-Card update has been saved.';
+
+  @override
+  String get rCardsExchanged => 'R-Cards have been exchanged.';
+
+  @override
+  String get goToRCard => 'Go to R-Card';
+
+  @override
+  String get selectIdentityTitle => 'Select Identity';
+
+  @override
+  String get selectIdentityInstruction =>
+      'Swipe left or right to choose the identity you want to use to generate the R‑Card';
+
+  @override
+  String get sendRCard => 'Send R-Card';
+
+  @override
+  String selectIdentityToVerifyRelationshipWithName(String name) {
+    return 'Select the identity that you would like to use to verify your relationship with $name.';
+  }
+
+  @override
+  String get verifiableRelationshipCredential =>
+      'Verifiable Relationship Credential';
+
+  @override
+  String get vrcDetailsTitle => 'Relationship Credential';
+
+  @override
+  String get vrcSectionIssuer => 'Issuer';
+
+  @override
+  String get vrcSectionHolder => 'Issued to';
+
+  @override
+  String get vrcSectionMetadata => 'Credential Details';
+
+  @override
+  String get vrcFieldDid => 'DID';
+
+  @override
+  String get vrcFieldName => 'Name';
+
+  @override
+  String get vrcFieldIssuedAt => 'Issued On';
+
+  @override
+  String get vrcFieldVerifiedAt => 'Verified';
+
+  @override
+  String get vrcFieldTypes => 'Types';
+
+  @override
+  String get vrcDescription =>
+      'This credential verifies the relationship between two parties.';
+
+  @override
+  String verifyRelationshipPrompt(String firstName) {
+    return 'Verify your relationship with $firstName by issuing a Verifiable Relationship Credential (VRC). Each VRC exchange increases your trust score.';
+  }
+
+  @override
+  String get generateVrc => 'Start now';
+
+  @override
+  String get generalVerify => 'Confirm';
+
+  @override
+  String get doLater => 'Do later';
+
+  @override
+  String get vrcExchangeInitiated => 'You\'ve initiated the VRC exchange.';
+
+  @override
+  String vrcRequestReceived(String name) {
+    return '$name has initiated the VRC exchange.';
+  }
+
+  @override
+  String get vrcDoLater =>
+      'VRC exchange is paused. Tap + and select \'Verifiable Relationship Credential\' to resume.';
+
+  @override
+  String get vrcExchangeCompleted =>
+      'You have successfully verified your relationship';
+
+  @override
+  String vrcVerifyPrompt(String name) {
+    return 'Would you like to verify your relationship with $name? Each VRC exchange increases your trust score.';
+  }
+
+  @override
+  String get vrcStartNow => 'Start Now';
+
+  @override
+  String get vrcDoLaterButton => 'Do Later';
+
+  @override
+  String get vrcYesButton => 'Yes';
+
+  @override
+  String nameSelectedIdentity(String name) {
+    return '$name\'s selected identity';
+  }
+
+  @override
+  String selectIdentityToVerifyRelationshipPrompt(String name) {
+    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
+  }
+
+  @override
+  String get sendVrc => 'Send Relationship Credential';
+
+  @override
+  String trustedBy(int count) {
+    return 'Trusted by $count';
+  }
 }

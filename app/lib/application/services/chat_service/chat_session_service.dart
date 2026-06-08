@@ -11,6 +11,7 @@ import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contact_card/contact_card.dart' as domain;
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
+import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/extensions/chat_items_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -18,6 +19,7 @@ import '../../../infrastructure/extensions/did_extensions.dart';
 import '../../../infrastructure/extensions/list_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
@@ -32,6 +34,9 @@ import 'delegates/chat_concierge_messenger.dart';
 import 'delegates/chat_group_manager.dart';
 import 'delegates/interfaces/concierge_messaging.dart';
 import 'delegates/interfaces/group_managing.dart';
+import 'delegates/r_card_manager.dart';
+import 'delegates/vdip_manager.dart';
+import 'delegates/vrc_manager.dart';
 import 'handlers/chat_message_protocol_handler.dart';
 import 'handlers/contact_card_protocol_handler.dart';
 import 'handlers/effect_protocol_handler.dart';
@@ -50,16 +55,20 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   static const _presenceGracePeriodSeconds = 1;
 
   late AppLogger _logger;
-  late String _channelDid;
+  late String _otherPartyPermanentDid;
+  late VdipManager _vdipManager;
 
   MeetingPlaceChatSDK? _chatSDK;
+  String? _chatId;
   bool _isGroupChat = false;
   String? _otherPartyFirstName;
-  ChatStream? _messageSubscription;
+  ChatStream? _chatStreamRef;
 
   late ConciergeMessaging _conciergeMessenger;
   late GroupManaging _groupManager;
   late ChatProtocolRouter _router;
+  late RCardManager _rCardManager;
+  late VrcManager _vrcManager;
 
   TimedAction? _presenceTimedAction;
   TimedAction? _typingTimedAction;
@@ -76,8 +85,33 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   ChatServiceState build(String channelDid) {
-    _channelDid = channelDid;
+    _otherPartyPermanentDid = channelDid;
     _logger = ref.read(appLoggerProvider);
+    _rCardManager = RCardManager(
+      ref: ref,
+      otherPartyPermanentDid: channelDid,
+      logger: _logger,
+      getChatSdk: () => _chatSDK,
+      upsertChatItem: _upsertChatItem,
+    );
+    _vrcManager = VrcManager(
+      ref: ref,
+      getChatId: () => _chatId,
+      logger: _logger,
+      getChatSdk: () => _chatSDK,
+      getMessages: () => state.messages,
+      upsertChatItem: _upsertChatItem,
+      removeChatItem: _removeChatItem,
+    );
+    _vdipManager = VdipManager(
+      ref: ref,
+      otherPartyPermanentDid: channelDid,
+      logger: _logger,
+      getChatSdk: () => _chatSDK,
+      getMessages: () => state.messages,
+      persistLocalEventMessage: _vrcManager.persistLocalEventMessage,
+      onVrcRequestReceived: _vrcManager.onVrcRequestReceived,
+    );
 
     _groupManager = ChatGroupManager(ref: ref);
     _setupChatProtocolRouter();
@@ -93,9 +127,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     }, fireImmediately: true);
 
     ref.onDispose(() {
-      _presenceTimedAction?.dispose();
-      _typingTimedAction?.dispose();
-      _messageSubscription?.dispose();
+      _presenceTimedAction?.cancel();
+      _typingTimedAction?.cancel();
+      _rCardManager.cancelSubscription();
+      _chatStreamRef?.dispose();
+      _chatStreamRef = null;
+      unawaited(_vdipManager.cancelSubscriptions());
       _chatSDK?.endChatSession();
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
@@ -146,7 +183,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
     final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
-      _channelDid,
+      _otherPartyPermanentDid,
     );
     if (channel == null) return;
 
@@ -155,7 +192,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _isGroupChat =
         ref
             .read(contactsServiceProvider)
-            .getContactByChannelDid(_channelDid)
+            .getContactByChannelDid(_otherPartyPermanentDid)
             ?.isGroup ??
         false;
 
@@ -175,55 +212,71 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   Future<void> startChatSession() async {
-    _messageSubscription?.dispose();
-    _messageSubscription = null;
+    _chatStreamRef?.dispose();
+    _chatStreamRef = null;
 
     await _ensureChatSdkInitialized();
     if (_chatSDK == null) return;
 
+    await _vdipManager.subscribe();
+
     try {
       final chatSession = await _chatSDK!.startChatSession();
+      _chatId = chatSession.id;
 
-      unawaited(
-        _chatSDK!.chatStreamSubscription.then(
-          (chatStream) {
-            if (chatStream == null) {
-              _logger.warning('Chat stream is null', name: _logKey);
-              return;
-            }
+      final chatStream = await _chatSDK!.chatStreamSubscription;
+      if (chatStream == null) {
+        _logger.warning('Chat stream is null', name: _logKey);
+      } else {
+        _chatStreamRef = chatStream
+          ..listen(
+            (data) => _onChannelMessagesData(data, _otherPartyPermanentDid),
+            onError: (Object error, StackTrace stackTrace) {
+              _logger.error(
+                'Error in chat stream subscription',
+                error: error,
+                stackTrace: stackTrace,
+                name: _logKey,
+              );
+            },
+          );
+      }
 
-            _messageSubscription = chatStream.listen(
-              (data) => _onChannelMessagesData(data, _channelDid),
-              onError: (Object error, StackTrace stackTrace) {
-                _logger.error(
-                  'Error in chat stream subscription',
-                  error: error,
-                  stackTrace: stackTrace,
-                  name: _logKey,
-                );
-              },
-            );
-          },
-          onError: (Object error, StackTrace stackTrace) {
-            _logger.error(
-              'Failed to get chat stream subscription',
-              error: error,
-              stackTrace: stackTrace,
-              name: _logKey,
-            );
-          },
-        ),
-      );
-
+      final dbMessageIds = {
+        EncryptionNotice().messageId,
+        for (final m in chatSession.messages) m.messageId,
+      };
+      final replayMessages = state.messages
+          .where((m) => !dbMessageIds.contains(m.messageId))
+          .toList();
       final messages = [
         EncryptionNotice(),
         ...chatSession.messages,
+        ...replayMessages,
       ].sortedBy((item) => item.dateCreated).reversed.toList();
       state = state.copyWith(messages: messages, isInitialized: true);
+
+      // Replay any VRC events that fired before the chat was opened
+      // (e.g. while the user was offline). Must run AFTER:
+      // 1. The stream listener is attached — so messages pushed via
+      //    chatStream reach the UI immediately.
+      // 2. state.messages is updated with the loaded chat history — so
+      //    _hasVrcExchangeInitiated, _vrcInitiatorIdentityDid and related
+      //    flags correctly reflect the persisted exchange state. Without
+      //    this ordering, the reciprocation step is skipped because the
+      //    initiator's state appears empty on a cold start.
+      if (_chatStreamRef != null) {
+        await _vdipManager.replayPending();
+      }
 
       await _resetBadgeCount();
       unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
+      unawaited(
+        _rCardManager.subscribeToIncomingRCards().then(
+          (_) => _rCardManager.replayPendingRCard(),
+        ),
+      );
       _logger.info('Chat session started', name: _logKey);
     } catch (error, stackTrace) {
       _logger.error(
@@ -272,12 +325,16 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   void pauseChat() {
-    final sdk = _chatSDK;
-    _chatSDK = null;
-    _messageSubscription?.dispose();
-    _messageSubscription = null;
-    sdk?.endChatSession();
+    _chatStreamRef?.dispose();
+    _chatStreamRef = null;
+    _chatSDK?.endChatSession();
+    _rCardManager.cancelSubscription();
+    unawaited(_vdipManager.cancelSubscriptions());
   }
+
+  @override
+  Future<void> sendRCardFromPlugin(Identity identity) =>
+      _rCardManager.sendRCardFromPlugin(identity);
 
   @override
   Future<void> sendTextMessage(
@@ -305,6 +362,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
     await _conciergeMessenger.sendChatContactDetailsUpdate(message);
+    await _rCardManager.sendProfileUpdateWithRCard(message);
   }
 
   @override
@@ -355,7 +413,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<void> _resetBadgeCount() async {
     await ref
         .read(contactsServiceProvider.notifier)
-        .resetContactBadgeCount(_channelDid);
+        .resetContactBadgeCount(_otherPartyPermanentDid);
   }
 
   // ---------------------------------------------------------------------------
@@ -382,9 +440,19 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     final chatItem = data.chatItem;
     if (chatItem != null) {
-      if (chatItem is Message ||
-          chatItem is ConciergeMessage ||
-          chatItem is EventMessage) {
+      // VRC request messages are protocol signals; they must not appear as
+      // chat bubbles on either side of the conversation.
+      final isVrcRequest =
+          chatItem is Message &&
+          chatItem.attachments.isNotEmpty &&
+          chatItem.attachments.every(
+            (a) => a.format == VrcRequestAttachment.pluginFormat,
+          );
+
+      if (!isVrcRequest &&
+          (chatItem is Message ||
+              chatItem is ConciergeMessage ||
+              chatItem is EventMessage)) {
         _upsertChatItem(chatItem);
       }
       if (chatItem is Message && !chatItem.isFromMe) {
@@ -450,7 +518,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           ? _otherPartyFirstName
           : ref
                 .read(contactsServiceProvider)
-                .getContactByChannelDid(_channelDid)
+                .getContactByChannelDid(_otherPartyPermanentDid)
                 ?.card
                 .firstName;
     }
@@ -462,6 +530,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
 
     _typingTimedAction?.cancel();
+    state = state.copyWith(membersTyping: []);
     _typingTimedAction = TimedAction(
       onRun: (args) {
         var memberNames = <String>[];
@@ -482,10 +551,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           '_onTypingMember onRun: membersTyping updated: $memberNames',
           name: _logKey,
         );
-      },
-      onCancel: () {
-        state = state.copyWith(membersTyping: []);
-        _logger.info('_onTypingMember onCancel', name: _logKey);
       },
       onComplete: () {
         state = state.copyWith(membersTyping: []);
@@ -530,6 +595,29 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _logger.info('Updated other party contact card', name: _logKey);
   }
 
+  @override
+  Future<void> persistLocalEventMessage(
+    EventMessageType eventType, {
+    Map<String, dynamic> data = const {},
+  }) => _vrcManager.persistLocalEventMessage(eventType, data: data);
+
+  @override
+  Future<void> dismissVrcConciergeMessages() =>
+      _vrcManager.dismissVrcConciergeMessages();
+
+  @override
+  Future<void> showSentVrcAttachment({
+    required String vcBlob,
+    required String senderDid,
+  }) => _vrcManager.showSentVrcAttachment(vcBlob: vcBlob, senderDid: senderDid);
+
+  void _removeChatItem(ChatItem item) {
+    final messages = state.messages
+        .where((m) => m.messageId != item.messageId)
+        .toList();
+    state = state.copyWith(messages: messages);
+  }
+
   Future<void> _refreshGroup() async {
     final currentGroup = state.group;
     if (currentGroup == null) return;
@@ -557,7 +645,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           ? _otherPartyFirstName
           : ref
                 .read(contactsServiceProvider)
-                .getContactByChannelDid(_channelDid)
+                .getContactByChannelDid(_otherPartyPermanentDid)
                 ?.card
                 .firstName;
     }

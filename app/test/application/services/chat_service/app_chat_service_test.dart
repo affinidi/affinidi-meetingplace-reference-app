@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
@@ -10,20 +13,33 @@ import 'package:mpx_flutter_reference_app/application/services/network_connectiv
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/credentials_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repository_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
+import 'package:ssi/ssi.dart';
 
 import '../../../fakes/fake_app_badge_service.dart';
 import '../../../fakes/fake_channels.dart';
+import '../../../fakes/fake_chat_repository.dart';
 import '../../../fakes/fake_chat_sdk.dart';
 import '../../../fakes/fake_contacts.dart';
 import '../../../fakes/fake_contacts_service.dart';
+import '../../../fakes/fake_credentials_sdk.dart';
 import '../../../fakes/fake_environment.dart';
 import '../../../fakes/fake_groups.dart';
+import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_meeting_place_sdk.dart';
+import '../../../fakes/fake_r_card_repository.dart';
+import '../../../fakes/fake_secure_storage.dart';
+import '../../../fakes/fake_vrc_repository.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +70,15 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpRCardRepository(),
+          ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -271,6 +296,15 @@ void main() {
           contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpRCardRepository(),
+          ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -350,6 +384,63 @@ void main() {
       },
     );
 
+    test('clears membersTyping immediately when a new typing event replaces the'
+        ' active timer', () async {
+      await chatService.startChatSession();
+
+      fakeChatSdk.simulateIncomingContactCardUpdate(
+        contactDid: 'did:key:other-party',
+        card: FakeContacts.individualContact.otherPartyCard!,
+        recipientDid: channelDid,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+
+      // First typing event — timer starts, membersTyping is populated.
+      fakeChatSdk.simulateIncomingTypingActivity(
+        senderDid: 'did:key:other-party',
+        createdTime: DateTime.now(),
+        recipientDid: channelDid,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      expect(serviceState().membersTyping, isNotEmpty);
+
+      // Second typing event — previous timer is cancelled, state must be
+      // cleared synchronously before the new timer populates it again.
+      fakeChatSdk.simulateIncomingTypingActivity(
+        senderDid: 'did:key:other-party',
+        createdTime: DateTime.now(),
+        recipientDid: channelDid,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 1));
+      expect(serviceState().membersTyping, isNotEmpty);
+    });
+
+    test(
+      'disposing provider while typing timer is active does not throw',
+      () async {
+        await chatService.startChatSession();
+
+        fakeChatSdk.simulateIncomingContactCardUpdate(
+          contactDid: 'did:key:other-party',
+          card: FakeContacts.individualContact.otherPartyCard!,
+          recipientDid: channelDid,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+
+        fakeChatSdk.simulateIncomingTypingActivity(
+          senderDid: 'did:key:other-party',
+          createdTime: DateTime.now(),
+          recipientDid: channelDid,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        expect(serviceState().membersTyping, isNotEmpty);
+
+        // Disposing while the timer is still running must not throw the
+        // Riverpod 3.x "Cannot modify providers inside life-cycles" assertion.
+        expect(() => container.dispose(), returnsNormally);
+      },
+    );
+
     test('updates effect in state when receiving effect', () async {
       await chatService.startChatSession();
 
@@ -396,6 +487,15 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpRCardRepository(),
+          ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
+          ),
           networkConnectivityServiceProvider.overrideWith(
             _FakeNetworkConnectivityService.new,
           ),
@@ -448,6 +548,344 @@ void main() {
         expect(serviceState().otherPartyCard?.firstName, 'Updated Alice');
       },
     );
+
+    test(
+      'preserves messages added to state during replay after startChatSession',
+      () async {
+        final replayMessage = EventMessage(
+          chatId: 'fake-chat-id',
+          messageId: 'replay-vrc-request-id',
+          senderDid: channelDid,
+          isFromMe: false,
+          dateCreated: DateTime.now(),
+          status: ChatItemStatus.received,
+          eventType: EventMessageType.fromJson('vrcRequestReceived'),
+          data: const {},
+        );
+        chatService.state = chatService.state.copyWith(
+          messages: [replayMessage],
+        );
+
+        await chatService.startChatSession();
+
+        expect(
+          serviceState().messages.any(
+            (m) => m.messageId == 'replay-vrc-request-id',
+          ),
+          isTrue,
+        );
+      },
+    );
+  });
+
+  group('ChatSessionService - R-Card Integration', () {
+    late ProviderContainer container;
+    late ChatSessionService chatService;
+    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeChatSdk fakeChatSdk;
+    late DidKeyManager issuerManager;
+    late String issuerDid;
+
+    final testContact = FakeContacts.individualContact;
+    final channelDid = testContact.channelDid!;
+
+    setUpAll(() async {
+      final wallet = PersistentWallet(InMemoryKeyStore());
+      issuerManager = DidKeyManager(wallet: wallet, store: InMemoryDidStore());
+      final keyPair = await wallet.generateKey();
+      await issuerManager.addVerificationMethod(keyPair.id);
+      final didDoc = await issuerManager.getDidDocument();
+      issuerDid = didDoc.id;
+    });
+
+    Channel makeChannel({
+      String? permanentChannelDid,
+      String? otherPartyPermanentChannelDid,
+    }) {
+      return Channel(
+        offerLink: 'test-offer-link',
+        publishOfferDid: 'did:key:publisher',
+        mediatorDid: 'did:key:mediator',
+        status: ChannelStatus.inaugurated,
+        contactCard: FakeContacts.individualContact.card.toSdkContactCard(),
+        outboundMessageId: 'msg-1',
+        acceptOfferDid: 'did:key:accept',
+        permanentChannelDid: permanentChannelDid ?? issuerDid,
+        otherPartyPermanentChannelDid:
+            otherPartyPermanentChannelDid ?? channelDid,
+        type: ChannelType.individual,
+        isConnectionInitiator: false,
+      );
+    }
+
+    ProviderContainer makeContainer(FakeMeetingPlaceSDK coreSdk) {
+      final c = ProviderContainer(
+        overrides: [
+          meetingPlaceSdkProvider.overrideWith((ref) async => coreSdk),
+          chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+          contactsServiceProvider.overrideWith(FakeContactsService.new),
+          environmentProvider.overrideWithValue(FakeEnvironment()),
+          appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpRCardRepository(),
+          ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
+          networkConnectivityServiceProvider.overrideWith(
+            _FakeNetworkConnectivityService.new,
+          ),
+        ],
+      );
+      c.listen(
+        chatSessionServiceProvider(channelDid),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      return c;
+    }
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      fakeCoreSdk = FakeMeetingPlaceSDK(channels: {channelDid: makeChannel()});
+      fakeCoreSdk.setFakeDidManager(issuerManager);
+      container = makeContainer(fakeCoreSdk);
+      chatService = container.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
+    });
+
+    tearDown(() => container.dispose());
+
+    test('sendRCardFromPlugin calls createAttachmentMessage', () async {
+      await chatService.startChatSession();
+
+      await chatService.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
+    });
+
+    test('sendRCardFromPlugin is a no-op when channel is not found', () async {
+      final noChannelSdk = FakeMeetingPlaceSDK(channels: {});
+      final noChannelContainer = makeContainer(noChannelSdk);
+      addTearDown(noChannelContainer.dispose);
+
+      noChannelContainer.listen(
+        chatSessionServiceProvider(channelDid),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      final service = noChannelContainer.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
+      await service.startChatSession();
+
+      await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
+    });
+
+    test('sendRCardFromPlugin silently skips when channel '
+        'lacks permanentChannelDid', () async {
+      final incompleteChannel = Channel(
+        offerLink: 'link',
+        publishOfferDid: 'did:key:pub',
+        mediatorDid: 'did:key:med',
+        status: ChannelStatus.inaugurated,
+        contactCard: FakeContacts.individualContact.card.toSdkContactCard(),
+        outboundMessageId: 'msg',
+        acceptOfferDid: 'did:key:acc',
+        permanentChannelDid: null,
+        otherPartyPermanentChannelDid: null,
+        type: ChannelType.individual,
+        isConnectionInitiator: false,
+      );
+      final sdkWithIncompleteChannel = FakeMeetingPlaceSDK(
+        channels: {channelDid: incompleteChannel},
+      );
+      sdkWithIncompleteChannel.setFakeDidManager(issuerManager);
+      final c = makeContainer(sdkWithIncompleteChannel);
+      addTearDown(c.dispose);
+
+      final service = c.read(chatSessionServiceProvider(channelDid).notifier);
+      await service.startChatSession();
+
+      await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
+    });
+
+    test('pauseChat cancels rCard subscription without error', () async {
+      await chatService.startChatSession();
+
+      chatService.pauseChat();
+      chatService.pauseChat(); // second call must not throw
+
+      expect(fakeChatSdk.sessionEnded, isTrue);
+    });
+  });
+
+  group('ChatSessionService - VRC Replay Ordering', () {
+    late ProviderContainer container;
+    late ChatSessionService chatService;
+    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeChatSdk fakeChatSdk;
+    late DidKeyManager peerDidManager;
+    late DidKeyManager localDidManager;
+    late String peerDid;
+    late String localIdentityDid;
+    late String peerVcBlob;
+
+    final testContact = FakeContacts.individualContact;
+    final channelDid = testContact.channelDid!;
+
+    Channel makeChannel() => Channel(
+      offerLink: 'test-offer-link',
+      publishOfferDid: 'did:key:publisher',
+      mediatorDid: 'did:key:mediator',
+      status: ChannelStatus.inaugurated,
+      contactCard: FakeContacts.individualContact.card.toSdkContactCard(),
+      outboundMessageId: 'msg-1',
+      acceptOfferDid: 'did:key:accept',
+      permanentChannelDid: localIdentityDid,
+      otherPartyPermanentChannelDid: channelDid,
+      type: ChannelType.individual,
+      isConnectionInitiator: true,
+    );
+
+    setUpAll(() async {
+      final peerWallet = PersistentWallet(InMemoryKeyStore());
+      peerDidManager = DidKeyManager(
+        wallet: peerWallet,
+        store: InMemoryDidStore(),
+      );
+      await peerWallet.generateKey().then(
+        (kp) => peerDidManager.addVerificationMethod(kp.id),
+      );
+      peerDid = (await peerDidManager.getDidDocument()).id;
+
+      final localWallet = PersistentWallet(InMemoryKeyStore());
+      localDidManager = DidKeyManager(
+        wallet: localWallet,
+        store: InMemoryDidStore(),
+      );
+      await localWallet.generateKey().then(
+        (kp) => localDidManager.addVerificationMethod(kp.id),
+      );
+      localIdentityDid = (await localDidManager.getDidDocument()).id;
+
+      final vc = await CredentialBuilder.buildVrc(
+        issuerDid: peerDid,
+        subject: VrcCredentialSubject(
+          from: VrcParty(did: peerDid, name: 'Bob'),
+          to: VrcParty(did: localIdentityDid, name: 'Alice'),
+        ),
+        issuerDidManager: peerDidManager,
+      );
+      peerVcBlob = jsonEncode(vc.toJson());
+    });
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      fakeChatSdk.sessionMessages = [
+        EventMessage(
+          chatId: 'fake-chat-id',
+          messageId: 'vrc-initiated-event-id',
+          senderDid: localIdentityDid,
+          isFromMe: true,
+          dateCreated: DateTime.now().subtract(const Duration(hours: 1)),
+          status: ChatItemStatus.confirmed,
+          eventType: EventMessageType.fromJson('vrcExchangeInitiated'),
+          data: {'identityDid': localIdentityDid, 'identityName': 'Alice'},
+        ),
+      ];
+
+      fakeCoreSdk = FakeMeetingPlaceSDK(channels: {channelDid: makeChannel()});
+      fakeCoreSdk.setFakeDidManager(localDidManager);
+
+      final pendingVrc = VrcIssuance(
+        senderDid: peerDid,
+        vcBlob: peerVcBlob,
+        parsedCredential: UniversalParser.parse(peerVcBlob),
+      );
+
+      container = ProviderContainer(
+        overrides: [
+          meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
+          chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+          contactsServiceProvider.overrideWith(FakeContactsService.new),
+          environmentProvider.overrideWithValue(FakeEnvironment()),
+          appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpRCardRepository(),
+          ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
+          ),
+          networkConnectivityServiceProvider.overrideWith(
+            _FakeNetworkConnectivityService.new,
+          ),
+          chatRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpChatRepository(),
+          ),
+          credentialsSdkProvider.overrideWith((ref) async {
+            final coreSDK = await ref.read(meetingPlaceSdkProvider.future);
+            final rCardRepo = await ref.read(rCardsRepositoryProvider.future);
+            final vrcRepo = await ref.read(vrcRepositoryProvider.future);
+            return StubCredentialsSdk(
+              coreSDK: coreSDK,
+              rCardRepository: rCardRepo,
+              vrcRepository: vrcRepo,
+              pendingVrc: pendingVrc,
+            );
+          }),
+        ],
+      );
+      container.listen(
+        chatSessionServiceProvider(channelDid),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      chatService = container.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
+    });
+
+    tearDown(() => container.dispose());
+
+    test(
+      'reciprocates VRC when state.messages is populated before replay runs',
+      () async {
+        await chatService.startChatSession();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        expect(
+          fakeChatSdk.createAttachmentMessageCalls
+              .where((c) => c.senderDid == localIdentityDid)
+              .toList(),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('shows incoming VRC chat item when pending VRC is replayed '
+        'on session open', () async {
+      await chatService.startChatSession();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(
+        fakeChatSdk.createAttachmentMessageCalls
+            .where((c) => c.senderDid == channelDid)
+            .toList(),
+        hasLength(1),
+      );
+    });
   });
 }
 

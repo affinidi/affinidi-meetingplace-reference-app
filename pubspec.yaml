@@ -15,13 +15,11 @@ dev_dependencies:
 
 dependency_overrides:
   test_api: ^0.7.12
-  meta: ^1.18.2
 
 hooks:
   user_defines:
     sqlite3:
       source: sqlite3mc
-
 
 melos:
   scripts:

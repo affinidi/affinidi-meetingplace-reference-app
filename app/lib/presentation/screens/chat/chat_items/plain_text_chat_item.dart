@@ -154,11 +154,19 @@ class _AttachmentWidget extends HookConsumerWidget {
 
     for (final plugin in plugins) {
       if (plugin.supportsFormat(_attachment)) {
-        return plugin.renderAttachment(
+        final child = plugin.renderAttachment(
           attachment: _attachment,
           isFromMe: _isFromMe,
           chatItemColor: _chatItemColor,
         );
+        if (_attachment.isRCard) {
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return SizedBox(width: constraints.maxWidth, child: child);
+            },
+          );
+        }
+        return child;
       }
     }
 

@@ -15,7 +15,10 @@ import '../../presentation/screens/offer/offer_details/offer_details_screen.dart
 import '../../presentation/screens/offer/publish_offer_screen/publish_offer_screen.dart';
 import '../../presentation/screens/oob/oob_scan_qr_screen/oob_scan_qr_screen.dart';
 import '../../presentation/screens/oob/oob_share_qr_screen/oob_share_qr_screen.dart';
+import '../../presentation/screens/r_cards/r_card_details_screen.dart';
+import '../../presentation/screens/r_cards/r_cards_screen.dart';
 import '../../presentation/screens/settings/settings_screen.dart';
+import '../../presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
 import '../router_config_provider.dart';
 import 'route_names.dart';
 import 'route_paths.dart';
@@ -30,6 +33,8 @@ part 'offer/offer_details_route.dart';
 part 'offer/publish_offer_route.dart';
 part 'qr/oob_share_qr_route.dart';
 part 'qr/qr_scanner_route.dart';
+part 'r_card/r_card_details_route.dart';
+part 'vrc/vrc_details_route.dart';
 
 // Dashboard shell route
 @TypedStatefulShellRoute<DashboardShellRouteData>(
@@ -102,6 +107,24 @@ part 'qr/qr_scanner_route.dart';
         ),
       ],
     ),
+    TypedStatefulShellBranch<RCardsBranchData>(
+      routes: [
+        TypedGoRoute<RCardsRoute>(
+          path: RoutePaths.rCards,
+          name: RouteNames.rCards,
+          routes: [
+            TypedGoRoute<RCardDetailsRoute>(
+              path: RoutePaths.rCardDetails,
+              name: RouteNames.rCardDetails,
+            ),
+            TypedGoRoute<VrcDetailsRoute>(
+              path: RoutePaths.vrcDetails,
+              name: RouteNames.vrcDetails,
+            ),
+          ],
+        ),
+      ],
+    ),
     TypedStatefulShellBranch<SettingsBranchData>(
       routes: [
         TypedGoRoute<SettingsRoute>(
@@ -135,6 +158,7 @@ final dashboardNavigatorKey = GlobalKey<NavigatorState>();
 final _contactsNavigatorKey = GlobalKey<NavigatorState>();
 final _connectionsNavigatorKey = GlobalKey<NavigatorState>();
 final _identitiesNavigatorKey = GlobalKey<NavigatorState>();
+final _rCardsNavigatorKey = GlobalKey<NavigatorState>();
 final _settingsNavigatorKey = GlobalKey<NavigatorState>();
 
 // Branch data classes for each tab
@@ -168,6 +192,13 @@ class SettingsBranchData extends StatefulShellBranchData {
   static const String $restorationScopeId = 'settingsBranchRestorationScopeId';
 }
 
+class RCardsBranchData extends StatefulShellBranchData {
+  const RCardsBranchData();
+
+  static final $navigatorKey = _rCardsNavigatorKey;
+  static const String $restorationScopeId = 'rCardsBranchRestorationScopeId';
+}
+
 // Main tabs
 class ContactsRoute extends GoRouteData with $ContactsRoute {
   const ContactsRoute();
@@ -199,4 +230,12 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const SettingsScreen();
+}
+
+class RCardsRoute extends GoRouteData with $RCardsRoute {
+  const RCardsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RCardsScreen();
 }

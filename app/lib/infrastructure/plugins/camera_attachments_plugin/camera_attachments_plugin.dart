@@ -26,6 +26,9 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
 
   final BaseCacheManager _cacheManager;
 
+  @override
+  bool get dismissSheetBeforePicking => false;
+
   /// Prompts the user to capture and review an image before attaching.
   ///
   /// Opens the [MediaScreen] with back camera enabled. Users can capture
@@ -106,7 +109,8 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
   }
 
   @override
-  String get icon => '📷';
+  @override
+  AttachmentPluginIcon get icon => const EmojiIcon('📷');
 
   @override
   String localizedName(BuildContext context) => context.l10n.generalCamera;

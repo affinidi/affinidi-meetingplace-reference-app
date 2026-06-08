@@ -621,10 +621,10 @@ packages:
     dependency: transitive
     description:
       name: firebase_core_platform_interface
-      sha256: cccb4f572325dc14904c02fcc7db6323ad62ba02536833dddb5c02cac7341c64
+      sha256: "0ecda14c1bfc9ed8cac303dd0f8d04a320811b479362a9a4efb14fd331a473ce"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.2"
+    version: "6.0.3"
   firebase_core_web:
     dependency: transitive
     description:
@@ -1017,10 +1017,10 @@ packages:
     dependency: transitive
     description:
       name: json_annotation
-      sha256: cb09e7dac6210041fad964ed7fbee004f14258b4eca4040f72d1234062ace4c8
+      sha256: "2a743920d81b7910627f68ee2c9ac1fc0bfee32b9fc3403587d7c6791ca12f80"
       url: "https://pub.dev"
     source: hosted
-    version: "4.11.0"
+    version: "4.12.0"
   json_ld_processor:
     dependency: transitive
     description:
@@ -1033,10 +1033,10 @@ packages:
     dependency: transitive
     description:
       name: json_serializable
-      sha256: "2c15e78e1cc6e62aadecf59f81566fd56829713d96a8c4177699e2b2e17f20db"
+      sha256: ffcd10cde35a93b2abbbcc26bd9971f4ca93763e8abe78d855e3c4177797e501
       url: "https://pub.dev"
     source: hosted
-    version: "6.13.2"
+    version: "6.14.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -1137,10 +1137,10 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_chat
-      sha256: "82a2f387459885d1d87155e7a60a2b1c00ebb56fece327d5328b6e765c018855"
+      sha256: e2e1ea5dcf8dc59bb42dcb151644490035fc130cd33ca287db8b8edda6a753ee
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.42"
+    version: "0.0.1-dev.43"
   meeting_place_control_plane:
     dependency: transitive
     description:
@@ -1153,26 +1153,26 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_core
-      sha256: "356124fe5d986a811002a2189cd299b3fcd3c32f00142cc1a30e946028f830e8"
+      sha256: fa36db660250f4f63390f551478486ff4ef80768c2a061184e83d6caa27a7773
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.39"
+    version: "0.0.1-dev.40"
   meeting_place_credentials:
     dependency: transitive
     description:
       name: meeting_place_credentials
-      sha256: "23c4d3fe3c101a6bb7c62db7d45ed097c371274559dad8a007736c3314238e78"
+      sha256: c59d6b71d37e3e1be447006e7f2556e71a2a05322c2de278cc4e9db8b911c8d3
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.2"
+    version: "0.0.1-dev.3"
   meeting_place_drift_repository:
     dependency: transitive
     description:
       name: meeting_place_drift_repository
-      sha256: "3fa8635268554ee3c4bf9ac28a170c79b5e3d8a2d24629ee632156ac717ec5e4"
+      sha256: "13fc017de93cb74cf976dc40272035d6fc84e2c1a130d0f755bf7495f8feb142"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.43"
+    version: "0.0.1-dev.44"
   meeting_place_mediator:
     dependency: transitive
     description:
@@ -1749,6 +1749,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  skeletonizer:
+    dependency: transitive
+    description:
+      name: skeletonizer
+      sha256: "9f38f9b47ec3cf2235a6a4f154a88a95432bc55ba98b3e2eb6ced5c1974bc122"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.3"
   sky_engine:
     dependency: transitive
     description: flutter

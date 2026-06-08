@@ -3,7 +3,7 @@
 	"@appName": {
 		"type": "text"
 	},
-	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} settings{Settings} other{Invalid}}",
+	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} settings{Settings} other{Invalid}}",
 	"@tabsTitle": {
 		"type": "text",
 		"placeholders": {
@@ -304,6 +304,10 @@
 	},
 	"generalDelete": "Delete",
 	"@generalDelete": {
+		"type": "text"
+	},
+	"generalSave": "Save",
+	"@generalSave": {
 		"type": "text"
 	},
 	"generalDone": "Done",
@@ -1405,5 +1409,124 @@
 	"cameraAccessDenied": "Camera access denied or unavailable.",
 	"cameraOpenSettings": "Open Settings",
 	"cameraNotAvailable": "Camera not available",
-	"goBack": "Go Back"
+	"goBack": "Go Back",
+	"rCardsPanelSubtitle": "Relationship cards received from your contacts",
+	"rCardsEmpty": "R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.",
+	"rCardsFilterLabel": "{filter, select, all{All} nonAnonymous{Non-anonymous} other{}}",
+	"@rCardsFilterLabel": {
+		"placeholders": {
+			"filter": {
+				"type": "String"
+			}
+		}
+	},
+	"noRCardsFoundWithFilter": "No R-Cards found matching your search.",
+	"rCardDetailsTitle": "R-Card Details",
+	"rCardSectionIdentity": "Identity",
+	"rCardSectionMetadata": "Credential Details",
+	"rCardFieldName": "Name",
+	"rCardFieldEmail": "Email",
+	"rCardFieldPhone": "Phone",
+	"rCardFieldCompany": "Company",
+	"rCardFieldPosition": "Position",
+	"rCardFieldWebsite": "Website",
+	"rCardFieldSocial": "Social",
+	"rCardFieldSubjectDid": "Subject DID",
+	"rCardAddNotes": "Add notes",
+	"rCardUpdateNotes": "Update notes",
+	"rCardNotesTitle": "Notes",
+	"rCardNotesPlaceholder": "Write your notes here...",
+	"rCardDeletePrompt": "Are you sure you want to delete this R-Card? This action cannot be undone.",
+	"rCardChatWith": "Chat with {name}",
+	"@rCardChatWith": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"rCardFieldIssuerDid": "Issuer DID",
+	"rCardFieldReceivedAt": "Received",
+	"rCardFieldIssuedAt": "Issued",
+	"rCardTitle": "R-Card",
+	"verifiableCredential": "Verifiable Credential",
+	"verified": "Verified",
+	"verifiableCredentialDescription": "Secured digital credentials that can be verified for authenticity",
+	"secureAttachmentsTitle": "Secure Attachments",
+	"credentialDetails": "Credential Details",
+	"genRCard": "R-Card",
+	"rCardPickIdentitySubtitle": "Select the identity to share as an R-Card",
+	"rCardFooterSent": "R-Card has been sent.",
+	"rCardFooterSaved": "R-Card has been saved.",
+	"rCardFooterUpdateShared": "R-Card update has been shared.",
+	"rCardFooterUpdateSaved": "R-Card update has been saved.",
+	"rCardsExchanged": "R-Cards have been exchanged.",
+	"goToRCard": "Go to R-Card",
+	"selectIdentityTitle": "Select Identity",
+	"selectIdentityInstruction": "Swipe left or right to choose the identity you want to use to generate the R‑Card",
+	"sendRCard": "Send R-Card",
+	"selectIdentityToVerifyRelationshipWithName": "Select the identity that you would like to use to verify your relationship with {name}.",
+	"@selectIdentityToVerifyRelationshipWithName": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"verifiableRelationshipCredential": "Verifiable Relationship Credential",
+	"vrcDetailsTitle": "Relationship Credential",
+	"vrcSectionIssuer": "Issuer",
+	"vrcSectionHolder": "Issued to",
+	"vrcSectionMetadata": "Credential Details",
+	"vrcFieldDid": "DID",
+	"vrcFieldName": "Name",
+	"vrcFieldIssuedAt": "Issued On",
+	"vrcFieldVerifiedAt": "Verified",
+	"vrcFieldTypes": "Types",
+	"vrcDescription": "This credential verifies the relationship between two parties.",
+	"verifyRelationshipPrompt": "Verify your relationship with {firstName} by issuing a Verifiable Relationship Credential (VRC). Each VRC exchange increases your trust score.",
+	"@verifyRelationshipPrompt": {
+		"placeholders": {
+			"firstName": { "type": "String" }
+		}
+	},
+	"generateVrc": "Start now",
+	"generalVerify": "Confirm",
+	"doLater": "Do later",
+	"vrcExchangeInitiated": "You've initiated the VRC exchange.",
+	"vrcRequestReceived": "{name} has initiated the VRC exchange.",
+	"@vrcRequestReceived": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcDoLater": "VRC exchange is paused. Tap + and select 'Verifiable Relationship Credential' to resume.",
+	"vrcExchangeCompleted": "You have successfully verified your relationship",
+	"vrcVerifyPrompt": "Would you like to verify your relationship with {name}? Each VRC exchange increases your trust score.",
+	"@vrcVerifyPrompt": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"vrcStartNow": "Start Now",
+	"vrcDoLaterButton": "Do Later",
+	"vrcYesButton": "Yes",
+	"notShared": "Not shared",
+	"nameSelectedIdentity": "{name}'s selected identity",
+	"@nameSelectedIdentity": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"selectIdentityToVerifyRelationshipPrompt": "Swipe left or right to choose the identity you want to use to verify your relationship with {name}.",
+	"@selectIdentityToVerifyRelationshipPrompt": {
+		"placeholders": {
+			"name": { "type": "String" }
+		}
+	},
+	"sendVrc": "Send Relationship Credential",
+	"trustedBy": "Trusted by {count}",
+	"@trustedBy": {
+		"placeholders": {
+			"count": { "type": "int" }
+		}
+	}
 }

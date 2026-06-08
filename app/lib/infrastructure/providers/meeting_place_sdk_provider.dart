@@ -1,9 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:ssi/ssi.dart';
 
+import '../../application/services/identities_service/identities_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
+import '../extensions/contact_card_extensions.dart';
 import '../secure_storage/secure_storage.dart';
 import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
@@ -20,50 +24,89 @@ import 'group_repository_provider.dart';
 /// - Uses mediator DID from settings and control plane DID from environment
 /// - Provides comprehensive logging throughout the initialization process
 /// - Handles initialization errors gracefully with proper error logging
-final meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>((
-  ref,
-) async {
-  const logKey = 'meetingPlaceSdkProvider';
-  final logger = ref.read(appLoggerProvider);
-  final secureStorage = await ref.read(secureStorageProvider.future);
+final FutureProvider<MeetingPlaceCoreSDK> meetingPlaceSdkProvider =
+    FutureProvider<MeetingPlaceCoreSDK>((ref) async {
+      const logKey = 'meetingPlaceSdkProvider';
+      final logger = ref.read(appLoggerProvider);
+      final secureStorage = await ref.read(secureStorageProvider.future);
 
-  try {
-    final wallet = PersistentWallet(secureStorage);
-    final settingsState = ref.read(settingsServiceProvider);
-    final initialMediatorDid = settingsState.selectedMediatorDid;
-    logger.info('Starting MeetingPlace SDK initialization', name: logKey);
-    logger.info('Selected mediator: $initialMediatorDid', name: logKey);
-    logger.info(
-      'Service DID: ${ref.read(environmentProvider).controlPlaneDid}',
-      name: logKey,
-    );
-    logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
+      try {
+        final wallet = PersistentWallet(secureStorage);
+        final settingsState = ref.read(settingsServiceProvider);
+        final initialMediatorDid = settingsState.selectedMediatorDid;
+        logger.info('Starting MeetingPlace SDK initialization', name: logKey);
+        logger.info('Selected mediator: $initialMediatorDid', name: logKey);
+        logger.info(
+          'Service DID: ${ref.read(environmentProvider).controlPlaneDid}',
+          name: logKey,
+        );
+        logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
-    final sdk = await MeetingPlaceCoreSDK.create(
-      wallet: wallet,
-      repositoryConfig: RepositoryConfig(
-        connectionOfferRepository: await ref.read(
-          connectionOfferRepositoryProvider.future,
-        ),
-        channelRepository: await ref.read(channelRepositoryProvider.future),
-        groupRepository: await ref.read(groupsRepositoryProvider.future),
-        keyRepository: secureStorage,
-      ),
-      mediatorDid: initialMediatorDid,
-      controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
-      logger: logger,
-    );
+        final sdk = await MeetingPlaceCoreSDK.create(
+          wallet: wallet,
+          repositoryConfig: RepositoryConfig(
+            connectionOfferRepository: await ref.read(
+              connectionOfferRepositoryProvider.future,
+            ),
+            channelRepository: await ref.read(channelRepositoryProvider.future),
+            groupRepository: await ref.read(groupsRepositoryProvider.future),
+            keyRepository: secureStorage,
+          ),
+          mediatorDid: initialMediatorDid,
+          controlPlaneDid: ref.read(environmentProvider).controlPlaneDid,
+          logger: logger,
+          options: MeetingPlaceCoreSDKOptions(
+            expectedMessageWrappingTypes: const [
+              MessageWrappingType.authcryptPlaintext,
+              MessageWrappingType.authcryptSignPlaintext,
+            ],
+            messageTypesForSequenceTracking: [
+              ChatProtocol.chatMessage.value,
+              VdipClient.requestIssuanceMessageType,
+              VdipClient.issuedCredentialMessageType,
+            ],
+            onBuildAttachments:
+                (
+                  Channel channel,
+                  Future<DidManager> Function(String did) getDidManager,
+                ) async {
+                  try {
+                    await ref
+                        .read(identitiesServiceProvider.notifier)
+                        .ensureInitialized();
 
-    logger.info('Completed initializing MeetingPlace SDK', name: logKey);
+                    final externalRef = channel.externalRef;
+                    if (externalRef == null || externalRef.isEmpty) return null;
 
-    return sdk;
-  } catch (error, stackTrace) {
-    logger.error(
-      'Error initializing MeetingPlace SDK',
-      error: error,
-      stackTrace: stackTrace,
-      name: logKey,
-    );
-    rethrow;
-  }
-}, name: 'meetingPlaceSdkProvider');
+                    final identity = ref
+                        .read(identitiesServiceProvider)
+                        .getIdentityById(externalRef);
+                    if (identity == null || identity.did.isEmpty) return null;
+
+                    final didManager = await getDidManager(identity.did);
+
+                    return RCardDIDCommAttachmentBuilder.build(
+                      issuerDid: identity.did,
+                      card: identity.card.toRCardSubject(),
+                      issuerDidManager: didManager,
+                    );
+                  } catch (_) {
+                    return null;
+                  }
+                },
+          ),
+        );
+
+        logger.info('Completed initializing MeetingPlace SDK', name: logKey);
+
+        return sdk;
+      } catch (error, stackTrace) {
+        logger.error(
+          'Error initializing MeetingPlace SDK',
+          error: error,
+          stackTrace: stackTrace,
+          name: logKey,
+        );
+        rethrow;
+      }
+    }, name: 'meetingPlaceSdkProvider');
