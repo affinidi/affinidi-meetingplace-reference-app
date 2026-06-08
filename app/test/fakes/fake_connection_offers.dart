@@ -14,7 +14,6 @@ class FakeConnectionOffers {
     oobInvitationMessage:
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
-    transport: ChannelTransport.didcomm,
     status: ConnectionOfferStatus.published,
     contactCard: FakeIdentities.secondaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
@@ -22,6 +21,7 @@ class FakeConnectionOffers {
     offerDescription: 'Test offer description',
     expiresAt: DateTime(2025, 12, 31),
     maximumUsage: 10,
+    transport: ChannelTransport.didcomm,
   );
 
   static ConnectionOffer get expiredOffer => ConnectionOffer(
@@ -33,13 +33,13 @@ class FakeConnectionOffers {
     oobInvitationMessage:
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
-    transport: ChannelTransport.didcomm,
     status: ConnectionOfferStatus.published,
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
     createdAt: DateTime(2023, 1, 1),
     offerDescription: 'This offer has expired',
     expiresAt: DateTime(2023, 12, 31),
+    transport: ChannelTransport.didcomm,
   );
 
   static ConnectionOffer get groupOffer => ConnectionOffer(
@@ -51,12 +51,12 @@ class FakeConnectionOffers {
     oobInvitationMessage:
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
-    transport: ChannelTransport.matrix,
     status: ConnectionOfferStatus.published,
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
     createdAt: DateTime(2024, 6, 1),
     offerDescription: 'Join our group chat',
+    transport: ChannelTransport.matrix,
   );
 
   static GroupConnectionOffer get groupOfferOwnedByMe => GroupConnectionOffer(
@@ -71,10 +71,10 @@ class FakeConnectionOffers {
     oobInvitationMessage:
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
-    transport: ChannelTransport.matrix,
     status: ConnectionOfferStatus.finalised,
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: true,
     createdAt: DateTime(2024, 6, 1),
+    transport: ChannelTransport.matrix,
   );
 }
