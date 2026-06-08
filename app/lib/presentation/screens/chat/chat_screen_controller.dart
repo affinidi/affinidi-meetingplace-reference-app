@@ -591,6 +591,19 @@ class ChatScreenController extends _$ChatScreenController
       final chatAttachment = attachment.toAttachment();
       final caption = index == 0 ? text : '';
 
+      // Seed the cache so the sender sees the image immediately: the SDK
+      // strips base64 from the echoed display attachment, so without this
+      // pre-cache the sender would only see the image once the upload
+      // completes and the download from the homeserver returns.
+      final base64Data = chatAttachment.data?.base64;
+      if (base64Data != null && base64Data.isNotEmpty) {
+        final updatedCache = Map.of(state.attachmentsDataCache);
+        updatedCache[attachmentCacheKey(chatAttachment)] = base64.decode(
+          base64Data,
+        );
+        state = state.copyWith(attachmentsDataCache: updatedCache);
+      }
+
       unawaited(
         _chatService?.sendTextMessage(caption, attachments: [chatAttachment]),
       );
