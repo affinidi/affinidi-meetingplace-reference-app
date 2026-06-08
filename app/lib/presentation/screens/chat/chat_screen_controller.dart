@@ -298,7 +298,7 @@ class ChatScreenController extends _$ChatScreenController
       case AppLifecycleState.paused:
         _chatResumingLock.synchronized(() async {
           if (!ref.mounted) return;
-          _pauseChatSession();
+          await _pauseChatSession();
         });
         break;
       default:
@@ -331,12 +331,12 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  void _pauseChatSession() {
+  Future<void> _pauseChatSession() async {
     if (_isPaused) return;
 
     _logger.info('Pausing chat session', name: _logKey);
     _isPaused = true;
-    unawaited(_chatService?.pauseChat());
+    await _chatService?.pauseChat();
   }
 
   void _onMessageTextChanged() {
@@ -550,7 +550,7 @@ class ChatScreenController extends _$ChatScreenController
   /// Sends a message directly with optional attachments
   Future<void> sendMessageDirect(
     String message, {
-    List<chat.Attachment>? attachments,
+    List<ChatAttachment>? attachments,
   }) async {
     final trimmedMessage = message.trimRight();
     // Allow empty messages if attachments are present
@@ -736,6 +736,44 @@ class ChatScreenController extends _$ChatScreenController
       }
 
       await _chatService?.reactOnMessage(message, reaction: reaction);
+    } finally {
+      _hideActivity();
+    }
+  }
+
+  /// Maximum age at which the original sender can still delete their own
+  /// message for everyone. Defers to the chat service (SDK option, falling
+  /// back to the environment-configured default before the SDK is ready).
+  Duration get deleteMessageWindow =>
+      _chatService?.deleteMessageWindow ?? Duration.zero;
+
+  /// Deletes a previously-sent message.
+  ///
+  /// When [deleteForMeOnly] is true the message is hidden only for the current
+  /// user and no wire traffic is generated. Otherwise the SDK broadcasts a
+  /// redaction so all participants drop the message, subject to the
+  /// sender-only / delivery / `deleteMessageWindow` rules enforced by the SDK.
+  Future<void> deleteMessage(
+    String messageId, {
+    bool deleteForMeOnly = false,
+  }) async {
+    try {
+      _showActivity();
+      final message =
+          state.messages.firstWhereOrNull((m) => m.messageId == messageId)
+              as chat.Message?;
+
+      if (message == null) {
+        throw AppException(
+          'Unable to find message with id $messageId',
+          code: AppExceptionType.missingMessage.name,
+        );
+      }
+
+      await _chatService?.deleteMessage(
+        message,
+        deleteForMeOnly: deleteForMeOnly,
+      );
     } finally {
       _hideActivity();
     }

@@ -838,6 +838,30 @@
 	"@messageCopiedClipboard": {
 		"type": "text"
 	},
+	"chatMessageActionDelete": "Delete for everyone",
+	"@chatMessageActionDelete": {
+		"type": "text"
+	},
+	"chatMessageActionDeleteLocal": "Delete for me",
+	"@chatMessageActionDeleteLocal": {
+		"type": "text"
+	},
+	"chatMessageActionCopy": "Copy message",
+	"@chatMessageActionCopy": {
+		"type": "text"
+	},
+	"chatMessageDeletedTombstone": "This message was deleted",
+	"@chatMessageDeletedTombstone": {
+		"type": "text"
+	},
+	"chatMessageDeletedLocallyTombstone": "You deleted this message",
+	"@chatMessageDeletedLocallyTombstone": {
+		"type": "text"
+	},
+	"chatMessageDeleteFailed": "Could not delete message",
+	"@chatMessageDeleteFailed": {
+		"type": "text"
+	},
 	"chatItemStatus": "{status, select, queued{Queued} delivered{Delivered} sending{Sending} sent{Sent} error{Error} groupDeleted{Group deleted} other{}}",
 	"@chatItemStatus": {
 		"type": "text",

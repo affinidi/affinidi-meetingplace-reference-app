@@ -52,6 +52,9 @@ final chatSdkProvider = FutureProvider.autoDispose
             chatPresenceExpiry: Duration(
               seconds: environment.chatPresenceIntervalInSeconds,
             ),
+            deleteMessageWindow: Duration(
+              seconds: environment.deleteMessageWindowInSeconds,
+            ),
           ),
           card: sdkContactCard,
           logger: logger,

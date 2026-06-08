@@ -41,16 +41,53 @@ class _PlainTextChatItem extends ConsumerWidget {
       controller.selectReactionAtIndex(_index);
     }
 
+    Future<void> showMessageActions() async {
+      if (!context.mounted) return;
+      controller.clearSelectedReaction();
+      await _ChatMessageActions.show(
+        context: context,
+        contactId: _contactId,
+        message: chatItem,
+      );
+    }
+
+    void onLongPress() {
+      if (chatItem.isDeleted || chatItem.isDeletedLocally) return;
+      if (chatItem.isFromMe) {
+        unawaited(showMessageActions());
+      } else {
+        selectReaction();
+      }
+    }
+
     Future<void> copyToClipboard() async {
       if (!context.mounted) return;
 
       if (chatItem.value.isEmpty) return;
+      if (chatItem.isDeleted || chatItem.isDeletedLocally) return;
 
       await Clipboard.setData(ClipboardData(text: chatItem.value));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.messageCopiedClipboard),
           duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+
+    if (chatItem.isDeleted || chatItem.isDeletedLocally) {
+      final label = chatItem.isDeletedLocally
+          ? context.l10n.chatMessageDeletedLocallyTombstone
+          : context.l10n.chatMessageDeletedTombstone;
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 14,
+            fontStyle: FontStyle.italic,
+          ),
         ),
       );
     }
@@ -64,7 +101,7 @@ class _PlainTextChatItem extends ConsumerWidget {
     final attachments = chatItem.attachments;
 
     return GestureDetector(
-      onLongPress: selectReaction,
+      onLongPress: onLongPress,
       onTap: () async {
         await copyToClipboard();
       },
