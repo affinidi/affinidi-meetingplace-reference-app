@@ -15,7 +15,7 @@ class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
   }) : _getOnZkpAttachment = getOnZkpAttachment,
        _logger = logger;
 
-  static const _logKey = 'ZKPATTACHMENTPROTOCOLHANDLER';
+  static const _logKey = 'ZKPATTCHDLR';
 
   final void Function(StreamData data, String channelDid)? Function()
   _getOnZkpAttachment;
