@@ -144,8 +144,8 @@ class ZkpFlowService {
     required List<int>? challengeNonce,
   }) async {
     final identity = await _ref
-      .read(contactsIdentitiesServiceProvider)
-      .resolveIdentityForContact(_contactId);
+        .read(contactsIdentitiesServiceProvider)
+        .resolveIdentityForContact(_contactId);
     if (identity == null || identity.did.isEmpty) {
       return const ZkpSendProofResult.failure(
         error: 'No identity is linked to this connection.',

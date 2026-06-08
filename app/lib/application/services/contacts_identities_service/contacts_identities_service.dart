@@ -21,7 +21,9 @@ class ContactsIdentitiesService {
   AppLogger get _logger => _ref.read(appLoggerProvider);
 
   Future<Identity?> resolveIdentityForContact(String contactId) async {
-    final contact = _ref.read(contactsServiceProvider).getContactById(contactId);
+    final contact = _ref
+        .read(contactsServiceProvider)
+        .getContactById(contactId);
     if (contact == null) {
       _logger.warning(
         'resolveIdentityForContact: unknown contact $contactId',
@@ -40,9 +42,9 @@ class ContactsIdentitiesService {
     }
 
     await _ref.read(identitiesServiceProvider.notifier).ensureInitialized();
-    final identity = _ref.read(identitiesServiceProvider).getIdentityById(
-      identityId,
-    );
+    final identity = _ref
+        .read(identitiesServiceProvider)
+        .getIdentityById(identityId);
     if (identity == null) {
       _logger.warning(
         'resolveIdentityForContact: identity $identityId not in wallet',
