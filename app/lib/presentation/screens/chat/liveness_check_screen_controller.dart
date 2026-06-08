@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 
-import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/contacts_identities_service/contacts_identities_service.dart';
 import '../../../application/services/credential_service/credential_service.dart';
 import '../../../application/services/credential_service/credential_service_state.dart';
 import '../../../application/services/credential_service/liveness_errors.dart';
@@ -84,7 +84,7 @@ class LivenessCheckScreenController
 
   Future<void> _initProofContext() async {
     final identity = await _ref
-        .read(contactsServiceProvider.notifier)
+        .read(contactsIdentitiesServiceProvider)
         .resolveIdentityForContact(_contactId);
     if (!_ref.mounted) return;
 
