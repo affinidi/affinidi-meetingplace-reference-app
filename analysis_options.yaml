@@ -20,6 +20,7 @@ analyzer:
   errors:
     avoid_print: error
   exclude:
+    - "build/ios/**"
     - "**/*.g.dart"
     - "**/build/**"
 # Additional information about this file can be found at
