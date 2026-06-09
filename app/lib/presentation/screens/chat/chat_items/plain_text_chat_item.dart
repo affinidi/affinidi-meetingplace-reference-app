@@ -196,8 +196,10 @@ class _HostedMediaWidget extends ConsumerWidget {
     final hasFailed = ref.watch(
       provider.select((s) => s.failedAttachmentDownloads.contains(cacheKey)),
     );
-    void onRetry() =>
+    bool onRetry() =>
         ref.read(provider.notifier).retryAttachmentDownload(_attachment);
+    bool onDownload() =>
+        ref.read(provider.notifier).loadMediaAttachment(_attachment);
 
     final category = mediaCategoryFromMimeType(_attachment.mediaType);
 
@@ -208,6 +210,7 @@ class _HostedMediaWidget extends ConsumerWidget {
           cachedBytes: cachedBytes,
           hasFailed: hasFailed,
           onRetry: onRetry,
+          onDownload: onDownload,
         );
       case MediaCategory.audio:
       case MediaCategory.document:
@@ -216,6 +219,7 @@ class _HostedMediaWidget extends ConsumerWidget {
           cachedBytes: cachedBytes,
           hasFailed: hasFailed,
           onRetry: onRetry,
+          onDownload: onDownload,
         );
       case MediaCategory.image:
         return _HostedImageWidget(
@@ -279,33 +283,109 @@ class _HostedImageWidget extends StatelessWidget {
   }
 }
 
-class _HostedVideoWidget extends StatelessWidget {
+final class _HostedVideoWidget extends StatefulWidget {
   const _HostedVideoWidget({
     required chat.ChatAttachment attachment,
     required Uint8List? cachedBytes,
     required bool hasFailed,
-    required VoidCallback onRetry,
+    required bool Function() onRetry,
+    required bool Function() onDownload,
   }) : _attachment = attachment,
        _cachedBytes = cachedBytes,
        _hasFailed = hasFailed,
-       _onRetry = onRetry;
+       _onRetry = onRetry,
+       _onDownload = onDownload;
 
   final chat.ChatAttachment _attachment;
   final Uint8List? _cachedBytes;
   final bool _hasFailed;
-  final VoidCallback _onRetry;
+  final bool Function() _onRetry;
+  final bool Function() _onDownload;
+
+  @override
+  State<_HostedVideoWidget> createState() => _HostedVideoWidgetState();
+}
+
+final class _HostedVideoWidgetState extends State<_HostedVideoWidget> {
+  bool _isDownloading = false;
+
+  @override
+  void didUpdateWidget(covariant _HostedVideoWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget._cachedBytes != null || widget._hasFailed) {
+      _isDownloading = false;
+    }
+  }
+
+  void _startDownload(bool Function() action) {
+    if (_isDownloading) return;
+    if (!action()) return;
+    setState(() => _isDownloading = true);
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (_hasFailed) {
-      return _MediaDownloadRetryBox(onRetry: _onRetry);
+    if (widget._hasFailed) {
+      return _MediaDownloadRetryBox(
+        onRetry: () => _startDownload(widget._onRetry),
+      );
     }
 
-    if (_cachedBytes == null) {
-      return const SizedBox(
+    final cachedBytes = widget._cachedBytes;
+    if (cachedBytes == null) {
+      return SizedBox(
         height: 200,
         width: 200,
-        child: Center(child: CircularProgressIndicator()),
+        child: GestureDetector(
+          onTap: _isDownloading
+              ? null
+              : () => _startDownload(widget._onDownload),
+          child: Card(
+            color: const Color.fromARGB(0, 10, 10, 10),
+            clipBehavior: Clip.hardEdge,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            elevation: 5,
+            child: Center(
+              child: _isDownloading
+                  ? const CircularProgressIndicator()
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.video_file,
+                          color: Colors.white70,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 8),
+                        const Icon(
+                          Icons.download,
+                          color: Colors.white70,
+                          size: 24,
+                        ),
+                        if (widget._attachment.filename != null)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              top: 8,
+                              left: 8,
+                              right: 8,
+                            ),
+                            child: Text(
+                              widget._attachment.filename!,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 11,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
       );
     }
 
@@ -317,8 +397,8 @@ class _HostedVideoWidget extends StatelessWidget {
           Navigator.of(context, rootNavigator: true).push<void>(
             MaterialPageRoute<void>(
               builder: (context) => _VideoPlayerScreen(
-                videoBytes: _cachedBytes,
-                filename: _attachment.filename,
+                videoBytes: cachedBytes,
+                filename: widget._attachment.filename,
               ),
             ),
           );
@@ -343,35 +423,62 @@ class _HostedVideoWidget extends StatelessWidget {
   }
 }
 
-class _HostedDocumentWidget extends StatelessWidget {
+final class _HostedDocumentWidget extends StatefulWidget {
   const _HostedDocumentWidget({
     required chat.ChatAttachment attachment,
     required Uint8List? cachedBytes,
     required bool hasFailed,
-    required VoidCallback onRetry,
+    required bool Function() onRetry,
+    required bool Function() onDownload,
   }) : _attachment = attachment,
        _cachedBytes = cachedBytes,
        _hasFailed = hasFailed,
-       _onRetry = onRetry;
+       _onRetry = onRetry,
+       _onDownload = onDownload;
 
   final chat.ChatAttachment _attachment;
   final Uint8List? _cachedBytes;
   final bool _hasFailed;
-  final VoidCallback _onRetry;
+  final bool Function() _onRetry;
+  final bool Function() _onDownload;
+
+  @override
+  State<_HostedDocumentWidget> createState() => _HostedDocumentWidgetState();
+}
+
+final class _HostedDocumentWidgetState extends State<_HostedDocumentWidget> {
+  bool _isDownloading = false;
+
+  @override
+  void didUpdateWidget(covariant _HostedDocumentWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget._cachedBytes != null || widget._hasFailed) {
+      _isDownloading = false;
+    }
+  }
+
+  void _startDownload(bool Function() action) {
+    if (_isDownloading) return;
+    if (!action()) return;
+    setState(() => _isDownloading = true);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final filename = _attachment.filename ?? 'Document';
-    final size = _attachment.byteCount;
+    final filename = widget._attachment.filename ?? 'Document';
+    final size = widget._attachment.byteCount;
     final sizeLabel = size != null ? _formatFileSize(size) : '';
-    final isLoaded = _cachedBytes != null && _cachedBytes.isNotEmpty;
+    final cachedBytes = widget._cachedBytes;
+    final isLoaded = cachedBytes != null && cachedBytes.isNotEmpty;
 
     return SizedBox(
       width: 220,
       child: GestureDetector(
         onTap: isLoaded
             ? () => _openDocument(context)
-            : (_hasFailed ? _onRetry : null),
+            : (widget._hasFailed
+                  ? () => _startDownload(widget._onRetry)
+                  : () => _startDownload(widget._onDownload)),
         child: Card(
           color: Colors.grey.shade900,
           clipBehavior: Clip.hardEdge,
@@ -384,7 +491,7 @@ class _HostedDocumentWidget extends StatelessWidget {
             child: Row(
               children: [
                 Icon(
-                  _iconForMimeType(_attachment.mediaType),
+                  _iconForMimeType(widget._attachment.mediaType),
                   color: Colors.white70,
                   size: 32,
                 ),
@@ -412,18 +519,20 @@ class _HostedDocumentWidget extends StatelessWidget {
                             fontSize: 11,
                           ),
                         ),
-                      if (!isLoaded && !_hasFailed)
+                      if (!isLoaded && !widget._hasFailed)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
-                            context.l10n.documentTapToDownload,
+                            _isDownloading
+                                ? context.l10n.loading
+                                : context.l10n.documentTapToDownload,
                             style: const TextStyle(
                               color: Colors.white38,
                               fontSize: 10,
                             ),
                           ),
                         ),
-                      if (_hasFailed)
+                      if (widget._hasFailed)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
@@ -437,13 +546,19 @@ class _HostedDocumentWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (!isLoaded && !_hasFailed)
-                  const SizedBox(
+                if (!isLoaded && !widget._hasFailed)
+                  SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: _isDownloading
+                        ? const CircularProgressIndicator(strokeWidth: 2)
+                        : const Icon(
+                            Icons.download,
+                            color: Colors.white54,
+                            size: 16,
+                          ),
                   ),
-                if (_hasFailed)
+                if (widget._hasFailed)
                   const Icon(
                     Icons.error_outline,
                     color: Colors.redAccent,
@@ -458,13 +573,14 @@ class _HostedDocumentWidget extends StatelessWidget {
   }
 
   Future<void> _openDocument(BuildContext context) async {
-    if (_cachedBytes == null) return;
+    final cachedBytes = widget._cachedBytes;
+    if (cachedBytes == null) return;
 
     try {
       final tempDir = await getTemporaryDirectory();
-      final safeName = path.basename(_attachment.filename ?? 'document');
+      final safeName = path.basename(widget._attachment.filename ?? 'document');
       final file = File('${tempDir.path}/$safeName');
-      await file.writeAsBytes(_cachedBytes);
+      await file.writeAsBytes(cachedBytes);
       await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
     } catch (e, stackTrace) {
       AppLogger.instance.error(

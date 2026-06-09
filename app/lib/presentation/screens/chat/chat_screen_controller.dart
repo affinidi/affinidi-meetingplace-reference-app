@@ -19,6 +19,7 @@ import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/event_message_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
+import '../../../infrastructure/plugins/media_category.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
@@ -619,50 +620,55 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  /// Loads an image attachment into the chat screen.
+  /// Loads a media attachment into the chat screen.
   ///
   /// Handles both legacy base64-encoded attachments and hosted media
   /// attachments (downloaded by the SDK via the attachment's transportId).
-  void loadImageAttachment(ChatAttachment attachment) {
+  bool loadMediaAttachment(ChatAttachment attachment) {
     final attachmentId = attachmentCacheKey(attachment);
 
     final attachmentsDataCache = Map.of(state.attachmentsDataCache);
     final existingData = attachmentsDataCache[attachmentId];
-    if (existingData != null) return;
+    if (existingData != null) return false;
 
     final attachmentData = attachment.data?.base64;
     if (attachmentData != null) {
       attachmentsDataCache[attachmentId] = base64.decode(attachmentData);
       state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
-      return;
+      return true;
     }
 
     // Outgoing hosted-media attachments are pushed optimistically without a
     // transportId until the upload completes; downloading then would fail
     // and poison the cache. Skip and wait for the post-upload state push.
-    if (attachment.transportId == null) return;
+    if (attachment.transportId == null) return false;
 
     _downloadAndCacheAttachment(attachmentId, attachment);
+    return true;
   }
 
   /// Retries a previously failed attachment download. Clears the failed flag
   /// and re-runs the download flow so the UI can show progress again.
-  void retryAttachmentDownload(ChatAttachment attachment) {
+  bool retryAttachmentDownload(ChatAttachment attachment) {
     final attachmentId = attachmentCacheKey(attachment);
-    if (_attachmentsLoading.contains(attachmentId)) return;
-    if (!state.failedAttachmentDownloads.contains(attachmentId)) return;
+    if (_attachmentsLoading.contains(attachmentId)) return false;
+    if (!state.failedAttachmentDownloads.contains(attachmentId)) return false;
 
     final failed = Set.of(state.failedAttachmentDownloads)
       ..remove(attachmentId);
     state = state.copyWith(failedAttachmentDownloads: failed);
     unawaited(_downloadAndCacheAttachment(attachmentId, attachment));
+    return true;
   }
 
   void _preloadHostedMediaAttachments(List<chat.ChatItem> messages) {
     for (final message in messages.whereType<chat.Message>()) {
       for (final attachment in message.attachments) {
         if (attachment.format == AttachmentFormat.hostedMedia.value) {
-          loadImageAttachment(attachment);
+          final category = mediaCategoryFromMimeType(attachment.mediaType);
+          if (category == MediaCategory.image) {
+            loadMediaAttachment(attachment);
+          }
         }
       }
     }
