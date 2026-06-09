@@ -224,20 +224,12 @@ class ChatScreenController extends _$ChatScreenController
 
     messageTextController.addListener(_onMessageTextChanged);
     _subscribeToVrcPlugin();
-    final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
 
     ref.onDispose(() {
       _vrcPluginSubscription?.cancel();
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
-      if (isZkpEnabled) {
-        if (ref.exists(proofFlowControllerProvider(contactId))) {
-          ref
-              .read(proofFlowControllerProvider(contactId).notifier)
-              .resetSession();
-        }
-      }
       _chatService?.pauseChat();
 
       messageTextController.removeListener(_onMessageTextChanged);
