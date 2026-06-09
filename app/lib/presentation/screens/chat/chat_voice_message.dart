@@ -4,7 +4,7 @@ enum _VoiceEntryMode { text, starting, recording, draft, sending }
 
 const _voiceMessageMimeTypeMp4 = 'audio/mp4';
 const _voiceMessageMimeTypeWav = 'audio/wav';
-const _voiceMessageSampleRate = 8000;
+const _voiceMessageSampleRate = 16000;
 
 class _VoiceMessageDraft {
   const _VoiceMessageDraft({
@@ -20,6 +20,317 @@ class _VoiceMessageDraft {
   final List<double> levels;
   final List<int> waveform;
   final String mediaType;
+}
+
+class _VoiceRecorderState {
+  const _VoiceRecorderState({
+    required this.mode,
+    required this.duration,
+    required this.levels,
+    required this.draft,
+    required this.startRecording,
+    required this.stopRecording,
+    required this.discard,
+    required this.send,
+  });
+
+  final _VoiceEntryMode mode;
+  final Duration duration;
+  final List<double> levels;
+  final _VoiceMessageDraft? draft;
+  final VoidCallback startRecording;
+  final VoidCallback stopRecording;
+  final VoidCallback discard;
+  final VoidCallback send;
+
+  bool get isRecording => mode == _VoiceEntryMode.recording;
+
+  bool get isVoiceMode =>
+      mode != _VoiceEntryMode.text && mode != _VoiceEntryMode.sending;
+
+  bool get isBusy =>
+      mode == _VoiceEntryMode.starting || mode == _VoiceEntryMode.sending;
+
+  bool get hasDraftOrRecording => draft != null || isRecording;
+}
+
+/// Owns voice-recording state and lifecycle, exposing the current state and
+/// the start, stop, discard, and send actions to its builder.
+///
+/// Mirrors the [_VoicePlayer] builder pattern so the recording logic lives
+/// next to playback instead of inside the chat input widget.
+class _VoiceRecorder extends HookWidget {
+  const _VoiceRecorder({
+    required ChatScreenController controller,
+    required bool shouldDisable,
+    required bool hasMessageText,
+    required VoidCallback onRequestKeyboard,
+    required Widget Function(BuildContext context, _VoiceRecorderState state)
+    builder,
+  }) : _controller = controller,
+       _shouldDisable = shouldDisable,
+       _hasMessageText = hasMessageText,
+       _onRequestKeyboard = onRequestKeyboard,
+       _builder = builder;
+
+  final ChatScreenController _controller;
+  final bool _shouldDisable;
+  final bool _hasMessageText;
+  final VoidCallback _onRequestKeyboard;
+  final Widget Function(BuildContext context, _VoiceRecorderState state)
+  _builder;
+
+  @override
+  Widget build(BuildContext context) {
+    final recorder = useMemoized(AudioRecorder.new);
+    final recorderMimeType = useRef<String>(_voiceMessageMimeTypeMp4);
+    final recordingStartedAt = useRef<DateTime?>(null);
+    final recordingTicker = useRef<Timer?>(null);
+    final recordingCapTimer = useRef<Timer?>(null);
+    final amplitudeSubscription = useRef<StreamSubscription<Amplitude>?>(null);
+    final voiceEntryMode = useState(_VoiceEntryMode.text);
+    final recordingDuration = useState(Duration.zero);
+    final recordingLevels = useState(<double>[]);
+    final voiceDraft = useState<_VoiceMessageDraft?>(null);
+    const voiceMessageMaxDuration = Duration(minutes: 5);
+
+    Future<void> deleteDraftFile(_VoiceMessageDraft draft) async {
+      try {
+        final file = File(draft.path);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (e, stackTrace) {
+        AppLogger.instance.error(
+          'Failed to delete voice message draft',
+          error: e,
+          stackTrace: stackTrace,
+          name: '_VoiceRecorder',
+        );
+      }
+    }
+
+    void clearRecordingTimers() {
+      recordingTicker.value?.cancel();
+      recordingTicker.value = null;
+      recordingCapTimer.value?.cancel();
+      recordingCapTimer.value = null;
+      final subscription = amplitudeSubscription.value;
+      amplitudeSubscription.value = null;
+      if (subscription != null) {
+        unawaited(subscription.cancel());
+      }
+    }
+
+    void clearRecordingState() {
+      clearRecordingTimers();
+      recordingStartedAt.value = null;
+      recorderMimeType.value = _voiceMessageMimeTypeMp4;
+      voiceEntryMode.value = _VoiceEntryMode.text;
+      recordingDuration.value = Duration.zero;
+      recordingLevels.value = const [];
+    }
+
+    Future<_VoiceMessageDraft?> stopRecording() async {
+      if (voiceEntryMode.value != _VoiceEntryMode.recording) {
+        return voiceDraft.value;
+      }
+
+      clearRecordingTimers();
+      final filePath = await recorder.stop();
+      final duration = recordingDuration.value;
+      var levels = recordingLevels.value;
+      final mediaType = recorderMimeType.value;
+      clearRecordingState();
+
+      if (filePath == null) return null;
+      final fileLevels = await _levelsFromVoiceFile(filePath, mediaType);
+      if (fileLevels.isNotEmpty) {
+        levels = fileLevels;
+      }
+
+      final draft = _VoiceMessageDraft(
+        path: filePath,
+        duration: duration,
+        levels: levels,
+        waveform: _waveformFromLevels(levels),
+        mediaType: mediaType,
+      );
+      voiceDraft.value = draft;
+      voiceEntryMode.value = _VoiceEntryMode.draft;
+      return draft;
+    }
+
+    Future<void> discard() async {
+      if (voiceEntryMode.value == _VoiceEntryMode.recording) {
+        clearRecordingTimers();
+        await recorder.cancel();
+        clearRecordingState();
+      }
+
+      final draft = voiceDraft.value;
+      voiceDraft.value = null;
+      voiceEntryMode.value = _VoiceEntryMode.text;
+      if (draft != null) {
+        await deleteDraftFile(draft);
+      }
+    }
+
+    Future<void> startRecording() async {
+      if (_shouldDisable ||
+          _hasMessageText ||
+          voiceEntryMode.value != _VoiceEntryMode.text) {
+        return;
+      }
+
+      voiceEntryMode.value = _VoiceEntryMode.starting;
+      final previousDraft = voiceDraft.value;
+      voiceDraft.value = null;
+      if (previousDraft != null) {
+        await deleteDraftFile(previousDraft);
+      }
+
+      try {
+        final hasPermission = await recorder.hasPermission();
+        if (!hasPermission) {
+          voiceEntryMode.value = _VoiceEntryMode.text;
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.voiceMessagePermissionDenied),
+              action: SnackBarAction(
+                label: context.l10n.cameraOpenSettings,
+                onPressed: () => unawaited(openAppSettings()),
+              ),
+            ),
+          );
+          return;
+        }
+
+        final encoder = await _supportedVoiceEncoder(recorder);
+        if (encoder == null) {
+          throw StateError('No supported voice recording encoder');
+        }
+
+        final mediaType = _voiceMessageMediaType(encoder);
+        final tempDir = await getTemporaryDirectory();
+        final filePath = path.join(
+          tempDir.path,
+          'voice-message-${clock.now().microsecondsSinceEpoch}'
+          '.${_voiceMessageFileExtension(encoder)}',
+        );
+
+        await recorder.start(
+          RecordConfig(
+            encoder: encoder,
+            sampleRate: _voiceMessageSampleRate,
+            numChannels: 1,
+          ),
+          path: filePath,
+        );
+
+        recorderMimeType.value = mediaType;
+        recordingStartedAt.value = clock.now();
+        recordingDuration.value = Duration.zero;
+        recordingLevels.value = const [];
+        voiceEntryMode.value = _VoiceEntryMode.recording;
+
+        recordingTicker.value = Timer.periodic(
+          const Duration(milliseconds: 200),
+          (_) {
+            final startedAt = recordingStartedAt.value;
+            if (startedAt == null) return;
+            final elapsed = clock.now().difference(startedAt);
+            recordingDuration.value = elapsed > voiceMessageMaxDuration
+                ? voiceMessageMaxDuration
+                : elapsed;
+          },
+        );
+        amplitudeSubscription.value = recorder
+            .onAmplitudeChanged(const Duration(milliseconds: 100))
+            .listen((amplitude) {
+              final normalized = ((amplitude.current + 60) / 60)
+                  .clamp(0.0, 1.0)
+                  .toDouble();
+              recordingLevels.value = [...recordingLevels.value, normalized];
+            });
+        recordingCapTimer.value = Timer(
+          voiceMessageMaxDuration,
+          () => unawaited(stopRecording()),
+        );
+      } catch (e, stackTrace) {
+        clearRecordingState();
+        AppLogger.instance.error(
+          'Failed to start voice recording',
+          error: e,
+          stackTrace: stackTrace,
+          name: '_VoiceRecorder',
+        );
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.voiceMessageRecordingFailed)),
+        );
+      }
+    }
+
+    Future<void> send() async {
+      final draft = voiceEntryMode.value == _VoiceEntryMode.recording
+          ? await stopRecording()
+          : voiceDraft.value;
+      if (draft == null) return;
+
+      voiceDraft.value = null;
+      voiceEntryMode.value = _VoiceEntryMode.sending;
+      _onRequestKeyboard();
+
+      final didSend = await _controller.sendVoiceMessage(
+        filePath: draft.path,
+        mediaType: draft.mediaType,
+        duration: draft.duration,
+        waveform: draft.waveform,
+      );
+      if (!context.mounted) return;
+
+      if (didSend) {
+        voiceEntryMode.value = _VoiceEntryMode.text;
+        await deleteDraftFile(draft);
+      } else {
+        voiceDraft.value = draft;
+        voiceEntryMode.value = _VoiceEntryMode.draft;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.voiceMessageSendFailed)),
+        );
+      }
+    }
+
+    useEffect(() {
+      return () {
+        clearRecordingTimers();
+        unawaited(() async {
+          await recorder.cancel();
+          await recorder.dispose();
+        }());
+        final draft = voiceDraft.value;
+        if (draft != null) {
+          unawaited(deleteDraftFile(draft));
+        }
+      };
+    }, [recorder]);
+
+    return _builder(
+      context,
+      _VoiceRecorderState(
+        mode: voiceEntryMode.value,
+        duration: recordingDuration.value,
+        levels: recordingLevels.value,
+        draft: voiceDraft.value,
+        startRecording: () => unawaited(startRecording()),
+        stopRecording: () => unawaited(stopRecording()),
+        discard: () => unawaited(discard()),
+        send: () => unawaited(send()),
+      ),
+    );
+  }
 }
 
 class _VoiceInputPreview extends HookWidget {
@@ -652,4 +963,23 @@ String _formatVoiceDuration(Duration duration) {
   final minutes = totalSeconds ~/ 60;
   final seconds = totalSeconds % 60;
   return '$minutes:${seconds.toString().padLeft(2, '0')}';
+}
+
+Future<AudioEncoder?> _supportedVoiceEncoder(AudioRecorder recorder) async {
+  for (final encoder in const [AudioEncoder.wav, AudioEncoder.aacLc]) {
+    if (await recorder.isEncoderSupported(encoder)) {
+      return encoder;
+    }
+  }
+  return null;
+}
+
+String _voiceMessageMediaType(AudioEncoder encoder) {
+  return encoder == AudioEncoder.wav
+      ? _voiceMessageMimeTypeWav
+      : _voiceMessageMimeTypeMp4;
+}
+
+String _voiceMessageFileExtension(AudioEncoder encoder) {
+  return encoder == AudioEncoder.wav ? 'wav' : 'm4a';
 }

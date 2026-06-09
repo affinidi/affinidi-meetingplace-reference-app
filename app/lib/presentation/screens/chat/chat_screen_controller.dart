@@ -1,21 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
-import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
+import '../../../application/services/chat_service/local_voice_message_data.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
@@ -54,7 +52,7 @@ class ChatScreenController extends _$ChatScreenController
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
   final Set<String> _attachmentsLoading = {};
-  final Map<String, _LocalVoiceMessageData> _localVoiceMessages = {};
+  final Map<String, LocalVoiceMessageData> _localVoiceMessages = {};
 
   late final Map<String, ProviderSubscription<void>>
   _conciergeLoadingControllersSubscriptions = {};
@@ -641,52 +639,29 @@ class ChatScreenController extends _$ChatScreenController
       return false;
     }
 
-    late final Uint8List bytes;
-    try {
-      final file = File(filePath);
-      if (!await file.exists()) {
-        _logger.warning('Voice message file missing', name: _logKey);
-        return false;
-      }
-
-      bytes = await file.readAsBytes();
-      if (bytes.isEmpty) {
-        _logger.warning('Voice message file is empty', name: _logKey);
-        return false;
-      }
-    } catch (e, st) {
-      _logger.error(
-        'Failed to read voice message file',
-        error: e,
-        stackTrace: st,
-        name: _logKey,
-      );
-      return false;
-    }
-
-    final now = clock.now();
-    final attachment = ChatAttachment.voiceMessage(
-      base64: base64.encode(bytes),
-      durationMs: duration.inMilliseconds,
-      waveform: waveform,
-      filename: path.basename(filePath),
+    final voiceMessage = await chatService.buildVoiceMessageAttachment(
+      filePath: filePath,
       mediaType: mediaType,
-      format: AttachmentFormat.hostedMedia.value,
-      lastModifiedTime: now,
-      byteCount: bytes.length,
+      duration: duration,
+      waveform: waveform,
     );
+    if (voiceMessage == null) return false;
+
     _cacheLocalVoiceMessage(
-      attachment,
-      bytes,
+      voiceMessage.attachment,
+      voiceMessage.bytes,
       durationMs: duration.inMilliseconds,
       waveform: waveform,
     );
 
     try {
-      await chatService.sendTextMessage('', attachments: [attachment]);
+      await chatService.sendTextMessage(
+        '',
+        attachments: [voiceMessage.attachment],
+      );
       return true;
     } catch (e, st) {
-      _removeLocalVoiceMessage(attachment);
+      _removeLocalVoiceMessage(voiceMessage.attachment);
       _logger.error(
         'Failed to send voice message',
         error: e,
@@ -804,7 +779,7 @@ class ChatScreenController extends _$ChatScreenController
     _cacheAttachmentBytes(attachmentCacheKey(attachment), bytes);
     final key = _localVoiceMessageKey(attachment);
     if (key != null) {
-      _localVoiceMessages[key] = _LocalVoiceMessageData(
+      _localVoiceMessages[key] = LocalVoiceMessageData(
         bytes: bytes,
         durationMs: durationMs,
         waveform: waveform,
@@ -812,9 +787,7 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  _LocalVoiceMessageData? _localVoiceMessageFor(
-    chat.ChatAttachment attachment,
-  ) {
+  LocalVoiceMessageData? _localVoiceMessageFor(chat.ChatAttachment attachment) {
     final key = _localVoiceMessageKey(attachment);
     if (key == null) return null;
     return _localVoiceMessages[key];
@@ -933,18 +906,6 @@ class ChatScreenController extends _$ChatScreenController
         .read(contactsServiceProvider.notifier)
         .updateContact(updatedContact);
   }
-}
-
-class _LocalVoiceMessageData {
-  const _LocalVoiceMessageData({
-    required this.bytes,
-    required this.durationMs,
-    required this.waveform,
-  });
-
-  final Uint8List bytes;
-  final int durationMs;
-  final List<int> waveform;
 }
 
 extension ChatScreenControllerProviderSelectors

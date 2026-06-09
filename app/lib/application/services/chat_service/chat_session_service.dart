@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
@@ -315,6 +318,50 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       message,
       attachments: attachments ?? const [],
     );
+  }
+
+  @override
+  Future<({ChatAttachment attachment, Uint8List bytes})?>
+  buildVoiceMessageAttachment({
+    required String filePath,
+    required String mediaType,
+    required Duration duration,
+    required List<int> waveform,
+  }) async {
+    late final Uint8List bytes;
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) {
+        _logger.warning('Voice message file missing', name: _logKey);
+        return null;
+      }
+
+      bytes = await file.readAsBytes();
+      if (bytes.isEmpty) {
+        _logger.warning('Voice message file is empty', name: _logKey);
+        return null;
+      }
+    } catch (e, st) {
+      _logger.error(
+        'Failed to read voice message file',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+      return null;
+    }
+
+    final attachment = ChatAttachment.voiceMessage(
+      base64: base64.encode(bytes),
+      durationMs: duration.inMilliseconds,
+      waveform: waveform,
+      filename: path.basename(filePath),
+      mediaType: mediaType,
+      format: AttachmentFormat.hostedMedia.value,
+      lastModifiedTime: clock.now(),
+      byteCount: bytes.length,
+    );
+    return (attachment: attachment, bytes: bytes);
   }
 
   @override

@@ -36,6 +36,14 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
     List<ChatAttachment>? attachments,
   });
 
+  Future<({ChatAttachment attachment, Uint8List bytes})?>
+  buildVoiceMessageAttachment({
+    required String filePath,
+    required String mediaType,
+    required Duration duration,
+    required List<int> waveform,
+  });
+
   Future<Uint8List> downloadMedia(ChatAttachment attachment);
 
   Future<void> sendChatActivity();
