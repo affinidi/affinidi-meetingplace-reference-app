@@ -117,20 +117,10 @@ class _ConnectionListItem extends ConsumerWidget {
 
 class _ConnectionCard extends ConsumerWidget {
   const _ConnectionCard({
-    required ConnectionOffer connection,
-    required void Function({
-      required ConnectionOffer connection,
-      required bool isSelected,
-    })
-    onConnectionPress,
-    required void Function({
-      required ConnectionOffer connection,
-      required BuildContext context,
-    })
-    onConnectionLongPress,
-  }) : _onConnectionLongPress = onConnectionLongPress,
-       _onConnectionPress = onConnectionPress,
-       _connection = connection;
+    required this._connection,
+    required this._onConnectionPress,
+    required this._onConnectionLongPress,
+  });
 
   final ConnectionOffer _connection;
   final void Function({

@@ -14,8 +14,7 @@ import 'logger_target.dart';
 /// parsed into [logs] and trimmed to [_maxMemoryEntries] to prevent unbounded
 /// growth.
 class DebugLogCollectorTarget implements LoggerTarget {
-  DebugLogCollectorTarget(this._logFile, {int maxMemoryEntries = 1000})
-    : _maxMemoryEntries = maxMemoryEntries {
+  DebugLogCollectorTarget(this._logFile, {this._maxMemoryEntries = 1000}) {
     _writeQueue = _loadFromFile();
   }
 

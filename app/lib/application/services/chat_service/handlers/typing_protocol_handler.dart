@@ -10,11 +10,9 @@ import 'interfaces/chat_protocol_handler.dart';
 class TypingProtocolHandler implements ChatProtocolHandler {
   TypingProtocolHandler({
     required int secondsToShowChatActivityIndicator,
-    required void Function(String? senderDid) onTypingMember,
-    required AppLogger logger,
-  }) : _secondsToShow = secondsToShowChatActivityIndicator,
-       _onTypingMember = onTypingMember,
-       _logger = logger;
+    required this._onTypingMember,
+    required this._logger,
+  }) : _secondsToShow = secondsToShowChatActivityIndicator;
 
   static const _logKey = 'TYPINGPROTOCOLHANDLER';
 

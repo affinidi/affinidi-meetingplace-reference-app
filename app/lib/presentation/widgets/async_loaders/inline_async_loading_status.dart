@@ -26,14 +26,11 @@ class InlineAsyncLoadingStatus extends HookConsumerWidget
   const InlineAsyncLoadingStatus(
     this._provider, {
     super.key,
-    bool initialLoading = false,
-    required Widget child,
-    void Function()? retry,
-    String? loadingMessage,
-  }) : _retry = retry,
-       _child = child,
-       _initialLoading = initialLoading,
-       _loadingMessage = loadingMessage;
+    this._initialLoading = false,
+    required this._child,
+    this._retry,
+    this._loadingMessage,
+  });
 
   final ProviderListenable<AsyncValue<void>> _provider;
   final String? _loadingMessage;

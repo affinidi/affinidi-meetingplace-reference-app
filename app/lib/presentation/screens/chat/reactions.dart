@@ -2,12 +2,10 @@ part of 'chat_screen.dart';
 
 class _Reactions extends ConsumerWidget {
   _Reactions({
-    required String contactId,
-    required chat.Message chatItem,
-    required int index,
-  }) : _contactId = contactId,
-       _chatItem = chatItem,
-       _index = index;
+    required this._contactId,
+    required this._chatItem,
+    required this._index,
+  });
 
   final String _contactId;
   final chat.Message _chatItem;

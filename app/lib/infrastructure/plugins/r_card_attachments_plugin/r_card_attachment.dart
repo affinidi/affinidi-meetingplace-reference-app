@@ -6,7 +6,7 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:uuid/uuid.dart';
 
 class RCardAttachment implements MessageAttachment {
-  RCardAttachment({required String vcBlob}) : _vcBlob = vcBlob;
+  RCardAttachment({required this._vcBlob});
 
   /// The DIDComm attachment format identifier for R-Card attachments.
   ///

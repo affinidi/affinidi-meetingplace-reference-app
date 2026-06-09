@@ -9,10 +9,9 @@ import 'interfaces/chat_protocol_handler.dart';
 /// attachments and reports them via callback for state propagation.
 class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
   ZkpAttachmentProtocolHandler({
-    required void Function(StreamData data, String channelDid) onZkpAttachment,
-    required AppLogger logger,
-  }) : _onZkpAttachment = onZkpAttachment,
-       _logger = logger;
+    required this._onZkpAttachment,
+    required this._logger,
+  });
 
   static const _logKey = 'ZKPATTCHDLR';
 

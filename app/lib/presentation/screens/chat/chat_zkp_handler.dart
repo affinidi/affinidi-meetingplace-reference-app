@@ -19,13 +19,13 @@ import 'proof_flow_controller.dart';
 
 class ChatZkpHandler {
   ChatZkpHandler({
-    required Ref ref,
+    required this._ref,
     required this.logger,
     required this.logKey,
     required this.isZkpEnabled,
     required this.getContact,
     required this.onUpsertChatItem,
-  }) : _ref = ref;
+  });
 
   final Ref _ref;
   final AppLogger logger;

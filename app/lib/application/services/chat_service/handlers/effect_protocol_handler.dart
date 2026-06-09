@@ -7,11 +7,7 @@ import 'interfaces/chat_protocol_handler.dart';
 /// Handles `ChatProtocol.chatEffect` — extracts the effect name from the
 /// incoming message and notifies the caller.
 class EffectProtocolHandler implements ChatProtocolHandler {
-  EffectProtocolHandler({
-    required void Function(String? effectName) onEffect,
-    required AppLogger logger,
-  }) : _onEffect = onEffect,
-       _logger = logger;
+  EffectProtocolHandler({required this._onEffect, required this._logger});
 
   static const _logKey = 'EFFECTPROTOCOLHANDLER';
 

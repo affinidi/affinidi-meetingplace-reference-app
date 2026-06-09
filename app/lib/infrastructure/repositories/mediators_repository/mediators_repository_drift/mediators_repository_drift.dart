@@ -26,8 +26,7 @@ Future<MediatorsRepositoryDrift> mediatorsRepositoryInMemoryDrift(
 
 /// Drift implementation of [MediatorsRepository].
 class MediatorsRepositoryDrift implements MediatorsRepository {
-  MediatorsRepositoryDrift({required db.MediatorsDatabase database})
-    : _database = database;
+  MediatorsRepositoryDrift({required this._database});
 
   final db.MediatorsDatabase _database;
 

@@ -4,7 +4,7 @@ part of 'chat_screen.dart';
 /// delivered to the member immediately after they have just accepted
 /// their offer request.
 class _AwaitingMembersWarning extends ConsumerWidget {
-  _AwaitingMembersWarning({required String contactId}) : _contactId = contactId;
+  _AwaitingMembersWarning({required this._contactId});
 
   final String _contactId;
   @override

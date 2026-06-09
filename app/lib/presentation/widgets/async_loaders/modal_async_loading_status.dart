@@ -68,12 +68,10 @@ class ModalAsyncLoadingStatus extends HookConsumerWidget
   const ModalAsyncLoadingStatus(
     this._provider, {
     super.key,
-    String? loadingMessage,
-    String? successMessage,
-    LoadingMessageStyle successMessageStyle = LoadingMessageStyle.complete,
-  }) : _successMessageStyle = successMessageStyle,
-       _successMessage = successMessage,
-       _loadingMessage = loadingMessage;
+    this._loadingMessage,
+    this._successMessage,
+    this._successMessageStyle = LoadingMessageStyle.complete,
+  });
 
   final ProviderListenable<AsyncValue<void>> _provider;
   final String? _loadingMessage;

@@ -7,11 +7,9 @@ import 'interfaces/chat_protocol_handler.dart';
 /// trigger a group refresh. Add new group-details-update logic here.
 class GroupDetailsProtocolHandler implements ChatProtocolHandler {
   GroupDetailsProtocolHandler({
-    required void Function(StreamData data, String channelDid)
-    onGroupDetailsUpdated,
-    required AppLogger logger,
-  }) : _onGroupDetailsUpdated = onGroupDetailsUpdated,
-       _logger = logger;
+    required this._onGroupDetailsUpdated,
+    required this._logger,
+  });
 
   static const _logKey = 'GROUPDETAILSPROTOCOLHANDLER';
 

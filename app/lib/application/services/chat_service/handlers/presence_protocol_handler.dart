@@ -15,12 +15,10 @@ import 'interfaces/chat_protocol_handler.dart';
 /// online; before the handler split, `chatActivity` also refreshed presence.
 class PresenceProtocolHandler implements ChatProtocolHandler {
   PresenceProtocolHandler({
-    required Ref ref,
-    required void Function(DateTime timestamp) onPresenceUpdated,
-    required AppLogger logger,
-  }) : _ref = ref,
-       _onPresenceUpdated = onPresenceUpdated,
-       _logger = logger;
+    required this._ref,
+    required this._onPresenceUpdated,
+    required this._logger,
+  });
 
   static const _logKey = 'PRESENCEPROTOCOLHANDLER';
 

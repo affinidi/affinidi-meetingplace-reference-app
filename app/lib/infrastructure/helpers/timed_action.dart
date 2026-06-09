@@ -7,18 +7,16 @@ import 'package:flutter/foundation.dart';
 class TimedAction {
   /// Creates a [TimedAction].
   ///
-  /// [onRun] is executed immediately when [start] is called.
-  /// [onComplete] is invoked once the timer finishes.
+  /// [_onRun] is executed immediately when [start] is called.
+  /// [_onComplete] is invoked once the timer finishes.
   TimedAction({
-    required void Function(List<dynamic>? args) onRun,
-    VoidCallback? onComplete,
-    required Duration duration,
-  }) : _duration = duration,
-       _onComplete = onComplete,
-       _execute = onRun;
+    required this._onRun,
+    this._onComplete,
+    required this._duration,
+  });
 
   Timer? _timer;
-  final void Function(List<dynamic>? args) _execute;
+  final void Function(List<dynamic>? args) _onRun;
   final VoidCallback? _onComplete;
   final Duration _duration;
 
@@ -52,13 +50,13 @@ class TimedAction {
 
   /// Starts the timed action with optional [args].
   ///
-  /// - Immediately calls [_execute] with [args].
+  /// - Immediately calls [_onRun] with [args].
   /// - Sets a timer that will call [_complete] after [_duration].
   /// - Does nothing if already running.
   void start({List<dynamic>? args = const []}) {
     if (_timer != null) return;
 
     _timer = Timer(_duration, _complete);
-    _execute.call(args);
+    _onRun.call(args);
   }
 }

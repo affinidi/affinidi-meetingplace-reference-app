@@ -77,10 +77,9 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
 
 class _VrcAttachmentWidget extends ConsumerWidget {
   const _VrcAttachmentWidget({
-    required Attachment attachment,
-    required bool isFromMe,
-  }) : _attachment = attachment,
-       _isFromMe = isFromMe;
+    required this._attachment,
+    required this._isFromMe,
+  });
 
   final Attachment _attachment;
   final bool _isFromMe;

@@ -15,8 +15,8 @@ class StubCredentialsSdk extends MeetingPlaceCredentialsSDK {
     required super.coreSDK,
     required super.rCardRepository,
     required super.vrcRepository,
-    required VrcIssuance pendingVrc,
-  }) : _pendingVrc = pendingVrc;
+    required VrcIssuance this._pendingVrc,
+  });
 
   VrcIssuance? _pendingVrc;
 

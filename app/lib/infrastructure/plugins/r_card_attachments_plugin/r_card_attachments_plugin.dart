@@ -23,8 +23,7 @@ part 'r_card_attachment_widget.dart';
 part 'select_r_card_identity_screen.dart';
 
 class RCardAttachmentsPlugin implements AttachmentPlugin {
-  RCardAttachmentsPlugin({required BaseCacheManager cacheManager})
-    : _cacheManager = cacheManager;
+  RCardAttachmentsPlugin({required this._cacheManager});
 
   final _startRCardController = StreamController<Identity>.broadcast();
 

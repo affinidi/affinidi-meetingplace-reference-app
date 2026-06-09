@@ -7,24 +7,17 @@ import 'fake_publish_offer_result.dart';
 
 class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   FakeMeetingPlaceSDK({
-    bool shouldFailToRegisterPushToken = false,
-    PublishOfferResult? offerToReturn,
-    Exception? publishOfferException,
-    Exception? createOobFlowException,
-    Exception? acceptOobFlowException,
-    bool isPhraseAvailable = true,
+    this._shouldFailToRegisterPushToken = false,
+    this._offerToReturn,
+    this._publishOfferException,
+    this._createOobFlowException,
+    this._acceptOobFlowException,
+    this._isPhraseAvailable = true,
     Map<String, Channel>? channels,
     this.offerToFind,
     this.findOfferHasError = false,
-    bool shouldTimeout = false,
-  }) : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
-       _offerToReturn = offerToReturn,
-       _publishOfferException = publishOfferException,
-       _createOobFlowException = createOobFlowException,
-       _acceptOobFlowException = acceptOobFlowException,
-       _isPhraseAvailable = isPhraseAvailable,
-       _shouldTimeout = shouldTimeout,
-       _channels = channels ?? {};
+    this._shouldTimeout = false,
+  }) : _channels = channels ?? {};
 
   final bool _shouldFailToRegisterPushToken;
   final PublishOfferResult? _offerToReturn;

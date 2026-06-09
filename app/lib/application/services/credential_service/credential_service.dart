@@ -30,9 +30,8 @@ final credentialServiceProvider =
     });
 
 class CredentialService extends StateNotifier<CredentialServiceState> {
-  CredentialService({required Ref ref})
-    : _ref = ref,
-      _issuanceService = const LivenessVcIssuanceService(),
+  CredentialService({required this._ref})
+    : _issuanceService = const LivenessVcIssuanceService(),
       super(const CredentialServiceState()) {
     _logger = _ref.read(appLoggerProvider);
   }

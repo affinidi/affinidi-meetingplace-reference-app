@@ -18,8 +18,7 @@ import 'gallery_image_attachment.dart';
 /// - Render image attachments as tappable cards in chat
 /// - Support full-screen image viewing
 class GalleryAttachmentsPlugin implements AttachmentPlugin {
-  GalleryAttachmentsPlugin({required BaseCacheManager cacheManager})
-    : _cacheManager = cacheManager;
+  GalleryAttachmentsPlugin({required this._cacheManager});
 
   static const _pluginName = 'mpx_gallery_attachment_plugin';
 
@@ -125,10 +124,9 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
 /// attachment as a separate [_GalleryAttachmentWidget].
 class _ListGalleryAttachmentsWidget extends StatelessWidget {
   const _ListGalleryAttachmentsWidget({
-    required List<Attachment> attachments,
-    required BaseCacheManager cacheManager,
-  }) : _attachments = attachments,
-       _cacheManager = cacheManager;
+    required this._attachments,
+    required this._cacheManager,
+  });
 
   final List<Attachment> _attachments;
   final BaseCacheManager _cacheManager;
@@ -158,10 +156,9 @@ class _ListGalleryAttachmentsWidget extends StatelessWidget {
 /// - Returns empty widget if attachment data is invalid
 class _GalleryAttachmentWidget extends StatelessWidget {
   _GalleryAttachmentWidget({
-    required Attachment attachment,
-    required BaseCacheManager cacheManager,
-  }) : _attachment = attachment,
-       _cacheManager = cacheManager;
+    required this._attachment,
+    required this._cacheManager,
+  });
 
   final Attachment _attachment;
   final BaseCacheManager _cacheManager;

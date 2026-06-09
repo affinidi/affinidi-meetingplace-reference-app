@@ -1,7 +1,7 @@
 part of 'chat_screen.dart';
 
 class _ChatContactDisplayName extends ConsumerWidget {
-  _ChatContactDisplayName({required String contactId}) : _contactId = contactId;
+  _ChatContactDisplayName({required this._contactId});
 
   final String _contactId;
 
@@ -92,7 +92,7 @@ class _ChatContactDisplayName extends ConsumerWidget {
 }
 
 class _IndividualChatName extends ConsumerWidget {
-  _IndividualChatName({required String contactId}) : _contactId = contactId;
+  _IndividualChatName({required this._contactId});
 
   final String _contactId;
   @override
@@ -111,7 +111,7 @@ class _IndividualChatName extends ConsumerWidget {
 }
 
 class _ChatContactImage extends ConsumerWidget {
-  _ChatContactImage({required String contactId}) : _contactId = contactId;
+  _ChatContactImage({required this._contactId});
 
   final String _contactId;
 

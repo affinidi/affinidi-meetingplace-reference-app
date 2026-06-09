@@ -6,12 +6,10 @@ import '../common/app_card.dart';
 class FormCard extends StatelessWidget {
   const FormCard({
     super.key,
-    required String title,
-    required Widget child,
-    Widget? trailing,
-  }) : _title = title,
-       _child = child,
-       _trailing = trailing;
+    required this._title,
+    required this._child,
+    this._trailing,
+  });
 
   final Widget _child;
   final String _title;

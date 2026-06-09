@@ -1,8 +1,7 @@
 part of 'chat_screen.dart';
 
 class ChatContactPresenceStatus extends ConsumerWidget {
-  const ChatContactPresenceStatus({required String contactId})
-    : _contactId = contactId;
+  const ChatContactPresenceStatus({required this._contactId});
 
   final String _contactId;
 

@@ -9,9 +9,7 @@ import 'package:image_picker/image_picker.dart';
 /// This allows tests to simulate image picking without requiring
 /// actual camera/gallery access.
 class FakeImagePicker extends ImagePicker {
-  FakeImagePicker({XFile? xFileToReturn, bool shouldReturnNull = false})
-    : _xFileToReturn = xFileToReturn,
-      _shouldReturnNull = shouldReturnNull;
+  FakeImagePicker({this._xFileToReturn, this._shouldReturnNull = false});
 
   /// Creates a default fake image picker with a 1x1 red pixel PNG.
   factory FakeImagePicker.withDefaultImage() {

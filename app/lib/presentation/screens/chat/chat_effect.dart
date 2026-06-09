@@ -1,7 +1,7 @@
 part of 'chat_screen.dart';
 
 class ChatEffect extends ConsumerWidget {
-  ChatEffect({super.key, required String contactId}) : _contactId = contactId;
+  ChatEffect({super.key, required this._contactId});
 
   final String _contactId;
   @override

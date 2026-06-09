@@ -1,9 +1,7 @@
 part of '../dashboard_routes.dart';
 
 class AcceptOfferRoute extends GoRouteData with $AcceptOfferRoute {
-  AcceptOfferRoute({required String mnemonic, required String identityId})
-    : _mnemonic = mnemonic,
-      _identityId = identityId;
+  AcceptOfferRoute({required this._mnemonic, required this._identityId});
 
   static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;
 

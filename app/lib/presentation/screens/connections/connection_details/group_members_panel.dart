@@ -168,12 +168,10 @@ class _GroupMembersList extends ConsumerWidget {
 
 class _GroupMemberIcon extends StatelessWidget {
   const _GroupMemberIcon({
-    required String memberDid,
-    required String? myDid,
-    required bool isAdmin,
-  }) : _memberDid = memberDid,
-       _myDid = myDid,
-       _isAdmin = isAdmin;
+    required this._memberDid,
+    required this._myDid,
+    required this._isAdmin,
+  });
 
   final String _memberDid;
   final String? _myDid;

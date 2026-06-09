@@ -84,8 +84,7 @@ part 'reactions.dart';
 part 'vrc_banner.dart';
 
 class ChatScreen extends HookConsumerWidget {
-  const ChatScreen({super.key, required String contactId})
-    : _contactId = contactId;
+  const ChatScreen({super.key, required this._contactId});
 
   final String _contactId;
 
