@@ -456,12 +456,14 @@ class _HostedAudioWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final cachedBytes = _cachedBytes;
     final levels = _levelsForHostedVoice(_attachment, cachedBytes);
+    final durationMs =
+        chat.VoiceMessageMetadata.of(_attachment)?.durationMs ?? 0;
     if (cachedBytes == null) {
       return _VoiceMessageBubble(
         isFromMe: _isFromMe,
         chatItemColor: _chatItemColor,
         isPlaying: false,
-        duration: Duration(milliseconds: _attachment.durationMs ?? 0),
+        duration: Duration(milliseconds: durationMs),
         levels: levels,
         progress: 0,
         onPressed: _hasFailed ? _onRetry : () {},
@@ -471,7 +473,7 @@ class _HostedAudioWidget extends StatelessWidget {
     return _VoicePlayer(
       bytes: cachedBytes,
       mediaType: _attachment.mediaType,
-      initialDuration: Duration(milliseconds: _attachment.durationMs ?? 0),
+      initialDuration: Duration(milliseconds: durationMs),
       builder: (context, state) => _VoiceMessageBubble(
         isFromMe: _isFromMe,
         chatItemColor: _chatItemColor,
@@ -829,11 +831,12 @@ List<double> _levelsForHostedVoice(
   chat.ChatAttachment attachment,
   Uint8List? bytes,
 ) {
-  if (!_hasWaveformShape(attachment.waveform) && bytes != null) {
+  final waveform = chat.VoiceMessageMetadata.of(attachment)?.waveform;
+  if (!_hasWaveformShape(waveform) && bytes != null) {
     final byteLevels = _levelsFromVoiceBytes(bytes, attachment.mediaType);
     if (byteLevels.isNotEmpty) return byteLevels;
   }
-  return _levelsFromWaveform(attachment.waveform);
+  return _levelsFromWaveform(waveform);
 }
 
 Future<List<double>> _levelsFromVoiceFile(String path, String mediaType) async {

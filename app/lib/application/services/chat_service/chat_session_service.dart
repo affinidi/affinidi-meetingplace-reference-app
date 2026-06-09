@@ -351,7 +351,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       return null;
     }
 
-    final attachment = ChatAttachment.voiceMessage(
+    final attachment = VoiceMessageMetadata.buildAttachment(
       base64: base64.encode(bytes),
       durationMs: duration.inMilliseconds,
       waveform: waveform,

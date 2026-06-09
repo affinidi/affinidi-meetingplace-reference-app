@@ -214,8 +214,10 @@ void main() {
             data: ChatAttachmentData(
               links: [Uri.parse('mxc://fake-homeserver/voice')],
             ),
-            durationMs: 11000,
-            waveform: [0, 35, 100],
+            metadata: VoiceMessageMetadata(
+              durationMs: 11000,
+              waveform: [0, 35, 100],
+            ).toMetadata(),
           ),
         ],
       );

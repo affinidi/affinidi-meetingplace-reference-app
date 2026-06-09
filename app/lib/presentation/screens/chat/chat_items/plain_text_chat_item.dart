@@ -152,8 +152,7 @@ class _AttachmentWidget extends HookConsumerWidget {
 
   bool get _isHostedMedia =>
       _attachment.format == AttachmentFormat.hostedMedia.value;
-  bool get _isVoiceMessage =>
-      _attachment.mediaKind == chat.AttachmentMediaKind.voice;
+  bool get _isVoiceMessage => chat.VoiceMessageMetadata.isVoice(_attachment);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -214,7 +213,7 @@ class _HostedMediaWidget extends ConsumerWidget {
         ref.read(provider.notifier).loadMediaAttachment(_attachment);
 
     final category = mediaCategoryFromMimeType(_attachment.mediaType);
-    if (_attachment.mediaKind == chat.AttachmentMediaKind.voice) {
+    if (chat.VoiceMessageMetadata.isVoice(_attachment)) {
       return _HostedAudioWidget(
         attachment: _attachment,
         cachedBytes: cachedBytes,

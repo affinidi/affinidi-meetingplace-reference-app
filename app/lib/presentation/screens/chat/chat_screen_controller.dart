@@ -723,8 +723,7 @@ class ChatScreenController extends _$ChatScreenController
       for (final attachment in message.attachments) {
         if (attachment.format == AttachmentFormat.hostedMedia.value) {
           final category = mediaCategoryFromMimeType(attachment.mediaType);
-          final isVoice =
-              attachment.mediaKind == chat.AttachmentMediaKind.voice;
+          final isVoice = chat.VoiceMessageMetadata.isVoice(attachment);
           if (category == MediaCategory.image || isVoice) {
             loadMediaAttachment(attachment);
           }
@@ -819,9 +818,9 @@ class ChatScreenController extends _$ChatScreenController
                 if (!_isVoiceAttachment(attachment)) return attachment;
                 final localVoiceMessage = _localVoiceMessageFor(attachment);
                 if (localVoiceMessage == null) return attachment;
-                if (attachment.waveform?.isNotEmpty == true &&
-                    attachment.durationMs != null &&
-                    attachment.mediaKind == chat.AttachmentMediaKind.voice) {
+                final voice = chat.VoiceMessageMetadata.of(attachment);
+                if (voice?.waveform?.isNotEmpty == true &&
+                    voice?.durationMs != null) {
                   return attachment;
                 }
 
@@ -837,13 +836,13 @@ class ChatScreenController extends _$ChatScreenController
                   data: attachment.data,
                   byteCount: attachment.byteCount,
                   transportId: attachment.transportId,
-                  mediaKind:
-                      attachment.mediaKind ?? chat.AttachmentMediaKind.voice,
-                  durationMs:
-                      attachment.durationMs ?? localVoiceMessage.durationMs,
-                  waveform: attachment.waveform?.isNotEmpty == true
-                      ? attachment.waveform
-                      : localVoiceMessage.waveform,
+                  metadata: chat.VoiceMessageMetadata(
+                    durationMs:
+                        voice?.durationMs ?? localVoiceMessage.durationMs,
+                    waveform: voice?.waveform?.isNotEmpty == true
+                        ? voice!.waveform
+                        : localVoiceMessage.waveform,
+                  ).toMetadata(),
                 );
               })
               .toList(growable: false);
@@ -872,7 +871,7 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   bool _isVoiceAttachment(chat.ChatAttachment attachment) {
-    if (attachment.mediaKind == chat.AttachmentMediaKind.voice) return true;
+    if (chat.VoiceMessageMetadata.isVoice(attachment)) return true;
     return attachment.mediaType?.toLowerCase().startsWith('audio/') ?? false;
   }
 

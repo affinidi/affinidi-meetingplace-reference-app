@@ -12,6 +12,7 @@ String attachmentCacheKey(chat.ChatAttachment attachment) {
     return 'chat_attachment_transport_$transportId';
   }
 
+  final voice = chat.VoiceMessageMetadata.of(attachment);
   final parts = <String?>[
     attachment.data?.hash,
     attachment.data?.links?.firstOrNull?.toString(),
@@ -19,8 +20,8 @@ String attachmentCacheKey(chat.ChatAttachment attachment) {
     attachment.mediaType,
     attachment.description,
     attachment.byteCount?.toString(),
-    attachment.mediaKind?.value,
-    attachment.durationMs?.toString(),
+    voice != null ? chat.VoiceMessageMetadata.voiceKind : null,
+    voice?.durationMs?.toString(),
     attachment.data?.json,
   ].whereType<String>().where((part) => part.isNotEmpty).toList();
 
