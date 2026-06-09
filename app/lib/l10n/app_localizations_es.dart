@@ -1869,4 +1869,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String zkpNoticeRequest(String contactName) {
     return '$contactName ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.';
   }
+
+  @override
+  String get zkpProofAlreadyShared => 'Prueba ZKP ya compartida';
 }
