@@ -18,6 +18,10 @@ class _ChatMessageList extends HookConsumerWidget {
     final selectedReactionIndex = ref.watch(
       provider.select((state) => state.selectedReactionIndex),
     );
+    final zkpPolicy = ChatZkpMessageListPolicy.fromMessages(
+      enabled: ref.read(environmentProvider).zkpEnabled,
+      messages: sortedMessages,
+    );
 
     var lastUsedChatItemStatus = chat.ChatItemStatus.error;
 
@@ -54,18 +58,23 @@ class _ChatMessageList extends HookConsumerWidget {
               reverse: true,
               itemCount: sortedMessages.length,
               itemBuilder: (context, index) {
-                var chatItem = sortedMessages[index];
+                final chatItem = sortedMessages[index];
 
-                // VRC request messages are protocol signals
-                // — never render them.
-                if (_isVrcRequestOnlyMessage(chatItem)) {
+                if (_isVrcRequestOnlyMessage(chatItem) ||
+                    zkpPolicy.shouldHide(chatItem)) {
                   return const SizedBox.shrink();
                 }
-
                 var nextItemFromSameDid = false;
 
-                if (index < sortedMessages.length - 1) {
-                  var chatItemNext = sortedMessages[index + 1];
+                var nextIndex = index + 1;
+                while (nextIndex < sortedMessages.length &&
+                    (_isVrcRequestOnlyMessage(sortedMessages[nextIndex]) ||
+                        zkpPolicy.shouldHide(sortedMessages[nextIndex]))) {
+                  nextIndex++;
+                }
+
+                if (nextIndex < sortedMessages.length) {
+                  final chatItemNext = sortedMessages[nextIndex];
                   nextItemFromSameDid =
                       chatItemNext.senderDid == chatItem.senderDid;
                 }
@@ -74,7 +83,6 @@ class _ChatMessageList extends HookConsumerWidget {
 
                 if (chatItem.isFromMe && !_isRCardOnlyMessage(chatItem)) {
                   if (index == indexOfLastMessageFromMe) {
-                    // this is the last one from me, show status regardless
                     thisItemStatus = context.l10n.chatItemStatus(
                       chatItem.status.toString(),
                     );
@@ -82,20 +90,11 @@ class _ChatMessageList extends HookConsumerWidget {
                       chatItem,
                     );
                   } else {
-                    //
-                    // if the previous item in the visual list
-                    // (meaning, the NEXT)
-                    // item in the list, (remember, it is displayed in reverse)
-                    // has the same status as this item, we don't show the
-                    // status on this item, we let it show on
-                    // the next item - this
-                    // will propagate all the way down
-                    //
-                    var indexOfNextMessageFromMe = ref
+                    final indexOfNextMessageFromMe = ref
                         .read(provider)
                         .getIndexOfNextMessageFromMe(index);
                     if (indexOfNextMessageFromMe != -1) {
-                      var chatItemNextFromMe =
+                      final chatItemNextFromMe =
                           sortedMessages[indexOfNextMessageFromMe];
                       if (consolidateChatItemStatus(chatItem) !=
                           lastUsedChatItemStatus) {
@@ -114,8 +113,7 @@ class _ChatMessageList extends HookConsumerWidget {
                 }
 
                 return Padding(
-                  key: ValueKey(chatItem.messageId),
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  padding: zkpPolicy.horizontalPadding(chatItem),
                   child: Column(
                     children: [
                       Align(
@@ -145,12 +143,22 @@ class _ChatMessageList extends HookConsumerWidget {
                                   contactId: _contactId,
                                 ),
                               ),
-                            _RCardBubble(
-                              chatItem: chatItem,
-                              index: index,
-                              contactId: _contactId,
-                              selectedReactionIndex: selectedReactionIndex,
-                            ),
+                            _isRCardOnlyMessage(chatItem)
+                                ? _RCardBubble(
+                                    chatItem: chatItem,
+                                    index: index,
+                                    contactId: _contactId,
+                                    selectedReactionIndex:
+                                        selectedReactionIndex,
+                                  )
+                                : _ZkpBubble(
+                                    chatItem: chatItem,
+                                    index: index,
+                                    contactId: _contactId,
+                                    selectedReactionIndex:
+                                        selectedReactionIndex,
+                                    policy: zkpPolicy,
+                                  ),
                           ],
                         ),
                       ),
@@ -220,18 +228,12 @@ chat.ChatItemStatus consolidateChatItemStatus(chat.ChatItem chatItem) {
   return chatItem.status;
 }
 
-Color getChatItemColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
+Color _rCardBubbleColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
   if (chatItem.isFromMe) {
     if (chatItem.status == chat.ChatItemStatus.error) {
       return Colors.red;
     }
     return colorScheme.primary;
-  }
-
-  if (chatItem.type == chat.ChatItemType.conciergeMessage) {
-    return const Color.fromARGB(255, 53, 130, 6);
-  } else if (chatItem.type == chat.ChatItemType.eventMessage) {
-    return Colors.transparent;
   }
 
   return const Color.fromARGB(248, 107, 65, 162);
@@ -285,7 +287,7 @@ class _RCardBubble extends StatelessWidget {
       }
     }
 
-    final chatItemColor = getChatItemColor(context.colorScheme, chatItem);
+    final chatItemColor = _rCardBubbleColor(context.colorScheme, chatItem);
 
     final margin =
         chatItem is EncryptionNotice ||
@@ -336,6 +338,44 @@ class _RCardBubble extends StatelessWidget {
         final bubbleWidth = constraints.maxWidth * 0.67 + 16;
         return SizedBox(width: bubbleWidth, child: bubble);
       },
+    );
+  }
+}
+
+class _ZkpBubble extends StatelessWidget {
+  const _ZkpBubble({
+    required this.chatItem,
+    required this.index,
+    required this.contactId,
+    required this.selectedReactionIndex,
+    required this.policy,
+  });
+
+  final chat.ChatItem chatItem;
+  final int index;
+  final String contactId;
+  final int? selectedReactionIndex;
+  final ChatZkpMessageListPolicy policy;
+
+  @override
+  Widget build(BuildContext context) {
+    final bubbleColor = policy.bubbleColor(context.colorScheme, chatItem);
+    return Container(
+      margin: policy.bubbleMargin(
+        item: chatItem,
+        index: index,
+        selectedReactionIndex: selectedReactionIndex ?? -1,
+      ),
+      decoration: BoxDecoration(
+        color: bubbleColor,
+        borderRadius: BorderRadius.circular(16.0),
+      ),
+      child: ChatItem(
+        chatItem: chatItem,
+        index: index,
+        contactId: contactId,
+        chatItemColor: bubbleColor,
+      ),
     );
   }
 }

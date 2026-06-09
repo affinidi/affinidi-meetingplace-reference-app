@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
@@ -43,6 +42,7 @@ import 'handlers/effect_protocol_handler.dart';
 import 'handlers/group_details_protocol_handler.dart';
 import 'handlers/presence_protocol_handler.dart';
 import 'handlers/typing_protocol_handler.dart';
+import 'handlers/zkp_attachment_protocol_handler.dart';
 
 part 'chat_session_service.g.dart';
 
@@ -92,7 +92,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       otherPartyPermanentDid: channelDid,
       logger: _logger,
       getChatSdk: () => _chatSDK,
-      upsertChatItem: _upsertChatItem,
+      upsertChatItem: upsertChatItem,
     );
     _vrcManager = VrcManager(
       ref: ref,
@@ -100,7 +100,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       logger: _logger,
       getChatSdk: () => _chatSDK,
       getMessages: () => state.messages,
-      upsertChatItem: _upsertChatItem,
+      upsertChatItem: upsertChatItem,
       removeChatItem: _removeChatItem,
     );
     _vdipManager = VdipManager(
@@ -153,6 +153,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           onUpdateSequenceNumber: updateContactSequenceNumber,
           logger: _logger,
         ),
+        ZkpAttachmentProtocolHandler(
+          onZkpAttachment: _onZkpAttachment,
+          logger: _logger,
+        ),
         TypingProtocolHandler(
           secondsToShowChatActivityIndicator: env.chatActivityExpiresInSeconds,
           onTypingMember: _onTypingMember,
@@ -171,6 +175,15 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           logger: _logger,
         ),
       ],
+    );
+  }
+
+  void _onZkpAttachment(StreamData data, String channelDid) {
+    state = state.copyWith(
+      zkpAttachmentEvent: ZkpAttachmentEvent(
+        data: data,
+        channelDid: channelDid,
+      ),
     );
   }
 
@@ -249,11 +262,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       final replayMessages = state.messages
           .where((m) => !dbMessageIds.contains(m.messageId))
           .toList();
-      final messages = [
+      final baseMessages = [
         EncryptionNotice(),
         ...chatSession.messages,
         ...replayMessages,
       ].sortedBy((item) => item.dateCreated).reversed.toList();
+      final messages = _appendDerivedZkpNotices(baseMessages);
       state = state.copyWith(messages: messages, isInitialized: true);
 
       // Replay any VRC events that fired before the chat was opened
@@ -426,13 +440,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   ) async {
     _toggleChatLoading(true);
     _logger.info(
-      '[MessagesStream] Received message type: '
-      '${data.plainTextMessage?.type.toString()}',
-      name: _logKey,
-    );
-    _logger.info(
-      '[MessagesStream] body: '
-      '${json.encode(data.plainTextMessage?.toJson())}',
+      '[MessagesStream] type=${data.plainTextMessage?.type} '
+      'from=${data.plainTextMessage?.from}',
       name: _logKey,
     );
 
@@ -453,23 +462,50 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           (chatItem is Message ||
               chatItem is ConciergeMessage ||
               chatItem is EventMessage)) {
-        _upsertChatItem(chatItem);
+        upsertChatItem(chatItem);
       }
       if (chatItem is Message && !chatItem.isFromMe) {
         _clearMembersTypingActivity(data.plainTextMessage?.from);
+      }
+      if (chatItem is Message &&
+          LivenessZkpConciergeDeriver.messageHasZkpAttachments(chatItem)) {
+        _syncHumanZkpNotices();
       }
     }
 
     _toggleChatLoading(false);
   }
 
-  void _upsertChatItem(ChatItem item) {
+  @override
+  void upsertChatItem(ChatItem item) {
     final existing = state.messages;
     final idx = existing.indexWhere((m) => m.messageId == item.messageId);
     final messages = idx == -1
         ? existing.insertSorted(item)
         : existing.replaceItemAtIndex(idx, item);
     state = state.copyWith(messages: messages);
+  }
+
+  String _peerFirstNameForZkpUi() {
+    return _otherPartyFirstName?.isNotEmpty == true
+        ? _otherPartyFirstName!
+        : ref
+                  .read(contactsServiceProvider)
+                  .getContactByChannelDid(_otherPartyPermanentDid)
+                  ?.card
+                  .firstName ??
+              '';
+  }
+
+  List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
+    return LivenessZkpConciergeDeriver.appendDerivedHumanZkpConciergeMessages(
+      existing,
+      contactName: _peerFirstNameForZkpUi(),
+    );
+  }
+
+  void _syncHumanZkpNotices() {
+    state = state.copyWith(messages: _appendDerivedZkpNotices(state.messages));
   }
 
   // ---------------------------------------------------------------------------

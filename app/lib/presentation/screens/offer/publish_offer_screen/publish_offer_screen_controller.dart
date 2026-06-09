@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/connections_service/connections_service.dart';
+import '../../../../application/services/connections_service/publish_offer_request.dart';
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../application/services/mediator_service/mediator_service.dart';
 import '../../../../application/services/settings_service/settings_service.dart';
@@ -332,18 +333,30 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
         }
       }
 
-      // Reset expiryDate to null if not set
+      // Reset expiryDate to null if not set and refresh offer score.
       final vrcCount = await ref
           .read(vrcServiceProvider.notifier)
           .countVrcsByDid(selectedIdentity.did);
 
-      final updatedFormData =
-          (formData.hasExpiry ? formData : formData.copyWith(expiryDate: null))
-              .copyWith(score: vrcCount);
+      final normalizedFormData = formData.hasExpiry
+          ? formData
+          : formData.copyWith(expiryDate: null);
+      final updatedFormData = normalizedFormData.copyWith(score: vrcCount);
+
+      final request = PublishOfferRequest(
+        headline: updatedFormData.headline,
+        description: updatedFormData.description,
+        isGroupOffer: updatedFormData.isGroupOffer,
+        selectedMediatorDid: updatedFormData.selectedMediatorDid,
+        expiryDate: updatedFormData.expiryDate,
+        maxUsages: updatedFormData.maxUsages,
+        customPhrase: updatedFormData.customPhrase,
+        score: updatedFormData.score,
+      );
 
       await ref
           .read(connectionsServiceProvider.notifier)
-          .publishOffer(updatedFormData, identity: selectedIdentity);
+          .publishOffer(request, identity: selectedIdentity);
     });
   }
 

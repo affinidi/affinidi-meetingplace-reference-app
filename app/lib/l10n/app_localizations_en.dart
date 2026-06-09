@@ -18,11 +18,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'contacts': 'Channels',
       'identities': 'Identities',
       'rCards': 'R-Cards',
+      'credentials': 'Credentials',
       'settings': 'Settings',
       'other': 'Invalid',
     });
     return '$_temp0';
   }
+
+  @override
+  String get rCardsPlaceholderMessage => 'R-Cards will appear here.';
 
   @override
   String get publishOffer => 'Publish Invitation';
@@ -113,6 +117,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'scanQRCode': 'Direct scan a QR Code',
       'claimAnOffer': 'Accept Meeting Place Invitation',
       'publishAnOffer': 'Publish Meeting Place Invitation',
+      'prove': 'Prove',
       'other': '',
     });
     return '$_temp0';
@@ -156,6 +161,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'scanQRCode': 'Scan a QR Code with your camera',
       'claimAnOffer': 'Connect with someone through Meeting Place',
       'publishAnOffer': 'Advertise your invitation to connect on Meeting Place',
+      'prove': 'Zero-knowledge proof verification',
       'other': '',
     });
     return '$_temp0';
@@ -1701,5 +1707,134 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String trustedBy(int count) {
     return 'Trusted by $count';
+  }
+
+  @override
+  String get humanZkp => 'Human ZKP';
+
+  @override
+  String get humanZeroKnowledgeProof => 'Human Zero-Knowledge Proof';
+
+  @override
+  String get livenessCredential => 'Liveness Credential';
+
+  @override
+  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
+
+  @override
+  String get noCredentialsYet => 'You don\'t have any credentials yet.';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get generatingZeroKnowledgeProof =>
+      'Generating Zero-Knowledge Proof...';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get generateCredential => 'Generate credential';
+
+  @override
+  String get generateProof => 'Generate proof';
+
+  @override
+  String get livenessCredentialRequest => 'Liveness Credential Request';
+
+  @override
+  String get livenessCheckDemoMode => 'Liveness Check (Demo Mode)';
+
+  @override
+  String get searchingForLivenessCredential =>
+      'Searching for Liveness Credential...';
+
+  @override
+  String get noLivenessCredentialFound =>
+      'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.';
+
+  @override
+  String get livenessCheckDemoModeNote =>
+      'This reference app runs in demo mode and does not perform a real liveness check.';
+
+  @override
+  String get livenessCheckInProgress => 'Liveness Check in progress...';
+
+  @override
+  String get livenessCheckSimulatedFlow =>
+      'This is a simulated flow for development and demonstration purposes only.';
+
+  @override
+  String get mockLivenessCredentialGenerated =>
+      'A mock Liveness Credential has been generated and securely stored under the Credentials tab.';
+
+  @override
+  String get mockLivenessCredentialNext =>
+      'You can now continue to generate a Human Zero-Knowledge proof.';
+
+  @override
+  String get livenessEvidenceThresholdNotMet =>
+      'Liveness check did not meet the required threshold. Please try again.';
+
+  @override
+  String get livenessCredentialSessionMissing =>
+      'Your liveness credential is not available in this app session. Generate a new credential and try again.';
+
+  @override
+  String get issuedTo => 'Issued to';
+
+  @override
+  String get types => 'Types';
+
+  @override
+  String get issuer => 'Issuer';
+
+  @override
+  String get issuedOn => 'Issued on';
+
+  @override
+  String get human => 'Human';
+
+  @override
+  String get proofFlowThisContact => 'this contact';
+
+  @override
+  String get proofFlowContact => 'Contact';
+
+  @override
+  String proofFlowCheckIfHuman(String contactName) {
+    return 'Check if $contactName is human using a Zero‑Knowledge Proof (ZKP) derived from a Liveness Credential.';
+  }
+
+  @override
+  String get proofFlowRequestProof => 'Request proof';
+
+  @override
+  String proofFlowVerifyingProof(String contactName) {
+    return 'Verifying proof from $contactName...';
+  }
+
+  @override
+  String proofFlowVerificationFailed(String contactName) {
+    return 'Verification failed for $contactName';
+  }
+
+  @override
+  String get zkpNoticePaused =>
+      'You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.';
+
+  @override
+  String get zkpNoticeShared =>
+      'You have shared a Zero‑Knowledge Proof confirming you are human.\n*No personal data was shared.';
+
+  @override
+  String zkpNoticeReceived(String contactName) {
+    return '$contactName has shared a Zero‑Knowledge Proof confirming they are human.';
+  }
+
+  @override
+  String zkpNoticeRequest(String contactName) {
+    return '$contactName has requested a Zero‑Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.';
   }
 }

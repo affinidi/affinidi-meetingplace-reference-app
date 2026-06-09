@@ -29,8 +29,8 @@ class _AwaitingMembersWarning extends ConsumerWidget {
       color: Colors.grey.shade700,
       child: Text(
         message,
-        style: const TextStyle(
-          color: Color(0xFFEEEEEE),
+        style: TextStyle(
+          color: context.customColors.awaitingMemberWarningText,
           fontWeight: FontWeight.w300,
           fontSize: 12,
         ),

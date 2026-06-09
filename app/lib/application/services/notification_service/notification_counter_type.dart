@@ -3,7 +3,7 @@ enum NotificationCounterType {
   connections,
   identities,
   rCards,
-  settings;
+  credentials;
 
   const NotificationCounterType();
 }

@@ -25,6 +25,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get rCardsPlaceholderMessage => 'Las R-Cards aparecerán aquí.';
+
+  @override
   String get publishOffer => 'Publicar invitación';
 
   @override
@@ -1733,5 +1736,137 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String trustedBy(int count) {
     return 'Trusted by $count';
+  }
+
+  @override
+  String get humanZkp => 'Human ZKP';
+
+  @override
+  String get humanZeroKnowledgeProof => 'Prueba de conocimiento cero humana';
+
+  @override
+  String get livenessCredential => 'Liveness Credential';
+
+  @override
+  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
+
+  @override
+  String get noCredentialsYet => 'You don\'t have any credentials yet.';
+
+  @override
+  String get all => 'Todos';
+
+  @override
+  String get generatingZeroKnowledgeProof =>
+      'Generating Zero-Knowledge Proof...';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get generateCredential => 'Generate credential';
+
+  @override
+  String get generateProof => 'Generate proof';
+
+  @override
+  String get livenessCredentialRequest =>
+      'Solicitud de credencial de detección de vida';
+
+  @override
+  String get livenessCheckDemoMode =>
+      'Verificación de detección de vida (Modo Demo)';
+
+  @override
+  String get searchingForLivenessCredential =>
+      'Buscando credencial de detección de vida...';
+
+  @override
+  String get noLivenessCredentialFound =>
+      'No se encontró ninguna credencial de detección de vida.\n\nPara continuar, se generará localmente una credencial de detección de vida simulada.\nEsta credencial se utiliza para demostrar cómo se deriva una prueba de conocimiento cero (ZKP).';
+
+  @override
+  String get livenessCheckDemoModeNote =>
+      'Esta aplicación de referencia se ejecuta en modo de demostración y no realiza una verificación de detección de vida real.';
+
+  @override
+  String get livenessCheckInProgress =>
+      'Verificación de detección de vida en progreso...';
+
+  @override
+  String get livenessCheckSimulatedFlow =>
+      'Este es un flujo simulado solo para fines de desarrollo y demostración.';
+
+  @override
+  String get mockLivenessCredentialGenerated =>
+      'Se ha generado una credencial de detección de vida simulada y se ha almacenado de forma segura en la pestaña Credenciales.\nAhora puede continuar para generar una prueba de conocimiento cero humana.';
+
+  @override
+  String get mockLivenessCredentialNext =>
+      'You can now continue to generate a Human Zero-Knowledge proof.';
+
+  @override
+  String get livenessEvidenceThresholdNotMet =>
+      'La verificación de detección de vida no alcanzó el umbral requerido. Inténtelo de nuevo.';
+
+  @override
+  String get livenessCredentialSessionMissing =>
+      'Su credencial de detección de vida no está disponible en esta sesión de la aplicación. Genere una nueva credencial e inténtelo de nuevo.';
+
+  @override
+  String get issuedTo => 'Emitido a';
+
+  @override
+  String get types => 'Tipos';
+
+  @override
+  String get issuer => 'Emisor';
+
+  @override
+  String get issuedOn => 'Emitido el';
+
+  @override
+  String get human => 'Humano';
+
+  @override
+  String get proofFlowThisContact => 'este contacto';
+
+  @override
+  String get proofFlowContact => 'Contacto';
+
+  @override
+  String proofFlowCheckIfHuman(String contactName) {
+    return 'Comprueba si $contactName es humano usando una Prueba de Conocimiento Cero (ZKP) derivada de una Credencial de Detección de Vida.';
+  }
+
+  @override
+  String get proofFlowRequestProof => 'Solicitar prueba';
+
+  @override
+  String proofFlowVerifyingProof(String contactName) {
+    return 'Verificando prueba de $contactName...';
+  }
+
+  @override
+  String proofFlowVerificationFailed(String contactName) {
+    return 'Verificación fallida para $contactName';
+  }
+
+  @override
+  String get zkpNoticePaused =>
+      'Has pausado la solicitud de prueba de ZKP humano. Toca el icono \"+\" para reiniciarla.';
+
+  @override
+  String get zkpNoticeShared =>
+      'Has compartido una Prueba de Conocimiento Cero que confirma que eres humano.\n*No se compartieron datos personales.';
+
+  @override
+  String zkpNoticeReceived(String contactName) {
+    return '$contactName ha compartido una Prueba de Conocimiento Cero que confirma que es humano.';
+  }
+
+  @override
+  String zkpNoticeRequest(String contactName) {
+    return '$contactName ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.';
   }
 }

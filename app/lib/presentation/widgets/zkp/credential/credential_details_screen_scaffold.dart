@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../../infrastructure/extensions/build_context_extensions.dart';
 
 /// A reusable scaffold for displaying credential details.
 ///

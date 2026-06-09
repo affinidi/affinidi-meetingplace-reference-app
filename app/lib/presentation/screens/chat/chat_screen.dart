@@ -15,12 +15,12 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
 import 'package:mpx_app_core/mpx_app_core.dart';
-
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../domain/models/identity/identity.dart';
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/concierge_message_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -58,6 +58,10 @@ import 'chat_items/group_deleted_chat_item.dart';
 import 'chat_items/joining_group_chat_item.dart';
 import 'chat_items/leaving_group_chat_item.dart';
 import 'chat_screen_controller.dart';
+import 'chat_zkp/chat_zkp_concierge_item.dart';
+import 'chat_zkp/chat_zkp_message_list_policy.dart';
+import 'chat_zkp/chat_zkp_overlay.dart';
+import 'proof_flow_controller.dart';
 
 part 'awaiting_members_warning.dart';
 part 'chat_contact_display_name.dart';
@@ -89,6 +93,7 @@ class ChatScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
+    final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     ref.keepAround(provider);
 
     Future<void> onVrcStart() async {
@@ -172,6 +177,7 @@ class ChatScreen extends HookConsumerWidget {
                     ChatActivityProgressIndicator(contactId: _contactId),
                     _NotificationsUnavailableWarning(_contactId),
                     _VrcBanner(_contactId),
+                    if (isZkpEnabled) ChatZkpOverlay(contactId: _contactId),
                     Expanded(child: _ChatMessageList(_contactId)),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),

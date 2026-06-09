@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
@@ -19,6 +20,7 @@ import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -34,6 +36,9 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_screen_state.dart';
+import 'chat_zkp/chat_zkp_message_list_policy.dart';
+import 'chat_zkp_handler.dart';
+import 'proof_flow_controller.dart';
 
 part 'chat_screen_controller.g.dart';
 
@@ -47,10 +52,19 @@ class ChatScreenController extends _$ChatScreenController
     with WidgetsBindingObserver {
   ChatScreenController() : super();
 
+  late final bool _isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
   static const _logKey = 'UXCHAT';
 
   late final messageTextController = TextEditingController();
   late final _logger = ref.read(appLoggerProvider);
+  late final _zkpHandler = ChatZkpHandler(
+    ref: ref,
+    logger: _logger,
+    logKey: _logKey,
+    isZkpEnabled: _isZkpEnabled,
+    getContact: () => state.contact,
+    onUpsertChatItem: _upsertChatItemThroughService,
+  );
 
   TimedAction? _sendChatActivityTimedAction;
   Timer? _saveUnsentMessageDebouncer;
@@ -85,8 +99,10 @@ class ChatScreenController extends _$ChatScreenController
     var hasInitializedState = false;
 
     if (channelDid != null) {
-      _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
-      ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
+      final chatSessionProvider = chatSessionServiceProvider(channelDid);
+      final sessionService = ref.read(chatSessionProvider.notifier);
+      _chatService = sessionService;
+      ref.listen(chatSessionProvider, (previous, next) {
         Future.microtask(() {
           if (hasInitializedState) {
             pendingState = state;
@@ -97,6 +113,15 @@ class ChatScreenController extends _$ChatScreenController
             newEffect = _mapEffect(next.effect!);
           } else if (next.effect == null) {
             newEffect = null;
+          }
+
+          final zkpAttachmentEvent = next.zkpAttachmentEvent;
+          if (zkpAttachmentEvent != null &&
+              previous?.zkpAttachmentEvent != zkpAttachmentEvent) {
+            _zkpHandler.handleZkpAttachment(
+              zkpAttachmentEvent.data,
+              zkpAttachmentEvent.channelDid,
+            );
           }
 
           // Auto-hide the VRC banner when the peer's request concierge arrives.
@@ -190,6 +215,7 @@ class ChatScreenController extends _$ChatScreenController
       (previous, next) {
         if (next == null) return;
         Future.microtask(() {
+          if (!ref.mounted) return;
           state = state.copyWith(contact: next);
         });
       },
@@ -197,14 +223,21 @@ class ChatScreenController extends _$ChatScreenController
     );
 
     messageTextController.addListener(_onMessageTextChanged);
-
     _subscribeToVrcPlugin();
+    final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
 
     ref.onDispose(() {
       _vrcPluginSubscription?.cancel();
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
+      if (isZkpEnabled) {
+        if (ref.exists(proofFlowControllerProvider(contactId))) {
+          ref
+              .read(proofFlowControllerProvider(contactId).notifier)
+              .resetSession();
+        }
+      }
       _chatService?.pauseChat();
 
       messageTextController.removeListener(_onMessageTextChanged);
@@ -251,20 +284,28 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> onScreenOpened() async {
     if (!state.isInitialized) return;
 
+    if (ref.read(environmentProvider).zkpEnabled) {
+      ref.read(proofFlowControllerProvider(contactId).notifier).resetSession();
+    }
+
     await _restoreUnsentMessage();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!ref.mounted) return;
+
     _logger.info('didChangeAppLifecycleState: $state', name: _logKey);
     switch (state) {
       case AppLifecycleState.resumed:
         _chatResumingLock.synchronized(() async {
+          if (!ref.mounted) return;
           await _resumeChatSession();
         });
         break;
       case AppLifecycleState.paused:
         _chatResumingLock.synchronized(() async {
+          if (!ref.mounted) return;
           _pauseChatSession();
         });
         break;
@@ -274,6 +315,7 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   Future<void> _resumeChatSession() async {
+    if (!ref.mounted) return;
     if (!_isPaused) return;
 
     _logger.info('Resuming chat session', name: _logKey);
@@ -285,6 +327,7 @@ class ChatScreenController extends _$ChatScreenController
 
     try {
       await _chatService?.startChatSession();
+      if (!ref.mounted) return;
       _isPaused = false;
     } catch (e, st) {
       _logger.error(
@@ -424,7 +467,7 @@ class ChatScreenController extends _$ChatScreenController
     await _chatService?.updateContactSequenceNumber(channelDid);
     await _chatService?.startChatSession();
 
-    if (channel.type == ChannelType.group) {
+    if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
       final connection = await coreSdk.getConnectionOffer(channel.offerLink);
       state = state.copyWith(group: group, offerName: connection?.offerName);
@@ -456,6 +499,35 @@ class ChatScreenController extends _$ChatScreenController
     _hideActivity();
   }
 
+  /// Insert a ZKP paused notice into the chat (local only, not sent)
+  Future<void> insertZkpPausedNotice({String? pausedForNoticeMessageId}) async {
+    await _zkpHandler.insertZkpPausedNotice(
+      pausedForNoticeMessageId: pausedForNoticeMessageId,
+    );
+  }
+
+  Future<void> pauseHumanZkpRequestFlow() async {
+    final requestNoticeId =
+        ChatZkpMessageListPolicy.latestHumanZkpRequestNoticeMessageId(
+          state.messages,
+        );
+    await insertZkpPausedNotice(pausedForNoticeMessageId: requestNoticeId);
+  }
+
+  /// Routes a chat item through the service to persist it in the service state.
+  /// This ensures ZKP notices survive ref.listen state overwrites.
+  void _upsertChatItemThroughService(chat.ChatItem item) {
+    final service = _chatService;
+    if (service == null) {
+      _logger.warning(
+        'Skipping ZKP notice upsert: chat service not initialized yet',
+        name: _logKey,
+      );
+      return;
+    }
+    service.upsertChatItem(item);
+  }
+
   Future<void> _updateGroupContactPendingStatus() async {
     final contact = state.contact;
     final group = state.group;
@@ -481,6 +553,25 @@ class ChatScreenController extends _$ChatScreenController
     unawaited(_chatService?.sendTextMessage(trimmedMessage) ?? Future.value());
     _sendChatActivityTimedAction?.cancel();
     messageTextController.clear();
+  }
+
+  /// Sends a message directly with optional attachments
+  Future<void> sendMessageDirect(
+    String message, {
+    List<chat.Attachment>? attachments,
+  }) async {
+    final trimmedMessage = message.trimRight();
+    // Allow empty messages if attachments are present
+    if (trimmedMessage.isEmpty &&
+        (attachments == null || attachments.isEmpty)) {
+      return;
+    }
+
+    await (_chatService?.sendTextMessage(
+          trimmedMessage,
+          attachments: attachments,
+        ) ??
+        Future<void>.value());
   }
 
   Future<void> sendChatActivity() async {

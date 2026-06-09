@@ -20,9 +20,10 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? searchFieldFill,
     Color? fromMeColor,
     Color? fromMeDarkColor,
+    Color? credentialCardGradientStart,
+    Color? credentialCardShadow,
+    Color? awaitingMemberWarningText,
   }) : _cyan = cyan,
-       _fromMeColor = fromMeColor,
-       _fromMeDarkColor = fromMeDarkColor,
        _purple = purple,
        _rose = rose,
        _violet = violet,
@@ -36,7 +37,23 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
        _disabledGrey = disabledGrey,
        _darkGrey = darkGrey,
        _searchHintText = searchHintText,
-       _searchFieldFill = searchFieldFill;
+       _searchFieldFill = searchFieldFill,
+       _fromMeColor = fromMeColor,
+       _fromMeDarkColor = fromMeDarkColor,
+       _credentialCardGradientStart = credentialCardGradientStart,
+       _credentialCardShadow = credentialCardShadow,
+       _awaitingMemberWarningText = awaitingMemberWarningText;
+
+  /// Color for concierge messages in chat
+  static const conciergeMessageColor = Color.fromARGB(255, 53, 130, 6);
+  static const grey800 = Color(0xFF404040);
+  static const conciergeCardGradientStart = grey800;
+  static const conciergeCardGradientEnd = Color(0xFF1F1F1F);
+  static const conciergeActionOnWhite = grey800;
+
+  static const primaryBrand10 = Color(0xFFE8EEFF);
+  static const secondaryBrand90 = Color(0xFF1D2138);
+  static const utilitySuccess100 = Color(0xFF00A08D);
 
   final Color? _cyan;
   final Color? _purple;
@@ -55,10 +72,9 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color? _searchFieldFill;
   final Color? _fromMeColor;
   final Color? _fromMeDarkColor;
-
-  Color get fromMeColor =>
-      _fromMeColor ?? const Color.fromARGB(255, 3, 104, 192);
-  Color get fromMeDarkColor => _fromMeDarkColor ?? const Color(0xFF020B1A);
+  final Color? _credentialCardGradientStart;
+  final Color? _credentialCardShadow;
+  final Color? _awaitingMemberWarningText;
 
   Color get cyan => _cyan ?? Colors.cyan;
   Color get purple => _purple ?? Colors.purple;
@@ -77,6 +93,15 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   Color get darkGrey => _darkGrey ?? const Color.fromARGB(255, 49, 49, 51);
   Color get searchHintText => _searchHintText ?? const Color(0xFFBDBDBD);
   Color get searchFieldFill => _searchFieldFill ?? const Color(0xFF1C1C1E);
+  Color get fromMeColor =>
+      _fromMeColor ?? const Color.fromARGB(255, 3, 104, 192);
+  Color get fromMeDarkColor => _fromMeDarkColor ?? const Color(0xFF020B1A);
+  Color get credentialCardGradientStart =>
+      _credentialCardGradientStart ?? const Color(0xFF040822);
+  Color get credentialCardShadow =>
+      _credentialCardShadow ?? const Color.fromARGB(64, 0, 0, 0);
+  Color get awaitingMemberWarningText =>
+      _awaitingMemberWarningText ?? const Color(0xFFEEEEEE);
 
   @override
   AppCustomColors copyWith({
@@ -97,6 +122,9 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? searchFieldFill,
     Color? fromMeColor,
     Color? fromMeDarkColor,
+    Color? credentialCardGradientStart,
+    Color? credentialCardShadow,
+    Color? awaitingMemberWarningText,
   }) {
     return AppCustomColors(
       cyan: cyan ?? _cyan,
@@ -116,6 +144,11 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
       searchFieldFill: searchFieldFill ?? _searchFieldFill,
       fromMeColor: fromMeColor ?? _fromMeColor,
       fromMeDarkColor: fromMeDarkColor ?? _fromMeDarkColor,
+      credentialCardGradientStart:
+          credentialCardGradientStart ?? _credentialCardGradientStart,
+      credentialCardShadow: credentialCardShadow ?? _credentialCardShadow,
+      awaitingMemberWarningText:
+          awaitingMemberWarningText ?? _awaitingMemberWarningText,
     );
   }
 
@@ -140,6 +173,21 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
       searchFieldFill: Color.lerp(_searchFieldFill, other._searchFieldFill, t),
       fromMeColor: Color.lerp(_fromMeColor, other._fromMeColor, t),
       fromMeDarkColor: Color.lerp(_fromMeDarkColor, other._fromMeDarkColor, t),
+      credentialCardGradientStart: Color.lerp(
+        _credentialCardGradientStart,
+        other._credentialCardGradientStart,
+        t,
+      ),
+      credentialCardShadow: Color.lerp(
+        _credentialCardShadow,
+        other._credentialCardShadow,
+        t,
+      ),
+      awaitingMemberWarningText: Color.lerp(
+        _awaitingMemberWarningText,
+        other._awaitingMemberWarningText,
+        t,
+      ),
     );
   }
 }

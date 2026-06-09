@@ -6,12 +6,17 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../application/services/r_cards_service/r_cards_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
+import '../../painting/cached_base64_image.dart';
+import '../../widgets/cards/animated_stacked_card_deck.dart';
+import '../../widgets/cards/r_card_header_card.dart';
 import '../../widgets/section_banner.dart';
 import '../../widgets/tab_bar_tab.dart';
-import 'r_cards_deck.dart';
 import 'r_cards_screen_controller.dart';
 import 'r_cards_screen_filter.dart';
+import 'returning_card_provider.dart';
 
 /// Displays all received R-Cards as a stacked card deck with filter, search,
 /// and export capabilities.
@@ -26,7 +31,6 @@ class RCardsScreen extends HookConsumerWidget {
     final provider = rCardsScreenControllerProvider;
     final controller = ref.read(provider.notifier);
 
-    final filter = ref.watch(provider.select((state) => state.filter));
     final isSearchActive = ref.watch(
       provider.select((state) => state.isSearchActive),
     );
@@ -72,8 +76,6 @@ class RCardsScreen extends HookConsumerWidget {
       await SharePlus.instance.share(params);
     }
 
-    final deckKey = 'r_cards_deck_${cards.length}_${filter.name}';
-
     return ColoredBox(
       color: colorScheme.surface,
       child: SafeArea(
@@ -83,10 +85,6 @@ class RCardsScreen extends HookConsumerWidget {
             SectionBanner(
               title: l10n.tabsTitle(Tabs.rCards.name),
               subtitle: l10n.rCardsPanelSubtitle,
-              icon: Icon(
-                Icons.credit_card_outlined,
-                color: colorScheme.onSurfaceVariant,
-              ),
             ),
             Row(
               children: [
@@ -159,11 +157,7 @@ class RCardsScreen extends HookConsumerWidget {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                            child: RCardsDeck(
-                              deckKey: deckKey,
-                              cards: cards,
-                              extractSubject: RCardSubject.fromVcBlob,
-                            ),
+                            child: _RCardsDeckWidget(cards: cards),
                           ),
                         ),
                       ),
@@ -228,6 +222,53 @@ class _EmptyStateWidget extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _RCardsDeckWidget extends ConsumerWidget {
+  const _RCardsDeckWidget({required this.cards});
+
+  final List<RCard> cards;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final returningCardId = ref.watch(returningCardProvider);
+    final returningIndex = returningCardId != null
+        ? cards.indexWhere((card) => card.subjectDid == returningCardId)
+        : null;
+
+    final cacheManager = ref.read(cacheManagerProvider);
+
+    return AnimatedStackedCardDeck<RCard>(
+      items: cards,
+      cardHeight: RCardHeaderCard.height,
+      overlapOffset: 60.0,
+      returningIndex: returningIndex,
+      onReturningAnimationComplete: () {
+        ref.read(returningCardProvider.notifier).set(null);
+      },
+      cardBuilder: (context, card, index, fadeAnimation) {
+        final subject = RCardSubject.fromVcBlob(card.vcBlob);
+        final name = subject.name.trim();
+        final displayName = name.isNotEmpty ? name : card.subjectDid;
+        final profilePic = subject.profilePic?.trim();
+
+        return GestureDetector(
+          onTap: () => RCardDetailsRoute(
+            subjectDid: card.subjectDid,
+          ).push<void>(context),
+          child: Hero(
+            tag: 'r_card_${card.subjectDid}',
+            child: RCardHeaderCard(
+              name: displayName,
+              avatarImage: profilePic == null || profilePic.isEmpty
+                  ? null
+                  : CachedBase64Image(profilePic, cacheManager: cacheManager),
+            ),
+          ),
+        );
+      },
     );
   }
 }

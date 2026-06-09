@@ -7,6 +7,7 @@ import '../../presentation/screens/chat/chat_screen.dart';
 import '../../presentation/screens/connections/connection_details/connection_details_screen.dart';
 import '../../presentation/screens/connections/connections_screen.dart';
 import '../../presentation/screens/contacts/contacts_screen.dart';
+import '../../presentation/screens/credentials/credentials_screen.dart';
 import '../../presentation/screens/identities/form_screen/identity_form_screen.dart';
 import '../../presentation/screens/identities/identities_screen.dart';
 import '../../presentation/screens/offer/accept_offer_screen/accept_offer_screen.dart';
@@ -17,7 +18,6 @@ import '../../presentation/screens/oob/oob_scan_qr_screen/oob_scan_qr_screen.dar
 import '../../presentation/screens/oob/oob_share_qr_screen/oob_share_qr_screen.dart';
 import '../../presentation/screens/r_cards/r_card_details_screen.dart';
 import '../../presentation/screens/r_cards/r_cards_screen.dart';
-import '../../presentation/screens/settings/settings_screen.dart';
 import '../../presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
 import '../router_config_provider.dart';
 import 'route_names.dart';
@@ -125,11 +125,11 @@ part 'vrc/vrc_details_route.dart';
         ),
       ],
     ),
-    TypedStatefulShellBranch<SettingsBranchData>(
+    TypedStatefulShellBranch<CredentialsBranchData>(
       routes: [
-        TypedGoRoute<SettingsRoute>(
-          path: RoutePaths.settings,
-          name: RouteNames.settings,
+        TypedGoRoute<CredentialsRoute>(
+          path: RoutePaths.credentials,
+          name: RouteNames.credentials,
         ),
       ],
     ),
@@ -159,7 +159,7 @@ final _contactsNavigatorKey = GlobalKey<NavigatorState>();
 final _connectionsNavigatorKey = GlobalKey<NavigatorState>();
 final _identitiesNavigatorKey = GlobalKey<NavigatorState>();
 final _rCardsNavigatorKey = GlobalKey<NavigatorState>();
-final _settingsNavigatorKey = GlobalKey<NavigatorState>();
+final _credentialsNavigatorKey = GlobalKey<NavigatorState>();
 
 // Branch data classes for each tab
 class ContactsBranchData extends StatefulShellBranchData {
@@ -185,18 +185,19 @@ class IdentitiesBranchData extends StatefulShellBranchData {
       'identitiesBranchRestorationScopeId';
 }
 
-class SettingsBranchData extends StatefulShellBranchData {
-  const SettingsBranchData();
-
-  static final $navigatorKey = _settingsNavigatorKey;
-  static const String $restorationScopeId = 'settingsBranchRestorationScopeId';
-}
-
 class RCardsBranchData extends StatefulShellBranchData {
   const RCardsBranchData();
 
   static final $navigatorKey = _rCardsNavigatorKey;
   static const String $restorationScopeId = 'rCardsBranchRestorationScopeId';
+}
+
+class CredentialsBranchData extends StatefulShellBranchData {
+  const CredentialsBranchData();
+
+  static final $navigatorKey = _credentialsNavigatorKey;
+  static const String $restorationScopeId =
+      'credentialsBranchRestorationScopeId';
 }
 
 // Main tabs
@@ -224,18 +225,18 @@ class IdentitiesRoute extends GoRouteData with $IdentitiesRoute {
       const IdentitiesScreen();
 }
 
-class SettingsRoute extends GoRouteData with $SettingsRoute {
-  const SettingsRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const SettingsScreen();
-}
-
 class RCardsRoute extends GoRouteData with $RCardsRoute {
   const RCardsRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const RCardsScreen();
+}
+
+class CredentialsRoute extends GoRouteData with $CredentialsRoute {
+  const CredentialsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const CredentialsScreen();
 }

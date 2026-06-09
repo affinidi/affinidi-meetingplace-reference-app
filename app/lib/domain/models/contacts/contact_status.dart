@@ -17,3 +17,8 @@ enum ContactStatus {
 
   final int value;
 }
+
+extension ContactStatusExtensions on ContactStatus {
+  bool get isEstablished =>
+      this == ContactStatus.active || this == ContactStatus.approved;
+}

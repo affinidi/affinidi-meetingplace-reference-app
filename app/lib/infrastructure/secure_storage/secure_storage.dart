@@ -17,6 +17,8 @@ enum _Key {
   databasePassphrase,
   pushNotificationToken,
   showMeetingPlaceQr,
+  zkpLivenessCredentials,
+  livenessIssuerDid,
 }
 
 /// Secure storage wrapper implementing [KeyRepository] and [KeyStore].
@@ -279,6 +281,32 @@ class SecureStorage implements KeyRepository, KeyStore {
   /// Clears all unsent messages from secure storage.
   Future<void> clearUnsentMessages() async {
     await _secureStorage.delete(key: 'unsent_messages');
+  }
+
+  /// Reads persisted liveness credential metadata (JSON array).
+  Future<String?> readLivenessCredentials() async {
+    return _secureStorage.read(key: _Key.zkpLivenessCredentials.name);
+  }
+
+  /// Persists liveness credential metadata (JSON array).
+  Future<void> writeLivenessCredentials(String json) async {
+    await _secureStorage.write(
+      key: _Key.zkpLivenessCredentials.name,
+      value: json,
+    );
+  }
+
+  /// Clears all persisted liveness credential metadata.
+  Future<void> clearLivenessCredentials() async {
+    await _secureStorage.delete(key: _Key.zkpLivenessCredentials.name);
+  }
+
+  Future<String?> readLivenessIssuerDid() async {
+    return _secureStorage.read(key: _Key.livenessIssuerDid.name);
+  }
+
+  Future<void> writeLivenessIssuerDid(String did) async {
+    await _secureStorage.write(key: _Key.livenessIssuerDid.name, value: did);
   }
 }
 

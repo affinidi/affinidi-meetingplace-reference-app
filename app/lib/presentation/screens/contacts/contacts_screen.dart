@@ -45,7 +45,6 @@ class ContactsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
     final provider = contactsScreenControllerProvider;
     final controller = ref.read(provider.notifier);
     ref.keepAround(contactsScreenControllerProvider);
@@ -58,8 +57,6 @@ class ContactsScreen extends ConsumerWidget {
             SectionBanner(
               title: l10n.tabsTitle(Tabs.contacts.name),
               subtitle: context.l10n.contactsPanelSubtitle,
-              icon: Icon(Icons.chat, color: colorScheme.onSurfaceVariant),
-              onTap: () => _showNewConnectionsMenu(context, ref),
             ),
             _FiltersBar(),
             Padding(

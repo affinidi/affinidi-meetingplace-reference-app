@@ -6,6 +6,8 @@ class RoutePaths {
   static const connections = '/connections';
   static const contacts = '/contacts';
   static const identities = '/identities';
+  static const rCards = '/r-cards';
+  static const credentials = '/credentials';
   static const settings = '/settings';
 
   // Contacts
@@ -28,7 +30,6 @@ class RoutePaths {
   static const oobScanQr = 'oob-scan-qr';
 
   // R-Cards
-  static const rCards = '/r-cards';
   static const rCardDetails = ':subjectDid/details';
 
   // VRC

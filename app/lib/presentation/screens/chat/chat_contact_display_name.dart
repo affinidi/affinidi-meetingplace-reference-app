@@ -120,6 +120,16 @@ class _ChatContactImage extends ConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final cacheManager = ref.read(cacheManagerProvider);
     final contact = ref.watch(provider.select((state) => state.contact));
+    final zkpEnabled = ref.watch(
+      environmentProvider.select((env) => env.zkpEnabled),
+    );
+    final hasVerifiedProof = ref.watch(
+      provider.select(
+        (state) =>
+            zkpEnabled &&
+            ChatZkpMessageListPolicy.hasVerifiedProof(state.messages),
+      ),
+    );
 
     if (contact == null) return const SizedBox.shrink();
 
@@ -142,6 +152,25 @@ class _ChatContactImage extends ConsumerWidget {
             child: ProfileCircleAvatar(image: displayImage),
           ),
         ),
+        if (hasVerifiedProof)
+          Positioned(
+            top: 1,
+            right: 1,
+            child: Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                color: context.colorScheme.primary,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.verified_user,
+                color: context.colorScheme.onPrimary,
+                size: 11,
+              ),
+            ),
+          ),
         if (showBadge)
           Positioned(
             bottom: 1,

@@ -18,11 +18,15 @@ class AppLocalizationsDe extends AppLocalizations {
       'contacts': 'Kanäle',
       'identities': 'Identitäten',
       'rCards': 'R-Karten',
+      'credentials': 'Anmeldeinformationen',
       'settings': 'Einstellungen',
       'other': 'Ungültig',
     });
     return '$_temp0';
   }
+
+  @override
+  String get rCardsPlaceholderMessage => 'R-Cards werden hier angezeigt.';
 
   @override
   String get publishOffer => 'Einladung veröffentlichen';
@@ -1739,5 +1743,135 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String trustedBy(int count) {
     return 'Trusted by $count';
+  }
+
+  @override
+  String get humanZkp => 'Human ZKP';
+
+  @override
+  String get humanZeroKnowledgeProof => 'Human Zero-Knowledge-Beweis';
+
+  @override
+  String get livenessCredential => 'Liveness Credential';
+
+  @override
+  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
+
+  @override
+  String get noCredentialsYet => 'You don\'t have any credentials yet.';
+
+  @override
+  String get all => 'Alle';
+
+  @override
+  String get generatingZeroKnowledgeProof =>
+      'Generating Zero-Knowledge Proof...';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get generateCredential => 'Generate credential';
+
+  @override
+  String get generateProof => 'Generate proof';
+
+  @override
+  String get livenessCredentialRequest =>
+      'Anforderung eines Liveness-Nachweises';
+
+  @override
+  String get livenessCheckDemoMode => 'Liveness-Prüfung (Demo-Modus)';
+
+  @override
+  String get searchingForLivenessCredential =>
+      'Suche nach Liveness-Nachweis...';
+
+  @override
+  String get noLivenessCredentialFound =>
+      'Es wurde kein Liveness-Nachweis gefunden.\n\nZum Fortfahren wird lokal ein simulierter Liveness-Nachweis generiert.\nDieser Nachweis dient zur Demonstration, wie ein Zero-Knowledge-Beweis (ZKP) abgeleitet wird.';
+
+  @override
+  String get livenessCheckDemoModeNote =>
+      'Diese Referenz-App läuft im Demo-Modus und führt keine echte Liveness-Prüfung durch.';
+
+  @override
+  String get livenessCheckInProgress => 'Liveness-Prüfung läuft...';
+
+  @override
+  String get livenessCheckSimulatedFlow =>
+      'Dies ist ein simulierter Ablauf nur für Entwicklungs- und Demonstrationszwecke.';
+
+  @override
+  String get mockLivenessCredentialGenerated =>
+      'Ein simulierter Liveness-Nachweis wurde generiert und sicher unter dem Tab Anmeldeinformationen gespeichert.\nSie können jetzt fortfahren, um einen menschlichen Zero-Knowledge-Beweis zu generieren.';
+
+  @override
+  String get mockLivenessCredentialNext =>
+      'You can now continue to generate a Human Zero-Knowledge proof.';
+
+  @override
+  String get livenessEvidenceThresholdNotMet =>
+      'Die Liveness-Prüfung hat den erforderlichen Schwellenwert nicht erreicht. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get livenessCredentialSessionMissing =>
+      'Ihr Liveness-Nachweis ist in dieser App-Sitzung nicht verfügbar. Generieren Sie einen neuen Nachweis und versuchen Sie es erneut.';
+
+  @override
+  String get issuedTo => 'Ausgestellt an';
+
+  @override
+  String get types => 'Typen';
+
+  @override
+  String get issuer => 'Aussteller';
+
+  @override
+  String get issuedOn => 'Ausgestellt am';
+
+  @override
+  String get human => 'Mensch';
+
+  @override
+  String get proofFlowThisContact => 'dieser Kontakt';
+
+  @override
+  String get proofFlowContact => 'Kontakt';
+
+  @override
+  String proofFlowCheckIfHuman(String contactName) {
+    return 'Überprüfe, ob $contactName ein Mensch ist, mithilfe eines Zero-Knowledge-Beweises (ZKP), der aus einem Liveness-Nachweis abgeleitet wurde.';
+  }
+
+  @override
+  String get proofFlowRequestProof => 'Beweis anfordern';
+
+  @override
+  String proofFlowVerifyingProof(String contactName) {
+    return 'Beweis von $contactName wird überprüft...';
+  }
+
+  @override
+  String proofFlowVerificationFailed(String contactName) {
+    return 'Überprüfung für $contactName fehlgeschlagen';
+  }
+
+  @override
+  String get zkpNoticePaused =>
+      'Sie haben die Human-ZKP-Beweisanforderung pausiert. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
+
+  @override
+  String get zkpNoticeShared =>
+      'Sie haben einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass Sie ein Mensch sind.\n*Es wurden keine persönlichen Daten geteilt.';
+
+  @override
+  String zkpNoticeReceived(String contactName) {
+    return '$contactName hat einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass sie/er ein Mensch ist.';
+  }
+
+  @override
+  String zkpNoticeRequest(String contactName) {
+    return '$contactName hat einen Zero‑Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.';
   }
 }

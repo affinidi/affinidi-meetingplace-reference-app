@@ -23,6 +23,13 @@ class ChatItem extends StatelessWidget {
       return const ChatEncryptionNotice();
     }
 
+    if (ChatZkpConciergeItem.matches(_chatItem)) {
+      return ChatZkpConciergeItem(
+        chatItem: _chatItem as chat.ConciergeMessage,
+        contactId: _contactId,
+      );
+    }
+
     if (_chatItem is chat.Message) {
       return _PlainTextChatItem(
         chatItem: _chatItem,

@@ -109,8 +109,14 @@ abstract class AppLocalizations {
   /// No description provided for @tabsTitle.
   ///
   /// In en, this message translates to:
-  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} settings{Settings} other{Invalid}}'**
+  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
+
+  /// No description provided for @rCardsPlaceholderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Cards will appear here.'**
+  String get rCardsPlaceholderMessage;
 
   /// No description provided for @publishOffer.
   ///
@@ -259,7 +265,7 @@ abstract class AppLocalizations {
   /// No description provided for @newConnectionOptionTitle.
   ///
   /// In en, this message translates to:
-  /// **'{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} other{}}'**
+  /// **'{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} prove{Prove} other{}}'**
   String newConnectionOptionTitle(String option);
 
   /// No description provided for @setExpiryDateTime.
@@ -307,7 +313,7 @@ abstract class AppLocalizations {
   /// No description provided for @newConnectionOptionSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} other{}}'**
+  /// **'{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} prove{Zero-knowledge proof verification} other{}}'**
   String newConnectionOptionSubtitle(String option);
 
   /// No description provided for @unableToDetectCamera.
@@ -2571,6 +2577,222 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trusted by {count}'**
   String trustedBy(int count);
+
+  /// No description provided for @humanZkp.
+  ///
+  /// In en, this message translates to:
+  /// **'Human ZKP'**
+  String get humanZkp;
+
+  /// No description provided for @humanZeroKnowledgeProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Human Zero-Knowledge Proof'**
+  String get humanZeroKnowledgeProof;
+
+  /// No description provided for @livenessCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Credential'**
+  String get livenessCredential;
+
+  /// No description provided for @verifiableCredentialWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifiable Credential wallet'**
+  String get verifiableCredentialWallet;
+
+  /// No description provided for @noCredentialsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any credentials yet.'**
+  String get noCredentialsYet;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @generatingZeroKnowledgeProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating Zero-Knowledge Proof...'**
+  String get generatingZeroKnowledgeProof;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @generateCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate credential'**
+  String get generateCredential;
+
+  /// No description provided for @generateProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate proof'**
+  String get generateProof;
+
+  /// No description provided for @livenessCredentialRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Credential Request'**
+  String get livenessCredentialRequest;
+
+  /// No description provided for @livenessCheckDemoMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Check (Demo Mode)'**
+  String get livenessCheckDemoMode;
+
+  /// No description provided for @searchingForLivenessCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for Liveness Credential...'**
+  String get searchingForLivenessCredential;
+
+  /// No description provided for @noLivenessCredentialFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.'**
+  String get noLivenessCredentialFound;
+
+  /// No description provided for @livenessCheckDemoModeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This reference app runs in demo mode and does not perform a real liveness check.'**
+  String get livenessCheckDemoModeNote;
+
+  /// No description provided for @livenessCheckInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Check in progress...'**
+  String get livenessCheckInProgress;
+
+  /// No description provided for @livenessCheckSimulatedFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a simulated flow for development and demonstration purposes only.'**
+  String get livenessCheckSimulatedFlow;
+
+  /// No description provided for @mockLivenessCredentialGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'A mock Liveness Credential has been generated and securely stored under the Credentials tab.'**
+  String get mockLivenessCredentialGenerated;
+
+  /// No description provided for @mockLivenessCredentialNext.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now continue to generate a Human Zero-Knowledge proof.'**
+  String get mockLivenessCredentialNext;
+
+  /// No description provided for @livenessEvidenceThresholdNotMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness check did not meet the required threshold. Please try again.'**
+  String get livenessEvidenceThresholdNotMet;
+
+  /// No description provided for @livenessCredentialSessionMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Your liveness credential is not available in this app session. Generate a new credential and try again.'**
+  String get livenessCredentialSessionMissing;
+
+  /// No description provided for @issuedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued to'**
+  String get issuedTo;
+
+  /// No description provided for @types.
+  ///
+  /// In en, this message translates to:
+  /// **'Types'**
+  String get types;
+
+  /// No description provided for @issuer.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuer'**
+  String get issuer;
+
+  /// No description provided for @issuedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued on'**
+  String get issuedOn;
+
+  /// No description provided for @human.
+  ///
+  /// In en, this message translates to:
+  /// **'Human'**
+  String get human;
+
+  /// No description provided for @proofFlowThisContact.
+  ///
+  /// In en, this message translates to:
+  /// **'this contact'**
+  String get proofFlowThisContact;
+
+  /// No description provided for @proofFlowContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get proofFlowContact;
+
+  /// No description provided for @proofFlowCheckIfHuman.
+  ///
+  /// In en, this message translates to:
+  /// **'Check if {contactName} is human using a Zero‑Knowledge Proof (ZKP) derived from a Liveness Credential.'**
+  String proofFlowCheckIfHuman(String contactName);
+
+  /// No description provided for @proofFlowRequestProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Request proof'**
+  String get proofFlowRequestProof;
+
+  /// No description provided for @proofFlowVerifyingProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying proof from {contactName}...'**
+  String proofFlowVerifyingProof(String contactName);
+
+  /// No description provided for @proofFlowVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed for {contactName}'**
+  String proofFlowVerificationFailed(String contactName);
+
+  /// No description provided for @zkpNoticePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.'**
+  String get zkpNoticePaused;
+
+  /// No description provided for @zkpNoticeShared.
+  ///
+  /// In en, this message translates to:
+  /// **'You have shared a Zero‑Knowledge Proof confirming you are human.\n*No personal data was shared.'**
+  String get zkpNoticeShared;
+
+  /// No description provided for @zkpNoticeReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'{contactName} has shared a Zero‑Knowledge Proof confirming they are human.'**
+  String zkpNoticeReceived(String contactName);
+
+  /// No description provided for @zkpNoticeRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'{contactName} has requested a Zero‑Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.'**
+  String zkpNoticeRequest(String contactName);
 }
 
 class _AppLocalizationsDelegate

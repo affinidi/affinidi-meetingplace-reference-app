@@ -24,7 +24,6 @@ class _ChatMediaOption extends StatelessWidget {
     final tappable = _item.onTap != null;
     final styleEnabled = _item.enabled;
     final icon = _item.icon;
-
     Widget leading;
     if (icon is MaterialIcon) {
       leading = Icon(
@@ -51,7 +50,6 @@ class _ChatMediaOption extends StatelessWidget {
     } else {
       leading = const SizedBox.shrink();
     }
-
     return ListTile(
       enabled: tappable,
       leading: leading,
@@ -88,8 +86,10 @@ class _ChatMediaOptions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
+    ref.watch(provider);
     final availableAttachmentPlugins = ref.read(
       availableAttachmentPluginsProvider,
     );
@@ -135,6 +135,10 @@ class _ChatMediaOptions extends ConsumerWidget {
       }
     }
 
+    final zkpChannelReady =
+        isZkpEnabled &&
+        ProofFlowController.watchIsZkpChannelReady(ref, _contactId);
+
     final items = <_ChatMediaOptionItem>[
       ...availableAttachmentPlugins.map((plugin) {
         final platformSupported = plugin.isPlatformSupported;
@@ -171,6 +175,20 @@ class _ChatMediaOptions extends ConsumerWidget {
           sendEffect(ScreenEffect.confetti());
         },
       ),
+      if (isZkpEnabled)
+        _ChatMediaOptionItem(
+          icon: const MaterialIcon(Icons.how_to_reg, color: Colors.white),
+          label: context.l10n.humanZeroKnowledgeProof,
+          onTap: zkpChannelReady
+              ? () async {
+                  final sent = await ref
+                      .read(proofFlowControllerProvider(_contactId).notifier)
+                      .requestLivenessCheck();
+                  if (!context.mounted || !sent) return;
+                  Navigator.of(context).pop();
+                }
+              : null,
+        ),
     ];
 
     return BackdropFilter(

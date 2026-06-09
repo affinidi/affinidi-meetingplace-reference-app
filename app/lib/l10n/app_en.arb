@@ -3,7 +3,7 @@
 	"@appName": {
 		"type": "text"
 	},
-	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} settings{Settings} other{Invalid}}",
+	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}",
 	"@tabsTitle": {
 		"type": "text",
 		"placeholders": {
@@ -11,6 +11,10 @@
 				"type": "String"
 			}
 		}
+	},
+	"rCardsPlaceholderMessage": "R-Cards will appear here.",
+	"@rCardsPlaceholderMessage": {
+		"type": "text"
 	},
 	"publishOffer": "Publish Invitation",
 	"@publishOffer": {
@@ -116,7 +120,7 @@
 	"@setMediatorName": {
 		"type": "text"
 	},
-	"newConnectionOptionTitle": "{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} other{}}",
+	"newConnectionOptionTitle": "{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} prove{Prove} other{}}",
 	"@newConnectionOptionTitle": {
 		"type": "text",
 		"placeholders": {
@@ -157,7 +161,7 @@
 			}
 		}
 	},
-	"newConnectionOptionSubtitle": "{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} other{}}",
+	"newConnectionOptionSubtitle": "{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} prove{Zero-knowledge proof verification} other{}}",
 	"@newConnectionOptionSubtitle": {
 		"type": "text",
 		"placeholders": {
@@ -1527,6 +1531,187 @@
 	"@trustedBy": {
 		"placeholders": {
 			"count": { "type": "int" }
+		}
+	},
+	"humanZkp": "Human ZKP",
+	"@humanZkp": {
+		"type": "text"
+	},
+	"humanZeroKnowledgeProof": "Human Zero-Knowledge Proof",
+	"@humanZeroKnowledgeProof": {
+		"type": "text"
+	},
+	"livenessCredential": "Liveness Credential",
+	"@livenessCredential": {
+		"type": "text"
+	},
+	"@verifiableCredential": {
+		"type": "text"
+	},
+	"verifiableCredentialWallet": "Verifiable Credential wallet",
+	"@verifiableCredentialWallet": {
+		"type": "text"
+	},
+	"noCredentialsYet": "You don't have any credentials yet.",
+	"@noCredentialsYet": {
+		"type": "text"
+	},
+	"all": "All",
+	"@all": {
+		"type": "text"
+	},
+	"@credentialDetails": {
+		"type": "text"
+	},
+	"generatingZeroKnowledgeProof": "Generating Zero-Knowledge Proof...",
+	"@generatingZeroKnowledgeProof": {
+		"type": "text"
+	},
+	"cancel": "Cancel",
+	"@cancel": {
+		"type": "text"
+	},
+	"generateCredential": "Generate credential",
+	"@generateCredential": {
+		"type": "text"
+	},
+	"generateProof": "Generate proof",
+	"@generateProof": {
+		"type": "text"
+	},
+	"livenessCredentialRequest": "Liveness Credential Request",
+	"@livenessCredentialRequest": {
+		"type": "text"
+	},
+	"livenessCheckDemoMode": "Liveness Check (Demo Mode)",
+	"@livenessCheckDemoMode": {
+		"type": "text"
+	},
+	"searchingForLivenessCredential": "Searching for Liveness Credential...",
+	"@searchingForLivenessCredential": {
+		"type": "text"
+	},
+	"noLivenessCredentialFound": "No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.",
+	"@noLivenessCredentialFound": {
+		"type": "text"
+	},
+	"livenessCheckDemoModeNote": "This reference app runs in demo mode and does not perform a real liveness check.",
+	"@livenessCheckDemoModeNote": {
+		"type": "text"
+	},
+	"livenessCheckInProgress": "Liveness Check in progress...",
+	"@livenessCheckInProgress": {
+		"type": "text"
+	},
+	"livenessCheckSimulatedFlow": "This is a simulated flow for development and demonstration purposes only.",
+	"@livenessCheckSimulatedFlow": {
+		"type": "text"
+	},
+	"mockLivenessCredentialGenerated": "A mock Liveness Credential has been generated and securely stored under the Credentials tab.",
+	"@mockLivenessCredentialGenerated": {
+		"type": "text"
+	},
+	"mockLivenessCredentialNext": "You can now continue to generate a Human Zero-Knowledge proof.",
+	"@mockLivenessCredentialNext": {
+		"type": "text"
+	},
+	"livenessEvidenceThresholdNotMet": "Liveness check did not meet the required threshold. Please try again.",
+	"@livenessEvidenceThresholdNotMet": {
+		"type": "text"
+	},
+	"livenessCredentialSessionMissing": "Your liveness credential is not available in this app session. Generate a new credential and try again.",
+	"@livenessCredentialSessionMissing": {
+		"type": "text"
+	},
+	"@doLater": {
+		"type": "text"
+	},
+	"@verified": {
+		"type": "text"
+	},
+	"issuedTo": "Issued to",
+	"@issuedTo": {
+		"type": "text"
+	},
+	"types": "Types",
+	"@types": {
+		"type": "text"
+	},
+	"issuer": "Issuer",
+	"@issuer": {
+		"type": "text"
+	},
+	"issuedOn": "Issued on",
+	"@issuedOn": {
+		"type": "text"
+	},
+	"human": "Human",
+	"@human": {
+		"type": "text"
+	},
+	"proofFlowThisContact": "this contact",
+	"@proofFlowThisContact": {
+		"type": "text"
+	},
+	"proofFlowContact": "Contact",
+	"@proofFlowContact": {
+		"type": "text"
+	},
+	"proofFlowCheckIfHuman": "Check if {contactName} is human using a Zero\u2011Knowledge Proof (ZKP) derived from a Liveness Credential.",
+	"@proofFlowCheckIfHuman": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
+	},
+	"proofFlowRequestProof": "Request proof",
+	"@proofFlowRequestProof": {
+		"type": "text"
+	},
+	"proofFlowVerifyingProof": "Verifying proof from {contactName}...",
+	"@proofFlowVerifyingProof": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
+	},
+	"proofFlowVerificationFailed": "Verification failed for {contactName}",
+	"@proofFlowVerificationFailed": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
+	},
+	"zkpNoticePaused": "You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.",
+	"@zkpNoticePaused": {
+		"type": "text"
+	},
+	"zkpNoticeShared": "You have shared a Zero\u2011Knowledge Proof confirming you are human.\n*No personal data was shared.",
+	"@zkpNoticeShared": {
+		"type": "text"
+	},
+	"zkpNoticeReceived": "{contactName} has shared a Zero\u2011Knowledge Proof confirming they are human.",
+	"@zkpNoticeReceived": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
+	},
+	"zkpNoticeRequest": "{contactName} has requested a Zero\u2011Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.",
+	"@zkpNoticeRequest": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
 		}
 	}
 }
