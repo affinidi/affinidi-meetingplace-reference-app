@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../infrastructure/extensions/box_constraints_extensions.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../screens/chat/liveness_credential_view_data.dart';
 import '../../screens/credentials/credential_details_screen.dart';
@@ -109,64 +110,97 @@ class VcNotFoundStepView extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 16),
-          const Icon(
-            Icons.search_off,
-            size: 80,
-            color: AppCustomColors.primaryBrand10,
-          ),
-          const SizedBox(height: 22),
-          Text(
-            context.l10n.noLivenessCredentialFound,
-            style: textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w400,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 16),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isCompactScreen = constraints.isCompactScreen;
+                        final text = Text(
+                          context.l10n.noLivenessCredentialFound,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        );
+
+                        return Flex(
+                          spacing: 22,
+                          direction: isCompactScreen
+                              ? Axis.vertical
+                              : Axis.horizontal,
+                          crossAxisAlignment: isCompactScreen
+                              ? CrossAxisAlignment.stretch
+                              : CrossAxisAlignment.start,
+                          children: [
+                            const Align(
+                              alignment: Alignment.topCenter,
+                              child: Icon(
+                                Icons.search_off,
+                                size: 80,
+                                color: AppCustomColors.primaryBrand10,
+                              ),
+                            ),
+                            isCompactScreen ? text : Expanded(child: text),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    ZkpInfoBanner(
+                      message: context.l10n.livenessCheckDemoModeNote,
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          const SizedBox(height: 24),
-          ZkpInfoBanner(message: context.l10n.livenessCheckDemoModeNote),
-          const Spacer(),
-          Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: onCancel,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: Text(
-                      context.l10n.cancel,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: onGenerate,
-                    child: Text(
-                      context.l10n.generateCredential,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+            const SizedBox(height: 24),
+            Row(
+              spacing: 12,
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: onCancel,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(
+                        context.l10n.cancel,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                Expanded(
+                  flex: 2,
+                  child: SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: onGenerate,
+                      child: Text(
+                        context.l10n.generateCredential,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -223,69 +257,108 @@ class VcGeneratedStepView extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const SizedBox(height: 20),
-          const Icon(
-            Icons.check_circle,
-            size: 80,
-            color: AppCustomColors.utilitySuccess100,
-          ),
-          const SizedBox(height: 30),
-          Text(
-            context.l10n.mockLivenessCredentialGenerated,
-            style: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.mockLivenessCredentialNext,
-            style: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 32),
-          CredentialCard(
-            topLeftText: context.l10n.livenessCredential,
-            bottomLeftText: context.l10n.verifiableCredential,
-            onTap: identityId == null
-                ? null
-                : () {
-                    Navigator.of(context).push<void>(
-                      MaterialPageRoute<void>(
-                        builder: (context) => CredentialDetailsScreen(
-                          identityId: identityId!,
-                          allowDelete: false,
-                        ),
-                      ),
-                    );
-                  },
-          ),
-          const Spacer(),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onDoLater,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: colorScheme.primary),
-                  ),
-                  child: Text(
-                    context.l10n.doLater,
-                    style: const TextStyle(color: Colors.white),
-                  ),
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          spacing: 24,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 20),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isCompactScreen = constraints.isCompactScreen;
+                        final description = Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 16,
+                          children: [
+                            Text(
+                              context.l10n.mockLivenessCredentialGenerated,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            Text(
+                              context.l10n.mockLivenessCredentialNext,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        );
+
+                        return Flex(
+                          spacing: 22,
+                          direction: isCompactScreen
+                              ? Axis.vertical
+                              : Axis.horizontal,
+                          crossAxisAlignment: isCompactScreen
+                              ? CrossAxisAlignment.stretch
+                              : CrossAxisAlignment.start,
+                          children: [
+                            const Align(
+                              alignment: Alignment.topCenter,
+                              child: Icon(
+                                Icons.check_circle,
+                                size: 80,
+                                color: AppCustomColors.utilitySuccess100,
+                              ),
+                            ),
+                            isCompactScreen
+                                ? description
+                                : Expanded(child: description),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 32),
+                    CredentialCard(
+                      topLeftText: context.l10n.livenessCredential,
+                      bottomLeftText: context.l10n.verifiableCredential,
+                      onTap: identityId == null
+                          ? null
+                          : () {
+                              Navigator.of(context).push<void>(
+                                MaterialPageRoute<void>(
+                                  builder: (context) => CredentialDetailsScreen(
+                                    identityId: identityId!,
+                                    allowDelete: false,
+                                  ),
+                                ),
+                              );
+                            },
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: onGenerateProof,
-                  child: Text(context.l10n.generateProof),
+            ),
+
+            Row(
+              spacing: 12,
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onDoLater,
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: colorScheme.primary),
+                    ),
+                    child: Text(
+                      context.l10n.doLater,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onGenerateProof,
+                    child: Text(context.l10n.generateProof),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
