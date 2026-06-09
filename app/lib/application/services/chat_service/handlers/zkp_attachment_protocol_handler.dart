@@ -6,19 +6,17 @@ import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import 'interfaces/chat_protocol_handler.dart';
 
 /// Handles `ChatProtocol.chatMessage` events that contain liveness ZKP
-/// attachments and delegates them to the configured callback.
+/// attachments and reports them via callback for state propagation.
 class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
   ZkpAttachmentProtocolHandler({
-    required void Function(StreamData data, String channelDid)? Function()
-    getOnZkpAttachment,
+    required void Function(StreamData data, String channelDid) onZkpAttachment,
     required AppLogger logger,
-  }) : _getOnZkpAttachment = getOnZkpAttachment,
+  }) : _onZkpAttachment = onZkpAttachment,
        _logger = logger;
 
   static const _logKey = 'ZKPATTCHDLR';
 
-  final void Function(StreamData data, String channelDid)? Function()
-  _getOnZkpAttachment;
+  final void Function(StreamData data, String channelDid) _onZkpAttachment;
   final AppLogger _logger;
 
   @override
@@ -27,9 +25,6 @@ class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
 
   @override
   Future<void> handle(StreamData data, String channelDid) async {
-    final onZkpAttachment = _getOnZkpAttachment();
-    if (onZkpAttachment == null) return;
-
     final attachments = data.plainTextMessage?.attachments;
     if (attachments == null || attachments.isEmpty) return;
 
@@ -43,6 +38,6 @@ class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
       'Received chat message with liveness ZKP attachment',
       name: _logKey,
     );
-    onZkpAttachment(data, channelDid);
+    _onZkpAttachment(data, channelDid);
   }
 }

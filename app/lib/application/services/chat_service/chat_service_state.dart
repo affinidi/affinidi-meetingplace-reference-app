@@ -9,6 +9,13 @@ import '../../../domain/models/contacts/contact_presence_status.dart';
 
 part 'chat_service_state.freezed.dart';
 
+class ZkpAttachmentEvent {
+  const ZkpAttachmentEvent({required this.data, required this.channelDid});
+
+  final chat.StreamData data;
+  final String channelDid;
+}
+
 /// Contains all chat-session data that the controller observes. UI-only fields
 /// (selectedReactionIndex, attachmentsDataCache) live in `ChatScreenState`.
 @Freezed(fromJson: false, toJson: false)
@@ -20,6 +27,7 @@ abstract class ChatServiceState with _$ChatServiceState {
     Group? group,
     ContactCard? otherPartyCard,
     @Default([]) List<chat.ChatItem> messages,
+    ZkpAttachmentEvent? zkpAttachmentEvent,
     @Default([]) List<String> membersTyping,
     @Default(false) bool isActive,
     @Default(false) bool isInitialized,

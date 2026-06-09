@@ -10,9 +10,9 @@ import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/zkp/zkp_challenge_nonce.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../contacts_identities_service/contacts_identities_service.dart';
 import '../../services/contacts_service/contacts_service.dart';
 import '../chat_service/chat_session_service.dart';
+import '../contacts_identities_service/contacts_identities_service.dart';
 import '../zkp_service/zkp_service.dart';
 import '../zkp_service/zkp_service_state.dart';
 

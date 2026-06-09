@@ -99,10 +99,7 @@ class ChatScreenController extends _$ChatScreenController
     var hasInitializedState = false;
 
     if (channelDid != null) {
-      final chatSessionProvider = chatSessionServiceProvider(
-        channelDid,
-        onZkpAttachment: _zkpHandler.handleZkpAttachment,
-      );
+      final chatSessionProvider = chatSessionServiceProvider(channelDid);
       final sessionService = ref.read(chatSessionProvider.notifier);
       _chatService = sessionService;
       ref.listen(chatSessionProvider, (previous, next) {
@@ -116,6 +113,15 @@ class ChatScreenController extends _$ChatScreenController
             newEffect = _mapEffect(next.effect!);
           } else if (next.effect == null) {
             newEffect = null;
+          }
+
+          final zkpAttachmentEvent = next.zkpAttachmentEvent;
+          if (zkpAttachmentEvent != null &&
+              previous?.zkpAttachmentEvent != zkpAttachmentEvent) {
+            _zkpHandler.handleZkpAttachment(
+              zkpAttachmentEvent.data,
+              zkpAttachmentEvent.channelDid,
+            );
           }
 
           // Auto-hide the VRC banner when the peer's request concierge arrives.

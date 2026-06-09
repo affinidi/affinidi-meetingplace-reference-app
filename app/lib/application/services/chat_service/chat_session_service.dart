@@ -84,10 +84,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   bool get isGroupChat => _isGroupChat;
 
   @override
-  ChatServiceState build(
-    String channelDid, {
-    void Function(StreamData data, String channelDid)? onZkpAttachment,
-  }) {
+  ChatServiceState build(String channelDid) {
     _otherPartyPermanentDid = channelDid;
     _logger = ref.read(appLoggerProvider);
     _rCardManager = RCardManager(
@@ -117,7 +114,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
 
     _groupManager = ChatGroupManager(ref: ref);
-    _setupChatProtocolRouter(onZkpAttachment);
+    _setupChatProtocolRouter();
 
     ref.listen(networkConnectivityServiceProvider, (previous, next) {
       if (previous?.isConnected == false && next.isConnected) {
@@ -143,9 +140,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     return ChatServiceState();
   }
 
-  void _setupChatProtocolRouter(
-    void Function(StreamData data, String channelDid)? onZkpAttachment,
-  ) {
+  void _setupChatProtocolRouter() {
     final env = ref.read(environmentProvider);
     _router = ChatProtocolRouter(
       handlers: [
@@ -159,7 +154,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           logger: _logger,
         ),
         ZkpAttachmentProtocolHandler(
-          getOnZkpAttachment: () => onZkpAttachment,
+          onZkpAttachment: _onZkpAttachment,
           logger: _logger,
         ),
         TypingProtocolHandler(
@@ -180,6 +175,15 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           logger: _logger,
         ),
       ],
+    );
+  }
+
+  void _onZkpAttachment(StreamData data, String channelDid) {
+    state = state.copyWith(
+      zkpAttachmentEvent: ZkpAttachmentEvent(
+        data: data,
+        channelDid: channelDid,
+      ),
     );
   }
 
