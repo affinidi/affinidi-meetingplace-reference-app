@@ -6,12 +6,14 @@ class _ChatMediaOptionItem {
     required this.label,
     required this.onTap,
     this.enabled = true,
+    this.subtitle,
   });
 
   final AttachmentPluginIcon icon;
   final String label;
   final VoidCallback? onTap;
   final bool enabled;
+  final String? subtitle;
 }
 
 class _ChatMediaOption extends StatelessWidget {
@@ -21,47 +23,50 @@ class _ChatMediaOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tappable = _item.onTap != null;
-    final styleEnabled = _item.enabled;
+    final enabled = _item.enabled && _item.onTap != null;
+    final disabledColor = context.theme.disabledColor;
     final icon = _item.icon;
     Widget leading;
     if (icon is MaterialIcon) {
       leading = Icon(
         icon.iconData,
         size: 30,
-        color: icon.color ?? (!tappable ? context.theme.disabledColor : null),
+        color: icon.color ?? (!enabled ? disabledColor : null),
       );
     } else if (icon is AssetIcon) {
       leading = Image.asset(
         icon.assetPath,
         width: 30,
         height: 30,
-        color: !tappable ? context.theme.disabledColor : null,
-        colorBlendMode: !tappable ? BlendMode.srcIn : null,
+        color: !enabled ? disabledColor : null,
+        colorBlendMode: !enabled ? BlendMode.srcIn : null,
       );
     } else if (icon is EmojiIcon) {
       leading = Text(
         icon.emoji,
-        style: TextStyle(
-          fontSize: 30,
-          color: !tappable ? context.theme.disabledColor : null,
-        ),
+        style: TextStyle(fontSize: 30, color: !enabled ? disabledColor : null),
       );
     } else {
       leading = const SizedBox.shrink();
     }
     return ListTile(
-      enabled: tappable,
+      enabled: enabled,
       leading: leading,
       title: Text(
         _item.label,
         style: TextStyle(
-          color: !styleEnabled ? context.theme.disabledColor : Colors.white,
+          color: !enabled ? disabledColor : Colors.white,
           fontSize: 18,
         ),
         overflow: TextOverflow.ellipsis,
         maxLines: 2,
       ),
+      subtitle: _item.subtitle == null
+          ? null
+          : Text(
+              _item.subtitle!,
+              style: TextStyle(color: disabledColor, fontSize: 13),
+            ),
       onTap: _item.onTap,
     );
   }
@@ -138,6 +143,12 @@ class _ChatMediaOptions extends ConsumerWidget {
     final zkpChannelReady =
         isZkpEnabled &&
         ProofFlowController.watchIsZkpChannelReady(ref, _contactId);
+    final hasVerifiedProof = ref.watch(
+      provider.select(
+        (state) => ChatZkpMessageListPolicy.hasVerifiedProof(state.messages),
+      ),
+    );
+    final zkpOptionEnabled = zkpChannelReady && !hasVerifiedProof;
 
     final items = <_ChatMediaOptionItem>[
       ...availableAttachmentPlugins.map((plugin) {
@@ -179,7 +190,10 @@ class _ChatMediaOptions extends ConsumerWidget {
         _ChatMediaOptionItem(
           icon: const MaterialIcon(Icons.how_to_reg, color: Colors.white),
           label: context.l10n.humanZeroKnowledgeProof,
-          onTap: zkpChannelReady
+          subtitle: hasVerifiedProof
+              ? context.l10n.zkpProofAlreadyShared
+              : null,
+          onTap: zkpOptionEnabled
               ? () async {
                   final sent = await ref
                       .read(proofFlowControllerProvider(_contactId).notifier)
@@ -188,6 +202,7 @@ class _ChatMediaOptions extends ConsumerWidget {
                   Navigator.of(context).pop();
                 }
               : null,
+          enabled: zkpOptionEnabled,
         ),
     ];
 

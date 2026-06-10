@@ -1874,4 +1874,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String zkpNoticeRequest(String contactName) {
     return '$contactName hat einen Zero‑Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.';
   }
+
+  @override
+  String get zkpProofAlreadyShared => 'ZKP-Beweis bereits geteilt';
 }

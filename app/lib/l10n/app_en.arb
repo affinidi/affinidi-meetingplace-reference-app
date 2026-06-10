@@ -1713,5 +1713,9 @@
 				"type": "String"
 			}
 		}
+	},
+	"zkpProofAlreadyShared": "ZKP Proof already shared",
+	"@zkpProofAlreadyShared": {
+		"type": "text"
 	}
 }
