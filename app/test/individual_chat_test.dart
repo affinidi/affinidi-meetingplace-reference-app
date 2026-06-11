@@ -471,6 +471,37 @@ void main() {
             contactName,
           );
         });
+
+        testWidgets('should send video selected from image picker', (
+          tester,
+        ) async {
+          final l10n = await getL10n();
+          final meetingPlaceChatSDK = FakeChatSdk();
+
+          await navigateToChatScreen(
+            tester,
+            contactId: contactId,
+            imagePicker: FakeImagePicker(
+              xFileToReturn: XFile.fromData(
+                FakeImagePicker.defaultImageBytes,
+                name: 'clip.mp4',
+                mimeType: 'video/mp4',
+              ),
+            ),
+            meetingPlaceChatSDK: meetingPlaceChatSDK,
+          );
+
+          await tester.tap(findAddMediaButton());
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.text(l10n.generalPhoto));
+          await tester.pumpAndSettle();
+
+          expect(meetingPlaceChatSDK.sendMediaMessageCalls, hasLength(1));
+          final sendCall = meetingPlaceChatSDK.sendMediaMessageCalls.first;
+          expect(sendCall['contentType'], startsWith('video/'));
+          expect(sendCall['filename'], 'video.mp4');
+        });
       });
 
       group('and pressing on camera', () {

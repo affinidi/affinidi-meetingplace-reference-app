@@ -11,7 +11,7 @@ import 'video_attachment.dart';
 final class VideoAttachmentsPlugin implements AttachmentPlugin {
   VideoAttachmentsPlugin();
 
-  static const _pluginName = 'mpx_video_attachment_plugin';
+  static const pluginName = 'mpx_video_attachment_plugin';
 
   /// Hard upper bound on raw video bytes accepted from the picker.
   /// Above this the file is rejected before being loaded into memory or
@@ -49,7 +49,7 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
       attachments: [
         VideoAttachment(
           base64: base64Data,
-          pluginName: _pluginName,
+          pluginName: pluginName,
           mimeType: mimeType,
           filename: filename,
           byteCount: bytes.length,
@@ -87,7 +87,7 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   bool supportsFormat(ChatAttachment attachment) =>
-      attachment.format == _pluginName;
+      attachment.format == pluginName;
 
   @override
   String get icon => '🎬';

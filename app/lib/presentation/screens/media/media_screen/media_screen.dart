@@ -16,14 +16,35 @@ import 'media_screen_controller.dart';
 class MediaReviewResult {
   MediaReviewResult.empty()
     : compressedImage = CompressedImage.empty(),
+      videoBase64 = null,
+      videoMimeType = null,
+      videoFilename = null,
+      videoByteCount = null,
       textMessage = '',
       succeeded = false;
 
-  MediaReviewResult(this.succeeded, this.textMessage, this.compressedImage);
+  MediaReviewResult(this.succeeded, this.textMessage, this.compressedImage)
+    : videoBase64 = null,
+      videoMimeType = null,
+      videoFilename = null,
+      videoByteCount = null;
+
+  MediaReviewResult.video({
+    required this.textMessage,
+    required this.videoBase64,
+    required this.videoMimeType,
+    required this.videoFilename,
+    required this.videoByteCount,
+  }) : succeeded = true,
+       compressedImage = CompressedImage.empty();
 
   final bool succeeded;
   final CompressedImage compressedImage;
   final String textMessage;
+  final String? videoBase64;
+  final String? videoMimeType;
+  final String? videoFilename;
+  final int? videoByteCount;
 }
 
 class MediaScreen extends HookConsumerWidget {
