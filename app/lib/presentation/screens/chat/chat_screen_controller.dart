@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -11,6 +9,7 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../../../application/services/attachment_cache_service/attachment_cache_service.dart';
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
@@ -25,7 +24,6 @@ import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
-import 'attachment_cache_key.dart';
 import 'chat_screen_state.dart';
 
 part 'chat_screen_controller.g.dart';
@@ -42,6 +40,7 @@ class ChatScreenController extends _$ChatScreenController
 
   static const _logKey = 'UXCHAT';
 
+  late final String _contactId;
   late final messageTextController = TextEditingController();
   late final _logger = ref.read(appLoggerProvider);
 
@@ -49,7 +48,6 @@ class ChatScreenController extends _$ChatScreenController
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
-  final Set<String> _attachmentsLoading = {};
 
   late final Map<String, ProviderSubscription<void>>
   _conciergeLoadingControllersSubscriptions = {};
@@ -63,6 +61,7 @@ class ChatScreenController extends _$ChatScreenController
 
   @override
   ChatScreenState build(String contactId) {
+    _contactId = contactId;
     WidgetsBinding.instance.addObserver(this);
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
@@ -70,6 +69,10 @@ class ChatScreenController extends _$ChatScreenController
 
     if (channelDid != null) {
       _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
+      // Keep the attachment cache alive for the chat screen's lifetime so that
+      // optimistic seeds and in-flight downloads survive until the screen is
+      // disposed, even when no media widget is currently mounted.
+      ref.listen(attachmentCacheServiceProvider(contactId), (_, _) {});
       ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
         var newEffect = state.effect;
         if (next.effect != null && previous?.effect != next.effect) {
@@ -89,7 +92,9 @@ class ChatScreenController extends _$ChatScreenController
           effect: newEffect,
         );
         if (!identical(previous?.messages, next.messages)) {
-          _preloadHostedMediaAttachments(next.messages);
+          ref
+              .read(attachmentCacheServiceProvider(contactId).notifier)
+              .preload(next.messages);
         }
       });
     }
@@ -639,6 +644,7 @@ class ChatScreenController extends _$ChatScreenController
     messageTextController.clear();
     _sendChatActivityTimedAction?.cancel();
 
+    final cache = ref.read(attachmentCacheServiceProvider(_contactId).notifier);
     for (final (index, attachment) in messageAttachment.indexed) {
       final chatAttachment = attachment.toAttachment();
       final caption = index == 0 ? text : '';
@@ -647,92 +653,11 @@ class ChatScreenController extends _$ChatScreenController
       // strips base64 from the echoed display attachment, so without this
       // pre-cache the sender would only see the image once the upload
       // completes and the download from the homeserver returns.
-      final base64Data = chatAttachment.data?.base64;
-      if (base64Data != null && base64Data.isNotEmpty) {
-        final updatedCache = Map.of(state.attachmentsDataCache);
-        updatedCache[attachmentCacheKey(chatAttachment)] = base64.decode(
-          base64Data,
-        );
-        state = state.copyWith(attachmentsDataCache: updatedCache);
-      }
+      cache.seed(chatAttachment);
 
       unawaited(
         _chatService?.sendTextMessage(caption, attachments: [chatAttachment]),
       );
-    }
-  }
-
-  /// Loads an image attachment into the chat screen.
-  ///
-  /// Handles both legacy base64-encoded attachments and hosted media
-  /// attachments (downloaded by the SDK via the attachment's transportId).
-  void loadImageAttachment(ChatAttachment attachment) {
-    final attachmentId = attachmentCacheKey(attachment);
-
-    final attachmentsDataCache = Map.of(state.attachmentsDataCache);
-    final existingData = attachmentsDataCache[attachmentId];
-    if (existingData != null) return;
-
-    final attachmentData = attachment.data?.base64;
-    if (attachmentData != null) {
-      attachmentsDataCache[attachmentId] = base64.decode(attachmentData);
-      state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
-      return;
-    }
-
-    // Outgoing hosted-media attachments are pushed optimistically without a
-    // transportId until the upload completes; downloading then would fail
-    // and poison the cache. Skip and wait for the post-upload state push.
-    if (attachment.transportId == null) return;
-
-    _downloadAndCacheAttachment(attachmentId, attachment);
-  }
-
-  void _preloadHostedMediaAttachments(List<chat.ChatItem> messages) {
-    for (final message in messages.whereType<chat.Message>()) {
-      for (final attachment in message.attachments) {
-        if (attachment.format == AttachmentFormat.hostedMedia.value) {
-          loadImageAttachment(attachment);
-        }
-      }
-    }
-  }
-
-  Future<void> _downloadAndCacheAttachment(
-    String cacheKey,
-    ChatAttachment attachment,
-  ) async {
-    if (_attachmentsLoading.contains(cacheKey)) return;
-    _attachmentsLoading.add(cacheKey);
-
-    try {
-      final bytes = await _chatService?.downloadMedia(attachment);
-      if (bytes == null) {
-        _logger.warning(
-          'Chat service unavailable, skipping media download',
-          name: _logKey,
-        );
-        final failedCache = Map.of(state.attachmentsDataCache);
-        failedCache[cacheKey] = Uint8List(0);
-        state = state.copyWith(attachmentsDataCache: failedCache);
-        return;
-      }
-
-      final attachmentsDataCache = Map.of(state.attachmentsDataCache);
-      attachmentsDataCache[cacheKey] = bytes;
-      state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
-    } catch (e, stackTrace) {
-      _logger.error(
-        'Failed to download media attachment',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      final failedCache = Map.of(state.attachmentsDataCache);
-      failedCache[cacheKey] = Uint8List(0);
-      state = state.copyWith(attachmentsDataCache: failedCache);
-    } finally {
-      _attachmentsLoading.remove(cacheKey);
     }
   }
 
