@@ -136,7 +136,7 @@ class _ChatMediaOptions extends ConsumerWidget {
           icon: switch (plugin.icon) {
             '📷' => Icons.camera_alt,
             '🖼' => Icons.image_outlined,
-            '🎬' => Icons.image_outlined,
+            '🎬' => Icons.videocam_outlined,
             '📄' => Icons.assignment_outlined,
             _ => Icons.attachment,
           },
