@@ -1,4 +1,4 @@
-package com.affinidi.mpx.meetingplace
+package com.example.meetingplace
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
