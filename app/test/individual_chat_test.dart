@@ -384,9 +384,7 @@ void main() {
     });
 
     group('and clicking the add media button', () {
-      testWidgets('should show a menu with media options', (
-        tester,
-      ) async {
+      testWidgets('should show a menu with media options', (tester) async {
         final l10n = await getL10n();
 
         await navigateToChatScreen(
