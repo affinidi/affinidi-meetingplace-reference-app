@@ -192,6 +192,45 @@ void main() {
       expect(find.text(l10n.chatEncryptionNotice), findsOneWidget);
     });
 
+    testWidgets('it renders audio attachments as voice messages', (
+      tester,
+    ) async {
+      final chatSDK = FakeChatSdk();
+      await navigateToGroupChatScreen(
+        tester,
+        contactId: contactId,
+        meetingPlaceChatSDK: chatSDK,
+      );
+
+      chatSDK.simulateIncomingTextMessage(
+        text: '',
+        recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+        attachments: [
+          ChatAttachment(
+            mediaType: 'audio/mp4',
+            filename: 'voice.m4a',
+            format: AttachmentFormat.hostedMedia.value,
+            data: ChatAttachmentData(
+              links: [Uri.parse('mxc://fake-homeserver/voice')],
+            ),
+            metadata: VoiceMessageMetadata(
+              durationMs: 11000,
+              waveform: [0, 35, 100],
+            ).toMetadata(),
+          ),
+        ],
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+      expect(find.text('0:11'), findsOneWidget);
+      final waveform = find.byKey(const Key('voice_waveform_paint'));
+      expect(waveform, findsOneWidget);
+      expect(tester.getSize(waveform).width, greaterThan(0));
+      expect(tester.getSize(waveform).height, 28);
+      expect(find.byIcon(Icons.insert_drive_file), findsNothing);
+    });
+
     testWidgets('it allows typing in the message input', (tester) async {
       await navigateToGroupChatScreen(
         tester,

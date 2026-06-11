@@ -8,9 +8,11 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/plugins/media_category.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../chat_service/chat_service.dart';
 import '../chat_service/chat_session_service.dart';
+import '../chat_service/local_voice_message_data.dart';
 import '../contacts_service/contacts_service.dart';
 
 part 'attachment_cache_service.g.dart';
@@ -28,6 +30,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
   late final AppLogger _logger;
   ChatService? _chatService;
   final Set<String> _attachmentsLoading = {};
+  final Map<String, LocalVoiceMessageData> _localVoiceMessages = {};
 
   @override
   Map<String, Uint8List> build(String contactId) {
@@ -93,11 +96,15 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     }
   }
 
-  /// Loads an attachment into the cache. Handles both legacy base64-encoded
-  /// attachments and hosted media downloaded via the attachment's transportId.
-  void loadAttachment(ChatAttachment attachment) {
+  /// Loads an attachment into the cache. Handles legacy base64-encoded
+  /// attachments, locally recorded voice messages, and hosted media downloaded
+  /// via the attachment's transportId.
+  ///
+  /// Returns `true` when a load was started or resolved synchronously, and
+  /// `false` when the attachment is already cached or cannot be loaded yet.
+  bool loadAttachment(ChatAttachment attachment) {
     final key = cacheKey(attachment);
-    if (state[key] != null) return;
+    if (state[key] != null) return false;
 
     final base64Data = attachment.data?.base64;
     if (base64Data != null) {
@@ -111,26 +118,95 @@ class AttachmentCacheService extends _$AttachmentCacheService {
           name: _logKey,
         );
       }
-      return;
+      return true;
+    }
+
+    final localVoiceMessage = localVoiceMessageFor(attachment);
+    if (localVoiceMessage != null) {
+      _writeCache(key, localVoiceMessage.bytes);
+      return true;
     }
 
     // Outgoing hosted-media attachments are pushed optimistically without a
     // transportId until the upload completes; downloading then would fail and
     // poison the cache. Skip and wait for the post-upload state push.
-    if (attachment.transportId == null) return;
+    if (attachment.transportId == null) return false;
 
-    _downloadAndCache(key, attachment);
+    unawaited(_downloadAndCache(key, attachment));
+    return true;
   }
 
-  /// Preloads every hosted-media attachment found in [messages].
+  /// Retries a previously failed download. A failed download is recorded as an
+  /// empty cache entry, so this clears it and re-runs the download flow.
+  bool retry(ChatAttachment attachment) {
+    final key = cacheKey(attachment);
+    if (_attachmentsLoading.contains(key)) return false;
+
+    final current = state[key];
+    if (current == null || current.isNotEmpty) return false;
+
+    state = {...state}..remove(key);
+    unawaited(_downloadAndCache(key, attachment));
+    return true;
+  }
+
+  /// Preloads hosted media that should be available without a manual tap:
+  /// images and voice messages. Larger media (video, documents) is downloaded
+  /// on demand to avoid eagerly fetching big payloads.
   void preload(List<chat.ChatItem> messages) {
     for (final message in messages.whereType<chat.Message>()) {
       for (final attachment in message.attachments) {
-        if (attachment.format == AttachmentFormat.hostedMedia.value) {
+        if (attachment.format != AttachmentFormat.hostedMedia.value) continue;
+        final category = mediaCategoryFromMimeType(attachment.mediaType);
+        final isVoice = chat.VoiceMessageMetadata.isVoice(attachment);
+        if (category == MediaCategory.image || isVoice) {
           loadAttachment(attachment);
         }
       }
     }
+  }
+
+  /// Caches a just-recorded voice message so the sender sees it immediately and
+  /// can replay it before the upload/download round-trip completes.
+  void cacheLocalVoiceMessage(
+    ChatAttachment attachment,
+    Uint8List bytes, {
+    required int durationMs,
+    required List<int> waveform,
+  }) {
+    _writeCache(cacheKey(attachment), bytes);
+    final key = _localVoiceMessageKey(attachment);
+    if (key != null) {
+      _localVoiceMessages[key] = LocalVoiceMessageData(
+        bytes: bytes,
+        durationMs: durationMs,
+        waveform: waveform,
+      );
+    }
+  }
+
+  /// Returns the locally retained payload for a voice message sent from this
+  /// device, or `null` if none was recorded in this session.
+  LocalVoiceMessageData? localVoiceMessageFor(ChatAttachment attachment) {
+    final key = _localVoiceMessageKey(attachment);
+    if (key == null) return null;
+    return _localVoiceMessages[key];
+  }
+
+  /// Drops the locally retained payload for a voice message, e.g. after a send
+  /// failure so a later retry re-reads from source.
+  void removeLocalVoiceMessage(ChatAttachment attachment) {
+    final key = _localVoiceMessageKey(attachment);
+    if (key != null) {
+      _localVoiceMessages.remove(key);
+    }
+  }
+
+  String? _localVoiceMessageKey(ChatAttachment attachment) {
+    final filename = attachment.filename;
+    final mediaType = attachment.mediaType;
+    if (filename == null || mediaType == null) return null;
+    return '$filename|$mediaType';
   }
 
   Future<void> _downloadAndCache(

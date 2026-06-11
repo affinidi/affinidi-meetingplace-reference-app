@@ -7,7 +7,7 @@ part of 'media_review_controller.dart';
 // **************************************************************************
 
 String _$mediaReviewControllerHash() =>
-    r'c175c6e72aa4042d2dadfe12af0c4442c26b94af';
+    r'3e576e1445e7f2ec38686b4a795f7065e7d88126';
 
 /// See also [MediaReviewController].
 @ProviderFor(MediaReviewController)

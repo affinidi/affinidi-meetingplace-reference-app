@@ -149,10 +149,11 @@ void main() {
     });
 
     test(
-      'preload triggers download for hosted media attachment with transportId',
+      'preload triggers download for hosted image attachment with transportId',
       () async {
         final attachment = ChatAttachment(
           format: AttachmentFormat.hostedMedia.value,
+          mediaType: 'image/jpeg',
         )..transportId = 'test-transport-id';
         final message = Message(
           chatId: 'fake-chat-id',
@@ -173,6 +174,30 @@ void main() {
         expect(service.state.containsKey(key), isTrue);
       },
     );
+
+    test('preload defers hosted video until explicitly requested', () async {
+      final attachment = ChatAttachment(
+        format: AttachmentFormat.hostedMedia.value,
+        mediaType: 'video/mp4',
+      )..transportId = 'video-transport-id';
+      final message = Message(
+        chatId: 'fake-chat-id',
+        messageId: 'fake-video-msg-id',
+        value: '',
+        dateCreated: DateTime.now(),
+        status: ChatItemStatus.confirmed,
+        isFromMe: false,
+        senderDid: 'fake-sender-did',
+        attachments: [attachment],
+      );
+
+      service.preload([message]);
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      final key = AttachmentCacheService.cacheKey(attachment);
+      expect(service.state.containsKey(key), isFalse);
+    });
   });
 }
 

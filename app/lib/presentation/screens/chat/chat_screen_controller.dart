@@ -24,6 +24,7 @@ import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
+
 import 'chat_screen_state.dart';
 
 part 'chat_screen_controller.g.dart';
@@ -77,8 +78,9 @@ class ChatScreenController extends _$ChatScreenController
           newEffect = null;
         }
 
+        final messages = _withLocalVoiceMetadata(next.messages);
         state = state.copyWith(
-          messages: next.messages,
+          messages: messages,
           membersTyping: next.membersTyping,
           contactPresenceStatus: next.contactPresenceStatus,
           isActive: next.isActive,
@@ -655,6 +657,132 @@ class ChatScreenController extends _$ChatScreenController
         _chatService?.sendTextMessage(caption, attachments: [chatAttachment]),
       );
     }
+  }
+
+  /// Records and sends a voice message: builds the attachment, caches the
+  /// recording locally so the sender can replay it immediately, then sends it.
+  Future<bool> sendVoiceMessage({
+    required String filePath,
+    required String mediaType,
+    required Duration duration,
+    required List<int> waveform,
+  }) async {
+    messageTextController.clear();
+    _sendChatActivityTimedAction?.cancel();
+
+    final chatService = _chatService;
+    if (chatService == null) {
+      _logger.warning('Chat service unavailable', name: _logKey);
+      return false;
+    }
+
+    final voiceMessage = await chatService.buildVoiceMessageAttachment(
+      filePath: filePath,
+      mediaType: mediaType,
+      duration: duration,
+      waveform: waveform,
+    );
+    if (voiceMessage == null) return false;
+
+    final cache = ref.read(attachmentCacheServiceProvider(_contactId).notifier);
+    cache.cacheLocalVoiceMessage(
+      voiceMessage.attachment,
+      voiceMessage.bytes,
+      durationMs: duration.inMilliseconds,
+      waveform: waveform,
+    );
+
+    try {
+      await chatService.sendTextMessage(
+        '',
+        attachments: [voiceMessage.attachment],
+      );
+      return true;
+    } catch (e, st) {
+      cache.removeLocalVoiceMessage(voiceMessage.attachment);
+      _logger.error(
+        'Failed to send voice message',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+      return false;
+    }
+  }
+
+  /// Backfills duration/waveform metadata on the sender's own voice messages
+  /// from the locally cached recording, so the bubble shows the waveform and
+  /// duration before the hosted copy round-trips back from the homeserver.
+  List<chat.ChatItem> _withLocalVoiceMetadata(List<chat.ChatItem> messages) {
+    final cache = ref.read(attachmentCacheServiceProvider(_contactId).notifier);
+    var didChange = false;
+    final nextMessages = messages
+        .map((item) {
+          if (item is! chat.Message || !item.isFromMe) return item;
+
+          var messageDidChange = false;
+          final nextAttachments = item.attachments
+              .map((attachment) {
+                if (!_isVoiceAttachment(attachment)) return attachment;
+                final localVoiceMessage = cache.localVoiceMessageFor(
+                  attachment,
+                );
+                if (localVoiceMessage == null) return attachment;
+                final voice = chat.VoiceMessageMetadata.of(attachment);
+                if (voice?.waveform?.isNotEmpty == true &&
+                    voice?.durationMs != null) {
+                  return attachment;
+                }
+
+                messageDidChange = true;
+                didChange = true;
+                return chat.ChatAttachment(
+                  id: attachment.id,
+                  description: attachment.description,
+                  filename: attachment.filename,
+                  mediaType: attachment.mediaType,
+                  format: attachment.format,
+                  lastModifiedTime: attachment.lastModifiedTime,
+                  data: attachment.data,
+                  byteCount: attachment.byteCount,
+                  transportId: attachment.transportId,
+                  metadata: chat.VoiceMessageMetadata(
+                    durationMs:
+                        voice?.durationMs ?? localVoiceMessage.durationMs,
+                    waveform: voice?.waveform?.isNotEmpty == true
+                        ? voice!.waveform
+                        : localVoiceMessage.waveform,
+                  ).toMetadata(),
+                );
+              })
+              .toList(growable: false);
+
+          if (!messageDidChange) return item;
+          return chat.Message(
+            chatId: item.chatId,
+            messageId: item.messageId,
+            senderDid: item.senderDid,
+            isFromMe: item.isFromMe,
+            dateCreated: item.dateCreated,
+            status: item.status,
+            type: item.type,
+            value: item.value,
+            attachments: nextAttachments,
+            reactions: item.reactions,
+            editedAt: item.editedAt,
+            transportId: item.transportId,
+            isDeleted: item.isDeleted,
+            isDeletedLocally: item.isDeletedLocally,
+          );
+        })
+        .toList(growable: false);
+
+    return didChange ? nextMessages : messages;
+  }
+
+  bool _isVoiceAttachment(chat.ChatAttachment attachment) {
+    if (chat.VoiceMessageMetadata.isVoice(attachment)) return true;
+    return attachment.mediaType?.toLowerCase().startsWith('audio/') ?? false;
   }
 
   Future<void> _restoreUnsentMessage() async {

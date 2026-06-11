@@ -57,6 +57,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String recipientDid,
     List<ChatAttachment>? attachments,
   }) {
+    final transportId =
+        'fake-transport-incoming-${DateTime.now().microsecondsSinceEpoch}';
+    for (final attachment in attachments ?? const <ChatAttachment>[]) {
+      attachment.transportId ??= transportId;
+    }
     final message = Message(
       chatId: 'fake-chat-id',
       messageId: 'msg-incoming-${DateTime.now().millisecondsSinceEpoch}',
@@ -486,8 +491,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
           mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
           filename: firstAttachment.filename,
           format: AttachmentFormat.hostedMedia.value,
+          transportId: transportId,
           data: ChatAttachmentData(links: [mediaUri], base64: base64Data),
-        )..transportId = transportId,
+          metadata: firstAttachment.metadata,
+        ),
       ];
     }
 

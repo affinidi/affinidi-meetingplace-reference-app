@@ -7,7 +7,7 @@ part of 'attachment_cache_service.dart';
 // **************************************************************************
 
 String _$attachmentCacheServiceHash() =>
-    r'0487c92608dacaa18048c4cd538cfc75bebee5a5';
+    r'a1cffed6cee1a5b8690c79cef1424471bb8c44d9';
 
 /// Copied from Dart SDK
 class _SystemHash {
