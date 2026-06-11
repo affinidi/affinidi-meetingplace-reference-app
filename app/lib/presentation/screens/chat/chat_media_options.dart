@@ -125,7 +125,9 @@ class _ChatMediaOptions extends ConsumerWidget {
     }
 
     final items = <_ChatMediaOptionItem>[
-      ...availableAttachmentPlugins.map((plugin) {
+      ...availableAttachmentPlugins.where((plugin) => plugin.icon != '🎬').map((
+        plugin,
+      ) {
         final supported = plugin.isPlatformSupported;
         final label = supported
             ? plugin.localizedName(context)
@@ -136,7 +138,6 @@ class _ChatMediaOptions extends ConsumerWidget {
           icon: switch (plugin.icon) {
             '📷' => Icons.camera_alt,
             '🖼' => Icons.image_outlined,
-            '🎬' => Icons.videocam_outlined,
             '📄' => Icons.assignment_outlined,
             _ => Icons.attachment,
           },
