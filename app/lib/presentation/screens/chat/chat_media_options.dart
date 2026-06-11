@@ -146,7 +146,10 @@ class _ChatMediaOptions extends ConsumerWidget {
       }),
     ];
 
-    return _ChatOptionsBottomSheet(items: items);
+    return _ChatOptionsBottomSheet(
+      items: items,
+      kind: _ChatOptionsSheetKind.media,
+    );
   }
 }
 
@@ -201,12 +204,17 @@ class _ChatEffectOptions extends ConsumerWidget {
       ),
     ];
 
-    return _ChatOptionsBottomSheet(items: items);
+    return _ChatOptionsBottomSheet(
+      items: items,
+      kind: _ChatOptionsSheetKind.effects,
+    );
   }
 }
 
+enum _ChatOptionsSheetKind { media, effects }
+
 class _ChatOptionsBottomSheet extends StatelessWidget {
-  const _ChatOptionsBottomSheet({required this.items});
+  const _ChatOptionsBottomSheet({required this.items, required this.kind});
 
   static const _columnCount = 3;
   static const _itemExtent = 136.0;
@@ -218,10 +226,11 @@ class _ChatOptionsBottomSheet extends StatelessWidget {
   static const _borderRadius = BorderRadius.vertical(top: Radius.circular(28));
 
   final List<_ChatMediaOptionItem> items;
+  final _ChatOptionsSheetKind kind;
 
   @override
   Widget build(BuildContext context) {
-    final isEffectSheet = items.length == 2;
+    final isEffectSheet = kind == _ChatOptionsSheetKind.effects;
     final columnCount = isEffectSheet ? items.length : _columnCount;
     final rowCount = (items.length / columnCount).ceil();
     final topPadding = isEffectSheet ? _effectTopPadding : _topPadding;
@@ -236,7 +245,9 @@ class _ChatOptionsBottomSheet extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: ColoredBox(
-          color: context.colorScheme.surfaceContainerHigh,
+          color: context.colorScheme.surfaceContainerHigh.withValues(
+            alpha: 0.85,
+          ),
           child: BottomSheetMenu(
             showHandle: true,
             itemCount: 1,
