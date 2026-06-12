@@ -10,11 +10,11 @@ part of 'qr_code_picker_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(QrCodePickerController)
-final qrCodePickerControllerProvider = QrCodePickerControllerProvider._();
+const qrCodePickerControllerProvider = QrCodePickerControllerProvider._();
 
 final class QrCodePickerControllerProvider
     extends $NotifierProvider<QrCodePickerController, QrCodePickerState> {
-  QrCodePickerControllerProvider._()
+  const QrCodePickerControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,6 +49,7 @@ abstract class _$QrCodePickerController extends $Notifier<QrCodePickerState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<QrCodePickerState, QrCodePickerState>;
     final element =
         ref.element
@@ -58,6 +59,6 @@ abstract class _$QrCodePickerController extends $Notifier<QrCodePickerState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

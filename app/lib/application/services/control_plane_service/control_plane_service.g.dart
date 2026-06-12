@@ -32,7 +32,7 @@ part of 'control_plane_service.dart';
 /// push notifications, and app-level services.
 
 @ProviderFor(ControlPlaneService)
-final controlPlaneServiceProvider = ControlPlaneServiceProvider._();
+const controlPlaneServiceProvider = ControlPlaneServiceProvider._();
 
 /// Service responsible for processing control plane stream events and device
 ///  tokens.
@@ -80,7 +80,7 @@ final class ControlPlaneServiceProvider
   /// . It does not expose public mutation APIs;
   /// it acts as an adapter between the SDK control plane feed,
   /// push notifications, and app-level services.
-  ControlPlaneServiceProvider._()
+  const ControlPlaneServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -139,6 +139,7 @@ abstract class _$ControlPlaneService
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref =
         this.ref as $Ref<ControlPlaneServiceState, ControlPlaneServiceState>;
     final element =
@@ -149,6 +150,6 @@ abstract class _$ControlPlaneService
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

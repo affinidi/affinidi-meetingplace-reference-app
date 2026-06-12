@@ -10,13 +10,13 @@ part of 'identities_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(IdentitiesScreenController)
-final identitiesScreenControllerProvider =
+const identitiesScreenControllerProvider =
     IdentitiesScreenControllerProvider._();
 
 final class IdentitiesScreenControllerProvider
     extends
         $NotifierProvider<IdentitiesScreenController, IdentitiesScreenState> {
-  IdentitiesScreenControllerProvider._()
+  const IdentitiesScreenControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -52,6 +52,7 @@ abstract class _$IdentitiesScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<IdentitiesScreenState, IdentitiesScreenState>;
     final element =
         ref.element
@@ -61,6 +62,6 @@ abstract class _$IdentitiesScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

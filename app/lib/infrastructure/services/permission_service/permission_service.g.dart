@@ -11,7 +11,7 @@ part of 'permission_service.dart';
 /// A service for checking and requesting permissions.
 
 @ProviderFor(permissionService)
-final permissionServiceProvider = PermissionServiceProvider._();
+const permissionServiceProvider = PermissionServiceProvider._();
 
 /// A service for checking and requesting permissions.
 
@@ -24,7 +24,7 @@ final class PermissionServiceProvider
         >
     with $Provider<PermissionService> {
   /// A service for checking and requesting permissions.
-  PermissionServiceProvider._()
+  const PermissionServiceProvider._()
     : super(
         from: null,
         argument: null,

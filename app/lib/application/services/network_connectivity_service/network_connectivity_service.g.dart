@@ -11,7 +11,7 @@ part of 'network_connectivity_service.dart';
 /// Service for monitoring network connectivity status and notifying changes.
 
 @ProviderFor(NetworkConnectivityService)
-final networkConnectivityServiceProvider =
+const networkConnectivityServiceProvider =
     NetworkConnectivityServiceProvider._();
 
 /// Service for monitoring network connectivity status and notifying changes.
@@ -22,7 +22,7 @@ final class NetworkConnectivityServiceProvider
           NetworkConnectivityServiceState
         > {
   /// Service for monitoring network connectivity status and notifying changes.
-  NetworkConnectivityServiceProvider._()
+  const NetworkConnectivityServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -62,6 +62,7 @@ abstract class _$NetworkConnectivityService
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref =
         this.ref
             as $Ref<
@@ -79,6 +80,6 @@ abstract class _$NetworkConnectivityService
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

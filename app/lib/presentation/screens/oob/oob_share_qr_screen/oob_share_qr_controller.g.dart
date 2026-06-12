@@ -10,11 +10,11 @@ part of 'oob_share_qr_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(OobShareQrController)
-final oobShareQrControllerProvider = OobShareQrControllerProvider._();
+const oobShareQrControllerProvider = OobShareQrControllerProvider._();
 
 final class OobShareQrControllerProvider
     extends $NotifierProvider<OobShareQrController, OobShareQrState> {
-  OobShareQrControllerProvider._()
+  const OobShareQrControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,6 +49,7 @@ abstract class _$OobShareQrController extends $Notifier<OobShareQrState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<OobShareQrState, OobShareQrState>;
     final element =
         ref.element
@@ -58,6 +59,6 @@ abstract class _$OobShareQrController extends $Notifier<OobShareQrState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

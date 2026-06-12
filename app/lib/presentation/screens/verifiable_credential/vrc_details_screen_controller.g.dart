@@ -10,12 +10,12 @@ part of 'vrc_details_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(VrcDetailsScreenController)
-final vrcDetailsScreenControllerProvider = VrcDetailsScreenControllerFamily._();
+const vrcDetailsScreenControllerProvider = VrcDetailsScreenControllerFamily._();
 
 final class VrcDetailsScreenControllerProvider
     extends
         $NotifierProvider<VrcDetailsScreenController, VrcDetailsScreenState> {
-  VrcDetailsScreenControllerProvider._({
+  const VrcDetailsScreenControllerProvider._({
     required VrcDetailsScreenControllerFamily super.from,
     required (String, {String? vcBlob}) super.argument,
   }) : super(
@@ -72,7 +72,7 @@ final class VrcDetailsScreenControllerFamily extends $Family
           VrcDetailsScreenState,
           (String, {String? vcBlob})
         > {
-  VrcDetailsScreenControllerFamily._()
+  const VrcDetailsScreenControllerFamily._()
     : super(
         retry: null,
         name: r'vrcDetailsScreenControllerProvider',
@@ -103,6 +103,7 @@ abstract class _$VrcDetailsScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(_$args.$1, vcBlob: _$args.vcBlob);
     final ref = this.ref as $Ref<VrcDetailsScreenState, VrcDetailsScreenState>;
     final element =
         ref.element
@@ -112,6 +113,6 @@ abstract class _$VrcDetailsScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args.$1, vcBlob: _$args.vcBlob));
+    element.handleValue(ref, created);
   }
 }

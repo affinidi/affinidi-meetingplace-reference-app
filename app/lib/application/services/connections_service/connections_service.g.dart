@@ -21,7 +21,7 @@ part of 'connections_service.dart';
 /// channel inauguration events.
 
 @ProviderFor(ConnectionsService)
-final connectionsServiceProvider = ConnectionsServiceProvider._();
+const connectionsServiceProvider = ConnectionsServiceProvider._();
 
 /// Service responsible for managing connection offers and channels.
 ///
@@ -47,7 +47,7 @@ final class ConnectionsServiceProvider
   ///
   /// It interacts with the MeetingPlaceCoreSDK and exposes a stream for group
   /// channel inauguration events.
-  ConnectionsServiceProvider._()
+  const ConnectionsServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -94,6 +94,7 @@ abstract class _$ConnectionsService extends $Notifier<ConnectionsServiceState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref =
         this.ref as $Ref<ConnectionsServiceState, ConnectionsServiceState>;
     final element =
@@ -104,6 +105,6 @@ abstract class _$ConnectionsService extends $Notifier<ConnectionsServiceState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

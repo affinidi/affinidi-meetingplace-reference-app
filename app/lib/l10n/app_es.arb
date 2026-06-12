@@ -179,6 +179,11 @@
 	"chatMessageActionDelete": "Eliminar para todos",
 	"chatMessageActionDeleteLocal": "Eliminar para mí",
 	"chatMessageActionCopy": "Copiar mensaje",
+	"chatMessageActionEdit": "Editar mensaje",
+	"chatMessageEditedLabel": "editado",
+	"chatMessageEditFailed": "No se pudo editar el mensaje",
+	"chatMessageEditHint": "Texto del mensaje",
+	"chatMessageEditSave": "Guardar",
 	"chatMessageDeletedTombstone": "Este mensaje fue eliminado",
 	"chatMessageDeletedLocallyTombstone": "Eliminaste este mensaje",
 	"chatMessageDeleteFailed": "No se pudo eliminar el mensaje",
@@ -361,7 +366,6 @@
 	"chatNotificationsWhyNote": "Solo verás mensajes nuevos cuando estés en el chat. No habrá actualizaciones de insignias ni notificaciones que te informen que han llegado mensajes nuevos, incluso si la aplicación está abierta.",
 	"chatNotificationsWhyTitle": "¿Por qué no hay notificaciones push?",
 	"goBack": "Volver",
-	"debugPanelShareLogs": "Compartir registros",
 	"rCardsPanelSubtitle": "Tarjetas de relación recibidas de tus contactos",
 	"rCardsEmpty": "Las tarjetas R son una versión moderna y autoactualizante de las vCards. Una vez que hagas tu primera conexión, tus tarjetas de visita digitales aparecerán aquí.",
 	"rCardsFilterLabel": "{filter, select, all{Todos} nonAnonymous{No anónimos} other{}}",
@@ -477,5 +481,6 @@
 	"zkpNoticeShared": "Has compartido una Prueba de Conocimiento Cero que confirma que eres humano.\n*No se compartieron datos personales.",
 	"zkpNoticeReceived": "{contactName} ha compartido una Prueba de Conocimiento Cero que confirma que es humano.",
 	"zkpNoticeRequest": "{contactName} ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.",
-	"zkpProofAlreadyShared": "Prueba ZKP ya compartida"
+	"zkpProofAlreadyShared": "Prueba ZKP ya compartida",
+	"debugPanelShareLogs": "Compartir registros"
 }

@@ -15,7 +15,7 @@ part of 'router_config_provider.dart';
 /// [ref] - Used to read dependencies like authentication and settings state.
 
 @ProviderFor(routerConfig)
-final routerConfigProvider = RouterConfigProvider._();
+const routerConfigProvider = RouterConfigProvider._();
 
 /// Provides the app's [GoRouter] configuration.
 ///
@@ -31,7 +31,7 @@ final class RouterConfigProvider
   /// Sets up navigation guards, refresh logic, and the main route table.
   ///
   /// [ref] - Used to read dependencies like authentication and settings state.
-  RouterConfigProvider._()
+  const RouterConfigProvider._()
     : super(
         from: null,
         argument: null,

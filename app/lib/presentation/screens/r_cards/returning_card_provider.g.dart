@@ -12,7 +12,7 @@ part of 'returning_card_provider.dart';
 /// from [RCardDetailsScreen].
 
 @ProviderFor(ReturningCard)
-final returningCardProvider = ReturningCardProvider._();
+const returningCardProvider = ReturningCardProvider._();
 
 /// Provider used to trigger the "return" animation when navigating back
 /// from [RCardDetailsScreen].
@@ -20,7 +20,7 @@ final class ReturningCardProvider
     extends $NotifierProvider<ReturningCard, String?> {
   /// Provider used to trigger the "return" animation when navigating back
   /// from [RCardDetailsScreen].
-  ReturningCardProvider._()
+  const ReturningCardProvider._()
     : super(
         from: null,
         argument: null,
@@ -57,6 +57,7 @@ abstract class _$ReturningCard extends $Notifier<String?> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<String?, String?>;
     final element =
         ref.element
@@ -66,6 +67,6 @@ abstract class _$ReturningCard extends $Notifier<String?> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

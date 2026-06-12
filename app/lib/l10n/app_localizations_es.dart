@@ -945,6 +945,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chatMessageActionCopy => 'Copiar mensaje';
 
   @override
+  String get chatMessageActionEdit => 'Editar mensaje';
+
+  @override
+  String get chatMessageEditedLabel => 'editado';
+
+  @override
+  String get chatMessageEditFailed => 'No se pudo editar el mensaje';
+
+  @override
+  String get chatMessageEditHint => 'Texto del mensaje';
+
+  @override
+  String get chatMessageEditSave => 'Guardar';
+
+  @override
   String get chatMessageDeletedTombstone => 'Este mensaje fue eliminado';
 
   @override

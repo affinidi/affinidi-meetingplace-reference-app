@@ -20,7 +20,7 @@ part of 'mediator_service.dart';
 /// mediators using a repository layer with secure storage backing.
 
 @ProviderFor(MediatorService)
-final mediatorServiceProvider = MediatorServiceProvider._();
+const mediatorServiceProvider = MediatorServiceProvider._();
 
 /// Service to manage mediators: loading, adding, renaming, and removing.
 ///
@@ -44,7 +44,7 @@ final class MediatorServiceProvider
   ///
   /// The service maintains state through Riverpod and persists custom
   /// mediators using a repository layer with secure storage backing.
-  MediatorServiceProvider._()
+  const MediatorServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -89,6 +89,7 @@ abstract class _$MediatorService extends $Notifier<MediatorServiceState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<MediatorServiceState, MediatorServiceState>;
     final element =
         ref.element
@@ -98,6 +99,6 @@ abstract class _$MediatorService extends $Notifier<MediatorServiceState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

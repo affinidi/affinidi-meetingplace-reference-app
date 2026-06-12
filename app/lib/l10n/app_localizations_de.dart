@@ -414,6 +414,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'oob_invalid_type': 'QR-Code-Daten werden nicht unterstützt',
       'network_error':
           'Verbindung konnte nicht hergestellt werden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.',
+      'deleteContactFailed':
+          'Kontakt konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.',
       'other': '$errorCode',
     });
     return '$_temp0';
@@ -950,6 +952,22 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get chatMessageActionCopy => 'Nachricht kopieren';
+
+  @override
+  String get chatMessageActionEdit => 'Nachricht bearbeiten';
+
+  @override
+  String get chatMessageEditedLabel => 'bearbeitet';
+
+  @override
+  String get chatMessageEditFailed =>
+      'Nachricht konnte nicht bearbeitet werden';
+
+  @override
+  String get chatMessageEditHint => 'Nachrichtentext';
+
+  @override
+  String get chatMessageEditSave => 'Speichern';
 
   @override
   String get chatMessageDeletedTombstone => 'Diese Nachricht wurde gelöscht';

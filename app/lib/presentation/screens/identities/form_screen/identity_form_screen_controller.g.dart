@@ -10,7 +10,7 @@ part of 'identity_form_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(IdentityFormScreenController)
-final identityFormScreenControllerProvider =
+const identityFormScreenControllerProvider =
     IdentityFormScreenControllerFamily._();
 
 final class IdentityFormScreenControllerProvider
@@ -19,7 +19,7 @@ final class IdentityFormScreenControllerProvider
           IdentityFormScreenController,
           IdentityFormScreenState
         > {
-  IdentityFormScreenControllerProvider._({
+  const IdentityFormScreenControllerProvider._({
     required IdentityFormScreenControllerFamily super.from,
     required String? super.argument,
   }) : super(
@@ -76,7 +76,7 @@ final class IdentityFormScreenControllerFamily extends $Family
           IdentityFormScreenState,
           String?
         > {
-  IdentityFormScreenControllerFamily._()
+  const IdentityFormScreenControllerFamily._()
     : super(
         retry: null,
         name: r'identityFormScreenControllerProvider',
@@ -101,6 +101,7 @@ abstract class _$IdentityFormScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(_$args);
     final ref =
         this.ref as $Ref<IdentityFormScreenState, IdentityFormScreenState>;
     final element =
@@ -111,6 +112,6 @@ abstract class _$IdentityFormScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    element.handleValue(ref, created);
   }
 }

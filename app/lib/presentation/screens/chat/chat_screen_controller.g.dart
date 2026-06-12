@@ -15,7 +15,7 @@ part of 'chat_screen_controller.dart';
 /// user interactions, and UI updates within the chat screen.
 
 @ProviderFor(ChatScreenController)
-final chatScreenControllerProvider = ChatScreenControllerFamily._();
+const chatScreenControllerProvider = ChatScreenControllerFamily._();
 
 /// Controller class for managing the state and logic of the chat screen.
 ///
@@ -29,7 +29,7 @@ final class ChatScreenControllerProvider
   /// Extends [_$ChatScreenController] to provide reactive state management
   /// and business logic for chat-related features, such as handling messages,
   /// user interactions, and UI updates within the chat screen.
-  ChatScreenControllerProvider._({
+  const ChatScreenControllerProvider._({
     required ChatScreenControllerFamily super.from,
     required String super.argument,
   }) : super(
@@ -91,7 +91,7 @@ final class ChatScreenControllerFamily extends $Family
           ChatScreenState,
           String
         > {
-  ChatScreenControllerFamily._()
+  const ChatScreenControllerFamily._()
     : super(
         retry: null,
         name: r'chatScreenControllerProvider',
@@ -127,6 +127,7 @@ abstract class _$ChatScreenController extends $Notifier<ChatScreenState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(_$args);
     final ref = this.ref as $Ref<ChatScreenState, ChatScreenState>;
     final element =
         ref.element
@@ -136,6 +137,6 @@ abstract class _$ChatScreenController extends $Notifier<ChatScreenState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    element.handleValue(ref, created);
   }
 }
