@@ -18,6 +18,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     this.offerToFind,
     this.findOfferHasError = false,
     bool shouldTimeout = false,
+    this.shouldFailToLeaveChannel = false,
   }) : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
        _offerToReturn = offerToReturn,
        _publishOfferException = publishOfferException,
@@ -41,6 +42,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   // Getter to check if subscriptions have been created (useful for debugging)
   final ConnectionOffer? offerToFind;
   final bool findOfferHasError;
+  final bool shouldFailToLeaveChannel;
 
   final _controlPlaneEventStreamManager =
       StreamController<ControlPlaneStreamEvent>.broadcast();
@@ -164,6 +166,13 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
     final channel = _channels[channelDid];
     return channel;
+  }
+
+  @override
+  Future<void> leaveChannel(Channel channel) async {
+    if (shouldFailToLeaveChannel) {
+      throw Exception('Simulated leaveChannel error');
+    }
   }
 
   @override

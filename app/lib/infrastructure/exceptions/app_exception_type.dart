@@ -25,4 +25,5 @@ enum AppExceptionType {
   unableToFindMediator,
   offerNotFound,
   cameraInitializationFailed,
+  deleteContactFailed,
 }
