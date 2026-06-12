@@ -322,7 +322,7 @@ class _EditMessageDialogState extends State<_EditMessageDialog> {
   }
 }
 
-class _HostedMediaWidget extends ConsumerWidget {
+class _HostedMediaWidget extends HookConsumerWidget {
   const _HostedMediaWidget({
     required String contactId,
     required chat.ChatAttachment attachment,
@@ -358,6 +358,12 @@ class _HostedMediaWidget extends ConsumerWidget {
         .loadAttachment(_attachment);
 
     final category = mediaCategoryFromMimeType(_attachment.mediaType);
+    final shouldLoadImage = category == MediaCategory.image && cached == null;
+    useEffect(() {
+      if (shouldLoadImage) onDownload();
+      return null;
+    }, [cacheKey, shouldLoadImage]);
+
     if (chat.VoiceMessageMetadata.isVoice(_attachment)) {
       return _HostedAudioWidget(
         attachment: _attachment,
