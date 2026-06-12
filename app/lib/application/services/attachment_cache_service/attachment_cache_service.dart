@@ -7,6 +7,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../infrastructure/extensions/chat_attachment_extensions.dart';
 import '../../../infrastructure/extensions/string_list_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/plugins/media_category.dart';
@@ -159,10 +160,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
       for (final attachment in message.attachments) {
         if (attachment.format != AttachmentFormat.hostedMedia.value) continue;
         final category = mediaCategoryFromMimeType(attachment.mediaType);
-        final isVoice = chat.VoiceMessageMetadata.isVoice(attachment);
-        if (category == MediaCategory.image ||
-            category == MediaCategory.audio ||
-            isVoice) {
+        if (category == MediaCategory.image || attachment.isVoice) {
           loadAttachment(attachment);
         }
       }
@@ -219,7 +217,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
           var messageDidChange = false;
           final nextAttachments = item.attachments
               .map((attachment) {
-                if (!_isVoiceAttachment(attachment)) return attachment;
+                if (!attachment.isVoice) return attachment;
                 final localVoiceMessage = localVoiceMessageFor(attachment);
                 if (localVoiceMessage == null) return attachment;
                 final voice = chat.VoiceMessageMetadata.of(attachment);
@@ -272,11 +270,6 @@ class AttachmentCacheService extends _$AttachmentCacheService {
         .toList(growable: false);
 
     return didChange ? nextMessages : messages;
-  }
-
-  bool _isVoiceAttachment(ChatAttachment attachment) {
-    if (chat.VoiceMessageMetadata.isVoice(attachment)) return true;
-    return attachment.mediaType?.toLowerCase().startsWith('audio/') ?? false;
   }
 
   String? _localVoiceMessageKey(ChatAttachment attachment) {
