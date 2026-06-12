@@ -10,7 +10,7 @@ part of 'chat_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(chatRepository)
-final chatRepositoryProvider = ChatRepositoryProvider._();
+const chatRepositoryProvider = ChatRepositoryProvider._();
 
 final class ChatRepositoryProvider
     extends
@@ -20,7 +20,7 @@ final class ChatRepositoryProvider
           FutureOr<ChatRepository>
         >
     with $FutureModifier<ChatRepository>, $FutureProvider<ChatRepository> {
-  ChatRepositoryProvider._()
+  const ChatRepositoryProvider._()
     : super(
         from: null,
         argument: null,

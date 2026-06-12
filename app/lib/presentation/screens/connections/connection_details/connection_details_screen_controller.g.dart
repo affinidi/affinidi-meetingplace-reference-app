@@ -10,7 +10,7 @@ part of 'connection_details_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ConnectionDetailsScreenController)
-final connectionDetailsScreenControllerProvider =
+const connectionDetailsScreenControllerProvider =
     ConnectionDetailsScreenControllerFamily._();
 
 final class ConnectionDetailsScreenControllerProvider
@@ -19,7 +19,7 @@ final class ConnectionDetailsScreenControllerProvider
           ConnectionDetailsScreenController,
           ConnectionDetailsScreenState
         > {
-  ConnectionDetailsScreenControllerProvider._({
+  const ConnectionDetailsScreenControllerProvider._({
     required ConnectionDetailsScreenControllerFamily super.from,
     required String super.argument,
   }) : super(
@@ -78,7 +78,7 @@ final class ConnectionDetailsScreenControllerFamily extends $Family
           ConnectionDetailsScreenState,
           String
         > {
-  ConnectionDetailsScreenControllerFamily._()
+  const ConnectionDetailsScreenControllerFamily._()
     : super(
         retry: null,
         name: r'connectionDetailsScreenControllerProvider',
@@ -106,6 +106,7 @@ abstract class _$ConnectionDetailsScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(_$args);
     final ref =
         this.ref
             as $Ref<ConnectionDetailsScreenState, ConnectionDetailsScreenState>;
@@ -120,6 +121,6 @@ abstract class _$ConnectionDetailsScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    element.handleValue(ref, created);
   }
 }

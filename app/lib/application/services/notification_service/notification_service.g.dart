@@ -17,7 +17,7 @@ part of 'notification_service.dart';
 ///  counts.
 
 @ProviderFor(NotificationService)
-final notificationServiceProvider = NotificationServiceProvider._();
+const notificationServiceProvider = NotificationServiceProvider._();
 
 /// Service responsible for tracking notification counters for app features.
 ///
@@ -35,7 +35,7 @@ final class NotificationServiceProvider
   /// - Maintains per-type counters (contacts, connections) in state.
   /// - Exposes counter state via the provider for UI to display aggregated
   ///  counts.
-  NotificationServiceProvider._()
+  const NotificationServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -79,6 +79,7 @@ abstract class _$NotificationService
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref =
         this.ref as $Ref<NotificationServiceState, NotificationServiceState>;
     final element =
@@ -89,6 +90,6 @@ abstract class _$NotificationService
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

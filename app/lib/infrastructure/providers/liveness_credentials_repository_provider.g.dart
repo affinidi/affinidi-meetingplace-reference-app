@@ -10,7 +10,7 @@ part of 'liveness_credentials_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(livenessCredentialsRepository)
-final livenessCredentialsRepositoryProvider =
+const livenessCredentialsRepositoryProvider =
     LivenessCredentialsRepositoryProvider._();
 
 final class LivenessCredentialsRepositoryProvider
@@ -23,7 +23,7 @@ final class LivenessCredentialsRepositoryProvider
     with
         $FutureModifier<LivenessCredentialsRepository>,
         $FutureProvider<LivenessCredentialsRepository> {
-  LivenessCredentialsRepositoryProvider._()
+  const LivenessCredentialsRepositoryProvider._()
     : super(
         from: null,
         argument: null,

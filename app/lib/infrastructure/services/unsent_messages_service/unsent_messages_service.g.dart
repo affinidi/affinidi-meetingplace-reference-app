@@ -15,7 +15,7 @@ part of 'unsent_messages_service.dart';
 /// separate from the main database.
 
 @ProviderFor(UnsentMessagesService)
-final unsentMessagesServiceProvider = UnsentMessagesServiceProvider._();
+const unsentMessagesServiceProvider = UnsentMessagesServiceProvider._();
 
 /// Service for managing unsent messages per contact.
 ///
@@ -30,7 +30,7 @@ final class UnsentMessagesServiceProvider
   /// This service persists draft messages to secure storage (encrypted),
   /// allowing them to survive app restarts while keeping them secure and
   /// separate from the main database.
-  UnsentMessagesServiceProvider._()
+  const UnsentMessagesServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -72,6 +72,7 @@ abstract class _$UnsentMessagesService
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref =
         this.ref
             as $Ref<UnsentMessagesServiceState, UnsentMessagesServiceState>;
@@ -86,6 +87,6 @@ abstract class _$UnsentMessagesService
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

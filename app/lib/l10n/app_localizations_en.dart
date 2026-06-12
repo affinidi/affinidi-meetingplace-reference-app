@@ -399,6 +399,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'oob_invalid_type': 'QR-Code data not supported',
       'network_error':
           'Could not connect. Check your internet connection and try again.',
+      'deleteContactFailed': 'Failed to delete contact.',
       'other': '$errorCode',
     });
     return '$_temp0';
@@ -925,6 +926,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatMessageActionCopy => 'Copy message';
+
+  @override
+  String get chatMessageActionEdit => 'Edit message';
+
+  @override
+  String get chatMessageEditedLabel => 'edited';
+
+  @override
+  String get chatMessageEditFailed => 'Could not edit message';
+
+  @override
+  String get chatMessageEditHint => 'Message text';
+
+  @override
+  String get chatMessageEditSave => 'Save';
 
   @override
   String get chatMessageDeletedTombstone => 'This message was deleted';

@@ -14,7 +14,7 @@ part of 'r_cards_repository_provider.dart';
 /// provider in the root [ProviderScope] with [rCardsRepositoryDrift].
 
 @ProviderFor(rCardsRepository)
-final rCardsRepositoryProvider = RCardsRepositoryProvider._();
+const rCardsRepositoryProvider = RCardsRepositoryProvider._();
 
 /// Provides the app-wide [RCardRepository] instance.
 ///
@@ -33,7 +33,7 @@ final class RCardsRepositoryProvider
   ///
   /// The default implementation throws [UnimplementedError]. Override this
   /// provider in the root [ProviderScope] with [rCardsRepositoryDrift].
-  RCardsRepositoryProvider._()
+  const RCardsRepositoryProvider._()
     : super(
         from: null,
         argument: null,

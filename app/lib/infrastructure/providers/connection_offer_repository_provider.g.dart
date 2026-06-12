@@ -10,7 +10,7 @@ part of 'connection_offer_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(connectionOfferRepository)
-final connectionOfferRepositoryProvider = ConnectionOfferRepositoryProvider._();
+const connectionOfferRepositoryProvider = ConnectionOfferRepositoryProvider._();
 
 final class ConnectionOfferRepositoryProvider
     extends
@@ -22,7 +22,7 @@ final class ConnectionOfferRepositoryProvider
     with
         $FutureModifier<model.ConnectionOfferRepository>,
         $FutureProvider<model.ConnectionOfferRepository> {
-  ConnectionOfferRepositoryProvider._()
+  const ConnectionOfferRepositoryProvider._()
     : super(
         from: null,
         argument: null,

@@ -20,7 +20,7 @@ part of 'identities_service.dart';
 /// in sync with environment defaults and repository state.
 
 @ProviderFor(IdentitiesService)
-final identitiesServiceProvider = IdentitiesServiceProvider._();
+const identitiesServiceProvider = IdentitiesServiceProvider._();
 
 /// Service responsible for managing identities and the current contact card.
 ///
@@ -44,7 +44,7 @@ final class IdentitiesServiceProvider
   ///
   /// The service initializes by loading identities and keeps the current identity
   /// in sync with environment defaults and repository state.
-  IdentitiesServiceProvider._()
+  const IdentitiesServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -89,6 +89,7 @@ abstract class _$IdentitiesService extends $Notifier<IdentitiesServiceState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref =
         this.ref as $Ref<IdentitiesServiceState, IdentitiesServiceState>;
     final element =
@@ -99,6 +100,6 @@ abstract class _$IdentitiesService extends $Notifier<IdentitiesServiceState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

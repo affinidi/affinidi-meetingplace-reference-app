@@ -19,7 +19,7 @@ part of 'credentials_sdk_provider.dart';
 /// across the app lifetime.
 
 @ProviderFor(credentialsSdk)
-final credentialsSdkProvider = CredentialsSdkProvider._();
+const credentialsSdkProvider = CredentialsSdkProvider._();
 
 /// Provides the `MeetingPlaceCredentialsSDK` instance backed by the
 /// `MeetingPlaceCoreSDK` from `meetingPlaceSdkProvider`.
@@ -50,7 +50,7 @@ final class CredentialsSdkProvider
   ///
   /// Keep-alive ensures the credentials SDK is initialized once and shared
   /// across the app lifetime.
-  CredentialsSdkProvider._()
+  const CredentialsSdkProvider._()
     : super(
         from: null,
         argument: null,

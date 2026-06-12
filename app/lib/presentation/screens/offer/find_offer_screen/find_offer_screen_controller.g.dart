@@ -10,11 +10,11 @@ part of 'find_offer_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(FindOfferScreenController)
-final findOfferScreenControllerProvider = FindOfferScreenControllerProvider._();
+const findOfferScreenControllerProvider = FindOfferScreenControllerProvider._();
 
 final class FindOfferScreenControllerProvider
     extends $NotifierProvider<FindOfferScreenController, FindOfferScreenState> {
-  FindOfferScreenControllerProvider._()
+  const FindOfferScreenControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -50,6 +50,7 @@ abstract class _$FindOfferScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<FindOfferScreenState, FindOfferScreenState>;
     final element =
         ref.element
@@ -59,6 +60,6 @@ abstract class _$FindOfferScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

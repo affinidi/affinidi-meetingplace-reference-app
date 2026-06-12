@@ -10,7 +10,7 @@ part of 'channel_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(channelRepository)
-final channelRepositoryProvider = ChannelRepositoryProvider._();
+const channelRepositoryProvider = ChannelRepositoryProvider._();
 
 final class ChannelRepositoryProvider
     extends
@@ -22,7 +22,7 @@ final class ChannelRepositoryProvider
     with
         $FutureModifier<model.ChannelRepository>,
         $FutureProvider<model.ChannelRepository> {
-  ChannelRepositoryProvider._()
+  const ChannelRepositoryProvider._()
     : super(
         from: null,
         argument: null,

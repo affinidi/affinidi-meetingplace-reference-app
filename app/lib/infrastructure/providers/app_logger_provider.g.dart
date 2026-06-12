@@ -15,7 +15,7 @@ part of 'app_logger_provider.dart';
 /// [ref] - The Riverpod reference used for dependency injection.
 
 @ProviderFor(appLogger)
-final appLoggerProvider = AppLoggerProvider._();
+const appLoggerProvider = AppLoggerProvider._();
 
 /// A Riverpod provider that exposes the global [AppLogger] instance.
 ///
@@ -31,7 +31,7 @@ final class AppLoggerProvider
   /// Useful for consistent logging across the app.
   ///
   /// [ref] - The Riverpod reference used for dependency injection.
-  AppLoggerProvider._()
+  const AppLoggerProvider._()
     : super(
         from: null,
         argument: null,

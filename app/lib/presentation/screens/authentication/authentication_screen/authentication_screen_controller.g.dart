@@ -10,7 +10,7 @@ part of 'authentication_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(AuthenticationScreenController)
-final authenticationScreenControllerProvider =
+const authenticationScreenControllerProvider =
     AuthenticationScreenControllerProvider._();
 
 final class AuthenticationScreenControllerProvider
@@ -19,7 +19,7 @@ final class AuthenticationScreenControllerProvider
           AuthenticationScreenController,
           AuthenticationScreenState
         > {
-  AuthenticationScreenControllerProvider._()
+  const AuthenticationScreenControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -55,6 +55,7 @@ abstract class _$AuthenticationScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref =
         this.ref as $Ref<AuthenticationScreenState, AuthenticationScreenState>;
     final element =
@@ -65,6 +66,6 @@ abstract class _$AuthenticationScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

@@ -10,11 +10,11 @@ part of 'vrc_attachment_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(VrcAttachmentController)
-final vrcAttachmentControllerProvider = VrcAttachmentControllerFamily._();
+const vrcAttachmentControllerProvider = VrcAttachmentControllerFamily._();
 
 final class VrcAttachmentControllerProvider
     extends $NotifierProvider<VrcAttachmentController, VrcAttachmentState> {
-  VrcAttachmentControllerProvider._({
+  const VrcAttachmentControllerProvider._({
     required VrcAttachmentControllerFamily super.from,
     required String super.argument,
   }) : super(
@@ -71,7 +71,7 @@ final class VrcAttachmentControllerFamily extends $Family
           VrcAttachmentState,
           String
         > {
-  VrcAttachmentControllerFamily._()
+  const VrcAttachmentControllerFamily._()
     : super(
         retry: null,
         name: r'vrcAttachmentControllerProvider',
@@ -95,6 +95,7 @@ abstract class _$VrcAttachmentController extends $Notifier<VrcAttachmentState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(_$args);
     final ref = this.ref as $Ref<VrcAttachmentState, VrcAttachmentState>;
     final element =
         ref.element
@@ -104,6 +105,6 @@ abstract class _$VrcAttachmentController extends $Notifier<VrcAttachmentState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    element.handleValue(ref, created);
   }
 }

@@ -20,7 +20,7 @@ part of 'contacts_service.dart';
 /// contacts and exposes streams for processing and contact-card updates.
 
 @ProviderFor(ContactsService)
-final contactsServiceProvider = ContactsServiceProvider._();
+const contactsServiceProvider = ContactsServiceProvider._();
 
 /// Service responsible for managing contacts derived from channels and offers.
 ///
@@ -44,7 +44,7 @@ final class ContactsServiceProvider
   ///
   /// The service listens to control plane events to automatically create/update
   /// contacts and exposes streams for processing and contact-card updates.
-  ContactsServiceProvider._()
+  const ContactsServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -89,6 +89,7 @@ abstract class _$ContactsService extends $Notifier<ContactsServiceState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<ContactsServiceState, ContactsServiceState>;
     final element =
         ref.element
@@ -98,6 +99,6 @@ abstract class _$ContactsService extends $Notifier<ContactsServiceState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

@@ -10,7 +10,7 @@ part of 'group_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(groupsRepository)
-final groupsRepositoryProvider = GroupsRepositoryProvider._();
+const groupsRepositoryProvider = GroupsRepositoryProvider._();
 
 final class GroupsRepositoryProvider
     extends
@@ -22,7 +22,7 @@ final class GroupsRepositoryProvider
     with
         $FutureModifier<model.GroupRepository>,
         $FutureProvider<model.GroupRepository> {
-  GroupsRepositoryProvider._()
+  const GroupsRepositoryProvider._()
     : super(
         from: null,
         argument: null,

@@ -20,7 +20,7 @@ part of 'settings_service.dart';
 /// of mediators, and updates persistent storage when settings change.
 
 @ProviderFor(SettingsService)
-final settingsServiceProvider = SettingsServiceProvider._();
+const settingsServiceProvider = SettingsServiceProvider._();
 
 /// Service responsible for application settings and mediator configuration.
 ///
@@ -44,7 +44,7 @@ final class SettingsServiceProvider
   ///
   /// It reads environment defaults and secure storage, exposes the combined list
   /// of mediators, and updates persistent storage when settings change.
-  SettingsServiceProvider._()
+  const SettingsServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -89,6 +89,7 @@ abstract class _$SettingsService extends $Notifier<SettingsServiceState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<SettingsServiceState, SettingsServiceState>;
     final element =
         ref.element
@@ -98,6 +99,6 @@ abstract class _$SettingsService extends $Notifier<SettingsServiceState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

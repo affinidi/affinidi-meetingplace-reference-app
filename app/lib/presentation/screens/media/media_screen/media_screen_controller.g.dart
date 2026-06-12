@@ -10,11 +10,11 @@ part of 'media_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(MediaScreenController)
-final mediaScreenControllerProvider = MediaScreenControllerFamily._();
+const mediaScreenControllerProvider = MediaScreenControllerFamily._();
 
 final class MediaScreenControllerProvider
     extends $NotifierProvider<MediaScreenController, MediaScreenState> {
-  MediaScreenControllerProvider._({
+  const MediaScreenControllerProvider._({
     required MediaScreenControllerFamily super.from,
     required ({
       CameraLensDirection cameraLensDirection,
@@ -79,7 +79,7 @@ final class MediaScreenControllerFamily extends $Family
             bool useChatSemantics,
           })
         > {
-  MediaScreenControllerFamily._()
+  const MediaScreenControllerFamily._()
     : super(
         retry: null,
         name: r'mediaScreenControllerProvider',
@@ -125,6 +125,11 @@ abstract class _$MediaScreenController extends $Notifier<MediaScreenState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(
+      cameraLensDirection: _$args.cameraLensDirection,
+      useCamera: _$args.useCamera,
+      useChatSemantics: _$args.useChatSemantics,
+    );
     final ref = this.ref as $Ref<MediaScreenState, MediaScreenState>;
     final element =
         ref.element
@@ -134,13 +139,6 @@ abstract class _$MediaScreenController extends $Notifier<MediaScreenState> {
               Object?,
               Object?
             >;
-    element.handleCreate(
-      ref,
-      () => build(
-        cameraLensDirection: _$args.cameraLensDirection,
-        useCamera: _$args.useCamera,
-        useChatSemantics: _$args.useChatSemantics,
-      ),
-    );
+    element.handleValue(ref, created);
   }
 }
