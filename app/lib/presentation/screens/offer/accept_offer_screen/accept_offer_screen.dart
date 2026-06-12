@@ -18,10 +18,9 @@ import 'accept_offer_screen_controller.dart';
 class AcceptOfferScreen extends ConsumerWidget {
   AcceptOfferScreen({
     super.key,
-    required String mnemonic,
-    required String identityId,
-  }) : _mnemonic = mnemonic,
-       _identityId = identityId;
+    required this._mnemonic,
+    required this._identityId,
+  });
 
   final String _mnemonic;
   final String _identityId;
@@ -76,7 +75,7 @@ class AcceptOfferScreen extends ConsumerWidget {
 }
 
 class _Loader extends ConsumerWidget {
-  _Loader({required String mnemonic}) : _mnemonic = mnemonic;
+  _Loader({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -99,44 +98,77 @@ class _Loader extends ConsumerWidget {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required String mnemonic}) : _mnemonic = mnemonic;
-
-  final String _mnemonic;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: AlignmentDirectional.center,
-      children: [
-        const Column(children: [OfferBanner(), SizedBox(height: 110)]),
-        Positioned(bottom: 0, child: _ProfilePicture(mnemonic: _mnemonic)),
-      ],
-    );
-  }
-}
-
-class _ProfilePicture extends ConsumerWidget {
-  _ProfilePicture({required String mnemonic}) : _mnemonic = mnemonic;
+class _Header extends ConsumerWidget {
+  const _Header({required this._mnemonic});
 
   final String _mnemonic;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = acceptOfferScreenControllerProvider(_mnemonic);
+    final score = ref.watch(provider.select((state) => state.offer?.score));
+    return Stack(
+      alignment: AlignmentDirectional.center,
+      children: [
+        const Column(children: [OfferBanner(), SizedBox(height: 110)]),
+        Positioned(
+          bottom: 0,
+          child: _ProfilePictureWithScore(mnemonic: _mnemonic, score: score),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProfilePictureWithScore extends ConsumerWidget {
+  const _ProfilePictureWithScore({required this.mnemonic, required this.score});
+
+  final String mnemonic;
+  final int? score;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = acceptOfferScreenControllerProvider(mnemonic);
     final cacheManager = ref.read(cacheManagerProvider);
     final profileImage = ref.watch(
       provider.select(
         (state) => state.offer?.contactCard.image(cacheManager: cacheManager),
       ),
     );
+    final colorScheme = context.colorScheme;
 
-    return ProfilePicture(image: profileImage);
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        ProfilePicture(image: profileImage),
+        if (score != null && score! > 0)
+          Chip(
+            label: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.verified_user,
+                  size: 18,
+                  color: colorScheme.onSurface,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  context.l10n.trustedBy(score!),
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: colorScheme.primary,
+          ),
+      ],
+    );
   }
 }
 
 class _PublisherAlias extends ConsumerWidget {
-  _PublisherAlias({required String mnemonic}) : _mnemonic = mnemonic;
+  _PublisherAlias({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -160,7 +192,7 @@ class _PublisherAlias extends ConsumerWidget {
 }
 
 class _OfferName extends ConsumerWidget {
-  const _OfferName({required String mnemonic}) : _mnemonic = mnemonic;
+  const _OfferName({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -186,7 +218,7 @@ class _OfferName extends ConsumerWidget {
 }
 
 class _ErrorSection extends ConsumerWidget {
-  _ErrorSection({required String mnemonic}) : _mnemonic = mnemonic;
+  _ErrorSection({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -213,7 +245,7 @@ class _ErrorSection extends ConsumerWidget {
 }
 
 class _ContactDetailsPanel extends StatelessWidget {
-  _ContactDetailsPanel({required String mnemonic}) : _mnemonic = mnemonic;
+  _ContactDetailsPanel({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -227,7 +259,7 @@ class _ContactDetailsPanel extends StatelessWidget {
 }
 
 class _ContactCardView extends ConsumerWidget {
-  _ContactCardView({required String mnemonic}) : _mnemonic = mnemonic;
+  _ContactCardView({required this._mnemonic});
 
   final String _mnemonic;
 
@@ -247,9 +279,7 @@ class _ContactCardView extends ConsumerWidget {
 }
 
 class _AliasPicker extends HookConsumerWidget {
-  _AliasPicker({required String mnemonic, required String identityId})
-    : _mnemonic = mnemonic,
-      _identityId = identityId;
+  _AliasPicker({required this._mnemonic, required this._identityId});
 
   final String _mnemonic;
   final String _identityId;
@@ -304,7 +334,7 @@ class _AliasPicker extends HookConsumerWidget {
 }
 
 class _ActionBar extends ConsumerWidget {
-  _ActionBar({required String mnemonic}) : _mnemonic = mnemonic;
+  _ActionBar({required this._mnemonic});
 
   final String _mnemonic;
 

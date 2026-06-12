@@ -1,11 +1,7 @@
 part of '../chat_screen.dart';
 
 class _ChatItemFromInfo extends ConsumerWidget {
-  const _ChatItemFromInfo({
-    required chat.ChatItem chatItem,
-    required String contactId,
-  }) : _chatItem = chatItem,
-       _contactId = contactId;
+  const _ChatItemFromInfo({required this._chatItem, required this._contactId});
 
   final chat.ChatItem _chatItem;
   final String _contactId;

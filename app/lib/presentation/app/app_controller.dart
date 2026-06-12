@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../application/services/authentication_service/authentication_service.dart';
@@ -9,8 +10,11 @@ import '../../application/services/contacts_connections_service/contacts_connect
 import '../../application/services/contacts_service/contacts_service.dart';
 import '../../application/services/control_plane_service/control_plane_service.dart';
 import '../../application/services/network_connectivity_service/network_connectivity_service.dart';
+import '../../application/services/r_cards_service/r_card_chat_notifier_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
+import '../../application/services/vrc_service/vrc_service.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
+import '../../infrastructure/providers/credentials_sdk_provider.dart';
 
 part 'app_controller.g.dart';
 
@@ -23,8 +27,15 @@ class AppController extends _$AppController with WidgetsBindingObserver {
     ref.listen(
       authenticationServiceProvider.select((state) => state.isAuthenticated),
       (prev, next) async {
+        if (!next) {
+          final sdk = ref.read(credentialsSdkProvider).asData?.value;
+          await sdk?.closeCredentialStreams();
+          return;
+        }
         if (next) {
           ref.read(controlPlaneServiceProvider);
+          ref.read(rCardChatNotifierServiceProvider);
+          ref.read(vrcServiceProvider);
           await ref.read(contactsServiceProvider.notifier).ensureInitialized();
           await ref
               .read(connectionsServiceProvider.notifier)

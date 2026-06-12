@@ -17,4 +17,7 @@ abstract class IdentitiesServiceState with _$IdentitiesServiceState {
 
   Identity? getIdentityById(String? identityId) =>
       identities.firstWhereOrNull((identity) => identity.id == identityId);
+
+  Identity? getIdentityByDid(String? identityDid) =>
+      identities.firstWhereOrNull((i) => i.did == identityDid);
 }

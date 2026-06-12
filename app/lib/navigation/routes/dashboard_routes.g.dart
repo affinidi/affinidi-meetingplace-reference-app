@@ -15,29 +15,23 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       navigatorKey: ContactsBranchData.$navigatorKey,
       restorationScopeId: ContactsBranchData.$restorationScopeId,
-
       routes: [
         GoRouteData.$route(
           path: '/contacts',
           name: 'contacts',
-
-          factory: _$ContactsRoute._fromState,
+          factory: $ContactsRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: ':contactId/connection-details',
               name: 'connectionDetails',
-
               parentNavigatorKey: ConnectionDetailsRoute.$parentNavigatorKey,
-
-              factory: _$ConnectionDetailsRoute._fromState,
+              factory: $ConnectionDetailsRoute._fromState,
             ),
             GoRouteData.$route(
               path: ':contactId/chat',
               name: 'chat',
-
               parentNavigatorKey: ChatRoute.$parentNavigatorKey,
-
-              factory: _$ChatRoute._fromState,
+              factory: $ChatRoute._fromState,
             ),
           ],
         ),
@@ -46,63 +40,49 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       navigatorKey: ConnectionsBranchData.$navigatorKey,
       restorationScopeId: ConnectionsBranchData.$restorationScopeId,
-
       routes: [
         GoRouteData.$route(
           path: '/connections',
           name: 'connections',
-
-          factory: _$ConnectionsRoute._fromState,
+          factory: $ConnectionsRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'find-offer',
               name: 'findOffer',
-
               parentNavigatorKey: FindOfferRoute.$parentNavigatorKey,
-
-              factory: _$FindOfferRoute._fromState,
+              factory: $FindOfferRoute._fromState,
               routes: [
                 GoRouteData.$route(
                   path: ':mnemonic/accept',
                   name: 'acceptOffer',
-
                   parentNavigatorKey: AcceptOfferRoute.$parentNavigatorKey,
-
-                  factory: _$AcceptOfferRoute._fromState,
+                  factory: $AcceptOfferRoute._fromState,
                 ),
               ],
             ),
             GoRouteData.$route(
               path: 'publish-offer',
               name: 'publishOffer',
-
               parentNavigatorKey: PublishOfferRoute.$parentNavigatorKey,
-
-              factory: _$PublishOfferRoute._fromState,
+              factory: $PublishOfferRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'offer-details',
               name: 'offerDetails',
-
               parentNavigatorKey: OfferDetailsRoute.$parentNavigatorKey,
-
-              factory: _$OfferDetailsRoute._fromState,
+              factory: $OfferDetailsRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'oob-share-qr',
               name: 'oobQr',
-
               parentNavigatorKey: OOBShareQrRoute.$parentNavigatorKey,
-
-              factory: _$OOBShareQrRoute._fromState,
+              factory: $OOBShareQrRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'oob-scan-qr',
               name: 'qrScanner',
-
               parentNavigatorKey: OOBScanQrRoute.$parentNavigatorKey,
-
-              factory: _$OOBScanQrRoute._fromState,
+              factory: $OOBScanQrRoute._fromState,
             ),
           ],
         ),
@@ -111,36 +91,55 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       navigatorKey: IdentitiesBranchData.$navigatorKey,
       restorationScopeId: IdentitiesBranchData.$restorationScopeId,
-
       routes: [
         GoRouteData.$route(
           path: '/identities',
           name: 'identities',
-
-          factory: _$IdentitiesRoute._fromState,
+          factory: $IdentitiesRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'identity-form',
               name: 'identityForm',
-
               parentNavigatorKey: IdentityFormRoute.$parentNavigatorKey,
-
-              factory: _$IdentityFormRoute._fromState,
+              factory: $IdentityFormRoute._fromState,
             ),
           ],
         ),
       ],
     ),
     StatefulShellBranchData.$branch(
-      navigatorKey: SettingsBranchData.$navigatorKey,
-      restorationScopeId: SettingsBranchData.$restorationScopeId,
-
+      navigatorKey: RCardsBranchData.$navigatorKey,
+      restorationScopeId: RCardsBranchData.$restorationScopeId,
       routes: [
         GoRouteData.$route(
-          path: '/settings',
-          name: 'settings',
-
-          factory: _$SettingsRoute._fromState,
+          path: '/r-cards',
+          name: 'rCards',
+          factory: $RCardsRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: ':subjectDid/details',
+              name: 'rCardDetails',
+              parentNavigatorKey: RCardDetailsRoute.$parentNavigatorKey,
+              factory: $RCardDetailsRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: ':credentialId/vrc-details',
+              name: 'vrcDetails',
+              parentNavigatorKey: VrcDetailsRoute.$parentNavigatorKey,
+              factory: $VrcDetailsRoute._fromState,
+            ),
+          ],
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      navigatorKey: CredentialsBranchData.$navigatorKey,
+      restorationScopeId: CredentialsBranchData.$restorationScopeId,
+      routes: [
+        GoRouteData.$route(
+          path: '/credentials',
+          name: 'credentials',
+          factory: $CredentialsRoute._fromState,
         ),
       ],
     ),
@@ -152,7 +151,7 @@ extension $DashboardShellRouteDataExtension on DashboardShellRouteData {
       const DashboardShellRouteData();
 }
 
-mixin _$ContactsRoute on GoRouteData {
+mixin $ContactsRoute on GoRouteData {
   static ContactsRoute _fromState(GoRouterState state) => const ContactsRoute();
 
   @override
@@ -172,7 +171,7 @@ mixin _$ContactsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$ConnectionDetailsRoute on GoRouteData {
+mixin $ConnectionDetailsRoute on GoRouteData {
   static ConnectionDetailsRoute _fromState(GoRouterState state) =>
       ConnectionDetailsRoute(contactId: state.pathParameters['contactId']!);
 
@@ -197,7 +196,7 @@ mixin _$ConnectionDetailsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$ChatRoute on GoRouteData {
+mixin $ChatRoute on GoRouteData {
   static ChatRoute _fromState(GoRouterState state) =>
       ChatRoute(contactId: state.pathParameters['contactId']!);
 
@@ -222,7 +221,7 @@ mixin _$ChatRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$ConnectionsRoute on GoRouteData {
+mixin $ConnectionsRoute on GoRouteData {
   static ConnectionsRoute _fromState(GoRouterState state) =>
       const ConnectionsRoute();
 
@@ -243,7 +242,7 @@ mixin _$ConnectionsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$FindOfferRoute on GoRouteData {
+mixin $FindOfferRoute on GoRouteData {
   static FindOfferRoute _fromState(GoRouterState state) =>
       FindOfferRoute(identityId: state.uri.queryParameters['identity-id']);
 
@@ -271,7 +270,7 @@ mixin _$FindOfferRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$AcceptOfferRoute on GoRouteData {
+mixin $AcceptOfferRoute on GoRouteData {
   static AcceptOfferRoute _fromState(GoRouterState state) => AcceptOfferRoute(
     mnemonic: state.pathParameters['mnemonic']!,
     identityId: state.uri.queryParameters['identity-id']!,
@@ -299,7 +298,7 @@ mixin _$AcceptOfferRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$PublishOfferRoute on GoRouteData {
+mixin $PublishOfferRoute on GoRouteData {
   static PublishOfferRoute _fromState(GoRouterState state) =>
       PublishOfferRoute(identityId: state.uri.queryParameters['identity-id']!);
 
@@ -325,7 +324,7 @@ mixin _$PublishOfferRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$OfferDetailsRoute on GoRouteData {
+mixin $OfferDetailsRoute on GoRouteData {
   static OfferDetailsRoute _fromState(GoRouterState state) =>
       OfferDetailsRoute(state.uri.queryParameters['offer-link']!);
 
@@ -351,7 +350,7 @@ mixin _$OfferDetailsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$OOBShareQrRoute on GoRouteData {
+mixin $OOBShareQrRoute on GoRouteData {
   static OOBShareQrRoute _fromState(GoRouterState state) =>
       const OOBShareQrRoute();
 
@@ -372,7 +371,7 @@ mixin _$OOBShareQrRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$OOBScanQrRoute on GoRouteData {
+mixin $OOBScanQrRoute on GoRouteData {
   static OOBScanQrRoute _fromState(GoRouterState state) =>
       const OOBScanQrRoute();
 
@@ -393,7 +392,7 @@ mixin _$OOBScanQrRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$IdentitiesRoute on GoRouteData {
+mixin $IdentitiesRoute on GoRouteData {
   static IdentitiesRoute _fromState(GoRouterState state) =>
       const IdentitiesRoute();
 
@@ -414,7 +413,7 @@ mixin _$IdentitiesRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$IdentityFormRoute on GoRouteData {
+mixin $IdentityFormRoute on GoRouteData {
   static IdentityFormRoute _fromState(GoRouterState state) =>
       IdentityFormRoute(identityId: state.uri.queryParameters['identity-id']);
 
@@ -442,11 +441,82 @@ mixin _$IdentityFormRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin _$SettingsRoute on GoRouteData {
-  static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
+mixin $RCardsRoute on GoRouteData {
+  static RCardsRoute _fromState(GoRouterState state) => const RCardsRoute();
 
   @override
-  String get location => GoRouteData.$location('/settings');
+  String get location => GoRouteData.$location('/r-cards');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $RCardDetailsRoute on GoRouteData {
+  static RCardDetailsRoute _fromState(GoRouterState state) =>
+      RCardDetailsRoute(subjectDid: state.pathParameters['subjectDid']!);
+
+  RCardDetailsRoute get _self => this as RCardDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/r-cards/${Uri.encodeComponent(_self.subjectDid)}/details',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $VrcDetailsRoute on GoRouteData {
+  static VrcDetailsRoute _fromState(GoRouterState state) =>
+      VrcDetailsRoute(credentialId: state.pathParameters['credentialId']!);
+
+  VrcDetailsRoute get _self => this as VrcDetailsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/r-cards/${Uri.encodeComponent(_self.credentialId)}/vrc-details',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $CredentialsRoute on GoRouteData {
+  static CredentialsRoute _fromState(GoRouterState state) =>
+      const CredentialsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/credentials');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -6,46 +6,46 @@ workspace:
   - packages/app-core
 
 environment:
-  sdk: ">=3.9.0 <4.0.0"
+  sdk: ">=3.12.0 <4.0.0"
 
 dev_dependencies:
   coverage: ^1.11.1
   dart_flutter_team_lints: ^3.2.1
-  drift_dev: ^2.28.0
   melos: ^7.1.1
 
 dependency_overrides:
+  ffi: 2.2.0
   meeting_place_chat:
     # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_chat
-      ref: c23715149300354076f4bf0e2c5d1091c09f1618
+      ref: 392035233a62cf8492754ff5c23d9b3f539619c2
   meeting_place_control_plane:
     # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_control_plane
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_control_plane
-      ref: c23715149300354076f4bf0e2c5d1091c09f1618
+      ref: 392035233a62cf8492754ff5c23d9b3f539619c2
   meeting_place_core:
     # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_core
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_core
-      ref: c23715149300354076f4bf0e2c5d1091c09f1618
+      ref: 392035233a62cf8492754ff5c23d9b3f539619c2
   meeting_place_drift_repository:
     # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_drift_repository
-      ref: c23715149300354076f4bf0e2c5d1091c09f1618
+      ref: 392035233a62cf8492754ff5c23d9b3f539619c2
   meeting_place_mediator:
     # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_mediator
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_mediator
-      ref: c23715149300354076f4bf0e2c5d1091c09f1618
-  meta: 1.17.0
+      ref: 392035233a62cf8492754ff5c23d9b3f539619c2
+  meta: 1.18.2
   test_api: ^0.7.12
 
 melos:

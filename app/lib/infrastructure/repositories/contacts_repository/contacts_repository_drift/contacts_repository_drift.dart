@@ -32,8 +32,7 @@ Future<ContactsRepository> contactsRepositoryInMemoryDrift(Ref ref) async {
 }
 
 class ContactsRepositoryDrift implements ContactsRepository {
-  ContactsRepositoryDrift({required db.ContactsDatabase database})
-    : _database = database;
+  ContactsRepositoryDrift({required this._database});
 
   final db.ContactsDatabase _database;
 

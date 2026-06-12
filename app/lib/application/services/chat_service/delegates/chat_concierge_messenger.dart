@@ -4,8 +4,7 @@ import 'interfaces/concierge_messaging.dart';
 
 /// Handles concierge-related SDK interactions.
 class ChatConciergeMessenger implements ConciergeMessaging {
-  ChatConciergeMessenger({required MeetingPlaceChatSDK chatSdk})
-    : _chatSdk = chatSdk;
+  ChatConciergeMessenger({required this._chatSdk});
 
   final MeetingPlaceChatSDK _chatSdk;
 

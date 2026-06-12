@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class ChatRoute extends GoRouteData with _$ChatRoute {
+class ChatRoute extends GoRouteData with $ChatRoute {
   const ChatRoute({required this.contactId});
 
   final String contactId;

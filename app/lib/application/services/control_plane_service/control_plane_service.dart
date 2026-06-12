@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
@@ -340,14 +341,11 @@ class ControlPlaneService extends _$ControlPlaneService
 
 class _ControlPlaneEventsProcessor {
   _ControlPlaneEventsProcessor({
-    required MeetingPlaceCoreSDK sdk,
-    required AppLogger logger,
-    required VoidCallback onDidStart,
-    required VoidCallback onDidEnd,
-  }) : _sdk = sdk,
-       _logger = logger,
-       _onDidStart = onDidStart,
-       _onDidEnd = onDidEnd;
+    required this._sdk,
+    required this._logger,
+    required this._onDidStart,
+    required this._onDidEnd,
+  });
 
   static const _logKey = 'CTLPLNEVTPROC';
   final MeetingPlaceCoreSDK _sdk;

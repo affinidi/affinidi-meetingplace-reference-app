@@ -1,31 +1,24 @@
 import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:ssi/src/did/did_document/did_document.dart';
+import 'package:ssi/ssi.dart';
 
 import 'fake_publish_offer_result.dart';
 
 class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   FakeMeetingPlaceSDK({
-    bool shouldFailToRegisterPushToken = false,
-    PublishOfferResult? offerToReturn,
-    Exception? publishOfferException,
-    Exception? createOobFlowException,
-    Exception? acceptOobFlowException,
-    bool isPhraseAvailable = true,
+    this._shouldFailToRegisterPushToken = false,
+    this._offerToReturn,
+    this._publishOfferException,
+    this._createOobFlowException,
+    this._acceptOobFlowException,
+    this._isPhraseAvailable = true,
     Map<String, Channel>? channels,
     List<ConnectionOffer>? connectionOffers,
     this.offerToFind,
     this.findOfferHasError = false,
-    bool shouldTimeout = false,
-  }) : _shouldFailToRegisterPushToken = shouldFailToRegisterPushToken,
-       _offerToReturn = offerToReturn,
-       _publishOfferException = publishOfferException,
-       _createOobFlowException = createOobFlowException,
-       _acceptOobFlowException = acceptOobFlowException,
-       _isPhraseAvailable = isPhraseAvailable,
-       _shouldTimeout = shouldTimeout,
-       _channels = channels ?? {},
+    this._shouldTimeout = false,
+  }) : _channels = channels ?? {},
        _connectionOffers = connectionOffers ?? [];
 
   final bool _shouldFailToRegisterPushToken;
@@ -37,6 +30,12 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final bool _shouldTimeout;
   final Map<String, Channel> _channels;
   final List<ConnectionOffer> _connectionOffers;
+
+  DidKeyManager? _fakeDidManager;
+
+  void setFakeDidManager(DidKeyManager manager) {
+    _fakeDidManager = manager;
+  }
 
   // Getter to check if subscriptions have been created (useful for debugging)
   final ConnectionOffer? offerToFind;
@@ -73,9 +72,18 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final List<Map<String, dynamic>> _publishOfferCalls = [];
   List<Map<String, dynamic>> get publishOfferCalls => _publishOfferCalls;
 
+  final List<ConnectionOffer> _allConnectionOffers = [];
+
+  void setAllConnectionOffers(List<ConnectionOffer> offers) {
+    _allConnectionOffers
+      ..clear()
+      ..addAll(offers);
+  }
+
   @override
   Future<List<ConnectionOffer>> listConnectionOffers() async {
-    return _connectionOffers;
+    if (_connectionOffers.isNotEmpty) return _connectionOffers;
+    return List.unmodifiable(_allConnectionOffers);
   }
 
   @override
@@ -96,6 +104,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     String? metadata,
     String? externalRef,
     ChannelTransport transport = ChannelTransport.didcomm,
+    int? score,
   }) async {
     // Record the call parameters
     _publishOfferCalls.add({
@@ -109,6 +118,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'mediatorDid': mediatorDid,
       'metadata': metadata,
       'externalRef': externalRef,
+      'score': score,
     });
 
     if (_publishOfferException != null) {
@@ -164,6 +174,17 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
     final channel = _channels[channelDid];
     return channel;
+  }
+
+  @override
+  Future<DidManager> getDidManager(String did) async {
+    if (_fakeDidManager != null) return _fakeDidManager!;
+    final wallet = PersistentWallet(InMemoryKeyStore());
+    final manager = DidKeyManager(wallet: wallet, store: InMemoryDidStore());
+    final keyPair = await wallet.generateKey();
+    await manager.addVerificationMethod(keyPair.id);
+    _fakeDidManager = manager;
+    return manager;
   }
 
   @override
@@ -322,6 +343,64 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   }
 
   @override
+  Stream<ChannelAttachmentEvent> get channelAttachments => const Stream.empty();
+
+  @override
+  VdipClient get vdip => _fakeVdipClient;
+
+  final _fakeVdipClient = _FakeVdipClient();
+
+  final Map<String, List<ConnectionOffer>> _connectionOffersByExternalRef = {};
+
+  void setConnectionOffersForExternalRef(
+    String externalRef,
+    List<ConnectionOffer> offers,
+  ) {
+    _connectionOffersByExternalRef[externalRef] = offers;
+  }
+
+  @override
+  Future<List<ConnectionOffer>> getConnectionOffersByExternalRef(
+    String externalRef,
+  ) async {
+    return _connectionOffersByExternalRef[externalRef] ?? [];
+  }
+
+  final List<Map<String, dynamic>> _updateScoreForOffersCalls = [];
+  List<Map<String, dynamic>> get updateScoreForOffersCalls =>
+      _updateScoreForOffersCalls;
+
+  @override
+  Future<UpdateScoreForOffersResult> updateScoreForOffers({
+    required int score,
+    required List<ConnectionOffer> offers,
+  }) async {
+    _updateScoreForOffersCalls.add({'score': score, 'offers': offers});
+    return UpdateScoreForOffersResult(
+      updatedOffers: offers.map((o) => o.mnemonic).toList(),
+      failedOffers: [],
+    );
+  }
+
+  final List<Map<String, dynamic>> _updateLocalConnectionOffersScoreCalls = [];
+  List<Map<String, dynamic>> get updateLocalConnectionOffersScoreCalls =>
+      _updateLocalConnectionOffersScoreCalls;
+
+  @override
+  Future<void> updateLocalConnectionOffersScore({
+    required int score,
+    required List<ConnectionOffer> offers,
+  }) async {
+    _updateLocalConnectionOffersScoreCalls.add({
+      'score': score,
+      'offers': offers,
+    });
+  }
+
+  @override
+  Future<void> closeVdipStream() async {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
   }
@@ -456,4 +535,46 @@ class _FakeOobStream implements OobStream {
   void triggerTimeout() {
     _timeoutCallback?.call();
   }
+}
+
+class _FakeVdipClient implements VdipClient {
+  final List<Future<void> Function(PlainTextMessage)> _messageProcessors = [];
+  final List<Map<String, dynamic>> sendIssuedCredentialCalls = [];
+
+  @override
+  Stream<PlainTextMessage> get incomingMessages => const Stream.empty();
+
+  @override
+  List<Future<void> Function(PlainTextMessage)> get messageProcessors =>
+      List.unmodifiable(_messageProcessors);
+
+  @override
+  void registerMessageProcessor(
+    Future<void> Function(PlainTextMessage) processor,
+  ) {
+    _messageProcessors.add(processor);
+  }
+
+  @override
+  Future<void> issueCredential({
+    required Channel channel,
+    required VerifiableCredential credential,
+  }) async {
+    // no-op: credential issuance is not tested at the network level
+  }
+
+  @override
+  Future<void> sendIssuedCredential({
+    required String senderDid,
+    required String recipientDid,
+    required VdipIssuedCredentialBody body,
+  }) async {
+    sendIssuedCredentialCalls.add({
+      'senderDid': senderDid,
+      'recipientDid': recipientDid,
+    });
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }

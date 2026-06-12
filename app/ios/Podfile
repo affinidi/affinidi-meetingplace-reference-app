@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '13.0'
+platform :ios, '16.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -37,17 +37,40 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  cxx_link_targets = %w[
+    Pods-Runner
+    Pods-RunnerTests
+    rapidsnark
+    flutter_rapidsnark
+  ]
+
+  # The bundled rapidsnark simulator archive is incomplete for x86_64.
+  # Apple Silicon simulator builds use arm64, so constrain these targets accordingly.
+  exclude_simulator_86_64_targets = %w[
+    Pods-Runner
+    Pods-RunnerTests
+    rapidsnark
+    flutter_rapidsnark
+  ]
+
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
 
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
 
-      # Remove system SQLite linker flag for SQLCipher
-      xcconfig_path = config.base_configuration_reference.real_path
-      xcconfig = File.read(xcconfig_path)
-      new_xcconfig = xcconfig.sub(' -l"sqlite3"', '')
-      File.open(xcconfig_path, "w") { |file| file << new_xcconfig }
+      if exclude_simulator_86_64_targets.include?(target.name)
+        config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'x86_64'
+      end
+
+      if cxx_link_targets.include?(target.name)
+        # Link C++ standard library only for the zk-related pods and aggregate pod targets.
+        ldflags = config.build_settings['OTHER_LDFLAGS']
+        ldflags = ldflags.nil? ? ['$(inherited)'] : (ldflags.is_a?(Array) ? ldflags.dup : [ldflags.to_s])
+        ldflags << '-lc++' unless ldflags.any? { |f| f.to_s.include?('lc++') }
+        config.build_settings['OTHER_LDFLAGS'] = ldflags
+        config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+      end
 
       # You can remove unused permissions here
       # for more information: https://github.com/Baseflow/flutter-permission-handler/blob/main/permission_handler_apple/ios/Classes/PermissionHandlerEnums.h

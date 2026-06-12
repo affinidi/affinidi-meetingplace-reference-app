@@ -4,6 +4,8 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
+import 'fake_chat.dart';
+
 class FakeChatSdk implements MeetingPlaceChatSDK {
   int _chatSessionStartedCalls = 0;
   int _startedChatPresenceUpdates = 0;
@@ -40,6 +42,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
+  final List<({List<Attachment> attachments, String senderDid})>
+  createAttachmentMessageCalls = [];
 
   int get startChatSessionCallCount => _chatSessionStartedCalls;
   int get startedChatPresenceUpdatesCount => _startedChatPresenceUpdates;
@@ -111,6 +115,86 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     _emit(StreamData(event: chatEvent, chatItem: conciergeMessage));
 
     return conciergeMessage;
+  }
+
+  /// Simulates a permission to verify relationship concierge message
+  ConciergeMessage simulateVrcPermissionRequest({
+    required String senderDid,
+    required String recipientDid,
+  }) {
+    final conciergeMessage = ConciergeMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'concierge-vrc-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.userInput,
+      data: {},
+      conciergeType: ConciergeMessageType.fromJson(
+        'permissionToVerifyRelationship',
+      ),
+    );
+
+    final plainTextMessage = PlainTextMessage(
+      id: conciergeMessage.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/concierge'),
+      body: {
+        'type': 'permissionToVerifyRelationship',
+        'timestamp': conciergeMessage.dateCreated.toIso8601String(),
+      },
+      from: senderDid,
+      to: [recipientDid],
+      createdTime: conciergeMessage.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(
+        plainTextMessage: plainTextMessage,
+        chatItem: conciergeMessage,
+      ),
+    );
+
+    return conciergeMessage;
+  }
+
+  /// Simulates a VRC event message (e.g. vrcExchangeInitiated,
+  /// vrcExchangeDoLater, vrcExchangeCompleted, vrcRequestReceived). Pass
+  /// extra [data] as needed.
+  EventMessage simulateVrcEvent({
+    required String eventType,
+    required String senderDid,
+    required String recipientDid,
+    Map<String, dynamic> data = const {},
+  }) {
+    final eventMessage = EventMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'event-vrc-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.received,
+      eventType: EventMessageType.fromJson(eventType),
+      data: data,
+    );
+
+    final plainTextMessage = PlainTextMessage(
+      id: eventMessage.messageId,
+      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+      body: {
+        'type': eventType,
+        'timestamp': eventMessage.dateCreated.toIso8601String(),
+        ...data,
+      },
+      from: senderDid,
+      to: [recipientDid],
+      createdTime: eventMessage.dateCreated,
+    );
+
+    _streamController.add(
+      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
+    );
+
+    return eventMessage;
   }
 
   /// Simulates a profile update request concierge message
@@ -435,6 +519,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     return message;
   }
 
+  List<ChatItem>? sessionMessages;
+
   @override
   Future<Chat> startChatSession() async {
     _chatSessionStartedCalls++;
@@ -442,12 +528,24 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     if (shouldThrowOnStartSession) {
       throw Exception('Simulated SDK error');
     }
-    return FakeChat();
+    final msgs = sessionMessages;
+    return msgs != null ? FakeChatWithMessages(msgs) : FakeChat();
   }
 
   @override
   Future<void> startChatPresenceUpdates() async {
     _startedChatPresenceUpdates += 1;
+  }
+
+  @override
+  Future<void> createAttachmentMessage({
+    required List<Attachment> attachments,
+    required String senderDid,
+  }) async {
+    createAttachmentMessageCalls.add((
+      attachments: attachments,
+      senderDid: senderDid,
+    ));
   }
 
   @override

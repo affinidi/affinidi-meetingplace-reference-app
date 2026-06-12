@@ -11,13 +11,12 @@ class FakeEnvironment implements Environment {
     this.matrixHomeserver = 'https://test-matrix.org',
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
-    Map<String, String> defaultMediators = const {},
+    this._defaultMediators = const {},
     this.enabledIndividualChatTransports = const [
       ChannelTransport.didcomm,
       ChannelTransport.matrix,
     ],
-  }) : _defaultMediators = defaultMediators,
-       defaultMediatorDid =
+  }) : defaultMediatorDid =
            defaultMediatorDid ?? FakeMediators.defaultMediator.mediatorDid;
 
   final Map<String, String> _defaultMediators;
@@ -82,6 +81,9 @@ class FakeEnvironment implements Environment {
 
   @override
   bool get isBiometricsEnabled => true;
+
+  @override
+  bool get zkpEnabled => false;
 
   @override
   String get appVersionName => '1.0.0-test';

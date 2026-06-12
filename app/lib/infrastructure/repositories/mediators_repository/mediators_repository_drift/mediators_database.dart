@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../domain/models/mediator/mediator_status.dart';
@@ -25,9 +25,8 @@ class MediatorsDatabase extends _$MediatorsDatabase {
     required String passphrase,
     required bool inMemory,
     required Directory directory,
-    required Map<String, String> defaultMediators,
-  }) : _defaultMediators = defaultMediators,
-       super(
+    required this._defaultMediators,
+  }) : super(
          openConnection(
            databaseName: databaseName,
            passphrase: passphrase,

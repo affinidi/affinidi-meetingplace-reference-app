@@ -7,8 +7,7 @@ import '../../../../infrastructure/extensions/event_message_extensions.dart';
 import 'concierge_message.dart';
 
 class LeavingGroupChatItem extends StatelessWidget {
-  const LeavingGroupChatItem({super.key, required EventMessage chatItem})
-    : _chatItem = chatItem;
+  const LeavingGroupChatItem({super.key, required this._chatItem});
 
   final EventMessage _chatItem;
   @override

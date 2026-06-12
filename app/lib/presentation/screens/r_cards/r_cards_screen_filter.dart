@@ -1,0 +1,1 @@
+enum RCardsScreenFilter { all, nonAnonymous }

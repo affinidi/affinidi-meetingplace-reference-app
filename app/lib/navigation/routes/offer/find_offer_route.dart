@@ -1,6 +1,6 @@
 part of '../dashboard_routes.dart';
 
-class FindOfferRoute extends GoRouteData with _$FindOfferRoute {
+class FindOfferRoute extends GoRouteData with $FindOfferRoute {
   const FindOfferRoute({this.identityId});
 
   static final GlobalKey<NavigatorState> $parentNavigatorKey = rootNavigatorKey;

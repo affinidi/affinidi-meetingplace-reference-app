@@ -96,7 +96,14 @@ class AppTheme {
       headlineMedium: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
       headlineSmall: TextStyle(fontSize: 12),
     ),
-    appBarTheme: const AppBarTheme(titleTextStyle: TextStyle(fontSize: 16)),
+    appBarTheme: const AppBarTheme(
+      titleTextStyle: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        height: 1.6,
+        letterSpacing: 0.07,
+      ),
+    ),
     navigationBarTheme: NavigationBarThemeData(
       labelTextStyle: WidgetStateTextStyle.resolveWith((states) {
         return TextStyle(

@@ -203,8 +203,7 @@ class FindOfferScreen extends HookConsumerWidget {
 }
 
 class _QrButton extends ConsumerWidget {
-  _QrButton({required void Function(String? data) onDidReceiveQrData})
-    : _onDidReceiveQrData = onDidReceiveQrData;
+  _QrButton({required this._onDidReceiveQrData});
 
   final void Function(String? data) _onDidReceiveQrData;
 

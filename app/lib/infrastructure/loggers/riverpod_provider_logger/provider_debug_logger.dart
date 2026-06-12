@@ -2,26 +2,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app_logger/app_logger.dart';
 
-class ProviderDebugLogger extends ProviderObserver {
+base class ProviderDebugLogger extends ProviderObserver {
   static const _logKey = 'PROV';
   final AppLogger _logger = AppLogger.instance;
 
   @override
-  void didAddProvider(
-    ProviderBase provider,
-    Object? value,
-    ProviderContainer container,
-  ) {
+  void didAddProvider(ProviderObserverContext context, Object? value) {
     _logger.info(
-      'Add: "${provider.name ?? provider.runtimeType}"',
+      'Add: "${context.provider.name ?? context.provider.runtimeType}"',
       name: _logKey,
     );
   }
 
   @override
-  void didDisposeProvider(ProviderBase provider, ProviderContainer container) {
+  void didDisposeProvider(ProviderObserverContext context) {
     _logger.info(
-      'Dispose: "${provider.name ?? provider.runtimeType}"',
+      'Dispose: "${context.provider.name ?? context.provider.runtimeType}"',
       name: _logKey,
     );
   }

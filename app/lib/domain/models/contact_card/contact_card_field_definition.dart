@@ -39,14 +39,12 @@ class ContactCardFieldDefinition {
     required this.shouldValidateOnBlur,
     required this.textInputAction,
     required this.placeholder,
-    required ContactCardFieldValidators validators,
+    required this._validators,
     required this.jsonPath,
     required this.nullWhenEmpty,
-    required ContactCardFieldValueAccessor valueAccessor,
-    required ContactCardFieldUpdater updateCard,
-  }) : _valueAccessor = valueAccessor,
-       _updateCard = updateCard,
-       _validatorsBuilder = validators;
+    required this._valueAccessor,
+    required this._updateCard,
+  });
 
   final ContactCardFieldKey key;
   final IconData icon;
@@ -59,7 +57,7 @@ class ContactCardFieldDefinition {
   final bool shouldValidateOnBlur;
   final TextInputAction textInputAction;
   final ContactCardFieldPlaceholder placeholder;
-  final ContactCardFieldValidators _validatorsBuilder;
+  final ContactCardFieldValidators _validators;
   final List<String> jsonPath;
   final bool nullWhenEmpty;
   final ContactCardFieldValueAccessor _valueAccessor;
@@ -72,7 +70,7 @@ class ContactCardFieldDefinition {
   String label(AppLocalizations l10n) => l10n.contactCardFieldName(name);
 
   MultiValidator validator(BuildContext context) =>
-      MultiValidator(_validatorsBuilder(context));
+      MultiValidator(_validators(context));
 
   String valueFrom(ContactCard card) => _valueAccessor(card) ?? '';
 

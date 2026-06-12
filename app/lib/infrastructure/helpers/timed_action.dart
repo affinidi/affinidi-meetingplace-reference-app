@@ -3,38 +3,35 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 /// A utility class for executing a timed action with optional
-/// cancel and completion callbacks.
+/// completion callback.
 class TimedAction {
   /// Creates a [TimedAction].
   ///
-  /// [onRun] is executed immediately when [start] is called.
-  /// [onCancel] is invoked if [cancel] is called before completion.
-  /// [onComplete] is invoked once the timer finishes.
+  /// [_onRun] is executed immediately when [start] is called.
+  /// [_onComplete] is invoked once the timer finishes.
   TimedAction({
-    required void Function(List<dynamic>? args) onRun,
-    VoidCallback? onCancel,
-    VoidCallback? onComplete,
-    required Duration duration,
-  }) : _duration = duration,
-       _onCancel = onCancel,
-       _onComplete = onComplete,
-       _execute = onRun;
+    required this._onRun,
+    this._onComplete,
+    required this._duration,
+  });
 
   Timer? _timer;
-  final void Function(List<dynamic>? args) _execute;
-  final VoidCallback? _onCancel;
+  final void Function(List<dynamic>? args) _onRun;
   final VoidCallback? _onComplete;
   final Duration _duration;
 
-  /// Cancels the running timer and invokes [_onCancel] if provided.
+  /// Cancels the running timer. No callbacks are invoked.
+  ///
+  /// Any side-effects on cancellation (e.g. clearing UI state) are the
+  /// caller's responsibility.
   void cancel() {
-    if (_timer == null) {
-      return;
-    }
+    _timer?.cancel();
+    _timer = null;
+  }
 
-    _onCancel?.call();
-
-    _timer!.cancel();
+  /// Cancels the running timer without invoking callbacks.
+  void dispose() {
+    _timer?.cancel();
     _timer = null;
   }
 
@@ -53,13 +50,13 @@ class TimedAction {
 
   /// Starts the timed action with optional [args].
   ///
-  /// - Immediately calls [_execute] with [args].
+  /// - Immediately calls [_onRun] with [args].
   /// - Sets a timer that will call [_complete] after [_duration].
   /// - Does nothing if already running.
   void start({List<dynamic>? args = const []}) {
     if (_timer != null) return;
 
     _timer = Timer(_duration, _complete);
-    _execute.call(args);
+    _onRun.call(args);
   }
 }

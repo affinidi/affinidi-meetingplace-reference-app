@@ -8,6 +8,7 @@ import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/identities_repository_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../credential_service/credential_service.dart';
 import 'identities_service_state.dart';
 
 part 'identities_service.g.dart';
@@ -111,6 +112,9 @@ class IdentitiesService extends _$IdentitiesService {
   Future<void> deleteIdentity(String id) async {
     _repository ??= await _ensureRepositoryInitialized();
     await _repository!.deleteIdentity(id);
+    await ref
+        .read(credentialServiceProvider.notifier)
+        .deleteCredentialForIdentity(id);
     await _fetchIdentities();
     _logger.info('Identity deleted', name: _logKey);
 
@@ -134,8 +138,7 @@ class IdentitiesService extends _$IdentitiesService {
       await ref.read(identitiesRepositoryProvider.future);
 }
 
-extension IdentitiesServiceSelectors
-    on NotifierProvider<IdentitiesService, IdentitiesServiceState> {
+extension IdentitiesServiceSelectors on IdentitiesServiceProvider {
   ProviderListenable<Identity?> get currentIdentityOrPrimary {
     return select(
       (state) =>

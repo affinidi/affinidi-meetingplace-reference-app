@@ -1,8 +1,7 @@
 part of 'chat_screen.dart';
 
 class _ChatTypingActivityIndicator extends ConsumerWidget {
-  const _ChatTypingActivityIndicator({required String contactId})
-    : _contactId = contactId;
+  const _ChatTypingActivityIndicator({required this._contactId});
 
   final String _contactId;
 

@@ -30,8 +30,7 @@ part 'phrase_validation_icon.dart';
 part 'validity_visibility_section.dart';
 
 class PublishOfferScreen extends HookConsumerWidget {
-  const PublishOfferScreen({super.key, required String identityId})
-    : _identityId = identityId;
+  const PublishOfferScreen({super.key, required this._identityId});
 
   final String _identityId;
 

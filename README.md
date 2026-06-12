@@ -1,86 +1,81 @@
-# Affinidi Meeting Place - Reference App for Flutter
 
-This reference application demonstrates the sample usage of the **[Affinidi Meeting Place Core](https://pub.dev/packages/meeting_place_core)** and **[Chat](https://pub.dev/packages/meeting_place_chat)** SDK together with sample integrations (state management, services, infrastructure) in a real Flutter project.
+# Affinidi Meeting Place — Flutter Reference App
 
-With the use of Affinidi Meeting Place SDK, you can build a messaging appplication that provides a safe and secure method for discovering, connecting, and communicating with others (individuals, businesses, and AI agents) using Decentralised Identifiers (DIDs) and DIDComm v2.1 protocol.
+A production-ready reference app showing how to build a secure, privacy-first messaging application using the **[Affinidi Meeting Place Core](https://pub.dev/packages/meeting_place_core)** and **[Chat](https://pub.dev/packages/meeting_place_chat)** SDKs; with **Decentralised Identifiers (DIDs)**, **DIDComm v2.1** messaging, and a working **Human ZKP demo** built in.
 
-> **IMPORTANT:** This project does not collect or process any personal data. However, when used as part of a broader system or application that handles personally identifiable information (PII), users are responsible for ensuring that any such use complies with applicable privacy laws and data protection obligations.
+> **Privacy notice:** This project does not collect or process any personal data. If you integrate it into a broader system that handles personally identifiable information (PII), you are responsible for complying with all applicable privacy laws and data-protection obligations.
 
 ## Table of Contents
 
-- [Core Concepts](#core-concepts)
-- [Preview](#preview)
-- [Key Features](#key-features)
-- [Architecture Overview](#architecture-overview)
-  - [Architectural Layers](#architectural-layers)
-  - [Core Components](#core-components)
-  - [Access Rules and Data Flow](#access-rules-and-data-flow)
-  - [Affinidi Meeting Place SDK Integration](#affinidi-meeting-place-sdk-integration)
-  - [Chat Screen Architecture](#chat-screen-architecture)
-- [Requirements](#requirements)
-- [Getting started](#getting-started)
-- [Environment Variables](#environment-variables)
-  - [Required Environment Variables](#required-environment-variables)
-  - [Optional Environment Variables](#optional-environment-variables)
-- [VSCode Configuration](#vscode-configuration)
-- [Run App on Simulator](#run-app-on-simulator)
-- [Troubleshooting](#troubleshooting)
-- [Support \& Feedback](#support--feedback)
-  - [Reporting Technical Issues](#reporting-technical-issues)
-- [Contributing](#contributing)
-      - [Connect to Control Plane API](#connect-to-control-plane-api)
-      - [Connect to DIDComm Mediator](#connect-to-didcomm-mediator)
-      - [Enable Push Notifications](#enable-push-notifications)
-        - [Firebase iOS App](#firebase-ios-app)
-        - [Firebase Android App](#firebase-android-app)
-    - [Optional Environment Variables](#optional-environment-variables)
-  - [VSCode Configuration](#vscode-configuration)
-  - [Run App on Simulator](#run-app-on-simulator)
-  - [Troubleshooting](#troubleshooting)
-    - [Firebase Configuration Issues](#firebase-configuration-issues)
-  - [Support \& Feedback](#support--feedback)
-    - [Reporting Technical Issues](#reporting-technical-issues)
-  - [Contributing](#contributing)
+1. [Core Concepts](#core-concepts)
+2. [Preview](#preview)
+3. [Key Features](#key-features)
+4. [Architecture Overview](#architecture-overview)
+5. [Feature Demonstrations](#feature-demos)
+6. [Requirements](#requirements)
+7. [Getting Started](#getting-started)
+8. [Environment Variables](#environment-variables)
+9. [VSCode Configuration](#vscode-configuration)
+10. [Run App on Simulator](#run-app-on-simulator)
+11. [Git Hooks](#git-hooks)
+12. [Troubleshooting](#troubleshooting)
+13. [Support & Feedback](#support--feedback)
+14. [Contributing](#contributing)
+
+---
 
 ## Core Concepts
 
-- **Decentralised Identifier (DID):** A globally unique identifier that enables secure interactions. The DID is the cornerstone of Self-Sovereign Identity (SSI), a concept that empowers individuals or entities to control their digital identities. DID has different methods to prove control of digital identity.
+Familiarise yourself with these key terms before diving into the code.
 
-- **Verifiable Credential (VC):** A digital representation of a claim created by the issuer about the subject (e.g., Individual). VC is cryptographically signed and verifiable.
-
-- **Messaging Server (Mediator):** A service that handles and routes messages securely between parties (e.g., users, businesses, other mediators, or even AI agents). The mediators process the message without being able to access the message’s content intended for the recipient.
-
-- **Invitation:** A ContactCard containing information about the invitation, such as name, description, and validity. It also includes a unique phrase or mnemonic that a user can publish to allow others to initiate a connection request. It serves as an entry point for users who wish to connect with you securely.
-
-- **Channel:** A secure connection that forms once an invitation to connect is accepted and finalised by the offerer. Each channels creates its own DID as an identifier along with the DID of each participants.
+<table>
+<thead>
+<tr><th>Term</th><th>Definition</th></tr>
+</thead>
+<tbody>
+<tr><td colspan="2"><strong>Core SDK</strong></td></tr>
+<tr><td><strong>Decentralised Identifier (DID)</strong></td><td>A globally unique identifier that enables secure, self-sovereign identity interactions. The owner controls the DID without relying on a central authority.</td></tr>
+<tr><td><strong>Verifiable Credential (VC)</strong></td><td>A cryptographically signed digital claim about a subject (e.g. a person or organisation), issued by a trusted issuer and verifiable by anyone.</td></tr>
+<tr><td><strong>Messaging Server (Mediator)</strong></td><td>A routing service that securely relays messages between parties; individuals, businesses, or AI agents, without being able to read message content.</td></tr>
+<tr><td><strong>Invitation</strong></td><td>A <code>ContactCard</code> containing a name, description, validity period, and a unique mnemonic phrase. Publish one so others can initiate a secure connection request with you.</td></tr>
+<tr><td><strong>Channel</strong></td><td>A secure, bilateral connection formed once an invitation is accepted. Each channel has its own DID, separate from each participant's primary DID.</td></tr>
+<tr><td><strong>Relationship Card (R-Card)</strong></td><td>A signed contact credential containing your name, email, phone, and company. Sent automatically when a channel opens and stored in the Credentials tab. Exportable to vCard 3.0.</td></tr>
+<tr><td><strong>Verifiable Relationship Credential (VRC)</strong></td><td>A mutual "verified relationship" credential between two DIDs, exchanged via a two step handshake in chat. Both participants receive a signed copy stored in the Credentials tab.</td></tr>
+<tr><td colspan="2"><strong>ZKP Feature (opt-in)</strong></td></tr>
+<tr><td><strong>Zero Knowledge Proof (ZKP)</strong></td><td>A cryptographic method that lets one party prove a fact to another without revealing underlying personal data. Used in this app to prove "humanness" via a Liveness Credential. Enable with <code>ZKP_ENABLED=true</code>.</td></tr>
+</tbody>
+</table>
 
 ## Preview
 
-The reference application showcases the implementation of the Affinidi Meeting Place Core and Chat SDKs, including the best practices. It showcases the core functionalities and capabilities of a secure and private messaging application, where you can set up your primary identity, create connection offers, and send messages, which include peer-to-peer and group messaging.
+The reference app showcases the core capabilities of a secure, private messaging application - identity setup, connection offers, peer-to-peer messaging, and group messaging, all built on best practices from the Affinidi Meeting Place SDK.
 
-![screenshots](assets/docs/meetingplace-screenshot.png)
+![App preview screenshots](assets/docs/meetingplace-screenshot.png)
 
 ## Key Features
 
-- **Multiple Identities** - set up your primary identity to serve as your main professional or personal profile. Additionally, create aliases tailored to specific scenarios or communication needs (for example, a hobbyist or community profile).
+| Feature | Description |
+|---------|-------------|
+| **Multiple Identities** | Set a primary identity for your main profile, plus create aliases for specific contexts (e.g. a hobbyist persona or professional profile). |
+| **Connect with Invitations** | Create and publish invitations with custom options: a custom phrase, a usage limit, or an expiry date. |
+| **Secure Messaging** | Peer-to-peer and group messaging with end-to-end privacy built in. |
+| **Verified Identity (R-Card and VRC)** | Share your R-Card (a signed digital contact card) in any chat, or initiate a mutual VRC exchange to create a verifiable record of your relationship. See [Feature Demonstrations](#feature-demos). |
+| **Messaging Server** | Use the Affinidi-hosted messaging server or bring your own managed mediator. |
+| **Human ZKP Demo** | Prove a contact is human using a Zero Knowledge Proof; no biometric data or personal information is shared. See [Feature Demonstrations](#feature-demos). |
 
-- **Connect with Invitations** - create and publish invitations for other users to find and connect with you, whether it's peer-to-peer or in a group setting. You can create invites with custom setup options, such as using a custom phrase, specifying the number of invite uses, or setting an expiry, for a more secure setup.
-
-- **Secure Messaging** - communicate either in a peer-to-peer or group setting, like how most chat applications do, but with security and privacy built in.
-
-- **Verified Identity** - show a proof of your identity using a verifiable credential as proof within the chat.
-
-- **Messaging Server** - use our messaging servers as your default server configuration or create your own managed messaging server.
-
-Refer to [the documentation](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/) to learn more about Affinidi Meeting Place SDK.
+For full SDK documentation, see the [Affinidi Meeting Place SDK docs](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/).
 
 ## Architecture Overview
 
-The architecture is organised into distinct layers, each with specific responsibilities to ensure maintainability, testability, and separation of concerns.
+The app uses a clean, four layer architecture. Each layer has one job and can only talk to the layer below it.
 
 ### Architectural Layers
 
-![Reference App Arch](./assets/docs/reference-app-arch-diagram.png)
+![Reference App Architecture](./assets/docs/reference-app-arch-diagram.png)
+
+```
+Presentation Layer → Application Layer → Domain Layer → Infrastructure Layer
+```
 
 ### Core Components
 
@@ -106,305 +101,321 @@ The architecture is organised into distinct layers, each with specific responsib
 - **External Services**: Firebase messaging, biometrics, secure storage, media handling.
 - **Configuration**: Environment settings and app configuration.
 
-> To add a new profile field (e.g. a new contact attribute), see the [Adding Profile Fields guide](doc/ADDING_PROFILE_FIELDS.md).
 
-### Access Rules and Data Flow
+### Access Rules
 
-The architecture enforces strict access rules to maintain separation of concerns:
+Layers can only access the layer directly below them, never skip a level.
 
-#### Screens (Presentation Layer)
-- **Responsibility**: Display UI and handle user interactions only.
-- **Access**: Can only access **Controllers** for state changes.
-- **Restrictions**: No direct access to services or infrastructure.
+| Layer | Responsibility | Can access |
+|-------|----------------|------------|
+| **Screens** (Presentation) | Display UI, handle user input | Controllers only |
+| **Controllers** (State management) | Manage state, coordinate UI ↔ business logic | Services, infrastructure providers |
+| **Services** (Application) | Implement business logic and use cases | Repository interfaces, infrastructure providers |
 
-#### Controllers (State Management)
-- **Responsibility**: Manage application state and coordinate between UI and business logic.
-- **Access**: Can access **Services** and **Infrastructure Providers**.
-- **Pattern**: Implemented as Riverpod StateNotifiers/Providers.
+### SDK Integration
 
-#### Services (Application Layer)
-- **Responsibility**: Implement business logic and use cases.
-- **Access**: Can access **Repository interfaces** from the Domain layer and **Infrastructure Providers**.
-
-```mermaid
-graph LR
-    Screen["Screen<br/>(Display UI)"] 
-    Controller["Controller(UI Logic)<br/>(UI State Management)"]
-    Service["Service<br/>(App Business Logic)<br/>(App State Management)"]
-    RepoInterface["Repository Interface<br/>(Domain Contract)"]
-    RepoImpl["Repository Implementation<br/>(Infrastructure Implementation)"]
-
-    Screen --> Controller
-    Controller --> Service
-    Service --> RepoInterface
-    RepoInterface --> RepoImpl
-
-    classDef presentation fill:#040822,color:white,stroke:#85fbfd,stroke-width:1px
-    classDef application fill:#040822,color:white,stroke:#3464fd,stroke-width:1px
-    classDef domain fill:#040822,color:white,stroke:#cdced3,stroke-width:1px
-    classDef infrastructure fill:#040822,color:white,stroke:#cdced3,stroke-width:1px
-
-    class Screen,Controller presentation
-    class Service application
-    class RepoInterface domain
-    class RepoImpl infrastructure
-```
-
-This ensures that:
-
-- UI components remain pure and testable.
-- Business logic is isolated from infrastructure concerns.
-- Dependencies flow inward toward the domain core.
-- Each layer has a single, well-defined responsibility.
-
-### Affinidi Meeting Place SDK Integration
-
-The app integrates with Affinidi Meeting Place using:
-
-- **Core SDK**: Handles DID management and DIDComm messaging.
-- **Chat SDK**: Provides messaging capabilities.
-- **Repository Pattern**: Abstracts SDK interactions behind domain interfaces.
-- **Provider Pattern**: Manages SDK instances through dependency injection.
-
-This architecture ensures that the Affinidi SDK integration is properly abstracted and can be easily maintained or replaced if needed.
+| Component | What it does |
+|-----------|--------------|
+| **Core SDK** | DID management and DIDComm messaging |
+| **Chat SDK** | Messaging capabilities |
+| **Repository pattern** | Wraps SDK calls behind domain interfaces; swap the SDK without touching UI or business logic |
+| **Riverpod providers** | Injects SDK instances throughout the app |
 
 ### Chat Screen Architecture
 
-The chat screen follows the same layered architecture, with clear separation between presentation, application, and SDK concerns. The diagram below shows the component breakdown of the chat screen.
-
 ![Chat Screen Architecture](./assets/docs/chat_screen_architecture.png)
 
-> The source diagram is available at [`assets/docs/chat_screen_architecture.puml`](./assets/docs/chat_screen_architecture.puml).
+Source diagram: [`assets/docs/chat_screen_architecture.puml`](./assets/docs/chat_screen_architecture.puml)
+
+<h2 id="feature-demos">Feature Demonstrations</h2>
+
+Each tab below documents one interactive feature built into this reference app. Adding a new feature demo = adding a new tab. The page length stays constant regardless of how many demos are included.
+
+<details open id="panel-zkp">
+<summary><strong>Human ZKP Demo</strong></summary>
+
+Zero-Knowledge Proof (ZKP) is an optional, privacy-preserving way to prove
+"I am human" without sharing biometrics or personal data.
+
+- Feature flag: `ZKP_ENABLED=true`
+- Default state: off
+- Credentials tab is visible when ZKP is enabled
+
+For the complete guide (architecture, assets, binary size impact,
+screenshots, and provider setup), see [doc/ZKP.md](doc/ZKP.md).
+
+</details>
+
+<details id="panel-vrc">
+<summary><strong>R-Card and VRC Demo</strong></summary>
+
+<h3 id="vrc-what">What are R-Cards and VRCs?</h3>
+
+The Meeting Place app includes a built-in credential exchange system powered by the **Credentials SDK**. Two types of verifiable credentials are supported:
+
+| Credential | What it encodes | How it is exchanged |
+|------------|-----------------|---------------------|
+| **Relationship Card (R-Card)** | Your contact information: name, email, phone, company. Signed as a jCard Verifiable Credential (RFC 7095). Exportable to vCard 3.0. | Sent automatically when a channel first opens (inauguration), or shared manually from the chat action menu. |
+| **Verifiable Relationship Credential (VRC)** | A mutual "verified relationship" credential encoding the DIDs of both participants and the timestamp of the exchange. | Two-step VDIP handshake: one side requests, the other reciprocates. Both participants receive a signed copy. |
+
+> R-Card and VRC exchange requires no feature flags. Any open channel can exchange credentials. The **Credentials** tab shows all stored R-Cards and VRCs on this device.
+
+> **Integrating into your own app?** See the [Credentials SDK documentation](https://github.com/affinidi/affinidi-meetingplace-sdk-dart/blob/main/meeting-place-credentials.html#rcard-vrc) for the operations API, repository interfaces, and data models.
+
+<h3 id="vrc-rcard">R-Card exchange</h3>
+
+An R-Card is your verifiable digital contact card. The app supports two R-Card flows: automatic sharing when a channel opens, and manual sharing from the chat action menu.
+
+<h4>Automatic flow</h4>
+
+The app automatically sends your R-Card to a new contact when a channel is first opened.
+
+<table>
+<tr>
+<td align="center" width="33%"><strong>Open a channel</strong></td>
+<td align="center" width="33%"><strong>R-Card sent automatically</strong></td>
+<td align="center" width="33%"><strong>Contact receives it and saves it</strong></td>
+</tr>
+<tr>
+<td align="center" width="33%"><img src="assets/rcard/rcard-automatic.png" alt="R-Card sent automatically" /></td>
+<td align="center" width="33%"><img src="assets/rcard/rcard-info.png" alt="R-Card received in thread" /></td>
+<td align="center" width="33%"><img src="assets/rcard/rcard-tab.png" alt="R-Card saved to credentials" /></td>
+</tr>
+</table>
+
+<h4>Manual flow</h4>
+
+You can also share an R-Card at any time from the chat action menu by tapping **+** and selecting **Share R-Card**.
+
+<table>
+<tr>
+<td align="center" width="33%"><strong>Open chat action menu</strong></td>
+<td align="center" width="33%"><strong>Select the R-Card you want to share</strong></td>
+<td align="center" width="33%"><strong>Both parties see it in chat</strong></td>
+</tr>
+<tr>
+<td align="center" width="33%"><img src="assets/rcard/rcard-manual.png" alt="R-Card sent manually" /></td>
+<td align="center" width="33%"><img src="assets/rcard/select-rcard.png" alt="Select the R-Card you want to share" /></td>
+<td align="center" width="33%"><img src="assets/rcard/rcard-shared-screen.png" alt="Both parties see it in chat" /></td>
+</tr>
+</table>
+
+<h3 id="vrc-exchange">VRC exchange</h3>
+
+A VRC is a mutual "verified relationship" credential. Unlike an R-Card, a VRC requires both participants to act: one side initiates a request, and the other reciprocates.
+
+> VRCs establish a trusted record of a relationship that exists independently of any messaging platform. The credential can be verified by anyone without contacting a central authority.
+
+<table>
+<tr>
+<td align="center" width="20%"><strong>Initiate request</strong></td>
+<td align="center" width="20%"><strong>Request sent</strong></td>
+<td align="center" width="20%"><strong>Contact prompted</strong></td>
+<td align="center" width="20%"><strong>Both sides sign</strong></td>
+</tr>
+<tr>
+<td align="center" width="20%"><img src="assets/vrc/initiate-request.png" alt="Initiate request" /></td>
+<td align="center" width="20%"><img src="assets/vrc/request-sent.png" alt="Request sent" /></td>
+<td align="center" width="20%"><img src="assets/vrc/contact-prompted.png" alt="Contact prompted" /></td>
+<td align="center" width="20%"><img src="assets/vrc/chat-screen-vrc.png" alt="Both sides sign" /></td>
+</tr>
+</table>
+
+</details>
+
+</details>
 
 ## Requirements
 
-- Flutter 3.41.4
-- Dart SDK ^3.9.2
+| Dependency | Version |
+|------------|---------|
+| **Flutter** | `3.44.1` |
+| **Dart SDK** | `^3.12.0` |
 
-## Getting started
+## Getting Started
 
 Set up your environment to run the Meeting Place application.
 
-#### Activate Melos
+### Step 1: Activate Melos
 
 ```bash
 dart pub global activate melos && export PATH="$PATH":"$HOME/.pub-cache/bin"
 ```
 
-> **NOTE:** Add the `export PATH="$PATH":"$HOME/.pub-cache/bin"` into your shell configuration file, like `~/.zshrc` or `~/.bashrc` to apply the new `PATH` permanently into your terminal.
+> Add the `export PATH="$PATH":"$HOME/.pub-cache/bin"` line to your shell config (`~/.zshrc` or `~/.bashrc`) so it persists across terminal sessions.
 
-#### Install Dependencies
+### Step 2: Install dependencies
 
 ```bash
 melos pubget
 ```
 
-#### Generate Models
-
-To generate models, run the following command in your terminal:
+### Step 3: Generate models
 
 ```bash
 melos gen
 ```
 
-#### Generate Localised Strings
-
-To generate localised strings from arb files, run the following command in your terminal:
+### Step 4: Generate localised strings
 
 ```bash
 melos strings
 ```
 
+### Step 5: Configure environment variables
+
+See [Environment Variables](#environment-variables) for the full setup.
+
 ## Environment Variables
 
-The Meeting Place reference app provides a `.example.env` template to populate the required variables and quickly setup the app.
-
-To prepare the env variable, copy the environment file from the template.
+The app uses a `.env` file for configuration. A template is provided.
 
 ```bash
 mkdir -p configurations && cp templates/.example.env configurations/.env
 ```
-> **NOTE:** Execute the command inside the root folder of the reference app.
 
-Most environment variables have sensible defaults defined in the application. You only need to provide values specific to your setup or when you want to override the defaults.
+> Run this from the **root folder** of the reference app. Most variables have sensible defaults, only supply values specific to your setup.
 
 ### Required Environment Variables
 
-The following variables **must** be provided in your `configurations/.env` file.
-
 #### Connect to Control Plane API
 
-The Control Plane API enables discovery and secure channel creation using DIDComm v2.1. Participants can publish a connection offer or invitation with one of their identities (e.g., gaming persona) for direct or group chat.
-
-To create an instance of Control Plane API locally, follow the guide from the [Control Plane API for Dart](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/deployment-options/control-plane-open-sourced/) open source project.
-
-After setting up the API server, copy the `CONTROL_PLANE_DID` containing the `did:web` value from the env file.
+The Control Plane API enables identity discovery and secure channel creation over DIDComm v2.1. To run it locally, follow the [Control Plane API for Dart](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/deployment-options/control-plane-open-sourced/) guide.
 
 ```bash
-# Required for MeetingPlaceCoreSDK functionality
-# YourControl Plane DID
+# Your Control Plane DID (did:web value from your API server)
 CONTROL_PLANE_DID=""
 ```
 
-The `did:web` value can differ depending on your domain hosting the Control Plane API.
-
 #### Connect to DIDComm Mediator
 
-The DIDComm Mediator is a messaging server that routes messages securely between parties, such as individuals, businesses, or AI agents. Mediators cannot access message content.
-
-To create an instance of DIDComm Mediator locally, follow the guide from the [DIDComm Mediator](https://docs.affinidi.com/products/affinidi-messaging/didcomm-mediator/deployment-options/mediator-open-sourced/) open source project.
-
-Setting up DIDComm Mediator generates the Mediator DID that you can use to populate the `DEFAULT_MEDIATOR_DID` env variable.
+The DIDComm Mediator routes messages between parties without reading their content. Follow the [DIDComm Mediator](https://docs.affinidi.com/products/affinidi-messaging/didcomm-mediator/deployment-options/mediator-open-sourced/) guide to set it up.
 
 ```bash
-# Required for MeetingPlaceCoreSDK functionality
 # Your Mediator DID
 DEFAULT_MEDIATOR_DID=""
 ```
 
-#### Connect to Matrix Homeserver
+#### Enable push notifications
 
-The Matrix Homeserver is a messaging server that stores and relays messages between clients using the Matrix protocol.
+Create a [Firebase](https://firebase.google.com/docs/projects/learn-more) project, then:
 
-TBD
+> **Firebase iOS app**
+> 1. [Create an iOS app](https://firebase.google.com/docs/ios/setup#register-app) in your Firebase project.
+> 2. Download `GoogleService-Info.plist` from the iOS app settings.
+> 3. Copy it to `app/ios/Runner/`. You only need the file, skip the other Firebase setup steps.
 
-Setting up a Matrix Homeserver generates the homeserver URL that you can use to populate the `MATRIX_HOMESERVER` env variable.
-
-```bash
-# Required for MeetingPlaceCoreSDK functionality
-# Your Matrix Homeserver URL
-MATRIX_HOMESERVER=""
-```
-
-#### Enable Push Notifications
-
-To enable push notification, create a [Firebase](https://firebase.google.com/docs/projects/learn-more) project. After creating the project, follows the steps below:
-
-##### Firebase iOS App
-
-1. [Create an iOS app](https://firebase.google.com/docs/ios/setup#register-app) from your Firebase project.
-2. Download the `GoogleService-Info.plist` from the iOS app settings.
-3. Copy the downloaded `GoogleService-Info.plist` into the `app/ios/Runner` folder of the Meeting Place reference app.
-
-> **NOTE:** Skip other steps, you only need to generate and download the `GoogleService-Info.plist` file.
-
-##### Firebase Android App
-
-1. [Create an Android app](https://firebase.google.com/docs/android/setup#register-app) from your Firebase project.
-2. Download the `google-services.json` from the iOS app settings.
-3. Copy the downloaded `google-services.json` into the `app/android/app` folder of the Meeting Place reference app.
-
-> **NOTE:** Skip other steps, you only need to generate and download the `google-services.json` file.
-
-After setting up the Firebase apps, populate the Firebase-related environment variables that can be found in the Firebase console or in the downloaded files.
+> **Firebase Android app**
+> 1. [Create an Android app](https://firebase.google.com/docs/android/setup#register-app) in your Firebase project.
+> 2. Download `google-services.json` from the Android app settings.
+> 3. Copy it to `app/android/app/`. You only need the file, skip the other Firebase setup steps.
 
 ```bash
-# Required for Firebase integration
+# Firebase - shared
 FIREBASE_MESSAGING_SENDER_ID=""
 FIREBASE_PROJECT_ID=""
 FIREBASE_STORAGE_BUCKET=""
 
+# Firebase - iOS
 FIREBASE_IOS_APIKEY=""
 FIREBASE_IOS_APP_ID=""
 FIREBASE_IOS_BUNDLE_ID=""
 
+# Firebase - Android
 FIREBASE_ANDROID_APIKEY=""
 FIREBASE_ANDROID_APP_ID=""
 ```
 
 ### Optional Environment Variables
 
-The following variables have default values but can be customized:
+These variables have defaults. Override them only when needed.
 
 ```bash
-# App configuration (defaults shown)
+# App configuration
 APP_VERSION_NAME=""                              # Default: ""
 BIOMETRICS_ENABLED="true"                        # Default: true
-DATABASE_LOGGING_ENABLED="false"                 # Default: false (debug mode only)
+DATABASE_LOGGING_ENABLED="false"                 # Default: false (debug builds only)
 FOREGROUND_NOTIFICATIONS_ENABLED="false"         # Default: false
 TAPS_TO_UNLOCK_DEBUG="7"                         # Default: 7
 
-# Chat settings (defaults shown)
+# Chat settings
 CHAT_ACTIVITY_EXPIRES_IN_SECONDS="3"             # Default: 3
 CHAT_PRESENCE_SEND_INTERVAL_IN_SECONDS="60"      # Default: 60
-CHAT_IMAGE_MAX_SIZE="800"                        # Default: 800
-CHAT_IMAGE_QUALITY_PERCENT="80"                  # Default: 80
+CHAT_IMAGE_MAX_SIZE="800"                        # Default: 800 px
+CHAT_IMAGE_QUALITY_PERCENT="80"                  # Default: 80%
 
-# Profile settings (defaults shown)
-PROFILE_IMAGE_MAX_SIZE="100"                     # Default: 100
-PROFILE_IMAGE_QUALITY_PERCENT="80"               # Default: 80
+# Profile settings
+PROFILE_IMAGE_MAX_SIZE="100"                     # Default: 100 px
+PROFILE_IMAGE_QUALITY_PERCENT="80"               # Default: 80%
 
 # Marketplace
 MARKETPLACE_QR_PREFIX=""                         # Default: ""
 
-# Out-of-Band (OOB) Flow Configuration
-# Set this value to distinguish between multiple OOB flows and prevent QR code validation from one flow interfering with another.
-# Values are not predefined and can be any string. For example: `oss-app-main-oob-flow`.
-DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: ""
+# Out-of-Band (OOB) flow: distinguishes multiple OOB flows so QR validation does not interfere across flows
+DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: "" (e.g. "oss-app-main-oob-flow")
+
+# Human ZKP & Liveness Credential
+ZKP_ENABLED="false"                              # Default: false — enables Human ZKP demo + Credentials tab
 ```
 
-> **NOTE:** You can find all available configuration options and their default values in `lib/infrastructure/configuration/environment.dart`.
+> All configuration options and their defaults are defined in `lib/infrastructure/configuration/environment.dart`.
 
 ## VSCode Configuration
-
-If you are using VS Code as your IDE, you can quickly set up your launch configuration for this project:
 
 ```bash
 mkdir -p .vscode && cp templates/.example.launch.json .vscode/launch.json
 ```
 
-This pre-defined configuration is set up to point to the appropriate environment file for your project. You can further customize this file to add or modify device IDs, change environment files, or extend it to suit your development needs.
+This configuration points to the correct environment file automatically. Edit `launch.json` to change device IDs, environment files, or other launch parameters.
 
 ## Run App on Simulator
 
-Refer to Flutter's [Get Started](https://docs.flutter.dev/get-started/install) page to learn more about setting up your environment to run the Flutter application on simulators.
+Refer to the [Flutter Get Started guide](https://docs.flutter.dev/get-started/install) for setting up your environment to run the app on an iOS Simulator or Android Emulator.
+
+> **For Face Liveness testing, use a physical device.** The camera challenge does not work on simulators or emulators.
 
 ## Git Hooks
 
-To ensure code quality before committing, set up the pre-commit hook:
+Automatically run code analysis before every commit:
 
 ```sh
 cp templates/.example.pre-commit .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
 
-This will automatically run `melos run analyze` before every commit and block the commit if there are any issues.
-**Note:** The hook file must be named `pre-commit` (no extension) in `.git/hooks`.
+This runs `melos run analyze` before each commit and blocks it if any issues are found.
+
+> The file **must** be named `pre-commit` (no extension) inside `.git/hooks/`.
 
 ## Troubleshooting
 
-### Firebase Configuration Issues
+### Firebase: duplicate app error
 
-**Error:** `FirebaseException ([core/duplicate-app] A Firebase App named "[DEFAULT]" already exists)`
+> `FirebaseException ([core/duplicate-app] A Firebase App named "[DEFAULT]" already exists)`
 
-**Cause:** This error occurs when there's a mismatch between your Firebase configuration files and the environment variables in `configurations/.env`.
+**Cause:** The Firebase configuration files and the environment variables in `configurations/.env` do not match.
 
-**Solution:** Ensure the following values match:
+**Solution:** Ensure the following values are consistent across files:
 
-1. Values in `google-services.json` (Android) must match `FIREBASE_ANDROID_*` variables in `.env`.
-2. Values in `GoogleService-Info.plist` (iOS or macOS) must match `FIREBASE_IOS_*` variables in `.env`.
-3. Common values like `FIREBASE_PROJECT_ID`, `FIREBASE_MESSAGING_SENDER_ID`, and `FIREBASE_STORAGE_BUCKET` must match across both platform files.
+| Config file | `.env` variable prefix |
+|-------------|------------------------|
+| `google-services.json` (Android) | `FIREBASE_ANDROID_*` |
+| `GoogleService-Info.plist` (iOS / macOS) | `FIREBASE_IOS_*` |
+| Both files | `FIREBASE_PROJECT_ID`, `FIREBASE_MESSAGING_SENDER_ID`, `FIREBASE_STORAGE_BUCKET` |
 
-**Reference:** See [Firebase duplicate-app](https://github.com/firebase/flutterfire/blob/main/packages/firebase_core/firebase_core_platform_interface/lib/src/firebase_core_exceptions.dart#L20-L25) error definition.
+See also: [Firebase duplicate app error reference](https://github.com/firebase/flutterfire/blob/main/packages/firebase_core/firebase_core_platform_interface/lib/src/firebase_core_exceptions.dart#L20-L25).
+
+For AWS Rekognition integration issues, refer to the [Credentials SDK: Provider Setup](https://github.com/affinidi/affinidi-meetingplace-sdk-dart/blob/main/meeting-place-credentials.html#provider-setup) guide.
 
 ## Support & Feedback
 
-If you face any issues or have suggestions, please don't hesitate to contact us using [this link](https://share.hsforms.com/1i-4HKZRXSsmENzXtPdIG4g8oa2v).
+If you face any issues or have suggestions, [contact us here](https://share.hsforms.com/1afnezgGiQTmkfIT5oxWc8Qea58c).
 
-### Reporting Technical Issues
+### Reporting technical issues
 
-If you have a technical issue with the project's codebase, you can also create an issue directly in GitHub.
-
-1. Ensure the bug was not already reported by searching on GitHub under
-   [Issues](https://github.com/affinidi/affinidi-meetingplace-reference-app/issues).
-
-2. If you're unable to find an open issue addressing the problem,
-   [open a new one](https://github.com/affinidi/affinidi-meetingplace-reference-app/issues/new).
-   Be sure to include a **title and clear description**, as much relevant information as possible,
-   and a **code sample** or an **executable test case** demonstrating the expected behaviour that is not occurring.
+1. Search [GitHub Issues](https://github.com/affinidi/affinidi-meetingplace-reference-app/issues) to check if the bug has already been reported.
+2. If not, [open a new issue](https://github.com/affinidi/affinidi-meetingplace-reference-app/issues/new). Include a clear title and description, steps to reproduce, and a code sample demonstrating the unexpected behaviour.
 
 ## Contributing
 
-Want to contribute?
-
-Head over to our [CONTRIBUTING](https://github.com/affinidi/affinidi-meetingplace-reference-app/blob/main/CONTRIBUTING.md) guidelines.
+Want to contribute? Head over to our [CONTRIBUTING](https://github.com/affinidi/affinidi-meetingplace-reference-app/blob/main/CONTRIBUTING.md) guidelines.

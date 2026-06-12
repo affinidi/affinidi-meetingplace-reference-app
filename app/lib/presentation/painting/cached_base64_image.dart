@@ -9,8 +9,8 @@ class CachedBase64Image extends ImageProvider<CachedBase64Image> {
   CachedBase64Image(
     this.base64String, {
     this.scale = 1.0,
-    required BaseCacheManager cacheManager,
-  }) : _cacheManager = cacheManager;
+    required this._cacheManager,
+  });
 
   final BaseCacheManager _cacheManager;
 

@@ -21,4 +21,12 @@ abstract class ContactsServiceState with _$ContactsServiceState {
   Contact? getContactByChannelDid(String did) {
     return contacts.firstWhereOrNull((c) => c.channelDid == did);
   }
+
+  /// Returns the contact whose [Contact.card] DID matches [did].
+  ///
+  /// Used to look up a contact from an R-Card whose subject DID identifies
+  /// the contact's card DID.
+  Contact? getContactByCardDid(String did) {
+    return contacts.firstWhereOrNull((c) => c.card.did == did);
+  }
 }

@@ -1,5 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 /// A Riverpod provider that supplies the list of available [AttachmentPlugin]s.
 ///

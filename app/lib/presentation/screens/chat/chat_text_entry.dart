@@ -1,7 +1,7 @@
 part of 'chat_screen.dart';
 
 class _ChatTextEntry extends HookConsumerWidget {
-  _ChatTextEntry({required String contactId}) : _contactId = contactId;
+  _ChatTextEntry({required this._contactId});
 
   final String _contactId;
 

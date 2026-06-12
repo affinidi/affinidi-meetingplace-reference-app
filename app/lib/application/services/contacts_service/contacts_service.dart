@@ -176,6 +176,7 @@ class ContactsService extends _$ContactsService {
             channel.otherPartyContactCard?.type,
           );
 
+    final origin = ContactOrigin.from(channel.type);
     return Contact(
       id: const Uuid().v4(),
       channelDid: channel.otherPartyPermanentChannelDid,
@@ -187,8 +188,9 @@ class ContactsService extends _$ContactsService {
       mediatorDid: channel.mediatorDid,
       type: ContactType.from(channel.type),
       status: status,
-      origin: ContactOrigin.from(channel.type),
+      origin: origin,
       category: category,
+      notificationBannerDismissed: origin != ContactOrigin.directInteractive,
     );
   }
 

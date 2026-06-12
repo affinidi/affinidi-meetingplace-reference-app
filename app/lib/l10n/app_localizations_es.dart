@@ -17,6 +17,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'connections': 'Invitaciones',
       'contacts': 'Canales',
       'identities': 'Identidades',
+      'rCards': 'Tarjetas-R',
       'settings': 'Configuración',
       'other': 'Inválido',
     });

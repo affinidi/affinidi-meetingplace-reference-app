@@ -24,6 +24,12 @@ Future<void> setupFindOfferTest(
   await tester.pumpAndSettle();
 }
 
+Future<void> tapSearchButton(WidgetTester tester, Finder searchButton) async {
+  await tester.ensureVisible(searchButton);
+  await tester.tap(searchButton);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   group('When finding an invitation', () {
     final testIdentity = FakeIdentities.primaryIdentity;
@@ -92,8 +98,7 @@ void main() {
         final searchButton = find.text(l10n.generalSearch);
         expect(searchButton, findsOneWidget);
 
-        await tester.tap(searchButton);
-        await tester.pumpAndSettle();
+        await tapSearchButton(tester, searchButton);
 
         expect(find.text(l10n.error('missingMnemonic')), findsOneWidget);
       });
@@ -119,10 +124,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final searchButton = find.text(l10n.generalSearch);
-        await tester.tap(searchButton);
-
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 1));
+        await tapSearchButton(tester, searchButton);
 
         expect(find.text(l10n.error('offerNotFound')), findsOneWidget);
       });
@@ -150,8 +152,7 @@ void main() {
         await tester.pumpAndSettle();
 
         final searchButton = find.text(l10n.generalSearch);
-        await tester.tap(searchButton);
-        await tester.pumpAndSettle();
+        await tapSearchButton(tester, searchButton);
 
         expect(find.text(l10n.acceptOfferTitle), findsOneWidget);
 
@@ -197,8 +198,7 @@ void main() {
           await tester.pumpAndSettle();
 
           final searchButton = find.text(l10n.generalSearch);
-          await tester.tap(searchButton);
-          await tester.pumpAndSettle();
+          await tapSearchButton(tester, searchButton);
 
           expect(find.text(l10n.acceptOfferTitle), findsOneWidget);
 

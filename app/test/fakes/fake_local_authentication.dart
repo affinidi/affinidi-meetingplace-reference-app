@@ -7,8 +7,7 @@ import 'package:local_auth_platform_interface/types/auth_messages.dart';
 import 'package:local_auth_windows/types/auth_messages_windows.dart';
 
 class FakeLocalAuthentication implements LocalAuthentication {
-  FakeLocalAuthentication({required bool isAuthenticated})
-    : _isAuthenticated = isAuthenticated;
+  FakeLocalAuthentication({required this._isAuthenticated});
 
   final bool _isAuthenticated;
 

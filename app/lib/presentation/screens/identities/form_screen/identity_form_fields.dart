@@ -1,14 +1,17 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 import '../../../../../infrastructure/extensions/identities_extensions.dart';
 import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../validators/input_validators.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
+import '../../../widgets/form_rows/label_icon.dart';
 import '../../../widgets/profile_picture.dart';
 import '../../media/media_screen/media_screen.dart';
 import 'identity_form_screen_controller.dart';
@@ -30,7 +33,13 @@ class IdentityFormFields extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final identity = ref.watch(provider.select((state) => state.identity));
     final cacheManager = ref.read(cacheManagerProvider);
-    final personaFields = ContactCardFieldDefinitions.values;
+    final identityFields = ContactCardFieldDefinitions.values
+        .where((f) => f.key != ContactCardFieldKey.mobile)
+        .toList();
+    final mobileField = ContactCardFieldDefinitions.byKey(
+      ContactCardFieldKey.mobile,
+    );
+    final initialMobilePhoneNumber = controller.initialMobilePhoneNumber;
 
     return Form(
       key: formKey,
@@ -97,15 +106,105 @@ class IdentityFormFields extends ConsumerWidget {
                 ],
               ),
             ),
-            for (var index = 0; index < personaFields.length; index++) ...[
+            for (var index = 0; index < identityFields.length; index++) ...[
               const Divider(),
-              _PersonaField(
+              _IdentityField(
                 identityId: identityId,
-                field: personaFields[index],
+                field: identityFields[index],
                 formKey: formKey,
                 traversalOrder: (index + 1).toDouble(),
               ),
             ],
+            const Divider(),
+            FocusTraversalOrder(
+              order: NumericFocusOrder((identityFields.length + 1).toDouble()),
+              child: ListTile(
+                leading: LabelIcon(
+                  icon: Icons.phone,
+                  iconColor: context.colorScheme.primary,
+                  label: mobileField.label(context.l10n),
+                ),
+                title: Row(
+                  children: [
+                    Text(
+                      mobileField.label(context.l10n),
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          dialogTheme: Theme.of(context).dialogTheme.copyWith(
+                            constraints: BoxConstraints(
+                              maxHeight:
+                                  MediaQuery.sizeOf(context).height * 0.7,
+                            ),
+                          ),
+                        ),
+                        child: InternationalPhoneNumberInput(
+                          initialValue: initialMobilePhoneNumber,
+                          textFieldController: controller.controllerFor(
+                            mobileField,
+                          ),
+                          focusNode: controller.focusNodeFor(mobileField)!,
+                          keyboardAction: TextInputAction.next,
+                          selectorConfig: const SelectorConfig(
+                            selectorType: PhoneInputSelectorType.DIALOG,
+                            setSelectorButtonAsPrefixIcon: true,
+                            trailingSpace: false,
+                            leadingPadding: 0,
+                          ),
+                          locale: Localizations.localeOf(context).languageCode,
+                          searchBoxDecoration: InputDecoration(
+                            hintText: context.l10n.filter,
+                            prefixIcon: const Icon(Icons.search),
+                          ),
+                          inputDecoration: InputDecoration(
+                            hintText: context.l10n.enterMobile,
+                          ),
+                          textStyle: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.onSurfaceVariant,
+                          ),
+                          selectorTextStyle: context.textTheme.bodyMedium
+                              ?.copyWith(
+                                color: context.colorScheme.onSurfaceVariant,
+                              ),
+                          onInputChanged: controller.updateMobile,
+                          onInputValidated: (isValid) {
+                            controller.updateMobileValidation(isValid, formKey);
+                          },
+                          onFieldSubmitted: (_) {
+                            controller.updateErrorVisibilityOnBlur(
+                              mobileField,
+                              formKey,
+                            );
+                            if (mobileField.textInputAction ==
+                                TextInputAction.next) {
+                              FocusScope.of(context).nextFocus();
+                            }
+                          },
+                          validator: (value) {
+                            if (!controller.shouldShowValidation(mobileField)) {
+                              return null;
+                            }
+                            return InputValidators.getValidator(
+                              context,
+                              InputType.phone,
+                              isPhoneValid: controller.isMobileValid,
+                              hasTouchedPhone: controller.hasTouchedMobile,
+                            ).call(value);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+              ),
+            ),
           ],
         ),
       ),
@@ -113,8 +212,8 @@ class IdentityFormFields extends ConsumerWidget {
   }
 }
 
-class _PersonaField extends ConsumerWidget {
-  const _PersonaField({
+class _IdentityField extends ConsumerWidget {
+  const _IdentityField({
     required this.identityId,
     required this.field,
     required this.formKey,
@@ -130,6 +229,15 @@ class _PersonaField extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = identityFormScreenControllerProvider(identityId);
     final controller = ref.read(provider.notifier);
+    void handleFieldSubmitted(String _) {
+      controller.updateErrorVisibilityOnBlur(field, formKey);
+
+      if (field.textInputAction != TextInputAction.next) {
+        return;
+      }
+
+      FocusScope.of(context).nextFocus();
+    }
 
     String? validateField(BuildContext context, String? value) {
       if (field.shouldValidateOnBlur &&
@@ -153,7 +261,7 @@ class _PersonaField extends ConsumerWidget {
       keyboardType: field.keyboardType,
       onChanged: (value) => controller.updateField(field, value, formKey),
       onFieldSubmitted: field.shouldValidateOnBlur
-          ? (_) => controller.updateErrorVisibilityOnBlur(field, formKey)
+          ? handleFieldSubmitted
           : null,
       validator: (value) => validateField(context, value),
       textInputAction: field.textInputAction,

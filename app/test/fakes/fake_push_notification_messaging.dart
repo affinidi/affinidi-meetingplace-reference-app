@@ -5,15 +5,12 @@ import 'package:mpx_flutter_reference_app/infrastructure/firebase_messaging/push
 
 class FakePushNotificationMessaging implements PushNotificationMessaging {
   FakePushNotificationMessaging({
-    String? tokenToReturn,
-    RemoteMessage? initialMessageToReturn,
-    int attemptsToFailGettingToken = 0,
-    int attemptsToFailGettingApnsToken = 0,
+    this._tokenToReturn,
+    this._initialMessageToReturn,
+    this._attemptsToFailGettingToken = 0,
+    this._attemptsToFailGettingApnsToken = 0,
     String? apnsTokenToReturn,
-  }) : _initialMessageToReturn = initialMessageToReturn,
-       _tokenToReturn = tokenToReturn,
-       _attemptsToFailGettingToken = attemptsToFailGettingToken,
-       _attemptsToFailGettingApnsToken = attemptsToFailGettingApnsToken;
+  });
 
   final String? _tokenToReturn;
   final RemoteMessage? _initialMessageToReturn;

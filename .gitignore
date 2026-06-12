@@ -53,9 +53,11 @@ app/android/build
 app/ios/build/
 app/ios/Podfile.lock
 app/ios/Gemfile.lock
+**Package.resolved
 
 # MacOS
 app/macos/Podfile.lock
+app/macos/Gemfile.lock
 
 # Firebase
 **GoogleService-Info.plist

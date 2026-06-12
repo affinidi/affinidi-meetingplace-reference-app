@@ -12,7 +12,7 @@ class ContactCardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _PersonaFieldListView(
+    return _IdentityFieldListView(
       valueResolver: (field) => field.valueFrom(card),
     );
   }
@@ -25,14 +25,14 @@ class SdkContactCardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _PersonaFieldListView(
+    return _IdentityFieldListView(
       valueResolver: (field) => field.sdkValueFrom(card),
     );
   }
 }
 
-class _PersonaFieldListView extends StatelessWidget {
-  const _PersonaFieldListView({required this.valueResolver});
+class _IdentityFieldListView extends StatelessWidget {
+  const _IdentityFieldListView({required this.valueResolver});
 
   final String Function(ContactCardFieldDefinition) valueResolver;
 

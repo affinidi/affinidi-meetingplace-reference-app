@@ -7,17 +7,13 @@ import 'package:ssi/ssi.dart' show StoredKey;
 
 class FakeSecureStorage extends SecureStorage {
   FakeSecureStorage({
-    bool? debugMode,
-    String passphrase = 'test_passphrase',
+    this._debugMode,
+    this._passphrase = 'test_passphrase',
     String unsentMessages = 'test_passphrase',
-    String? preferredMediatorDid,
-    bool? shouldShowMeetingPlaceQR,
-    int? savingPushTokenDuration,
-  }) : _debugMode = debugMode,
-       _passphrase = passphrase,
-       _preferredMediatorDid = preferredMediatorDid,
-       _shouldShowMeetingPlaceQR = shouldShowMeetingPlaceQR,
-       _savingPushTokenDuration = savingPushTokenDuration;
+    this._preferredMediatorDid,
+    this._shouldShowMeetingPlaceQR,
+    this._savingPushTokenDuration,
+  });
 
   final bool? _debugMode;
   final String _passphrase;
@@ -145,6 +141,21 @@ class FakeSecureStorage extends SecureStorage {
   @override
   Future<void> clearUnsentMessages() async {
     _storedKeys.remove('unsent_messages');
+  }
+
+  @override
+  Future<String?> readLivenessCredentials() async {
+    return _storedKeys['zkp_liveness_credentials'];
+  }
+
+  @override
+  Future<void> writeLivenessCredentials(String json) async {
+    _storedKeys['zkp_liveness_credentials'] = json;
+  }
+
+  @override
+  Future<void> clearLivenessCredentials() async {
+    _storedKeys.remove('zkp_liveness_credentials');
   }
 
   @override

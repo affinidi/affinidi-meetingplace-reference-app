@@ -2,6 +2,7 @@ import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 
 import 'fakes/fake_identities.dart';
@@ -36,6 +37,7 @@ void verifyPublishCall(
   int? maximumUsage,
   required String mediatorDid,
   required String externalRef,
+  int? score,
 }) {
   expect(publishCall['offerName'], offerName);
   expect(publishCall['type'], type);
@@ -45,6 +47,9 @@ void verifyPublishCall(
   expect(publishCall['maximumUsage'], maximumUsage);
   expect(publishCall['mediatorDid'], mediatorDid);
   expect(publishCall['externalRef'], externalRef);
+  if (score != null) {
+    expect(publishCall['score'], score);
+  }
 }
 
 Future<void> setupPublishOfferTest(
@@ -52,6 +57,7 @@ Future<void> setupPublishOfferTest(
   String location,
   Identity testIdentity, {
   FakeMeetingPlaceSDK? fakeSdk,
+  List<Vrc> vrcs = const [],
 }) async {
   await navigateToLocation(
     tester,
@@ -59,19 +65,14 @@ Future<void> setupPublishOfferTest(
     identities: [testIdentity],
     mediators: FakeMediators.all,
     meetingPlaceCoreSDK: fakeSdk,
+    vrcs: vrcs,
   );
   await tester.pumpAndSettle();
 }
 
-Future<void> tapToggleSwitchByKey(
-  WidgetTester tester,
-  String key, {
-  bool ensureVisible = false,
-}) async {
+Future<void> tapToggleSwitchByKey(WidgetTester tester, String key) async {
   final switchFinder = findToggleSwitchByKey(key);
-  if (ensureVisible) {
-    await tester.ensureVisible(switchFinder);
-  }
+  await tester.ensureVisible(switchFinder);
   await tester.tap(switchFinder);
   await tester.pumpAndSettle();
 }
@@ -241,6 +242,7 @@ void main() {
         FakeMediators.defaultMediator.mediatorDid,
       );
       expect(publishCall['externalRef'], testIdentity.id);
+      expect(publishCall['score'], 0);
     });
 
     group('and group chat is enabled', () {
@@ -314,7 +316,6 @@ void main() {
         await tapToggleSwitchByKey(
           tester,
           'random_phrase_switch_${testIdentity.id}',
-          ensureVisible: true,
         );
 
         expect(find.text(l10n.customPhrase), findsOneWidget);
@@ -346,7 +347,6 @@ void main() {
           await tapToggleSwitchByKey(
             tester,
             'random_phrase_switch_${testIdentity.id}',
-            ensureVisible: true,
           );
 
           expect(find.text(l10n.customPhrase), findsOneWidget);
@@ -411,7 +411,6 @@ void main() {
             await tapToggleSwitchByKey(
               tester,
               'random_phrase_switch_${testIdentity.id}',
-              ensureVisible: true,
             );
 
             final customPhraseField = findTextFieldByKey(
@@ -424,7 +423,6 @@ void main() {
             await tapToggleSwitchByKey(
               tester,
               'random_phrase_switch_${testIdentity.id}',
-              ensureVisible: true,
             );
 
             expect(find.text(l10n.customPhrase), findsNothing);
@@ -469,7 +467,6 @@ void main() {
             await tapToggleSwitchByKey(
               tester,
               'random_phrase_switch_${testIdentity.id}',
-              ensureVisible: true,
             );
 
             expect(find.text(l10n.customPhrase), findsOneWidget);
@@ -513,7 +510,6 @@ void main() {
               await tapToggleSwitchByKey(
                 tester,
                 'random_phrase_switch_${testIdentity.id}',
-                ensureVisible: true,
               );
 
               expect(find.text(l10n.customPhrase), findsOneWidget);
@@ -678,7 +674,6 @@ void main() {
         await tapToggleSwitchByKey(
           tester,
           'set_expiry_switch_${testIdentity.id}',
-          ensureVisible: true,
         );
 
         await tapPublishButton(tester, l10n.publishToMeetingPlace);
@@ -726,7 +721,6 @@ void main() {
             await tapToggleSwitchByKey(
               tester,
               'set_expiry_switch_${testIdentity.id}',
-              ensureVisible: true,
             );
 
             final changeButtons = find.text(l10n.changeButton);
@@ -801,7 +795,6 @@ void main() {
                 await tapToggleSwitchByKey(
                   tester,
                   'set_expiry_switch_${testIdentity.id}',
-                  ensureVisible: true,
                 );
 
                 final changeButtons = find.text(l10n.changeButton);
@@ -821,7 +814,6 @@ void main() {
                 await tapToggleSwitchByKey(
                   tester,
                   'set_expiry_switch_${testIdentity.id}',
-                  ensureVisible: true,
                 );
 
                 expect(find.text(l10n.setExpiryHelperDisabled), findsOneWidget);
@@ -875,7 +867,6 @@ void main() {
         await tapToggleSwitchByKey(
           tester,
           'limit_uses_switch_${testIdentity.id}',
-          ensureVisible: true,
         );
 
         await tapPublishButton(tester, l10n.publishToMeetingPlace);
@@ -914,7 +905,6 @@ void main() {
           await tapToggleSwitchByKey(
             tester,
             'limit_uses_switch_${testIdentity.id}',
-            ensureVisible: true,
           );
 
           final usageLabel = find.text(l10n.canBeUsedTimes(3));
@@ -970,7 +960,6 @@ void main() {
               await tapToggleSwitchByKey(
                 tester,
                 'limit_uses_switch_${testIdentity.id}',
-                ensureVisible: true,
               );
 
               final usageLabel = find.text(l10n.canBeUsedTimes(3));
@@ -994,7 +983,6 @@ void main() {
               await tapToggleSwitchByKey(
                 tester,
                 'limit_uses_switch_${testIdentity.id}',
-                ensureVisible: true,
               );
 
               expect(find.text(l10n.limitUsesHelperDisabled), findsOneWidget);
@@ -1076,6 +1064,106 @@ void main() {
           mediatorDid: FakeMediators.customMediator.mediatorDid,
           externalRef: testIdentity.id,
         );
+      });
+    });
+
+    group('and the user has VRCs', () {
+      List<Vrc> makeVrcs(int count, {String? holderDid}) => List.generate(
+        count,
+        (i) => Vrc(
+          id: 'vrc-$i',
+          vcBlob: 'blob-$i',
+          referenceId: 'channel-$i',
+          holderDid: holderDid ?? testIdentity.did,
+          issuerDid: 'did:key:issuer-$i',
+          issuedAt: DateTime(2024, 1, i + 1),
+        ),
+      );
+
+      testWidgets('it passes score 1 when the user has exactly 1 VRC', (
+        tester,
+      ) async {
+        final l10n = await getL10n();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+
+        await setupPublishOfferTest(
+          tester,
+          location,
+          testIdentity,
+          fakeSdk: fakeMeetingPlaceCoreSDK,
+          vrcs: makeVrcs(1),
+        );
+
+        await tapPublishButton(tester, l10n.publishToMeetingPlace);
+
+        final publishCall = fakeMeetingPlaceCoreSDK.publishOfferCalls.first;
+        expect(publishCall['score'], 1);
+      });
+
+      testWidgets('it passes the current VRC score when publishing', (
+        tester,
+      ) async {
+        final l10n = await getL10n();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+
+        await setupPublishOfferTest(
+          tester,
+          location,
+          testIdentity,
+          fakeSdk: fakeMeetingPlaceCoreSDK,
+          vrcs: makeVrcs(3),
+        );
+
+        await tapPublishButton(tester, l10n.publishToMeetingPlace);
+
+        expect(fakeMeetingPlaceCoreSDK.publishOfferCalls, hasLength(1));
+        final publishCall = fakeMeetingPlaceCoreSDK.publishOfferCalls.first;
+        expect(publishCall['score'], 3);
+      });
+
+      testWidgets('it only counts VRCs belonging to the publishing identity', (
+        tester,
+      ) async {
+        final l10n = await getL10n();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+
+        await setupPublishOfferTest(
+          tester,
+          location,
+          testIdentity,
+          fakeSdk: fakeMeetingPlaceCoreSDK,
+          vrcs: makeVrcs(3, holderDid: 'did:key:other-identity'),
+        );
+
+        await tapPublishButton(tester, l10n.publishToMeetingPlace);
+
+        final publishCall = fakeMeetingPlaceCoreSDK.publishOfferCalls.first;
+        expect(publishCall['score'], 0);
+      });
+
+      testWidgets('it passes the VRC score for group offers', (tester) async {
+        final l10n = await getL10n();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+
+        await setupPublishOfferTest(
+          tester,
+          location,
+          testIdentity,
+          fakeSdk: fakeMeetingPlaceCoreSDK,
+          vrcs: makeVrcs(3),
+        );
+
+        await tapToggleSwitchByKey(
+          tester,
+          switchKey('group_offer', testIdentity.id),
+        );
+
+        await tapPublishButton(tester, l10n.publishToMeetingPlace);
+
+        expect(fakeMeetingPlaceCoreSDK.publishOfferCalls, hasLength(1));
+        final publishCall = fakeMeetingPlaceCoreSDK.publishOfferCalls.first;
+        expect(publishCall['type'], SDKConnectionOfferType.groupInvitation);
+        expect(publishCall['score'], 3);
       });
     });
   });

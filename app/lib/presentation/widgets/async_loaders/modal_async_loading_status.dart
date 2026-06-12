@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hooks_riverpod/misc.dart' show ProviderListenable;
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
@@ -67,12 +68,10 @@ class ModalAsyncLoadingStatus extends HookConsumerWidget
   const ModalAsyncLoadingStatus(
     this._provider, {
     super.key,
-    String? loadingMessage,
-    String? successMessage,
-    LoadingMessageStyle successMessageStyle = LoadingMessageStyle.complete,
-  }) : _successMessageStyle = successMessageStyle,
-       _successMessage = successMessage,
-       _loadingMessage = loadingMessage;
+    this._loadingMessage,
+    this._successMessage,
+    this._successMessageStyle = LoadingMessageStyle.complete,
+  });
 
   final ProviderListenable<AsyncValue<void>> _provider;
   final String? _loadingMessage;

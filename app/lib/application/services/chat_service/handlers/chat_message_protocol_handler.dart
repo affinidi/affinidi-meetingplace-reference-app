@@ -9,10 +9,9 @@ import 'interfaces/chat_protocol_handler.dart';
 /// update so the app stays in sync with the channel's message sequence.
 class ChatMessageProtocolHandler implements ChatProtocolHandler {
   ChatMessageProtocolHandler({
-    required Future<void> Function(String channelDid) onUpdateSequenceNumber,
-    required AppLogger logger,
-  }) : _onUpdateSequenceNumber = onUpdateSequenceNumber,
-       _logger = logger;
+    required this._onUpdateSequenceNumber,
+    required this._logger,
+  });
 
   static const _logKey = 'CHATMESSAGEPROTOCOLHANDLER';
 
