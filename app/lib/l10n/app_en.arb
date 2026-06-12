@@ -854,6 +854,14 @@
 	"@chatMessageEditFailed": {
 		"type": "text"
 	},
+	"chatMessageEditHint": "Message text",
+	"@chatMessageEditHint": {
+		"type": "text"
+	},
+	"chatMessageEditSave": "Save",
+	"@chatMessageEditSave": {
+		"type": "text"
+	},
 	"chatMessageDeletedTombstone": "This message was deleted",
 	"@chatMessageDeletedTombstone": {
 		"type": "text"

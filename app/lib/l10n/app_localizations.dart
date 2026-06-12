@@ -1348,6 +1348,18 @@ abstract class AppLocalizations {
   /// **'Could not edit message'**
   String get chatMessageEditFailed;
 
+  /// No description provided for @chatMessageEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message text'**
+  String get chatMessageEditHint;
+
+  /// No description provided for @chatMessageEditSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get chatMessageEditSave;
+
   /// No description provided for @chatMessageDeletedTombstone.
   ///
   /// In en, this message translates to:

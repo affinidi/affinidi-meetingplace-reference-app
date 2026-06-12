@@ -687,7 +687,7 @@ void main() {
         await tester.tap(find.text(l10n.chatMessageActionEdit));
         await tester.pumpAndSettle();
 
-        expect(find.text('Edit message'), findsOneWidget);
+        expect(find.text(l10n.chatMessageActionEdit), findsOneWidget);
         final dialogTextField = find.descendant(
           of: find.byType(AlertDialog),
           matching: find.byType(TextField),
@@ -701,7 +701,7 @@ void main() {
         await tester.enterText(dialogTextField, editedMessage);
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('Save'));
+        await tester.tap(find.text(l10n.chatMessageEditSave));
         await tester.pumpAndSettle();
 
         expect(meetingPlaceChatSDK.editTextMessageCalls, hasLength(1));
