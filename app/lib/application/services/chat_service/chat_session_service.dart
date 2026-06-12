@@ -373,6 +373,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
+  Future<void> editTextMessage(Message message, String newText) async {
+    await _chatSDK?.editTextMessage(message, newText);
+  }
+
+  @override
   Future<void> sendEffect(Effect effectType) async {
     await _chatSDK?.sendEffect(effectType);
   }

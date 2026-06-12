@@ -1,5 +1,7 @@
 part of 'chat_screen.dart';
 
+enum _MessageActionResult { edit }
+
 /// Bottom-sheet menu of actions available on a single chat message.
 ///
 /// Shown on long-press of a message bubble. Always offers Copy; offers
@@ -15,11 +17,11 @@ class _ChatMessageActions extends ConsumerWidget {
   final String _contactId;
   final chat.Message _message;
 
-  static Future<void> show({
+  static Future<_MessageActionResult?> show({
     required BuildContext context,
     required String contactId,
     required chat.Message message,
-  }) async => await showModalBottomSheet(
+  }) async => await showModalBottomSheet<_MessageActionResult>(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
@@ -86,6 +88,12 @@ class _ChatMessageActions extends ConsumerWidget {
           icon: Icons.copy,
           label: context.l10n.chatMessageActionCopy,
           onTap: copy,
+        ),
+      if (canDelete)
+        _ChatMessageActionItem(
+          icon: Icons.edit_outlined,
+          label: context.l10n.chatMessageActionEdit,
+          onTap: () => Navigator.of(context).pop(_MessageActionResult.edit),
         ),
       if (canDelete) ...[
         _ChatMessageActionItem(

@@ -573,6 +573,20 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
+  Future<void> editTextMessage(String messageId, String newText) async {
+    final idx = state.messages.indexWhere((m) => m.messageId == messageId);
+    final message = idx == -1 ? null : state.messages[idx] as chat.Message?;
+
+    if (message == null) {
+      throw AppException(
+        'Unable to find message with id $messageId',
+        code: AppExceptionType.missingMessage.name,
+      );
+    }
+
+    await _chatService?.editTextMessage(message, newText);
+  }
+
   /// Sends a [ScreenEffect] to the chat screen.
   ///
   /// This method handles the logic for triggering a visual or interactive
