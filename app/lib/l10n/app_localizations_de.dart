@@ -406,6 +406,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'oob_invalid_type': 'QR-Code-Daten werden nicht unterstützt',
       'network_error':
           'Verbindung konnte nicht hergestellt werden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.',
+      'deleteContactFailed': 'Kontakt konnte nicht gelöscht werden.',
       'other': '$errorCode',
     });
     return '$_temp0';

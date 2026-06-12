@@ -474,6 +474,49 @@ void main() {
       );
       expect(find.byKey(const Key('dismissible_delete_text')), findsOneWidget);
     });
+
+    testWidgets(
+      'should show localized error snackbar when leaveChannel fails',
+      (tester) async {
+        final l10n = await getL10n();
+        final fakeSdk = FakeMeetingPlaceSDK(
+          shouldFailToLeaveChannel: true,
+          channels: FakeChannels.allChannels,
+        );
+
+        await navigateToLocation(
+          tester,
+          '/contacts',
+          isAuthenticated: true,
+          alreadyOnboarded: true,
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [FakeContacts.individualContact],
+          meetingPlaceCoreSDK: fakeSdk,
+        );
+        await tester.pumpAndSettle();
+
+        // Switch to list view
+        await tester.tap(findListViewToggle());
+        await tester.pumpAndSettle();
+
+        // Long press the contact to show delete dialog
+        final contactName =
+            FakeContacts.individualContact.displayName ?? 'Contact';
+        await tester.longPress(findContactByName(contactName).first);
+        await tester.pumpAndSettle();
+
+        // Verify dialog appeared
+        expect(find.text(l10n.contactDeleteHeading), findsOneWidget);
+
+        // Confirm deletion
+        final deleteButton = find.text(l10n.generalDelete).last;
+        await tester.tap(deleteButton);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(find.text(l10n.error('deleteContactFailed')), findsOneWidget);
+      },
+    );
   });
 
   group('When handling contact status', () {

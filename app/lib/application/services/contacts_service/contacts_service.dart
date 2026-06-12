@@ -312,7 +312,14 @@ class ContactsService extends _$ContactsService {
       );
     }
 
-    await coreSdk.leaveChannel(channel);
+    try {
+      await coreSdk.leaveChannel(channel);
+    } catch (e) {
+      throw AppException(
+        'Failed to leave chat: $e',
+        code: AppExceptionType.deleteContactFailed.name,
+      );
+    }
     _contactLeftChatController.add(channel);
   }
 

@@ -389,6 +389,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'oob_invalid_type': 'QR-Code data not supported',
       'network_error':
           'Could not connect. Check your internet connection and try again.',
+      'deleteContactFailed': 'Failed to delete contact.',
       'other': '$errorCode',
     });
     return '$_temp0';
