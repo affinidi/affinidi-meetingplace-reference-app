@@ -28,15 +28,27 @@ part 'attachment_cache_service.g.dart';
 @riverpod
 class AttachmentCacheService extends _$AttachmentCacheService {
   static const _logKey = 'ATTACHCACHE';
+  static const _silentPreloadRetryDelay = Duration(milliseconds: 500);
+  static const _silentPreloadRetryCount = 4;
 
   late final AppLogger _logger;
   ChatService? _chatService;
   final Set<String> _attachmentsLoading = {};
+  final Set<Timer> _silentRetryTimers = {};
   final Map<String, LocalVoiceMessageData> _localVoiceMessages = {};
+  bool _isDisposed = false;
 
   @override
   Map<String, Uint8List> build(String contactId) {
+    _isDisposed = false;
     _logger = ref.read(appLoggerProvider);
+    ref.onDispose(() {
+      _isDisposed = true;
+      for (final timer in _silentRetryTimers) {
+        timer.cancel();
+      }
+      _silentRetryTimers.clear();
+    });
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     final channelDid = contact?.channelDid;
@@ -104,7 +116,12 @@ class AttachmentCacheService extends _$AttachmentCacheService {
   ///
   /// Returns `true` when a load was started or resolved synchronously, and
   /// `false` when the attachment is already cached or cannot be loaded yet.
-  bool loadAttachment(ChatAttachment attachment) {
+  bool loadAttachment(
+    ChatAttachment attachment, {
+    bool markFailedOnError = true,
+    bool logFailure = true,
+    int remainingSilentRetries = 0,
+  }) {
     final key = cacheKey(attachment);
     if (state[key] != null) return false;
 
@@ -134,7 +151,15 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     // poison the cache. Skip and wait for the post-upload state push.
     if (attachment.transportId == null) return false;
 
-    unawaited(_downloadAndCache(key, attachment));
+    unawaited(
+      _downloadAndCache(
+        key,
+        attachment,
+        markFailedOnError: markFailedOnError,
+        logFailure: logFailure,
+        remainingSilentRetries: remainingSilentRetries,
+      ),
+    );
     return true;
   }
 
@@ -148,20 +173,36 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     if (current == null || current.isNotEmpty) return false;
 
     state = {...state}..remove(key);
-    unawaited(_downloadAndCache(key, attachment));
+    unawaited(
+      _downloadAndCache(
+        key,
+        attachment,
+        markFailedOnError: true,
+        logFailure: true,
+      ),
+    );
     return true;
   }
 
   /// Preloads hosted media that should be available without a manual tap:
   /// images and audio (including voice messages). Larger media (video,
   /// documents) is downloaded on demand to avoid eagerly fetching big payloads.
+  ///
+  /// Failures during preload are silent — no failed marker is written — so the
+  /// attachment stays in the "tap to download" state rather than showing a
+  /// permanent failure the user never triggered.
   void preload(List<chat.ChatItem> messages) {
     for (final message in messages.whereType<chat.Message>()) {
       for (final attachment in message.attachments) {
         if (attachment.format != AttachmentFormat.hostedMedia.value) continue;
         final category = mediaCategoryFromMimeType(attachment.mediaType);
         if (category == MediaCategory.image || attachment.isVoice) {
-          loadAttachment(attachment);
+          loadAttachment(
+            attachment,
+            markFailedOnError: false,
+            logFailure: false,
+            remainingSilentRetries: _silentPreloadRetryCount,
+          );
         }
       }
     }
@@ -280,34 +321,69 @@ class AttachmentCacheService extends _$AttachmentCacheService {
 
   Future<void> _downloadAndCache(
     String cacheKey,
-    ChatAttachment attachment,
-  ) async {
+    ChatAttachment attachment, {
+    required bool markFailedOnError,
+    required bool logFailure,
+    int remainingSilentRetries = 0,
+  }) async {
     if (_attachmentsLoading.contains(cacheKey)) return;
     _attachmentsLoading.add(cacheKey);
 
     try {
       final bytes = await _chatService?.downloadMedia(attachment);
       if (bytes == null) {
-        _logger.warning(
-          'Chat service unavailable, skipping media download',
-          name: _logKey,
-        );
-        _writeCache(cacheKey, Uint8List(0));
+        if (logFailure) {
+          _logger.warning(
+            'Chat service unavailable, skipping media download',
+            name: _logKey,
+          );
+        }
+        if (markFailedOnError) _writeCache(cacheKey, Uint8List(0));
+        if (!markFailedOnError && remainingSilentRetries > 0) {
+          _scheduleSilentRetry(cacheKey, attachment, remainingSilentRetries);
+        }
         return;
       }
 
       _writeCache(cacheKey, bytes);
     } catch (e, stackTrace) {
-      _logger.error(
-        'Failed to download media attachment',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      _writeCache(cacheKey, Uint8List(0));
+      if (logFailure) {
+        _logger.error(
+          'Failed to download media attachment',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
+      if (markFailedOnError) _writeCache(cacheKey, Uint8List(0));
+      if (!markFailedOnError && remainingSilentRetries > 0) {
+        _scheduleSilentRetry(cacheKey, attachment, remainingSilentRetries);
+      }
     } finally {
       _attachmentsLoading.remove(cacheKey);
     }
+  }
+
+  void _scheduleSilentRetry(
+    String cacheKey,
+    ChatAttachment attachment,
+    int remainingSilentRetries,
+  ) {
+    late final Timer timer;
+    timer = Timer(_silentPreloadRetryDelay, () {
+      _silentRetryTimers.remove(timer);
+      if (_isDisposed || state[cacheKey] != null) return;
+      unawaited(
+        _downloadAndCache(
+          cacheKey,
+          attachment,
+          markFailedOnError: false,
+          logFailure: false,
+          remainingSilentRetries: remainingSilentRetries - 1,
+        ),
+      );
+    });
+    _silentRetryTimers.add(timer);
   }
 
   void _writeCache(String cacheKey, Uint8List bytes) {

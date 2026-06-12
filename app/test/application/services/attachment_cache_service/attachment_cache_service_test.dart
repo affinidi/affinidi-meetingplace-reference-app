@@ -154,6 +154,7 @@ void main() {
         final attachment = ChatAttachment(
           format: AttachmentFormat.hostedMedia.value,
           mediaType: 'image/jpeg',
+          data: ChatAttachmentData(base64: base64Encode([1, 2, 3])),
         )..transportId = 'test-transport-id';
         final message = Message(
           chatId: 'fake-chat-id',
@@ -203,6 +204,7 @@ void main() {
       final attachment = ChatAttachment(
         format: AttachmentFormat.hostedMedia.value,
         mediaType: 'audio/mp4',
+        data: ChatAttachmentData(base64: base64Encode([4, 5, 6])),
       )..transportId = 'audio-transport-id';
       final message = Message(
         chatId: 'fake-chat-id',
@@ -221,6 +223,30 @@ void main() {
 
       final key = AttachmentCacheService.cacheKey(attachment);
       expect(service.state.containsKey(key), isTrue);
+    });
+
+    test('preload failure does not write failed marker', () async {
+      final attachment = ChatAttachment(
+        format: AttachmentFormat.hostedMedia.value,
+        mediaType: 'audio/mp4',
+      )..transportId = 'missing-media-transport-id';
+      final message = Message(
+        chatId: 'fake-chat-id',
+        messageId: 'fake-audio-fail-msg-id',
+        value: '',
+        dateCreated: DateTime.now(),
+        status: ChatItemStatus.confirmed,
+        isFromMe: false,
+        senderDid: 'fake-sender-did',
+        attachments: [attachment],
+      );
+
+      service.preload([message]);
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      final key = AttachmentCacheService.cacheKey(attachment);
+      expect(service.state.containsKey(key), isFalse);
     });
   });
 }

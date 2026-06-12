@@ -91,10 +91,13 @@ class ChatScreenController extends _$ChatScreenController
           otherPartyCard: next.otherPartyCard ?? state.otherPartyCard,
           effect: newEffect,
         );
-        if (!identical(previous?.messages, next.messages)) {
+        final messagesChanged = !identical(previous?.messages, next.messages);
+        final becameInitialized =
+            previous?.isInitialized != true && next.isInitialized;
+        if (messagesChanged || becameInitialized) {
           ref
               .read(attachmentCacheServiceProvider(contactId).notifier)
-              .preload(next.messages);
+              .preload(messages);
         }
       });
     }
