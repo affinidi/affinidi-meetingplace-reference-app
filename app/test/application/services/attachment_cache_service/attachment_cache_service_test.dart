@@ -198,6 +198,30 @@ void main() {
       final key = AttachmentCacheService.cacheKey(attachment);
       expect(service.state.containsKey(key), isFalse);
     });
+
+    test('preload triggers download for hosted audio attachment', () async {
+      final attachment = ChatAttachment(
+        format: AttachmentFormat.hostedMedia.value,
+        mediaType: 'audio/mp4',
+      )..transportId = 'audio-transport-id';
+      final message = Message(
+        chatId: 'fake-chat-id',
+        messageId: 'fake-audio-msg-id',
+        value: '',
+        dateCreated: DateTime.now(),
+        status: ChatItemStatus.confirmed,
+        isFromMe: false,
+        senderDid: 'fake-sender-did',
+        attachments: [attachment],
+      );
+
+      service.preload([message]);
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      final key = AttachmentCacheService.cacheKey(attachment);
+      expect(service.state.containsKey(key), isTrue);
+    });
   });
 }
 

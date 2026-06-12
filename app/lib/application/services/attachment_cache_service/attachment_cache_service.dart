@@ -152,15 +152,17 @@ class AttachmentCacheService extends _$AttachmentCacheService {
   }
 
   /// Preloads hosted media that should be available without a manual tap:
-  /// images and voice messages. Larger media (video, documents) is downloaded
-  /// on demand to avoid eagerly fetching big payloads.
+  /// images and audio (including voice messages). Larger media (video,
+  /// documents) is downloaded on demand to avoid eagerly fetching big payloads.
   void preload(List<chat.ChatItem> messages) {
     for (final message in messages.whereType<chat.Message>()) {
       for (final attachment in message.attachments) {
         if (attachment.format != AttachmentFormat.hostedMedia.value) continue;
         final category = mediaCategoryFromMimeType(attachment.mediaType);
         final isVoice = chat.VoiceMessageMetadata.isVoice(attachment);
-        if (category == MediaCategory.image || isVoice) {
+        if (category == MediaCategory.image ||
+            category == MediaCategory.audio ||
+            isVoice) {
           loadAttachment(attachment);
         }
       }
@@ -201,6 +203,80 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     if (key != null) {
       _localVoiceMessages.remove(key);
     }
+  }
+
+  /// Backfills duration/waveform metadata on the sender's own voice messages
+  /// from the locally cached recording, so the bubble shows the waveform and
+  /// duration before the hosted copy round-trips back from the homeserver.
+  ///
+  /// Returns the original list unchanged when no message needed backfilling.
+  List<chat.ChatItem> withLocalVoiceMetadata(List<chat.ChatItem> messages) {
+    var didChange = false;
+    final nextMessages = messages
+        .map((item) {
+          if (item is! chat.Message || !item.isFromMe) return item;
+
+          var messageDidChange = false;
+          final nextAttachments = item.attachments
+              .map((attachment) {
+                if (!_isVoiceAttachment(attachment)) return attachment;
+                final localVoiceMessage = localVoiceMessageFor(attachment);
+                if (localVoiceMessage == null) return attachment;
+                final voice = chat.VoiceMessageMetadata.of(attachment);
+                if (voice?.waveform?.isNotEmpty == true &&
+                    voice?.durationMs != null) {
+                  return attachment;
+                }
+
+                messageDidChange = true;
+                didChange = true;
+                return ChatAttachment(
+                  id: attachment.id,
+                  description: attachment.description,
+                  filename: attachment.filename,
+                  mediaType: attachment.mediaType,
+                  format: attachment.format,
+                  lastModifiedTime: attachment.lastModifiedTime,
+                  data: attachment.data,
+                  byteCount: attachment.byteCount,
+                  transportId: attachment.transportId,
+                  metadata: chat.VoiceMessageMetadata(
+                    durationMs:
+                        voice?.durationMs ?? localVoiceMessage.durationMs,
+                    waveform: voice?.waveform?.isNotEmpty == true
+                        ? voice!.waveform
+                        : localVoiceMessage.waveform,
+                  ).toMetadata(),
+                );
+              })
+              .toList(growable: false);
+
+          if (!messageDidChange) return item;
+          return chat.Message(
+            chatId: item.chatId,
+            messageId: item.messageId,
+            senderDid: item.senderDid,
+            isFromMe: item.isFromMe,
+            dateCreated: item.dateCreated,
+            status: item.status,
+            type: item.type,
+            value: item.value,
+            attachments: nextAttachments,
+            reactions: item.reactions,
+            editedAt: item.editedAt,
+            transportId: item.transportId,
+            isDeleted: item.isDeleted,
+            isDeletedLocally: item.isDeletedLocally,
+          );
+        })
+        .toList(growable: false);
+
+    return didChange ? nextMessages : messages;
+  }
+
+  bool _isVoiceAttachment(ChatAttachment attachment) {
+    if (chat.VoiceMessageMetadata.isVoice(attachment)) return true;
+    return attachment.mediaType?.toLowerCase().startsWith('audio/') ?? false;
   }
 
   String? _localVoiceMessageKey(ChatAttachment attachment) {

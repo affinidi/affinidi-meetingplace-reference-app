@@ -696,8 +696,13 @@ class _VoicePlayer extends HookWidget {
     useEffect(() {
       if (_autoPlay && !hasAutoPlayed.value) {
         hasAutoPlayed.value = true;
-        unawaited(togglePlayback());
-        _onAutoPlayed?.call();
+        // The effect runs synchronously during build; defer the playback start
+        // and the parent state reset to the next frame so we don't mutate the
+        // parent widget's state while it is still building.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          unawaited(togglePlayback());
+          _onAutoPlayed?.call();
+        });
       }
       return null;
     }, [_autoPlay]);
