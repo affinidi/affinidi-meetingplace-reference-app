@@ -41,6 +41,18 @@ class _ChatTextEntry extends HookConsumerWidget {
     void handleMediaSelection() =>
         _ChatMediaOptions.show(context: context, contactId: _contactId);
 
+    void handleEffectSelection() =>
+        _ChatEffectOptions.show(context: context, contactId: _contactId);
+
+    final inputBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: context.colorScheme.primary, width: 1),
+      borderRadius: BorderRadius.circular(32.0),
+    );
+    final inputTextStyle = context.textTheme.bodyLarge?.copyWith(
+      overflow: TextOverflow.ellipsis,
+      color: context.colorScheme.onSurface,
+    );
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -54,19 +66,23 @@ class _ChatTextEntry extends HookConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               if (!voice.isVoiceMode)
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: shouldDisable
-                        ? context.theme.disabledColor
-                        : context.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
+                Material(
+                  color: shouldDisable
+                      ? context.theme.disabledColor
+                      : context.colorScheme.primary,
+                  shape: const CircleBorder(),
                   child: InkWell(
                     key: const Key('chat_add_media_button'),
-                    radius: 60,
-                    child: const Icon(Icons.add, size: 25, color: Colors.white),
                     onTap: shouldDisable ? null : handleMediaSelection,
+                    customBorder: const CircleBorder(),
+                    child: SizedBox.square(
+                      dimension: 50,
+                      child: Icon(
+                        Icons.add,
+                        size: 30,
+                        color: context.colorScheme.onPrimary,
+                      ),
+                    ),
                   ),
                 ),
               if (voice.isVoiceMode) ...[
@@ -82,10 +98,10 @@ class _ChatTextEntry extends HookConsumerWidget {
                     key: const Key('chat_voice_delete_button'),
                     radius: 60,
                     onTap: shouldDisable || voice.isBusy ? null : voice.discard,
-                    child: const Icon(
+                    child: Icon(
                       Icons.delete,
                       size: 25,
-                      color: Colors.white,
+                      color: context.colorScheme.onPrimary,
                     ),
                   ),
                 ),
@@ -122,21 +138,66 @@ class _ChatTextEntry extends HookConsumerWidget {
                           : null,
                       keyboardType: TextInputType.text,
                       textCapitalization: TextCapitalization.sentences,
-                      cursorHeight: 16,
-                      style: const TextStyle(
-                        overflow: TextOverflow.ellipsis,
-                        fontSize: 14,
-                        color: Colors.white,
-                      ),
+                      cursorHeight: 22,
+                      style: inputTextStyle,
                       controller: controller.messageTextController,
                       maxLines: 3,
                       minLines: 1,
                       decoration: context.chatInputDecoration.copyWith(
+                        isDense: true,
+                        enabledBorder: inputBorder,
+                        focusedBorder: inputBorder,
+                        border: inputBorder,
+                        contentPadding: const EdgeInsets.only(
+                          left: 16,
+                          top: 10,
+                          bottom: 10,
+                        ),
+                        hintStyle: inputTextStyle?.copyWith(
+                          color: context.colorScheme.onSurface.withValues(
+                            alpha: 0.70,
+                          ),
+                        ),
                         hintText: isGroupChat
                             ? context.l10n.chatTypeMessagePromptGroup
                             : context.l10n.chatTypeMessagePrompt(
                                 otherPartyName ?? '',
                               ),
+                        suffixIcon: SizedBox(
+                          width: 36,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: Center(
+                              child: Material(
+                                color: shouldDisable
+                                    ? context.theme.disabledColor
+                                    : context.colorScheme.primary,
+                                borderRadius: BorderRadius.circular(4),
+                                child: InkWell(
+                                  key: const Key('chat_gif_button'),
+                                  onTap: shouldDisable
+                                      ? null
+                                      : handleEffectSelection,
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 4,
+                                    ),
+                                    child: Text(
+                                      'GIF',
+                                      style: TextStyle(
+                                        color: context.colorScheme.surface,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                       validator: MultiValidator([
                         ZalgoTextValidator(
@@ -151,24 +212,18 @@ class _ChatTextEntry extends HookConsumerWidget {
                     ),
                   ),
                 ),
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: shouldDisable || voice.isBusy
-                      ? context.theme.disabledColor
-                      : context.colorScheme.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: InkWell(
-                  key: const Key('chat_send_button'),
-                  radius: 60,
-                  onTap: shouldDisable || voice.isBusy
-                      ? null
-                      : voice.isVoiceMode
-                      ? voice.send
-                      : hasMessageText
-                      ? sendMessage
-                      : voice.startRecording,
+              InkWell(
+                key: const Key('chat_send_button'),
+                radius: 30,
+                onTap: shouldDisable || voice.isBusy
+                    ? null
+                    : voice.isVoiceMode
+                    ? voice.send
+                    : hasMessageText
+                    ? sendMessage
+                    : voice.startRecording,
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
                   child: Icon(
                     key: Key(
                       hasMessageText || voice.hasDraftOrRecording
@@ -178,8 +233,10 @@ class _ChatTextEntry extends HookConsumerWidget {
                     hasMessageText || voice.hasDraftOrRecording
                         ? Icons.send
                         : Icons.mic,
-                    size: 25,
-                    color: Colors.white,
+                    size: 40,
+                    color: shouldDisable || voice.isBusy
+                        ? context.theme.disabledColor
+                        : context.colorScheme.primary,
                   ),
                 ),
               ),

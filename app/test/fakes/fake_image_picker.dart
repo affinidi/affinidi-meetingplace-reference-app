@@ -110,4 +110,18 @@ class FakeImagePicker extends ImagePicker {
 
     return _xFileToReturn;
   }
+
+  @override
+  Future<XFile?> pickMedia({
+    double? maxWidth,
+    double? maxHeight,
+    int? imageQuality,
+    bool requestFullMetadata = true,
+  }) async {
+    if (_shouldReturnNull) {
+      return null;
+    }
+
+    return _xFileToReturn;
+  }
 }

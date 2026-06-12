@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
@@ -23,6 +24,7 @@ part 'media_screen_controller.g.dart';
 class MediaScreenController extends _$MediaScreenController {
   late final AppLogger _logger = ref.read(appLoggerProvider);
   static const _logKey = 'MEDSCRCTRL';
+  static const _maxVideoBytes = 25 * 1024 * 1024;
 
   @override
   MediaScreenState build({
@@ -74,16 +76,46 @@ class MediaScreenController extends _$MediaScreenController {
         ? environment.chatImageConfig
         : environment.profileImageConfig;
 
-    final picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxHeight: imageConfig.imageMaxSize.toDouble(),
-      maxWidth: imageConfig.imageMaxSize.toDouble(),
-      imageQuality: imageConfig.qualityPercentage,
-    );
+    final picked = useChatSemantics
+        ? await picker.pickMedia(
+            maxHeight: imageConfig.imageMaxSize.toDouble(),
+            maxWidth: imageConfig.imageMaxSize.toDouble(),
+            imageQuality: imageConfig.qualityPercentage,
+          )
+        : await picker.pickImage(
+            source: ImageSource.gallery,
+            maxHeight: imageConfig.imageMaxSize.toDouble(),
+            maxWidth: imageConfig.imageMaxSize.toDouble(),
+            imageQuality: imageConfig.qualityPercentage,
+          );
 
     state = state.copyWith(isLoading: false);
 
-    if (picked != null) {
+    if (picked != null && _isVideo(picked)) {
+      final sizeBytes = await picked.length();
+      if (sizeBytes > _maxVideoBytes) {
+        final maxMb = _maxVideoBytes ~/ (1024 * 1024);
+        _logger.warning(
+          'Selected video is larger than $_maxVideoBytes bytes',
+          name: _logKey,
+        );
+        state = state.copyWith(videoTooLargeMaxMb: maxMb);
+        return;
+      }
+
+      final bytes = await picked.readAsBytes();
+      ref
+          .read(navigatorProvider)
+          .pop(
+            MediaReviewResult.video(
+              textMessage: '',
+              videoBase64: base64.encode(bytes),
+              videoMimeType: picked.mimeType ?? 'video/mp4',
+              videoFilename: _filenameFor(picked),
+              videoByteCount: bytes.length,
+            ),
+          );
+    } else if (picked != null) {
       state = state.copyWith(pickedImageBytes: await picked.readAsBytes());
     } else {
       final navigator = ref.read(navigatorProvider);
@@ -92,6 +124,27 @@ class MediaScreenController extends _$MediaScreenController {
       }
       navigator.pop(MediaReviewResult.empty());
     }
+  }
+
+  bool _isVideo(XFile file) {
+    final mimeType = file.mimeType?.toLowerCase();
+    if (mimeType != null) return mimeType.startsWith('video/');
+
+    final path = file.path.toLowerCase();
+    return path.endsWith('.mp4') ||
+        path.endsWith('.mov') ||
+        path.endsWith('.m4v');
+  }
+
+  String _filenameFor(XFile file) {
+    if (file.name.isNotEmpty) return file.name;
+
+    final path = file.path;
+    if (path.isEmpty) return 'video.mp4';
+
+    final pathSegments = path.split(RegExp(r'[/\\]'));
+    final filename = pathSegments.last;
+    return filename.isEmpty ? 'video.mp4' : filename;
   }
 
   Future<void> captureWithCamera() async {
