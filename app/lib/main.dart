@@ -19,7 +19,6 @@ import 'infrastructure/loggers/riverpod_provider_logger/provider_debug_logger.da
 import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
 import 'infrastructure/providers/available_attachment_plugins_provider.dart';
-import 'infrastructure/providers/cache_manager_provider.dart';
 import 'infrastructure/providers/channel_repository_provider.dart';
 import 'infrastructure/providers/chat_repository_provider.dart';
 import 'infrastructure/providers/connection_offer_repository_provider.dart';
@@ -68,14 +67,7 @@ void main() async {
     ProviderScope(
       overrides: [
         availableAttachmentPluginsProvider.overrideWith(
-          (ref) => [
-            CameraAttachmentsPlugin(
-              cacheManager: ref.read(cacheManagerProvider),
-            ),
-            GalleryAttachmentsPlugin(
-              cacheManager: ref.read(cacheManagerProvider),
-            ),
-          ],
+          (ref) => [CameraAttachmentsPlugin(), GalleryAttachmentsPlugin()],
         ),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),
         chatRepositoryProvider.overrideWith(chatRepositoryDrift),

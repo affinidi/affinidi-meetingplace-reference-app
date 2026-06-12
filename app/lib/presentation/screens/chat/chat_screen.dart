@@ -25,7 +25,6 @@ import '../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
-import '../../../infrastructure/helpers/attachment_cache_key.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
@@ -37,9 +36,9 @@ import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/bottom_sheet_menu.dart';
+import '../../widgets/images/chat_image_card.dart';
 import '../../widgets/info_banner.dart';
 import '../../widgets/profile_circle_avatar.dart';
-import '../media/image_view_screen/image_view_screen.dart';
 import 'chat_activity_progress_indicator.dart';
 import 'chat_items/chat_encryption_notice.dart';
 import 'chat_items/group_deleted_chat_item.dart';
@@ -78,6 +77,7 @@ class ChatScreen extends HookConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     ref.keepAround(provider);
+    ref.keepAround(attachmentCacheServiceProvider(_contactId));
 
     useEffect(() {
       if (!context.mounted) return;

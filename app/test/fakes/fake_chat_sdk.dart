@@ -537,9 +537,6 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
-  Future<void> editTextMessage(Message message, String newText) async {}
-
-  @override
   Future<ChatItem?> getMessageById(String messageId) async {
     return null;
   }

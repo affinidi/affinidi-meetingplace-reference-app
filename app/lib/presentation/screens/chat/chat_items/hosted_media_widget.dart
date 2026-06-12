@@ -15,7 +15,7 @@ class _HostedMediaWidget extends ConsumerWidget {
     final cachedBytes = ref.watch(
       attachmentCacheServiceProvider(
         _contactId,
-      ).select((cache) => cache[attachmentCacheKey(_attachment)]),
+      ).select((cache) => cache[AttachmentCacheService.cacheKey(_attachment)]),
     );
 
     if (cachedBytes == null) {
@@ -34,27 +34,6 @@ class _HostedMediaWidget extends ConsumerWidget {
       );
     }
 
-    return SizedBox(
-      height: 200,
-      width: 200,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context, rootNavigator: true).push<void>(
-            MaterialPageRoute<void>(
-              builder: (context) => ImageViewScreen(imageBytes: cachedBytes),
-            ),
-          );
-        },
-        child: Card(
-          color: const Color.fromARGB(0, 10, 10, 10),
-          clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          elevation: 5,
-          child: Image.memory(cachedBytes, fit: BoxFit.cover),
-        ),
-      ),
-    );
+    return ChatImageCard(imageBytes: cachedBytes);
   }
 }

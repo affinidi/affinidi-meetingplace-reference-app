@@ -69,10 +69,6 @@ class ChatScreenController extends _$ChatScreenController
 
     if (channelDid != null) {
       _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
-      // Keep the attachment cache alive for the chat screen's lifetime so that
-      // optimistic seeds and in-flight downloads survive until the screen is
-      // disposed, even when no media widget is currently mounted.
-      ref.listen(attachmentCacheServiceProvider(contactId), (_, _) {});
       ref.listen(chatSessionServiceProvider(channelDid), (previous, next) {
         var newEffect = state.effect;
         if (next.effect != null && previous?.effect != next.effect) {
