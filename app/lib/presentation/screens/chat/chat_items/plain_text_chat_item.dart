@@ -79,6 +79,21 @@ class _PlainTextChatItem extends ConsumerWidget {
       }
     }
 
+    Future<void> copyToClipboard() async {
+      if (!context.mounted) return;
+
+      if (chatItem.value.isEmpty) return;
+      if (chatItem.isDeleted || chatItem.isDeletedLocally) return;
+
+      await Clipboard.setData(ClipboardData(text: chatItem.value));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.messageCopiedClipboard),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+
     if (chatItem.isDeleted || chatItem.isDeletedLocally) {
       final label = chatItem.isDeletedLocally
           ? context.l10n.chatMessageDeletedLocallyTombstone
@@ -106,6 +121,9 @@ class _PlainTextChatItem extends ConsumerWidget {
 
     return GestureDetector(
       onLongPress: onLongPress,
+      onTap: () async {
+        await copyToClipboard();
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
