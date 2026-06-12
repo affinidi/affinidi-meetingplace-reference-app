@@ -288,17 +288,17 @@ class _EditMessageDialogState extends State<_EditMessageDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Edit message'),
+      title: Text(context.l10n.chatMessageActionEdit),
       content: TextField(
         controller: _textController,
         autofocus: true,
         maxLines: null,
-        decoration: const InputDecoration(hintText: 'Message text'),
+        decoration: InputDecoration(hintText: context.l10n.chatMessageEditHint),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.generalCancel),
         ),
         TextButton(
           onPressed: () {
@@ -309,7 +309,7 @@ class _EditMessageDialogState extends State<_EditMessageDialog> {
             }
             Navigator.of(context).pop(value);
           },
-          child: const Text('Save'),
+          child: Text(context.l10n.chatMessageEditSave),
         ),
       ],
     );

@@ -927,6 +927,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatMessageEditFailed => 'Could not edit message';
 
   @override
+  String get chatMessageEditHint => 'Message text';
+
+  @override
+  String get chatMessageEditSave => 'Save';
+
+  @override
   String get chatMessageDeletedTombstone => 'This message was deleted';
 
   @override

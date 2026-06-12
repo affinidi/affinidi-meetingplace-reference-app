@@ -403,6 +403,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'oob_invalid_type': 'Los datos del código QR no son compatibles',
       'network_error':
           'No se pudo conectar. Verifica tu conexión a internet y vuelve a intentarlo.',
+      'deleteContactFailed':
+          'No se pudo eliminar el contacto. Por favor, inténtalo de nuevo.',
       'other': '$errorCode',
     });
     return '$_temp0';
@@ -938,13 +940,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chatMessageActionCopy => 'Copiar mensaje';
 
   @override
-  String get chatMessageActionEdit => 'Edit message';
+  String get chatMessageActionEdit => 'Editar mensaje';
 
   @override
-  String get chatMessageEditedLabel => 'edited';
+  String get chatMessageEditedLabel => 'editado';
 
   @override
-  String get chatMessageEditFailed => 'Could not edit message';
+  String get chatMessageEditFailed => 'No se pudo editar el mensaje';
+
+  @override
+  String get chatMessageEditHint => 'Texto del mensaje';
+
+  @override
+  String get chatMessageEditSave => 'Guardar';
 
   @override
   String get chatMessageDeletedTombstone => 'Este mensaje fue eliminado';
