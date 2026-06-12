@@ -364,6 +364,7 @@ class _HostedMediaWidget extends ConsumerWidget {
         cachedBytes: cachedBytes,
         hasFailed: hasFailed,
         onRetry: onRetry,
+        onDownload: onDownload,
         isFromMe: _isFromMe,
         chatItemColor: _chatItemColor,
       );
@@ -384,6 +385,7 @@ class _HostedMediaWidget extends ConsumerWidget {
           cachedBytes: cachedBytes,
           hasFailed: hasFailed,
           onRetry: onRetry,
+          onDownload: onDownload,
           isFromMe: _isFromMe,
           chatItemColor: _chatItemColor,
         );

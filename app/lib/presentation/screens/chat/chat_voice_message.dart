@@ -431,25 +431,28 @@ class _VoiceInputPill extends StatelessWidget {
   }
 }
 
-class _HostedAudioWidget extends StatelessWidget {
+class _HostedAudioWidget extends HookWidget {
   const _HostedAudioWidget({
     required chat.ChatAttachment attachment,
     required Uint8List? cachedBytes,
     required bool hasFailed,
-    required VoidCallback onRetry,
+    required bool Function() onRetry,
+    required bool Function() onDownload,
     required bool isFromMe,
     required Color chatItemColor,
   }) : _attachment = attachment,
        _cachedBytes = cachedBytes,
        _hasFailed = hasFailed,
        _onRetry = onRetry,
+       _onDownload = onDownload,
        _isFromMe = isFromMe,
        _chatItemColor = chatItemColor;
 
   final chat.ChatAttachment _attachment;
   final Uint8List? _cachedBytes;
   final bool _hasFailed;
-  final VoidCallback _onRetry;
+  final bool Function() _onRetry;
+  final bool Function() _onDownload;
   final bool _isFromMe;
   final Color _chatItemColor;
 
@@ -459,15 +462,34 @@ class _HostedAudioWidget extends StatelessWidget {
     final levels = _levelsForHostedVoice(_attachment, cachedBytes);
     final durationMs =
         chat.VoiceMessageMetadata.of(_attachment)?.durationMs ?? 0;
+
+    // Set when the user taps play before the clip is cached, so the download
+    // is kicked off and playback starts automatically once the bytes arrive.
+    final playRequested = useState(false);
+
     if (cachedBytes == null) {
+      // While a requested download is still in flight (and has not failed),
+      // show a spinner instead of an inert play button.
+      final isLoading = playRequested.value && !_hasFailed;
+
+      void onPressed() {
+        if (_hasFailed) {
+          if (_onRetry()) playRequested.value = true;
+          return;
+        }
+        if (playRequested.value) return;
+        if (_onDownload()) playRequested.value = true;
+      }
+
       return _VoiceMessageBubble(
         isFromMe: _isFromMe,
         chatItemColor: _chatItemColor,
         isPlaying: false,
+        isLoading: isLoading,
         duration: Duration(milliseconds: durationMs),
         levels: levels,
         progress: 0,
-        onPressed: _hasFailed ? _onRetry : () {},
+        onPressed: onPressed,
       );
     }
 
@@ -475,6 +497,8 @@ class _HostedAudioWidget extends StatelessWidget {
       bytes: cachedBytes,
       mediaType: _attachment.mediaType,
       initialDuration: Duration(milliseconds: durationMs),
+      autoPlay: playRequested.value,
+      onAutoPlayed: () => playRequested.value = false,
       builder: (context, state) => _VoiceMessageBubble(
         isFromMe: _isFromMe,
         chatItemColor: _chatItemColor,
@@ -497,13 +521,15 @@ class _VoiceMessageBubble extends StatelessWidget {
     required List<double> levels,
     required double progress,
     required VoidCallback onPressed,
+    bool isLoading = false,
   }) : _isFromMe = isFromMe,
        _chatItemColor = chatItemColor,
        _isPlaying = isPlaying,
        _duration = duration,
        _levels = levels,
        _progress = progress,
-       _onPressed = onPressed;
+       _onPressed = onPressed,
+       _isLoading = isLoading;
 
   final bool _isFromMe;
   final Color _chatItemColor;
@@ -512,6 +538,7 @@ class _VoiceMessageBubble extends StatelessWidget {
   final List<double> _levels;
   final double _progress;
   final VoidCallback _onPressed;
+  final bool _isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -537,12 +564,21 @@ class _VoiceMessageBubble extends StatelessWidget {
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-            onPressed: _onPressed,
-            icon: Icon(
-              _isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.white,
-              size: 30,
-            ),
+            onPressed: _isLoading ? null : _onPressed,
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Icon(
+                    _isPlaying ? Icons.pause : Icons.play_arrow,
+                    color: Colors.white,
+                    size: 30,
+                  ),
           ),
           Expanded(
             child: _VoiceProgressDots(
@@ -584,16 +620,22 @@ class _VoicePlayer extends HookWidget {
     String? filePath,
     Uint8List? bytes,
     String? mediaType,
+    bool autoPlay = false,
+    VoidCallback? onAutoPlayed,
   }) : _initialDuration = initialDuration,
        _builder = builder,
        _filePath = filePath,
        _bytes = bytes,
-       _mediaType = mediaType;
+       _mediaType = mediaType,
+       _autoPlay = autoPlay,
+       _onAutoPlayed = onAutoPlayed;
 
   final String? _filePath;
   final Uint8List? _bytes;
   final String? _mediaType;
   final Duration _initialDuration;
+  final bool _autoPlay;
+  final VoidCallback? _onAutoPlayed;
   final Widget Function(BuildContext context, _VoicePlayerState state) _builder;
 
   @override
@@ -647,6 +689,18 @@ class _VoicePlayer extends HookWidget {
         await player.play(DeviceFileSource(filePath, mimeType: _mediaType));
       }
     }
+
+    // Starts playback once the bytes become available when the user tapped
+    // play while the clip was still downloading.
+    final hasAutoPlayed = useRef(false);
+    useEffect(() {
+      if (_autoPlay && !hasAutoPlayed.value) {
+        hasAutoPlayed.value = true;
+        unawaited(togglePlayback());
+        _onAutoPlayed?.call();
+      }
+      return null;
+    }, [_autoPlay]);
 
     final durationMs = duration.value.inMilliseconds;
     final progress = durationMs <= 0
