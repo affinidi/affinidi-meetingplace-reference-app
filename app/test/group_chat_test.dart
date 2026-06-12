@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
@@ -99,17 +100,27 @@ Future<void> verifyMessageWithAttachmentSent(
   String message,
   String groupName,
 ) async {
-  expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
-  final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
-  expect(sendCall['text'], message);
-  expect(sendCall['attachments'], isA<List<ChatAttachment>>());
-  expect((sendCall['attachments'] as List).length, 1);
+  expect(meetingPlaceChatSDK.sendMediaMessageCalls, hasLength(1));
+  final sendCall = meetingPlaceChatSDK.sendMediaMessageCalls.first;
+  expect(sendCall['caption'], message);
+  expect(sendCall['fileBytes'], isNotNull);
+  expect(sendCall['contentType'], startsWith('image/'));
 
-  final attachments = sendCall['attachments'] as List<ChatAttachment>;
+  // Simulate the message coming back through the stream as a hosted media
+  // attachment — transportId-only so the download path is exercised.
+  final mxcUri = sendCall['mxcUri'] as Uri;
+  final transportId = sendCall['transportId'] as String;
+  final attachment = ChatAttachment(
+    mediaType: sendCall['contentType'] as String,
+    filename: sendCall['filename'] as String?,
+    format: AttachmentFormat.hostedMedia.value,
+    data: ChatAttachmentData(links: [mxcUri]),
+  )..transportId = transportId;
+
   meetingPlaceChatSDK.simulateIncomingTextMessage(
     text: message,
     recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-    attachments: attachments,
+    attachments: [attachment],
   );
   await tester.pumpAndSettle();
 
@@ -265,7 +276,7 @@ void main() {
         expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
         final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
         expect(sendCall['text'], testMessage);
-        expect(sendCall['attachments'], isNull);
+        expect(sendCall['attachments'], isEmpty);
 
         // Simulate the message appearing in the UI
         meetingPlaceChatSDK.simulateIncomingTextMessage(

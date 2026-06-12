@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
 
+import '../../../application/services/attachment_cache_service/attachment_cache_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
@@ -35,6 +36,7 @@ import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/bottom_sheet_menu.dart';
+import '../../widgets/images/chat_image_card.dart';
 import '../../widgets/info_banner.dart';
 import '../../widgets/profile_circle_avatar.dart';
 import 'chat_activity_progress_indicator.dart';
@@ -52,6 +54,7 @@ part 'chat_item.dart';
 part 'chat_items/chat_item_from_info.dart';
 part 'chat_items/concierge_join_group_request_chat_item.dart';
 part 'chat_items/concierge_update_profile_request_chat_item.dart';
+part 'chat_items/hosted_media_widget.dart';
 part 'chat_items/plain_text_chat_item.dart';
 part 'chat_items/reaction_picker_chat_item.dart';
 part 'chat_items/unknown_chat_item.dart';
@@ -74,6 +77,7 @@ class ChatScreen extends HookConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     ref.keepAround(provider);
+    ref.keepAround(attachmentCacheServiceProvider(_contactId));
 
     useEffect(() {
       if (!context.mounted) return;

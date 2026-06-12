@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -37,6 +39,8 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
     String message, {
     List<ChatAttachment>? attachments,
   });
+
+  Future<Uint8List> downloadMedia(ChatAttachment attachment);
 
   Future<void> sendChatActivity();
   Future<void> reactOnMessage(Message message, {required String reaction});

@@ -104,12 +104,15 @@ class _PlainTextChatItem extends ConsumerWidget {
         emojiCount <= _maximumEmojisForLargeScale;
     final attachments = chatItem.attachments;
 
+    final hasMedia = attachments.isNotEmpty;
+    final showText = chatItem.value.isNotEmpty;
+
     return GestureDetector(
       onLongPress: onLongPress,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (attachments.isNotEmpty)
+          if (hasMedia)
             ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
@@ -124,9 +127,9 @@ class _PlainTextChatItem extends ConsumerWidget {
                 );
               },
             ),
-          if (chatItem.value.isNotEmpty)
+          if (showText)
             Padding(
-              padding: EdgeInsets.all(attachments.isEmpty ? 0 : 8),
+              padding: EdgeInsets.all(hasMedia ? 8.0 : 0),
               child: _TextMessage(
                 text: chatItem.value,
                 shouldScaleEmojis: shouldScaleEmojis,
@@ -190,23 +193,32 @@ class _TextMessage extends StatelessWidget {
   }
 }
 
-class _AttachmentWidget extends HookConsumerWidget {
+class _AttachmentWidget extends ConsumerWidget {
   _AttachmentWidget({
     required String contactId,
     required chat.ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
-  }) : _attachment = attachment,
+  }) : _contactId = contactId,
+       _attachment = attachment,
        _isFromMe = isFromMe,
        _chatItemColor = chatItemColor,
-       super(key: ValueKey('chat_attachment_${attachment.id!}'));
+       super(key: ValueKey(AttachmentCacheService.cacheKey(attachment)));
 
+  final String _contactId;
   final chat.ChatAttachment _attachment;
   final bool _isFromMe;
   final Color _chatItemColor;
 
+  bool get _isHostedMedia =>
+      _attachment.format == AttachmentFormat.hostedMedia.value;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (_isHostedMedia) {
+      return _HostedMediaWidget(contactId: _contactId, attachment: _attachment);
+    }
+
     final plugins = ref.read(availableAttachmentPluginsProvider);
 
     for (final plugin in plugins) {

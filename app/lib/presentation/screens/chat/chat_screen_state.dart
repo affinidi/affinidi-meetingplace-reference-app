@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:collection/collection.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
@@ -29,7 +27,6 @@ abstract class ChatScreenState with _$ChatScreenState {
     @Default(ContactPresenceStatus.unknown)
     ContactPresenceStatus contactPresenceStatus,
     ScreenEffect? effect,
-    @Default({}) Map<String, Uint8List> attachmentsDataCache,
     String? notificationToken,
   }) = _ChatScreenState;
 

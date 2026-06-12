@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
@@ -328,7 +329,19 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String message, {
     List<ChatAttachment>? attachments,
   }) async {
-    await _chatSDK?.sendTextMessage(message, attachments: attachments);
+    await _chatSDK?.sendTextMessage(
+      message,
+      attachments: attachments ?? const [],
+    );
+  }
+
+  @override
+  Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
+    final sdk = _chatSDK;
+    if (sdk == null) {
+      throw StateError('Chat SDK not initialized');
+    }
+    return sdk.downloadMedia(attachment);
   }
 
   @override

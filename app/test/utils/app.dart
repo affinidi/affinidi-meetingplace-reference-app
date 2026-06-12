@@ -85,12 +85,7 @@ Future<void> startApp(
         (ref) async => Directory('/tmp'),
       ),
       availableAttachmentPluginsProvider.overrideWith(
-        (ref) => [
-          CameraAttachmentsPlugin(cacheManager: ref.read(cacheManagerProvider)),
-          GalleryAttachmentsPlugin(
-            cacheManager: ref.read(cacheManagerProvider),
-          ),
-        ],
+        (ref) => [CameraAttachmentsPlugin(), GalleryAttachmentsPlugin()],
       ),
       localAuthProvider.overrideWith(
         (ref) => FakeLocalAuthentication(isAuthenticated: isAuthenticated),

@@ -1,12 +1,11 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
-import '../../../presentation/painting/cached_base64_image.dart';
-import '../../../presentation/screens/media/image_view_screen/image_view_screen.dart';
 import '../../../presentation/screens/media/media_screen/media_screen.dart';
+import '../../../presentation/widgets/images/chat_image_card.dart';
 import '../../extensions/build_context_extensions.dart';
 import 'gallery_image_attachment.dart';
 
@@ -18,12 +17,9 @@ import 'gallery_image_attachment.dart';
 /// - Render image attachments as tappable cards in chat
 /// - Support full-screen image viewing
 class GalleryAttachmentsPlugin implements AttachmentPlugin {
-  GalleryAttachmentsPlugin({required BaseCacheManager cacheManager})
-    : _cacheManager = cacheManager;
+  GalleryAttachmentsPlugin();
 
   static const _pluginName = 'mpx_gallery_attachment_plugin';
-
-  final BaseCacheManager _cacheManager;
 
   /// Prompts the user to pick and review an image from gallery.
   ///
@@ -69,16 +65,13 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   /// Renders a single image attachment as a tappable card widget.
   ///
   /// Creates a 200x200 card with rounded corners that displays the image.
-  /// Tapping opens the image in full-screen view via [ImageViewScreen].
+  /// Tapping opens the image in full-screen view via [ChatImageCard].
   @override
   Widget renderAttachment({
     required ChatAttachment attachment,
     required bool isFromMe,
     Color? chatItemColor,
-  }) => _GalleryAttachmentWidget(
-    attachment: attachment,
-    cacheManager: _cacheManager,
-  );
+  }) => _GalleryAttachmentWidget(attachment: attachment);
 
   /// Renders multiple image attachments as a scrollable list.
   ///
@@ -89,10 +82,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     Color? chatItemColor,
-  }) => _ListGalleryAttachmentsWidget(
-    attachments: attachments,
-    cacheManager: _cacheManager,
-  );
+  }) => _ListGalleryAttachmentsWidget(attachments: attachments);
 
   /// Checks if this plugin supports the given attachment format.
   ///
@@ -122,12 +112,9 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
 class _ListGalleryAttachmentsWidget extends StatelessWidget {
   const _ListGalleryAttachmentsWidget({
     required List<ChatAttachment> attachments,
-    required BaseCacheManager cacheManager,
-  }) : _attachments = attachments,
-       _cacheManager = cacheManager;
+  }) : _attachments = attachments;
 
   final List<ChatAttachment> _attachments;
-  final BaseCacheManager _cacheManager;
 
   @override
   Widget build(BuildContext context) {
@@ -136,10 +123,7 @@ class _ListGalleryAttachmentsWidget extends StatelessWidget {
       shrinkWrap: true,
       itemCount: _attachments.length,
       itemBuilder: (context, index) {
-        return _GalleryAttachmentWidget(
-          attachment: _attachments[index],
-          cacheManager: _cacheManager,
-        );
+        return _GalleryAttachmentWidget(attachment: _attachments[index]);
       },
     );
   }
@@ -149,18 +133,13 @@ class _ListGalleryAttachmentsWidget extends StatelessWidget {
 ///
 /// Features:
 /// - 200x200 size with rounded corners and elevation
-/// - Displays image using [CachedBase64Image] for performance
-/// - Taps navigate to [ImageViewScreen] for full-screen viewing
+/// - Tap gesture opens full-screen [ChatImageCard]
 /// - Returns empty widget if attachment data is invalid
 class _GalleryAttachmentWidget extends StatelessWidget {
-  _GalleryAttachmentWidget({
-    required ChatAttachment attachment,
-    required BaseCacheManager cacheManager,
-  }) : _attachment = attachment,
-       _cacheManager = cacheManager;
+  _GalleryAttachmentWidget({required ChatAttachment attachment})
+    : _attachment = attachment;
 
   final ChatAttachment _attachment;
-  final BaseCacheManager _cacheManager;
 
   @override
   Widget build(BuildContext context) {
@@ -168,34 +147,12 @@ class _GalleryAttachmentWidget extends StatelessWidget {
 
     if (imageDataBase64 == null) return const SizedBox.shrink();
 
-    return SizedBox(
-      height: 200,
-      width: 200,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context, rootNavigator: true).push<ImageViewScreen>(
-            MaterialPageRoute(
-              builder: (context) =>
-                  ImageViewScreen(imageBytes: base64.decode(imageDataBase64)),
-            ),
-          );
-        },
-        child: Card(
-          color: const Color.fromARGB(0, 10, 10, 10),
-          clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          elevation: 5,
-          child: Image(
-            fit: BoxFit.cover,
-            image: CachedBase64Image(
-              imageDataBase64,
-              cacheManager: _cacheManager,
-            ),
-          ),
-        ),
-      ),
-    );
+    final Uint8List imageBytes;
+    try {
+      imageBytes = base64.decode(imageDataBase64);
+    } on FormatException {
+      return const SizedBox.shrink();
+    }
+    return ChatImageCard(imageBytes: imageBytes);
   }
 }

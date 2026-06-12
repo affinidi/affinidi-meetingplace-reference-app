@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    show AttachmentFormat;
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
@@ -34,6 +38,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   int removeMemberCallCount = 0;
 
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
+  final List<Map<String, dynamic>> sendMediaMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
   final List<Map<String, dynamic>> reactOnMessageCalls = [];
   final List<Map<String, dynamic>> editTextMessageCalls = [];
@@ -41,6 +46,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
+  final Map<String, Uint8List> _downloadedMedia = {};
 
   int get startChatSessionCallCount => _chatSessionStartedCalls;
   int get startedChatPresenceUpdatesCount => _startedChatPresenceUpdates;
@@ -384,6 +390,9 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
+  Future<List<ChatItem>> get messages async => const <ChatItem>[];
+
+  @override
   Future<void> reactOnMessage(
     Message message, {
     required String reaction,
@@ -450,6 +459,38 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     // Track the call
     sendTextMessageCalls.add({'text': text, 'attachments': attachments});
 
+    var normalizedAttachments = attachments ?? const <ChatAttachment>[];
+    final firstAttachment = normalizedAttachments.firstOrNull;
+    final base64Data = firstAttachment?.data?.base64;
+    if (firstAttachment != null &&
+        base64Data != null &&
+        base64Data.isNotEmpty &&
+        firstAttachment.data?.links?.isEmpty != false) {
+      final fileBytes = base64Decode(base64Data);
+      final mediaUri = Uri.parse(
+        'mxc://fake-homeserver/fake-media-${sendMediaMessageCalls.length}',
+      );
+      final transportId = 'fake-event-${DateTime.now().microsecondsSinceEpoch}';
+      sendMediaMessageCalls.add({
+        'fileBytes': fileBytes,
+        'contentType': firstAttachment.mediaType ?? 'application/octet-stream',
+        'filename': firstAttachment.filename,
+        'caption': text,
+        'mxcUri': mediaUri,
+        'transportId': transportId,
+      });
+      _downloadedMedia[transportId] = fileBytes;
+
+      normalizedAttachments = [
+        ChatAttachment(
+          mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
+          filename: firstAttachment.filename,
+          format: AttachmentFormat.hostedMedia.value,
+          data: ChatAttachmentData(links: [mediaUri], base64: base64Data),
+        )..transportId = transportId,
+      ];
+    }
+
     final message = Message(
       chatId: 'fake-chat-id',
       messageId: 'msg-${DateTime.now().millisecondsSinceEpoch}',
@@ -458,10 +499,26 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       status: ChatItemStatus.queued,
       isFromMe: true,
       senderDid: 'fake-sender-did',
-      attachments: attachments ?? [],
+      attachments: normalizedAttachments,
     );
 
     return message;
+  }
+
+  @override
+  Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
+    final base64Data = attachment.data?.base64;
+    if (base64Data != null && base64Data.isNotEmpty) {
+      return base64Decode(base64Data);
+    }
+
+    final transportId = attachment.transportId;
+    if (transportId != null) {
+      final fileBytes = _downloadedMedia[transportId];
+      if (fileBytes != null) return fileBytes;
+    }
+
+    throw StateError('No media bytes available in FakeChatSdk');
   }
 
   @override
@@ -477,6 +534,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   @override
   Future<void> startChatPresenceUpdates() async {
     _startedChatPresenceUpdates += 1;
+  }
+
+  @override
+  Future<ChatItem?> getMessageById(String messageId) async {
+    return null;
   }
 
   @override

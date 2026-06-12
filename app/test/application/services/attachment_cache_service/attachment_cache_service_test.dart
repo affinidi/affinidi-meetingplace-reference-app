@@ -1,0 +1,184 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:mpx_flutter_reference_app/application/services/attachment_cache_service/attachment_cache_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
+
+import '../../../fakes/fake_app_badge_service.dart';
+import '../../../fakes/fake_channels.dart';
+import '../../../fakes/fake_chat_sdk.dart';
+import '../../../fakes/fake_contacts.dart';
+import '../../../fakes/fake_contacts_service.dart';
+import '../../../fakes/fake_environment.dart';
+import '../../../fakes/fake_meeting_place_sdk.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  AppLogger.initialize(
+    File('${Directory.systemTemp.path}/attach_cache_test.log'),
+  );
+
+  group('AttachmentCacheService', () {
+    late ProviderContainer container;
+    late AttachmentCacheService service;
+    late FakeChatSdk fakeChatSdk;
+
+    final testContact = FakeContacts.individualContact;
+    final contactId = testContact.id;
+    final channelDid = testContact.channelDid!;
+
+    setUp(() async {
+      final fakeCoreSdk = FakeMeetingPlaceSDK(
+        channels: {channelDid: FakeChannels.individualChannel},
+      );
+      fakeChatSdk = FakeChatSdk();
+      final fakeContactsService = FakeContactsService();
+
+      container = ProviderContainer(
+        overrides: [
+          meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
+          chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+          contactsServiceProvider.overrideWith(() => fakeContactsService),
+          environmentProvider.overrideWithValue(FakeEnvironment()),
+          appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          networkConnectivityServiceProvider.overrideWith(
+            _FakeNetworkConnectivityService.new,
+          ),
+        ],
+      );
+      container.listen(
+        attachmentCacheServiceProvider(contactId),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      service = container.read(
+        attachmentCacheServiceProvider(contactId).notifier,
+      );
+    });
+
+    tearDown(() => container.dispose());
+
+    test('seed writes base64 bytes into cache', () {
+      final bytes = Uint8List.fromList([1, 2, 3]);
+      final attachment = ChatAttachment(
+        data: ChatAttachmentData(base64: base64Encode(bytes)),
+      );
+
+      service.seed(attachment);
+
+      expect(
+        service.state[AttachmentCacheService.cacheKey(attachment)],
+        equals(bytes),
+      );
+    });
+
+    test('seed ignores attachment with no base64 data', () {
+      final attachment = ChatAttachment();
+
+      service.seed(attachment);
+
+      expect(service.state, isEmpty);
+    });
+
+    test('seed handles invalid base64 without throwing', () {
+      final attachment = ChatAttachment(
+        data: ChatAttachmentData(base64: 'not-valid-base64!!!'),
+      );
+
+      expect(() => service.seed(attachment), returnsNormally);
+      expect(service.state, isEmpty);
+    });
+
+    test('loadAttachment writes base64 bytes into cache', () {
+      final bytes = Uint8List.fromList([10, 20, 30]);
+      final attachment = ChatAttachment(
+        data: ChatAttachmentData(base64: base64Encode(bytes)),
+      );
+
+      service.loadAttachment(attachment);
+
+      expect(
+        service.state[AttachmentCacheService.cacheKey(attachment)],
+        equals(bytes),
+      );
+    });
+
+    test('loadAttachment skips if already cached', () {
+      final bytes = Uint8List.fromList([7, 8, 9]);
+      final attachment = ChatAttachment(
+        data: ChatAttachmentData(base64: base64Encode(bytes)),
+      );
+
+      service.loadAttachment(attachment);
+      final stateAfterFirst = service.state;
+
+      service.loadAttachment(attachment);
+
+      expect(identical(service.state, stateAfterFirst), isTrue);
+    });
+
+    test('loadAttachment handles invalid base64 without throwing', () {
+      final attachment = ChatAttachment(
+        data: ChatAttachmentData(base64: '!!!invalid!!!'),
+      );
+
+      expect(() => service.loadAttachment(attachment), returnsNormally);
+      expect(service.state, isEmpty);
+    });
+
+    test('loadAttachment skips hosted media with no transportId', () {
+      final attachment = ChatAttachment(
+        format: AttachmentFormat.hostedMedia.value,
+      );
+
+      service.loadAttachment(attachment);
+
+      expect(service.state, isEmpty);
+    });
+
+    test(
+      'preload triggers download for hosted media attachment with transportId',
+      () async {
+        final attachment = ChatAttachment(
+          format: AttachmentFormat.hostedMedia.value,
+        )..transportId = 'test-transport-id';
+        final message = Message(
+          chatId: 'fake-chat-id',
+          messageId: 'fake-msg-id',
+          value: '',
+          dateCreated: DateTime.now(),
+          status: ChatItemStatus.confirmed,
+          isFromMe: false,
+          senderDid: 'fake-sender-did',
+          attachments: [attachment],
+        );
+
+        service.preload([message]);
+
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        final key = AttachmentCacheService.cacheKey(attachment);
+        expect(service.state.containsKey(key), isTrue);
+      },
+    );
+  });
+}
+
+class _FakeNetworkConnectivityService extends NetworkConnectivityService {
+  @override
+  NetworkConnectivityServiceState build() {
+    return const NetworkConnectivityServiceState(isConnected: true);
+  }
+}

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -10,6 +9,7 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../../../application/services/attachment_cache_service/attachment_cache_service.dart';
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
@@ -40,6 +40,7 @@ class ChatScreenController extends _$ChatScreenController
 
   static const _logKey = 'UXCHAT';
 
+  late final String _contactId;
   late final messageTextController = TextEditingController();
   late final _logger = ref.read(appLoggerProvider);
 
@@ -60,6 +61,7 @@ class ChatScreenController extends _$ChatScreenController
 
   @override
   ChatScreenState build(String contactId) {
+    _contactId = contactId;
     WidgetsBinding.instance.addObserver(this);
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
@@ -85,6 +87,11 @@ class ChatScreenController extends _$ChatScreenController
           otherPartyCard: next.otherPartyCard ?? state.otherPartyCard,
           effect: newEffect,
         );
+        if (!identical(previous?.messages, next.messages)) {
+          ref
+              .read(attachmentCacheServiceProvider(contactId).notifier)
+              .preload(next.messages);
+        }
       });
     }
 
@@ -621,60 +628,33 @@ class ChatScreenController extends _$ChatScreenController
     state = state.copyWith(isActive: false);
   }
 
-  /// Sends an attachment in the chat.
+  /// Sends an attachment in the chat via media upload.
   ///
-  /// This method handles the process of sending an attachment, such as an
-  /// image or file, to the chat. It performs necessary validations and updates
-  /// the chat state accordingly.
-  ///
-  /// Returns a [Future] that completes when the attachment has been sent.
+  /// Uploads each attachment to the Matrix homeserver with E2EE, then sends
+  /// a media message containing the mxc:// reference. The recipient downloads
+  /// and decrypts the media from the homeserver.
   Future<void> sendAttachment(
     String text,
     List<MessageAttachment> messageAttachment,
   ) async {
     messageTextController.clear();
-    unawaited(
-      _chatService?.sendTextMessage(
-        text,
-        attachments: messageAttachment.map((a) => a.toAttachment()).toList(),
-      ),
-    );
     _sendChatActivityTimedAction?.cancel();
-  }
 
-  /// Loads an image attachment into the chat screen.
-  ///
-  /// This method handles the process of displaying or processing an image
-  /// attachment provided by the [attachment] parameter. It may involve
-  /// updating the UI, storing the attachment, or triggering further actions
-  /// related to the image.
-  ///
-  /// [attachment] - The image attachment to be loaded.
-  void loadImageAttachment(ChatAttachment attachment) {
-    final attachmentId = attachment.id;
-    if (attachmentId == null) {
-      _logger.info(
-        'Attachment cannot be displayed as it does not have an id',
-        name: _logKey,
+    final cache = ref.read(attachmentCacheServiceProvider(_contactId).notifier);
+    for (final (index, attachment) in messageAttachment.indexed) {
+      final chatAttachment = attachment.toAttachment();
+      final caption = index == 0 ? text : '';
+
+      // Seed the cache so the sender sees the image immediately: the SDK
+      // strips base64 from the echoed display attachment, so without this
+      // pre-cache the sender would only see the image once the upload
+      // completes and the download from the homeserver returns.
+      cache.seed(chatAttachment);
+
+      unawaited(
+        _chatService?.sendTextMessage(caption, attachments: [chatAttachment]),
       );
-      return;
     }
-
-    final attachmentData = attachment.data?.base64;
-    if (attachmentData == null) {
-      _logger.info(
-        'Attachment cannot be displayed as it does not have data',
-        name: _logKey,
-      );
-      return;
-    }
-
-    final attachmentsDataCache = Map.of(state.attachmentsDataCache);
-    final existingData = attachmentsDataCache[attachmentId];
-    if (existingData != null) return;
-
-    attachmentsDataCache[attachmentId] = base64.decode(attachmentData);
-    state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
   }
 
   Future<void> _restoreUnsentMessage() async {

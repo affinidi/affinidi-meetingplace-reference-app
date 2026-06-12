@@ -17,8 +17,8 @@ import 'applications_documents_directory_provider.dart';
 ///   in the application documents directory
 final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
   final environment = ref.read(environmentProvider);
-  final settingsState = ref.read(settingsServiceProvider);
   final homeserver = environment.matrixHomeserver;
+  final mediatorDid = ref.read(settingsServiceProvider).selectedMediatorDid;
   final directory = await ref.read(
     applicationDocumentsDirectoryProvider.future,
   );
@@ -27,7 +27,7 @@ final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
   final passphrase = await secureStorage.provideDatabasePassphrase();
 
   return MatrixConfig(
-    mediatorDid: settingsState.selectedMediatorDid,
+    mediatorDid: mediatorDid,
     controlPlaneDid: environment.controlPlaneDid,
     homeserver: Uri.parse(homeserver),
     databaseFactory: CallbackMatrixDatabaseFactory(
