@@ -9,6 +9,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contact_card/contact_card.dart' as domain;
@@ -370,6 +371,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     }
 
     final attachment = VoiceMessageMetadata.buildAttachment(
+      id: const Uuid().v4(),
       base64: base64.encode(bytes),
       durationMs: duration.inMilliseconds,
       waveform: waveform,

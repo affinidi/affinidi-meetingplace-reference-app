@@ -488,6 +488,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
       normalizedAttachments = [
         ChatAttachment(
+          id: firstAttachment.id,
           mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
           filename: firstAttachment.filename,
           format: AttachmentFormat.hostedMedia.value,

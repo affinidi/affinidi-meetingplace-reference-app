@@ -7,6 +7,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../infrastructure/extensions/string_list_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/plugins/media_category.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -69,7 +70,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
       attachment.description,
       attachment.byteCount?.toString(),
       attachment.data?.json,
-    ].whereType<String>().where((part) => part.isNotEmpty).toList();
+    ].nonEmpty.toList();
 
     if (parts.isEmpty) {
       return 'chat_attachment_${identityHashCode(attachment)}';
@@ -203,10 +204,9 @@ class AttachmentCacheService extends _$AttachmentCacheService {
   }
 
   String? _localVoiceMessageKey(ChatAttachment attachment) {
-    final filename = attachment.filename;
-    final mediaType = attachment.mediaType;
-    if (filename == null || mediaType == null) return null;
-    return '$filename|$mediaType';
+    final id = attachment.id;
+    if (id == null || id.isEmpty) return null;
+    return id;
   }
 
   Future<void> _downloadAndCache(
