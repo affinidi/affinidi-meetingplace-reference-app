@@ -1330,6 +1330,24 @@ abstract class AppLocalizations {
   /// **'Copy message'**
   String get chatMessageActionCopy;
 
+  /// No description provided for @chatMessageActionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit message'**
+  String get chatMessageActionEdit;
+
+  /// No description provided for @chatMessageEditedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'edited'**
+  String get chatMessageEditedLabel;
+
+  /// No description provided for @chatMessageEditFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not edit message'**
+  String get chatMessageEditFailed;
+
   /// No description provided for @chatMessageDeletedTombstone.
   ///
   /// In en, this message translates to:

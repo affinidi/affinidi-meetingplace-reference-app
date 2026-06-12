@@ -84,6 +84,18 @@ Future<void> simulateIncomingMessage(
   await tester.pumpAndSettle();
 }
 
+Future<void> simulateOwnMessage(
+  WidgetTester tester,
+  FakeChatSdk meetingPlaceChatSDK,
+  String message,
+) async {
+  meetingPlaceChatSDK.simulateOwnTextMessage(
+    text: message,
+    recipientDid: FakeChannels.individualChannel.permanentChannelDid!,
+  );
+  await tester.pumpAndSettle();
+}
+
 Future<void> submitMediaWithMessage(WidgetTester tester, String message) async {
   final textInput = find.byKey(const Key('media_review_text_input'));
   await tester.enterText(textInput, message);
@@ -649,6 +661,57 @@ void main() {
           expect(find.byIcon(Icons.notifications_off_outlined), findsOneWidget);
         },
       );
+    });
+
+    group('and user long press on own message', () {
+      testWidgets('should let user edit the message', (tester) async {
+        final meetingPlaceChatSDK = FakeChatSdk();
+        final l10n = await getL10n();
+        const originalMessage = 'Hello, original message!';
+        const editedMessage = 'Hello, edited message!';
+
+        await navigateToChatScreen(
+          tester,
+          contactId: contactId,
+          meetingPlaceChatSDK: meetingPlaceChatSDK,
+        );
+
+        await simulateOwnMessage(tester, meetingPlaceChatSDK, originalMessage);
+        expect(find.text(originalMessage), findsOneWidget);
+
+        await tester.longPress(find.text(originalMessage));
+        await tester.pumpAndSettle();
+
+        expect(find.text(l10n.chatMessageActionEdit), findsOneWidget);
+
+        await tester.tap(find.text(l10n.chatMessageActionEdit));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Edit message'), findsOneWidget);
+        final dialogTextField = find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        );
+        expect(dialogTextField, findsOneWidget);
+        expect(
+          tester.widget<TextField>(dialogTextField).controller?.text,
+          originalMessage,
+        );
+
+        await tester.enterText(dialogTextField, editedMessage);
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Save'));
+        await tester.pumpAndSettle();
+
+        expect(meetingPlaceChatSDK.editTextMessageCalls, hasLength(1));
+        final editCall = meetingPlaceChatSDK.editTextMessageCalls.first;
+        expect(editCall['newText'], editedMessage);
+
+        expect(find.text(editedMessage), findsOneWidget);
+        expect(find.text(originalMessage), findsNothing);
+        expect(find.text(l10n.chatMessageEditedLabel), findsOneWidget);
+      });
     });
   });
 }

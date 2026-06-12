@@ -842,6 +842,18 @@
 	"@chatMessageActionCopy": {
 		"type": "text"
 	},
+	"chatMessageActionEdit": "Edit message",
+	"@chatMessageActionEdit": {
+		"type": "text"
+	},
+	"chatMessageEditedLabel": "edited",
+	"@chatMessageEditedLabel": {
+		"type": "text"
+	},
+	"chatMessageEditFailed": "Could not edit message",
+	"@chatMessageEditFailed": {
+		"type": "text"
+	},
 	"chatMessageDeletedTombstone": "This message was deleted",
 	"@chatMessageDeletedTombstone": {
 		"type": "text"

@@ -33,6 +33,19 @@ class _PlainTextChatItem extends ConsumerWidget {
       ),
     );
 
+    // Watch mutable fields so Riverpod triggers a rebuild when
+    // the SDK mutates the Message object in place.
+    ref.watch(
+      provider.select((state) {
+        final m =
+            state.messages.firstWhereOrNull(
+                  (m) => m.messageId == _chatItem.messageId,
+                )
+                as chat.Message?;
+        return (m?.value, m?.editedAt, m?.isDeleted, m?.isDeletedLocally);
+      }),
+    );
+
     void selectReaction() {
       if (!context.mounted) return;
 
@@ -47,11 +60,14 @@ class _PlainTextChatItem extends ConsumerWidget {
     Future<void> showMessageActions() async {
       if (!context.mounted) return;
       controller.clearSelectedReaction();
-      await _ChatMessageActions.show(
+      final result = await _ChatMessageActions.show(
         context: context,
         contactId: _contactId,
         message: chatItem,
       );
+      if (result == _MessageActionResult.edit && context.mounted) {
+        await _showEditDialog(context, controller, chatItem);
+      }
     }
 
     void onLongPress() {
@@ -132,6 +148,7 @@ class _PlainTextChatItem extends ConsumerWidget {
               child: _TextMessage(
                 text: chatItem.value,
                 shouldScaleEmojis: shouldScaleEmojis,
+                isEdited: chatItem.editedAt != null,
               ),
             ),
         ],
@@ -141,12 +158,17 @@ class _PlainTextChatItem extends ConsumerWidget {
 }
 
 class _TextMessage extends StatelessWidget {
-  const _TextMessage({required String text, required bool shouldScaleEmojis})
-    : _text = text,
-      _shouldScaleEmojis = shouldScaleEmojis;
+  const _TextMessage({
+    required String text,
+    required bool shouldScaleEmojis,
+    required bool isEdited,
+  }) : _text = text,
+       _shouldScaleEmojis = shouldScaleEmojis,
+       _isEdited = isEdited;
 
   final String _text;
   final bool _shouldScaleEmojis;
+  final bool _isEdited;
 
   @override
   Widget build(BuildContext context) {
@@ -154,16 +176,32 @@ class _TextMessage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
       child: Container(
         constraints: const BoxConstraints(minWidth: 25),
-        child: Text(
-          _text,
-          textAlign: _text.length < 6 ? TextAlign.center : TextAlign.start,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: _shouldScaleEmojis
-                ? 42.0
-                : 14.0, // 3x size for emoji-only messages
-            fontWeight: FontWeight.bold,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _text,
+              textAlign: _text.length < 6 ? TextAlign.center : TextAlign.start,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: _shouldScaleEmojis ? 42.0 : 14.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (_isEdited)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  context.l10n.chatMessageEditedLabel,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 10,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -200,5 +238,86 @@ class _AttachmentWidget extends HookConsumerWidget {
     }
 
     return const SizedBox.shrink();
+  }
+}
+
+Future<void> _showEditDialog(
+  BuildContext context,
+  ChatScreenController controller,
+  chat.Message message,
+) async {
+  final messenger = ScaffoldMessenger.of(context);
+
+  final newText = await showDialog<String>(
+    context: context,
+    builder: (dialogContext) => _EditMessageDialog(initialText: message.value),
+  );
+
+  if (newText != null) {
+    try {
+      await controller.editTextMessage(message.messageId, newText);
+    } catch (_) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.chatMessageEditFailed),
+          backgroundColor: context.colorScheme.error,
+        ),
+      );
+    }
+  }
+}
+
+class _EditMessageDialog extends StatefulWidget {
+  const _EditMessageDialog({required this.initialText});
+
+  final String initialText;
+
+  @override
+  State<_EditMessageDialog> createState() => _EditMessageDialogState();
+}
+
+class _EditMessageDialogState extends State<_EditMessageDialog> {
+  late final TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: widget.initialText);
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Edit message'),
+      content: TextField(
+        controller: _textController,
+        autofocus: true,
+        maxLines: null,
+        decoration: const InputDecoration(hintText: 'Message text'),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            final value = _textController.text.trim();
+            if (value.isEmpty || value == widget.initialText) {
+              Navigator.of(context).pop();
+              return;
+            }
+            Navigator.of(context).pop(value);
+          },
+          child: const Text('Save'),
+        ),
+      ],
+    );
   }
 }

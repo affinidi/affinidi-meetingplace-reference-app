@@ -36,6 +36,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
   final List<Map<String, dynamic>> reactOnMessageCalls = [];
+  final List<Map<String, dynamic>> editTextMessageCalls = [];
   final List<Map<String, dynamic>> approveConnectionRequestCalls = [];
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
@@ -69,6 +70,26 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     );
 
     _emit(StreamData(event: chatEvent, chatItem: message));
+  }
+
+  /// Simulates an own (sent) text message by emitting it through the stream
+  void simulateOwnTextMessage({
+    required String text,
+    required String recipientDid,
+  }) {
+    final message = Message(
+      chatId: 'fake-chat-id',
+      messageId: 'msg-own-${DateTime.now().millisecondsSinceEpoch}',
+      value: text,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.sent,
+      isFromMe: true,
+      senderDid: 'fake-sender-did',
+      attachments: [],
+      transportId: 'transport-${DateTime.now().millisecondsSinceEpoch}',
+    );
+
+    _emit(StreamData(event: const ChatMessageEvent(), chatItem: message));
   }
 
   /// Simulates an incoming concierge message for join group requests
@@ -370,6 +391,14 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     lastReactionMessage = message;
     lastReaction = reaction;
     reactOnMessageCalls.add({'message': message, 'reaction': reaction});
+  }
+
+  @override
+  Future<void> editTextMessage(Message message, String newText) async {
+    editTextMessageCalls.add({'message': message, 'newText': newText});
+    message.value = newText;
+    message.editedAt = DateTime.now().toUtc();
+    _emit(StreamData(chatItem: message));
   }
 
   @override
