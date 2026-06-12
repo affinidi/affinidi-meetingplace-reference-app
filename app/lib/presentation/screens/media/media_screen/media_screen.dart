@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../navigation/navigator.dart' hide Navigator;
 import '../../../widgets/camera_permission_instruction.dart';
 import '../../../widgets/images/compressed_image.dart';
@@ -123,6 +124,20 @@ class MediaScreen extends HookConsumerWidget {
       }
       return null;
     }, [state.pickedImageBytes]);
+
+    useEffect(() {
+      final maxMb = state.videoTooLargeMaxMb;
+      if (maxMb != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.attachmentTooLarge(maxMb))),
+          );
+          navigator.pop(MediaReviewResult.empty());
+        });
+      }
+      return null;
+    }, [state.videoTooLargeMaxMb]);
 
     return Scaffold(
       body: Builder(

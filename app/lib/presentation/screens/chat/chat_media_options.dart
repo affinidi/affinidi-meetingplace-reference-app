@@ -1,5 +1,13 @@
 part of 'chat_screen.dart';
 
+const _kAttachmentPluginIcons = <String, IconData>{
+  '📷': Icons.camera_alt,
+  '🖼': Icons.image_outlined,
+  '📄': Icons.assignment_outlined,
+};
+
+const _kHiddenAttachmentPluginIcons = {'🎬'};
+
 class _ChatMediaOptionItem {
   const _ChatMediaOptionItem({
     required this.icon,
@@ -125,26 +133,23 @@ class _ChatMediaOptions extends ConsumerWidget {
     }
 
     final items = <_ChatMediaOptionItem>[
-      ...availableAttachmentPlugins.where((plugin) => plugin.icon != '🎬').map((
-        plugin,
-      ) {
-        final supported = plugin.isPlatformSupported;
-        final label = supported
-            ? plugin.localizedName(context)
-            : '${plugin.localizedName(context)}\n'
-                  '(${context.l10n.platformNotSupported})';
+      ...availableAttachmentPlugins
+          .where(
+            (plugin) => !_kHiddenAttachmentPluginIcons.contains(plugin.icon),
+          )
+          .map((plugin) {
+            final supported = plugin.isPlatformSupported;
+            final label = supported
+                ? plugin.localizedName(context)
+                : '${plugin.localizedName(context)}\n'
+                      '(${context.l10n.platformNotSupported})';
 
-        return _ChatMediaOptionItem(
-          icon: switch (plugin.icon) {
-            '📷' => Icons.camera_alt,
-            '🖼' => Icons.image_outlined,
-            '📄' => Icons.assignment_outlined,
-            _ => Icons.attachment,
-          },
-          label: label,
-          onTap: supported ? () => attachFromPlugin(plugin) : null,
-        );
-      }),
+            return _ChatMediaOptionItem(
+              icon: _kAttachmentPluginIcons[plugin.icon] ?? Icons.attachment,
+              label: label,
+              onTap: supported ? () => attachFromPlugin(plugin) : null,
+            );
+          }),
     ];
 
     return _ChatOptionsBottomSheet(

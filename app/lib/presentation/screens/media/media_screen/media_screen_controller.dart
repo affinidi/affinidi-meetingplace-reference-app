@@ -94,11 +94,12 @@ class MediaScreenController extends _$MediaScreenController {
     if (picked != null && _isVideo(picked)) {
       final sizeBytes = await picked.length();
       if (sizeBytes > _maxVideoBytes) {
+        final maxMb = _maxVideoBytes ~/ (1024 * 1024);
         _logger.warning(
           'Selected video is larger than $_maxVideoBytes bytes',
           name: _logKey,
         );
-        ref.read(navigatorProvider).pop(MediaReviewResult.empty());
+        state = state.copyWith(videoTooLargeMaxMb: maxMb);
         return;
       }
 
