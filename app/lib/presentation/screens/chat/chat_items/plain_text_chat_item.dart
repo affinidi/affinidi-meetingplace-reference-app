@@ -731,11 +731,18 @@ final class _HostedDocumentWidgetState extends State<_HostedDocumentWidget> {
     final cachedBytes = widget._cachedBytes;
     if (cachedBytes == null) return;
 
-    File? tempFile;
     try {
       final tempDir = await getTemporaryDirectory();
       final safeName = path.basename(widget._attachment.filename ?? 'document');
-      tempFile = File('${tempDir.path}/$safeName');
+      // Use a uniquely-named file so concurrent opens don't collide and so the
+      // OS can clean it up on its own. The file must not be deleted immediately
+      // after share() returns because on Android the receiving app reads
+      // through the FileProvider URI after the intent is dispatched.
+      final uniqueName =
+          '${path.basenameWithoutExtension(safeName)}_'
+          '${DateTime.now().millisecondsSinceEpoch}'
+          '${path.extension(safeName)}';
+      final tempFile = File('${tempDir.path}/$uniqueName');
       await tempFile.writeAsBytes(cachedBytes);
       await SharePlus.instance.share(
         ShareParams(files: [XFile(tempFile.path)]),
@@ -747,8 +754,6 @@ final class _HostedDocumentWidgetState extends State<_HostedDocumentWidget> {
         stackTrace: stackTrace,
         name: '_HostedDocumentWidget',
       );
-    } finally {
-      tempFile?.delete().ignore();
     }
   }
 

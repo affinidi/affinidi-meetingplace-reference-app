@@ -124,19 +124,17 @@ class _VideoPlayerScreenState extends State<_VideoPlayerScreen> {
     );
   }
 
-  void _togglePlayback() {
+  Future<void> _togglePlayback() async {
     final controller = _controller;
     if (controller == null) return;
 
-    setState(() {
-      if (controller.value.isPlaying) {
-        controller.pause();
-      } else {
-        if (controller.value.position >= controller.value.duration) {
-          controller.seekTo(Duration.zero);
-        }
-        controller.play();
+    if (controller.value.isPlaying) {
+      await controller.pause();
+    } else {
+      if (controller.value.position >= controller.value.duration) {
+        await controller.seekTo(Duration.zero);
       }
-    });
+      await controller.play();
+    }
   }
 }
