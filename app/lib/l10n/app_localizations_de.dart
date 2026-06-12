@@ -26,6 +26,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get rCardsPlaceholderMessage => 'R-Cards werden hier angezeigt.';
+
+  @override
   String get publishOffer => 'Einladung veröffentlichen';
 
   @override
@@ -311,6 +314,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get generalDelete => 'Löschen';
 
   @override
+  String get generalSave => 'Speichern';
+
+  @override
   String get generalDone => 'Fertig';
 
   @override
@@ -408,6 +414,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'oob_invalid_type': 'QR-Code-Daten werden nicht unterstützt',
       'network_error':
           'Verbindung konnte nicht hergestellt werden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.',
+      'deleteContactFailed':
+          'Kontakt konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.',
       'other': '$errorCode',
     });
     return '$_temp0';
@@ -944,6 +952,22 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get chatMessageActionCopy => 'Nachricht kopieren';
+
+  @override
+  String get chatMessageActionEdit => 'Nachricht bearbeiten';
+
+  @override
+  String get chatMessageEditedLabel => 'bearbeitet';
+
+  @override
+  String get chatMessageEditFailed =>
+      'Nachricht konnte nicht bearbeitet werden';
+
+  @override
+  String get chatMessageEditHint => 'Nachrichtentext';
+
+  @override
+  String get chatMessageEditSave => 'Speichern';
 
   @override
   String get chatMessageDeletedTombstone => 'Diese Nachricht wurde gelöscht';
@@ -1531,6 +1555,379 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get goBack => 'Zurück gehen';
+
+  @override
+  String get rCardsPanelSubtitle => 'Beziehungskarten von Ihren Kontakten';
+
+  @override
+  String get rCardsEmpty =>
+      'R-Karten sind eine moderne, selbstaktualisierende Version von vCards. Sobald Sie Ihre erste Verbindung herstellen, erscheinen Ihre digitalen Visitenkarten hier.';
+
+  @override
+  String rCardsFilterLabel(String filter) {
+    String _temp0 = intl.Intl.selectLogic(filter, {
+      'all': 'Alle',
+      'nonAnonymous': 'Nicht-anonym',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get noRCardsFoundWithFilter =>
+      'Keine R-Karten gefunden, die Ihrer Suche entsprechen.';
+
+  @override
+  String get rCardDetailsTitle => 'R-Karten Details';
+
+  @override
+  String get rCardSectionIdentity => 'Identität';
+
+  @override
+  String get rCardSectionMetadata => 'Credential-Details';
+
+  @override
+  String get rCardFieldName => 'Name';
+
+  @override
+  String get rCardFieldEmail => 'E-Mail';
+
+  @override
+  String get rCardFieldPhone => 'Telefon';
+
+  @override
+  String get rCardFieldCompany => 'Unternehmen';
+
+  @override
+  String get rCardFieldPosition => 'Position';
+
+  @override
+  String get rCardFieldWebsite => 'Website';
+
+  @override
+  String get rCardFieldSocial => 'Sozial';
+
+  @override
+  String get rCardFieldSubjectDid => 'Subjekt-DID';
+
+  @override
+  String get rCardAddNotes => 'Notizen hinzufügen';
+
+  @override
+  String get rCardUpdateNotes => 'Notizen aktualisieren';
+
+  @override
+  String get rCardNotesTitle => 'Notizen';
+
+  @override
+  String get rCardNotesPlaceholder => 'Schreiben Sie hier Ihre Notizen...';
+
+  @override
+  String get rCardDeletePrompt =>
+      'Möchten Sie diese R-Karte wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.';
+
+  @override
+  String rCardChatWith(String name) {
+    return 'Chat mit $name';
+  }
+
+  @override
+  String get rCardFieldIssuerDid => 'Aussteller-DID';
+
+  @override
+  String get rCardFieldReceivedAt => 'Empfangen';
+
+  @override
+  String get rCardFieldIssuedAt => 'Ausgestellt';
+
+  @override
+  String get rCardTitle => 'R-Karte';
+
+  @override
+  String get verifiableCredential => 'Überprüfbarer Nachweis';
+
+  @override
+  String get verified => 'Verifiziert';
+
+  @override
+  String get verifiableCredentialDescription =>
+      'Gesicherte digitale Nachweise, die auf Echtheit überprüft werden können';
+
+  @override
+  String get secureAttachmentsTitle => 'Sichere Anhänge';
+
+  @override
+  String get credentialDetails => 'Nachweisdetails';
+
+  @override
+  String get genRCard => 'R-Karte';
+
+  @override
+  String get rCardPickIdentitySubtitle =>
+      'Wähle die Identität aus, die als R-Karte geteilt werden soll';
+
+  @override
+  String get rCardFooterSent => 'R-Karte wurde gesendet.';
+
+  @override
+  String get rCardFooterSaved => 'R-Karte wurde gespeichert.';
+
+  @override
+  String get rCardFooterUpdateShared => 'R-Karten-Update wurde geteilt.';
+
+  @override
+  String get rCardFooterUpdateSaved => 'R-Karten-Update wurde gespeichert.';
+
+  @override
+  String get rCardsExchanged => 'R-Karten ausgetauscht';
+
+  @override
+  String get goToRCard => 'Zur R-Karte';
+
+  @override
+  String get selectIdentityTitle => 'Identität auswählen';
+
+  @override
+  String get selectIdentityInstruction =>
+      'Wische links oder rechts, um die Identität auszuwählen, die du für die R‑Karte verwenden möchtest';
+
+  @override
+  String get sendRCard => 'R-Karte senden';
+
+  @override
+  String selectIdentityToVerifyRelationshipWithName(String name) {
+    return 'Wähle die Identität aus, die du verwenden möchtest, um deine Beziehung mit $name zu bestätigen';
+  }
+
+  @override
+  String get verifiableRelationshipCredential =>
+      'Überprüfbarer Beziehungsnachweis';
+
+  @override
+  String get vrcDetailsTitle => 'Beziehungsnachweis';
+
+  @override
+  String get vrcSectionIssuer => 'Aussteller';
+
+  @override
+  String get vrcSectionHolder => 'Ausgestellt an';
+
+  @override
+  String get vrcSectionMetadata => 'Nachweisdetails';
+
+  @override
+  String get vrcFieldDid => 'DID';
+
+  @override
+  String get vrcFieldName => 'Name';
+
+  @override
+  String get vrcFieldIssuedAt => 'Ausgestellt am';
+
+  @override
+  String get vrcFieldVerifiedAt => 'Verifiziert';
+
+  @override
+  String get vrcFieldTypes => 'Typen';
+
+  @override
+  String get vrcDescription =>
+      'Dieser Nachweis bestätigt die Beziehung zwischen zwei Parteien.';
+
+  @override
+  String verifyRelationshipPrompt(String firstName) {
+    return 'Bestätige deine Beziehung mit $firstName, indem du eine Verifiable Relationship Credential (VRC) ausstellst. Jeder VRC-Austausch erhöht deinen Vertrauenswert.';
+  }
+
+  @override
+  String get generateVrc => 'Jetzt starten';
+
+  @override
+  String get generalVerify => 'Bestätigen';
+
+  @override
+  String get doLater => 'Später';
+
+  @override
+  String get vrcExchangeInitiated => 'Du hast den VRC-Austausch eingeleitet.';
+
+  @override
+  String vrcRequestReceived(String name) {
+    return '$name hat den VRC-Austausch eingeleitet.';
+  }
+
+  @override
+  String get vrcDoLater =>
+      'VRC-Austausch pausiert. Tippe auf + und wähle \'Überprüfbarer Beziehungsnachweis\' um fortzufahren.';
+
+  @override
+  String get vrcExchangeCompleted =>
+      'Du hast deine Beziehung erfolgreich verifiziert';
+
+  @override
+  String vrcVerifyPrompt(String name) {
+    return 'Möchtest du deine Beziehung mit $name verifizieren? Jeder VRC-Austausch erhöht deinen Vertrauensscore.';
+  }
+
+  @override
+  String get vrcStartNow => 'Jetzt starten';
+
+  @override
+  String get vrcDoLaterButton => 'Später';
+
+  @override
+  String get vrcYesButton => 'Ja';
+
+  @override
+  String nameSelectedIdentity(String name) {
+    return '$name\'s selected identity';
+  }
+
+  @override
+  String selectIdentityToVerifyRelationshipPrompt(String name) {
+    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
+  }
+
+  @override
+  String get sendVrc => 'Beziehungsnachweis senden';
+
+  @override
+  String trustedBy(int count) {
+    return 'Trusted by $count';
+  }
+
+  @override
+  String get humanZkp => 'Human ZKP';
+
+  @override
+  String get humanZeroKnowledgeProof => 'Human Zero-Knowledge-Beweis';
+
+  @override
+  String get livenessCredential => 'Liveness Credential';
+
+  @override
+  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
+
+  @override
+  String get noCredentialsYet => 'You don\'t have any credentials yet.';
+
+  @override
+  String get all => 'Alle';
+
+  @override
+  String get generatingZeroKnowledgeProof =>
+      'Generating Zero-Knowledge Proof...';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get generateCredential => 'Generate credential';
+
+  @override
+  String get generateProof => 'Generate proof';
+
+  @override
+  String get livenessCredentialRequest =>
+      'Anforderung eines Liveness-Nachweises';
+
+  @override
+  String get livenessCheckDemoMode => 'Liveness-Prüfung (Demo-Modus)';
+
+  @override
+  String get searchingForLivenessCredential =>
+      'Suche nach Liveness-Nachweis...';
+
+  @override
+  String get noLivenessCredentialFound =>
+      'Es wurde kein Liveness-Nachweis gefunden.\n\nZum Fortfahren wird lokal ein simulierter Liveness-Nachweis generiert.\nDieser Nachweis dient zur Demonstration, wie ein Zero-Knowledge-Beweis (ZKP) abgeleitet wird.';
+
+  @override
+  String get livenessCheckDemoModeNote =>
+      'Diese Referenz-App läuft im Demo-Modus und führt keine echte Liveness-Prüfung durch.';
+
+  @override
+  String get livenessCheckInProgress => 'Liveness-Prüfung läuft...';
+
+  @override
+  String get livenessCheckSimulatedFlow =>
+      'Dies ist ein simulierter Ablauf nur für Entwicklungs- und Demonstrationszwecke.';
+
+  @override
+  String get mockLivenessCredentialGenerated =>
+      'Ein simulierter Liveness-Nachweis wurde generiert und sicher unter dem Tab Anmeldeinformationen gespeichert.\nSie können jetzt fortfahren, um einen menschlichen Zero-Knowledge-Beweis zu generieren.';
+
+  @override
+  String get mockLivenessCredentialNext =>
+      'You can now continue to generate a Human Zero-Knowledge proof.';
+
+  @override
+  String get livenessEvidenceThresholdNotMet =>
+      'Die Liveness-Prüfung hat den erforderlichen Schwellenwert nicht erreicht. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get livenessCredentialSessionMissing =>
+      'Ihr Liveness-Nachweis ist in dieser App-Sitzung nicht verfügbar. Generieren Sie einen neuen Nachweis und versuchen Sie es erneut.';
+
+  @override
+  String get issuedTo => 'Ausgestellt an';
+
+  @override
+  String get types => 'Typen';
+
+  @override
+  String get issuer => 'Aussteller';
+
+  @override
+  String get issuedOn => 'Ausgestellt am';
+
+  @override
+  String get human => 'Mensch';
+
+  @override
+  String get proofFlowThisContact => 'dieser Kontakt';
+
+  @override
+  String get proofFlowContact => 'Kontakt';
+
+  @override
+  String proofFlowCheckIfHuman(String contactName) {
+    return 'Überprüfe, ob $contactName ein Mensch ist, mithilfe eines Zero-Knowledge-Beweises (ZKP), der aus einem Liveness-Nachweis abgeleitet wurde.';
+  }
+
+  @override
+  String get proofFlowRequestProof => 'Beweis anfordern';
+
+  @override
+  String proofFlowVerifyingProof(String contactName) {
+    return 'Beweis von $contactName wird überprüft...';
+  }
+
+  @override
+  String proofFlowVerificationFailed(String contactName) {
+    return 'Überprüfung für $contactName fehlgeschlagen';
+  }
+
+  @override
+  String get zkpNoticePaused =>
+      'Sie haben die Human-ZKP-Beweisanforderung pausiert. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
+
+  @override
+  String get zkpNoticeShared =>
+      'Sie haben einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass Sie ein Mensch sind.\n*Es wurden keine persönlichen Daten geteilt.';
+
+  @override
+  String zkpNoticeReceived(String contactName) {
+    return '$contactName hat einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass sie/er ein Mensch ist.';
+  }
+
+  @override
+  String zkpNoticeRequest(String contactName) {
+    return '$contactName hat einen Zero‑Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.';
+  }
+
+  @override
+  String get zkpProofAlreadyShared => 'ZKP-Beweis bereits geteilt';
 
   @override
   String get removeMemberDialogTitle => 'Remove member';

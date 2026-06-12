@@ -109,8 +109,14 @@ abstract class AppLocalizations {
   /// No description provided for @tabsTitle.
   ///
   /// In en, this message translates to:
-  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} settings{Settings} other{Invalid}}'**
+  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
+
+  /// No description provided for @rCardsPlaceholderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Cards will appear here.'**
+  String get rCardsPlaceholderMessage;
 
   /// No description provided for @publishOffer.
   ///
@@ -271,7 +277,7 @@ abstract class AppLocalizations {
   /// No description provided for @newConnectionOptionTitle.
   ///
   /// In en, this message translates to:
-  /// **'{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} other{}}'**
+  /// **'{option, select, shareQRCode{Direct share QR Code} scanQRCode{Direct scan a QR Code} claimAnOffer{Accept Meeting Place Invitation} publishAnOffer{Publish Meeting Place Invitation} prove{Prove} other{}}'**
   String newConnectionOptionTitle(String option);
 
   /// No description provided for @setExpiryDateTime.
@@ -319,7 +325,7 @@ abstract class AppLocalizations {
   /// No description provided for @newConnectionOptionSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} other{}}'**
+  /// **'{option, select, shareQRCode{Gives you complete privacy and confidentiality} scanQRCode{Scan a QR Code with your camera} claimAnOffer{Connect with someone through Meeting Place} publishAnOffer{Advertise your invitation to connect on Meeting Place} prove{Zero-knowledge proof verification} other{}}'**
   String newConnectionOptionSubtitle(String option);
 
   /// No description provided for @unableToDetectCamera.
@@ -490,6 +496,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get generalDelete;
 
+  /// No description provided for @generalSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get generalSave;
+
   /// No description provided for @generalDone.
   ///
   /// In en, this message translates to:
@@ -577,7 +589,7 @@ abstract class AppLocalizations {
   /// No description provided for @error.
   ///
   /// In en, this message translates to:
-  /// **'{errorCode, select, connection_offer_owned_by_claiming_party{You cannot accept this invitation because you are the inviter!} connection_offer_already_claimed_by_claiming_party{You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress} missingMnemonic{Please enter an invitation passphrase to search} connection_offer_not_found_error{The details you provided did not match any active invitations.} discovery_register_offer_group_generic{Failed to publish invitation.} missingDeviceToken{Unable to find device notification token} offerOwnedByClaimingParty{You cannot claim this invitation because you are the owner} offerAlreadyClaimedByParty{You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress} offerNotFound{The details you provided did not match any active invitations.} mediatorAlreadyExists{Message server with the same DID already exists.} mediator_get_did_error{No message server found at the provided URL} unableToFindMediator{No message server found at the provided URL} oobFlowTimedOut{Unable to establish a connection with other party, QR code was likely already used} connection_offer_expired{This invitation has expired} connection_offer_limit_exceeded{This invitation has reached its maximum number of uses} register_offer_mnemonic_in_use{This phrase is already in use, please choose another one} invalidQrCode{QR-Code is not valid} oob_invalid_data{QR-Code data is not valid} oob_not_found{QR-Code data does not match any active invitation} oob_invalid_type{QR-Code data not supported} network_error{Could not connect. Check your internet connection and try again.} other{{errorCode}}}'**
+  /// **'{errorCode, select, connection_offer_owned_by_claiming_party{You cannot accept this invitation because you are the inviter!} connection_offer_already_claimed_by_claiming_party{You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress} missingMnemonic{Please enter an invitation passphrase to search} connection_offer_not_found_error{The details you provided did not match any active invitations.} discovery_register_offer_group_generic{Failed to publish invitation.} missingDeviceToken{Unable to find device notification token} offerOwnedByClaimingParty{You cannot claim this invitation because you are the owner} offerAlreadyClaimedByParty{You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress} offerNotFound{The details you provided did not match any active invitations.} mediatorAlreadyExists{Message server with the same DID already exists.} mediator_get_did_error{No message server found at the provided URL} unableToFindMediator{No message server found at the provided URL} oobFlowTimedOut{Unable to establish a connection with other party, QR code was likely already used} connection_offer_expired{This invitation has expired} connection_offer_limit_exceeded{This invitation has reached its maximum number of uses} register_offer_mnemonic_in_use{This phrase is already in use, please choose another one} invalidQrCode{QR-Code is not valid} oob_invalid_data{QR-Code data is not valid} oob_not_found{QR-Code data does not match any active invitation} oob_invalid_type{QR-Code data not supported} network_error{Could not connect. Check your internet connection and try again.} deleteContactFailed{Failed to delete contact.} other{{errorCode}}}'**
   String error(String errorCode);
 
   /// No description provided for @offerCreated.
@@ -1329,6 +1341,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy message'**
   String get chatMessageActionCopy;
+
+  /// No description provided for @chatMessageActionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit message'**
+  String get chatMessageActionEdit;
+
+  /// No description provided for @chatMessageEditedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'edited'**
+  String get chatMessageEditedLabel;
+
+  /// No description provided for @chatMessageEditFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not edit message'**
+  String get chatMessageEditFailed;
+
+  /// No description provided for @chatMessageEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message text'**
+  String get chatMessageEditHint;
+
+  /// No description provided for @chatMessageEditSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get chatMessageEditSave;
 
   /// No description provided for @chatMessageDeletedTombstone.
   ///
@@ -2199,6 +2241,642 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Back'**
   String get goBack;
+
+  /// No description provided for @rCardsPanelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship cards received from your contacts'**
+  String get rCardsPanelSubtitle;
+
+  /// No description provided for @rCardsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.'**
+  String get rCardsEmpty;
+
+  /// No description provided for @rCardsFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{filter, select, all{All} nonAnonymous{Non-anonymous} other{}}'**
+  String rCardsFilterLabel(String filter);
+
+  /// No description provided for @noRCardsFoundWithFilter.
+  ///
+  /// In en, this message translates to:
+  /// **'No R-Cards found matching your search.'**
+  String get noRCardsFoundWithFilter;
+
+  /// No description provided for @rCardDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card Details'**
+  String get rCardDetailsTitle;
+
+  /// No description provided for @rCardSectionIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get rCardSectionIdentity;
+
+  /// No description provided for @rCardSectionMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Details'**
+  String get rCardSectionMetadata;
+
+  /// No description provided for @rCardFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get rCardFieldName;
+
+  /// No description provided for @rCardFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get rCardFieldEmail;
+
+  /// No description provided for @rCardFieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get rCardFieldPhone;
+
+  /// No description provided for @rCardFieldCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get rCardFieldCompany;
+
+  /// No description provided for @rCardFieldPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get rCardFieldPosition;
+
+  /// No description provided for @rCardFieldWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get rCardFieldWebsite;
+
+  /// No description provided for @rCardFieldSocial.
+  ///
+  /// In en, this message translates to:
+  /// **'Social'**
+  String get rCardFieldSocial;
+
+  /// No description provided for @rCardFieldSubjectDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Subject DID'**
+  String get rCardFieldSubjectDid;
+
+  /// No description provided for @rCardAddNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Add notes'**
+  String get rCardAddNotes;
+
+  /// No description provided for @rCardUpdateNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Update notes'**
+  String get rCardUpdateNotes;
+
+  /// No description provided for @rCardNotesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes'**
+  String get rCardNotesTitle;
+
+  /// No description provided for @rCardNotesPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your notes here...'**
+  String get rCardNotesPlaceholder;
+
+  /// No description provided for @rCardDeletePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this R-Card? This action cannot be undone.'**
+  String get rCardDeletePrompt;
+
+  /// No description provided for @rCardChatWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with {name}'**
+  String rCardChatWith(String name);
+
+  /// No description provided for @rCardFieldIssuerDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuer DID'**
+  String get rCardFieldIssuerDid;
+
+  /// No description provided for @rCardFieldReceivedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get rCardFieldReceivedAt;
+
+  /// No description provided for @rCardFieldIssuedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued'**
+  String get rCardFieldIssuedAt;
+
+  /// No description provided for @rCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card'**
+  String get rCardTitle;
+
+  /// No description provided for @verifiableCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifiable Credential'**
+  String get verifiableCredential;
+
+  /// No description provided for @verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verified;
+
+  /// No description provided for @verifiableCredentialDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Secured digital credentials that can be verified for authenticity'**
+  String get verifiableCredentialDescription;
+
+  /// No description provided for @secureAttachmentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure Attachments'**
+  String get secureAttachmentsTitle;
+
+  /// No description provided for @credentialDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Details'**
+  String get credentialDetails;
+
+  /// No description provided for @genRCard.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card'**
+  String get genRCard;
+
+  /// No description provided for @rCardPickIdentitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the identity to share as an R-Card'**
+  String get rCardPickIdentitySubtitle;
+
+  /// No description provided for @rCardFooterSent.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card has been sent.'**
+  String get rCardFooterSent;
+
+  /// No description provided for @rCardFooterSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card has been saved.'**
+  String get rCardFooterSaved;
+
+  /// No description provided for @rCardFooterUpdateShared.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card update has been shared.'**
+  String get rCardFooterUpdateShared;
+
+  /// No description provided for @rCardFooterUpdateSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Card update has been saved.'**
+  String get rCardFooterUpdateSaved;
+
+  /// No description provided for @rCardsExchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'R-Cards have been exchanged.'**
+  String get rCardsExchanged;
+
+  /// No description provided for @goToRCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to R-Card'**
+  String get goToRCard;
+
+  /// No description provided for @selectIdentityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Identity'**
+  String get selectIdentityTitle;
+
+  /// No description provided for @selectIdentityInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left or right to choose the identity you want to use to generate the R‑Card'**
+  String get selectIdentityInstruction;
+
+  /// No description provided for @sendRCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Send R-Card'**
+  String get sendRCard;
+
+  /// No description provided for @selectIdentityToVerifyRelationshipWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the identity that you would like to use to verify your relationship with {name}.'**
+  String selectIdentityToVerifyRelationshipWithName(String name);
+
+  /// No description provided for @verifiableRelationshipCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifiable Relationship Credential'**
+  String get verifiableRelationshipCredential;
+
+  /// No description provided for @vrcDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship Credential'**
+  String get vrcDetailsTitle;
+
+  /// No description provided for @vrcSectionIssuer.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuer'**
+  String get vrcSectionIssuer;
+
+  /// No description provided for @vrcSectionHolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued to'**
+  String get vrcSectionHolder;
+
+  /// No description provided for @vrcSectionMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential Details'**
+  String get vrcSectionMetadata;
+
+  /// No description provided for @vrcFieldDid.
+  ///
+  /// In en, this message translates to:
+  /// **'DID'**
+  String get vrcFieldDid;
+
+  /// No description provided for @vrcFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get vrcFieldName;
+
+  /// No description provided for @vrcFieldIssuedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued On'**
+  String get vrcFieldIssuedAt;
+
+  /// No description provided for @vrcFieldVerifiedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get vrcFieldVerifiedAt;
+
+  /// No description provided for @vrcFieldTypes.
+  ///
+  /// In en, this message translates to:
+  /// **'Types'**
+  String get vrcFieldTypes;
+
+  /// No description provided for @vrcDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This credential verifies the relationship between two parties.'**
+  String get vrcDescription;
+
+  /// No description provided for @verifyRelationshipPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your relationship with {firstName} by issuing a Verifiable Relationship Credential (VRC). Each VRC exchange increases your trust score.'**
+  String verifyRelationshipPrompt(String firstName);
+
+  /// No description provided for @generateVrc.
+  ///
+  /// In en, this message translates to:
+  /// **'Start now'**
+  String get generateVrc;
+
+  /// No description provided for @generalVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get generalVerify;
+
+  /// No description provided for @doLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Do later'**
+  String get doLater;
+
+  /// No description provided for @vrcExchangeInitiated.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve initiated the VRC exchange.'**
+  String get vrcExchangeInitiated;
+
+  /// No description provided for @vrcRequestReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has initiated the VRC exchange.'**
+  String vrcRequestReceived(String name);
+
+  /// No description provided for @vrcDoLater.
+  ///
+  /// In en, this message translates to:
+  /// **'VRC exchange is paused. Tap + and select \'Verifiable Relationship Credential\' to resume.'**
+  String get vrcDoLater;
+
+  /// No description provided for @vrcExchangeCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'You have successfully verified your relationship'**
+  String get vrcExchangeCompleted;
+
+  /// No description provided for @vrcVerifyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to verify your relationship with {name}? Each VRC exchange increases your trust score.'**
+  String vrcVerifyPrompt(String name);
+
+  /// No description provided for @vrcStartNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Now'**
+  String get vrcStartNow;
+
+  /// No description provided for @vrcDoLaterButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Do Later'**
+  String get vrcDoLaterButton;
+
+  /// No description provided for @vrcYesButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get vrcYesButton;
+
+  /// No description provided for @nameSelectedIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s selected identity'**
+  String nameSelectedIdentity(String name);
+
+  /// No description provided for @selectIdentityToVerifyRelationshipPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left or right to choose the identity you want to use to verify your relationship with {name}.'**
+  String selectIdentityToVerifyRelationshipPrompt(String name);
+
+  /// No description provided for @sendVrc.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Relationship Credential'**
+  String get sendVrc;
+
+  /// No description provided for @trustedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Trusted by {count}'**
+  String trustedBy(int count);
+
+  /// No description provided for @humanZkp.
+  ///
+  /// In en, this message translates to:
+  /// **'Human ZKP'**
+  String get humanZkp;
+
+  /// No description provided for @humanZeroKnowledgeProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Human Zero-Knowledge Proof'**
+  String get humanZeroKnowledgeProof;
+
+  /// No description provided for @livenessCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Credential'**
+  String get livenessCredential;
+
+  /// No description provided for @verifiableCredentialWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifiable Credential wallet'**
+  String get verifiableCredentialWallet;
+
+  /// No description provided for @noCredentialsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any credentials yet.'**
+  String get noCredentialsYet;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @generatingZeroKnowledgeProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating Zero-Knowledge Proof...'**
+  String get generatingZeroKnowledgeProof;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @generateCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate credential'**
+  String get generateCredential;
+
+  /// No description provided for @generateProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate proof'**
+  String get generateProof;
+
+  /// No description provided for @livenessCredentialRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Credential Request'**
+  String get livenessCredentialRequest;
+
+  /// No description provided for @livenessCheckDemoMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Check (Demo Mode)'**
+  String get livenessCheckDemoMode;
+
+  /// No description provided for @searchingForLivenessCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for Liveness Credential...'**
+  String get searchingForLivenessCredential;
+
+  /// No description provided for @noLivenessCredentialFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.'**
+  String get noLivenessCredentialFound;
+
+  /// No description provided for @livenessCheckDemoModeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This reference app runs in demo mode and does not perform a real liveness check.'**
+  String get livenessCheckDemoModeNote;
+
+  /// No description provided for @livenessCheckInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness Check in progress...'**
+  String get livenessCheckInProgress;
+
+  /// No description provided for @livenessCheckSimulatedFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a simulated flow for development and demonstration purposes only.'**
+  String get livenessCheckSimulatedFlow;
+
+  /// No description provided for @mockLivenessCredentialGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'A mock Liveness Credential has been generated and securely stored under the Credentials tab.'**
+  String get mockLivenessCredentialGenerated;
+
+  /// No description provided for @mockLivenessCredentialNext.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now continue to generate a Human Zero-Knowledge proof.'**
+  String get mockLivenessCredentialNext;
+
+  /// No description provided for @livenessEvidenceThresholdNotMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Liveness check did not meet the required threshold. Please try again.'**
+  String get livenessEvidenceThresholdNotMet;
+
+  /// No description provided for @livenessCredentialSessionMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Your liveness credential is not available in this app session. Generate a new credential and try again.'**
+  String get livenessCredentialSessionMissing;
+
+  /// No description provided for @issuedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued to'**
+  String get issuedTo;
+
+  /// No description provided for @types.
+  ///
+  /// In en, this message translates to:
+  /// **'Types'**
+  String get types;
+
+  /// No description provided for @issuer.
+  ///
+  /// In en, this message translates to:
+  /// **'Issuer'**
+  String get issuer;
+
+  /// No description provided for @issuedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued on'**
+  String get issuedOn;
+
+  /// No description provided for @human.
+  ///
+  /// In en, this message translates to:
+  /// **'Human'**
+  String get human;
+
+  /// No description provided for @proofFlowThisContact.
+  ///
+  /// In en, this message translates to:
+  /// **'this contact'**
+  String get proofFlowThisContact;
+
+  /// No description provided for @proofFlowContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get proofFlowContact;
+
+  /// No description provided for @proofFlowCheckIfHuman.
+  ///
+  /// In en, this message translates to:
+  /// **'Check if {contactName} is human using a Zero‑Knowledge Proof (ZKP) derived from a Liveness Credential.'**
+  String proofFlowCheckIfHuman(String contactName);
+
+  /// No description provided for @proofFlowRequestProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Request proof'**
+  String get proofFlowRequestProof;
+
+  /// No description provided for @proofFlowVerifyingProof.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying proof from {contactName}...'**
+  String proofFlowVerifyingProof(String contactName);
+
+  /// No description provided for @proofFlowVerificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed for {contactName}'**
+  String proofFlowVerificationFailed(String contactName);
+
+  /// No description provided for @zkpNoticePaused.
+  ///
+  /// In en, this message translates to:
+  /// **'You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.'**
+  String get zkpNoticePaused;
+
+  /// No description provided for @zkpNoticeShared.
+  ///
+  /// In en, this message translates to:
+  /// **'You have shared a Zero‑Knowledge Proof confirming you are human.\n*No personal data was shared.'**
+  String get zkpNoticeShared;
+
+  /// No description provided for @zkpNoticeReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'{contactName} has shared a Zero‑Knowledge Proof confirming they are human.'**
+  String zkpNoticeReceived(String contactName);
+
+  /// No description provided for @zkpNoticeRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'{contactName} has requested a Zero‑Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.'**
+  String zkpNoticeRequest(String contactName);
+
+  /// No description provided for @zkpProofAlreadyShared.
+  ///
+  /// In en, this message translates to:
+  /// **'ZKP Proof already shared'**
+  String get zkpProofAlreadyShared;
 
   /// No description provided for @removeMemberDialogTitle.
   ///

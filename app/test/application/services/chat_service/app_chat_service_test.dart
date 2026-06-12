@@ -721,8 +721,8 @@ void main() {
     test('pauseChat cancels rCard subscription without error', () async {
       await chatService.startChatSession();
 
-      chatService.pauseChat();
-      chatService.pauseChat(); // second call must not throw
+      await chatService.pauseChat();
+      await chatService.pauseChat(); // second call must not throw
 
       expect(fakeChatSdk.sessionEnded, isTrue);
     });

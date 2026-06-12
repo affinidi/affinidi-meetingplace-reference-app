@@ -19,8 +19,7 @@ import 'camera_image_attachment.dart';
 /// - Renders camera attachments as tappable image cards
 /// - Supports full-screen image viewing via [ImageViewScreen]
 class CameraAttachmentsPlugin implements AttachmentPlugin {
-  CameraAttachmentsPlugin({required BaseCacheManager cacheManager})
-    : _cacheManager = cacheManager;
+  CameraAttachmentsPlugin({required this._cacheManager});
 
   static const _pluginName = 'mpx_camera_attachment_plugin';
 
@@ -121,10 +120,9 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
 /// parent scroll containers without interfering with their scroll behavior.
 class _ListCameraAttachmentsWidget extends StatelessWidget {
   const _ListCameraAttachmentsWidget({
-    required List<ChatAttachment> attachments,
-    required BaseCacheManager cacheManager,
-  }) : _attachments = attachments,
-       _cacheManager = cacheManager;
+    required this._attachments,
+    required this._cacheManager,
+  });
 
   final List<ChatAttachment> _attachments;
   final BaseCacheManager _cacheManager;
@@ -153,10 +151,9 @@ class _ListCameraAttachmentsWidget extends StatelessWidget {
 /// - Uses [CachedBase64Image] for efficient image rendering
 class _CameraAttachmentWidget extends StatelessWidget {
   _CameraAttachmentWidget({
-    required ChatAttachment attachment,
-    required BaseCacheManager cacheManager,
-  }) : _attachment = attachment,
-       _cacheManager = cacheManager;
+    required this._attachment,
+    required this._cacheManager,
+  });
 
   final ChatAttachment _attachment;
   final BaseCacheManager _cacheManager;
