@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
@@ -247,6 +248,49 @@ void main() {
 
       final key = AttachmentCacheService.cacheKey(attachment);
       expect(service.state.containsKey(key), isFalse);
+    });
+
+    test('auto-load stops retrying once the backoff schedule is exhausted', () {
+      fakeAsync((async) {
+        final attachment = ChatAttachment(
+          format: AttachmentFormat.hostedMedia.value,
+          mediaType: 'image/png',
+        )..transportId = 'missing-media-transport-id';
+
+        service.autoLoad(attachment);
+        async.flushMicrotasks();
+
+        // A failed auto-load schedules a backoff retry instead of giving up.
+        expect(async.pendingTimers, isNotEmpty);
+
+        // Exhaust the full backoff schedule (0.5 + 1 + 2 + 4 + 8 + 8 = 23.5s).
+        async.elapse(const Duration(seconds: 24));
+
+        // The retry schedule is bounded: nothing is left pending and the cache
+        // is never poisoned with a failed marker.
+        expect(async.pendingTimers, isEmpty);
+        final key = AttachmentCacheService.cacheKey(attachment);
+        expect(service.state.containsKey(key), isFalse);
+      });
+    });
+
+    test('disposing the service cancels pending auto-load retries', () {
+      fakeAsync((async) {
+        final attachment = ChatAttachment(
+          format: AttachmentFormat.hostedMedia.value,
+          mediaType: 'image/png',
+        )..transportId = 'missing-media-transport-id';
+
+        service.autoLoad(attachment);
+        async.flushMicrotasks();
+        expect(async.pendingTimers, isNotEmpty);
+
+        container.dispose();
+
+        // onDispose cancels the scheduled retry timer.
+        expect(async.pendingTimers, isEmpty);
+        async.elapse(const Duration(seconds: 24));
+      });
     });
   });
 }

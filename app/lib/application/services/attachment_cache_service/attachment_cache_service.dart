@@ -28,13 +28,25 @@ part 'attachment_cache_service.g.dart';
 @riverpod
 class AttachmentCacheService extends _$AttachmentCacheService {
   static const _logKey = 'ATTACHCACHE';
-  static const _silentPreloadRetryDelay = Duration(milliseconds: 500);
-  static const _silentPreloadRetryCount = 4;
+
+  // Hosted media lives in Matrix timeline events that are decrypted
+  // asynchronously after the room syncs. Until decryption completes a download
+  // fails with an `m.room.encrypted` error, so auto-loads retry on this backoff
+  // (one entry per follow-up attempt) instead of giving up or poisoning the
+  // cache with a permanent failure the user never triggered.
+  static const _autoRetryBackoff = <Duration>[
+    Duration(milliseconds: 500),
+    Duration(seconds: 1),
+    Duration(seconds: 2),
+    Duration(seconds: 4),
+    Duration(seconds: 8),
+    Duration(seconds: 8),
+  ];
 
   late final AppLogger _logger;
   ChatService? _chatService;
   final Set<String> _attachmentsLoading = {};
-  final Set<Timer> _silentRetryTimers = {};
+  final Set<Timer> _autoRetryTimers = {};
   final Map<String, LocalVoiceMessageData> _localVoiceMessages = {};
   bool _isDisposed = false;
 
@@ -44,10 +56,10 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     _logger = ref.read(appLoggerProvider);
     ref.onDispose(() {
       _isDisposed = true;
-      for (final timer in _silentRetryTimers) {
+      for (final timer in _autoRetryTimers) {
         timer.cancel();
       }
-      _silentRetryTimers.clear();
+      _autoRetryTimers.clear();
     });
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
@@ -110,17 +122,42 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     }
   }
 
-  /// Loads an attachment into the cache. Handles legacy base64-encoded
+  /// Loads an attachment into the cache in response to an explicit user action
+  /// (tapping a video, document, or voice bubble). Handles legacy base64
   /// attachments, locally recorded voice messages, and hosted media downloaded
-  /// via the attachment's transportId.
+  /// via the attachment's transportId. A failed hosted download is recorded as
+  /// an empty cache entry so the bubble can surface a retry affordance.
   ///
   /// Returns `true` when a load was started or resolved synchronously, and
   /// `false` when the attachment is already cached or cannot be loaded yet.
-  bool loadAttachment(
+  bool loadAttachment(ChatAttachment attachment) {
+    return _load(
+      attachment,
+      markFailedOnError: true,
+      logFailure: true,
+      retryAttempt: null,
+    );
+  }
+
+  /// Loads an attachment without any user interaction (preload, image bubbles).
+  ///
+  /// Hosted media download failures are silent and never poison the cache:
+  /// historical Matrix events decrypt asynchronously after the room syncs, so a
+  /// failed attempt is retried on a backoff until the bytes become available.
+  bool autoLoad(ChatAttachment attachment) {
+    return _load(
+      attachment,
+      markFailedOnError: false,
+      logFailure: false,
+      retryAttempt: 0,
+    );
+  }
+
+  bool _load(
     ChatAttachment attachment, {
-    bool markFailedOnError = true,
-    bool logFailure = true,
-    int remainingSilentRetries = 0,
+    required bool markFailedOnError,
+    required bool logFailure,
+    required int? retryAttempt,
   }) {
     final key = cacheKey(attachment);
     if (state[key] != null) return false;
@@ -157,7 +194,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
         attachment,
         markFailedOnError: markFailedOnError,
         logFailure: logFailure,
-        remainingSilentRetries: remainingSilentRetries,
+        retryAttempt: retryAttempt,
       ),
     );
     return true;
@@ -179,6 +216,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
         attachment,
         markFailedOnError: true,
         logFailure: true,
+        retryAttempt: null,
       ),
     );
     return true;
@@ -187,22 +225,13 @@ class AttachmentCacheService extends _$AttachmentCacheService {
   /// Preloads hosted media that should be available without a manual tap:
   /// images and audio (including voice messages). Larger media (video,
   /// documents) is downloaded on demand to avoid eagerly fetching big payloads.
-  ///
-  /// Failures during preload are silent — no failed marker is written — so the
-  /// attachment stays in the "tap to download" state rather than showing a
-  /// permanent failure the user never triggered.
   void preload(List<chat.ChatItem> messages) {
     for (final message in messages.whereType<chat.Message>()) {
       for (final attachment in message.attachments) {
         if (attachment.format != AttachmentFormat.hostedMedia.value) continue;
         final category = mediaCategoryFromMimeType(attachment.mediaType);
         if (category == MediaCategory.image || attachment.isVoice) {
-          loadAttachment(
-            attachment,
-            markFailedOnError: false,
-            logFailure: false,
-            remainingSilentRetries: _silentPreloadRetryCount,
-          );
+          autoLoad(attachment);
         }
       }
     }
@@ -324,7 +353,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     ChatAttachment attachment, {
     required bool markFailedOnError,
     required bool logFailure,
-    int remainingSilentRetries = 0,
+    required int? retryAttempt,
   }) async {
     if (_attachmentsLoading.contains(cacheKey)) return;
     _attachmentsLoading.add(cacheKey);
@@ -339,9 +368,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
           );
         }
         if (markFailedOnError) _writeCache(cacheKey, Uint8List(0));
-        if (!markFailedOnError && remainingSilentRetries > 0) {
-          _scheduleSilentRetry(cacheKey, attachment, remainingSilentRetries);
-        }
+        _scheduleAutoRetry(cacheKey, attachment, retryAttempt);
         return;
       }
 
@@ -356,22 +383,28 @@ class AttachmentCacheService extends _$AttachmentCacheService {
         );
       }
       if (markFailedOnError) _writeCache(cacheKey, Uint8List(0));
-      if (!markFailedOnError && remainingSilentRetries > 0) {
-        _scheduleSilentRetry(cacheKey, attachment, remainingSilentRetries);
-      }
+      _scheduleAutoRetry(cacheKey, attachment, retryAttempt);
     } finally {
       _attachmentsLoading.remove(cacheKey);
     }
   }
 
-  void _scheduleSilentRetry(
+  /// Schedules a follow-up auto-load when [retryAttempt] is within the backoff
+  /// schedule. Hosted media events decrypt asynchronously after the room syncs,
+  /// so a failed auto-load is retried until the bytes become available rather
+  /// than left as a permanently empty bubble.
+  void _scheduleAutoRetry(
     String cacheKey,
     ChatAttachment attachment,
-    int remainingSilentRetries,
+    int? retryAttempt,
   ) {
+    if (retryAttempt == null || retryAttempt >= _autoRetryBackoff.length) {
+      return;
+    }
+
     late final Timer timer;
-    timer = Timer(_silentPreloadRetryDelay, () {
-      _silentRetryTimers.remove(timer);
+    timer = Timer(_autoRetryBackoff[retryAttempt], () {
+      _autoRetryTimers.remove(timer);
       if (_isDisposed || state[cacheKey] != null) return;
       unawaited(
         _downloadAndCache(
@@ -379,11 +412,11 @@ class AttachmentCacheService extends _$AttachmentCacheService {
           attachment,
           markFailedOnError: false,
           logFailure: false,
-          remainingSilentRetries: remainingSilentRetries - 1,
+          retryAttempt: retryAttempt + 1,
         ),
       );
     });
-    _silentRetryTimers.add(timer);
+    _autoRetryTimers.add(timer);
   }
 
   void _writeCache(String cacheKey, Uint8List bytes) {

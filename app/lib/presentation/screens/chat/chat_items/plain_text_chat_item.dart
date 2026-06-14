@@ -358,9 +358,16 @@ class _HostedMediaWidget extends HookConsumerWidget {
         .loadAttachment(_attachment);
 
     final category = mediaCategoryFromMimeType(_attachment.mediaType);
+    // Images have no manual download affordance, so they auto-load. Auto-loads
+    // never poison the cache and retry on a backoff, because historical Matrix
+    // events decrypt asynchronously after the room syncs.
     final shouldLoadImage = category == MediaCategory.image && cached == null;
     useEffect(() {
-      if (shouldLoadImage) onDownload();
+      if (shouldLoadImage) {
+        ref
+            .read(attachmentCacheServiceProvider(_contactId).notifier)
+            .autoLoad(_attachment);
+      }
       return null;
     }, [cacheKey, shouldLoadImage]);
 
