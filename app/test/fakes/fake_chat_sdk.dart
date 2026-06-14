@@ -10,6 +10,18 @@ import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card
 import 'fake_chat.dart';
 
 class FakeChatSdk implements MeetingPlaceChatSDK {
+  FakeChatSdk({TransportCapabilities? capabilities})
+    : _capabilities =
+          capabilities ??
+          TransportCapabilities.forTransport(ChannelTransport.matrix);
+
+  TransportCapabilities _capabilities;
+
+  @override
+  TransportCapabilities get capabilities => _capabilities;
+
+  set capabilities(TransportCapabilities caps) => _capabilities = caps;
+
   int _chatSessionStartedCalls = 0;
   int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =

@@ -467,6 +467,7 @@ class ChatScreenController extends _$ChatScreenController
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
       notificationToken: channel.otherPartyNotificationToken,
+      transport: channel.transport,
     );
 
     final lastKeepAliveMessage = contact.lastKeepAliveMessage;
@@ -1159,7 +1160,38 @@ extension ChatScreenControllerProviderSelectors
   ProviderListenable<bool> get shouldDisable {
     return select((state) => !state.isInitialized || state.isGroupDeleted);
   }
+
+  ProviderListenable<bool> get supportsMedia {
+    return select(
+      (state) =>
+          _capsFor(state.transport).supports(chat.ChatFeature.mediaAttachments),
+    );
+  }
+
+  ProviderListenable<bool> get supportsVoiceMessages {
+    return select(
+      (state) =>
+          _capsFor(state.transport).supports(chat.ChatFeature.voiceMessages),
+    );
+  }
+
+  ProviderListenable<bool> get supportsDeleteForEveryone {
+    return select(
+      (state) =>
+          _capsFor(state.transport).supports(chat.ChatFeature.messageDelete),
+    );
+  }
+
+  ProviderListenable<bool> get supportsPresence {
+    return select(
+      (state) => _capsFor(state.transport).supports(chat.ChatFeature.presence),
+    );
+  }
 }
+
+chat.TransportCapabilities _capsFor(ChannelTransport? t) => t == null
+    ? const chat.TransportCapabilities({chat.ChatFeature.textMessaging})
+    : chat.TransportCapabilities.forTransport(t);
 
 extension _ChatScreenStateExtensions on ChatScreenState {
   bool get isGroupChat => contact?.isGroup ?? false;

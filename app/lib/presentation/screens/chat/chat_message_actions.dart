@@ -27,8 +27,10 @@ class _ChatMessageActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final controller = ref.read(
-      chatScreenControllerProvider(_contactId).notifier,
+    final provider = chatScreenControllerProvider(_contactId);
+    final controller = ref.read(provider.notifier);
+    final supportsDeleteForEveryone = ref.watch(
+      provider.supportsDeleteForEveryone,
     );
 
     Future<void> copy() async {
@@ -109,13 +111,14 @@ class _ChatMessageActions extends ConsumerWidget {
           onTap: edit,
         ),
       if (_message.canDelete) ...[
-        _ChatMessageActionItem(
-          icon: Icons.delete_outline,
-          label: context.l10n.chatMessageActionDelete,
-          isDestructive: true,
-          enabled: isWithinDeleteWindow,
-          onTap: () => delete(localOnly: false),
-        ),
+        if (supportsDeleteForEveryone)
+          _ChatMessageActionItem(
+            icon: Icons.delete_outline,
+            label: context.l10n.chatMessageActionDelete,
+            isDestructive: true,
+            enabled: isWithinDeleteWindow,
+            onTap: () => delete(localOnly: false),
+          ),
         _ChatMessageActionItem(
           icon: Icons.visibility_off_outlined,
           label: context.l10n.chatMessageActionDeleteLocal,

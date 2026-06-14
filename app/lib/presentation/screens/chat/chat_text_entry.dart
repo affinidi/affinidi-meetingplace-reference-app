@@ -12,6 +12,8 @@ class _ChatTextEntry extends HookConsumerWidget {
     final otherPartyName = ref.watch(provider.otherPartyName);
     final isGroupChat = ref.watch(provider.isGroupChat);
     final shouldDisable = ref.watch(provider.shouldDisable);
+    final supportsMedia = ref.watch(provider.supportsMedia);
+    final supportsVoiceMessages = ref.watch(provider.supportsVoiceMessages);
     final focusNode = useFocusNode();
     final inputDecoration = context.chatInputDecoration;
     final messageTextValue = useValueListenable(
@@ -65,7 +67,7 @@ class _ChatTextEntry extends HookConsumerWidget {
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              if (!voice.isVoiceMode)
+              if (!voice.isVoiceMode && supportsMedia)
                 Material(
                   color: shouldDisable
                       ? context.theme.disabledColor
@@ -221,18 +223,24 @@ class _ChatTextEntry extends HookConsumerWidget {
                     ? voice.send
                     : hasMessageText
                     ? sendMessage
-                    : voice.startRecording,
+                    : supportsVoiceMessages
+                    ? voice.startRecording
+                    : null,
                 child: Padding(
                   padding: const EdgeInsets.all(6.0),
                   child: Icon(
                     key: Key(
                       hasMessageText || voice.hasDraftOrRecording
                           ? 'chat_send_icon'
-                          : 'chat_voice_record_icon',
+                          : supportsVoiceMessages
+                          ? 'chat_voice_record_icon'
+                          : 'chat_send_icon',
                     ),
                     hasMessageText || voice.hasDraftOrRecording
                         ? Icons.send
-                        : Icons.mic,
+                        : supportsVoiceMessages
+                        ? Icons.mic
+                        : Icons.send,
                     size: 40,
                     color: shouldDisable || voice.isBusy
                         ? context.theme.disabledColor
