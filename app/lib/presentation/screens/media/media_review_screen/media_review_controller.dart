@@ -37,6 +37,10 @@ class MediaReviewController extends _$MediaReviewController {
         qualityPercent: imageConfig.qualityPercentage,
       );
 
+      if (!compressedImage.succeeded) {
+        return MediaReviewResult.empty();
+      }
+
       return MediaReviewResult(success, message, compressedImage);
     } catch (_) {
       return MediaReviewResult.empty();

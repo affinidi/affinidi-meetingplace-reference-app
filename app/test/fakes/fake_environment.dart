@@ -99,5 +99,14 @@ class FakeEnvironment implements Environment {
   int get extraDelayAtLaunchInMilliseconds => 0;
 
   @override
+  int get matrixMediaMaxCacheBytes => 30 * 1024 * 1024;
+
+  @override
+  int get chatAttachmentMaxBytes => 25 * 1024 * 1024;
+
+  @override
+  Duration get matrixMediaCacheTtl => const Duration(days: 30);
+
+  @override
   String? get directInteractiveOobType => null;
 }

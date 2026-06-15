@@ -7,7 +7,7 @@ part of 'attachment_cache_service.dart';
 // **************************************************************************
 
 String _$attachmentCacheServiceHash() =>
-    r'0487c92608dacaa18048c4cd538cfc75bebee5a5';
+    r'dc3154c66b2957cbff2eaa36c0240487a0160159';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -37,7 +37,8 @@ abstract class _$AttachmentCacheService
   Map<String, Uint8List> build(String contactId);
 }
 
-/// Holds decrypted attachment bytes for a chat, keyed by [attachmentCacheKey].
+/// Holds decrypted attachment bytes for a chat, keyed by
+/// [AttachmentCacheService.cacheKey].
 ///
 /// Downloads hosted media via the [ChatService] and decodes legacy base64
 /// attachments, deduplicating in-flight downloads. Owned per contact so the
@@ -47,7 +48,8 @@ abstract class _$AttachmentCacheService
 @ProviderFor(AttachmentCacheService)
 const attachmentCacheServiceProvider = AttachmentCacheServiceFamily();
 
-/// Holds decrypted attachment bytes for a chat, keyed by [attachmentCacheKey].
+/// Holds decrypted attachment bytes for a chat, keyed by
+/// [AttachmentCacheService.cacheKey].
 ///
 /// Downloads hosted media via the [ChatService] and decodes legacy base64
 /// attachments, deduplicating in-flight downloads. Owned per contact so the
@@ -55,7 +57,8 @@ const attachmentCacheServiceProvider = AttachmentCacheServiceFamily();
 ///
 /// Copied from [AttachmentCacheService].
 class AttachmentCacheServiceFamily extends Family<Map<String, Uint8List>> {
-  /// Holds decrypted attachment bytes for a chat, keyed by [attachmentCacheKey].
+  /// Holds decrypted attachment bytes for a chat, keyed by
+  /// [AttachmentCacheService.cacheKey].
   ///
   /// Downloads hosted media via the [ChatService] and decodes legacy base64
   /// attachments, deduplicating in-flight downloads. Owned per contact so the
@@ -64,7 +67,8 @@ class AttachmentCacheServiceFamily extends Family<Map<String, Uint8List>> {
   /// Copied from [AttachmentCacheService].
   const AttachmentCacheServiceFamily();
 
-  /// Holds decrypted attachment bytes for a chat, keyed by [attachmentCacheKey].
+  /// Holds decrypted attachment bytes for a chat, keyed by
+  /// [AttachmentCacheService.cacheKey].
   ///
   /// Downloads hosted media via the [ChatService] and decodes legacy base64
   /// attachments, deduplicating in-flight downloads. Owned per contact so the
@@ -97,7 +101,8 @@ class AttachmentCacheServiceFamily extends Family<Map<String, Uint8List>> {
   String? get name => r'attachmentCacheServiceProvider';
 }
 
-/// Holds decrypted attachment bytes for a chat, keyed by [attachmentCacheKey].
+/// Holds decrypted attachment bytes for a chat, keyed by
+/// [AttachmentCacheService.cacheKey].
 ///
 /// Downloads hosted media via the [ChatService] and decodes legacy base64
 /// attachments, deduplicating in-flight downloads. Owned per contact so the
@@ -110,7 +115,8 @@ class AttachmentCacheServiceProvider
           AttachmentCacheService,
           Map<String, Uint8List>
         > {
-  /// Holds decrypted attachment bytes for a chat, keyed by [attachmentCacheKey].
+  /// Holds decrypted attachment bytes for a chat, keyed by
+  /// [AttachmentCacheService.cacheKey].
   ///
   /// Downloads hosted media via the [ChatService] and decodes legacy base64
   /// attachments, deduplicating in-flight downloads. Owned per contact so the

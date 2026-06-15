@@ -362,5 +362,15 @@
 	"chatNotificationsWhyNote": "Solo verás mensajes nuevos cuando estés en el chat. No habrá actualizaciones de insignias ni notificaciones que te informen que han llegado mensajes nuevos, incluso si la aplicación está abierta.",
 	"chatNotificationsWhyTitle": "¿Por qué no hay notificaciones push?",
 	"goBack": "Volver",
-	"debugPanelShareLogs": "Compartir registros"
+	"debugPanelShareLogs": "Compartir registros",
+	"mediaTapToRetry": "Toca para reintentar",
+	"mediaDownloadFailedTapToRetry": "Descarga fallida. Toca para reintentar",
+	"attachmentTooLarge": "El archivo adjunto es demasiado grande. Tamaño máximo: {maxMb} MB.",
+	"generalVideo": "Vídeo",
+	"generalDocument": "Documento",
+	"documentTapToDownload": "Toca para descargar",
+	"videoLoadingError": "No se puede reproducir el vídeo",
+	"voiceMessagePermissionDenied": "Se requiere permiso de micrófono para grabar mensajes de voz.",
+	"voiceMessageRecordingFailed": "No se puede iniciar la grabación de voz.",
+	"voiceMessageSendFailed": "No se puede enviar el mensaje de voz."
 }

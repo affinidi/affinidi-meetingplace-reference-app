@@ -111,6 +111,30 @@ class Environment {
     defaultValue: 500,
   );
 
+  /// Maximum size, in bytes, of media retained in the Matrix on-disk cache.
+  /// Configured in megabytes via `MATRIX_MEDIA_MAX_CACHE_MB`.
+  int get matrixMediaMaxCacheBytes =>
+      const int.fromEnvironment('MATRIX_MEDIA_MAX_CACHE_MB', defaultValue: 30) *
+      1024 *
+      1024;
+
+  /// Maximum size, in bytes, accepted for an outgoing chat attachment such as
+  /// a document or video. Configured in megabytes via
+  /// `CHAT_ATTACHMENT_MAX_SIZE_MB`.
+  int get chatAttachmentMaxBytes =>
+      const int.fromEnvironment(
+        'CHAT_ATTACHMENT_MAX_SIZE_MB',
+        defaultValue: 25,
+      ) *
+      1024 *
+      1024;
+
+  /// Period after which downloaded Matrix media is evicted from the on-disk
+  /// cache. Configured in days via `MATRIX_MEDIA_CACHE_TTL_DAYS`.
+  Duration get matrixMediaCacheTtl => const Duration(
+    days: int.fromEnvironment('MATRIX_MEDIA_CACHE_TTL_DAYS', defaultValue: 30),
+  );
+
   late final Map<String, String> _defaultMediators = Map<String, String>.from(
     jsonDecode(
           const String.fromEnvironment('DEFAULT_MEDIATORS', defaultValue: '{}'),

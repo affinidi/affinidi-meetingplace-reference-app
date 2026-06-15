@@ -1483,5 +1483,51 @@
 	"removeMemberNotSupported": "Removing members isn't supported yet.",
 	"@removeMemberNotSupported": {
 		"type": "text"
+	},
+	"generalVideo": "Video",
+	"@generalVideo": {
+		"description": "Label for the video attachment plugin"
+	},
+	"generalDocument": "Document",
+	"@generalDocument": {
+		"description": "Label for the document attachment plugin"
+	},
+	"documentTapToDownload": "Tap to download",
+	"@documentTapToDownload": {
+		"description": "Hint shown on document attachment before download"
+	},
+	"videoLoadingError": "Unable to play video",
+	"@videoLoadingError": {
+		"description": "Error shown when video cannot be played"
+	},
+	"mediaTapToRetry": "Tap to retry",
+	"@mediaTapToRetry": {
+		"description": "Action label shown over a failed media attachment download, prompting the user to retry"
+	},
+	"mediaDownloadFailedTapToRetry": "Download failed. Tap to retry",
+	"@mediaDownloadFailedTapToRetry": {
+		"description": "Status label shown on a document attachment when its download fails, prompting the user to retry"
+	},
+	"attachmentTooLarge": "Attachment is too large. Maximum size is {maxMb} MB.",
+	"@attachmentTooLarge": {
+		"description": "Snackbar shown when a picked attachment exceeds the byte-size cap",
+		"placeholders": {
+			"maxMb": {
+				"type": "int",
+				"example": "25"
+			}
+		}
+	},
+	"voiceMessagePermissionDenied": "Microphone permission is required to record voice messages.",
+	"@voiceMessagePermissionDenied": {
+		"description": "Snackbar shown when voice-message recording cannot start because microphone permission is denied"
+	},
+	"voiceMessageRecordingFailed": "Unable to start voice recording.",
+	"@voiceMessageRecordingFailed": {
+		"description": "Snackbar shown when voice-message recording fails to start"
+	},
+	"voiceMessageSendFailed": "Unable to send voice message.",
+	"@voiceMessageSendFailed": {
+		"description": "Snackbar shown when a recorded voice message could not be sent"
 	}
 }

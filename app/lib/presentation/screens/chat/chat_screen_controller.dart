@@ -24,6 +24,7 @@ import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
+
 import 'chat_screen_state.dart';
 
 part 'chat_screen_controller.g.dart';
@@ -77,8 +78,11 @@ class ChatScreenController extends _$ChatScreenController
           newEffect = null;
         }
 
+        final messages = ref
+            .read(attachmentCacheServiceProvider(contactId).notifier)
+            .withLocalVoiceMetadata(next.messages);
         state = state.copyWith(
-          messages: next.messages,
+          messages: messages,
           membersTyping: next.membersTyping,
           contactPresenceStatus: next.contactPresenceStatus,
           isActive: next.isActive,
@@ -87,10 +91,13 @@ class ChatScreenController extends _$ChatScreenController
           otherPartyCard: next.otherPartyCard ?? state.otherPartyCard,
           effect: newEffect,
         );
-        if (!identical(previous?.messages, next.messages)) {
+        final messagesChanged = !identical(previous?.messages, next.messages);
+        final becameInitialized =
+            previous?.isInitialized != true && next.isInitialized;
+        if (messagesChanged || becameInitialized) {
           ref
               .read(attachmentCacheServiceProvider(contactId).notifier)
-              .preload(next.messages);
+              .preload(messages);
         }
       });
     }
@@ -654,6 +661,57 @@ class ChatScreenController extends _$ChatScreenController
       unawaited(
         _chatService?.sendTextMessage(caption, attachments: [chatAttachment]),
       );
+    }
+  }
+
+  /// Records and sends a voice message: builds the attachment, caches the
+  /// recording locally so the sender can replay it immediately, then sends it.
+  Future<bool> sendVoiceMessage({
+    required String filePath,
+    required String mediaType,
+    required Duration duration,
+    required List<int> waveform,
+  }) async {
+    messageTextController.clear();
+    _sendChatActivityTimedAction?.cancel();
+
+    final chatService = _chatService;
+    if (chatService == null) {
+      _logger.warning('Chat service unavailable', name: _logKey);
+      return false;
+    }
+
+    final voiceMessage = await chatService.buildVoiceMessageAttachment(
+      filePath: filePath,
+      mediaType: mediaType,
+      duration: duration,
+      waveform: waveform,
+    );
+    if (voiceMessage == null) return false;
+
+    final cache = ref.read(attachmentCacheServiceProvider(_contactId).notifier);
+    cache.cacheLocalVoiceMessage(
+      voiceMessage.attachment,
+      voiceMessage.bytes,
+      durationMs: duration.inMilliseconds,
+      waveform: waveform,
+    );
+
+    try {
+      await chatService.sendTextMessage(
+        '',
+        attachments: [voiceMessage.attachment],
+      );
+      return true;
+    } catch (e, st) {
+      cache.removeLocalVoiceMessage(voiceMessage.attachment);
+      _logger.error(
+        'Failed to send voice message',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+      return false;
     }
   }
 

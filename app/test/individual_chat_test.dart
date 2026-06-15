@@ -63,6 +63,7 @@ Future<void> navigateToChatScreen(
 Finder findChatMessageInput() => find.byKey(const Key('chat_message_input'));
 Finder findSendButton() => find.byKey(const Key('chat_send_button'));
 Finder findAddMediaButton() => find.byKey(const Key('chat_add_media_button'));
+Finder findGifButton() => find.byKey(const Key('chat_gif_button'));
 
 Future<void> enterChatMessage(WidgetTester tester, String message) async {
   await tester.enterText(findChatMessageInput(), message);
@@ -383,9 +384,7 @@ void main() {
     });
 
     group('and clicking the add media button', () {
-      testWidgets('should show a menu with media and effects options', (
-        tester,
-      ) async {
+      testWidgets('should show a menu with media options', (tester) async {
         final l10n = await getL10n();
 
         await navigateToChatScreen(
@@ -401,8 +400,9 @@ void main() {
 
         expect(find.text(l10n.generalCamera), findsOneWidget);
         expect(find.text(l10n.generalPhoto), findsOneWidget);
-        expect(find.text(l10n.generalBalloons), findsOneWidget);
-        expect(find.text(l10n.generalConfetti), findsOneWidget);
+        expect(find.text(l10n.generalVideo), findsNothing);
+        expect(find.text(l10n.generalBalloons), findsNothing);
+        expect(find.text(l10n.generalConfetti), findsNothing);
       });
 
       for (final effect in [Effect.balloons, Effect.confetti]) {
@@ -422,7 +422,7 @@ void main() {
               meetingPlaceChatSDK: meetingPlaceChatSDK,
             );
 
-            await tester.tap(findAddMediaButton());
+            await tester.tap(findGifButton());
             await tester.pumpAndSettle();
 
             await tester.tap(find.text(effectLabel));
@@ -470,6 +470,37 @@ void main() {
             message,
             contactName,
           );
+        });
+
+        testWidgets('should send video selected from image picker', (
+          tester,
+        ) async {
+          final l10n = await getL10n();
+          final meetingPlaceChatSDK = FakeChatSdk();
+
+          await navigateToChatScreen(
+            tester,
+            contactId: contactId,
+            imagePicker: FakeImagePicker(
+              xFileToReturn: XFile.fromData(
+                FakeImagePicker.defaultImageBytes,
+                name: 'clip.mp4',
+                mimeType: 'video/mp4',
+              ),
+            ),
+            meetingPlaceChatSDK: meetingPlaceChatSDK,
+          );
+
+          await tester.tap(findAddMediaButton());
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.text(l10n.generalPhoto));
+          await tester.pumpAndSettle();
+
+          expect(meetingPlaceChatSDK.sendMediaMessageCalls, hasLength(1));
+          final sendCall = meetingPlaceChatSDK.sendMediaMessageCalls.first;
+          expect(sendCall['contentType'], startsWith('video/'));
+          expect(sendCall['filename'], 'video.mp4');
         });
       });
 
