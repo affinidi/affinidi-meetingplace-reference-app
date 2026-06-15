@@ -94,7 +94,7 @@ class ZkpFlowService {
       if (item is! chat.Message || item.isFromMe) continue;
 
       final payload = LivenessZkpAttachmentParser.tryParseRequestIn(
-        item.attachments,
+        item.attachments.map((a) => a.toCoreAttachment()).toList(),
       );
       if (payload == null) continue;
 
