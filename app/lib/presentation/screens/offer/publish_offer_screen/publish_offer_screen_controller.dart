@@ -362,6 +362,7 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
         maxUsages: updatedFormData.maxUsages,
         customPhrase: updatedFormData.customPhrase,
         score: updatedFormData.score,
+        transport: updatedFormData.transport,
       );
 
       await ref

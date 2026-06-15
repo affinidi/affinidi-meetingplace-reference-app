@@ -129,8 +129,12 @@ final class _Enabled extends ChatZkpMessageListPolicy {
       if (attachments.isNotEmpty &&
           attachments.every(
             (att) =>
-                LivenessZkpAttachmentParser.matchesRequestFormat(att) ||
-                LivenessZkpAttachmentParser.matchesProofFormat(att),
+                LivenessZkpAttachmentParser.matchesRequestFormat(
+                  att.toCoreAttachment(),
+                ) ||
+                LivenessZkpAttachmentParser.matchesProofFormat(
+                  att.toCoreAttachment(),
+                ),
           )) {
         return true;
       }

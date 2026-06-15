@@ -22,8 +22,10 @@ class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
   bool canHandle(ChatEvent event) => event is ChatMessageEvent;
 
   @override
-  Future<void> handle(StreamData data, String channelDid) async {
-    final attachments = data.plainTextMessage?.attachments;
+  Future<void> handle(ChatEvent event, String channelDid) async {
+    if (event is! ChatMessageEvent) return;
+
+    final attachments = event.data.plainTextMessage?.attachments;
     if (attachments == null || attachments.isEmpty) return;
 
     final hasRequest =
@@ -36,6 +38,6 @@ class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
       'Received chat message with liveness ZKP attachment',
       name: _logKey,
     );
-    _onZkpAttachment(data, channelDid);
+    _onZkpAttachment(event.data, channelDid);
   }
 }

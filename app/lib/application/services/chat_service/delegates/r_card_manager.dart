@@ -103,7 +103,7 @@ class RCardManager {
       final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
       final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(vcJson);
       await _chatSdk?.createAttachmentMessage(
-        attachments: attachments,
+        attachments: attachments.map((a) => a.toChatAttachment()).toList(),
         senderDid: channelDid,
       );
     } catch (error, stackTrace) {
@@ -175,7 +175,7 @@ class RCardManager {
         isUpdate: true,
       );
       await _chatSdk?.createAttachmentMessage(
-        attachments: attachments,
+        attachments: attachments.map((a) => a.toChatAttachment()).toList(),
         senderDid: channelDid,
       );
     } catch (e, st) {
@@ -213,7 +213,7 @@ class RCardManager {
       final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
       final attachments = RCardDIDCommAttachmentBuilder.fromVcJson(vcJson);
       await chatSdk.createAttachmentMessage(
-        attachments: attachments,
+        attachments: attachments.map((a) => a.toChatAttachment()).toList(),
         senderDid: otherDid,
       );
     } catch (error, stackTrace) {
