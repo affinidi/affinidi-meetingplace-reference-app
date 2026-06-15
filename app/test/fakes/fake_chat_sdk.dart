@@ -12,15 +12,9 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =
       StreamController<StreamData>.broadcast();
-  final List<StreamData> _bufferedEvents = [];
-  final bool _hasListener = false;
 
   void _emit(StreamData data) {
-    if (_hasListener) {
-      _streamController.add(data);
-    } else {
-      _bufferedEvents.add(data);
-    }
+    _streamController.add(data);
   }
 
   bool chatActivitySent = false;
