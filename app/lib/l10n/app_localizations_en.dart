@@ -1576,6 +1576,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get removeMemberDialogTitle => 'Remove member';
+
+  @override
+  String removeMemberDialogBody(String name) {
+    return 'Remove $name from this group? They will no longer receive messages.';
+  }
+
+  @override
   String get rCardFieldIssuerDid => 'Issuer DID';
 
   @override
@@ -1871,14 +1879,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zkpProofAlreadyShared => 'ZKP Proof already shared';
-
-  @override
-  String get removeMemberDialogTitle => 'Remove member';
-
-  @override
-  String removeMemberDialogBody(String name) {
-    return 'Remove $name from this group? They will no longer receive messages.';
-  }
 
   @override
   String get removeMemberConfirm => 'Remove';
