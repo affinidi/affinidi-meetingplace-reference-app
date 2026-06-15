@@ -16,6 +16,7 @@ import '../chat_service/chat_service.dart';
 import '../chat_service/chat_session_service.dart';
 import '../chat_service/local_voice_message_data.dart';
 import '../contacts_service/contacts_service.dart';
+import 'chat_media_bytes_cache.dart';
 
 part 'attachment_cache_service.g.dart';
 
@@ -44,6 +45,8 @@ class AttachmentCacheService extends _$AttachmentCacheService {
   ];
 
   late final AppLogger _logger;
+  late final String _contactId;
+  late final ChatMediaBytesCache _bytesCache;
   ChatService? _chatService;
   final Set<String> _attachmentsLoading = {};
   final Set<Timer> _autoRetryTimers = {};
@@ -53,7 +56,9 @@ class AttachmentCacheService extends _$AttachmentCacheService {
   @override
   Map<String, Uint8List> build(String contactId) {
     _isDisposed = false;
+    _contactId = contactId;
     _logger = ref.read(appLoggerProvider);
+    _bytesCache = ref.read(chatMediaBytesCacheProvider);
     ref.onDispose(() {
       _isDisposed = true;
       for (final timer in _autoRetryTimers) {
@@ -68,7 +73,10 @@ class AttachmentCacheService extends _$AttachmentCacheService {
       _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
     }
 
-    return const {};
+    // Seed from the process-lifetime warm cache so re-entering a chat renders
+    // its already-decrypted media immediately instead of showing a spinner per
+    // image while it re-downloads and re-decrypts.
+    return {..._bytesCache.snapshotFor(contactId)};
   }
 
   /// Returns a stable string key for [attachment] suitable for use as a cache
@@ -111,7 +119,11 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     if (base64Data == null || base64Data.isEmpty) return;
 
     try {
-      _writeCache(cacheKey(attachment), base64.decode(base64Data));
+      _writeCache(
+        cacheKey(attachment),
+        base64.decode(base64Data),
+        attachment: attachment,
+      );
     } catch (e, stackTrace) {
       _logger.error(
         'Failed to decode attachment base64 in seed',
@@ -165,7 +177,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     final base64Data = attachment.data?.base64;
     if (base64Data != null) {
       try {
-        _writeCache(key, base64.decode(base64Data));
+        _writeCache(key, base64.decode(base64Data), attachment: attachment);
       } catch (e, stackTrace) {
         _logger.error(
           'Failed to decode attachment base64',
@@ -179,7 +191,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
 
     final localVoiceMessage = localVoiceMessageFor(attachment);
     if (localVoiceMessage != null) {
-      _writeCache(key, localVoiceMessage.bytes);
+      _writeCache(key, localVoiceMessage.bytes, attachment: attachment);
       return true;
     }
 
@@ -245,7 +257,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     required int durationMs,
     required List<int> waveform,
   }) {
-    _writeCache(cacheKey(attachment), bytes);
+    _writeCache(cacheKey(attachment), bytes, attachment: attachment);
     final key = _localVoiceMessageKey(attachment);
     if (key != null) {
       _localVoiceMessages[key] = LocalVoiceMessageData(
@@ -372,7 +384,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
         return;
       }
 
-      _writeCache(cacheKey, bytes);
+      _writeCache(cacheKey, bytes, attachment: attachment);
     } catch (e, stackTrace) {
       if (logFailure) {
         _logger.error(
@@ -419,7 +431,23 @@ class AttachmentCacheService extends _$AttachmentCacheService {
     _autoRetryTimers.add(timer);
   }
 
-  void _writeCache(String cacheKey, Uint8List bytes) {
+  void _writeCache(
+    String cacheKey,
+    Uint8List bytes, {
+    ChatAttachment? attachment,
+  }) {
     state = {...state, cacheKey: bytes};
+    if (attachment != null && _isWarmCacheable(attachment)) {
+      _bytesCache.put(_contactId, cacheKey, bytes);
+    }
+  }
+
+  /// Whether [attachment] is small, auto-displayed media worth retaining in the
+  /// process-lifetime warm cache. Large tap-to-open media (video, documents) is
+  /// excluded so it cannot evict the images the warm cache exists to keep.
+  bool _isWarmCacheable(ChatAttachment attachment) {
+    if (attachment.isVoice) return true;
+    return mediaCategoryFromMimeType(attachment.mediaType) ==
+        MediaCategory.image;
   }
 }

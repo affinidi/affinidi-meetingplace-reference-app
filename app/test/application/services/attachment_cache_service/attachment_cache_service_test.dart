@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/attachment_cache_service/attachment_cache_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/attachment_cache_service/chat_media_bytes_cache.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
@@ -40,25 +41,27 @@ void main() {
     final contactId = testContact.id;
     final channelDid = testContact.channelDid!;
 
-    setUp(() async {
+    List<Override> buildOverrides() {
       final fakeCoreSdk = FakeMeetingPlaceSDK(
         channels: {channelDid: FakeChannels.individualChannel},
       );
       fakeChatSdk = FakeChatSdk();
       final fakeContactsService = FakeContactsService();
 
-      container = ProviderContainer(
-        overrides: [
-          meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
-          chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
-          contactsServiceProvider.overrideWith(() => fakeContactsService),
-          environmentProvider.overrideWithValue(FakeEnvironment()),
-          appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
-          networkConnectivityServiceProvider.overrideWith(
-            _FakeNetworkConnectivityService.new,
-          ),
-        ],
-      );
+      return [
+        meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
+        chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+        contactsServiceProvider.overrideWith(() => fakeContactsService),
+        environmentProvider.overrideWithValue(FakeEnvironment()),
+        appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+        networkConnectivityServiceProvider.overrideWith(
+          _FakeNetworkConnectivityService.new,
+        ),
+      ];
+    }
+
+    setUp(() async {
+      container = ProviderContainer(overrides: buildOverrides());
       container.listen(
         attachmentCacheServiceProvider(contactId),
         (previous, value) {},
@@ -291,6 +294,66 @@ void main() {
         expect(async.pendingTimers, isEmpty);
         async.elapse(const Duration(seconds: 24));
       });
+    });
+
+    test('loading an image populates the shared warm cache', () {
+      final attachment = ChatAttachment(
+        format: AttachmentFormat.hostedMedia.value,
+        mediaType: 'image/jpeg',
+        data: ChatAttachmentData(base64: base64Encode([1, 2, 3])),
+      )..transportId = 'warm-cache-transport-id';
+      final key = AttachmentCacheService.cacheKey(attachment);
+
+      service.loadAttachment(attachment);
+
+      final warmCache = container.read(chatMediaBytesCacheProvider);
+      expect(warmCache.snapshotFor(contactId)[key], [1, 2, 3]);
+    });
+
+    test('video bytes are not added to the warm cache', () {
+      final attachment = ChatAttachment(
+        format: AttachmentFormat.hostedMedia.value,
+        mediaType: 'video/mp4',
+        data: ChatAttachmentData(base64: base64Encode([9, 9, 9])),
+      )..transportId = 'warm-cache-video-id';
+      final key = AttachmentCacheService.cacheKey(attachment);
+
+      service.loadAttachment(attachment);
+
+      final warmCache = container.read(chatMediaBytesCacheProvider);
+      expect(warmCache.snapshotFor(contactId).containsKey(key), isFalse);
+    });
+
+    test('re-entering a chat seeds its cache from the warm cache', () {
+      final attachment = ChatAttachment(
+        format: AttachmentFormat.hostedMedia.value,
+        mediaType: 'image/jpeg',
+      )..transportId = 'seeded-transport-id';
+      final key = AttachmentCacheService.cacheKey(attachment);
+
+      // A previous visit left the image in the process-lifetime warm cache.
+      final warmCache = ChatMediaBytesCache()
+        ..put(contactId, key, Uint8List.fromList([1, 2, 3]));
+
+      final reopenedContainer = ProviderContainer(
+        overrides: [
+          ...buildOverrides(),
+          chatMediaBytesCacheProvider.overrideWithValue(warmCache),
+        ],
+      );
+      addTearDown(reopenedContainer.dispose);
+      reopenedContainer.listen(
+        attachmentCacheServiceProvider(contactId),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      final reopenedService = reopenedContainer.read(
+        attachmentCacheServiceProvider(contactId).notifier,
+      );
+
+      // The freshly opened chat starts with the image already present, so no
+      // spinner or re-download is needed.
+      expect(reopenedService.state[key], [1, 2, 3]);
     });
   });
 }
