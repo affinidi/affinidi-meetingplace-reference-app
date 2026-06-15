@@ -119,7 +119,7 @@ class ChatScreenController extends _$ChatScreenController
           if (zkpAttachmentEvent != null &&
               previous?.zkpAttachmentEvent != zkpAttachmentEvent) {
             _zkpHandler.handleZkpAttachment(
-              zkpAttachmentEvent.data,
+              zkpAttachmentEvent.chatItem,
               zkpAttachmentEvent.channelDid,
             );
           }

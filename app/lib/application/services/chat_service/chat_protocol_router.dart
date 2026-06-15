@@ -20,7 +20,7 @@ class ChatProtocolRouter {
     if (data.event case final event?) {
       for (final handler in _handlers) {
         if (handler.canHandle(event)) {
-          await handler.handle(event, channelDid);
+          await handler.handle(data, channelDid);
         }
       }
     }

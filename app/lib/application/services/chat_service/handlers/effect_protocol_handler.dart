@@ -17,10 +17,11 @@ class EffectProtocolHandler implements ChatProtocolHandler {
   bool canHandle(ChatEvent event) => event is ChatEffectEvent;
 
   @override
-  Future<void> handle(ChatEvent event, String channelDid) async {
-    if (event is! ChatEffectEvent) {
-      throw StateError('Unexpected event type: ${event.runtimeType}');
+  Future<void> handle(StreamData data, String channelDid) async {
+    if (data.event is! ChatEffectEvent) {
+      throw StateError('Unexpected event type: ${data.event.runtimeType}');
     }
+    final event = data.event as ChatEffectEvent;
 
     _logger.info('Received chat effect update', name: _logKey);
     _onEffect(event.effectName);
