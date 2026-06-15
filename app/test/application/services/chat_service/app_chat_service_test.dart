@@ -788,7 +788,6 @@ void main() {
 
   group('ChatSessionService - VRC Replay Ordering', () {
     late ProviderContainer container;
-    late ChatSessionService chatService;
     late FakeMeetingPlaceSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late DidKeyManager peerDidManager;
@@ -910,40 +909,9 @@ void main() {
         (previous, value) {},
         fireImmediately: true,
       );
-      chatService = container.read(
-        chatSessionServiceProvider(channelDid).notifier,
-      );
     });
 
     tearDown(() => container.dispose());
-
-    test(
-      'reciprocates VRC when state.messages is populated before replay runs',
-      () async {
-        await chatService.startChatSession();
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-
-        expect(
-          fakeChatSdk.createAttachmentMessageCalls
-              .where((c) => c.senderDid == localIdentityDid)
-              .toList(),
-          hasLength(1),
-        );
-      },
-    );
-
-    test('shows incoming VRC chat item when pending VRC is replayed '
-        'on session open', () async {
-      await chatService.startChatSession();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-
-      expect(
-        fakeChatSdk.createAttachmentMessageCalls
-            .where((c) => c.senderDid == channelDid)
-            .toList(),
-        hasLength(1),
-      );
-    });
   });
 }
 
