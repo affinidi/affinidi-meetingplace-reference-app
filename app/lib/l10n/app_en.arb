@@ -1481,6 +1481,12 @@
 	"rCardDeletePrompt": "Are you sure you want to delete this R-Card? This action cannot be undone.",
 	"rCardChatWith": "Chat with {name}",
 	"@rCardChatWith": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"removeMemberDialogTitle": "Remove member",
 	"@removeMemberDialogTitle": {
 		"type": "text"
@@ -1770,6 +1776,8 @@
 	},
 	"zkpProofAlreadyShared": "ZKP Proof already shared",
 	"@zkpProofAlreadyShared": {
+		"type": "text"
+	},
 	"removeMemberConfirm": "Remove",
 	"@removeMemberConfirm": {
 		"type": "text"

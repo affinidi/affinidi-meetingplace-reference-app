@@ -2338,6 +2338,18 @@ abstract class AppLocalizations {
   /// **'Chat with {name}'**
   String rCardChatWith(String name);
 
+  /// No description provided for @removeMemberDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member'**
+  String get removeMemberDialogTitle;
+
+  /// No description provided for @removeMemberDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from this group? They will no longer receive messages.'**
+  String removeMemberDialogBody(String name);
+
   /// No description provided for @rCardFieldIssuerDid.
   ///
   /// In en, this message translates to:
@@ -2853,18 +2865,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'ZKP Proof already shared'**
   String get zkpProofAlreadyShared;
-
-  /// No description provided for @removeMemberDialogTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove member'**
-  String get removeMemberDialogTitle;
-
-  /// No description provided for @removeMemberDialogBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove {name} from this group? They will no longer receive messages.'**
-  String removeMemberDialogBody(String name);
 
   /// No description provided for @removeMemberConfirm.
   ///
