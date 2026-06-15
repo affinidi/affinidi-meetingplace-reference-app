@@ -5,7 +5,6 @@ import 'package:meeting_place_credentials/meeting_place_credentials.dart'
         LivenessProofPayload,
         LivenessZkpAttachmentParser,
         LivenessZkpDIDCommAttachmentBuilder;
-import 'package:mpx_app_core/mpx_app_core.dart';
 
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/zkp/zkp_challenge_nonce.dart';
