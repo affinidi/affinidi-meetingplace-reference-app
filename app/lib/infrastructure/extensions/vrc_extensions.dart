@@ -11,7 +11,7 @@ import '../plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
 // Attachment extensions
 // ─────────────────────────────────────────────────────────────────────────────
 
-extension AttachmentVrcX on Attachment {
+extension AttachmentVrcX on ChatAttachment {
   bool get isVrc => format == VrcAttachment.pluginFormat;
 
   String? get vrcVcBlob {
@@ -30,7 +30,7 @@ extension AttachmentVrcX on Attachment {
   }
 }
 
-extension AttachmentVrcRequestX on Attachment {
+extension AttachmentVrcRequestX on ChatAttachment {
   bool get isVrcRequest => format == VrcRequestAttachment.pluginFormat;
 
   String? get vrcRequestIdentityDid {

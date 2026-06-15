@@ -5,6 +5,7 @@ import 'package:meeting_place_credentials/meeting_place_credentials.dart'
         LivenessProofPayload,
         LivenessZkpAttachmentParser,
         LivenessZkpDIDCommAttachmentBuilder;
+import 'package:mpx_app_core/mpx_app_core.dart';
 
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/zkp/zkp_challenge_nonce.dart';
@@ -184,7 +185,7 @@ class ZkpFlowService {
             .read(chatSessionServiceProvider(channelDid).notifier)
             .sendTextMessage(
               '',
-              attachments: List<chat.Attachment>.from(attachments),
+              attachments: List<ChatAttachment>.from(attachments),
             );
 
         _logger.info('Proof sent to contact successfully', name: _logKey);
@@ -231,7 +232,7 @@ class ZkpFlowService {
   }
 
   Future<bool> _sendZkpAttachments(
-    List<chat.Attachment> attachments, {
+    List<ChatAttachment> attachments, {
     required String errorMessage,
   }) async {
     final channelDid = _readChannelDid();
@@ -248,7 +249,7 @@ class ZkpFlowService {
           .read(chatSessionServiceProvider(channelDid).notifier)
           .sendTextMessage(
             '',
-            attachments: List<chat.Attachment>.from(attachments),
+            attachments: List<ChatAttachment>.from(attachments),
           );
       return true;
     } catch (error, stackTrace) {

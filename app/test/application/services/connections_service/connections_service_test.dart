@@ -36,6 +36,7 @@ ConnectionOffer _makeOffer({
   createdAt: DateTime(2024, 1, 1),
   externalRef: externalRef,
   score: score,
+  transport: ChannelTransport.didcomm,
 );
 
 final _testIdentity = FakeIdentities.primaryIdentity.copyWith(

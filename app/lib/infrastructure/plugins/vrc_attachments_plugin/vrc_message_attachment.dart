@@ -11,5 +11,5 @@ class VrcMessageAttachment implements MessageAttachment {
   String get pluginName => VrcAttachment.pluginFormat;
 
   @override
-  Attachment toAttachment() => VrcAttachment(vcBlob: vcBlob).toAttachment();
+  ChatAttachment toAttachment() => VrcAttachment(vcBlob: vcBlob).toAttachment();
 }

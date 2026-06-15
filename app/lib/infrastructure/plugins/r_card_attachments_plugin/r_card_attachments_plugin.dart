@@ -61,12 +61,12 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
   }
 
   @override
-  bool supportsFormat(Attachment attachment) =>
+  bool supportsFormat(ChatAttachment attachment) =>
       attachment.format == RCardAttachment.pluginFormat;
 
   @override
   Widget renderAttachment({
-    required Attachment attachment,
+    required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
   }) => _RCardAttachmentWidget(
@@ -78,7 +78,7 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   Widget renderAttachments({
-    required List<Attachment> attachments,
+    required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
   }) {

@@ -6,11 +6,7 @@ part of 'chat_screen.dart';
 /// Delete-for-everyone and Delete-for-me only on the user's own non-deleted
 /// messages.
 class _ChatMessageActions extends ConsumerWidget {
-  const _ChatMessageActions({
-    required String contactId,
-    required chat.Message message,
-  }) : _contactId = contactId,
-       _message = message;
+  const _ChatMessageActions({required this._contactId, required this._message});
 
   final String _contactId;
   final chat.Message _message;
@@ -132,8 +128,7 @@ class _ChatMessageActionItem {
 }
 
 class _ChatMessageActionTile extends StatelessWidget {
-  const _ChatMessageActionTile({required _ChatMessageActionItem item})
-    : _item = item;
+  const _ChatMessageActionTile({required this._item});
 
   final _ChatMessageActionItem _item;
 

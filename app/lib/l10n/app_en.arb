@@ -1451,7 +1451,7 @@
 	"cameraOpenSettings": "Open Settings",
 	"cameraNotAvailable": "Camera not available",
 	"goBack": "Go Back",
-<<<<<<< HEAD
+
 	"rCardsPanelSubtitle": "Relationship cards received from your contacts",
 	"rCardsEmpty": "R-Cards are a modern self-updating version of vCards. Once you make your first connection, your digital business cards will appear here.",
 	"rCardsFilterLabel": "{filter, select, all{All} nonAnonymous{Non-anonymous} other{}}",
@@ -1494,7 +1494,6 @@
 			}
 		}
 	},
-<<<<<<< HEAD
 	"rCardFieldIssuerDid": "Issuer DID",
 	"rCardFieldReceivedAt": "Received",
 	"rCardFieldIssuedAt": "Issued",

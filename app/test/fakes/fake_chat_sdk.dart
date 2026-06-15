@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
+
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
@@ -13,7 +13,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final StreamController<StreamData> _streamController =
       StreamController<StreamData>.broadcast();
   final List<StreamData> _bufferedEvents = [];
-  bool _hasListener = false;
+  final bool _hasListener = false;
 
   void _emit(StreamData data) {
     if (_hasListener) {
@@ -136,24 +136,17 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       ),
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: conciergeMessage.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/concierge'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/concierge',
+      senderDid: senderDid,
       body: {
         'type': 'permissionToVerifyRelationship',
         'timestamp': conciergeMessage.dateCreated.toIso8601String(),
       },
-      from: senderDid,
-      to: [recipientDid],
       createdTime: conciergeMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: conciergeMessage,
-      ),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: conciergeMessage));
 
     return conciergeMessage;
   }
@@ -178,22 +171,18 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       data: data,
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: eventMessage.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/event',
+      senderDid: senderDid,
       body: {
         'type': eventType,
         'timestamp': eventMessage.dateCreated.toIso8601String(),
         ...data,
       },
-      from: senderDid,
-      to: [recipientDid],
       createdTime: eventMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
 
     return eventMessage;
   }
@@ -566,52 +555,6 @@ class FakeChat implements Chat {
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError(
       'Method ${invocation.memberName} not implemented in FakeChat',
-    );
-  }
-}
-
-class _FakeChatStream implements ChatStream {
-  _FakeChatStream(
-    this._stream, {
-    required this.drainBuffer,
-    required this.onDispose,
-  });
-
-  final Stream<StreamData> _stream;
-  final void Function(void Function(StreamData) onData) drainBuffer;
-  final void Function() onDispose;
-  StreamSubscription<StreamData>? _subscription;
-
-  @override
-  ChatStream listen(
-    void Function(StreamData) onData, {
-    Function? onError,
-    void Function()? onDone,
-    bool? cancelOnError,
-  }) {
-    drainBuffer(onData);
-    _subscription = _stream.listen(
-      onData,
-      onError: onError,
-      onDone: onDone,
-      cancelOnError: cancelOnError,
-    );
-    return this;
-  }
-
-  @override
-  Stream<StreamData> get stream => _stream;
-
-  @override
-  Future<void> dispose() async {
-    await _subscription?.cancel();
-    onDispose();
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError(
-      'Method ${invocation.memberName} not implemented in _FakeChatStream',
     );
   }
 }
