@@ -481,5 +481,15 @@
 	"zkpNoticeReceived": "{contactName} hat einen Zero\u2011Knowledge-Beweis geteilt, der bestätigt, dass sie/er ein Mensch ist.",
 	"zkpNoticeRequest": "{contactName} hat einen Zero\u2011Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.",
 	"zkpProofAlreadyShared": "ZKP-Beweis bereits geteilt",
-	"debugPanelShareLogs": "Protokolle teilen"
+	"debugPanelShareLogs": "Protokolle teilen",
+	"mediaTapToRetry": "Zum Wiederholen tippen",
+	"mediaDownloadFailedTapToRetry": "Download fehlgeschlagen. Zum Wiederholen tippen",
+	"attachmentTooLarge": "Anhang ist zu groß. Maximale Größe: {maxMb} MB.",
+	"generalVideo": "Video",
+	"generalDocument": "Dokument",
+	"documentTapToDownload": "Zum Herunterladen tippen",
+	"videoLoadingError": "Video kann nicht abgespielt werden",
+	"voiceMessagePermissionDenied": "Zum Aufnehmen von Sprachnachrichten ist Mikrofonzugriff erforderlich.",
+	"voiceMessageRecordingFailed": "Sprachaufnahme kann nicht gestartet werden.",
+	"voiceMessageSendFailed": "Sprachnachricht kann nicht gesendet werden."
 }

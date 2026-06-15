@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contact_card/contact_card.dart' as domain;
@@ -418,7 +423,64 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String message, {
     List<ChatAttachment>? attachments,
   }) async {
-    await _chatSDK?.sendTextMessage(message, attachments: attachments ?? []);
+    await _chatSDK?.sendTextMessage(
+      message,
+      attachments: attachments ?? const [],
+    );
+  }
+
+  @override
+  Future<({ChatAttachment attachment, Uint8List bytes})?>
+  buildVoiceMessageAttachment({
+    required String filePath,
+    required String mediaType,
+    required Duration duration,
+    required List<int> waveform,
+  }) async {
+    late final Uint8List bytes;
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) {
+        _logger.warning('Voice message file missing', name: _logKey);
+        return null;
+      }
+
+      bytes = await file.readAsBytes();
+      if (bytes.isEmpty) {
+        _logger.warning('Voice message file is empty', name: _logKey);
+        return null;
+      }
+    } catch (e, st) {
+      _logger.error(
+        'Failed to read voice message file',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+      return null;
+    }
+
+    final attachment = VoiceMessageMetadata.buildAttachment(
+      id: const Uuid().v4(),
+      base64: base64.encode(bytes),
+      durationMs: duration.inMilliseconds,
+      waveform: waveform,
+      filename: path.basename(filePath),
+      mediaType: mediaType,
+      format: AttachmentFormat.hostedMedia.value,
+      lastModifiedTime: clock.now(),
+      byteCount: bytes.length,
+    );
+    return (attachment: attachment, bytes: bytes);
+  }
+
+  @override
+  Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
+    final sdk = _chatSDK;
+    if (sdk == null) {
+      throw StateError('Chat SDK not initialized');
+    }
+    return sdk.downloadMedia(attachment);
   }
 
   @override
@@ -461,6 +523,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     bool deleteForMeOnly = false,
   }) async {
     await _chatSDK?.deleteMessage(message, localOnly: deleteForMeOnly);
+  }
+
+  @override
+  Future<void> editTextMessage(Message message, String newText) async {
+    await _chatSDK?.editTextMessage(message, newText);
   }
 
   @override

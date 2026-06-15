@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
 
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
@@ -37,6 +39,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
+  final List<Map<String, dynamic>> sendMediaMessageCalls = [];
+  final Map<String, List<int>> _downloadedMedia = {};
   final List<({List<ChatAttachment> attachments, String senderDid})>
   createAttachmentMessageCalls = [];
 
@@ -49,6 +53,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String recipientDid,
     List<ChatAttachment>? attachments,
   }) {
+    final transportId =
+        'fake-transport-incoming-${DateTime.now().microsecondsSinceEpoch}';
+    for (final attachment in attachments ?? const <ChatAttachment>[]) {
+      attachment.transportId ??= transportId;
+    }
     final message = Message(
       chatId: 'fake-chat-id',
       messageId: 'msg-incoming-${DateTime.now().millisecondsSinceEpoch}',
@@ -476,6 +485,41 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }) async {
     // Track the call
     sendTextMessageCalls.add({'text': text, 'attachments': attachments});
+
+    var normalizedAttachments = attachments ?? const <ChatAttachment>[];
+    final firstAttachment = normalizedAttachments.firstOrNull;
+    final base64Data = firstAttachment?.data?.base64;
+    if (firstAttachment != null &&
+        base64Data != null &&
+        base64Data.isNotEmpty &&
+        firstAttachment.data?.links?.isEmpty != false) {
+      final fileBytes = base64Decode(base64Data);
+      final mediaUri = Uri.parse(
+        'mxc://fake-homeserver/fake-media-${sendMediaMessageCalls.length}',
+      );
+      final transportId = 'fake-event-${DateTime.now().microsecondsSinceEpoch}';
+      sendMediaMessageCalls.add({
+        'fileBytes': fileBytes,
+        'contentType': firstAttachment.mediaType ?? 'application/octet-stream',
+        'filename': firstAttachment.filename,
+        'caption': text,
+        'mxcUri': mediaUri,
+        'transportId': transportId,
+      });
+      _downloadedMedia[transportId] = fileBytes;
+
+      normalizedAttachments = [
+        ChatAttachment(
+          id: firstAttachment.id,
+          mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
+          filename: firstAttachment.filename,
+          format: AttachmentFormat.hostedMedia.value,
+          transportId: transportId,
+          data: ChatAttachmentData(links: [mediaUri], base64: base64Data),
+          metadata: firstAttachment.metadata,
+        ),
+      ];
+    }
 
     final message = Message(
       chatId: 'fake-chat-id',

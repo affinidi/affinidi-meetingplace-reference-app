@@ -16,5 +16,6 @@ abstract class MediaScreenState with _$MediaScreenState {
     @Default(false) bool isFrontCamera,
     @Default(false) bool isLoading,
     @Default(true) bool permissionGranted,
+    int? videoTooLargeMaxMb,
   }) = _MediaScreenState;
 }
