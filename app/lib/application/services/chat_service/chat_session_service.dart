@@ -250,10 +250,21 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       final chatSession = await _chatSDK!.startChatSession();
       _chatId = chatSession.id;
 
-      final messages = [
+      final dbMessageIds = {
+        EncryptionNotice().messageId,
+        for (final m in chatSession.messages) m.messageId,
+      };
+      final replayMessages = state.messages
+          .where((m) => !dbMessageIds.contains(m.messageId))
+          .toList();
+
+      final baseMessages = [
         EncryptionNotice(),
         ...chatSession.messages,
+        ...replayMessages,
       ].sortedBy((item) => item.dateCreated).reversed.toList();
+
+      final messages = _appendDerivedZkpNotices(baseMessages);
       state = state.copyWith(messages: messages, isInitialized: true);
 
       // Reset must be fully committed before the stream listener is attached.
@@ -291,23 +302,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
             );
         }),
       );
-
-      final dbMessageIds = {
-        EncryptionNotice().messageId,
-        for (final m in chatSession.messages) m.messageId,
-      };
-      final replayMessages = state.messages
-          .where((m) => !dbMessageIds.contains(m.messageId))
-          .toList();
-
-      final baseMessages = [
-        EncryptionNotice(),
-        ...chatSession.messages,
-        ...replayMessages,
-      ].sortedBy((item) => item.dateCreated).reversed.toList();
-
-      final messages = _appendDerivedZkpNotices(baseMessages);
-      state = state.copyWith(messages: messages, isInitialized: true);
 
       // Replay any VRC events that fired before the chat was opened
       // (e.g. while the user was offline). Must run AFTER:

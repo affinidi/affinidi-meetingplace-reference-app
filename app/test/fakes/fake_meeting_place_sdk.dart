@@ -94,7 +94,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     required ContactCard contactCard,
     required SDKConnectionOfferType type,
     required String offerDescription,
-    required ChannelTransport transport,
+    ChannelTransport transport = ChannelTransport.didcomm,
     String? customPhrase,
     DateTime? validUntil,
     int? maximumUsage,

@@ -27,7 +27,7 @@ class DatabasePlatform {
     // PRAGMA cipher_version check that only worked with SQLCipher.
     final cipherCheck = sqliteDb.select('PRAGMA cipher;');
     if (cipherCheck.isEmpty) {
-      sqliteDb.close();
+      sqliteDb.dispose();
       throw UnsupportedError('Database encryption support not available');
     }
 
@@ -41,7 +41,7 @@ class DatabasePlatform {
         logStatements: Environment.instance.isDatabaseLoggingEnabled,
       );
     } on SqliteException {
-      sqliteDb.close();
+      sqliteDb.dispose();
     }
 
     // Default cipher failed — database was created with SQLCipher.
@@ -57,7 +57,7 @@ class DatabasePlatform {
         logStatements: Environment.instance.isDatabaseLoggingEnabled,
       );
     } catch (_) {
-      legacyDb.close();
+      legacyDb.dispose();
       rethrow;
     }
   }

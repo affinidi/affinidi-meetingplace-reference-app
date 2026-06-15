@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
@@ -342,12 +341,12 @@ void main() {
         text: '',
         recipientDid: recipientDid,
         attachments: [
-          chat.Attachment(
+          ChatAttachment(
             id: 'att-1',
             mediaType: 'application/json',
             format: RCardAttachment.pluginFormat,
             lastModifiedTime: DateTime(2024),
-            data: chat.AttachmentData(json: rCardPayload),
+            data: ChatAttachmentData(json: rCardPayload),
           ),
         ],
       );

@@ -20,19 +20,19 @@ class RCardAttachment implements MessageAttachment {
   String get pluginName => pluginFormat;
 
   @override
-  Attachment toAttachment() {
+  ChatAttachment toAttachment() {
     final payload = jsonEncode({'vcBlob': _vcBlob, 'isUpdate': false});
-    return Attachment(
+    return ChatAttachment(
       id: const Uuid().v4(),
       mediaType: 'application/json',
       format: pluginFormat,
       lastModifiedTime: clock.now(),
-      data: AttachmentData(json: payload),
+      data: ChatAttachmentData(json: payload),
     );
   }
 }
 
-extension AttachmentRCardX on Attachment {
+extension AttachmentRCardX on ChatAttachment {
   bool get isRCard => format == RCardAttachment.pluginFormat;
 
   String? get rCardVcBlob {
