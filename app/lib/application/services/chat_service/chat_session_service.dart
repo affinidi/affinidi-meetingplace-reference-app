@@ -522,6 +522,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       // VRC request messages are protocol signals; they must not appear as
       // chat bubbles on either side of the conversation.
       final isVrcRequest =
+          (data.event is ChatRequestIssuanceEvent ||
+              data.event is ChatIssuedCredentialEvent) &&
           chatItem is Message &&
           chatItem.attachments.isNotEmpty &&
           chatItem.attachments.every(
