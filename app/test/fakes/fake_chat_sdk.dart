@@ -527,28 +527,3 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     );
   }
 }
-
-class FakeChat implements Chat {
-  @override
-  ChatStream? stream;
-
-  @override
-  List<ChatItem> get messages => [
-    ChatItem(
-      chatId: 'chatId',
-      messageId: 'messageId',
-      senderDid: 'senderDid',
-      isFromMe: true,
-      dateCreated: DateTime.now(),
-      status: ChatItemStatus.confirmed,
-      type: ChatItemType.message,
-    ),
-  ];
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError(
-      'Method ${invocation.memberName} not implemented in FakeChat',
-    );
-  }
-}
