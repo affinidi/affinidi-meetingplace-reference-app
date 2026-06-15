@@ -75,7 +75,7 @@ final class RCardChatNotifierServiceProvider
 }
 
 String _$rCardChatNotifierServiceHash() =>
-    r'073279be13f3f3d5547e7c4dfb5c7b44c6213321';
+    r'7fe16b4ebeeda01d724d1b0829cf6cb2c2a8a5c4';
 
 /// Global service that creates chat messages for R-Cards delivered via the
 /// DIDComm channel-inauguration (OOB) path.
