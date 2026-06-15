@@ -9,7 +9,8 @@ abstract class ChatProtocolHandler {
   /// Returns `true` if this handler should process the given [ChatEvent].
   bool canHandle(ChatEvent event);
 
-  /// Processes the incoming [ChatEvent] for the channel identified by
-  /// [channelDid].
-  Future<void> handle(ChatEvent event, String channelDid);
+  /// Processes the incoming [StreamData] for the channel identified by
+  /// [channelDid]. [data] carries the full stream payload including the
+  /// [ChatEvent] and the associated [ChatItem].
+  Future<void> handle(StreamData data, String channelDid);
 }

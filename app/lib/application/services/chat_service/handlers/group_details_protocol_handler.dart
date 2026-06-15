@@ -21,12 +21,15 @@ class GroupDetailsProtocolHandler implements ChatProtocolHandler {
   bool canHandle(ChatEvent event) => event is ChatGroupDetailsUpdateEvent;
 
   @override
-  Future<void> handle(ChatEvent event, String channelDid) async {
-    if (event is! ChatGroupDetailsUpdateEvent) {
-      throw StateError('Unexpected event type: ${event.runtimeType}');
+  Future<void> handle(StreamData data, String channelDid) async {
+    if (data.event is! ChatGroupDetailsUpdateEvent) {
+      throw StateError('Unexpected event type: ${data.event.runtimeType}');
     }
 
     _logger.info('Received group details update', name: _logKey);
-    _onGroupDetailsUpdated(event, channelDid);
+    _onGroupDetailsUpdated(
+      data.event as ChatGroupDetailsUpdateEvent,
+      channelDid,
+    );
   }
 }

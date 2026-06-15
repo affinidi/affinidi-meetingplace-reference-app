@@ -24,10 +24,11 @@ class TypingProtocolHandler implements ChatProtocolHandler {
   bool canHandle(ChatEvent event) => event is ChatActivityEvent;
 
   @override
-  Future<void> handle(ChatEvent event, String channelDid) async {
-    if (event is! ChatActivityEvent) {
-      throw StateError('Unexpected event type: ${event.runtimeType}');
+  Future<void> handle(StreamData data, String channelDid) async {
+    if (data.event is! ChatActivityEvent) {
+      throw StateError('Unexpected event type: ${data.event.runtimeType}');
     }
+    final event = data.event as ChatActivityEvent;
 
     final createdTime = event.createdTime;
     if (createdTime == null) return;

@@ -188,10 +188,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
   }
 
-  void _onZkpAttachment(StreamData data, String channelDid) {
+  void _onZkpAttachment(ChatItem chatItem, String channelDid) {
     state = state.copyWith(
       zkpAttachmentEvent: ZkpAttachmentEvent(
-        data: data,
+        chatItem: chatItem,
         channelDid: channelDid,
       ),
     );

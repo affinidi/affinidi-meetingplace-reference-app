@@ -22,9 +22,9 @@ class ChatMessageProtocolHandler implements ChatProtocolHandler {
   bool canHandle(ChatEvent event) => event is ChatMessageEvent;
 
   @override
-  Future<void> handle(ChatEvent event, String channelDid) async {
-    if (event is! ChatMessageEvent) {
-      throw StateError('Unexpected event type: ${event.runtimeType}');
+  Future<void> handle(StreamData data, String channelDid) async {
+    if (data.event is! ChatMessageEvent) {
+      throw StateError('Unexpected event type: ${data.event.runtimeType}');
     }
 
     _logger.info(

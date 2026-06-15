@@ -31,7 +31,8 @@ class PresenceProtocolHandler implements ChatProtocolHandler {
       event is ChatPresenceEvent || event is ChatActivityEvent;
 
   @override
-  Future<void> handle(ChatEvent event, String channelDid) async {
+  Future<void> handle(StreamData data, String channelDid) async {
+    final event = data.event;
     final timestamp = switch (event) {
       ChatPresenceEvent(:final timestamp) => timestamp,
       ChatActivityEvent(:final timestamp) => timestamp,
