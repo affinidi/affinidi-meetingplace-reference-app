@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import 'video_attachment.dart';
 
@@ -17,7 +18,7 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
   /// Above this the file is rejected before being loaded into memory or
   /// base64-encoded, which would otherwise risk an OOM kill on lower-memory
   /// devices.
-  static const _maxBytes = 25 * 1024 * 1024;
+  int get _maxBytes => Environment.instance.chatAttachmentMaxBytes;
 
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(

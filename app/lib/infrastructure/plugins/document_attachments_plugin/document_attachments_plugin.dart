@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import 'document_attachment.dart';
 
@@ -17,7 +18,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   /// Hard upper bound on raw document bytes accepted from the picker.
   /// Above this the file is rejected before being base64-encoded, which would
   /// otherwise inflate the in-memory footprint by roughly 33 percent.
-  static const _maxBytes = 25 * 1024 * 1024;
+  int get _maxBytes => Environment.instance.chatAttachmentMaxBytes;
 
   static const _allowedExtensions = [
     'pdf',

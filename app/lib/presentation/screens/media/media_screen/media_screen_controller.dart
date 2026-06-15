@@ -24,7 +24,6 @@ part 'media_screen_controller.g.dart';
 class MediaScreenController extends _$MediaScreenController {
   late final AppLogger _logger = ref.read(appLoggerProvider);
   static const _logKey = 'MEDSCRCTRL';
-  static const _maxVideoBytes = 25 * 1024 * 1024;
 
   @override
   MediaScreenState build({
@@ -93,10 +92,11 @@ class MediaScreenController extends _$MediaScreenController {
 
     if (picked != null && _isVideo(picked)) {
       final sizeBytes = await picked.length();
-      if (sizeBytes > _maxVideoBytes) {
-        final maxMb = _maxVideoBytes ~/ (1024 * 1024);
+      final maxVideoBytes = environment.chatAttachmentMaxBytes;
+      if (sizeBytes > maxVideoBytes) {
+        final maxMb = maxVideoBytes ~/ (1024 * 1024);
         _logger.warning(
-          'Selected video is larger than $_maxVideoBytes bytes',
+          'Selected video is larger than $maxVideoBytes bytes',
           name: _logKey,
         );
         state = state.copyWith(videoTooLargeMaxMb: maxMb);
