@@ -95,7 +95,7 @@ class ZkpFlowService {
     try {
       await chatService.sendTextMessage(
         '',
-        attachments: List<ChatAttachment>.from(attachments),
+        attachments: attachments.map((a) => a.toChatAttachment()).toList(),
       );
       return true;
     } catch (error, stackTrace) {
@@ -213,7 +213,9 @@ class ZkpFlowService {
             .read(chatSessionServiceProvider(channelDid).notifier)
             .sendTextMessage(
               '',
-              attachments: List<ChatAttachment>.from(attachments),
+              attachments: attachments
+                  .map((a) => a.toChatAttachment())
+                  .toList(),
             );
 
         _logger.info('Proof sent to contact successfully', name: _logKey);
