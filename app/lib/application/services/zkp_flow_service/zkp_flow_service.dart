@@ -76,7 +76,7 @@ class ZkpFlowService {
           challengeNonceHex: zkpChallengeNonceToHex(challengeNonce),
         );
     return _sendZkpAttachments(
-      attachments,
+      attachments.map((a) => a.toChatAttachment()).toList(),
       errorMessage: 'Failed to send liveness check request',
     );
   }
@@ -185,7 +185,9 @@ class ZkpFlowService {
             .read(chatSessionServiceProvider(channelDid).notifier)
             .sendTextMessage(
               '',
-              attachments: List<ChatAttachment>.from(attachments),
+              attachments: attachments
+                  .map((a) => a.toChatAttachment())
+                  .toList(),
             );
 
         _logger.info('Proof sent to contact successfully', name: _logKey);
@@ -219,7 +221,7 @@ class ZkpFlowService {
     final attachments =
         LivenessZkpDIDCommAttachmentBuilder.buildLivenessDeclined();
     return _sendZkpAttachments(
-      attachments,
+      attachments.map((a) => a.toChatAttachment()).toList(),
       errorMessage: 'Failed to send liveness declined event',
     );
   }
