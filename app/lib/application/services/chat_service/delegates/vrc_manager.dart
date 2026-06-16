@@ -50,6 +50,20 @@ class VrcManager {
       return;
     }
 
+    final alreadyReceived = _getMessages().any(
+      (message) =>
+          message is EventMessage &&
+          message.eventType ==
+              EventMessageType.fromJson('vrcRequestReceived'),
+    );
+    if (alreadyReceived) {
+      _logger.warning(
+        'VRC request already received, skipping duplicate',
+        name: _logKey,
+      );
+      return;
+    }
+
     final hasVrc = await _ref
         .read(vrcServiceProvider.notifier)
         .hasVrcInChannel(channelDid);
