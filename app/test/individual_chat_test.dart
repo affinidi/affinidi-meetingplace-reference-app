@@ -351,7 +351,7 @@ void main() {
           final l10n = await getL10n();
           final meetingPlaceChatSDK = FakeChatSdk();
 
-          await navigateToChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
             imagePicker: FakeImagePicker(
@@ -361,7 +361,7 @@ void main() {
                 mimeType: 'video/mp4',
               ),
             ),
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: meetingPlaceChatSDK,
           );
 
           await tester.tap(findAddMediaButton());
