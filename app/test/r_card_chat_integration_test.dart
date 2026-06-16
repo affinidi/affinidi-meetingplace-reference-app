@@ -28,6 +28,12 @@ void _mockSharePlus() {
       );
 }
 
+InkWell _findOptionTapTarget(WidgetTester tester, Finder optionLabel) {
+  return tester.widget<InkWell>(
+    find.ancestor(of: optionLabel, matching: find.byType(InkWell)).first,
+  );
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -58,8 +64,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      expect(find.text('💳'), findsOneWidget);
       expect(find.text(l10n.genRCard), findsOneWidget);
+      expect(find.byIcon(Icons.attachment), findsWidgets);
     });
 
     testWidgets('R-Card option is enabled (onTap is non-null) '
@@ -78,13 +84,11 @@ void main() {
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      final rCardTile = tester.widget<ListTile>(
-        find.ancestor(
-          of: find.text(l10n.genRCard),
-          matching: find.byType(ListTile),
-        ),
+      final rCardOption = _findOptionTapTarget(
+        tester,
+        find.text(l10n.genRCard),
       );
-      expect(rCardTile.enabled, isTrue);
+      expect(rCardOption.onTap, isNotNull);
     });
 
     testWidgets('R-Card option is disabled when isPlatformSupported = false', (
@@ -106,14 +110,10 @@ void main() {
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('R-Card (disabled)'), findsOneWidget);
-      final rCardTile = tester.widget<ListTile>(
-        find.ancestor(
-          of: find.textContaining('R-Card (disabled)'),
-          matching: find.byType(ListTile),
-        ),
-      );
-      expect(rCardTile.enabled, isFalse);
+      final disabledLabel = find.textContaining('R-Card (disabled)');
+      expect(disabledLabel, findsOneWidget);
+      final rCardOption = _findOptionTapTarget(tester, disabledLabel);
+      expect(rCardOption.onTap, isNull);
     });
 
     testWidgets(
@@ -271,13 +271,11 @@ void main() {
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      final rCardTile = tester.widget<ListTile>(
-        find.ancestor(
-          of: find.text(l10n.genRCard),
-          matching: find.byType(ListTile),
-        ),
+      final rCardOption = _findOptionTapTarget(
+        tester,
+        find.text(l10n.genRCard),
       );
-      expect(rCardTile.enabled, isFalse);
+      expect(rCardOption.onTap, isNull);
     });
 
     testWidgets('tapping disabled R-Card in group chat does nothing', (

@@ -8,6 +8,8 @@ import '../../../presentation/painting/cached_base64_image.dart';
 import '../../../presentation/screens/media/image_view_screen/image_view_screen.dart';
 import '../../../presentation/screens/media/media_screen/media_screen.dart';
 import '../../extensions/build_context_extensions.dart';
+import '../video_attachments_plugin/video_attachment.dart';
+import '../video_attachments_plugin/video_attachments_plugin.dart';
 import 'gallery_image_attachment.dart';
 
 /// A plugin for handling gallery-based image attachments.
@@ -55,6 +57,22 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
 
     if (!result.succeeded) {
       return null;
+    }
+
+    final videoBase64 = result.videoBase64;
+    if (videoBase64 != null) {
+      return AttachmentPluginPickResult(
+        text: result.textMessage,
+        attachments: [
+          VideoAttachment(
+            base64: videoBase64,
+            pluginName: VideoAttachmentsPlugin.pluginName,
+            mimeType: result.videoMimeType ?? 'video/mp4',
+            filename: result.videoFilename ?? 'video.mp4',
+            byteCount: result.videoByteCount ?? 0,
+          ),
+        ],
+      );
     }
 
     return AttachmentPluginPickResult(

@@ -482,5 +482,15 @@
 	"zkpNoticeReceived": "{contactName} ha compartido una Prueba de Conocimiento Cero que confirma que es humano.",
 	"zkpNoticeRequest": "{contactName} ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.",
 	"zkpProofAlreadyShared": "Prueba ZKP ya compartida",
-	"debugPanelShareLogs": "Compartir registros"
+	"debugPanelShareLogs": "Compartir registros",
+	"mediaTapToRetry": "Toca para reintentar",
+	"mediaDownloadFailedTapToRetry": "Descarga fallida. Toca para reintentar",
+	"attachmentTooLarge": "El archivo adjunto es demasiado grande. Tamaño máximo: {maxMb} MB.",
+	"generalVideo": "Vídeo",
+	"generalDocument": "Documento",
+	"documentTapToDownload": "Toca para descargar",
+	"videoLoadingError": "No se puede reproducir el vídeo",
+	"voiceMessagePermissionDenied": "Se requiere permiso de micrófono para grabar mensajes de voz.",
+	"voiceMessageRecordingFailed": "No se puede iniciar la grabación de voz.",
+	"voiceMessageSendFailed": "No se puede enviar el mensaje de voz."
 }

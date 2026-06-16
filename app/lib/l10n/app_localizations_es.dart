@@ -1938,4 +1938,39 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get removeMemberNotSupported =>
       'Removing members isn\'t supported yet.';
+
+  @override
+  String get generalVideo => 'Vídeo';
+
+  @override
+  String get generalDocument => 'Documento';
+
+  @override
+  String get documentTapToDownload => 'Toca para descargar';
+
+  @override
+  String get videoLoadingError => 'No se puede reproducir el vídeo';
+
+  @override
+  String get mediaTapToRetry => 'Toca para reintentar';
+
+  @override
+  String get mediaDownloadFailedTapToRetry =>
+      'Descarga fallida. Toca para reintentar';
+
+  @override
+  String attachmentTooLarge(int maxMb) {
+    return 'El archivo adjunto es demasiado grande. Tamaño máximo: $maxMb MB.';
+  }
+
+  @override
+  String get voiceMessagePermissionDenied =>
+      'Se requiere permiso de micrófono para grabar mensajes de voz.';
+
+  @override
+  String get voiceMessageRecordingFailed =>
+      'No se puede iniciar la grabación de voz.';
+
+  @override
+  String get voiceMessageSendFailed => 'No se puede enviar el mensaje de voz.';
 }

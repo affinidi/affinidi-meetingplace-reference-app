@@ -113,6 +113,62 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.1"
+  audioplayers:
+    dependency: transitive
+    description:
+      name: audioplayers
+      sha256: ab3868065119285370fcd41399c7541fb32239dd90f65be1338d284a80487668
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.8.0"
+  audioplayers_android:
+    dependency: transitive
+    description:
+      name: audioplayers_android
+      sha256: f5ff5b15620fbab8cb0849e9636c48e2b96c3f0f71723bbbe2ad3c761b205f05
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.3.0"
+  audioplayers_darwin:
+    dependency: transitive
+    description:
+      name: audioplayers_darwin
+      sha256: "1ca553add991384ecf421b9569da850f3ab2472ffb83f6970b0416365abc51be"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.5.0"
+  audioplayers_linux:
+    dependency: transitive
+    description:
+      name: audioplayers_linux
+      sha256: "15178b726b7cdee5364d0463c8d445630c4e0fb7d26612b73c767e7d25de9417"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.3.0"
+  audioplayers_platform_interface:
+    dependency: transitive
+    description:
+      name: audioplayers_platform_interface
+      sha256: "765f6f0e6dca55cb471c9483fc77700564b3484d19198aca4ebb5147c6c85acb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.2.0"
+  audioplayers_web:
+    dependency: transitive
+    description:
+      name: audioplayers_web
+      sha256: ae1e0103c865a03e273f6d13d97b93f5595eac09915729cd5e37ef96e2857319
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.3.0"
+  audioplayers_windows:
+    dependency: transitive
+    description:
+      name: audioplayers_windows
+      sha256: d0690f33b1443ee89632126861a997db33dc90f3af54aef305dfb977bc580f2c
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.4.0"
   base58check:
     dependency: transitive
     description:
@@ -633,14 +689,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
-  ffi_leak_tracker:
-    dependency: transitive
-    description:
-      name: ffi_leak_tracker
-      sha256: "4093d4ef9ca06ffe2786e73bfb25e22aa92112b9bb4ec941f11e3e6b61489a97"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.2"
   file:
     dependency: transitive
     description:
@@ -649,6 +697,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
+  file_picker:
+    dependency: transitive
+    description:
+      name: file_picker
+      sha256: f13a03000d942e476bc1ff0a736d2e9de711d2f89a95cd4c1d88f861c3348387
+      url: "https://pub.dev"
+    source: hosted
+    version: "11.0.2"
   file_selector_linux:
     dependency: transitive
     description:
@@ -855,10 +911,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_secure_storage_windows
-      sha256: "471951813a97006d899db4948acc654a4f28c440083ea08178935ce20b173ec1"
+      sha256: "3b7c8e068875dfd46719ff57c90d8c459c87f2302ed6b00ff006b3c9fcad1613"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.2"
+    version: "4.1.0"
   flutter_svg:
     dependency: transitive
     description:
@@ -1265,8 +1321,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_chat"
-      ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
-      resolved-ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
+      ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
+      resolved-ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.43"
@@ -1274,8 +1330,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_control_plane"
-      ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
-      resolved-ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
+      ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
+      resolved-ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.19"
@@ -1283,8 +1339,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_core"
-      ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
-      resolved-ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
+      ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
+      resolved-ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.40"
@@ -1300,8 +1356,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_drift_repository"
-      ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
-      resolved-ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
+      ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
+      resolved-ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.44"
@@ -1309,8 +1365,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_mediator"
-      ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
-      resolved-ref: "59466aad6087b3675d6c610985e8863aaf2dab8a"
+      ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
+      resolved-ref: "870888fcbdfb4771ba9a07f4e56bdddb76ec2e69"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.15"
@@ -1438,18 +1494,18 @@ packages:
     dependency: transitive
     description:
       name: package_info_plus
-      sha256: "4bf625947f6c7713ee242296a682e23e44823c09cf9d79e4f1238923c92db852"
+      sha256: "16eee997588c60225bda0488b6dcfac69280a6b7a3cf02c741895dd370a02968"
       url: "https://pub.dev"
     source: hosted
-    version: "10.1.0"
+    version: "8.3.1"
   package_info_plus_platform_interface:
     dependency: transitive
     description:
       name: package_info_plus_platform_interface
-      sha256: db762cb2f4f25ee60fb6359773861b0f199e00b90d237bd85a76a1e806b46ef4
+      sha256: "202a487f08836a592a6bd4f901ac69b3a8f146af552bbd14407b6b41e1c3f086"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.0"
+    version: "3.2.1"
   path:
     dependency: transitive
     description:
@@ -1722,6 +1778,54 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
+  record:
+    dependency: transitive
+    description:
+      name: record
+      sha256: "10911465138fafacef459a780564e883e01bd48eabf87ab20543684884492870"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.2.1"
+  record_android:
+    dependency: transitive
+    description:
+      name: record_android
+      sha256: eb1732e42d0d2a1895b8db86e4fc917287e6d8491b6ed59918aea8bed6c69de4
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.5.2"
+  record_ios:
+    dependency: transitive
+    description:
+      name: record_ios
+      sha256: c051fb48edd7a0e265daafb9108730dc827c27b551728a3fdfb3ef69efd89c73
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.1"
+  record_linux:
+    dependency: transitive
+    description:
+      name: record_linux
+      sha256: "31181787bf7eccb0e298835836b69b3cd0a903863b75d70e937de3dec71cd8f3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.1"
+  record_macos:
+    dependency: transitive
+    description:
+      name: record_macos
+      sha256: cfe1b61435e27db418bf513dc36820d10c9f7eb1843786c2c9a52e07e2f4f627
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2"
+  record_platform_interface:
+    dependency: transitive
+    description:
+      name: record_platform_interface
+      sha256: "8e56cbe06c6984137fb86132ff03459f29938d927496d9b2d0962e2d6345d488"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.6.0"
   record_use:
     dependency: transitive
     description:
@@ -1730,6 +1834,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.0"
+  record_web:
+    dependency: transitive
+    description:
+      name: record_web
+      sha256: "7e9846981c1f2d111d86f0ae3309071f5bba8b624d1c977316706f08fc31d16d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.3.0"
+  record_windows:
+    dependency: transitive
+    description:
+      name: record_windows
+      sha256: "223258060a1d25c62bae18282c16783f28581ec19401d17e56b5205b9f039d78"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
   retry:
     dependency: transitive
     description:
@@ -1806,18 +1926,18 @@ packages:
     dependency: transitive
     description:
       name: share_plus
-      sha256: a857d8b1479250aff6b57a51b2c02d31ca05848d441817c43f1640c885c286c0
+      sha256: "223873d106614442ea6f20db5a038685cc5b32a2fba81cdecaefbbae0523f7fa"
       url: "https://pub.dev"
     source: hosted
-    version: "13.1.0"
+    version: "12.0.2"
   share_plus_platform_interface:
     dependency: transitive
     description:
       name: share_plus_platform_interface
-      sha256: "7f7ae28cf400d13f811e297ff37742dba83b79e0a6f5dce14eec0248274e6ce9"
+      sha256: "88023e53a13429bd65d8e85e11a9b484f49d4c190abbd96c7932b74d6927cc9a"
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.0"
+    version: "6.1.0"
   shared_preferences:
     dependency: transitive
     description:
@@ -2339,10 +2459,10 @@ packages:
     dependency: transitive
     description:
       name: win32
-      sha256: ba6f4bba816c8d7e3c1580e170f3786d216951cc6b94babc3b814c08d2cb2738
+      sha256: d7cb55e04cd34096cd3a79b3330245f54cb96a370a1c27adb3c84b917de8b08e
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.0"
+    version: "5.15.0"
   x25519:
     dependency: transitive
     description:
