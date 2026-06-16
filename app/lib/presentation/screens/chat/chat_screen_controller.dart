@@ -857,6 +857,17 @@ class ChatScreenController extends _$ChatScreenController
     String text,
     List<MessageAttachment> messageAttachment,
   ) async {
+    final supportsMedia = _capsFor(
+      state.transport,
+    ).supports(chat.ChatFeature.mediaAttachments);
+    if (!supportsMedia) {
+      _logger.warning(
+        'Media attachments are not supported on this chat transport; '
+        'dropping send request.',
+        name: _logKey,
+      );
+      return;
+    }
     messageTextController.clear();
     unawaited(
       _chatService?.sendTextMessage(

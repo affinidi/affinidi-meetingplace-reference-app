@@ -424,14 +424,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String message, {
     List<ChatAttachment>? attachments,
   }) async {
-    if (attachments != null && attachments.isNotEmpty) {
-      if (!(_chatSDK?.capabilities.supports(ChatFeature.mediaAttachments) ??
-          false)) {
-        throw StateError(
-          'Attachments are not supported on this chat transport.',
-        );
-      }
-    }
     await _chatSDK?.sendTextMessage(
       message,
       attachments: attachments ?? const [],
