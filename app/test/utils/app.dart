@@ -323,6 +323,8 @@ Future<void> navigateToChat(
   PermissionStatus? cameraPermissionStatus,
   bool isAuthenticated = true,
   bool alreadyOnboarded = true,
+  List<AttachmentPlugin>? attachmentPlugins,
+  RCardsService Function()? rCardsServiceFactory,
 }) async {
   addTearDown(() async {
     await _closeChat(tester);
@@ -345,6 +347,8 @@ Future<void> navigateToChat(
     cameraPermissionStatus: cameraPermissionStatus,
     isAuthenticated: isAuthenticated,
     alreadyOnboarded: alreadyOnboarded,
+    attachmentPlugins: attachmentPlugins,
+    rCardsServiceFactory: rCardsServiceFactory,
   );
   await tester.pumpAndSettle();
 }
