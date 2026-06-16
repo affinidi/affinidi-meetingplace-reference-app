@@ -18,7 +18,11 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     this.offerToFind,
     this.findOfferHasError = false,
     this._shouldTimeout = false,
-  }) : _channels = channels ?? {};
+  }) : _channels = channels ?? {} {
+    if (connectionOffers != null) {
+      _allConnectionOffers.addAll(connectionOffers);
+    }
+  }
 
   final bool _shouldFailToRegisterPushToken;
   final PublishOfferResult? _offerToReturn;
