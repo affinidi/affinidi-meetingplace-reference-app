@@ -227,7 +227,7 @@ return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_t
 
 
 class _ChatServiceState extends ChatServiceState {
-   _ChatServiceState({this.contact, this.group, this.otherPartyCard, final  List<chat.ChatItem> messages = const [], this.zkpAttachmentEvent, final  List<String> membersTyping = const [], this.isActive = false, this.isInitialized = false, this.contactPresenceStatus = ContactPresenceStatus.unknown, this.effect}): _messages = messages,_membersTyping = membersTyping,super._();
+   _ChatServiceState({this.contact, this.group, this.otherPartyCard, final  List<chat.ChatItem> messages = const [], this.zkpAttachmentEvent, final  List<String> membersTyping = const [], this.isActive = false, this.isInitialized = false, this.contactPresenceStatus = ContactPresenceStatus.offline, this.effect}): _messages = messages,_membersTyping = membersTyping,super._();
   
 
 @override final  Contact? contact;

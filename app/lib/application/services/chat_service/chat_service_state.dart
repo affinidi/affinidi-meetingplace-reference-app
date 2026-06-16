@@ -31,7 +31,7 @@ abstract class ChatServiceState with _$ChatServiceState {
     @Default([]) List<String> membersTyping,
     @Default(false) bool isActive,
     @Default(false) bool isInitialized,
-    @Default(ContactPresenceStatus.unknown)
+    @Default(ContactPresenceStatus.offline)
     ContactPresenceStatus contactPresenceStatus,
     chat.Effect? effect,
   }) = _ChatServiceState;
