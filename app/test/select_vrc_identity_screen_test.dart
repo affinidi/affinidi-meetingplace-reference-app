@@ -1,4 +1,3 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,27 +6,9 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/identity_picker/i
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
-import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
-
-Future<void> _navigateToChat(
-  WidgetTester tester, {
-  FakeChatSdk? chatSdk,
-}) async {
-  await navigateToLocation(
-    tester,
-    '/contacts/individual-contact-id/chat',
-    identities: [FakeIdentities.primaryIdentity],
-    contacts: [FakeContacts.individualContact],
-    meetingPlaceChatSDK: chatSdk ?? FakeChatSdk(),
-    connectivity: FakeConnectivity(
-      initialConnectivityToReturn: [ConnectivityResult.wifi],
-    ),
-  );
-  await tester.pumpAndSettle();
-}
 
 void main() {
   final firstName = FakeContacts.individualContact.otherPartyCard!.firstName;
@@ -36,7 +17,7 @@ void main() {
     testWidgets('shows Select Persona title', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await tester.tap(find.text(l10n.generateVrc));
       await tester.pumpAndSettle();
 
@@ -46,7 +27,7 @@ void main() {
     testWidgets('shows instruction text with the contact name', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await tester.tap(find.text(l10n.generateVrc));
       await tester.pumpAndSettle();
 
@@ -59,7 +40,7 @@ void main() {
     testWidgets('shows Start now confirm button', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await tester.tap(find.text(l10n.generateVrc));
       await tester.pumpAndSettle();
 
@@ -72,7 +53,7 @@ void main() {
     testWidgets('shows Cancel button', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await tester.tap(find.text(l10n.generateVrc));
       await tester.pumpAndSettle();
 
@@ -82,7 +63,7 @@ void main() {
     testWidgets('shows the identity picker for the local user', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await tester.tap(find.text(l10n.generateVrc));
       await tester.pumpAndSettle();
 
@@ -93,7 +74,7 @@ void main() {
   group('SelectVrcIdentityScreen — responder role', () {
     Future<void> navigateAndOpenResponderScreen(WidgetTester tester) async {
       final chatSdk = FakeChatSdk();
-      await _navigateToChat(tester, chatSdk: chatSdk);
+      await navigateToChat(tester, chatSdk: chatSdk);
 
       // Simulate the other party requesting verification — banner hides and
       // the concierge item appears with its own Start now button.
@@ -175,29 +156,17 @@ void main() {
   });
 
   group('SelectVrcIdentityScreen — identity picker defaults', () {
-    Future<void> navigateToChatWithTwoIdentities(WidgetTester tester) async {
-      await navigateToLocation(
-        tester,
-        '/contacts/individual-contact-id/chat',
-        identities: [
-          FakeIdentities.primaryIdentity,
-          FakeIdentities.secondaryIdentity,
-        ],
-        contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: FakeChatSdk(),
-        connectivity: FakeConnectivity(
-          initialConnectivityToReturn: [ConnectivityResult.wifi],
-        ),
-      );
-      await tester.pumpAndSettle();
-    }
+    final identities = [
+      FakeIdentities.primaryIdentity,
+      FakeIdentities.secondaryIdentity,
+    ];
 
     testWidgets(
       'pre-selects primary identity by default when no current identity is set',
       (tester) async {
         final l10n = await getL10n();
 
-        await navigateToChatWithTwoIdentities(tester);
+        await navigateToChat(tester, identities: identities);
         await tester.tap(find.text(l10n.generateVrc));
         await tester.pumpAndSettle();
 
@@ -213,7 +182,7 @@ void main() {
       (tester) async {
         final l10n = await getL10n();
 
-        await navigateToChatWithTwoIdentities(tester);
+        await navigateToChat(tester, identities: identities);
 
         final container = ProviderScope.containerOf(
           tester.element(find.byType(Scaffold).first),

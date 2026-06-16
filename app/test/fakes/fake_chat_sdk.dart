@@ -12,15 +12,9 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =
       StreamController<StreamData>.broadcast();
-  final List<StreamData> _bufferedEvents = [];
-  final bool _hasListener = false;
 
   void _emit(StreamData data) {
-    if (_hasListener) {
-      _streamController.add(data);
-    } else {
-      _bufferedEvents.add(data);
-    }
+    _streamController.add(data);
   }
 
   bool chatActivitySent = false;
@@ -530,31 +524,6 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError(
       'Method ${invocation.memberName} not implemented in FakeChatSdk',
-    );
-  }
-}
-
-class FakeChat implements Chat {
-  @override
-  ChatStream? stream;
-
-  @override
-  List<ChatItem> get messages => [
-    ChatItem(
-      chatId: 'chatId',
-      messageId: 'messageId',
-      senderDid: 'senderDid',
-      isFromMe: true,
-      dateCreated: DateTime.now(),
-      status: ChatItemStatus.confirmed,
-      type: ChatItemType.message,
-    ),
-  ];
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    throw UnimplementedError(
-      'Method ${invocation.memberName} not implemented in FakeChat',
     );
   }
 }

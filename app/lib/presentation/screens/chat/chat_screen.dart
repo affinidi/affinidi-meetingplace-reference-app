@@ -15,6 +15,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
 import 'package:mpx_app_core/mpx_app_core.dart';
+
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -27,7 +28,6 @@ import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
-import '../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachment.dart';
@@ -94,7 +94,9 @@ class ChatScreen extends HookConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
-    ref.keepAround(provider);
+    final isInitialized = ref.watch(
+      provider.select((state) => state.isInitialized),
+    );
 
     Future<void> onVrcStart() async {
       final state = ref.read(chatScreenControllerProvider(_contactId));
@@ -170,29 +172,62 @@ class ChatScreen extends HookConsumerWidget {
       body: Column(
         children: [
           Expanded(
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    ChatActivityProgressIndicator(contactId: _contactId),
-                    _NotificationsUnavailableWarning(_contactId),
-                    _VrcBanner(_contactId),
-                    if (isZkpEnabled) ChatZkpOverlay(contactId: _contactId),
-                    Expanded(child: _ChatMessageList(_contactId)),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                      child: _ChatTypingActivityIndicator(
-                        contactId: _contactId,
-                      ),
-                    ),
-                    _ChatTextEntry(contactId: _contactId),
-                  ],
-                ),
-                ChatEffect(contactId: _contactId),
-              ],
-            ),
+            child: isInitialized
+                ? _ChatSection(
+                    contactId: _contactId,
+                    isZkpEnabled: isZkpEnabled,
+                  )
+                : const _LoadingSection(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ChatSection extends StatelessWidget {
+  const _ChatSection({required this._contactId, required this.isZkpEnabled});
+
+  final String _contactId;
+  final bool isZkpEnabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Column(
+          children: [
+            ChatActivityProgressIndicator(contactId: _contactId),
+            _NotificationsUnavailableWarning(_contactId),
+            _VrcBanner(_contactId),
+            if (isZkpEnabled) ChatZkpOverlay(contactId: _contactId),
+            Expanded(child: _ChatMessageList(_contactId)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
+              child: _ChatTypingActivityIndicator(contactId: _contactId),
+            ),
+            _ChatTextEntry(contactId: _contactId),
+          ],
+        ),
+        ChatEffect(contactId: _contactId),
+      ],
+    );
+  }
+}
+
+class _LoadingSection extends StatelessWidget {
+  const _LoadingSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 16,
+          children: [CircularProgressIndicator.adaptive()],
+        ),
       ),
     );
   }
