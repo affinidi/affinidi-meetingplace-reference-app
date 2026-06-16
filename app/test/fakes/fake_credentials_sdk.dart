@@ -251,9 +251,13 @@ class _AwaitableBroadcastStream<T> extends Stream<T> {
   }) {
     return _source.listen(
       (event) {
-        final dynamic handler = onData;
-        final result = handler?.call(event);
-        onDataHandled(result is Future ? Future<void>.value(result) : null);
+        if (onData case final Future<void> Function(T event) asyncHandler) {
+          onDataHandled(asyncHandler(event));
+          return;
+        }
+
+        onData?.call(event);
+        onDataHandled(null);
       },
       onError: onError,
       onDone: onDone,
