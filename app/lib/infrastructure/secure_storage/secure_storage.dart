@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:ssi/ssi.dart' hide KeyPair;
+import 'package:uuid/uuid.dart';
 
 import '../providers/app_logger_provider.dart';
 import '../providers/shared_preferences_provider.dart';
@@ -15,6 +16,7 @@ enum _Key {
   mediatorDid,
   debugMode,
   databasePassphrase,
+  deviceId,
   pushNotificationToken,
   showMeetingPlaceQr,
   zkpLivenessCredentials,
@@ -175,6 +177,16 @@ class SecureStorage implements KeyRepository, KeyStore {
     } finally {
       _passphraseFuture = null;
     }
+  }
+
+  /// Provides a stable device ID, creating one on first call.
+  Future<String> provideDeviceId() async {
+    var deviceId = await _secureStorage.read(key: _Key.deviceId.name);
+    if (deviceId?.isNotEmpty == true) return deviceId!;
+
+    deviceId = const Uuid().v4();
+    await _secureStorage.write(key: _Key.deviceId.name, value: deviceId);
+    return deviceId;
   }
 
   /// Loads existing passphrase or creates a new 32-byte random one.
