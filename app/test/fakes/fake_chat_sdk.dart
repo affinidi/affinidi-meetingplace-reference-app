@@ -55,8 +55,25 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }) {
     final transportId =
         'fake-transport-incoming-${DateTime.now().microsecondsSinceEpoch}';
+    final normalizedAttachments = <ChatAttachment>[];
+    var attachmentIndex = 0;
     for (final attachment in attachments ?? const <ChatAttachment>[]) {
-      attachment.transportId ??= transportId;
+      normalizedAttachments.add(
+        ChatAttachment(
+          id:
+              attachment.id ??
+              'fake-attachment-${DateTime.now().microsecondsSinceEpoch}-${attachmentIndex++}',
+          description: attachment.description,
+          filename: attachment.filename,
+          mediaType: attachment.mediaType,
+          format: attachment.format,
+          lastModifiedTime: attachment.lastModifiedTime,
+          data: attachment.data,
+          byteCount: attachment.byteCount,
+          transportId: attachment.transportId ?? transportId,
+          metadata: attachment.metadata,
+        ),
+      );
     }
     final message = Message(
       chatId: 'fake-chat-id',
@@ -66,7 +83,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       status: ChatItemStatus.confirmed,
       isFromMe: false,
       senderDid: 'fake-sender-did',
-      attachments: attachments ?? [],
+      attachments: normalizedAttachments,
     );
 
     final chatEvent = UnhandledChatEvent(
