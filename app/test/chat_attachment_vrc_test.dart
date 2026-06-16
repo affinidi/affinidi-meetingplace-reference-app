@@ -11,10 +11,28 @@ import 'utils/app.dart';
 
 const _addMediaButtonKey = Key('chat_add_media_button');
 
+Future<void> _closeChat(WidgetTester tester) async {
+  final binding = tester.binding;
+
+  try {
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pumpAndSettle();
+  } catch (_) {
+    // Ignore teardown-time settle failures when the tree is already gone.
+  }
+
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pumpAndSettle();
+}
+
 Future<void> _navigateToChat(
   WidgetTester tester, {
   FakeChatSdk? chatSdk,
 }) async {
+  addTearDown(() async {
+    await _closeChat(tester);
+  });
+
   await navigateToLocation(
     tester,
     '/contacts/individual-contact-id/chat',
