@@ -228,7 +228,7 @@ void main() {
         expect(chatSdk.sendTextMessageCalls, hasLength(1));
         final sendCall = chatSdk.sendTextMessageCalls.first;
         expect(sendCall['text'], testMessage);
-        expect(sendCall['attachments'], isNull);
+        expect(sendCall['attachments'], isEmpty);
 
         // Simulate the message appearing in the UI
         chatSdk.simulateIncomingTextMessage(
