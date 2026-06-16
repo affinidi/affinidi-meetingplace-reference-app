@@ -325,6 +325,7 @@ Future<void> navigateToChat(
   bool alreadyOnboarded = true,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
+  List<RCard> rCards = const [],
 }) async {
   addTearDown(() async {
     await _closeChat(tester);
@@ -349,6 +350,7 @@ Future<void> navigateToChat(
     alreadyOnboarded: alreadyOnboarded,
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
+    rCards: rCards,
   );
   await tester.pumpAndSettle();
 }

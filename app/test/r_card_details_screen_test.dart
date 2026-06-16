@@ -369,13 +369,12 @@ void main() {
       final chatSdk = FakeChatSdk();
 
       // Step 1: Start at the chat screen.
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/${FakeContacts.individualContact.id}/chat',
+        contactId: FakeContacts.individualContact.id,
+        chatSdk: chatSdk,
         identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: chatSdk,
         rCards: [card],
         rCardsServiceFactory: () => FakeRCardsService([card]),
       );
