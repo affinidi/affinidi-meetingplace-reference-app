@@ -456,6 +456,7 @@ void main() {
               ),
             ),
             chatSdk: meetingPlaceChatSDK,
+            contacts: contacts,
           );
 
           await tester.tap(findAddMediaButton());
