@@ -1,34 +1,17 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
-import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
-
-Future<FakeChatSdk> _navigateToChat(WidgetTester tester) async {
-  final chatSdk = FakeChatSdk();
-  await navigateToLocation(
-    tester,
-    '/contacts/individual-contact-id/chat',
-    identities: [FakeIdentities.primaryIdentity],
-    contacts: [FakeContacts.individualContact],
-    meetingPlaceChatSDK: chatSdk,
-    connectivity: FakeConnectivity(
-      initialConnectivityToReturn: [ConnectivityResult.wifi],
-    ),
-  );
-  await tester.pumpAndSettle();
-  return chatSdk;
-}
 
 void main() {
   group('ChatVrcExchangeInitiatedNotice', () {
     testWidgets('shows initiated text in chat timeline', (tester) async {
       final l10n = await getL10n();
-      final chatSdk = await _navigateToChat(tester);
+      final chatSdk = FakeChatSdk();
+      await navigateToChat(tester, chatSdk: chatSdk);
 
       chatSdk.simulateVrcEvent(
         eventType: 'vrcExchangeInitiated',
@@ -44,7 +27,8 @@ void main() {
   group('ChatVrcExchangeDoLaterNotice', () {
     testWidgets('shows do later text in chat timeline', (tester) async {
       final l10n = await getL10n();
-      final chatSdk = await _navigateToChat(tester);
+      final chatSdk = FakeChatSdk();
+      await navigateToChat(tester, chatSdk: chatSdk);
 
       chatSdk.simulateVrcEvent(
         eventType: 'vrcExchangeDoLater',
@@ -60,7 +44,8 @@ void main() {
   group('ChatVrcExchangeCompleteNotice', () {
     testWidgets('shows completed text in chat timeline', (tester) async {
       final l10n = await getL10n();
-      final chatSdk = await _navigateToChat(tester);
+      final chatSdk = FakeChatSdk();
+      await navigateToChat(tester, chatSdk: chatSdk);
 
       chatSdk.simulateVrcEvent(
         eventType: 'vrcExchangeCompleted',
@@ -78,7 +63,8 @@ void main() {
       tester,
     ) async {
       final l10n = await getL10n();
-      final chatSdk = await _navigateToChat(tester);
+      final chatSdk = FakeChatSdk();
+      await navigateToChat(tester, chatSdk: chatSdk);
       final firstName =
           FakeContacts.individualContact.otherPartyCard!.firstName;
 

@@ -347,7 +347,7 @@ void main() {
         tester,
         location,
         identities: [FakeIdentities.primaryIdentity],
-        mockCameras: [
+        cameras: [
           const CameraDescription(
             name: 'fake_camera',
             lensDirection: CameraLensDirection.back,

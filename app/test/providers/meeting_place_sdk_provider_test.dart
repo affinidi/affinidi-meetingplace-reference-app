@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/matrix_config_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/connection_offer_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/shared_preferences_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
@@ -122,13 +123,15 @@ void main() {
 
     test('proceeds past vodozemac init when it succeeds', () async {
       final callLog = <String>[];
+      final connectionOfferRepositoryReached = Completer<void>();
 
       SharedPreferences.setMockInitialValues({});
       final sharedPreferences = await SharedPreferences.getInstance();
 
       // When vodozemacInit succeeds, the provider must continue into the
       // next bootstrap step. We detect that by injecting a sentinel error
-      // at matrixConfigProvider — the only way the sentinel can surface is
+      // at the first repository future awaited after vodozemacInit — the
+      // only way the sentinel can surface is
       // if execution flowed past the awaited vodozemacInit.
       final container = ProviderContainer(
         overrides: [
@@ -141,26 +144,35 @@ void main() {
           vodozemacInitProvider.overrideWith((ref) async {
             callLog.add('fvod.init completed');
           }),
-          matrixConfigProvider.overrideWith((ref) async {
-            callLog.add('matrixConfig reached');
+          connectionOfferRepositoryProvider.overrideWith((ref) async {
+            callLog.add('connectionOfferRepository reached');
+            if (!connectionOfferRepositoryReached.isCompleted) {
+              connectionOfferRepositoryReached.complete();
+            }
             throw Exception('sentinel – proceeded past vodozemac');
           }),
         ],
       );
       addTearDown(container.dispose);
 
+      final subscription = container.listen<AsyncValue<Object?>>(
+        meetingPlaceSdkProvider,
+        (previous, next) {},
+        fireImmediately: true,
+      );
+      addTearDown(subscription.close);
+
       await expectLater(
-        container.read(meetingPlaceSdkProvider.future),
-        throwsA(
-          isA<Exception>().having(
-            (e) => e.toString(),
-            'message',
-            contains('proceeded past vodozemac'),
-          ),
+        connectionOfferRepositoryReached.future.timeout(
+          const Duration(seconds: 1),
         ),
+        completes,
       );
 
-      expect(callLog, equals(['fvod.init completed', 'matrixConfig reached']));
+      expect(
+        callLog,
+        equals(['fvod.init completed', 'connectionOfferRepository reached']),
+      );
 
       // Drain settingsService background microtask before container
       // dispose so it doesn't read from a disposed container.

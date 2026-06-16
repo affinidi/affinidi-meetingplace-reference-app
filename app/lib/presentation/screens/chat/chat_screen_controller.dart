@@ -230,7 +230,6 @@ class ChatScreenController extends _$ChatScreenController
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
-      unawaited(_chatService?.pauseChat());
 
       messageTextController.removeListener(_onMessageTextChanged);
       messageTextController.dispose();
@@ -414,6 +413,8 @@ class ChatScreenController extends _$ChatScreenController
   ///
   /// Throws an exception if the contact cannot be loaded.
   Future<void> loadContact(String contactId) async {
+    await ref.read(contactsServiceProvider.notifier).ensureInitialized();
+
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     if (contact == null) {
       throw AppException(

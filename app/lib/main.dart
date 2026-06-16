@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
+import 'package:sqlite3/open.dart' as sqlite_open;
 
 import 'infrastructure/configuration/environment.dart';
 import 'infrastructure/firebase_messaging/firebase_options.dart';
@@ -39,8 +41,24 @@ import 'infrastructure/repositories/liveness_credentials_repository/liveness_cre
 import 'infrastructure/repositories/mediators_repository/mediators_repository_drift/mediators_repository_drift.dart';
 import 'presentation/app/app.dart';
 
+bool _isSqliteConfigured = false;
+
+Future<void> _configureSqlite() async {
+  if (_isSqliteConfigured) {
+    return;
+  }
+
+  sqlite_open.open.overrideFor(
+    sqlite_open.OperatingSystem.android,
+    openCipherOnAndroid,
+  );
+  await applyWorkaroundToOpenSqlCipherOnOldAndroidVersions();
+  _isSqliteConfigured = true;
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await _configureSqlite();
   await DeviceRegionPlugin.initialize();
   final dir = await getApplicationDocumentsDirectory();
   AppLogger.initialize(

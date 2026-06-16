@@ -2,7 +2,6 @@ import 'package:camera/camera.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -14,50 +13,6 @@ import 'fakes/fake_identities.dart';
 import 'fakes/fake_image_picker.dart';
 import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
-
-const _mockCameras = [
-  CameraDescription(
-    name: 'Mock Front Camera',
-    lensDirection: CameraLensDirection.front,
-    sensorOrientation: 90,
-  ),
-  CameraDescription(
-    name: 'Mock Back Camera',
-    lensDirection: CameraLensDirection.back,
-    sensorOrientation: 90,
-  ),
-];
-
-Future<void> navigateToChatScreen(
-  WidgetTester tester, {
-  required String contactId,
-  MeetingPlaceChatSDK? meetingPlaceChatSDK,
-  ImagePicker? imagePicker,
-  List<CameraDescription>? mockCameras,
-  FakeSecureStorage? secureStorage,
-  PermissionStatus? cameraPermissionStatus,
-  Connectivity? connectivity,
-}) async {
-  await navigateToLocation(
-    tester,
-    '/contacts/$contactId/chat',
-    isAuthenticated: true,
-    alreadyOnboarded: true,
-    identities: [FakeIdentities.primaryIdentity],
-    contacts: [FakeContacts.individualContact],
-    meetingPlaceChatSDK: meetingPlaceChatSDK,
-    imagePicker: imagePicker,
-    mockCameras: mockCameras,
-    secureStorage: secureStorage,
-    cameraPermissionStatus: cameraPermissionStatus,
-    connectivity:
-        connectivity ??
-        FakeConnectivity(
-          initialConnectivityToReturn: [ConnectivityResult.wifi],
-        ),
-  );
-  await tester.pumpAndSettle();
-}
 
 Finder findChatMessageInput() => find.byKey(const Key('chat_message_input'));
 Finder findSendButton() => find.byKey(const Key('chat_send_button'));
@@ -74,10 +29,10 @@ Future<void> tapSendButton(WidgetTester tester) async {
 
 Future<void> simulateIncomingMessage(
   WidgetTester tester,
-  FakeChatSdk meetingPlaceChatSDK,
+  FakeChatSdk chatSdk,
   String message,
 ) async {
-  meetingPlaceChatSDK.simulateIncomingTextMessage(
+  chatSdk.simulateIncomingTextMessage(
     text: message,
     recipientDid: FakeChannels.individualChannel.permanentChannelDid!,
   );
@@ -123,24 +78,16 @@ void main() {
     final contactId = FakeContacts.individualContact.id;
     final contact = FakeContacts.individualContact;
     final contactName = contact.displayName ?? 'Contact';
-    final meetingPlaceChatSDK = FakeChatSdk();
+    final chatSdk = FakeChatSdk();
 
     testWidgets('it shows the chat screen with correct title', (tester) async {
-      await navigateToChatScreen(
-        tester,
-        contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-      );
+      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
 
       expect(find.text(contactName), findsOneWidget);
     });
 
     testWidgets('it shows the message input field', (tester) async {
-      await navigateToChatScreen(
-        tester,
-        contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-      );
+      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
 
       final inputField = findChatMessageInput();
       expect(inputField, findsOneWidget);
@@ -150,22 +97,15 @@ void main() {
     });
 
     testWidgets('it shows the send button', (tester) async {
-      await navigateToChatScreen(
-        tester,
-        contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-      );
+      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
 
       final sendButton = findSendButton();
       expect(sendButton, findsOneWidget);
     });
 
     testWidgets('it shows the add media button', (tester) async {
-      await navigateToChatScreen(
-        tester,
-        contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-      );
+      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+
       final addButton = findAddMediaButton();
       expect(addButton, findsOneWidget);
     });
@@ -173,20 +113,12 @@ void main() {
     testWidgets('it shows the encryption notice', (tester) async {
       final l10n = await getL10n();
 
-      await navigateToChatScreen(
-        tester,
-        contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-      );
+      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
       expect(find.text(l10n.chatEncryptionNotice), findsOneWidget);
     });
 
     testWidgets('it allows typing in the message input', (tester) async {
-      await navigateToChatScreen(
-        tester,
-        contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-      );
+      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
       const testMessage = 'Hello, this is a test message!';
 
       await enterChatMessage(tester, testMessage);
@@ -197,11 +129,7 @@ void main() {
     });
 
     testWidgets('it shows contact presence status', (tester) async {
-      await navigateToChatScreen(
-        tester,
-        contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-      );
+      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
       expect(find.text(contactName), findsOneWidget);
     });
 
@@ -213,10 +141,10 @@ void main() {
         final secureStorage = FakeSecureStorage();
         await secureStorage.saveUnsentMessages({contactId: unsentMessage});
 
-        await navigateToChatScreen(
+        await navigateToChat(
           tester,
           contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          chatSdk: chatSdk,
           secureStorage: secureStorage,
         );
 
@@ -228,11 +156,7 @@ void main() {
 
     group('and contact has an avatar', () {
       testWidgets('it shows the contact avatar', (tester) async {
-        await navigateToChatScreen(
-          tester,
-          contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
-        );
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
         final contactAvatarKey = const Key('chat_contact_avatar');
         expect(find.byKey(contactAvatarKey), findsOneWidget);
       });
@@ -240,11 +164,7 @@ void main() {
 
     group('and entering a message', () {
       testWidgets('it has the send button available', (tester) async {
-        await navigateToChatScreen(
-          tester,
-          contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
-        );
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
         const testMessage = 'Test message';
 
         await enterChatMessage(tester, testMessage);
@@ -258,37 +178,29 @@ void main() {
       testWidgets('it shows only the encryption notice', (tester) async {
         final l10n = await getL10n();
 
-        await navigateToChatScreen(
-          tester,
-          contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
-        );
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
         expect(find.text(l10n.chatEncryptionNotice), findsOneWidget);
       });
     });
 
     group('and sending a message', () {
-      final meetingPlaceChatSDK = FakeChatSdk();
+      final chatSdk = FakeChatSdk();
 
       testWidgets('it appears on the screen', (tester) async {
-        await navigateToChatScreen(
-          tester,
-          contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
-        );
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
         const testMessage = 'Hello, this is my test message!';
 
         await enterChatMessage(tester, testMessage);
         await tapSendButton(tester);
         await tester.pumpAndSettle();
 
-        expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
-        final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
         expect(sendCall['text'], testMessage);
-        expect(sendCall['attachments'], isNull);
+        expect(sendCall['attachments'], isEmpty);
 
         // Simulate the message appearing in the UI
-        meetingPlaceChatSDK.simulateIncomingTextMessage(
+        chatSdk.simulateIncomingTextMessage(
           text: testMessage,
           recipientDid: FakeChannels.individualChannel.permanentChannelDid!,
         );
@@ -298,11 +210,7 @@ void main() {
       });
 
       testWidgets('the input field is cleared after sending', (tester) async {
-        await navigateToChatScreen(
-          tester,
-          contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
-        );
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
         const testMessage = 'Another test message';
 
         await enterChatMessage(tester, testMessage);
@@ -316,29 +224,21 @@ void main() {
     });
 
     group('and receiving a message', () {
-      final meetingPlaceChatSDK = FakeChatSdk();
+      final chatSdk = FakeChatSdk();
       const message = 'Hello from the other side!';
 
       testWidgets('an incoming message appears on the screen', (tester) async {
-        await navigateToChatScreen(
-          tester,
-          contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
-        );
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
 
-        await simulateIncomingMessage(tester, meetingPlaceChatSDK, message);
+        await simulateIncomingMessage(tester, chatSdk, message);
         expect(find.text(message), findsOneWidget);
       });
 
       group('and user long press on the received message', () {
         testWidgets('should let user react to the message', (tester) async {
-          await navigateToChatScreen(
-            tester,
-            contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
-          );
+          await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
 
-          await simulateIncomingMessage(tester, meetingPlaceChatSDK, message);
+          await simulateIncomingMessage(tester, chatSdk, message);
 
           await tester.longPress(find.text(message));
           await tester.pumpAndSettle();
@@ -351,8 +251,8 @@ void main() {
           await tester.tap(find.text('👍').first);
           await tester.pumpAndSettle();
 
-          expect(meetingPlaceChatSDK.reactOnMessageCalls, hasLength(1));
-          final reactionCall = meetingPlaceChatSDK.reactOnMessageCalls.first;
+          expect(chatSdk.reactOnMessageCalls, hasLength(1));
+          final reactionCall = chatSdk.reactOnMessageCalls.first;
           expect(reactionCall['reaction'], '👍');
           expect(reactionCall['message'], isA<Message>());
         });
@@ -365,11 +265,7 @@ void main() {
       ) async {
         final l10n = await getL10n();
 
-        await navigateToChatScreen(
-          tester,
-          contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
-        );
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
         final addMediaButton = findAddMediaButton();
         expect(addMediaButton, findsOneWidget);
 
@@ -393,10 +289,10 @@ void main() {
                 : l10n.generalConfetti;
             final meetingPlaceChatSDK = FakeChatSdk();
 
-            await navigateToChatScreen(
+            await navigateToChat(
               tester,
               contactId: contactId,
-              meetingPlaceChatSDK: meetingPlaceChatSDK,
+              chatSdk: meetingPlaceChatSDK,
             );
 
             await tester.tap(findAddMediaButton());
@@ -419,11 +315,11 @@ void main() {
           const message = 'Check out this photo!';
           final meetingPlaceChatSDK = FakeChatSdk();
 
-          await navigateToChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
             imagePicker: FakeImagePicker.withDefaultImage(),
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: meetingPlaceChatSDK,
           );
 
           await tester.tap(findAddMediaButton());
@@ -451,6 +347,19 @@ void main() {
       });
 
       group('and pressing on camera', () {
+        const mockCameras = [
+          CameraDescription(
+            name: 'Mock Front Camera',
+            lensDirection: CameraLensDirection.front,
+            sensorOrientation: 90,
+          ),
+          CameraDescription(
+            name: 'Mock Back Camera',
+            lensDirection: CameraLensDirection.back,
+            sensorOrientation: 90,
+          ),
+        ];
+
         testWidgets('should send photo and return to chat screen', (
           tester,
         ) async {
@@ -458,12 +367,12 @@ void main() {
           const message = 'Check out this photo!';
           final meetingPlaceChatSDK = FakeChatSdk();
 
-          await navigateToChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
             imagePicker: FakeImagePicker.withDefaultImage(),
-            mockCameras: _mockCameras,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            cameras: mockCameras,
+            chatSdk: meetingPlaceChatSDK,
             cameraPermissionStatus: PermissionStatus.granted,
           );
 
@@ -502,12 +411,12 @@ void main() {
           final l10n = await getL10n();
           final meetingPlaceChatSDK = FakeChatSdk();
 
-          await navigateToChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
             imagePicker: FakeImagePicker.withDefaultImage(),
-            mockCameras: _mockCameras,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            cameras: mockCameras,
+            chatSdk: meetingPlaceChatSDK,
             cameraPermissionStatus: PermissionStatus.denied,
           );
 
@@ -532,10 +441,10 @@ void main() {
           initialConnectivityToReturn: [ConnectivityResult.none],
         );
 
-        await navigateToChatScreen(
+        await navigateToChat(
           tester,
           contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          chatSdk: meetingPlaceChatSDK,
           cameraPermissionStatus: PermissionStatus.granted,
           connectivity: fakeConnectivity,
         );
@@ -556,14 +465,14 @@ void main() {
         final l10n = await getL10n();
         final oobChatSDK = FakeChatSdk();
 
-        await navigateToLocation(
+        await navigateToChat(
           tester,
-          '/contacts/${FakeContacts.oobContact.id}/chat',
+          contactId: FakeContacts.oobContact.id,
           isAuthenticated: true,
           alreadyOnboarded: true,
           identities: [FakeIdentities.primaryIdentity],
           contacts: [FakeContacts.oobContact],
-          meetingPlaceChatSDK: oobChatSDK,
+          chatSdk: oobChatSDK,
         );
         await tester.pumpAndSettle();
 
@@ -593,14 +502,14 @@ void main() {
         testWidgets('it should dismiss the banner', (tester) async {
           final oobChatSDK = FakeChatSdk();
 
-          await navigateToLocation(
+          await navigateToChat(
             tester,
-            '/contacts/${FakeContacts.oobContact.id}/chat',
+            contactId: FakeContacts.oobContact.id,
             isAuthenticated: true,
             alreadyOnboarded: true,
             identities: [FakeIdentities.primaryIdentity],
             contacts: [FakeContacts.oobContact],
-            meetingPlaceChatSDK: oobChatSDK,
+            chatSdk: oobChatSDK,
           );
           await tester.pumpAndSettle();
 
@@ -630,14 +539,14 @@ void main() {
         (tester) async {
           final oobChatSDK = FakeChatSdk();
 
-          await navigateToLocation(
+          await navigateToChat(
             tester,
-            '/contacts/${FakeContacts.oobContactDismissed.id}/chat',
+            contactId: FakeContacts.oobContactDismissed.id,
             isAuthenticated: true,
             alreadyOnboarded: true,
             identities: [FakeIdentities.primaryIdentity],
             contacts: [FakeContacts.oobContactDismissed],
-            meetingPlaceChatSDK: oobChatSDK,
+            chatSdk: oobChatSDK,
           );
           await tester.pumpAndSettle();
 

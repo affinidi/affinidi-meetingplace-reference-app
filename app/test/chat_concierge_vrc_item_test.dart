@@ -1,29 +1,10 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
-import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
-
-Future<void> _navigateToChat(
-  WidgetTester tester, {
-  required FakeChatSdk chatSdk,
-}) async {
-  await navigateToLocation(
-    tester,
-    '/contacts/individual-contact-id/chat',
-    identities: [FakeIdentities.primaryIdentity],
-    contacts: [FakeContacts.individualContact],
-    meetingPlaceChatSDK: chatSdk,
-    connectivity: FakeConnectivity(
-      initialConnectivityToReturn: [ConnectivityResult.wifi],
-    ),
-  );
-  await tester.pumpAndSettle();
-}
 
 void main() {
   group('ConciergeVrcChatItem', () {
@@ -33,7 +14,7 @@ void main() {
         final l10n = await getL10n();
         final chatSdk = FakeChatSdk();
 
-        await _navigateToChat(tester, chatSdk: chatSdk);
+        await navigateToChat(tester, chatSdk: chatSdk);
 
         chatSdk.simulateVrcPermissionRequest(
           senderDid: FakeChannels.individualChannel.permanentChannelDid!,
@@ -52,7 +33,7 @@ void main() {
       final l10n = await getL10n();
       final chatSdk = FakeChatSdk();
 
-      await _navigateToChat(tester, chatSdk: chatSdk);
+      await navigateToChat(tester, chatSdk: chatSdk);
 
       chatSdk.simulateVrcPermissionRequest(
         senderDid: FakeChannels.individualChannel.permanentChannelDid!,
