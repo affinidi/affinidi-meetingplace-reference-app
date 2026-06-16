@@ -14,10 +14,12 @@ Future<void> _openAttachmentSheet(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-ListTile _findVrcListTile(WidgetTester tester, String label) {
-  return tester.widget<ListTile>(
-    find.ancestor(of: find.text(label), matching: find.byType(ListTile)),
+bool _isVrcOptionEnabled(WidgetTester tester, String label) {
+  final option = tester.widget<InkWell>(
+    find.ancestor(of: find.text(label), matching: find.byType(InkWell)),
   );
+
+  return option.onTap != null;
 }
 
 Future<void> _navigateToGroupChat(WidgetTester tester) async {
@@ -69,11 +71,11 @@ void main() {
       await _navigateToGroupChat(tester);
       await _openAttachmentSheet(tester);
 
-      final tile = _findVrcListTile(
+      final enabled = _isVrcOptionEnabled(
         tester,
         l10n.verifiableRelationshipCredential,
       );
-      expect(tile.enabled, isFalse);
+      expect(enabled, isFalse);
     });
   });
 
@@ -99,11 +101,11 @@ void main() {
       await _navigateToOobChat(tester);
       await _openAttachmentSheet(tester);
 
-      final tile = _findVrcListTile(
+      final enabled = _isVrcOptionEnabled(
         tester,
         l10n.verifiableRelationshipCredential,
       );
-      expect(tile.enabled, isFalse);
+      expect(enabled, isFalse);
     });
   });
 }

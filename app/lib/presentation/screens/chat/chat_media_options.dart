@@ -281,7 +281,7 @@ class _ChatOptionsBottomSheet extends StatelessWidget {
   const _ChatOptionsBottomSheet({required this.items, required this.kind});
 
   static const _columnCount = 3;
-  static const _itemExtent = 136.0;
+  static const _itemExtent = 152.0;
   static const _horizontalPadding = 20.0;
   static const _topPadding = 24.0;
   static const _bottomPadding = 24.0;
