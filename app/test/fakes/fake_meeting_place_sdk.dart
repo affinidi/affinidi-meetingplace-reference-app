@@ -43,11 +43,24 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final ConnectionOffer? offerToFind;
   final bool findOfferHasError;
 
-  final _controlPlaneEventStreamManager =
-      StreamController<ControlPlaneStreamEvent>.broadcast();
+  final Completer<void> _controlPlaneEventsListenerCompleter =
+      Completer<void>();
+
+  late final StreamController<ControlPlaneStreamEvent>
+  _controlPlaneEventStreamManager =
+      StreamController<ControlPlaneStreamEvent>.broadcast(
+        onListen: () {
+          if (!_controlPlaneEventsListenerCompleter.isCompleted) {
+            _controlPlaneEventsListenerCompleter.complete();
+          }
+        },
+      );
   @override
   Stream<ControlPlaneStreamEvent> get controlPlaneEventsStream =>
       _controlPlaneEventStreamManager.stream;
+
+  Future<void> waitForControlPlaneEventsListener() =>
+      _controlPlaneEventsListenerCompleter.future;
 
   String? _lastRegisteredToken;
   String? get lastRegisteredToken => _lastRegisteredToken;

@@ -719,7 +719,6 @@ void main() {
       await chatService.startChatSession();
 
       await chatService.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
     });
@@ -740,7 +739,6 @@ void main() {
       await service.startChatSession();
 
       await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
@@ -771,7 +769,6 @@ void main() {
       await service.startChatSession();
 
       await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });

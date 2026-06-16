@@ -39,6 +39,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
   final List<({List<ChatAttachment> attachments, String senderDid})>
   createAttachmentMessageCalls = [];
+  final List<({int targetCount, Completer<void> completer})>
+  _attachmentMessageWaiters = [];
 
   int get startChatSessionCallCount => _chatSessionStartedCalls;
   int get startedChatPresenceUpdatesCount => _startedChatPresenceUpdates;
@@ -496,7 +498,6 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   @override
   Future<Chat> startChatSession() async {
     _chatSessionStartedCalls++;
-    await Future<void>.delayed(const Duration(milliseconds: 10));
     if (shouldThrowOnStartSession) {
       throw Exception('Simulated SDK error');
     }
@@ -518,6 +519,29 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       attachments: attachments,
       senderDid: senderDid,
     ));
+    _resolveAttachmentMessageWaiters();
+  }
+
+  Future<void> waitForAttachmentMessageCount(int count) {
+    if (createAttachmentMessageCalls.length >= count) {
+      return Future.value();
+    }
+
+    final completer = Completer<void>();
+    _attachmentMessageWaiters.add((targetCount: count, completer: completer));
+    return completer.future;
+  }
+
+  void _resolveAttachmentMessageWaiters() {
+    final completedWaiters = _attachmentMessageWaiters
+        .where(
+          (waiter) => createAttachmentMessageCalls.length >= waiter.targetCount,
+        )
+        .toList();
+    for (final waiter in completedWaiters) {
+      waiter.completer.complete();
+      _attachmentMessageWaiters.remove(waiter);
+    }
   }
 
   @override

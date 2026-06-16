@@ -320,9 +320,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
       unawaited(
-        _rCardManager.subscribeToIncomingRCards().then(
-          (_) => _rCardManager.replayPendingRCard(),
-        ),
+        _rCardManager.subscribeToIncomingRCards().then((_) async {
+          if (!ref.mounted) return;
+          await _rCardManager.replayPendingRCard();
+        }),
       );
 
       _logger.info('Chat session started', name: _logKey);
