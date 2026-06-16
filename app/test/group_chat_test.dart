@@ -1,63 +1,14 @@
 import 'package:camera/camera.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
-import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
-import 'fakes/fake_identities.dart';
 import 'fakes/fake_image_picker.dart';
-import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
-
-const _mockCameras = [
-  CameraDescription(
-    name: 'Mock Front Camera',
-    lensDirection: CameraLensDirection.front,
-    sensorOrientation: 90,
-  ),
-  CameraDescription(
-    name: 'Mock Back Camera',
-    lensDirection: CameraLensDirection.back,
-    sensorOrientation: 90,
-  ),
-];
-
-Future<void> navigateToGroupChatScreen(
-  WidgetTester tester, {
-  required String contactId,
-  MeetingPlaceChatSDK? meetingPlaceChatSDK,
-  ImagePicker? imagePicker,
-  List<CameraDescription>? mockCameras,
-  FakeSecureStorage? secureStorage,
-  PermissionStatus? cameraPermissionStatus,
-  Connectivity? connectivity,
-}) async {
-  await navigateToLocation(
-    tester,
-    '/contacts/$contactId/chat',
-    isAuthenticated: true,
-    alreadyOnboarded: true,
-    identities: [FakeIdentities.primaryIdentity],
-    contacts: [FakeContacts.groupContact],
-    connectivity:
-        connectivity ??
-        FakeConnectivity(
-          initialConnectivityToReturn: [ConnectivityResult.wifi],
-        ),
-    meetingPlaceChatSDK: meetingPlaceChatSDK,
-    imagePicker: imagePicker,
-    mockCameras: mockCameras,
-    secureStorage: secureStorage,
-    cameraPermissionStatus: cameraPermissionStatus,
-  );
-  await tester.pumpAndSettle();
-}
 
 Finder findChatMessageInput() => find.byKey(const Key('chat_message_input'));
 Finder findSendButton() => find.byKey(const Key('chat_send_button'));
@@ -74,10 +25,10 @@ Future<void> tapSendButton(WidgetTester tester) async {
 
 Future<void> simulateIncomingMessage(
   WidgetTester tester,
-  FakeChatSdk meetingPlaceChatSDK,
+  FakeChatSdk chatSdk,
   String message,
 ) async {
-  meetingPlaceChatSDK.simulateIncomingTextMessage(
+  chatSdk.simulateIncomingTextMessage(
     text: message,
     recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
   );
@@ -95,18 +46,18 @@ Future<void> submitMediaWithMessage(WidgetTester tester, String message) async {
 
 Future<void> verifyMessageWithAttachmentSent(
   WidgetTester tester,
-  FakeChatSdk meetingPlaceChatSDK,
+  FakeChatSdk chatSdk,
   String message,
   String groupName,
 ) async {
-  expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
-  final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
+  expect(chatSdk.sendTextMessageCalls, hasLength(1));
+  final sendCall = chatSdk.sendTextMessageCalls.first;
   expect(sendCall['text'], message);
   expect(sendCall['attachments'], isA<List<ChatAttachment>>());
   expect((sendCall['attachments'] as List).length, 1);
 
   final attachments = sendCall['attachments'] as List<ChatAttachment>;
-  meetingPlaceChatSDK.simulateIncomingTextMessage(
+  chatSdk.simulateIncomingTextMessage(
     text: message,
     recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
     attachments: attachments,
@@ -119,27 +70,30 @@ Future<void> verifyMessageWithAttachmentSent(
 }
 
 void main() {
+  final contacts = [FakeContacts.groupContact];
   group('When opening a group chat', () {
     final contactId = FakeContacts.groupContact.id;
     final contact = FakeContacts.groupContact;
     final groupName = contact.displayName ?? 'Group';
-    final meetingPlaceChatSDK = FakeChatSdk();
+    final chatSdk = FakeChatSdk();
 
     testWidgets('it shows the chat screen with correct title', (tester) async {
-      await navigateToGroupChatScreen(
+      await navigateToChat(
         tester,
         contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
+        chatSdk: chatSdk,
+        contacts: contacts,
       );
 
       expect(find.text(groupName), findsOneWidget);
     });
 
     testWidgets('it shows the message input field', (tester) async {
-      await navigateToGroupChatScreen(
+      await navigateToChat(
         tester,
         contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
+        chatSdk: chatSdk,
+        contacts: contacts,
       );
 
       final inputField = findChatMessageInput();
@@ -150,10 +104,11 @@ void main() {
     });
 
     testWidgets('it shows the send button', (tester) async {
-      await navigateToGroupChatScreen(
+      await navigateToChat(
         tester,
         contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
+        chatSdk: chatSdk,
+        contacts: contacts,
       );
 
       final sendButton = findSendButton();
@@ -161,10 +116,11 @@ void main() {
     });
 
     testWidgets('it shows the add media button', (tester) async {
-      await navigateToGroupChatScreen(
+      await navigateToChat(
         tester,
         contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
+        chatSdk: chatSdk,
+        contacts: contacts,
       );
       final addButton = findAddMediaButton();
       expect(addButton, findsOneWidget);
@@ -173,19 +129,21 @@ void main() {
     testWidgets('it shows the encryption notice', (tester) async {
       final l10n = await getL10n();
 
-      await navigateToGroupChatScreen(
+      await navigateToChat(
         tester,
         contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
+        chatSdk: chatSdk,
+        contacts: contacts,
       );
       expect(find.text(l10n.chatEncryptionNotice), findsOneWidget);
     });
 
     testWidgets('it allows typing in the message input', (tester) async {
-      await navigateToGroupChatScreen(
+      await navigateToChat(
         tester,
         contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
+        chatSdk: chatSdk,
+        contacts: contacts,
       );
       const testMessage = 'Hello group!';
 
@@ -197,10 +155,11 @@ void main() {
     });
 
     testWidgets('it shows the group avatar', (tester) async {
-      await navigateToGroupChatScreen(
+      await navigateToChat(
         tester,
         contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
+        chatSdk: chatSdk,
+        contacts: contacts,
       );
       final contactAvatarKey = const Key('chat_contact_avatar');
       expect(find.byKey(contactAvatarKey), findsOneWidget);
@@ -209,10 +168,11 @@ void main() {
     testWidgets('it shows group member details hint', (tester) async {
       final l10n = await getL10n();
 
-      await navigateToGroupChatScreen(
+      await navigateToChat(
         tester,
         contactId: contactId,
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
+        chatSdk: chatSdk,
+        contacts: contacts,
       );
 
       expect(find.text(l10n.chatScreenTapForMemberDetails), findsOneWidget);
@@ -220,10 +180,11 @@ void main() {
 
     group('and entering a message', () {
       testWidgets('it has the send button available', (tester) async {
-        await navigateToGroupChatScreen(
+        await navigateToChat(
           tester,
           contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          chatSdk: chatSdk,
+          contacts: contacts,
         );
         const testMessage = 'Test group message';
 
@@ -238,23 +199,25 @@ void main() {
       testWidgets('it shows only the encryption notice', (tester) async {
         final l10n = await getL10n();
 
-        await navigateToGroupChatScreen(
+        await navigateToChat(
           tester,
           contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          chatSdk: chatSdk,
+          contacts: contacts,
         );
         expect(find.text(l10n.chatEncryptionNotice), findsOneWidget);
       });
     });
 
     group('and sending a message', () {
-      final meetingPlaceChatSDK = FakeChatSdk();
+      final chatSdk = FakeChatSdk();
 
       testWidgets('it appears on the screen', (tester) async {
-        await navigateToGroupChatScreen(
+        await navigateToChat(
           tester,
           contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          chatSdk: chatSdk,
+          contacts: contacts,
         );
         const testMessage = 'Hello group members!';
 
@@ -262,13 +225,13 @@ void main() {
         await tapSendButton(tester);
         await tester.pumpAndSettle();
 
-        expect(meetingPlaceChatSDK.sendTextMessageCalls, hasLength(1));
-        final sendCall = meetingPlaceChatSDK.sendTextMessageCalls.first;
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
         expect(sendCall['text'], testMessage);
         expect(sendCall['attachments'], isNull);
 
         // Simulate the message appearing in the UI
-        meetingPlaceChatSDK.simulateIncomingTextMessage(
+        chatSdk.simulateIncomingTextMessage(
           text: testMessage,
           recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
         );
@@ -278,10 +241,11 @@ void main() {
       });
 
       testWidgets('the input field is cleared after sending', (tester) async {
-        await navigateToGroupChatScreen(
+        await navigateToChat(
           tester,
           contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          chatSdk: chatSdk,
+          contacts: contacts,
         );
         const testMessage = 'Another group message';
 
@@ -296,29 +260,31 @@ void main() {
     });
 
     group('and receiving a message', () {
-      final meetingPlaceChatSDK = FakeChatSdk();
+      final chatSdk = FakeChatSdk();
       const message = 'Hello everyone in the group!';
 
       testWidgets('an incoming message appears on the screen', (tester) async {
-        await navigateToGroupChatScreen(
+        await navigateToChat(
           tester,
           contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          chatSdk: chatSdk,
+          contacts: contacts,
         );
 
-        await simulateIncomingMessage(tester, meetingPlaceChatSDK, message);
+        await simulateIncomingMessage(tester, chatSdk, message);
         expect(find.text(message), findsOneWidget);
       });
 
       group('and user long press on the received message', () {
         testWidgets('should let user react to the message', (tester) async {
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          await simulateIncomingMessage(tester, meetingPlaceChatSDK, message);
+          await simulateIncomingMessage(tester, chatSdk, message);
 
           await tester.longPress(find.text(message));
           await tester.pumpAndSettle();
@@ -331,8 +297,8 @@ void main() {
           await tester.tap(find.text('👍').first);
           await tester.pumpAndSettle();
 
-          expect(meetingPlaceChatSDK.reactOnMessageCalls, hasLength(1));
-          final reactionCall = meetingPlaceChatSDK.reactOnMessageCalls.first;
+          expect(chatSdk.reactOnMessageCalls, hasLength(1));
+          final reactionCall = chatSdk.reactOnMessageCalls.first;
           expect(reactionCall['reaction'], '👍');
           expect(reactionCall['message'], isA<Message>());
         });
@@ -345,10 +311,11 @@ void main() {
       ) async {
         final l10n = await getL10n();
 
-        await navigateToGroupChatScreen(
+        await navigateToChat(
           tester,
           contactId: contactId,
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          chatSdk: chatSdk,
+          contacts: contacts,
         );
         final addMediaButton = findAddMediaButton();
         expect(addMediaButton, findsOneWidget);
@@ -371,12 +338,13 @@ void main() {
             final effectLabel = effect == Effect.balloons
                 ? l10n.generalBalloons
                 : l10n.generalConfetti;
-            final meetingPlaceChatSDK = FakeChatSdk();
+            final chatSdk = FakeChatSdk();
 
-            await navigateToGroupChatScreen(
+            await navigateToChat(
               tester,
               contactId: contactId,
-              meetingPlaceChatSDK: meetingPlaceChatSDK,
+              chatSdk: chatSdk,
+              contacts: contacts,
             );
 
             await tester.tap(findAddMediaButton());
@@ -385,8 +353,8 @@ void main() {
             await tester.tap(find.text(effectLabel));
             await tester.pumpAndSettle();
 
-            expect(meetingPlaceChatSDK.sendEffectCalls, hasLength(1));
-            expect(meetingPlaceChatSDK.sendEffectCalls.first['effect'], effect);
+            expect(chatSdk.sendEffectCalls, hasLength(1));
+            expect(chatSdk.sendEffectCalls.first['effect'], effect);
           });
         });
       }
@@ -397,13 +365,14 @@ void main() {
         ) async {
           final l10n = await getL10n();
           const message = 'Check out this photo!';
-          final meetingPlaceChatSDK = FakeChatSdk();
+          final chatSdk = FakeChatSdk();
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
             imagePicker: FakeImagePicker.withDefaultImage(),
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
           await tester.tap(findAddMediaButton());
@@ -423,7 +392,7 @@ void main() {
 
           await verifyMessageWithAttachmentSent(
             tester,
-            meetingPlaceChatSDK,
+            chatSdk,
             message,
             groupName,
           );
@@ -431,20 +400,34 @@ void main() {
       });
 
       group('and pressing on camera', () {
+        const mockCameras = [
+          CameraDescription(
+            name: 'Mock Front Camera',
+            lensDirection: CameraLensDirection.front,
+            sensorOrientation: 90,
+          ),
+          CameraDescription(
+            name: 'Mock Back Camera',
+            lensDirection: CameraLensDirection.back,
+            sensorOrientation: 90,
+          ),
+        ];
+
         testWidgets('should send photo and return to chat screen', (
           tester,
         ) async {
           final l10n = await getL10n();
           const message = 'Check out this photo!';
-          final meetingPlaceChatSDK = FakeChatSdk();
+          final chatSdk = FakeChatSdk();
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
             imagePicker: FakeImagePicker.withDefaultImage(),
-            mockCameras: _mockCameras,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            cameras: mockCameras,
+            chatSdk: chatSdk,
             cameraPermissionStatus: PermissionStatus.granted,
+            contacts: contacts,
           );
 
           await tester.tap(findAddMediaButton());
@@ -470,7 +453,7 @@ void main() {
 
           await verifyMessageWithAttachmentSent(
             tester,
-            meetingPlaceChatSDK,
+            chatSdk,
             message,
             groupName,
           );
@@ -486,13 +469,14 @@ void main() {
           final l10n = await getL10n();
           const memberName = 'Khoa Vo';
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          meetingPlaceChatSDK.simulateJoinGroupRequest(
+          chatSdk.simulateJoinGroupRequest(
             memberName: memberName,
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
             recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
@@ -508,13 +492,14 @@ void main() {
           final l10n = await getL10n();
           const memberName = 'Khoa Vo';
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          meetingPlaceChatSDK.simulateJoinGroupRequest(
+          chatSdk.simulateJoinGroupRequest(
             memberName: memberName,
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
             recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
@@ -531,13 +516,14 @@ void main() {
           final l10n = await getL10n();
           const memberName = 'Khoa Vo';
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          meetingPlaceChatSDK.simulateJoinGroupRequest(
+          chatSdk.simulateJoinGroupRequest(
             memberName: memberName,
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
             recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
@@ -553,32 +539,28 @@ void main() {
           (tester) async {
             final l10n = await getL10n();
             const memberName = 'Khoa Vo';
-            final meetingPlaceChatSDK = FakeChatSdk();
+            final chatSdk = FakeChatSdk();
 
-            await navigateToGroupChatScreen(
+            await navigateToChat(
               tester,
               contactId: contactId,
-              meetingPlaceChatSDK: meetingPlaceChatSDK,
+              chatSdk: chatSdk,
+              contacts: contacts,
             );
 
-            final simulatedMessage = meetingPlaceChatSDK
-                .simulateJoinGroupRequest(
-                  memberName: memberName,
-                  senderDid:
-                      FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-                  recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-                );
+            final simulatedMessage = chatSdk.simulateJoinGroupRequest(
+              memberName: memberName,
+              senderDid:
+                  FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+              recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            );
             await tester.pumpAndSettle();
 
             await tester.tap(find.text(l10n.generalApprove));
             await tester.pumpAndSettle();
 
-            expect(
-              meetingPlaceChatSDK.approveConnectionRequestCalls,
-              hasLength(1),
-            );
-            final approveCall =
-                meetingPlaceChatSDK.approveConnectionRequestCalls.first;
+            expect(chatSdk.approveConnectionRequestCalls, hasLength(1));
+            final approveCall = chatSdk.approveConnectionRequestCalls.first;
             final calledWithMessage =
                 approveCall['message'] as ConciergeMessage;
             expect(calledWithMessage.messageId, simulatedMessage.messageId);
@@ -591,32 +573,28 @@ void main() {
           (tester) async {
             final l10n = await getL10n();
             const memberName = 'Khoa Vo';
-            final meetingPlaceChatSDK = FakeChatSdk();
+            final chatSdk = FakeChatSdk();
 
-            await navigateToGroupChatScreen(
+            await navigateToChat(
               tester,
               contactId: contactId,
-              meetingPlaceChatSDK: meetingPlaceChatSDK,
+              chatSdk: chatSdk,
+              contacts: contacts,
             );
 
-            final simulatedMessage = meetingPlaceChatSDK
-                .simulateJoinGroupRequest(
-                  memberName: memberName,
-                  senderDid:
-                      FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-                  recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-                );
+            final simulatedMessage = chatSdk.simulateJoinGroupRequest(
+              memberName: memberName,
+              senderDid:
+                  FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+              recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            );
             await tester.pumpAndSettle();
 
             await tester.tap(find.text(l10n.generalReject));
             await tester.pumpAndSettle();
 
-            expect(
-              meetingPlaceChatSDK.rejectConnectionRequestCalls,
-              hasLength(1),
-            );
-            final rejectCall =
-                meetingPlaceChatSDK.rejectConnectionRequestCalls.first;
+            expect(chatSdk.rejectConnectionRequestCalls, hasLength(1));
+            final rejectCall = chatSdk.rejectConnectionRequestCalls.first;
             final calledWithMessage = rejectCall['message'] as ConciergeMessage;
             expect(calledWithMessage.messageId, simulatedMessage.messageId);
             expect(calledWithMessage.chatId, simulatedMessage.chatId);
@@ -629,16 +607,17 @@ void main() {
           WidgetTester tester,
         ) async {
           final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
+          final chatSdk = FakeChatSdk();
           final l10n = await getL10n();
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          meetingPlaceChatSDK.simulateProfileUpdateRequest(
+          chatSdk.simulateProfileUpdateRequest(
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
             recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
           );
@@ -654,16 +633,17 @@ void main() {
           WidgetTester tester,
         ) async {
           final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
+          final chatSdk = FakeChatSdk();
           final l10n = await getL10n();
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          meetingPlaceChatSDK.simulateProfileUpdateRequest(
+          chatSdk.simulateProfileUpdateRequest(
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
             recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
           );
@@ -678,32 +658,28 @@ void main() {
           'Yes button calls sendContactDetailsUpdate with correct message',
           (WidgetTester tester) async {
             final contactId = FakeContacts.groupContact.id;
-            final meetingPlaceChatSDK = FakeChatSdk();
+            final chatSdk = FakeChatSdk();
             final l10n = await getL10n();
 
-            await navigateToGroupChatScreen(
+            await navigateToChat(
               tester,
               contactId: contactId,
-              meetingPlaceChatSDK: meetingPlaceChatSDK,
+              chatSdk: chatSdk,
+              contacts: contacts,
             );
 
-            final simulatedMessage = meetingPlaceChatSDK
-                .simulateProfileUpdateRequest(
-                  senderDid:
-                      FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-                  recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-                );
+            final simulatedMessage = chatSdk.simulateProfileUpdateRequest(
+              senderDid:
+                  FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+              recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            );
             await tester.pumpAndSettle();
 
             await tester.tap(find.text(l10n.genWordYes));
             await tester.pumpAndSettle();
 
-            expect(
-              meetingPlaceChatSDK.sendContactDetailsUpdateCalls,
-              hasLength(1),
-            );
-            final updateCall =
-                meetingPlaceChatSDK.sendContactDetailsUpdateCalls.first;
+            expect(chatSdk.sendContactDetailsUpdateCalls, hasLength(1));
+            final updateCall = chatSdk.sendContactDetailsUpdateCalls.first;
             final calledWithMessage = updateCall['message'] as ConciergeMessage;
             expect(calledWithMessage.messageId, simulatedMessage.messageId);
             expect(calledWithMessage.chatId, simulatedMessage.chatId);
@@ -714,16 +690,17 @@ void main() {
           WidgetTester tester,
         ) async {
           final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
+          final chatSdk = FakeChatSdk();
           final l10n = await getL10n();
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          meetingPlaceChatSDK.simulateProfileUpdateRequest(
+          chatSdk.simulateProfileUpdateRequest(
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
             recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
           );
@@ -747,32 +724,28 @@ void main() {
           'No button calls cancelUpdatingContactDetails with correct message',
           (WidgetTester tester) async {
             final contactId = FakeContacts.groupContact.id;
-            final meetingPlaceChatSDK = FakeChatSdk();
+            final chatSdk = FakeChatSdk();
             final l10n = await getL10n();
 
-            await navigateToGroupChatScreen(
+            await navigateToChat(
               tester,
               contactId: contactId,
-              meetingPlaceChatSDK: meetingPlaceChatSDK,
+              chatSdk: chatSdk,
+              contacts: contacts,
             );
 
-            final simulatedMessage = meetingPlaceChatSDK
-                .simulateProfileUpdateRequest(
-                  senderDid:
-                      FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
-                  recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-                );
+            final simulatedMessage = chatSdk.simulateProfileUpdateRequest(
+              senderDid:
+                  FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+              recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            );
             await tester.pumpAndSettle();
 
             await tester.tap(find.text(l10n.genWordNo));
             await tester.pumpAndSettle();
 
-            expect(
-              meetingPlaceChatSDK.cancelUpdatingContactDetailsCalls,
-              hasLength(1),
-            );
-            final cancelCall =
-                meetingPlaceChatSDK.cancelUpdatingContactDetailsCalls.first;
+            expect(chatSdk.cancelUpdatingContactDetailsCalls, hasLength(1));
+            final cancelCall = chatSdk.cancelUpdatingContactDetailsCalls.first;
             final calledWithMessage = cancelCall['message'] as ConciergeMessage;
             expect(calledWithMessage.messageId, simulatedMessage.messageId);
             expect(calledWithMessage.chatId, simulatedMessage.chatId);
@@ -783,16 +756,17 @@ void main() {
       group('and member joins the group', () {
         testWidgets('shows member joined message', (WidgetTester tester) async {
           final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
+          final chatSdk = FakeChatSdk();
           final memberName = 'Khoa Vo';
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          meetingPlaceChatSDK.simulateMemberJoinedGroup(
+          chatSdk.simulateMemberJoinedGroup(
             memberName: memberName,
             memberDid: 'did:member:123',
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
@@ -808,17 +782,18 @@ void main() {
       group('and member leaves the group', () {
         testWidgets('shows member left message', (WidgetTester tester) async {
           final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
+          final chatSdk = FakeChatSdk();
           final l10n = await getL10n();
           final memberName = 'Earl G.Reyes';
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          meetingPlaceChatSDK.simulateMemberLeftGroup(
+          chatSdk.simulateMemberLeftGroup(
             memberName: memberName,
             memberDid: 'did:member:456',
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
@@ -833,16 +808,17 @@ void main() {
       group('and group is deleted', () {
         testWidgets('shows group deleted message', (WidgetTester tester) async {
           final contactId = FakeContacts.groupContact.id;
-          final meetingPlaceChatSDK = FakeChatSdk();
+          final chatSdk = FakeChatSdk();
           final l10n = await getL10n();
 
-          await navigateToGroupChatScreen(
+          await navigateToChat(
             tester,
             contactId: contactId,
-            meetingPlaceChatSDK: meetingPlaceChatSDK,
+            chatSdk: chatSdk,
+            contacts: contacts,
           );
 
-          meetingPlaceChatSDK.simulateGroupDeleted(
+          chatSdk.simulateGroupDeleted(
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
             recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
           );

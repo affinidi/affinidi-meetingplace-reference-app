@@ -1,50 +1,12 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
-import 'fakes/fake_connectivity.dart';
-import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
 
 const _addMediaButtonKey = Key('chat_add_media_button');
-
-Future<void> _closeChat(WidgetTester tester) async {
-  final binding = tester.binding;
-
-  try {
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    await tester.pumpAndSettle();
-  } catch (_) {
-    // Ignore teardown-time settle failures when the tree is already gone.
-  }
-
-  await tester.pumpWidget(const SizedBox.shrink());
-  await tester.pumpAndSettle();
-}
-
-Future<void> _navigateToChat(
-  WidgetTester tester, {
-  FakeChatSdk? chatSdk,
-}) async {
-  addTearDown(() async {
-    await _closeChat(tester);
-  });
-
-  await navigateToLocation(
-    tester,
-    '/contacts/individual-contact-id/chat',
-    identities: [FakeIdentities.primaryIdentity],
-    contacts: [FakeContacts.individualContact],
-    meetingPlaceChatSDK: chatSdk ?? FakeChatSdk(),
-    connectivity: FakeConnectivity(
-      initialConnectivityToReturn: [ConnectivityResult.wifi],
-    ),
-  );
-  await tester.pumpAndSettle();
-}
 
 Future<void> _openMediaSheet(WidgetTester tester) async {
   await tester.tap(find.byKey(_addMediaButtonKey));
@@ -62,7 +24,7 @@ void main() {
     testWidgets('shows VRC option in media options sheet', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await _openMediaSheet(tester);
 
       expect(find.text(l10n.verifiableRelationshipCredential), findsOneWidget);
@@ -71,7 +33,7 @@ void main() {
     testWidgets('VRC option is enabled in a fresh chat', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await _openMediaSheet(tester);
 
       final tile = _findVrcListTile(
@@ -87,7 +49,7 @@ void main() {
       final l10n = await getL10n();
       final chatSdk = FakeChatSdk();
 
-      await _navigateToChat(tester, chatSdk: chatSdk);
+      await navigateToChat(tester, chatSdk: chatSdk);
 
       chatSdk.simulateVrcEvent(
         eventType: 'vrcExchangeInitiated',
@@ -110,7 +72,7 @@ void main() {
     ) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
 
       // Tap Do later from the banner — this should keep the attachment enabled
       await tester.tap(find.text(l10n.doLater));
