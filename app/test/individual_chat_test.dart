@@ -197,7 +197,7 @@ void main() {
         expect(chatSdk.sendTextMessageCalls, hasLength(1));
         final sendCall = chatSdk.sendTextMessageCalls.first;
         expect(sendCall['text'], testMessage);
-        expect(sendCall['attachments'], isNull);
+        expect(sendCall['attachments'], isEmpty);
 
         // Simulate the message appearing in the UI
         chatSdk.simulateIncomingTextMessage(
@@ -465,14 +465,14 @@ void main() {
         final l10n = await getL10n();
         final oobChatSDK = FakeChatSdk();
 
-        await navigateToLocation(
+        await navigateToChat(
           tester,
-          '/contacts/${FakeContacts.oobContact.id}/chat',
+          contactId: FakeContacts.oobContact.id,
           isAuthenticated: true,
           alreadyOnboarded: true,
           identities: [FakeIdentities.primaryIdentity],
           contacts: [FakeContacts.oobContact],
-          meetingPlaceChatSDK: oobChatSDK,
+          chatSdk: oobChatSDK,
         );
         await tester.pumpAndSettle();
 
@@ -502,14 +502,14 @@ void main() {
         testWidgets('it should dismiss the banner', (tester) async {
           final oobChatSDK = FakeChatSdk();
 
-          await navigateToLocation(
+          await navigateToChat(
             tester,
-            '/contacts/${FakeContacts.oobContact.id}/chat',
+            contactId: FakeContacts.oobContact.id,
             isAuthenticated: true,
             alreadyOnboarded: true,
             identities: [FakeIdentities.primaryIdentity],
             contacts: [FakeContacts.oobContact],
-            meetingPlaceChatSDK: oobChatSDK,
+            chatSdk: oobChatSDK,
           );
           await tester.pumpAndSettle();
 
@@ -539,14 +539,14 @@ void main() {
         (tester) async {
           final oobChatSDK = FakeChatSdk();
 
-          await navigateToLocation(
+          await navigateToChat(
             tester,
-            '/contacts/${FakeContacts.oobContactDismissed.id}/chat',
+            contactId: FakeContacts.oobContactDismissed.id,
             isAuthenticated: true,
             alreadyOnboarded: true,
             identities: [FakeIdentities.primaryIdentity],
             contacts: [FakeContacts.oobContactDismissed],
-            meetingPlaceChatSDK: oobChatSDK,
+            chatSdk: oobChatSDK,
           );
           await tester.pumpAndSettle();
 
