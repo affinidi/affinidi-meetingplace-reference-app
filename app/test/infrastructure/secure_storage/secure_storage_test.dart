@@ -19,6 +19,7 @@ void main() {
         deviceId,
         matches(
           RegExp(
+            // ignore: lines_longer_than_80_chars
             r'^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$',
           ),
         ),
@@ -42,14 +43,16 @@ void main() {
       expect(deviceId, equals(existingId));
     });
 
-    test('new storage instance reads same ID persisted by earlier instance',
-        () async {
-      final id = await storage.provideDeviceId();
+    test(
+      'new storage instance reads same ID persisted by earlier instance',
+      () async {
+        final id = await storage.provideDeviceId();
 
-      final storage2 = SecureStorage();
-      final id2 = await storage2.provideDeviceId();
+        final storage2 = SecureStorage();
+        final id2 = await storage2.provideDeviceId();
 
-      expect(id2, equals(id));
-    });
+        expect(id2, equals(id));
+      },
+    );
   });
 }

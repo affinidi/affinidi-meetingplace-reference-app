@@ -13,8 +13,8 @@ class FakeSecureStorage extends SecureStorage {
     this._preferredMediatorDid,
     this._shouldShowMeetingPlaceQR,
     this._savingPushTokenDuration,
-    String deviceId = 'test-device-id',
-  }) : _deviceId = deviceId;
+    this._deviceId = 'test-device-id',
+  });
 
   final bool? _debugMode;
   final String _passphrase;
