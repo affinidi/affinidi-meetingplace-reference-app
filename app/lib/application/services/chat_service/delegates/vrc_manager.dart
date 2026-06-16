@@ -53,8 +53,7 @@ class VrcManager {
     final alreadyReceived = _getMessages().any(
       (message) =>
           message is EventMessage &&
-          message.eventType ==
-              EventMessageType.fromJson('vrcRequestReceived'),
+          message.eventType == EventMessageType.fromJson('vrcRequestReceived'),
     );
     if (alreadyReceived) {
       _logger.warning(
