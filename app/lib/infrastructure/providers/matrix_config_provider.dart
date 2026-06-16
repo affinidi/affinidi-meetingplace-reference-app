@@ -25,11 +25,13 @@ final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
 
   final secureStorage = await ref.read(secureStorageProvider.future);
   final passphrase = await secureStorage.provideDatabasePassphrase();
+  final deviceId = await secureStorage.provideDeviceId();
 
   return MatrixConfig(
     mediatorDid: settingsState.selectedMediatorDid,
     controlPlaneDid: environment.controlPlaneDid,
     homeserver: Uri.parse(homeserver),
+    deviceId: deviceId,
     databaseFactory: CallbackMatrixDatabaseFactory(
       openDatabase: (context) async {
         final safeDatabaseName = p
