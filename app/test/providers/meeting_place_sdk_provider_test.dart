@@ -97,7 +97,6 @@ void main() {
             (ref) async => FakeSecureStorage(),
           ),
           vodozemacInitProvider.overrideWith((ref) async {
-            await Future<void>.delayed(const Duration(milliseconds: 10));
             callLog.add('fvod.init completed');
             throw Exception('sentinel – stop after init');
           }),

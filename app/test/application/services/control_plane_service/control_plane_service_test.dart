@@ -56,13 +56,13 @@ void main() {
       );
 
       await container.read(meetingPlaceSdkProvider.future);
-      await Future<void>.delayed(Duration.zero);
+      await fakeCoreSdk.waitForControlPlaneEventsListener();
     });
 
     tearDown(() => container.dispose());
 
     test('throws on channel activity before inauguration', () async {
-      Object? capturedError;
+      final capturedError = Completer<Object>();
       var emittedActivityCount = 0;
 
       await runZonedGuarded(
@@ -99,7 +99,7 @@ void main() {
           );
 
           await scopedContainer.read(meetingPlaceSdkProvider.future);
-          await Future<void>.delayed(Duration.zero);
+          await scopedFakeSdk.waitForControlPlaneEventsListener();
 
           final subscription = scopedControlPlaneService.onChannelActivity
               .listen((_) {
@@ -110,37 +110,35 @@ void main() {
           scopedFakeSdk.simulateChannelActivity(
             _channelWithStatus(ChannelStatus.approved),
           );
-          await Future<void>.delayed(const Duration(milliseconds: 1));
+          await capturedError.future;
         },
         (error, stackTrace) {
-          capturedError = error;
+          if (!capturedError.isCompleted) {
+            capturedError.complete(error);
+          }
         },
       );
 
-      await Future<void>.delayed(const Duration(milliseconds: 1));
+      final error = await capturedError.future;
 
-      expect(capturedError, isA<AppException>());
+      expect(error, isA<AppException>());
       expect(
-        (capturedError as AppException).message,
+        (error as AppException).message,
         'Received channel activity for a non-inaugurated channel',
       );
       expect(emittedActivityCount, 0);
     });
 
     test('emits channel activity after inauguration', () async {
-      var emittedActivityCount = 0;
-      final subscription = controlPlaneService.onChannelActivity.listen((_) {
-        emittedActivityCount += 1;
-      });
-      addTearDown(subscription.cancel);
+      final nextActivity = controlPlaneService.onChannelActivity.first;
 
       fakeCoreSdk.simulateChannelActivity(
         _channelWithStatus(ChannelStatus.inaugurated),
       );
 
-      await Future<void>.delayed(const Duration(milliseconds: 1));
+      final channel = await nextActivity;
 
-      expect(emittedActivityCount, 1);
+      expect(channel.status, ChannelStatus.inaugurated);
     });
   });
 }

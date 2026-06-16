@@ -134,7 +134,6 @@ void main() {
       manager.cancelSubscription();
 
       stub.emitRCard(_makeRCard(issuerDid: otherPartyDid));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
@@ -142,8 +141,7 @@ void main() {
     test('subscribeToIncomingRCards — incoming RCard from expected sender '
         'calls createAttachmentMessage', () async {
       await manager.subscribeToIncomingRCards();
-      stub.emitRCard(_makeRCard(issuerDid: otherPartyDid));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await stub.emitRCardAndWait(_makeRCard(issuerDid: otherPartyDid));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
     });
@@ -152,8 +150,9 @@ void main() {
         'does not match the channel', () async {
       await manager.subscribeToIncomingRCards();
 
-      stub.emitRCard(_makeRCard(issuerDid: 'did:key:someone-else'));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await stub.emitRCardAndWait(
+        _makeRCard(issuerDid: 'did:key:someone-else'),
+      );
 
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
@@ -168,8 +167,7 @@ void main() {
       );
 
       await noSdkManager.subscribeToIncomingRCards();
-      stub.emitRCard(_makeRCard(issuerDid: otherPartyDid));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await stub.emitRCardAndWait(_makeRCard(issuerDid: otherPartyDid));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
@@ -199,8 +197,7 @@ void main() {
       );
 
       await noChannelManager.subscribeToIncomingRCards();
-      stub.emitRCard(_makeRCard(issuerDid: otherPartyDid));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await stub.emitRCardAndWait(_makeRCard(issuerDid: otherPartyDid));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
@@ -239,8 +236,7 @@ void main() {
 
         await manager.subscribeToIncomingRCards();
 
-        stub.emitRCard(_makeRCard(issuerDid: otherPartyDid));
-        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await stub.emitRCardAndWait(_makeRCard(issuerDid: otherPartyDid));
 
         expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
 
