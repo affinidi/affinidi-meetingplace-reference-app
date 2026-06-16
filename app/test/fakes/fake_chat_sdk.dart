@@ -62,7 +62,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
         ChatAttachment(
           id:
               attachment.id ??
-              'fake-attachment-${DateTime.now().microsecondsSinceEpoch}-${attachmentIndex++}',
+              '''fake-attachment-${DateTime.now().microsecondsSinceEpoch}-${attachmentIndex++}''',
           description: attachment.description,
           filename: attachment.filename,
           mediaType: attachment.mediaType,
