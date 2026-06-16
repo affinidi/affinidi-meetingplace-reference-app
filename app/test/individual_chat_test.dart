@@ -505,7 +505,6 @@ void main() {
           contacts: [FakeContacts.oobContact],
           chatSdk: oobChatSDK,
         );
-        await tester.pumpAndSettle();
 
         expect(
           find.byKey(const Key('notifications_unavailable_banner')),
@@ -542,7 +541,6 @@ void main() {
             contacts: [FakeContacts.oobContact],
             chatSdk: oobChatSDK,
           );
-          await tester.pumpAndSettle();
 
           expect(
             find.byKey(const Key('notifications_unavailable_banner')),
@@ -579,7 +577,6 @@ void main() {
             contacts: [FakeContacts.oobContactDismissed],
             chatSdk: oobChatSDK,
           );
-          await tester.pumpAndSettle();
 
           expect(
             find.byKey(const Key('notifications_unavailable_banner')),
