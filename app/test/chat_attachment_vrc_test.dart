@@ -13,10 +13,12 @@ Future<void> _openMediaSheet(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-ListTile _findVrcListTile(WidgetTester tester, String label) {
-  return tester.widget<ListTile>(
-    find.ancestor(of: find.text(label), matching: find.byType(ListTile)),
+bool _isVrcOptionEnabled(WidgetTester tester, String label) {
+  final option = tester.widget<InkWell>(
+    find.ancestor(of: find.text(label), matching: find.byType(InkWell)),
   );
+
+  return option.onTap != null;
 }
 
 void main() {
@@ -36,11 +38,11 @@ void main() {
       await navigateToChat(tester);
       await _openMediaSheet(tester);
 
-      final tile = _findVrcListTile(
+      final enabled = _isVrcOptionEnabled(
         tester,
         l10n.verifiableRelationshipCredential,
       );
-      expect(tile.enabled, isTrue);
+      expect(enabled, isTrue);
     });
 
     testWidgets('VRC option is disabled after exchange is initiated', (
@@ -60,11 +62,11 @@ void main() {
 
       await _openMediaSheet(tester);
 
-      final tile = _findVrcListTile(
+      final enabled = _isVrcOptionEnabled(
         tester,
         l10n.verifiableRelationshipCredential,
       );
-      expect(tile.enabled, isFalse);
+      expect(enabled, isFalse);
     });
 
     testWidgets('VRC option is re-enabled after Do later is tapped', (
@@ -80,11 +82,11 @@ void main() {
 
       await _openMediaSheet(tester);
 
-      final tile = _findVrcListTile(
+      final enabled = _isVrcOptionEnabled(
         tester,
         l10n.verifiableRelationshipCredential,
       );
-      expect(tile.enabled, isTrue);
+      expect(enabled, isTrue);
     });
   });
 }
