@@ -21,31 +21,29 @@ ListTile _findVrcListTile(WidgetTester tester, String label) {
 }
 
 Future<void> _navigateToGroupChat(WidgetTester tester) async {
-  await navigateToLocation(
+  await navigateToChat(
     tester,
-    '/contacts/${FakeContacts.groupContact.id}/chat',
+    contactId: FakeContacts.groupContact.id,
     identities: [FakeIdentities.primaryIdentity],
     contacts: [FakeContacts.groupContact],
-    meetingPlaceChatSDK: FakeChatSdk(),
+    chatSdk: FakeChatSdk(),
     connectivity: FakeConnectivity(
       initialConnectivityToReturn: [ConnectivityResult.wifi],
     ),
   );
-  await tester.pumpAndSettle();
 }
 
 Future<void> _navigateToOobChat(WidgetTester tester) async {
-  await navigateToLocation(
+  await navigateToChat(
     tester,
-    '/contacts/${FakeContacts.oobContact.id}/chat',
+    contactId: FakeContacts.oobContact.id,
     identities: [FakeIdentities.primaryIdentity],
     contacts: [FakeContacts.oobContact],
-    meetingPlaceChatSDK: FakeChatSdk(),
+    chatSdk: FakeChatSdk(),
     connectivity: FakeConnectivity(
       initialConnectivityToReturn: [ConnectivityResult.wifi],
     ),
   );
-  await tester.pumpAndSettle();
 }
 
 void main() {
