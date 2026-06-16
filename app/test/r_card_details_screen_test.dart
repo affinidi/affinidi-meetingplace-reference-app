@@ -380,7 +380,6 @@ void main() {
         rCards: [card],
         rCardsServiceFactory: () => FakeRCardsService([card]),
       );
-      await tester.pumpAndSettle();
 
       // Step 2: Simulate an incoming R-Card auto-exchange message with the
       // signed vcBlob, so the "Go to R-Card" link appears in the chat.

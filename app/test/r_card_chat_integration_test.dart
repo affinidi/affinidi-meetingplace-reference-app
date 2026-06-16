@@ -58,7 +58,6 @@ void main() {
         attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -78,7 +77,6 @@ void main() {
         attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -105,7 +103,6 @@ void main() {
         attachmentPlugins: [disabledPlugin],
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -128,7 +125,6 @@ void main() {
           attachmentPlugins: const [],
           rCardsServiceFactory: () => FakeRCardsService(const []),
         );
-        await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(const Key('chat_add_media_button')));
         await tester.pumpAndSettle();
@@ -150,7 +146,6 @@ void main() {
         attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -176,7 +171,6 @@ void main() {
         attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -208,7 +202,6 @@ void main() {
         attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
       final l10n = await getL10n();
@@ -265,7 +258,6 @@ void main() {
         attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -292,7 +284,6 @@ void main() {
         attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -318,7 +309,6 @@ void main() {
         chatSdk: chatSdk,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       final recipientDid = FakeChannels.individualChannel.permanentChannelDid!;
       final rCardPayload = jsonEncode({'vcBlob': '{}', 'isAutoExchange': true});
@@ -356,7 +346,6 @@ void main() {
         attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
       final l10n = await getL10n();
@@ -397,7 +386,6 @@ void main() {
           attachmentPlugins: attachmentPlugins,
           rCardsServiceFactory: () => FakeRCardsService(const []),
         );
-        await tester.pumpAndSettle();
 
         // Switch current identity to secondary before opening the R-Card screen
         final container = ProviderScope.containerOf(
