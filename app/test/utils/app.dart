@@ -82,6 +82,9 @@ Future<void> startApp(
   RCardsService Function()? rCardsServiceFactory,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
+  addTearDown(() async {
+    await _closeChat(tester);
+  });
   AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
   SharedPreferences.setMockInitialValues({
     'alreadyOnboarded': alreadyOnboarded,
@@ -327,10 +330,6 @@ Future<void> navigateToChat(
   RCardsService Function()? rCardsServiceFactory,
   List<RCard> rCards = const [],
 }) async {
-  addTearDown(() async {
-    await _closeChat(tester);
-  });
-
   await navigateToLocation(
     tester,
     '/contacts/$contactId/chat',
