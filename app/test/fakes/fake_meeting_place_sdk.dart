@@ -398,6 +398,38 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   @override
   Future<void> closeVdipStream() async {}
 
+  final List<IncomingMessageSubscription> _subscribeCalls = [];
+  List<IncomingMessageSubscription> get subscribeCalls =>
+      List.unmodifiable(_subscribeCalls);
+
+  final List<_FakeIncomingMessageHandle> _incomingMessageHandles = [];
+  int get activeIncomingMessageSubscriptions =>
+      _incomingMessageHandles.where((handle) => !handle.isDisposed).length;
+
+  void simulateIncomingMessage(IncomingMessage message) {
+    for (final handle in _incomingMessageHandles) {
+      handle.add(message);
+    }
+  }
+
+  @override
+  Future<IncomingMessageHandle> subscribe(
+    IncomingMessageSubscription subscription,
+  ) async {
+    _subscribeCalls.add(subscription);
+
+    late final _FakeIncomingMessageHandle handle;
+    handle = _FakeIncomingMessageHandle(
+      onDispose: () {
+        _incomingMessageHandles.removeWhere(
+          (existingHandle) => identical(existingHandle, handle),
+        );
+      },
+    );
+    _incomingMessageHandles.add(handle);
+    return handle;
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
@@ -575,4 +607,38 @@ class _FakeVdipClient implements VdipClient {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+class _FakeIncomingMessageHandle implements IncomingMessageHandle {
+  _FakeIncomingMessageHandle({required this.onDispose});
+
+  final void Function() onDispose;
+  final StreamController<IncomingMessage> _streamController =
+      StreamController<IncomingMessage>.broadcast();
+
+  bool _isDisposed = false;
+
+  bool get isDisposed => _isDisposed;
+
+  @override
+  Stream<IncomingMessage> get stream => _streamController.stream;
+
+  void add(IncomingMessage message) {
+    if (_isDisposed || _streamController.isClosed) {
+      return;
+    }
+
+    _streamController.add(message);
+  }
+
+  @override
+  Future<void> dispose() async {
+    if (_isDisposed) {
+      return;
+    }
+
+    _isDisposed = true;
+    await _streamController.close();
+    onDispose();
+  }
 }
