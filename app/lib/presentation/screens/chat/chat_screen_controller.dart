@@ -1194,6 +1194,13 @@ extension ChatScreenControllerProviderSelectors
     );
   }
 
+  ProviderListenable<bool> get supportsMessageEdit {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.messageEdit) ?? false,
+    );
+  }
+
   ProviderListenable<bool> get supportsPresence {
     return select(
       (state) =>

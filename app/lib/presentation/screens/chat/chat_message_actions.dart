@@ -2,10 +2,10 @@ part of 'chat_screen.dart';
 
 /// Bottom-sheet menu of actions available on a single chat message.
 ///
-/// Shown on long-press of a message bubble. Always offers Copy; offers
-/// Delete-for-everyone and Delete-for-me only on the user's own non-deleted
-/// messages, and only when the active transport supports message deletion
-/// (Matrix). DIDComm has no delete support, so no delete actions are shown.
+/// Shown on long-press of a message bubble. Always offers Copy. Edit and the
+/// two Delete actions appear only on the user's own non-deleted messages, and
+/// only when the active transport supports them (Matrix). DIDComm supports
+/// neither edit nor delete, so those actions are hidden there.
 class _ChatMessageActions extends ConsumerWidget {
   const _ChatMessageActions({required this._contactId, required this._message});
 
@@ -31,6 +31,7 @@ class _ChatMessageActions extends ConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     final supportsMessageDelete = ref.watch(provider.supportsMessageDelete);
+    final supportsMessageEdit = ref.watch(provider.supportsMessageEdit);
 
     Future<void> copy() async {
       if (!context.mounted) return;
@@ -103,7 +104,7 @@ class _ChatMessageActions extends ConsumerWidget {
           label: context.l10n.chatMessageActionCopy,
           onTap: copy,
         ),
-      if (_message.canEdit)
+      if (_message.canEdit && supportsMessageEdit)
         _ChatMessageActionItem(
           icon: Icons.edit_outlined,
           label: context.l10n.chatMessageActionEdit,
