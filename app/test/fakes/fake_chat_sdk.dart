@@ -40,6 +40,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
   final List<Map<String, dynamic>> sendMediaMessageCalls = [];
+  final List<Map<String, dynamic>> deleteMessageCalls = [];
+  final List<Map<String, dynamic>> editTextMessageCalls = [];
   final Map<String, List<int>> _downloadedMedia = {};
   final List<({List<ChatAttachment> attachments, String senderDid})>
   createAttachmentMessageCalls = [];
@@ -579,6 +581,32 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       attachments: attachments,
       senderDid: senderDid,
     ));
+  }
+
+  /// Simulates a sent (own) text message appearing in the stream.
+  void simulateSentTextMessage({required String text}) {
+    final message = Message(
+      chatId: 'fake-chat-id',
+      messageId: 'msg-sent-${DateTime.now().millisecondsSinceEpoch}',
+      value: text,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      isFromMe: true,
+      senderDid: 'fake-my-did',
+      attachments: [],
+    );
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/message',
+      senderDid: 'fake-my-did',
+      body: {'text': text, 'timestamp': message.dateCreated.toIso8601String()},
+      createdTime: message.dateCreated,
+    );
+    _emit(StreamData(event: chatEvent, chatItem: message));
+  }
+
+  @override
+  Future<void> editTextMessage(Message message, String newText) async {
+    editTextMessageCalls.add({'message': message, 'newText': newText});
   }
 
   @override
