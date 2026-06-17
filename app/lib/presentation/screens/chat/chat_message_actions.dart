@@ -49,9 +49,9 @@ class _ChatMessageActions extends ConsumerWidget {
     }
 
     Future<void> edit() async {
-      final newText = await showDialog<String>(
-        context: context,
-        builder: (_) => _EditMessageDialog(initialText: _message.value),
+      final newText = await _EditMessageDialog.show(
+        context,
+        initialText: _message.value,
       );
 
       if (newText == null) return;
