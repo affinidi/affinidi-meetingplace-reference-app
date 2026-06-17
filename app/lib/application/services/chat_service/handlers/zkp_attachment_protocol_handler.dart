@@ -31,7 +31,9 @@ class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
         LivenessZkpAttachmentParser.tryParseRequestIn(attachments) != null;
     final hasProof =
         LivenessZkpAttachmentParser.tryParseProofIn(attachments) != null;
-    if (!hasRequest && !hasProof) return;
+    final hasDeclined =
+        LivenessZkpAttachmentParser.tryParseDeclinedIn(attachments) != null;
+    if (!hasRequest && !hasProof && !hasDeclined) return;
 
     _logger.info(
       'Received chat message with liveness ZKP attachment',

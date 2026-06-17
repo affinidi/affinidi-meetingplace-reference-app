@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_chat/meeting_place_chat.dart'
     show LivenessZkpConciergeTypes;
+import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 
+import '../zkp_declined_notice_widget.dart';
 import '../zkp_paused_notice_widget.dart';
 import '../zkp_proof_received_notice_widget.dart';
 import '../zkp_proof_shared_notice_widget.dart';
@@ -23,6 +24,8 @@ class ChatZkpConciergeItem extends StatelessWidget {
     switch (chatItem.conciergeType.value) {
       case LivenessZkpConciergeTypes.humanZkpPaused:
         return ZkpPausedNoticeWidget(chatItem: chatItem);
+      case LivenessZkpConciergeTypes.humanZkpDeclined:
+        return ZkpDeclinedNoticeWidget(chatItem: chatItem);
       case LivenessZkpConciergeTypes.humanZkpProofShared:
         return ZkpProofSharedNoticeWidget(chatItem: chatItem);
       case LivenessZkpConciergeTypes.humanZkpProofReceived:

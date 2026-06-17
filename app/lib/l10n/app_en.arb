@@ -1688,9 +1688,18 @@
 			}
 		}
 	},
-	"zkpNoticePaused": "You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.",
+	"zkpNoticePaused": "You paused a Zero‑Knowledge Proof request.",
 	"@zkpNoticePaused": {
 		"type": "text"
+	},
+	"zkpNoticeDeclined": "{contactName} has declined the Human ZKP request. Tap the \"+\" icon to restart it.",
+	"@zkpNoticeDeclined": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
 	},
 	"zkpNoticeShared": "You have shared a Zero\u2011Knowledge Proof confirming you are human.\n*No personal data was shared.",
 	"@zkpNoticeShared": {

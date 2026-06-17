@@ -35,8 +35,8 @@ class ZkpSendProofResult {
 }
 
 class ZkpFlowService {
-  ZkpFlowService({required this._ref, required this._contactId}) {
-    _logger = _ref.read(appLoggerProvider);
+  ZkpFlowService({required Ref ref, required this._contactId}) : _ref = ref {
+    _logger = ref.read(appLoggerProvider);
   }
 
   final Ref _ref;
@@ -69,43 +69,15 @@ class ZkpFlowService {
       return false;
     }
 
-    final channelDid = _ref
-        .read(contactsServiceProvider)
-        .getContactById(_contactId)
-        ?.channelDid;
-    if (channelDid == null) {
-      _logger.warning(
-        'ZKP request blocked: missing channel DID for contact $_contactId',
-        name: _logKey,
-      );
-      return false;
-    }
-
-    final chatService = _ref.read(
-      chatSessionServiceProvider(channelDid).notifier,
-    );
-
     final challengeNonce = generateZkpChallengeNonce();
     final attachments =
         LivenessZkpDIDCommAttachmentBuilder.buildLivenessCheckRequest(
           challengeNonceHex: zkpChallengeNonceToHex(challengeNonce),
         );
-
-    try {
-      await chatService.sendTextMessage(
-        '',
-        attachments: List<chat.Attachment>.from(attachments),
-      );
-      return true;
-    } catch (error, stackTrace) {
-      _logger.error(
-        'Failed to send liveness check request',
-        name: _logKey,
-        error: error,
-        stackTrace: stackTrace,
-      );
-      return false;
-    }
+    return _sendZkpAttachments(
+      attachments,
+      errorMessage: 'Failed to send liveness check request',
+    );
   }
 
   List<int>? findVerifierChallengeNonceFromChatHistory() {
@@ -239,5 +211,54 @@ class ZkpFlowService {
 
     _logger.info('Verification result: ${verification.isValid}', name: _logKey);
     return verification;
+  }
+
+  Future<bool> sendDeclined() async {
+    if (!readIsZkpChannelReady()) return false;
+    final attachments =
+        LivenessZkpDIDCommAttachmentBuilder.buildLivenessDeclined();
+    return _sendZkpAttachments(
+      attachments,
+      errorMessage: 'Failed to send liveness declined event',
+    );
+  }
+
+  String? _readChannelDid() {
+    return _ref
+        .read(contactsServiceProvider)
+        .getContactById(_contactId)
+        ?.channelDid;
+  }
+
+  Future<bool> _sendZkpAttachments(
+    List<chat.Attachment> attachments, {
+    required String errorMessage,
+  }) async {
+    final channelDid = _readChannelDid();
+    if (channelDid == null) {
+      _logger.warning(
+        'ZKP message blocked: missing channel DID for contact $_contactId',
+        name: _logKey,
+      );
+      return false;
+    }
+
+    try {
+      await _ref
+          .read(chatSessionServiceProvider(channelDid).notifier)
+          .sendTextMessage(
+            '',
+            attachments: List<chat.Attachment>.from(attachments),
+          );
+      return true;
+    } catch (error, stackTrace) {
+      _logger.error(
+        errorMessage,
+        name: _logKey,
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
   }
 }

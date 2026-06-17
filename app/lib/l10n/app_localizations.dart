@@ -2773,8 +2773,14 @@ abstract class AppLocalizations {
   /// No description provided for @zkpNoticePaused.
   ///
   /// In en, this message translates to:
-  /// **'You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.'**
+  /// **'You paused a Zero‑Knowledge Proof request.'**
   String get zkpNoticePaused;
+
+  /// No description provided for @zkpNoticeDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'{contactName} has declined the Human ZKP request. Tap the \"+\" icon to restart it.'**
+  String zkpNoticeDeclined(String contactName);
 
   /// No description provided for @zkpNoticeShared.
   ///

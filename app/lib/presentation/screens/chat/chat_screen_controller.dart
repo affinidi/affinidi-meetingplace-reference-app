@@ -499,6 +499,9 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   Future<void> pauseHumanZkpRequestFlow() async {
+    await ref
+        .read(proofFlowControllerProvider(contactId).notifier)
+        .sendDeclined();
     final requestNoticeId =
         ChatZkpMessageListPolicy.latestHumanZkpRequestNoticeMessageId(
           state.messages,

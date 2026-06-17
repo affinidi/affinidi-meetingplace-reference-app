@@ -33,9 +33,7 @@ class ZkpRequestReceivedNoticeWidget extends ConsumerWidget {
       onDoLater: () async {
         await ref
             .read(chatScreenControllerProvider(_contactId).notifier)
-            .insertZkpPausedNotice(
-              pausedForNoticeMessageId: chatItem.messageId,
-            );
+            .pauseHumanZkpRequestFlow();
       },
     );
   }
