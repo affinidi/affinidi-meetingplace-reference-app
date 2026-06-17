@@ -1,3 +1,6 @@
+import '../exceptions/app_exception.dart';
+import '../exceptions/app_exception_type.dart';
+
 extension MapPathExtensions on Map<String, dynamic> {
   /// Returns the string value at the nested [pathKeys] location, or
   /// [defaultValue] if any key is missing or the final value is not a String.
@@ -42,9 +45,10 @@ extension MapPathExtensions on Map<String, dynamic> {
         parentElement[pathKey] = newNode;
         parentElement = newNode;
       } else {
-        throw StateError(
+        throw AppException(
           "setPathValue: expected a map at key '$pathKey' but found "
           '${elementAtPath.runtimeType}',
+          code: AppExceptionType.other.name,
         );
       }
     }

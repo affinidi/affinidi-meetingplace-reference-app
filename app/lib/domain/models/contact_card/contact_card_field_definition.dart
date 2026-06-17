@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
+import '../../../infrastructure/exceptions/app_exception.dart';
+import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/map_path_extensions.dart';
 import '../../../l10n/app_localizations.dart';
@@ -194,7 +196,10 @@ class ContactCardFieldDefinitions {
   static ContactCardFieldDefinition byKey(ContactCardFieldKey key) {
     final field = _byKey[key];
     if (field == null) {
-      throw StateError('Missing ContactCard field definition for $key');
+      throw AppException(
+        'Missing ContactCard field definition for $key',
+        code: AppExceptionType.missingContactCardFieldDefinition.name,
+      );
     }
     return field;
   }
