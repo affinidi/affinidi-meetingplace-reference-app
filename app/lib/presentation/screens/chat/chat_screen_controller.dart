@@ -476,6 +476,7 @@ class ChatScreenController extends _$ChatScreenController
 
     await _chatService?.updateContactSequenceNumber(channelDid);
     await _chatService?.startChatSession();
+    state = state.copyWith(capabilities: _chatService?.capabilities);
 
     if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
@@ -856,6 +857,17 @@ class ChatScreenController extends _$ChatScreenController
     String text,
     List<MessageAttachment> messageAttachment,
   ) async {
+    final supportsMedia =
+        state.capabilities?.supports(chat.ChatFeature.mediaAttachments) ??
+        false;
+    if (!supportsMedia) {
+      _logger.warning(
+        'Media attachments are not supported on this chat transport; '
+        'dropping send request.',
+        name: _logKey,
+      );
+      return;
+    }
     messageTextController.clear();
     unawaited(
       _chatService?.sendTextMessage(
@@ -1158,6 +1170,42 @@ extension ChatScreenControllerProviderSelectors
 
   ProviderListenable<bool> get shouldDisable {
     return select((state) => !state.isInitialized || state.isGroupDeleted);
+  }
+
+  ProviderListenable<bool> get supportsMedia {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.mediaAttachments) ??
+          false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsVoiceMessages {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.voiceMessages) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsMessageDelete {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.messageDelete) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsMessageEdit {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.messageEdit) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsPresence {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.presence) ?? false,
+    );
   }
 }
 
