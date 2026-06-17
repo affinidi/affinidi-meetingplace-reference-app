@@ -88,14 +88,6 @@ class _ChatMessageActions extends ConsumerWidget {
       }
     }
 
-    final canDelete =
-        _message.isFromMe && !_message.isDeleted && !_message.isDeletedLocally;
-    final canEdit =
-        _message.isFromMe &&
-        !_message.isDeleted &&
-        !_message.isDeletedLocally &&
-        _message.value.isNotEmpty;
-
     // Delete-for-everyone is allowed only inside the SDK's redaction window.
     // Outside the window the SDK throws, so disable the action upfront rather
     // than letting the user tap and fail.
@@ -110,13 +102,13 @@ class _ChatMessageActions extends ConsumerWidget {
           label: context.l10n.chatMessageActionCopy,
           onTap: copy,
         ),
-      if (canEdit)
+      if (_message.canEdit)
         _ChatMessageActionItem(
           icon: Icons.edit_outlined,
           label: context.l10n.chatMessageActionEdit,
           onTap: edit,
         ),
-      if (canDelete) ...[
+      if (_message.canDelete) ...[
         _ChatMessageActionItem(
           icon: Icons.delete_outline,
           label: context.l10n.chatMessageActionDelete,
