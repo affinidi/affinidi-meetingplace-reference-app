@@ -232,6 +232,40 @@ A VRC is a mutual "verified relationship" credential. Unlike an R-Card, a VRC re
 | **Flutter** | `3.44.1` |
 | **Dart SDK** | `^3.12.0` |
 
+### Matrix E2E Encryption
+
+**Native build requirements, if Matrix is enabled.** This app supports configurable transport protocols (DIDComm, Matrix, or both). If you enable Matrix, it uses `flutter_vodozemac`, a Rust-based implementation of Olm/Megolm encryption, for end-to-end encrypted messaging. If you disable Matrix or use only DIDComm, Rust is not required. See [Environment Variables](#environment-variables) to configure which transports your app uses via `ENABLED_INDIVIDUAL_CHAT_TRANSPORTS`.
+
+**Step 1: Install Rust**
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+. "$HOME/.cargo/env"
+```
+
+**Step 2: Add compilation targets**
+
+For iOS:
+
+```bash
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+```
+
+For Android:
+
+```bash
+rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+```
+
+> **Note:** Android builds also require NDK, installed via Android Studio (SDK Manager > SDK Tools > NDK).
+
+**If builds fail after `flutter clean`:**
+
+```bash
+rm -rf app/build/flutter_vodozemac
+fvm flutter run
+```
+
 ## Getting Started
 
 Set up your environment to run the Meeting Place application.
