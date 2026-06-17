@@ -223,6 +223,14 @@ class _EditMessageDialog extends StatefulWidget {
 
   final String initialText;
 
+  static Future<String?> show(
+    BuildContext context, {
+    required String initialText,
+  }) => showDialog<String>(
+    context: context,
+    builder: (_) => _EditMessageDialog(initialText: initialText),
+  );
+
   @override
   State<_EditMessageDialog> createState() => _EditMessageDialogState();
 }
