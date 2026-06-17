@@ -17,6 +17,7 @@ import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
+import '../../../application/services/zkp_flow_service/zkp_flow_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';
@@ -499,6 +500,7 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   Future<void> pauseHumanZkpRequestFlow() async {
+    await ZkpFlowService(ref: ref, contactId: contactId).sendDeclined();
     final requestNoticeId =
         ChatZkpMessageListPolicy.latestHumanZkpRequestNoticeMessageId(
           state.messages,

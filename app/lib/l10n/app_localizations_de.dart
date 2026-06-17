@@ -1859,7 +1859,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get zkpNoticePaused =>
-      'Sie haben die Human-ZKP-Beweisanforderung pausiert. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
+      'Sie haben eine Zero-Knowledge-Beweisanfrage pausiert.';
+
+  @override
+  String zkpNoticeDeclined(String contactName) {
+    return '$contactName hat die Human-ZKP-Anfrage abgelehnt. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
+  }
 
   @override
   String get zkpNoticeShared =>

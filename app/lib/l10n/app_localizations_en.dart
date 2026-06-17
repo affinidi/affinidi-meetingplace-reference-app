@@ -1821,8 +1821,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get zkpNoticePaused =>
-      'You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.';
+  String get zkpNoticePaused => 'You paused a Zero‑Knowledge Proof request.';
+
+  @override
+  String zkpNoticeDeclined(String contactName) {
+    return '$contactName has declined the Human ZKP request. Tap the \"+\" icon to restart it.';
+  }
 
   @override
   String get zkpNoticeShared =>

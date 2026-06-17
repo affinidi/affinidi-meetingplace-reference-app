@@ -62,11 +62,7 @@ class ConciergeMessage extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 16),
-        Text(
-          _message,
-          textAlign: _fullWidth ? TextAlign.center : TextAlign.left,
-          style: textStyle,
-        ),
+        Text(_message, textAlign: TextAlign.center, style: textStyle),
         if (hasActions) ...[
           const SizedBox(height: 16),
           Padding(
