@@ -35,8 +35,8 @@ class ZkpSendProofResult {
 }
 
 class ZkpFlowService {
-  ZkpFlowService({required this._ref, required this._contactId}) {
-    _logger = _ref.read(appLoggerProvider);
+  ZkpFlowService({required Ref ref, required this._contactId}) : _ref = ref {
+    _logger = ref.read(appLoggerProvider);
   }
 
   final Ref _ref;

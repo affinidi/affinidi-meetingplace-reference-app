@@ -130,7 +130,7 @@ final class _Enabled extends ChatZkpMessageListPolicy {
           attachments.every(
             (att) =>
                 LivenessZkpAttachmentParser.matchesRequestFormat(att) ||
-                LivenessZkpAttachmentParser.matchesProofFormat(att) || 
+                LivenessZkpAttachmentParser.matchesProofFormat(att) ||
                 LivenessZkpAttachmentParser.matchesDeclinedFormat(att),
           )) {
         return true;

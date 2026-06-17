@@ -52,6 +52,10 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
     return _zkpFlowService.requestLivenessCheck();
   }
 
+  Future<bool> sendDeclined() async {
+    return _zkpFlowService.sendDeclined();
+  }
+
   void resetSession() {
     state = const ProofFlowState();
   }

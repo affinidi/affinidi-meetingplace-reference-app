@@ -12,16 +12,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  meeting_place_core:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 36221c1aa544555a243c2b4f7a0712969c0ab4e5
-      path: packages/meeting_place_core
-  meeting_place_credentials:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 36221c1aa544555a243c2b4f7a0712969c0ab4e5
-      path: packages/meeting_place_credentials
+  meeting_place_core: ^0.0.1-dev.40
+  meeting_place_credentials: ^0.0.1-dev.5
 
 dev_dependencies:
   dart_flutter_team_lints: ^3.3.0
