@@ -24,6 +24,11 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   /// for everyone. Mirrors the SDK's `deleteMessageWindow` option.
   Duration get deleteMessageWindow;
 
+  /// Capabilities of the active chat, or `null` before the chat session has
+  /// been started. Sourced from the underlying chat SDK variant, so it
+  /// reflects both the transport and the chat type (individual vs group).
+  TransportCapabilities? get capabilities;
+
   Future<void> startChatSession();
   Future<void> pauseChat();
 

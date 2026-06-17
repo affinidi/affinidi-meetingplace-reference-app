@@ -12,8 +12,10 @@ class ChatContactPresenceStatus extends ConsumerWidget {
       provider.select((state) => state.contactPresenceStatus),
     );
     final isGroupChat = ref.watch(provider.isGroupChat);
+    final supportsPresence = ref.watch(provider.supportsPresence);
 
     if (isGroupChat) return const SizedBox.shrink();
+    if (!supportsPresence) return const SizedBox.shrink();
 
     return Text(status.dot, style: const TextStyle(fontSize: 10));
   }

@@ -99,6 +99,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     seconds: ref.read(environmentProvider).deleteMessageWindowInSeconds,
   );
 
+  @override
+  TransportCapabilities? get capabilities => _chatSDK?.capabilities;
+
   bool get isGroupChat => _isGroupChat;
 
   @override
@@ -438,6 +441,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     required Duration duration,
     required List<int> waveform,
   }) async {
+    if (!(_chatSDK?.capabilities.supports(ChatFeature.voiceMessages) ??
+        false)) {
+      throw StateError(
+        'Voice messages are not supported on this chat transport.',
+      );
+    }
     late final Uint8List bytes;
     try {
       final file = File(filePath);
@@ -523,6 +532,13 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     Message message, {
     bool deleteForMeOnly = false,
   }) async {
+    if (!deleteForMeOnly &&
+        !(_chatSDK?.capabilities.supports(ChatFeature.messageDelete) ??
+            false)) {
+      throw StateError(
+        'Delete for everyone is not supported on this chat transport.',
+      );
+    }
     await _chatSDK?.deleteMessage(message, localOnly: deleteForMeOnly);
   }
 
