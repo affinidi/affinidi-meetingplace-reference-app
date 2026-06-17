@@ -467,7 +467,6 @@ class ChatScreenController extends _$ChatScreenController
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
       notificationToken: channel.otherPartyNotificationToken,
-      transport: channel.transport,
     );
 
     final lastKeepAliveMessage = contact.lastKeepAliveMessage;
@@ -477,6 +476,7 @@ class ChatScreenController extends _$ChatScreenController
 
     await _chatService?.updateContactSequenceNumber(channelDid);
     await _chatService?.startChatSession();
+    state = state.copyWith(capabilities: _chatService?.capabilities);
 
     if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
@@ -857,9 +857,9 @@ class ChatScreenController extends _$ChatScreenController
     String text,
     List<MessageAttachment> messageAttachment,
   ) async {
-    final supportsMedia = _capsFor(
-      state.transport,
-    ).supports(chat.ChatFeature.mediaAttachments);
+    final supportsMedia =
+        state.capabilities?.supports(chat.ChatFeature.mediaAttachments) ??
+        false;
     if (!supportsMedia) {
       _logger.warning(
         'Media attachments are not supported on this chat transport; '
@@ -1175,34 +1175,32 @@ extension ChatScreenControllerProviderSelectors
   ProviderListenable<bool> get supportsMedia {
     return select(
       (state) =>
-          _capsFor(state.transport).supports(chat.ChatFeature.mediaAttachments),
+          state.capabilities?.supports(chat.ChatFeature.mediaAttachments) ??
+          false,
     );
   }
 
   ProviderListenable<bool> get supportsVoiceMessages {
     return select(
       (state) =>
-          _capsFor(state.transport).supports(chat.ChatFeature.voiceMessages),
+          state.capabilities?.supports(chat.ChatFeature.voiceMessages) ?? false,
     );
   }
 
-  ProviderListenable<bool> get supportsDeleteForEveryone {
+  ProviderListenable<bool> get supportsMessageDelete {
     return select(
       (state) =>
-          _capsFor(state.transport).supports(chat.ChatFeature.messageDelete),
+          state.capabilities?.supports(chat.ChatFeature.messageDelete) ?? false,
     );
   }
 
   ProviderListenable<bool> get supportsPresence {
     return select(
-      (state) => _capsFor(state.transport).supports(chat.ChatFeature.presence),
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.presence) ?? false,
     );
   }
 }
-
-chat.TransportCapabilities _capsFor(ChannelTransport? t) => t == null
-    ? const chat.TransportCapabilities({chat.ChatFeature.textMessaging})
-    : chat.TransportCapabilities.forTransport(t);
 
 extension _ChatScreenStateExtensions on ChatScreenState {
   bool get isGroupChat => contact?.isGroup ?? false;

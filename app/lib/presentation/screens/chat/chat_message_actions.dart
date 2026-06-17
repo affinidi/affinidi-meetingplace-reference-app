@@ -4,7 +4,8 @@ part of 'chat_screen.dart';
 ///
 /// Shown on long-press of a message bubble. Always offers Copy; offers
 /// Delete-for-everyone and Delete-for-me only on the user's own non-deleted
-/// messages.
+/// messages, and only when the active transport supports message deletion
+/// (Matrix). DIDComm has no delete support, so no delete actions are shown.
 class _ChatMessageActions extends ConsumerWidget {
   const _ChatMessageActions({required this._contactId, required this._message});
 
@@ -29,9 +30,7 @@ class _ChatMessageActions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final supportsDeleteForEveryone = ref.watch(
-      provider.supportsDeleteForEveryone,
-    );
+    final supportsMessageDelete = ref.watch(provider.supportsMessageDelete);
 
     Future<void> copy() async {
       if (!context.mounted) return;
@@ -110,15 +109,14 @@ class _ChatMessageActions extends ConsumerWidget {
           label: context.l10n.chatMessageActionEdit,
           onTap: edit,
         ),
-      if (_message.canDelete) ...[
-        if (supportsDeleteForEveryone)
-          _ChatMessageActionItem(
-            icon: Icons.delete_outline,
-            label: context.l10n.chatMessageActionDelete,
-            isDestructive: true,
-            enabled: isWithinDeleteWindow,
-            onTap: () => delete(localOnly: false),
-          ),
+      if (_message.canDelete && supportsMessageDelete) ...[
+        _ChatMessageActionItem(
+          icon: Icons.delete_outline,
+          label: context.l10n.chatMessageActionDelete,
+          isDestructive: true,
+          enabled: isWithinDeleteWindow,
+          onTap: () => delete(localOnly: false),
+        ),
         _ChatMessageActionItem(
           icon: Icons.visibility_off_outlined,
           label: context.l10n.chatMessageActionDeleteLocal,

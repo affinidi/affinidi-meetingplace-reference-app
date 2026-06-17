@@ -99,6 +99,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     seconds: ref.read(environmentProvider).deleteMessageWindowInSeconds,
   );
 
+  @override
+  TransportCapabilities? get capabilities => _chatSDK?.capabilities;
+
   bool get isGroupChat => _isGroupChat;
 
   @override

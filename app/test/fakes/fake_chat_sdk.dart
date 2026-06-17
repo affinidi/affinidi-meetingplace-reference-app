@@ -11,9 +11,21 @@ import 'fake_chat.dart';
 
 class FakeChatSdk implements MeetingPlaceChatSDK {
   FakeChatSdk({TransportCapabilities? capabilities})
-    : _capabilities =
-          capabilities ??
-          TransportCapabilities.forTransport(ChannelTransport.matrix);
+    : _capabilities = capabilities ?? _defaultCapabilities;
+
+  /// Mirrors an individual Matrix chat: the common case exercised by tests.
+  static const _defaultCapabilities = TransportCapabilities({
+    ChatFeature.textMessaging,
+    ChatFeature.mediaAttachments,
+    ChatFeature.voiceMessages,
+    ChatFeature.reactions,
+    ChatFeature.typingIndicators,
+    ChatFeature.deliveryReceipts,
+    ChatFeature.messageEdit,
+    ChatFeature.messageDelete,
+    ChatFeature.effects,
+    ChatFeature.contactDetailsUpdate,
+  });
 
   TransportCapabilities _capabilities;
 
