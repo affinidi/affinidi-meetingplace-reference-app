@@ -38,6 +38,7 @@ import '../../../infrastructure/extensions/concierge_message_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../infrastructure/extensions/contact_image_extensions.dart';
+import '../../../infrastructure/extensions/message_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/plugins/media_category.dart';

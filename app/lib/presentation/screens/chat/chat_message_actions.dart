@@ -48,6 +48,28 @@ class _ChatMessageActions extends ConsumerWidget {
       );
     }
 
+    Future<void> edit() async {
+      final newText = await _EditMessageDialog.show(
+        context,
+        initialText: _message.value,
+      );
+
+      if (newText == null) return;
+      Navigator.of(context).pop();
+
+      try {
+        await controller.editTextMessage(_message.messageId, newText);
+      } catch (_) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.chatMessageEditFailed),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+
     Future<void> delete({required bool localOnly}) async {
       Navigator.of(context).pop();
       try {
@@ -66,9 +88,6 @@ class _ChatMessageActions extends ConsumerWidget {
       }
     }
 
-    final canDelete =
-        _message.isFromMe && !_message.isDeleted && !_message.isDeletedLocally;
-
     // Delete-for-everyone is allowed only inside the SDK's redaction window.
     // Outside the window the SDK throws, so disable the action upfront rather
     // than letting the user tap and fail.
@@ -83,7 +102,13 @@ class _ChatMessageActions extends ConsumerWidget {
           label: context.l10n.chatMessageActionCopy,
           onTap: copy,
         ),
-      if (canDelete) ...[
+      if (_message.canEdit)
+        _ChatMessageActionItem(
+          icon: Icons.edit_outlined,
+          label: context.l10n.chatMessageActionEdit,
+          onTap: edit,
+        ),
+      if (_message.canDelete) ...[
         _ChatMessageActionItem(
           icon: Icons.delete_outline,
           label: context.l10n.chatMessageActionDelete,
