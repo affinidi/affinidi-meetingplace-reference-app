@@ -1672,6 +1672,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'La actualización de la tarjeta R ha sido compartida.';
 
   @override
+  String get profileDetailsUpdateSharedGroup =>
+      'La actualización de los detalles del perfil ha sido compartida con el grupo.';
+
+  @override
   String get rCardFooterUpdateSaved =>
       'La actualización de la tarjeta R se ha guardado.';
 
