@@ -430,6 +430,7 @@ class _HostedAudioWidget extends HookWidget {
     required this._onDownload,
     required this._isFromMe,
     required this._chatItemColor,
+    required this._senderAvatar,
   });
 
   final chat.ChatAttachment _attachment;
@@ -439,6 +440,7 @@ class _HostedAudioWidget extends HookWidget {
   final bool Function() _onDownload;
   final bool _isFromMe;
   final Color _chatItemColor;
+  final ImageProvider<Object>? _senderAvatar;
 
   @override
   Widget build(BuildContext context) {
@@ -474,6 +476,7 @@ class _HostedAudioWidget extends HookWidget {
         levels: levels,
         progress: 0,
         onPressed: onPressed,
+        senderAvatar: _senderAvatar,
       );
     }
 
@@ -491,6 +494,7 @@ class _HostedAudioWidget extends HookWidget {
         levels: levels,
         progress: state.progress,
         onPressed: state.toggle,
+        senderAvatar: _senderAvatar,
       ),
     );
   }
@@ -505,6 +509,7 @@ class _VoiceMessageBubble extends StatelessWidget {
     required this._levels,
     required this._progress,
     required this._onPressed,
+    required this._senderAvatar,
     this._isLoading = false,
   });
 
@@ -515,6 +520,7 @@ class _VoiceMessageBubble extends StatelessWidget {
   final List<double> _levels;
   final double _progress;
   final VoidCallback _onPressed;
+  final ImageProvider<Object>? _senderAvatar;
   final bool _isLoading;
 
   @override
@@ -530,6 +536,7 @@ class _VoiceMessageBubble extends StatelessWidget {
         children: [
           ProfileCircleAvatar(
             radius: 28,
+            image: _senderAvatar,
             child: Icon(
               _isFromMe ? Icons.person : Icons.person_outline,
               color: Colors.white,

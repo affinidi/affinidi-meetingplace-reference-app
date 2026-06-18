@@ -129,6 +129,7 @@ class _PlainTextChatItem extends ConsumerWidget {
                   contactId: _contactId,
                   attachment: attachment,
                   isFromMe: chatItem.isFromMe,
+                  senderDid: chatItem.senderDid,
                   chatItemColor: _chatItemColor,
                 );
               },
@@ -199,6 +200,7 @@ class _AttachmentWidget extends HookConsumerWidget {
     required this._contactId,
     required ChatAttachment attachment,
     required this._isFromMe,
+    required this._senderDid,
     required this._chatItemColor,
   }) : _attachment = attachment,
        super(key: ValueKey('chat_attachment_${attachment.id!}'));
@@ -206,6 +208,7 @@ class _AttachmentWidget extends HookConsumerWidget {
   final ChatAttachment _attachment;
   final String _contactId;
   final bool _isFromMe;
+  final String _senderDid;
   final Color _chatItemColor;
 
   bool get _isHostedMedia =>
@@ -219,6 +222,7 @@ class _AttachmentWidget extends HookConsumerWidget {
         contactId: _contactId,
         attachment: _attachment,
         isFromMe: _isFromMe,
+        senderDid: _senderDid,
         chatItemColor: _chatItemColor,
       );
     }
@@ -315,12 +319,14 @@ class _HostedMediaWidget extends HookConsumerWidget {
     required this._contactId,
     required this._attachment,
     required this._isFromMe,
+    required this._senderDid,
     required this._chatItemColor,
   });
 
   final String _contactId;
   final chat.ChatAttachment _attachment;
   final bool _isFromMe;
+  final String _senderDid;
   final Color _chatItemColor;
 
   @override
@@ -365,6 +371,7 @@ class _HostedMediaWidget extends HookConsumerWidget {
         onDownload: onDownload,
         isFromMe: _isFromMe,
         chatItemColor: _chatItemColor,
+        senderAvatar: _senderAvatar(ref),
       );
     }
 
@@ -386,6 +393,7 @@ class _HostedMediaWidget extends HookConsumerWidget {
           onDownload: onDownload,
           isFromMe: _isFromMe,
           chatItemColor: _chatItemColor,
+          senderAvatar: _senderAvatar(ref),
         );
       case MediaCategory.document:
         return _HostedDocumentWidget(
@@ -402,6 +410,29 @@ class _HostedMediaWidget extends HookConsumerWidget {
           onRetry: onRetry,
         );
     }
+  }
+
+  ImageProvider<Object>? _senderAvatar(WidgetRef ref) {
+    final cacheManager = ref.read(cacheManagerProvider);
+    final provider = chatScreenControllerProvider(_contactId);
+    if (_isFromMe) {
+      final myCard = ref.watch(provider.select((s) => s.myCard));
+      return myCard?.image(cacheManager: cacheManager);
+    }
+    if (ref.watch(provider.isGroupChat)) {
+      final member = ref.watch(
+        provider.select(
+          (s) =>
+              s.group?.members.firstWhereOrNull((gm) => gm.did == _senderDid),
+        ),
+      );
+      if (member == null) return null;
+      return ContactCardUtils.fromSdkContactCard(
+        member.contactCard,
+      ).image(cacheManager: cacheManager);
+    }
+    final contact = ref.watch(provider.select((s) => s.contact));
+    return contact?.image(cacheManager: cacheManager);
   }
 }
 
