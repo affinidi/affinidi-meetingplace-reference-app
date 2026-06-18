@@ -6,7 +6,30 @@ const _kAttachmentPluginIcons = <String, IconData>{
   '📄': Icons.assignment_outlined,
 };
 
-const _kHiddenAttachmentPluginIcons = {'🎬'};
+bool _isHiddenAttachmentIcon(AttachmentPluginIcon icon) => switch (icon) {
+  EmojiIcon(:final emoji) => emoji.startsWith('🎬'),
+  _ => false,
+};
+
+IconData _resolveAttachmentIcon(AttachmentPluginIcon icon) => switch (icon) {
+  MaterialIcon(:final iconData) => iconData,
+  EmojiIcon(:final emoji) =>
+    _kAttachmentPluginIcons[emoji] ??
+        (emoji.startsWith('📷')
+            ? Icons.camera_alt
+            : emoji.startsWith('🖼')
+            ? Icons.image_outlined
+            : emoji.startsWith('📄')
+            ? Icons.assignment_outlined
+            : Icons.attachment),
+  AssetIcon() => Icons.attachment,
+};
+
+IconData _resolveMediaOptionIcon(AttachmentPlugin plugin) => switch (plugin) {
+  VrcAttachmentsPlugin() => Icons.handshake,
+  RCardAttachmentsPlugin() => Icons.credit_card,
+  _ => _resolveAttachmentIcon(plugin.icon),
+};
 
 class _ChatMediaOptionItem {
   const _ChatMediaOptionItem({
@@ -164,10 +187,7 @@ class _ChatMediaOptions extends ConsumerWidget {
 
     final items = <_ChatMediaOptionItem>[
       ...availableAttachmentPlugins
-          .where(
-            (plugin) =>
-                !_kHiddenAttachmentPluginIcons.contains(plugin.icon.toString()),
-          )
+          .where((plugin) => !_isHiddenAttachmentIcon(plugin.icon))
           .map((plugin) {
             final platformSupported = plugin.isPlatformSupported;
             final enabled = switch (plugin) {
@@ -176,15 +196,17 @@ class _ChatMediaOptions extends ConsumerWidget {
               _ => true,
             };
             final supported = platformSupported && enabled;
+            final baseLabel = switch (plugin) {
+              VrcAttachmentsPlugin() => 'VRC',
+              _ => plugin.localizedName(context),
+            };
             final label = !platformSupported
-                ? '${plugin.localizedName(context)}\n'
+                ? '$baseLabel\n'
                       '(${context.l10n.platformNotSupported})'
-                : plugin.localizedName(context);
+                : baseLabel;
 
             return _ChatMediaOptionItem(
-              icon:
-                  _kAttachmentPluginIcons[plugin.icon.toString()] ??
-                  Icons.attachment,
+              icon: _resolveMediaOptionIcon(plugin),
               label: label,
               onTap: supported ? () => attachFromPlugin(plugin) : null,
               enabled: supported,
