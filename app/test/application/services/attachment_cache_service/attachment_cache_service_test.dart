@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -8,6 +9,8 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/attachment_cache_service/attachment_cache_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/attachment_cache_service/chat_media_bytes_cache.dart';
+import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
+import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
@@ -36,6 +39,7 @@ void main() {
     late ProviderContainer container;
     late AttachmentCacheService service;
     late FakeChatSdk fakeChatSdk;
+    late _FakeChatSessionService fakeChatSession;
 
     final testContact = FakeContacts.individualContact;
     final contactId = testContact.id;
@@ -57,6 +61,12 @@ void main() {
         networkConnectivityServiceProvider.overrideWith(
           _FakeNetworkConnectivityService.new,
         ),
+        // The cache service resolves its ChatService from this provider; a thin
+        // fake lets media download/probe paths be driven without a live session.
+        chatSessionServiceProvider(channelDid).overrideWith(() {
+          fakeChatSession = _FakeChatSessionService();
+          return fakeChatSession;
+        }),
       ];
     }
 
@@ -355,6 +365,98 @@ void main() {
       // spinner or re-download is needed.
       expect(reopenedService.state[key], [1, 2, 3]);
     });
+
+    test(
+      'restoreFromLocalCache seeds state from the local media cache',
+      () async {
+        final bytes = Uint8List.fromList([5, 6, 7]);
+        final attachment = ChatAttachment(
+          format: AttachmentFormat.hostedMedia.value,
+          mediaType: 'video/mp4',
+        )..transportId = 'cached-video-id';
+        fakeChatSession.localMedia['cached-video-id'] = bytes;
+
+        await service.restoreFromLocalCache(attachment);
+
+        final key = AttachmentCacheService.cacheKey(attachment);
+        expect(service.state[key], equals(bytes));
+        // The probe must be cache-only, never a network download.
+        expect(fakeChatSession.downloadMediaLocalOnlyCalls, [true]);
+      },
+    );
+
+    test(
+      'restoreFromLocalCache leaves the cache untouched on a miss',
+      () async {
+        final attachment = ChatAttachment(
+          format: AttachmentFormat.hostedMedia.value,
+          mediaType: 'video/mp4',
+        )..transportId = 'uncached-video-id';
+
+        await service.restoreFromLocalCache(attachment);
+
+        // No bytes and no failed marker, so the download affordance stays.
+        final key = AttachmentCacheService.cacheKey(attachment);
+        expect(service.state.containsKey(key), isFalse);
+      },
+    );
+
+    test('restoreFromLocalCache skips media with no transportId', () async {
+      final attachment = ChatAttachment(
+        format: AttachmentFormat.hostedMedia.value,
+        mediaType: 'video/mp4',
+      );
+
+      await service.restoreFromLocalCache(attachment);
+
+      expect(service.state, isEmpty);
+      expect(fakeChatSession.downloadMediaLocalOnlyCalls, isEmpty);
+    });
+
+    test(
+      'restoreFromLocalCache does not clobber bytes cached during the probe',
+      () async {
+        final probeBytes = Uint8List.fromList([9, 9, 9]);
+        final downloadedBytes = Uint8List.fromList([1, 2, 3]);
+        final attachment = ChatAttachment(
+          format: AttachmentFormat.hostedMedia.value,
+          mediaType: 'video/mp4',
+          data: ChatAttachmentData(base64: base64Encode(downloadedBytes)),
+        )..transportId = 'racing-video-id';
+        fakeChatSession.localMedia['racing-video-id'] = probeBytes;
+        final gate = Completer<void>();
+        fakeChatSession.downloadGate = gate;
+
+        final future = service.restoreFromLocalCache(attachment);
+        // A user-tapped download lands while the probe is still in flight.
+        service.loadAttachment(attachment);
+        gate.complete();
+        await future;
+
+        final key = AttachmentCacheService.cacheKey(attachment);
+        expect(service.state[key], equals(downloadedBytes));
+      },
+    );
+
+    test('restoreFromLocalCache does not write after disposal', () async {
+      final attachment = ChatAttachment(
+        format: AttachmentFormat.hostedMedia.value,
+        mediaType: 'video/mp4',
+      )..transportId = 'disposed-video-id';
+      fakeChatSession.localMedia['disposed-video-id'] = Uint8List.fromList([
+        4,
+        2,
+      ]);
+      final gate = Completer<void>();
+      fakeChatSession.downloadGate = gate;
+
+      final future = service.restoreFromLocalCache(attachment);
+      container.dispose();
+      gate.complete();
+
+      // The post-await disposal guard skips the write instead of throwing.
+      await expectLater(future, completes);
+    });
   });
 }
 
@@ -362,5 +464,33 @@ class _FakeNetworkConnectivityService extends NetworkConnectivityService {
   @override
   NetworkConnectivityServiceState build() {
     return const NetworkConnectivityServiceState(isConnected: true);
+  }
+}
+
+/// Thin [ChatSessionService] that skips session wiring and serves media from an
+/// in-memory map, so the cache service's download and local-probe paths can be
+/// exercised in isolation. An absent transportId throws, mirroring a miss.
+class _FakeChatSessionService extends ChatSessionService {
+  final Map<String, Uint8List> localMedia = {};
+  Completer<void>? downloadGate;
+  final List<bool> downloadMediaLocalOnlyCalls = [];
+
+  @override
+  ChatServiceState build(String channelDid) => ChatServiceState();
+
+  @override
+  Future<Uint8List> downloadMedia(
+    ChatAttachment attachment, {
+    bool localOnly = false,
+  }) async {
+    downloadMediaLocalOnlyCalls.add(localOnly);
+    final gate = downloadGate;
+    if (gate != null) await gate.future;
+    final id = attachment.transportId;
+    final bytes = id == null ? null : localMedia[id];
+    if (bytes == null) {
+      throw StateError('No media cached for transportId $id');
+    }
+    return bytes;
   }
 }
