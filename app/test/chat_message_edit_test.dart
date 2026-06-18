@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
@@ -153,6 +154,83 @@ void main() {
 
           expect(chatSdk.editTextMessageCalls, isEmpty);
         });
+
+        testWidgets('shows edited indicator after saving an edit', (
+          tester,
+        ) async {
+          final chatSdk = FakeChatSdk();
+          final l10n = await getL10n();
+          const originalText = 'Original message';
+          const editedText = 'Updated message';
+
+          await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+          await _simulateSentMessage(tester, chatSdk, originalText);
+
+          await tester.longPress(find.text(originalText));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.text(l10n.chatMessageActionEdit));
+          await tester.pumpAndSettle();
+
+          await tester.enterText(find.byType(TextField).last, editedText);
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.text(l10n.chatMessageEditSave));
+          await tester.pumpAndSettle();
+
+          expect(find.text(l10n.chatMessageEditedLabel), findsOneWidget);
+        });
+      });
+    });
+
+    group('when opening chat with previously edited messages', () {
+      testWidgets('shows edited indicator for message with editedAt', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk();
+        final l10n = await getL10n();
+
+        chatSdk.sessionMessages = [
+          Message(
+            chatId: 'fake-chat-id',
+            messageId: 'msg-edited',
+            value: 'A previously edited message',
+            dateCreated: DateTime.now().subtract(const Duration(minutes: 5)),
+            status: ChatItemStatus.confirmed,
+            isFromMe: true,
+            senderDid: 'fake-my-did',
+            attachments: [],
+            editedAt: DateTime.now().subtract(const Duration(minutes: 2)),
+          ),
+        ];
+
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+
+        expect(find.text(l10n.chatMessageEditedLabel), findsOneWidget);
+      });
+
+      testWidgets('does not show edited indicator for unedited message', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk();
+        final l10n = await getL10n();
+
+        chatSdk.sessionMessages = [
+          Message(
+            chatId: 'fake-chat-id',
+            messageId: 'msg-not-edited',
+            value: 'An unedited message',
+            dateCreated: DateTime.now().subtract(const Duration(minutes: 5)),
+            status: ChatItemStatus.confirmed,
+            isFromMe: true,
+            senderDid: 'fake-my-did',
+            attachments: [],
+          ),
+        ];
+
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+
+        expect(find.text(l10n.chatMessageEditedLabel), findsNothing);
       });
     });
   });

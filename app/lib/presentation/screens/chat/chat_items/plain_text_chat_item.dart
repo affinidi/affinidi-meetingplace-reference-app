@@ -129,6 +129,7 @@ class _PlainTextChatItem extends ConsumerWidget {
               child: _TextMessage(
                 text: chatItem.value,
                 shouldScaleEmojis: shouldScaleEmojis,
+                isEdited: chatItem.editedAt != null,
               ),
             ),
         ],
@@ -138,10 +139,15 @@ class _PlainTextChatItem extends ConsumerWidget {
 }
 
 class _TextMessage extends StatelessWidget {
-  const _TextMessage({required this._text, required this._shouldScaleEmojis});
+  const _TextMessage({
+    required this._text,
+    required this._shouldScaleEmojis,
+    required this._isEdited,
+  });
 
   final String _text;
   final bool _shouldScaleEmojis;
+  final bool _isEdited;
 
   @override
   Widget build(BuildContext context) {
@@ -149,16 +155,29 @@ class _TextMessage extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
       child: Container(
         constraints: const BoxConstraints(minWidth: 25),
-        child: Text(
-          _text,
-          textAlign: _text.length < 6 ? TextAlign.center : TextAlign.start,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: _shouldScaleEmojis
-                ? 42.0
-                : 14.0, // 3x size for emoji-only messages
-            fontWeight: FontWeight.bold,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              _text,
+              textAlign: _text.length < 6 ? TextAlign.center : TextAlign.start,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: _shouldScaleEmojis ? 42.0 : 14.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (_isEdited)
+              Text(
+                context.l10n.chatMessageEditedLabel,
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+          ],
         ),
       ),
     );
