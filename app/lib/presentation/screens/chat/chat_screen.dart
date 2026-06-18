@@ -33,6 +33,8 @@ import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/configuration/environment.dart';
+import '../../../infrastructure/exceptions/app_exception.dart';
+import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/concierge_message_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';

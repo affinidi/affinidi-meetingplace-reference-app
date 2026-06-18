@@ -25,4 +25,10 @@ enum AppExceptionType {
   unableToFindMediator,
   offerNotFound,
   cameraInitializationFailed,
+  voiceMessagesNotSupported,
+  deleteForEveryoneNotSupported,
+  chatSdkNotInitialized,
+  unexpectedChatEventType,
+  voiceEncoderNotSupported,
+  invalidMapStructure,
 }

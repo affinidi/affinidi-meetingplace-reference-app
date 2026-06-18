@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
+import '../../../../infrastructure/exceptions/app_exception.dart';
+import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../services/contacts_service/contacts_service.dart';
 import 'interfaces/chat_protocol_handler.dart';
@@ -36,7 +38,10 @@ class PresenceProtocolHandler implements ChatProtocolHandler {
     final timestamp = switch (event) {
       ChatPresenceEvent(:final timestamp) => timestamp,
       ChatActivityEvent(:final timestamp) => timestamp,
-      _ => throw StateError('Unexpected event type: ${event.runtimeType}'),
+      _ => throw AppException(
+        'Unexpected event type: ${event.runtimeType}',
+        code: AppExceptionType.unexpectedChatEventType.name,
+      ),
     };
 
     if (channelDid.isEmpty) {

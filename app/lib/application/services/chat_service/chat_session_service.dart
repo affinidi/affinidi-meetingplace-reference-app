@@ -17,6 +17,8 @@ import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/configuration/environment.dart';
+import '../../../infrastructure/exceptions/app_exception.dart';
+import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/chat_items_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/did_extensions.dart';
@@ -443,8 +445,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }) async {
     if (!(_chatSDK?.capabilities.supports(ChatFeature.voiceMessages) ??
         false)) {
-      throw StateError(
+      throw AppException(
         'Voice messages are not supported on this chat transport.',
+        code: AppExceptionType.voiceMessagesNotSupported.name,
       );
     }
     late final Uint8List bytes;
@@ -488,7 +491,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
     final sdk = _chatSDK;
     if (sdk == null) {
-      throw StateError('Chat SDK not initialized');
+      throw AppException(
+        'Chat SDK not initialized',
+        code: AppExceptionType.chatSdkNotInitialized.name,
+      );
     }
     return sdk.downloadMedia(attachment);
   }
@@ -535,8 +541,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     if (!deleteForMeOnly &&
         !(_chatSDK?.capabilities.supports(ChatFeature.messageDelete) ??
             false)) {
-      throw StateError(
+      throw AppException(
         'Delete for everyone is not supported on this chat transport.',
+        code: AppExceptionType.deleteForEveryoneNotSupported.name,
       );
     }
     await _chatSDK?.deleteMessage(message, localOnly: deleteForMeOnly);
