@@ -69,7 +69,8 @@ void main() {
       await _navigateToGroupChat(tester);
       await _openAttachmentSheet(tester);
 
-      final enabled = _isVrcOptionEnabled(tester, 'VRC');
+      final l10n = await getL10n();
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
       expect(enabled, isFalse);
     });
   });
@@ -94,7 +95,8 @@ void main() {
       await _navigateToOobChat(tester);
       await _openAttachmentSheet(tester);
 
-      final enabled = _isVrcOptionEnabled(tester, 'VRC');
+      final l10n = await getL10n();
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
       expect(enabled, isFalse);
     });
   });

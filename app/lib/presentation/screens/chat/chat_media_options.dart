@@ -197,7 +197,7 @@ class _ChatMediaOptions extends ConsumerWidget {
             };
             final supported = platformSupported && enabled;
             final baseLabel = switch (plugin) {
-              VrcAttachmentsPlugin() => 'VRC',
+              VrcAttachmentsPlugin() => context.l10n.vrcAbbreviation,
               _ => plugin.localizedName(context),
             };
             final label = !platformSupported

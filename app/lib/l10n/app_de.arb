@@ -408,6 +408,7 @@
 	"selectIdentityInstruction": "Wische links oder rechts, um die Identität auszuwählen, die du für die R‑Karte verwenden möchtest",
 	"sendRCard": "R-Karte senden",
 	"verifiableRelationshipCredential": "Überprüfbarer Beziehungsnachweis",
+	"vrcAbbreviation": "VRC",
 	"vrcDetailsTitle": "Beziehungsnachweis",
 	"vrcSectionIssuer": "Aussteller",
 	"vrcSectionHolder": "Ausgestellt an",

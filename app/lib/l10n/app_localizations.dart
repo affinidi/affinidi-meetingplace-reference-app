@@ -2512,6 +2512,12 @@ abstract class AppLocalizations {
   /// **'Verifiable Relationship Credential'**
   String get verifiableRelationshipCredential;
 
+  /// No description provided for @vrcAbbreviation.
+  ///
+  /// In en, this message translates to:
+  /// **'VRC'**
+  String get vrcAbbreviation;
+
   /// No description provided for @vrcDetailsTitle.
   ///
   /// In en, this message translates to:
