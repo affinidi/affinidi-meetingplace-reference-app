@@ -35,6 +35,7 @@ import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
+import '../../validators/max_length_validator_type.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 
 import 'chat_screen_state.dart';
@@ -55,6 +56,7 @@ class ChatScreenController extends _$ChatScreenController
   ChatScreenController() : super();
 
   static const _logKey = 'UXCHAT';
+  static final _maxChatMessageLength = MaxLengthValidatorType.extraLong.value;
 
   late final messageTextController = TextEditingController();
   late final _logger = ref.read(appLoggerProvider);
@@ -566,6 +568,7 @@ class ChatScreenController extends _$ChatScreenController
     final originalText = messageTextController.text;
     final trimmedMessage = originalText.trimRight();
     if (trimmedMessage.isEmpty) return;
+    if (trimmedMessage.length > _maxChatMessageLength) return;
 
     unawaited(_chatService?.sendTextMessage(trimmedMessage) ?? Future.value());
     _sendChatActivityTimedAction?.cancel();
