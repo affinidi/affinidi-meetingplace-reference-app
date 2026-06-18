@@ -41,6 +41,15 @@ class _PlainTextChatItem extends ConsumerWidget {
       controller.selectReactionAtIndex(_index);
     }
 
+    final supportsMessageActions = ref.watch(
+      provider.select((state) {
+        final capabilities = state.capabilities;
+        return (capabilities?.supports(chat.ChatFeature.messageEdit) ??
+                false) ||
+            (capabilities?.supports(chat.ChatFeature.messageDelete) ?? false);
+      }),
+    );
+
     Future<void> showMessageActions() async {
       if (!context.mounted) return;
       controller.clearSelectedReaction();
@@ -54,6 +63,7 @@ class _PlainTextChatItem extends ConsumerWidget {
     void onLongPress() {
       if (chatItem.isDeleted || chatItem.isDeletedLocally) return;
       if (chatItem.isFromMe) {
+        if (!supportsMessageActions) return;
         unawaited(showMessageActions());
       } else {
         selectReaction();

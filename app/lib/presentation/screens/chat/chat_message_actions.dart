@@ -2,10 +2,10 @@ part of 'chat_screen.dart';
 
 /// Bottom-sheet menu of actions available on a single chat message.
 ///
-/// Shown on long-press of a message bubble. Always offers Copy. Edit and the
-/// two Delete actions appear only on the user's own non-deleted messages, and
-/// only when the active transport supports them (Matrix). DIDComm supports
-/// neither edit nor delete, so those actions are hidden there.
+/// Shown on long-press of the user's own message bubble on Matrix chats only.
+/// Offers Copy when the message has text, plus Edit and Delete when supported.
+/// DIDComm does not support message edit or delete, so long-press actions are
+/// disabled there.
 class _ChatMessageActions extends ConsumerWidget {
   const _ChatMessageActions({required this._contactId, required this._message});
 
