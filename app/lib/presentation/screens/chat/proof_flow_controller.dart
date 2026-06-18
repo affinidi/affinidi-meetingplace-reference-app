@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show LivenessProofPayload;
 
@@ -34,9 +35,11 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
     if (!contact.status.isEstablished) return false;
 
     return ref.watch(
-      chatScreenControllerProvider(
-        contactId,
-      ).select((state) => state.isInitialized),
+      chatScreenControllerProvider(contactId).select(
+        (state) =>
+            state.isInitialized &&
+            (state.capabilities?.supports(chat.ChatFeature.humanZkp) ?? false),
+      ),
     );
   }
 

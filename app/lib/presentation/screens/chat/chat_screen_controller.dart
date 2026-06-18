@@ -54,7 +54,6 @@ class ChatScreenController extends _$ChatScreenController
     with WidgetsBindingObserver {
   ChatScreenController() : super();
 
-  late final bool _isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
   static const _logKey = 'UXCHAT';
 
   late final messageTextController = TextEditingController();
@@ -63,10 +62,14 @@ class ChatScreenController extends _$ChatScreenController
     ref: ref,
     logger: _logger,
     logKey: _logKey,
-    isZkpEnabled: _isZkpEnabled,
+    isHumanZkpSupported: _isHumanZkpSupported,
     getContact: () => state.contact,
     onUpsertChatItem: _upsertChatItemThroughService,
   );
+
+  bool _isHumanZkpSupported() =>
+      ref.read(environmentProvider).zkpEnabled &&
+      (state.capabilities?.supports(chat.ChatFeature.humanZkp) ?? false);
 
   TimedAction? _sendChatActivityTimedAction;
   Timer? _saveUnsentMessageDebouncer;
@@ -292,7 +295,7 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> onScreenOpened() async {
     if (!state.isInitialized) return;
 
-    if (ref.read(environmentProvider).zkpEnabled) {
+    if (_isHumanZkpSupported()) {
       ref.read(proofFlowControllerProvider(contactId).notifier).resetSession();
     }
 
