@@ -222,7 +222,7 @@ class _ChatMediaOptions extends ConsumerWidget {
       if (isZkpEnabled && supportsHumanZkp)
         _ChatMediaOptionItem(
           icon: Icons.how_to_reg,
-          label: context.l10n.humanZeroKnowledgeProof,
+          label: context.l10n.humanZkp,
           subtitle: hasVerifiedProof
               ? context.l10n.zkpProofAlreadyShared
               : null,
