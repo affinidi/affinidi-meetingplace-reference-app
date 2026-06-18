@@ -211,13 +211,17 @@ class _AttachmentWidget extends HookConsumerWidget {
   final String _senderDid;
   final Color _chatItemColor;
 
-  bool get _isHostedMedia =>
-      _attachment.format == AttachmentFormat.hostedMedia.value;
+  static const String _hostedMediaFormatName = 'hostedMedia';
+
+  bool get _isHostedMedia => _attachment.format == _hostedMediaFormatName;
   bool get _isVoiceMessage => chat.VoiceMessageMetadata.isVoice(_attachment);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (_isHostedMedia || _isVoiceMessage) {
+    final provider = chatScreenControllerProvider(_contactId);
+    final controller = ref.read(provider.notifier);
+
+    if (_isVoiceMessage || _isHostedMedia) {
       return _HostedMediaWidget(
         contactId: _contactId,
         attachment: _attachment,
@@ -229,12 +233,18 @@ class _AttachmentWidget extends HookConsumerWidget {
 
     final plugins = ref.read(availableAttachmentPluginsProvider);
 
+    // Create callback for downloading media
+    // (e.g., for gallery images with URLs)
+    Future<Uint8List> downloadCallback(ChatAttachment attachment) =>
+        controller.downloadAttachmentForPlugin(attachment);
+
     for (final plugin in plugins) {
       if (plugin.supportsFormat(_attachment)) {
         final child = plugin.renderAttachment(
           attachment: _attachment,
           isFromMe: _isFromMe,
           chatItemColor: _chatItemColor,
+          download: downloadCallback,
         );
         if (_attachment.isRCard) {
           return LayoutBuilder(

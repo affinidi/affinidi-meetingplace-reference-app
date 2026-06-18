@@ -17,7 +17,7 @@ class ZkpAttachmentEvent {
 }
 
 /// Contains all chat-session data that the controller observes. UI-only fields
-/// (selectedReactionIndex, attachmentsDataCache) live in `ChatScreenState`.
+/// (selectedReactionIndex) live in `ChatScreenState`.
 @Freezed(fromJson: false, toJson: false)
 abstract class ChatServiceState with _$ChatServiceState {
   ChatServiceState._();

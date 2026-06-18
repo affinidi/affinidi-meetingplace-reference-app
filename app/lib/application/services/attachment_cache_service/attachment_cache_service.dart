@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
-import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -241,7 +240,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
   void preload(List<chat.ChatItem> messages) {
     for (final message in messages.whereType<chat.Message>()) {
       for (final attachment in message.attachments) {
-        if (attachment.format != AttachmentFormat.hostedMedia.value) continue;
+        if (attachment.format != 'hostedMedia') continue;
         final category = mediaCategoryFromMimeType(attachment.mediaType);
         if (category == MediaCategory.image || attachment.isVoice) {
           autoLoad(attachment);

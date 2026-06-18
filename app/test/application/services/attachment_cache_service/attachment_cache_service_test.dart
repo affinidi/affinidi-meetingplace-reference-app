@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/attachment_cache_service/attachment_cache_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/attachment_cache_service/chat_media_bytes_cache.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
@@ -143,9 +142,7 @@ void main() {
     });
 
     test('loadAttachment skips hosted media with no transportId', () {
-      final attachment = ChatAttachment(
-        format: AttachmentFormat.hostedMedia.value,
-      );
+      final attachment = ChatAttachment(format: 'hostedMedia');
 
       service.loadAttachment(attachment);
 
@@ -156,7 +153,7 @@ void main() {
       'preload triggers download for hosted image attachment with transportId',
       () async {
         final attachment = ChatAttachment(
-          format: AttachmentFormat.hostedMedia.value,
+          format: 'hostedMedia',
           mediaType: 'image/jpeg',
           data: ChatAttachmentData(base64: base64Encode([1, 2, 3])),
         )..transportId = 'test-transport-id';
@@ -182,7 +179,7 @@ void main() {
 
     test('preload defers hosted video until explicitly requested', () async {
       final attachment = ChatAttachment(
-        format: AttachmentFormat.hostedMedia.value,
+        format: 'hostedMedia',
         mediaType: 'video/mp4',
       )..transportId = 'video-transport-id';
       final message = Message(
@@ -206,7 +203,7 @@ void main() {
 
     test('preload triggers download for hosted audio attachment', () async {
       final attachment = ChatAttachment(
-        format: AttachmentFormat.hostedMedia.value,
+        format: 'hostedMedia',
         mediaType: 'audio/mp4',
         data: ChatAttachmentData(base64: base64Encode([4, 5, 6])),
       )..transportId = 'audio-transport-id';
@@ -231,7 +228,7 @@ void main() {
 
     test('preload failure does not write failed marker', () async {
       final attachment = ChatAttachment(
-        format: AttachmentFormat.hostedMedia.value,
+        format: 'hostedMedia',
         mediaType: 'audio/mp4',
       )..transportId = 'missing-media-transport-id';
       final message = Message(
@@ -256,7 +253,7 @@ void main() {
     test('auto-load stops retrying once the backoff schedule is exhausted', () {
       fakeAsync((async) {
         final attachment = ChatAttachment(
-          format: AttachmentFormat.hostedMedia.value,
+          format: 'hostedMedia',
           mediaType: 'image/png',
         )..transportId = 'missing-media-transport-id';
 
@@ -280,7 +277,7 @@ void main() {
     test('disposing the service cancels pending auto-load retries', () {
       fakeAsync((async) {
         final attachment = ChatAttachment(
-          format: AttachmentFormat.hostedMedia.value,
+          format: 'hostedMedia',
           mediaType: 'image/png',
         )..transportId = 'missing-media-transport-id';
 
@@ -298,7 +295,7 @@ void main() {
 
     test('loading an image populates the shared warm cache', () {
       final attachment = ChatAttachment(
-        format: AttachmentFormat.hostedMedia.value,
+        format: 'hostedMedia',
         mediaType: 'image/jpeg',
         data: ChatAttachmentData(base64: base64Encode([1, 2, 3])),
       )..transportId = 'warm-cache-transport-id';
@@ -312,7 +309,7 @@ void main() {
 
     test('video bytes are not added to the warm cache', () {
       final attachment = ChatAttachment(
-        format: AttachmentFormat.hostedMedia.value,
+        format: 'hostedMedia',
         mediaType: 'video/mp4',
         data: ChatAttachmentData(base64: base64Encode([9, 9, 9])),
       )..transportId = 'warm-cache-video-id';
@@ -326,7 +323,7 @@ void main() {
 
     test('re-entering a chat seeds its cache from the warm cache', () {
       final attachment = ChatAttachment(
-        format: AttachmentFormat.hostedMedia.value,
+        format: 'hostedMedia',
         mediaType: 'image/jpeg',
       )..transportId = 'seeded-transport-id';
       final key = AttachmentCacheService.cacheKey(attachment);

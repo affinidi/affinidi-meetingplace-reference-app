@@ -489,7 +489,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       waveform: waveform,
       filename: path.basename(filePath),
       mediaType: mediaType,
-      format: AttachmentFormat.hostedMedia.value,
+      format: 'hostedMedia',
       lastModifiedTime: clock.now(),
       byteCount: bytes.length,
     );

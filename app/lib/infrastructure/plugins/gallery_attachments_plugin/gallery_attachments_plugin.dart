@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -95,9 +96,11 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     Color? chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => _GalleryAttachmentWidget(
     attachment: attachment,
     cacheManager: _cacheManager,
+    download: download,
   );
 
   /// Renders multiple image attachments as a scrollable list.
@@ -109,9 +112,11 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     Color? chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => _ListGalleryAttachmentsWidget(
     attachments: attachments,
     cacheManager: _cacheManager,
+    download: download,
   );
 
   /// Checks if this plugin supports the given attachment format.
@@ -144,10 +149,12 @@ class _ListGalleryAttachmentsWidget extends StatelessWidget {
   const _ListGalleryAttachmentsWidget({
     required this._attachments,
     required this._cacheManager,
+    this._download,
   });
 
   final List<ChatAttachment> _attachments;
   final BaseCacheManager _cacheManager;
+  final Future<Uint8List> Function(ChatAttachment)? _download;
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +166,7 @@ class _ListGalleryAttachmentsWidget extends StatelessWidget {
         return _GalleryAttachmentWidget(
           attachment: _attachments[index],
           cacheManager: _cacheManager,
+          download: _download,
         );
       },
     );
@@ -169,52 +177,152 @@ class _ListGalleryAttachmentsWidget extends StatelessWidget {
 ///
 /// Features:
 /// - 200x200 size with rounded corners and elevation
-/// - Displays image using [CachedBase64Image] for performance
-/// - Taps navigate to [ImageViewScreen] for full-screen viewing
-/// - Returns empty widget if attachment data is invalid
+/// - When inline base64 data is available, renders using [CachedBase64Image]
+/// - When no inline data but a [download] callback is provided, uses
+///   [FutureBuilder] to download and render the image
+/// - Shows loading spinner while downloading
+/// - Shows broken image icon on download error
+/// - Returns empty widget if neither data nor callback are available
 class _GalleryAttachmentWidget extends StatelessWidget {
-  _GalleryAttachmentWidget({
-    required this._attachment,
-    required this._cacheManager,
+  const _GalleryAttachmentWidget({
+    required this.attachment,
+    required this.cacheManager,
+    this.download,
   });
 
-  final ChatAttachment _attachment;
-  final BaseCacheManager _cacheManager;
+  final ChatAttachment attachment;
+  final BaseCacheManager cacheManager;
+  final Future<Uint8List> Function(ChatAttachment)? download;
+
+  String _cacheKey(ChatAttachment attachment) {
+    final id = attachment.id;
+    if (id != null && id.isNotEmpty) return 'chat_attachment_$id';
+
+    final transportId = attachment.transportId;
+    if (transportId != null && transportId.isNotEmpty) {
+      return 'chat_attachment_transport_$transportId';
+    }
+
+    return attachment.data?.links?.firstOrNull?.toString() ??
+        'chat_attachment_${identityHashCode(attachment)}';
+  }
+
+  Future<Uint8List> _loadImageBytes(
+    ChatAttachment attachment,
+    Future<Uint8List> Function(ChatAttachment) downloadFn,
+  ) async {
+    final cacheKey = _cacheKey(attachment);
+    final cachedFileInfo = await cacheManager.getFileFromCache(cacheKey);
+    if (cachedFileInfo != null) {
+      return cachedFileInfo.file.readAsBytes();
+    }
+
+    final imageBytes = await downloadFn(attachment);
+    await cacheManager.putFile(cacheKey, imageBytes);
+    return imageBytes;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final imageDataBase64 = _attachment.data?.base64;
+    final imageDataBase64 = attachment.data?.base64;
 
-    if (imageDataBase64 == null) return const SizedBox.shrink();
-
-    return SizedBox(
-      height: 200,
-      width: 200,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context, rootNavigator: true).push<ImageViewScreen>(
-            MaterialPageRoute(
-              builder: (context) =>
-                  ImageViewScreen(imageBytes: base64.decode(imageDataBase64)),
+    // If we have inline base64, render it directly (legacy / sender path).
+    if (imageDataBase64 != null) {
+      return SizedBox(
+        height: 200,
+        width: 200,
+        child: GestureDetector(
+          onTap: () {
+            Navigator.of(context, rootNavigator: true).push<ImageViewScreen>(
+              MaterialPageRoute(
+                builder: (context) =>
+                    ImageViewScreen(imageBytes: base64.decode(imageDataBase64)),
+              ),
+            );
+          },
+          child: Card(
+            color: const Color.fromARGB(0, 10, 10, 10),
+            clipBehavior: Clip.hardEdge,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
             ),
-          );
-        },
-        child: Card(
-          color: const Color.fromARGB(0, 10, 10, 10),
-          clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          elevation: 5,
-          child: Image(
-            fit: BoxFit.cover,
-            image: CachedBase64Image(
-              imageDataBase64,
-              cacheManager: _cacheManager,
+            elevation: 5,
+            child: Image(
+              fit: BoxFit.cover,
+              image: CachedBase64Image(
+                imageDataBase64,
+                cacheManager: cacheManager,
+              ),
             ),
           ),
         ),
-      ),
+      );
+    }
+
+    // No inline data: if no download callback, show nothing
+    final downloadFn = download;
+    if (downloadFn == null) return const SizedBox.shrink();
+
+    // Use FutureBuilder to download and render the image
+    return FutureBuilder<Uint8List>(
+      future: _loadImageBytes(attachment, downloadFn),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const SizedBox(
+            height: 200,
+            width: 200,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return const SizedBox(
+            height: 200,
+            width: 200,
+            child: Center(child: Icon(Icons.broken_image_outlined)),
+          );
+        }
+
+        if (!snapshot.hasData) {
+          return const SizedBox(
+            height: 200,
+            width: 200,
+            child: Center(child: Icon(Icons.broken_image_outlined)),
+          );
+        }
+
+        final imageBytes = snapshot.data!;
+        final imageBase64 = base64.encode(imageBytes);
+
+        return SizedBox(
+          height: 200,
+          width: 200,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context, rootNavigator: true).push<ImageViewScreen>(
+                MaterialPageRoute(
+                  builder: (context) => ImageViewScreen(imageBytes: imageBytes),
+                ),
+              );
+            },
+            child: Card(
+              color: const Color.fromARGB(0, 10, 10, 10),
+              clipBehavior: Clip.hardEdge,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              elevation: 5,
+              child: Image(
+                fit: BoxFit.cover,
+                image: CachedBase64Image(
+                  imageBase64,
+                  cacheManager: cacheManager,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

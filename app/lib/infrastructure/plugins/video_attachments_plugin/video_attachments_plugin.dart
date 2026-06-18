@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -74,6 +75,7 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => _VideoAttachmentWidget(attachment: attachment);
 
   @override
@@ -81,6 +83,7 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => ListView.builder(
     physics: const NeverScrollableScrollPhysics(),
     shrinkWrap: true,

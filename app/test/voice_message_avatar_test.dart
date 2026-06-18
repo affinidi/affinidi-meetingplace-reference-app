@@ -41,7 +41,7 @@ const _voiceAvatarKey = Key('voice_sender_avatar');
 ChatAttachment _voiceAttachment() => ChatAttachment(
   mediaType: 'audio/mp4',
   filename: 'voice.m4a',
-  format: sdk.AttachmentFormat.hostedMedia.value,
+  format: 'hostedMedia',
   data: ChatAttachmentData(links: [Uri.parse('mxc://fake-homeserver/voice')]),
   metadata: VoiceMessageMetadata(
     durationMs: 11000,

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -38,7 +38,6 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../../effects/screen_effect.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
-
 import 'chat_screen_state.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp_handler.dart';
@@ -899,39 +898,15 @@ class ChatScreenController extends _$ChatScreenController
     _sendChatActivityTimedAction?.cancel();
   }
 
-  /// Loads an image attachment into the chat screen.
+  /// Downloads bytes for attachment plugins.
   ///
-  /// This method handles the process of displaying or processing an image
-  /// attachment provided by the [attachment] parameter. It may involve
-  /// updating the UI, storing the attachment, or triggering further actions
-  /// related to the image.
-  ///
-  /// [attachment] - The image attachment to be loaded.
-  void loadImageAttachment(ChatAttachment attachment) {
-    final attachmentId = attachment.id;
-    if (attachmentId == null) {
-      _logger.info(
-        'Attachment cannot be displayed as it does not have an id',
-        name: _logKey,
-      );
-      return;
-    }
-
-    final attachmentData = attachment.data?.base64;
-    if (attachmentData == null) {
-      _logger.info(
-        'Attachment cannot be displayed as it does not have data',
-        name: _logKey,
-      );
-      return;
-    }
-
-    final attachmentsDataCache = Map.of(state.attachmentsDataCache);
-    final existingData = attachmentsDataCache[attachmentId];
-    if (existingData != null) return;
-
-    attachmentsDataCache[attachmentId] = base64.decode(attachmentData);
-    state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
+  /// The UI delegates to this controller method; cache strategy decisions
+  /// remain in lower layers (service/plugin cache managers), not UI state.
+  Future<Uint8List> downloadAttachmentForPlugin(
+    ChatAttachment attachment,
+  ) async {
+    final bytes = await _chatService?.downloadMedia(attachment);
+    return bytes ?? Uint8List(0);
   }
 
   /// Records and sends a voice message: builds the attachment, caches the

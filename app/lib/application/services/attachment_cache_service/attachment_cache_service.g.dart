@@ -78,7 +78,7 @@ final class AttachmentCacheServiceProvider
 }
 
 String _$attachmentCacheServiceHash() =>
-    r'dc3154c66b2957cbff2eaa36c0240487a0160159';
+    r'b1ef89132a4b4714be3f8fd85531b47b6e9083c1';
 
 /// Holds decrypted attachment bytes for a chat, keyed by
 /// [AttachmentCacheService.cacheKey].

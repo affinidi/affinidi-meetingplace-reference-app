@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -89,6 +90,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => _DocumentAttachmentWidget(attachment: attachment);
 
   @override
@@ -96,6 +98,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => ListView.builder(
     physics: const NeverScrollableScrollPhysics(),
     shrinkWrap: true,
