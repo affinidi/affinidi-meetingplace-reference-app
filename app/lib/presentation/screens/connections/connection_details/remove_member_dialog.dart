@@ -35,14 +35,13 @@ class _RemoveMemberDialog extends ConsumerWidget {
           isDefaultAction: true,
         ),
         ActionButton(
-          onPressed: () async {
-            await ref
+          onPressed: () {
+            Navigator.of(context).pop(true);
+            ref
                 .read(
                   connectionDetailsScreenControllerProvider(contactId).notifier,
                 )
                 .removeMember(member.did);
-            if (!context.mounted) return;
-            Navigator.of(context).pop(true);
           },
           isDestructiveAction: true,
           label: context.l10n.removeMemberConfirm,
