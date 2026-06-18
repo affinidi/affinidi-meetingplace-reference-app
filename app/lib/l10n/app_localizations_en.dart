@@ -1644,6 +1644,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rCardFooterUpdateShared => 'R-Card update has been shared.';
 
   @override
+  String get profileDetailsUpdateSharedGroup =>
+      'Profile details update has been shared with the group.';
+
+  @override
   String get rCardFooterUpdateSaved => 'R-Card update has been saved.';
 
   @override

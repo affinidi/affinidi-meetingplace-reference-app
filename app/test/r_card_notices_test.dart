@@ -98,7 +98,12 @@ void main() {
     testWidgets('renders rCardFooterUpdateShared text', (tester) async {
       final l10n = await getL10n();
       await tester.pumpWidget(
-        _l10n(ChatRCardUpdatedByMeNotice(dateCreated: DateTime(2024))),
+        _l10n(
+          ChatRCardUpdatedByMeNotice(
+            dateCreated: DateTime(2024),
+            isGroupChat: false,
+          ),
+        ),
       );
       await tester.pump();
       expect(find.text(l10n.rCardFooterUpdateShared), findsOneWidget);

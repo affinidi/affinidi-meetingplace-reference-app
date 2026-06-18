@@ -2464,6 +2464,12 @@ abstract class AppLocalizations {
   /// **'R-Card update has been shared.'**
   String get rCardFooterUpdateShared;
 
+  /// No description provided for @profileDetailsUpdateSharedGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile details update has been shared with the group.'**
+  String get profileDetailsUpdateSharedGroup;
+
   /// No description provided for @rCardFooterUpdateSaved.
   ///
   /// In en, this message translates to:
