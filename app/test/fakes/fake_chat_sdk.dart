@@ -655,6 +655,9 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   @override
   Future<void> editTextMessage(Message message, String newText) async {
     editTextMessageCalls.add({'message': message, 'newText': newText});
+    message.value = newText;
+    message.editedAt = DateTime.now().toUtc();
+    _emit(StreamData(chatItem: message));
   }
 
   @override
