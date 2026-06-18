@@ -318,14 +318,29 @@ class _HostedMediaWidget extends HookConsumerWidget {
     // never poison the cache and retry on a backoff, because historical Matrix
     // events decrypt asynchronously after the room syncs.
     final shouldLoadImage = category == MediaCategory.image && cached == null;
+    // Tap-to-download media (video, documents, non-voice audio) is not eagerly
+    // fetched, so on chat re-entry it would show a download affordance even
+    // when the user already downloaded it. Probe the SDK's on-disk media cache
+    // (no network) to restore the play/open state for already-downloaded media.
+    final isVoice = chat.VoiceMessageMetadata.isVoice(_attachment);
+    final shouldRestoreLocal =
+        cached == null &&
+        !isVoice &&
+        (category == MediaCategory.video ||
+            category == MediaCategory.audio ||
+            category == MediaCategory.document);
     useEffect(() {
       if (shouldLoadImage) {
         ref
             .read(attachmentCacheServiceProvider(_contactId).notifier)
             .autoLoad(_attachment);
+      } else if (shouldRestoreLocal) {
+        ref
+            .read(attachmentCacheServiceProvider(_contactId).notifier)
+            .restoreFromLocalCache(_attachment);
       }
       return null;
-    }, [cacheKey, shouldLoadImage]);
+    }, [cacheKey, shouldLoadImage, shouldRestoreLocal]);
 
     if (chat.VoiceMessageMetadata.isVoice(_attachment)) {
       return _HostedAudioWidget(

@@ -50,6 +50,7 @@ class AttachmentCacheService extends _$AttachmentCacheService {
   late final ChatMediaBytesCache _bytesCache;
   ChatService? _chatService;
   final Set<String> _attachmentsLoading = {};
+  final Set<String> _localProbesInFlight = {};
   final Set<Timer> _autoRetryTimers = {};
   final Map<String, LocalVoiceMessageData> _localVoiceMessages = {};
   bool _isDisposed = false;
@@ -233,6 +234,43 @@ class AttachmentCacheService extends _$AttachmentCacheService {
       ),
     );
     return true;
+  }
+
+  /// Restores an already-downloaded hosted attachment from the SDK's on-disk
+  /// media cache without contacting the homeserver, so media the user
+  /// previously downloaded renders its play/open state on chat re-entry instead
+  /// of a download affordance. Used for tap-to-download media (video,
+  /// documents, non-voice audio) that is not eagerly auto-loaded.
+  ///
+  /// A local-cache miss is silent and leaves the cache untouched, so the
+  /// download affordance stays and the user can still fetch the media on tap.
+  Future<void> restoreFromLocalCache(ChatAttachment attachment) async {
+    final key = cacheKey(attachment);
+    if (state[key] != null) return;
+    // Outgoing attachments without a transportId have no hosted copy to probe.
+    if (attachment.transportId == null) return;
+    // Guard with a probe-only set, not [_attachmentsLoading], so a concurrent
+    // user-initiated download is never suppressed by an in-flight probe.
+    if (_localProbesInFlight.contains(key)) return;
+    _localProbesInFlight.add(key);
+
+    try {
+      final bytes = await _chatService?.downloadMedia(
+        attachment,
+        localOnly: true,
+      );
+      if (_isDisposed) return;
+      // A user-initiated download may have populated the cache while the probe
+      // was in flight; don't clobber it.
+      if (state[key] == null && bytes != null && bytes.isNotEmpty) {
+        _writeCache(key, bytes, attachment: attachment);
+      }
+    } catch (_) {
+      // Not in the local cache yet (or cache miss): keep the download
+      // affordance rather than poisoning the cache with a failure marker.
+    } finally {
+      _localProbesInFlight.remove(key);
+    }
   }
 
   /// Preloads hosted media that should be available without a manual tap:
