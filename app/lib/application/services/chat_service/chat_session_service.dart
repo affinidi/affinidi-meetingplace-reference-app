@@ -104,6 +104,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   TransportCapabilities? get capabilities => _chatSDK?.capabilities;
 
+  bool get _isHumanZkpActive =>
+      ref.read(environmentProvider).zkpEnabled &&
+      (_chatSDK?.capabilities.supports(ChatFeature.humanZkp) ?? false);
+
   bool get isGroupChat => _isGroupChat;
 
   @override
@@ -199,6 +203,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   void _onZkpAttachment(ChatItem chatItem, String channelDid) {
+    if (!_isHumanZkpActive) return;
     state = state.copyWith(
       zkpAttachmentEvent: ZkpAttachmentEvent(
         chatItem: chatItem,
@@ -631,6 +636,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         _clearMembersTypingActivity(chatItem.senderDid);
       }
       if (chatItem is Message &&
+          _isHumanZkpActive &&
           LivenessZkpConciergeDeriver.messageHasZkpAttachments(chatItem)) {
         _syncHumanZkpNotices();
       }
@@ -661,6 +667,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
+    if (!_isHumanZkpActive) return existing;
+
     return LivenessZkpConciergeDeriver.appendDerivedHumanZkpConciergeMessages(
       existing,
       contactName: _peerFirstNameForZkpUi(),

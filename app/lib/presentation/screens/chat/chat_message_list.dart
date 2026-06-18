@@ -19,7 +19,13 @@ class _ChatMessageList extends HookConsumerWidget {
       provider.select((state) => state.selectedReactionIndex),
     );
     final zkpPolicy = ChatZkpMessageListPolicy.fromMessages(
-      enabled: ref.read(environmentProvider).zkpEnabled,
+      enabled:
+          ref.read(environmentProvider).zkpEnabled &&
+          (ref
+                  .read(provider)
+                  .capabilities
+                  ?.supports(chat.ChatFeature.humanZkp) ??
+              false),
       messages: sortedMessages,
     );
 

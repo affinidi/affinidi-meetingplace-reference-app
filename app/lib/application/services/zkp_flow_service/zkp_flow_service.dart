@@ -56,6 +56,14 @@ class ZkpFlowService {
     final channelDid = contact.channelDid;
     if (channelDid == null) return false;
 
+    final chatService = _ref.read(
+      chatSessionServiceProvider(channelDid).notifier,
+    );
+    if (!(chatService.capabilities?.supports(chat.ChatFeature.humanZkp) ??
+        false)) {
+      return false;
+    }
+
     return _ref.read(chatSessionServiceProvider(channelDid)).isInitialized;
   }
 

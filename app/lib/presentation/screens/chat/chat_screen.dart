@@ -113,6 +113,13 @@ class ChatScreen extends HookConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
+    final showHumanZkp = ref.watch(
+      provider.select(
+        (state) =>
+            isZkpEnabled &&
+            (state.capabilities?.supports(chat.ChatFeature.humanZkp) ?? false),
+      ),
+    );
     final isInitialized = ref.watch(
       provider.select((state) => state.isInitialized),
     );
@@ -194,7 +201,7 @@ class ChatScreen extends HookConsumerWidget {
             child: isInitialized
                 ? _ChatSection(
                     contactId: _contactId,
-                    isZkpEnabled: isZkpEnabled,
+                    showHumanZkp: showHumanZkp,
                   )
                 : const _LoadingSection(),
           ),
@@ -205,10 +212,10 @@ class ChatScreen extends HookConsumerWidget {
 }
 
 class _ChatSection extends StatelessWidget {
-  const _ChatSection({required this._contactId, required this.isZkpEnabled});
+  const _ChatSection({required this._contactId, required this.showHumanZkp});
 
   final String _contactId;
-  final bool isZkpEnabled;
+  final bool showHumanZkp;
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +226,7 @@ class _ChatSection extends StatelessWidget {
             ChatActivityProgressIndicator(contactId: _contactId),
             _NotificationsUnavailableWarning(_contactId),
             _VrcBanner(_contactId),
-            if (isZkpEnabled) ChatZkpOverlay(contactId: _contactId),
+            if (showHumanZkp) ChatZkpOverlay(contactId: _contactId),
             Expanded(child: _ChatMessageList(_contactId)),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
