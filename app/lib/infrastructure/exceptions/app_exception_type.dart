@@ -30,5 +30,5 @@ enum AppExceptionType {
   chatSdkNotInitialized,
   unexpectedChatEventType,
   voiceEncoderNotSupported,
-  missingContactCardFieldDefinition,
+  invalidMapStructure,
 }

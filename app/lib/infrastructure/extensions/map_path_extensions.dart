@@ -48,7 +48,7 @@ extension MapPathExtensions on Map<String, dynamic> {
         throw AppException(
           "setPathValue: expected a map at key '$pathKey' but found "
           '${elementAtPath.runtimeType}',
-          code: AppExceptionType.other.name,
+          code: AppExceptionType.invalidMapStructure.name,
         );
       }
     }
