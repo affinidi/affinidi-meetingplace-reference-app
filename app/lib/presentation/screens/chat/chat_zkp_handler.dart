@@ -22,7 +22,7 @@ class ChatZkpHandler {
     required this._ref,
     required this.logger,
     required this.logKey,
-    required this.isZkpEnabled,
+    required this.isHumanZkpSupported,
     required this.getContact,
     required this.onUpsertChatItem,
   });
@@ -30,12 +30,12 @@ class ChatZkpHandler {
   final Ref _ref;
   final AppLogger logger;
   final String logKey;
-  final bool isZkpEnabled;
+  final bool Function() isHumanZkpSupported;
   final Contact? Function() getContact;
   final void Function(chat.ChatItem item) onUpsertChatItem;
 
   void handleZkpAttachment(chat.ChatItem chatItem, String channelDid) {
-    if (!isZkpEnabled) return;
+    if (!isHumanZkpSupported()) return;
     if (chatItem is! chat.Message) return;
 
     final attachments = chatItem.attachments.map((a) => a.toCoreAttachment());
@@ -133,7 +133,7 @@ class ChatZkpHandler {
   }
 
   Future<void> insertZkpPausedNotice({String? pausedForNoticeMessageId}) async {
-    if (!isZkpEnabled) return;
+    if (!isHumanZkpSupported()) return;
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
 

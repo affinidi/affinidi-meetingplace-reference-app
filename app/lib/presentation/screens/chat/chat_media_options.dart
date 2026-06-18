@@ -123,13 +123,12 @@ class _ChatMediaOptions extends ConsumerWidget {
     final isGroupChat = ref.watch(
       provider.select((state) => state.contact?.isGroup ?? false),
     );
-    final supportsMessageEdit = ref.watch(
+    final supportsHumanZkp = ref.watch(
       provider.select(
         (state) =>
-            state.capabilities?.supports(chat.ChatFeature.messageEdit) ?? false,
+            state.capabilities?.supports(chat.ChatFeature.humanZkp) ?? false,
       ),
     );
-    final isDidcommIndividualChat = !isGroupChat && !supportsMessageEdit;
     final shouldEnableRCardAttachment = !isGroupChat;
     final contact = ref.watch(provider.select((state) => state.contact));
     final isOobChat = contact?.origin == ContactOrigin.directInteractive;
@@ -161,7 +160,7 @@ class _ChatMediaOptions extends ConsumerWidget {
 
     final zkpChannelReady =
         isZkpEnabled &&
-        isDidcommIndividualChat &&
+        supportsHumanZkp &&
         ProofFlowController.watchIsZkpChannelReady(ref, _contactId);
     final hasVerifiedProof = ref.watch(
       provider.select(
@@ -198,7 +197,7 @@ class _ChatMediaOptions extends ConsumerWidget {
               enabled: supported,
             );
           }),
-      if (isZkpEnabled && isDidcommIndividualChat)
+      if (isZkpEnabled && supportsHumanZkp)
         _ChatMediaOptionItem(
           icon: Icons.how_to_reg,
           label: context.l10n.humanZeroKnowledgeProof,

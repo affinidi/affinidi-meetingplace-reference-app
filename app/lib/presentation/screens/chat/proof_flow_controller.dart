@@ -32,17 +32,13 @@ class ProofFlowController extends StateNotifier<ProofFlowState> {
     );
     if (contact == null) return false;
 
-    // ZKP is only for individual chats
-    if (contact.isGroup) return false;
-
     if (!contact.status.isEstablished) return false;
 
     return ref.watch(
       chatScreenControllerProvider(contactId).select(
         (state) =>
             state.isInitialized &&
-            !(state.capabilities?.supports(chat.ChatFeature.messageEdit) ??
-                false),
+            (state.capabilities?.supports(chat.ChatFeature.humanZkp) ?? false),
       ),
     );
   }
