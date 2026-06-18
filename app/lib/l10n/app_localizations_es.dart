@@ -1701,6 +1701,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Credencial de Relación Verificable';
 
   @override
+  String get vrcAbbreviation => 'VRC';
+
+  @override
   String get vrcDetailsTitle => 'Credencial de Relación';
 
   @override

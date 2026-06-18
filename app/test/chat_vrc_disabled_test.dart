@@ -66,15 +66,11 @@ void main() {
     });
 
     testWidgets('VRC option in attachment sheet is disabled', (tester) async {
-      final l10n = await getL10n();
-
       await _navigateToGroupChat(tester);
       await _openAttachmentSheet(tester);
 
-      final enabled = _isVrcOptionEnabled(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
+      final l10n = await getL10n();
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
       expect(enabled, isFalse);
     });
   });
@@ -96,15 +92,11 @@ void main() {
     });
 
     testWidgets('VRC option in attachment sheet is disabled', (tester) async {
-      final l10n = await getL10n();
-
       await _navigateToOobChat(tester);
       await _openAttachmentSheet(tester);
 
-      final enabled = _isVrcOptionEnabled(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
+      final l10n = await getL10n();
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
       expect(enabled, isFalse);
     });
   });
