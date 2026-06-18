@@ -1712,6 +1712,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Überprüfbarer Beziehungsnachweis';
 
   @override
+  String get vrcAbbreviation => 'VRC';
+
+  @override
   String get vrcDetailsTitle => 'Beziehungsnachweis';
 
   @override

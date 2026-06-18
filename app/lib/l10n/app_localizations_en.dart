@@ -1672,6 +1672,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Verifiable Relationship Credential';
 
   @override
+  String get vrcAbbreviation => 'VRC';
+
+  @override
   String get vrcDetailsTitle => 'Relationship Credential';
 
   @override

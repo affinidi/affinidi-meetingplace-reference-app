@@ -64,7 +64,7 @@ void main() {
 
       final l10n = await getL10n();
       expect(find.text(l10n.genRCard), findsOneWidget);
-      expect(find.byIcon(Icons.attachment), findsWidgets);
+      expect(find.byIcon(Icons.credit_card), findsOneWidget);
     });
 
     testWidgets('R-Card option is enabled (onTap is non-null) '

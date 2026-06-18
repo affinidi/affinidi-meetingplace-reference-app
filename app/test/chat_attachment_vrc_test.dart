@@ -29,7 +29,7 @@ void main() {
       await navigateToChat(tester);
       await _openMediaSheet(tester);
 
-      expect(find.text(l10n.verifiableRelationshipCredential), findsOneWidget);
+      expect(find.text(l10n.vrcAbbreviation), findsOneWidget);
     });
 
     testWidgets('VRC option is enabled in a fresh chat', (tester) async {
@@ -38,10 +38,7 @@ void main() {
       await navigateToChat(tester);
       await _openMediaSheet(tester);
 
-      final enabled = _isVrcOptionEnabled(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
       expect(enabled, isTrue);
     });
 
@@ -62,10 +59,7 @@ void main() {
 
       await _openMediaSheet(tester);
 
-      final enabled = _isVrcOptionEnabled(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
       expect(enabled, isFalse);
     });
 
@@ -82,10 +76,7 @@ void main() {
 
       await _openMediaSheet(tester);
 
-      final enabled = _isVrcOptionEnabled(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
       expect(enabled, isTrue);
     });
   });
