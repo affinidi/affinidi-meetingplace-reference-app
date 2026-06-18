@@ -1932,6 +1932,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get zkpNoticeRequestInitiated =>
+      'Has iniciado una solicitud de Human ZKP.';
+
+  @override
   String get zkpProofAlreadyShared => 'Prueba ZKP ya compartida';
 
   @override

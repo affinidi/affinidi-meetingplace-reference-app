@@ -1786,6 +1786,10 @@
 			}
 		}
 	},
+	"zkpNoticeRequestInitiated": "You have initiated a Human ZKP request.",
+	"@zkpNoticeRequestInitiated": {
+		"type": "text"
+	},
 	"zkpProofAlreadyShared": "ZKP Proof already shared",
 	"@zkpProofAlreadyShared": {
 		"type": "text"
