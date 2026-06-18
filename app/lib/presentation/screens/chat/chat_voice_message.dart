@@ -204,7 +204,10 @@ class _VoiceRecorder extends HookWidget {
 
         final encoder = await _supportedVoiceEncoder(recorder);
         if (encoder == null) {
-          throw StateError('No supported voice recording encoder');
+          throw AppException(
+            'No supported voice recording encoder',
+            code: AppExceptionType.voiceEncoderNotSupported.name,
+          );
         }
 
         final mediaType = _voiceMessageMediaType(encoder);

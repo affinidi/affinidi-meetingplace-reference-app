@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import '../../../../domain/models/contact_card/contact_card.dart' as domain;
+import '../../../../infrastructure/exceptions/app_exception.dart';
+import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../services/contacts_service/contacts_service.dart';
@@ -41,7 +43,10 @@ class ContactCardProtocolHandler implements ChatProtocolHandler {
     }
 
     if (data.event is! ChatContactDetailsUpdateEvent) {
-      throw StateError('Unexpected event type: ${data.event.runtimeType}');
+      throw AppException(
+        'Unexpected event type: ${data.event.runtimeType}',
+        code: AppExceptionType.unexpectedChatEventType.name,
+      );
     }
     final event = data.event as ChatContactDetailsUpdateEvent;
 

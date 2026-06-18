@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
+import '../../../../infrastructure/exceptions/app_exception.dart';
+import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import 'interfaces/chat_protocol_handler.dart';
 
@@ -24,7 +26,10 @@ class ChatMessageProtocolHandler implements ChatProtocolHandler {
   @override
   Future<void> handle(StreamData data, String channelDid) async {
     if (data.event is! ChatMessageEvent) {
-      throw StateError('Unexpected event type: ${data.event.runtimeType}');
+      throw AppException(
+        'Unexpected event type: ${data.event.runtimeType}',
+        code: AppExceptionType.unexpectedChatEventType.name,
+      );
     }
 
     _logger.info(

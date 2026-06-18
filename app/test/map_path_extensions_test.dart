@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/exceptions/app_exception.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/map_path_extensions.dart';
 
 void main() {
@@ -105,12 +106,12 @@ void main() {
       expect(existing['x'], 'existing');
     });
 
-    test('throws StateError when an intermediate node is not a map', () {
+    test('throws AppException when an intermediate node is not a map', () {
       final map = <String, dynamic>{'a': 'not-a-map'};
       expect(
         () => map.setPathValue(['a', 'b'], 'value'),
         throwsA(
-          isA<StateError>().having(
+          isA<AppException>().having(
             (e) => e.message,
             'message',
             contains("expected a map at key 'a'"),
@@ -119,11 +120,11 @@ void main() {
       );
     });
 
-    test('throws StateError when an intermediate node is a List', () {
+    test('throws AppException when an intermediate node is a List', () {
       final map = <String, dynamic>{'a': <dynamic>[]};
       expect(
         () => map.setPathValue(['a', 'b'], 'value'),
-        throwsA(isA<StateError>()),
+        throwsA(isA<AppException>()),
       );
     });
 
@@ -136,17 +137,20 @@ void main() {
       expect(map['a'], 'flat');
     });
 
-    test('throws StateError when a later write passes through a leaf written by'
-        ' an earlier write', () {
-      // Simulates a future field conflict: ['n'] is set as a leaf, then
-      // ['n', 'given'] tries to traverse it as a map.
-      final map = <String, dynamic>{};
-      map.setPathValue(['n'], 'flat-value');
-      expect(
-        () => map.setPathValue(['n', 'given'], 'first'),
-        throwsA(isA<StateError>()),
-      );
-    });
+    test(
+      'throws AppException when a later write passes through a leaf written by'
+      ' an earlier write',
+      () {
+        // Simulates a future field conflict: ['n'] is set as a leaf, then
+        // ['n', 'given'] tries to traverse it as a map.
+        final map = <String, dynamic>{};
+        map.setPathValue(['n'], 'flat-value');
+        expect(
+          () => map.setPathValue(['n', 'given'], 'first'),
+          throwsA(isA<AppException>()),
+        );
+      },
+    );
   });
 
   group('round-trip: setPathValue then getPathValue', () {
