@@ -897,7 +897,7 @@ void main() {
             memberDid: 'did:member:456',
             senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
             recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
-            reason: 'removed',
+            reason: GroupMemberLeaveReason.kick,
           );
           await tester.pumpAndSettle();
 

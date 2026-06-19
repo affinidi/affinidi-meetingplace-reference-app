@@ -3,8 +3,6 @@ import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import '../../domain/models/contact_card/contact_card.dart';
 import 'contact_card_extensions.dart';
 
-const _groupMemberRemovedReason = 'removed';
-
 extension EventMessageContactCard on EventMessage {
   ContactCard? get contactCard {
     final cardField = data['contactCard'];
@@ -28,6 +26,8 @@ extension EventMessageContactCard on EventMessage {
   }
 
   bool get isGroupMemberRemoved {
-    return data['reason'] == _groupMemberRemovedReason;
+    final reason = data['reason'];
+    return GroupMemberLeaveReason.fromJson(reason is String ? reason : null) ==
+        GroupMemberLeaveReason.kick;
   }
 }
