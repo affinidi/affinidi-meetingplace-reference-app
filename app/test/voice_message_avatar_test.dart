@@ -14,10 +14,20 @@ import 'fakes/fake_contacts.dart';
 import 'fakes/fake_meeting_place_sdk.dart';
 import 'utils/app.dart';
 
-// 1x1 transparent PNG, used to give a contact card a decodable profile picture.
-const _photoBase64 =
-    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk'
-    '+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+// Four distinct, decodable 1x1 PNGs so each test can assert that the avatar
+// shows the photo of the EXPECTED source, not merely some base64 image.
+const _myPhoto =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mP4'
+    'z8AAAAMBAQD3A0FDAAAAAElFTkSuQmCC';
+const _contactPhoto =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mNg'
+    '+M8AAAICAQBF9FLUAAAAAElFTkSuQmCC';
+const _memberPhoto =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mNg'
+    'YPgPAAEDAQA2dBFAAAAAAElFTkSuQmCC';
+const _otherMemberPhoto =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mP4'
+    '/58BAAT/Af9jgNErAAAAAElFTkSuQmCC';
 
 const _voiceAvatarKey = Key('voice_sender_avatar');
 
@@ -38,66 +48,82 @@ ProfileCircleAvatar _voiceAvatar(WidgetTester tester) {
   return tester.widget<ProfileCircleAvatar>(finder);
 }
 
-sdk.Channel _individualChannelWithMyCard(sdk.ContactCard myCard) {
+/// The base64 of the photo actually shown in the voice avatar, failing the test
+/// if the avatar is not rendering a base64 profile picture.
+String _voiceAvatarPhoto(WidgetTester tester) {
+  final image = _voiceAvatar(tester).image;
+  expect(
+    image,
+    isA<CachedBase64Image>(),
+    reason: 'voice avatar should render a base64 profile picture',
+  );
+  return (image! as CachedBase64Image).base64String;
+}
+
+Contact _contactWithPhoto(String base64) =>
+    FakeContacts.individualContact.copyWith(
+      card: FakeContacts.individualContact.card.copyWith(profilePic: base64),
+    );
+
+/// Core SDK whose individual channel reports MY own contact card carrying
+/// [base64], so `myCard` is distinct from the contact card.
+FakeMeetingPlaceSDK _coreSdkWithMyPhoto(String base64) {
   final contact = FakeContacts.individualContact;
-  return sdk.Channel(
-    permanentChannelDid: contact.channelDid!,
-    otherPartyPermanentChannelDid: contact.channelDid!,
-    offerLink: contact.offerLink,
-    contactCard: myCard,
-    otherPartyContactCard: contact.otherPartyCard?.toSdkContactCard(),
-    otherPartyNotificationToken: 'fake-notification-token',
-    seqNo: 0,
-    type: sdk.ChannelType.individual,
-    publishOfferDid: 'did:key:individual-offer',
-    mediatorDid: contact.mediatorDid,
-    status: sdk.ChannelStatus.inaugurated,
-    isConnectionInitiator: true,
-  );
-}
-
-sdk.Group _groupWithMember({
-  required String memberDid,
-  required sdk.ContactCard memberCard,
-}) {
-  return sdk.Group(
-    id: 'group-id',
-    did: 'group-did',
-    offerLink: FakeContacts.groupContact.offerLink,
-    members: [
-      sdk.GroupMember(
-        did: memberDid,
-        dateAdded: DateTime(2025, 1, 1),
-        status: sdk.GroupMemberStatus.approved,
-        membershipType: sdk.GroupMembershipType.member,
-        contactCard: memberCard,
-        publicKey: 'fake-public-key',
+  final myCard = contact.card.copyWith(profilePic: base64).toSdkContactCard();
+  return FakeMeetingPlaceSDK(
+    channels: {
+      contact.channelDid!: sdk.Channel(
+        permanentChannelDid: contact.channelDid!,
+        otherPartyPermanentChannelDid: contact.channelDid!,
+        offerLink: contact.offerLink,
+        contactCard: myCard,
+        otherPartyContactCard: contact.otherPartyCard?.toSdkContactCard(),
+        otherPartyNotificationToken: 'fake-notification-token',
+        seqNo: 0,
+        type: sdk.ChannelType.individual,
+        publishOfferDid: 'did:key:individual-offer',
+        mediatorDid: contact.mediatorDid,
+        status: sdk.ChannelStatus.inaugurated,
+        isConnectionInitiator: true,
       ),
-    ],
-    created: DateTime(2025, 1, 1),
-    publicKey: 'fake-public-key',
+    },
   );
 }
 
-sdk.ContactCard _sdkCardWithPhoto(String did) => sdk.ContactCard(
+sdk.GroupMember _member(String did, String photoBase64) => sdk.GroupMember(
   did: did,
-  type: ContactCardType.individual.value,
-  contactInfo: {
-    'n': {'given': 'Member', 'surname': 'One', 'displayName': 'Member One'},
-    'photo': _photoBase64,
-  },
+  dateAdded: DateTime(2025, 1, 1),
+  status: sdk.GroupMemberStatus.approved,
+  membershipType: sdk.GroupMembershipType.member,
+  contactCard: sdk.ContactCard(
+    did: did,
+    type: ContactCardType.individual.value,
+    contactInfo: {
+      'n': {'given': 'Member', 'surname': did, 'displayName': did},
+      'photo': photoBase64,
+    },
+  ),
+  publicKey: 'public-key-$did',
+);
+
+sdk.Group _groupWith(List<sdk.GroupMember> members) => sdk.Group(
+  id: 'group-id',
+  did: 'group-did',
+  offerLink: FakeContacts.groupContact.offerLink,
+  members: members,
+  created: DateTime(2025, 1, 1),
+  publicKey: 'fake-public-key',
 );
 
 void main() {
   group('Voice message sender avatar', () {
-    testWidgets('received 1:1 voice shows the sender contact photo', (
+    testWidgets('received 1:1 voice shows the contact photo, not my own', (
       tester,
     ) async {
-      final contact = FakeContacts.individualContact.copyWith(
-        card: FakeContacts.individualContact.card.copyWith(
-          profilePic: _photoBase64,
-        ),
-      );
+      final contact = _contactWithPhoto(_contactPhoto);
+      // myCard carries a different photo to prove the received avatar comes
+      // from the contact card, not from my own card.
+      final coreSdk = _coreSdkWithMyPhoto(_myPhoto);
       final chatSdk = FakeChatSdk();
 
       await navigateToChat(
@@ -105,6 +131,7 @@ void main() {
         contactId: contact.id,
         chatSdk: chatSdk,
         contacts: [contact],
+        meetingPlaceCoreSDK: coreSdk,
       );
 
       chatSdk.simulateIncomingTextMessage(
@@ -114,7 +141,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(_voiceAvatar(tester).image, isA<CachedBase64Image>());
+      expect(_voiceAvatarPhoto(tester), _contactPhoto);
     });
 
     testWidgets('received 1:1 voice falls back to the default image '
@@ -138,14 +165,13 @@ void main() {
       expect(_voiceAvatar(tester).image, equals(defaultProfileImage));
     });
 
-    testWidgets('sent voice shows my own profile photo', (tester) async {
-      final contact = FakeContacts.individualContact;
-      final myCard = contact.card
-          .copyWith(profilePic: _photoBase64)
-          .toSdkContactCard();
-      final coreSdk = FakeMeetingPlaceSDK(
-        channels: {contact.channelDid!: _individualChannelWithMyCard(myCard)},
-      );
+    testWidgets('sent voice shows my own photo, not the contact photo', (
+      tester,
+    ) async {
+      // The contact card carries a different photo to prove the sent avatar
+      // comes from my own card.
+      final contact = _contactWithPhoto(_contactPhoto);
+      final coreSdk = _coreSdkWithMyPhoto(_myPhoto);
       final chatSdk = FakeChatSdk();
 
       await navigateToChat(
@@ -164,20 +190,22 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(_voiceAvatar(tester).image, isA<CachedBase64Image>());
+      expect(_voiceAvatarPhoto(tester), _myPhoto);
     });
 
-    testWidgets('received group voice shows the matched member photo', (
-      tester,
-    ) async {
-      const memberDid = 'did:key:photo-member';
+    testWidgets('received group voice shows the matched member photo, '
+        'not another member', (tester) async {
+      const senderDid = 'did:key:photo-member';
+      const otherMemberDid = 'did:key:other-member';
       final groupContact = FakeContacts.groupContact;
+      // The matched member is listed second so the test fails if the code
+      // picks the first member instead of matching by sender DID.
       final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
         ..setMockGroup(
-          _groupWithMember(
-            memberDid: memberDid,
-            memberCard: _sdkCardWithPhoto(memberDid),
-          ),
+          _groupWith([
+            _member(otherMemberDid, _otherMemberPhoto),
+            _member(senderDid, _memberPhoto),
+          ]),
         );
       final chatSdk = FakeChatSdk();
 
@@ -193,23 +221,19 @@ void main() {
         text: '',
         recipientDid: groupContact.channelDid!,
         attachments: [_voiceAttachment()],
-        senderDid: memberDid,
+        senderDid: senderDid,
       );
       await tester.pumpAndSettle();
 
-      expect(_voiceAvatar(tester).image, isA<CachedBase64Image>());
+      expect(_voiceAvatarPhoto(tester), _memberPhoto);
     });
 
     testWidgets('received group voice falls back to the icon '
         'for an unknown sender', (tester) async {
-      const memberDid = 'did:key:photo-member';
       final groupContact = FakeContacts.groupContact;
       final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
         ..setMockGroup(
-          _groupWithMember(
-            memberDid: memberDid,
-            memberCard: _sdkCardWithPhoto(memberDid),
-          ),
+          _groupWith([_member('did:key:photo-member', _memberPhoto)]),
         );
       final chatSdk = FakeChatSdk();
 
