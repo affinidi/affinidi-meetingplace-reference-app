@@ -329,6 +329,7 @@ Future<void> navigateToChat(
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
   List<RCard> rCards = const [],
+  MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
 }) async {
   await navigateToLocation(
     tester,
@@ -336,6 +337,7 @@ Future<void> navigateToChat(
     identities: identities ?? [FakeIdentities.primaryIdentity],
     contacts: contacts ?? [FakeContacts.individualContact],
     meetingPlaceChatSDK: chatSdk ?? FakeChatSdk(),
+    meetingPlaceCoreSDK: meetingPlaceCoreSDK,
     secureStorage: secureStorage,
     connectivity:
         connectivity ??

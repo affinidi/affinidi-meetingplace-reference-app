@@ -535,6 +535,7 @@ class _VoiceMessageBubble extends StatelessWidget {
       child: Row(
         children: [
           ProfileCircleAvatar(
+            key: const Key('voice_sender_avatar'),
             radius: 28,
             image: _senderAvatar,
             child: Icon(
