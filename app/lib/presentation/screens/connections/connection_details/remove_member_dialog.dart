@@ -42,9 +42,9 @@ class _RemoveMemberDialog extends ConsumerWidget {
           isDefaultAction: true,
         ),
         ActionButton(
-          onPressed: () {
+          onPressed: () async {
             Navigator.of(context).pop(true);
-            ref
+            await ref
                 .read(
                   connectionDetailsScreenControllerProvider(contactId).notifier,
                 )
