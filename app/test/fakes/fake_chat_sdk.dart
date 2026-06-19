@@ -55,6 +55,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   bool shouldThrowOnStartSession = false;
   String? lastRemovedMemberDid;
   int removeMemberCallCount = 0;
+  Completer<void>? removeMemberBlocker;
 
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
@@ -523,6 +524,9 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   Future<void> removeMember(String memberDid) async {
     lastRemovedMemberDid = memberDid;
     removeMemberCallCount++;
+    if (removeMemberBlocker != null) {
+      await removeMemberBlocker!.future;
+    }
   }
 
   @override

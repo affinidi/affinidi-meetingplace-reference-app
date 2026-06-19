@@ -16,6 +16,13 @@ class _RemoveMemberDialog extends ConsumerWidget {
         ) ??
         false;
     if (!confirmed || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.removeMemberSuccess),
+        duration: const Duration(seconds: 2),
+        backgroundColor: context.customColors.success,
+      ),
+    );
   }
 
   final String contactId;
@@ -36,13 +43,12 @@ class _RemoveMemberDialog extends ConsumerWidget {
         ),
         ActionButton(
           onPressed: () async {
+            Navigator.of(context).pop(true);
             await ref
                 .read(
                   connectionDetailsScreenControllerProvider(contactId).notifier,
                 )
                 .removeMember(member.did);
-            if (!context.mounted) return;
-            Navigator.of(context).pop(true);
           },
           isDestructiveAction: true,
           label: context.l10n.removeMemberConfirm,

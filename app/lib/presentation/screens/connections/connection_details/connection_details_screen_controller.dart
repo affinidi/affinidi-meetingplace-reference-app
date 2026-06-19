@@ -254,16 +254,22 @@ class ConnectionDetailsScreenController
   }
 
   Future<void> removeMember(String memberDid) async {
-    final groupId = state.group?.id;
+    final group = state.group;
     final channelDid = state.contact?.channelDid;
-    if (groupId == null || channelDid == null) return;
+    if (group == null || channelDid == null) return;
+
+    state = state.copyWith(
+      group: group.copyWith(
+        members: group.members.where((m) => m.did != memberDid).toList(),
+      ),
+    );
 
     final chatService = ref.read(
       chatSessionServiceProvider(channelDid).notifier,
     );
-    await chatService.removeMember(groupId: groupId, memberDid: memberDid);
+    await chatService.removeMember(groupId: group.id, memberDid: memberDid);
 
-    final updatedGroup = await chatService.refreshGroup(groupId);
+    final updatedGroup = await chatService.refreshGroup(group.id);
     state = state.copyWith(group: updatedGroup);
   }
 }

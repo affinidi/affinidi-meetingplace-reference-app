@@ -1920,6 +1920,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Removing members isn\'t supported yet.';
 
   @override
+  String get removeMemberSuccess => 'Member removed from group.';
+
+  @override
   String get generalVideo => 'Video';
 
   @override
