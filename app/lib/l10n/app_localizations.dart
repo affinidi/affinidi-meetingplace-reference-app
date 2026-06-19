@@ -2098,6 +2098,12 @@ abstract class AppLocalizations {
   /// **'{memberName} has left the group'**
   String leavingGroup(String memberName);
 
+  /// No description provided for @memberRemovedFromGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'{memberName} has been removed'**
+  String memberRemovedFromGroup(String memberName);
+
   /// No description provided for @concierge.
   ///
   /// In en, this message translates to:

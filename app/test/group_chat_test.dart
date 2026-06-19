@@ -876,6 +876,37 @@ void main() {
 
           expect(find.text(l10n.leavingGroup(memberName)), findsOneWidget);
         });
+
+        testWidgets('shows member removed message', (
+          WidgetTester tester,
+        ) async {
+          final contactId = FakeContacts.groupContact.id;
+          final chatSdk = FakeChatSdk();
+          final l10n = await getL10n();
+          final memberName = 'Alice';
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+          );
+
+          chatSdk.simulateMemberLeftGroup(
+            memberName: memberName,
+            memberDid: 'did:member:456',
+            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            reason: 'removed',
+          );
+          await tester.pumpAndSettle();
+
+          expect(
+            find.text(l10n.memberRemovedFromGroup(memberName)),
+            findsOneWidget,
+          );
+          expect(find.text(l10n.leavingGroup(memberName)), findsNothing);
+        });
       });
 
       group('and group is deleted', () {

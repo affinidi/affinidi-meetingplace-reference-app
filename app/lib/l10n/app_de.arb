@@ -313,6 +313,7 @@
 	"groupDeleted": "Diese Gruppe wurde gelöscht",
 	"joiningGroup": "{memberName} ist der Gruppe beigetreten",
 	"leavingGroup": "{memberName} hat die Gruppe verlassen",
+	"memberRemovedFromGroup": "{memberName} wurde entfernt",
 	"meetingPlaceControlPlane": "Steuerungsebene für Treffpunkte",
 	"noExpirySetHelperText": "Es wurde kein Ablaufdatum festgelegt, sodass diese Einladung zur Verbindung nicht abläuft",
 	"offerUnlimitedUsages": "Diese Einladung kann beliebig oft verwendet werden",

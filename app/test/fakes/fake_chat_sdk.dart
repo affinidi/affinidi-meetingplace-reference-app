@@ -315,6 +315,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String memberDid,
     required String senderDid,
     required String recipientDid,
+    String? reason,
   }) {
     final eventMessage = EventMessage(
       chatId: 'fake-chat-id',
@@ -333,6 +334,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
             'n': {'given': memberName},
           },
         },
+        'reason': ?reason,
       },
     );
 
