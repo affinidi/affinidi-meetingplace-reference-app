@@ -434,16 +434,10 @@ class _HostedMediaWidget extends HookConsumerWidget {
       return memberCard?.image(cacheManager: cacheManager);
     }
 
-    // 1:1 received: prefer whichever available card actually carries a photo.
-    final otherPartyCard = ref.watch(provider.select((s) => s.otherPartyCard));
-    final contactCard = ref.watch(provider.select((s) => s.contact?.card));
-    if (otherPartyCard?.hasProfilePic ?? false) {
-      return otherPartyCard!.image(cacheManager: cacheManager);
-    }
-    if (contactCard?.hasProfilePic ?? false) {
-      return contactCard!.image(cacheManager: cacheManager);
-    }
-    return (otherPartyCard ?? contactCard)?.image(cacheManager: cacheManager);
+    // 1:1 received: the chat contact is the message sender (the other party),
+    // so show their card and fall back to the default image, like the header.
+    final contact = ref.watch(provider.select((s) => s.contact));
+    return contact?.image(cacheManager: cacheManager);
   }
 }
 
