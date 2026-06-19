@@ -1435,6 +1435,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String memberRemovedFromGroup(String memberName) {
+    return '$memberName has been removed';
+  }
+
+  @override
   String get concierge => 'Concierge';
 
   @override

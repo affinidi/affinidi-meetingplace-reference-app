@@ -24,4 +24,10 @@ extension EventMessageContactCard on EventMessage {
   String? get memberDid {
     return data['memberDid'] as String?;
   }
+
+  bool get isGroupMemberRemoved {
+    final reason = data['reason'];
+    return GroupMemberLeaveReason.fromJson(reason is String ? reason : null) ==
+        GroupMemberLeaveReason.kick;
+  }
 }
