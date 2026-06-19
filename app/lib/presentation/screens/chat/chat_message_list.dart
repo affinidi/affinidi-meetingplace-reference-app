@@ -185,7 +185,6 @@ class _ChatMessageList extends HookConsumerWidget {
                                   child: _Reactions(
                                     contactId: _contactId,
                                     chatItem: chatItem,
-                                    index: index,
                                   ),
                                 ),
                               )
