@@ -495,5 +495,6 @@
 	"videoLoadingError": "Video kann nicht abgespielt werden",
 	"voiceMessagePermissionDenied": "Zum Aufnehmen von Sprachnachrichten ist Mikrofonzugriff erforderlich.",
 	"voiceMessageRecordingFailed": "Sprachaufnahme kann nicht gestartet werden.",
-	"voiceMessageSendFailed": "Sprachnachricht kann nicht gesendet werden."
+	"voiceMessageSendFailed": "Sprachnachricht kann nicht gesendet werden.",
+	"removeMemberSuccess": "Mitglied aus der Gruppe entfernt."
 }

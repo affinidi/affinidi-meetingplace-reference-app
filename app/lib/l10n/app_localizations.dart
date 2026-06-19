@@ -2926,6 +2926,12 @@ abstract class AppLocalizations {
   /// **'Removing members isn\'t supported yet.'**
   String get removeMemberNotSupported;
 
+  /// No description provided for @removeMemberSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Member removed from group.'**
+  String get removeMemberSuccess;
+
   /// Label for the video attachment plugin
   ///
   /// In en, this message translates to:

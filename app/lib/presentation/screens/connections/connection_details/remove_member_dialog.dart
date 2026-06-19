@@ -16,6 +16,13 @@ class _RemoveMemberDialog extends ConsumerWidget {
         ) ??
         false;
     if (!confirmed || !context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.removeMemberSuccess),
+        duration: const Duration(seconds: 2),
+        backgroundColor: context.customColors.success,
+      ),
+    );
   }
 
   final String contactId;
