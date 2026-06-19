@@ -146,8 +146,11 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
           ),
         ),
         Divider(height: 1, thickness: 1, color: dividerColor),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+        SafeArea(
+          top: false,
+          left: false,
+          right: false,
+          minimum: const EdgeInsets.fromLTRB(24, 12, 24, 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
