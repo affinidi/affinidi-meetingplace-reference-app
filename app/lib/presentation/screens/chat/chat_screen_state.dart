@@ -31,6 +31,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     ScreenEffect? effect,
     @Default({}) Map<String, Uint8List> attachmentsDataCache,
     String? notificationToken,
+    String? myDid,
     @Default(false) bool shouldEnableVrcAttachment,
     @Default(false) bool shouldShowVrcBanner,
     @Default(false) bool shouldStartVrcExchangeFromAttachment,
