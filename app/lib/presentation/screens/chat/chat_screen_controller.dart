@@ -472,6 +472,7 @@ class ChatScreenController extends _$ChatScreenController
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
       notificationToken: channel.otherPartyNotificationToken,
+      myDid: channel.permanentChannelDid,
     );
 
     final lastKeepAliveMessage = contact.lastKeepAliveMessage;
