@@ -467,10 +467,14 @@ class ChatScreenController extends _$ChatScreenController
       );
     }
     final srcCard = channel.otherPartyContactCard;
+    final ownCard = channel.contactCard;
     state = state.copyWith(
       otherPartyCard: srcCard == null
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
+      myCard: ownCard == null
+          ? null
+          : ContactCardUtils.fromSdkContactCard(ownCard),
       notificationToken: channel.otherPartyNotificationToken,
       myDid: channel.permanentChannelDid,
     );
