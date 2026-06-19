@@ -69,7 +69,7 @@ class ChatItem extends StatelessWidget {
 
     if (_chatItem is chat.EventMessage &&
         _chatItem.eventType == chat.EventMessageType.groupMemberLeftGroup) {
-      return LeavingGroupChatItem(chatItem: _chatItem);
+      return LeavingGroupChatItem(chatItem: _chatItem, contactId: _contactId);
     }
 
     if (_chatItem is chat.EventMessage &&

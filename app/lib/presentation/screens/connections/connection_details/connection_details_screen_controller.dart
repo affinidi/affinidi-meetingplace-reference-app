@@ -258,18 +258,23 @@ class ConnectionDetailsScreenController
     final channelDid = state.contact?.channelDid;
     if (group == null || channelDid == null) return;
 
-    state = state.copyWith(
-      group: group.copyWith(
-        members: group.members.where((m) => m.did != memberDid).toList(),
-      ),
-    );
+    if (ref.mounted) {
+      state = state.copyWith(
+        group: group.copyWith(
+          members: group.members.where((m) => m.did != memberDid).toList(),
+        ),
+      );
+    }
 
     final chatService = ref.read(
       chatSessionServiceProvider(channelDid).notifier,
     );
     await chatService.removeMember(groupId: group.id, memberDid: memberDid);
+    if (!ref.mounted) return;
 
     final updatedGroup = await chatService.refreshGroup(group.id);
+    if (!ref.mounted || updatedGroup == null) return;
+
     state = state.copyWith(group: updatedGroup);
   }
 }

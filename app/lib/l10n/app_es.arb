@@ -314,6 +314,7 @@
 	"joiningGroup": "{memberName} se ha unido al grupo",
 	"leavingGroup": "{memberName} ha dejado el grupo",
 	"memberRemovedFromGroup": "{memberName} ha sido eliminado",
+	"youRemovedFromGroup": "Has sido eliminado",
 	"meetingPlaceControlPlane": "Plano de control del lugar de reunión",
 	"noExpirySetHelperText": "No se ha establecido una fecha de caducidad, por lo que esta invitación a conectarse no caduca",
 	"offerUnlimitedUsages": "Esta invitación se puede utilizar cualquier número de veces",

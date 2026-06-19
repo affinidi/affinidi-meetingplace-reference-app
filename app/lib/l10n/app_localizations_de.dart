@@ -1479,6 +1479,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get youRemovedFromGroup => 'Du wurdest entfernt';
+
+  @override
   String get concierge => 'Hausmeister';
 
   @override

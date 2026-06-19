@@ -2104,6 +2104,12 @@ abstract class AppLocalizations {
   /// **'{memberName} has been removed'**
   String memberRemovedFromGroup(String memberName);
 
+  /// No description provided for @youRemovedFromGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'You have been removed'**
+  String get youRemovedFromGroup;
+
   /// No description provided for @concierge.
   ///
   /// In en, this message translates to:

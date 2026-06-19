@@ -1406,6 +1406,10 @@
 			}
 		}
 	},
+	"youRemovedFromGroup": "You have been removed",
+	"@youRemovedFromGroup": {
+		"type": "text"
+	},
 	"concierge": "Concierge",
 	"@concierge": {
 		"type": "text"

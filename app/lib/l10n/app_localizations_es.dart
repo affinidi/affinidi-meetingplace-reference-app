@@ -1465,6 +1465,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get youRemovedFromGroup => 'Has sido eliminado';
+
+  @override
   String get concierge => 'Conserje';
 
   @override
