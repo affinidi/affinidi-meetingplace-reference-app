@@ -1397,6 +1397,15 @@
 			}
 		}
 	},
+	"memberRemovedFromGroup": "{memberName} has been removed",
+	"@memberRemovedFromGroup": {
+		"type": "text",
+		"placeholders": {
+			"memberName": {
+				"type": "String"
+			}
+		}
+	},
 	"concierge": "Concierge",
 	"@concierge": {
 		"type": "text"
