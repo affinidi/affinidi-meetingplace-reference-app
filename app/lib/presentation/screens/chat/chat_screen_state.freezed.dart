@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatScreenState {
 
- Contact? get contact; Group? get group; String? get offerName; ContactCard? get otherPartyCard; List<chat.ChatItem> get messages; List<String> get membersTyping; int get selectedReactionIndex; bool get isActive; bool get isInitialized; ContactPresenceStatus get contactPresenceStatus; ScreenEffect? get effect; Map<String, Uint8List> get attachmentsDataCache; String? get notificationToken; String? get myDid; bool get shouldEnableVrcAttachment; bool get shouldShowVrcBanner; bool get shouldStartVrcExchangeFromAttachment; chat.TransportCapabilities? get capabilities;
+ Contact? get contact; Group? get group; String? get offerName; ContactCard? get otherPartyCard; ContactCard? get myCard; List<chat.ChatItem> get messages; List<String> get membersTyping; int get selectedReactionIndex; bool get isActive; bool get isInitialized; ContactPresenceStatus get contactPresenceStatus; ScreenEffect? get effect; Map<String, Uint8List> get attachmentsDataCache; String? get notificationToken; String? get myDid; bool get shouldEnableVrcAttachment; bool get shouldShowVrcBanner; bool get shouldStartVrcExchangeFromAttachment; chat.TransportCapabilities? get capabilities;
 /// Create a copy of ChatScreenState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ChatScreenStateCopyWith<ChatScreenState> get copyWith => _$ChatScreenStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.offerName, offerName) || other.offerName == offerName)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other.messages, messages)&&const DeepCollectionEquality().equals(other.membersTyping, membersTyping)&&(identical(other.selectedReactionIndex, selectedReactionIndex) || other.selectedReactionIndex == selectedReactionIndex)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&(identical(other.effect, effect) || other.effect == effect)&&const DeepCollectionEquality().equals(other.attachmentsDataCache, attachmentsDataCache)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken)&&(identical(other.myDid, myDid) || other.myDid == myDid)&&(identical(other.shouldEnableVrcAttachment, shouldEnableVrcAttachment) || other.shouldEnableVrcAttachment == shouldEnableVrcAttachment)&&(identical(other.shouldShowVrcBanner, shouldShowVrcBanner) || other.shouldShowVrcBanner == shouldShowVrcBanner)&&(identical(other.shouldStartVrcExchangeFromAttachment, shouldStartVrcExchangeFromAttachment) || other.shouldStartVrcExchangeFromAttachment == shouldStartVrcExchangeFromAttachment)&&(identical(other.capabilities, capabilities) || other.capabilities == capabilities));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.offerName, offerName) || other.offerName == offerName)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&(identical(other.myCard, myCard) || other.myCard == myCard)&&const DeepCollectionEquality().equals(other.messages, messages)&&const DeepCollectionEquality().equals(other.membersTyping, membersTyping)&&(identical(other.selectedReactionIndex, selectedReactionIndex) || other.selectedReactionIndex == selectedReactionIndex)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&(identical(other.effect, effect) || other.effect == effect)&&const DeepCollectionEquality().equals(other.attachmentsDataCache, attachmentsDataCache)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken)&&(identical(other.myDid, myDid) || other.myDid == myDid)&&(identical(other.shouldEnableVrcAttachment, shouldEnableVrcAttachment) || other.shouldEnableVrcAttachment == shouldEnableVrcAttachment)&&(identical(other.shouldShowVrcBanner, shouldShowVrcBanner) || other.shouldShowVrcBanner == shouldShowVrcBanner)&&(identical(other.shouldStartVrcExchangeFromAttachment, shouldStartVrcExchangeFromAttachment) || other.shouldStartVrcExchangeFromAttachment == shouldStartVrcExchangeFromAttachment)&&(identical(other.capabilities, capabilities) || other.capabilities == capabilities));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contact,group,offerName,otherPartyCard,const DeepCollectionEquality().hash(messages),const DeepCollectionEquality().hash(membersTyping),selectedReactionIndex,isActive,isInitialized,contactPresenceStatus,effect,const DeepCollectionEquality().hash(attachmentsDataCache),notificationToken,myDid,shouldEnableVrcAttachment,shouldShowVrcBanner,shouldStartVrcExchangeFromAttachment,capabilities);
+int get hashCode => Object.hashAll([runtimeType,contact,group,offerName,otherPartyCard,myCard,const DeepCollectionEquality().hash(messages),const DeepCollectionEquality().hash(membersTyping),selectedReactionIndex,isActive,isInitialized,contactPresenceStatus,effect,const DeepCollectionEquality().hash(attachmentsDataCache),notificationToken,myDid,shouldEnableVrcAttachment,shouldShowVrcBanner,shouldStartVrcExchangeFromAttachment,capabilities]);
 
 @override
 String toString() {
-  return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken, myDid: $myDid, shouldEnableVrcAttachment: $shouldEnableVrcAttachment, shouldShowVrcBanner: $shouldShowVrcBanner, shouldStartVrcExchangeFromAttachment: $shouldStartVrcExchangeFromAttachment, capabilities: $capabilities)';
+  return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, myCard: $myCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken, myDid: $myDid, shouldEnableVrcAttachment: $shouldEnableVrcAttachment, shouldShowVrcBanner: $shouldShowVrcBanner, shouldStartVrcExchangeFromAttachment: $shouldStartVrcExchangeFromAttachment, capabilities: $capabilities)';
 }
 
 
@@ -45,11 +45,11 @@ abstract mixin class $ChatScreenStateCopyWith<$Res>  {
   factory $ChatScreenStateCopyWith(ChatScreenState value, $Res Function(ChatScreenState) _then) = _$ChatScreenStateCopyWithImpl;
 @useResult
 $Res call({
- Contact? contact, Group? group, String? offerName, ContactCard? otherPartyCard, List<chat.ChatItem> messages, List<String> membersTyping, int selectedReactionIndex, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, ScreenEffect? effect, Map<String, Uint8List> attachmentsDataCache, String? notificationToken, String? myDid, bool shouldEnableVrcAttachment, bool shouldShowVrcBanner, bool shouldStartVrcExchangeFromAttachment, chat.TransportCapabilities? capabilities
+ Contact? contact, Group? group, String? offerName, ContactCard? otherPartyCard, ContactCard? myCard, List<chat.ChatItem> messages, List<String> membersTyping, int selectedReactionIndex, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, ScreenEffect? effect, Map<String, Uint8List> attachmentsDataCache, String? notificationToken, String? myDid, bool shouldEnableVrcAttachment, bool shouldShowVrcBanner, bool shouldStartVrcExchangeFromAttachment, chat.TransportCapabilities? capabilities
 });
 
 
-$ContactCardCopyWith<$Res>? get otherPartyCard;
+$ContactCardCopyWith<$Res>? get otherPartyCard;$ContactCardCopyWith<$Res>? get myCard;
 
 }
 /// @nodoc
@@ -62,12 +62,13 @@ class _$ChatScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatScreenState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? contact = freezed,Object? group = freezed,Object? offerName = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? membersTyping = null,Object? selectedReactionIndex = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? effect = freezed,Object? attachmentsDataCache = null,Object? notificationToken = freezed,Object? myDid = freezed,Object? shouldEnableVrcAttachment = null,Object? shouldShowVrcBanner = null,Object? shouldStartVrcExchangeFromAttachment = null,Object? capabilities = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? contact = freezed,Object? group = freezed,Object? offerName = freezed,Object? otherPartyCard = freezed,Object? myCard = freezed,Object? messages = null,Object? membersTyping = null,Object? selectedReactionIndex = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? effect = freezed,Object? attachmentsDataCache = null,Object? notificationToken = freezed,Object? myDid = freezed,Object? shouldEnableVrcAttachment = null,Object? shouldShowVrcBanner = null,Object? shouldStartVrcExchangeFromAttachment = null,Object? capabilities = freezed,}) {
   return _then(_self.copyWith(
 contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
 as Contact?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as Group?,offerName: freezed == offerName ? _self.offerName : offerName // ignore: cast_nullable_to_non_nullable
 as String?,otherPartyCard: freezed == otherPartyCard ? _self.otherPartyCard : otherPartyCard // ignore: cast_nullable_to_non_nullable
+as ContactCard?,myCard: freezed == myCard ? _self.myCard : myCard // ignore: cast_nullable_to_non_nullable
 as ContactCard?,messages: null == messages ? _self.messages : messages // ignore: cast_nullable_to_non_nullable
 as List<chat.ChatItem>,membersTyping: null == membersTyping ? _self.membersTyping : membersTyping // ignore: cast_nullable_to_non_nullable
 as List<String>,selectedReactionIndex: null == selectedReactionIndex ? _self.selectedReactionIndex : selectedReactionIndex // ignore: cast_nullable_to_non_nullable
@@ -96,6 +97,18 @@ $ContactCardCopyWith<$Res>? get otherPartyCard {
 
   return $ContactCardCopyWith<$Res>(_self.otherPartyCard!, (value) {
     return _then(_self.copyWith(otherPartyCard: value));
+  });
+}/// Create a copy of ChatScreenState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ContactCardCopyWith<$Res>? get myCard {
+    if (_self.myCard == null) {
+    return null;
+  }
+
+  return $ContactCardCopyWith<$Res>(_self.myCard!, (value) {
+    return _then(_self.copyWith(myCard: value));
   });
 }
 }
@@ -179,10 +192,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken,  String? myDid,  bool shouldEnableVrcAttachment,  bool shouldShowVrcBanner,  bool shouldStartVrcExchangeFromAttachment,  chat.TransportCapabilities? capabilities)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  ContactCard? myCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken,  String? myDid,  bool shouldEnableVrcAttachment,  bool shouldShowVrcBanner,  bool shouldStartVrcExchangeFromAttachment,  chat.TransportCapabilities? capabilities)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatScreenState() when $default != null:
-return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect,_that.attachmentsDataCache,_that.notificationToken,_that.myDid,_that.shouldEnableVrcAttachment,_that.shouldShowVrcBanner,_that.shouldStartVrcExchangeFromAttachment,_that.capabilities);case _:
+return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.myCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect,_that.attachmentsDataCache,_that.notificationToken,_that.myDid,_that.shouldEnableVrcAttachment,_that.shouldShowVrcBanner,_that.shouldStartVrcExchangeFromAttachment,_that.capabilities);case _:
   return orElse();
 
 }
@@ -200,10 +213,10 @@ return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken,  String? myDid,  bool shouldEnableVrcAttachment,  bool shouldShowVrcBanner,  bool shouldStartVrcExchangeFromAttachment,  chat.TransportCapabilities? capabilities)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  ContactCard? myCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken,  String? myDid,  bool shouldEnableVrcAttachment,  bool shouldShowVrcBanner,  bool shouldStartVrcExchangeFromAttachment,  chat.TransportCapabilities? capabilities)  $default,) {final _that = this;
 switch (_that) {
 case _ChatScreenState():
-return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect,_that.attachmentsDataCache,_that.notificationToken,_that.myDid,_that.shouldEnableVrcAttachment,_that.shouldShowVrcBanner,_that.shouldStartVrcExchangeFromAttachment,_that.capabilities);case _:
+return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.myCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect,_that.attachmentsDataCache,_that.notificationToken,_that.myDid,_that.shouldEnableVrcAttachment,_that.shouldShowVrcBanner,_that.shouldStartVrcExchangeFromAttachment,_that.capabilities);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -220,10 +233,10 @@ return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken,  String? myDid,  bool shouldEnableVrcAttachment,  bool shouldShowVrcBanner,  bool shouldStartVrcExchangeFromAttachment,  chat.TransportCapabilities? capabilities)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Contact? contact,  Group? group,  String? offerName,  ContactCard? otherPartyCard,  ContactCard? myCard,  List<chat.ChatItem> messages,  List<String> membersTyping,  int selectedReactionIndex,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  ScreenEffect? effect,  Map<String, Uint8List> attachmentsDataCache,  String? notificationToken,  String? myDid,  bool shouldEnableVrcAttachment,  bool shouldShowVrcBanner,  bool shouldStartVrcExchangeFromAttachment,  chat.TransportCapabilities? capabilities)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatScreenState() when $default != null:
-return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect,_that.attachmentsDataCache,_that.notificationToken,_that.myDid,_that.shouldEnableVrcAttachment,_that.shouldShowVrcBanner,_that.shouldStartVrcExchangeFromAttachment,_that.capabilities);case _:
+return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_that.myCard,_that.messages,_that.membersTyping,_that.selectedReactionIndex,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect,_that.attachmentsDataCache,_that.notificationToken,_that.myDid,_that.shouldEnableVrcAttachment,_that.shouldShowVrcBanner,_that.shouldStartVrcExchangeFromAttachment,_that.capabilities);case _:
   return null;
 
 }
@@ -235,13 +248,14 @@ return $default(_that.contact,_that.group,_that.offerName,_that.otherPartyCard,_
 
 
 class _ChatScreenState extends ChatScreenState {
-   _ChatScreenState({this.contact, this.group, this.offerName, this.otherPartyCard, final  List<chat.ChatItem> messages = const [], final  List<String> membersTyping = const [], this.selectedReactionIndex = -1, this.isActive = false, this.isInitialized = false, this.contactPresenceStatus = ContactPresenceStatus.unknown, this.effect, final  Map<String, Uint8List> attachmentsDataCache = const {}, this.notificationToken, this.myDid, this.shouldEnableVrcAttachment = false, this.shouldShowVrcBanner = false, this.shouldStartVrcExchangeFromAttachment = false, this.capabilities}): _messages = messages,_membersTyping = membersTyping,_attachmentsDataCache = attachmentsDataCache,super._();
+   _ChatScreenState({this.contact, this.group, this.offerName, this.otherPartyCard, this.myCard, final  List<chat.ChatItem> messages = const [], final  List<String> membersTyping = const [], this.selectedReactionIndex = -1, this.isActive = false, this.isInitialized = false, this.contactPresenceStatus = ContactPresenceStatus.unknown, this.effect, final  Map<String, Uint8List> attachmentsDataCache = const {}, this.notificationToken, this.myDid, this.shouldEnableVrcAttachment = false, this.shouldShowVrcBanner = false, this.shouldStartVrcExchangeFromAttachment = false, this.capabilities}): _messages = messages,_membersTyping = membersTyping,_attachmentsDataCache = attachmentsDataCache,super._();
   
 
 @override final  Contact? contact;
 @override final  Group? group;
 @override final  String? offerName;
 @override final  ContactCard? otherPartyCard;
+@override final  ContactCard? myCard;
  final  List<chat.ChatItem> _messages;
 @override@JsonKey() List<chat.ChatItem> get messages {
   if (_messages is EqualUnmodifiableListView) return _messages;
@@ -285,16 +299,16 @@ _$ChatScreenStateCopyWith<_ChatScreenState> get copyWith => __$ChatScreenStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.offerName, offerName) || other.offerName == offerName)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other._messages, _messages)&&const DeepCollectionEquality().equals(other._membersTyping, _membersTyping)&&(identical(other.selectedReactionIndex, selectedReactionIndex) || other.selectedReactionIndex == selectedReactionIndex)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&(identical(other.effect, effect) || other.effect == effect)&&const DeepCollectionEquality().equals(other._attachmentsDataCache, _attachmentsDataCache)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken)&&(identical(other.myDid, myDid) || other.myDid == myDid)&&(identical(other.shouldEnableVrcAttachment, shouldEnableVrcAttachment) || other.shouldEnableVrcAttachment == shouldEnableVrcAttachment)&&(identical(other.shouldShowVrcBanner, shouldShowVrcBanner) || other.shouldShowVrcBanner == shouldShowVrcBanner)&&(identical(other.shouldStartVrcExchangeFromAttachment, shouldStartVrcExchangeFromAttachment) || other.shouldStartVrcExchangeFromAttachment == shouldStartVrcExchangeFromAttachment)&&(identical(other.capabilities, capabilities) || other.capabilities == capabilities));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.offerName, offerName) || other.offerName == offerName)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&(identical(other.myCard, myCard) || other.myCard == myCard)&&const DeepCollectionEquality().equals(other._messages, _messages)&&const DeepCollectionEquality().equals(other._membersTyping, _membersTyping)&&(identical(other.selectedReactionIndex, selectedReactionIndex) || other.selectedReactionIndex == selectedReactionIndex)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&(identical(other.effect, effect) || other.effect == effect)&&const DeepCollectionEquality().equals(other._attachmentsDataCache, _attachmentsDataCache)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken)&&(identical(other.myDid, myDid) || other.myDid == myDid)&&(identical(other.shouldEnableVrcAttachment, shouldEnableVrcAttachment) || other.shouldEnableVrcAttachment == shouldEnableVrcAttachment)&&(identical(other.shouldShowVrcBanner, shouldShowVrcBanner) || other.shouldShowVrcBanner == shouldShowVrcBanner)&&(identical(other.shouldStartVrcExchangeFromAttachment, shouldStartVrcExchangeFromAttachment) || other.shouldStartVrcExchangeFromAttachment == shouldStartVrcExchangeFromAttachment)&&(identical(other.capabilities, capabilities) || other.capabilities == capabilities));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contact,group,offerName,otherPartyCard,const DeepCollectionEquality().hash(_messages),const DeepCollectionEquality().hash(_membersTyping),selectedReactionIndex,isActive,isInitialized,contactPresenceStatus,effect,const DeepCollectionEquality().hash(_attachmentsDataCache),notificationToken,myDid,shouldEnableVrcAttachment,shouldShowVrcBanner,shouldStartVrcExchangeFromAttachment,capabilities);
+int get hashCode => Object.hashAll([runtimeType,contact,group,offerName,otherPartyCard,myCard,const DeepCollectionEquality().hash(_messages),const DeepCollectionEquality().hash(_membersTyping),selectedReactionIndex,isActive,isInitialized,contactPresenceStatus,effect,const DeepCollectionEquality().hash(_attachmentsDataCache),notificationToken,myDid,shouldEnableVrcAttachment,shouldShowVrcBanner,shouldStartVrcExchangeFromAttachment,capabilities]);
 
 @override
 String toString() {
-  return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken, myDid: $myDid, shouldEnableVrcAttachment: $shouldEnableVrcAttachment, shouldShowVrcBanner: $shouldShowVrcBanner, shouldStartVrcExchangeFromAttachment: $shouldStartVrcExchangeFromAttachment, capabilities: $capabilities)';
+  return 'ChatScreenState(contact: $contact, group: $group, offerName: $offerName, otherPartyCard: $otherPartyCard, myCard: $myCard, messages: $messages, membersTyping: $membersTyping, selectedReactionIndex: $selectedReactionIndex, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect, attachmentsDataCache: $attachmentsDataCache, notificationToken: $notificationToken, myDid: $myDid, shouldEnableVrcAttachment: $shouldEnableVrcAttachment, shouldShowVrcBanner: $shouldShowVrcBanner, shouldStartVrcExchangeFromAttachment: $shouldStartVrcExchangeFromAttachment, capabilities: $capabilities)';
 }
 
 
@@ -305,11 +319,11 @@ abstract mixin class _$ChatScreenStateCopyWith<$Res> implements $ChatScreenState
   factory _$ChatScreenStateCopyWith(_ChatScreenState value, $Res Function(_ChatScreenState) _then) = __$ChatScreenStateCopyWithImpl;
 @override @useResult
 $Res call({
- Contact? contact, Group? group, String? offerName, ContactCard? otherPartyCard, List<chat.ChatItem> messages, List<String> membersTyping, int selectedReactionIndex, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, ScreenEffect? effect, Map<String, Uint8List> attachmentsDataCache, String? notificationToken, String? myDid, bool shouldEnableVrcAttachment, bool shouldShowVrcBanner, bool shouldStartVrcExchangeFromAttachment, chat.TransportCapabilities? capabilities
+ Contact? contact, Group? group, String? offerName, ContactCard? otherPartyCard, ContactCard? myCard, List<chat.ChatItem> messages, List<String> membersTyping, int selectedReactionIndex, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, ScreenEffect? effect, Map<String, Uint8List> attachmentsDataCache, String? notificationToken, String? myDid, bool shouldEnableVrcAttachment, bool shouldShowVrcBanner, bool shouldStartVrcExchangeFromAttachment, chat.TransportCapabilities? capabilities
 });
 
 
-@override $ContactCardCopyWith<$Res>? get otherPartyCard;
+@override $ContactCardCopyWith<$Res>? get otherPartyCard;@override $ContactCardCopyWith<$Res>? get myCard;
 
 }
 /// @nodoc
@@ -322,12 +336,13 @@ class __$ChatScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatScreenState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? contact = freezed,Object? group = freezed,Object? offerName = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? membersTyping = null,Object? selectedReactionIndex = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? effect = freezed,Object? attachmentsDataCache = null,Object? notificationToken = freezed,Object? myDid = freezed,Object? shouldEnableVrcAttachment = null,Object? shouldShowVrcBanner = null,Object? shouldStartVrcExchangeFromAttachment = null,Object? capabilities = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? contact = freezed,Object? group = freezed,Object? offerName = freezed,Object? otherPartyCard = freezed,Object? myCard = freezed,Object? messages = null,Object? membersTyping = null,Object? selectedReactionIndex = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? effect = freezed,Object? attachmentsDataCache = null,Object? notificationToken = freezed,Object? myDid = freezed,Object? shouldEnableVrcAttachment = null,Object? shouldShowVrcBanner = null,Object? shouldStartVrcExchangeFromAttachment = null,Object? capabilities = freezed,}) {
   return _then(_ChatScreenState(
 contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
 as Contact?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as Group?,offerName: freezed == offerName ? _self.offerName : offerName // ignore: cast_nullable_to_non_nullable
 as String?,otherPartyCard: freezed == otherPartyCard ? _self.otherPartyCard : otherPartyCard // ignore: cast_nullable_to_non_nullable
+as ContactCard?,myCard: freezed == myCard ? _self.myCard : myCard // ignore: cast_nullable_to_non_nullable
 as ContactCard?,messages: null == messages ? _self._messages : messages // ignore: cast_nullable_to_non_nullable
 as List<chat.ChatItem>,membersTyping: null == membersTyping ? _self._membersTyping : membersTyping // ignore: cast_nullable_to_non_nullable
 as List<String>,selectedReactionIndex: null == selectedReactionIndex ? _self.selectedReactionIndex : selectedReactionIndex // ignore: cast_nullable_to_non_nullable
@@ -357,6 +372,18 @@ $ContactCardCopyWith<$Res>? get otherPartyCard {
 
   return $ContactCardCopyWith<$Res>(_self.otherPartyCard!, (value) {
     return _then(_self.copyWith(otherPartyCard: value));
+  });
+}/// Create a copy of ChatScreenState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ContactCardCopyWith<$Res>? get myCard {
+    if (_self.myCard == null) {
+    return null;
+  }
+
+  return $ContactCardCopyWith<$Res>(_self.myCard!, (value) {
+    return _then(_self.copyWith(myCard: value));
   });
 }
 }

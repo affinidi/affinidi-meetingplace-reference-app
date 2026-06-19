@@ -81,6 +81,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String text,
     required String recipientDid,
     List<ChatAttachment>? attachments,
+    bool isFromMe = false,
+    String senderDid = 'fake-sender-did',
   }) {
     final transportId =
         'fake-transport-incoming-${DateTime.now().microsecondsSinceEpoch}';
@@ -110,14 +112,14 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       value: text,
       dateCreated: DateTime.now(),
       status: ChatItemStatus.confirmed,
-      isFromMe: false,
-      senderDid: 'fake-sender-did',
+      isFromMe: isFromMe,
+      senderDid: senderDid,
       attachments: normalizedAttachments,
     );
 
     final chatEvent = UnhandledChatEvent(
       type: 'https://affinidi.com/chat/1.0/message',
-      senderDid: 'fake-sender-did',
+      senderDid: senderDid,
       body: {'text': text, 'timestamp': message.dateCreated.toIso8601String()},
       createdTime: message.dateCreated,
     );

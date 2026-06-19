@@ -21,6 +21,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     Group? group,
     String? offerName,
     ContactCard? otherPartyCard,
+    ContactCard? myCard,
     @Default([]) List<chat.ChatItem> messages,
     @Default([]) List<String> membersTyping,
     @Default(-1) int selectedReactionIndex,
