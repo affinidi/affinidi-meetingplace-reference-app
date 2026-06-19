@@ -481,6 +481,7 @@
 	"zkpNoticeShared": "Has compartido una Prueba de Conocimiento Cero que confirma que eres humano.\n*No se compartieron datos personales.",
 	"zkpNoticeReceived": "{contactName} ha compartido una Prueba de Conocimiento Cero que confirma que es humano.",
 	"zkpNoticeRequest": "{contactName} ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.",
+	"zkpNoticeRequestInitiated": "Has iniciado una solicitud de Human ZKP.",
 	"zkpProofAlreadyShared": "Prueba ZKP ya compartida",
 	"debugPanelShareLogs": "Compartir registros",
 	"mediaTapToRetry": "Toca para reintentar",

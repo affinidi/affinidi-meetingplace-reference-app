@@ -2896,6 +2896,12 @@ abstract class AppLocalizations {
   /// **'{contactName} has requested a Zero‑Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.'**
   String zkpNoticeRequest(String contactName);
 
+  /// No description provided for @zkpNoticeRequestInitiated.
+  ///
+  /// In en, this message translates to:
+  /// **'You have initiated a Human ZKP request.'**
+  String get zkpNoticeRequestInitiated;
+
   /// No description provided for @zkpProofAlreadyShared.
   ///
   /// In en, this message translates to:

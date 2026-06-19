@@ -16,6 +16,9 @@ enum ZkpNoticeType {
   /// User received a proof request
   request,
 
+  /// User initiated a proof request
+  initiated,
+
   /// User paused the ZKP flow
   paused,
 }
@@ -72,6 +75,13 @@ class ZkpNoticeBanner extends ConsumerWidget {
           contactName: contactName,
           onGenerateProof: onGenerateProof,
           onDoLater: onDoLater,
+        );
+
+      case ZkpNoticeType.initiated:
+        return ConciergeMessage(
+          dateCreated: dateCreated,
+          message: context.l10n.zkpNoticeRequestInitiated,
+          fullWidth: true,
         );
     }
   }
