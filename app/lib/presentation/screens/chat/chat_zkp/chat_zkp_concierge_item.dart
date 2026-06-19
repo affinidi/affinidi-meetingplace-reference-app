@@ -7,6 +7,7 @@ import '../zkp_declined_notice_widget.dart';
 import '../zkp_paused_notice_widget.dart';
 import '../zkp_proof_received_notice_widget.dart';
 import '../zkp_proof_shared_notice_widget.dart';
+import '../zkp_request_initiated_notice_widget.dart';
 import '../zkp_request_received_notice_widget.dart';
 
 class ChatZkpConciergeItem extends StatelessWidget {
@@ -35,6 +36,8 @@ class ChatZkpConciergeItem extends StatelessWidget {
           chatItem: chatItem,
           contactId: contactId,
         );
+      case LivenessZkpConciergeTypes.humanZkpRequestInitiated:
+        return ZkpRequestInitiatedNoticeWidget(chatItem: chatItem);
       default:
         return const SizedBox.shrink();
     }
