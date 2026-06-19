@@ -495,5 +495,6 @@
 	"videoLoadingError": "No se puede reproducir el vídeo",
 	"voiceMessagePermissionDenied": "Se requiere permiso de micrófono para grabar mensajes de voz.",
 	"voiceMessageRecordingFailed": "No se puede iniciar la grabación de voz.",
-	"voiceMessageSendFailed": "No se puede enviar el mensaje de voz."
+	"voiceMessageSendFailed": "No se puede enviar el mensaje de voz.",
+	"removeMemberSuccess": "Miembro eliminado del grupo."
 }

@@ -1821,6 +1821,10 @@
 	"@removeMemberNotSupported": {
 		"type": "text"
 	},
+	"removeMemberSuccess": "Member removed from group.",
+	"@removeMemberSuccess": {
+		"type": "text"
+	},
 	"generalVideo": "Video",
 	"@generalVideo": {
 		"description": "Label for the video attachment plugin"

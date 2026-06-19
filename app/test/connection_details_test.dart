@@ -113,5 +113,54 @@ void main() {
       );
       expect(adminRemoveButton, findsNothing);
     });
+
+    testWidgets('removed member disappears from the list after confirming', (
+      tester,
+    ) async {
+      final coreSdk = buildCoreSdkWithGroup();
+
+      await navigateToLocation(
+        tester,
+        '/contacts/${groupContact.id}/connection-details',
+        identities: [FakeIdentities.primaryIdentity],
+        contacts: [groupContact],
+        meetingPlaceCoreSDK: coreSdk,
+        meetingPlaceChatSDK: FakeChatSdk(),
+      );
+      await tester.pumpAndSettle();
+
+      final removeButton = find.descendant(
+        of: find.ancestor(
+          of: find.textContaining(FakeGroups.removableMemberFirstName),
+          matching: find.byType(ListTile),
+        ),
+        matching: find.byIcon(Icons.person_remove_outlined),
+      );
+      await tester.ensureVisible(removeButton);
+      await tester.pumpAndSettle();
+
+      // Update the mock so that refreshGroup also returns a group without
+      // Bob, consistent with the optimistic state already applied to the UI.
+      final group = FakeGroups.approvedGroup();
+      coreSdk.setMockGroup(
+        group.copyWith(
+          members: group.members
+              .where((m) => m.did != FakeGroups.removableMemberDid)
+              .toList(),
+        ),
+      );
+
+      await tester.tap(removeButton);
+      await tester.pumpAndSettle();
+
+      final l10n = await getL10n();
+      await tester.tap(find.text(l10n.removeMemberConfirm));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.textContaining(FakeGroups.removableMemberFirstName),
+        findsNothing,
+      );
+    });
   });
 }
