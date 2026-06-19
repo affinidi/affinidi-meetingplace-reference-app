@@ -415,10 +415,12 @@ class _HostedMediaWidget extends HookConsumerWidget {
   ImageProvider<Object>? _senderAvatar(WidgetRef ref) {
     final cacheManager = ref.read(cacheManagerProvider);
     final provider = chatScreenControllerProvider(_contactId);
+
     if (_isFromMe) {
       final myCard = ref.watch(provider.select((s) => s.myCard));
       return myCard?.image(cacheManager: cacheManager);
     }
+
     if (ref.watch(provider.isGroupChat)) {
       final member = ref.watch(
         provider.select(
@@ -426,13 +428,22 @@ class _HostedMediaWidget extends HookConsumerWidget {
               s.group?.members.firstWhereOrNull((gm) => gm.did == _senderDid),
         ),
       );
-      if (member == null) return null;
-      return ContactCardUtils.fromSdkContactCard(
-        member.contactCard,
-      ).image(cacheManager: cacheManager);
+      final memberCard = member == null
+          ? null
+          : ContactCardUtils.fromSdkContactCard(member.contactCard);
+      return memberCard?.image(cacheManager: cacheManager);
     }
-    final contact = ref.watch(provider.select((s) => s.contact));
-    return contact?.image(cacheManager: cacheManager);
+
+    // 1:1 received: prefer whichever available card actually carries a photo.
+    final otherPartyCard = ref.watch(provider.select((s) => s.otherPartyCard));
+    final contactCard = ref.watch(provider.select((s) => s.contact?.card));
+    if (otherPartyCard?.hasProfilePic ?? false) {
+      return otherPartyCard!.image(cacheManager: cacheManager);
+    }
+    if (contactCard?.hasProfilePic ?? false) {
+      return contactCard!.image(cacheManager: cacheManager);
+    }
+    return (otherPartyCard ?? contactCard)?.image(cacheManager: cacheManager);
   }
 }
 
