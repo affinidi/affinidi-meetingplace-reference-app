@@ -51,6 +51,7 @@ import 'handlers/group_details_protocol_handler.dart';
 import 'handlers/presence_protocol_handler.dart';
 import 'handlers/typing_protocol_handler.dart';
 import 'handlers/zkp_attachment_protocol_handler.dart';
+import 'typing_timer.dart';
 
 part 'chat_session_service.g.dart';
 
@@ -86,7 +87,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late VrcManager _vrcManager;
 
   TimedAction? _presenceTimedAction;
-  TimedAction? _typingTimedAction;
+  final Map<String, TypingTimer> _typingTimedActions = {};
+  static const _oneToOneTypingKey = '_one_to_one_';
 
   @override
   int get secondsToShowChatActivityIndicator =>
@@ -155,7 +157,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     ref.onDispose(() {
       _presenceTimedAction?.cancel();
-      _typingTimedAction?.cancel();
+      for (final action in _typingTimedActions.values) {
+        action.cancel();
+      }
 
       unawaited(_disposeChatSession());
       _logger.info('ChatSessionService disposed', name: _logKey);
@@ -666,6 +670,17 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
               '';
   }
 
+  String? _resolveGroupMemberName(String senderDid) =>
+      state.getGroupMemberByDid(senderDid)?.contactCard.firstName;
+
+  String _typingTimerKey(String? senderDid) =>
+      _isGroupChat ? senderDid! : _oneToOneTypingKey;
+
+  void _cancelTypingTimer(String timerKey) {
+    _typingTimedActions[timerKey]?.cancel();
+    _typingTimedActions.remove(timerKey);
+  }
+
   List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
     if (!_isHumanZkpActive) return existing;
 
@@ -714,10 +729,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String? contactName;
 
     if (_isGroupChat && senderDid != null) {
-      groupMessageSenderName = state
-          .getGroupMemberByDid(senderDid)
-          ?.contactCard
-          .firstName;
+      groupMessageSenderName = _resolveGroupMemberName(senderDid);
     }
 
     if (!_isGroupChat) {
@@ -736,36 +748,27 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       name: _logKey,
     );
 
-    _typingTimedAction?.cancel();
-    state = state.copyWith(membersTyping: []);
-    _typingTimedAction = TimedAction(
-      onRun: (args) {
-        var memberNames = <String>[];
-        if (groupMessageSenderName != null &&
-            groupMessageSenderName.isNotEmpty) {
-          memberNames = [...state.membersTyping];
-          if (memberNames.length < _maxTypingMembersVisible &&
-              !memberNames.contains(groupMessageSenderName)) {
-            memberNames.add(groupMessageSenderName);
-          }
-        } else if (contactName != null && contactName.isNotEmpty) {
-          memberNames = [contactName];
-        }
-        if (memberNames.isEmpty) return;
-        state = state.copyWith(membersTyping: memberNames);
+    final timerKey = _typingTimerKey(senderDid);
+    _cancelTypingTimer(timerKey);
 
-        _logger.info(
-          '_onTypingMember onRun: membersTyping updated: $memberNames',
-          name: _logKey,
-        );
-      },
-      onComplete: () {
-        state = state.copyWith(membersTyping: []);
+    final timer = TypingTimer(
+      memberName: groupMessageSenderName ?? contactName ?? '',
+      maxVisible: _maxTypingMembersVisible,
+      duration: Duration(seconds: secondsToShowChatActivityIndicator),
+      getNames: () => state.membersTyping,
+      setNames: (names) => state = state.copyWith(membersTyping: names),
+      onExpired: () {
+        _typingTimedActions.remove(timerKey);
         _logger.info('_onTypingMember onComplete', name: _logKey);
       },
-      duration: Duration(seconds: secondsToShowChatActivityIndicator),
     );
-    _typingTimedAction!.start(args: [groupMessageSenderName]);
+    _typingTimedActions[timerKey] = timer;
+    timer.start();
+    _logger.info(
+      '_onTypingMember timer started for: '
+      '${groupMessageSenderName ?? contactName}',
+      name: _logKey,
+    );
   }
 
   void _onEffect(String? effectName) {
@@ -836,14 +839,17 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   void _clearMembersTypingActivity(String? senderDid) {
-    final memberNames = [...state.membersTyping];
-    if (memberNames.isEmpty) return;
-
     // For group chats, senderDid is required to identify which member to remove
     if (_isGroupChat && (senderDid == null || senderDid.isEmpty)) return;
 
+    final timerKey = _typingTimerKey(senderDid);
+    _cancelTypingTimer(timerKey);
+
+    final memberNames = [...state.membersTyping];
+    if (memberNames.isEmpty) return;
+
     final groupMessageSenderName = _isGroupChat && senderDid != null
-        ? state.getGroupMemberByDid(senderDid)?.contactCard.firstName
+        ? _resolveGroupMemberName(senderDid)
         : null;
 
     String? contactName;

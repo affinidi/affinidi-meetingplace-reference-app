@@ -9,7 +9,7 @@ class DeviceRegionPlugin {
   DeviceRegionPlugin._();
 
   static const _channel = MethodChannel(
-    'com.example.meetingplace/device_region',
+    'com.affinidi.mpx.meetingplace/device_region',
   );
 
   static String? _cachedRegionCode;
