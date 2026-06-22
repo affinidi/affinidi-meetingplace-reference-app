@@ -146,7 +146,9 @@ Future<void> startApp(
               RCardAttachmentsPlugin(
                 cacheManager: ref.read(cacheManagerProvider),
               ),
-              DocumentAttachmentsPlugin(),
+              DocumentAttachmentsPlugin(
+                cacheManager: ref.read(cacheManagerProvider),
+              ),
               VrcAttachmentsPlugin(),
             ],
       ),

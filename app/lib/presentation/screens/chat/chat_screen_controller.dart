@@ -94,6 +94,19 @@ class ChatScreenController extends _$ChatScreenController
   ChatService? _chatService;
   late final String _contactId;
 
+  Future<Uint8List> downloadAttachmentForPlugin(
+    ChatAttachment attachment,
+  ) async {
+    final chatService = _chatService;
+    if (chatService == null) {
+      throw AppException(
+        'Chat service not initialized',
+        code: AppExceptionType.chatSdkNotInitialized.name,
+      );
+    }
+    return chatService.downloadMedia(attachment);
+  }
+
   @override
   ChatScreenState build(String contactId) {
     _contactId = contactId;

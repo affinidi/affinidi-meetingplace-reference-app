@@ -6,7 +6,8 @@
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
-      "program": "app/lib/main.dart",
+      "program": "lib/main.dart",
+      "cwd": "${workspaceFolder}/app",
       "toolArgs": [
         "--dart-define-from-file=../configurations/.env"
       ]
