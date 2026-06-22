@@ -335,7 +335,7 @@ DEFAULT_MEDIATOR_DID=""
 
 The Matrix Homeserver is a messaging server that stores and relays messages between clients using the Matrix protocol. The SDK authenticates with it using short-lived JWTs issued by the Control Plane API — no password or manual registration is required.
 
-Deploy a Matrix Synapse homeserver and configure it for JWT-based login (`org.matrix.login.jwt`) using the Control Plane's public key as the JWT secret and the Control Plane DID as the issuer. Once running, supply its base URL:
+Deploy a Matrix Synapse homeserver and configure it for JWT-based login (`org.matrix.login.jwt`) using the Control Plane's public key as the JWT secret and the Control Plane DID as the issuer (see the [Control Plane API: Matrix Authentication](https://github.com/affinidi/affinidi-meetingplace-controlplane-api-dart#matrix-authentication) section for full setup details). Once running, supply its base URL:
 
 ```bash
 # Required when Matrix transport is enabled
@@ -404,7 +404,7 @@ DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: "" (e.g. "oss-app-ma
 ZKP_ENABLED="false"                              # Default: false — enables Human ZKP demo + Credentials tab
 
 # Matrix transport
-ENABLED_INDIVIDUAL_CHAT_TRANSPORTS=""            # Default: '["didcomm"]' — JSON array of enabled transports; options: "didcomm", "matrix". Single entry hides the picker; multiple show it at offer creation.
+ENABLED_INDIVIDUAL_CHAT_TRANSPORTS=""            # Default: '["didcomm"]' — JSON array of enabled transports; options: "didcomm", "matrix" (e.g., '["didcomm", "matrix"]'). Single entry hides the picker; multiple show it at offer creation.
 MATRIX_MEDIA_MAX_CACHE_MB=""                     # Default: 30 — on-disk media cache limit per Matrix account in megabytes
 MATRIX_MEDIA_CACHE_TTL_DAYS=""                   # Default: 30 — how long cached Matrix media files are kept on device
 ```
