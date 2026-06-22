@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,6 +64,7 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => _VrcAttachmentWidget(attachment: attachment, isFromMe: isFromMe);
 
   @override
@@ -70,6 +72,7 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => attachments.isEmpty
       ? const SizedBox.shrink()
       : _VrcAttachmentWidget(attachment: attachments.first, isFromMe: isFromMe);

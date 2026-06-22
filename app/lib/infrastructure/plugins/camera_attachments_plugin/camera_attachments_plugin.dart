@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +83,8 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
   Widget renderAttachment({
     required ChatAttachment attachment,
     required bool isFromMe,
-    Color? chatItemColor,
+    required Color chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => _CameraAttachmentWidget(
     attachment: attachment,
     cacheManager: _cacheManager,
@@ -97,7 +99,8 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
   Widget renderAttachments({
     required List<ChatAttachment> attachments,
     required bool isFromMe,
-    Color? chatItemColor,
+    required Color chatItemColor,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => _ListCameraAttachmentsWidget(
     attachments: attachments,
     cacheManager: _cacheManager,

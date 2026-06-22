@@ -31,4 +31,13 @@ class FakeInMemoryChatRepository implements chat.ChatRepository {
     required String chatId,
     required String messageId,
   }) async => _store['${chatId}_$messageId'];
+
+  @override
+  Future<String?> getSyncMarker(String chatId) async => null;
+
+  @override
+  Future<void> updateSyncMarker({
+    required String chatId,
+    required String eventId,
+  }) async {}
 }

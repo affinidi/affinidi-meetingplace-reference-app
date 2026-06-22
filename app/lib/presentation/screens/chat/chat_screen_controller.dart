@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -91,6 +92,19 @@ class ChatScreenController extends _$ChatScreenController
   _conciergeLoadingControllers = {};
 
   ChatService? _chatService;
+
+  Future<Uint8List> downloadAttachmentForPlugin(
+    ChatAttachment attachment,
+  ) async {
+    final chatService = _chatService;
+    if (chatService == null) {
+      throw AppException(
+        'Chat service not initialized',
+        code: AppExceptionType.chatSdkNotInitialized.name,
+      );
+    }
+    return chatService.downloadMedia(attachment);
+  }
 
   @override
   ChatScreenState build(String contactId) {
