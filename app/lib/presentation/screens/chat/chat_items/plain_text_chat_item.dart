@@ -348,7 +348,10 @@ class _HostedMediaWidget extends HookConsumerWidget {
         .read(attachmentCacheServiceProvider(_contactId).notifier)
         .loadAttachment(_attachment);
 
-    final category = mediaCategoryFromMimeType(_attachment.mediaType);
+    final category = mediaCategoryFromMimeType(
+      _attachment.mediaType,
+      filename: _attachment.filename,
+    );
     // Images have no manual download affordance, so they auto-load. Auto-loads
     // never poison the cache and retry on a backoff, because historical Matrix
     // events decrypt asynchronously after the room syncs.

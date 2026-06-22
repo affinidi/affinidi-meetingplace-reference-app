@@ -7,6 +7,7 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../media_category.dart';
 import 'document_attachment.dart';
 
 /// A plugin for handling document file attachments.
@@ -20,7 +21,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   /// otherwise inflate the in-memory footprint by roughly 33 percent.
   int get _maxBytes => Environment.instance.chatAttachmentMaxBytes;
 
-  static const _allowedExtensions = [
+  static const _documentExtensions = [
     'pdf',
     'doc',
     'docx',
@@ -34,6 +35,13 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
     'zip',
     'gz',
     'tar',
+  ];
+
+  /// Document extensions plus the playable audio extensions, so audio files
+  /// shared as a generic file can be picked and later played inline.
+  List<String> get _allowedExtensions => [
+    ..._documentExtensions,
+    ...audioFileExtensions,
   ];
 
   @override
@@ -119,6 +127,8 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
 
   String? _mimeTypeFromExtension(String? ext) {
     if (ext == null) return null;
+    final audioMime = audioMimeFromExtension(ext);
+    if (audioMime != null) return audioMime;
     return switch (ext.toLowerCase()) {
       'pdf' => 'application/pdf',
       'doc' => 'application/msword',

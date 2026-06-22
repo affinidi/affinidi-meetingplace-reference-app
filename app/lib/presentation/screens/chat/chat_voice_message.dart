@@ -442,6 +442,17 @@ class _HostedAudioWidget extends HookWidget {
   final Color _chatItemColor;
   final ImageProvider<Object>? _senderAvatar;
 
+  /// MIME type handed to the audio player. Hosted audio that arrived with a
+  /// generic file MIME (for example an MP3 shared as `application/octet-stream`)
+  /// is resolved from its filename so the player can decode it.
+  String? get _playbackMediaType {
+    final mediaType = _attachment.mediaType;
+    if (mediaType != null && mediaType.toLowerCase().startsWith('audio/')) {
+      return mediaType;
+    }
+    return audioMimeFromFilename(_attachment.filename) ?? mediaType;
+  }
+
   @override
   Widget build(BuildContext context) {
     final cachedBytes = _cachedBytes;
@@ -482,7 +493,7 @@ class _HostedAudioWidget extends HookWidget {
 
     return _VoicePlayer(
       bytes: cachedBytes,
-      mediaType: _attachment.mediaType,
+      mediaType: _playbackMediaType,
       initialDuration: Duration(milliseconds: durationMs),
       autoPlay: playRequested.value,
       onAutoPlayed: () => playRequested.value = false,
