@@ -144,6 +144,65 @@ void main() {
         expect(a.mediaType, 'application/octet-stream');
       });
     });
+
+    group('renderAttachment', () {
+      testWidgets('document with inline data is tappable to open', (
+        tester,
+      ) async {
+        final attachment = ChatAttachment(
+          format: 'mpx_document_attachment_plugin',
+          mediaType: 'application/pdf',
+          filename: 'report.pdf',
+          byteCount: 1024,
+          data: ChatAttachmentData(base64: 'AAAA'),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: plugin.renderAttachment(
+                attachment: attachment,
+                isFromMe: false,
+                chatItemColor: Colors.blue,
+              ),
+            ),
+          ),
+        );
+
+        final gestureDetector = tester.widget<GestureDetector>(
+          find.byType(GestureDetector),
+        );
+        expect(gestureDetector.onTap, isNotNull);
+      });
+
+      testWidgets('document without inline data is not tappable', (
+        tester,
+      ) async {
+        final attachment = ChatAttachment(
+          format: 'mpx_document_attachment_plugin',
+          mediaType: 'application/pdf',
+          filename: 'report.pdf',
+          byteCount: 1024,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: plugin.renderAttachment(
+                attachment: attachment,
+                isFromMe: false,
+                chatItemColor: Colors.blue,
+              ),
+            ),
+          ),
+        );
+
+        final gestureDetector = tester.widget<GestureDetector>(
+          find.byType(GestureDetector),
+        );
+        expect(gestureDetector.onTap, isNull);
+      });
+    });
   });
 }
 
