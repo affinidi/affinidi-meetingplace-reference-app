@@ -470,7 +470,7 @@ class ChatScreenController extends _$ChatScreenController
     }
     final srcCard = channel.otherPartyContactCard;
     final ownCard = channel.contactCard;
-    final localIdentity = ref
+    final ownIdentity = ref
         .read(identitiesServiceProvider)
         .getIdentityById(channel.externalRef);
     state = state.copyWith(
@@ -478,7 +478,7 @@ class ChatScreenController extends _$ChatScreenController
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
       myCard:
-          localIdentity?.card ??
+          ownIdentity?.card ??
           (ownCard == null
               ? null
               : ContactCardUtils.fromSdkContactCard(ownCard)),
