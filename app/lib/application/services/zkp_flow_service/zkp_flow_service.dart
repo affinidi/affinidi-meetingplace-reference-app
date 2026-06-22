@@ -241,7 +241,7 @@ class ZkpFlowService {
   }
 
   Future<bool> _sendZkpAttachments(
-    List<ChatAttachment> attachments, {
+    List<chat.ChatAttachment> attachments, {
     required String errorMessage,
   }) async {
     final channelDid = _readChannelDid();
@@ -258,7 +258,7 @@ class ZkpFlowService {
           .read(chatSessionServiceProvider(channelDid).notifier)
           .sendTextMessage(
             '',
-            attachments: List<ChatAttachment>.from(attachments),
+            attachments: List<chat.ChatAttachment>.from(attachments),
           );
       return true;
     } catch (error, stackTrace) {
