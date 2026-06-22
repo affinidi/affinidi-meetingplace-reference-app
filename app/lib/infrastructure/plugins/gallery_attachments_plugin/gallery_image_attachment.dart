@@ -1,6 +1,5 @@
 import 'package:clock/clock.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
-import 'package:uuid/uuid.dart';
 
 /// A message attachment representing an image picked from the gallery.
 ///
@@ -8,9 +7,14 @@ import 'package:uuid/uuid.dart';
 /// into a standard `ChatAttachment` object with JPEG media type and generated
 /// UUID identifier.
 class GalleryImageAttachment implements MessageAttachment {
-  GalleryImageAttachment({required this._base64, required this._pluginName});
+  GalleryImageAttachment({
+    required this.id,
+    required this.base64,
+    required this._pluginName,
+  });
 
-  final String _base64;
+  final String id;
+  final String base64;
   final String _pluginName;
   final String _mediaType = AttachmentMediaType.imageJpeg.value;
 
@@ -19,10 +23,10 @@ class GalleryImageAttachment implements MessageAttachment {
 
   @override
   ChatAttachment toAttachment() => ChatAttachment(
-    id: const Uuid().v4(),
+    id: id,
     mediaType: _mediaType,
-    format: _pluginName,
+    format: pluginName,
     lastModifiedTime: clock.now(),
-    data: ChatAttachmentData(base64: _base64),
+    data: ChatAttachmentData(base64: base64),
   );
 }

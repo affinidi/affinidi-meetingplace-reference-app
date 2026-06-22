@@ -65,6 +65,16 @@ class _ChatMessageList extends HookConsumerWidget {
             child: ListView.builder(
               controller: scrollController,
               reverse: true,
+              findChildIndexCallback: (key) {
+                if (key is! ValueKey<String>) return null;
+
+                final messageId = key.value;
+                final index = sortedMessages.indexWhere(
+                  (message) => message.messageId == messageId,
+                );
+
+                return index == -1 ? null : index;
+              },
               itemCount: sortedMessages.length,
               itemBuilder: (context, index) {
                 final chatItem = sortedMessages[index];
@@ -122,6 +132,7 @@ class _ChatMessageList extends HookConsumerWidget {
                 }
 
                 return Padding(
+                  key: ValueKey(chatItem.messageId),
                   padding: zkpPolicy.horizontalPadding(chatItem),
                   child: Column(
                     children: [
