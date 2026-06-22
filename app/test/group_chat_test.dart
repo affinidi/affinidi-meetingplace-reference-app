@@ -930,6 +930,34 @@ void main() {
 
           expect(find.text(l10n.groupDeleted), findsOneWidget);
         });
+
+        testWidgets('disables the message input', (WidgetTester tester) async {
+          final contactId = FakeContacts.groupContact.id;
+          final chatSdk = FakeChatSdk();
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+          );
+
+          final inputBeforeDeletion = tester.widget<TextFormField>(
+            findChatMessageInput(),
+          );
+          expect(inputBeforeDeletion.enabled, isNot(false));
+
+          chatSdk.simulateGroupDeleted(
+            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+          );
+          await tester.pumpAndSettle();
+
+          final inputAfterDeletion = tester.widget<TextFormField>(
+            findChatMessageInput(),
+          );
+          expect(inputAfterDeletion.enabled, isFalse);
+        });
       });
     });
   });
