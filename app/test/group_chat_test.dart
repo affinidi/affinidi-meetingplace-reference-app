@@ -8,7 +8,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
+import 'fakes/fake_groups.dart';
 import 'fakes/fake_image_picker.dart';
+import 'fakes/fake_meeting_place_sdk.dart';
 import 'utils/app.dart';
 
 Finder findChatMessageInput() => find.byKey(const Key('chat_message_input'));
@@ -956,6 +958,28 @@ void main() {
             findChatMessageInput(),
           );
           expect(inputAfterDeletion.enabled, isFalse);
+        });
+
+        testWidgets('disables the message input when opened after deletion', (
+          WidgetTester tester,
+        ) async {
+          final contactId = FakeContacts.groupContact.id;
+          final chatSdk = FakeChatSdk();
+          final deletedGroup = FakeGroups.approvedGroup()..markAsDeleted();
+          final coreSdk = FakeMeetingPlaceSDK(
+            channels: FakeChannels.allChannels,
+          )..setMockGroup(deletedGroup);
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+            meetingPlaceCoreSDK: coreSdk,
+          );
+
+          final input = tester.widget<TextFormField>(findChatMessageInput());
+          expect(input.enabled, isFalse);
         });
       });
     });
