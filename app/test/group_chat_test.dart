@@ -982,6 +982,81 @@ void main() {
           expect(input.enabled, isFalse);
         });
       });
+
+      group('and current user is removed from the group', () {
+        testWidgets('disables the message input on a live removal', (
+          WidgetTester tester,
+        ) async {
+          final contactId = FakeContacts.groupContact.id;
+          final chatSdk = FakeChatSdk();
+          final myDid = FakeContacts.groupContact.channelDid!;
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+          );
+
+          final inputBefore = tester.widget<TextFormField>(
+            findChatMessageInput(),
+          );
+          expect(inputBefore.enabled, isNot(false));
+
+          chatSdk.simulateMemberLeftGroup(
+            memberName: 'You',
+            memberDid: myDid,
+            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            reason: GroupMemberLeaveReason.kick,
+          );
+          await tester.pumpAndSettle();
+
+          final inputAfter = tester.widget<TextFormField>(
+            findChatMessageInput(),
+          );
+          expect(inputAfter.enabled, isFalse);
+        });
+
+        testWidgets('disables the message input when opened after removal', (
+          WidgetTester tester,
+        ) async {
+          final contactId = FakeContacts.groupContact.id;
+          final chatSdk = FakeChatSdk();
+          final myDid = FakeContacts.groupContact.channelDid!;
+          final groupWithSelfRemoved = Group(
+            id: 'group-id',
+            did: 'group-did',
+            offerLink: FakeContacts.groupContact.offerLink,
+            members: [
+              GroupMember(
+                did: myDid,
+                dateAdded: DateTime.now(),
+                status: GroupMemberStatus.deleted,
+                membershipType: GroupMembershipType.member,
+                contactCard: FakeContacts.sdkContactCard,
+                publicKey: 'fake-public-key',
+              ),
+            ],
+            created: DateTime.now(),
+            publicKey: 'fake-public-key',
+          );
+          final coreSdk = FakeMeetingPlaceSDK(
+            channels: FakeChannels.allChannels,
+          )..setMockGroup(groupWithSelfRemoved);
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+            meetingPlaceCoreSDK: coreSdk,
+          );
+
+          final input = tester.widget<TextFormField>(findChatMessageInput());
+          expect(input.enabled, isFalse);
+        });
+      });
     });
   });
 }
