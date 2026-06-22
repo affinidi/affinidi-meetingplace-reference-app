@@ -17,6 +17,7 @@ import '../../../application/services/attachment_cache_service/attachment_cache_
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -436,6 +437,7 @@ class ChatScreenController extends _$ChatScreenController
   /// Throws an exception if the contact cannot be loaded.
   Future<void> loadContact(String contactId) async {
     await ref.read(contactsServiceProvider.notifier).ensureInitialized();
+    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     if (contact == null) {
@@ -468,13 +470,18 @@ class ChatScreenController extends _$ChatScreenController
     }
     final srcCard = channel.otherPartyContactCard;
     final ownCard = channel.contactCard;
+    final ownIdentity = ref
+        .read(identitiesServiceProvider)
+        .getIdentityById(channel.externalRef);
     state = state.copyWith(
       otherPartyCard: srcCard == null
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
-      myCard: ownCard == null
-          ? null
-          : ContactCardUtils.fromSdkContactCard(ownCard),
+      myCard:
+          ownIdentity?.card ??
+          (ownCard == null
+              ? null
+              : ContactCardUtils.fromSdkContactCard(ownCard)),
       notificationToken: channel.otherPartyNotificationToken,
       myDid: channel.permanentChannelDid,
     );
