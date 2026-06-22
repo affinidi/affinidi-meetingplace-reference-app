@@ -155,6 +155,7 @@ extension ContactCardExtensions on ContactCard {
     lastName: lastName,
     email: email,
     phone: mobile,
+    profilePic: profilePic,
   );
 }
 
