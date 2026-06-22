@@ -2998,6 +2998,12 @@ abstract class AppLocalizations {
   /// **'Attachment is too large. Maximum size is {maxMb} MB.'**
   String attachmentTooLarge(int maxMb);
 
+  /// Snackbar shown when the media picker returns a file that is neither an image nor a video
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported file type. Please choose an image or video.'**
+  String get attachmentUnsupportedType;
+
   /// Snackbar shown when voice-message recording cannot start because microphone permission is denied
   ///
   /// In en, this message translates to:

@@ -1993,6 +1993,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get attachmentUnsupportedType =>
+      'Tipo de archivo no compatible. Elige una imagen o un video.';
+
+  @override
   String get voiceMessagePermissionDenied =>
       'Se requiere permiso de micrófono para grabar mensajes de voz.';
 

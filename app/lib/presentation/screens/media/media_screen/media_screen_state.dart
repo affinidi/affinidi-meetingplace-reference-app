@@ -17,5 +17,6 @@ abstract class MediaScreenState with _$MediaScreenState {
     @Default(false) bool isLoading,
     @Default(true) bool permissionGranted,
     int? videoTooLargeMaxMb,
+    @Default(false) bool unsupportedMediaSelected,
   }) = _MediaScreenState;
 }

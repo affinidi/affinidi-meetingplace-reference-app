@@ -499,6 +499,7 @@
 	"mediaTapToRetry": "Toca para reintentar",
 	"mediaDownloadFailedTapToRetry": "Descarga fallida. Toca para reintentar",
 	"attachmentTooLarge": "El archivo adjunto es demasiado grande. Tamaño máximo: {maxMb} MB.",
+	"attachmentUnsupportedType": "Tipo de archivo no compatible. Elige una imagen o un video.",
 	"generalVideo": "Vídeo",
 	"generalVoice": "Voz",
 	"generalDocument": "Documento",

@@ -1960,6 +1960,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get attachmentUnsupportedType =>
+      'Unsupported file type. Please choose an image or video.';
+
+  @override
   String get voiceMessagePermissionDenied =>
       'Microphone permission is required to record voice messages.';
 

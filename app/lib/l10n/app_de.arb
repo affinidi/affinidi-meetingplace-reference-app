@@ -500,6 +500,7 @@
 	"mediaTapToRetry": "Zum Wiederholen tippen",
 	"mediaDownloadFailedTapToRetry": "Download fehlgeschlagen. Zum Wiederholen tippen",
 	"attachmentTooLarge": "Anhang ist zu groß. Maximale Größe: {maxMb} MB.",
+	"attachmentUnsupportedType": "Nicht unterstützter Dateityp. Bitte wählen Sie ein Bild oder Video.",
 	"generalVideo": "Video",
 	"generalVoice": "Stimme",
 	"generalDocument": "Dokument",

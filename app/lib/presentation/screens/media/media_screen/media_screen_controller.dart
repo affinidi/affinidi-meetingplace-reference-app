@@ -124,6 +124,16 @@ class MediaScreenController extends _$MediaScreenController {
               videoByteCount: bytes.length,
             ),
           );
+    } else if (picked != null && _isUnsupportedMedia(picked)) {
+      // On Android the system media picker can fall back to a document
+      // provider that lets the user choose arbitrary files (e.g. a PDF).
+      // Reject anything positively identified as non-image/non-video here
+      // instead of forwarding it down the image path where decoding fails.
+      _logger.warning(
+        'Picked media is neither image nor video: ${picked.mimeType}',
+        name: _logKey,
+      );
+      state = state.copyWith(unsupportedMediaSelected: true);
     } else if (picked != null) {
       state = state.copyWith(pickedImageBytes: await picked.readAsBytes());
     } else {
@@ -144,6 +154,41 @@ class MediaScreenController extends _$MediaScreenController {
     return path.endsWith('.mp4') ||
         path.endsWith('.mov') ||
         path.endsWith('.m4v');
+  }
+
+  /// Whether the picked file is positively identified as neither an image nor
+  /// a video. Indeterminate files (no MIME type and no extension) are treated
+  /// as images to preserve the default gallery behaviour; only files we can
+  /// confidently classify as non-media (e.g. a PDF) are rejected.
+  static const _mediaExtensions = {
+    'jpg',
+    'jpeg',
+    'png',
+    'gif',
+    'webp',
+    'bmp',
+    'heic',
+    'heif',
+    'mp4',
+    'mov',
+    'm4v',
+    'webm',
+    '3gp',
+    'avi',
+    'mkv',
+  };
+
+  bool _isUnsupportedMedia(XFile file) {
+    final mimeType = file.mimeType?.toLowerCase();
+    if (mimeType != null) {
+      return !mimeType.startsWith('image/') && !mimeType.startsWith('video/');
+    }
+
+    final path = file.path.toLowerCase();
+    final dotIndex = path.lastIndexOf('.');
+    if (dotIndex == -1 || dotIndex == path.length - 1) return false;
+    final extension = path.substring(dotIndex + 1);
+    return !_mediaExtensions.contains(extension);
   }
 
   String _filenameFor(XFile file) {

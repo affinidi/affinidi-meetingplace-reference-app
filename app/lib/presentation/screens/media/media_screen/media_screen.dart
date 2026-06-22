@@ -154,6 +154,19 @@ class MediaScreen extends HookConsumerWidget {
       return null;
     }, [state.videoTooLargeMaxMb]);
 
+    useEffect(() {
+      if (state.unsupportedMediaSelected) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.attachmentUnsupportedType)),
+          );
+          navigator.pop(MediaReviewResult.empty());
+        });
+      }
+      return null;
+    }, [state.unsupportedMediaSelected]);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Builder(
