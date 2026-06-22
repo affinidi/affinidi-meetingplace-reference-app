@@ -20,6 +20,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/configuration/app_info.
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/firebase_messaging/push_notification_messaging.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/media/image_picker/image_picker_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_info_provider.dart';
@@ -145,6 +146,7 @@ Future<void> startApp(
               RCardAttachmentsPlugin(
                 cacheManager: ref.read(cacheManagerProvider),
               ),
+              DocumentAttachmentsPlugin(),
               VrcAttachmentsPlugin(),
             ],
       ),
