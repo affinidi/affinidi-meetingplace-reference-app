@@ -155,9 +155,9 @@ class ModalAsyncLoadingStatus extends HookConsumerWidget
     }
 
     void dismissProgressDialogIfNeeded() {
-      if (!isShowingProgressDialog.value) {
-        return;
-      }
+      // if (!isShowingProgressDialog.value) {
+      //   return;
+      // }
 
       isShowingProgressDialog.value = false;
       if (!context.mounted) return;
