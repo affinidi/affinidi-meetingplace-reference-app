@@ -526,7 +526,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
     await _conciergeMessenger.sendChatContactDetailsUpdate(message);
-    await _rCardManager.sendProfileUpdateWithRCard(message);
+    if (!_isGroupChat) {
+      await _rCardManager.sendProfileUpdateWithRCard(message);
+    }
   }
 
   @override
