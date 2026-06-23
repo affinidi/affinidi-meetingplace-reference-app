@@ -116,6 +116,52 @@ class ZkpFlowService {
     }
   }
 
+  Future<bool> sendDeclined() async {
+    if (!readIsZkpChannelReady()) {
+      _logger.warning(
+        'ZKP decline blocked: connection not established '
+        'for contact $_contactId',
+        name: _logKey,
+      );
+      return false;
+    }
+
+    final channelDid = _ref
+        .read(contactsServiceProvider)
+        .getContactById(_contactId)
+        ?.channelDid;
+    if (channelDid == null) {
+      _logger.warning(
+        'ZKP decline blocked: missing channel DID for contact $_contactId',
+        name: _logKey,
+      );
+      return false;
+    }
+
+    final chatService = _ref.read(
+      chatSessionServiceProvider(channelDid).notifier,
+    );
+
+    final attachments =
+        LivenessZkpDIDCommAttachmentBuilder.buildLivenessDeclined();
+
+    try {
+      await chatService.sendTextMessage(
+        '',
+        attachments: attachments.map((a) => a.toChatAttachment()).toList(),
+      );
+      return true;
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to send ZKP declined message',
+        name: _logKey,
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+  }
+
   List<int>? findVerifierChallengeNonceFromChatHistory() {
     final channelDid = _ref
         .read(contactsServiceProvider)

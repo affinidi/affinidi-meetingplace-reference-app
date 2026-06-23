@@ -1228,17 +1228,11 @@ extension ChatScreenControllerProviderSelectors
 extension _ChatScreenStateExtensions on ChatScreenState {
   bool get isGroupChat => contact?.isGroup ?? false;
   bool get isGroupDeleted {
-    final groupDeleted = messages
-        .whereType<chat.EventMessage>()
-        .where(
-          (message) =>
-              message.eventType == chat.EventMessageType.groupDeleted &&
-              message.status == chat.ChatItemStatus.received,
-        )
-        .map((message) => message.contactCard?.firstName)
-        .where((firstName) => firstName != null)
-        .cast<String>();
-
-    return groupDeleted.isNotEmpty;
+    return messages.any(
+      (message) =>
+          message is chat.EventMessage &&
+          message.eventType == chat.EventMessageType.groupDeleted &&
+          message.status == chat.ChatItemStatus.received,
+    );
   }
 }

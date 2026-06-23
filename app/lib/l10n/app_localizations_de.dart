@@ -1951,6 +1951,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'You have initiated a Human ZKP request.';
 
   @override
+  String get zkpNoticeDeclined =>
+      'Sie haben die Human-ZKP-Beweisanforderung abgelehnt.';
+
+  @override
   String get zkpProofAlreadyShared => 'ZKP-Beweis bereits geteilt';
 
   @override
