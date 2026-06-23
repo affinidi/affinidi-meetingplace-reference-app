@@ -20,7 +20,6 @@ analyzer:
   errors:
     avoid_print: error
   exclude:
-    - "build/ios/**"
     - "**/*.g.dart"
     - "build/ios/**"
     - "build/macos/**"
