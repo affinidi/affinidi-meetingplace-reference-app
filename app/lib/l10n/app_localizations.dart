@@ -3003,6 +3003,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to send voice message.'**
   String get voiceMessageSendFailed;
+
+  /// No description provided for @generalEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get generalEmail;
+
+  /// No description provided for @vrcResponderIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has selected the following persona to verify the relationship:'**
+  String vrcResponderIntro(Object name);
 }
 
 class _AppLocalizationsDelegate

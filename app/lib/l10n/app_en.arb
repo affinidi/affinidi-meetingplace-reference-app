@@ -1533,10 +1533,19 @@
 	"rCardFieldIssuedAt": "Issued",
 	"rCardTitle": "R-Card",
 	"verifiableCredential": "Verifiable Credential",
+	"@verifiableCredential": {
+		"type": "text"
+	},
 	"verified": "Verified",
+	"@verified": {
+		"type": "text"
+	},
 	"verifiableCredentialDescription": "Secured digital credentials that can be verified for authenticity",
 	"secureAttachmentsTitle": "Secure Attachments",
 	"credentialDetails": "Credential Details",
+	"@credentialDetails": {
+		"type": "text"
+	},
 	"genRCard": "R-Card",
 	"rCardPickIdentitySubtitle": "Select the identity to share as an R-Card",
 	"rCardFooterSent": "R-Card has been sent.",
@@ -1552,7 +1561,9 @@
 	"selectIdentityToVerifyRelationshipWithName": "Select the identity that you would like to use to verify your relationship with {name}.",
 	"@selectIdentityToVerifyRelationshipWithName": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"verifiableRelationshipCredential": "Verifiable Relationship Credential",
@@ -1570,17 +1581,24 @@
 	"verifyRelationshipPrompt": "Verify your relationship with {firstName} by issuing a Verifiable Relationship Credential (VRC). Each VRC exchange increases your trust score.",
 	"@verifyRelationshipPrompt": {
 		"placeholders": {
-			"firstName": { "type": "String" }
+			"firstName": {
+				"type": "String"
+			}
 		}
 	},
 	"generateVrc": "Start now",
 	"generalVerify": "Confirm",
 	"doLater": "Do later",
+	"@doLater": {
+		"type": "text"
+	},
 	"vrcExchangeInitiated": "You've initiated the VRC exchange.",
 	"vrcRequestReceived": "{name} has initiated the VRC exchange.",
 	"@vrcRequestReceived": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcDoLater": "VRC exchange is paused. Tap + and select 'Verifiable Relationship Credential' to resume.",
@@ -1588,30 +1606,37 @@
 	"vrcVerifyPrompt": "Would you like to verify your relationship with {name}? Each VRC exchange increases your trust score.",
 	"@vrcVerifyPrompt": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcStartNow": "Start Now",
 	"vrcDoLaterButton": "Do Later",
 	"vrcYesButton": "Yes",
-	"notShared": "Not shared",
 	"nameSelectedIdentity": "{name}'s selected identity",
 	"@nameSelectedIdentity": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"selectIdentityToVerifyRelationshipPrompt": "Swipe left or right to choose the identity you want to use to verify your relationship with {name}.",
 	"@selectIdentityToVerifyRelationshipPrompt": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"sendVrc": "Send Relationship Credential",
 	"trustedBy": "Trusted by {count}",
 	"@trustedBy": {
 		"placeholders": {
-			"count": { "type": "int" }
+			"count": {
+				"type": "int"
+			}
 		}
 	},
 	"humanZkp": "Human Zero Knowledge Proof",
@@ -1630,9 +1655,6 @@
 	"@livenessCredential": {
 		"type": "text"
 	},
-	"@verifiableCredential": {
-		"type": "text"
-	},
 	"verifiableCredentialWallet": "Verifiable Credential wallet",
 	"@verifiableCredentialWallet": {
 		"type": "text"
@@ -1643,9 +1665,6 @@
 	},
 	"all": "All",
 	"@all": {
-		"type": "text"
-	},
-	"@credentialDetails": {
 		"type": "text"
 	},
 	"generatingZeroKnowledgeProof": "Generating Human Zero Knowledge Proof...",
@@ -1708,12 +1727,6 @@
 	"@livenessCredentialSessionMissing": {
 		"type": "text"
 	},
-	"@doLater": {
-		"type": "text"
-	},
-	"@verified": {
-		"type": "text"
-	},
 	"issuedTo": "Issued to",
 	"@issuedTo": {
 		"type": "text"
@@ -1742,7 +1755,7 @@
 	"@proofFlowContact": {
 		"type": "text"
 	},
-	"proofFlowCheckIfHuman": "Check if {contactName} is human using a Zero\u2011Knowledge Proof (ZKP) derived from a Liveness Credential.",
+	"proofFlowCheckIfHuman": "Check if {contactName} is human using a Zero‑Knowledge Proof (ZKP) derived from a Liveness Credential.",
 	"@proofFlowCheckIfHuman": {
 		"type": "text",
 		"placeholders": {
@@ -1786,11 +1799,11 @@
 			}
 		}
 	},
-	"zkpNoticeShared": "You have shared a Zero\u2011Knowledge Proof confirming you are human.\n*No personal data was shared.",
+	"zkpNoticeShared": "You have shared a Zero‑Knowledge Proof confirming you are human.\n*No personal data was shared.",
 	"@zkpNoticeShared": {
 		"type": "text"
 	},
-	"zkpNoticeReceived": "{contactName} has shared a Zero\u2011Knowledge Proof confirming they are human.",
+	"zkpNoticeReceived": "{contactName} has shared a Zero‑Knowledge Proof confirming they are human.",
 	"@zkpNoticeReceived": {
 		"type": "text",
 		"placeholders": {
@@ -1820,7 +1833,6 @@
 	"@removeMemberConfirm": {
 		"type": "text"
 	},
-
 	"removeMemberNotSupported": "Removing members isn't supported yet.",
 	"@removeMemberNotSupported": {
 		"type": "text"
@@ -1858,8 +1870,8 @@
 		"description": "Snackbar shown when a picked attachment exceeds the byte-size cap",
 		"placeholders": {
 			"maxMb": {
-				"type": "int",
-				"example": "25"
+				"example": "25",
+				"type": "int"
 			}
 		}
 	},
@@ -1874,5 +1886,7 @@
 	"voiceMessageSendFailed": "Unable to send voice message.",
 	"@voiceMessageSendFailed": {
 		"description": "Snackbar shown when a recorded voice message could not be sent"
-	}
+	},
+	"generalEmail": "Email",
+	"vrcResponderIntro": "{name} has selected the following persona to verify the relationship:"
 }

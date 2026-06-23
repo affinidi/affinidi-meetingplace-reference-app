@@ -423,13 +423,17 @@
 	"selectIdentityToVerifyRelationshipWithName": "Selecciona la identidad que deseas usar para verificar tu relación con {name}",
 	"@selectIdentityToVerifyRelationshipWithName": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"verifyRelationshipPrompt": "Verifica tu relación con {firstName} emitiendo una Credencial de Relación Verificable (VRC). Cada intercambio de VRC aumenta tu puntuación de confianza.",
 	"@verifyRelationshipPrompt": {
 		"placeholders": {
-			"firstName": { "type": "String" }
+			"firstName": {
+				"type": "String"
+			}
 		}
 	},
 	"generateVrc": "Empezar ahora",
@@ -438,7 +442,9 @@
 	"vrcRequestReceived": "{name} ha iniciado el intercambio de VRC.",
 	"@vrcRequestReceived": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcDoLater": "El intercambio de VRC está en pausa. Toca + y selecciona 'Credencial de Relación Verificable' para continuar.",
@@ -446,13 +452,14 @@
 	"vrcVerifyPrompt": "¿Deseas verificar tu relación con {name}? Cada intercambio de VRC aumenta tu puntuación de confianza.",
 	"@vrcVerifyPrompt": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcStartNow": "Comenzar ahora",
 	"vrcDoLaterButton": "Más tarde",
 	"vrcYesButton": "Sí",
-	"notShared": "No compartido",
 	"vrcResponderIntro": "{name} ha seleccionado la siguiente persona para verificar la relación:",
 	"sendVrc": "Enviar Credencial de Relación",
 	"livenessCredentialRequest": "Solicitud de credencial de detección de vida",
@@ -498,5 +505,21 @@
 	"voiceMessagePermissionDenied": "Se requiere permiso de micrófono para grabar mensajes de voz.",
 	"voiceMessageRecordingFailed": "No se puede iniciar la grabación de voz.",
 	"voiceMessageSendFailed": "No se puede enviar el mensaje de voz.",
-	"removeMemberSuccess": "Miembro eliminado del grupo."
+	"removeMemberSuccess": "Miembro eliminado del grupo.",
+	"cancel": "Cancelar",
+	"generateCredential": "Generar credencial",
+	"generateProof": "Generar prueba",
+	"generatingZeroKnowledgeProof": "Generando Prueba de Conocimiento Cero Humano...",
+	"livenessCredential": "Credencial de Vitalidad",
+	"mockLivenessCredentialNext": "Ahora puedes continuar para generar una Prueba de Conocimiento Cero Humana.",
+	"nameSelectedIdentity": "Identidad seleccionada de {name}",
+	"noCredentialsYet": "Aún no tienes credenciales.",
+	"removeMemberConfirm": "Eliminar",
+	"removeMemberDialogBody": "¿Eliminar a {name} de este grupo? Ya no recibirá mensajes.",
+	"removeMemberDialogTitle": "Eliminar miembro",
+	"removeMemberNotSupported": "Eliminar miembros aún no está soportado.",
+	"selectIdentityToVerifyRelationshipPrompt": "Desliza hacia la izquierda o derecha para elegir la identidad que deseas usar para verificar tu relación con {name}.",
+	"trustedBy": "Confiado por {count}",
+	"verifiableCredentialWallet": "Cartera de Credenciales Verificables",
+	"vrcAbbreviation": "VRC"
 }

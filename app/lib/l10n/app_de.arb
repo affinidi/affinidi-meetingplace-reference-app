@@ -424,13 +424,17 @@
 	"selectIdentityToVerifyRelationshipWithName": "Wähle die Identität aus, die du verwenden möchtest, um deine Beziehung mit {name} zu bestätigen",
 	"@selectIdentityToVerifyRelationshipWithName": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"verifyRelationshipPrompt": "Bestätige deine Beziehung mit {firstName}, indem du eine Verifiable Relationship Credential (VRC) ausstellst. Jeder VRC-Austausch erhöht deinen Vertrauenswert.",
 	"@verifyRelationshipPrompt": {
 		"placeholders": {
-			"firstName": { "type": "String" }
+			"firstName": {
+				"type": "String"
+			}
 		}
 	},
 	"generateVrc": "Jetzt starten",
@@ -439,7 +443,9 @@
 	"vrcRequestReceived": "{name} hat den VRC-Austausch eingeleitet.",
 	"@vrcRequestReceived": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcDoLater": "VRC-Austausch pausiert. Tippe auf + und wähle 'Überprüfbarer Beziehungsnachweis' um fortzufahren.",
@@ -447,13 +453,14 @@
 	"vrcVerifyPrompt": "Möchtest du deine Beziehung mit {name} verifizieren? Jeder VRC-Austausch erhöht deinen Vertrauensscore.",
 	"@vrcVerifyPrompt": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcStartNow": "Jetzt starten",
 	"vrcDoLaterButton": "Später",
 	"vrcYesButton": "Ja",
-	"notShared": "Nicht geteilt",
 	"vrcResponderIntro": "{name} hat die folgende Persona zur Verifizierung der Beziehung ausgewählt:",
 	"sendVrc": "Beziehungsnachweis senden",
 	"livenessCredentialRequest": "Anforderung eines Liveness-Nachweises",
@@ -483,9 +490,9 @@
 	"proofFlowVerificationFailed": "Überprüfung für {contactName} fehlgeschlagen",
 	"zkpNoticePaused": "Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis pausiert.",
 	"zkpNoticeDeclined": "{contactName} hat die Anfrage für einen Human Zero-Knowledge-Beweis abgelehnt. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.",
-	"zkpNoticeShared": "Sie haben einen Zero\u2011Knowledge-Beweis geteilt, der bestätigt, dass Sie ein Mensch sind.\n*Es wurden keine persönlichen Daten geteilt.",
-	"zkpNoticeReceived": "{contactName} hat einen Zero\u2011Knowledge-Beweis geteilt, der bestätigt, dass sie/er ein Mensch ist.",
-	"zkpNoticeRequest": "{contactName} hat einen Zero\u2011Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.",
+	"zkpNoticeShared": "Sie haben einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass Sie ein Mensch sind.\n*Es wurden keine persönlichen Daten geteilt.",
+	"zkpNoticeReceived": "{contactName} hat einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass sie/er ein Mensch ist.",
+	"zkpNoticeRequest": "{contactName} hat einen Zero‑Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.",
 	"zkpNoticeRequestInitiated": "Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis gestartet.",
 	"zkpProofAlreadyShared": "ZKP-Beweis bereits geteilt",
 	"debugPanelShareLogs": "Protokolle teilen",
@@ -499,5 +506,20 @@
 	"voiceMessagePermissionDenied": "Zum Aufnehmen von Sprachnachrichten ist Mikrofonzugriff erforderlich.",
 	"voiceMessageRecordingFailed": "Sprachaufnahme kann nicht gestartet werden.",
 	"voiceMessageSendFailed": "Sprachnachricht kann nicht gesendet werden.",
-	"removeMemberSuccess": "Mitglied aus der Gruppe entfernt."
+	"removeMemberSuccess": "Mitglied aus der Gruppe entfernt.",
+	"cancel": "Abbrechen",
+	"generateCredential": "Anmeldeinformationen generieren",
+	"generateProof": "Beweis erzeugen",
+	"generatingZeroKnowledgeProof": "Generiere menschlichen Zero-Knowledge-Beweis...",
+	"livenessCredential": "Lebendigkeit Nachweis",
+	"mockLivenessCredentialNext": "Sie können jetzt mit der Erstellung eines Human Zero Knowledge Proof fortfahren.",
+	"nameSelectedIdentity": "Ausgewählte Identität von {name}",
+	"noCredentialsYet": "Sie haben noch keine Anmeldeinformationen.",
+	"removeMemberConfirm": "Entfernen",
+	"removeMemberDialogBody": "{name} aus dieser Gruppe entfernen? Sie erhalten keine Nachrichten mehr.",
+	"removeMemberDialogTitle": "Mitglied entfernen",
+	"removeMemberNotSupported": "Das Entfernen von Mitgliedern wird noch nicht unterstützt.",
+	"selectIdentityToVerifyRelationshipPrompt": "Wischen Sie nach links oder rechts, um die Identität auszuwählen, mit der Sie Ihre Beziehung zu {name} verifizieren möchten.",
+	"trustedBy": "Vertraut von {count}",
+	"verifiableCredentialWallet": "Verifizierbare Berechtigungs-Wallet"
 }

@@ -1962,4 +1962,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceMessageSendFailed => 'Unable to send voice message.';
+
+  @override
+  String get generalEmail => 'Email';
+
+  @override
+  String vrcResponderIntro(Object name) {
+    return '$name has selected the following persona to verify the relationship:';
+  }
 }
