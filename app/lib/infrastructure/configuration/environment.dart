@@ -37,6 +37,23 @@ class Environment {
   String get matrixHomeserver =>
       const String.fromEnvironment('MATRIX_HOMESERVER');
 
+  /// The Matrix server name (`server_name` in homeserver.yaml) used for Matrix
+  /// user ID derivation (`@hash:<serverName>`). In production this equals the
+  /// host of [matrixHomeserver]. For local development the homeserver may be
+  /// reached via a tunnel whose hostname differs from the Synapse server_name —
+  /// set MATRIX_SERVER_NAME explicitly in .env to fix user ID mismatches.
+  String get matrixServerName {
+    const explicit = String.fromEnvironment('MATRIX_SERVER_NAME');
+    if (explicit.isNotEmpty) return explicit;
+    final uri = Uri.tryParse(matrixHomeserver);
+    return uri?.host ?? matrixHomeserver;
+  }
+
+  String get livekitServiceUrl =>
+      const String.fromEnvironment('LIVEKIT_SERVICE_URL');
+
+  String get livekitSfuUrl => const String.fromEnvironment('LIVEKIT_SFU_URL');
+
   FirebaseEnvironment get firebase => FirebaseEnvironment.instance;
 
   int get maxOfferUsages => 100;
@@ -51,6 +68,22 @@ class Environment {
   Duration get initialTimeOffset => const Duration(minutes: 3);
   int get numberOfTapsToUnlockDebug =>
       const int.fromEnvironment('TAPS_TO_UNLOCK_DEBUG', defaultValue: 7);
+
+  Duration get incomingCallRingTimeout => const Duration(
+    seconds: int.fromEnvironment(
+      'INCOMING_CALL_RING_TIMEOUT_SECONDS',
+      defaultValue: 15,
+    ),
+  );
+
+  /// Maximum time the caller waits in outgoing-ringing state before the call
+  /// is automatically cancelled. Configured via `OUTGOING_CALL_TIMEOUT_SECONDS`
+  Duration get outgoingCallTimeout => const Duration(
+    seconds: int.fromEnvironment(
+      'OUTGOING_CALL_TIMEOUT_SECONDS',
+      defaultValue: 60,
+    ),
+  );
 
   bool get isDatabaseLoggingEnabled =>
       const bool.fromEnvironment('DATABASE_LOGGING_ENABLED') && kDebugMode;
