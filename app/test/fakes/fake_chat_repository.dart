@@ -8,7 +8,6 @@ class FakeNoOpChatRepository implements chat.ChatRepository {
 class FakeInMemoryChatRepository implements chat.ChatRepository {
   final List<chat.ChatItem> createdMessages = [];
   final Map<String, chat.ChatItem> _store = {};
-  final Map<String, String?> _syncMarker = {};
 
   @override
   Future<chat.ChatItem> createMessage(chat.ChatItem message) async {
@@ -34,15 +33,11 @@ class FakeInMemoryChatRepository implements chat.ChatRepository {
   }) async => _store['${chatId}_$messageId'];
 
   @override
-  Future<String?> getSyncMarker(String chatId) async {
-    return _syncMarker[chatId];
-  }
+  Future<String?> getSyncMarker(String chatId) async => null;
 
   @override
   Future<void> updateSyncMarker({
     required String chatId,
     required String eventId,
-  }) async {
-    _syncMarker[chatId] = eventId;
-  }
+  }) async {}
 }

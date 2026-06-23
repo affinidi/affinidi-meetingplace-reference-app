@@ -910,6 +910,257 @@ void main() {
 
     tearDown(() => container.dispose());
   });
+
+  group('ChatSessionService - Call Chat Item', () {
+    late ProviderContainer container;
+    late ChatSessionService chatService;
+    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeChatSdk fakeChatSdk;
+
+    final testContact = FakeContacts.individualContact;
+    final channelDid = testContact.channelDid!;
+
+    Message callMessage({
+      required String messageId,
+      required bool isFromMe,
+      required CallStatus status,
+    }) => Message(
+      chatId: 'fake-chat-id',
+      messageId: messageId,
+      value: '',
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      isFromMe: isFromMe,
+      senderDid: isFromMe ? 'me' : channelDid,
+      attachments: [
+        CallMetadata.buildAttachment(
+          mediaType: CallMediaType.video,
+          status: status,
+        ),
+      ],
+    );
+
+    setUp(() async {
+      fakeCoreSdk = FakeMeetingPlaceSDK(
+        channels: {channelDid: FakeChannels.individualChannel},
+      );
+      fakeChatSdk = FakeChatSdk();
+
+      container = ProviderContainer(
+        overrides: [
+          meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
+          chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+          contactsServiceProvider.overrideWith(FakeContactsService.new),
+          environmentProvider.overrideWithValue(FakeEnvironment()),
+          appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
+          rCardsRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpRCardRepository(),
+          ),
+          vrcRepositoryProvider.overrideWith(
+            (ref) async => FakeNoOpVrcRepository(),
+          ),
+          secureStorageProvider.overrideWith(
+            (ref) async => FakeSecureStorage(),
+          ),
+          networkConnectivityServiceProvider.overrideWith(
+            _FakeNetworkConnectivityService.new,
+          ),
+        ],
+      );
+      container.listen(
+        chatSessionServiceProvider(channelDid),
+        (previous, value) {},
+        fireImmediately: true,
+      );
+      chatService = container.read(
+        chatSessionServiceProvider(channelDid).notifier,
+      );
+    });
+
+    tearDown(() => container.dispose());
+
+    test('sendOutgoingCallMessage sends a call item over the wire '
+        'and returns its id', () async {
+      final messageId = await chatService.sendOutgoingCallMessage(
+        mediaType: CallMediaType.audio,
+      );
+
+      expect(messageId, isNotNull);
+      expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
+      final sent = fakeChatSdk.sendTextMessageCalls.single;
+      expect(sent['text'], '');
+      final attachments = sent['attachments'] as List<ChatAttachment>;
+      expect(CallMetadata.isCall(attachments.single), isTrue);
+      final call = CallMetadata.maybeOf(attachments.single);
+      expect(call?.mediaType, CallMediaType.audio);
+      expect(call?.status, CallStatus.calling);
+    });
+
+    test('resolveIncomingCallChatItemId returns the latest non-terminal '
+        'incoming call item', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'old-incoming',
+          isFromMe: false,
+          status: CallStatus.calling,
+        ),
+        callMessage(
+          messageId: 'my-call',
+          isFromMe: true,
+          status: CallStatus.calling,
+        ),
+        callMessage(
+          messageId: 'latest-incoming',
+          isFromMe: false,
+          status: CallStatus.calling,
+        ),
+      ];
+
+      final resolved = await chatService.resolveIncomingCallChatItemId();
+
+      expect(resolved, 'latest-incoming');
+    });
+
+    test('resolveIncomingCallChatItemId returns null when only terminal or '
+        'own call items exist', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'ended-incoming',
+          isFromMe: false,
+          status: CallStatus.ended,
+        ),
+        callMessage(
+          messageId: 'my-call',
+          isFromMe: true,
+          status: CallStatus.calling,
+        ),
+      ];
+
+      final resolved = await chatService.resolveIncomingCallChatItemId();
+
+      expect(resolved, isNull);
+    });
+
+    test('resolveOutgoingCallChatItemId returns the latest non-terminal '
+        'outgoing call item', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'their-call',
+          isFromMe: false,
+          status: CallStatus.calling,
+        ),
+        callMessage(
+          messageId: 'old-mine',
+          isFromMe: true,
+          status: CallStatus.calling,
+        ),
+        callMessage(
+          messageId: 'latest-mine',
+          isFromMe: true,
+          status: CallStatus.ringing,
+        ),
+      ];
+
+      final resolved = await chatService.resolveOutgoingCallChatItemId();
+
+      expect(resolved, 'latest-mine');
+    });
+
+    test('resolveOutgoingCallChatItemId returns null when only terminal or '
+        'incoming call items exist', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'ended-mine',
+          isFromMe: true,
+          status: CallStatus.ended,
+        ),
+        callMessage(
+          messageId: 'their-call',
+          isFromMe: false,
+          status: CallStatus.calling,
+        ),
+      ];
+
+      final resolved = await chatService.resolveOutgoingCallChatItemId();
+
+      expect(resolved, isNull);
+    });
+
+    test('updateCallChatItem updates call attachment status on an existing '
+        'call message', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'call-msg-1',
+          isFromMe: true,
+          status: CallStatus.calling,
+        ),
+      ];
+
+      await chatService.updateCallChatItem(
+        'call-msg-1',
+        status: CallStatus.ended,
+        duration: const Duration(seconds: 30),
+      );
+
+      expect(fakeChatSdk.updateMessageCalls, hasLength(1));
+      final updated = fakeChatSdk.updateMessageCalls.single;
+      final call = CallMetadata.maybeOf(
+        updated.attachments.firstWhere(CallMetadata.isCall),
+      );
+      expect(call?.status, CallStatus.ended);
+      expect(call?.durationMs, 30000);
+    });
+
+    test(
+      'updateCallChatItem is a no-op when the message id does not exist',
+      () async {
+        fakeChatSdk.sessionMessages = [];
+
+        await chatService.updateCallChatItem(
+          'missing-id',
+          status: CallStatus.ended,
+        );
+
+        expect(fakeChatSdk.updateMessageCalls, isEmpty);
+      },
+    );
+
+    test('markCallAsMissed updates the latest non-terminal incoming call item '
+        'to missed', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'incoming-call',
+          isFromMe: false,
+          status: CallStatus.calling,
+        ),
+      ];
+
+      await chatService.markCallAsMissed();
+
+      expect(fakeChatSdk.updateMessageCalls, hasLength(1));
+      final updated = fakeChatSdk.updateMessageCalls.single;
+      expect(updated.messageId, 'incoming-call');
+      final call = CallMetadata.maybeOf(
+        updated.attachments.firstWhere(CallMetadata.isCall),
+      );
+      expect(call?.status, CallStatus.missed);
+    });
+
+    test('markCallAsMissed is a no-op when there is no pending incoming call '
+        'item', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'ended-incoming',
+          isFromMe: false,
+          status: CallStatus.ended,
+        ),
+      ];
+
+      await chatService.markCallAsMissed();
+
+      expect(fakeChatSdk.updateMessageCalls, isEmpty);
+    });
+  });
 }
 
 class _FakeNetworkConnectivityService extends NetworkConnectivityService {

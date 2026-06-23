@@ -1475,7 +1475,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String memberRemovedFromGroup(String memberName) {
-    return '$memberName wurde entfernt';
+    return '$memberName has been removed';
   }
 
   @override
@@ -1637,11 +1637,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get removeMemberDialogTitle => 'Mitglied entfernen';
+  String get removeMemberDialogTitle => 'Remove member';
 
   @override
   String removeMemberDialogBody(String name) {
-    return '$name aus dieser Gruppe entfernen? Sie erhalten keine Nachrichten mehr.';
+    return 'Remove $name from this group? They will no longer receive messages.';
   }
 
   @override
@@ -1800,12 +1800,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String nameSelectedIdentity(String name) {
-    return 'Ausgewählte Identität von $name';
+    return '$name\'s selected identity';
   }
 
   @override
   String selectIdentityToVerifyRelationshipPrompt(String name) {
-    return 'Wischen Sie nach links oder rechts, um die Identität auszuwählen, mit der Sie Ihre Beziehung zu $name verifizieren möchten.';
+    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
   }
 
   @override
@@ -1813,43 +1813,39 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String trustedBy(int count) {
-    return 'Vertraut von $count';
+    return 'Trusted by $count';
   }
 
   @override
-  String get humanZkp => 'Human Zero-Knowledge-Beweis';
-
-  @override
-  String get humanZkpAbbreviated => 'Human ZKP';
+  String get humanZkp => 'Human ZKP';
 
   @override
   String get humanZeroKnowledgeProof => 'Human Zero-Knowledge-Beweis';
 
   @override
-  String get livenessCredential => 'Lebendigkeit Nachweis';
+  String get livenessCredential => 'Liveness Credential';
 
   @override
-  String get verifiableCredentialWallet =>
-      'Verifizierbare Berechtigungs-Wallet';
+  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
 
   @override
-  String get noCredentialsYet => 'Sie haben noch keine Anmeldeinformationen.';
+  String get noCredentialsYet => 'You don\'t have any credentials yet.';
 
   @override
   String get all => 'Alle';
 
   @override
   String get generatingZeroKnowledgeProof =>
-      'Generiere menschlichen Zero-Knowledge-Beweis...';
+      'Generating Zero-Knowledge Proof...';
 
   @override
-  String get cancel => 'Abbrechen';
+  String get cancel => 'Cancel';
 
   @override
-  String get generateCredential => 'Anmeldeinformationen generieren';
+  String get generateCredential => 'Generate credential';
 
   @override
-  String get generateProof => 'Beweis erzeugen';
+  String get generateProof => 'Generate proof';
 
   @override
   String get livenessCredentialRequest =>
@@ -1883,7 +1879,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mockLivenessCredentialNext =>
-      'Sie können jetzt mit der Erstellung eines Human Zero Knowledge Proof fortfahren.';
+      'You can now continue to generate a Human Zero-Knowledge proof.';
 
   @override
   String get livenessEvidenceThresholdNotMet =>
@@ -1934,12 +1930,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get zkpNoticePaused =>
-      'Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis pausiert.';
-
-  @override
-  String zkpNoticeDeclined(String contactName) {
-    return '$contactName hat die Anfrage für einen Human Zero-Knowledge-Beweis abgelehnt. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
-  }
+      'Sie haben die Human-ZKP-Beweisanforderung pausiert. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
 
   @override
   String get zkpNoticeShared =>
@@ -1957,20 +1948,20 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get zkpNoticeRequestInitiated =>
-      'Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis gestartet.';
+      'You have initiated a Human ZKP request.';
 
   @override
   String get zkpProofAlreadyShared => 'ZKP-Beweis bereits geteilt';
 
   @override
-  String get removeMemberConfirm => 'Entfernen';
+  String get removeMemberConfirm => 'Remove';
 
   @override
   String get removeMemberNotSupported =>
-      'Das Entfernen von Mitgliedern wird noch nicht unterstützt.';
+      'Removing members isn\'t supported yet.';
 
   @override
-  String get removeMemberSuccess => 'Mitglied aus der Gruppe entfernt.';
+  String get removeMemberSuccess => 'Member removed from group.';
 
   @override
   String get generalVideo => 'Video';
@@ -2009,10 +2000,196 @@ class AppLocalizationsDe extends AppLocalizations {
       'Sprachnachricht kann nicht gesendet werden.';
 
   @override
-  String get generalEmail => 'E-Mail';
+  String get videoCallTitle => 'Gruppenanruf';
 
   @override
-  String vrcResponderIntro(Object name) {
-    return '$name hat die folgende Persona zur Verifizierung der Beziehung ausgewählt:';
+  String get videoCallJoiningCall => 'Anruf wird beigetreten...';
+
+  @override
+  String get videoCallWaitingForParticipants => 'Warte auf Teilnehmer...';
+
+  @override
+  String videoCallShowMore(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $count more',
+      one: 'Show 1 more',
+    );
+    return '$_temp0';
   }
+
+  @override
+  String get videoCallShowLess => 'Show less';
+
+  @override
+  String videoCallFailedToJoin(Object error) {
+    return 'Beitreten fehlgeschlagen: $error';
+  }
+
+  @override
+  String get videoCallUnknownError => 'Unbekannter Fehler';
+
+  @override
+  String get videoCallMicToggleFailed =>
+      'Couldn\'t change the microphone. Please try again.';
+
+  @override
+  String get videoCallCameraToggleFailed =>
+      'Couldn\'t change the camera. Please try again.';
+
+  @override
+  String get videoCallSpeakerToggleFailed =>
+      'Couldn\'t change the speaker. Please try again.';
+
+  @override
+  String get videoCallMemberNamesFailed => 'Couldn\'t load participant names.';
+
+  @override
+  String get videoCallHangUpFailed => 'Couldn\'t hang up. Please try again.';
+
+  @override
+  String videoCallParticipantCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Teilnehmer',
+      one: '1 Teilnehmer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoCallMute => 'Stummschalten';
+
+  @override
+  String get videoCallUnmute => 'Stummschaltung aufheben';
+
+  @override
+  String get videoCallEnd => 'Beenden';
+
+  @override
+  String get videoCallMicPermissionDenied =>
+      'Mikrofonberechtigung verweigert. Aktivieren Sie es in den Einstellungen.';
+
+  @override
+  String get videoCallCameraPermissionDenied =>
+      'Kameraberechtigung verweigert. Aktivieren Sie es in den Einstellungen.';
+
+  @override
+  String get videoCallWaitingForEncryption =>
+      'Verschlüsselung wird eingerichtet...';
+
+  @override
+  String get videoCallYou => 'Du';
+
+  @override
+  String get videoCallRinging => 'Klingelt';
+
+  @override
+  String get videoCallCalling => 'Calling...';
+
+  @override
+  String get videoCallCancelCall => 'Abbrechen';
+
+  @override
+  String get videoCallNoAnswer => 'Keine Antwort';
+
+  @override
+  String get videoCallCallDeclined => 'Anruf abgelehnt';
+
+  @override
+  String get videoCallCancel => 'Abbrechen';
+
+  @override
+  String get videoCallAgain => 'Erneut anrufen';
+
+  @override
+  String get videoCallGroupCallJoin => 'Beitreten';
+
+  @override
+  String get videoCallGroupCallActive => 'Gruppenanruf läuft';
+
+  @override
+  String incomingCallBannerIsCalling(String callerName) {
+    return '$callerName ruft an';
+  }
+
+  @override
+  String get incomingCallBannerAccept => 'Annehmen';
+
+  @override
+  String get incomingCallBannerDecline => 'Ablehnen';
+
+  @override
+  String get incomingCallBannerUnknownCaller => 'Unbekannter Anrufer';
+
+  @override
+  String get incomingCallBannerAudioCall => 'MeetingPlace Audio';
+
+  @override
+  String get incomingCallBannerVideoCall => 'MeetingPlace Video';
+
+  @override
+  String get callChatItemAudioCall => 'Audioanruf';
+
+  @override
+  String get callChatItemVideoCall => 'Videoanruf';
+
+  @override
+  String get callChatItemCalling => 'Anrufen...';
+
+  @override
+  String get callChatItemRinging => 'Klingelt';
+
+  @override
+  String get callChatItemIncoming => 'Eingehender Anruf';
+
+  @override
+  String get callChatItemTapToReturn => 'Zum Zurückkehren tippen';
+
+  @override
+  String get callChatItemMissed => 'Verpasst';
+
+  @override
+  String get callChatItemNotAnswered => 'Nicht beantwortet';
+
+  @override
+  String callDurationHourFormat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Std.',
+      one: '1 Std.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationMinuteFormat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Min.',
+      one: '1 Min.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationSecondFormat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Sek.',
+      one: '1 Sek.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoCallSwitchToVideoTitle => 'Zu Videoanruf wechseln?';
+
+  @override
+  String get videoCallSwitch => 'Wechsel';
 }

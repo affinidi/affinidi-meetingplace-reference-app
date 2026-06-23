@@ -15,9 +15,54 @@ dev_dependencies:
 
 dependency_overrides:
   ffi: 2.2.0
+  # TODO (earl): remove once meeting_place_matrix_livekit is published to pub.dev and
+  # the git override below is no longer needed. The git-pinned livekit_client
+  # transitively requires device_info_plus ^12.3.0 → win32 ^5.x, which
+  # conflicts with file_picker ^12.x requiring win32 ^6.x.
+  # flutter_secure_storage_windows 4.1.0 also requires win32 ^5.x.
+  device_info_plus: ^13.0.0
+  win32: ^6.2.0
+  flutter_secure_storage_windows: ^4.2.2
+
+  meeting_place_chat:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_chat
+      ref: 04a0e7238cb29d39e1420498b1d3a5dfab8964ae
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_chat
+  meeting_place_control_plane:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_control_plane
+      ref: 04a0e7238cb29d39e1420498b1d3a5dfab8964ae
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_control_plane
+  meeting_place_core:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_core
+      ref: 04a0e7238cb29d39e1420498b1d3a5dfab8964ae
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_core
+  meeting_place_drift_repository:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_drift_repository
+      ref: 04a0e7238cb29d39e1420498b1d3a5dfab8964ae
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_drift_repository
+  meeting_place_matrix_livekit:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_matrix_livekit
+      ref: 04a0e7238cb29d39e1420498b1d3a5dfab8964ae
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_matrix_livekit
+  meeting_place_mediator:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_mediator
+      ref: 04a0e7238cb29d39e1420498b1d3a5dfab8964ae
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_mediator
   meta: ^1.18.2
   test_api: ^0.7.12
-  
+
 melos:
   scripts:
     analyze:
@@ -74,7 +119,7 @@ melos:
         echo "Generating code"
         echo "------------------------------------------------------------------------"
         melos exec --scope=mpx_flutter_reference_app -- flutter clean
-        melos exec --scope=mpx_flutter_reference_app -- dart run build_runner build
+        melos exec --scope=mpx_flutter_reference_app -- dart run build_runner build --delete-conflicting-outputs
         melos exec --scope=mpx_flutter_reference_app -- dart format -l 80 lib test
 
     strings:
