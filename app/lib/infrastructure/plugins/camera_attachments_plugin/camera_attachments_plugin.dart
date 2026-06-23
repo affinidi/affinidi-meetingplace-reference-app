@@ -244,7 +244,7 @@ class _CameraAttachmentWidget extends StatelessWidget {
           );
         }
 
-        if (!snapshot.hasData) {
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const SizedBox(
             height: 200,
             width: 200,

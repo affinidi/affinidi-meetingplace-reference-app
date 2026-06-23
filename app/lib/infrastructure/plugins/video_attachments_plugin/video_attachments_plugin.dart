@@ -15,11 +15,15 @@ import 'video_attachment.dart';
 
 /// A plugin for handling video attachments picked from the device gallery.
 final class VideoAttachmentsPlugin implements AttachmentPlugin {
-  VideoAttachmentsPlugin({required this._cacheManager});
+  VideoAttachmentsPlugin({
+    required this._cacheManager,
+    required this._imagePicker,
+  });
 
   static const pluginName = 'mpx_video_attachment_plugin';
 
   final BaseCacheManager _cacheManager;
+  final ImagePicker _imagePicker;
 
   int get _maxBytes => Environment.instance.chatAttachmentMaxBytes;
 
@@ -30,12 +34,10 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
   Future<AttachmentPluginPickResult?> pickAttachments(
     BuildContext context,
   ) async {
-    final picker = ImagePicker();
-    final video = await picker.pickVideo(
+    final video = await _imagePicker.pickVideo(
       source: ImageSource.gallery,
       maxDuration: const Duration(minutes: 5),
     );
-
     if (video == null) return null;
 
     final sizeBytes = await video.length();
@@ -47,18 +49,15 @@ final class VideoAttachmentsPlugin implements AttachmentPlugin {
     }
 
     final bytes = await video.readAsBytes();
-    final base64Data = base64.encode(bytes);
-    final mimeType = video.mimeType ?? 'video/mp4';
-    final filename = video.name;
 
     return AttachmentPluginPickResult(
       text: '',
       attachments: [
         VideoAttachment(
-          base64: base64Data,
+          base64: base64.encode(bytes),
           pluginName: pluginName,
-          mimeType: mimeType,
-          filename: filename,
+          mimeType: video.mimeType ?? 'video/mp4',
+          filename: video.name,
           byteCount: bytes.length,
         ),
       ],

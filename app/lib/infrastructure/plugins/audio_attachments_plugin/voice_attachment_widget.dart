@@ -20,6 +20,7 @@ class VoiceAttachmentWidget extends HookWidget {
     required this.chatItemColor,
     required this.cacheManager,
     required this.localVoiceStore,
+    this.avatarImage,
     this.download,
   });
 
@@ -28,6 +29,7 @@ class VoiceAttachmentWidget extends HookWidget {
   final Color chatItemColor;
   final BaseCacheManager cacheManager;
   final LocalVoiceAttachmentStore localVoiceStore;
+  final ImageProvider<Object>? avatarImage;
   final Future<Uint8List> Function(ChatAttachment)? download;
 
   @override
@@ -106,6 +108,7 @@ class VoiceAttachmentWidget extends HookWidget {
         duration: Duration(milliseconds: durationMs),
         levels: levels,
         progress: 0,
+        avatarImage: avatarImage,
         onPressed: () => unawaited(onPressed()),
       );
     }
@@ -123,6 +126,7 @@ class VoiceAttachmentWidget extends HookWidget {
         duration: state.duration,
         levels: levels,
         progress: state.progress,
+        avatarImage: avatarImage,
         onPressed: state.toggle,
       ),
     );

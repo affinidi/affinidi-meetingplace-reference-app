@@ -127,6 +127,7 @@ class _PlainTextChatItem extends ConsumerWidget {
                 final attachment = attachments[index];
                 return _AttachmentWidget(
                   contactId: _contactId,
+                  chatItem: chatItem,
                   attachment: attachment,
                   isFromMe: chatItem.isFromMe,
                   chatItemColor: _chatItemColor,
@@ -197,6 +198,7 @@ class _TextMessage extends StatelessWidget {
 class _AttachmentWidget extends HookConsumerWidget {
   _AttachmentWidget({
     required this._contactId,
+    required this._chatItem,
     required ChatAttachment attachment,
     required this._isFromMe,
     required this._chatItemColor,
@@ -204,6 +206,7 @@ class _AttachmentWidget extends HookConsumerWidget {
        super(key: ValueKey('chat_attachment_${attachment.id!}'));
 
   final ChatAttachment _attachment;
+  final chat.Message _chatItem;
   final String _contactId;
   final bool _isFromMe;
   final Color _chatItemColor;
@@ -212,6 +215,7 @@ class _AttachmentWidget extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
+    final chatState = ref.watch(provider);
 
     final plugins = ref.read(availableAttachmentPluginsProvider);
 
@@ -220,12 +224,24 @@ class _AttachmentWidget extends HookConsumerWidget {
 
     for (final plugin in plugins) {
       if (plugin.supportsFormat(_attachment)) {
-        final child = plugin.renderAttachment(
-          attachment: _attachment,
-          isFromMe: _isFromMe,
-          chatItemColor: _chatItemColor,
-          download: downloadCallback,
-        );
+        final child = plugin is AudioAttachmentsPlugin
+            ? plugin.renderAttachmentWithAvatar(
+                attachment: _attachment,
+                isFromMe: _isFromMe,
+                chatItemColor: _chatItemColor,
+                avatarImage: _voiceAvatarImage(
+                  state: chatState,
+                  message: _chatItem,
+                  cacheManager: ref.read(cacheManagerProvider),
+                ),
+                download: downloadCallback,
+              )
+            : plugin.renderAttachment(
+                attachment: _attachment,
+                isFromMe: _isFromMe,
+                chatItemColor: _chatItemColor,
+                download: downloadCallback,
+              );
         if (_attachment.isRCard) {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -238,6 +254,30 @@ class _AttachmentWidget extends HookConsumerWidget {
     }
 
     return const SizedBox.shrink();
+  }
+
+  ImageProvider<Object>? _voiceAvatarImage({
+    required ChatScreenState state,
+    required chat.Message message,
+    required BaseCacheManager cacheManager,
+  }) {
+    if (message.isFromMe) {
+      return state.myCard?.image(cacheManager: cacheManager) ??
+          defaultProfileImage;
+    }
+
+    final group = state.group;
+    if (group != null) {
+      final member = group.members.firstWhereOrNull(
+        (member) => member.did == message.senderDid,
+      );
+      if (member == null || !member.contactCard.hasProfilePic) return null;
+      return member.contactCard.image(cacheManager: cacheManager);
+    }
+
+    return state.contact?.card.image(cacheManager: cacheManager) ??
+        state.otherPartyCard?.image(cacheManager: cacheManager) ??
+        defaultProfileImage;
   }
 }
 

@@ -21,6 +21,7 @@ class VoiceAttachmentBubble extends StatelessWidget {
     required this.levels,
     required this.progress,
     required this.onPressed,
+    this.avatarImage,
     this.isLoading = false,
   });
 
@@ -31,6 +32,7 @@ class VoiceAttachmentBubble extends StatelessWidget {
   final List<double> levels;
   final double progress;
   final VoidCallback onPressed;
+  final ImageProvider<Object>? avatarImage;
   final bool isLoading;
 
   @override
@@ -45,12 +47,16 @@ class VoiceAttachmentBubble extends StatelessWidget {
       child: Row(
         children: [
           ProfileCircleAvatar(
+            key: const Key('voice_sender_avatar'),
             radius: 28,
-            child: Icon(
-              isFromMe ? Icons.person : Icons.person_outline,
-              color: Colors.white,
-              size: 30,
-            ),
+            image: avatarImage,
+            child: avatarImage == null
+                ? Icon(
+                    isFromMe ? Icons.person : Icons.person_outline,
+                    color: Colors.white,
+                    size: 30,
+                  )
+                : null,
           ),
           const SizedBox(width: 12),
           IconButton(

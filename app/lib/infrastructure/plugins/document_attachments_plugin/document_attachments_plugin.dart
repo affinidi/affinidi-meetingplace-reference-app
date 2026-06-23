@@ -19,15 +19,19 @@ import 'document_attachment.dart';
 
 /// A plugin for handling document file attachments.
 final class DocumentAttachmentsPlugin implements AttachmentPlugin {
-  DocumentAttachmentsPlugin({required this._cacheManager});
+  DocumentAttachmentsPlugin({
+    required this._cacheManager,
+    required this._filePickerPlatform,
+  });
 
   static const pluginName = 'mpx_document_attachment_plugin';
 
   final BaseCacheManager _cacheManager;
+  final FilePickerPlatform _filePickerPlatform;
 
   int get _maxBytes => Environment.instance.chatAttachmentMaxBytes;
 
-  static const _allowedExtensions = [
+  static const allowedExtensions = [
     'pdf',
     'doc',
     'docx',
@@ -47,9 +51,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   Future<AttachmentPluginPickResult?> pickAttachments(
     BuildContext context,
   ) async {
-    final result = await FilePicker.pickFiles(
+    final result = await _filePickerPlatform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: _allowedExtensions,
+      allowedExtensions: allowedExtensions,
     );
 
     if (result == null || result.files.isEmpty) return null;
@@ -65,8 +69,6 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
     final filePath = file.path;
     if (filePath == null) return null;
     final bytes = await File(filePath).readAsBytes();
-
-    final base64Data = base64.encode(bytes);
     final mimeType =
         _mimeTypeFromExtension(file.extension) ?? 'application/octet-stream';
 
@@ -74,7 +76,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
       text: '',
       attachments: [
         DocumentAttachment(
-          base64: base64Data,
+          base64: base64.encode(bytes),
           pluginName: pluginName,
           mimeType: mimeType,
           filename: file.name,
@@ -128,6 +130,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   @override
   bool get isPlatformSupported => true;
 
+  @override
+  bool get dismissSheetBeforePicking => false;
+
   String? _mimeTypeFromExtension(String? ext) {
     if (ext == null) return null;
     return switch (ext.toLowerCase()) {
@@ -153,9 +158,6 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
       _ => null,
     };
   }
-
-  @override
-  bool get dismissSheetBeforePicking => false;
 }
 
 class _ListDocumentAttachmentsWidget extends StatelessWidget {

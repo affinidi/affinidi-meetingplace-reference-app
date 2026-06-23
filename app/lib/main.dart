@@ -17,6 +17,8 @@ import 'infrastructure/firebase_messaging/firebase_push_notification_messaging.d
 import 'infrastructure/loggers/app_logger/app_logger.dart';
 import 'infrastructure/loggers/error_logger/error_logger.dart';
 import 'infrastructure/loggers/riverpod_provider_logger/provider_debug_logger.dart';
+import 'infrastructure/media/file_picker/file_picker_platform_provider.dart';
+import 'infrastructure/media/image_picker/image_picker_provider.dart';
 import 'infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'infrastructure/plugins/audio_attachments_plugin/local_voice_attachment_store.dart';
 import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
@@ -106,9 +108,11 @@ void main() async {
             VrcAttachmentsPlugin(),
             VideoAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),
+              imagePicker: ref.read(imagePickerProvider),
             ),
             DocumentAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),
+              filePickerPlatform: ref.read(filePickerPlatformProvider),
             ),
             AudioAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),

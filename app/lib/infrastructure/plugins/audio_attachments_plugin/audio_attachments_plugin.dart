@@ -5,6 +5,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
 
+import '../../extensions/build_context_extensions.dart';
 import 'local_voice_attachment_store.dart';
 import 'voice_attachment_widget.dart';
 
@@ -49,6 +50,22 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
     download: download,
   );
 
+  Widget renderAttachmentWithAvatar({
+    required ChatAttachment attachment,
+    required bool isFromMe,
+    required Color chatItemColor,
+    ImageProvider<Object>? avatarImage,
+    Future<Uint8List> Function(ChatAttachment)? download,
+  }) => VoiceAttachmentWidget(
+    attachment: attachment,
+    isFromMe: isFromMe,
+    chatItemColor: chatItemColor,
+    cacheManager: _cacheManager,
+    localVoiceStore: _localVoiceStore,
+    avatarImage: avatarImage,
+    download: download,
+  );
+
   @override
   Widget renderAttachments({
     required List<ChatAttachment> attachments,
@@ -77,5 +94,5 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
   AttachmentPluginIcon get icon => const EmojiIcon('🎤');
 
   @override
-  String localizedName(BuildContext context) => 'Voice';
+  String localizedName(BuildContext context) => context.l10n.generalVoice;
 }
