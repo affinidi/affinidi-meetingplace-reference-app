@@ -2914,6 +2914,12 @@ abstract class AppLocalizations {
   /// **'You have initiated a Human ZKP request.'**
   String get zkpNoticeRequestInitiated;
 
+  /// No description provided for @zkpNoticeDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'You declined the Human ZKP proof request.'**
+  String get zkpNoticeDeclined;
+
   /// No description provided for @zkpProofAlreadyShared.
   ///
   /// In en, this message translates to:
