@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -1024,16 +1025,16 @@ void main() {
           final contactId = FakeContacts.groupContact.id;
           final chatSdk = FakeChatSdk();
           final myDid = FakeContacts.groupContact.channelDid!;
-          final groupWithSelfRemoved = Group(
+          final groupWithSelfRemoved = sdk.Group(
             id: 'group-id',
             did: 'group-did',
             offerLink: FakeContacts.groupContact.offerLink,
             members: [
-              GroupMember(
+              sdk.GroupMember(
                 did: myDid,
                 dateAdded: DateTime.now(),
-                status: GroupMemberStatus.deleted,
-                membershipType: GroupMembershipType.member,
+                status: sdk.GroupMemberStatus.deleted,
+                membershipType: sdk.GroupMembershipType.member,
                 contactCard: FakeContacts.sdkContactCard,
                 publicKey: 'fake-public-key',
               ),
@@ -1055,6 +1056,32 @@ void main() {
 
           final input = tester.widget<TextFormField>(findChatMessageInput());
           expect(input.enabled, isFalse);
+        });
+
+        testWidgets('keeps the message input enabled when a member voluntarily '
+            'leaves', (WidgetTester tester) async {
+          final contactId = FakeContacts.groupContact.id;
+          final chatSdk = FakeChatSdk();
+          final myDid = FakeContacts.groupContact.channelDid!;
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+          );
+
+          chatSdk.simulateMemberLeftGroup(
+            memberName: 'You',
+            memberDid: myDid,
+            senderDid: FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            reason: GroupMemberLeaveReason.leave,
+          );
+          await tester.pumpAndSettle();
+
+          final input = tester.widget<TextFormField>(findChatMessageInput());
+          expect(input.enabled, isNot(false));
         });
       });
     });

@@ -1293,7 +1293,8 @@ extension _ChatScreenStateExtensions on ChatScreenState {
       (message) =>
           message.eventType == chat.EventMessageType.groupMemberLeftGroup &&
           message.status == chat.ChatItemStatus.received &&
-          message.memberDid == did,
+          message.memberDid == did &&
+          message.isGroupMemberRemoved,
     );
   }
 }
