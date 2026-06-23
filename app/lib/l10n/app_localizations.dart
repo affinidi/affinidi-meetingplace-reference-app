@@ -2950,6 +2950,12 @@ abstract class AppLocalizations {
   /// **'Video'**
   String get generalVideo;
 
+  /// Label for the voice message attachment plugin
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get generalVoice;
+
   /// Label for the document attachment plugin
   ///
   /// In en, this message translates to:

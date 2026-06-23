@@ -138,4 +138,17 @@ class FakeImagePicker extends ImagePicker {
 
     return _xFileToReturn;
   }
+
+  @override
+  Future<XFile?> pickVideo({
+    required ImageSource source,
+    CameraDevice preferredCameraDevice = CameraDevice.rear,
+    Duration? maxDuration,
+  }) async {
+    if (_shouldReturnNull) {
+      return null;
+    }
+
+    return _xFileToReturn;
+  }
 }

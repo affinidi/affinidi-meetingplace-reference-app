@@ -12,16 +12,22 @@ import 'document_attachment.dart';
 
 /// A plugin for handling document file attachments.
 final class DocumentAttachmentsPlugin implements AttachmentPlugin {
-  DocumentAttachmentsPlugin();
+  DocumentAttachmentsPlugin({
+    required this._cacheManager,
+    required this._filePickerPlatform,
+  });
 
-  static const _pluginName = 'mpx_document_attachment_plugin';
+  static const pluginName = 'mpx_document_attachment_plugin';
+
+  final BaseCacheManager _cacheManager;
+  final FilePickerPlatform _filePickerPlatform;
 
   /// Hard upper bound on raw document bytes accepted from the picker.
   /// Above this the file is rejected before being base64-encoded, which would
   /// otherwise inflate the in-memory footprint by roughly 33 percent.
   int get _maxBytes => Environment.instance.chatAttachmentMaxBytes;
 
-  static const _allowedExtensions = [
+  static const allowedExtensions = [
     'pdf',
     'doc',
     'docx',
@@ -41,9 +47,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   Future<AttachmentPluginPickResult?> pickAttachments(
     BuildContext context,
   ) async {
-    final result = await FilePicker.pickFiles(
+    final result = await _filePickerPlatform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: _allowedExtensions,
+      allowedExtensions: allowedExtensions,
     );
 
     if (result == null || result.files.isEmpty) return null;
@@ -56,11 +62,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
       return null;
     }
 
-    final path = file.path;
-    if (path == null) return null;
-    final bytes = await File(path).readAsBytes();
-
-    final base64Data = base64.encode(bytes);
+    final filePath = file.path;
+    if (filePath == null) return null;
+    final bytes = await File(filePath).readAsBytes();
     final mimeType =
         _mimeTypeFromExtension(file.extension) ?? 'application/octet-stream';
 
@@ -68,8 +72,8 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
       text: '',
       attachments: [
         DocumentAttachment(
-          base64: base64Data,
-          pluginName: _pluginName,
+          base64: base64.encode(bytes),
+          pluginName: pluginName,
           mimeType: mimeType,
           filename: file.name,
           byteCount: bytes.length,
@@ -118,6 +122,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   @override
   bool get isPlatformSupported => true;
 
+  @override
+  bool get dismissSheetBeforePicking => false;
+
   String? _mimeTypeFromExtension(String? ext) {
     if (ext == null) return null;
     return switch (ext.toLowerCase()) {
@@ -143,9 +150,6 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
       _ => null,
     };
   }
-
-  @override
-  bool get dismissSheetBeforePicking => false;
 }
 
 class _DocumentAttachmentWidget extends StatelessWidget {

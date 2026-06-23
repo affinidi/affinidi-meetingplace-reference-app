@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,7 +20,10 @@ import 'package:mpx_flutter_reference_app/infrastructure/biometrics/local_auth_p
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/app_info.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/firebase_messaging/push_notification_messaging.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/media/file_picker/file_picker_platform_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/media/image_picker/image_picker_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/local_voice_attachment_store.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
@@ -69,6 +73,7 @@ Future<void> startApp(
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
+  FilePickerPlatform? filePickerPlatform,
   List<CameraDescription>? mockCameras,
   PermissionStatus? cameraPermissionStatus,
   required List<Identity> identities,
@@ -148,8 +153,13 @@ Future<void> startApp(
               ),
               DocumentAttachmentsPlugin(
                 cacheManager: ref.read(cacheManagerProvider),
+                filePickerPlatform: ref.read(filePickerPlatformProvider),
               ),
               VrcAttachmentsPlugin(),
+              AudioAttachmentsPlugin(
+                cacheManager: ref.read(cacheManagerProvider),
+                localVoiceStore: ref.read(localVoiceAttachmentStoreProvider),
+              ),
             ],
       ),
       localAuthProvider.overrideWith(
@@ -215,6 +225,8 @@ Future<void> startApp(
         ),
       if (imagePicker != null)
         imagePickerProvider.overrideWith((ref) => imagePicker),
+      if (filePickerPlatform != null)
+        filePickerPlatformProvider.overrideWith((ref) => filePickerPlatform),
       if (mockCameras != null) ...[
         availableCamerasProvider.overrideWith(
           (ref) =>

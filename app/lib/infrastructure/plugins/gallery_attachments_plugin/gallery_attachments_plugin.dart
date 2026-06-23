@@ -188,10 +188,7 @@ class _GalleryAttachmentWidgetState extends State<_GalleryAttachmentWidget>
 
   String? _cacheKey(ChatAttachment attachment) {
     final id = attachment.id;
-    final pluginName = attachment.format;
-    if (id == null || id.isEmpty || pluginName == null || pluginName.isEmpty) {
-      return null;
-    }
+    if (id == null || id.isEmpty) return null;
 
     return GalleryAttachmentsPlugin._cacheKeyForAttachment(id);
   }
@@ -211,6 +208,8 @@ class _GalleryAttachmentWidgetState extends State<_GalleryAttachmentWidget>
     }
 
     final imageBytes = await downloadFn(attachment);
+    if (imageBytes.isEmpty) return imageBytes;
+
     if (cacheKey != null) {
       await widget.cacheManager.putFile(cacheKey, imageBytes);
     }
@@ -275,7 +274,11 @@ class _GalleryAttachmentWidgetState extends State<_GalleryAttachmentWidget>
     final imageDataBase64 = widget.attachment.data?.base64;
 
     if (imageDataBase64 != null) {
-      return _ResolvedImage(base64Decode(imageDataBase64));
+      try {
+        return _ResolvedImage(base64Decode(imageDataBase64));
+      } catch (_) {
+        return const _ErrorImage();
+      }
     }
 
     final resolvedImageBytes = _resolvedImageBytes;
@@ -293,7 +296,7 @@ class _GalleryAttachmentWidgetState extends State<_GalleryAttachmentWidget>
           return const _LoadingImage();
         }
 
-        if (snapshot.hasError || !snapshot.hasData) {
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
           return const _ErrorImage();
         }
 

@@ -1845,6 +1845,10 @@
 	"@generalVideo": {
 		"description": "Label for the video attachment plugin"
 	},
+	"generalVoice": "Voice",
+	"@generalVoice": {
+		"description": "Label for the voice message attachment plugin"
+	},
 	"generalDocument": "Document",
 	"@generalDocument": {
 		"description": "Label for the document attachment plugin"

@@ -1976,6 +1976,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get generalVideo => 'Video';
 
   @override
+  String get generalVoice => 'Stimme';
+
+  @override
   String get generalDocument => 'Dokument';
 
   @override
