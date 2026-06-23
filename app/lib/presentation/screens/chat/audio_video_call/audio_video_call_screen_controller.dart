@@ -257,15 +257,19 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   }
 
   /// Checks initial microphone and camera permission status and updates state.
+  ///
+  /// Only flags an error for [PermissionStatus.permanentlyDenied] (user
+  /// explicitly denied a previous prompt). Undetermined ("not yet asked") is
+  /// not treated as an error — LiveKit requests the permission natively when
+  /// it enables the mic/camera track, avoiding races with AVAudioSession setup.
   Future<void> checkInitialPermissions() async {
     final ps = ref.read(permissionServiceProvider);
     final camStatus = await ps.getCameraPermissionStatus();
     final micStatus = await ps.getMicrophonePermissionStatus();
     if (_isDisposed) return;
     state = state.copyWith(
-      cameraPermissionError:
-          camStatus.isDenied || camStatus.isPermanentlyDenied,
-      micPermissionError: micStatus.isDenied || micStatus.isPermanentlyDenied,
+      cameraPermissionError: camStatus.isPermanentlyDenied,
+      micPermissionError: micStatus.isPermanentlyDenied,
     );
   }
 
@@ -407,11 +411,21 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     }
   }
 
-  /// Toggles microphone on/off, requesting permission if needed.
+  /// Toggles microphone on/off.
+  ///
+  /// Skips the permission check when the call is active — LiveKit already
+  /// owns the AVAudioSession at that point and re-querying permission_handler
+  /// can return a stale status. Only re-checks if a previous permission error
+  /// was recorded.
   Future<void> toggleMic() => _toggleDevice(
-    permission: () =>
-        ref.read(permissionServiceProvider).requestMicrophonePermission(),
-    isGranted: (s) => s.isGranted,
+    permission: () async {
+      if (!state.micPermissionError) return PermissionStatus.granted;
+      final ps = ref.read(permissionServiceProvider);
+      final current = await ps.getMicrophonePermissionStatus();
+      if (current.isDenied) return ps.requestMicrophonePermission();
+      return current;
+    },
+    isGranted: (s) => s.isGranted || s.isLimited,
     onDenied: () => state = state.copyWith(micPermissionError: true),
     currentValue: state.isMicEnabled,
     apply: (v) async => _session?.setMicrophoneEnabled(v),
@@ -421,11 +435,18 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     failureLabel: 'Failed to toggle microphone',
   );
 
-  /// Toggles camera on/off, requesting permission if needed.
+  /// Toggles camera on/off.
+  ///
+  /// Same skip-if-active logic as [toggleMic].
   Future<void> toggleCamera() => _toggleDevice(
-    permission: () =>
-        ref.read(permissionServiceProvider).requestCameraPermission(),
-    isGranted: (s) => s.isGranted,
+    permission: () async {
+      if (!state.cameraPermissionError) return PermissionStatus.granted;
+      final ps = ref.read(permissionServiceProvider);
+      final current = await ps.getCameraPermissionStatus();
+      if (current.isDenied) return ps.requestCameraPermission();
+      return current;
+    },
+    isGranted: (s) => s.isGranted || s.isLimited,
     onDenied: () => state = state.copyWith(cameraPermissionError: true),
     currentValue: state.isCameraEnabled,
     apply: (v) async => _session?.setCameraEnabled(v),
