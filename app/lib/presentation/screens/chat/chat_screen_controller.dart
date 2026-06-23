@@ -33,6 +33,7 @@ import '../../../infrastructure/plugins/audio_attachments_plugin/local_voice_att
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/providers/audio_video_call_plugin_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -112,11 +113,15 @@ class ChatScreenController extends _$ChatScreenController
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     final channelDid = contact?.channelDid;
+    final isCallSupported = ref.watch(
+      audioVideoCallPluginProvider.select((v) => v.value?.isSupported ?? false),
+    );
     var pendingState = ChatScreenState(
       contact: contact,
       isActive: true,
       isInitialized: false,
       contactPresenceStatus: ContactPresenceStatus.unknown,
+      isCallSupported: isCallSupported,
     );
     var hasInitializedState = false;
 
@@ -446,7 +451,6 @@ class ChatScreenController extends _$ChatScreenController
   /// Throws an exception if the contact cannot be loaded.
   Future<void> loadContact(String contactId) async {
     await ref.read(contactsServiceProvider.notifier).ensureInitialized();
-    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     if (contact == null) {
@@ -479,18 +483,13 @@ class ChatScreenController extends _$ChatScreenController
     }
     final srcCard = channel.otherPartyContactCard;
     final ownCard = channel.contactCard;
-    final ownIdentity = ref
-        .read(identitiesServiceProvider)
-        .getIdentityById(channel.externalRef);
     state = state.copyWith(
       otherPartyCard: srcCard == null
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
-      myCard:
-          ownIdentity?.card ??
-          (ownCard == null
-              ? null
-              : ContactCardUtils.fromSdkContactCard(ownCard)),
+      myCard: ownCard == null
+          ? null
+          : ContactCardUtils.fromSdkContactCard(ownCard),
       notificationToken: channel.otherPartyNotificationToken,
       myDid: channel.permanentChannelDid,
     );
@@ -544,9 +543,6 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   Future<void> pauseHumanZkpRequestFlow() async {
-    await ref
-        .read(proofFlowControllerProvider(contactId).notifier)
-        .sendDeclined();
     final requestNoticeId =
         ChatZkpMessageListPolicy.latestHumanZkpRequestNoticeMessageId(
           state.messages,

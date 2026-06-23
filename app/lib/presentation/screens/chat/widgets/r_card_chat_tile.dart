@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 
+// TODO (earl): Rename to `RcardChatItem` for consistency
 class RCardChatTile extends StatelessWidget {
   const RCardChatTile({
     super.key,
