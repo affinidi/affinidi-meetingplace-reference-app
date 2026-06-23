@@ -314,7 +314,6 @@
 	"groupDeleted": "Diese Gruppe wurde gelöscht",
 	"joiningGroup": "{memberName} ist der Gruppe beigetreten",
 	"leavingGroup": "{memberName} hat die Gruppe verlassen",
-	"memberRemovedFromGroup": "{memberName} wurde entfernt",
 	"meetingPlaceControlPlane": "Steuerungsebene für Treffpunkte",
 	"noExpirySetHelperText": "Es wurde kein Ablaufdatum festgelegt, sodass diese Einladung zur Verbindung nicht abläuft",
 	"offerUnlimitedUsages": "Diese Einladung kann beliebig oft verwendet werden",
@@ -480,8 +479,6 @@
 	"issuer": "Aussteller",
 	"issuedOn": "Ausgestellt am",
 	"human": "Mensch",
-	"humanZkp": "Human Zero-Knowledge-Beweis",
-	"humanZkpAbbreviated": "Human ZKP",
 	"humanZeroKnowledgeProof": "Human Zero-Knowledge-Beweis",
 	"proofFlowThisContact": "dieser Kontakt",
 	"proofFlowContact": "Kontakt",
@@ -489,12 +486,10 @@
 	"proofFlowRequestProof": "Beweis anfordern",
 	"proofFlowVerifyingProof": "Beweis von {contactName} wird überprüft...",
 	"proofFlowVerificationFailed": "Überprüfung für {contactName} fehlgeschlagen",
-	"zkpNoticePaused": "Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis pausiert.",
-	"zkpNoticeDeclined": "{contactName} hat die Anfrage für einen Human Zero-Knowledge-Beweis abgelehnt. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.",
+	"zkpNoticePaused": "Sie haben die Human-ZKP-Beweisanforderung pausiert. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.",
 	"zkpNoticeShared": "Sie haben einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass Sie ein Mensch sind.\n*Es wurden keine persönlichen Daten geteilt.",
 	"zkpNoticeReceived": "{contactName} hat einen Zero‑Knowledge-Beweis geteilt, der bestätigt, dass sie/er ein Mensch ist.",
 	"zkpNoticeRequest": "{contactName} hat einen Zero‑Knowledge-Beweis angefordert, um zu bestätigen, dass Sie ein Mensch sind.\nSie können den Beweis mithilfe einer vorhandenen Liveness-Berechtigung generieren oder eine schnelle Liveness-Prüfung durchführen.",
-	"zkpNoticeRequestInitiated": "Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis gestartet.",
 	"zkpProofAlreadyShared": "ZKP-Beweis bereits geteilt",
 	"debugPanelShareLogs": "Protokolle teilen",
 	"mediaTapToRetry": "Zum Wiederholen tippen",
@@ -509,20 +504,70 @@
 	"voiceMessagePermissionDenied": "Zum Aufnehmen von Sprachnachrichten ist Mikrofonzugriff erforderlich.",
 	"voiceMessageRecordingFailed": "Sprachaufnahme kann nicht gestartet werden.",
 	"voiceMessageSendFailed": "Sprachnachricht kann nicht gesendet werden.",
-	"removeMemberSuccess": "Mitglied aus der Gruppe entfernt.",
-	"cancel": "Abbrechen",
-	"generateCredential": "Anmeldeinformationen generieren",
-	"generateProof": "Beweis erzeugen",
-	"generatingZeroKnowledgeProof": "Generiere menschlichen Zero-Knowledge-Beweis...",
-	"livenessCredential": "Lebendigkeit Nachweis",
-	"mockLivenessCredentialNext": "Sie können jetzt mit der Erstellung eines Human Zero Knowledge Proof fortfahren.",
-	"nameSelectedIdentity": "Ausgewählte Identität von {name}",
-	"noCredentialsYet": "Sie haben noch keine Anmeldeinformationen.",
-	"removeMemberConfirm": "Entfernen",
-	"removeMemberDialogBody": "{name} aus dieser Gruppe entfernen? Sie erhalten keine Nachrichten mehr.",
-	"removeMemberDialogTitle": "Mitglied entfernen",
-	"removeMemberNotSupported": "Das Entfernen von Mitgliedern wird noch nicht unterstützt.",
-	"selectIdentityToVerifyRelationshipPrompt": "Wischen Sie nach links oder rechts, um die Identität auszuwählen, mit der Sie Ihre Beziehung zu {name} verifizieren möchten.",
-	"trustedBy": "Vertraut von {count}",
-	"verifiableCredentialWallet": "Verifizierbare Berechtigungs-Wallet"
+	"videoCallTitle": "Gruppenanruf",
+	"videoCallJoiningCall": "Anruf wird beigetreten...",
+	"videoCallWaitingForParticipants": "Warte auf Teilnehmer...",
+	"videoCallFailedToJoin": "Beitreten fehlgeschlagen: {error}",
+	"videoCallUnknownError": "Unbekannter Fehler",
+	"videoCallHangUpFailed": "Couldn't hang up. Please try again.",
+	"videoCallParticipantCount": "{count, plural, =1{1 Teilnehmer} other{{count} Teilnehmer}}",
+	"videoCallMute": "Stummschalten",
+	"videoCallUnmute": "Stummschaltung aufheben",
+	"videoCallEnd": "Beenden",
+	"videoCallMicPermissionDenied": "Mikrofonberechtigung verweigert. Aktivieren Sie es in den Einstellungen.",
+	"videoCallCameraPermissionDenied": "Kameraberechtigung verweigert. Aktivieren Sie es in den Einstellungen.",
+	"videoCallWaitingForEncryption": "Verschlüsselung wird eingerichtet...",
+	"videoCallYou": "Du",
+	"videoCallRinging": "Klingelt",
+	"videoCallCancelCall": "Abbrechen",
+	"videoCallNoAnswer": "Keine Antwort",
+	"videoCallCallDeclined": "Anruf abgelehnt",
+	"videoCallCancel": "Abbrechen",
+	"videoCallAgain": "Erneut anrufen",
+	"videoCallGroupCallJoin": "Beitreten",
+	"videoCallGroupCallActive": "Gruppenanruf läuft",
+	"videoCallSwitchToVideoTitle": "Zu Videoanruf wechseln?",
+	"videoCallSwitch": "Wechsel",
+	"callChatItemAudioCall": "Audioanruf",
+	"callChatItemVideoCall": "Videoanruf",
+	"callChatItemCalling": "Anrufen...",
+	"callChatItemRinging": "Klingelt",
+	"callChatItemIncoming": "Eingehender Anruf",
+	"callChatItemTapToReturn": "Zum Zurückkehren tippen",
+	"callChatItemMissed": "Verpasst",
+	"callChatItemNotAnswered": "Nicht beantwortet",
+	"incomingCallBannerIsCalling": "{callerName} ruft an",
+	"incomingCallBannerAccept": "Annehmen",
+	"incomingCallBannerDecline": "Ablehnen",
+	"incomingCallBannerUnknownCaller": "Unbekannter Anrufer",
+	"callDurationHourFormat": "{count, plural, =1{1 Std.} other{{count} Std.}}",
+	"@callDurationHourFormat": {
+		"description": "Format for hours in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "1"
+			}
+		}
+	},
+	"callDurationMinuteFormat": "{count, plural, =1{1 Min.} other{{count} Min.}}",
+	"@callDurationMinuteFormat": {
+		"description": "Format for minutes in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "30"
+			}
+		}
+	},
+	"callDurationSecondFormat": "{count, plural, =1{1 Sek.} other{{count} Sek.}}",
+	"@callDurationSecondFormat": {
+		"description": "Format for seconds in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "14"
+			}
+		}
+	}
 }

@@ -15,6 +15,7 @@ class FakeConnectionOffers {
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
     status: ConnectionOfferStatus.published,
+    transport: ChannelTransport.didcomm,
     contactCard: FakeIdentities.secondaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
     createdAt: DateTime(2024, 1, 1),
@@ -34,6 +35,7 @@ class FakeConnectionOffers {
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
     status: ConnectionOfferStatus.published,
+    transport: ChannelTransport.didcomm,
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
     createdAt: DateTime(2023, 1, 1),
@@ -52,6 +54,7 @@ class FakeConnectionOffers {
         '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
     type: ConnectionOfferType.meetingPlaceInvitation,
     status: ConnectionOfferStatus.published,
+    transport: ChannelTransport.didcomm,
     contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
     ownedByMe: false,
     createdAt: DateTime(2024, 6, 1),
@@ -76,5 +79,24 @@ class FakeConnectionOffers {
     ownedByMe: true,
     createdAt: DateTime(2024, 6, 1),
     transport: ChannelTransport.matrix,
+  );
+
+  static GroupConnectionOffer get groupOfferOwnedByMe => GroupConnectionOffer(
+    groupId: 'group-id',
+    groupDid: 'group-did',
+    offerName: 'My Group',
+    offerLink: FakeContacts.groupContact.offerLink,
+    mnemonic: 'my-group-passphrase',
+    publishOfferDid: 'did:peer:group-owner',
+    mediatorDid: 'did:peer:mediator123',
+    offerDescription: 'My owned group',
+    oobInvitationMessage:
+        '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
+    type: ConnectionOfferType.meetingPlaceInvitation,
+    status: ConnectionOfferStatus.finalised,
+    transport: ChannelTransport.didcomm,
+    contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
+    ownedByMe: true,
+    createdAt: DateTime(2024, 6, 1),
   );
 }

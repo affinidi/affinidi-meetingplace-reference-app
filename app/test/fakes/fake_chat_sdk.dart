@@ -36,6 +36,15 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   set capabilities(TransportCapabilities caps) => _capabilities = caps;
 
+  @override
+  String get did => 'fake-sender-did';
+
+  @override
+  String get otherPartyDid => 'fake-other-party-did';
+
+  @override
+  String get chatId => 'fake-chat-id';
+
   int _chatSessionStartedCalls = 0;
   int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =
@@ -597,6 +606,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   List<ChatItem>? sessionMessages;
 
   @override
+  Future<List<ChatItem>> get messages async =>
+      sessionMessages ?? const <ChatItem>[];
+
+  @override
   Future<Chat> startChatSession() async {
     _chatSessionStartedCalls++;
     if (shouldThrowOnStartSession) {
@@ -698,6 +711,19 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     message.value = newText;
     message.editedAt = DateTime.now().toUtc();
     _emit(StreamData(chatItem: message));
+  }
+
+  final List<Message> updateMessageCalls = [];
+
+  @override
+  Future<ChatItem?> getMessageById(String id) async => sessionMessages
+      ?.whereType<Message>()
+      .cast<Message?>()
+      .firstWhere((m) => m?.messageId == id, orElse: () => null);
+
+  @override
+  Future<void> updateMessage(Message message) async {
+    updateMessageCalls.add(message);
   }
 
   @override
