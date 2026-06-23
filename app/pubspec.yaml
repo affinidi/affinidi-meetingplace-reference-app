@@ -60,6 +60,8 @@ dependencies:
   hooks_riverpod: ^3.0.3
   image: ^4.5.4
   image_picker: ^1.2.0
+  image_picker_android: ^0.8.13+19
+  image_picker_platform_interface: ^2.11.1
   intl: any
   intl_phone_number_input: ^0.7.5
   local_auth: ^2.3.0
