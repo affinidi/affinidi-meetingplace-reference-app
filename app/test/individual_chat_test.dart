@@ -274,32 +274,9 @@ void main() {
         expect(find.text(l10n.generalCamera), findsOneWidget);
         expect(find.text(l10n.generalPhoto), findsOneWidget);
         expect(find.text(l10n.generalDocument), findsOneWidget);
+        expect(find.text(l10n.generalVideo), findsNothing);
         expect(find.text(l10n.generalBalloons), findsNothing);
         expect(find.text(l10n.generalConfetti), findsNothing);
-      });
-
-      testWidgets('hides the document option when the transport does not '
-          'support document attachments', (tester) async {
-        final l10n = await getL10n();
-        final didcommChatSdk = FakeChatSdk(
-          capabilities: const TransportCapabilities({
-            ChatFeature.textMessaging,
-            ChatFeature.mediaAttachments,
-            ChatFeature.reactions,
-          }),
-        );
-
-        await navigateToChat(
-          tester,
-          contactId: contactId,
-          chatSdk: didcommChatSdk,
-        );
-
-        await tester.tap(findAddMediaButton());
-        await tester.pumpAndSettle();
-
-        expect(find.text(l10n.generalPhoto), findsOneWidget);
-        expect(find.text(l10n.generalDocument), findsNothing);
       });
 
       for (final effect in [Effect.balloons, Effect.confetti]) {

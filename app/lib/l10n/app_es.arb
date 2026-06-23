@@ -314,7 +314,6 @@
 	"groupDeleted": "Este grupo ha sido eliminado",
 	"joiningGroup": "{memberName} se ha unido al grupo",
 	"leavingGroup": "{memberName} ha dejado el grupo",
-	"memberRemovedFromGroup": "{memberName} ha sido eliminado",
 	"meetingPlaceControlPlane": "Plano de control del lugar de reunión",
 	"noExpirySetHelperText": "No se ha establecido una fecha de caducidad, por lo que esta invitación a conectarse no caduca",
 	"offerUnlimitedUsages": "Esta invitación se puede utilizar cualquier número de veces",
@@ -479,8 +478,6 @@
 	"issuer": "Emisor",
 	"issuedOn": "Emitido el",
 	"human": "Humano",
-	"humanZkp": "Prueba de conocimiento cero humana",
-	"humanZkpAbbreviated": "Human ZKP",
 	"humanZeroKnowledgeProof": "Prueba de conocimiento cero humana",
 	"proofFlowThisContact": "este contacto",
 	"proofFlowContact": "Contacto",
@@ -488,12 +485,10 @@
 	"proofFlowRequestProof": "Solicitar prueba",
 	"proofFlowVerifyingProof": "Verificando prueba de {contactName}...",
 	"proofFlowVerificationFailed": "Verificación fallida para {contactName}",
-	"zkpNoticePaused": "Has pausado una solicitud de prueba de conocimiento cero humana.",
-	"zkpNoticeDeclined": "{contactName} ha rechazado la solicitud de prueba de conocimiento cero humana. Toca el icono \"+\" para reiniciarla.",
+	"zkpNoticePaused": "Has pausado la solicitud de prueba de ZKP humano. Toca el icono \"+\" para reiniciarla.",
 	"zkpNoticeShared": "Has compartido una Prueba de Conocimiento Cero que confirma que eres humano.\n*No se compartieron datos personales.",
 	"zkpNoticeReceived": "{contactName} ha compartido una Prueba de Conocimiento Cero que confirma que es humano.",
 	"zkpNoticeRequest": "{contactName} ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.",
-	"zkpNoticeRequestInitiated": "Has iniciado una solicitud de prueba de conocimiento cero humana.",
 	"zkpProofAlreadyShared": "Prueba ZKP ya compartida",
 	"debugPanelShareLogs": "Compartir registros",
 	"mediaTapToRetry": "Toca para reintentar",
@@ -507,21 +502,70 @@
 	"voiceMessagePermissionDenied": "Se requiere permiso de micrófono para grabar mensajes de voz.",
 	"voiceMessageRecordingFailed": "No se puede iniciar la grabación de voz.",
 	"voiceMessageSendFailed": "No se puede enviar el mensaje de voz.",
-	"removeMemberSuccess": "Miembro eliminado del grupo.",
-	"cancel": "Cancelar",
-	"generateCredential": "Generar credencial",
-	"generateProof": "Generar prueba",
-	"generatingZeroKnowledgeProof": "Generando Prueba de Conocimiento Cero Humano...",
-	"livenessCredential": "Credencial de Vitalidad",
-	"mockLivenessCredentialNext": "Ahora puedes continuar para generar una Prueba de Conocimiento Cero Humana.",
-	"nameSelectedIdentity": "Identidad seleccionada de {name}",
-	"noCredentialsYet": "Aún no tienes credenciales.",
-	"removeMemberConfirm": "Eliminar",
-	"removeMemberDialogBody": "¿Eliminar a {name} de este grupo? Ya no recibirá mensajes.",
-	"removeMemberDialogTitle": "Eliminar miembro",
-	"removeMemberNotSupported": "Eliminar miembros aún no está soportado.",
-	"selectIdentityToVerifyRelationshipPrompt": "Desliza hacia la izquierda o derecha para elegir la identidad que deseas usar para verificar tu relación con {name}.",
-	"trustedBy": "Confiado por {count}",
-	"verifiableCredentialWallet": "Cartera de Credenciales Verificables",
-	"vrcAbbreviation": "VRC"
+	"videoCallTitle": "Llamada grupal",
+	"videoCallJoiningCall": "Uniéndose a la llamada...",
+	"videoCallWaitingForParticipants": "Esperando participantes...",
+	"videoCallFailedToJoin": "Error al unirse: {error}",
+	"videoCallUnknownError": "Error desconocido",
+	"videoCallHangUpFailed": "Couldn't hang up. Please try again.",
+	"videoCallParticipantCount": "{count, plural, =1{1 participante} other{{count} participantes}}",
+	"videoCallMute": "Silenciar",
+	"videoCallUnmute": "Activar audio",
+	"videoCallEnd": "Terminar",
+	"videoCallMicPermissionDenied": "Permiso de micrófono denegado. Actívalo en Configuración.",
+	"videoCallCameraPermissionDenied": "Permiso de cámara denegado. Actívalo en Configuración.",
+	"videoCallWaitingForEncryption": "Configurando el cifrado...",
+	"videoCallYou": "Tú",
+	"videoCallRinging": "Llamando",
+	"videoCallCancelCall": "Cancelar",
+	"videoCallNoAnswer": "Sin respuesta",
+	"videoCallCallDeclined": "Llamada rechazada",
+	"videoCallCancel": "Cancelar",
+	"videoCallAgain": "Volver a llamar",
+	"videoCallGroupCallJoin": "Unirse",
+	"videoCallGroupCallActive": "Llamada grupal en curso",
+	"videoCallSwitchToVideoTitle": "¿Cambiar a videollamada?",
+	"videoCallSwitch": "Cambiar",
+	"callChatItemAudioCall": "Llamada de audio",
+	"callChatItemVideoCall": "Videollamada",
+	"callChatItemCalling": "Llamando...",
+	"callChatItemRinging": "Sonando",
+	"callChatItemIncoming": "Llamada entrante",
+	"callChatItemTapToReturn": "Toca para volver",
+	"callChatItemMissed": "Perdida",
+	"callChatItemNotAnswered": "Sin respuesta",
+	"incomingCallBannerIsCalling": "{callerName} está llamando",
+	"incomingCallBannerAccept": "Aceptar",
+	"incomingCallBannerDecline": "Rechazar",
+	"incomingCallBannerUnknownCaller": "Llamante desconocido",
+	"callDurationHourFormat": "{count, plural, =1{1 h} other{{count} h}}",
+	"@callDurationHourFormat": {
+		"description": "Format for hours in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "1"
+			}
+		}
+	},
+	"callDurationMinuteFormat": "{count, plural, =1{1 m} other{{count} m}}",
+	"@callDurationMinuteFormat": {
+		"description": "Format for minutes in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "30"
+			}
+		}
+	},
+	"callDurationSecondFormat": "{count, plural, =1{1 s} other{{count} s}}",
+	"@callDurationSecondFormat": {
+		"description": "Format for seconds in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "14"
+			}
+		}
+	}
 }

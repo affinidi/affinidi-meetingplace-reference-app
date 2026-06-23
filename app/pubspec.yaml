@@ -68,6 +68,7 @@ dependencies:
   meeting_place_core: ^0.0.1-dev.42
   meeting_place_credentials: ^0.0.1-dev.7
   meeting_place_drift_repository: ^0.0.1-dev.48
+  meeting_place_matrix_livekit: ^1.0.0
   mobile_scanner: ^7.2.0
   mpx_app_core:
     path: ../packages/app-core
@@ -78,6 +79,7 @@ dependencies:
   pie_menu: ^3.3.0
   qr_flutter: ^4.1.0
   record: ^6.2.1
+  riverpod: ^3.0.3
   riverpod_annotation: ^3.0.3
   share_plus: ^13.1.0
   shared_preferences: ^2.5.5

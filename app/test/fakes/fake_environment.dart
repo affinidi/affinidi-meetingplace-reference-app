@@ -111,4 +111,19 @@ class FakeEnvironment implements Environment {
 
   @override
   String? get directInteractiveOobType => null;
+
+  @override
+  String get livekitServiceUrl => '';
+
+  @override
+  String get livekitSfuUrl => '';
+
+  @override
+  String get matrixServerName => Uri.parse(matrixHomeserver).host;
+
+  @override
+  Duration get incomingCallRingTimeout => const Duration(seconds: 15);
+
+  @override
+  Duration get outgoingCallTimeout => const Duration(seconds: 60);
 }
