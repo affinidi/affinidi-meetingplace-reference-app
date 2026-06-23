@@ -1803,6 +1803,10 @@
 	"@zkpNoticeRequestInitiated": {
 		"type": "text"
 	},
+	"zkpNoticeDeclined": "You declined the Human ZKP proof request.",
+	"@zkpNoticeDeclined": {
+		"type": "text"
+	},
 	"zkpProofAlreadyShared": "ZKP Proof already shared",
 	"@zkpProofAlreadyShared": {
 		"type": "text"
