@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -18,8 +20,17 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   int get secondsToShowChatActivityIndicator;
   int get chatPresenceIntervalInSeconds;
 
+  /// Maximum age at which the original sender can still delete a message
+  /// for everyone. Mirrors the SDK's `deleteMessageWindow` option.
+  Duration get deleteMessageWindow;
+
+  /// Capabilities of the active chat, or `null` before the chat session has
+  /// been started. Sourced from the underlying chat SDK variant, so it
+  /// reflects both the transport and the chat type (individual vs group).
+  TransportCapabilities? get capabilities;
+
   Future<void> startChatSession();
-  void pauseChat();
+  Future<void> pauseChat();
 
   Future<String?> restoreUnsentMessage(String contactId);
   Future<ContactPresenceStatus> calculateContactPresenceStatus(
@@ -29,9 +40,25 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
 
   void onPresenceUpdated(DateTime datePresence);
 
-  Future<void> sendTextMessage(String message, {List<Attachment>? attachments});
+  Future<void> sendTextMessage(
+    String message, {
+    List<ChatAttachment>? attachments,
+  });
+
+  Future<({ChatAttachment attachment, Uint8List bytes})?>
+  buildVoiceMessageAttachment({
+    required String filePath,
+    required String mediaType,
+    required Duration duration,
+    required List<int> waveform,
+  });
+
+  Future<Uint8List> downloadMedia(ChatAttachment attachment);
+
   Future<void> sendChatActivity();
   Future<void> reactOnMessage(Message message, {required String reaction});
+  Future<void> deleteMessage(Message message, {bool deleteForMeOnly = false});
+  Future<void> editTextMessage(Message message, String newText);
   Future<void> sendEffect(Effect effectType);
 
   Future<void> updateContactSequenceNumber(String channelDid);

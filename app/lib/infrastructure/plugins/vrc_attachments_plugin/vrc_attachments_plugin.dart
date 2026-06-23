@@ -55,19 +55,19 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
   }
 
   @override
-  bool supportsFormat(Attachment attachment) =>
+  bool supportsFormat(ChatAttachment attachment) =>
       attachment.format == VrcAttachment.pluginFormat;
 
   @override
   Widget renderAttachment({
-    required Attachment attachment,
+    required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
   }) => _VrcAttachmentWidget(attachment: attachment, isFromMe: isFromMe);
 
   @override
   Widget renderAttachments({
-    required List<Attachment> attachments,
+    required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
   }) => attachments.isEmpty
@@ -81,7 +81,7 @@ class _VrcAttachmentWidget extends ConsumerWidget {
     required this._isFromMe,
   });
 
-  final Attachment _attachment;
+  final ChatAttachment _attachment;
   final bool _isFromMe;
 
   void _openDetails(BuildContext context, VrcCredential credential) {

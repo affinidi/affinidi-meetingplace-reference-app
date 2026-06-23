@@ -10,7 +10,7 @@ part of 'mediators_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(mediatorsRepository)
-final mediatorsRepositoryProvider = MediatorsRepositoryProvider._();
+const mediatorsRepositoryProvider = MediatorsRepositoryProvider._();
 
 final class MediatorsRepositoryProvider
     extends
@@ -22,7 +22,7 @@ final class MediatorsRepositoryProvider
     with
         $FutureModifier<MediatorsRepository>,
         $FutureProvider<MediatorsRepository> {
-  MediatorsRepositoryProvider._()
+  const MediatorsRepositoryProvider._()
     : super(
         from: null,
         argument: null,

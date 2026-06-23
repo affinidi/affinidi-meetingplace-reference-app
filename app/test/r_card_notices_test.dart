@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
+import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/r_cards_service/r_cards_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
@@ -23,7 +24,7 @@ Widget _l10n(Widget child) => MaterialApp(
   home: Scaffold(body: child),
 );
 
-chat.Attachment _rCardAttachment({
+ChatAttachment _rCardAttachment({
   required String vcBlob,
   bool isUpdate = false,
   bool isAutoExchange = false,
@@ -33,17 +34,17 @@ chat.Attachment _rCardAttachment({
     if (isUpdate) 'isUpdate': true,
     if (isAutoExchange) 'isAutoExchange': true,
   });
-  return chat.Attachment(
+  return ChatAttachment(
     id: 'att-${DateTime.now().millisecondsSinceEpoch}',
     mediaType: 'application/json',
     format: RCardAttachment.pluginFormat,
     lastModifiedTime: DateTime(2024),
-    data: chat.AttachmentData(json: payload),
+    data: ChatAttachmentData(json: payload),
   );
 }
 
 chat.Message _rCardMessage({
-  required chat.Attachment attachment,
+  required ChatAttachment attachment,
   bool isFromMe = false,
 }) => chat.Message(
   chatId: 'test-chat',
@@ -97,7 +98,12 @@ void main() {
     testWidgets('renders rCardFooterUpdateShared text', (tester) async {
       final l10n = await getL10n();
       await tester.pumpWidget(
-        _l10n(ChatRCardUpdatedByMeNotice(dateCreated: DateTime(2024))),
+        _l10n(
+          ChatRCardUpdatedByMeNotice(
+            dateCreated: DateTime(2024),
+            isGroupChat: false,
+          ),
+        ),
       );
       await tester.pump();
       expect(find.text(l10n.rCardFooterUpdateShared), findsOneWidget);

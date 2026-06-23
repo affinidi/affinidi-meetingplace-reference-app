@@ -22,7 +22,7 @@ class ChatZkpHandler {
     required this._ref,
     required this.logger,
     required this.logKey,
-    required this.isZkpEnabled,
+    required this.isHumanZkpSupported,
     required this.getContact,
     required this.onUpsertChatItem,
   });
@@ -30,22 +30,22 @@ class ChatZkpHandler {
   final Ref _ref;
   final AppLogger logger;
   final String logKey;
-  final bool isZkpEnabled;
+  final bool Function() isHumanZkpSupported;
   final Contact? Function() getContact;
   final void Function(chat.ChatItem item) onUpsertChatItem;
 
-  void handleZkpAttachment(chat.StreamData data, String channelDid) {
-    if (!isZkpEnabled) return;
-    final plainTextMessage = data.plainTextMessage;
-    if (plainTextMessage == null) return;
-    final attachments = plainTextMessage.attachments;
-    if (attachments == null || attachments.isEmpty) return;
+  void handleZkpAttachment(chat.ChatItem chatItem, String channelDid) {
+    if (!isHumanZkpSupported()) return;
+    if (chatItem is! chat.Message) return;
+
+    final attachments = chatItem.attachments.map((a) => a.toCoreAttachment());
+    if (attachments.isEmpty) return;
 
     final requestPayload = LivenessZkpAttachmentParser.tryParseRequestIn(
       attachments,
     );
     if (requestPayload != null) {
-      _handleLivenessRequest(channelDid, data, requestPayload);
+      _handleLivenessRequest(channelDid, chatItem, requestPayload);
       return;
     }
 
@@ -53,20 +53,19 @@ class ChatZkpHandler {
       attachments,
     );
     if (proofPayload != null) {
-      _handleLivenessProof(channelDid, data, proofPayload);
+      _handleLivenessProof(channelDid, chatItem, proofPayload);
     }
   }
 
   void _handleLivenessRequest(
     String channelDid,
-    chat.StreamData data,
+    chat.ChatItem chatItem,
     LivenessCheckRequestPayload requestPayload,
   ) {
     final contact = getContact();
     if (contact == null || contact.channelDid != channelDid) return;
 
-    final chatItem = data.chatItem;
-    if (chatItem == null || chatItem.isFromMe) return;
+    if (chatItem.isFromMe) return;
 
     _ref
         .read(proofFlowControllerProvider(contact.id).notifier)
@@ -77,7 +76,7 @@ class ChatZkpHandler {
 
   void _handleLivenessProof(
     String channelDid,
-    chat.StreamData data,
+    chat.ChatItem chatItem,
     LivenessProofPayload proofPayload,
   ) {
     logger.info(
@@ -91,9 +90,8 @@ class ChatZkpHandler {
       return;
     }
 
-    final chatItem = data.chatItem;
-    if (chatItem == null || chatItem.isFromMe) {
-      logger.info('  Skipping: chatItem null or isFromMe', name: logKey);
+    if (chatItem.isFromMe) {
+      logger.info('  Skipping: isFromMe', name: logKey);
       return;
     }
 
@@ -135,7 +133,7 @@ class ChatZkpHandler {
   }
 
   Future<void> insertZkpPausedNotice({String? pausedForNoticeMessageId}) async {
-    if (!isZkpEnabled) return;
+    if (!isHumanZkpSupported()) return;
     final contact = getContact();
     if (contact == null || contact.channelDid == null) return;
 

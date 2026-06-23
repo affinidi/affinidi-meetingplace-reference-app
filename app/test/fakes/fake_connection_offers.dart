@@ -1,6 +1,7 @@
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
+import 'fake_contacts.dart';
 import 'fake_identities.dart';
 
 class FakeConnectionOffers {
@@ -20,6 +21,7 @@ class FakeConnectionOffers {
     offerDescription: 'Test offer description',
     expiresAt: DateTime(2025, 12, 31),
     maximumUsage: 10,
+    transport: ChannelTransport.didcomm,
   );
 
   static ConnectionOffer get expiredOffer => ConnectionOffer(
@@ -37,6 +39,7 @@ class FakeConnectionOffers {
     createdAt: DateTime(2023, 1, 1),
     offerDescription: 'This offer has expired',
     expiresAt: DateTime(2023, 12, 31),
+    transport: ChannelTransport.didcomm,
   );
 
   static ConnectionOffer get groupOffer => ConnectionOffer(
@@ -53,5 +56,25 @@ class FakeConnectionOffers {
     ownedByMe: false,
     createdAt: DateTime(2024, 6, 1),
     offerDescription: 'Join our group chat',
+    transport: ChannelTransport.matrix,
+  );
+
+  static GroupConnectionOffer get groupOfferOwnedByMe => GroupConnectionOffer(
+    groupId: 'group-id',
+    groupDid: 'group-did',
+    offerName: 'My Group',
+    offerLink: FakeContacts.groupContact.offerLink,
+    mnemonic: 'my-group-passphrase',
+    publishOfferDid: 'did:peer:group-owner',
+    mediatorDid: 'did:peer:mediator123',
+    offerDescription: 'My owned group',
+    oobInvitationMessage:
+        '{"@type":"https://didcomm.org/out-of-band/2.0/invitation"}',
+    type: ConnectionOfferType.meetingPlaceInvitation,
+    status: ConnectionOfferStatus.finalised,
+    contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
+    ownedByMe: true,
+    createdAt: DateTime(2024, 6, 1),
+    transport: ChannelTransport.matrix,
   );
 }

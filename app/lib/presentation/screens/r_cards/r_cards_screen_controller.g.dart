@@ -10,11 +10,11 @@ part of 'r_cards_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(RCardsScreenController)
-final rCardsScreenControllerProvider = RCardsScreenControllerProvider._();
+const rCardsScreenControllerProvider = RCardsScreenControllerProvider._();
 
 final class RCardsScreenControllerProvider
     extends $NotifierProvider<RCardsScreenController, RCardsScreenState> {
-  RCardsScreenControllerProvider._()
+  const RCardsScreenControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,6 +49,7 @@ abstract class _$RCardsScreenController extends $Notifier<RCardsScreenState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<RCardsScreenState, RCardsScreenState>;
     final element =
         ref.element
@@ -58,6 +59,6 @@ abstract class _$RCardsScreenController extends $Notifier<RCardsScreenState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

@@ -6,9 +6,11 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 /// effects). Register handlers in `ChatProtocolRouter`; the router will call
 /// the first handler whose `canHandle` returns `true`.
 abstract class ChatProtocolHandler {
-  /// Returns `true` if this handler should process the given `protocolType`.
-  bool canHandle(String protocolType);
+  /// Returns `true` if this handler should process the given [ChatEvent].
+  bool canHandle(ChatEvent event);
 
-  /// Processes the incoming `data` for the channel identified by `channelDid`.
+  /// Processes the incoming [StreamData] for the channel identified by
+  /// [channelDid]. [data] carries the full stream payload including the
+  /// [ChatEvent] and the associated [ChatItem].
   Future<void> handle(StreamData data, String channelDid);
 }

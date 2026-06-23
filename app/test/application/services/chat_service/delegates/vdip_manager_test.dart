@@ -37,6 +37,8 @@ void main() {
     late List<bool> onVrcRequestReceivedShouldPrompt;
     late List<EventMessageType> persistedEvents;
     late List<ChatItem> messages;
+    late Completer<void>? onVrcRequestReceivedCompleter;
+    late Completer<void>? persistedEventCompleter;
 
     const otherPartyPermanentDid = 'did:key:other-party';
     const localPermanentDid = 'did:key:local-party';
@@ -77,6 +79,8 @@ void main() {
       onVrcRequestReceivedDids = [];
       onVrcRequestReceivedShouldPrompt = [];
       persistedEvents = [];
+      onVrcRequestReceivedCompleter = null;
+      persistedEventCompleter = null;
       fakeChatSdk = FakeChatSdk();
 
       fakeCoreSdk = FakeMeetingPlaceSDK(
@@ -120,7 +124,14 @@ void main() {
         logger: AppLogger.instance,
         getChatSdk: () => fakeChatSdk,
         getMessages: () => messages,
-        persistLocalEventMessage: (type) async => persistedEvents.add(type),
+        persistLocalEventMessage: (type) async {
+          persistedEvents.add(type);
+          if (persistedEventCompleter case final completer?) {
+            if (!completer.isCompleted) {
+              completer.complete();
+            }
+          }
+        },
         onVrcRequestReceived:
             (
               did,
@@ -130,6 +141,11 @@ void main() {
             }) async {
               onVrcRequestReceivedDids.add(did);
               onVrcRequestReceivedShouldPrompt.add(shouldPromptForAction);
+              if (onVrcRequestReceivedCompleter case final completer?) {
+                if (!completer.isCompleted) {
+                  completer.complete();
+                }
+              }
             },
       );
     });
@@ -143,9 +159,12 @@ void main() {
         'with shouldPromptForAction true', () async {
       stub.nextRequestResult = const VrcRequestProcessingResultPromptRequired();
       await manager.subscribe();
+      onVrcRequestReceivedCompleter = Completer<void>();
 
-      stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await stub.emitRequestAndWaitHandled(
+        VrcRequest(senderDid: otherPartyPermanentDid),
+      );
+      await onVrcRequestReceivedCompleter!.future;
 
       expect(onVrcRequestReceivedDids, [otherPartyPermanentDid]);
       expect(onVrcRequestReceivedShouldPrompt, [true]);
@@ -157,9 +176,12 @@ void main() {
         'stub-vc-blob',
       );
       await manager.subscribe();
+      onVrcRequestReceivedCompleter = Completer<void>();
 
-      stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await stub.emitRequestAndWaitHandled(
+        VrcRequest(senderDid: otherPartyPermanentDid),
+      );
+      await onVrcRequestReceivedCompleter!.future;
 
       expect(onVrcRequestReceivedDids, [otherPartyPermanentDid]);
       expect(onVrcRequestReceivedShouldPrompt, [false]);
@@ -172,9 +194,12 @@ void main() {
           'stub-sent-vc-blob',
         );
         await manager.subscribe();
+        final attachmentCreated = fakeChatSdk.waitForAttachmentMessageCount(1);
 
-        stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
-        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await stub.emitRequestAndWaitHandled(
+          VrcRequest(senderDid: otherPartyPermanentDid),
+        );
+        await attachmentCreated;
 
         expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
         expect(
@@ -188,9 +213,12 @@ void main() {
         'with shouldPromptForAction false', () async {
       stub.nextRequestResult = const VrcRequestProcessingResultWaiting();
       await manager.subscribe();
+      onVrcRequestReceivedCompleter = Completer<void>();
 
-      stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await stub.emitRequestAndWaitHandled(
+        VrcRequest(senderDid: otherPartyPermanentDid),
+      );
+      await onVrcRequestReceivedCompleter!.future;
 
       expect(onVrcRequestReceivedDids, [otherPartyPermanentDid]);
       expect(onVrcRequestReceivedShouldPrompt, [false]);
@@ -200,7 +228,6 @@ void main() {
       await manager.subscribe();
 
       stub.emitRequest(VrcRequest(senderDid: 'did:key:someone-else'));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(onVrcRequestReceivedDids, isEmpty);
     });
@@ -211,8 +238,7 @@ void main() {
         stub.nextVrcResult = const VrcProcessingResultIgnored();
         await manager.subscribe();
 
-        stub.emitVrc(vrcIssuance);
-        await Future<void>.delayed(const Duration(milliseconds: 50));
+        await stub.emitVrcAndWaitHandled(vrcIssuance);
 
         expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
         expect(persistedEvents, isEmpty);
@@ -223,9 +249,10 @@ void main() {
         ' exchange event', () async {
       stub.nextVrcResult = const VrcProcessingResultCompleted();
       await manager.subscribe();
+      persistedEventCompleter = Completer<void>();
 
-      stub.emitVrc(vrcIssuance);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await stub.emitVrcAndWaitHandled(vrcIssuance);
+      await persistedEventCompleter!.future;
 
       expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
       expect(
@@ -241,9 +268,10 @@ void main() {
         'stub-sent-vc-blob',
       );
       await manager.subscribe();
+      persistedEventCompleter = Completer<void>();
 
-      stub.emitVrc(vrcIssuance);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await stub.emitVrcAndWaitHandled(vrcIssuance);
+      await persistedEventCompleter!.future;
 
       expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(2));
       expect(
@@ -269,7 +297,6 @@ void main() {
           parsedCredential: UniversalParser.parse(vcBlob),
         ),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
@@ -310,6 +337,11 @@ void main() {
               data: const {},
             ),
           ];
+          if (persistedEventCompleter case final completer?) {
+            if (!completer.isCompleted) {
+              completer.complete();
+            }
+          }
         },
         onVrcRequestReceived:
             (
@@ -324,11 +356,10 @@ void main() {
 
       await managerWithPersistedMessages.subscribe();
 
-      stub.emitVrc(vrcIssuance);
+      final firstHandled = stub.emitVrcAndWaitHandled(vrcIssuance);
       await firstVrcHandlerStarted.future;
 
-      stub.emitVrc(vrcIssuance);
-      await Future<void>.delayed(const Duration(milliseconds: 20));
+      final secondHandled = stub.emitVrcAndWaitHandled(vrcIssuance);
 
       expect(
         stub.handledVrcExchangeStates,
@@ -339,7 +370,7 @@ void main() {
       );
 
       allowFirstVrcHandlerToContinue.complete();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await Future.wait([firstHandled, secondHandled]);
 
       expect(stub.handledVrcExchangeStates, hasLength(2));
       expect(
@@ -396,7 +427,6 @@ void main() {
       await manager.cancelSubscriptions();
 
       stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(onVrcRequestReceivedDids, isEmpty);
     });
@@ -437,6 +467,11 @@ void main() {
               }) async {
                 onVrcRequestReceivedDids.add(did);
                 onVrcRequestReceivedShouldPrompt.add(shouldPromptForAction);
+                if (onVrcRequestReceivedCompleter case final completer?) {
+                  if (!completer.isCompleted) {
+                    completer.complete();
+                  }
+                }
               },
         );
 
@@ -446,8 +481,15 @@ void main() {
         delayedCredentials.complete(stub);
         await Future.wait([firstSubscribe, secondSubscribe]);
 
-        stub.emitRequest(VrcRequest(senderDid: otherPartyPermanentDid));
-        await Future<void>.delayed(const Duration(milliseconds: 50));
+        expect(stub.activeRequestListenerCount, 1);
+        expect(stub.activeVrcListenerCount, 1);
+
+        onVrcRequestReceivedCompleter = Completer<void>();
+
+        await stub.emitRequestAndWaitHandled(
+          VrcRequest(senderDid: otherPartyPermanentDid),
+        );
+        await onVrcRequestReceivedCompleter!.future;
 
         expect(
           onVrcRequestReceivedDids,

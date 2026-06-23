@@ -26,6 +26,7 @@
 	"chatEncryptionNotice": "Los mensajes y cualquier dato compartido en este chat están cifrados de extremo a extremo. Solo las personas y agentes de este chat pueden leerlos.",
 	"chatStartOfConversationInitiatedByMe": "Estableciste este canal en {date} en {time}",
 	"chatTooLong": "El mensaje de chat es demasiado largo",
+	"chatTransport": "Transporte de chat",
 	"chatTypeMessagePrompt": "Mensaje para {name}",
 	"chatTypeMessagePromptGroup": "Mensaje al canal",
 	"chooseFromGallery": "Elige de la galería",
@@ -175,6 +176,17 @@
 	"mediatorName": "Nombre del servidor de mensajes",
 	"meetingPlaceBannerText": "Meeting Place le permite publicar de forma anónima y privada una invitación para conectarse con usted. Proporcione un título y una descripción, así como detalles de validez para limitar el tiempo que la oferta está disponible.",
 	"messageCopiedClipboard": "Mensaje copiado en el portapapeles",
+	"chatMessageActionDelete": "Eliminar para todos",
+	"chatMessageActionDeleteLocal": "Eliminar para mí",
+	"chatMessageActionCopy": "Copiar mensaje",
+	"chatMessageActionEdit": "Editar mensaje",
+	"chatMessageEditedLabel": "editado",
+	"chatMessageEditFailed": "No se pudo editar el mensaje",
+	"chatMessageEditHint": "Texto del mensaje",
+	"chatMessageEditSave": "Guardar",
+	"chatMessageDeletedTombstone": "Este mensaje fue eliminado",
+	"chatMessageDeletedLocallyTombstone": "Eliminaste este mensaje",
+	"chatMessageDeleteFailed": "No se pudo eliminar el mensaje",
 	"mobileTooLong": "El número de móvil es demasiado largo",
 	"myAliasProfile": "Mi perfil de alias",
 	"myCustomMediator": "Mi servidor de mensajes personalizado",
@@ -249,6 +261,7 @@
 	"timeAgoSecond": "{seconds, plural, =1{hace 1 segundo} other{hace {seconds} segundos}}",
 	"timeAgoWeek": "{weeks, plural, =1{hace 1 semana} other{hace {weeks} semanas}}",
 	"timeAgoYesterday": "Ayer",
+	"transportLabel": "{transport, select, didcomm{DIDComm} matrix{Matrix} other{{transport}}}",
 	"typingMessage": "{amount, plural, =1{{names} está escribiendo} other{{names} están escribiendo}}",
 	"unableToDetectCamera": "No se puede detectar una cámara",
 	"unknownType": "Tipo desconocido",
@@ -300,6 +313,7 @@
 	"groupDeleted": "Este grupo ha sido eliminado",
 	"joiningGroup": "{memberName} se ha unido al grupo",
 	"leavingGroup": "{memberName} ha dejado el grupo",
+	"memberRemovedFromGroup": "{memberName} ha sido eliminado",
 	"meetingPlaceControlPlane": "Plano de control del lugar de reunión",
 	"noExpirySetHelperText": "No se ha establecido una fecha de caducidad, por lo que esta invitación a conectarse no caduca",
 	"offerUnlimitedUsages": "Esta invitación se puede utilizar cualquier número de veces",
@@ -353,7 +367,6 @@
 	"chatNotificationsWhyNote": "Solo verás mensajes nuevos cuando estés en el chat. No habrá actualizaciones de insignias ni notificaciones que te informen que han llegado mensajes nuevos, incluso si la aplicación está abierta.",
 	"chatNotificationsWhyTitle": "¿Por qué no hay notificaciones push?",
 	"goBack": "Volver",
-	"debugPanelShareLogs": "Compartir registros",
 	"rCardsPanelSubtitle": "Tarjetas de relación recibidas de tus contactos",
 	"rCardsEmpty": "Las tarjetas R son una versión moderna y autoactualizante de las vCards. Una vez que hagas tu primera conexión, tus tarjetas de visita digitales aparecerán aquí.",
 	"rCardsFilterLabel": "{filter, select, all{Todos} nonAnonymous{No anónimos} other{}}",
@@ -389,6 +402,7 @@
 	"rCardsExchanged": "Tarjetas R intercambiadas",
 	"rCardFooterSent": "Tarjeta R enviada.",
 	"rCardFooterUpdateShared": "La actualización de la tarjeta R ha sido compartida.",
+	"profileDetailsUpdateSharedGroup": "La actualización de los detalles del perfil ha sido compartida con el grupo.",
 	"rCardFooterUpdateSaved": "La actualización de la tarjeta R se ha guardado.",
 	"rCardFooterSaved": "Tarjeta R guardada.",
 	"goToRCard": "Ir a la Tarjeta R",
@@ -409,13 +423,17 @@
 	"selectIdentityToVerifyRelationshipWithName": "Selecciona la identidad que deseas usar para verificar tu relación con {name}",
 	"@selectIdentityToVerifyRelationshipWithName": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"verifyRelationshipPrompt": "Verifica tu relación con {firstName} emitiendo una Credencial de Relación Verificable (VRC). Cada intercambio de VRC aumenta tu puntuación de confianza.",
 	"@verifyRelationshipPrompt": {
 		"placeholders": {
-			"firstName": { "type": "String" }
+			"firstName": {
+				"type": "String"
+			}
 		}
 	},
 	"generateVrc": "Empezar ahora",
@@ -424,7 +442,9 @@
 	"vrcRequestReceived": "{name} ha iniciado el intercambio de VRC.",
 	"@vrcRequestReceived": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcDoLater": "El intercambio de VRC está en pausa. Toca + y selecciona 'Credencial de Relación Verificable' para continuar.",
@@ -432,13 +452,14 @@
 	"vrcVerifyPrompt": "¿Deseas verificar tu relación con {name}? Cada intercambio de VRC aumenta tu puntuación de confianza.",
 	"@vrcVerifyPrompt": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcStartNow": "Comenzar ahora",
 	"vrcDoLaterButton": "Más tarde",
 	"vrcYesButton": "Sí",
-	"notShared": "No compartido",
 	"vrcResponderIntro": "{name} ha seleccionado la siguiente persona para verificar la relación:",
 	"sendVrc": "Enviar Credencial de Relación",
 	"livenessCredentialRequest": "Solicitud de credencial de detección de vida",
@@ -457,6 +478,8 @@
 	"issuer": "Emisor",
 	"issuedOn": "Emitido el",
 	"human": "Humano",
+	"humanZkp": "Prueba de conocimiento cero humana",
+	"humanZkpAbbreviated": "Human ZKP",
 	"humanZeroKnowledgeProof": "Prueba de conocimiento cero humana",
 	"proofFlowThisContact": "este contacto",
 	"proofFlowContact": "Contacto",
@@ -464,10 +487,39 @@
 	"proofFlowRequestProof": "Solicitar prueba",
 	"proofFlowVerifyingProof": "Verificando prueba de {contactName}...",
 	"proofFlowVerificationFailed": "Verificación fallida para {contactName}",
-	"zkpNoticePaused": "Has pausado una solicitud de prueba de conocimiento cero.",
-	"zkpNoticeDeclined": "{contactName} ha rechazado la solicitud de ZKP humano. Toca el icono \"+\" para reiniciarla.",
+	"zkpNoticePaused": "Has pausado una solicitud de prueba de conocimiento cero humana.",
+	"zkpNoticeDeclined": "{contactName} ha rechazado la solicitud de prueba de conocimiento cero humana. Toca el icono \"+\" para reiniciarla.",
 	"zkpNoticeShared": "Has compartido una Prueba de Conocimiento Cero que confirma que eres humano.\n*No se compartieron datos personales.",
 	"zkpNoticeReceived": "{contactName} ha compartido una Prueba de Conocimiento Cero que confirma que es humano.",
 	"zkpNoticeRequest": "{contactName} ha solicitado una Prueba de Conocimiento Cero para confirmar que eres humano.\nPuedes generar la prueba usando una Credencial de Detección de Vida existente o completar una verificación rápida de detección de vida.",
-	"zkpProofAlreadyShared": "Prueba ZKP ya compartida"
+	"zkpNoticeRequestInitiated": "Has iniciado una solicitud de prueba de conocimiento cero humana.",
+	"zkpProofAlreadyShared": "Prueba ZKP ya compartida",
+	"debugPanelShareLogs": "Compartir registros",
+	"mediaTapToRetry": "Toca para reintentar",
+	"mediaDownloadFailedTapToRetry": "Descarga fallida. Toca para reintentar",
+	"attachmentTooLarge": "El archivo adjunto es demasiado grande. Tamaño máximo: {maxMb} MB.",
+	"generalVideo": "Vídeo",
+	"generalDocument": "Documento",
+	"documentTapToDownload": "Toca para descargar",
+	"videoLoadingError": "No se puede reproducir el vídeo",
+	"voiceMessagePermissionDenied": "Se requiere permiso de micrófono para grabar mensajes de voz.",
+	"voiceMessageRecordingFailed": "No se puede iniciar la grabación de voz.",
+	"voiceMessageSendFailed": "No se puede enviar el mensaje de voz.",
+	"removeMemberSuccess": "Miembro eliminado del grupo.",
+	"cancel": "Cancelar",
+	"generateCredential": "Generar credencial",
+	"generateProof": "Generar prueba",
+	"generatingZeroKnowledgeProof": "Generando Prueba de Conocimiento Cero Humano...",
+	"livenessCredential": "Credencial de Vitalidad",
+	"mockLivenessCredentialNext": "Ahora puedes continuar para generar una Prueba de Conocimiento Cero Humana.",
+	"nameSelectedIdentity": "Identidad seleccionada de {name}",
+	"noCredentialsYet": "Aún no tienes credenciales.",
+	"removeMemberConfirm": "Eliminar",
+	"removeMemberDialogBody": "¿Eliminar a {name} de este grupo? Ya no recibirá mensajes.",
+	"removeMemberDialogTitle": "Eliminar miembro",
+	"removeMemberNotSupported": "Eliminar miembros aún no está soportado.",
+	"selectIdentityToVerifyRelationshipPrompt": "Desliza hacia la izquierda o derecha para elegir la identidad que deseas usar para verificar tu relación con {name}.",
+	"trustedBy": "Confiado por {count}",
+	"verifiableCredentialWallet": "Cartera de Credenciales Verificables",
+	"vrcAbbreviation": "VRC"
 }

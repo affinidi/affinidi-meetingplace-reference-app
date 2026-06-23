@@ -21,7 +21,7 @@ part of 'r_card_chat_notifier_service.dart';
 /// are intentionally NOT processed here.
 
 @ProviderFor(RCardChatNotifierService)
-final rCardChatNotifierServiceProvider = RCardChatNotifierServiceProvider._();
+const rCardChatNotifierServiceProvider = RCardChatNotifierServiceProvider._();
 
 /// Global service that creates chat messages for R-Cards delivered via the
 /// DIDComm channel-inauguration (OOB) path.
@@ -47,7 +47,7 @@ final class RCardChatNotifierServiceProvider
   ///
   /// VDIP-path R-Cards (explicit sends) are handled by [ChatSessionService] and
   /// are intentionally NOT processed here.
-  RCardChatNotifierServiceProvider._()
+  const RCardChatNotifierServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -75,7 +75,7 @@ final class RCardChatNotifierServiceProvider
 }
 
 String _$rCardChatNotifierServiceHash() =>
-    r'073279be13f3f3d5547e7c4dfb5c7b44c6213321';
+    r'7fe16b4ebeeda01d724d1b0829cf6cb2c2a8a5c4';
 
 /// Global service that creates chat messages for R-Cards delivered via the
 /// DIDComm channel-inauguration (OOB) path.
@@ -94,6 +94,7 @@ abstract class _$RCardChatNotifierService extends $Notifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
+    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -103,6 +104,6 @@ abstract class _$RCardChatNotifierService extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, null);
   }
 }

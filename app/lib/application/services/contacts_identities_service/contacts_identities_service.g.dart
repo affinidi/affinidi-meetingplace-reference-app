@@ -10,7 +10,7 @@ part of 'contacts_identities_service.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(contactsIdentitiesService)
-final contactsIdentitiesServiceProvider = ContactsIdentitiesServiceProvider._();
+const contactsIdentitiesServiceProvider = ContactsIdentitiesServiceProvider._();
 
 final class ContactsIdentitiesServiceProvider
     extends
@@ -20,7 +20,7 @@ final class ContactsIdentitiesServiceProvider
           ContactsIdentitiesService
         >
     with $Provider<ContactsIdentitiesService> {
-  ContactsIdentitiesServiceProvider._()
+  const ContactsIdentitiesServiceProvider._()
     : super(
         from: null,
         argument: null,

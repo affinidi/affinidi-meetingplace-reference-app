@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 /// A message attachment for images captured by the camera.
 ///
 /// Stores the base64-encoded image data and plugin name, and can be
-/// converted into a standard [Attachment] object with JPEG media type.
+/// converted into a standard `ChatAttachment` object with JPEG media type.
 class CameraImageAttachment implements MessageAttachment {
   CameraImageAttachment({required this._base64, required this._pluginName});
 
@@ -16,7 +16,7 @@ class CameraImageAttachment implements MessageAttachment {
   @override
   String get pluginName => _pluginName;
 
-  /// Converts this camera image into a standard [Attachment].
+  /// Converts this camera image into a standard [ChatAttachment].
   ///
   /// Creates an attachment with:
   /// - A unique UUID as the id
@@ -25,11 +25,11 @@ class CameraImageAttachment implements MessageAttachment {
   /// - Current timestamp as last modified time
   /// - Base64 image data
   @override
-  Attachment toAttachment() => Attachment(
+  ChatAttachment toAttachment() => ChatAttachment(
     id: const Uuid().v4(),
     mediaType: _mediaType,
     format: _pluginName,
     lastModifiedTime: clock.now(),
-    data: AttachmentData(base64: _base64),
+    data: ChatAttachmentData(base64: _base64),
   );
 }

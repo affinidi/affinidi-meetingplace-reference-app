@@ -56,6 +56,14 @@ class ZkpFlowService {
     final channelDid = contact.channelDid;
     if (channelDid == null) return false;
 
+    final chatService = _ref.read(
+      chatSessionServiceProvider(channelDid).notifier,
+    );
+    if (!(chatService.capabilities?.supports(chat.ChatFeature.humanZkp) ??
+        false)) {
+      return false;
+    }
+
     return _ref.read(chatSessionServiceProvider(channelDid)).isInitialized;
   }
 
@@ -75,7 +83,7 @@ class ZkpFlowService {
           challengeNonceHex: zkpChallengeNonceToHex(challengeNonce),
         );
     return _sendZkpAttachments(
-      attachments,
+      attachments.map((a) => a.toChatAttachment()).toList(),
       errorMessage: 'Failed to send liveness check request',
     );
   }
@@ -93,7 +101,7 @@ class ZkpFlowService {
       if (item is! chat.Message || item.isFromMe) continue;
 
       final payload = LivenessZkpAttachmentParser.tryParseRequestIn(
-        item.attachments,
+        item.attachments.map((a) => a.toCoreAttachment()).toList(),
       );
       if (payload == null) continue;
 
@@ -184,7 +192,9 @@ class ZkpFlowService {
             .read(chatSessionServiceProvider(channelDid).notifier)
             .sendTextMessage(
               '',
-              attachments: List<chat.Attachment>.from(attachments),
+              attachments: attachments
+                  .map((a) => a.toChatAttachment())
+                  .toList(),
             );
 
         _logger.info('Proof sent to contact successfully', name: _logKey);
@@ -218,7 +228,7 @@ class ZkpFlowService {
     final attachments =
         LivenessZkpDIDCommAttachmentBuilder.buildLivenessDeclined();
     return _sendZkpAttachments(
-      attachments,
+      attachments.map((a) => a.toChatAttachment()).toList(),
       errorMessage: 'Failed to send liveness declined event',
     );
   }
@@ -231,7 +241,7 @@ class ZkpFlowService {
   }
 
   Future<bool> _sendZkpAttachments(
-    List<chat.Attachment> attachments, {
+    List<chat.ChatAttachment> attachments, {
     required String errorMessage,
   }) async {
     final channelDid = _readChannelDid();
@@ -248,7 +258,7 @@ class ZkpFlowService {
           .read(chatSessionServiceProvider(channelDid).notifier)
           .sendTextMessage(
             '',
-            attachments: List<chat.Attachment>.from(attachments),
+            attachments: List<chat.ChatAttachment>.from(attachments),
           );
       return true;
     } catch (error, stackTrace) {

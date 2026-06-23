@@ -123,10 +123,17 @@ class _ChatContactImage extends ConsumerWidget {
     final zkpEnabled = ref.watch(
       environmentProvider.select((env) => env.zkpEnabled),
     );
-    final hasVerifiedProof = ref.watch(
+    final supportsHumanZkp = ref.watch(
       provider.select(
         (state) =>
             zkpEnabled &&
+            (state.capabilities?.supports(chat.ChatFeature.humanZkp) ?? false),
+      ),
+    );
+    final hasVerifiedProof = ref.watch(
+      provider.select(
+        (state) =>
+            supportsHumanZkp &&
             ChatZkpMessageListPolicy.hasVerifiedProof(state.messages),
       ),
     );

@@ -1,6 +1,8 @@
 import 'package:clock/clock.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
+import '../../../../infrastructure/exceptions/app_exception.dart';
+import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import 'interfaces/chat_protocol_handler.dart';
 
@@ -21,15 +23,19 @@ class TypingProtocolHandler implements ChatProtocolHandler {
   final AppLogger _logger;
 
   @override
-  bool canHandle(String protocolType) =>
-      protocolType == ChatProtocol.chatActivity.value;
+  bool canHandle(ChatEvent event) => event is ChatActivityEvent;
 
   @override
   Future<void> handle(StreamData data, String channelDid) async {
-    final plainTextMessage = data.plainTextMessage;
-    if (plainTextMessage == null) return;
+    if (data.event is! ChatActivityEvent) {
+      throw AppException(
+        'Unexpected event type: ${data.event.runtimeType}',
+        code: AppExceptionType.unexpectedChatEventType.name,
+      );
+    }
+    final event = data.event as ChatActivityEvent;
 
-    final createdTime = plainTextMessage.createdTime;
+    final createdTime = event.createdTime;
     if (createdTime == null) return;
 
     final differenceInSeconds = clock.now().difference(createdTime).inSeconds;
@@ -37,8 +43,6 @@ class TypingProtocolHandler implements ChatProtocolHandler {
     if (isExpired) return;
 
     _logger.info('Received chat activity update', name: _logKey);
-
-    final senderDid = plainTextMessage.from;
-    _onTypingMember(senderDid);
+    _onTypingMember(event.senderDid);
   }
 }

@@ -12,7 +12,7 @@ part of 'push_notifications_handler.dart';
 /// device token updates, and notification streams.
 
 @ProviderFor(PushNotificationsHandler)
-final pushNotificationsHandlerProvider = PushNotificationsHandlerProvider._();
+const pushNotificationsHandlerProvider = PushNotificationsHandlerProvider._();
 
 /// A Riverpod provider class that handles push notifications lifecycle,
 /// device token updates, and notification streams.
@@ -20,7 +20,7 @@ final class PushNotificationsHandlerProvider
     extends $AsyncNotifierProvider<PushNotificationsHandler, void> {
   /// A Riverpod provider class that handles push notifications lifecycle,
   /// device token updates, and notification streams.
-  PushNotificationsHandlerProvider._()
+  const PushNotificationsHandlerProvider._()
     : super(
         from: null,
         argument: null,
@@ -50,6 +50,7 @@ abstract class _$PushNotificationsHandler extends $AsyncNotifier<void> {
   @$mustCallSuper
   @override
   void runBuild() {
+    build();
     final ref = this.ref as $Ref<AsyncValue<void>, void>;
     final element =
         ref.element
@@ -59,6 +60,6 @@ abstract class _$PushNotificationsHandler extends $AsyncNotifier<void> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, null);
   }
 }

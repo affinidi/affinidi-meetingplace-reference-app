@@ -43,8 +43,7 @@ void main() {
       );
 
       container.read(rCardChatNotifierServiceProvider);
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
+      await fakeCredentialsSdk.waitForChannelRCardListener();
     });
 
     tearDown(() async {
@@ -64,10 +63,9 @@ void main() {
           receivedAt: DateTime(2024),
         );
 
-        fakeCredentialsSdk.emitOnChannel(
+        await fakeCredentialsSdk.emitOnChannelAndWait(
           ChannelRCardEvent(channel: FakeChannels.groupChannel, rCard: rCard),
         );
-        await Future<void>.delayed(Duration.zero);
 
         expect(fakeChatRepo.createdMessages, isEmpty);
       },
@@ -85,13 +83,12 @@ void main() {
           receivedAt: DateTime(2024),
         );
 
-        fakeCredentialsSdk.emitOnChannel(
+        await fakeCredentialsSdk.emitOnChannelAndWait(
           ChannelRCardEvent(
             channel: FakeChannels.individualChannel,
             rCard: rCard,
           ),
         );
-        await Future<void>.delayed(Duration.zero);
 
         expect(fakeChatRepo.createdMessages, hasLength(1));
       },

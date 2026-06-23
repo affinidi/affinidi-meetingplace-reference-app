@@ -14,10 +14,15 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     this._acceptOobFlowException,
     this._isPhraseAvailable = true,
     Map<String, Channel>? channels,
+    List<ConnectionOffer>? connectionOffers,
     this.offerToFind,
     this.findOfferHasError = false,
     this._shouldTimeout = false,
-  }) : _channels = channels ?? {};
+  }) : _channels = channels ?? {} {
+    if (connectionOffers != null) {
+      _allConnectionOffers.addAll(connectionOffers);
+    }
+  }
 
   final bool _shouldFailToRegisterPushToken;
   final PublishOfferResult? _offerToReturn;
@@ -38,11 +43,24 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final ConnectionOffer? offerToFind;
   final bool findOfferHasError;
 
-  final _controlPlaneEventStreamManager =
-      StreamController<ControlPlaneStreamEvent>.broadcast();
+  final Completer<void> _controlPlaneEventsListenerCompleter =
+      Completer<void>();
+
+  late final StreamController<ControlPlaneStreamEvent>
+  _controlPlaneEventStreamManager =
+      StreamController<ControlPlaneStreamEvent>.broadcast(
+        onListen: () {
+          if (!_controlPlaneEventsListenerCompleter.isCompleted) {
+            _controlPlaneEventsListenerCompleter.complete();
+          }
+        },
+      );
   @override
   Stream<ControlPlaneStreamEvent> get controlPlaneEventsStream =>
       _controlPlaneEventStreamManager.stream;
+
+  Future<void> waitForControlPlaneEventsListener() =>
+      _controlPlaneEventsListenerCompleter.future;
 
   String? _lastRegisteredToken;
   String? get lastRegisteredToken => _lastRegisteredToken;
@@ -93,6 +111,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     required ContactCard contactCard,
     required SDKConnectionOfferType type,
     required String offerDescription,
+    ChannelTransport transport = ChannelTransport.didcomm,
     String? customPhrase,
     DateTime? validUntil,
     int? maximumUsage,
@@ -114,6 +133,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'metadata': metadata,
       'externalRef': externalRef,
       'score': score,
+      'transport': transport,
     });
 
     if (_publishOfferException != null) {
@@ -395,6 +415,38 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   @override
   Future<void> closeVdipStream() async {}
 
+  final List<IncomingMessageSubscription> _subscribeCalls = [];
+  List<IncomingMessageSubscription> get subscribeCalls =>
+      List.unmodifiable(_subscribeCalls);
+
+  final List<_FakeIncomingMessageHandle> _incomingMessageHandles = [];
+  int get activeIncomingMessageSubscriptions =>
+      _incomingMessageHandles.where((handle) => !handle.isDisposed).length;
+
+  void simulateIncomingMessage(IncomingMessage message) {
+    for (final handle in _incomingMessageHandles) {
+      handle.add(message);
+    }
+  }
+
+  @override
+  Future<IncomingMessageHandle> subscribe(
+    IncomingMessageSubscription subscription,
+  ) async {
+    _subscribeCalls.add(subscription);
+
+    late final _FakeIncomingMessageHandle handle;
+    handle = _FakeIncomingMessageHandle(
+      onDispose: () {
+        _incomingMessageHandles.removeWhere(
+          (existingHandle) => identical(existingHandle, handle),
+        );
+      },
+    );
+    _incomingMessageHandles.add(handle);
+    return handle;
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
@@ -572,4 +624,38 @@ class _FakeVdipClient implements VdipClient {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
+class _FakeIncomingMessageHandle implements IncomingMessageHandle {
+  _FakeIncomingMessageHandle({required this.onDispose});
+
+  final void Function() onDispose;
+  final StreamController<IncomingMessage> _streamController =
+      StreamController<IncomingMessage>.broadcast();
+
+  bool _isDisposed = false;
+
+  bool get isDisposed => _isDisposed;
+
+  @override
+  Stream<IncomingMessage> get stream => _streamController.stream;
+
+  void add(IncomingMessage message) {
+    if (_isDisposed || _streamController.isClosed) {
+      return;
+    }
+
+    _streamController.add(message);
+  }
+
+  @override
+  Future<void> dispose() async {
+    if (_isDisposed) {
+      return;
+    }
+
+    _isDisposed = true;
+    await _streamController.close();
+    onDispose();
+  }
 }

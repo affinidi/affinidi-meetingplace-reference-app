@@ -13,9 +13,11 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../../../application/services/attachment_cache_service/attachment_cache_service.dart';
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -34,7 +36,9 @@ import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
+import '../../validators/max_length_validator_type.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
+
 import 'chat_screen_state.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp_handler.dart';
@@ -52,8 +56,8 @@ class ChatScreenController extends _$ChatScreenController
     with WidgetsBindingObserver {
   ChatScreenController() : super();
 
-  late final bool _isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
   static const _logKey = 'UXCHAT';
+  static final _maxChatMessageLength = MaxLengthValidatorType.extraLong.value;
 
   late final messageTextController = TextEditingController();
   late final _logger = ref.read(appLoggerProvider);
@@ -61,10 +65,14 @@ class ChatScreenController extends _$ChatScreenController
     ref: ref,
     logger: _logger,
     logKey: _logKey,
-    isZkpEnabled: _isZkpEnabled,
+    isHumanZkpSupported: _isHumanZkpSupported,
     getContact: () => state.contact,
     onUpsertChatItem: _upsertChatItemThroughService,
   );
+
+  bool _isHumanZkpSupported() =>
+      ref.read(environmentProvider).zkpEnabled &&
+      (state.capabilities?.supports(chat.ChatFeature.humanZkp) ?? false);
 
   TimedAction? _sendChatActivityTimedAction;
   Timer? _saveUnsentMessageDebouncer;
@@ -83,9 +91,11 @@ class ChatScreenController extends _$ChatScreenController
   _conciergeLoadingControllers = {};
 
   ChatService? _chatService;
+  late final String _contactId;
 
   @override
   ChatScreenState build(String contactId) {
+    _contactId = contactId;
     WidgetsBinding.instance.addObserver(this);
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
@@ -119,7 +129,7 @@ class ChatScreenController extends _$ChatScreenController
           if (zkpAttachmentEvent != null &&
               previous?.zkpAttachmentEvent != zkpAttachmentEvent) {
             _zkpHandler.handleZkpAttachment(
-              zkpAttachmentEvent.data,
+              zkpAttachmentEvent.chatItem,
               zkpAttachmentEvent.channelDid,
             );
           }
@@ -167,8 +177,12 @@ class ChatScreenController extends _$ChatScreenController
                     chat.EventMessageType.fromJson('vrcExchangeCompleted'),
           );
 
+          final messages = ref
+              .read(attachmentCacheServiceProvider(contactId).notifier)
+              .withLocalVoiceMetadata(next.messages);
+
           pendingState = pendingState.copyWith(
-            messages: next.messages,
+            messages: messages,
             membersTyping: next.membersTyping,
             contactPresenceStatus: next.contactPresenceStatus,
             isActive: next.isActive,
@@ -190,6 +204,15 @@ class ChatScreenController extends _$ChatScreenController
 
           if (hasInitializedState) {
             state = pendingState;
+          }
+
+          final messagesChanged = !identical(previous?.messages, next.messages);
+          final becameInitialized =
+              previous?.isInitialized != true && next.isInitialized;
+          if (messagesChanged || becameInitialized) {
+            ref
+                .read(attachmentCacheServiceProvider(contactId).notifier)
+                .preload(messages);
           }
         });
       }, fireImmediately: true);
@@ -230,7 +253,6 @@ class ChatScreenController extends _$ChatScreenController
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
-      _chatService?.pauseChat();
 
       messageTextController.removeListener(_onMessageTextChanged);
       messageTextController.dispose();
@@ -276,7 +298,7 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> onScreenOpened() async {
     if (!state.isInitialized) return;
 
-    if (ref.read(environmentProvider).zkpEnabled) {
+    if (_isHumanZkpSupported()) {
       ref.read(proofFlowControllerProvider(contactId).notifier).resetSession();
     }
 
@@ -298,7 +320,7 @@ class ChatScreenController extends _$ChatScreenController
       case AppLifecycleState.paused:
         _chatResumingLock.synchronized(() async {
           if (!ref.mounted) return;
-          _pauseChatSession();
+          await _pauseChatSession();
         });
         break;
       default:
@@ -331,12 +353,12 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  void _pauseChatSession() {
+  Future<void> _pauseChatSession() async {
     if (_isPaused) return;
 
     _logger.info('Pausing chat session', name: _logKey);
     _isPaused = true;
-    _chatService?.pauseChat();
+    await _chatService?.pauseChat();
   }
 
   void _onMessageTextChanged() {
@@ -414,6 +436,9 @@ class ChatScreenController extends _$ChatScreenController
   ///
   /// Throws an exception if the contact cannot be loaded.
   Future<void> loadContact(String contactId) async {
+    await ref.read(contactsServiceProvider.notifier).ensureInitialized();
+    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
+
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     if (contact == null) {
       throw AppException(
@@ -444,11 +469,21 @@ class ChatScreenController extends _$ChatScreenController
       );
     }
     final srcCard = channel.otherPartyContactCard;
+    final ownCard = channel.contactCard;
+    final ownIdentity = ref
+        .read(identitiesServiceProvider)
+        .getIdentityById(channel.externalRef);
     state = state.copyWith(
       otherPartyCard: srcCard == null
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
+      myCard:
+          ownIdentity?.card ??
+          (ownCard == null
+              ? null
+              : ContactCardUtils.fromSdkContactCard(ownCard)),
       notificationToken: channel.otherPartyNotificationToken,
+      myDid: channel.permanentChannelDid,
     );
 
     final lastKeepAliveMessage = contact.lastKeepAliveMessage;
@@ -458,6 +493,7 @@ class ChatScreenController extends _$ChatScreenController
 
     await _chatService?.updateContactSequenceNumber(channelDid);
     await _chatService?.startChatSession();
+    state = state.copyWith(capabilities: _chatService?.capabilities);
 
     if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
@@ -544,6 +580,7 @@ class ChatScreenController extends _$ChatScreenController
     final originalText = messageTextController.text;
     final trimmedMessage = originalText.trimRight();
     if (trimmedMessage.isEmpty) return;
+    if (trimmedMessage.length > _maxChatMessageLength) return;
 
     unawaited(_chatService?.sendTextMessage(trimmedMessage) ?? Future.value());
     _sendChatActivityTimedAction?.cancel();
@@ -553,7 +590,7 @@ class ChatScreenController extends _$ChatScreenController
   /// Sends a message directly with optional attachments
   Future<void> sendMessageDirect(
     String message, {
-    List<chat.Attachment>? attachments,
+    List<ChatAttachment>? attachments,
   }) async {
     final trimmedMessage = message.trimRight();
     // Allow empty messages if attachments are present
@@ -744,6 +781,58 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
+  /// Maximum age at which the original sender can still delete their own
+  /// message for everyone. Defers to the chat service (SDK option, falling
+  /// back to the environment-configured default before the SDK is ready).
+  Duration get deleteMessageWindow =>
+      _chatService?.deleteMessageWindow ?? Duration.zero;
+
+  /// Deletes a previously-sent message.
+  ///
+  /// When [deleteForMeOnly] is true the message is hidden only for the current
+  /// user and no wire traffic is generated. Otherwise the SDK broadcasts a
+  /// redaction so all participants drop the message, subject to the
+  /// sender-only / delivery / `deleteMessageWindow` rules enforced by the SDK.
+  Future<void> deleteMessage(
+    String messageId, {
+    bool deleteForMeOnly = false,
+  }) async {
+    try {
+      _showActivity();
+      final message =
+          state.messages.firstWhereOrNull((m) => m.messageId == messageId)
+              as chat.Message?;
+
+      if (message == null) {
+        throw AppException(
+          'Unable to find message with id $messageId',
+          code: AppExceptionType.missingMessage.name,
+        );
+      }
+
+      await _chatService?.deleteMessage(
+        message,
+        deleteForMeOnly: deleteForMeOnly,
+      );
+    } finally {
+      _hideActivity();
+    }
+  }
+
+  Future<void> editTextMessage(String messageId, String newText) async {
+    final idx = state.messages.indexWhere((m) => m.messageId == messageId);
+    final message = idx == -1 ? null : state.messages[idx] as chat.Message?;
+
+    if (message == null) {
+      throw AppException(
+        'Unable to find message with id $messageId',
+        code: AppExceptionType.missingMessage.name,
+      );
+    }
+
+    await _chatService?.editTextMessage(message, newText);
+  }
+
   /// Sends a [ScreenEffect] to the chat screen.
   ///
   /// This method handles the logic for triggering a visual or interactive
@@ -789,6 +878,17 @@ class ChatScreenController extends _$ChatScreenController
     String text,
     List<MessageAttachment> messageAttachment,
   ) async {
+    final supportsMedia =
+        state.capabilities?.supports(chat.ChatFeature.mediaAttachments) ??
+        false;
+    if (!supportsMedia) {
+      _logger.warning(
+        'Media attachments are not supported on this chat transport; '
+        'dropping send request.',
+        name: _logKey,
+      );
+      return;
+    }
     messageTextController.clear();
     unawaited(
       _chatService?.sendTextMessage(
@@ -807,7 +907,7 @@ class ChatScreenController extends _$ChatScreenController
   /// related to the image.
   ///
   /// [attachment] - The image attachment to be loaded.
-  void loadImageAttachment(Attachment attachment) {
+  void loadImageAttachment(ChatAttachment attachment) {
     final attachmentId = attachment.id;
     if (attachmentId == null) {
       _logger.info(
@@ -832,6 +932,57 @@ class ChatScreenController extends _$ChatScreenController
 
     attachmentsDataCache[attachmentId] = base64.decode(attachmentData);
     state = state.copyWith(attachmentsDataCache: attachmentsDataCache);
+  }
+
+  /// Records and sends a voice message: builds the attachment, caches the
+  /// recording locally so the sender can replay it immediately, then sends it.
+  Future<bool> sendVoiceMessage({
+    required String filePath,
+    required String mediaType,
+    required Duration duration,
+    required List<int> waveform,
+  }) async {
+    messageTextController.clear();
+    _sendChatActivityTimedAction?.cancel();
+
+    final chatService = _chatService;
+    if (chatService == null) {
+      _logger.warning('Chat service unavailable', name: _logKey);
+      return false;
+    }
+
+    final voiceMessage = await chatService.buildVoiceMessageAttachment(
+      filePath: filePath,
+      mediaType: mediaType,
+      duration: duration,
+      waveform: waveform,
+    );
+    if (voiceMessage == null) return false;
+
+    final cache = ref.read(attachmentCacheServiceProvider(_contactId).notifier);
+    cache.cacheLocalVoiceMessage(
+      voiceMessage.attachment,
+      voiceMessage.bytes,
+      durationMs: duration.inMilliseconds,
+      waveform: waveform,
+    );
+
+    try {
+      await chatService.sendTextMessage(
+        '',
+        attachments: [voiceMessage.attachment],
+      );
+      return true;
+    } catch (e, st) {
+      cache.removeLocalVoiceMessage(voiceMessage.attachment);
+      _logger.error(
+        'Failed to send voice message',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+      return false;
+    }
   }
 
   Future<void> _restoreUnsentMessage() async {
@@ -1041,22 +1192,51 @@ extension ChatScreenControllerProviderSelectors
   ProviderListenable<bool> get shouldDisable {
     return select((state) => !state.isInitialized || state.isGroupDeleted);
   }
+
+  ProviderListenable<bool> get supportsMedia {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.mediaAttachments) ??
+          false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsVoiceMessages {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.voiceMessages) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsMessageDelete {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.messageDelete) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsMessageEdit {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.messageEdit) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsPresence {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.presence) ?? false,
+    );
+  }
 }
 
 extension _ChatScreenStateExtensions on ChatScreenState {
   bool get isGroupChat => contact?.isGroup ?? false;
   bool get isGroupDeleted {
-    final groupDeleted = messages
-        .whereType<chat.EventMessage>()
-        .where(
-          (message) =>
-              message.eventType == chat.EventMessageType.groupDeleted &&
-              message.status == chat.ChatItemStatus.received,
-        )
-        .map((message) => message.contactCard?.firstName)
-        .where((firstName) => firstName != null)
-        .cast<String>();
-
-    return groupDeleted.isNotEmpty;
+    return messages.whereType<chat.EventMessage>().any(
+      (message) =>
+          message.eventType == chat.EventMessageType.groupDeleted &&
+          message.status == chat.ChatItemStatus.received,
+    );
   }
 }

@@ -1,10 +1,15 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:path/path.dart' as path;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contact_card/contact_card.dart' as domain;
@@ -12,10 +17,13 @@ import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/configuration/environment.dart';
+import '../../../infrastructure/exceptions/app_exception.dart';
+import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/chat_items_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/did_extensions.dart';
 import '../../../infrastructure/extensions/list_extensions.dart';
+import '../../../infrastructure/helpers/keyed_lock.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
@@ -43,6 +51,7 @@ import 'handlers/group_details_protocol_handler.dart';
 import 'handlers/presence_protocol_handler.dart';
 import 'handlers/typing_protocol_handler.dart';
 import 'handlers/zkp_attachment_protocol_handler.dart';
+import 'typing_timer.dart';
 
 part 'chat_session_service.g.dart';
 
@@ -53,6 +62,13 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   static const _maxTypingMembersVisible = 4;
   // Grace period to avoid blinking of presence indicator
   static const _presenceGracePeriodSeconds = 1;
+
+  // Serializes session lifecycle (init/teardown) per channel across notifier
+  // instances. ref.onDispose is `void`, so a freshly-built notifier needs a
+  // way to wait for the previous instance's still-in-flight endChatSession
+  // before constructing a new SDK. Locks are retained for the process
+  // lifetime; bound is the set of channels the user has opened.
+  static final _channelLocks = KeyedLock<String>();
 
   late AppLogger _logger;
   late String _otherPartyPermanentDid;
@@ -71,7 +87,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late VrcManager _vrcManager;
 
   TimedAction? _presenceTimedAction;
-  TimedAction? _typingTimedAction;
+  final Map<String, TypingTimer> _typingTimedActions = {};
+  static const _oneToOneTypingKey = '_one_to_one_';
 
   @override
   int get secondsToShowChatActivityIndicator =>
@@ -80,6 +97,18 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   int get chatPresenceIntervalInSeconds =>
       ref.read(environmentProvider).chatPresenceIntervalInSeconds;
+
+  @override
+  Duration get deleteMessageWindow => Duration(
+    seconds: ref.read(environmentProvider).deleteMessageWindowInSeconds,
+  );
+
+  @override
+  TransportCapabilities? get capabilities => _chatSDK?.capabilities;
+
+  bool get _isHumanZkpActive =>
+      ref.read(environmentProvider).zkpEnabled &&
+      (_chatSDK?.capabilities.supports(ChatFeature.humanZkp) ?? false);
 
   bool get isGroupChat => _isGroupChat;
 
@@ -128,12 +157,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     ref.onDispose(() {
       _presenceTimedAction?.cancel();
-      _typingTimedAction?.cancel();
-      _rCardManager.cancelSubscription();
-      _chatStreamRef?.dispose();
-      _chatStreamRef = null;
-      unawaited(_vdipManager.cancelSubscriptions());
-      _chatSDK?.endChatSession();
+      for (final action in _typingTimedActions.values) {
+        action.cancel();
+      }
+
+      unawaited(_disposeChatSession());
       _logger.info('ChatSessionService disposed', name: _logKey);
     });
 
@@ -178,10 +206,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
   }
 
-  void _onZkpAttachment(StreamData data, String channelDid) {
+  void _onZkpAttachment(ChatItem chatItem, String channelDid) {
+    if (!_isHumanZkpActive) return;
     state = state.copyWith(
       zkpAttachmentEvent: ZkpAttachmentEvent(
-        data: data,
+        chatItem: chatItem,
         channelDid: channelDid,
       ),
     );
@@ -193,34 +222,37 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   Future<void> _ensureChatSdkInitialized() async {
     if (_chatSDK != null) return;
+    await _channelLocks.synchronized(_otherPartyPermanentDid, () async {
+      if (_chatSDK != null) return;
 
-    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
-      _otherPartyPermanentDid,
-    );
-    if (channel == null) return;
+      final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+        _otherPartyPermanentDid,
+      );
+      if (channel == null) return;
 
-    _chatSDK = await ref.read(chatSdkProvider(channel).future);
-    _conciergeMessenger = ChatConciergeMessenger(chatSdk: _chatSDK!);
-    _isGroupChat =
-        ref
-            .read(contactsServiceProvider)
-            .getContactByChannelDid(_otherPartyPermanentDid)
-            ?.isGroup ??
-        false;
+      _chatSDK = await ref.read(chatSdkProvider(channel).future);
+      _conciergeMessenger = ChatConciergeMessenger(chatSdk: _chatSDK!);
+      _isGroupChat =
+          ref
+              .read(contactsServiceProvider)
+              .getContactByChannelDid(_otherPartyPermanentDid)
+              ?.isGroup ??
+          false;
 
-    final srcCard = channel.otherPartyContactCard;
-    final initialCard = srcCard != null
-        ? ContactCardUtils.fromSdkContactCard(srcCard)
-        : null;
-    _otherPartyFirstName = initialCard?.firstName;
+      final srcCard = channel.otherPartyContactCard;
+      final initialCard = srcCard != null
+          ? ContactCardUtils.fromSdkContactCard(srcCard)
+          : null;
+      _otherPartyFirstName = initialCard?.firstName;
 
-    if (_isGroupChat) {
-      final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
-      if (group != null) {
-        state = state.copyWith(group: group);
+      if (_isGroupChat) {
+        final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
+        if (group != null) {
+          state = state.copyWith(group: group);
+        }
       }
-    }
+    });
   }
 
   @override
@@ -237,24 +269,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       final chatSession = await _chatSDK!.startChatSession();
       _chatId = chatSession.id;
 
-      final chatStream = await _chatSDK!.chatStreamSubscription;
-      if (chatStream == null) {
-        _logger.warning('Chat stream is null', name: _logKey);
-      } else {
-        _chatStreamRef = chatStream
-          ..listen(
-            (data) => _onChannelMessagesData(data, _otherPartyPermanentDid),
-            onError: (Object error, StackTrace stackTrace) {
-              _logger.error(
-                'Error in chat stream subscription',
-                error: error,
-                stackTrace: stackTrace,
-                name: _logKey,
-              );
-            },
-          );
-      }
-
       final dbMessageIds = {
         EncryptionNotice().messageId,
         for (final m in chatSession.messages) m.messageId,
@@ -262,13 +276,51 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       final replayMessages = state.messages
           .where((m) => !dbMessageIds.contains(m.messageId))
           .toList();
+
       final baseMessages = [
         EncryptionNotice(),
         ...chatSession.messages,
         ...replayMessages,
       ].sortedBy((item) => item.dateCreated).reversed.toList();
+
       final messages = _appendDerivedZkpNotices(baseMessages);
       state = state.copyWith(messages: messages, isInitialized: true);
+
+      // Reset must be fully committed before the stream listener is attached.
+      // Buffered events flush as soon as the listener attaches and would
+      // otherwise race with this update on a stale Contact snapshot, causing
+      // a seqNo write to clobber badgeCount=0 back to its previous value.
+      await _resetBadgeCount();
+      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
+
+      unawaited(
+        _chatSDK!.chatStreamSubscription.then((chatStream) {
+          if (_chatSDK == null) {
+            // pauseChat ran while we were waiting for the transport
+            // subscription. Drop the listener attachment to avoid leaking
+            // a subscription that has no disposal path.
+            return;
+          }
+
+          if (chatStream == null) {
+            _logger.warning('Chat stream is null', name: _logKey);
+            return;
+          }
+
+          _chatStreamRef = chatStream
+            ..listen(
+              (data) => _onChannelMessagesData(data, _otherPartyPermanentDid),
+              onError: (Object error, StackTrace stackTrace) {
+                _logger.error(
+                  'Error in chat stream subscription',
+                  error: error,
+                  stackTrace: stackTrace,
+                  name: _logKey,
+                );
+              },
+            );
+        }),
+      );
 
       // Replay any VRC events that fired before the chat was opened
       // (e.g. while the user was offline). Must run AFTER:
@@ -287,10 +339,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
       unawaited(
-        _rCardManager.subscribeToIncomingRCards().then(
-          (_) => _rCardManager.replayPendingRCard(),
-        ),
+        _rCardManager.subscribeToIncomingRCards().then((_) async {
+          if (!ref.mounted) return;
+          await _rCardManager.replayPendingRCard();
+        }),
       );
+
       _logger.info('Chat session started', name: _logKey);
     } catch (error, stackTrace) {
       _logger.error(
@@ -338,12 +392,41 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _groupManager.refreshGroup(groupId);
 
   @override
-  void pauseChat() {
+  Future<void> removeMember({
+    required String groupId,
+    required String memberDid,
+  }) async {
+    await _ensureChatSdkInitialized();
+    if (!_isGroupChat) {
+      _logger.error(
+        'Attempted to remove member from non-group chat',
+        name: _logKey,
+      );
+      return;
+    }
+
+    await _chatSDK?.removeMember(memberDid);
+  }
+
+  @override
+  Future<void> pauseChat() => _disposeChatSession();
+
+  Future<void> _disposeChatSession() async {
+    final sdk = _chatSDK;
+    _chatSDK = null;
+
     _chatStreamRef?.dispose();
     _chatStreamRef = null;
-    _chatSDK?.endChatSession();
+
     _rCardManager.cancelSubscription();
-    unawaited(_vdipManager.cancelSubscriptions());
+    await _vdipManager.cancelSubscriptions();
+
+    if (sdk == null) return Future.value();
+
+    return _channelLocks.synchronized(
+      _otherPartyPermanentDid,
+      sdk.endChatSession,
+    );
   }
 
   @override
@@ -353,9 +436,76 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   Future<void> sendTextMessage(
     String message, {
-    List<Attachment>? attachments,
+    List<ChatAttachment>? attachments,
   }) async {
-    await _chatSDK?.sendTextMessage(message, attachments: attachments);
+    await _chatSDK?.sendTextMessage(
+      message,
+      attachments: attachments ?? const [],
+    );
+  }
+
+  @override
+  Future<({ChatAttachment attachment, Uint8List bytes})?>
+  buildVoiceMessageAttachment({
+    required String filePath,
+    required String mediaType,
+    required Duration duration,
+    required List<int> waveform,
+  }) async {
+    if (!(_chatSDK?.capabilities.supports(ChatFeature.voiceMessages) ??
+        false)) {
+      throw AppException(
+        'Voice messages are not supported on this chat transport.',
+        code: AppExceptionType.voiceMessagesNotSupported.name,
+      );
+    }
+    late final Uint8List bytes;
+    try {
+      final file = File(filePath);
+      if (!await file.exists()) {
+        _logger.warning('Voice message file missing', name: _logKey);
+        return null;
+      }
+
+      bytes = await file.readAsBytes();
+      if (bytes.isEmpty) {
+        _logger.warning('Voice message file is empty', name: _logKey);
+        return null;
+      }
+    } catch (e, st) {
+      _logger.error(
+        'Failed to read voice message file',
+        error: e,
+        stackTrace: st,
+        name: _logKey,
+      );
+      return null;
+    }
+
+    final attachment = VoiceMessageMetadata.buildAttachment(
+      id: const Uuid().v4(),
+      base64: base64.encode(bytes),
+      durationMs: duration.inMilliseconds,
+      waveform: waveform,
+      filename: path.basename(filePath),
+      mediaType: mediaType,
+      format: AttachmentFormat.hostedMedia.value,
+      lastModifiedTime: clock.now(),
+      byteCount: bytes.length,
+    );
+    return (attachment: attachment, bytes: bytes);
+  }
+
+  @override
+  Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
+    final sdk = _chatSDK;
+    if (sdk == null) {
+      throw AppException(
+        'Chat SDK not initialized',
+        code: AppExceptionType.chatSdkNotInitialized.name,
+      );
+    }
+    return sdk.downloadMedia(attachment);
   }
 
   @override
@@ -376,7 +526,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {
     await _conciergeMessenger.sendChatContactDetailsUpdate(message);
-    await _rCardManager.sendProfileUpdateWithRCard(message);
+    if (!_isGroupChat) {
+      await _rCardManager.sendProfileUpdateWithRCard(message);
+    }
   }
 
   @override
@@ -390,6 +542,27 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     required String reaction,
   }) async {
     await _chatSDK?.reactOnMessage(message, reaction: reaction);
+  }
+
+  @override
+  Future<void> deleteMessage(
+    Message message, {
+    bool deleteForMeOnly = false,
+  }) async {
+    if (!deleteForMeOnly &&
+        !(_chatSDK?.capabilities.supports(ChatFeature.messageDelete) ??
+            false)) {
+      throw AppException(
+        'Delete for everyone is not supported on this chat transport.',
+        code: AppExceptionType.deleteForEveryoneNotSupported.name,
+      );
+    }
+    await _chatSDK?.deleteMessage(message, localOnly: deleteForMeOnly);
+  }
+
+  @override
+  Future<void> editTextMessage(Message message, String newText) async {
+    await _chatSDK?.editTextMessage(message, newText);
   }
 
   @override
@@ -440,8 +613,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   ) async {
     _toggleChatLoading(true);
     _logger.info(
-      '[MessagesStream] type=${data.plainTextMessage?.type} '
-      'from=${data.plainTextMessage?.from}',
+      '[MessagesStream] Received event: ${data.event.runtimeType}',
       name: _logKey,
     );
 
@@ -452,6 +624,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       // VRC request messages are protocol signals; they must not appear as
       // chat bubbles on either side of the conversation.
       final isVrcRequest =
+          (data.event is ChatRequestIssuanceEvent ||
+              data.event is ChatIssuedCredentialEvent) &&
           chatItem is Message &&
           chatItem.attachments.isNotEmpty &&
           chatItem.attachments.every(
@@ -465,9 +639,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         upsertChatItem(chatItem);
       }
       if (chatItem is Message && !chatItem.isFromMe) {
-        _clearMembersTypingActivity(data.plainTextMessage?.from);
+        _clearMembersTypingActivity(chatItem.senderDid);
       }
       if (chatItem is Message &&
+          _isHumanZkpActive &&
           LivenessZkpConciergeDeriver.messageHasZkpAttachments(chatItem)) {
         _syncHumanZkpNotices();
       }
@@ -497,7 +672,20 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
               '';
   }
 
+  String? _resolveGroupMemberName(String senderDid) =>
+      state.getGroupMemberByDid(senderDid)?.contactCard.firstName;
+
+  String _typingTimerKey(String? senderDid) =>
+      _isGroupChat ? senderDid! : _oneToOneTypingKey;
+
+  void _cancelTypingTimer(String timerKey) {
+    _typingTimedActions[timerKey]?.cancel();
+    _typingTimedActions.remove(timerKey);
+  }
+
   List<ChatItem> _appendDerivedZkpNotices(List<ChatItem> existing) {
+    if (!_isHumanZkpActive) return existing;
+
     return LivenessZkpConciergeDeriver.appendDerivedHumanZkpConciergeMessages(
       existing,
       contactName: _peerFirstNameForZkpUi(),
@@ -543,10 +731,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String? contactName;
 
     if (_isGroupChat && senderDid != null) {
-      groupMessageSenderName = state
-          .getGroupMemberByDid(senderDid)
-          ?.contactCard
-          .firstName;
+      groupMessageSenderName = _resolveGroupMemberName(senderDid);
     }
 
     if (!_isGroupChat) {
@@ -565,36 +750,27 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       name: _logKey,
     );
 
-    _typingTimedAction?.cancel();
-    state = state.copyWith(membersTyping: []);
-    _typingTimedAction = TimedAction(
-      onRun: (args) {
-        var memberNames = <String>[];
-        if (groupMessageSenderName != null &&
-            groupMessageSenderName.isNotEmpty) {
-          memberNames = [...state.membersTyping];
-          if (memberNames.length < _maxTypingMembersVisible &&
-              !memberNames.contains(groupMessageSenderName)) {
-            memberNames.add(groupMessageSenderName);
-          }
-        } else if (contactName != null && contactName.isNotEmpty) {
-          memberNames = [contactName];
-        }
-        if (memberNames.isEmpty) return;
-        state = state.copyWith(membersTyping: memberNames);
+    final timerKey = _typingTimerKey(senderDid);
+    _cancelTypingTimer(timerKey);
 
-        _logger.info(
-          '_onTypingMember onRun: membersTyping updated: $memberNames',
-          name: _logKey,
-        );
-      },
-      onComplete: () {
-        state = state.copyWith(membersTyping: []);
+    final timer = TypingTimer(
+      memberName: groupMessageSenderName ?? contactName ?? '',
+      maxVisible: _maxTypingMembersVisible,
+      duration: Duration(seconds: secondsToShowChatActivityIndicator),
+      getNames: () => state.membersTyping,
+      setNames: (names) => state = state.copyWith(membersTyping: names),
+      onExpired: () {
+        _typingTimedActions.remove(timerKey);
         _logger.info('_onTypingMember onComplete', name: _logKey);
       },
-      duration: Duration(seconds: secondsToShowChatActivityIndicator),
     );
-    _typingTimedAction!.start(args: [groupMessageSenderName]);
+    _typingTimedActions[timerKey] = timer;
+    timer.start();
+    _logger.info(
+      '_onTypingMember timer started for: '
+      '${groupMessageSenderName ?? contactName}',
+      name: _logKey,
+    );
   }
 
   void _onEffect(String? effectName) {
@@ -617,7 +793,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     state = state.copyWith(effect: null);
   }
 
-  void _onGroupDetailsUpdated(StreamData data, String channelDid) {
+  void _onGroupDetailsUpdated(ChatEvent event, String channelDid) {
     _logger.info(
       'Updating group details for channel ${channelDid.topAndTail()}',
       name: _logKey,
@@ -665,14 +841,17 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   void _clearMembersTypingActivity(String? senderDid) {
-    final memberNames = [...state.membersTyping];
-    if (memberNames.isEmpty) return;
-
     // For group chats, senderDid is required to identify which member to remove
     if (_isGroupChat && (senderDid == null || senderDid.isEmpty)) return;
 
+    final timerKey = _typingTimerKey(senderDid);
+    _cancelTypingTimer(timerKey);
+
+    final memberNames = [...state.membersTyping];
+    if (memberNames.isEmpty) return;
+
     final groupMessageSenderName = _isGroupChat && senderDid != null
-        ? state.getGroupMemberByDid(senderDid)?.contactCard.firstName
+        ? _resolveGroupMemberName(senderDid)
         : null;
 
     String? contactName;

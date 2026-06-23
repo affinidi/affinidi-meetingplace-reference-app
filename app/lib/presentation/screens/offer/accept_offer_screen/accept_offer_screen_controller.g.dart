@@ -10,13 +10,13 @@ part of 'accept_offer_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(AcceptOfferScreenController)
-final acceptOfferScreenControllerProvider =
+const acceptOfferScreenControllerProvider =
     AcceptOfferScreenControllerFamily._();
 
 final class AcceptOfferScreenControllerProvider
     extends
         $NotifierProvider<AcceptOfferScreenController, AcceptOfferScreenState> {
-  AcceptOfferScreenControllerProvider._({
+  const AcceptOfferScreenControllerProvider._({
     required AcceptOfferScreenControllerFamily super.from,
     required String super.argument,
   }) : super(
@@ -73,7 +73,7 @@ final class AcceptOfferScreenControllerFamily extends $Family
           AcceptOfferScreenState,
           String
         > {
-  AcceptOfferScreenControllerFamily._()
+  const AcceptOfferScreenControllerFamily._()
     : super(
         retry: null,
         name: r'acceptOfferScreenControllerProvider',
@@ -98,6 +98,7 @@ abstract class _$AcceptOfferScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(_$args);
     final ref =
         this.ref as $Ref<AcceptOfferScreenState, AcceptOfferScreenState>;
     final element =
@@ -108,6 +109,6 @@ abstract class _$AcceptOfferScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    element.handleValue(ref, created);
   }
 }

@@ -10,7 +10,7 @@ part of 'identities_repository_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(identitiesRepository)
-final identitiesRepositoryProvider = IdentitiesRepositoryProvider._();
+const identitiesRepositoryProvider = IdentitiesRepositoryProvider._();
 
 final class IdentitiesRepositoryProvider
     extends
@@ -22,7 +22,7 @@ final class IdentitiesRepositoryProvider
     with
         $FutureModifier<IdentitiesRepository>,
         $FutureProvider<IdentitiesRepository> {
-  IdentitiesRepositoryProvider._()
+  const IdentitiesRepositoryProvider._()
     : super(
         from: null,
         argument: null,

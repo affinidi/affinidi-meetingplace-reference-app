@@ -1,16 +1,48 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
+
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 import 'fake_chat.dart';
 
 class FakeChatSdk implements MeetingPlaceChatSDK {
+  FakeChatSdk({TransportCapabilities? capabilities})
+    : _capabilities = capabilities ?? _defaultCapabilities;
+
+  /// Mirrors an individual Matrix chat: the common case exercised by tests.
+  static const _defaultCapabilities = TransportCapabilities({
+    ChatFeature.textMessaging,
+    ChatFeature.mediaAttachments,
+    ChatFeature.documentAttachments,
+    ChatFeature.voiceMessages,
+    ChatFeature.reactions,
+    ChatFeature.typingIndicators,
+    ChatFeature.deliveryReceipts,
+    ChatFeature.messageEdit,
+    ChatFeature.messageDelete,
+    ChatFeature.effects,
+    ChatFeature.contactDetailsUpdate,
+  });
+
+  TransportCapabilities _capabilities;
+
+  @override
+  TransportCapabilities get capabilities => _capabilities;
+
+  set capabilities(TransportCapabilities caps) => _capabilities = caps;
+
   int _chatSessionStartedCalls = 0;
   int _startedChatPresenceUpdates = 0;
   final StreamController<StreamData> _streamController =
       StreamController<StreamData>.broadcast();
+
+  void _emit(StreamData data) {
+    _streamController.add(data);
+  }
 
   bool chatActivitySent = false;
   ConciergeMessage? lastRejectedConnection;
@@ -22,6 +54,9 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   bool sessionEnded = false;
   String? lastEffectSent;
   bool shouldThrowOnStartSession = false;
+  String? lastRemovedMemberDid;
+  int removeMemberCallCount = 0;
+  Completer<void>? removeMemberBlocker;
 
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
@@ -30,8 +65,14 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
   final List<Map<String, dynamic>> cancelUpdatingContactDetailsCalls = [];
-  final List<({List<Attachment> attachments, String senderDid})>
+  final List<Map<String, dynamic>> sendMediaMessageCalls = [];
+  final List<Map<String, dynamic>> deleteMessageCalls = [];
+  final List<Map<String, dynamic>> editTextMessageCalls = [];
+  final Map<String, List<int>> _downloadedMedia = {};
+  final List<({List<ChatAttachment> attachments, String senderDid})>
   createAttachmentMessageCalls = [];
+  final List<({int targetCount, Completer<void> completer})>
+  _attachmentMessageWaiters = [];
 
   int get startChatSessionCallCount => _chatSessionStartedCalls;
   int get startedChatPresenceUpdatesCount => _startedChatPresenceUpdates;
@@ -40,31 +81,51 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   void simulateIncomingTextMessage({
     required String text,
     required String recipientDid,
-    List<Attachment>? attachments,
+    List<ChatAttachment>? attachments,
+    bool isFromMe = false,
+    String senderDid = 'fake-sender-did',
   }) {
+    final transportId =
+        'fake-transport-incoming-${DateTime.now().microsecondsSinceEpoch}';
+    final normalizedAttachments = <ChatAttachment>[];
+    var attachmentIndex = 0;
+    for (final attachment in attachments ?? const <ChatAttachment>[]) {
+      normalizedAttachments.add(
+        ChatAttachment(
+          id:
+              attachment.id ??
+              '''fake-attachment-${DateTime.now().microsecondsSinceEpoch}-${attachmentIndex++}''',
+          description: attachment.description,
+          filename: attachment.filename,
+          mediaType: attachment.mediaType,
+          format: attachment.format,
+          lastModifiedTime: attachment.lastModifiedTime,
+          data: attachment.data,
+          byteCount: attachment.byteCount,
+          transportId: attachment.transportId ?? transportId,
+          metadata: attachment.metadata,
+        ),
+      );
+    }
     final message = Message(
       chatId: 'fake-chat-id',
       messageId: 'msg-incoming-${DateTime.now().millisecondsSinceEpoch}',
       value: text,
       dateCreated: DateTime.now(),
       status: ChatItemStatus.confirmed,
-      isFromMe: false,
-      senderDid: 'fake-sender-did',
-      attachments: attachments ?? [],
+      isFromMe: isFromMe,
+      senderDid: senderDid,
+      attachments: normalizedAttachments,
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: message.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/message'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/message',
+      senderDid: senderDid,
       body: {'text': text, 'timestamp': message.dateCreated.toIso8601String()},
-      from: 'fake-sender-did',
-      to: [recipientDid],
       createdTime: message.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(plainTextMessage: plainTextMessage, chatItem: message),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: message));
   }
 
   /// Simulates an incoming concierge message for join group requests
@@ -93,25 +154,18 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       conciergeType: ConciergeMessageType.permissionToJoinGroup,
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: conciergeMessage.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/concierge'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/concierge',
+      senderDid: senderDid,
       body: {
         'type': 'permissionToJoinGroup',
         'memberName': memberName,
         'timestamp': conciergeMessage.dateCreated.toIso8601String(),
       },
-      from: senderDid,
-      to: [recipientDid],
       createdTime: conciergeMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: conciergeMessage,
-      ),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: conciergeMessage));
 
     return conciergeMessage;
   }
@@ -134,24 +188,17 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       ),
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: conciergeMessage.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/concierge'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/concierge',
+      senderDid: senderDid,
       body: {
         'type': 'permissionToVerifyRelationship',
         'timestamp': conciergeMessage.dateCreated.toIso8601String(),
       },
-      from: senderDid,
-      to: [recipientDid],
       createdTime: conciergeMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: conciergeMessage,
-      ),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: conciergeMessage));
 
     return conciergeMessage;
   }
@@ -176,22 +223,18 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       data: data,
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: eventMessage.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/event',
+      senderDid: senderDid,
       body: {
         'type': eventType,
         'timestamp': eventMessage.dateCreated.toIso8601String(),
         ...data,
       },
-      from: senderDid,
-      to: [recipientDid],
       createdTime: eventMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
 
     return eventMessage;
   }
@@ -212,24 +255,17 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       conciergeType: ConciergeMessageType.permissionToUpdateProfile,
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: conciergeMessage.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/concierge'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/concierge',
+      senderDid: senderDid,
       body: {
         'type': 'permissionToUpdateProfile',
         'timestamp': conciergeMessage.dateCreated.toIso8601String(),
       },
-      from: senderDid,
-      to: [recipientDid],
       createdTime: conciergeMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(
-        plainTextMessage: plainTextMessage,
-        chatItem: conciergeMessage,
-      ),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: conciergeMessage));
 
     return conciergeMessage;
   }
@@ -261,22 +297,18 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       },
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: eventMessage.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/event',
+      senderDid: senderDid,
       body: {
         'type': 'groupMemberJoinedGroup',
         'memberName': memberName,
         'timestamp': eventMessage.dateCreated.toIso8601String(),
       },
-      from: senderDid,
-      to: [recipientDid],
       createdTime: eventMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
 
     return eventMessage;
   }
@@ -287,6 +319,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String memberDid,
     required String senderDid,
     required String recipientDid,
+    GroupMemberLeaveReason reason = GroupMemberLeaveReason.leave,
   }) {
     final eventMessage = EventMessage(
       chatId: 'fake-chat-id',
@@ -305,25 +338,22 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
             'n': {'given': memberName},
           },
         },
+        'reason': reason.name,
       },
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: eventMessage.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/event',
+      senderDid: senderDid,
       body: {
         'type': 'groupMemberLeftGroup',
         'memberName': memberName,
         'timestamp': eventMessage.dateCreated.toIso8601String(),
       },
-      from: senderDid,
-      to: [recipientDid],
       createdTime: eventMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
 
     return eventMessage;
   }
@@ -344,21 +374,17 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       data: {},
     );
 
-    final plainTextMessage = PlainTextMessage(
-      id: eventMessage.messageId,
-      type: Uri.parse('https://affinidi.com/chat/1.0/event'),
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/event',
+      senderDid: senderDid,
       body: {
         'type': 'groupDeleted',
         'timestamp': eventMessage.dateCreated.toIso8601String(),
       },
-      from: senderDid,
-      to: [recipientDid],
       createdTime: eventMessage.dateCreated,
     );
 
-    _streamController.add(
-      StreamData(plainTextMessage: plainTextMessage, chatItem: eventMessage),
-    );
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
 
     return eventMessage;
   }
@@ -393,15 +419,9 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String timestamp,
     required String recipientDid,
   }) {
-    _streamController.add(
+    _emit(
       StreamData(
-        plainTextMessage: PlainTextMessage(
-          id: 'presence-${DateTime.now().millisecondsSinceEpoch}',
-          type: Uri.parse(ChatProtocol.chatPresence.value),
-          body: {'timestamp': timestamp},
-          from: recipientDid,
-        ),
-        chatItem: null,
+        event: ChatPresenceEvent(timestamp: DateTime.parse(timestamp)),
       ),
     );
   }
@@ -411,15 +431,13 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required DateTime createdTime,
     required String recipientDid,
   }) {
-    _streamController.add(
+    _emit(
       StreamData(
-        plainTextMessage: PlainTextMessage(
-          id: 'typing-${DateTime.now().millisecondsSinceEpoch}',
-          type: Uri.parse(ChatProtocol.chatActivity.value),
+        event: ChatActivityEvent(
+          senderDid: senderDid,
+          timestamp: createdTime,
           createdTime: createdTime,
-          from: senderDid,
         ),
-        chatItem: null,
       ),
     );
   }
@@ -428,39 +446,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String effectName,
     required String recipientDid,
   }) {
-    _streamController.add(
-      StreamData(
-        plainTextMessage: PlainTextMessage(
-          id: 'effect-${DateTime.now().millisecondsSinceEpoch}',
-          type: Uri.parse(ChatProtocol.chatEffect.value),
-          body: {'effect': effectName},
-          from: recipientDid,
-        ),
-        chatItem: null,
-      ),
-    );
+    _emit(StreamData(event: ChatEffectEvent(effectName: effectName)));
   }
 
   void simulateIncomingGroupDetailsUpdate({required String recipientDid}) {
-    _streamController.add(
-      StreamData(
-        plainTextMessage: PlainTextMessage(
-          id: 'group-details-${DateTime.now().millisecondsSinceEpoch}',
-          type: Uri.parse(ChatProtocol.chatGroupDetailsUpdate.value),
-          from: recipientDid,
-          body: {
-            'groupId': 'fake-group-id',
-            'groupDid': recipientDid,
-            'offerLink': 'https://fake.link',
-            'members': <Map<String, dynamic>>[],
-            'adminDids': <String>[recipientDid],
-            'dateCreated': DateTime.now().toIso8601String(),
-            'groupPublicKey': 'fake-public-key',
-          },
-        ),
-        chatItem: null,
-      ),
-    );
+    _emit(StreamData(event: const ChatGroupDetailsUpdateEvent()));
   }
 
   void simulateIncomingContactCardUpdate({
@@ -468,33 +458,12 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required ContactCard card,
     required String recipientDid,
   }) {
-    _streamController.add(
+    _emit(
       StreamData(
-        plainTextMessage: PlainTextMessage(
-          id: 'contact-card-${DateTime.now().millisecondsSinceEpoch}',
-          type: Uri.parse(ChatProtocol.chatContactDetailsUpdate.value),
-          from: contactDid,
-          body: {
-            'did': card.did,
-            'type': card.type,
-            'contactInfo': {
-              'n': {
-                'given': card.firstName,
-                'surname': card.lastName ?? '',
-                'displayName': card.displayName,
-              },
-              'email': {
-                'type': {'work': card.email ?? ''},
-              },
-              'tel': {
-                'type': {'cell': card.mobile ?? ''},
-              },
-              'photo': card.profilePic ?? '',
-              'x-meetingplace-identity-card-color': card.cardColor ?? '',
-            },
-          },
+        event: ChatContactDetailsUpdateEvent(
+          senderDid: contactDid,
+          contactCard: card.toSdkContactCard(),
         ),
-        chatItem: null,
       ),
     );
   }
@@ -555,12 +524,56 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
+  Future<void> removeMember(String memberDid) async {
+    lastRemovedMemberDid = memberDid;
+    removeMemberCallCount++;
+    if (removeMemberBlocker != null) {
+      await removeMemberBlocker!.future;
+    }
+  }
+
+  @override
   Future<Message> sendTextMessage(
     String text, {
-    List<Attachment>? attachments,
+    List<ChatAttachment>? attachments,
   }) async {
     // Track the call
     sendTextMessageCalls.add({'text': text, 'attachments': attachments});
+
+    var normalizedAttachments = attachments ?? const <ChatAttachment>[];
+    final firstAttachment = normalizedAttachments.firstOrNull;
+    final base64Data = firstAttachment?.data?.base64;
+    if (firstAttachment != null &&
+        base64Data != null &&
+        base64Data.isNotEmpty &&
+        firstAttachment.data?.links?.isEmpty != false) {
+      final fileBytes = base64Decode(base64Data);
+      final mediaUri = Uri.parse(
+        'mxc://fake-homeserver/fake-media-${sendMediaMessageCalls.length}',
+      );
+      final transportId = 'fake-event-${DateTime.now().microsecondsSinceEpoch}';
+      sendMediaMessageCalls.add({
+        'fileBytes': fileBytes,
+        'contentType': firstAttachment.mediaType ?? 'application/octet-stream',
+        'filename': firstAttachment.filename,
+        'caption': text,
+        'mxcUri': mediaUri,
+        'transportId': transportId,
+      });
+      _downloadedMedia[transportId] = fileBytes;
+
+      normalizedAttachments = [
+        ChatAttachment(
+          id: firstAttachment.id,
+          mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
+          filename: firstAttachment.filename,
+          format: AttachmentFormat.hostedMedia.value,
+          transportId: transportId,
+          data: ChatAttachmentData(links: [mediaUri], base64: base64Data),
+          metadata: firstAttachment.metadata,
+        ),
+      ];
+    }
 
     final message = Message(
       chatId: 'fake-chat-id',
@@ -581,7 +594,6 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   @override
   Future<Chat> startChatSession() async {
     _chatSessionStartedCalls++;
-    await Future<void>.delayed(const Duration(milliseconds: 10));
     if (shouldThrowOnStartSession) {
       throw Exception('Simulated SDK error');
     }
@@ -596,13 +608,65 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   @override
   Future<void> createAttachmentMessage({
-    required List<Attachment> attachments,
+    required List<ChatAttachment> attachments,
     required String senderDid,
   }) async {
     createAttachmentMessageCalls.add((
       attachments: attachments,
       senderDid: senderDid,
     ));
+    _resolveAttachmentMessageWaiters();
+  }
+
+  Future<void> waitForAttachmentMessageCount(int count) {
+    if (createAttachmentMessageCalls.length >= count) {
+      return Future.value();
+    }
+
+    final completer = Completer<void>();
+    _attachmentMessageWaiters.add((targetCount: count, completer: completer));
+    return completer.future;
+  }
+
+  void _resolveAttachmentMessageWaiters() {
+    final completedWaiters = _attachmentMessageWaiters
+        .where(
+          (waiter) => createAttachmentMessageCalls.length >= waiter.targetCount,
+        )
+        .toList();
+    for (final waiter in completedWaiters) {
+      waiter.completer.complete();
+      _attachmentMessageWaiters.remove(waiter);
+    }
+  }
+
+  /// Simulates a sent (own) text message appearing in the stream.
+  void simulateSentTextMessage({required String text}) {
+    final message = Message(
+      chatId: 'fake-chat-id',
+      messageId: 'msg-sent-${DateTime.now().millisecondsSinceEpoch}',
+      value: text,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      isFromMe: true,
+      senderDid: 'fake-my-did',
+      attachments: [],
+    );
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/message',
+      senderDid: 'fake-my-did',
+      body: {'text': text, 'timestamp': message.dateCreated.toIso8601String()},
+      createdTime: message.dateCreated,
+    );
+    _emit(StreamData(event: chatEvent, chatItem: message));
+  }
+
+  @override
+  Future<void> editTextMessage(Message message, String newText) async {
+    editTextMessageCalls.add({'message': message, 'newText': newText});
+    message.value = newText;
+    message.editedAt = DateTime.now().toUtc();
+    _emit(StreamData(chatItem: message));
   }
 
   @override

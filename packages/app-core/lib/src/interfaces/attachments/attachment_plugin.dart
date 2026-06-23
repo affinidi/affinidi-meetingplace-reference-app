@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
 
-import 'attachment_plugin_icon.dart';
-import 'attachment_plugin_pick_result.dart';
+import '../../../mpx_app_core.dart';
 
 abstract interface class AttachmentPlugin {
   AttachmentPluginIcon get icon;
@@ -15,18 +13,18 @@ abstract interface class AttachmentPlugin {
   Future<AttachmentPluginPickResult?> pickAttachments(BuildContext context);
 
   Widget renderAttachment({
-    required Attachment attachment,
+    required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
   });
 
   Widget renderAttachments({
-    required List<Attachment> attachments,
+    required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
   });
 
-  bool supportsFormat(Attachment format);
+  bool supportsFormat(ChatAttachment format);
 
   String localizedName(BuildContext context);
 

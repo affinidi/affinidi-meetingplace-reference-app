@@ -10,9 +10,9 @@ import '../../../domain/models/contacts/contact_presence_status.dart';
 part 'chat_service_state.freezed.dart';
 
 class ZkpAttachmentEvent {
-  const ZkpAttachmentEvent({required this.data, required this.channelDid});
+  const ZkpAttachmentEvent({required this.chatItem, required this.channelDid});
 
-  final chat.StreamData data;
+  final chat.ChatItem chatItem;
   final String channelDid;
 }
 

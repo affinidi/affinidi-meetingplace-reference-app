@@ -10,12 +10,12 @@ part of 'image_picker_provider.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(imagePicker)
-final imagePickerProvider = ImagePickerProvider._();
+const imagePickerProvider = ImagePickerProvider._();
 
 final class ImagePickerProvider
     extends $FunctionalProvider<ImagePicker, ImagePicker, ImagePicker>
     with $Provider<ImagePicker> {
-  ImagePickerProvider._()
+  const ImagePickerProvider._()
     : super(
         from: null,
         argument: null,

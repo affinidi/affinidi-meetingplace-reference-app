@@ -26,6 +26,7 @@ ConnectionOffer _offerForContact({int? score}) => ConnectionOffer(
   expiresAt: DateTime(2025, 12, 31),
   maximumUsage: 10,
   score: score,
+  transport: ChannelTransport.didcomm,
 );
 
 Future<void> _navigateToConnectionDetails(

@@ -17,12 +17,7 @@ dependency_overrides:
   ffi: 2.2.0
   meta: ^1.18.2
   test_api: ^0.7.12
-
-hooks:
-  user_defines:
-    sqlite3:
-      source: sqlite3mc
-
+  
 melos:
   scripts:
     analyze:
@@ -79,8 +74,8 @@ melos:
         echo "Generating code"
         echo "------------------------------------------------------------------------"
         melos exec --scope=mpx_flutter_reference_app -- flutter clean
-        melos exec --scope=mpx_flutter_reference_app -- dart run build_runner build --delete-conflicting-outputs
-        dart format -l 80 .
+        melos exec --scope=mpx_flutter_reference_app -- dart run build_runner build
+        melos exec --scope=mpx_flutter_reference_app -- dart format -l 80 lib test
 
     strings:
       run: |
@@ -88,4 +83,4 @@ melos:
         echo "Generating localized strings"
         echo "------------------------------------------------------------------------"
         melos exec --scope=mpx_flutter_reference_app -- flutter gen-l10n
-        dart format -l 80 .
+        melos exec --scope=mpx_flutter_reference_app -- dart format -l 80 lib test

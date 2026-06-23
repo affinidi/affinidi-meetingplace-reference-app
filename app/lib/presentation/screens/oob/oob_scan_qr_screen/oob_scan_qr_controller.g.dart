@@ -10,11 +10,11 @@ part of 'oob_scan_qr_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(OobScanQrController)
-final oobScanQrControllerProvider = OobScanQrControllerProvider._();
+const oobScanQrControllerProvider = OobScanQrControllerProvider._();
 
 final class OobScanQrControllerProvider
     extends $NotifierProvider<OobScanQrController, OobScanQrState> {
-  OobScanQrControllerProvider._()
+  const OobScanQrControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,6 +49,7 @@ abstract class _$OobScanQrController extends $Notifier<OobScanQrState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<OobScanQrState, OobScanQrState>;
     final element =
         ref.element
@@ -58,6 +59,6 @@ abstract class _$OobScanQrController extends $Notifier<OobScanQrState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

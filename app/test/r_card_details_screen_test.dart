@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
+import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import 'package:ssi/ssi.dart';
 
@@ -369,17 +369,15 @@ void main() {
       final chatSdk = FakeChatSdk();
 
       // Step 1: Start at the chat screen.
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/${FakeContacts.individualContact.id}/chat',
+        contactId: FakeContacts.individualContact.id,
+        chatSdk: chatSdk,
         identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: chatSdk,
         rCards: [card],
         rCardsServiceFactory: () => FakeRCardsService([card]),
       );
-      await tester.pumpAndSettle();
 
       // Step 2: Simulate an incoming R-Card auto-exchange message with the
       // signed vcBlob, so the "Go to R-Card" link appears in the chat.
@@ -388,12 +386,12 @@ void main() {
         text: '',
         recipientDid: recipientDid,
         attachments: [
-          chat.Attachment(
+          ChatAttachment(
             id: 'att-rcard-dedup',
             mediaType: 'application/json',
             format: RCardAttachment.pluginFormat,
             lastModifiedTime: DateTime(2024),
-            data: chat.AttachmentData(
+            data: ChatAttachmentData(
               json: jsonEncode({'vcBlob': aliceVcBlob, 'isAutoExchange': true}),
             ),
           ),

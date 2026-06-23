@@ -19,8 +19,17 @@ class _ChatMessageList extends HookConsumerWidget {
       provider.select((state) => state.selectedReactionIndex),
     );
     final zkpPolicy = ChatZkpMessageListPolicy.fromMessages(
-      enabled: ref.read(environmentProvider).zkpEnabled,
+      enabled:
+          ref.read(environmentProvider).zkpEnabled &&
+          (ref
+                  .read(provider)
+                  .capabilities
+                  ?.supports(chat.ChatFeature.humanZkp) ??
+              false),
       messages: sortedMessages,
+    );
+    final isGroupChat = ref.watch(
+      provider.select((state) => state.group != null),
     );
 
     var lastUsedChatItemStatus = chat.ChatItemStatus.error;
@@ -150,6 +159,7 @@ class _ChatMessageList extends HookConsumerWidget {
                                     contactId: _contactId,
                                     selectedReactionIndex:
                                         selectedReactionIndex,
+                                    isGroupChat: isGroupChat,
                                   )
                                 : _ZkpBubble(
                                     chatItem: chatItem,
@@ -175,7 +185,6 @@ class _ChatMessageList extends HookConsumerWidget {
                                   child: _Reactions(
                                     contactId: _contactId,
                                     chatItem: chatItem,
-                                    index: index,
                                   ),
                                 ),
                               )
@@ -262,12 +271,14 @@ class _RCardBubble extends StatelessWidget {
     required this.index,
     required this.contactId,
     required this.selectedReactionIndex,
+    required this.isGroupChat,
   });
 
   final chat.ChatItem chatItem;
   final int index;
   final String contactId;
   final int? selectedReactionIndex;
+  final bool isGroupChat;
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +287,10 @@ class _RCardBubble extends StatelessWidget {
     if (isCredentialOnly && chatItem.isFromMe) {
       final msg = chatItem as chat.Message;
       if (msg.attachments.first.isRCardUpdate) {
-        return ChatRCardUpdatedByMeNotice(dateCreated: chatItem.dateCreated);
+        return ChatRCardUpdatedByMeNotice(
+          dateCreated: chatItem.dateCreated,
+          isGroupChat: isGroupChat,
+        );
       }
     }
 

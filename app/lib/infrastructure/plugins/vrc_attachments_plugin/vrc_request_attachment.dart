@@ -19,13 +19,13 @@ class VrcRequestAttachment implements MessageAttachment {
   String get pluginName => pluginFormat;
 
   @override
-  Attachment toAttachment() {
-    return Attachment(
+  ChatAttachment toAttachment() {
+    return ChatAttachment(
       id: const Uuid().v4(),
       mediaType: 'application/json',
       format: pluginFormat,
       lastModifiedTime: clock.now(),
-      data: AttachmentData(
+      data: ChatAttachmentData(
         json: jsonEncode({
           'identityDid': identityDid,
           'identityName': identityName,

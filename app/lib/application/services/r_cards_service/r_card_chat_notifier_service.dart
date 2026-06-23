@@ -117,7 +117,7 @@ class RCardChatNotifierService extends _$RCardChatNotifierService {
         dateCreated: rCard.receivedAt,
         status: chat.ChatItemStatus.confirmed,
         value: '',
-        attachments: attachments,
+        attachments: attachments.map((e) => e.toChatAttachment()).toList(),
       );
 
       await chatRepo.createMessage(message);

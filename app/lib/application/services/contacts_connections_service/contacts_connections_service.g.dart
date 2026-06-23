@@ -20,7 +20,7 @@ part of 'contacts_connections_service.dart';
 /// - `ContactsConnectionsService` instance with listeners registered.
 
 @ProviderFor(contactsConnectionsService)
-final contactsConnectionsServiceProvider =
+const contactsConnectionsServiceProvider =
     ContactsConnectionsServiceProvider._();
 
 /// Provider that exposes a single ContactsConnectionsService instance.
@@ -52,7 +52,7 @@ final class ContactsConnectionsServiceProvider
   ///
   /// Returns:
   /// - `ContactsConnectionsService` instance with listeners registered.
-  ContactsConnectionsServiceProvider._()
+  const ContactsConnectionsServiceProvider._()
     : super(
         from: null,
         argument: null,

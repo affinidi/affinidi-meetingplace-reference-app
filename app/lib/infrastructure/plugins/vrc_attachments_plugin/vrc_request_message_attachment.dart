@@ -15,7 +15,7 @@ class VrcRequestMessageAttachment implements MessageAttachment {
   String get pluginName => VrcRequestAttachment.pluginFormat;
 
   @override
-  Attachment toAttachment() => VrcRequestAttachment(
+  ChatAttachment toAttachment() => VrcRequestAttachment(
     identityDid: identityDid,
     identityName: identityName,
   ).toAttachment();

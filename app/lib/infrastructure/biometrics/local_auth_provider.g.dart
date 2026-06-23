@@ -14,7 +14,7 @@ part of 'local_auth_provider.dart';
 /// - [ref] - Riverpod Ref used to construct the provider.
 
 @ProviderFor(localAuth)
-final localAuthProvider = LocalAuthProvider._();
+const localAuthProvider = LocalAuthProvider._();
 
 /// Provides a LocalAuthentication instance from the `local_auth` plugin.
 ///
@@ -33,7 +33,7 @@ final class LocalAuthProvider
   ///
   /// Factory parameters:
   /// - [ref] - Riverpod Ref used to construct the provider.
-  LocalAuthProvider._()
+  const LocalAuthProvider._()
     : super(
         from: null,
         argument: null,

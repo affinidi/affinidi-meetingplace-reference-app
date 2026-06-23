@@ -1,42 +1,24 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
-import 'fakes/fake_connectivity.dart';
-import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
 
 const _addMediaButtonKey = Key('chat_add_media_button');
-
-Future<void> _navigateToChat(
-  WidgetTester tester, {
-  FakeChatSdk? chatSdk,
-}) async {
-  await navigateToLocation(
-    tester,
-    '/contacts/individual-contact-id/chat',
-    identities: [FakeIdentities.primaryIdentity],
-    contacts: [FakeContacts.individualContact],
-    meetingPlaceChatSDK: chatSdk ?? FakeChatSdk(),
-    connectivity: FakeConnectivity(
-      initialConnectivityToReturn: [ConnectivityResult.wifi],
-    ),
-  );
-  await tester.pumpAndSettle();
-}
 
 Future<void> _openMediaSheet(WidgetTester tester) async {
   await tester.tap(find.byKey(_addMediaButtonKey));
   await tester.pumpAndSettle();
 }
 
-ListTile _findVrcListTile(WidgetTester tester, String label) {
-  return tester.widget<ListTile>(
-    find.ancestor(of: find.text(label), matching: find.byType(ListTile)),
+bool _isVrcOptionEnabled(WidgetTester tester, String label) {
+  final option = tester.widget<InkWell>(
+    find.ancestor(of: find.text(label), matching: find.byType(InkWell)),
   );
+
+  return option.onTap != null;
 }
 
 void main() {
@@ -44,23 +26,20 @@ void main() {
     testWidgets('shows VRC option in media options sheet', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await _openMediaSheet(tester);
 
-      expect(find.text(l10n.verifiableRelationshipCredential), findsOneWidget);
+      expect(find.text(l10n.vrcAbbreviation), findsOneWidget);
     });
 
     testWidgets('VRC option is enabled in a fresh chat', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await _openMediaSheet(tester);
 
-      final tile = _findVrcListTile(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
-      expect(tile.enabled, isTrue);
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
+      expect(enabled, isTrue);
     });
 
     testWidgets('VRC option is disabled after exchange is initiated', (
@@ -69,7 +48,7 @@ void main() {
       final l10n = await getL10n();
       final chatSdk = FakeChatSdk();
 
-      await _navigateToChat(tester, chatSdk: chatSdk);
+      await navigateToChat(tester, chatSdk: chatSdk);
 
       chatSdk.simulateVrcEvent(
         eventType: 'vrcExchangeInitiated',
@@ -80,11 +59,8 @@ void main() {
 
       await _openMediaSheet(tester);
 
-      final tile = _findVrcListTile(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
-      expect(tile.enabled, isFalse);
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
+      expect(enabled, isFalse);
     });
 
     testWidgets('VRC option is re-enabled after Do later is tapped', (
@@ -92,7 +68,7 @@ void main() {
     ) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
 
       // Tap Do later from the banner — this should keep the attachment enabled
       await tester.tap(find.text(l10n.doLater));
@@ -100,11 +76,8 @@ void main() {
 
       await _openMediaSheet(tester);
 
-      final tile = _findVrcListTile(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
-      expect(tile.enabled, isTrue);
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
+      expect(enabled, isTrue);
     });
   });
 }

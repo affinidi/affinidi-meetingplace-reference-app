@@ -44,6 +44,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get createGroupChatOffer => 'Chat grupal';
 
   @override
+  String get chatTransport => 'Transporte de chat';
+
+  @override
+  String transportLabel(String transport) {
+    String _temp0 = intl.Intl.selectLogic(transport, {
+      'didcomm': 'DIDComm',
+      'matrix': 'Matrix',
+      'other': '$transport',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get groupOfferHelperText =>
       'La invitación representará un chat grupal para que varios contactos se unan y chateen. Todavía tienes control sobre quién puede unirse al chat grupal.';
 
@@ -923,6 +936,39 @@ class AppLocalizationsEs extends AppLocalizations {
   String get messageCopiedClipboard => 'Mensaje copiado en el portapapeles';
 
   @override
+  String get chatMessageActionDelete => 'Eliminar para todos';
+
+  @override
+  String get chatMessageActionDeleteLocal => 'Eliminar para mí';
+
+  @override
+  String get chatMessageActionCopy => 'Copiar mensaje';
+
+  @override
+  String get chatMessageActionEdit => 'Editar mensaje';
+
+  @override
+  String get chatMessageEditedLabel => 'editado';
+
+  @override
+  String get chatMessageEditFailed => 'No se pudo editar el mensaje';
+
+  @override
+  String get chatMessageEditHint => 'Texto del mensaje';
+
+  @override
+  String get chatMessageEditSave => 'Guardar';
+
+  @override
+  String get chatMessageDeletedTombstone => 'Este mensaje fue eliminado';
+
+  @override
+  String get chatMessageDeletedLocallyTombstone => 'Eliminaste este mensaje';
+
+  @override
+  String get chatMessageDeleteFailed => 'No se pudo eliminar el mensaje';
+
+  @override
   String chatItemStatus(String status) {
     String _temp0 = intl.Intl.selectLogic(status, {
       'queued': 'En cola',
@@ -1414,6 +1460,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String memberRemovedFromGroup(String memberName) {
+    return '$memberName ha sido eliminado';
+  }
+
+  @override
   String get concierge => 'Conserje';
 
   @override
@@ -1573,6 +1624,14 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get removeMemberDialogTitle => 'Eliminar miembro';
+
+  @override
+  String removeMemberDialogBody(String name) {
+    return '¿Eliminar a $name de este grupo? Ya no recibirá mensajes.';
+  }
+
+  @override
   String get rCardFieldIssuerDid => 'DID del emisor';
 
   @override
@@ -1618,6 +1677,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'La actualización de la tarjeta R ha sido compartida.';
 
   @override
+  String get profileDetailsUpdateSharedGroup =>
+      'La actualización de los detalles del perfil ha sido compartida con el grupo.';
+
+  @override
   String get rCardFooterUpdateSaved =>
       'La actualización de la tarjeta R se ha guardado.';
 
@@ -1645,6 +1708,9 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get verifiableRelationshipCredential =>
       'Credencial de Relación Verificable';
+
+  @override
+  String get vrcAbbreviation => 'VRC';
 
   @override
   String get vrcDetailsTitle => 'Credencial de Relación';
@@ -1722,12 +1788,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String nameSelectedIdentity(String name) {
-    return '$name\'s selected identity';
+    return 'Identidad seleccionada de $name';
   }
 
   @override
   String selectIdentityToVerifyRelationshipPrompt(String name) {
-    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
+    return 'Desliza hacia la izquierda o derecha para elegir la identidad que deseas usar para verificar tu relación con $name.';
   }
 
   @override
@@ -1735,39 +1801,43 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String trustedBy(int count) {
-    return 'Trusted by $count';
+    return 'Confiado por $count';
   }
 
   @override
-  String get humanZkp => 'Human ZKP';
+  String get humanZkp => 'Prueba de conocimiento cero humana';
+
+  @override
+  String get humanZkpAbbreviated => 'Human ZKP';
 
   @override
   String get humanZeroKnowledgeProof => 'Prueba de conocimiento cero humana';
 
   @override
-  String get livenessCredential => 'Liveness Credential';
+  String get livenessCredential => 'Credencial de Vitalidad';
 
   @override
-  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
+  String get verifiableCredentialWallet =>
+      'Cartera de Credenciales Verificables';
 
   @override
-  String get noCredentialsYet => 'You don\'t have any credentials yet.';
+  String get noCredentialsYet => 'Aún no tienes credenciales.';
 
   @override
   String get all => 'Todos';
 
   @override
   String get generatingZeroKnowledgeProof =>
-      'Generating Zero-Knowledge Proof...';
+      'Generando Prueba de Conocimiento Cero Humano...';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'Cancelar';
 
   @override
-  String get generateCredential => 'Generate credential';
+  String get generateCredential => 'Generar credencial';
 
   @override
-  String get generateProof => 'Generate proof';
+  String get generateProof => 'Generar prueba';
 
   @override
   String get livenessCredentialRequest =>
@@ -1803,7 +1873,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mockLivenessCredentialNext =>
-      'You can now continue to generate a Human Zero-Knowledge proof.';
+      'Ahora puedes continuar para generar una Prueba de Conocimiento Cero Humana.';
 
   @override
   String get livenessEvidenceThresholdNotMet =>
@@ -1854,11 +1924,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get zkpNoticePaused =>
-      'Has pausado una solicitud de prueba de conocimiento cero.';
+      'Has pausado una solicitud de prueba de conocimiento cero humana.';
 
   @override
   String zkpNoticeDeclined(String contactName) {
-    return '$contactName ha rechazado la solicitud de ZKP humano. Toca el icono \"+\" para reiniciarla.';
+    return '$contactName ha rechazado la solicitud de prueba de conocimiento cero humana. Toca el icono \"+\" para reiniciarla.';
   }
 
   @override
@@ -1876,5 +1946,62 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get zkpNoticeRequestInitiated =>
+      'Has iniciado una solicitud de prueba de conocimiento cero humana.';
+
+  @override
   String get zkpProofAlreadyShared => 'Prueba ZKP ya compartida';
+
+  @override
+  String get removeMemberConfirm => 'Eliminar';
+
+  @override
+  String get removeMemberNotSupported =>
+      'Eliminar miembros aún no está soportado.';
+
+  @override
+  String get removeMemberSuccess => 'Miembro eliminado del grupo.';
+
+  @override
+  String get generalVideo => 'Vídeo';
+
+  @override
+  String get generalDocument => 'Documento';
+
+  @override
+  String get documentTapToDownload => 'Toca para descargar';
+
+  @override
+  String get videoLoadingError => 'No se puede reproducir el vídeo';
+
+  @override
+  String get mediaTapToRetry => 'Toca para reintentar';
+
+  @override
+  String get mediaDownloadFailedTapToRetry =>
+      'Descarga fallida. Toca para reintentar';
+
+  @override
+  String attachmentTooLarge(int maxMb) {
+    return 'El archivo adjunto es demasiado grande. Tamaño máximo: $maxMb MB.';
+  }
+
+  @override
+  String get voiceMessagePermissionDenied =>
+      'Se requiere permiso de micrófono para grabar mensajes de voz.';
+
+  @override
+  String get voiceMessageRecordingFailed =>
+      'No se puede iniciar la grabación de voz.';
+
+  @override
+  String get voiceMessageSendFailed => 'No se puede enviar el mensaje de voz.';
+
+  @override
+  String get generalEmail => 'Correo electrónico';
+
+  @override
+  String vrcResponderIntro(Object name) {
+    return '$name ha seleccionado la siguiente persona para verificar la relación:';
+  }
 }

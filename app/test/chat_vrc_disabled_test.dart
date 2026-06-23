@@ -14,38 +14,38 @@ Future<void> _openAttachmentSheet(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-ListTile _findVrcListTile(WidgetTester tester, String label) {
-  return tester.widget<ListTile>(
-    find.ancestor(of: find.text(label), matching: find.byType(ListTile)),
+bool _isVrcOptionEnabled(WidgetTester tester, String label) {
+  final option = tester.widget<InkWell>(
+    find.ancestor(of: find.text(label), matching: find.byType(InkWell)),
   );
+
+  return option.onTap != null;
 }
 
 Future<void> _navigateToGroupChat(WidgetTester tester) async {
-  await navigateToLocation(
+  await navigateToChat(
     tester,
-    '/contacts/${FakeContacts.groupContact.id}/chat',
+    contactId: FakeContacts.groupContact.id,
     identities: [FakeIdentities.primaryIdentity],
     contacts: [FakeContacts.groupContact],
-    meetingPlaceChatSDK: FakeChatSdk(),
+    chatSdk: FakeChatSdk(),
     connectivity: FakeConnectivity(
       initialConnectivityToReturn: [ConnectivityResult.wifi],
     ),
   );
-  await tester.pumpAndSettle();
 }
 
 Future<void> _navigateToOobChat(WidgetTester tester) async {
-  await navigateToLocation(
+  await navigateToChat(
     tester,
-    '/contacts/${FakeContacts.oobContact.id}/chat',
+    contactId: FakeContacts.oobContact.id,
     identities: [FakeIdentities.primaryIdentity],
     contacts: [FakeContacts.oobContact],
-    meetingPlaceChatSDK: FakeChatSdk(),
+    chatSdk: FakeChatSdk(),
     connectivity: FakeConnectivity(
       initialConnectivityToReturn: [ConnectivityResult.wifi],
     ),
   );
-  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -66,16 +66,12 @@ void main() {
     });
 
     testWidgets('VRC option in attachment sheet is disabled', (tester) async {
-      final l10n = await getL10n();
-
       await _navigateToGroupChat(tester);
       await _openAttachmentSheet(tester);
 
-      final tile = _findVrcListTile(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
-      expect(tile.enabled, isFalse);
+      final l10n = await getL10n();
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
+      expect(enabled, isFalse);
     });
   });
 
@@ -96,16 +92,12 @@ void main() {
     });
 
     testWidgets('VRC option in attachment sheet is disabled', (tester) async {
-      final l10n = await getL10n();
-
       await _navigateToOobChat(tester);
       await _openAttachmentSheet(tester);
 
-      final tile = _findVrcListTile(
-        tester,
-        l10n.verifiableRelationshipCredential,
-      );
-      expect(tile.enabled, isFalse);
+      final l10n = await getL10n();
+      final enabled = _isVrcOptionEnabled(tester, l10n.vrcAbbreviation);
+      expect(enabled, isFalse);
     });
   });
 }

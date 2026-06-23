@@ -29,7 +29,7 @@ void main() {
           tester,
           location,
           identities: [testIdentity],
-          mockCameras: _mockCameras,
+          cameras: _mockCameras,
         );
         await tester.pumpAndSettle();
 
@@ -53,7 +53,7 @@ void main() {
               location,
               identities: [testIdentity],
               meetingPlaceCoreSDK: fakeSdk,
-              mockCameras: _mockCameras,
+              cameras: _mockCameras,
             );
             await tester.pumpAndSettle();
 
@@ -97,7 +97,7 @@ void main() {
             location,
             identities: [testIdentity],
             meetingPlaceCoreSDK: fakeSdk,
-            mockCameras: _mockCameras,
+            cameras: _mockCameras,
           );
           await tester.pumpAndSettle();
 
@@ -135,7 +135,7 @@ void main() {
             location,
             identities: [testIdentity],
             meetingPlaceCoreSDK: fakeSdk,
-            mockCameras: _mockCameras,
+            cameras: _mockCameras,
           );
           await tester.pumpAndSettle();
 
@@ -168,7 +168,7 @@ void main() {
             location,
             identities: [testIdentity],
             meetingPlaceCoreSDK: fakeSdk,
-            mockCameras: _mockCameras,
+            cameras: _mockCameras,
           );
           await tester.pumpAndSettle();
 
@@ -203,7 +203,7 @@ void main() {
             location,
             identities: [testIdentity],
             meetingPlaceCoreSDK: fakeSdk,
-            mockCameras: _mockCameras,
+            cameras: _mockCameras,
           );
           await tester.pumpAndSettle();
 
@@ -238,7 +238,7 @@ void main() {
             location,
             identities: [testIdentity],
             meetingPlaceCoreSDK: fakeSdk,
-            mockCameras: _mockCameras,
+            cameras: _mockCameras,
           );
           await tester.pumpAndSettle();
 
@@ -271,7 +271,7 @@ void main() {
             location,
             identities: [testIdentity],
             meetingPlaceCoreSDK: fakeSdk,
-            mockCameras: _mockCameras,
+            cameras: _mockCameras,
           );
           await tester.pumpAndSettle();
 
@@ -298,7 +298,7 @@ void main() {
               location,
               identities: [testIdentity],
               meetingPlaceCoreSDK: fakeSdk,
-              mockCameras: _mockCameras,
+              cameras: _mockCameras,
             );
             await tester.pumpAndSettle();
 
@@ -330,7 +330,7 @@ void main() {
                 location,
                 identities: [testIdentity],
                 meetingPlaceCoreSDK: fakeSdk,
-                mockCameras: _mockCameras,
+                cameras: _mockCameras,
               );
               await tester.pumpAndSettle();
 

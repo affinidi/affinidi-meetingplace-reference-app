@@ -10,11 +10,11 @@ part of 'contacts_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ContactsScreenController)
-final contactsScreenControllerProvider = ContactsScreenControllerProvider._();
+const contactsScreenControllerProvider = ContactsScreenControllerProvider._();
 
 final class ContactsScreenControllerProvider
     extends $NotifierProvider<ContactsScreenController, ContactsScreenState> {
-  ContactsScreenControllerProvider._()
+  const ContactsScreenControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -50,6 +50,7 @@ abstract class _$ContactsScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<ContactsScreenState, ContactsScreenState>;
     final element =
         ref.element
@@ -59,6 +60,6 @@ abstract class _$ContactsScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

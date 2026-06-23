@@ -15,7 +15,7 @@ part of 'vrc_service.dart';
 /// - Provides methods to save, delete, and query VRCs.
 
 @ProviderFor(VrcService)
-final vrcServiceProvider = VrcServiceProvider._();
+const vrcServiceProvider = VrcServiceProvider._();
 
 /// Service that manages Verifiable Relationship Credentials (VRC).
 ///
@@ -29,7 +29,7 @@ final class VrcServiceProvider
   /// Responsibilities:
   /// - Exposes all stored [VrcCredential]s as live state for the UI.
   /// - Provides methods to save, delete, and query VRCs.
-  VrcServiceProvider._()
+  const VrcServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -69,6 +69,7 @@ abstract class _$VrcService extends $Notifier<List<VrcCredential>> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<List<VrcCredential>, List<VrcCredential>>;
     final element =
         ref.element
@@ -78,6 +79,6 @@ abstract class _$VrcService extends $Notifier<List<VrcCredential>> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

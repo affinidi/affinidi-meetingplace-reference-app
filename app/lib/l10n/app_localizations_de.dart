@@ -45,6 +45,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get createGroupChatOffer => 'Gruppenchat';
 
   @override
+  String get chatTransport => 'Chat-Übertragung';
+
+  @override
+  String transportLabel(String transport) {
+    String _temp0 = intl.Intl.selectLogic(transport, {
+      'didcomm': 'DIDComm',
+      'matrix': 'Matrix',
+      'other': '$transport',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get groupOfferHelperText =>
       'Die Einladung stellt einen Gruppenchat dar, an dem mehrere Kontakte teilnehmen und chatten können. Sie haben weiterhin die Kontrolle darüber, wer dem Gruppenchat beitreten kann.';
 
@@ -401,6 +414,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'oob_invalid_type': 'QR-Code-Daten werden nicht unterstützt',
       'network_error':
           'Verbindung konnte nicht hergestellt werden. Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.',
+      'deleteContactFailed':
+          'Kontakt konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.',
       'other': '$errorCode',
     });
     return '$_temp0';
@@ -930,6 +945,42 @@ class AppLocalizationsDe extends AppLocalizations {
       'Nachricht in die Zwischenablage kopiert';
 
   @override
+  String get chatMessageActionDelete => 'Für alle löschen';
+
+  @override
+  String get chatMessageActionDeleteLocal => 'Für mich löschen';
+
+  @override
+  String get chatMessageActionCopy => 'Nachricht kopieren';
+
+  @override
+  String get chatMessageActionEdit => 'Nachricht bearbeiten';
+
+  @override
+  String get chatMessageEditedLabel => 'bearbeitet';
+
+  @override
+  String get chatMessageEditFailed =>
+      'Nachricht konnte nicht bearbeitet werden';
+
+  @override
+  String get chatMessageEditHint => 'Nachrichtentext';
+
+  @override
+  String get chatMessageEditSave => 'Speichern';
+
+  @override
+  String get chatMessageDeletedTombstone => 'Diese Nachricht wurde gelöscht';
+
+  @override
+  String get chatMessageDeletedLocallyTombstone =>
+      'Du hast diese Nachricht gelöscht';
+
+  @override
+  String get chatMessageDeleteFailed =>
+      'Nachricht konnte nicht gelöscht werden';
+
+  @override
   String chatItemStatus(String status) {
     String _temp0 = intl.Intl.selectLogic(status, {
       'queued': 'In Warteschlange',
@@ -1423,6 +1474,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String memberRemovedFromGroup(String memberName) {
+    return '$memberName wurde entfernt';
+  }
+
+  @override
   String get concierge => 'Hausmeister';
 
   @override
@@ -1581,6 +1637,14 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get removeMemberDialogTitle => 'Mitglied entfernen';
+
+  @override
+  String removeMemberDialogBody(String name) {
+    return '$name aus dieser Gruppe entfernen? Sie erhalten keine Nachrichten mehr.';
+  }
+
+  @override
   String get rCardFieldIssuerDid => 'Aussteller-DID';
 
   @override
@@ -1625,6 +1689,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get rCardFooterUpdateShared => 'R-Karten-Update wurde geteilt.';
 
   @override
+  String get profileDetailsUpdateSharedGroup =>
+      'Profildetails-Update wurde mit der Gruppe geteilt.';
+
+  @override
   String get rCardFooterUpdateSaved => 'R-Karten-Update wurde gespeichert.';
 
   @override
@@ -1651,6 +1719,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get verifiableRelationshipCredential =>
       'Überprüfbarer Beziehungsnachweis';
+
+  @override
+  String get vrcAbbreviation => 'VRC';
 
   @override
   String get vrcDetailsTitle => 'Beziehungsnachweis';
@@ -1729,12 +1800,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String nameSelectedIdentity(String name) {
-    return '$name\'s selected identity';
+    return 'Ausgewählte Identität von $name';
   }
 
   @override
   String selectIdentityToVerifyRelationshipPrompt(String name) {
-    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
+    return 'Wischen Sie nach links oder rechts, um die Identität auszuwählen, mit der Sie Ihre Beziehung zu $name verifizieren möchten.';
   }
 
   @override
@@ -1742,39 +1813,43 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String trustedBy(int count) {
-    return 'Trusted by $count';
+    return 'Vertraut von $count';
   }
 
   @override
-  String get humanZkp => 'Human ZKP';
+  String get humanZkp => 'Human Zero-Knowledge-Beweis';
+
+  @override
+  String get humanZkpAbbreviated => 'Human ZKP';
 
   @override
   String get humanZeroKnowledgeProof => 'Human Zero-Knowledge-Beweis';
 
   @override
-  String get livenessCredential => 'Liveness Credential';
+  String get livenessCredential => 'Lebendigkeit Nachweis';
 
   @override
-  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
+  String get verifiableCredentialWallet =>
+      'Verifizierbare Berechtigungs-Wallet';
 
   @override
-  String get noCredentialsYet => 'You don\'t have any credentials yet.';
+  String get noCredentialsYet => 'Sie haben noch keine Anmeldeinformationen.';
 
   @override
   String get all => 'Alle';
 
   @override
   String get generatingZeroKnowledgeProof =>
-      'Generating Zero-Knowledge Proof...';
+      'Generiere menschlichen Zero-Knowledge-Beweis...';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'Abbrechen';
 
   @override
-  String get generateCredential => 'Generate credential';
+  String get generateCredential => 'Anmeldeinformationen generieren';
 
   @override
-  String get generateProof => 'Generate proof';
+  String get generateProof => 'Beweis erzeugen';
 
   @override
   String get livenessCredentialRequest =>
@@ -1808,7 +1883,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mockLivenessCredentialNext =>
-      'You can now continue to generate a Human Zero-Knowledge proof.';
+      'Sie können jetzt mit der Erstellung eines Human Zero Knowledge Proof fortfahren.';
 
   @override
   String get livenessEvidenceThresholdNotMet =>
@@ -1859,11 +1934,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get zkpNoticePaused =>
-      'Sie haben eine Zero-Knowledge-Beweisanfrage pausiert.';
+      'Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis pausiert.';
 
   @override
   String zkpNoticeDeclined(String contactName) {
-    return '$contactName hat die Human-ZKP-Anfrage abgelehnt. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
+    return '$contactName hat die Anfrage für einen Human Zero-Knowledge-Beweis abgelehnt. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
   }
 
   @override
@@ -1881,5 +1956,63 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get zkpNoticeRequestInitiated =>
+      'Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis gestartet.';
+
+  @override
   String get zkpProofAlreadyShared => 'ZKP-Beweis bereits geteilt';
+
+  @override
+  String get removeMemberConfirm => 'Entfernen';
+
+  @override
+  String get removeMemberNotSupported =>
+      'Das Entfernen von Mitgliedern wird noch nicht unterstützt.';
+
+  @override
+  String get removeMemberSuccess => 'Mitglied aus der Gruppe entfernt.';
+
+  @override
+  String get generalVideo => 'Video';
+
+  @override
+  String get generalDocument => 'Dokument';
+
+  @override
+  String get documentTapToDownload => 'Zum Herunterladen tippen';
+
+  @override
+  String get videoLoadingError => 'Video kann nicht abgespielt werden';
+
+  @override
+  String get mediaTapToRetry => 'Zum Wiederholen tippen';
+
+  @override
+  String get mediaDownloadFailedTapToRetry =>
+      'Download fehlgeschlagen. Zum Wiederholen tippen';
+
+  @override
+  String attachmentTooLarge(int maxMb) {
+    return 'Anhang ist zu groß. Maximale Größe: $maxMb MB.';
+  }
+
+  @override
+  String get voiceMessagePermissionDenied =>
+      'Zum Aufnehmen von Sprachnachrichten ist Mikrofonzugriff erforderlich.';
+
+  @override
+  String get voiceMessageRecordingFailed =>
+      'Sprachaufnahme kann nicht gestartet werden.';
+
+  @override
+  String get voiceMessageSendFailed =>
+      'Sprachnachricht kann nicht gesendet werden.';
+
+  @override
+  String get generalEmail => 'E-Mail';
+
+  @override
+  String vrcResponderIntro(Object name) {
+    return '$name hat die folgende Persona zur Verifizierung der Beziehung ausgewählt:';
+  }
 }

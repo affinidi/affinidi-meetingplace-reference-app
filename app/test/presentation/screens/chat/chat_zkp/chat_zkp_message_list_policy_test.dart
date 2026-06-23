@@ -69,12 +69,12 @@ void main() {
           status: ChatItemStatus.confirmed,
           value: '',
           attachments: [
-            Attachment(
+            ChatAttachment(
               id: 'att-proof',
               mediaType: 'application/json',
               format: LivenessZkpProtocol.livenessProofFormat,
               lastModifiedTime: when,
-              data: AttachmentData(
+              data: ChatAttachmentData(
                 json:
                     '{"type":"liveness_proof","proof":"p","publicSignals":"s"}',
               ),
@@ -102,6 +102,33 @@ void main() {
       );
 
       expect(ChatZkpMessageListPolicy.hasVerifiedProof([message]), isFalse);
+    });
+  });
+
+  group('ChatZkpMessageListPolicy.shouldHide', () {
+    test('hides request-initiated notice after proof is verified', () {
+      final initiated = LivenessZkpConciergeChatMapper.toConciergeMessage(
+        LivenessZkpConciergeMessages.humanZkpRequestInitiated(
+          chatId: chatId,
+          messageId: 'request-initiated-1',
+          dateCreated: when,
+        ),
+      );
+      final verified = LivenessZkpConciergeChatMapper.toConciergeMessage(
+        LivenessZkpConciergeMessages.humanZkpProofReceived(
+          chatId: chatId,
+          messageId: 'proof-received-1',
+          dateCreated: when,
+          contactName: contactName,
+        ),
+      );
+
+      final policy = ChatZkpMessageListPolicy.fromMessages(
+        enabled: true,
+        messages: [initiated, verified],
+      );
+
+      expect(policy.shouldHide(initiated), isTrue);
     });
   });
 }

@@ -18,7 +18,7 @@ part of 'authentication_service.dart';
 /// checks are enabled.
 
 @ProviderFor(AuthenticationService)
-final authenticationServiceProvider = AuthenticationServiceProvider._();
+const authenticationServiceProvider = AuthenticationServiceProvider._();
 
 /// Service responsible for managing authentication state and biometric flows.
 ///
@@ -38,7 +38,7 @@ final class AuthenticationServiceProvider
   /// It relies on the platform-specific local_auth provider for biometric
   /// operations and the environment provider to determine whether biometric
   /// checks are enabled.
-  AuthenticationServiceProvider._()
+  const AuthenticationServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -82,6 +82,7 @@ abstract class _$AuthenticationService extends $Notifier<AuthenticationState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<AuthenticationState, AuthenticationState>;
     final element =
         ref.element
@@ -91,6 +92,6 @@ abstract class _$AuthenticationService extends $Notifier<AuthenticationState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

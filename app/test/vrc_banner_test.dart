@@ -1,29 +1,10 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
-import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
-
-Future<void> _navigateToChat(
-  WidgetTester tester, {
-  FakeChatSdk? chatSdk,
-}) async {
-  await navigateToLocation(
-    tester,
-    '/contacts/individual-contact-id/chat',
-    identities: [FakeIdentities.primaryIdentity],
-    contacts: [FakeContacts.individualContact],
-    meetingPlaceChatSDK: chatSdk ?? FakeChatSdk(),
-    connectivity: FakeConnectivity(
-      initialConnectivityToReturn: [ConnectivityResult.wifi],
-    ),
-  );
-  await tester.pumpAndSettle();
-}
 
 void main() {
   group('VrcBanner', () {
@@ -32,7 +13,7 @@ void main() {
     ) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
 
       expect(
         find.text(
@@ -47,7 +28,7 @@ void main() {
     testWidgets('shows Start now and Do later buttons', (tester) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
 
       expect(find.text(l10n.generateVrc), findsOneWidget);
       expect(find.text(l10n.doLater), findsOneWidget);
@@ -60,7 +41,7 @@ void main() {
       final firstName =
           FakeContacts.individualContact.otherPartyCard!.firstName;
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       expect(
         find.text(l10n.verifyRelationshipPrompt(firstName)),
         findsOneWidget,
@@ -80,7 +61,7 @@ void main() {
       final firstName =
           FakeContacts.individualContact.otherPartyCard!.firstName;
 
-      await _navigateToChat(tester, chatSdk: chatSdk);
+      await navigateToChat(tester, chatSdk: chatSdk);
       expect(
         find.text(l10n.verifyRelationshipPrompt(firstName)),
         findsOneWidget,
@@ -103,7 +84,7 @@ void main() {
     ) async {
       final l10n = await getL10n();
 
-      await _navigateToChat(tester);
+      await navigateToChat(tester);
       await tester.tap(find.text(l10n.generateVrc));
       await tester.pumpAndSettle();
 
@@ -115,7 +96,7 @@ void main() {
       (tester) async {
         final l10n = await getL10n();
 
-        await _navigateToChat(tester);
+        await navigateToChat(tester);
         await tester.tap(find.text(l10n.generateVrc));
         await tester.pumpAndSettle();
 

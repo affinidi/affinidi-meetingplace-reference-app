@@ -10,7 +10,7 @@ part of 'offer_details_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(OfferDetailsScreenController)
-final offerDetailsScreenControllerProvider =
+const offerDetailsScreenControllerProvider =
     OfferDetailsScreenControllerFamily._();
 
 final class OfferDetailsScreenControllerProvider
@@ -19,7 +19,7 @@ final class OfferDetailsScreenControllerProvider
           OfferDetailsScreenController,
           OfferDetailsScreenState
         > {
-  OfferDetailsScreenControllerProvider._({
+  const OfferDetailsScreenControllerProvider._({
     required OfferDetailsScreenControllerFamily super.from,
     required String super.argument,
   }) : super(
@@ -76,7 +76,7 @@ final class OfferDetailsScreenControllerFamily extends $Family
           OfferDetailsScreenState,
           String
         > {
-  OfferDetailsScreenControllerFamily._()
+  const OfferDetailsScreenControllerFamily._()
     : super(
         retry: null,
         name: r'offerDetailsScreenControllerProvider',
@@ -101,6 +101,7 @@ abstract class _$OfferDetailsScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(_$args);
     final ref =
         this.ref as $Ref<OfferDetailsScreenState, OfferDetailsScreenState>;
     final element =
@@ -111,6 +112,6 @@ abstract class _$OfferDetailsScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    element.handleValue(ref, created);
   }
 }

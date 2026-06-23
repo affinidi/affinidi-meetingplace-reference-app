@@ -10,11 +10,11 @@ part of 'chat_session_service.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ChatSessionService)
-final chatSessionServiceProvider = ChatSessionServiceFamily._();
+const chatSessionServiceProvider = ChatSessionServiceFamily._();
 
 final class ChatSessionServiceProvider
     extends $NotifierProvider<ChatSessionService, ChatServiceState> {
-  ChatSessionServiceProvider._({
+  const ChatSessionServiceProvider._({
     required ChatSessionServiceFamily super.from,
     required String super.argument,
   }) : super(
@@ -59,7 +59,7 @@ final class ChatSessionServiceProvider
 }
 
 String _$chatSessionServiceHash() =>
-    r'b48a6311f8a4608c6668ee3c29191476ea230b4f';
+    r'22aebba9ff6cfd552d5b14e08d9a3cdc47315a9e';
 
 final class ChatSessionServiceFamily extends $Family
     with
@@ -70,7 +70,7 @@ final class ChatSessionServiceFamily extends $Family
           ChatServiceState,
           String
         > {
-  ChatSessionServiceFamily._()
+  const ChatSessionServiceFamily._()
     : super(
         retry: null,
         name: r'chatSessionServiceProvider',
@@ -94,6 +94,7 @@ abstract class _$ChatSessionService extends $Notifier<ChatServiceState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(_$args);
     final ref = this.ref as $Ref<ChatServiceState, ChatServiceState>;
     final element =
         ref.element
@@ -103,6 +104,6 @@ abstract class _$ChatSessionService extends $Notifier<ChatServiceState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args));
+    element.handleValue(ref, created);
   }
 }

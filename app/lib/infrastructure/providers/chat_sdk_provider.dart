@@ -42,7 +42,7 @@ final chatSdkProvider = FutureProvider.autoDispose
           channel,
           coreSDK: coreSDK,
           chatRepository: await ref.read(chatRepositoryProvider.future),
-          options: ChatSDKOptions(
+          options: MeetingPlaceChatSDKOptions(
             chatActivityExpiry: Duration(
               seconds: environment.chatActivityExpiresInSeconds,
             ),
@@ -51,6 +51,9 @@ final chatSdkProvider = FutureProvider.autoDispose
             ),
             chatPresenceExpiry: Duration(
               seconds: environment.chatPresenceIntervalInSeconds,
+            ),
+            deleteMessageWindow: Duration(
+              seconds: environment.deleteMessageWindowInSeconds,
             ),
           ),
           card: sdkContactCard,

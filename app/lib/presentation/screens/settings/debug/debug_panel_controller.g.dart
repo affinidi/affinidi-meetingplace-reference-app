@@ -10,11 +10,11 @@ part of 'debug_panel_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(DebugPanelController)
-final debugPanelControllerProvider = DebugPanelControllerProvider._();
+const debugPanelControllerProvider = DebugPanelControllerProvider._();
 
 final class DebugPanelControllerProvider
     extends $NotifierProvider<DebugPanelController, DebugPanelState> {
-  DebugPanelControllerProvider._()
+  const DebugPanelControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -49,6 +49,7 @@ abstract class _$DebugPanelController extends $Notifier<DebugPanelState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<DebugPanelState, DebugPanelState>;
     final element =
         ref.element
@@ -58,6 +59,6 @@ abstract class _$DebugPanelController extends $Notifier<DebugPanelState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

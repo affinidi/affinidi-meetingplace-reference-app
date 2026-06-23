@@ -8,7 +8,7 @@ class _RCardAttachmentWidget extends StatelessWidget {
     required this._isFromMe,
   });
 
-  final Attachment _attachment;
+  final ChatAttachment _attachment;
   final BaseCacheManager _cacheManager;
   final Color _chatItemColor;
   final bool _isFromMe;

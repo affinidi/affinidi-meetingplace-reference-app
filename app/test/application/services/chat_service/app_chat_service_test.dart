@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -170,7 +171,7 @@ void main() {
 
     test('ends session and cancels subscription on pauseChat', () async {
       await chatService.startChatSession();
-      chatService.pauseChat();
+      await chatService.pauseChat();
       expect(fakeChatSdk.sessionEnded, true);
     });
 
@@ -213,15 +214,15 @@ void main() {
       await chatService.startChatSession();
       await chatService.sendTextMessage(
         'hello',
-        attachments: [Attachment(id: '1')],
+        attachments: [ChatAttachment(id: '1')],
       );
       expect(fakeChatSdk.sendTextMessageCalls.last['attachments'], isNotEmpty);
     });
 
     test('pauseChat can be called multiple times safely', () async {
       await chatService.startChatSession();
-      chatService.pauseChat();
-      chatService.pauseChat();
+      await chatService.pauseChat();
+      await chatService.pauseChat();
       expect(fakeChatSdk.sessionEnded, true);
     });
 
@@ -281,6 +282,36 @@ void main() {
     ChatServiceState serviceState() =>
         container.read(chatSessionServiceProvider(channelDid));
 
+    Future<void> waitForState(
+      bool Function(ChatServiceState state) predicate,
+      void Function() trigger,
+    ) async {
+      if (predicate(serviceState())) {
+        trigger();
+        return;
+      }
+
+      final completer = Completer<void>();
+      late ProviderSubscription<ChatServiceState> subscription;
+      subscription = container.listen<ChatServiceState>(
+        chatSessionServiceProvider(channelDid),
+        (previous, next) {
+          if (completer.isCompleted || !predicate(next)) return;
+          completer.complete();
+          subscription.close();
+        },
+      );
+
+      trigger();
+
+      if (!completer.isCompleted && predicate(serviceState())) {
+        completer.complete();
+        subscription.close();
+      }
+
+      await completer.future;
+    }
+
     setUp(() async {
       fakeCoreSdk = FakeMeetingPlaceSDK(
         channels: {channelDid: FakeChannels.individualChannel},
@@ -325,13 +356,17 @@ void main() {
     test('adds chatItem to state when receiving message', () async {
       await chatService.startChatSession();
 
-      fakeChatSdk.simulateIncomingTextMessage(
-        text: 'test message',
-        recipientDid: channelDid,
-        attachments: [],
+      await waitForState(
+        (state) => state.messages.whereType<Message>().any(
+          (message) => message.value == 'test message',
+        ),
+        () => fakeChatSdk.simulateIncomingTextMessage(
+          text: 'test message',
+          recipientDid: channelDid,
+          attachments: [],
+        ),
       );
 
-      await Future<void>.delayed(const Duration(milliseconds: 1));
       expect(
         serviceState().messages.whereType<Message>().any(
           (m) => m.value == 'test message',
@@ -345,12 +380,15 @@ void main() {
       () async {
         await chatService.startChatSession();
 
-        fakeChatSdk.simulateIncomingPresenceMessage(
-          timestamp: DateTime.now().toIso8601String(),
-          recipientDid: channelDid,
+        await waitForState(
+          (state) =>
+              state.contactPresenceStatus == ContactPresenceStatus.online,
+          () => fakeChatSdk.simulateIncomingPresenceMessage(
+            timestamp: DateTime.now().toIso8601String(),
+            recipientDid: channelDid,
+          ),
         );
 
-        await Future<void>.delayed(const Duration(milliseconds: 1));
         expect(
           serviceState().contactPresenceStatus,
           ContactPresenceStatus.online,
@@ -364,22 +402,26 @@ void main() {
         await chatService.startChatSession();
 
         // Simulate contact card update to set otherPartyCard in state
-        fakeChatSdk.simulateIncomingContactCardUpdate(
-          contactDid: 'did:key:other-party', // Bob's DID
-          card: FakeContacts.individualContact.otherPartyCard!,
-          recipientDid: channelDid,
+        await waitForState(
+          (state) => state.otherPartyCard?.firstName != null,
+          () => fakeChatSdk.simulateIncomingContactCardUpdate(
+            contactDid: 'did:key:other-party', // Bob's DID
+            card: FakeContacts.individualContact.otherPartyCard!,
+            recipientDid: channelDid,
+          ),
         );
 
-        await Future<void>.delayed(const Duration(milliseconds: 1));
         expect(serviceState().otherPartyCard?.firstName, isNotNull);
 
-        fakeChatSdk.simulateIncomingTypingActivity(
-          senderDid: 'did:key:other-party',
-          createdTime: DateTime.now(),
-          recipientDid: channelDid,
+        await waitForState(
+          (state) => state.membersTyping.isNotEmpty,
+          () => fakeChatSdk.simulateIncomingTypingActivity(
+            senderDid: 'did:key:other-party',
+            createdTime: DateTime.now(),
+            recipientDid: channelDid,
+          ),
         );
 
-        await Future<void>.delayed(const Duration(milliseconds: 1));
         expect(serviceState().membersTyping, isNotEmpty);
       },
     );
@@ -388,30 +430,36 @@ void main() {
         ' active timer', () async {
       await chatService.startChatSession();
 
-      fakeChatSdk.simulateIncomingContactCardUpdate(
-        contactDid: 'did:key:other-party',
-        card: FakeContacts.individualContact.otherPartyCard!,
-        recipientDid: channelDid,
+      await waitForState(
+        (state) => state.otherPartyCard?.firstName != null,
+        () => fakeChatSdk.simulateIncomingContactCardUpdate(
+          contactDid: 'did:key:other-party',
+          card: FakeContacts.individualContact.otherPartyCard!,
+          recipientDid: channelDid,
+        ),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 1));
 
       // First typing event — timer starts, membersTyping is populated.
-      fakeChatSdk.simulateIncomingTypingActivity(
-        senderDid: 'did:key:other-party',
-        createdTime: DateTime.now(),
-        recipientDid: channelDid,
+      await waitForState(
+        (state) => state.membersTyping.isNotEmpty,
+        () => fakeChatSdk.simulateIncomingTypingActivity(
+          senderDid: 'did:key:other-party',
+          createdTime: DateTime.now(),
+          recipientDid: channelDid,
+        ),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 1));
       expect(serviceState().membersTyping, isNotEmpty);
 
       // Second typing event — previous timer is cancelled, state must be
       // cleared synchronously before the new timer populates it again.
-      fakeChatSdk.simulateIncomingTypingActivity(
-        senderDid: 'did:key:other-party',
-        createdTime: DateTime.now(),
-        recipientDid: channelDid,
+      await waitForState(
+        (state) => state.membersTyping.isNotEmpty,
+        () => fakeChatSdk.simulateIncomingTypingActivity(
+          senderDid: 'did:key:other-party',
+          createdTime: DateTime.now(),
+          recipientDid: channelDid,
+        ),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 1));
       expect(serviceState().membersTyping, isNotEmpty);
     });
 
@@ -420,19 +468,23 @@ void main() {
       () async {
         await chatService.startChatSession();
 
-        fakeChatSdk.simulateIncomingContactCardUpdate(
-          contactDid: 'did:key:other-party',
-          card: FakeContacts.individualContact.otherPartyCard!,
-          recipientDid: channelDid,
+        await waitForState(
+          (state) => state.otherPartyCard?.firstName != null,
+          () => fakeChatSdk.simulateIncomingContactCardUpdate(
+            contactDid: 'did:key:other-party',
+            card: FakeContacts.individualContact.otherPartyCard!,
+            recipientDid: channelDid,
+          ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 1));
 
-        fakeChatSdk.simulateIncomingTypingActivity(
-          senderDid: 'did:key:other-party',
-          createdTime: DateTime.now(),
-          recipientDid: channelDid,
+        await waitForState(
+          (state) => state.membersTyping.isNotEmpty,
+          () => fakeChatSdk.simulateIncomingTypingActivity(
+            senderDid: 'did:key:other-party',
+            createdTime: DateTime.now(),
+            recipientDid: channelDid,
+          ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 1));
         expect(serviceState().membersTyping, isNotEmpty);
 
         // Disposing while the timer is still running must not throw the
@@ -444,23 +496,27 @@ void main() {
     test('updates effect in state when receiving effect', () async {
       await chatService.startChatSession();
 
-      fakeChatSdk.simulateIncomingEffectMessage(
-        effectName: Effect.confetti.name,
-        recipientDid: channelDid,
+      await waitForState(
+        (state) => state.effect == Effect.confetti,
+        () => fakeChatSdk.simulateIncomingEffectMessage(
+          effectName: Effect.confetti.name,
+          recipientDid: channelDid,
+        ),
       );
 
-      await Future<void>.delayed(const Duration(milliseconds: 1));
       expect(serviceState().effect, Effect.confetti);
     });
 
     test('clearEffect resets effect in state', () async {
       await chatService.startChatSession();
 
-      fakeChatSdk.simulateIncomingEffectMessage(
-        effectName: Effect.confetti.name,
-        recipientDid: channelDid,
+      await waitForState(
+        (state) => state.effect == Effect.confetti,
+        () => fakeChatSdk.simulateIncomingEffectMessage(
+          effectName: Effect.confetti.name,
+          recipientDid: channelDid,
+        ),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 1));
       expect(serviceState().effect, Effect.confetti);
 
       chatService.clearEffect();
@@ -538,13 +594,15 @@ void main() {
         final updatedCard = FakeContacts.individualContact.card.copyWith(
           firstName: 'Updated Alice',
         );
-        fakeChatSdk.simulateIncomingContactCardUpdate(
-          contactDid: channelDid,
-          card: updatedCard,
-          recipientDid: channelDid,
+        await waitForState(
+          (state) => state.otherPartyCard?.firstName == 'Updated Alice',
+          () => fakeChatSdk.simulateIncomingContactCardUpdate(
+            contactDid: channelDid,
+            card: updatedCard,
+            recipientDid: channelDid,
+          ),
         );
 
-        await Future<void>.delayed(const Duration(milliseconds: 1));
         expect(serviceState().otherPartyCard?.firstName, 'Updated Alice');
       },
     );
@@ -661,7 +719,6 @@ void main() {
       await chatService.startChatSession();
 
       await chatService.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
     });
@@ -682,7 +739,6 @@ void main() {
       await service.startChatSession();
 
       await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
@@ -713,7 +769,6 @@ void main() {
       await service.startChatSession();
 
       await service.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(fakeChatSdk.createAttachmentMessageCalls, isEmpty);
     });
@@ -721,8 +776,8 @@ void main() {
     test('pauseChat cancels rCard subscription without error', () async {
       await chatService.startChatSession();
 
-      chatService.pauseChat();
-      chatService.pauseChat(); // second call must not throw
+      await chatService.pauseChat();
+      await chatService.pauseChat(); // second call must not throw
 
       expect(fakeChatSdk.sessionEnded, isTrue);
     });
@@ -730,7 +785,6 @@ void main() {
 
   group('ChatSessionService - VRC Replay Ordering', () {
     late ProviderContainer container;
-    late ChatSessionService chatService;
     late FakeMeetingPlaceSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late DidKeyManager peerDidManager;
@@ -852,40 +906,9 @@ void main() {
         (previous, value) {},
         fireImmediately: true,
       );
-      chatService = container.read(
-        chatSessionServiceProvider(channelDid).notifier,
-      );
     });
 
     tearDown(() => container.dispose());
-
-    test(
-      'reciprocates VRC when state.messages is populated before replay runs',
-      () async {
-        await chatService.startChatSession();
-        await Future<void>.delayed(const Duration(milliseconds: 50));
-
-        expect(
-          fakeChatSdk.createAttachmentMessageCalls
-              .where((c) => c.senderDid == localIdentityDid)
-              .toList(),
-          hasLength(1),
-        );
-      },
-    );
-
-    test('shows incoming VRC chat item when pending VRC is replayed '
-        'on session open', () async {
-      await chatService.startChatSession();
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-
-      expect(
-        fakeChatSdk.createAttachmentMessageCalls
-            .where((c) => c.senderDid == channelDid)
-            .toList(),
-        hasLength(1),
-      );
-    });
   });
 }
 

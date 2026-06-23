@@ -16,7 +16,7 @@ part of 'camera_service.dart';
 /// - Maintains camera state via [CameraServiceState].
 
 @ProviderFor(CameraService)
-final cameraServiceProvider = CameraServiceProvider._();
+const cameraServiceProvider = CameraServiceProvider._();
 
 /// A service class for managing camera functionality in the app.
 ///
@@ -32,7 +32,7 @@ final class CameraServiceProvider
   ///   and capturing images.
   /// - Observes the app lifecycle to recheck camera availability when resuming.
   /// - Maintains camera state via [CameraServiceState].
-  CameraServiceProvider._()
+  const CameraServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -73,6 +73,7 @@ abstract class _$CameraService extends $Notifier<CameraServiceState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<CameraServiceState, CameraServiceState>;
     final element =
         ref.element
@@ -82,6 +83,6 @@ abstract class _$CameraService extends $Notifier<CameraServiceState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

@@ -2,10 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
@@ -30,15 +28,20 @@ void _mockSharePlus() {
       );
 }
 
-List<AttachmentPlugin> _pluginsWithRCard(BaseCacheManager cacheManager) => [
-  RCardAttachmentsPlugin(cacheManager: cacheManager),
-];
+InkWell _findOptionTapTarget(WidgetTester tester, Finder optionLabel) {
+  return tester.widget<InkWell>(
+    find.ancestor(of: optionLabel, matching: find.byType(InkWell)).first,
+  );
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   final contactId = FakeContacts.individualContact.id;
-  final meetingPlaceChatSDK = FakeChatSdk();
+  final chatSdk = FakeChatSdk();
+  final attachmentPlugins = [
+    RCardAttachmentsPlugin(cacheManager: FakeCacheManager()),
+  ];
 
   setUpAll(_mockSharePlus);
 
@@ -46,51 +49,44 @@ void main() {
     testWidgets('shows R-Card option with correct label in bottom sheet', (
       tester,
     ) async {
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$contactId/chat',
+        contactId: contactId,
         identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-        attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        chatSdk: chatSdk,
+        attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      expect(find.text('💳'), findsOneWidget);
       expect(find.text(l10n.genRCard), findsOneWidget);
+      expect(find.byIcon(Icons.credit_card), findsOneWidget);
     });
 
     testWidgets('R-Card option is enabled (onTap is non-null) '
         'when isPlatformSupported = true', (tester) async {
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$contactId/chat',
-        identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
+        contactId: contactId,
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-        attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        chatSdk: chatSdk,
+        attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      final rCardTile = tester.widget<ListTile>(
-        find.ancestor(
-          of: find.text(l10n.genRCard),
-          matching: find.byType(ListTile),
-        ),
+      final rCardOption = _findOptionTapTarget(
+        tester,
+        find.text(l10n.genRCard),
       );
-      expect(rCardTile.enabled, isTrue);
+      expect(rCardOption.onTap, isNotNull);
     });
 
     testWidgets('R-Card option is disabled when isPlatformSupported = false', (
@@ -98,45 +94,37 @@ void main() {
     ) async {
       final disabledPlugin = FakeUnsupportedRCardPlugin();
 
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$contactId/chat',
+        contactId: contactId,
         identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
+        chatSdk: chatSdk,
         attachmentPlugins: [disabledPlugin],
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('R-Card (disabled)'), findsOneWidget);
-      final rCardTile = tester.widget<ListTile>(
-        find.ancestor(
-          of: find.textContaining('R-Card (disabled)'),
-          matching: find.byType(ListTile),
-        ),
-      );
-      expect(rCardTile.enabled, isFalse);
+      final disabledLabel = find.textContaining('R-Card (disabled)');
+      expect(disabledLabel, findsOneWidget);
+      final rCardOption = _findOptionTapTarget(tester, disabledLabel);
+      expect(rCardOption.onTap, isNull);
     });
 
     testWidgets(
       'R-Card option is absent when RCardPlugin is not in the plugins list',
       (tester) async {
-        await navigateToLocation(
+        await navigateToChat(
           tester,
-          '/contacts/$contactId/chat',
+          contactId: contactId,
           identities: [FakeIdentities.primaryIdentity],
-          mediators: [],
           contacts: [FakeContacts.individualContact],
-          meetingPlaceChatSDK: meetingPlaceChatSDK,
+          chatSdk: chatSdk,
           attachmentPlugins: const [],
           rCardsServiceFactory: () => FakeRCardsService(const []),
         );
-        await tester.pumpAndSettle();
 
         await tester.tap(find.byKey(const Key('chat_add_media_button')));
         await tester.pumpAndSettle();
@@ -149,17 +137,15 @@ void main() {
     testWidgets('tapping R-Card option opens SelectIdentityScreen', (
       tester,
     ) async {
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$contactId/chat',
+        contactId: contactId,
         identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-        attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        chatSdk: chatSdk,
+        attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -176,17 +162,15 @@ void main() {
     testWidgets('tapping Cancel on SelectIdentityScreen dismisses it', (
       tester,
     ) async {
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$contactId/chat',
+        contactId: contactId,
         identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-        attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        chatSdk: chatSdk,
+        attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -209,17 +193,15 @@ void main() {
       WidgetTester tester, {
       List<Identity> identities = const [],
     }) async {
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$contactId/chat',
+        contactId: contactId,
         identities: identities,
-        mediators: [],
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-        attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        chatSdk: chatSdk,
+        attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
       final l10n = await getL10n();
@@ -267,29 +249,25 @@ void main() {
     ) async {
       final groupContactId = FakeContacts.groupContact.id;
 
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$groupContactId/chat',
+        contactId: groupContactId,
         identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
         contacts: [FakeContacts.groupContact],
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-        attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        chatSdk: chatSdk,
+        attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      final rCardTile = tester.widget<ListTile>(
-        find.ancestor(
-          of: find.text(l10n.genRCard),
-          matching: find.byType(ListTile),
-        ),
+      final rCardOption = _findOptionTapTarget(
+        tester,
+        find.text(l10n.genRCard),
       );
-      expect(rCardTile.enabled, isFalse);
+      expect(rCardOption.onTap, isNull);
     });
 
     testWidgets('tapping disabled R-Card in group chat does nothing', (
@@ -297,17 +275,15 @@ void main() {
     ) async {
       final groupContactId = FakeContacts.groupContact.id;
 
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$groupContactId/chat',
+        contactId: groupContactId,
         identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
         contacts: [FakeContacts.groupContact],
-        meetingPlaceChatSDK: meetingPlaceChatSDK,
-        attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        chatSdk: chatSdk,
+        attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
@@ -325,16 +301,14 @@ void main() {
         'shows "R-Cards have been exchanged."', (tester) async {
       final chatSdk = FakeChatSdk();
 
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$contactId/chat',
+        contactId: contactId,
         identities: [FakeIdentities.primaryIdentity],
-        mediators: [],
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: chatSdk,
+        chatSdk: chatSdk,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
 
       final recipientDid = FakeChannels.individualChannel.permanentChannelDid!;
       final rCardPayload = jsonEncode({'vcBlob': '{}', 'isAutoExchange': true});
@@ -342,12 +316,12 @@ void main() {
         text: '',
         recipientDid: recipientDid,
         attachments: [
-          chat.Attachment(
+          ChatAttachment(
             id: 'att-1',
             mediaType: 'application/json',
             format: RCardAttachment.pluginFormat,
             lastModifiedTime: DateTime(2024),
-            data: chat.AttachmentData(json: rCardPayload),
+            data: ChatAttachmentData(json: rCardPayload),
           ),
         ],
       );
@@ -363,17 +337,15 @@ void main() {
       WidgetTester tester, {
       required List<Identity> identities,
     }) async {
-      await navigateToLocation(
+      await navigateToChat(
         tester,
-        '/contacts/$contactId/chat',
+        contactId: contactId,
         identities: identities,
-        mediators: [],
         contacts: [FakeContacts.individualContact],
-        meetingPlaceChatSDK: FakeChatSdk(),
-        attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+        chatSdk: FakeChatSdk(),
+        attachmentPlugins: attachmentPlugins,
         rCardsServiceFactory: () => FakeRCardsService(const []),
       );
-      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('chat_add_media_button')));
       await tester.pumpAndSettle();
       final l10n = await getL10n();
@@ -402,20 +374,18 @@ void main() {
     testWidgets(
       'pre-selects current identity when it differs from the primary',
       (tester) async {
-        await navigateToLocation(
+        await navigateToChat(
           tester,
-          '/contacts/$contactId/chat',
+          contactId: contactId,
           identities: [
             FakeIdentities.primaryIdentity,
             FakeIdentities.secondaryIdentity,
           ],
-          mediators: [],
           contacts: [FakeContacts.individualContact],
-          meetingPlaceChatSDK: FakeChatSdk(),
-          attachmentPlugins: _pluginsWithRCard(FakeCacheManager()),
+          chatSdk: FakeChatSdk(),
+          attachmentPlugins: attachmentPlugins,
           rCardsServiceFactory: () => FakeRCardsService(const []),
         );
-        await tester.pumpAndSettle();
 
         // Switch current identity to secondary before opening the R-Card screen
         final container = ProviderScope.containerOf(

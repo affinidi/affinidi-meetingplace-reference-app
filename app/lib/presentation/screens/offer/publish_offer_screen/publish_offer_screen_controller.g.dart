@@ -10,7 +10,7 @@ part of 'publish_offer_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(PublishOfferScreenController)
-final publishOfferScreenControllerProvider =
+const publishOfferScreenControllerProvider =
     PublishOfferScreenControllerFamily._();
 
 final class PublishOfferScreenControllerProvider
@@ -19,7 +19,7 @@ final class PublishOfferScreenControllerProvider
           PublishOfferScreenController,
           PublishOfferScreenState
         > {
-  PublishOfferScreenControllerProvider._({
+  const PublishOfferScreenControllerProvider._({
     required PublishOfferScreenControllerFamily super.from,
     required (String, AppLocalizations) super.argument,
   }) : super(
@@ -65,7 +65,7 @@ final class PublishOfferScreenControllerProvider
 }
 
 String _$publishOfferScreenControllerHash() =>
-    r'e238cafedfd68d289dc193ae7eb7ddb5804bfc24';
+    r'ac05312366ee33a50420aee077de86206fef71ee';
 
 final class PublishOfferScreenControllerFamily extends $Family
     with
@@ -76,7 +76,7 @@ final class PublishOfferScreenControllerFamily extends $Family
           PublishOfferScreenState,
           (String, AppLocalizations)
         > {
-  PublishOfferScreenControllerFamily._()
+  const PublishOfferScreenControllerFamily._()
     : super(
         retry: null,
         name: r'publishOfferScreenControllerProvider',
@@ -107,6 +107,7 @@ abstract class _$PublishOfferScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build(_$args.$1, _$args.$2);
     final ref =
         this.ref as $Ref<PublishOfferScreenState, PublishOfferScreenState>;
     final element =
@@ -117,6 +118,6 @@ abstract class _$PublishOfferScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, () => build(_$args.$1, _$args.$2));
+    element.handleValue(ref, created);
   }
 }

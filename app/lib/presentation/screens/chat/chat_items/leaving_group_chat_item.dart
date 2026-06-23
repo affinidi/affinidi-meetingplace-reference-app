@@ -20,8 +20,12 @@ class LeavingGroupChatItem extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
+    final message = _chatItem.isGroupMemberRemoved
+        ? l10n.memberRemovedFromGroup(memberName)
+        : l10n.leavingGroup(memberName);
+
     return ConciergeMessage(
-      message: l10n.leavingGroup(memberName),
+      message: message,
       dateCreated: _chatItem.dateCreated,
     );
   }

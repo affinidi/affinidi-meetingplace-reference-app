@@ -10,11 +10,11 @@ part of 'media_review_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(MediaReviewController)
-final mediaReviewControllerProvider = MediaReviewControllerProvider._();
+const mediaReviewControllerProvider = MediaReviewControllerProvider._();
 
 final class MediaReviewControllerProvider
     extends $NotifierProvider<MediaReviewController, void> {
-  MediaReviewControllerProvider._()
+  const MediaReviewControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -42,13 +42,14 @@ final class MediaReviewControllerProvider
 }
 
 String _$mediaReviewControllerHash() =>
-    r'c175c6e72aa4042d2dadfe12af0c4442c26b94af';
+    r'3e576e1445e7f2ec38686b4a795f7065e7d88126';
 
 abstract class _$MediaReviewController extends $Notifier<void> {
   void build();
   @$mustCallSuper
   @override
   void runBuild() {
+    build();
     final ref = this.ref as $Ref<void, void>;
     final element =
         ref.element
@@ -58,6 +59,6 @@ abstract class _$MediaReviewController extends $Notifier<void> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, null);
   }
 }

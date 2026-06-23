@@ -59,6 +59,7 @@ The reference app showcases the core capabilities of a secure, private messaging
 | **Multiple Identities** | Set a primary identity for your main profile, plus create aliases for specific contexts (e.g. a hobbyist persona or professional profile). |
 | **Connect with Invitations** | Create and publish invitations with custom options: a custom phrase, a usage limit, or an expiry date. |
 | **Secure Messaging** | Peer-to-peer and group messaging with end-to-end privacy built in. |
+| **Matrix Transport** | Individual chats can run over DIDComm, Matrix, or both. When more than one transport is enabled, a picker is shown at offer creation. Group chat always uses Matrix. Configure via `ENABLED_INDIVIDUAL_CHAT_TRANSPORTS`. |
 | **Verified Identity (R-Card and VRC)** | Share your R-Card (a signed digital contact card) in any chat, or initiate a mutual VRC exchange to create a verifiable record of your relationship. See [Feature Demonstrations](#feature-demos). |
 | **Messaging Server** | Use the Affinidi-hosted messaging server or bring your own managed mediator. |
 | **Human ZKP Demo** | Prove a contact is human using a Zero Knowledge Proof; no biometric data or personal information is shared. See [Feature Demonstrations](#feature-demos). |
@@ -232,6 +233,40 @@ A VRC is a mutual "verified relationship" credential. Unlike an R-Card, a VRC re
 | **Flutter** | `3.44.1` |
 | **Dart SDK** | `^3.12.0` |
 
+### Matrix E2E Encryption
+
+**Native build requirements, if Matrix is enabled.** This app supports configurable transport protocols (DIDComm, Matrix, or both). If you enable Matrix, it uses `flutter_vodozemac`, a Rust-based implementation of Olm/Megolm encryption, for end-to-end encrypted messaging. If you disable Matrix or use only DIDComm, Rust is not required. See [Environment Variables](#environment-variables) to configure which transports your app uses via `ENABLED_INDIVIDUAL_CHAT_TRANSPORTS`.
+
+**Step 1: Install Rust**
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+. "$HOME/.cargo/env"
+```
+
+**Step 2: Add compilation targets**
+
+For iOS:
+
+```bash
+rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+```
+
+For Android:
+
+```bash
+rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+```
+
+> **Note:** Android builds also require NDK, installed via Android Studio (SDK Manager > SDK Tools > NDK).
+
+**If builds fail after `flutter clean`:**
+
+```bash
+rm -rf app/build/flutter_vodozemac
+fvm flutter run
+```
+
 ## Getting Started
 
 Set up your environment to run the Meeting Place application.
@@ -296,7 +331,18 @@ The DIDComm Mediator routes messages between parties without reading their conte
 DEFAULT_MEDIATOR_DID=""
 ```
 
-#### Enable push notifications
+#### Connect to Matrix Homeserver
+
+The Matrix Homeserver is a messaging server that stores and relays messages between clients using the Matrix protocol. The SDK authenticates with it using short-lived JWTs issued by the Control Plane API — no password or manual registration is required.
+
+Deploy a Matrix Synapse homeserver and configure it for JWT-based login (`org.matrix.login.jwt`) using the Control Plane's public key as the JWT secret and the Control Plane DID as the issuer (see the [Control Plane API: Matrix Authentication](https://github.com/affinidi/affinidi-meetingplace-controlplane-api-dart#matrix-authentication) section for full setup details). Once running, supply its base URL:
+
+```bash
+# Required when Matrix transport is enabled
+MATRIX_HOMESERVER="https://matrix.yourdomain.com"
+```
+
+#### Enable Push Notifications
 
 Create a [Firebase](https://firebase.google.com/docs/projects/learn-more) project, then:
 
@@ -356,6 +402,11 @@ DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: "" (e.g. "oss-app-ma
 
 # Human ZKP & Liveness Credential
 ZKP_ENABLED="false"                              # Default: false — enables Human ZKP demo + Credentials tab
+
+# Matrix transport
+ENABLED_INDIVIDUAL_CHAT_TRANSPORTS=""            # Default: '["didcomm"]' — JSON array of enabled transports; options: "didcomm", "matrix" (e.g., '["didcomm", "matrix"]'). Single entry hides the picker; multiple show it at offer creation.
+MATRIX_MEDIA_MAX_CACHE_MB=""                     # Default: 30 — on-disk media cache limit per Matrix account in megabytes
+MATRIX_MEDIA_CACHE_TTL_DAYS=""                   # Default: 30 — how long cached Matrix media files are kept on device
 ```
 
 > All configuration options and their defaults are defined in `lib/infrastructure/configuration/environment.dart`.

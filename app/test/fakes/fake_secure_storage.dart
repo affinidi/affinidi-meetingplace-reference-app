@@ -13,10 +13,12 @@ class FakeSecureStorage extends SecureStorage {
     this._preferredMediatorDid,
     this._shouldShowMeetingPlaceQR,
     this._savingPushTokenDuration,
+    this._deviceId = 'test-device-id',
   });
 
   final bool? _debugMode;
   final String _passphrase;
+  final String _deviceId;
   final String? _preferredMediatorDid;
   final bool? _shouldShowMeetingPlaceQR;
   final int? _savingPushTokenDuration;
@@ -32,6 +34,9 @@ class FakeSecureStorage extends SecureStorage {
   Future<String> provideDatabasePassphrase() async {
     return _passphrase;
   }
+
+  @override
+  Future<String> provideDeviceId() async => _deviceId;
 
   @override
   Future<String?> getPreferredMediatorDid() async {

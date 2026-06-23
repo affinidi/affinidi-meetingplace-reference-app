@@ -21,6 +21,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     Group? group,
     String? offerName,
     ContactCard? otherPartyCard,
+    ContactCard? myCard,
     @Default([]) List<chat.ChatItem> messages,
     @Default([]) List<String> membersTyping,
     @Default(-1) int selectedReactionIndex,
@@ -31,9 +32,11 @@ abstract class ChatScreenState with _$ChatScreenState {
     ScreenEffect? effect,
     @Default({}) Map<String, Uint8List> attachmentsDataCache,
     String? notificationToken,
+    String? myDid,
     @Default(false) bool shouldEnableVrcAttachment,
     @Default(false) bool shouldShowVrcBanner,
     @Default(false) bool shouldStartVrcExchangeFromAttachment,
+    chat.TransportCapabilities? capabilities,
   }) = _ChatScreenState;
 
   bool get hasPendingVrcConcierge => messages.any(

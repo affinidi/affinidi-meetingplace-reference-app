@@ -109,10 +109,12 @@ final class _Enabled extends ChatZkpMessageListPolicy {
             m is chat.ConciergeMessage &&
             m.conciergeType.value ==
                 LivenessZkpConciergeTypes.humanZkpProofShared,
-      );
+      ),
+      _hasVerifiedProof = ChatZkpMessageListPolicy.hasVerifiedProof(messages);
 
   final Set<String> _pausedNoticeMessageIds;
   final bool _hasSharedProof;
+  final bool _hasVerifiedProof;
 
   bool _isHumanZkpConcierge(chat.ChatItem item) =>
       item is chat.ConciergeMessage &&
@@ -122,6 +124,11 @@ final class _Enabled extends ChatZkpMessageListPolicy {
       item is chat.ConciergeMessage &&
       item.conciergeType.value == LivenessZkpConciergeTypes.humanZkpRequest;
 
+  bool _isHumanZkpRequestInitiated(chat.ChatItem item) =>
+      item is chat.ConciergeMessage &&
+      item.conciergeType.value ==
+          LivenessZkpConciergeTypes.humanZkpRequestInitiated;
+
   @override
   bool shouldHide(chat.ChatItem item) {
     if (item is chat.Message && item.value.isEmpty) {
@@ -129,9 +136,15 @@ final class _Enabled extends ChatZkpMessageListPolicy {
       if (attachments.isNotEmpty &&
           attachments.every(
             (att) =>
-                LivenessZkpAttachmentParser.matchesRequestFormat(att) ||
-                LivenessZkpAttachmentParser.matchesProofFormat(att) ||
-                LivenessZkpAttachmentParser.matchesDeclinedFormat(att),
+                LivenessZkpAttachmentParser.matchesRequestFormat(
+                  att.toCoreAttachment(),
+                ) ||
+                LivenessZkpAttachmentParser.matchesProofFormat(
+                  att.toCoreAttachment(),
+                ) ||
+                LivenessZkpAttachmentParser.matchesDeclinedFormat(
+                  att.toCoreAttachment(),
+                ),
           )) {
         return true;
       }
@@ -143,6 +156,10 @@ final class _Enabled extends ChatZkpMessageListPolicy {
         forRequestNoticeMessageId: item.messageId,
       );
       return _pausedNoticeMessageIds.contains(expectedPausedId);
+    }
+
+    if (_isHumanZkpRequestInitiated(item) && _hasVerifiedProof) {
+      return true;
     }
 
     return false;

@@ -45,6 +45,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createGroupChatOffer => 'Group chat';
 
   @override
+  String get chatTransport => 'Chat transport';
+
+  @override
+  String transportLabel(String transport) {
+    String _temp0 = intl.Intl.selectLogic(transport, {
+      'didcomm': 'DIDComm',
+      'matrix': 'Matrix',
+      'other': '$transport',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get groupOfferHelperText =>
       'The invitation will represent a group chat for multiple contacts to join and chat. You still have control over who can join the group chat.';
 
@@ -386,6 +399,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'oob_invalid_type': 'QR-Code data not supported',
       'network_error':
           'Could not connect. Check your internet connection and try again.',
+      'deleteContactFailed': 'Failed to delete contact.',
       'other': '$errorCode',
     });
     return '$_temp0';
@@ -905,6 +919,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get messageCopiedClipboard => 'Message copied to clipboard';
 
   @override
+  String get chatMessageActionDelete => 'Delete for everyone';
+
+  @override
+  String get chatMessageActionDeleteLocal => 'Delete for me';
+
+  @override
+  String get chatMessageActionCopy => 'Copy message';
+
+  @override
+  String get chatMessageActionEdit => 'Edit message';
+
+  @override
+  String get chatMessageEditedLabel => 'edited';
+
+  @override
+  String get chatMessageEditFailed => 'Could not edit message';
+
+  @override
+  String get chatMessageEditHint => 'Message text';
+
+  @override
+  String get chatMessageEditSave => 'Save';
+
+  @override
+  String get chatMessageDeletedTombstone => 'This message was deleted';
+
+  @override
+  String get chatMessageDeletedLocallyTombstone => 'You deleted this message';
+
+  @override
+  String get chatMessageDeleteFailed => 'Could not delete message';
+
+  @override
   String chatItemStatus(String status) {
     String _temp0 = intl.Intl.selectLogic(status, {
       'queued': 'Queued',
@@ -1388,6 +1435,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String memberRemovedFromGroup(String memberName) {
+    return '$memberName has been removed';
+  }
+
+  @override
   String get concierge => 'Concierge';
 
   @override
@@ -1545,6 +1597,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get removeMemberDialogTitle => 'Remove member';
+
+  @override
+  String removeMemberDialogBody(String name) {
+    return 'Remove $name from this group? They will no longer receive messages.';
+  }
+
+  @override
   String get rCardFieldIssuerDid => 'Issuer DID';
 
   @override
@@ -1589,6 +1649,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rCardFooterUpdateShared => 'R-Card update has been shared.';
 
   @override
+  String get profileDetailsUpdateSharedGroup =>
+      'Profile details update has been shared with the group.';
+
+  @override
   String get rCardFooterUpdateSaved => 'R-Card update has been saved.';
 
   @override
@@ -1615,6 +1679,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get verifiableRelationshipCredential =>
       'Verifiable Relationship Credential';
+
+  @override
+  String get vrcAbbreviation => 'VRC';
 
   @override
   String get vrcDetailsTitle => 'Relationship Credential';
@@ -1710,10 +1777,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get humanZkp => 'Human ZKP';
+  String get humanZkp => 'Human Zero Knowledge Proof';
 
   @override
-  String get humanZeroKnowledgeProof => 'Human Zero-Knowledge Proof';
+  String get humanZkpAbbreviated => 'Human ZKP';
+
+  @override
+  String get humanZeroKnowledgeProof => 'Human Zero Knowledge Proof';
 
   @override
   String get livenessCredential => 'Liveness Credential';
@@ -1729,7 +1799,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generatingZeroKnowledgeProof =>
-      'Generating Zero-Knowledge Proof...';
+      'Generating Human Zero Knowledge Proof...';
 
   @override
   String get cancel => 'Cancel';
@@ -1752,7 +1822,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noLivenessCredentialFound =>
-      'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.';
+      'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Human Zero Knowledge Proof (ZKP) is derived.';
 
   @override
   String get livenessCheckDemoModeNote =>
@@ -1771,7 +1841,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mockLivenessCredentialNext =>
-      'You can now continue to generate a Human Zero-Knowledge proof.';
+      'You can now continue to generate a Human Zero Knowledge Proof.';
 
   @override
   String get livenessEvidenceThresholdNotMet =>
@@ -1821,11 +1891,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get zkpNoticePaused => 'You paused a Zero‑Knowledge Proof request.';
+  String get zkpNoticePaused =>
+      'You paused a Human Zero Knowledge Proof request.';
 
   @override
   String zkpNoticeDeclined(String contactName) {
-    return '$contactName has declined the Human ZKP request. Tap the \"+\" icon to restart it.';
+    return '$contactName has declined the Human Zero Knowledge Proof request. Tap the \"+\" icon to restart it.';
   }
 
   @override
@@ -1839,9 +1910,64 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String zkpNoticeRequest(String contactName) {
-    return '$contactName has requested a Zero‑Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.';
+    return '$contactName has requested a Human Zero Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.';
   }
 
   @override
+  String get zkpNoticeRequestInitiated =>
+      'You have initiated a Human Zero Knowledge Proof request.';
+
+  @override
   String get zkpProofAlreadyShared => 'ZKP Proof already shared';
+
+  @override
+  String get removeMemberConfirm => 'Remove';
+
+  @override
+  String get removeMemberNotSupported =>
+      'Removing members isn\'t supported yet.';
+
+  @override
+  String get removeMemberSuccess => 'Member removed from group.';
+
+  @override
+  String get generalVideo => 'Video';
+
+  @override
+  String get generalDocument => 'Document';
+
+  @override
+  String get documentTapToDownload => 'Tap to download';
+
+  @override
+  String get videoLoadingError => 'Unable to play video';
+
+  @override
+  String get mediaTapToRetry => 'Tap to retry';
+
+  @override
+  String get mediaDownloadFailedTapToRetry => 'Download failed. Tap to retry';
+
+  @override
+  String attachmentTooLarge(int maxMb) {
+    return 'Attachment is too large. Maximum size is $maxMb MB.';
+  }
+
+  @override
+  String get voiceMessagePermissionDenied =>
+      'Microphone permission is required to record voice messages.';
+
+  @override
+  String get voiceMessageRecordingFailed => 'Unable to start voice recording.';
+
+  @override
+  String get voiceMessageSendFailed => 'Unable to send voice message.';
+
+  @override
+  String get generalEmail => 'Email';
+
+  @override
+  String vrcResponderIntro(Object name) {
+    return '$name has selected the following persona to verify the relationship:';
+  }
 }

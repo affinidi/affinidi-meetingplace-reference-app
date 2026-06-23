@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 
 import 'firebase_environment.dart';
 import 'image_config.dart';
@@ -13,6 +15,7 @@ import 'image_config.dart';
 /// - [controlPlaneDid] - CONTROL_PLANE_DID compile-time environment value.
 /// - [defaultMediatorDid] - DEFAULT_MEDIATOR_DID compile-time environment
 ///  value.
+/// - [matrixHomeserver] - MATRIX_HOMESERVER compile-time environment value.
 /// - [firebase] - FirebaseEnvironment singleton providing firebase-related
 ///  config.
 /// - [maxOfferUsages] - Maximum usages for offers.
@@ -27,8 +30,13 @@ class Environment {
 
   String get controlPlaneDid =>
       const String.fromEnvironment('CONTROL_PLANE_DID');
+
   String get defaultMediatorDid =>
       const String.fromEnvironment('DEFAULT_MEDIATOR_DID');
+
+  String get matrixHomeserver =>
+      const String.fromEnvironment('MATRIX_HOMESERVER');
+
   FirebaseEnvironment get firebase => FirebaseEnvironment.instance;
 
   int get maxOfferUsages => 100;
@@ -91,9 +99,42 @@ class Environment {
     defaultValue: 60,
   );
 
+  /// Maximum age, in seconds, at which the original sender can still delete
+  /// one of their own messages for everyone. Passed to the chat SDK as
+  /// `MeetingPlaceChatSDKOptions.deleteMessageWindow`. Default matches the
+  /// SDK default (2 minutes).
+  int get deleteMessageWindowInSeconds => const int.fromEnvironment(
+    'DELETE_MESSAGE_WINDOW_IN_SECONDS',
+    defaultValue: 120,
+  );
+
   int get extraDelayAtLaunchInMilliseconds => const int.fromEnvironment(
     'EXTRA_DELAY_AT_LAUNCH_IN_MILLISECONDS',
     defaultValue: 500,
+  );
+
+  /// Maximum size, in bytes, of media retained in the Matrix on-disk cache.
+  /// Configured in megabytes via `MATRIX_MEDIA_MAX_CACHE_MB`.
+  int get matrixMediaMaxCacheBytes =>
+      const int.fromEnvironment('MATRIX_MEDIA_MAX_CACHE_MB', defaultValue: 30) *
+      1024 *
+      1024;
+
+  /// Maximum size, in bytes, accepted for an outgoing chat attachment such as
+  /// a document or video. Configured in megabytes via
+  /// `CHAT_ATTACHMENT_MAX_SIZE_MB`.
+  int get chatAttachmentMaxBytes =>
+      const int.fromEnvironment(
+        'CHAT_ATTACHMENT_MAX_SIZE_MB',
+        defaultValue: 25,
+      ) *
+      1024 *
+      1024;
+
+  /// Period after which downloaded Matrix media is evicted from the on-disk
+  /// cache. Configured in days via `MATRIX_MEDIA_CACHE_TTL_DAYS`.
+  Duration get matrixMediaCacheTtl => const Duration(
+    days: int.fromEnvironment('MATRIX_MEDIA_CACHE_TTL_DAYS', defaultValue: 30),
   );
 
   late final Map<String, String> _defaultMediators = Map<String, String>.from(
@@ -103,6 +144,14 @@ class Environment {
         as Map<String, dynamic>,
   );
   Map<String, String> get defaultMediators => _defaultMediators;
+
+  List<ChannelTransport> get enabledIndividualChatTransports =>
+      _parseEnabledIndividualChatTransports(
+        const String.fromEnvironment(
+          'ENABLED_INDIVIDUAL_CHAT_TRANSPORTS',
+          defaultValue: '["didcomm"]',
+        ),
+      );
 
   /// The type to use for direct interactive OOB flows, sourced from the
   /// `DIRECT_INTERACTIVE_OOB_TYPE` compile-time environment variable. If the
@@ -119,3 +168,30 @@ class Environment {
 Provider<Environment> environmentProvider = Provider<Environment>((ref) {
   return Environment.instance;
 }, name: 'environmentProvider');
+
+List<ChannelTransport> _parseEnabledIndividualChatTransports(String raw) {
+  const fallback = [ChannelTransport.didcomm];
+  final decoded = raw.isEmpty ? null : _tryJsonDecode(raw);
+  if (decoded is! List) return fallback;
+
+  final transports = decoded
+      .whereType<String>()
+      .map(
+        (token) => ChannelTransport.values.firstWhereOrNull(
+          (t) => t.name.toLowerCase() == token.toLowerCase(),
+        ),
+      )
+      .nonNulls
+      .toSet()
+      .toList();
+
+  return transports.isEmpty ? fallback : transports;
+}
+
+Object? _tryJsonDecode(String raw) {
+  try {
+    return jsonDecode(raw);
+  } on FormatException {
+    return null;
+  }
+}

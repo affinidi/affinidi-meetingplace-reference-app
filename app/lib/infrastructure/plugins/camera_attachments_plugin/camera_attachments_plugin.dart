@@ -79,7 +79,7 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
   /// full-screen [ImageViewScreen].
   @override
   Widget renderAttachment({
-    required Attachment attachment,
+    required ChatAttachment attachment,
     required bool isFromMe,
     Color? chatItemColor,
   }) => _CameraAttachmentWidget(
@@ -93,7 +93,7 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
   /// each attachment using [_CameraAttachmentWidget].
   @override
   Widget renderAttachments({
-    required List<Attachment> attachments,
+    required List<ChatAttachment> attachments,
     required bool isFromMe,
     Color? chatItemColor,
   }) => _ListCameraAttachmentsWidget(
@@ -103,7 +103,7 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
 
   /// Returns `true` if the attachment format matches this plugin.
   @override
-  bool supportsFormat(Attachment attachment) {
+  bool supportsFormat(ChatAttachment attachment) {
     return attachment.format == _pluginName;
   }
 
@@ -128,7 +128,7 @@ class _ListCameraAttachmentsWidget extends StatelessWidget {
     required this._cacheManager,
   });
 
-  final List<Attachment> _attachments;
+  final List<ChatAttachment> _attachments;
   final BaseCacheManager _cacheManager;
   @override
   Widget build(BuildContext context) {
@@ -159,7 +159,7 @@ class _CameraAttachmentWidget extends StatelessWidget {
     required this._cacheManager,
   });
 
-  final Attachment _attachment;
+  final ChatAttachment _attachment;
   final BaseCacheManager _cacheManager;
 
   @override

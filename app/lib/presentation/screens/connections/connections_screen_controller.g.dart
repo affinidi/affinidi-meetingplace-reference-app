@@ -10,13 +10,13 @@ part of 'connections_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(ConnectionsScreenController)
-final connectionsScreenControllerProvider =
+const connectionsScreenControllerProvider =
     ConnectionsScreenControllerProvider._();
 
 final class ConnectionsScreenControllerProvider
     extends
         $NotifierProvider<ConnectionsScreenController, ConnectionsScreenState> {
-  ConnectionsScreenControllerProvider._()
+  const ConnectionsScreenControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -52,6 +52,7 @@ abstract class _$ConnectionsScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref =
         this.ref as $Ref<ConnectionsScreenState, ConnectionsScreenState>;
     final element =
@@ -62,6 +63,6 @@ abstract class _$ConnectionsScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

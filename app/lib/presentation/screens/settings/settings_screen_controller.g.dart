@@ -10,11 +10,11 @@ part of 'settings_screen_controller.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(SettingsScreenController)
-final settingsScreenControllerProvider = SettingsScreenControllerProvider._();
+const settingsScreenControllerProvider = SettingsScreenControllerProvider._();
 
 final class SettingsScreenControllerProvider
     extends $NotifierProvider<SettingsScreenController, SettingsScreenState> {
-  SettingsScreenControllerProvider._()
+  const SettingsScreenControllerProvider._()
     : super(
         from: null,
         argument: null,
@@ -50,6 +50,7 @@ abstract class _$SettingsScreenController
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<SettingsScreenState, SettingsScreenState>;
     final element =
         ref.element
@@ -59,6 +60,6 @@ abstract class _$SettingsScreenController
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }

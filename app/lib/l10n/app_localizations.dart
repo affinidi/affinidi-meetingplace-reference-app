@@ -148,6 +148,18 @@ abstract class AppLocalizations {
   /// **'Group chat'**
   String get createGroupChatOffer;
 
+  /// No description provided for @chatTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat transport'**
+  String get chatTransport;
+
+  /// No description provided for @transportLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{transport, select, didcomm{DIDComm} matrix{Matrix} other{{transport}}}'**
+  String transportLabel(String transport);
+
   /// No description provided for @groupOfferHelperText.
   ///
   /// In en, this message translates to:
@@ -577,7 +589,7 @@ abstract class AppLocalizations {
   /// No description provided for @error.
   ///
   /// In en, this message translates to:
-  /// **'{errorCode, select, connection_offer_owned_by_claiming_party{You cannot accept this invitation because you are the inviter!} connection_offer_already_claimed_by_claiming_party{You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress} missingMnemonic{Please enter an invitation passphrase to search} connection_offer_not_found_error{The details you provided did not match any active invitations.} discovery_register_offer_group_generic{Failed to publish invitation.} missingDeviceToken{Unable to find device notification token} offerOwnedByClaimingParty{You cannot claim this invitation because you are the owner} offerAlreadyClaimedByParty{You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress} offerNotFound{The details you provided did not match any active invitations.} mediatorAlreadyExists{Message server with the same DID already exists.} mediator_get_did_error{No message server found at the provided URL} unableToFindMediator{No message server found at the provided URL} oobFlowTimedOut{Unable to establish a connection with other party, QR code was likely already used} connection_offer_expired{This invitation has expired} connection_offer_limit_exceeded{This invitation has reached its maximum number of uses} register_offer_mnemonic_in_use{This phrase is already in use, please choose another one} invalidQrCode{QR-Code is not valid} oob_invalid_data{QR-Code data is not valid} oob_not_found{QR-Code data does not match any active invitation} oob_invalid_type{QR-Code data not supported} network_error{Could not connect. Check your internet connection and try again.} other{{errorCode}}}'**
+  /// **'{errorCode, select, connection_offer_owned_by_claiming_party{You cannot accept this invitation because you are the inviter!} connection_offer_already_claimed_by_claiming_party{You cannot accept this invitation because you already requested to connect and have an outstanding claim in progress} missingMnemonic{Please enter an invitation passphrase to search} connection_offer_not_found_error{The details you provided did not match any active invitations.} discovery_register_offer_group_generic{Failed to publish invitation.} missingDeviceToken{Unable to find device notification token} offerOwnedByClaimingParty{You cannot claim this invitation because you are the owner} offerAlreadyClaimedByParty{You cannot claim this offer because you already accepted the invitation and have an outstanding request in progress} offerNotFound{The details you provided did not match any active invitations.} mediatorAlreadyExists{Message server with the same DID already exists.} mediator_get_did_error{No message server found at the provided URL} unableToFindMediator{No message server found at the provided URL} oobFlowTimedOut{Unable to establish a connection with other party, QR code was likely already used} connection_offer_expired{This invitation has expired} connection_offer_limit_exceeded{This invitation has reached its maximum number of uses} register_offer_mnemonic_in_use{This phrase is already in use, please choose another one} invalidQrCode{QR-Code is not valid} oob_invalid_data{QR-Code data is not valid} oob_not_found{QR-Code data does not match any active invitation} oob_invalid_type{QR-Code data not supported} network_error{Could not connect. Check your internet connection and try again.} deleteContactFailed{Failed to delete contact.} other{{errorCode}}}'**
   String error(String errorCode);
 
   /// No description provided for @offerCreated.
@@ -1312,6 +1324,72 @@ abstract class AppLocalizations {
   /// **'Message copied to clipboard'**
   String get messageCopiedClipboard;
 
+  /// No description provided for @chatMessageActionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for everyone'**
+  String get chatMessageActionDelete;
+
+  /// No description provided for @chatMessageActionDeleteLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for me'**
+  String get chatMessageActionDeleteLocal;
+
+  /// No description provided for @chatMessageActionCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy message'**
+  String get chatMessageActionCopy;
+
+  /// No description provided for @chatMessageActionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit message'**
+  String get chatMessageActionEdit;
+
+  /// No description provided for @chatMessageEditedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'edited'**
+  String get chatMessageEditedLabel;
+
+  /// No description provided for @chatMessageEditFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not edit message'**
+  String get chatMessageEditFailed;
+
+  /// No description provided for @chatMessageEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Message text'**
+  String get chatMessageEditHint;
+
+  /// No description provided for @chatMessageEditSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get chatMessageEditSave;
+
+  /// No description provided for @chatMessageDeletedTombstone.
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted'**
+  String get chatMessageDeletedTombstone;
+
+  /// No description provided for @chatMessageDeletedLocallyTombstone.
+  ///
+  /// In en, this message translates to:
+  /// **'You deleted this message'**
+  String get chatMessageDeletedLocallyTombstone;
+
+  /// No description provided for @chatMessageDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete message'**
+  String get chatMessageDeleteFailed;
+
   /// No description provided for @chatItemStatus.
   ///
   /// In en, this message translates to:
@@ -2020,6 +2098,12 @@ abstract class AppLocalizations {
   /// **'{memberName} has left the group'**
   String leavingGroup(String memberName);
 
+  /// No description provided for @memberRemovedFromGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'{memberName} has been removed'**
+  String memberRemovedFromGroup(String memberName);
+
   /// No description provided for @concierge.
   ///
   /// In en, this message translates to:
@@ -2290,6 +2374,18 @@ abstract class AppLocalizations {
   /// **'Chat with {name}'**
   String rCardChatWith(String name);
 
+  /// No description provided for @removeMemberDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member'**
+  String get removeMemberDialogTitle;
+
+  /// No description provided for @removeMemberDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from this group? They will no longer receive messages.'**
+  String removeMemberDialogBody(String name);
+
   /// No description provided for @rCardFieldIssuerDid.
   ///
   /// In en, this message translates to:
@@ -2374,6 +2470,12 @@ abstract class AppLocalizations {
   /// **'R-Card update has been shared.'**
   String get rCardFooterUpdateShared;
 
+  /// No description provided for @profileDetailsUpdateSharedGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile details update has been shared with the group.'**
+  String get profileDetailsUpdateSharedGroup;
+
   /// No description provided for @rCardFooterUpdateSaved.
   ///
   /// In en, this message translates to:
@@ -2421,6 +2523,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Verifiable Relationship Credential'**
   String get verifiableRelationshipCredential;
+
+  /// No description provided for @vrcAbbreviation.
+  ///
+  /// In en, this message translates to:
+  /// **'VRC'**
+  String get vrcAbbreviation;
 
   /// No description provided for @vrcDetailsTitle.
   ///
@@ -2581,13 +2689,19 @@ abstract class AppLocalizations {
   /// No description provided for @humanZkp.
   ///
   /// In en, this message translates to:
-  /// **'Human ZKP'**
+  /// **'Human Zero Knowledge Proof'**
   String get humanZkp;
+
+  /// No description provided for @humanZkpAbbreviated.
+  ///
+  /// In en, this message translates to:
+  /// **'Human ZKP'**
+  String get humanZkpAbbreviated;
 
   /// No description provided for @humanZeroKnowledgeProof.
   ///
   /// In en, this message translates to:
-  /// **'Human Zero-Knowledge Proof'**
+  /// **'Human Zero Knowledge Proof'**
   String get humanZeroKnowledgeProof;
 
   /// No description provided for @livenessCredential.
@@ -2617,7 +2731,7 @@ abstract class AppLocalizations {
   /// No description provided for @generatingZeroKnowledgeProof.
   ///
   /// In en, this message translates to:
-  /// **'Generating Zero-Knowledge Proof...'**
+  /// **'Generating Human Zero Knowledge Proof...'**
   String get generatingZeroKnowledgeProof;
 
   /// No description provided for @cancel.
@@ -2659,7 +2773,7 @@ abstract class AppLocalizations {
   /// No description provided for @noLivenessCredentialFound.
   ///
   /// In en, this message translates to:
-  /// **'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.'**
+  /// **'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Human Zero Knowledge Proof (ZKP) is derived.'**
   String get noLivenessCredentialFound;
 
   /// No description provided for @livenessCheckDemoModeNote.
@@ -2689,7 +2803,7 @@ abstract class AppLocalizations {
   /// No description provided for @mockLivenessCredentialNext.
   ///
   /// In en, this message translates to:
-  /// **'You can now continue to generate a Human Zero-Knowledge proof.'**
+  /// **'You can now continue to generate a Human Zero Knowledge Proof.'**
   String get mockLivenessCredentialNext;
 
   /// No description provided for @livenessEvidenceThresholdNotMet.
@@ -2773,13 +2887,13 @@ abstract class AppLocalizations {
   /// No description provided for @zkpNoticePaused.
   ///
   /// In en, this message translates to:
-  /// **'You paused a Zero‑Knowledge Proof request.'**
+  /// **'You paused a Human Zero Knowledge Proof request.'**
   String get zkpNoticePaused;
 
   /// No description provided for @zkpNoticeDeclined.
   ///
   /// In en, this message translates to:
-  /// **'{contactName} has declined the Human ZKP request. Tap the \"+\" icon to restart it.'**
+  /// **'{contactName} has declined the Human Zero Knowledge Proof request. Tap the \"+\" icon to restart it.'**
   String zkpNoticeDeclined(String contactName);
 
   /// No description provided for @zkpNoticeShared.
@@ -2797,14 +2911,110 @@ abstract class AppLocalizations {
   /// No description provided for @zkpNoticeRequest.
   ///
   /// In en, this message translates to:
-  /// **'{contactName} has requested a Zero‑Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.'**
+  /// **'{contactName} has requested a Human Zero Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.'**
   String zkpNoticeRequest(String contactName);
+
+  /// No description provided for @zkpNoticeRequestInitiated.
+  ///
+  /// In en, this message translates to:
+  /// **'You have initiated a Human Zero Knowledge Proof request.'**
+  String get zkpNoticeRequestInitiated;
 
   /// No description provided for @zkpProofAlreadyShared.
   ///
   /// In en, this message translates to:
   /// **'ZKP Proof already shared'**
   String get zkpProofAlreadyShared;
+
+  /// No description provided for @removeMemberConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get removeMemberConfirm;
+
+  /// No description provided for @removeMemberNotSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing members isn\'t supported yet.'**
+  String get removeMemberNotSupported;
+
+  /// No description provided for @removeMemberSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Member removed from group.'**
+  String get removeMemberSuccess;
+
+  /// Label for the video attachment plugin
+  ///
+  /// In en, this message translates to:
+  /// **'Video'**
+  String get generalVideo;
+
+  /// Label for the document attachment plugin
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get generalDocument;
+
+  /// Hint shown on document attachment before download
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to download'**
+  String get documentTapToDownload;
+
+  /// Error shown when video cannot be played
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to play video'**
+  String get videoLoadingError;
+
+  /// Action label shown over a failed media attachment download, prompting the user to retry
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to retry'**
+  String get mediaTapToRetry;
+
+  /// Status label shown on a document attachment when its download fails, prompting the user to retry
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed. Tap to retry'**
+  String get mediaDownloadFailedTapToRetry;
+
+  /// Snackbar shown when a picked attachment exceeds the byte-size cap
+  ///
+  /// In en, this message translates to:
+  /// **'Attachment is too large. Maximum size is {maxMb} MB.'**
+  String attachmentTooLarge(int maxMb);
+
+  /// Snackbar shown when voice-message recording cannot start because microphone permission is denied
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission is required to record voice messages.'**
+  String get voiceMessagePermissionDenied;
+
+  /// Snackbar shown when voice-message recording fails to start
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to start voice recording.'**
+  String get voiceMessageRecordingFailed;
+
+  /// Snackbar shown when a recorded voice message could not be sent
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to send voice message.'**
+  String get voiceMessageSendFailed;
+
+  /// No description provided for @generalEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get generalEmail;
+
+  /// No description provided for @vrcResponderIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has selected the following persona to verify the relationship:'**
+  String vrcResponderIntro(Object name);
 }
 
 class _AppLocalizationsDelegate

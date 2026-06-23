@@ -15,17 +15,20 @@ class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
 
   static const _logKey = 'ZKPATTCHDLR';
 
-  final void Function(StreamData data, String channelDid) _onZkpAttachment;
+  final void Function(ChatItem chatItem, String channelDid) _onZkpAttachment;
   final AppLogger _logger;
 
   @override
-  bool canHandle(String protocolType) =>
-      protocolType == ChatProtocol.chatMessage.value;
+  bool canHandle(ChatEvent event) => event is ChatMessageEvent;
 
   @override
   Future<void> handle(StreamData data, String channelDid) async {
-    final attachments = data.plainTextMessage?.attachments;
-    if (attachments == null || attachments.isEmpty) return;
+    if (data.event is! ChatMessageEvent) return;
+    if (data.chatItem is! Message) return;
+    final chatItem = data.chatItem as Message;
+
+    final attachments = chatItem.attachments.map((a) => a.toCoreAttachment());
+    if (attachments.isEmpty) return;
 
     final hasRequest =
         LivenessZkpAttachmentParser.tryParseRequestIn(attachments) != null;
@@ -39,6 +42,6 @@ class ZkpAttachmentProtocolHandler implements ChatProtocolHandler {
       'Received chat message with liveness ZKP attachment',
       name: _logKey,
     );
-    _onZkpAttachment(data, channelDid);
+    _onZkpAttachment(chatItem, channelDid);
   }
 }

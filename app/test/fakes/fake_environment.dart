@@ -1,3 +1,4 @@
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/firebase_environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/image_config.dart';
@@ -7,9 +8,14 @@ import 'fake_mediators.dart';
 class FakeEnvironment implements Environment {
   FakeEnvironment({
     this.controlPlaneDid = 'did:test:control-plane',
+    this.matrixHomeserver = 'https://test-matrix.org',
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
     this._defaultMediators = const {},
+    this.enabledIndividualChatTransports = const [
+      ChannelTransport.didcomm,
+      ChannelTransport.matrix,
+    ],
   }) : defaultMediatorDid =
            defaultMediatorDid ?? FakeMediators.defaultMediator.mediatorDid;
 
@@ -24,7 +30,13 @@ class FakeEnvironment implements Environment {
   final String defaultMediatorDid;
 
   @override
+  final String matrixHomeserver;
+
+  @override
   final int maxOfferUsages;
+
+  @override
+  final List<ChannelTransport> enabledIndividualChatTransports;
 
   @override
   int get maxLogMemoryEntries => 1000;
@@ -83,7 +95,19 @@ class FakeEnvironment implements Environment {
   int get chatPresenceIntervalInSeconds => 60;
 
   @override
+  int get deleteMessageWindowInSeconds => 120;
+
+  @override
   int get extraDelayAtLaunchInMilliseconds => 0;
+
+  @override
+  int get matrixMediaMaxCacheBytes => 30 * 1024 * 1024;
+
+  @override
+  int get chatAttachmentMaxBytes => 25 * 1024 * 1024;
+
+  @override
+  Duration get matrixMediaCacheTtl => const Duration(days: 30);
 
   @override
   String? get directInteractiveOobType => null;

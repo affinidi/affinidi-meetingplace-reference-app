@@ -20,6 +20,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/configuration/app_info.
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/firebase_messaging/push_notification_messaging.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/media/image_picker/image_picker_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_info_provider.dart';
@@ -45,8 +46,11 @@ import '../fakes/fake_app_badge_service.dart';
 import '../fakes/fake_cache_manager.dart';
 import '../fakes/fake_camera_controller.dart';
 import '../fakes/fake_channels.dart';
+import '../fakes/fake_chat_sdk.dart';
 import '../fakes/fake_connectivity.dart';
+import '../fakes/fake_contacts.dart';
 import '../fakes/fake_environment.dart';
+import '../fakes/fake_identities.dart';
 import '../fakes/fake_local_authentication.dart';
 import '../fakes/fake_meeting_place_sdk.dart';
 import '../fakes/fake_permission_service.dart';
@@ -79,6 +83,9 @@ Future<void> startApp(
   RCardsService Function()? rCardsServiceFactory,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
+  addTearDown(() async {
+    await _closeChat(tester);
+  });
   AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
   SharedPreferences.setMockInitialValues({
     'alreadyOnboarded': alreadyOnboarded,
@@ -139,6 +146,7 @@ Future<void> startApp(
               RCardAttachmentsPlugin(
                 cacheManager: ref.read(cacheManagerProvider),
               ),
+              DocumentAttachmentsPlugin(),
               VrcAttachmentsPlugin(),
             ],
       ),
@@ -266,7 +274,7 @@ Future<void> navigateToLocation(
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
   MeetingPlaceChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
-  List<CameraDescription>? mockCameras,
+  List<CameraDescription>? cameras,
   PermissionStatus? cameraPermissionStatus = PermissionStatus.granted,
   SecureStorage? secureStorage,
   ShareService? shareService,
@@ -284,7 +292,7 @@ Future<void> navigateToLocation(
     meetingPlaceCoreSDK: meetingPlaceCoreSDK,
     meetingPlaceChatSDK: meetingPlaceChatSDK,
     imagePicker: imagePicker,
-    mockCameras: mockCameras,
+    mockCameras: cameras,
     cameraPermissionStatus: cameraPermissionStatus,
     secureStorage: secureStorage,
     mediators: mediators,
@@ -305,6 +313,63 @@ Future<void> navigateToLocation(
   );
   await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .handlePlatformMessage('flutter/navigation', message, (_) {});
+}
+
+Future<void> navigateToChat(
+  WidgetTester tester, {
+  String contactId = 'individual-contact-id',
+  FakeChatSdk? chatSdk,
+  List<Identity>? identities,
+  List<Contact>? contacts,
+  Connectivity? connectivity,
+  FakeSecureStorage? secureStorage,
+  ImagePicker? imagePicker,
+  List<CameraDescription>? cameras,
+  PermissionStatus? cameraPermissionStatus,
+  bool isAuthenticated = true,
+  bool alreadyOnboarded = true,
+  List<AttachmentPlugin>? attachmentPlugins,
+  RCardsService Function()? rCardsServiceFactory,
+  List<RCard> rCards = const [],
+  MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
+}) async {
+  await navigateToLocation(
+    tester,
+    '/contacts/$contactId/chat',
+    identities: identities ?? [FakeIdentities.primaryIdentity],
+    contacts: contacts ?? [FakeContacts.individualContact],
+    meetingPlaceChatSDK: chatSdk ?? FakeChatSdk(),
+    meetingPlaceCoreSDK: meetingPlaceCoreSDK,
+    secureStorage: secureStorage,
+    connectivity:
+        connectivity ??
+        FakeConnectivity(
+          initialConnectivityToReturn: [ConnectivityResult.wifi],
+        ),
+    imagePicker: imagePicker,
+    cameras: cameras,
+    cameraPermissionStatus: cameraPermissionStatus,
+    isAuthenticated: isAuthenticated,
+    alreadyOnboarded: alreadyOnboarded,
+    attachmentPlugins: attachmentPlugins,
+    rCardsServiceFactory: rCardsServiceFactory,
+    rCards: rCards,
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _closeChat(WidgetTester tester) async {
+  final binding = tester.binding;
+
+  try {
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pumpAndSettle();
+  } catch (_) {
+    // Ignore teardown-time settle failures when the tree is already gone.
+  }
+
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.pumpAndSettle();
 }
 
 Future<AppLocalizations> getL10n({

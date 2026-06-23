@@ -18,7 +18,7 @@ part of 'oob_service.dart';
 /// - Expose the last established channel and the current OOB offer in state.
 
 @ProviderFor(OOBService)
-final oOBServiceProvider = OOBServiceProvider._();
+const oOBServiceProvider = OOBServiceProvider._();
 
 /// Service responsible for creating and accepting out-of-band (OOB) flows.
 ///
@@ -38,7 +38,7 @@ final class OOBServiceProvider
   /// - Accept an incoming OOB offer URL and complete the connection flow.
   /// - Observe control plane events to finalize connections and update state.
   /// - Expose the last established channel and the current OOB offer in state.
-  OOBServiceProvider._()
+  const OOBServiceProvider._()
     : super(
         from: null,
         argument: null,
@@ -81,6 +81,7 @@ abstract class _$OOBService extends $Notifier<OOBServiceState> {
   @$mustCallSuper
   @override
   void runBuild() {
+    final created = build();
     final ref = this.ref as $Ref<OOBServiceState, OOBServiceState>;
     final element =
         ref.element
@@ -90,6 +91,6 @@ abstract class _$OOBService extends $Notifier<OOBServiceState> {
               Object?,
               Object?
             >;
-    element.handleCreate(ref, build);
+    element.handleValue(ref, created);
   }
 }
