@@ -147,15 +147,6 @@ class _ChatMediaOptions extends ConsumerWidget {
             state.capabilities?.supports(chat.ChatFeature.humanZkp) ?? false,
       ),
     );
-    final supportsDocumentAttachments = ref.watch(
-      provider.select(
-        (state) =>
-            state.capabilities?.supports(
-              chat.ChatFeature.documentAttachments,
-            ) ??
-            false,
-      ),
-    );
     final shouldEnableRCardAttachment = !isGroupChat;
     final contact = ref.watch(provider.select((state) => state.contact));
     final isOobChat = contact?.origin == ContactOrigin.directInteractive;
@@ -231,7 +222,7 @@ class _ChatMediaOptions extends ConsumerWidget {
       if (isZkpEnabled && supportsHumanZkp)
         _ChatMediaOptionItem(
           icon: Icons.how_to_reg,
-          label: context.l10n.humanZkpAbbreviated,
+          label: context.l10n.humanZkp,
           subtitle: hasVerifiedProof
               ? context.l10n.zkpProofAlreadyShared
               : null,

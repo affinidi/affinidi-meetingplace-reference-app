@@ -1,0 +1,701 @@
+import 'dart:async';
+
+import 'package:meeting_place_chat/meeting_place_chat.dart'
+    show
+        AudioVideoCallPlugin,
+        AudioVideoCallSession,
+        AudioVideoCallStatus,
+        CallMediaType,
+        CallRole,
+        CallStatus;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../../application/services/chat_service/chat_session_service.dart';
+import '../../../../application/services/contacts_service/contacts_service.dart';
+import '../../../../domain/models/contact_card/contact_card.dart';
+import '../../../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../../../infrastructure/providers/active_group_call_provider.dart';
+import '../../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../../infrastructure/providers/audio_video_call_plugin_provider.dart';
+import '../../../../infrastructure/providers/incoming_call_state_provider.dart';
+import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../../infrastructure/providers/pending_call_session_provider.dart';
+import '../../../../infrastructure/services/permission_service/permission_service.dart';
+import '../../../widgets/banners/active_call/active_call_controller.dart';
+import '../../../widgets/banners/active_call/active_call_state.dart';
+
+import 'audio_video_call_screen_state.dart';
+import 'audio_video_call_state_update.dart';
+import 'handlers/call_chat_item_handler.dart';
+import 'handlers/call_session_handler.dart';
+import 'rules/call_chat_item_rules.dart';
+import 'rules/call_ui_rules.dart';
+
+part 'audio_video_call_screen_controller.g.dart';
+
+const _inProgressStatuses = {
+  AudioVideoCallStatus.outgoingRinging,
+  AudioVideoCallStatus.connecting,
+  AudioVideoCallStatus.waitingForKeys,
+  AudioVideoCallStatus.active,
+};
+
+@riverpod
+class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
+  static const _logKey = 'AudioVideoCallScreenController';
+
+  late final _logger = ref.read(appLoggerProvider);
+
+  AudioVideoCallPlugin? _plugin;
+  AudioVideoCallSession? _session;
+  CallSessionHandler? _sessionHandler;
+  bool _isDisposed = false;
+  bool _isMinimizing = false;
+  AudioVideoCallStatus _lastStatus = AudioVideoCallStatus.idle;
+  bool _isGroupContact = false;
+
+  // The device's call role, mirrored from the session's authoritative ownRole.
+  // True once the SDK reports this device opened the call (CallRole.caller).
+  // Drives end-status resolution; the chat item itself is gated by the emitter.
+  bool _isCaller = false;
+
+  late final CallChatItemHandler _chatItemHandler;
+
+  @override
+  set state(AudioVideoCallScreenState value) {
+    _lastStatus = value.status;
+    super.state = value;
+    _syncActiveCallBanner(value);
+  }
+
+  @override
+  AudioVideoCallScreenState build(String contactId) {
+    final contact = ref.read(contactsServiceProvider).getContactById(contactId);
+    _isGroupContact = contact?.isGroup ?? false;
+    final incomingEvent = ref.read(incomingCallStateProvider);
+    final expectedOtherPartyDid = contact?.channelDid ?? contactId;
+    final isAcceptedIncomingForThisScreen =
+        incomingEvent != null &&
+        incomingEvent.otherPartyChannelDid == expectedOtherPartyDid;
+
+    if (_isGroupContact && contact != null) {
+      unawaited(_loadGroupMemberNames(contact.offerLink));
+    }
+
+    _chatItemHandler = CallChatItemHandler(
+      resolveItemId: ({required bool isCaller}) async {
+        final bannerItemId = ref
+            .read(activeCallControllerProvider.notifier)
+            .callChatItemId;
+        if (bannerItemId != null) return bannerItemId;
+        if (_isDisposed) return null;
+        final channelDid = _channelDid;
+        if (channelDid == null) return null;
+        return ref
+            .read(chatSessionServiceProvider(channelDid).notifier)
+            .resolveIncomingCallChatItemId();
+      },
+      updateItem: (messageId, {required status, duration}) async {
+        final channelDid = _channelDid;
+        if (channelDid == null) return;
+        await ref
+            .read(chatSessionServiceProvider(channelDid).notifier)
+            .updateCallChatItem(messageId, status: status, duration: duration);
+      },
+      logger: _logger,
+    );
+
+    final rawPendingSession = ref.read(pendingCallSessionProvider);
+    final banner = ref.read(activeCallControllerProvider);
+    final hasActiveBanner =
+        banner != null && !isTerminalCallStatus(banner.status);
+    final pendingSession = hasActiveBanner ? rawPendingSession : null;
+    final restoredBanner = pendingSession != null ? banner : null;
+    if (rawPendingSession != null) {
+      Future.microtask(
+        () => ref.read(pendingCallSessionProvider.notifier).state = null,
+      );
+    }
+    if (pendingSession != null) {
+      _session = pendingSession;
+      _attachSession(
+        pendingSession,
+        fromBuild: true,
+        skipBannerRegistration: true,
+      );
+    }
+
+    // Keep callDurationSeconds in sync with the banner timer, which persists
+    // through minimize/maximize.
+    ref.listen(activeCallControllerProvider, (_, bannerState) {
+      if (!_isDisposed && bannerState != null) {
+        state = state.copyWith(
+          callDurationSeconds: bannerState.callDurationSeconds,
+        );
+      }
+    });
+
+    ref.listen(audioVideoCallPluginProvider, (prev, next) {
+      _plugin = next.value;
+    }, fireImmediately: true);
+
+    final activeCallController = ref.read(
+      activeCallControllerProvider.notifier,
+    );
+
+    // Read the logger eagerly here (outside the dispose lifecycle) and close
+    // over the local inside onDispose. Riverpod forbids ref.read while a
+    // provider is being disposed, which is when the onDispose callback runs.
+    final logger = _logger;
+
+    ref.onDispose(() {
+      _isDisposed = true;
+      _sessionHandler?.dispose();
+      if (!_isMinimizing) {
+        logger.info(
+          'onDispose: Screen controller releasing session from banner',
+          name: _logKey,
+        );
+        Future.microtask(() {
+          if (!isTerminalCallStatus(_lastStatus) &&
+              _lastStatus != AudioVideoCallStatus.idle) {
+            activeCallController.hangUpFromScreen(
+              role: _isCaller ? CallRole.caller : CallRole.recipient,
+            );
+          } else {
+            activeCallController.clearSession();
+          }
+        });
+      } else {
+        logger.info(
+          'onDispose: minimized; banner retains session',
+          name: _logKey,
+        );
+      }
+    });
+
+    return AudioVideoCallScreenState(
+      isGroupContact: _isGroupContact,
+      peerName: contact?.displayName ?? contact?.card.displayName ?? '',
+      hasHadPeer: restoredBanner != null
+          ? (restoredBanner.callDurationSeconds > 0)
+          : isAcceptedIncomingForThisScreen || pendingSession != null,
+      status: restoredBanner?.status ?? AudioVideoCallStatus.idle,
+      callDurationSeconds: restoredBanner?.callDurationSeconds ?? 0,
+      isMicEnabled: restoredBanner?.isMicEnabled ?? true,
+      isAudioOnly: restoredBanner?.isAudioOnly ?? false,
+      isCameraEnabled: restoredBanner == null || !restoredBanner.isAudioOnly,
+      session: pendingSession,
+    );
+  }
+
+  /// Starts the call on screen entry: restores any minimized call still in
+  /// progress, then places an outgoing call if none is active.
+  Future<void> startCall({required bool isAudioOnly}) async {
+    _isMinimizing = false;
+    ref.read(activeCallControllerProvider.notifier).restore();
+    state = state.copyWith(isAudioOnly: isAudioOnly);
+    await checkInitialPermissions();
+    await joinCall();
+  }
+
+  /// Discards a finished call (missed or declined) and places a fresh
+  /// outgoing call. Used by the "Call again" action on the end-call screen.
+  Future<void> restartCall({required bool isAudioOnly}) async {
+    _isMinimizing = false;
+    _session = null;
+    _sessionHandler?.dispose();
+    _sessionHandler = null;
+    state = state.copyWith(
+      status: AudioVideoCallStatus.idle,
+      hasHadPeer: false,
+      participants: [],
+      session: null,
+      isAudioOnly: isAudioOnly,
+    );
+    await checkInitialPermissions();
+    await joinCall();
+  }
+
+  /// Toggles top-bar and controls-bar visibility (tap-anywhere behaviour).
+  void toggleControlsBar() {
+    state = state.copyWith(showControlsBar: !state.showControlsBar);
+  }
+
+  /// Directly sets controls-bar visibility (used by scroll-driven hiding).
+  void setControlsBarVisible({required bool visible}) {
+    if (state.showControlsBar == visible) return;
+    state = state.copyWith(showControlsBar: visible);
+  }
+
+  /// Switches between front and rear camera.
+  Future<void> switchCamera() async {
+    _logger.info('switchCamera', name: _logKey);
+    await _session?.switchCamera();
+  }
+
+  /// Sets the participant displayed full-screen in focused layout.
+  /// Pass null to return to the grid layout.
+  void setFocusedParticipant(int? index) {
+    state = state.copyWith(focusedParticipantIndex: index);
+  }
+
+  /// Toggles the floating mini-grid between collapsed and expanded.
+  void toggleMiniGridExpanded() {
+    state = state.copyWith(miniGridExpanded: !state.miniGridExpanded);
+  }
+
+  /// Transitions the call to banner control and marks the screen as minimizing.
+  /// The screen controller will remain alive but won't clean up the session
+  /// when disposed, leaving it under banner ownership.
+  void minimize() {
+    _logger.info('minimize: Transitioning to banner control', name: _logKey);
+    _isMinimizing = true;
+    _clearIncomingCallState();
+    ref.read(activeCallControllerProvider.notifier).minimize();
+  }
+
+  /// Checks initial microphone and camera permission status and updates state.
+  Future<void> checkInitialPermissions() async {
+    final ps = ref.read(permissionServiceProvider);
+    final camStatus = await ps.getCameraPermissionStatus();
+    final micStatus = await ps.getMicrophonePermissionStatus();
+    if (_isDisposed) return;
+    state = state.copyWith(
+      cameraPermissionError:
+          camStatus.isDenied || camStatus.isPermanentlyDenied,
+      micPermissionError: micStatus.isDenied || micStatus.isPermanentlyDenied,
+    );
+  }
+
+  /// Initiates a new outgoing call to the contact,
+  /// acquiring the plugin session.
+  Future<void> joinCall() async {
+    if (_isDisposed) return;
+    if (!_canStartNewCall()) return;
+
+    final plugin = _plugin;
+    if (plugin == null) {
+      _logger.warning('joinCall: Plugin not available', name: _logKey);
+      state = state.copyWith(status: AudioVideoCallStatus.error);
+      return;
+    }
+
+    final channelDid = _channelDid;
+    if (channelDid == null) {
+      _logger.warning('joinCall: Contact has no channelDid', name: _logKey);
+      state = state.copyWith(status: AudioVideoCallStatus.error);
+      return;
+    }
+
+    await _startPluginCall(plugin, channelDid);
+  }
+
+  /// Returns true if a new outgoing call can be placed.
+  ///
+  /// Returns false (with a log) if a call is already in progress or a
+  /// pre-accepted incoming session is waiting.
+  bool _canStartNewCall() {
+    if (_inProgressStatuses.contains(state.status)) {
+      _logger.warning('joinCall: Already in progress', name: _logKey);
+      return false;
+    }
+    if (_session != null) {
+      _logger.info('joinCall: Using pre-accepted session', name: _logKey);
+      return false;
+    }
+    return true;
+  }
+
+  /// Places the call via the plugin and attaches the resulting session.
+  Future<void> _startPluginCall(
+    AudioVideoCallPlugin plugin,
+    String channelDid,
+  ) async {
+    final speakerphoneEnabled = _isGroupContact;
+    state = state.copyWith(
+      status: AudioVideoCallStatus.connecting,
+      isSpeakerEnabled: speakerphoneEnabled,
+    );
+    try {
+      final session = await plugin.startCall(
+        otherPartyChannelDid: channelDid,
+        mediaType: state.isAudioOnly
+            ? CallMediaType.audio
+            : CallMediaType.video,
+      );
+      _session = session;
+      await session.setSpeakerphoneEnabled(speakerphoneEnabled);
+      _attachSession(session);
+    } catch (e, stackTrace) {
+      _logger.error(
+        'joinCall: StartCall failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      if (!_isDisposed) {
+        state = state.copyWith(status: AudioVideoCallStatus.error);
+      }
+    }
+  }
+
+  /// Cancels an outgoing call that has not yet been answered.
+  Future<void> cancelCall() async {
+    if (_isDisposed) return;
+    try {
+      await _session?.hangUp();
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Failed to cancel call cleanly',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    } finally {
+      if (!_isDisposed) {
+        _clearIncomingCallState();
+        state = state.copyWith(status: AudioVideoCallStatus.ended);
+        _chatItemHandler.endCallChatItem(
+          outcome: state.hasHadPeer
+              ? CallEndOutcome.hungUp
+              : CallEndOutcome.declined,
+          isCaller: _isCaller,
+          hasHadPeer: state.hasHadPeer,
+          callDuration: Duration(seconds: state.callDurationSeconds),
+          isDisposed: () => _isDisposed,
+        );
+      }
+    }
+  }
+
+  /// Hangs up the call, dispatching either a cancel
+  /// (if still ringing) or leave.
+  Future<void> hangUp() async {
+    if (_isDisposed) return;
+    if (state.status == AudioVideoCallStatus.outgoingRinging ||
+        state.status == AudioVideoCallStatus.connecting) {
+      await cancelCall();
+    } else {
+      await leaveCall();
+    }
+  }
+
+  /// Ends the active call and transitions to ended state.
+  Future<void> leaveCall() async {
+    if (_isDisposed) return;
+    try {
+      await _session?.hangUp();
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Failed to hang up call cleanly',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      if (!_isDisposed) {
+        state = state.copyWith(
+          actionFailure: CallActionFailureEvent(CallActionFailure.hangUp),
+        );
+      }
+    } finally {
+      if (!_isDisposed) {
+        _clearIncomingCallState();
+        state = state.copyWith(status: AudioVideoCallStatus.ended);
+      }
+    }
+  }
+
+  /// Toggles microphone on/off, requesting permission if needed.
+  Future<void> toggleMic() => _toggleDevice(
+    permission: () =>
+        ref.read(permissionServiceProvider).requestMicrophonePermission(),
+    isGranted: (s) => s.isGranted,
+    onDenied: () => state = state.copyWith(micPermissionError: true),
+    currentValue: state.isMicEnabled,
+    apply: (v) async => _session?.setMicrophoneEnabled(v),
+    onSuccess: (v) =>
+        state = state.copyWith(isMicEnabled: v, micPermissionError: false),
+    failureType: CallActionFailure.microphone,
+    failureLabel: 'Failed to toggle microphone',
+  );
+
+  /// Toggles camera on/off, requesting permission if needed.
+  Future<void> toggleCamera() => _toggleDevice(
+    permission: () =>
+        ref.read(permissionServiceProvider).requestCameraPermission(),
+    isGranted: (s) => s.isGranted,
+    onDenied: () => state = state.copyWith(cameraPermissionError: true),
+    currentValue: state.isCameraEnabled,
+    apply: (v) async => _session?.setCameraEnabled(v),
+    onSuccess: (v) => state = state.copyWith(
+      isCameraEnabled: v,
+      cameraPermissionError: false,
+    ),
+    failureType: CallActionFailure.camera,
+    failureLabel: 'Failed to toggle camera',
+  );
+
+  /// Toggles speakerphone on/off.
+  Future<void> toggleSpeaker() async {
+    if (_isDisposed) return;
+    final next = !state.isSpeakerEnabled;
+    try {
+      await _session?.setSpeakerphoneEnabled(next);
+      if (!_isDisposed) state = state.copyWith(isSpeakerEnabled: next);
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Failed to toggle speaker',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      if (!_isDisposed) {
+        state = state.copyWith(
+          actionFailure: CallActionFailureEvent(CallActionFailure.speaker),
+        );
+      }
+    }
+  }
+
+  /// Attaches a new session, setting up the handler
+  /// and optionally registering with the banner.
+  ///
+  /// [fromBuild] must be true when called from [build] — in that case the
+  /// session is written into the returned initial state instead of via [state]
+  /// (which is uninitialized during build).
+  ///
+  /// [skipBannerRegistration] skips the banner registration when the banner
+  /// already owns the session (e.g., when restoring from a minimized call).
+  void _attachSession(
+    AudioVideoCallSession session, {
+    bool fromBuild = false,
+    bool skipBannerRegistration = false,
+  }) {
+    _sessionHandler?.dispose();
+    if (!fromBuild) state = state.copyWith(session: session);
+    if (!skipBannerRegistration) {
+      _logger.info(
+        '_attachSession: registering session with banner',
+        name: _logKey,
+      );
+      ref
+          .read(activeCallControllerProvider.notifier)
+          .registerSession(
+            session,
+            channelDid: _channelDid ?? contactId,
+            isAudioOnly: state.isAudioOnly,
+            initialStatus: state.status,
+            peerName: state.peerName,
+            isMicEnabled: state.isMicEnabled,
+            isMinimized: _isMinimizing,
+          );
+    }
+    final handler = CallSessionHandler(
+      logger: _logger,
+      logKey: _logKey,
+      onUpdate: _applySessionUpdate,
+    )..attach(session);
+    _sessionHandler = handler;
+  }
+
+  /// Applies handler-transformed session events to the screen
+  /// state and syncs to banner.
+  void _applySessionUpdate(AudioVideoCallStateUpdate update) {
+    if (_isDisposed) {
+      _logger.info(
+        'applySessionUpdate: Skipping, controller disposed',
+        name: _logKey,
+      );
+      return;
+    }
+
+    final bannerItemId = ref
+        .read(activeCallControllerProvider.notifier)
+        .callChatItemId;
+    if (bannerItemId != null) {
+      _chatItemHandler.seedCallChatItemId(bannerItemId);
+    }
+
+    if (update.ownRole != null) {
+      _isCaller = update.ownRole == CallRole.caller;
+    }
+
+    final nextParticipants = update.participants ?? state.participants;
+    final anyHasVideo = nextParticipants.any((p) => p.hasVideo);
+
+    state = state.copyWith(
+      status: update.status ?? state.status,
+      participants: nextParticipants,
+      errorCode: update.errorCode,
+      isMicEnabled: update.isMicEnabled ?? state.isMicEnabled,
+      isCameraEnabled: update.isCameraEnabled ?? state.isCameraEnabled,
+      participantEvent: update.participantEvent,
+      hasHadPeer: state.hasHadPeer || update.hasHadPeer,
+      isAudioOnly: state.isAudioOnly && !anyHasVideo,
+    );
+
+    if (update.peerJustJoined) {
+      _clearIncomingCallState();
+      ref.read(activeCallControllerProvider.notifier).startTimer();
+      _chatItemHandler.updateCallChatItemStatus(
+        CallStatus.inProgress,
+        isDisposed: () => _isDisposed,
+      );
+    }
+
+    if (!_chatItemHandler.callChatItemEnded &&
+        update.status == AudioVideoCallStatus.outgoingRinging &&
+        !update.peerJustJoined) {
+      _chatItemHandler.updateCallChatItemStatus(
+        CallStatus.ringing,
+        isDisposed: () => _isDisposed,
+      );
+    }
+
+    if (isTerminalCallStatus(update.status ?? state.status)) {
+      _clearIncomingCallState();
+      ref.read(activeCallControllerProvider.notifier).stopTimer();
+      _chatItemHandler.endCallChatItem(
+        outcome:
+            (_lastStatus == AudioVideoCallStatus.declined ||
+                _lastStatus == AudioVideoCallStatus.missed ||
+                !state.hasHadPeer)
+            ? CallEndOutcome.declined
+            : CallEndOutcome.hungUp,
+        isCaller: _isCaller,
+        hasHadPeer: state.hasHadPeer,
+        callDuration: Duration(seconds: state.callDurationSeconds),
+        isDisposed: () => _isDisposed,
+      );
+    }
+
+    _syncActiveGroupCall(update.status ?? state.status);
+  }
+
+  String? get _channelDid {
+    final contact = ref.read(contactsServiceProvider).getContactById(contactId);
+    return contact?.channelDid ?? contactId;
+  }
+
+  /// Clears the kept-alive incoming-call state once the call leaves the
+  /// joiner-detection window (established, ended, cancelled, or minimized).
+  /// Holding it until this point lets the joiner be detected even if this
+  /// autoDispose controller rebuilds during navigation, while still hiding the
+  /// dashboard incoming banner once the call is underway or over.
+  void _clearIncomingCallState() {
+    if (_isDisposed) return;
+    ref.read(incomingCallStateProvider.notifier).clear();
+  }
+
+  /// Generic device toggle helper that checks permissions,
+  /// applies the toggle, and handles errors.
+  Future<void> _toggleDevice({
+    required Future<PermissionStatus> Function() permission,
+    required bool Function(PermissionStatus) isGranted,
+    required void Function() onDenied,
+    required bool currentValue,
+    required Future<void> Function(bool) apply,
+    required void Function(bool) onSuccess,
+    required CallActionFailure failureType,
+    required String failureLabel,
+  }) async {
+    if (_isDisposed) return;
+    final status = await permission();
+    if (!isGranted(status)) {
+      onDenied();
+      return;
+    }
+    final next = !currentValue;
+    try {
+      await apply(next);
+      if (!_isDisposed) onSuccess(next);
+    } catch (e, stackTrace) {
+      _logger.error(
+        failureLabel,
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      if (!_isDisposed) {
+        state = state.copyWith(
+          actionFailure: CallActionFailureEvent(failureType),
+        );
+      }
+    }
+  }
+
+  /// Fetches and caches group member contact cards by their DIDs.
+  Future<void> _loadGroupMemberNames(String offerLink) async {
+    try {
+      final sdk = await ref.read(meetingPlaceSdkProvider.future);
+      final group = await sdk.getGroupByOfferLink(offerLink);
+      if (group == null || _isDisposed) return;
+      final cards = <String, ContactCard>{
+        for (final member in group.members)
+          member.did: ContactCardUtils.fromSdkContactCard(member.contactCard),
+      };
+      if (_isDisposed) return;
+      state = state.copyWith(memberContactCards: cards);
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Failed to load group member names',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      if (!_isDisposed) {
+        state = state.copyWith(
+          actionFailure: CallActionFailureEvent(CallActionFailure.memberNames),
+        );
+      }
+    }
+  }
+
+  /// Syncs screen state to the banner controller,
+  /// clearing if call is not visible.
+  void _syncActiveCallBanner(AudioVideoCallScreenState value) {
+    final activeCallController = ref.read(
+      activeCallControllerProvider.notifier,
+    );
+    if (!value.isVisible) {
+      activeCallController.clear();
+      return;
+    }
+    final currentMinimized =
+        ref.read(activeCallControllerProvider)?.isMinimized ?? false;
+    activeCallController.update(
+      ActiveCallState(
+        contactId: contactId,
+        peerName: value.peerName,
+        status: value.status,
+        callDurationSeconds: value.callDurationSeconds,
+        isMicEnabled: value.isMicEnabled,
+        isAudioOnly: value.isAudioOnly,
+        hasHadPeer: value.hasHadPeer,
+        isMinimized: currentMinimized,
+        isCameraEnabled: value.isCameraEnabled,
+      ),
+    );
+  }
+
+  /// Tracks the active group call state, setting or clearing
+  /// the active group contact ID.
+  void _syncActiveGroupCall(AudioVideoCallStatus status) {
+    final notifier = ref.read(activeGroupCallProvider.notifier);
+    if (_isGroupContact &&
+        (status == AudioVideoCallStatus.connected ||
+            status == AudioVideoCallStatus.active)) {
+      notifier.state = contactId;
+      return;
+    }
+    if (status == AudioVideoCallStatus.ended ||
+        status == AudioVideoCallStatus.disconnected ||
+        status == AudioVideoCallStatus.error) {
+      if (ref.read(activeGroupCallProvider) == contactId) {
+        notifier.state = null;
+      }
+    }
+  }
+}

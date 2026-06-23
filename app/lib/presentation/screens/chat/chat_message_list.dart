@@ -163,7 +163,15 @@ class _ChatMessageList extends HookConsumerWidget {
                                   contactId: _contactId,
                                 ),
                               ),
-                            _isRCardOnlyMessage(chatItem)
+                            _isCallOnlyMessage(chatItem)
+                                ? _CallBubble(
+                                    chatItem: chatItem,
+                                    index: index,
+                                    contactId: _contactId,
+                                    selectedReactionIndex:
+                                        selectedReactionIndex,
+                                  )
+                                : _isRCardOnlyMessage(chatItem)
                                 ? _RCardBubble(
                                     chatItem: chatItem,
                                     index: index,
@@ -248,6 +256,18 @@ chat.ChatItemStatus consolidateChatItemStatus(chat.ChatItem chatItem) {
   return chatItem.status;
 }
 
+Color _callBubbleColor(BuildContext context, chat.ChatItem chatItem) {
+  final colorScheme = context.colorScheme;
+  if (chatItem.isFromMe) {
+    if (chatItem.status == chat.ChatItemStatus.error) {
+      return colorScheme.error;
+    }
+    return colorScheme.primary;
+  }
+
+  return context.customColors.callBubbleGrey;
+}
+
 Color _rCardBubbleColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
   if (chatItem.isFromMe) {
     if (chatItem.status == chat.ChatItemStatus.error) {
@@ -257,6 +277,12 @@ Color _rCardBubbleColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
   }
 
   return const Color.fromARGB(248, 107, 65, 162);
+}
+
+bool _isCallOnlyMessage(chat.ChatItem chatItem) {
+  if (chatItem is! chat.Message) return false;
+  final attachments = chatItem.attachments;
+  return attachments.length == 1 && chat.CallMetadata.isCall(attachments.first);
 }
 
 bool _isRCardOnlyMessage(chat.ChatItem chatItem) {
@@ -334,7 +360,7 @@ class _RCardBubble extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         color: isCredentialOnly && !chatItem.isFromMe
-            ? const Color(0xFF2E3035)
+            ? context.customColors.callBubbleGrey
             : chatItemColor,
         borderRadius: BorderRadius.circular(isCredentialOnly ? 20.0 : 16.0),
       ),
@@ -357,6 +383,60 @@ class _RCardBubble extends StatelessWidget {
     );
 
     if (!isCredentialOnly) return bubble;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bubbleWidth = constraints.maxWidth * 0.67 + 16;
+        return SizedBox(width: bubbleWidth, child: bubble);
+      },
+    );
+  }
+}
+
+class _CallBubble extends StatelessWidget {
+  const _CallBubble({
+    required this.chatItem,
+    required this.index,
+    required this.contactId,
+    required this.selectedReactionIndex,
+  });
+
+  final chat.ChatItem chatItem;
+  final int index;
+  final String contactId;
+  final int? selectedReactionIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final chatItemColor = _callBubbleColor(context, chatItem);
+
+    final margin = EdgeInsets.fromLTRB(
+      chatItem.isFromMe ? 60 : 0,
+      8,
+      chatItem.isFromMe ? 0 : 60,
+      (selectedReactionIndex == index ||
+              chatItem is chat.Message &&
+                  (chatItem as chat.Message).reactions.isNotEmpty)
+          ? 0
+          : 8,
+    );
+
+    final bubble = Container(
+      margin: margin,
+      decoration: BoxDecoration(
+        color: chatItemColor,
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(3),
+        child: ChatItem(
+          chatItem: chatItem,
+          index: index,
+          contactId: contactId,
+          chatItemColor: chatItemColor,
+        ),
+      ),
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
