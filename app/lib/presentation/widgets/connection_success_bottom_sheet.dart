@@ -22,6 +22,7 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
       backgroundColor: Colors.black,
       context: context,
       isDismissible: true,
+      useSafeArea: true,
       builder: (context) => ConnectionSuccessBottomSheet(channel: channel),
       useRootNavigator: true,
     );
