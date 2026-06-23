@@ -1777,10 +1777,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get humanZkp => 'Human ZKP';
+  String get humanZkp => 'Human Zero Knowledge Proof';
 
   @override
-  String get humanZeroKnowledgeProof => 'Human Zero-Knowledge Proof';
+  String get humanZkpAbbreviated => 'Human ZKP';
+
+  @override
+  String get humanZeroKnowledgeProof => 'Human Zero Knowledge Proof';
 
   @override
   String get livenessCredential => 'Liveness Credential';
@@ -1796,7 +1799,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generatingZeroKnowledgeProof =>
-      'Generating Zero-Knowledge Proof...';
+      'Generating Human Zero Knowledge Proof...';
 
   @override
   String get cancel => 'Cancel';
@@ -1819,7 +1822,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noLivenessCredentialFound =>
-      'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.';
+      'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Human Zero Knowledge Proof (ZKP) is derived.';
 
   @override
   String get livenessCheckDemoModeNote =>
@@ -1838,7 +1841,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mockLivenessCredentialNext =>
-      'You can now continue to generate a Human Zero-Knowledge proof.';
+      'You can now continue to generate a Human Zero Knowledge Proof.';
 
   @override
   String get livenessEvidenceThresholdNotMet =>
@@ -1888,11 +1891,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get zkpNoticePaused => 'You paused a Zero‑Knowledge Proof request.';
+  String get zkpNoticePaused =>
+      'You paused a Human Zero Knowledge Proof request.';
 
   @override
   String zkpNoticeDeclined(String contactName) {
-    return '$contactName has declined the Human ZKP request. Tap the \"+\" icon to restart it.';
+    return '$contactName has declined the Human Zero Knowledge Proof request. Tap the \"+\" icon to restart it.';
   }
 
   @override
@@ -1906,12 +1910,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String zkpNoticeRequest(String contactName) {
-    return '$contactName has requested a Zero‑Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.';
+    return '$contactName has requested a Human Zero Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.';
   }
 
   @override
   String get zkpNoticeRequestInitiated =>
-      'You have initiated a Human ZKP request.';
+      'You have initiated a Human Zero Knowledge Proof request.';
 
   @override
   String get zkpProofAlreadyShared => 'ZKP Proof already shared';

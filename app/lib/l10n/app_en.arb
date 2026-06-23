@@ -1614,11 +1614,15 @@
 			"count": { "type": "int" }
 		}
 	},
-	"humanZkp": "Human ZKP",
+	"humanZkp": "Human Zero Knowledge Proof",
 	"@humanZkp": {
 		"type": "text"
 	},
-	"humanZeroKnowledgeProof": "Human Zero-Knowledge Proof",
+	"humanZkpAbbreviated": "Human ZKP",
+	"@humanZkpAbbreviated": {
+		"type": "text"
+	},
+	"humanZeroKnowledgeProof": "Human Zero Knowledge Proof",
 	"@humanZeroKnowledgeProof": {
 		"type": "text"
 	},
@@ -1644,7 +1648,7 @@
 	"@credentialDetails": {
 		"type": "text"
 	},
-	"generatingZeroKnowledgeProof": "Generating Zero-Knowledge Proof...",
+	"generatingZeroKnowledgeProof": "Generating Human Zero Knowledge Proof...",
 	"@generatingZeroKnowledgeProof": {
 		"type": "text"
 	},
@@ -1672,7 +1676,7 @@
 	"@searchingForLivenessCredential": {
 		"type": "text"
 	},
-	"noLivenessCredentialFound": "No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.",
+	"noLivenessCredentialFound": "No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Human Zero Knowledge Proof (ZKP) is derived.",
 	"@noLivenessCredentialFound": {
 		"type": "text"
 	},
@@ -1692,7 +1696,7 @@
 	"@mockLivenessCredentialGenerated": {
 		"type": "text"
 	},
-	"mockLivenessCredentialNext": "You can now continue to generate a Human Zero-Knowledge proof.",
+	"mockLivenessCredentialNext": "You can now continue to generate a Human Zero Knowledge Proof.",
 	"@mockLivenessCredentialNext": {
 		"type": "text"
 	},
@@ -1769,11 +1773,11 @@
 			}
 		}
 	},
-	"zkpNoticePaused": "You paused a Zero‑Knowledge Proof request.",
+	"zkpNoticePaused": "You paused a Human Zero Knowledge Proof request.",
 	"@zkpNoticePaused": {
 		"type": "text"
 	},
-	"zkpNoticeDeclined": "{contactName} has declined the Human ZKP request. Tap the \"+\" icon to restart it.",
+	"zkpNoticeDeclined": "{contactName} has declined the Human Zero Knowledge Proof request. Tap the \"+\" icon to restart it.",
 	"@zkpNoticeDeclined": {
 		"type": "text",
 		"placeholders": {
@@ -1795,7 +1799,7 @@
 			}
 		}
 	},
-	"zkpNoticeRequest": "{contactName} has requested a Zero\u2011Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.",
+	"zkpNoticeRequest": "{contactName} has requested a Human Zero Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.",
 	"@zkpNoticeRequest": {
 		"type": "text",
 		"placeholders": {
@@ -1804,7 +1808,7 @@
 			}
 		}
 	},
-	"zkpNoticeRequestInitiated": "You have initiated a Human ZKP request.",
+	"zkpNoticeRequestInitiated": "You have initiated a Human Zero Knowledge Proof request.",
 	"@zkpNoticeRequestInitiated": {
 		"type": "text"
 	},

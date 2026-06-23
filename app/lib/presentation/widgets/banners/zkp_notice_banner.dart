@@ -190,7 +190,7 @@ class _ZkpBadge extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              context.l10n.humanZkp,
+              context.l10n.humanZkpAbbreviated,
               style: textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
