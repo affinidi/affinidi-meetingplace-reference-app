@@ -524,5 +524,71 @@
 	"removeMemberNotSupported": "Das Entfernen von Mitgliedern wird noch nicht unterstützt.",
 	"selectIdentityToVerifyRelationshipPrompt": "Wischen Sie nach links oder rechts, um die Identität auszuwählen, mit der Sie Ihre Beziehung zu {name} verifizieren möchten.",
 	"trustedBy": "Vertraut von {count}",
-	"verifiableCredentialWallet": "Verifizierbare Berechtigungs-Wallet"
+	"verifiableCredentialWallet": "Verifizierbare Berechtigungs-Wallet",
+	"videoCallTitle": "Gruppenanruf",
+	"videoCallJoiningCall": "Anruf wird beigetreten...",
+	"videoCallWaitingForParticipants": "Warte auf Teilnehmer...",
+	"videoCallFailedToJoin": "Beitreten fehlgeschlagen: {error}",
+	"videoCallUnknownError": "Unbekannter Fehler",
+	"videoCallHangUpFailed": "Couldn't hang up. Please try again.",
+	"videoCallParticipantCount": "{count, plural, =1{1 Teilnehmer} other{{count} Teilnehmer}}",
+	"videoCallMute": "Stummschalten",
+	"videoCallUnmute": "Stummschaltung aufheben",
+	"videoCallEnd": "Beenden",
+	"videoCallMicPermissionDenied": "Mikrofonberechtigung verweigert. Aktivieren Sie es in den Einstellungen.",
+	"videoCallCameraPermissionDenied": "Kameraberechtigung verweigert. Aktivieren Sie es in den Einstellungen.",
+	"videoCallWaitingForEncryption": "Verschlüsselung wird eingerichtet...",
+	"videoCallYou": "Du",
+	"videoCallRinging": "Klingelt",
+	"videoCallCancelCall": "Abbrechen",
+	"videoCallNoAnswer": "Keine Antwort",
+	"videoCallCallDeclined": "Anruf abgelehnt",
+	"videoCallCancel": "Abbrechen",
+	"videoCallAgain": "Erneut anrufen",
+	"videoCallGroupCallJoin": "Beitreten",
+	"videoCallGroupCallActive": "Gruppenanruf läuft",
+	"videoCallSwitchToVideoTitle": "Zu Videoanruf wechseln?",
+	"videoCallSwitch": "Wechsel",
+	"callChatItemAudioCall": "Audioanruf",
+	"callChatItemVideoCall": "Videoanruf",
+	"callChatItemCalling": "Anrufen...",
+	"callChatItemRinging": "Klingelt",
+	"callChatItemIncoming": "Eingehender Anruf",
+	"callChatItemTapToReturn": "Zum Zurückkehren tippen",
+	"callChatItemMissed": "Verpasst",
+	"callChatItemNotAnswered": "Nicht beantwortet",
+	"incomingCallBannerIsCalling": "{callerName} ruft an",
+	"incomingCallBannerAccept": "Annehmen",
+	"incomingCallBannerDecline": "Ablehnen",
+	"incomingCallBannerUnknownCaller": "Unbekannter Anrufer",
+	"callDurationHourFormat": "{count, plural, =1{1 Std.} other{{count} Std.}}",
+	"@callDurationHourFormat": {
+		"description": "Format for hours in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "1"
+			}
+		}
+	},
+	"callDurationMinuteFormat": "{count, plural, =1{1 Min.} other{{count} Min.}}",
+	"@callDurationMinuteFormat": {
+		"description": "Format for minutes in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "30"
+			}
+		}
+	},
+	"callDurationSecondFormat": "{count, plural, =1{1 Sek.} other{{count} Sek.}}",
+	"@callDurationSecondFormat": {
+		"description": "Format for seconds in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "14"
+			}
+		}
+	}
 }

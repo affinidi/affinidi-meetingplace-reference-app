@@ -1900,5 +1900,87 @@
 		"description": "Snackbar shown when a recorded voice message could not be sent"
 	},
 	"generalEmail": "Email",
-	"vrcResponderIntro": "{name} has selected the following persona to verify the relationship:"
+	"vrcResponderIntro": "{name} has selected the following persona to verify the relationship:",
+	"videoCallTitle": "Group Call",
+	"videoCallJoiningCall": "Joining call...",
+	"videoCallWaitingForParticipants": "Waiting for participants...",
+	"videoCallShowMore": "{count, plural, =1{Show 1 more} other{Show {count} more}}",
+	"videoCallShowLess": "Show less",
+	"videoCallFailedToJoin": "Failed to join: {error}",
+	"videoCallUnknownError": "Unknown error",
+	"videoCallMicToggleFailed": "Couldn't change the microphone. Please try again.",
+	"videoCallCameraToggleFailed": "Couldn't change the camera. Please try again.",
+	"videoCallSpeakerToggleFailed": "Couldn't change the speaker. Please try again.",
+	"videoCallMemberNamesFailed": "Couldn't load participant names.",
+	"videoCallHangUpFailed": "Couldn't hang up. Please try again.",
+	"videoCallParticipantCount": "{count, plural, =1{1 participant} other{{count} participants}}",
+	"videoCallMute": "Mute",
+	"videoCallUnmute": "Unmute",
+	"videoCallEnd": "End",
+	"videoCallMicPermissionDenied": "Microphone permission denied. Enable it in Settings.",
+	"videoCallCameraPermissionDenied": "Camera permission denied. Enable it in Settings.",
+	"videoCallWaitingForEncryption": "Setting up encryption...",
+	"videoCallYou": "You",
+	"videoCallRinging": "Ringing",
+	"videoCallCalling": "Calling...",
+	"videoCallCancelCall": "Cancel",
+	"videoCallNoAnswer": "No answer",
+	"videoCallCallDeclined": "Call declined",
+	"videoCallCancel": "Cancel",
+	"videoCallAgain": "Call again",
+	"videoCallGroupCallJoin": "Join",
+	"videoCallGroupCallActive": "Group call in progress",
+	"incomingCallBannerIsCalling": "{callerName} is calling",
+	"@incomingCallBannerIsCalling": {
+		"placeholders": {
+			"callerName": {
+				"type": "String"
+			}
+		}
+	},
+	"incomingCallBannerAccept": "Accept",
+	"incomingCallBannerDecline": "Decline",
+	"incomingCallBannerUnknownCaller": "Unknown caller",
+	"incomingCallBannerAudioCall": "MeetingPlace Audio",
+	"incomingCallBannerVideoCall": "MeetingPlace Video",
+	"callChatItemAudioCall": "Audio call",
+	"callChatItemVideoCall": "Video call",
+	"callChatItemCalling": "Calling...",
+	"callChatItemRinging": "Ringing",
+	"callChatItemIncoming": "Incoming call",
+	"callChatItemTapToReturn": "Tap to return",
+	"callChatItemMissed": "Missed",
+	"callChatItemNotAnswered": "Not answered",
+	"callDurationHourFormat": "{count, plural, =1{1 h} other{{count} h}}",
+	"@callDurationHourFormat": {
+		"description": "Format for hours in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "1"
+			}
+		}
+	},
+	"callDurationMinuteFormat": "{count, plural, =1{1 m} other{{count} m}}",
+	"@callDurationMinuteFormat": {
+		"description": "Format for minutes in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "30"
+			}
+		}
+	},
+	"callDurationSecondFormat": "{count, plural, =1{1 s} other{{count} s}}",
+	"@callDurationSecondFormat": {
+		"description": "Format for seconds in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "14"
+			}
+		}
+	},
+	"videoCallSwitchToVideoTitle": "Switch to video call?",
+	"videoCallSwitch": "Switch"
 }

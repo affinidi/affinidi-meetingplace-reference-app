@@ -524,5 +524,71 @@
 	"selectIdentityToVerifyRelationshipPrompt": "Desliza hacia la izquierda o derecha para elegir la identidad que deseas usar para verificar tu relación con {name}.",
 	"trustedBy": "Confiado por {count}",
 	"verifiableCredentialWallet": "Cartera de Credenciales Verificables",
-	"vrcAbbreviation": "VRC"
+	"vrcAbbreviation": "VRC",
+	"videoCallTitle": "Llamada grupal",
+	"videoCallJoiningCall": "Uniéndose a la llamada...",
+	"videoCallWaitingForParticipants": "Esperando participantes...",
+	"videoCallFailedToJoin": "Error al unirse: {error}",
+	"videoCallUnknownError": "Error desconocido",
+	"videoCallHangUpFailed": "Couldn't hang up. Please try again.",
+	"videoCallParticipantCount": "{count, plural, =1{1 participante} other{{count} participantes}}",
+	"videoCallMute": "Silenciar",
+	"videoCallUnmute": "Activar audio",
+	"videoCallEnd": "Terminar",
+	"videoCallMicPermissionDenied": "Permiso de micrófono denegado. Actívalo en Configuración.",
+	"videoCallCameraPermissionDenied": "Permiso de cámara denegado. Actívalo en Configuración.",
+	"videoCallWaitingForEncryption": "Configurando el cifrado...",
+	"videoCallYou": "Tú",
+	"videoCallRinging": "Llamando",
+	"videoCallCancelCall": "Cancelar",
+	"videoCallNoAnswer": "Sin respuesta",
+	"videoCallCallDeclined": "Llamada rechazada",
+	"videoCallCancel": "Cancelar",
+	"videoCallAgain": "Volver a llamar",
+	"videoCallGroupCallJoin": "Unirse",
+	"videoCallGroupCallActive": "Llamada grupal en curso",
+	"videoCallSwitchToVideoTitle": "¿Cambiar a videollamada?",
+	"videoCallSwitch": "Cambiar",
+	"callChatItemAudioCall": "Llamada de audio",
+	"callChatItemVideoCall": "Videollamada",
+	"callChatItemCalling": "Llamando...",
+	"callChatItemRinging": "Sonando",
+	"callChatItemIncoming": "Llamada entrante",
+	"callChatItemTapToReturn": "Toca para volver",
+	"callChatItemMissed": "Perdida",
+	"callChatItemNotAnswered": "Sin respuesta",
+	"incomingCallBannerIsCalling": "{callerName} está llamando",
+	"incomingCallBannerAccept": "Aceptar",
+	"incomingCallBannerDecline": "Rechazar",
+	"incomingCallBannerUnknownCaller": "Llamante desconocido",
+	"callDurationHourFormat": "{count, plural, =1{1 h} other{{count} h}}",
+	"@callDurationHourFormat": {
+		"description": "Format for hours in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "1"
+			}
+		}
+	},
+	"callDurationMinuteFormat": "{count, plural, =1{1 m} other{{count} m}}",
+	"@callDurationMinuteFormat": {
+		"description": "Format for minutes in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "30"
+			}
+		}
+	},
+	"callDurationSecondFormat": "{count, plural, =1{1 s} other{{count} s}}",
+	"@callDurationSecondFormat": {
+		"description": "Format for seconds in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "14"
+			}
+		}
+	}
 }
