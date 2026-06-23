@@ -20,6 +20,7 @@ class IncomingCallBanner extends ConsumerStatefulWidget {
 
 class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner> {
   bool _accepted = false;
+  bool _dismissed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner> {
     final callState = ref.watch(activeCallControllerProvider);
     if (callState != null) return const SizedBox.shrink();
 
-    if (_accepted) return const SizedBox.shrink();
+    if (_accepted || _dismissed) return const SizedBox.shrink();
 
     final event = ref.watch(incomingCallStateProvider);
     if (event == null) return const SizedBox.shrink();
@@ -62,9 +63,17 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
+      child: GestureDetector(
+        onVerticalDragEnd: (details) {
+          // Dismiss on upward swipe (negative velocity = upward)
+          if (details.velocity.pixelsPerSecond.dy < -500) {
+            setState(() => _dismissed = true);
+            callService.decline(callId: event.callId);
+          }
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
           color: context.customColors.incomingCallBannerBackground,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
@@ -141,6 +150,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner> {
           ),
         ),
       ),
+        ),
     );
   }
 }
