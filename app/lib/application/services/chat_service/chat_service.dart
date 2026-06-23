@@ -91,4 +91,36 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
     required String senderDid,
   });
   void upsertChatItem(ChatItem item);
+
+  /// Sends a call chat item over the wire and persists it for the sender,
+  /// returning its message id so the call lifecycle can update the item in
+  /// place. The receiver gets the item automatically via the chat transport
+  /// (isFromMe: false) and is offline-notified like any other message.
+  Future<String?> sendOutgoingCallMessage({required CallMediaType mediaType});
+
+  /// Resolves the message id of the latest incoming (not-from-me) call chat
+  /// item that is still in a non-terminal state, so the receiver can update it
+  /// in place. Returns null when no such item exists.
+  Future<String?> resolveIncomingCallChatItemId();
+
+  /// Resolves the message id of the latest outgoing (isFromMe) call chat item
+  /// that is still in a non-terminal state. Used by the caller when the emitter
+  /// has not yet resolved the id (e.g. fast cancel during connecting phase).
+  /// Returns null when no such item exists.
+  Future<String?> resolveOutgoingCallChatItemId();
+
+  /// Updates the receiver's pending incoming call chat item to
+  /// [CallStatus.missed]. No-op when no matching item is found.
+  ///
+  /// Called when the ring timer expires or the user declines before answering.
+  Future<void> markCallAsMissed();
+
+  /// Updates the local-only [status] and participation [duration] of a
+  /// previously emitted call chat item, in place. Per-side and local-only: it
+  /// does not propagate to the other party.
+  Future<void> updateCallChatItem(
+    String messageId, {
+    required CallStatus status,
+    Duration? duration,
+  });
 }

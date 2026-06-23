@@ -9,6 +9,7 @@ class RouteNames {
 
   // Contacts
   static const chat = 'chat';
+  static const audioVideoCall = 'audioVideoCall';
 
   // Connections
   static const connectionDetails = 'connectionDetails';

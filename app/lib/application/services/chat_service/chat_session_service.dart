@@ -37,6 +37,7 @@ import '../network_connectivity_service/network_connectivity_service.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
 import 'chat_service_state.dart';
+import 'delegates/call_chat_item_manager.dart';
 import 'delegates/chat_concierge_messenger.dart';
 import 'delegates/chat_group_manager.dart';
 import 'delegates/interfaces/concierge_messaging.dart';
@@ -85,6 +86,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late ChatProtocolRouter _router;
   late RCardManager _rCardManager;
   late VrcManager _vrcManager;
+  late CallChatItemManager _callChatItemManager;
 
   TimedAction? _presenceTimedAction;
   final Map<String, TypingTimer> _typingTimedActions = {};
@@ -142,6 +144,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       onVrcRequestReceived: _vrcManager.onVrcRequestReceived,
     );
 
+    _callChatItemManager = CallChatItemManager(
+      ensureInitialized: _ensureChatSdkInitialized,
+      getChatSdk: () => _chatSDK,
+      logger: _logger,
+    );
     _groupManager = ChatGroupManager(ref: ref);
     _setupChatProtocolRouter();
 
@@ -822,6 +829,32 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     required String vcBlob,
     required String senderDid,
   }) => _vrcManager.showSentVrcAttachment(vcBlob: vcBlob, senderDid: senderDid);
+
+  @override
+  Future<String?> sendOutgoingCallMessage({required CallMediaType mediaType}) =>
+      _callChatItemManager.sendOutgoingCallMessage(mediaType: mediaType);
+
+  @override
+  Future<String?> resolveIncomingCallChatItemId() =>
+      _callChatItemManager.resolveIncomingCallChatItemId();
+
+  @override
+  Future<String?> resolveOutgoingCallChatItemId() =>
+      _callChatItemManager.resolveOutgoingCallChatItemId();
+
+  @override
+  Future<void> markCallAsMissed() => _callChatItemManager.markCallAsMissed();
+
+  @override
+  Future<void> updateCallChatItem(
+    String messageId, {
+    required CallStatus status,
+    Duration? duration,
+  }) => _callChatItemManager.updateCallChatItem(
+    messageId,
+    status: status,
+    duration: duration,
+  );
 
   void _removeChatItem(ChatItem item) {
     final messages = state.messages
