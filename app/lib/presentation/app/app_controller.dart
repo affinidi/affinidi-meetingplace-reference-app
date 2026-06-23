@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_matrix_livekit/meeting_place_matrix_livekit.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../application/services/authentication_service/authentication_service.dart';
@@ -9,11 +10,13 @@ import '../../application/services/connections_service/connections_service.dart'
 import '../../application/services/contacts_connections_service/contacts_connections_service.dart';
 import '../../application/services/contacts_service/contacts_service.dart';
 import '../../application/services/control_plane_service/control_plane_service.dart';
+import '../../application/services/incoming_call_service/incoming_call_service.dart';
 import '../../application/services/network_connectivity_service/network_connectivity_service.dart';
 import '../../application/services/r_cards_service/r_card_chat_notifier_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../../application/services/vrc_service/vrc_service.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
+import '../../infrastructure/providers/audio_video_call_plugin_provider.dart';
 import '../../infrastructure/providers/credentials_sdk_provider.dart';
 
 part 'app_controller.g.dart';
@@ -24,6 +27,8 @@ class AppController extends _$AppController with WidgetsBindingObserver {
 
   @override
   void build() {
+    ref.read(incomingCallServiceProvider);
+
     ref.listen(
       authenticationServiceProvider.select((state) => state.isAuthenticated),
       (prev, next) async {
@@ -54,6 +59,12 @@ class AppController extends _$AppController with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       unawaited(ref.read(appBadgeServiceProvider).clearBadge());
+    }
+    if (state == AppLifecycleState.detached) {
+      final plugin = ref.read(audioVideoCallPluginProvider).value;
+      if (plugin is MeetingPlaceLiveKitCallPlugin) {
+        unawaited(plugin.leaveCurrentCall());
+      }
     }
   }
 }
