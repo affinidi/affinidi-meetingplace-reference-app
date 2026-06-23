@@ -18,9 +18,33 @@ class IncomingCallBanner extends ConsumerStatefulWidget {
   ConsumerState<IncomingCallBanner> createState() => _IncomingCallBannerState();
 }
 
-class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner> {
+class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
+    with SingleTickerProviderStateMixin {
   bool _accepted = false;
   bool _dismissed = false;
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(0, -1),
+    ).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeIn),
+    );
+  }
+
+  @override
+  void dispose() {
+    _slideController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,13 +91,19 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner> {
         onVerticalDragEnd: (details) {
           // Dismiss on upward swipe (negative velocity = upward)
           if (details.velocity.pixelsPerSecond.dy < -500) {
-            setState(() => _dismissed = true);
-            callService.decline(callId: event.callId);
+            _slideController.forward().then((_) {
+              if (mounted) {
+                setState(() => _dismissed = true);
+                callService.decline(callId: event.callId);
+              }
+            });
           }
         },
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
+        child: SlideTransition(
+          position: _slideAnimation,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
           color: context.customColors.incomingCallBannerBackground,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
@@ -149,7 +179,8 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner> {
             ],
           ),
         ),
-      ),
+            ),
+          ),
         ),
     );
   }
