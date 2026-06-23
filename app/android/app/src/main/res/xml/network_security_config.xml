@@ -1,13 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  Allows cleartext HTTP to LAN addresses (192.168.x.x) so the app can reach
-  lk-jwt-service (port 8080) and LiveKit SFU (port 7880) on the dev machine
-  during local testing with a physical Android device.
-  Production builds connect to HTTPS endpoints only — this config does not
-  affect traffic to any non-LAN host.
--->
 <network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="false">192.168.1.93</domain>
-    </domain-config>
 </network-security-config>
