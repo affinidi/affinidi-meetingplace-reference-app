@@ -9,8 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../navigation/router_config_provider.dart';
 import '../themes/app_theme.dart';
-import '../widgets/banners/no_connection_banner.dart';
 import 'app_controller.dart';
+import 'app_header_banner.dart';
 
 class App extends ConsumerWidget {
   const App({super.key, this.locale});
@@ -45,12 +45,7 @@ class App extends ConsumerWidget {
         SystemChannels.textInput.invokeMethod('TextInput.hide');
 
         return MediaQuery.withNoTextScaling(
-          child: Stack(
-            children: [
-              child,
-              const SafeArea(child: NoConnectionBanner()),
-            ],
-          ),
+          child: AppHeaderBanner(child: child),
         );
       },
     );

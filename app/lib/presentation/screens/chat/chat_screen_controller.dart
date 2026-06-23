@@ -17,7 +17,6 @@ import '../../../application/services/attachment_cache_service/attachment_cache_
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
-import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -31,6 +30,7 @@ import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/providers/audio_video_call_plugin_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -100,11 +100,15 @@ class ChatScreenController extends _$ChatScreenController
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     final channelDid = contact?.channelDid;
+    final isCallSupported = ref.watch(
+      audioVideoCallPluginProvider.select((v) => v.value?.isSupported ?? false),
+    );
     var pendingState = ChatScreenState(
       contact: contact,
       isActive: true,
       isInitialized: false,
       contactPresenceStatus: ContactPresenceStatus.unknown,
+      isCallSupported: isCallSupported,
     );
     var hasInitializedState = false;
 
@@ -437,7 +441,6 @@ class ChatScreenController extends _$ChatScreenController
   /// Throws an exception if the contact cannot be loaded.
   Future<void> loadContact(String contactId) async {
     await ref.read(contactsServiceProvider.notifier).ensureInitialized();
-    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     if (contact == null) {
@@ -470,18 +473,13 @@ class ChatScreenController extends _$ChatScreenController
     }
     final srcCard = channel.otherPartyContactCard;
     final ownCard = channel.contactCard;
-    final ownIdentity = ref
-        .read(identitiesServiceProvider)
-        .getIdentityById(channel.externalRef);
     state = state.copyWith(
       otherPartyCard: srcCard == null
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
-      myCard:
-          ownIdentity?.card ??
-          (ownCard == null
-              ? null
-              : ContactCardUtils.fromSdkContactCard(ownCard)),
+      myCard: ownCard == null
+          ? null
+          : ContactCardUtils.fromSdkContactCard(ownCard),
       notificationToken: channel.otherPartyNotificationToken,
       myDid: channel.permanentChannelDid,
     );
@@ -535,9 +533,6 @@ class ChatScreenController extends _$ChatScreenController
   }
 
   Future<void> pauseHumanZkpRequestFlow() async {
-    await ref
-        .read(proofFlowControllerProvider(contactId).notifier)
-        .sendDeclined();
     final requestNoticeId =
         ChatZkpMessageListPolicy.latestHumanZkpRequestNoticeMessageId(
           state.messages,
@@ -1233,10 +1228,17 @@ extension ChatScreenControllerProviderSelectors
 extension _ChatScreenStateExtensions on ChatScreenState {
   bool get isGroupChat => contact?.isGroup ?? false;
   bool get isGroupDeleted {
-    return messages.whereType<chat.EventMessage>().any(
-      (message) =>
-          message.eventType == chat.EventMessageType.groupDeleted &&
-          message.status == chat.ChatItemStatus.received,
-    );
+    final groupDeleted = messages
+        .whereType<chat.EventMessage>()
+        .where(
+          (message) =>
+              message.eventType == chat.EventMessageType.groupDeleted &&
+              message.status == chat.ChatItemStatus.received,
+        )
+        .map((message) => message.contactCard?.firstName)
+        .where((firstName) => firstName != null)
+        .cast<String>();
+
+    return groupDeleted.isNotEmpty;
   }
 }

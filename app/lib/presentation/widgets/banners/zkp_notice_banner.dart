@@ -21,9 +21,6 @@ enum ZkpNoticeType {
 
   /// User paused the ZKP flow
   paused,
-
-  /// Peer declined the ZKP request
-  declined,
 }
 
 /// Unified widget for displaying ZKP-related notices
@@ -79,13 +76,7 @@ class ZkpNoticeBanner extends ConsumerWidget {
           onGenerateProof: onGenerateProof,
           onDoLater: onDoLater,
         );
-      case ZkpNoticeType.declined:
-        return ConciergeMessage(
-          dateCreated: dateCreated,
-          message: context.l10n.zkpNoticeDeclined(
-            contactName ?? context.l10n.proofFlowContact,
-          ),
-        );
+
       case ZkpNoticeType.initiated:
         return ConciergeMessage(
           dateCreated: dateCreated,
@@ -190,7 +181,7 @@ class _ZkpBadge extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              context.l10n.humanZkpAbbreviated,
+              context.l10n.humanZkp,
               style: textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,

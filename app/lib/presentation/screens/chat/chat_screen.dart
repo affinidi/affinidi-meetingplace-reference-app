@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
@@ -43,7 +44,6 @@ import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/message_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
-import '../../../infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import '../../../infrastructure/plugins/media_category.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
@@ -60,6 +60,8 @@ import '../../effects/screen_effect.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
+import '../../widgets/banners/active_call/active_call_controller.dart';
+import '../../widgets/banners/group_call_join_banner.dart';
 import '../../widgets/bottom_sheet_menu.dart';
 import '../../widgets/images/chat_image_card.dart';
 import '../../widgets/info_banner.dart';
@@ -80,6 +82,7 @@ import 'chat_zkp/chat_zkp_concierge_item.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp/chat_zkp_overlay.dart';
 import 'proof_flow_controller.dart';
+import 'widgets/call_chat_item.dart';
 
 part 'awaiting_members_warning.dart';
 part 'chat_contact_display_name.dart';
@@ -124,6 +127,11 @@ class ChatScreen extends HookConsumerWidget {
     final isInitialized = ref.watch(
       provider.select((state) => state.isInitialized),
     );
+    final isCallSupported = ref.watch(
+      provider.select((state) => state.isCallSupported),
+    );
+    final activeCallState = ref.watch(activeCallControllerProvider);
+    final canInitiateCall = isCallSupported && activeCallState == null;
 
     Future<void> onVrcStart() async {
       final state = ref.read(chatScreenControllerProvider(_contactId));
@@ -195,6 +203,35 @@ class ChatScreen extends HookConsumerWidget {
         ),
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
+        actions: [
+          if (isCallSupported)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.call),
+                  tooltip: context.l10n.videoCallCalling,
+                  onPressed: canInitiateCall
+                      ? () => context.push(
+                          AudioVideoCallRoute(
+                            contactId: _contactId,
+                            isAudioOnly: true,
+                          ).location,
+                        )
+                      : null,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.videocam),
+                  tooltip: context.l10n.videoCallTitle,
+                  onPressed: canInitiateCall
+                      ? () => context.push(
+                          AudioVideoCallRoute(contactId: _contactId).location,
+                        )
+                      : null,
+                ),
+              ],
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -228,6 +265,7 @@ class _ChatSection extends StatelessWidget {
             _NotificationsUnavailableWarning(_contactId),
             _VrcBanner(_contactId),
             if (showHumanZkp) ChatZkpOverlay(contactId: _contactId),
+            GroupCallJoinBanner(contactId: _contactId),
             Expanded(child: _ChatMessageList(_contactId)),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
