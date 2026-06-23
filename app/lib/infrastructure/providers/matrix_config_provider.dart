@@ -80,6 +80,7 @@ final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
     controlPlaneDid: environment.controlPlaneDid,
     homeserver: Uri.parse(homeserver),
     deviceId: deviceId,
+    serverName: environment.matrixServerName,
     databaseFactory: CallbackMatrixDatabaseFactory(
       openDatabase: (context) async {
         final safeDatabaseName = p

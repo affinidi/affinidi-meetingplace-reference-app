@@ -398,13 +398,16 @@ DEFAULT_MEDIATOR_DID=""
 
 #### Connect to Matrix Homeserver
 
-The Matrix Homeserver is a messaging server that stores and relays messages between clients using the Matrix protocol. The SDK authenticates with it using short-lived JWTs issued by the Control Plane API — no password or manual registration is required.
+The Matrix Homeserver is a messaging server that stores and relays messages between clients using the Matrix protocol.
 
-Deploy a Matrix Synapse homeserver and configure it for JWT-based login (`org.matrix.login.jwt`) using the Control Plane's public key as the JWT secret and the Control Plane DID as the issuer (see the [Control Plane API: Matrix Authentication](https://github.com/affinidi/affinidi-meetingplace-controlplane-api-dart#matrix-authentication) section for full setup details). Once running, supply its base URL:
+TBD
+
+Setting up a Matrix Homeserver generates the homeserver URL that you can use to populate the `MATRIX_HOMESERVER` env variable.
 
 ```bash
-# Required when Matrix transport is enabled
-MATRIX_HOMESERVER="https://matrix.yourdomain.com"
+# Required for MeetingPlaceCoreSDK functionality
+# Your Matrix Homeserver URL
+MATRIX_HOMESERVER=""
 ```
 
 #### Choose Chat Transports
@@ -509,16 +512,13 @@ Refer to the [Flutter Get Started guide](https://docs.flutter.dev/get-started/in
 
 ## Git Hooks
 
-Automatically run code analysis before every commit:
+The repo includes a pre-commit hook at `.githooks/pre-commit` that runs `dart format` and `melos analyze` before every commit.
 
 ```sh
-cp templates/.example.pre-commit .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+git config core.hooksPath .githooks
 ```
 
-This runs `melos run analyze` before each commit and blocks it if any issues are found.
-
-> The file **must** be named `pre-commit` (no extension) inside `.git/hooks/`.
+After cloning the repo, run this once to activate it for that clone and all future worktrees created from it.
 
 ## Troubleshooting
 
