@@ -98,6 +98,116 @@ void main() {
       },
     );
 
+    test(
+      'supersedes an in-flight initialization for a different lens',
+      () async {
+        final backInitializeCompleter = Completer<void>();
+        final frontInitializeCompleter = Completer<void>();
+        var backControllerDisposed = false;
+        var createdControllers = 0;
+
+        final container = makeContainer(
+          cameras: const [_backCamera, _frontCamera],
+          controllerFactory:
+              (
+                description,
+                resolutionPreset, {
+                enableAudio = true,
+                imageFormatGroup,
+              }) {
+                createdControllers += 1;
+                return _TrackedDelayedFakeCameraController(
+                  description,
+                  resolutionPreset,
+                  enableAudio: enableAudio,
+                  imageFormatGroup: imageFormatGroup,
+                  initializeCompleter:
+                      description.lensDirection == CameraLensDirection.back
+                      ? backInitializeCompleter
+                      : frontInitializeCompleter,
+                  onDispose: () {
+                    if (description.lensDirection == CameraLensDirection.back) {
+                      backControllerDisposed = true;
+                    }
+                  },
+                );
+              },
+        );
+
+        final notifier = container.read(cameraServiceProvider.notifier);
+
+        final backInitialization = notifier.initializeCamera(
+          CameraLensDirection.back,
+        );
+        final frontInitialization = notifier.initializeCamera(
+          CameraLensDirection.front,
+        );
+
+        await Future<void>.delayed(Duration.zero);
+        expect(createdControllers, 1);
+
+        backInitializeCompleter.complete();
+
+        await expectLater(
+          backInitialization,
+          throwsA(
+            isA<CameraException>().having(
+              (error) => error.code,
+              'code',
+              'CameraInitializationSuperseded',
+            ),
+          ),
+        );
+        expect(backControllerDisposed, isTrue);
+
+        await Future<void>.delayed(Duration.zero);
+        expect(createdControllers, 2);
+
+        frontInitializeCompleter.complete();
+
+        final frontController = await frontInitialization;
+
+        expect(
+          frontController.description.lensDirection,
+          CameraLensDirection.front,
+        );
+        expect(
+          container.read(cameraServiceProvider).controller,
+          same(frontController),
+        );
+      },
+    );
+
+    test('disposes the controller when initialization fails', () async {
+      var disposed = false;
+
+      final container = makeContainer(
+        controllerFactory:
+            (
+              description,
+              resolutionPreset, {
+              enableAudio = true,
+              imageFormatGroup,
+            }) => _FailingFakeCameraController(
+              description,
+              resolutionPreset,
+              enableAudio: enableAudio,
+              imageFormatGroup: imageFormatGroup,
+              onDispose: () => disposed = true,
+            ),
+      );
+
+      await expectLater(
+        container
+            .read(cameraServiceProvider.notifier)
+            .initializeCamera(CameraLensDirection.back),
+        throwsA(isA<CameraException>()),
+      );
+
+      expect(disposed, isTrue);
+      expect(container.read(cameraServiceProvider).controller, isNull);
+    });
+
     test('toggleCamera switches to the opposite lens', () async {
       final container = makeContainer(
         cameras: const [_backCamera, _frontCamera],
@@ -152,5 +262,50 @@ class _DelayedFakeCameraController extends FakeCameraController {
   Future<void> initialize() async {
     await initializeCompleter.future;
     await super.initialize();
+  }
+}
+
+class _TrackedDelayedFakeCameraController extends _DelayedFakeCameraController {
+  _TrackedDelayedFakeCameraController(
+    super.description,
+    super.resolutionPreset, {
+    super.enableAudio,
+    super.imageFormatGroup,
+    required super.initializeCompleter,
+    required this.onDispose,
+  });
+
+  final void Function() onDispose;
+
+  @override
+  Future<void> dispose() async {
+    onDispose();
+    await super.dispose();
+  }
+}
+
+class _FailingFakeCameraController extends FakeCameraController {
+  _FailingFakeCameraController(
+    super.description,
+    super.resolutionPreset, {
+    super.enableAudio,
+    super.imageFormatGroup,
+    required this.onDispose,
+  });
+
+  final void Function() onDispose;
+
+  @override
+  Future<void> initialize() async {
+    throw CameraException(
+      'InitializationFailed',
+      'Camera controller failed to initialize.',
+    );
+  }
+
+  @override
+  Future<void> dispose() async {
+    onDispose();
+    await super.dispose();
   }
 }

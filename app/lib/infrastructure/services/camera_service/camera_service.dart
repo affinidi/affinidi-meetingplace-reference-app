@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -49,15 +51,18 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
 
   late final AppLogger _logger = ref.read(appLoggerProvider);
   static const _logKey = 'CAMSVCS';
+  static const _supersededInitializationCode = 'CameraInitializationSuperseded';
   CameraController? _activeController;
   Future<CameraController>? _initializationInFlight;
+  CameraLensDirection? _initializationLensDirection;
+  int _initializationGeneration = 0;
 
   @override
   CameraServiceState build() {
     WidgetsBinding.instance.addObserver(this);
     ref.onDispose(_dispose);
 
-    Future(checkCameraAvailability);
+    _scheduleCheckCameraAvailability();
 
     return CameraServiceState();
   }
@@ -71,8 +76,15 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      Future(checkCameraAvailability);
+      _scheduleCheckCameraAvailability();
     }
+  }
+
+  void _scheduleCheckCameraAvailability() {
+    Future(() async {
+      if (!ref.mounted) return;
+      await checkCameraAvailability();
+    });
   }
 
   /// Initializes the camera with the given [cameraLensDirection].
@@ -92,31 +104,56 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
 
     final inFlight = _initializationInFlight;
     if (inFlight != null) {
-      final controller = await inFlight;
-      if (controller.description.lensDirection == cameraLensDirection &&
-          controller.value.isInitialized) {
-        return controller;
+      if (_initializationLensDirection == cameraLensDirection) {
+        final controller = await inFlight;
+        if (controller.description.lensDirection == cameraLensDirection &&
+            controller.value.isInitialized) {
+          return controller;
+        }
+      } else {
+        final requestGeneration = ++_initializationGeneration;
+        try {
+          await inFlight;
+        } on CameraException catch (error) {
+          if (error.code != _supersededInitializationCode) rethrow;
+        }
+
+        if (_initializationGeneration != requestGeneration) {
+          throw CameraException(
+            _supersededInitializationCode,
+            'Camera initialization was superseded by a newer request.',
+          );
+        }
       }
     }
+
+    final requestGeneration = ++_initializationGeneration;
 
     if (state.controller != null) {
       await closeCamera();
     }
 
-    final initialization = _createAndInitializeCamera(cameraLensDirection);
+    final initialization = _createAndInitializeCamera(
+      cameraLensDirection,
+      requestGeneration,
+    );
     _initializationInFlight = initialization;
+    _initializationLensDirection = cameraLensDirection;
 
     try {
       return await initialization;
     } finally {
-      if (identical(_initializationInFlight, initialization)) {
+      if (identical(_initializationInFlight, initialization) &&
+          _initializationGeneration == requestGeneration) {
         _initializationInFlight = null;
+        _initializationLensDirection = null;
       }
     }
   }
 
   Future<CameraController> _createAndInitializeCamera(
     CameraLensDirection cameraLensDirection,
+    int requestGeneration,
   ) async {
     final getCameras = ref.read(availableCamerasProvider);
     final cameras = await getCameras();
@@ -134,7 +171,20 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
-    await controller.initialize();
+    try {
+      await controller.initialize();
+
+      if (_initializationGeneration != requestGeneration) {
+        await controller.dispose();
+        throw CameraException(
+          _supersededInitializationCode,
+          'Camera initialization was superseded by a newer request.',
+        );
+      }
+    } catch (_) {
+      await controller.dispose();
+      rethrow;
+    }
 
     _activeController = controller;
     state = state.copyWith(
@@ -283,19 +333,24 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     // Camera plugin does not support macOS: assume camera is unavailable
     if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
       _logger.warning('Camera not available on this platform', name: _logKey);
+      if (!ref.mounted) return;
       state = state.copyWith(isAvailable: false);
       return;
     }
 
     _logger.info('checkCameraAvailability', name: _logKey);
 
+    if (!ref.mounted) return;
+
     try {
       final getCameras = ref.read(availableCamerasProvider);
       final cameras = await getCameras();
+      if (!ref.mounted) return;
       state = state.copyWith(isAvailable: cameras.isNotEmpty, cameras: cameras);
 
       _logger.info('${cameras.length} camera(s) found', name: _logKey);
     } catch (error, stackTrace) {
+      if (!ref.mounted) return;
       _logger.error(
         'Error while detecting cameras',
         error: error,
