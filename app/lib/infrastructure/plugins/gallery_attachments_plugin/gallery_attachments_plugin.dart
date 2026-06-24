@@ -9,17 +9,16 @@ import 'package:uuid/uuid.dart';
 import '../../../presentation/screens/media/image_view_screen/image_view_screen.dart';
 import '../../../presentation/screens/media/media_screen/media_screen.dart';
 import '../../extensions/build_context_extensions.dart';
-import '../video_attachments_plugin/video_attachment.dart';
-import '../video_attachments_plugin/video_attachments_plugin.dart';
 import 'gallery_image_attachment.dart';
+import 'gallery_video_attachment_widget.dart';
+import 'video_attachment.dart';
 
-/// A plugin for handling gallery-based image attachments.
+/// A plugin for handling gallery-based image and video attachments.
 ///
 /// This plugin provides functionality to:
-/// - Pick images from the device gallery via [MediaScreen]
-/// - Review selected images before attaching
-/// - Render image attachments as tappable cards in chat
-/// - Support full-screen image viewing
+/// - Pick images and videos from the device gallery via [MediaScreen]
+/// - Review selected media before attaching
+/// - Render image and video attachments in chat
 class GalleryAttachmentsPlugin implements AttachmentPlugin {
   GalleryAttachmentsPlugin({required this._cacheManager});
 
@@ -70,7 +69,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
         attachments: [
           VideoAttachment(
             base64: videoBase64,
-            pluginName: VideoAttachmentsPlugin.pluginName,
+            pluginName: _pluginName,
             mimeType: result.videoMimeType ?? 'video/mp4',
             filename: result.videoFilename ?? 'video.mp4',
             byteCount: result.videoByteCount ?? 0,
@@ -105,11 +104,21 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     required bool isFromMe,
     required Color chatItemColor,
     Future<Uint8List> Function(ChatAttachment)? download,
-  }) => _GalleryAttachmentWidget(
-    attachment: attachment,
-    cacheManager: _cacheManager,
-    download: download,
-  );
+  }) {
+    if (_isVideoAttachment(attachment)) {
+      return GalleryVideoAttachmentWidget(
+        attachment: attachment,
+        cacheManager: _cacheManager,
+        download: download,
+      );
+    }
+
+    return _GalleryAttachmentWidget(
+      attachment: attachment,
+      cacheManager: _cacheManager,
+      download: download,
+    );
+  }
 
   /// Renders multiple image attachments as a scrollable list.
   ///
@@ -123,9 +132,19 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => Column(
     children: List.generate(attachments.length, (index) {
+      final attachment = attachments[index];
+      if (_isVideoAttachment(attachment)) {
+        return GalleryVideoAttachmentWidget(
+          key: ValueKey(attachment.id ?? index),
+          attachment: attachment,
+          cacheManager: _cacheManager,
+          download: download,
+        );
+      }
+
       return _GalleryAttachmentWidget(
-        key: ValueKey(attachments[index].id ?? index),
-        attachment: attachments[index],
+        key: ValueKey(attachment.id ?? index),
+        attachment: attachment,
         cacheManager: _cacheManager,
         download: download,
       );
@@ -136,8 +155,12 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   ///
   /// Returns `true` if the attachment format matches this plugin's name.
   @override
-  bool supportsFormat(ChatAttachment attachment) {
-    return attachment.format == _pluginName;
+  bool supportsFormat(ChatAttachment attachment) =>
+      attachment.format == _pluginName;
+
+  static bool _isVideoAttachment(ChatAttachment attachment) {
+    if (attachment.format != _pluginName) return false;
+    return attachment.mediaType?.toLowerCase().startsWith('video/') ?? false;
   }
 
   /// The emoji icon representing this plugin type.
@@ -151,6 +174,9 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   /// Indicates this plugin is supported on all platforms.
   @override
   bool get isPlatformSupported => true;
+
+  @override
+  bool get includeInMediaOptions => true;
 }
 
 /// Widget that renders a single gallery image attachment as a tappable card.

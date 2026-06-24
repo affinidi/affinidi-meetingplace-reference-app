@@ -158,6 +158,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
       _ => null,
     };
   }
+
+  @override
+  bool get includeInMediaOptions => true;
 }
 
 class _ListDocumentAttachmentsWidget extends StatelessWidget {

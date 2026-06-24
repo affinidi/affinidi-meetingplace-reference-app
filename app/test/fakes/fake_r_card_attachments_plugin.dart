@@ -39,4 +39,7 @@ class FakeUnsupportedRCardPlugin implements AttachmentPlugin {
     required Color chatItemColor,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => const SizedBox.shrink();
+
+  @override
+  bool get includeInMediaOptions => true;
 }

@@ -4,139 +4,15 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart';
 
-import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../presentation/screens/media/video_player_screen/video_player_screen.dart';
 import '../attachment_plugin_cache.dart';
-import 'video_attachment.dart';
 
-/// A plugin for handling video attachments picked from the device gallery.
-final class VideoAttachmentsPlugin implements AttachmentPlugin {
-  VideoAttachmentsPlugin({
-    required this._cacheManager,
-    required this._imagePicker,
-  });
-
-  static const pluginName = 'mpx_video_attachment_plugin';
-
-  final BaseCacheManager _cacheManager;
-  final ImagePicker _imagePicker;
-
-  int get _maxBytes => Environment.instance.chatAttachmentMaxBytes;
-
-  @override
-  bool get dismissSheetBeforePicking => false;
-
-  @override
-  Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context,
-  ) async {
-    final video = await _imagePicker.pickVideo(
-      source: ImageSource.gallery,
-      maxDuration: const Duration(minutes: 5),
-    );
-    if (video == null) return null;
-
-    final sizeBytes = await video.length();
-    if (sizeBytes > _maxBytes) {
-      if (context.mounted) {
-        _showTooLargeSnackBar(context);
-      }
-      return null;
-    }
-
-    final bytes = await video.readAsBytes();
-
-    return AttachmentPluginPickResult(
-      text: '',
-      attachments: [
-        VideoAttachment(
-          base64: base64.encode(bytes),
-          pluginName: pluginName,
-          mimeType: video.mimeType ?? 'video/mp4',
-          filename: video.name,
-          byteCount: bytes.length,
-        ),
-      ],
-    );
-  }
-
-  void _showTooLargeSnackBar(BuildContext context) {
-    final maxMb = _maxBytes ~/ (1024 * 1024);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.attachmentTooLarge(maxMb))),
-    );
-  }
-
-  @override
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => _VideoAttachmentWidget(
-    attachment: attachment,
-    cacheManager: _cacheManager,
-    download: download,
-  );
-
-  @override
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => _ListVideoAttachmentsWidget(
-    attachments: attachments,
-    cacheManager: _cacheManager,
-    download: download,
-  );
-
-  @override
-  bool supportsFormat(ChatAttachment attachment) =>
-      attachment.format == pluginName;
-
-  @override
-  AttachmentPluginIcon get icon => const EmojiIcon('🎬');
-
-  @override
-  String localizedName(BuildContext context) => context.l10n.generalVideo;
-
-  @override
-  bool get isPlatformSupported => true;
-}
-
-class _ListVideoAttachmentsWidget extends StatelessWidget {
-  const _ListVideoAttachmentsWidget({
-    required this._attachments,
-    required this._cacheManager,
-    this._download,
-  });
-
-  final List<ChatAttachment> _attachments;
-  final BaseCacheManager _cacheManager;
-  final Future<Uint8List> Function(ChatAttachment)? _download;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: _attachments.length,
-      itemBuilder: (context, index) => _VideoAttachmentWidget(
-        attachment: _attachments[index],
-        cacheManager: _cacheManager,
-        download: _download,
-      ),
-    );
-  }
-}
-
-class _VideoAttachmentWidget extends StatefulWidget {
-  const _VideoAttachmentWidget({
+class GalleryVideoAttachmentWidget extends StatefulWidget {
+  const GalleryVideoAttachmentWidget({
+    super.key,
     required this.attachment,
     required this.cacheManager,
     this.download,
@@ -147,10 +23,12 @@ class _VideoAttachmentWidget extends StatefulWidget {
   final Future<Uint8List> Function(ChatAttachment)? download;
 
   @override
-  State<_VideoAttachmentWidget> createState() => _VideoAttachmentWidgetState();
+  State<GalleryVideoAttachmentWidget> createState() =>
+      _GalleryVideoAttachmentWidgetState();
 }
 
-class _VideoAttachmentWidgetState extends State<_VideoAttachmentWidget> {
+class _GalleryVideoAttachmentWidgetState
+    extends State<GalleryVideoAttachmentWidget> {
   Uint8List? _bytes;
   bool _isDownloading = false;
   bool _hasFailed = false;

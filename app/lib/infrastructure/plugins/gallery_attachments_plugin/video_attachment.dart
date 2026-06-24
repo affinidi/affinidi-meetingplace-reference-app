@@ -2,7 +2,9 @@ import 'package:clock/clock.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:uuid/uuid.dart';
 
-/// A message attachment representing a video picked from the gallery.
+import '../../../presentation/screens/media/media_screen/media_screen.dart';
+
+/// Wire format for videos picked from the gallery [MediaScreen].
 class VideoAttachment implements MessageAttachment {
   VideoAttachment({
     required this._base64,

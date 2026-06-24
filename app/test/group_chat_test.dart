@@ -364,7 +364,6 @@ void main() {
 
         expect(find.text(l10n.generalCamera), findsOneWidget);
         expect(find.text(l10n.generalPhoto), findsOneWidget);
-        expect(find.text(l10n.generalVideo), findsNothing);
         expect(find.text(l10n.generalBalloons), findsNothing);
         expect(find.text(l10n.generalConfetti), findsNothing);
       });

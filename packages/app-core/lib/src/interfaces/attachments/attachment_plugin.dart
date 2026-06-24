@@ -33,4 +33,6 @@ abstract interface class AttachmentPlugin {
   String localizedName(BuildContext context);
 
   bool get isPlatformSupported => true;
+
+  bool get includeInMediaOptions => true;
 }
