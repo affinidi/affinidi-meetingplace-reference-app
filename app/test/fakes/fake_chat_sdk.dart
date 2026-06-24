@@ -572,7 +572,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
           id: firstAttachment.id,
           mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
           filename: firstAttachment.filename,
-          format: AttachmentFormat.hostedMedia.value,
+          format: firstAttachment.format,
           transportId: transportId,
           data: ChatAttachmentData(links: [mediaUri], base64: base64Data),
           metadata: firstAttachment.metadata,

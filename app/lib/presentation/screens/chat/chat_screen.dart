@@ -22,10 +22,8 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../../application/services/attachment_cache_service/attachment_cache_service.dart';
 import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
@@ -45,7 +43,6 @@ import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import '../../../infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
-import '../../../infrastructure/plugins/media_category.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachment.dart';

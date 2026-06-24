@@ -1,16 +1,26 @@
-part of '../chat_screen.dart';
+import 'dart:io';
+import 'dart:typed_data';
 
-class _VideoPlayerScreen extends StatefulWidget {
-  const _VideoPlayerScreen({required this.videoBytes}) : filename = null;
+import 'package:clock/clock.dart';
+import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:video_player/video_player.dart';
+
+import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
+
+class VideoPlayerScreen extends StatefulWidget {
+  const VideoPlayerScreen({super.key, required this.videoBytes, this.filename});
 
   final Uint8List videoBytes;
   final String? filename;
 
   @override
-  State<_VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
 }
 
-class _VideoPlayerScreenState extends State<_VideoPlayerScreen> {
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _hasError = false;
@@ -51,7 +61,7 @@ class _VideoPlayerScreenState extends State<_VideoPlayerScreen> {
         'Failed to initialize video player',
         error: e,
         stackTrace: stackTrace,
-        name: '_VideoPlayerScreen',
+        name: 'VideoPlayerScreen',
       );
       if (mounted) {
         setState(() => _hasError = true);

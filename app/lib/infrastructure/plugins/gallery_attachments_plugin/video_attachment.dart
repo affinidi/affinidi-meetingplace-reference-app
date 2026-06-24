@@ -1,12 +1,12 @@
 import 'package:clock/clock.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../presentation/screens/media/media_screen/media_screen.dart';
 
 /// Wire format for videos picked from the gallery [MediaScreen].
 class VideoAttachment implements MessageAttachment {
   VideoAttachment({
+    required this._id,
     required this._base64,
     required this._pluginName,
     required this._mimeType,
@@ -14,6 +14,7 @@ class VideoAttachment implements MessageAttachment {
     required this._byteCount,
   });
 
+  final String _id;
   final String _base64;
   final String _pluginName;
   final String _mimeType;
@@ -25,7 +26,7 @@ class VideoAttachment implements MessageAttachment {
 
   @override
   ChatAttachment toAttachment() => ChatAttachment(
-    id: const Uuid().v4(),
+    id: _id,
     mediaType: _mimeType,
     format: _pluginName,
     filename: _filename,

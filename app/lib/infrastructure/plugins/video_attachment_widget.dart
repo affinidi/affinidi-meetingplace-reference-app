@@ -1,15 +1,17 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
-import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../presentation/screens/media/video_player_screen/video_player_screen.dart';
-import '../attachment_plugin_cache.dart';
+import '../../presentation/screens/media/video_player_screen/video_player_screen.dart';
+import '../extensions/build_context_extensions.dart';
+import 'attachment_plugin_cache.dart';
 
-class GalleryVideoAttachmentWidget extends StatefulWidget {
-  const GalleryVideoAttachmentWidget({
+class VideoAttachmentWidget extends StatefulWidget {
+  const VideoAttachmentWidget({
     super.key,
     required this.attachment,
     required this.cacheManager,
@@ -21,12 +23,10 @@ class GalleryVideoAttachmentWidget extends StatefulWidget {
   final Future<Uint8List> Function(ChatAttachment)? download;
 
   @override
-  State<GalleryVideoAttachmentWidget> createState() =>
-      _GalleryVideoAttachmentWidgetState();
+  State<VideoAttachmentWidget> createState() => _VideoAttachmentWidgetState();
 }
 
-class _GalleryVideoAttachmentWidgetState
-    extends State<GalleryVideoAttachmentWidget> {
+class _VideoAttachmentWidgetState extends State<VideoAttachmentWidget> {
   Uint8List? _bytes;
   bool _isDownloading = false;
   bool _hasFailed = false;
@@ -192,29 +192,21 @@ class _GalleryVideoAttachmentWidgetState
     return SizedBox(
       height: 200,
       width: 200,
-      child: Card(
-        color: const Color.fromARGB(0, 10, 10, 10),
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        elevation: 5,
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.videocam, color: Colors.white70, size: 48),
-              if (_attachment.filename != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
-                  child: Text(
-                    _attachment.filename!,
-                    style: const TextStyle(color: Colors.white70, fontSize: 11),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
+      child: GestureDetector(
+        onTap: _openPlayer,
+        child: Card(
+          color: const Color.fromARGB(0, 10, 10, 10),
+          clipBehavior: Clip.hardEdge,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          elevation: 5,
+          child: const Center(
+            child: Icon(
+              Icons.play_circle_outline,
+              color: Colors.white,
+              size: 56,
+            ),
           ),
         ),
       ),

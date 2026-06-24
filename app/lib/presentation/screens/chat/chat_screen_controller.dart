@@ -14,7 +14,6 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 
-import '../../../application/services/attachment_cache_service/attachment_cache_service.dart';
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
@@ -30,6 +29,7 @@ import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/event_message_extensions.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
+import '../../../infrastructure/plugins/audio_attachments_plugin/local_voice_attachment_store.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -92,7 +92,6 @@ class ChatScreenController extends _$ChatScreenController
   _conciergeLoadingControllers = {};
 
   ChatService? _chatService;
-  late final String _contactId;
 
   Future<Uint8List> downloadAttachmentForPlugin(
     ChatAttachment attachment,
@@ -109,7 +108,6 @@ class ChatScreenController extends _$ChatScreenController
 
   @override
   ChatScreenState build(String contactId) {
-    _contactId = contactId;
     WidgetsBinding.instance.addObserver(this);
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
@@ -192,7 +190,7 @@ class ChatScreenController extends _$ChatScreenController
           );
 
           final messages = ref
-              .read(attachmentCacheServiceProvider(contactId).notifier)
+              .read(localVoiceAttachmentStoreProvider)
               .withLocalVoiceMetadata(next.messages);
 
           pendingState = pendingState.copyWith(
@@ -218,15 +216,6 @@ class ChatScreenController extends _$ChatScreenController
 
           if (hasInitializedState) {
             state = pendingState;
-          }
-
-          final messagesChanged = !identical(previous?.messages, next.messages);
-          final becameInitialized =
-              previous?.isInitialized != true && next.isInitialized;
-          if (messagesChanged || becameInitialized) {
-            ref
-                .read(attachmentCacheServiceProvider(contactId).notifier)
-                .preload(messages);
           }
         });
       }, fireImmediately: true);
@@ -979,8 +968,8 @@ class ChatScreenController extends _$ChatScreenController
     );
     if (voiceMessage == null) return false;
 
-    final cache = ref.read(attachmentCacheServiceProvider(_contactId).notifier);
-    cache.cacheLocalVoiceMessage(
+    final localVoiceStore = ref.read(localVoiceAttachmentStoreProvider);
+    localVoiceStore.cacheLocalVoiceMessage(
       voiceMessage.attachment,
       voiceMessage.bytes,
       durationMs: duration.inMilliseconds,
@@ -994,7 +983,7 @@ class ChatScreenController extends _$ChatScreenController
       );
       return true;
     } catch (e, st) {
-      cache.removeLocalVoiceMessage(voiceMessage.attachment);
+      localVoiceStore.removeLocalVoiceMessage(voiceMessage.attachment);
       _logger.error(
         'Failed to send voice message',
         error: e,

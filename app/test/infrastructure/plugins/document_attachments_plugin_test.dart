@@ -8,6 +8,8 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 
+import '../../fakes/fake_cache_manager.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

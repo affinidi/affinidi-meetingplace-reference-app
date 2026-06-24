@@ -26,6 +26,7 @@ import '../../../infrastructure/extensions/list_extensions.dart';
 import '../../../infrastructure/helpers/keyed_lock.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -89,8 +90,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   TimedAction? _presenceTimedAction;
   final Map<String, TypingTimer> _typingTimedActions = {};
   static const _oneToOneTypingKey = '_one_to_one_';
-  final List<_BufferedOutboundMessage> _bufferedOutboundMessages = [];
-  Future<void>? _bufferFlushInFlight;
 
   @override
   int get secondsToShowChatActivityIndicator =>
@@ -287,7 +286,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
       final messages = _appendDerivedZkpNotices(baseMessages);
       state = state.copyWith(messages: messages, isInitialized: true);
-      await _flushBufferedOutboundMessages();
 
       // Reset must be fully committed before the stream listener is attached.
       // Buffered events flush as soon as the listener attaches and would
@@ -441,76 +439,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String message, {
     List<ChatAttachment>? attachments,
   }) async {
-    final sdk = _chatSDK;
-    if (sdk == null) {
-      final bufferedMessage = _BufferedOutboundMessage(
-        id: const Uuid().v4(),
-        text: message,
-        attachments: List<ChatAttachment>.from(attachments ?? const []),
-      );
-      _bufferedOutboundMessages.add(bufferedMessage);
-      _logger.info(
-        '''Buffered outbound message ${bufferedMessage.id} while chat SDK was unavailable''',
-        name: _logKey,
-      );
-      return;
-    }
-
-    await sdk.sendTextMessage(message, attachments: attachments ?? const []);
-  }
-
-  Future<void> _flushBufferedOutboundMessages() async {
-    final flushInFlight = _bufferFlushInFlight;
-    if (flushInFlight != null) {
-      await flushInFlight;
-      return;
-    }
-
-    final flushFuture = _flushBufferedOutboundMessagesInternal();
-    _bufferFlushInFlight = flushFuture;
-
-    try {
-      await flushFuture;
-    } finally {
-      if (identical(_bufferFlushInFlight, flushFuture)) {
-        _bufferFlushInFlight = null;
-      }
-    }
-  }
-
-  Future<void> _flushBufferedOutboundMessagesInternal() async {
-    final sdk = _chatSDK;
-    if (sdk == null || _bufferedOutboundMessages.isEmpty) return;
-
-    final batch = List<_BufferedOutboundMessage>.from(
-      _bufferedOutboundMessages,
+    await _chatSDK?.sendTextMessage(
+      message,
+      attachments: attachments ?? const [],
     );
-    _bufferedOutboundMessages.clear();
-
-    for (var index = 0; index < batch.length; index++) {
-      final bufferedMessage = batch[index];
-      final currentSdk = _chatSDK;
-      if (currentSdk == null) {
-        _bufferedOutboundMessages.insertAll(0, batch.skip(index));
-        return;
-      }
-
-      try {
-        await currentSdk.sendTextMessage(
-          bufferedMessage.text,
-          attachments: bufferedMessage.attachments,
-        );
-      } catch (error, stackTrace) {
-        _bufferedOutboundMessages.insertAll(0, batch.skip(index));
-        _logger.error(
-          'Failed to flush buffered outbound message ${bufferedMessage.id}',
-          error: error,
-          stackTrace: stackTrace,
-          name: _logKey,
-        );
-        return;
-      }
-    }
   }
 
   @override
@@ -558,7 +490,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       waveform: waveform,
       filename: path.basename(filePath),
       mediaType: mediaType,
-      format: AttachmentFormat.hostedMedia.value,
+      format: AudioAttachmentsPlugin.pluginName,
       lastModifiedTime: clock.now(),
       byteCount: bytes.length,
     );
@@ -939,16 +871,4 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
     state = state.copyWith(membersTyping: memberNames);
   }
-}
-
-class _BufferedOutboundMessage {
-  const _BufferedOutboundMessage({
-    required this.id,
-    required this.text,
-    required this.attachments,
-  });
-
-  final String id;
-  final String text;
-  final List<ChatAttachment> attachments;
 }
