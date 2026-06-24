@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -6,11 +5,10 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../presentation/screens/media/image_view_screen/image_view_screen.dart';
 import '../../../presentation/screens/media/media_screen/media_screen.dart';
 import '../../extensions/build_context_extensions.dart';
+import '../image_attachment_renderer_mixin.dart';
 import 'gallery_image_attachment.dart';
-import 'gallery_video_attachment_widget.dart';
 import 'video_attachment.dart';
 
 /// A plugin for handling gallery-based image and video attachments.
@@ -19,18 +17,23 @@ import 'video_attachment.dart';
 /// - Pick images and videos from the device gallery via [MediaScreen]
 /// - Review selected media before attaching
 /// - Render image and video attachments in chat
-class GalleryAttachmentsPlugin implements AttachmentPlugin {
+class GalleryAttachmentsPlugin
+    with ImageAttachmentRendererMixin
+    implements AttachmentPlugin {
   GalleryAttachmentsPlugin({required this._cacheManager});
 
   static const _pluginName = 'mpx_gallery_attachment_plugin';
-
-  static String _cacheKeyForAttachment(String attachmentId) =>
-      '$_pluginName:$attachmentId';
 
   final BaseCacheManager _cacheManager;
 
   @override
   bool get dismissSheetBeforePicking => false;
+
+  @override
+  BaseCacheManager get attachmentRendererCacheManager => _cacheManager;
+
+  @override
+  String get pluginName => _pluginName;
 
   /// Prompts the user to pick and review an image from gallery.
   ///
@@ -62,12 +65,15 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
       return null;
     }
 
+    final attachmentId = const Uuid().v4();
+
     final videoBase64 = result.videoBase64;
     if (videoBase64 != null) {
       return AttachmentPluginPickResult(
         text: result.textMessage,
         attachments: [
           VideoAttachment(
+            id: attachmentId,
             base64: videoBase64,
             pluginName: _pluginName,
             mimeType: result.videoMimeType ?? 'video/mp4',
@@ -78,8 +84,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
       );
     }
 
-    final attachmentId = const Uuid().v4();
-    final cacheKey = _cacheKeyForAttachment(attachmentId);
+    final cacheKey = cacheKeyForImageAttachment(attachmentId);
     await _cacheManager.putFile(cacheKey, result.compressedImage.bytes);
 
     return AttachmentPluginPickResult(
@@ -97,7 +102,7 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   /// Renders a single image attachment as a tappable card widget.
   ///
   /// Creates a 200x200 card with rounded corners that displays the image.
-  /// Tapping opens the image in full-screen view via [ImageViewScreen].
+  /// Tapping opens the image in full-screen view via the shared image widget.
   @override
   Widget renderAttachment({
     required ChatAttachment attachment,
@@ -105,17 +110,10 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     required Color chatItemColor,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) {
-    if (_isVideoAttachment(attachment)) {
-      return GalleryVideoAttachmentWidget(
-        attachment: attachment,
-        cacheManager: _cacheManager,
-        download: download,
-      );
-    }
-
-    return _GalleryAttachmentWidget(
+    return super.renderAttachment(
       attachment: attachment,
-      cacheManager: _cacheManager,
+      isFromMe: isFromMe,
+      chatItemColor: chatItemColor,
       download: download,
     );
   }
@@ -130,26 +128,14 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
     required bool isFromMe,
     required Color chatItemColor,
     Future<Uint8List> Function(ChatAttachment)? download,
-  }) => Column(
-    children: List.generate(attachments.length, (index) {
-      final attachment = attachments[index];
-      if (_isVideoAttachment(attachment)) {
-        return GalleryVideoAttachmentWidget(
-          key: ValueKey(attachment.id ?? index),
-          attachment: attachment,
-          cacheManager: _cacheManager,
-          download: download,
-        );
-      }
-
-      return _GalleryAttachmentWidget(
-        key: ValueKey(attachment.id ?? index),
-        attachment: attachment,
-        cacheManager: _cacheManager,
-        download: download,
-      );
-    }, growable: false),
-  );
+  }) {
+    return super.renderAttachments(
+      attachments: attachments,
+      isFromMe: isFromMe,
+      chatItemColor: chatItemColor,
+      download: download,
+    );
+  }
 
   /// Checks if this plugin supports the given attachment format.
   ///
@@ -157,11 +143,6 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
   @override
   bool supportsFormat(ChatAttachment attachment) =>
       attachment.format == _pluginName;
-
-  static bool _isVideoAttachment(ChatAttachment attachment) {
-    if (attachment.format != _pluginName) return false;
-    return attachment.mediaType?.toLowerCase().startsWith('video/') ?? false;
-  }
 
   /// The emoji icon representing this plugin type.
   @override
@@ -177,233 +158,4 @@ class GalleryAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   bool get includeInMediaOptions => true;
-}
-
-/// Widget that renders a single gallery image attachment as a tappable card.
-///
-/// Features:
-/// - 200x200 size with rounded corners and elevation
-/// - When inline base64 data is available, renders using [MemoryImage]
-/// - When no inline data but a [download] callback is provided, downloads once
-///   and reuses the same future while the attachment identity stays the same
-/// - Shows loading spinner while downloading
-/// - Shows broken image icon on download error
-/// - Returns empty widget if neither data nor callback are available
-class _GalleryAttachmentWidget extends StatefulWidget {
-  const _GalleryAttachmentWidget({
-    super.key,
-    required this.attachment,
-    required this.cacheManager,
-    this.download,
-  });
-
-  final ChatAttachment attachment;
-  final BaseCacheManager cacheManager;
-  final Future<Uint8List> Function(ChatAttachment)? download;
-
-  @override
-  State<_GalleryAttachmentWidget> createState() =>
-      _GalleryAttachmentWidgetState();
-}
-
-class _GalleryAttachmentWidgetState extends State<_GalleryAttachmentWidget>
-    with AutomaticKeepAliveClientMixin {
-  Future<Uint8List>? _imageFuture;
-  Uint8List? _resolvedImageBytes;
-  late String _attachmentKey;
-
-  String? _cacheKey(ChatAttachment attachment) {
-    final id = attachment.id;
-    if (id == null || id.isEmpty) return null;
-
-    return GalleryAttachmentsPlugin._cacheKeyForAttachment(id);
-  }
-
-  Future<Uint8List> _loadImageBytes(
-    ChatAttachment attachment,
-    Future<Uint8List> Function(ChatAttachment) downloadFn,
-  ) async {
-    final cacheKey = _cacheKey(attachment);
-    if (cacheKey != null) {
-      final cachedFileInfo = await widget.cacheManager.getFileFromCache(
-        cacheKey,
-      );
-      if (cachedFileInfo != null) {
-        return cachedFileInfo.file.readAsBytes();
-      }
-    }
-
-    final imageBytes = await downloadFn(attachment);
-    if (imageBytes.isEmpty) return imageBytes;
-
-    if (cacheKey != null) {
-      await widget.cacheManager.putFile(cacheKey, imageBytes);
-    }
-    return imageBytes;
-  }
-
-  String _attachmentIdentityKey(ChatAttachment attachment) {
-    final id = attachment.id;
-    if (id != null && id.isNotEmpty) return 'id:$id';
-
-    final transportId = attachment.transportId;
-    if (transportId != null && transportId.isNotEmpty) {
-      return 'transport:$transportId';
-    }
-
-    final link = attachment.data?.links?.firstOrNull?.toString();
-    if (link != null && link.isNotEmpty) return 'link:$link';
-
-    final base64Data = attachment.data?.base64;
-    if (base64Data != null && base64Data.isNotEmpty) {
-      return 'base64:${base64Data.hashCode}';
-    }
-
-    return 'attachment:${identityHashCode(attachment)}';
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _attachmentKey = _attachmentIdentityKey(widget.attachment);
-    _imageFuture = _createImageFuture();
-  }
-
-  @override
-  void didUpdateWidget(_GalleryAttachmentWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    final nextAttachmentKey = _attachmentIdentityKey(widget.attachment);
-    final downloadAvailabilityChanged =
-        (oldWidget.download == null) != (widget.download == null);
-    if (_attachmentKey != nextAttachmentKey || downloadAvailabilityChanged) {
-      _attachmentKey = nextAttachmentKey;
-      _resolvedImageBytes = null;
-      _imageFuture = _createImageFuture();
-    }
-  }
-
-  Future<Uint8List>? _createImageFuture() {
-    final imageDataBase64 = widget.attachment.data?.base64;
-    if (imageDataBase64 != null) return null;
-
-    final downloadFn = widget.download;
-    if (downloadFn == null) return null;
-
-    return _loadImageBytes(widget.attachment, downloadFn);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-
-    final imageDataBase64 = widget.attachment.data?.base64;
-
-    if (imageDataBase64 != null) {
-      try {
-        return _ResolvedImage(base64Decode(imageDataBase64));
-      } catch (_) {
-        return const _ErrorImage();
-      }
-    }
-
-    final resolvedImageBytes = _resolvedImageBytes;
-    if (resolvedImageBytes != null) {
-      return _ResolvedImage(resolvedImageBytes);
-    }
-
-    final imageFuture = _imageFuture;
-    if (imageFuture == null) return const SizedBox.shrink();
-
-    return FutureBuilder<Uint8List>(
-      future: imageFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const _LoadingImage();
-        }
-
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-          return const _ErrorImage();
-        }
-
-        final imageBytes = snapshot.data!;
-        _resolvedImageBytes ??= imageBytes;
-        return _ResolvedImage(imageBytes);
-      },
-    );
-  }
-
-  @override
-  bool get wantKeepAlive => true;
-}
-
-class _LoadingImage extends StatelessWidget {
-  const _LoadingImage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 200,
-      width: 200,
-      child: Card(
-        color: Color.fromARGB(0, 10, 10, 10),
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-        elevation: 5,
-        child: DecoratedBox(
-          decoration: BoxDecoration(color: Color.fromARGB(255, 36, 42, 56)),
-          child: Center(
-            child: Icon(Icons.image_outlined, size: 36, color: Colors.white54),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorImage extends StatelessWidget {
-  const _ErrorImage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox(
-      height: 200,
-      width: 200,
-      child: Center(child: Icon(Icons.broken_image_outlined)),
-    );
-  }
-}
-
-class _ResolvedImage extends StatelessWidget {
-  const _ResolvedImage(this.imageBytes);
-
-  final Uint8List imageBytes;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 200,
-      width: 200,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context, rootNavigator: true).push<ImageViewScreen>(
-            MaterialPageRoute(
-              builder: (context) => ImageViewScreen(imageBytes: imageBytes),
-            ),
-          );
-        },
-        child: Card(
-          color: const Color.fromARGB(0, 10, 10, 10),
-          clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          elevation: 5,
-          child: Image(fit: BoxFit.cover, image: MemoryImage(imageBytes)),
-        ),
-      ),
-    );
-  }
 }

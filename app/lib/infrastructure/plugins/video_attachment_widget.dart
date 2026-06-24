@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
-import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../presentation/screens/media/video_player_screen/video_player_screen.dart';
-import '../attachment_plugin_cache.dart';
+import '../../presentation/screens/media/video_player_screen/video_player_screen.dart';
+import '../extensions/build_context_extensions.dart';
+import 'attachment_plugin_cache.dart';
 
-class GalleryVideoAttachmentWidget extends StatefulWidget {
-  const GalleryVideoAttachmentWidget({
+class VideoAttachmentWidget extends StatefulWidget {
+  const VideoAttachmentWidget({
     super.key,
     required this.attachment,
     required this.cacheManager,
@@ -23,12 +23,10 @@ class GalleryVideoAttachmentWidget extends StatefulWidget {
   final Future<Uint8List> Function(ChatAttachment)? download;
 
   @override
-  State<GalleryVideoAttachmentWidget> createState() =>
-      _GalleryVideoAttachmentWidgetState();
+  State<VideoAttachmentWidget> createState() => _VideoAttachmentWidgetState();
 }
 
-class _GalleryVideoAttachmentWidgetState
-    extends State<GalleryVideoAttachmentWidget> {
+class _VideoAttachmentWidgetState extends State<VideoAttachmentWidget> {
   Uint8List? _bytes;
   bool _isDownloading = false;
   bool _hasFailed = false;
