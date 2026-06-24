@@ -99,4 +99,7 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
           .toList(),
     );
   }
+
+  @override
+  bool get includeInMediaOptions => true;
 }

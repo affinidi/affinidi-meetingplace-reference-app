@@ -31,6 +31,9 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
   bool get isPlatformSupported => false;
 
   @override
+  bool get includeInMediaOptions => false;
+
+  @override
   Future<AttachmentPluginPickResult?> pickAttachments(
     BuildContext context,
   ) async => null;

@@ -44,6 +44,9 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
   bool get dismissSheetBeforePicking => true;
 
   @override
+  bool get includeInMediaOptions => true;
+
+  @override
   String localizedName(BuildContext context) =>
       context.l10n.verifiableRelationshipCredential;
 

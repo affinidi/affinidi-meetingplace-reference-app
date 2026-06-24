@@ -6,11 +6,6 @@ const _kAttachmentPluginIcons = <String, IconData>{
   '📄': Icons.assignment_outlined,
 };
 
-bool _isHiddenAttachmentIcon(AttachmentPluginIcon icon) => switch (icon) {
-  EmojiIcon(:final emoji) => emoji.startsWith('🎬'),
-  _ => false,
-};
-
 IconData _resolveAttachmentIcon(AttachmentPluginIcon icon) => switch (icon) {
   MaterialIcon(:final iconData) => iconData,
   EmojiIcon(:final emoji) =>
@@ -203,7 +198,7 @@ class _ChatMediaOptions extends ConsumerWidget {
 
     final items = <_ChatMediaOptionItem>[
       ...availableAttachmentPlugins
-          .where((plugin) => !_isHiddenAttachmentIcon(plugin.icon))
+          .where((plugin) => plugin.includeInMediaOptions)
           .where(
             (plugin) =>
                 plugin is! DocumentAttachmentsPlugin ||

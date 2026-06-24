@@ -119,6 +119,9 @@ class CameraAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   bool get isPlatformSupported => true;
+
+  @override
+  bool get includeInMediaOptions => true;
 }
 
 /// Renders multiple camera attachments in a non-scrollable ListView.
