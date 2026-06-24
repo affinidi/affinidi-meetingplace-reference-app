@@ -59,7 +59,7 @@ final class CameraServiceProvider
   }
 }
 
-String _$cameraServiceHash() => r'9458edab53135f4359e3f553bd0bc6725bde111a';
+String _$cameraServiceHash() => r'504c3bdec6271dc657bbed219065b2bcdb31ec46';
 
 /// A service class for managing camera functionality in the app.
 ///

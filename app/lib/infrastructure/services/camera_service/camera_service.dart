@@ -50,6 +50,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   late final AppLogger _logger = ref.read(appLoggerProvider);
   static const _logKey = 'CAMSVCS';
   CameraController? _activeController;
+  Future<CameraController>? _initializationInFlight;
 
   @override
   CameraServiceState build() {
@@ -80,6 +81,41 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   ///
   /// Returns an initialized [CameraController].
   Future<CameraController> initializeCamera(
+    CameraLensDirection cameraLensDirection,
+  ) async {
+    final currentController = state.controller;
+    if (currentController != null &&
+        currentController.value.isInitialized &&
+        currentController.description.lensDirection == cameraLensDirection) {
+      return currentController;
+    }
+
+    final inFlight = _initializationInFlight;
+    if (inFlight != null) {
+      final controller = await inFlight;
+      if (controller.description.lensDirection == cameraLensDirection &&
+          controller.value.isInitialized) {
+        return controller;
+      }
+    }
+
+    if (state.controller != null) {
+      await closeCamera();
+    }
+
+    final initialization = _createAndInitializeCamera(cameraLensDirection);
+    _initializationInFlight = initialization;
+
+    try {
+      return await initialization;
+    } finally {
+      if (identical(_initializationInFlight, initialization)) {
+        _initializationInFlight = null;
+      }
+    }
+  }
+
+  Future<CameraController> _createAndInitializeCamera(
     CameraLensDirection cameraLensDirection,
   ) async {
     final getCameras = ref.read(availableCamerasProvider);
