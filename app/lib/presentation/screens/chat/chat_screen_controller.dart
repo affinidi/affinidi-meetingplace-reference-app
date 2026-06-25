@@ -451,6 +451,7 @@ class ChatScreenController extends _$ChatScreenController
   /// Throws an exception if the contact cannot be loaded.
   Future<void> loadContact(String contactId) async {
     await ref.read(contactsServiceProvider.notifier).ensureInitialized();
+    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     if (contact == null) {
@@ -483,13 +484,18 @@ class ChatScreenController extends _$ChatScreenController
     }
     final srcCard = channel.otherPartyContactCard;
     final ownCard = channel.contactCard;
+    final ownIdentity = ref
+        .read(identitiesServiceProvider)
+        .getIdentityById(channel.externalRef);
     state = state.copyWith(
       otherPartyCard: srcCard == null
           ? null
           : ContactCardUtils.fromSdkContactCard(srcCard),
-      myCard: ownCard == null
-          ? null
-          : ContactCardUtils.fromSdkContactCard(ownCard),
+      myCard:
+          ownIdentity?.card ??
+          (ownCard == null
+              ? null
+              : ContactCardUtils.fromSdkContactCard(ownCard)),
       notificationToken: channel.otherPartyNotificationToken,
       myDid: channel.permanentChannelDid,
     );
