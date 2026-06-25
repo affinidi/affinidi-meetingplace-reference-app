@@ -271,14 +271,6 @@ class ChatScreenController extends _$ChatScreenController
       WidgetsBinding.instance.removeObserver(this);
     });
 
-    ref.listen(voicePlaybackServiceProvider(contactId), (previous, next) {
-      if (hasInitializedState) {
-        state = state.copyWith(voicePlayback: next);
-      } else {
-        pendingState = pendingState.copyWith(voicePlayback: next);
-      }
-    });
-
     hasInitializedState = true;
     return pendingState;
   }

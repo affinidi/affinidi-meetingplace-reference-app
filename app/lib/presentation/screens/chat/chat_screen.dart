@@ -26,6 +26,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../application/services/attachment_cache_service/attachment_cache_service.dart';
+import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';

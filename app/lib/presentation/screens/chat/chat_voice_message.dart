@@ -635,27 +635,13 @@ class _VoicePlayer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = chatScreenControllerProvider(_contactId);
-    final controller = ref.read(provider.notifier);
-    final isPlaying = ref.watch(
-      provider.select(
-        (state) =>
-            state.voicePlayback.isActive(_clipId) &&
-            state.voicePlayback.isPlaying,
-      ),
+    final playback = voicePlaybackServiceProvider(_contactId);
+    final controller = ref.read(
+      chatScreenControllerProvider(_contactId).notifier,
     );
-    final progress = ref.watch(
-      provider.select((state) => state.voicePlayback.progressFor(_clipId)),
-    );
-    final duration = ref.watch(
-      provider.select((state) {
-        final playback = state.voicePlayback;
-        if (!playback.isActive(_clipId)) return _initialDuration;
-        return playback.duration > Duration.zero
-            ? playback.duration
-            : _initialDuration;
-      }),
-    );
+    final isPlaying = ref.watch(playback.isPlaying(_clipId));
+    final progress = ref.watch(playback.progress(_clipId));
+    final duration = ref.watch(playback.duration(_clipId, _initialDuration));
 
     Future<void> togglePlayback() async {
       await controller.toggleVoicePlayback(

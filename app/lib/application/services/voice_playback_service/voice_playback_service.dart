@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter_riverpod/misc.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/misc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'voice_playback_service.g.dart';
@@ -176,5 +177,25 @@ class VoicePlaybackState {
       position: position ?? this.position,
       duration: duration ?? this.duration,
     );
+  }
+}
+
+extension VoicePlaybackServiceProviderSelectors
+    on VoicePlaybackServiceProvider {
+  ProviderListenable<bool> isPlaying(String clipId) {
+    return select(
+      (playback) => playback.isActive(clipId) && playback.isPlaying,
+    );
+  }
+
+  ProviderListenable<double> progress(String clipId) {
+    return select((playback) => playback.progressFor(clipId));
+  }
+
+  ProviderListenable<Duration> duration(String clipId, Duration fallback) {
+    return select((playback) {
+      if (!playback.isActive(clipId)) return fallback;
+      return playback.duration > Duration.zero ? playback.duration : fallback;
+    });
   }
 }
