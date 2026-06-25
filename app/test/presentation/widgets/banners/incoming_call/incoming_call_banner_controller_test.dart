@@ -103,5 +103,28 @@ void main() {
 
       expect(container.read(incomingCallBannerControllerProvider), false);
     });
+
+    test(
+      'resets dismissed state for an audio call so the banner shows again',
+      () {
+        final container = _makeContainer();
+        container
+            .read(incomingCallBannerControllerProvider.notifier)
+            .dismiss(callId: _kCallId);
+        expect(container.read(incomingCallBannerControllerProvider), true);
+
+        container
+            .read(incomingCallStateProvider.notifier)
+            .set(
+              const IncomingAudioVideoCallEvent(
+                callId: 'call-789',
+                otherPartyChannelDid: 'did:example:other',
+                mediaType: CallMediaType.audio,
+              ),
+            );
+
+        expect(container.read(incomingCallBannerControllerProvider), false);
+      },
+    );
   });
 }
