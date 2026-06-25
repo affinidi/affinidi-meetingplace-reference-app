@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 
@@ -54,8 +55,9 @@ void main() {
         expect(plugin.supportsFormat(attachment), isTrue);
       });
 
-      test('returns false for hosted media format', () {
-        final attachment = ChatAttachment(format: 'hosted_media');
+      test('returns false for audio plugin format', () {
+        final attachment = ChatAttachment(
+          format: AudioAttachmentsPlugin.pluginName);
         expect(plugin.supportsFormat(attachment), isFalse);
       });
 

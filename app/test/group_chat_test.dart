@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
@@ -157,7 +158,7 @@ void main() {
           ChatAttachment(
             mediaType: 'audio/mp4',
             filename: 'voice.m4a',
-            format: 'hosted_media',
+            format: AudioAttachmentsPlugin.pluginName,
             data: ChatAttachmentData(
               links: [Uri.parse('mxc://fake-homeserver/voice')],
             ),

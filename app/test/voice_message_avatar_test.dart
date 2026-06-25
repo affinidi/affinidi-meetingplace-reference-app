@@ -5,6 +5,7 @@ import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/presentation/painting/cached_base64_image.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/images/default_profile_image.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
@@ -41,7 +42,7 @@ const _voiceAvatarKey = Key('voice_sender_avatar');
 ChatAttachment _voiceAttachment() => ChatAttachment(
   mediaType: 'audio/mp4',
   filename: 'voice.m4a',
-  format: 'hosted_media',
+  format: AudioAttachmentsPlugin.pluginName,
   data: ChatAttachmentData(links: [Uri.parse('mxc://fake-homeserver/voice')]),
   metadata: VoiceMessageMetadata(
     durationMs: 11000,
