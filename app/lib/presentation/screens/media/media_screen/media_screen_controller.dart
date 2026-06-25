@@ -23,7 +23,11 @@ part 'media_screen_controller.g.dart';
 @riverpod
 class MediaScreenController extends _$MediaScreenController {
   late final AppLogger _logger = ref.read(appLoggerProvider);
+  late final CameraService _cameraService = ref.read(
+    cameraServiceProvider.notifier,
+  );
   static const _logKey = 'MEDSCRCTRL';
+  var _isDisposed = false;
 
   @override
   MediaScreenState build({
@@ -31,6 +35,11 @@ class MediaScreenController extends _$MediaScreenController {
     required bool useCamera,
     required bool useChatSemantics,
   }) {
+    _isDisposed = false;
+    ref.onDispose(() {
+      _isDisposed = true;
+    });
+
     if (!useCamera) {
       Future(pickFromGallery);
       return MediaScreenState(isLoading: true);
@@ -148,7 +157,7 @@ class MediaScreenController extends _$MediaScreenController {
   }
 
   Future<void> captureWithCamera() async {
-    final file = await ref.read(cameraServiceProvider.notifier).captureImage();
+    final file = await _cameraService.captureImage();
     if (file != null) {
       state = state.copyWith(pickedImageBytes: await file.readAsBytes());
     }
@@ -156,7 +165,7 @@ class MediaScreenController extends _$MediaScreenController {
 
   Future<void> toggleCamera() async {
     state = state.copyWith(isLoading: true);
-    await ref.read(cameraServiceProvider.notifier).toggleCamera();
+    await _cameraService.toggleCamera();
     final current = ref.read(cameraServiceProvider).controller;
     if (current != null) {
       state = state.copyWith(
@@ -172,7 +181,8 @@ class MediaScreenController extends _$MediaScreenController {
   }
 
   Future<void> closeCamera() async {
-    await ref.read(cameraServiceProvider.notifier).closeCamera();
+    await _cameraService.closeCamera();
+    if (_isDisposed) return;
     state = state.copyWith(cameraController: null, isCameraAvailable: false);
   }
 
@@ -191,8 +201,9 @@ class MediaScreenController extends _$MediaScreenController {
   Future<void> _initCamera(CameraLensDirection direction) async {
     try {
       state = state.copyWith(isLoading: true);
-      final service = ref.read(cameraServiceProvider.notifier);
-      final isReady = await service.ensureCameraReady(direction: direction);
+      final isReady = await _cameraService.ensureCameraReady(
+        direction: direction,
+      );
 
       if (!isReady) {
         _logger.warning(
@@ -227,8 +238,6 @@ class MediaScreenController extends _$MediaScreenController {
         isFrontCamera: direction == CameraLensDirection.front,
         isLoading: false,
       );
-
-      ref.onDispose(controller.dispose);
     } catch (error, stackTrace) {
       _logger.error(
         'Error initializing camera',

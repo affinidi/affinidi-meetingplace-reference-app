@@ -54,6 +54,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   static const _supersededInitializationCode = 'CameraInitializationSuperseded';
   CameraController? _activeController;
   Future<CameraController>? _initializationInFlight;
+  Future<PermissionStatus>? _cameraPermissionRequestInFlight;
   CameraLensDirection? _initializationLensDirection;
   int _initializationGeneration = 0;
 
@@ -227,6 +228,8 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
   ///
   /// Sets the controller in state to `null`.
   Future<void> closeCamera() async {
+    if (!ref.mounted) return;
+
     final controller = state.controller;
     _activeController = null;
     state = state.copyWith(controller: null);
@@ -302,7 +305,7 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
     var status = await permissionService.getCameraPermissionStatus();
 
     if (status.isDenied) {
-      status = await permissionService.requestCameraPermission();
+      status = await _requestCameraPermission(permissionService);
     }
 
     if (!status.isGranted) {
@@ -323,6 +326,24 @@ class CameraService extends _$CameraService with WidgetsBindingObserver {
       );
       return false;
     }
+  }
+
+  Future<PermissionStatus> _requestCameraPermission(
+    PermissionService permissionService,
+  ) {
+    final inFlight = _cameraPermissionRequestInFlight;
+    if (inFlight != null) {
+      return inFlight;
+    }
+
+    final request = permissionService.requestCameraPermission();
+    _cameraPermissionRequestInFlight = request;
+
+    return request.whenComplete(() {
+      if (identical(_cameraPermissionRequestInFlight, request)) {
+        _cameraPermissionRequestInFlight = null;
+      }
+    });
   }
 
   /// Checks whether cameras are available on the device and updates the state.
