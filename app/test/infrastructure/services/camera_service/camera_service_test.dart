@@ -2,12 +2,16 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../fakes/fake_camera_controller.dart';
+import '../../../fakes/fake_permission_service.dart';
 
 const _backCamera = CameraDescription(
   name: 'Mock Back Camera',
@@ -244,6 +248,80 @@ void main() {
         CameraLensDirection.front,
       );
     });
+
+    test(
+      'coalesces concurrent permission requests for the same camera',
+      () async {
+        final requestCompleter = Completer<PermissionStatus>();
+        var requestInFlight = false;
+        var permissionRequestCount = 0;
+
+        final permissionService = FakePermissionService(
+          cameraPermissionStatus: PermissionStatus.denied,
+          onRequestCameraPermission: () {
+            permissionRequestCount += 1;
+
+            if (requestInFlight) {
+              throw PlatformException(
+                code: 'ERROR_ALREADY_REQUESTING_PERMISSIONS',
+                message:
+                    '''A request for permissions is already running, please wait for it to finish before doing another request.''',
+              );
+            }
+
+            requestInFlight = true;
+
+            return requestCompleter.future.whenComplete(() {
+              requestInFlight = false;
+            });
+          },
+        );
+
+        final container = ProviderContainer(
+          overrides: [
+            availableCamerasProvider.overrideWith(
+              (ref) =>
+                  () async => const [_backCamera],
+            ),
+            cameraControllerFactoryProvider.overrideWith(
+              (ref) =>
+                  (
+                    description,
+                    resolutionPreset, {
+                    enableAudio = true,
+                    imageFormatGroup,
+                  }) => FakeCameraController(
+                    description,
+                    resolutionPreset,
+                    enableAudio: enableAudio,
+                    imageFormatGroup: imageFormatGroup,
+                  ),
+            ),
+            permissionServiceProvider.overrideWith((ref) => permissionService),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final notifier = container.read(cameraServiceProvider.notifier);
+
+        final firstEnsureReady = notifier.ensureCameraReady(
+          direction: CameraLensDirection.back,
+        );
+
+        await Future<void>.delayed(Duration.zero);
+
+        final secondEnsureReady = notifier.ensureCameraReady(
+          direction: CameraLensDirection.back,
+        );
+
+        requestCompleter.complete(PermissionStatus.granted);
+
+        await expectLater(firstEnsureReady, completion(isTrue));
+        await expectLater(secondEnsureReady, completion(isTrue));
+
+        expect(permissionRequestCount, 1);
+      },
+    );
   });
 }
 

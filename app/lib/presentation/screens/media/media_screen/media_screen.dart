@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
@@ -114,6 +115,14 @@ class MediaScreen extends HookConsumerWidget {
     );
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
+
+    useEffect(() {
+      return () {
+        scheduleMicrotask(() {
+          unawaited(controller.closeCamera());
+        });
+      };
+    }, [controller]);
 
     useEffect(() {
       if (state.pickedImageBytes != null) {
