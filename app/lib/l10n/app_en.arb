@@ -1615,6 +1615,7 @@
 		}
 	},
 	"humanZkp": "Human ZKP",
+	"humanZkpAbbreviated": "Human ZKP",
 	"@humanZkp": {
 		"type": "text"
 	},
