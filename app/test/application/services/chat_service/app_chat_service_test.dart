@@ -280,6 +280,38 @@ void main() {
       expect(fakeChatSdk.sendMediaMessageCalls, hasLength(1));
     });
 
+    test(
+      '''keeps buffered messages queued when flush send fails without aborting start''',
+      () async {
+        await chatService.startChatSession();
+        await chatService.pauseChat();
+
+        await chatService.sendTextMessage(
+          '',
+          attachments: [bufferedVideoAttachment()],
+        );
+
+        fakeChatSdk.sendTextMessageFailuresRemaining = 1;
+
+        await chatService.startChatSession();
+
+        expect(fakeChatSdk.startChatSessionCallCount, equals(2));
+        expect(
+          fakeContactsService.resetBadgeCalledWith,
+          testContact.channelDid,
+        );
+        expect(fakeChatSdk.sendTextMessageCalls, isEmpty);
+        expect(fakeChatSdk.sendMediaMessageCalls, isEmpty);
+
+        await chatService.pauseChat();
+        await chatService.startChatSession();
+
+        expect(fakeChatSdk.startChatSessionCallCount, equals(3));
+        expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
+        expect(fakeChatSdk.sendMediaMessageCalls, hasLength(1));
+      },
+    );
+
     test('pauseChat can be called multiple times safely', () async {
       await chatService.startChatSession();
       await chatService.pauseChat();

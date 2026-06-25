@@ -508,7 +508,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           stackTrace: stackTrace,
           name: _logKey,
         );
-        rethrow;
+        return;
       }
     }
   }
