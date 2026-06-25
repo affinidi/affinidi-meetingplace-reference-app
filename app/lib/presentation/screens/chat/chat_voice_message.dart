@@ -332,8 +332,9 @@ class _VoiceRecorder extends HookWidget {
   }
 }
 
-class _VoiceInputPreview extends HookWidget {
+class _VoiceInputPreview extends HookConsumerWidget {
   const _VoiceInputPreview({
+    required this._contactId,
     required this._draft,
     required this._isRecording,
     required this._duration,
@@ -341,6 +342,7 @@ class _VoiceInputPreview extends HookWidget {
     required this._onStopRecording,
   });
 
+  final String _contactId;
   final _VoiceMessageDraft? _draft;
   final bool _isRecording;
   final Duration _duration;
@@ -348,10 +350,15 @@ class _VoiceInputPreview extends HookWidget {
   final VoidCallback _onStopRecording;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final draft = _draft;
+    final controller = ref.read(
+      chatScreenControllerProvider(_contactId).notifier,
+    );
     if (!_isRecording && draft != null) {
       return _VoicePlayer(
+        contactId: _contactId,
+        clipId: controller.voiceClipId('voice-input-draft'),
         filePath: draft.path,
         mediaType: draft.mediaType,
         initialDuration: draft.duration,
@@ -423,6 +430,8 @@ class _VoiceInputPill extends StatelessWidget {
 
 class _HostedAudioWidget extends HookWidget {
   const _HostedAudioWidget({
+    required this._clipId,
+    required this._contactId,
     required this._attachment,
     required this._cachedBytes,
     required this._hasFailed,
@@ -433,6 +442,8 @@ class _HostedAudioWidget extends HookWidget {
     required this._senderAvatar,
   });
 
+  final String _clipId;
+  final String _contactId;
   final chat.ChatAttachment _attachment;
   final Uint8List? _cachedBytes;
   final bool _hasFailed;
@@ -481,6 +492,8 @@ class _HostedAudioWidget extends HookWidget {
     }
 
     return _VoicePlayer(
+      contactId: _contactId,
+      clipId: _clipId,
       bytes: cachedBytes,
       mediaType: _attachment.mediaType,
       initialDuration: Duration(milliseconds: durationMs),
@@ -597,8 +610,10 @@ class _VoicePlayerState {
   final VoidCallback toggle;
 }
 
-class _VoicePlayer extends HookWidget {
+class _VoicePlayer extends HookConsumerWidget {
   const _VoicePlayer({
+    required this._contactId,
+    required this._clipId,
     required this._initialDuration,
     required this._builder,
     this._filePath,
@@ -608,6 +623,8 @@ class _VoicePlayer extends HookWidget {
     this._onAutoPlayed,
   });
 
+  final String _contactId;
+  final String _clipId;
   final String? _filePath;
   final Uint8List? _bytes;
   final String? _mediaType;
@@ -617,66 +634,43 @@ class _VoicePlayer extends HookWidget {
   final Widget Function(BuildContext context, _VoicePlayerState state) _builder;
 
   @override
-  Widget build(BuildContext context) {
-    final player = useMemoized(AudioPlayer.new);
-    final isPlaying = useState(false);
-    final position = useState(Duration.zero);
-    final duration = useState(_initialDuration);
-
-    useEffect(() {
-      final subscriptions = <StreamSubscription<Object?>>[
-        player.onPlayerStateChanged.listen((state) {
-          isPlaying.value = state == PlayerState.playing;
-          if (state == PlayerState.completed || state == PlayerState.stopped) {
-            position.value = Duration.zero;
-          }
-        }),
-        player.onPositionChanged.listen((nextPosition) {
-          position.value = nextPosition;
-        }),
-        player.onDurationChanged.listen((nextDuration) {
-          if (nextDuration > Duration.zero) {
-            duration.value = nextDuration;
-          }
-        }),
-      ];
-
-      return () {
-        for (final subscription in subscriptions) {
-          unawaited(subscription.cancel());
-        }
-        unawaited(player.dispose());
-      };
-    }, [player]);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = chatScreenControllerProvider(_contactId);
+    final controller = ref.read(provider.notifier);
+    final isPlaying = ref.watch(
+      provider.select(
+        (state) =>
+            state.voicePlayback.isActive(_clipId) &&
+            state.voicePlayback.isPlaying,
+      ),
+    );
+    final progress = ref.watch(
+      provider.select((state) => state.voicePlayback.progressFor(_clipId)),
+    );
+    final duration = ref.watch(
+      provider.select((state) {
+        final playback = state.voicePlayback;
+        if (!playback.isActive(_clipId)) return _initialDuration;
+        return playback.duration > Duration.zero
+            ? playback.duration
+            : _initialDuration;
+      }),
+    );
 
     Future<void> togglePlayback() async {
-      if (isPlaying.value) {
-        await player.stop();
-        return;
-      }
-
-      await player.stop();
-      final bytes = _bytes;
-      if (bytes != null) {
-        await player.play(BytesSource(bytes, mimeType: _mediaType));
-        return;
-      }
-
-      final filePath = _filePath;
-      if (filePath != null) {
-        await player.play(DeviceFileSource(filePath, mimeType: _mediaType));
-      }
+      await controller.toggleVoicePlayback(
+        clipId: _clipId,
+        bytes: _bytes,
+        filePath: _filePath,
+        mediaType: _mediaType,
+        initialDuration: _initialDuration,
+      );
     }
 
-    // Starts playback once the bytes become available when the user tapped
-    // play while the clip was still downloading.
     final hasAutoPlayed = useRef(false);
     useEffect(() {
       if (_autoPlay && !hasAutoPlayed.value) {
         hasAutoPlayed.value = true;
-        // The effect runs synchronously during build; defer the playback start
-        // and the parent state reset to the next frame so we don't mutate the
-        // parent widget's state while it is still building.
         WidgetsBinding.instance.addPostFrameCallback((_) {
           unawaited(togglePlayback());
           _onAutoPlayed?.call();
@@ -685,18 +679,11 @@ class _VoicePlayer extends HookWidget {
       return null;
     }, [_autoPlay]);
 
-    final durationMs = duration.value.inMilliseconds;
-    final progress = durationMs <= 0
-        ? 0.0
-        : (position.value.inMilliseconds / durationMs)
-              .clamp(0.0, 1.0)
-              .toDouble();
-
     return _builder(
       context,
       _VoicePlayerState(
-        isPlaying: isPlaying.value,
-        duration: duration.value,
+        isPlaying: isPlaying,
+        duration: duration,
         progress: progress,
         toggle: () => unawaited(togglePlayback()),
       ),

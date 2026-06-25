@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -153,7 +152,7 @@ class ChatScreen extends HookConsumerWidget {
     }
 
     useEffect(() {
-      if (!context.mounted) return;
+      if (!context.mounted) return null;
 
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         await controller.initialize();
@@ -162,7 +161,7 @@ class ChatScreen extends HookConsumerWidget {
       });
 
       return null;
-    }, []);
+    }, [_contactId]);
 
     ref.listen(
       chatScreenControllerProvider(

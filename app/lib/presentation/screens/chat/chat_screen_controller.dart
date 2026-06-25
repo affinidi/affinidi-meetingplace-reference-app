@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -18,6 +19,7 @@ import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
+import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -38,7 +40,6 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../../effects/screen_effect.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
-
 import 'chat_screen_state.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp_handler.dart';
@@ -248,6 +249,10 @@ class ChatScreenController extends _$ChatScreenController
     messageTextController.addListener(_onMessageTextChanged);
     _subscribeToVrcPlugin();
 
+    final voicePlaybackController = ref.read(
+      voicePlaybackServiceProvider(contactId).notifier,
+    );
+
     ref.onDispose(() {
       _vrcPluginSubscription?.cancel();
       _rCardPluginSubscription?.cancel();
@@ -259,9 +264,19 @@ class ChatScreenController extends _$ChatScreenController
 
       _disposeConciergeLoadingControllers();
 
+      voicePlaybackController.disposePlaybackResources();
+
       _logger.info('Chat session ended', name: _logKey);
 
       WidgetsBinding.instance.removeObserver(this);
+    });
+
+    ref.listen(voicePlaybackServiceProvider(contactId), (previous, next) {
+      if (hasInitializedState) {
+        state = state.copyWith(voicePlayback: next);
+      } else {
+        pendingState = pendingState.copyWith(voicePlayback: next);
+      }
     });
 
     hasInitializedState = true;
@@ -984,6 +999,27 @@ class ChatScreenController extends _$ChatScreenController
       return false;
     }
   }
+
+  Future<void> toggleVoicePlayback({
+    required String clipId,
+    Uint8List? bytes,
+    String? filePath,
+    String? mediaType,
+    Duration initialDuration = Duration.zero,
+  }) {
+    return ref
+        .read(voicePlaybackServiceProvider(_contactId).notifier)
+        .toggle(
+          clipId: clipId,
+          bytes: bytes,
+          filePath: filePath,
+          mediaType: mediaType,
+          initialDuration: initialDuration,
+        );
+  }
+
+  String voiceClipId(String attachmentCacheKey) =>
+      VoicePlaybackService.clipId(_contactId, attachmentCacheKey);
 
   Future<void> _restoreUnsentMessage() async {
     final contact = state.contact;

@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
 
+import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../domain/models/contact_card/contact_card.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -37,6 +38,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     @Default(false) bool shouldShowVrcBanner,
     @Default(false) bool shouldStartVrcExchangeFromAttachment,
     chat.TransportCapabilities? capabilities,
+    @Default(VoicePlaybackState()) VoicePlaybackState voicePlayback,
   }) = _ChatScreenState;
 
   bool get hasPendingVrcConcierge => messages.any(

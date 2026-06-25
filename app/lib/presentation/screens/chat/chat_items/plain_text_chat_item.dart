@@ -332,6 +332,10 @@ class _HostedMediaWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cacheKey = AttachmentCacheService.cacheKey(_attachment);
+    final chatController = ref.read(
+      chatScreenControllerProvider(_contactId).notifier,
+    );
+    final voiceClipId = chatController.voiceClipId(cacheKey);
     final cached = ref.watch(
       attachmentCacheServiceProvider(
         _contactId,
@@ -364,6 +368,8 @@ class _HostedMediaWidget extends HookConsumerWidget {
 
     if (chat.VoiceMessageMetadata.isVoice(_attachment)) {
       return _HostedAudioWidget(
+        clipId: voiceClipId,
+        contactId: _contactId,
         attachment: _attachment,
         cachedBytes: cachedBytes,
         hasFailed: hasFailed,
@@ -386,6 +392,8 @@ class _HostedMediaWidget extends HookConsumerWidget {
         );
       case MediaCategory.audio:
         return _HostedAudioWidget(
+          clipId: voiceClipId,
+          contactId: _contactId,
           attachment: _attachment,
           cachedBytes: cachedBytes,
           hasFailed: hasFailed,
