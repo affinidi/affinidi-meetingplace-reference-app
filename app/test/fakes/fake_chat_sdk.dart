@@ -36,13 +36,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   set capabilities(TransportCapabilities caps) => _capabilities = caps;
 
-  @override
   String get did => 'fake-sender-did';
 
-  @override
   String get otherPartyDid => 'fake-other-party-did';
 
-  @override
   String get chatId => 'fake-chat-id';
 
   int _chatSessionStartedCalls = 0;
