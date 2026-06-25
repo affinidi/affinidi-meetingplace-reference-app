@@ -28,37 +28,37 @@ dependency_overrides:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_chat
-      ref: 05e26e251fc619a5a07ec5889387e6efac985fac
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
     # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_chat
   meeting_place_control_plane:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_control_plane
-      ref: 05e26e251fc619a5a07ec5889387e6efac985fac
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
     # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_control_plane
   meeting_place_core:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_core
-      ref: 05e26e251fc619a5a07ec5889387e6efac985fac
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
     # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_core
   meeting_place_drift_repository:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_drift_repository
-      ref: 05e26e251fc619a5a07ec5889387e6efac985fac
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
     # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_drift_repository
   meeting_place_matrix_livekit:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_matrix_livekit
-      ref: 05e26e251fc619a5a07ec5889387e6efac985fac
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
     # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_matrix_livekit
   meeting_place_mediator:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
       path: packages/meeting_place_mediator
-      ref: 05e26e251fc619a5a07ec5889387e6efac985fac
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
     # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/matrix-livekit-plugin-rebase/packages/meeting_place_mediator
   meta: ^1.18.2
   test_api: ^0.7.12

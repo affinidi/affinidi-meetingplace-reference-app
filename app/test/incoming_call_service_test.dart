@@ -36,12 +36,14 @@ class _FakeCallPlugin extends Fake implements AudioVideoCallPlugin {
       declinedCallIds.add(callId);
 }
 
-IncomingAudioVideoCallEvent _event({String callId = 'call-1'}) =>
-    IncomingAudioVideoCallEvent(
-      callId: callId,
-      otherPartyChannelDid: 'did:key:caller',
-      mediaType: CallMediaType.video,
-    );
+IncomingAudioVideoCallEvent _event({
+  String callId = 'call-1',
+  CallMediaType mediaType = CallMediaType.video,
+}) => IncomingAudioVideoCallEvent(
+  callId: callId,
+  otherPartyChannelDid: 'did:key:caller',
+  mediaType: mediaType,
+);
 
 void main() {
   setUpAll(() {
@@ -58,6 +60,25 @@ void main() {
   );
 
   group('incoming call', () {
+    test('preserves audio media type on the incoming call state', () async {
+      final plugin = _FakeCallPlugin();
+      final container = buildContainer(plugin);
+      addTearDown(container.dispose);
+
+      container.read(incomingCallServiceProvider);
+      await container.read(audioVideoCallPluginProvider.future);
+      await pumpEventQueue();
+
+      final event = _event(mediaType: CallMediaType.audio);
+      plugin.emitIncoming(event);
+      await pumpEventQueue();
+
+      expect(
+        container.read(incomingCallStateProvider)?.mediaType,
+        CallMediaType.audio,
+      );
+    });
+
     test('sets the incoming call state when an event arrives', () async {
       final plugin = _FakeCallPlugin();
       final container = buildContainer(plugin);
