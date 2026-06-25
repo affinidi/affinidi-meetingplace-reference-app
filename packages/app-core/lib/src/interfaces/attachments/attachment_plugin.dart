@@ -18,6 +18,7 @@ abstract interface class AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   });
 
@@ -25,6 +26,7 @@ abstract interface class AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   });
 
@@ -35,4 +37,10 @@ abstract interface class AttachmentPlugin {
   bool get isPlatformSupported => true;
 
   bool get includeInMediaOptions => true;
+}
+
+class AttachmentRenderContext {
+  const AttachmentRenderContext({this.avatarImage});
+
+  final ImageProvider<Object>? avatarImage;
 }

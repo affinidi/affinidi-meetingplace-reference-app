@@ -43,6 +43,7 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => VoiceAttachmentWidget(
     attachment: attachment,
@@ -50,22 +51,7 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
     chatItemColor: chatItemColor,
     cacheManager: _cacheManager,
     localVoiceStore: _localVoiceStore,
-    download: download,
-  );
-
-  Widget renderAttachmentWithAvatar({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    ImageProvider<Object>? avatarImage,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => VoiceAttachmentWidget(
-    attachment: attachment,
-    isFromMe: isFromMe,
-    chatItemColor: chatItemColor,
-    cacheManager: _cacheManager,
-    localVoiceStore: _localVoiceStore,
-    avatarImage: avatarImage,
+    avatarImage: renderContext?.avatarImage,
     download: download,
   );
 
@@ -74,6 +60,7 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => ListView.builder(
     physics: const NeverScrollableScrollPhysics(),
@@ -85,6 +72,7 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
       chatItemColor: chatItemColor,
       cacheManager: _cacheManager,
       localVoiceStore: _localVoiceStore,
+      avatarImage: renderContext?.avatarImage,
       download: download,
     ),
   );

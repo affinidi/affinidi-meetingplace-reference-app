@@ -24,6 +24,7 @@ mixin ImageAttachmentRendererMixin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) {
     if (_isVideoAttachment(attachment)) {
@@ -46,6 +47,7 @@ mixin ImageAttachmentRendererMixin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => Column(
     children: List.generate(attachments.length, (index) {

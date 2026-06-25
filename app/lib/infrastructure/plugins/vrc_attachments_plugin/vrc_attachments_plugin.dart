@@ -67,6 +67,7 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => _VrcAttachmentWidget(attachment: attachment, isFromMe: isFromMe);
 
@@ -75,6 +76,7 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => attachments.isEmpty
       ? const SizedBox.shrink()

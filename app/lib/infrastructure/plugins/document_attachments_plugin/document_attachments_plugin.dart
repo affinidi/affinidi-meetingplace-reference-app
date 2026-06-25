@@ -98,6 +98,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => _DocumentAttachmentWidget(
     attachment: attachment,
@@ -110,6 +111,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => _ListDocumentAttachmentsWidget(
     attachments: attachments,

@@ -221,27 +221,23 @@ class _AttachmentWidget extends HookConsumerWidget {
 
     Future<Uint8List> downloadCallback(ChatAttachment attachment) =>
         controller.downloadAttachmentForPlugin(attachment);
+    final renderContext = AttachmentRenderContext(
+      avatarImage: _voiceAvatarImage(
+        state: chatState,
+        message: _chatItem,
+        cacheManager: ref.read(cacheManagerProvider),
+      ),
+    );
 
     for (final plugin in plugins) {
       if (plugin.supportsFormat(_attachment)) {
-        final child = plugin is AudioAttachmentsPlugin
-            ? plugin.renderAttachmentWithAvatar(
-                attachment: _attachment,
-                isFromMe: _isFromMe,
-                chatItemColor: _chatItemColor,
-                avatarImage: _voiceAvatarImage(
-                  state: chatState,
-                  message: _chatItem,
-                  cacheManager: ref.read(cacheManagerProvider),
-                ),
-                download: downloadCallback,
-              )
-            : plugin.renderAttachment(
-                attachment: _attachment,
-                isFromMe: _isFromMe,
-                chatItemColor: _chatItemColor,
-                download: downloadCallback,
-              );
+        final child = plugin.renderAttachment(
+          attachment: _attachment,
+          isFromMe: _isFromMe,
+          chatItemColor: _chatItemColor,
+          renderContext: renderContext,
+          download: downloadCallback,
+        );
         if (_attachment.isRCard) {
           return LayoutBuilder(
             builder: (context, constraints) {

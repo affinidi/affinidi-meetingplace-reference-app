@@ -29,6 +29,7 @@ class FakeUnsupportedRCardPlugin implements AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => const SizedBox.shrink();
 
@@ -37,6 +38,7 @@ class FakeUnsupportedRCardPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) => const SizedBox.shrink();
 

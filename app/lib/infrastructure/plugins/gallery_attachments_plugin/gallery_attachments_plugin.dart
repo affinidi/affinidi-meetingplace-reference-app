@@ -108,12 +108,14 @@ class GalleryAttachmentsPlugin
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) {
     return super.renderAttachment(
       attachment: attachment,
       isFromMe: isFromMe,
       chatItemColor: chatItemColor,
+      renderContext: renderContext,
       download: download,
     );
   }
@@ -127,6 +129,7 @@ class GalleryAttachmentsPlugin
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
     Future<Uint8List> Function(ChatAttachment)? download,
   }) {
     return super.renderAttachments(
