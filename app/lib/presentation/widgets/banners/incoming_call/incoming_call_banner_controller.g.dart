@@ -46,7 +46,7 @@ final class IncomingCallBannerControllerProvider
 }
 
 String _$incomingCallBannerControllerHash() =>
-    r'5ecf1a4acf0d078d70de544d9ed2abed9b5dabf5';
+    r'3b9e32deaaa864310674841b4ea871dc57f6a393';
 
 /// Manages intent and state for the incoming call banner.
 
