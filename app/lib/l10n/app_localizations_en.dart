@@ -1783,6 +1783,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get humanZkp => 'Human ZKP';
 
   @override
+  String get humanZkpAbbreviated => 'Human ZKP';
+
+  @override
   String get humanZeroKnowledgeProof => 'Human Zero-Knowledge Proof';
 
   @override

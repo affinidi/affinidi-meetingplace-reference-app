@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
+import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/presentation/painting/cached_base64_image.dart';
@@ -12,6 +13,7 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_av
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
+import 'fakes/fake_identities.dart';
 import 'fakes/fake_meeting_place_sdk.dart';
 import 'utils/app.dart';
 
@@ -29,6 +31,11 @@ const _memberPhoto =
 const _otherMemberPhoto =
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mP4'
     '/58BAAT/Af9jgNErAAAAAElFTkSuQmCC';
+// A stale own card stored on the channel, distinct from the live identity
+// photo, so a test can prove `myCard` comes from the live identity.
+const _stalePhoto =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR42mP4'
+    'z/AfAAQAAf8c9+lcAAAAAElFTkSuQmCC';
 
 const _voiceAvatarKey = Key('voice_sender_avatar');
 
@@ -86,6 +93,45 @@ FakeMeetingPlaceSDK _coreSdkWithMyPhoto(String base64) {
         mediatorDid: contact.mediatorDid,
         status: sdk.ChannelStatus.inaugurated,
         isConnectionInitiator: true,
+      ),
+    },
+  );
+}
+
+/// A copy of the primary identity whose card carries [base64], representing the
+/// live (just-updated) own profile photo.
+Identity _identityWithPhoto(String base64) =>
+    FakeIdentities.primaryIdentity.copyWith(
+      card: FakeIdentities.primaryIdentity.card.copyWith(profilePic: base64),
+    );
+
+/// Core SDK whose individual channel links to identity [externalRef] but still
+/// stores [staleBase64] as its own contact card, so a test can prove `myCard`
+/// is resolved from the live identity rather than the stale channel snapshot.
+FakeMeetingPlaceSDK _coreSdkLinkedToIdentity({
+  required String externalRef,
+  required String staleBase64,
+}) {
+  final contact = FakeContacts.individualContact;
+  final staleCard = contact.card
+      .copyWith(profilePic: staleBase64)
+      .toSdkContactCard();
+  return FakeMeetingPlaceSDK(
+    channels: {
+      contact.channelDid!: sdk.Channel(
+        permanentChannelDid: contact.channelDid!,
+        otherPartyPermanentChannelDid: contact.channelDid!,
+        offerLink: contact.offerLink,
+        contactCard: staleCard,
+        otherPartyContactCard: contact.otherPartyCard?.toSdkContactCard(),
+        otherPartyNotificationToken: 'fake-notification-token',
+        seqNo: 0,
+        type: sdk.ChannelType.individual,
+        publishOfferDid: 'did:key:individual-offer',
+        mediatorDid: contact.mediatorDid,
+        status: sdk.ChannelStatus.inaugurated,
+        isConnectionInitiator: true,
+        externalRef: externalRef,
       ),
     },
   );
@@ -186,6 +232,37 @@ void main() {
       chatSdk.simulateIncomingTextMessage(
         text: '',
         recipientDid: contact.channelDid!,
+        attachments: [_voiceAttachment()],
+        isFromMe: true,
+      );
+      await tester.pumpAndSettle();
+
+      expect(_voiceAvatarPhoto(tester), _myPhoto);
+    });
+
+    testWidgets('sent voice shows my live identity photo even when the '
+        'channel still holds an old card', (tester) async {
+      // Repro: the profile photo was changed after the channel was created, so
+      // the channel's stored own card is stale. The avatar must reflect the
+      // live identity immediately, without an app restart.
+      final coreSdk = _coreSdkLinkedToIdentity(
+        externalRef: FakeIdentities.primaryIdentity.id,
+        staleBase64: _stalePhoto,
+      );
+      final chatSdk = FakeChatSdk();
+
+      await navigateToChat(
+        tester,
+        contactId: FakeContacts.individualContact.id,
+        chatSdk: chatSdk,
+        contacts: [FakeContacts.individualContact],
+        identities: [_identityWithPhoto(_myPhoto)],
+        meetingPlaceCoreSDK: coreSdk,
+      );
+
+      chatSdk.simulateIncomingTextMessage(
+        text: '',
+        recipientDid: FakeContacts.individualContact.channelDid!,
         attachments: [_voiceAttachment()],
         isFromMe: true,
       );

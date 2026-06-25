@@ -17,6 +17,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   static const _defaultCapabilities = TransportCapabilities({
     ChatFeature.textMessaging,
     ChatFeature.mediaAttachments,
+    ChatFeature.documentAttachments,
     ChatFeature.voiceMessages,
     ChatFeature.reactions,
     ChatFeature.typingIndicators,
@@ -34,13 +35,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   set capabilities(TransportCapabilities caps) => _capabilities = caps;
 
-  @override
   String get did => 'fake-sender-did';
 
-  @override
   String get otherPartyDid => 'fake-other-party-did';
 
-  @override
   String get chatId => 'fake-chat-id';
 
   int _chatSessionStartedCalls = 0;
