@@ -117,12 +117,16 @@ class MediaScreen extends HookConsumerWidget {
     final controller = ref.read(provider.notifier);
 
     useEffect(() {
+      if (!useCamera) {
+        return null;
+      }
+
       return () {
         scheduleMicrotask(() {
           unawaited(controller.closeCamera());
         });
       };
-    }, [controller]);
+    }, [controller, useCamera]);
 
     useEffect(() {
       if (state.pickedImageBytes != null) {

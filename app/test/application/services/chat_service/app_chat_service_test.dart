@@ -46,6 +46,15 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
 
+  ChatAttachment bufferedVideoAttachment() => ChatAttachment(
+    id: 'buffered-video-id',
+    mediaType: 'video/mp4',
+    filename: 'video.mp4',
+    format: 'fake_buffered_video_plugin',
+    byteCount: 5,
+    data: ChatAttachmentData(base64: base64Encode([118, 105, 100, 101, 111])),
+  );
+
   group('ChatSessionService - Session & SDK Delegation', () {
     late ProviderContainer container;
     late ChatSessionService chatService;
@@ -218,6 +227,90 @@ void main() {
       );
       expect(fakeChatSdk.sendTextMessageCalls.last['attachments'], isNotEmpty);
     });
+
+    test(
+      'buffers outbound messages while paused and flushes them on resume',
+      () async {
+        await chatService.startChatSession();
+        await chatService.pauseChat();
+
+        await chatService.sendTextMessage(
+          '',
+          attachments: [bufferedVideoAttachment()],
+        );
+
+        expect(fakeChatSdk.sendTextMessageCalls, isEmpty);
+        expect(fakeChatSdk.sendMediaMessageCalls, isEmpty);
+
+        await chatService.startChatSession();
+
+        expect(fakeChatSdk.startChatSessionCallCount, equals(2));
+        expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
+        expect(fakeChatSdk.sendMediaMessageCalls, hasLength(1));
+        expect(
+          fakeChatSdk.sendMediaMessageCalls.first['contentType'],
+          startsWith('video/'),
+        );
+        expect(
+          fakeChatSdk.sendMediaMessageCalls.first['filename'],
+          'video.mp4',
+        );
+      },
+    );
+
+    test('does not flush the same buffered message more than once', () async {
+      await chatService.startChatSession();
+      await chatService.pauseChat();
+
+      await chatService.sendTextMessage(
+        '',
+        attachments: [bufferedVideoAttachment()],
+      );
+
+      await chatService.startChatSession();
+
+      expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
+      expect(fakeChatSdk.sendMediaMessageCalls, hasLength(1));
+
+      await chatService.pauseChat();
+      await chatService.startChatSession();
+
+      expect(fakeChatSdk.startChatSessionCallCount, equals(3));
+      expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
+      expect(fakeChatSdk.sendMediaMessageCalls, hasLength(1));
+    });
+
+    test(
+      '''keeps buffered messages queued when flush send fails without aborting start''',
+      () async {
+        await chatService.startChatSession();
+        await chatService.pauseChat();
+
+        await chatService.sendTextMessage(
+          '',
+          attachments: [bufferedVideoAttachment()],
+        );
+
+        fakeChatSdk.sendTextMessageFailuresRemaining = 1;
+
+        await chatService.startChatSession();
+
+        expect(fakeChatSdk.startChatSessionCallCount, equals(2));
+        expect(
+          fakeContactsService.resetBadgeCalledWith,
+          testContact.channelDid,
+        );
+        expect(fakeChatSdk.sendTextMessageCalls, isEmpty);
+        expect(fakeChatSdk.sendMediaMessageCalls, isEmpty);
+
+        await chatService.pauseChat();
+        await chatService.startChatSession();
+
+        expect(fakeChatSdk.startChatSessionCallCount, equals(3));
+        expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
+        expect(fakeChatSdk.sendMediaMessageCalls, hasLength(1));
+      },
+    );
 
     test('pauseChat can be called multiple times safely', () async {
       await chatService.startChatSession();

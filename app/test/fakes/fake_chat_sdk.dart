@@ -54,6 +54,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   bool sessionEnded = false;
   String? lastEffectSent;
   bool shouldThrowOnStartSession = false;
+  int sendTextMessageFailuresRemaining = 0;
   String? lastRemovedMemberDid;
   int removeMemberCallCount = 0;
   Completer<void>? removeMemberBlocker;
@@ -537,6 +538,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     String text, {
     List<ChatAttachment>? attachments,
   }) async {
+    if (sendTextMessageFailuresRemaining > 0) {
+      sendTextMessageFailuresRemaining--;
+      throw Exception('Simulated sendTextMessage error');
+    }
+
     // Track the call
     sendTextMessageCalls.add({'text': text, 'attachments': attachments});
 
