@@ -569,6 +569,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.3"
+  dart_webrtc:
+    dependency: transitive
+    description:
+      name: dart_webrtc
+      sha256: f6d615bddea5e458ce180a914f3055c234ffb52fb7397a51b3491e76d6d7edb2
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.8.1"
   dbus:
     dependency: transitive
     description:
@@ -585,6 +593,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  device_info_plus:
+    dependency: "direct overridden"
+    description:
+      name: device_info_plus
+      sha256: "0891702f96b2e465fe567b7ec448380e6b1c14f60af552a8536d9f583b6b8442"
+      url: "https://pub.dev"
+    source: hosted
+    version: "13.2.0"
+  device_info_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: device_info_plus_platform_interface
+      sha256: "04b173a92e2d9161dfead145667037c8d834db725ce2e7b942bfe18fd2f45a46"
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.1.0"
   didcomm:
     dependency: transitive
     description:
@@ -916,7 +940,7 @@ packages:
     source: hosted
     version: "2.1.1"
   flutter_secure_storage_windows:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: flutter_secure_storage_windows
       sha256: "471951813a97006d899db4948acc654a4f28c440083ea08178935ce20b173ec1"
@@ -949,6 +973,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_webrtc:
+    dependency: transitive
+    description:
+      name: flutter_webrtc
+      sha256: "8b220dc006c4891266735e516f7679bd08b7caaf7c36b1a93fb9357cec555f92"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   form_field_validator:
     dependency: transitive
     description:
@@ -1189,6 +1221,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  js:
+    dependency: transitive
+    description:
+      name: js
+      sha256: "53385261521cc4a0c4658fd0ad07a7d14591cf8fc33abbceae306ddb974888dc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.2"
   json_annotation:
     dependency: transitive
     description:
@@ -1245,6 +1285,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
+  livekit_client:
+    dependency: transitive
+    description:
+      name: livekit_client
+      sha256: bd68a1e273b286f03be14636c12fbbb5cc0fc6dee64ec6d4756c55a4f408fc23
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.8.1"
   local_auth:
     dependency: transitive
     description:
@@ -1285,6 +1333,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.11"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      sha256: "25aee487596a6257655a1e091ec2ae66bc30e7af663592cc3a27e6591e05035c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.7.0"
   logging:
     dependency: transitive
     description:
@@ -1326,29 +1382,32 @@ packages:
     source: hosted
     version: "7.3.0"
   meeting_place_chat:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_chat
-      sha256: "300996ede6009b02a6e3e06a4c4f16809f143114c6b6269d6dd88bd5f4c3300d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.50"
+      path: "packages/meeting_place_chat"
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      resolved-ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
+    version: "0.0.1-dev.47"
   meeting_place_control_plane:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_control_plane
-      sha256: "03a2965658a448be4de0a6dcabc20850a04f1a00b7de20df06d73a4ef55cd2ff"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/meeting_place_control_plane"
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      resolved-ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
     version: "0.0.1-dev.20"
   meeting_place_core:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_core
-      sha256: a9231442b1e4f3234938e6b146674600be4c8ce7fc678834431718a15f12a259
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.43"
+      path: "packages/meeting_place_core"
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      resolved-ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
+    version: "0.0.1-dev.41"
   meeting_place_credentials:
     dependency: transitive
     description:
@@ -1358,20 +1417,31 @@ packages:
     source: hosted
     version: "0.0.1-dev.8"
   meeting_place_drift_repository:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_drift_repository
-      sha256: "6810195aac8777e847c2be3360ce0b60994203f28123f83dbe3eaee4021dc80c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1-dev.50"
+      path: "packages/meeting_place_drift_repository"
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      resolved-ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
+    version: "0.0.1-dev.45"
+  meeting_place_matrix_livekit:
+    dependency: "direct overridden"
+    description:
+      path: "packages/meeting_place_matrix_livekit"
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      resolved-ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
+    version: "1.0.0"
   meeting_place_mediator:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_mediator
-      sha256: "78585d43e0e06405539e1da9a432b5328222bc98e63adb35c27d1b218f6ccffb"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/meeting_place_mediator"
+      ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      resolved-ref: b64327a606f29c7aeaba63bdfd6ea1ff6f07bb51
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
     version: "0.0.1-dev.15"
   melos:
     dependency: "direct dev"
@@ -1397,6 +1467,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  mime_type:
+    dependency: transitive
+    description:
+      name: mime_type
+      sha256: d652b613e84dac1af28030a9fba82c0999be05b98163f9e18a0849c6e63838bb
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   mobile_scanner:
     dependency: transitive
     description:
@@ -2459,13 +2537,21 @@ packages:
     source: hosted
     version: "1.5.1"
   win32:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: win32
       sha256: ba6f4bba816c8d7e3c1580e170f3786d216951cc6b94babc3b814c08d2cb2738
       url: "https://pub.dev"
     source: hosted
     version: "6.3.0"
+  win32_registry:
+    dependency: transitive
+    description:
+      name: win32_registry
+      sha256: "73b1d78920a9d6e03f8b4e43e612b87bf3152a0e5c5e5150267762b7c4116904"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.3"
   x25519:
     dependency: transitive
     description:

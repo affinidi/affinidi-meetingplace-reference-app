@@ -1464,7 +1464,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String memberRemovedFromGroup(String memberName) {
-    return '$memberName has been removed';
+    return '$memberName ha sido eliminado';
   }
 
   @override
@@ -1627,11 +1627,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get removeMemberDialogTitle => 'Remove member';
+  String get removeMemberDialogTitle => 'Eliminar miembro';
 
   @override
   String removeMemberDialogBody(String name) {
-    return 'Remove $name from this group? They will no longer receive messages.';
+    return '¿Eliminar a $name de este grupo? Ya no recibirá mensajes.';
   }
 
   @override
@@ -1791,12 +1791,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String nameSelectedIdentity(String name) {
-    return '$name\'s selected identity';
+    return 'Identidad seleccionada de $name';
   }
 
   @override
   String selectIdentityToVerifyRelationshipPrompt(String name) {
-    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
+    return 'Desliza hacia la izquierda o derecha para elegir la identidad que deseas usar para verificar tu relación con $name.';
   }
 
   @override
@@ -1804,39 +1804,43 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String trustedBy(int count) {
-    return 'Trusted by $count';
+    return 'Confiado por $count';
   }
 
   @override
-  String get humanZkp => 'Human ZKP';
+  String get humanZkp => 'Prueba de conocimiento cero humana';
+
+  @override
+  String get humanZkpAbbreviated => 'Human ZKP';
 
   @override
   String get humanZeroKnowledgeProof => 'Prueba de conocimiento cero humana';
 
   @override
-  String get livenessCredential => 'Liveness Credential';
+  String get livenessCredential => 'Credencial de Vitalidad';
 
   @override
-  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
+  String get verifiableCredentialWallet =>
+      'Cartera de Credenciales Verificables';
 
   @override
-  String get noCredentialsYet => 'You don\'t have any credentials yet.';
+  String get noCredentialsYet => 'Aún no tienes credenciales.';
 
   @override
   String get all => 'Todos';
 
   @override
   String get generatingZeroKnowledgeProof =>
-      'Generating Zero-Knowledge Proof...';
+      'Generando Prueba de Conocimiento Cero Humano...';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'Cancelar';
 
   @override
-  String get generateCredential => 'Generate credential';
+  String get generateCredential => 'Generar credencial';
 
   @override
-  String get generateProof => 'Generate proof';
+  String get generateProof => 'Generar prueba';
 
   @override
   String get livenessCredentialRequest =>
@@ -1872,7 +1876,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mockLivenessCredentialNext =>
-      'You can now continue to generate a Human Zero-Knowledge proof.';
+      'Ahora puedes continuar para generar una Prueba de Conocimiento Cero Humana.';
 
   @override
   String get livenessEvidenceThresholdNotMet =>
@@ -1923,7 +1927,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get zkpNoticePaused =>
-      'Has pausado la solicitud de prueba de ZKP humano. Toca el icono \"+\" para reiniciarla.';
+      'Has pausado una solicitud de prueba de conocimiento cero humana.';
+
+  @override
+  String zkpNoticeDeclined(String contactName) {
+    return '$contactName ha rechazado la solicitud de prueba de conocimiento cero humana. Toca el icono \"+\" para reiniciarla.';
+  }
 
   @override
   String get zkpNoticeShared =>
@@ -1941,24 +1950,20 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get zkpNoticeRequestInitiated =>
-      'You have initiated a Human ZKP request.';
-
-  @override
-  String get zkpNoticeDeclined =>
-      'Has rechazado la solicitud de prueba de ZKP humano.';
+      'Has iniciado una solicitud de prueba de conocimiento cero humana.';
 
   @override
   String get zkpProofAlreadyShared => 'Prueba ZKP ya compartida';
 
   @override
-  String get removeMemberConfirm => 'Remove';
+  String get removeMemberConfirm => 'Eliminar';
 
   @override
   String get removeMemberNotSupported =>
-      'Removing members isn\'t supported yet.';
+      'Eliminar miembros aún no está soportado.';
 
   @override
-  String get removeMemberSuccess => 'Member removed from group.';
+  String get removeMemberSuccess => 'Miembro eliminado del grupo.';
 
   @override
   String get generalVideo => 'Vídeo';
@@ -2000,6 +2005,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get voiceMessageSendFailed => 'No se puede enviar el mensaje de voz.';
+
+  @override
+  String get generalEmail => 'Correo electrónico';
+
+  @override
+  String vrcResponderIntro(Object name) {
+    return '$name ha seleccionado la siguiente persona para verificar la relación:';
+  }
 
   @override
   String get videoCallTitle => 'Llamada grupal';

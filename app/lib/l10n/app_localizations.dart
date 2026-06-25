@@ -2698,10 +2698,16 @@ abstract class AppLocalizations {
   /// **'Human ZKP'**
   String get humanZkp;
 
+  /// No description provided for @humanZkpAbbreviated.
+  ///
+  /// In en, this message translates to:
+  /// **'Human ZKP'**
+  String get humanZkpAbbreviated;
+
   /// No description provided for @humanZeroKnowledgeProof.
   ///
   /// In en, this message translates to:
-  /// **'Human Zero-Knowledge Proof'**
+  /// **'Human Zero Knowledge Proof'**
   String get humanZeroKnowledgeProof;
 
   /// No description provided for @livenessCredential.
@@ -2731,7 +2737,7 @@ abstract class AppLocalizations {
   /// No description provided for @generatingZeroKnowledgeProof.
   ///
   /// In en, this message translates to:
-  /// **'Generating Zero-Knowledge Proof...'**
+  /// **'Generating Human Zero Knowledge Proof...'**
   String get generatingZeroKnowledgeProof;
 
   /// No description provided for @cancel.
@@ -2773,7 +2779,7 @@ abstract class AppLocalizations {
   /// No description provided for @noLivenessCredentialFound.
   ///
   /// In en, this message translates to:
-  /// **'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.'**
+  /// **'No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Human Zero Knowledge Proof (ZKP) is derived.'**
   String get noLivenessCredentialFound;
 
   /// No description provided for @livenessCheckDemoModeNote.
@@ -2803,7 +2809,7 @@ abstract class AppLocalizations {
   /// No description provided for @mockLivenessCredentialNext.
   ///
   /// In en, this message translates to:
-  /// **'You can now continue to generate a Human Zero-Knowledge proof.'**
+  /// **'You can now continue to generate a Human Zero Knowledge Proof.'**
   String get mockLivenessCredentialNext;
 
   /// No description provided for @livenessEvidenceThresholdNotMet.
@@ -2887,8 +2893,14 @@ abstract class AppLocalizations {
   /// No description provided for @zkpNoticePaused.
   ///
   /// In en, this message translates to:
-  /// **'You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.'**
+  /// **'You paused a Human Zero Knowledge Proof request.'**
   String get zkpNoticePaused;
+
+  /// No description provided for @zkpNoticeDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'{contactName} has declined the Human Zero Knowledge Proof request. Tap the \"+\" icon to restart it.'**
+  String zkpNoticeDeclined(String contactName);
 
   /// No description provided for @zkpNoticeShared.
   ///
@@ -2905,20 +2917,14 @@ abstract class AppLocalizations {
   /// No description provided for @zkpNoticeRequest.
   ///
   /// In en, this message translates to:
-  /// **'{contactName} has requested a Zero‑Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.'**
+  /// **'{contactName} has requested a Human Zero Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.'**
   String zkpNoticeRequest(String contactName);
 
   /// No description provided for @zkpNoticeRequestInitiated.
   ///
   /// In en, this message translates to:
-  /// **'You have initiated a Human ZKP request.'**
+  /// **'You have initiated a Human Zero Knowledge Proof request.'**
   String get zkpNoticeRequestInitiated;
-
-  /// No description provided for @zkpNoticeDeclined.
-  ///
-  /// In en, this message translates to:
-  /// **'You declined the Human ZKP proof request.'**
-  String get zkpNoticeDeclined;
 
   /// No description provided for @zkpProofAlreadyShared.
   ///
@@ -3015,6 +3021,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to send voice message.'**
   String get voiceMessageSendFailed;
+
+  /// No description provided for @generalEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get generalEmail;
+
+  /// No description provided for @vrcResponderIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has selected the following persona to verify the relationship:'**
+  String vrcResponderIntro(Object name);
 
   /// No description provided for @videoCallTitle.
   ///
