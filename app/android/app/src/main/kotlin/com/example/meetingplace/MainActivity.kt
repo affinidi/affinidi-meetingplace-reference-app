@@ -11,7 +11,6 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
-import io.flutter.plugins.GeneratedPluginRegistrant
     
 class MainActivity: FlutterFragmentActivity() {
     companion object {
@@ -40,7 +39,6 @@ class MainActivity: FlutterFragmentActivity() {
         if (engine == null) {
             engine = FlutterEngine(this).apply {
                 dartExecutor.executeDartEntrypoint(DartExecutor.DartEntrypoint.createDefault())
-                GeneratedPluginRegistrant.registerWith(this)
             }
             FlutterEngineCache.getInstance().put(ENGINE_ID, engine)
         }
