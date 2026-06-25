@@ -10,6 +10,7 @@ import '../../../infrastructure/providers/incoming_call_state_provider.dart';
 import '../../../navigation/navigator.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../banners/active_call/active_call_controller.dart';
+import '../banners/incoming_call/incoming_call_banner_controller.dart';
 
 class IncomingCallBanner extends ConsumerStatefulWidget {
   const IncomingCallBanner({super.key});
@@ -20,24 +21,23 @@ class IncomingCallBanner extends ConsumerStatefulWidget {
 
 class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
     with SingleTickerProviderStateMixin {
-  bool _accepted = false;
-  bool _dismissed = false;
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
+
+  @visibleForTesting
+  AnimationController get slideController => _slideController;
 
   @override
   void initState() {
     super.initState();
     _slideController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 100),
       vsync: this,
     );
     _slideAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0, -1),
-    ).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeIn),
-    );
+    ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeIn));
   }
 
   @override
@@ -48,11 +48,14 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(incomingCallServiceProvider);
+
     // Hide banner when a call is active
     final callState = ref.watch(activeCallControllerProvider);
     if (callState != null) return const SizedBox.shrink();
 
-    if (_accepted || _dismissed) return const SizedBox.shrink();
+    final bannerController = ref.watch(incomingCallBannerControllerProvider);
+    if (bannerController) return const SizedBox.shrink();
 
     final event = ref.watch(incomingCallStateProvider);
     if (event == null) return const SizedBox.shrink();
@@ -69,11 +72,12 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
         context.l10n.incomingCallBannerUnknownCaller;
 
     final isGroup = contact?.type == ContactType.group;
-    final callService = ref.read(incomingCallServiceProvider.notifier);
+    final bannerNotifier = ref.read(
+      incomingCallBannerControllerProvider.notifier,
+    );
 
     void onJoinOrAccept() {
-      setState(() => _accepted = true);
-      callService.accept(callId: event.callId);
+      bannerNotifier.accept(callId: event.callId);
       final routeContactId = contact?.id ?? event.otherPartyChannelDid;
       ref
           .read(navigatorProvider)
@@ -90,12 +94,15 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
       child: GestureDetector(
         onVerticalDragEnd: (details) {
           // Dismiss on upward swipe (negative velocity = upward)
-          if (details.velocity.pixelsPerSecond.dy < -500) {
+          if (details.velocity.pixelsPerSecond.dy < -300) {
             _slideController.forward().then((_) {
-              if (mounted) {
-                setState(() => _dismissed = true);
-                callService.decline(callId: event.callId);
-              }
+              if (!mounted) return;
+              bannerNotifier.dismiss(callId: event.callId);
+              // Restore the resting position after the banner is hidden so the
+              // next call is not left off-screen (behind the notch).
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) _slideController.reset();
+              });
             });
           }
         },
@@ -104,84 +111,84 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Container(
-          color: context.customColors.incomingCallBannerBackground,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Icon(
-                event.mediaType == CallMediaType.audio
-                    ? Icons.phone
-                    : Icons.videocam,
-                color: context.customColors.incomingCallBannerCallTypeLabel,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      event.mediaType == CallMediaType.audio
-                          ? context.l10n.incomingCallBannerAudioCall
-                          : context.l10n.incomingCallBannerVideoCall,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context
-                            .customColors
-                            .incomingCallBannerCallTypeLabel,
-                      ),
-                    ),
-                    Text(
-                      callerName,
-                      style: context.textTheme.titleLarge?.copyWith(
-                        color: context.colorScheme.onSurface,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              if (!isGroup)
-                _ActionButton(
-                  icon: Icons.call_end,
-                  color: context.colorScheme.error,
-                  semanticsLabel: context.l10n.incomingCallBannerDecline,
-                  onTap: () => callService.decline(callId: event.callId),
-                ),
-              if (!isGroup) const SizedBox(width: 8),
-              if (isGroup)
-                TextButton(
-                  onPressed: onJoinOrAccept,
-                  style: TextButton.styleFrom(
-                    foregroundColor: context.customColors.success,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              color: context.customColors.incomingCallBannerBackground,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Icon(
+                    event.mediaType == CallMediaType.audio
+                        ? Icons.phone
+                        : Icons.videocam,
+                    color: context.customColors.incomingCallBannerCallTypeLabel,
                   ),
-                  child: Text(
-                    context.l10n.videoCallGroupCallJoin,
-                    style: context.textTheme.labelMedium?.copyWith(
-                      color: context.customColors.success,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          event.mediaType == CallMediaType.audio
+                              ? context.l10n.incomingCallBannerAudioCall
+                              : context.l10n.incomingCallBannerVideoCall,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: context
+                                .customColors
+                                .incomingCallBannerCallTypeLabel,
+                          ),
+                        ),
+                        Text(
+                          callerName,
+                          style: context.textTheme.titleLarge?.copyWith(
+                            color: context.colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
-                )
-              else
-                _ActionButton(
-                  icon: Icons.call,
-                  color: context.colorScheme.primary,
-                  semanticsLabel: context.l10n.incomingCallBannerAccept,
-                  onTap: onJoinOrAccept,
-                ),
-            ],
-          ),
-        ),
+                  const SizedBox(width: 8),
+                  if (!isGroup)
+                    _ActionButton(
+                      icon: Icons.call_end,
+                      color: context.colorScheme.error,
+                      semanticsLabel: context.l10n.incomingCallBannerDecline,
+                      onTap: () => bannerNotifier.dismiss(callId: event.callId),
+                    ),
+                  if (!isGroup) const SizedBox(width: 8),
+                  if (isGroup)
+                    TextButton(
+                      onPressed: onJoinOrAccept,
+                      style: TextButton.styleFrom(
+                        foregroundColor: context.customColors.success,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        context.l10n.videoCallGroupCallJoin,
+                        style: context.textTheme.labelMedium?.copyWith(
+                          color: context.customColors.success,
+                        ),
+                      ),
+                    )
+                  else
+                    _ActionButton(
+                      icon: Icons.call,
+                      color: context.colorScheme.primary,
+                      semanticsLabel: context.l10n.incomingCallBannerAccept,
+                      onTap: onJoinOrAccept,
+                    ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
     );
   }
 }
