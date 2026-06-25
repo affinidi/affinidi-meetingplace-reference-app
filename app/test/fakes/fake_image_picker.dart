@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart';
@@ -9,7 +10,11 @@ import 'package:image_picker/image_picker.dart';
 /// This allows tests to simulate image picking without requiring
 /// actual camera/gallery access.
 class FakeImagePicker extends ImagePicker {
-  FakeImagePicker({this._xFileToReturn, this._shouldReturnNull = false});
+  FakeImagePicker({
+    this._xFileToReturn,
+    this._shouldReturnNull = false,
+    this._pickBlocker,
+  });
 
   /// Creates a default fake image picker with a 1x1 red pixel PNG.
   factory FakeImagePicker.withDefaultImage() {
@@ -92,6 +97,7 @@ class FakeImagePicker extends ImagePicker {
 
   final XFile? _xFileToReturn;
   final bool _shouldReturnNull;
+  final Completer<void>? _pickBlocker;
 
   @override
   Future<XFile?> pickImage({
@@ -102,6 +108,11 @@ class FakeImagePicker extends ImagePicker {
     CameraDevice preferredCameraDevice = CameraDevice.rear,
     bool requestFullMetadata = false,
   }) async {
+    final pickBlocker = _pickBlocker;
+    if (pickBlocker != null) {
+      await pickBlocker.future;
+    }
+
     if (_shouldReturnNull) {
       return null;
     }
@@ -116,6 +127,11 @@ class FakeImagePicker extends ImagePicker {
     int? imageQuality,
     bool requestFullMetadata = true,
   }) async {
+    final pickBlocker = _pickBlocker;
+    if (pickBlocker != null) {
+      await pickBlocker.future;
+    }
+
     if (_shouldReturnNull) {
       return null;
     }

@@ -362,7 +362,14 @@ Future<void> _closeChat(WidgetTester tester) async {
   final binding = tester.binding;
 
   try {
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    for (final state in const [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+    ]) {
+      binding.handleAppLifecycleStateChanged(state);
+      await tester.pump();
+    }
     await tester.pumpAndSettle();
   } catch (_) {
     // Ignore teardown-time settle failures when the tree is already gone.
