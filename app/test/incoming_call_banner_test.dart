@@ -152,4 +152,42 @@ void main() {
       expect(navigator.goCalls, isEmpty);
     });
   });
+
+  group('swipe to dismiss', () {
+    testWidgets('declines when swiped upward past the threshold', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrap(_event()));
+      await tester.pump();
+
+      await tester.fling(
+        find.byType(IncomingCallBanner),
+        const Offset(0, -400),
+        1500,
+      );
+      await tester.pumpAndSettle();
+
+      expect(callService.declinedCallIds, ['call-1']);
+    });
+
+    testWidgets(
+      'slide animation returns to resting position after swipe-dismiss',
+      (tester) async {
+        await tester.pumpWidget(wrap(_event()));
+        await tester.pump();
+
+        await tester.fling(
+          find.byType(IncomingCallBanner),
+          const Offset(0, -400),
+          1500,
+        );
+        await tester.pumpAndSettle();
+
+        // ignore: invalid_use_of_visible_for_testing_member
+        final state = tester.state(find.byType(IncomingCallBanner)) as dynamic;
+        // ignore: avoid_dynamic_calls
+        expect((state.slideController as AnimationController).value, 0.0);
+      },
+    );
+  });
 }
