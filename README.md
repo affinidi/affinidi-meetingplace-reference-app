@@ -58,13 +58,25 @@ The reference app showcases the core capabilities of a secure, private messaging
 |---------|-------------|
 | **Multiple Identities** | Set a primary identity for your main profile, plus create aliases for specific contexts (e.g. a hobbyist persona or professional profile). |
 | **Connect with Invitations** | Create and publish invitations with custom options: a custom phrase, a usage limit, or an expiry date. |
-| **Secure Messaging** | Peer-to-peer and group messaging with end-to-end privacy built in. |
-| **Matrix Transport** | Individual chats can run over DIDComm, Matrix, or both. When more than one transport is enabled, a picker is shown at offer creation. Group chat always uses Matrix. Configure via `ENABLED_INDIVIDUAL_CHAT_TRANSPORTS`. |
+| **Secure Messaging** | Individual and group chats with end-to-end privacy built in. |
+| **Matrix Transport** | Use Matrix for richer chat features like voice messages, message edit, message delete, reactions, media, and group chat. Individual chats can use DIDComm, Matrix, or both. Configure this with `ENABLED_INDIVIDUAL_CHAT_TRANSPORTS`. |
 | **Verified Identity (R-Card and VRC)** | Share your R-Card (a signed digital contact card) in any chat, or initiate a mutual VRC exchange to create a verifiable record of your relationship. See [Feature Demonstrations](#feature-demos). |
 | **Messaging Server** | Use the Affinidi-hosted messaging server or bring your own managed mediator. |
 | **Human ZKP Demo** | Prove a contact is human using a Zero Knowledge Proof; no biometric data or personal information is shared. See [Feature Demonstrations](#feature-demos). |
 
 For full SDK documentation, see the [Affinidi Meeting Place SDK docs](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/).
+
+### Chat Transport Capabilities
+
+Individual chats can use DIDComm, Matrix, or both. Group chat always uses Matrix.
+
+| Scope | Supported features |
+|-------|--------------------|
+| **Matrix only** | Group chat, voice messages, edit messages, delete messages |
+| **DIDComm only** | Presence, which means online or last-seen status |
+| **Both** | Text, media attachments, reactions, typing indicators, delivery receipts, visual effects, contact details update |
+
+When both transports are enabled, the app shows a transport picker while creating an offer.
 
 ## Architecture Overview
 
@@ -224,6 +236,48 @@ A VRC is a mutual "verified relationship" credential. Unlike an R-Card, a VRC re
 
 </details>
 
+<details id="panel-matrix">
+<summary><strong>Matrix Rich Chat Demo</strong></summary>
+
+Matrix enables the richer chat features in this reference app.
+
+| Feature | What it shows |
+|---------|---------------|
+| **Transport picker** | Test DIDComm, Matrix, or both for individual chats. |
+| **Group chat** | Create and join Matrix-based group chats. |
+| **Voice messages** | Record and play audio messages in chat. |
+| **Message actions** | React to messages, edit sent messages, and delete messages. |
+| **Media messages** | Share files and images in chat. |
+
+The screenshots below show the Matrix chat flow and rich message actions.
+
+<table>
+<tr>
+<td align="center" width="33%"><strong>Choose transport</strong><br><sub>Select Matrix, DIDComm, or both</sub></td>
+<td align="center" width="33%"><strong>Send audio</strong><br><sub>Record and play voice messages</sub></td>
+<td align="center" width="33%"><strong>React to messages</strong><br><sub>Add reactions in the chat thread</sub></td>
+</tr>
+<tr>
+<td align="center" width="33%"><img src="assets/docs/matrix-transport-picker.png" alt="Choose Matrix transport" width="180" /><br><sub>Transport picker</sub></td>
+<td align="center" width="33%"><img src="assets/docs/matrix-audio-messages.png" alt="Matrix audio messages" width="180" /><br><sub>Audio messages</sub></td>
+<td align="center" width="33%"><img src="assets/docs/matrix-reactions.png" alt="Matrix message reactions" width="180" /><br><sub>Reactions</sub></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="center" width="33%"><strong>Edit message</strong><br><sub>Update a sent message</sub></td>
+<td align="center" width="33%"><strong>Delete message</strong><br><sub>Remove a sent message</sub></td>
+<td align="center" width="33%"><strong>Group chat</strong><br><sub>Chat with multiple members</sub></td>
+</tr>
+<tr>
+<td align="center" width="33%"><img src="assets/docs/matrix-edit-message.png" alt="Edit a Matrix message" width="180" /><br><sub>Edit</sub></td>
+<td align="center" width="33%"><img src="assets/docs/matrix-delete-message.png" alt="Delete a Matrix message" width="180" /><br><sub>Delete</sub></td>
+<td align="center" width="33%"><img src="assets/docs/matrix-group-chat.png" alt="Matrix group chat" width="180" /><br><sub>Group chat</sub></td>
+</tr>
+</table>
+
+</details>
+
 </details>
 
 ## Requirements
@@ -342,6 +396,23 @@ Deploy a Matrix Synapse homeserver and configure it for JWT-based login (`org.ma
 MATRIX_HOMESERVER="https://matrix.yourdomain.com"
 ```
 
+#### Choose Chat Transports
+
+Use `ENABLED_INDIVIDUAL_CHAT_TRANSPORTS` to choose how individual chats run.
+
+```bash
+# DIDComm only. This is the default and does not show a transport picker.
+ENABLED_INDIVIDUAL_CHAT_TRANSPORTS='["didcomm"]'
+
+# Matrix only. Requires MATRIX_HOMESERVER.
+ENABLED_INDIVIDUAL_CHAT_TRANSPORTS='["matrix"]'
+
+# Test both DIDComm and Matrix. Shows a picker when creating an offer.
+ENABLED_INDIVIDUAL_CHAT_TRANSPORTS='["didcomm", "matrix"]'
+```
+
+Group chats always use Matrix, so `MATRIX_HOMESERVER` is required for group chat.
+
 #### Enable Push Notifications
 
 Create a [Firebase](https://firebase.google.com/docs/projects/learn-more) project, then:
@@ -404,7 +475,7 @@ DIRECT_INTERACTIVE_OOB_TYPE=""                   # Default: "" (e.g. "oss-app-ma
 ZKP_ENABLED="false"                              # Default: false — enables Human ZKP demo + Credentials tab
 
 # Matrix transport
-ENABLED_INDIVIDUAL_CHAT_TRANSPORTS=""            # Default: '["didcomm"]' — JSON array of enabled transports; options: "didcomm", "matrix" (e.g., '["didcomm", "matrix"]'). Single entry hides the picker; multiple show it at offer creation.
+ENABLED_INDIVIDUAL_CHAT_TRANSPORTS=""            # Default: '["didcomm"]' — use '["matrix"]' for Matrix only or '["didcomm", "matrix"]' to test both. Multiple entries show a picker at offer creation.
 MATRIX_MEDIA_MAX_CACHE_MB=""                     # Default: 30 — on-disk media cache limit per Matrix account in megabytes
 MATRIX_MEDIA_CACHE_TTL_DAYS=""                   # Default: 30 — how long cached Matrix media files are kept on device
 ```
