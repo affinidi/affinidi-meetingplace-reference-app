@@ -65,6 +65,9 @@ class _FakePlugin extends Fake implements AudioVideoCallPlugin {
   @override
   Future<void> declineCall({required String callId}) async {}
 
+  @override
+  Future<void> leaveCurrentCall() async {}
+
   void emitState(AudioVideoCallState s) => _session.emit(s);
 }
 

@@ -349,7 +349,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   Future<void> cancelCall() async {
     if (_isDisposed) return;
     try {
-      await _session?.hangUp();
+      await _plugin?.leaveCurrentCall();
+      _session = null;
     } catch (e, stackTrace) {
       _logger.error(
         'Failed to cancel call cleanly',
@@ -390,7 +391,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   Future<void> leaveCall() async {
     if (_isDisposed) return;
     try {
-      await _session?.hangUp();
+      await _plugin?.leaveCurrentCall();
+      _session = null;
     } catch (e, stackTrace) {
       _logger.error(
         'Failed to hang up call cleanly',
