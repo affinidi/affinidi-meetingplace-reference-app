@@ -44,9 +44,10 @@ class _CallControls {
 }
 
 String _formatDuration(int seconds) {
-  final m = (seconds ~/ 60).toString().padLeft(2, '0');
+  final h = seconds ~/ 3600;
+  final m = ((seconds % 3600) ~/ 60).toString().padLeft(2, '0');
   final s = (seconds % 60).toString().padLeft(2, '0');
-  return '$m:$s';
+  return h > 0 ? '$h:$m:$s' : '$m:$s';
 }
 
 void _showCallSnackBar(
