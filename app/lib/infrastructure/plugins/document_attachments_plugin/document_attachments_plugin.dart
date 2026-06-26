@@ -29,6 +29,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   final BaseCacheManager _cacheManager;
   final FilePickerPlatform _filePickerPlatform;
 
+  String cacheKeyForDocumentAttachment(String attachmentId) =>
+      '$pluginName:$attachmentId';
+
   int get _maxBytes => Environment.instance.chatAttachmentMaxBytes;
 
   static const allowedExtensions = [
@@ -103,6 +106,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   }) => _DocumentAttachmentWidget(
     attachment: attachment,
     cacheManager: _cacheManager,
+    cacheKey: cacheKeyForDocumentAttachment(attachment.id ?? ''),
     download: download,
   );
 
@@ -116,6 +120,7 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   }) => _ListDocumentAttachmentsWidget(
     attachments: attachments,
     cacheManager: _cacheManager,
+    cacheKeyForAttachment: cacheKeyForDocumentAttachment,
     download: download,
   );
 
@@ -169,11 +174,13 @@ class _ListDocumentAttachmentsWidget extends StatelessWidget {
   const _ListDocumentAttachmentsWidget({
     required this._attachments,
     required this._cacheManager,
+    required this._cacheKeyForAttachment,
     this._download,
   });
 
   final List<ChatAttachment> _attachments;
   final BaseCacheManager _cacheManager;
+  final String Function(String attachmentId) _cacheKeyForAttachment;
   final Future<Uint8List> Function(ChatAttachment)? _download;
 
   @override
@@ -185,6 +192,7 @@ class _ListDocumentAttachmentsWidget extends StatelessWidget {
       itemBuilder: (context, index) => _DocumentAttachmentWidget(
         attachment: _attachments[index],
         cacheManager: _cacheManager,
+        cacheKey: _cacheKeyForAttachment(_attachments[index].id ?? ''),
         download: _download,
       ),
     );
@@ -195,11 +203,13 @@ class _DocumentAttachmentWidget extends StatefulWidget {
   const _DocumentAttachmentWidget({
     required this.attachment,
     required this.cacheManager,
+    required this.cacheKey,
     this.download,
   });
 
   final ChatAttachment attachment;
   final BaseCacheManager cacheManager;
+  final String cacheKey;
   final Future<Uint8List> Function(ChatAttachment)? download;
 
   @override
@@ -228,7 +238,7 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
   Future<void> _loadFromDiskCache() async {
     final cachedBytes = await readCachedAttachmentBytes(
       widget.cacheManager,
-      widget.attachment,
+      widget.cacheKey,
     );
     if (cachedBytes == null || !mounted) return;
     setState(() => _bytes = cachedBytes);
@@ -248,8 +258,8 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
     try {
       final bytes = await downloadAndCacheAttachmentBytes(
         cacheManager: widget.cacheManager,
-        attachment: widget.attachment,
-        download: downloadFn,
+        cacheKey: widget.cacheKey,
+        download: () => downloadFn(widget.attachment),
       );
       if (!mounted) return;
       if (bytes.isEmpty) {

@@ -19,6 +19,7 @@ class VoiceAttachmentWidget extends HookWidget {
     required this.isFromMe,
     required this.chatItemColor,
     required this.cacheManager,
+    required this.cacheKey,
     required this.localVoiceStore,
     this.avatarImage,
     this.playbackScopeId,
@@ -30,6 +31,7 @@ class VoiceAttachmentWidget extends HookWidget {
   final bool isFromMe;
   final Color chatItemColor;
   final BaseCacheManager cacheManager;
+  final String cacheKey;
   final LocalVoiceAttachmentStore localVoiceStore;
   final ImageProvider<Object>? avatarImage;
   final String? playbackScopeId;
@@ -53,7 +55,7 @@ class VoiceAttachmentWidget extends HookWidget {
       try {
         final cachedBytes = await readCachedAttachmentBytes(
           cacheManager,
-          attachment,
+          cacheKey,
         );
         if (cachedBytes != null) {
           bytes.value = cachedBytes;
@@ -66,7 +68,7 @@ class VoiceAttachmentWidget extends HookWidget {
           return;
         }
 
-        await writeCachedAttachmentBytes(cacheManager, attachment, downloaded);
+        await writeCachedAttachmentBytes(cacheManager, cacheKey, downloaded);
         bytes.value = downloaded;
       } catch (_) {
         if (markFailure) hasFailed.value = true;
@@ -78,12 +80,12 @@ class VoiceAttachmentWidget extends HookWidget {
     useEffect(() {
       if (bytes.value != null) return null;
       unawaited(
-        readCachedAttachmentBytes(cacheManager, attachment).then((cached) {
+        readCachedAttachmentBytes(cacheManager, cacheKey).then((cached) {
           if (cached != null) bytes.value = cached;
         }),
       );
       return null;
-    }, [attachment.id, attachment.transportId]);
+    }, [cacheKey]);
 
     final cachedBytes = bytes.value;
     final levels = voiceLevelsForAttachment(attachment, cachedBytes);

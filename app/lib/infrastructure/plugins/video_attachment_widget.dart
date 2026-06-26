@@ -15,11 +15,13 @@ class VideoAttachmentWidget extends StatefulWidget {
     super.key,
     required this.attachment,
     required this.cacheManager,
+    required this.cacheKey,
     this.download,
   });
 
   final ChatAttachment attachment;
   final BaseCacheManager cacheManager;
+  final String cacheKey;
   final Future<Uint8List> Function(ChatAttachment)? download;
 
   @override
@@ -47,7 +49,7 @@ class _VideoAttachmentWidgetState extends State<VideoAttachmentWidget> {
   Future<void> _loadFromDiskCache() async {
     final cachedBytes = await readCachedAttachmentBytes(
       widget.cacheManager,
-      widget.attachment,
+      widget.cacheKey,
     );
     if (cachedBytes == null || !mounted) return;
     setState(() => _bytes = cachedBytes);
@@ -67,8 +69,8 @@ class _VideoAttachmentWidgetState extends State<VideoAttachmentWidget> {
     try {
       final bytes = await downloadAndCacheAttachmentBytes(
         cacheManager: widget.cacheManager,
-        attachment: widget.attachment,
-        download: downloadFn,
+        cacheKey: widget.cacheKey,
+        download: () => downloadFn(widget.attachment),
       );
       if (!mounted) return;
       if (bytes.isEmpty) {

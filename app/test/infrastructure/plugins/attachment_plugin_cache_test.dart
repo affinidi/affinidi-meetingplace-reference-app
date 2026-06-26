@@ -4,85 +4,37 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/attachment_plugin_cache.dart';
 
 void main() {
-  group('attachmentPluginCacheKey', () {
-    test('prefers attachment id over transport id and link', () {
-      final attachment = ChatAttachment(
-        id: 'attachment-id',
-        transportId: 'transport-id',
-        data: ChatAttachmentData(links: [Uri.parse('mxc://example/media')]),
-      );
-
-      expect(
-        attachmentPluginCacheKey(attachment),
-        'chat_attachment_attachment-id',
-      );
-    });
-
-    test('uses transport id when attachment id is absent', () {
-      final attachment = ChatAttachment(
-        transportId: 'transport-id',
-        data: ChatAttachmentData(links: [Uri.parse('mxc://example/media')]),
-      );
-
-      expect(
-        attachmentPluginCacheKey(attachment),
-        'chat_attachment_transport_transport-id',
-      );
-    });
-
-    test('uses first link when id and transport id are absent', () {
-      final attachment = ChatAttachment(
-        data: ChatAttachmentData(links: [Uri.parse('mxc://example/media')]),
-      );
-
-      expect(attachmentPluginCacheKey(attachment), 'mxc://example/media');
-    });
-
-    test('uses object identity fallback when no stable fields are present', () {
-      final attachment = ChatAttachment();
-
-      expect(
-        attachmentPluginCacheKey(attachment),
-        'chat_attachment_${identityHashCode(attachment)}',
-      );
-    });
-  });
-
   group('attachment plugin cache helpers', () {
     test(
       'writeCachedAttachmentBytes and readCachedAttachmentBytes round trip',
       () async {
         final cacheManager = _MemoryCacheManager();
-        final attachment = ChatAttachment(id: 'attachment-id');
+        const cacheKey = 'plugin:attachment-id';
         final bytes = Uint8List.fromList([1, 2, 3]);
 
-        await writeCachedAttachmentBytes(cacheManager, attachment, bytes);
+        await writeCachedAttachmentBytes(cacheManager, cacheKey, bytes);
 
-        expect(
-          await readCachedAttachmentBytes(cacheManager, attachment),
-          bytes,
-        );
-        expect(cacheManager.writtenKeys, ['chat_attachment_attachment-id']);
+        expect(await readCachedAttachmentBytes(cacheManager, cacheKey), bytes);
+        expect(cacheManager.writtenKeys, [cacheKey]);
       },
     );
 
     test('downloadAndCacheAttachmentBytes returns cached bytes without '
         'downloading', () async {
       final cacheManager = _MemoryCacheManager();
-      final attachment = ChatAttachment(id: 'attachment-id');
+      const cacheKey = 'plugin:attachment-id';
       final cachedBytes = Uint8List.fromList([4, 5, 6]);
       var downloadCalls = 0;
 
-      await writeCachedAttachmentBytes(cacheManager, attachment, cachedBytes);
+      await writeCachedAttachmentBytes(cacheManager, cacheKey, cachedBytes);
 
       final result = await downloadAndCacheAttachmentBytes(
         cacheManager: cacheManager,
-        attachment: attachment,
-        download: (_) async {
+        cacheKey: cacheKey,
+        download: () async {
           downloadCalls++;
           return Uint8List.fromList([7, 8, 9]);
         },
@@ -96,23 +48,21 @@ void main() {
       'downloadAndCacheAttachmentBytes caches non-empty downloads',
       () async {
         final cacheManager = _MemoryCacheManager();
-        final attachment = ChatAttachment(transportId: 'transport-id');
+        const cacheKey = 'plugin:attachment-id';
         final downloadedBytes = Uint8List.fromList([7, 8, 9]);
 
         final result = await downloadAndCacheAttachmentBytes(
           cacheManager: cacheManager,
-          attachment: attachment,
-          download: (_) async => downloadedBytes,
+          cacheKey: cacheKey,
+          download: () async => downloadedBytes,
         );
 
         expect(result, downloadedBytes);
         expect(
-          await readCachedAttachmentBytes(cacheManager, attachment),
+          await readCachedAttachmentBytes(cacheManager, cacheKey),
           downloadedBytes,
         );
-        expect(cacheManager.writtenKeys, [
-          'chat_attachment_transport_transport-id',
-        ]);
+        expect(cacheManager.writtenKeys, [cacheKey]);
       },
     );
 
@@ -120,20 +70,17 @@ void main() {
       'downloadAndCacheAttachmentBytes does not cache empty downloads',
       () async {
         final cacheManager = _MemoryCacheManager();
-        final attachment = ChatAttachment(id: 'attachment-id');
+        const cacheKey = 'plugin:attachment-id';
         final emptyBytes = Uint8List(0);
 
         final result = await downloadAndCacheAttachmentBytes(
           cacheManager: cacheManager,
-          attachment: attachment,
-          download: (_) async => emptyBytes,
+          cacheKey: cacheKey,
+          download: () async => emptyBytes,
         );
 
         expect(result, emptyBytes);
-        expect(
-          await readCachedAttachmentBytes(cacheManager, attachment),
-          isNull,
-        );
+        expect(await readCachedAttachmentBytes(cacheManager, cacheKey), isNull);
         expect(cacheManager.writtenKeys, isEmpty);
       },
     );

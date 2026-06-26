@@ -24,6 +24,9 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
   final BaseCacheManager _cacheManager;
   final LocalVoiceAttachmentStore _localVoiceStore;
 
+  String cacheKeyForAudioAttachment(String attachmentId) =>
+      '$pluginName:$attachmentId';
+
   @override
   bool get dismissSheetBeforePicking => false;
 
@@ -50,6 +53,7 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
     isFromMe: isFromMe,
     chatItemColor: chatItemColor,
     cacheManager: _cacheManager,
+    cacheKey: cacheKeyForAudioAttachment(attachment.id ?? ''),
     localVoiceStore: _localVoiceStore,
     avatarImage: renderContext?.avatarImage,
     playbackScopeId: renderContext?.playbackScopeId,
@@ -73,6 +77,7 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
       isFromMe: isFromMe,
       chatItemColor: chatItemColor,
       cacheManager: _cacheManager,
+      cacheKey: cacheKeyForAudioAttachment(attachments[index].id ?? ''),
       localVoiceStore: _localVoiceStore,
       avatarImage: renderContext?.avatarImage,
       playbackScopeId: renderContext?.playbackScopeId,

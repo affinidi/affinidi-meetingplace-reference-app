@@ -13,13 +13,13 @@ class ImageAttachmentWidget extends StatefulWidget {
     super.key,
     required this.attachment,
     required this.cacheManager,
-    this.cacheKey,
+    required this.cacheKey,
     this.download,
   });
 
   final ChatAttachment attachment;
   final BaseCacheManager cacheManager;
-  final String? cacheKey;
+  final String cacheKey;
   final Future<Uint8List> Function(ChatAttachment)? download;
 
   @override
@@ -36,26 +36,10 @@ class _ImageAttachmentWidgetState extends State<ImageAttachmentWidget>
     ChatAttachment attachment,
     Future<Uint8List> Function(ChatAttachment) downloadFn,
   ) async {
-    final cacheKey = widget.cacheKey;
-    if (cacheKey != null) {
-      final cachedFileInfo = await widget.cacheManager.getFileFromCache(
-        cacheKey,
-      );
-      if (cachedFileInfo != null) {
-        return cachedFileInfo.file.readAsBytes();
-      }
-
-      final imageBytes = await downloadFn(attachment);
-      if (imageBytes.isEmpty) return imageBytes;
-
-      await widget.cacheManager.putFile(cacheKey, imageBytes);
-      return imageBytes;
-    }
-
     return downloadAndCacheAttachmentBytes(
       cacheManager: widget.cacheManager,
-      attachment: attachment,
-      download: downloadFn,
+      cacheKey: widget.cacheKey,
+      download: () => downloadFn(attachment),
     );
   }
 

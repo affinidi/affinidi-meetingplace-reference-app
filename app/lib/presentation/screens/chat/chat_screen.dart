@@ -41,7 +41,6 @@ import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/message_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
-import '../../../infrastructure/plugins/attachment_plugin_cache.dart';
 import '../../../infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';

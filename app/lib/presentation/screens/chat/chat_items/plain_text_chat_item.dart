@@ -228,9 +228,7 @@ class _AttachmentWidget extends HookConsumerWidget {
         cacheManager: ref.read(cacheManagerProvider),
       ),
       playbackScopeId: _contactId,
-      playbackClipId: controller.voiceClipId(
-        attachmentPluginCacheKey(_attachment),
-      ),
+      playbackClipId: _playbackClipId(controller),
     );
 
     for (final plugin in plugins) {
@@ -254,6 +252,22 @@ class _AttachmentWidget extends HookConsumerWidget {
     }
 
     return const SizedBox.shrink();
+  }
+
+  String _playbackClipId(ChatScreenController controller) =>
+      controller.voiceClipId(_playbackAttachmentKey(_attachment));
+
+  String _playbackAttachmentKey(ChatAttachment attachment) {
+    final id = attachment.id;
+    if (id != null && id.isNotEmpty) return 'chat_attachment_$id';
+
+    final transportId = attachment.transportId;
+    if (transportId != null && transportId.isNotEmpty) {
+      return 'chat_attachment_transport_$transportId';
+    }
+
+    return attachment.data?.links?.firstOrNull?.toString() ??
+        'chat_attachment_${identityHashCode(attachment)}';
   }
 
   ImageProvider<Object>? _voiceAvatarImage({

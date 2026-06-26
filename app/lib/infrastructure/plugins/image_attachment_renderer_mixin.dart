@@ -31,6 +31,7 @@ mixin ImageAttachmentRendererMixin {
       return VideoAttachmentWidget(
         attachment: attachment,
         cacheManager: attachmentRendererCacheManager,
+        cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
         download: download,
       );
     }
@@ -57,6 +58,7 @@ mixin ImageAttachmentRendererMixin {
           key: ValueKey(attachment.id ?? index),
           attachment: attachment,
           cacheManager: attachmentRendererCacheManager,
+          cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
           download: download,
         );
       }
