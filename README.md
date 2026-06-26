@@ -237,7 +237,7 @@ A VRC is a mutual "verified relationship" credential. Unlike an R-Card, a VRC re
 </details>
 
 <details id="panel-matrix">
-<summary><strong>Matrix Rich Chat Demo</strong></summary>
+<summary><strong>Matrix Chat</strong></summary>
 
 Matrix enables the richer chat features in this reference app.
 
@@ -253,26 +253,26 @@ The screenshots below show the Matrix chat flow and rich message actions.
 
 <table>
 <tr>
-<td align="center" width="33%"><strong>Choose transport</strong><br><sub>Select Matrix, DIDComm, or both</sub></td>
-<td align="center" width="33%"><strong>Send audio</strong><br><sub>Record and play voice messages</sub></td>
-<td align="center" width="33%"><strong>React to messages</strong><br><sub>Add reactions in the chat thread</sub></td>
+<td align="center" width="33%"><strong>Choose transport</strong></td>
+<td align="center" width="33%"><strong>Send audio</strong></td>
+<td align="center" width="33%"><strong>React to messages</strong></td>
 </tr>
 <tr>
-<td align="center" width="33%"><img src="assets/docs/matrix-transport-picker.png" alt="Choose Matrix transport" width="180" /><br><sub>Transport picker</sub></td>
-<td align="center" width="33%"><img src="assets/docs/matrix-audio-messages.png" alt="Matrix audio messages" width="180" /><br><sub>Audio messages</sub></td>
-<td align="center" width="33%"><img src="assets/docs/matrix-reactions.png" alt="Matrix message reactions" width="180" /><br><sub>Reactions</sub></td>
+<td align="center" width="33%"><img src="assets/matrix/matrix-transport-picker.png" alt="Choose Matrix transport" /></td>
+<td align="center" width="33%"><img src="assets/matrix/matrix-audio-messages.png" alt="Matrix audio messages" /></td>
+<td align="center" width="33%"><img src="assets/matrix/matrix-reactions.png" alt="Matrix message reactions" /></td>
 </tr>
 </table>
 <table>
 <tr>
-<td align="center" width="33%"><strong>Edit message</strong><br><sub>Update a sent message</sub></td>
-<td align="center" width="33%"><strong>Delete message</strong><br><sub>Remove a sent message</sub></td>
-<td align="center" width="33%"><strong>Group chat</strong><br><sub>Chat with multiple members</sub></td>
+<td align="center" width="33%"><strong>Edit message</strong></td>
+<td align="center" width="33%"><strong>Delete message</strong></td>
+<td align="center" width="33%"><strong>Group chat</strong></td>
 </tr>
 <tr>
-<td align="center" width="33%"><img src="assets/docs/matrix-edit-message.png" alt="Edit a Matrix message" width="180" /><br><sub>Edit</sub></td>
-<td align="center" width="33%"><img src="assets/docs/matrix-delete-message.png" alt="Delete a Matrix message" width="180" /><br><sub>Delete</sub></td>
-<td align="center" width="33%"><img src="assets/docs/matrix-group-chat.png" alt="Matrix group chat" width="180" /><br><sub>Group chat</sub></td>
+<td align="center" width="33%"><img src="assets/matrix/matrix-edit-message.png" alt="Edit a Matrix message" /></td>
+<td align="center" width="33%"><img src="assets/matrix/matrix-delete-message.png" alt="Delete a Matrix message" /></td>
+<td align="center" width="33%"><img src="assets/matrix/matrix-group-chat.png" alt="Matrix group chat" /></td>
 </tr>
 </table>
 
