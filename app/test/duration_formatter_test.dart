@@ -19,8 +19,20 @@ void main() {
       expect(formatDuration(75), '01:15');
     });
 
-    test('formats values beyond an hour without truncating minutes', () {
-      expect(formatDuration(3661), '61:01');
+    test('formats exactly one hour as 1:00:00', () {
+      expect(formatDuration(3600), '1:00:00');
+    });
+
+    test('formats one hour five minutes twenty-five seconds as 1:05:25', () {
+      expect(formatDuration(3600 + 5 * 60 + 25), '1:05:25');
+    });
+
+    test('pads minutes and seconds below ten when hours are present', () {
+      expect(formatDuration(3600 + 60 + 1), '1:01:01');
+    });
+
+    test('does not show hours component below 3600 seconds', () {
+      expect(formatDuration(3599), '59:59');
     });
   });
 }
