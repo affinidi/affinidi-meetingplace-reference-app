@@ -109,6 +109,7 @@ class _ChatTextEntry extends HookConsumerWidget {
                 ),
                 Expanded(
                   child: _VoiceInputPreview(
+                    contactId: _contactId,
                     draft: voice.draft,
                     isRecording: voice.isRecording,
                     duration: voice.duration,
