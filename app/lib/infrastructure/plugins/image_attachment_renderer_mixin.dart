@@ -32,6 +32,7 @@ mixin ImageAttachmentRendererMixin {
         attachment: attachment,
         cacheManager: attachmentRendererCacheManager,
         cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
+        playbackScopeId: renderContext?.playbackScopeId,
         download: download,
       );
     }
@@ -59,6 +60,7 @@ mixin ImageAttachmentRendererMixin {
           attachment: attachment,
           cacheManager: attachmentRendererCacheManager,
           cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
+          playbackScopeId: renderContext?.playbackScopeId,
           download: download,
         );
       }
