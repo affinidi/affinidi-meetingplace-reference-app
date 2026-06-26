@@ -1002,7 +1002,7 @@ class ChatScreenController extends _$ChatScreenController
     Duration initialDuration = Duration.zero,
   }) {
     return ref
-        .read(voicePlaybackServiceProvider(_contactId).notifier)
+        .read(voicePlaybackServiceProvider(contactId).notifier)
         .toggle(
           clipId: clipId,
           bytes: bytes,
@@ -1012,8 +1012,12 @@ class ChatScreenController extends _$ChatScreenController
         );
   }
 
+  Future<void> stopVoicePlayback() {
+    return ref.read(voicePlaybackServiceProvider(contactId).notifier).stop();
+  }
+
   String voiceClipId(String attachmentCacheKey) =>
-      VoicePlaybackService.clipId(_contactId, attachmentCacheKey);
+      VoicePlaybackService.clipId(contactId, attachmentCacheKey);
 
   Future<void> _restoreUnsentMessage() async {
     final contact = state.contact;

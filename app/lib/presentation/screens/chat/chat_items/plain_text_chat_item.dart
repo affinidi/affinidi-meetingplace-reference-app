@@ -227,6 +227,10 @@ class _AttachmentWidget extends HookConsumerWidget {
         message: _chatItem,
         cacheManager: ref.read(cacheManagerProvider),
       ),
+      playbackScopeId: _contactId,
+      playbackClipId: controller.voiceClipId(
+        attachmentPluginCacheKey(_attachment),
+      ),
     );
 
     for (final plugin in plugins) {

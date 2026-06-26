@@ -5,8 +5,10 @@ import 'dart:typed_data';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 
+import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../presentation/widgets/profile_circle_avatar.dart';
 
 const _voiceMessageMimeTypeWav = 'audio/wav';
@@ -97,13 +99,15 @@ class VoiceAttachmentBubble extends StatelessWidget {
   }
 }
 
-class VoiceAttachmentPlayer extends HookWidget {
+class VoiceAttachmentPlayer extends HookConsumerWidget {
   const VoiceAttachmentPlayer({
     super.key,
     required this.initialDuration,
     required this.builder,
     required this.bytes,
     this.mediaType,
+    this.playbackScopeId,
+    this.playbackClipId,
     this.autoPlay = false,
     this.onAutoPlayed,
   });
@@ -111,13 +115,57 @@ class VoiceAttachmentPlayer extends HookWidget {
   final Uint8List bytes;
   final String? mediaType;
   final Duration initialDuration;
+  final String? playbackScopeId;
+  final String? playbackClipId;
   final bool autoPlay;
   final VoidCallback? onAutoPlayed;
   final Widget Function(BuildContext context, VoiceAttachmentPlayerState state)
   builder;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scopeId = playbackScopeId;
+    final clipId = playbackClipId;
+    if (scopeId != null && clipId != null) {
+      final playback = voicePlaybackServiceProvider(scopeId);
+      final isPlaying = ref.watch(playback.isPlaying(clipId));
+      final progress = ref.watch(playback.progress(clipId));
+      final duration = ref.watch(playback.duration(clipId, initialDuration));
+
+      Future<void> togglePlayback() async {
+        await ref
+            .read(playback.notifier)
+            .toggle(
+              clipId: clipId,
+              bytes: bytes,
+              mediaType: mediaType,
+              initialDuration: initialDuration,
+            );
+      }
+
+      final hasAutoPlayed = useRef(false);
+      useEffect(() {
+        if (autoPlay && !hasAutoPlayed.value) {
+          hasAutoPlayed.value = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            unawaited(togglePlayback());
+            onAutoPlayed?.call();
+          });
+        }
+        return null;
+      }, [autoPlay]);
+
+      return builder(
+        context,
+        VoiceAttachmentPlayerState(
+          isPlaying: isPlaying,
+          duration: duration,
+          progress: progress,
+          toggle: () => unawaited(togglePlayback()),
+        ),
+      );
+    }
+
     final player = useMemoized(AudioPlayer.new);
     final isPlaying = useState(false);
     final position = useState(Duration.zero);

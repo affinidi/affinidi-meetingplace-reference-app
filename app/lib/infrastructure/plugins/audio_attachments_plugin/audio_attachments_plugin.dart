@@ -52,6 +52,8 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
     cacheManager: _cacheManager,
     localVoiceStore: _localVoiceStore,
     avatarImage: renderContext?.avatarImage,
+    playbackScopeId: renderContext?.playbackScopeId,
+    playbackClipId: renderContext?.playbackClipId,
     download: download,
   );
 
@@ -73,6 +75,8 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
       cacheManager: _cacheManager,
       localVoiceStore: _localVoiceStore,
       avatarImage: renderContext?.avatarImage,
+      playbackScopeId: renderContext?.playbackScopeId,
+      playbackClipId: renderContext?.playbackClipId,
       download: download,
     ),
   );

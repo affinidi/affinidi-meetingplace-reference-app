@@ -40,7 +40,13 @@ abstract interface class AttachmentPlugin {
 }
 
 class AttachmentRenderContext {
-  const AttachmentRenderContext({this.avatarImage});
+  const AttachmentRenderContext({
+    this.avatarImage,
+    this.playbackScopeId,
+    this.playbackClipId,
+  });
 
   final ImageProvider<Object>? avatarImage;
+  final String? playbackScopeId;
+  final String? playbackClipId;
 }

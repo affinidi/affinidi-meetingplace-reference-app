@@ -21,6 +21,8 @@ class VoiceAttachmentWidget extends HookWidget {
     required this.cacheManager,
     required this.localVoiceStore,
     this.avatarImage,
+    this.playbackScopeId,
+    this.playbackClipId,
     this.download,
   });
 
@@ -30,6 +32,8 @@ class VoiceAttachmentWidget extends HookWidget {
   final BaseCacheManager cacheManager;
   final LocalVoiceAttachmentStore localVoiceStore;
   final ImageProvider<Object>? avatarImage;
+  final String? playbackScopeId;
+  final String? playbackClipId;
   final Future<Uint8List> Function(ChatAttachment)? download;
 
   @override
@@ -117,6 +121,8 @@ class VoiceAttachmentWidget extends HookWidget {
       bytes: cachedBytes,
       mediaType: attachment.mediaType,
       initialDuration: Duration(milliseconds: durationMs),
+      playbackScopeId: playbackScopeId,
+      playbackClipId: playbackClipId,
       autoPlay: playRequested.value,
       onAutoPlayed: () => playRequested.value = false,
       builder: (context, state) => VoiceAttachmentBubble(

@@ -57,7 +57,8 @@ void main() {
 
       test('returns false for audio plugin format', () {
         final attachment = ChatAttachment(
-          format: AudioAttachmentsPlugin.pluginName);
+          format: AudioAttachmentsPlugin.pluginName,
+        );
         expect(plugin.supportsFormat(attachment), isFalse);
       });
 
