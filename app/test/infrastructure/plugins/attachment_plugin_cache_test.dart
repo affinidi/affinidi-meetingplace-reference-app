@@ -8,31 +8,27 @@ import 'package:mpx_flutter_reference_app/infrastructure/plugins/attachment_plug
 
 void main() {
   group('attachment plugin cache helpers', () {
-    test(
-      'writeCachedAttachmentBytes and readCachedAttachmentBytes round trip',
-      () async {
-        final cacheManager = _MemoryCacheManager();
-        const cacheKey = 'plugin:attachment-id';
-        final bytes = Uint8List.fromList([1, 2, 3]);
+    test('writeBytes and readBytes round trip', () async {
+      final cacheManager = _MemoryCacheManager();
+      const cacheKey = 'plugin:attachment-id';
+      final bytes = Uint8List.fromList([1, 2, 3]);
 
-        await writeCachedAttachmentBytes(cacheManager, cacheKey, bytes);
+      await cacheManager.writeBytes(cacheKey, bytes);
 
-        expect(await readCachedAttachmentBytes(cacheManager, cacheKey), bytes);
-        expect(cacheManager.writtenKeys, [cacheKey]);
-      },
-    );
+      expect(await cacheManager.readBytes(cacheKey), bytes);
+      expect(cacheManager.writtenKeys, [cacheKey]);
+    });
 
-    test('downloadAndCacheAttachmentBytes returns cached bytes without '
+    test('downloadBytes returns cached bytes without '
         'downloading', () async {
       final cacheManager = _MemoryCacheManager();
       const cacheKey = 'plugin:attachment-id';
       final cachedBytes = Uint8List.fromList([4, 5, 6]);
       var downloadCalls = 0;
 
-      await writeCachedAttachmentBytes(cacheManager, cacheKey, cachedBytes);
+      await cacheManager.writeBytes(cacheKey, cachedBytes);
 
-      final result = await downloadAndCacheAttachmentBytes(
-        cacheManager: cacheManager,
+      final result = await cacheManager.downloadBytes(
         cacheKey: cacheKey,
         download: () async {
           downloadCalls++;
@@ -44,46 +40,35 @@ void main() {
       expect(downloadCalls, 0);
     });
 
-    test(
-      'downloadAndCacheAttachmentBytes caches non-empty downloads',
-      () async {
-        final cacheManager = _MemoryCacheManager();
-        const cacheKey = 'plugin:attachment-id';
-        final downloadedBytes = Uint8List.fromList([7, 8, 9]);
+    test('downloadBytes caches non-empty downloads', () async {
+      final cacheManager = _MemoryCacheManager();
+      const cacheKey = 'plugin:attachment-id';
+      final downloadedBytes = Uint8List.fromList([7, 8, 9]);
 
-        final result = await downloadAndCacheAttachmentBytes(
-          cacheManager: cacheManager,
-          cacheKey: cacheKey,
-          download: () async => downloadedBytes,
-        );
+      final result = await cacheManager.downloadBytes(
+        cacheKey: cacheKey,
+        download: () async => downloadedBytes,
+      );
 
-        expect(result, downloadedBytes);
-        expect(
-          await readCachedAttachmentBytes(cacheManager, cacheKey),
-          downloadedBytes,
-        );
-        expect(cacheManager.writtenKeys, [cacheKey]);
-      },
-    );
+      expect(result, downloadedBytes);
+      expect(await cacheManager.readBytes(cacheKey), downloadedBytes);
+      expect(cacheManager.writtenKeys, [cacheKey]);
+    });
 
-    test(
-      'downloadAndCacheAttachmentBytes does not cache empty downloads',
-      () async {
-        final cacheManager = _MemoryCacheManager();
-        const cacheKey = 'plugin:attachment-id';
-        final emptyBytes = Uint8List(0);
+    test('downloadBytes does not cache empty downloads', () async {
+      final cacheManager = _MemoryCacheManager();
+      const cacheKey = 'plugin:attachment-id';
+      final emptyBytes = Uint8List(0);
 
-        final result = await downloadAndCacheAttachmentBytes(
-          cacheManager: cacheManager,
-          cacheKey: cacheKey,
-          download: () async => emptyBytes,
-        );
+      final result = await cacheManager.downloadBytes(
+        cacheKey: cacheKey,
+        download: () async => emptyBytes,
+      );
 
-        expect(result, emptyBytes);
-        expect(await readCachedAttachmentBytes(cacheManager, cacheKey), isNull);
-        expect(cacheManager.writtenKeys, isEmpty);
-      },
-    );
+      expect(result, emptyBytes);
+      expect(await cacheManager.readBytes(cacheKey), isNull);
+      expect(cacheManager.writtenKeys, isEmpty);
+    });
   });
 }
 

@@ -236,10 +236,7 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
   }
 
   Future<void> _loadFromDiskCache() async {
-    final cachedBytes = await readCachedAttachmentBytes(
-      widget.cacheManager,
-      widget.cacheKey,
-    );
+    final cachedBytes = await widget.cacheManager.readBytes(widget.cacheKey);
     if (cachedBytes == null || !mounted) return;
     setState(() => _bytes = cachedBytes);
   }
@@ -256,8 +253,7 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
     });
 
     try {
-      final bytes = await downloadAndCacheAttachmentBytes(
-        cacheManager: widget.cacheManager,
+      final bytes = await widget.cacheManager.downloadBytes(
         cacheKey: widget.cacheKey,
         download: () => downloadFn(widget.attachment),
       );

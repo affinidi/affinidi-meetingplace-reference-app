@@ -36,8 +36,7 @@ class _ImageAttachmentWidgetState extends State<ImageAttachmentWidget>
     ChatAttachment attachment,
     Future<Uint8List> Function(ChatAttachment) downloadFn,
   ) async {
-    return downloadAndCacheAttachmentBytes(
-      cacheManager: widget.cacheManager,
+    return widget.cacheManager.downloadBytes(
       cacheKey: widget.cacheKey,
       download: () => downloadFn(attachment),
     );

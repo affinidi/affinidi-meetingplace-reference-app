@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../presentation/screens/media/media_screen/media_screen.dart';
 import '../../extensions/build_context_extensions.dart';
+import '../attachment_plugin_cache.dart';
 import '../image_attachment_renderer_mixin.dart';
 import 'gallery_image_attachment.dart';
 import 'video_attachment.dart';
@@ -85,7 +86,7 @@ class GalleryAttachmentsPlugin
     }
 
     final cacheKey = cacheKeyForImageAttachment(attachmentId);
-    await _cacheManager.putFile(cacheKey, result.compressedImage.bytes);
+    await _cacheManager.writeBytes(cacheKey, result.compressedImage.bytes);
 
     return AttachmentPluginPickResult(
       text: result.textMessage,

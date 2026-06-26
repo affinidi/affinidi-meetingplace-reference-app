@@ -53,10 +53,7 @@ class VoiceAttachmentWidget extends HookWidget {
       hasFailed.value = false;
 
       try {
-        final cachedBytes = await readCachedAttachmentBytes(
-          cacheManager,
-          cacheKey,
-        );
+        final cachedBytes = await cacheManager.readBytes(cacheKey);
         if (cachedBytes != null) {
           bytes.value = cachedBytes;
           return;
@@ -68,7 +65,7 @@ class VoiceAttachmentWidget extends HookWidget {
           return;
         }
 
-        await writeCachedAttachmentBytes(cacheManager, cacheKey, downloaded);
+        await cacheManager.writeBytes(cacheKey, downloaded);
         bytes.value = downloaded;
       } catch (_) {
         if (markFailure) hasFailed.value = true;
@@ -80,7 +77,7 @@ class VoiceAttachmentWidget extends HookWidget {
     useEffect(() {
       if (bytes.value != null) return null;
       unawaited(
-        readCachedAttachmentBytes(cacheManager, cacheKey).then((cached) {
+        cacheManager.readBytes(cacheKey).then((cached) {
           if (cached != null) bytes.value = cached;
         }),
       );
