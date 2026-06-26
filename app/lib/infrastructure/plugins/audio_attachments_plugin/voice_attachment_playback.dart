@@ -39,73 +39,63 @@ class VoiceAttachmentBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 260,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: chatItemColor,
-        borderRadius: BorderRadius.circular(22),
+    return _VoiceAttachmentBubbleFrame(
+      chatItemColor: chatItemColor,
+      avatar: ProfileCircleAvatar(
+        key: const Key('voice_sender_avatar'),
+        radius: 28,
+        image: avatarImage,
+        child: avatarImage == null
+            ? Icon(
+                isFromMe ? Icons.person : Icons.person_outline,
+                color: Colors.white,
+                size: 30,
+              )
+            : null,
       ),
-      child: Row(
-        children: [
-          ProfileCircleAvatar(
-            key: const Key('voice_sender_avatar'),
-            radius: 28,
-            image: avatarImage,
-            child: avatarImage == null
-                ? Icon(
-                    isFromMe ? Icons.person : Icons.person_outline,
-                    color: Colors.white,
-                    size: 30,
-                  )
-                : null,
-          ),
-          const SizedBox(width: 12),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-            onPressed: isLoading ? null : onPressed,
-            icon: isLoading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-          ),
-          Expanded(
-            child: _VoiceAttachmentProgressDots(
-              levels: levels,
-              progress: progress,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            _formatVoiceDuration(duration),
-            style: const TextStyle(color: Colors.white, fontSize: 13),
-          ),
-        ],
+      control: IconButton(
+        visualDensity: VisualDensity.compact,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+        onPressed: isLoading ? null : onPressed,
+        icon: isLoading
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Icon(
+                isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+                size: 30,
+              ),
+      ),
+      progressIndicator: _VoiceAttachmentProgressDots(
+        levels: levels,
+        progress: progress,
+        color: Colors.white,
+      ),
+      durationText: Text(
+        _formatVoiceDuration(duration),
+        style: const TextStyle(color: Colors.white, fontSize: 13),
       ),
     );
   }
 }
 
-class VoiceAttachmentPlayer extends HookConsumerWidget {
-  const VoiceAttachmentPlayer({
+class VoiceAttachmentPlaybackBubble extends HookConsumerWidget {
+  const VoiceAttachmentPlaybackBubble({
     super.key,
-    required this.initialDuration,
-    required this.builder,
     required this.bytes,
+    required this.initialDuration,
+    required this.isFromMe,
+    required this.chatItemColor,
+    required this.levels,
     this.mediaType,
+    this.avatarImage,
     this.playbackScopeId,
     this.playbackClipId,
     this.autoPlay = false,
@@ -115,12 +105,14 @@ class VoiceAttachmentPlayer extends HookConsumerWidget {
   final Uint8List bytes;
   final String? mediaType;
   final Duration initialDuration;
+  final bool isFromMe;
+  final Color chatItemColor;
+  final List<double> levels;
+  final ImageProvider<Object>? avatarImage;
   final String? playbackScopeId;
   final String? playbackClipId;
   final bool autoPlay;
   final VoidCallback? onAutoPlayed;
-  final Widget Function(BuildContext context, VoiceAttachmentPlayerState state)
-  builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -128,44 +120,139 @@ class VoiceAttachmentPlayer extends HookConsumerWidget {
     final clipId = playbackClipId;
     if (scopeId != null && clipId != null) {
       final playback = voicePlaybackServiceProvider(scopeId);
-      final isPlaying = ref.watch(playback.isPlaying(clipId));
-      final progress = ref.watch(playback.progress(clipId));
-      final duration = ref.watch(playback.duration(clipId, initialDuration));
-
-      Future<void> togglePlayback() async {
-        await ref
-            .read(playback.notifier)
-            .toggle(
-              clipId: clipId,
-              bytes: bytes,
-              mediaType: mediaType,
-              initialDuration: initialDuration,
-            );
-      }
-
       final hasAutoPlayed = useRef(false);
+
       useEffect(() {
         if (autoPlay && !hasAutoPlayed.value) {
           hasAutoPlayed.value = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            unawaited(togglePlayback());
+            unawaited(
+              ref
+                  .read(playback.notifier)
+                  .toggle(
+                    clipId: clipId,
+                    bytes: bytes,
+                    mediaType: mediaType,
+                    initialDuration: initialDuration,
+                  ),
+            );
             onAutoPlayed?.call();
           });
         }
         return null;
       }, [autoPlay]);
 
-      return builder(
-        context,
-        VoiceAttachmentPlayerState(
-          isPlaying: isPlaying,
-          duration: duration,
-          progress: progress,
-          toggle: () => unawaited(togglePlayback()),
+      return _VoiceAttachmentBubbleFrame(
+        chatItemColor: chatItemColor,
+        avatar: ProfileCircleAvatar(
+          key: const Key('voice_sender_avatar'),
+          radius: 28,
+          image: avatarImage,
+          child: avatarImage == null
+              ? Icon(
+                  isFromMe ? Icons.person : Icons.person_outline,
+                  color: Colors.white,
+                  size: 30,
+                )
+              : null,
+        ),
+        control: _ScopedVoiceAttachmentPlaybackButton(
+          playback: playback,
+          clipId: clipId,
+          bytes: bytes,
+          mediaType: mediaType,
+          initialDuration: initialDuration,
+        ),
+        progressIndicator: _ScopedVoiceAttachmentProgressDots(
+          playback: playback,
+          clipId: clipId,
+          levels: levels,
+        ),
+        durationText: _ScopedVoiceAttachmentDurationText(
+          playback: playback,
+          clipId: clipId,
+          initialDuration: initialDuration,
         ),
       );
     }
 
+    return _LocalVoiceAttachmentPlaybackBubble(
+      bytes: bytes,
+      mediaType: mediaType,
+      initialDuration: initialDuration,
+      isFromMe: isFromMe,
+      chatItemColor: chatItemColor,
+      levels: levels,
+      avatarImage: avatarImage,
+      autoPlay: autoPlay,
+      onAutoPlayed: onAutoPlayed,
+    );
+  }
+}
+
+class _VoiceAttachmentBubbleFrame extends StatelessWidget {
+  const _VoiceAttachmentBubbleFrame({
+    required this.chatItemColor,
+    required this.avatar,
+    required this.control,
+    required this.progressIndicator,
+    required this.durationText,
+  });
+
+  final Color chatItemColor;
+  final Widget avatar;
+  final Widget control;
+  final Widget progressIndicator;
+  final Widget durationText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 260,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: chatItemColor,
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Row(
+        children: [
+          avatar,
+          const SizedBox(width: 12),
+          control,
+          Expanded(child: progressIndicator),
+          const SizedBox(width: 8),
+          durationText,
+        ],
+      ),
+    );
+  }
+}
+
+class _LocalVoiceAttachmentPlaybackBubble extends HookWidget {
+  const _LocalVoiceAttachmentPlaybackBubble({
+    required this.bytes,
+    required this.initialDuration,
+    required this.isFromMe,
+    required this.chatItemColor,
+    required this.levels,
+    this.mediaType,
+    this.avatarImage,
+    this.autoPlay = false,
+    this.onAutoPlayed,
+  });
+
+  final Uint8List bytes;
+  final String? mediaType;
+  final Duration initialDuration;
+  final bool isFromMe;
+  final Color chatItemColor;
+  final List<double> levels;
+  final ImageProvider<Object>? avatarImage;
+  final bool autoPlay;
+  final VoidCallback? onAutoPlayed;
+
+  @override
+  Widget build(BuildContext context) {
     final player = useMemoized(AudioPlayer.new);
     final isPlaying = useState(false);
     final position = useState(Duration.zero);
@@ -226,30 +313,106 @@ class VoiceAttachmentPlayer extends HookConsumerWidget {
               .clamp(0.0, 1.0)
               .toDouble();
 
-    return builder(
-      context,
-      VoiceAttachmentPlayerState(
-        isPlaying: isPlaying.value,
-        duration: duration.value,
-        progress: progress,
-        toggle: () => unawaited(togglePlayback()),
+    return VoiceAttachmentBubble(
+      isFromMe: isFromMe,
+      chatItemColor: chatItemColor,
+      isPlaying: isPlaying.value,
+      duration: duration.value,
+      levels: levels,
+      progress: progress,
+      avatarImage: avatarImage,
+      onPressed: () => unawaited(togglePlayback()),
+    );
+  }
+}
+
+class _ScopedVoiceAttachmentPlaybackButton extends ConsumerWidget {
+  const _ScopedVoiceAttachmentPlaybackButton({
+    required this.playback,
+    required this.clipId,
+    required this.bytes,
+    required this.mediaType,
+    required this.initialDuration,
+  });
+
+  final VoicePlaybackServiceProvider playback;
+  final String clipId;
+  final Uint8List bytes;
+  final String? mediaType;
+  final Duration initialDuration;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPlaying = ref.watch(playback.isPlaying(clipId));
+
+    return IconButton(
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+      onPressed: () {
+        unawaited(
+          ref
+              .read(playback.notifier)
+              .toggle(
+                clipId: clipId,
+                bytes: bytes,
+                mediaType: mediaType,
+                initialDuration: initialDuration,
+              ),
+        );
+      },
+      icon: Icon(
+        isPlaying ? Icons.pause : Icons.play_arrow,
+        color: Colors.white,
+        size: 30,
       ),
     );
   }
 }
 
-class VoiceAttachmentPlayerState {
-  const VoiceAttachmentPlayerState({
-    required this.isPlaying,
-    required this.duration,
-    required this.progress,
-    required this.toggle,
+class _ScopedVoiceAttachmentProgressDots extends ConsumerWidget {
+  const _ScopedVoiceAttachmentProgressDots({
+    required this.playback,
+    required this.clipId,
+    required this.levels,
   });
 
-  final bool isPlaying;
-  final Duration duration;
-  final double progress;
-  final VoidCallback toggle;
+  final VoicePlaybackServiceProvider playback;
+  final String clipId;
+  final List<double> levels;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progress = ref.watch(playback.progress(clipId));
+
+    return _VoiceAttachmentProgressDots(
+      levels: levels,
+      progress: progress,
+      color: Colors.white,
+    );
+  }
+}
+
+class _ScopedVoiceAttachmentDurationText extends ConsumerWidget {
+  const _ScopedVoiceAttachmentDurationText({
+    required this.playback,
+    required this.clipId,
+    required this.initialDuration,
+  });
+
+  final VoicePlaybackServiceProvider playback;
+  final String clipId;
+  final Duration initialDuration;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final duration = ref.watch(playback.duration(clipId, initialDuration));
+
+    return Text(
+      _formatVoiceDuration(duration),
+      style: const TextStyle(color: Colors.white, fontSize: 13),
+    );
+  }
 }
 
 class _VoiceAttachmentProgressDots extends StatelessWidget {
