@@ -8,12 +8,12 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 /// UUID identifier.
 class GalleryImageAttachment implements MessageAttachment {
   GalleryImageAttachment({
-    required this.id,
+    required this._id,
     required this._base64,
     required this._pluginName,
   });
 
-  final String id;
+  final String _id;
   final String _base64;
   final String _pluginName;
   final String _mediaType = AttachmentMediaType.imageJpeg.value;
@@ -23,7 +23,7 @@ class GalleryImageAttachment implements MessageAttachment {
 
   @override
   ChatAttachment toAttachment() => ChatAttachment(
-    id: id,
+    id: _id,
     mediaType: _mediaType,
     format: pluginName,
     lastModifiedTime: clock.now(),
