@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart'
     show AudioVideoCallParticipant, AudioVideoCallSession;
-import 'package:meeting_place_matrix_livekit/meeting_place_matrix_livekit.dart'
+import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart'
     show AudioVideoCallView;
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
