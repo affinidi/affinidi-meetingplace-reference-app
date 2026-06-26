@@ -11,7 +11,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart'
         AudioVideoCallSession,
         AudioVideoCallStatus,
         CallMediaType;
-import 'package:meeting_place_matrix_livekit/meeting_place_matrix_livekit.dart'
+import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart'
     show AudioVideoCallView;
 
 import '../../../../application/services/contacts_service/contacts_service.dart';

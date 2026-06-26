@@ -1,0 +1,21 @@
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+
+include: package:dart_flutter_team_lints/analysis_options.yaml
+
+linter:
+  rules:
+    - avoid_print
+    - sort_constructors_first
+    - unawaited_futures
+    - require_trailing_commas
+
+analyzer:
+  errors:
+    avoid_print: error
+  exclude:
+    - "**/*.g.dart"
+    - "build/**"
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options
