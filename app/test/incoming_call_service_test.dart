@@ -34,6 +34,9 @@ class _FakeCallPlugin extends Fake implements AudioVideoCallPlugin {
   @override
   Future<void> declineCall({required String callId}) async =>
       declinedCallIds.add(callId);
+
+  @override
+  Future<void> leaveCurrentCall() async {}
 }
 
 IncomingAudioVideoCallEvent _event({
