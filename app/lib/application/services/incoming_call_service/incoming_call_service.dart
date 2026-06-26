@@ -21,6 +21,7 @@ class IncomingCallService extends _$IncomingCallService {
 
   @override
   void build() {
+    _logger.info('Incoming call service initialized', name: _logKey);
     ref.listen(
       audioVideoCallPluginProvider,
       (_, next) => _bindToPlugin(next.value),
@@ -57,7 +58,14 @@ class IncomingCallService extends _$IncomingCallService {
   }
 
   void _bindToPlugin(AudioVideoCallPlugin? plugin) {
-    if (plugin == null) return;
+    if (plugin == null) {
+      _logger.warning('Call plugin not ready yet', name: _logKey);
+      return;
+    }
+    _logger.info(
+      'Binding to call plugin, listening for incoming calls',
+      name: _logKey,
+    );
     final incomingSub = plugin.incomingCalls.listen(_onIncomingCall);
     final cancelledSub = plugin.cancelledCalls.listen(_onCallCancelled);
     ref.onDispose(incomingSub.cancel);
@@ -99,11 +107,13 @@ class IncomingCallService extends _$IncomingCallService {
   }
 
   void _clearRingState() {
+    _logger.warning('Clearing incoming call state', name: _logKey);
     _cancelRingTimer();
     ref.read(incomingCallStateProvider.notifier).clear();
   }
 
   void _cancelRingTimer() {
+    _logger.warning('Cancelling ring timer', name: _logKey);
     _ringTimer?.cancel();
     _ringTimer = null;
   }
@@ -119,12 +129,14 @@ class IncomingCallService extends _$IncomingCallService {
       _logger.warning('Call plugin not available', name: _logKey);
       return;
     }
+    _logger.info('Executing action with call plugin', name: _logKey);
     action(plugin);
   }
 
   /// Updates the incoming call chat item to [CallStatus.missed] for the given
   /// [contactId]. Runs asynchronously so the ring state can be cleared first.
   void _markCallAsMissed(String contactId) {
+    _logger.warning('Marking call as missed for $contactId', name: _logKey);
     unawaited(
       Future(() async {
         try {

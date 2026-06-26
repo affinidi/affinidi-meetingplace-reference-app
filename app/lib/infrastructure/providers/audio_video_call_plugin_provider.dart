@@ -1,22 +1,35 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart';
+import 'package:meeting_place_matrix_livekit/meeting_place_matrix_livekit.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
+
+import '../configuration/environment.dart';
+import 'app_logger_provider.dart';
+import 'meeting_place_sdk_provider.dart';
 
 /// Supplies the active [AudioVideoCallPlugin].
 ///
-/// Returns `null` by default — the UI hides the call button when no plugin
-/// is registered. Override in `main.dart` to enable calling:
-///
-/// ```dart
-/// audioVideoCallPluginProvider.overrideWith((ref) async {
-///   final sdk = await ref.watch(meetingPlaceSdkProvider.future);
-///   return MeetingPlaceLiveKitPlugin(
-///     sdk: sdk,
-///     livekitServiceUrl: Uri.parse(
-///       ref.read(environmentProvider).livekitServiceUrl,
-///     ),
-///   );
-/// }),
-/// ```
-final audioVideoCallPluginProvider = FutureProvider<AudioVideoCallPlugin?>(
-  (ref) async => null,
-);
+/// The plugin is built lazily on first read — not at app startup — so the
+/// asynchronous [meetingPlaceSdkProvider] initialization does not block the
+/// launch path.
+final audioVideoCallPluginProvider = FutureProvider<AudioVideoCallPlugin?>((
+  ref,
+) async {
+  const logKey = 'AudioVideoCallPluginProvider';
+  final logger = ref.read(appLoggerProvider);
+
+  logger.info('Building audio/video call plugin', name: logKey);
+  final sdk = await ref.read(meetingPlaceSdkProvider.future);
+  final plugin = MeetingPlaceLiveKitCallPlugin(
+    options: MeetingPlaceLiveKitCallPluginOptions(
+      livekitServiceUrl: Uri.parse(Environment.instance.livekitServiceUrl),
+      livekitSfuUrl: Uri.tryParse(Environment.instance.livekitSfuUrl),
+      outgoingCallTimeout: Environment.instance.outgoingCallTimeout,
+    ),
+    rtcDelegate: FlutterMatrixRTCDelegate(),
+    roomFactory: (_) => FlutterLiveKitRoom(),
+  );
+  plugin.initialize(sdk: sdk);
+  logger.info('Audio/video call plugin initialized', name: logKey);
+  return plugin;
+});
