@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
 
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
@@ -567,13 +567,14 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
         'transportId': transportId,
       });
       _downloadedMedia[transportId] = fileBytes;
+      _downloadedMedia[mediaUri.toString()] = fileBytes;
 
       normalizedAttachments = [
         ChatAttachment(
           id: firstAttachment.id,
           mediaType: firstAttachment.mediaType ?? 'application/octet-stream',
           filename: firstAttachment.filename,
-          format: AttachmentFormat.hostedMedia.value,
+          format: firstAttachment.format,
           transportId: transportId,
           data: ChatAttachmentData(links: [mediaUri], base64: base64Data),
           metadata: firstAttachment.metadata,
@@ -610,6 +611,32 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   @override
   Future<void> startChatPresenceUpdates() async {
     _startedChatPresenceUpdates += 1;
+  }
+
+  @override
+  Future<Uint8List> downloadMedia(ChatAttachment attachment) async {
+    final transportId = attachment.transportId;
+    if (transportId != null) {
+      final transportBytes = _downloadedMedia[transportId];
+      if (transportBytes != null) {
+        return Uint8List.fromList(transportBytes);
+      }
+    }
+
+    final mediaLink = attachment.data?.links?.firstOrNull?.toString();
+    if (mediaLink != null) {
+      final linkedBytes = _downloadedMedia[mediaLink];
+      if (linkedBytes != null) {
+        return Uint8List.fromList(linkedBytes);
+      }
+    }
+
+    final base64Data = attachment.data?.base64;
+    if (base64Data != null && base64Data.isNotEmpty) {
+      return Uint8List.fromList(base64Decode(base64Data));
+    }
+
+    throw StateError('No fake media available for attachment');
   }
 
   @override

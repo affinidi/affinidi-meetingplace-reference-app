@@ -135,7 +135,10 @@ class VoicePlaybackService extends _$VoicePlaybackService {
     final player = _player;
     _player = null;
     if (player != null) {
-      unawaited(player.dispose());
+      unawaited(() async {
+        await player.stop();
+        await player.dispose();
+      }());
     }
   }
 }

@@ -1934,6 +1934,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalVideo => 'Video';
 
   @override
+  String get generalVoice => 'Voice';
+
+  @override
   String get generalDocument => 'Document';
 
   @override

@@ -84,3 +84,4 @@ melos:
         echo "------------------------------------------------------------------------"
         melos exec --scope=mpx_flutter_reference_app -- flutter gen-l10n
         melos exec --scope=mpx_flutter_reference_app -- dart format -l 80 lib test
+

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../../../mpx_app_core.dart';
@@ -16,12 +18,16 @@ abstract interface class AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
+    Future<Uint8List> Function(ChatAttachment)? download,
   });
 
   Widget renderAttachments({
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
+    Future<Uint8List> Function(ChatAttachment)? download,
   });
 
   bool supportsFormat(ChatAttachment format);
@@ -29,4 +35,18 @@ abstract interface class AttachmentPlugin {
   String localizedName(BuildContext context);
 
   bool get isPlatformSupported => true;
+
+  bool get includeInMediaOptions => true;
+}
+
+class AttachmentRenderContext {
+  const AttachmentRenderContext({
+    this.avatarImage,
+    this.playbackScopeId,
+    this.playbackClipId,
+  });
+
+  final ImageProvider<Object>? avatarImage;
+  final String? playbackScopeId;
+  final String? playbackClipId;
 }

@@ -9,12 +9,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
-import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
 import 'package:mpx_app_core/mpx_app_core.dart';
@@ -22,10 +22,8 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../../application/services/attachment_cache_service/attachment_cache_service.dart';
 import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
@@ -44,7 +42,6 @@ import '../../../infrastructure/extensions/message_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
-import '../../../infrastructure/plugins/media_category.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachment.dart';
@@ -61,7 +58,7 @@ import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/bottom_sheet_menu.dart';
-import '../../widgets/images/chat_image_card.dart';
+import '../../widgets/images/default_profile_image.dart';
 import '../../widgets/info_banner.dart';
 import '../../widgets/profile_circle_avatar.dart';
 import 'chat_activity_progress_indicator.dart';
@@ -76,6 +73,7 @@ import 'chat_items/group_deleted_chat_item.dart';
 import 'chat_items/joining_group_chat_item.dart';
 import 'chat_items/leaving_group_chat_item.dart';
 import 'chat_screen_controller.dart';
+import 'chat_screen_state.dart';
 import 'chat_zkp/chat_zkp_concierge_item.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp/chat_zkp_overlay.dart';
@@ -161,7 +159,7 @@ class ChatScreen extends HookConsumerWidget {
         await controller.onScreenOpened();
       });
 
-      return null;
+      return () => unawaited(controller.stopVoicePlayback());
     }, [_contactId]);
 
     ref.listen(

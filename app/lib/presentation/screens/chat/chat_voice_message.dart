@@ -428,174 +428,6 @@ class _VoiceInputPill extends StatelessWidget {
   }
 }
 
-class _HostedAudioWidget extends HookWidget {
-  const _HostedAudioWidget({
-    required this._clipId,
-    required this._contactId,
-    required this._attachment,
-    required this._cachedBytes,
-    required this._hasFailed,
-    required this._onRetry,
-    required this._onDownload,
-    required this._isFromMe,
-    required this._chatItemColor,
-    required this._senderAvatar,
-  });
-
-  final String _clipId;
-  final String _contactId;
-  final chat.ChatAttachment _attachment;
-  final Uint8List? _cachedBytes;
-  final bool _hasFailed;
-  final bool Function() _onRetry;
-  final bool Function() _onDownload;
-  final bool _isFromMe;
-  final Color _chatItemColor;
-  final ImageProvider<Object>? _senderAvatar;
-
-  @override
-  Widget build(BuildContext context) {
-    final cachedBytes = _cachedBytes;
-    final levels = _levelsForHostedVoice(_attachment, cachedBytes);
-    final durationMs =
-        chat.VoiceMessageMetadata.of(_attachment)?.durationMs ?? 0;
-
-    // Set when the user taps play before the clip is cached, so the download
-    // is kicked off and playback starts automatically once the bytes arrive.
-    final playRequested = useState(false);
-
-    if (cachedBytes == null) {
-      // While a requested download is still in flight (and has not failed),
-      // show a spinner instead of an inert play button.
-      final isLoading = playRequested.value && !_hasFailed;
-
-      void onPressed() {
-        if (_hasFailed) {
-          if (_onRetry()) playRequested.value = true;
-          return;
-        }
-        if (playRequested.value) return;
-        if (_onDownload()) playRequested.value = true;
-      }
-
-      return _VoiceMessageBubble(
-        isFromMe: _isFromMe,
-        chatItemColor: _chatItemColor,
-        isPlaying: false,
-        isLoading: isLoading,
-        duration: Duration(milliseconds: durationMs),
-        levels: levels,
-        progress: 0,
-        onPressed: onPressed,
-        senderAvatar: _senderAvatar,
-      );
-    }
-
-    return _VoicePlayer(
-      contactId: _contactId,
-      clipId: _clipId,
-      bytes: cachedBytes,
-      mediaType: _attachment.mediaType,
-      initialDuration: Duration(milliseconds: durationMs),
-      autoPlay: playRequested.value,
-      onAutoPlayed: () => playRequested.value = false,
-      builder: (context, state) => _VoiceMessageBubble(
-        isFromMe: _isFromMe,
-        chatItemColor: _chatItemColor,
-        isPlaying: state.isPlaying,
-        duration: state.duration,
-        levels: levels,
-        progress: state.progress,
-        onPressed: state.toggle,
-        senderAvatar: _senderAvatar,
-      ),
-    );
-  }
-}
-
-class _VoiceMessageBubble extends StatelessWidget {
-  const _VoiceMessageBubble({
-    required this._isFromMe,
-    required this._chatItemColor,
-    required this._isPlaying,
-    required this._duration,
-    required this._levels,
-    required this._progress,
-    required this._onPressed,
-    required this._senderAvatar,
-    this._isLoading = false,
-  });
-
-  final bool _isFromMe;
-  final Color _chatItemColor;
-  final bool _isPlaying;
-  final Duration _duration;
-  final List<double> _levels;
-  final double _progress;
-  final VoidCallback _onPressed;
-  final ImageProvider<Object>? _senderAvatar;
-  final bool _isLoading;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 260,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: _chatItemColor,
-        borderRadius: BorderRadius.circular(22),
-      ),
-      child: Row(
-        children: [
-          ProfileCircleAvatar(
-            key: const Key('voice_sender_avatar'),
-            radius: 28,
-            image: _senderAvatar,
-            child: Icon(
-              _isFromMe ? Icons.person : Icons.person_outline,
-              color: Colors.white,
-              size: 30,
-            ),
-          ),
-          const SizedBox(width: 12),
-          IconButton(
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-            onPressed: _isLoading ? null : _onPressed,
-            icon: _isLoading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Icon(
-                    _isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-          ),
-          Expanded(
-            child: _VoiceProgressDots(
-              levels: _levels,
-              progress: _progress,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            _formatVoiceDuration(_duration),
-            style: const TextStyle(color: Colors.white, fontSize: 13),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _VoicePlayerState {
   const _VoicePlayerState({
     required this.isPlaying,
@@ -617,20 +449,14 @@ class _VoicePlayer extends HookConsumerWidget {
     required this._initialDuration,
     required this._builder,
     this._filePath,
-    this._bytes,
     this._mediaType,
-    this._autoPlay = false,
-    this._onAutoPlayed,
   });
 
   final String _contactId;
   final String _clipId;
   final String? _filePath;
-  final Uint8List? _bytes;
   final String? _mediaType;
   final Duration _initialDuration;
-  final bool _autoPlay;
-  final VoidCallback? _onAutoPlayed;
   final Widget Function(BuildContext context, _VoicePlayerState state) _builder;
 
   @override
@@ -646,24 +472,11 @@ class _VoicePlayer extends HookConsumerWidget {
     Future<void> togglePlayback() async {
       await controller.toggleVoicePlayback(
         clipId: _clipId,
-        bytes: _bytes,
         filePath: _filePath,
         mediaType: _mediaType,
         initialDuration: _initialDuration,
       );
     }
-
-    final hasAutoPlayed = useRef(false);
-    useEffect(() {
-      if (_autoPlay && !hasAutoPlayed.value) {
-        hasAutoPlayed.value = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          unawaited(togglePlayback());
-          _onAutoPlayed?.call();
-        });
-      }
-      return null;
-    }, [_autoPlay]);
 
     return _builder(
       context,
@@ -830,18 +643,6 @@ List<int> _waveformFromLevels(List<double> levels) {
       .toList(growable: false);
 }
 
-List<double> _levelsForHostedVoice(
-  chat.ChatAttachment attachment,
-  Uint8List? bytes,
-) {
-  final waveform = chat.VoiceMessageMetadata.of(attachment)?.waveform;
-  if (!_hasWaveformShape(waveform) && bytes != null) {
-    final byteLevels = _levelsFromVoiceBytes(bytes, attachment.mediaType);
-    if (byteLevels.isNotEmpty) return byteLevels;
-  }
-  return _levelsFromWaveform(waveform);
-}
-
 Future<List<double>> _levelsFromVoiceFile(String path, String mediaType) async {
   if (mediaType != _voiceMessageMimeTypeWav) return const [];
 
@@ -943,25 +744,6 @@ List<double> _levelsFromWavBytes(Uint8List bytes) {
 String _ascii(Uint8List bytes, int offset, int length) {
   if (offset + length > bytes.length) return '';
   return String.fromCharCodes(bytes.sublist(offset, offset + length));
-}
-
-List<double> _levelsFromWaveform(List<int>? waveform) {
-  if (waveform == null || waveform.isEmpty) return _defaultVoiceLevels;
-  return waveform
-      .map((level) => (level.clamp(0, 100) / 100).toDouble())
-      .toList(growable: false);
-}
-
-bool _hasWaveformShape(List<int>? waveform) {
-  if (waveform == null || waveform.length < 2) return false;
-  var min = 100;
-  var max = 0;
-  for (final level in waveform) {
-    final value = level.clamp(0, 100);
-    min = math.min(min, value);
-    max = math.max(max, value);
-  }
-  return max > min;
 }
 
 String _formatVoiceDuration(Duration duration) {

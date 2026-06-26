@@ -26,6 +26,7 @@ import '../../../infrastructure/extensions/list_extensions.dart';
 import '../../../infrastructure/helpers/keyed_lock.dart';
 import '../../../infrastructure/helpers/timed_action.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -558,7 +559,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       waveform: waveform,
       filename: path.basename(filePath),
       mediaType: mediaType,
-      format: AttachmentFormat.hostedMedia.value,
+      format: AudioAttachmentsPlugin.pluginName,
       lastModifiedTime: clock.now(),
       byteCount: bytes.length,
     );

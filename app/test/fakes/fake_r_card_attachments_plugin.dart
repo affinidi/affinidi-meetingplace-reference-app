@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
@@ -27,6 +29,8 @@ class FakeUnsupportedRCardPlugin implements AttachmentPlugin {
     required ChatAttachment attachment,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => const SizedBox.shrink();
 
   @override
@@ -34,5 +38,10 @@ class FakeUnsupportedRCardPlugin implements AttachmentPlugin {
     required List<ChatAttachment> attachments,
     required bool isFromMe,
     required Color chatItemColor,
+    AttachmentRenderContext? renderContext,
+    Future<Uint8List> Function(ChatAttachment)? download,
   }) => const SizedBox.shrink();
+
+  @override
+  bool get includeInMediaOptions => true;
 }

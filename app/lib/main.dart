@@ -17,12 +17,14 @@ import 'infrastructure/firebase_messaging/firebase_push_notification_messaging.d
 import 'infrastructure/loggers/app_logger/app_logger.dart';
 import 'infrastructure/loggers/error_logger/error_logger.dart';
 import 'infrastructure/loggers/riverpod_provider_logger/provider_debug_logger.dart';
+import 'infrastructure/media/file_picker/file_picker_platform_provider.dart';
+import 'infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
+import 'infrastructure/plugins/audio_attachments_plugin/local_voice_attachment_store.dart';
 import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
 import 'infrastructure/plugins/device_region_plugin/device_region_plugin.dart';
 import 'infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
 import 'infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
-import 'infrastructure/plugins/video_attachments_plugin/video_attachments_plugin.dart';
 import 'infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import 'infrastructure/providers/available_attachment_plugins_provider.dart';
 import 'infrastructure/providers/cache_manager_provider.dart';
@@ -102,8 +104,14 @@ void main() async {
               cacheManager: ref.read(cacheManagerProvider),
             ),
             VrcAttachmentsPlugin(),
-            VideoAttachmentsPlugin(),
-            DocumentAttachmentsPlugin(),
+            DocumentAttachmentsPlugin(
+              cacheManager: ref.read(cacheManagerProvider),
+              filePickerPlatform: ref.read(filePickerPlatformProvider),
+            ),
+            AudioAttachmentsPlugin(
+              cacheManager: ref.read(cacheManagerProvider),
+              localVoiceStore: ref.read(localVoiceAttachmentStoreProvider),
+            ),
           ],
         ),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),

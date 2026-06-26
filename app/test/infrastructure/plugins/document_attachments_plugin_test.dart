@@ -5,10 +5,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_core/meeting_place_core.dart'
-    show AttachmentFormat;
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
+
+import '../../fakes/fake_cache_manager.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +41,10 @@ void main() {
     late DocumentAttachmentsPlugin plugin;
 
     setUp(() {
-      plugin = DocumentAttachmentsPlugin();
+      plugin = DocumentAttachmentsPlugin(
+        cacheManager: FakeCacheManager(),
+        filePickerPlatform: _FakeFilePickerPlatform(result: null),
+      );
     });
 
     group('supportsFormat', () {
@@ -51,9 +55,9 @@ void main() {
         expect(plugin.supportsFormat(attachment), isTrue);
       });
 
-      test('returns false for hosted media format', () {
+      test('returns false for audio plugin format', () {
         final attachment = ChatAttachment(
-          format: AttachmentFormat.hostedMedia.value,
+          format: AudioAttachmentsPlugin.pluginName,
         );
         expect(plugin.supportsFormat(attachment), isFalse);
       });
@@ -66,18 +70,19 @@ void main() {
 
     group('pickAttachments', () {
       test('returns null when user cancels', () async {
-        FilePickerPlatform.instance = _FakeFilePickerPlatform(result: null);
-
         final result = await plugin.pickAttachments(_FakeBuildContext());
         expect(result, isNull);
       });
 
       test('returns null when picked file exceeds max size', () async {
         const maxBytes = 25 * 1024 * 1024;
-        FilePickerPlatform.instance = _FakeFilePickerPlatform(
-          result: FilePickerResult([
-            PlatformFile(name: 'big.pdf', size: maxBytes + 1),
-          ]),
+        plugin = DocumentAttachmentsPlugin(
+          cacheManager: FakeCacheManager(),
+          filePickerPlatform: _FakeFilePickerPlatform(
+            result: FilePickerResult([
+              PlatformFile(name: 'big.pdf', size: maxBytes + 1),
+            ]),
+          ),
         );
 
         final result = await plugin.pickAttachments(
@@ -87,10 +92,13 @@ void main() {
       });
 
       test('returns null when file path is null', () async {
-        FilePickerPlatform.instance = _FakeFilePickerPlatform(
-          result: FilePickerResult([
-            PlatformFile(name: 'nodisk.pdf', size: 100),
-          ]),
+        plugin = DocumentAttachmentsPlugin(
+          cacheManager: FakeCacheManager(),
+          filePickerPlatform: _FakeFilePickerPlatform(
+            result: FilePickerResult([
+              PlatformFile(name: 'nodisk.pdf', size: 100),
+            ]),
+          ),
         );
 
         final result = await plugin.pickAttachments(_FakeBuildContext());
@@ -100,10 +108,13 @@ void main() {
       test('returns attachment with correct MIME type for pdf', () async {
         final tempFile = await _writeTempFile('doc.pdf', Uint8List(10));
 
-        FilePickerPlatform.instance = _FakeFilePickerPlatform(
-          result: FilePickerResult([
-            PlatformFile(name: 'doc.pdf', size: 10, path: tempFile.path),
-          ]),
+        plugin = DocumentAttachmentsPlugin(
+          cacheManager: FakeCacheManager(),
+          filePickerPlatform: _FakeFilePickerPlatform(
+            result: FilePickerResult([
+              PlatformFile(name: 'doc.pdf', size: 10, path: tempFile.path),
+            ]),
+          ),
         );
 
         final result = await plugin.pickAttachments(_FakeBuildContext());
@@ -117,10 +128,13 @@ void main() {
       test('returns attachment with correct MIME type for docx', () async {
         final tempFile = await _writeTempFile('doc.docx', Uint8List(10));
 
-        FilePickerPlatform.instance = _FakeFilePickerPlatform(
-          result: FilePickerResult([
-            PlatformFile(name: 'doc.docx', size: 10, path: tempFile.path),
-          ]),
+        plugin = DocumentAttachmentsPlugin(
+          cacheManager: FakeCacheManager(),
+          filePickerPlatform: _FakeFilePickerPlatform(
+            result: FilePickerResult([
+              PlatformFile(name: 'doc.docx', size: 10, path: tempFile.path),
+            ]),
+          ),
         );
 
         final result = await plugin.pickAttachments(_FakeBuildContext());
@@ -132,16 +146,34 @@ void main() {
       test('returns octet-stream for unknown extension', () async {
         final tempFile = await _writeTempFile('data.xyz', Uint8List(10));
 
-        FilePickerPlatform.instance = _FakeFilePickerPlatform(
-          result: FilePickerResult([
-            PlatformFile(name: 'data.xyz', size: 10, path: tempFile.path),
-          ]),
+        plugin = DocumentAttachmentsPlugin(
+          cacheManager: FakeCacheManager(),
+          filePickerPlatform: _FakeFilePickerPlatform(
+            result: FilePickerResult([
+              PlatformFile(name: 'data.xyz', size: 10, path: tempFile.path),
+            ]),
+          ),
         );
 
         final result = await plugin.pickAttachments(_FakeBuildContext());
         expect(result, isNotNull);
         final a = result!.attachments.first.toAttachment();
         expect(a.mediaType, 'application/octet-stream');
+      });
+
+      test('uses custom document extensions only', () async {
+        final platform = _FakeFilePickerPlatform(result: null);
+        plugin = DocumentAttachmentsPlugin(
+          cacheManager: FakeCacheManager(),
+          filePickerPlatform: platform,
+        );
+
+        await plugin.pickAttachments(_FakeBuildContext());
+
+        final allowedExtensions = DocumentAttachmentsPlugin.allowedExtensions;
+
+        expect(platform.lastType, FileType.custom);
+        expect(platform.lastAllowedExtensions, allowedExtensions);
       });
     });
   });
@@ -159,6 +191,8 @@ class _FakeFilePickerPlatform extends FilePickerPlatform {
   _FakeFilePickerPlatform({required this.result});
 
   final FilePickerResult? result;
+  FileType? lastType;
+  List<String>? lastAllowedExtensions;
 
   @override
   Future<FilePickerResult?> pickFiles({
@@ -175,7 +209,11 @@ class _FakeFilePickerPlatform extends FilePickerPlatform {
     bool lockParentWindow = false,
     bool readSequential = false,
     bool cancelUploadOnWindowBlur = true,
-  }) async => result;
+  }) async {
+    lastType = type;
+    lastAllowedExtensions = allowedExtensions;
+    return result;
+  }
 }
 
 class _FakeBuildContext extends Fake implements BuildContext {
