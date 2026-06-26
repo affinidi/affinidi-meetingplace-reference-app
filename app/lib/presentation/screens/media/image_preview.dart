@@ -11,7 +11,40 @@ class ImagePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (imageBytes == null) {
-      return Center(child: Text(context.l10n.loadImageFailed));
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white24),
+                ),
+                child: const Icon(
+                  Icons.broken_image_outlined,
+                  color: Colors.white70,
+                  size: 34,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                context.l10n.loadImageFailed,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     return Stack(

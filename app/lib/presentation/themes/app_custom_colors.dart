@@ -23,6 +23,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     this._credentialCardGradientStart,
     this._credentialCardShadow,
     this._awaitingMemberWarningText,
+    this._mediaSurfaceOverlay,
+    this._mediaSurfaceBorder,
   });
 
   /// Color for concierge messages in chat
@@ -56,6 +58,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color? _credentialCardGradientStart;
   final Color? _credentialCardShadow;
   final Color? _awaitingMemberWarningText;
+  final Color? _mediaSurfaceOverlay;
+  final Color? _mediaSurfaceBorder;
 
   Color get cyan => _cyan ?? Colors.cyan;
   Color get purple => _purple ?? Colors.purple;
@@ -83,6 +87,10 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
       _credentialCardShadow ?? const Color.fromARGB(64, 0, 0, 0);
   Color get awaitingMemberWarningText =>
       _awaitingMemberWarningText ?? const Color(0xFFEEEEEE);
+  Color get mediaSurfaceOverlay =>
+      _mediaSurfaceOverlay ?? const Color.fromARGB(178, 18, 18, 20);
+  Color get mediaSurfaceBorder =>
+      _mediaSurfaceBorder ?? const Color.fromARGB(52, 255, 255, 255);
 
   @override
   AppCustomColors copyWith({
@@ -106,6 +114,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? credentialCardGradientStart,
     Color? credentialCardShadow,
     Color? awaitingMemberWarningText,
+    Color? mediaSurfaceOverlay,
+    Color? mediaSurfaceBorder,
   }) {
     return AppCustomColors(
       cyan: cyan ?? _cyan,
@@ -130,6 +140,8 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
       credentialCardShadow: credentialCardShadow ?? _credentialCardShadow,
       awaitingMemberWarningText:
           awaitingMemberWarningText ?? _awaitingMemberWarningText,
+      mediaSurfaceOverlay: mediaSurfaceOverlay ?? _mediaSurfaceOverlay,
+      mediaSurfaceBorder: mediaSurfaceBorder ?? _mediaSurfaceBorder,
     );
   }
 
@@ -167,6 +179,16 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
       awaitingMemberWarningText: Color.lerp(
         _awaitingMemberWarningText,
         other._awaitingMemberWarningText,
+        t,
+      ),
+      mediaSurfaceOverlay: Color.lerp(
+        _mediaSurfaceOverlay,
+        other._mediaSurfaceOverlay,
+        t,
+      ),
+      mediaSurfaceBorder: Color.lerp(
+        _mediaSurfaceBorder,
+        other._mediaSurfaceBorder,
         t,
       ),
     );

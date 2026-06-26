@@ -1,13 +1,12 @@
-// ignore_for_file: avoid_print
-
 import 'dart:typed_data';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../navigation/navigator.dart';
-import '../bottom_media_bar.dart';
 import '../image_preview.dart';
 import '../media_screen/media_screen.dart';
 import 'media_review_controller.dart';
@@ -73,55 +72,192 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = context.customColors;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
           Positioned.fill(child: ImagePreview(imageBytes: widget.imageBytes)),
+          const Positioned.fill(child: _PreviewScrim()),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _ReviewActionButton(
+                      icon: Icons.close,
+                      backgroundColor: customColors.mediaSurfaceOverlay,
+                      onPressed: _isSending
+                          ? null
+                          : () => _submitResult(success: false),
+                    ),
+                    if (_isSending)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(18),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 9,
+                            ),
+                            decoration: BoxDecoration(
+                              color: customColors.mediaSurfaceOverlay,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: customColors.mediaSurfaceBorder,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox.square(
+                                  dimension: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  context.l10n.sending,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: BottomMediaBar(
-              children: [
-                if (widget.useChatSemantics)
-                  Expanded(
-                    child: _MessageInput(
-                      controller: _messageController,
-                      isSending: _isSending,
-                      onSend: () => _submitResult(success: true),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: customColors.mediaSurfaceOverlay,
+                        borderRadius: BorderRadius.circular(28),
+                        border: Border.all(
+                          color: customColors.mediaSurfaceBorder,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        mainAxisSize: widget.useChatSemantics
+                            ? MainAxisSize.max
+                            : MainAxisSize.min,
+                        children: [
+                          if (widget.useChatSemantics)
+                            Expanded(
+                              child: _MessageInput(
+                                controller: _messageController,
+                                isSending: _isSending,
+                                onSend: () => _submitResult(success: true),
+                              ),
+                            ),
+                          if (widget.useChatSemantics)
+                            const SizedBox(width: 10),
+                          if (_imageBytes != null)
+                            _ReviewActionButton(
+                              key: const Key('media_review_submit_button'),
+                              icon: widget.useChatSemantics
+                                  ? Icons.send_rounded
+                                  : Icons.check_rounded,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                              foregroundColor: Colors.white,
+                              onPressed: _isSending
+                                  ? null
+                                  : () => _submitResult(success: true),
+                            ),
+                        ],
+                      ),
                     ),
-                  )
-                else
-                  const Spacer(),
-                if (widget.useChatSemantics) const SizedBox(width: 10),
-                FloatingActionButton(
-                  heroTag: 2,
-                  backgroundColor: Colors.red,
-                  onPressed: () => _submitResult(success: false),
-                  child: const Icon(
-                    Icons.cancel_sharp,
-                    size: 35,
-                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 10),
-                if (_imageBytes != null)
-                  FloatingActionButton(
-                    key: const Key('media_review_submit_button'),
-                    heroTag: 1,
-                    backgroundColor: Colors.green,
-                    onPressed: _isSending
-                        ? null
-                        : () => _submitResult(success: true),
-                    child: Icon(
-                      widget.useChatSemantics ? Icons.send : Icons.done,
-                      size: 35,
-                      color: Colors.white,
-                    ),
-                  ),
-              ],
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PreviewScrim extends StatelessWidget {
+  const _PreviewScrim();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.black.withValues(alpha: 0.58),
+              Colors.transparent,
+              Colors.black.withValues(alpha: 0.72),
+            ],
+            stops: const [0, 0.38, 1],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReviewActionButton extends StatelessWidget {
+  const _ReviewActionButton({
+    super.key,
+    required this.icon,
+    required this.backgroundColor,
+    required this.onPressed,
+    this.foregroundColor = Colors.white,
+  });
+
+  final IconData icon;
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: 52,
+      child: Material(
+        color: onPressed == null
+            ? backgroundColor.withValues(alpha: 0.45)
+            : backgroundColor,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: Icon(icon, color: foregroundColor, size: 28),
+        ),
       ),
     );
   }
@@ -140,27 +276,31 @@ class _MessageInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final customColors = context.customColors;
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 49, 49, 51),
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: customColors.mediaSurfaceBorder),
       ),
       child: TextField(
         key: const Key('media_review_text_input'),
         controller: controller,
         maxLines: 3,
         minLines: 1,
+        enabled: !isSending,
         style: const TextStyle(color: Colors.white),
         textInputAction: TextInputAction.send,
         onSubmitted: isSending ? null : (_) => onSend(),
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
+            horizontal: 14,
+            vertical: 11,
           ),
           hintMaxLines: 1,
           hintText: context.l10n.chatAddMessageToMediaPrompt,
-          hintStyle: const TextStyle(fontSize: 14, color: Colors.grey),
+          hintStyle: const TextStyle(fontSize: 14, color: Colors.white60),
           border: InputBorder.none,
         ),
       ),

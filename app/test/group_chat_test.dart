@@ -425,7 +425,7 @@ void main() {
             find.byKey(const Key('media_review_submit_button')),
             findsOneWidget,
           );
-          expect(find.byIcon(Icons.cancel_sharp), findsOneWidget);
+          expect(find.byIcon(Icons.close), findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
           await tester.pumpAndSettle();
