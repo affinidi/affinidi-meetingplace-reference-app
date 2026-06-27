@@ -68,7 +68,7 @@ melos:
     analyze:
       run: melos run _analyze --no-select
     _analyze:
-      exec: dart analyze --fatal-infos .
+      exec: dart analyze --fatal-infos --fatal-warnings .
       concurrency: 4
       failFast: true
       packageFilters:
