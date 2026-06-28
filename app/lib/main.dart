@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meeting_place_matrix_livekit/meeting_place_matrix_livekit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
@@ -27,7 +26,6 @@ import 'infrastructure/plugins/document_attachments_plugin/document_attachments_
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
 import 'infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import 'infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
-import 'infrastructure/providers/app_logger_provider.dart';
 import 'infrastructure/providers/available_attachment_plugins_provider.dart';
 import 'infrastructure/providers/cache_manager_provider.dart';
 import 'infrastructure/providers/channel_repository_provider.dart';
@@ -116,7 +114,6 @@ void main() async {
             ),
           ],
         ),
-        pluginLoggerProvider.overrideWith((ref) => ref.read(appLoggerProvider)),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),
         chatRepositoryProvider.overrideWith(chatRepositoryDrift),
         connectionOfferRepositoryProvider.overrideWith(

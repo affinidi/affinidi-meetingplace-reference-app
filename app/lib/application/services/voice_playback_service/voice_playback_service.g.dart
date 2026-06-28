@@ -8,12 +8,21 @@ part of 'voice_playback_service.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Owns voice-message playback for one chat. Scoped per [contactId] so audio
+/// keeps playing while the message list virtualizes, and stops when the chat
+/// screen is left.
 
 @ProviderFor(VoicePlaybackService)
 const voicePlaybackServiceProvider = VoicePlaybackServiceFamily._();
 
+/// Owns voice-message playback for one chat. Scoped per [contactId] so audio
+/// keeps playing while the message list virtualizes, and stops when the chat
+/// screen is left.
 final class VoicePlaybackServiceProvider
     extends $NotifierProvider<VoicePlaybackService, VoicePlaybackState> {
+  /// Owns voice-message playback for one chat. Scoped per [contactId] so audio
+  /// keeps playing while the message list virtualizes, and stops when the chat
+  /// screen is left.
   const VoicePlaybackServiceProvider._({
     required VoicePlaybackServiceFamily super.from,
     required String super.argument,
@@ -59,7 +68,11 @@ final class VoicePlaybackServiceProvider
 }
 
 String _$voicePlaybackServiceHash() =>
-    r'8f3c2a1b9d4e5f60718293a4b5c6d7e8f9a0b1c2';
+    r'3807b2a7e9d1da85044f5409240544803d99205d';
+
+/// Owns voice-message playback for one chat. Scoped per [contactId] so audio
+/// keeps playing while the message list virtualizes, and stops when the chat
+/// screen is left.
 
 final class VoicePlaybackServiceFamily extends $Family
     with
@@ -79,12 +92,20 @@ final class VoicePlaybackServiceFamily extends $Family
         isAutoDispose: true,
       );
 
+  /// Owns voice-message playback for one chat. Scoped per [contactId] so audio
+  /// keeps playing while the message list virtualizes, and stops when the chat
+  /// screen is left.
+
   VoicePlaybackServiceProvider call(String contactId) =>
       VoicePlaybackServiceProvider._(argument: contactId, from: this);
 
   @override
   String toString() => r'voicePlaybackServiceProvider';
 }
+
+/// Owns voice-message playback for one chat. Scoped per [contactId] so audio
+/// keeps playing while the message list virtualizes, and stops when the chat
+/// screen is left.
 
 abstract class _$VoicePlaybackService extends $Notifier<VoicePlaybackState> {
   late final _$args = ref.$arg as String;

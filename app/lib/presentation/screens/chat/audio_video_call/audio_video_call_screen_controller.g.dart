@@ -65,7 +65,7 @@ final class AudioVideoCallScreenControllerProvider
 }
 
 String _$audioVideoCallScreenControllerHash() =>
-    r'8f8b12d85957ca5fdf180dfaa54758380c131e3e';
+    r'eb6c282004dc3409816aa15df12fab9485df4f3c';
 
 final class AudioVideoCallScreenControllerFamily extends $Family
     with

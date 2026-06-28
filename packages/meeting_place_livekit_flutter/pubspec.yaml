@@ -3,6 +3,8 @@ description: "Flutter implementation of meeting_place_matrix_livekit LiveKitRoom
 version: 0.0.1-dev.0
 publish_to: none
 
+resolution: workspace
+
 environment:
   sdk: ^3.8.0
 
@@ -24,23 +26,3 @@ dev_dependencies:
   dart_flutter_team_lints: ^3.2.1
   flutter_test:
     sdk: flutter
-
-dependency_overrides:
-  meeting_place_chat:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_chat
-      ref: 485de41861e88d4a7c6e7819b7d6b26cc4b45780
-    # path: ../../../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/livekit-room-interface/packages/meeting_place_chat
-  meeting_place_core:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_core
-      ref: 485de41861e88d4a7c6e7819b7d6b26cc4b45780
-    # path: ../../../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/livekit-room-interface/packages/meeting_place_core
-  meeting_place_matrix_livekit:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_matrix_livekit
-      ref: 485de41861e88d4a7c6e7819b7d6b26cc4b45780
-    # path: ../../../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/livekit-room-interface/packages/meeting_place_matrix_livekit
