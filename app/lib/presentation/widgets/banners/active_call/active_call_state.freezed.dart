@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ActiveCallState {
 
- String get contactId; String get peerName; AudioVideoCallStatus get status; int get callDurationSeconds; bool get isMicEnabled; bool get isAudioOnly; bool get hasHadPeer; bool get isMinimized; bool get isCameraEnabled;
+ String get contactId; String get peerName; AudioVideoCallStatus get status; int get callDurationSeconds; bool get isMicEnabled; bool get isAudioOnly; bool get hasHadPeer; bool get isMinimized; bool get isCameraEnabled; AudioVideoCallParticipant? get selfParticipant;
 /// Create a copy of ActiveCallState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ActiveCallStateCopyWith<ActiveCallState> get copyWith => _$ActiveCallStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActiveCallState&&(identical(other.contactId, contactId) || other.contactId == contactId)&&(identical(other.peerName, peerName) || other.peerName == peerName)&&(identical(other.status, status) || other.status == status)&&(identical(other.callDurationSeconds, callDurationSeconds) || other.callDurationSeconds == callDurationSeconds)&&(identical(other.isMicEnabled, isMicEnabled) || other.isMicEnabled == isMicEnabled)&&(identical(other.isAudioOnly, isAudioOnly) || other.isAudioOnly == isAudioOnly)&&(identical(other.hasHadPeer, hasHadPeer) || other.hasHadPeer == hasHadPeer)&&(identical(other.isMinimized, isMinimized) || other.isMinimized == isMinimized)&&(identical(other.isCameraEnabled, isCameraEnabled) || other.isCameraEnabled == isCameraEnabled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActiveCallState&&(identical(other.contactId, contactId) || other.contactId == contactId)&&(identical(other.peerName, peerName) || other.peerName == peerName)&&(identical(other.status, status) || other.status == status)&&(identical(other.callDurationSeconds, callDurationSeconds) || other.callDurationSeconds == callDurationSeconds)&&(identical(other.isMicEnabled, isMicEnabled) || other.isMicEnabled == isMicEnabled)&&(identical(other.isAudioOnly, isAudioOnly) || other.isAudioOnly == isAudioOnly)&&(identical(other.hasHadPeer, hasHadPeer) || other.hasHadPeer == hasHadPeer)&&(identical(other.isMinimized, isMinimized) || other.isMinimized == isMinimized)&&(identical(other.isCameraEnabled, isCameraEnabled) || other.isCameraEnabled == isCameraEnabled)&&(identical(other.selfParticipant, selfParticipant) || other.selfParticipant == selfParticipant));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contactId,peerName,status,callDurationSeconds,isMicEnabled,isAudioOnly,hasHadPeer,isMinimized,isCameraEnabled);
+int get hashCode => Object.hash(runtimeType,contactId,peerName,status,callDurationSeconds,isMicEnabled,isAudioOnly,hasHadPeer,isMinimized,isCameraEnabled,selfParticipant);
 
 @override
 String toString() {
-  return 'ActiveCallState(contactId: $contactId, peerName: $peerName, status: $status, callDurationSeconds: $callDurationSeconds, isMicEnabled: $isMicEnabled, isAudioOnly: $isAudioOnly, hasHadPeer: $hasHadPeer, isMinimized: $isMinimized, isCameraEnabled: $isCameraEnabled)';
+  return 'ActiveCallState(contactId: $contactId, peerName: $peerName, status: $status, callDurationSeconds: $callDurationSeconds, isMicEnabled: $isMicEnabled, isAudioOnly: $isAudioOnly, hasHadPeer: $hasHadPeer, isMinimized: $isMinimized, isCameraEnabled: $isCameraEnabled, selfParticipant: $selfParticipant)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ActiveCallStateCopyWith<$Res>  {
   factory $ActiveCallStateCopyWith(ActiveCallState value, $Res Function(ActiveCallState) _then) = _$ActiveCallStateCopyWithImpl;
 @useResult
 $Res call({
- String contactId, String peerName, AudioVideoCallStatus status, int callDurationSeconds, bool isMicEnabled, bool isAudioOnly, bool hasHadPeer, bool isMinimized, bool isCameraEnabled
+ String contactId, String peerName, AudioVideoCallStatus status, int callDurationSeconds, bool isMicEnabled, bool isAudioOnly, bool hasHadPeer, bool isMinimized, bool isCameraEnabled, AudioVideoCallParticipant? selfParticipant
 });
 
 
@@ -62,7 +62,7 @@ class _$ActiveCallStateCopyWithImpl<$Res>
 
 /// Create a copy of ActiveCallState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? contactId = null,Object? peerName = null,Object? status = null,Object? callDurationSeconds = null,Object? isMicEnabled = null,Object? isAudioOnly = null,Object? hasHadPeer = null,Object? isMinimized = null,Object? isCameraEnabled = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? contactId = null,Object? peerName = null,Object? status = null,Object? callDurationSeconds = null,Object? isMicEnabled = null,Object? isAudioOnly = null,Object? hasHadPeer = null,Object? isMinimized = null,Object? isCameraEnabled = null,Object? selfParticipant = freezed,}) {
   return _then(_self.copyWith(
 contactId: null == contactId ? _self.contactId : contactId // ignore: cast_nullable_to_non_nullable
 as String,peerName: null == peerName ? _self.peerName : peerName // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,8 @@ as bool,isAudioOnly: null == isAudioOnly ? _self.isAudioOnly : isAudioOnly // ig
 as bool,hasHadPeer: null == hasHadPeer ? _self.hasHadPeer : hasHadPeer // ignore: cast_nullable_to_non_nullable
 as bool,isMinimized: null == isMinimized ? _self.isMinimized : isMinimized // ignore: cast_nullable_to_non_nullable
 as bool,isCameraEnabled: null == isCameraEnabled ? _self.isCameraEnabled : isCameraEnabled // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,selfParticipant: freezed == selfParticipant ? _self.selfParticipant : selfParticipant // ignore: cast_nullable_to_non_nullable
+as AudioVideoCallParticipant?,
   ));
 }
 
@@ -158,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String contactId,  String peerName,  AudioVideoCallStatus status,  int callDurationSeconds,  bool isMicEnabled,  bool isAudioOnly,  bool hasHadPeer,  bool isMinimized,  bool isCameraEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String contactId,  String peerName,  AudioVideoCallStatus status,  int callDurationSeconds,  bool isMicEnabled,  bool isAudioOnly,  bool hasHadPeer,  bool isMinimized,  bool isCameraEnabled,  AudioVideoCallParticipant? selfParticipant)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ActiveCallState() when $default != null:
-return $default(_that.contactId,_that.peerName,_that.status,_that.callDurationSeconds,_that.isMicEnabled,_that.isAudioOnly,_that.hasHadPeer,_that.isMinimized,_that.isCameraEnabled);case _:
+return $default(_that.contactId,_that.peerName,_that.status,_that.callDurationSeconds,_that.isMicEnabled,_that.isAudioOnly,_that.hasHadPeer,_that.isMinimized,_that.isCameraEnabled,_that.selfParticipant);case _:
   return orElse();
 
 }
@@ -179,10 +180,10 @@ return $default(_that.contactId,_that.peerName,_that.status,_that.callDurationSe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String contactId,  String peerName,  AudioVideoCallStatus status,  int callDurationSeconds,  bool isMicEnabled,  bool isAudioOnly,  bool hasHadPeer,  bool isMinimized,  bool isCameraEnabled)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String contactId,  String peerName,  AudioVideoCallStatus status,  int callDurationSeconds,  bool isMicEnabled,  bool isAudioOnly,  bool hasHadPeer,  bool isMinimized,  bool isCameraEnabled,  AudioVideoCallParticipant? selfParticipant)  $default,) {final _that = this;
 switch (_that) {
 case _ActiveCallState():
-return $default(_that.contactId,_that.peerName,_that.status,_that.callDurationSeconds,_that.isMicEnabled,_that.isAudioOnly,_that.hasHadPeer,_that.isMinimized,_that.isCameraEnabled);case _:
+return $default(_that.contactId,_that.peerName,_that.status,_that.callDurationSeconds,_that.isMicEnabled,_that.isAudioOnly,_that.hasHadPeer,_that.isMinimized,_that.isCameraEnabled,_that.selfParticipant);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +200,10 @@ return $default(_that.contactId,_that.peerName,_that.status,_that.callDurationSe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String contactId,  String peerName,  AudioVideoCallStatus status,  int callDurationSeconds,  bool isMicEnabled,  bool isAudioOnly,  bool hasHadPeer,  bool isMinimized,  bool isCameraEnabled)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String contactId,  String peerName,  AudioVideoCallStatus status,  int callDurationSeconds,  bool isMicEnabled,  bool isAudioOnly,  bool hasHadPeer,  bool isMinimized,  bool isCameraEnabled,  AudioVideoCallParticipant? selfParticipant)?  $default,) {final _that = this;
 switch (_that) {
 case _ActiveCallState() when $default != null:
-return $default(_that.contactId,_that.peerName,_that.status,_that.callDurationSeconds,_that.isMicEnabled,_that.isAudioOnly,_that.hasHadPeer,_that.isMinimized,_that.isCameraEnabled);case _:
+return $default(_that.contactId,_that.peerName,_that.status,_that.callDurationSeconds,_that.isMicEnabled,_that.isAudioOnly,_that.hasHadPeer,_that.isMinimized,_that.isCameraEnabled,_that.selfParticipant);case _:
   return null;
 
 }
@@ -214,7 +215,7 @@ return $default(_that.contactId,_that.peerName,_that.status,_that.callDurationSe
 
 
 class _ActiveCallState implements ActiveCallState {
-  const _ActiveCallState({required this.contactId, required this.peerName, required this.status, required this.callDurationSeconds, required this.isMicEnabled, required this.isAudioOnly, this.hasHadPeer = false, this.isMinimized = false, this.isCameraEnabled = true});
+  const _ActiveCallState({required this.contactId, required this.peerName, required this.status, required this.callDurationSeconds, required this.isMicEnabled, required this.isAudioOnly, this.hasHadPeer = false, this.isMinimized = false, this.isCameraEnabled = true, this.selfParticipant});
   
 
 @override final  String contactId;
@@ -226,6 +227,7 @@ class _ActiveCallState implements ActiveCallState {
 @override@JsonKey() final  bool hasHadPeer;
 @override@JsonKey() final  bool isMinimized;
 @override@JsonKey() final  bool isCameraEnabled;
+@override final  AudioVideoCallParticipant? selfParticipant;
 
 /// Create a copy of ActiveCallState
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +239,16 @@ _$ActiveCallStateCopyWith<_ActiveCallState> get copyWith => __$ActiveCallStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActiveCallState&&(identical(other.contactId, contactId) || other.contactId == contactId)&&(identical(other.peerName, peerName) || other.peerName == peerName)&&(identical(other.status, status) || other.status == status)&&(identical(other.callDurationSeconds, callDurationSeconds) || other.callDurationSeconds == callDurationSeconds)&&(identical(other.isMicEnabled, isMicEnabled) || other.isMicEnabled == isMicEnabled)&&(identical(other.isAudioOnly, isAudioOnly) || other.isAudioOnly == isAudioOnly)&&(identical(other.hasHadPeer, hasHadPeer) || other.hasHadPeer == hasHadPeer)&&(identical(other.isMinimized, isMinimized) || other.isMinimized == isMinimized)&&(identical(other.isCameraEnabled, isCameraEnabled) || other.isCameraEnabled == isCameraEnabled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActiveCallState&&(identical(other.contactId, contactId) || other.contactId == contactId)&&(identical(other.peerName, peerName) || other.peerName == peerName)&&(identical(other.status, status) || other.status == status)&&(identical(other.callDurationSeconds, callDurationSeconds) || other.callDurationSeconds == callDurationSeconds)&&(identical(other.isMicEnabled, isMicEnabled) || other.isMicEnabled == isMicEnabled)&&(identical(other.isAudioOnly, isAudioOnly) || other.isAudioOnly == isAudioOnly)&&(identical(other.hasHadPeer, hasHadPeer) || other.hasHadPeer == hasHadPeer)&&(identical(other.isMinimized, isMinimized) || other.isMinimized == isMinimized)&&(identical(other.isCameraEnabled, isCameraEnabled) || other.isCameraEnabled == isCameraEnabled)&&(identical(other.selfParticipant, selfParticipant) || other.selfParticipant == selfParticipant));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contactId,peerName,status,callDurationSeconds,isMicEnabled,isAudioOnly,hasHadPeer,isMinimized,isCameraEnabled);
+int get hashCode => Object.hash(runtimeType,contactId,peerName,status,callDurationSeconds,isMicEnabled,isAudioOnly,hasHadPeer,isMinimized,isCameraEnabled,selfParticipant);
 
 @override
 String toString() {
-  return 'ActiveCallState(contactId: $contactId, peerName: $peerName, status: $status, callDurationSeconds: $callDurationSeconds, isMicEnabled: $isMicEnabled, isAudioOnly: $isAudioOnly, hasHadPeer: $hasHadPeer, isMinimized: $isMinimized, isCameraEnabled: $isCameraEnabled)';
+  return 'ActiveCallState(contactId: $contactId, peerName: $peerName, status: $status, callDurationSeconds: $callDurationSeconds, isMicEnabled: $isMicEnabled, isAudioOnly: $isAudioOnly, hasHadPeer: $hasHadPeer, isMinimized: $isMinimized, isCameraEnabled: $isCameraEnabled, selfParticipant: $selfParticipant)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$ActiveCallStateCopyWith<$Res> implements $ActiveCallState
   factory _$ActiveCallStateCopyWith(_ActiveCallState value, $Res Function(_ActiveCallState) _then) = __$ActiveCallStateCopyWithImpl;
 @override @useResult
 $Res call({
- String contactId, String peerName, AudioVideoCallStatus status, int callDurationSeconds, bool isMicEnabled, bool isAudioOnly, bool hasHadPeer, bool isMinimized, bool isCameraEnabled
+ String contactId, String peerName, AudioVideoCallStatus status, int callDurationSeconds, bool isMicEnabled, bool isAudioOnly, bool hasHadPeer, bool isMinimized, bool isCameraEnabled, AudioVideoCallParticipant? selfParticipant
 });
 
 
@@ -274,7 +276,7 @@ class __$ActiveCallStateCopyWithImpl<$Res>
 
 /// Create a copy of ActiveCallState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? contactId = null,Object? peerName = null,Object? status = null,Object? callDurationSeconds = null,Object? isMicEnabled = null,Object? isAudioOnly = null,Object? hasHadPeer = null,Object? isMinimized = null,Object? isCameraEnabled = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? contactId = null,Object? peerName = null,Object? status = null,Object? callDurationSeconds = null,Object? isMicEnabled = null,Object? isAudioOnly = null,Object? hasHadPeer = null,Object? isMinimized = null,Object? isCameraEnabled = null,Object? selfParticipant = freezed,}) {
   return _then(_ActiveCallState(
 contactId: null == contactId ? _self.contactId : contactId // ignore: cast_nullable_to_non_nullable
 as String,peerName: null == peerName ? _self.peerName : peerName // ignore: cast_nullable_to_non_nullable
@@ -285,7 +287,8 @@ as bool,isAudioOnly: null == isAudioOnly ? _self.isAudioOnly : isAudioOnly // ig
 as bool,hasHadPeer: null == hasHadPeer ? _self.hasHadPeer : hasHadPeer // ignore: cast_nullable_to_non_nullable
 as bool,isMinimized: null == isMinimized ? _self.isMinimized : isMinimized // ignore: cast_nullable_to_non_nullable
 as bool,isCameraEnabled: null == isCameraEnabled ? _self.isCameraEnabled : isCameraEnabled // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,selfParticipant: freezed == selfParticipant ? _self.selfParticipant : selfParticipant // ignore: cast_nullable_to_non_nullable
+as AudioVideoCallParticipant?,
   ));
 }
 
