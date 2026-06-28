@@ -281,6 +281,9 @@ class ActiveCallController extends _$ActiveCallController {
     state = current.copyWith(
       status: sessionState.status,
       hasHadPeer: hadRemote,
+      selfParticipant: sessionState.participants
+          .where((p) => p.isSelf)
+          .firstOrNull,
     );
 
     if (peerJustJoined) startTimer();

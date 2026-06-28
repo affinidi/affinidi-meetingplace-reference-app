@@ -175,6 +175,7 @@ class VideoCallPiPWindow extends HookConsumerWidget {
                       ? _SelfVideoView(
                           session: session,
                           participantId: participant.participantId,
+                          hasVideo: participant.hasVideo,
                         )
                       : const Center(child: _SelfAvatarPlaceholder()),
                 ),
@@ -188,20 +189,23 @@ class VideoCallPiPWindow extends HookConsumerWidget {
   }
 }
 
-class _SelfVideoView extends ConsumerWidget {
-  const _SelfVideoView({required this.session, required this.participantId});
+class _SelfVideoView extends StatelessWidget {
+  const _SelfVideoView({
+    required this.session,
+    required this.participantId,
+    required this.hasVideo,
+  });
 
   final AudioVideoCallSession? session;
   final String participantId;
+  final bool hasVideo;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final activeSession = session;
-    if (activeSession == null) return const SizedBox.shrink();
-
+  Widget build(BuildContext context) {
     return AudioVideoCallView(
-      session: activeSession,
+      session: session,
       participantId: participantId,
+      hasVideo: hasVideo,
       mirror: true,
     );
   }

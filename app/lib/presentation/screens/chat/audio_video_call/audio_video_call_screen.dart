@@ -455,10 +455,11 @@ class _VideoCallScreen extends ConsumerWidget {
           fit: StackFit.expand,
           children: [
             // Background: peer camera view or dark fallback
-            if (remotePeer != null && remotePeer.hasVideo)
+            if (remotePeer != null)
               _VideoView(
                 session: session,
                 participantId: remotePeer.participantId,
+                hasVideo: remotePeer.hasVideo,
                 mirror: false,
               )
             else
@@ -963,6 +964,7 @@ class _FocusedTile extends StatelessWidget {
               child: _VideoView(
                 session: session,
                 participantId: participant.participantId,
+                hasVideo: participant.hasVideo,
                 mirror: participant.isSelf,
               ),
             )
@@ -1311,6 +1313,7 @@ class _ParticipantTile extends StatelessWidget {
                   child: _VideoView(
                     session: session,
                     participantId: participant.participantId,
+                    hasVideo: participant.hasVideo,
                     mirror: participant.isSelf,
                   ),
                 ),
@@ -1428,20 +1431,21 @@ class _VideoView extends StatelessWidget {
   const _VideoView({
     required this.session,
     required this.participantId,
+    required this.hasVideo,
     this.mirror = false,
   });
 
   final AudioVideoCallSession? session;
   final String participantId;
+  final bool hasVideo;
   final bool mirror;
 
   @override
   Widget build(BuildContext context) {
-    final activeSession = session;
-    if (activeSession == null) return const SizedBox.shrink();
     return AudioVideoCallView(
-      session: activeSession,
+      session: session,
       participantId: participantId,
+      hasVideo: hasVideo,
       mirror: mirror,
     );
   }
