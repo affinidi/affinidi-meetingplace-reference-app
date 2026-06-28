@@ -18,7 +18,6 @@ final class MediaScreenControllerProvider
     required MediaScreenControllerFamily super.from,
     required ({
       CameraLensDirection cameraLensDirection,
-      MediaSelectionMode mediaSelectionMode,
       bool useCamera,
       bool useChatSemantics,
     })
@@ -65,7 +64,7 @@ final class MediaScreenControllerProvider
 }
 
 String _$mediaScreenControllerHash() =>
-    r'3240619154b73b897eaa53e9674a19c5efa98cef';
+    r'33eed68bb674af4b86d7b22945bf45571d803d99';
 
 final class MediaScreenControllerFamily extends $Family
     with
@@ -76,7 +75,6 @@ final class MediaScreenControllerFamily extends $Family
           MediaScreenState,
           ({
             CameraLensDirection cameraLensDirection,
-            MediaSelectionMode mediaSelectionMode,
             bool useCamera,
             bool useChatSemantics,
           })
@@ -92,13 +90,11 @@ final class MediaScreenControllerFamily extends $Family
 
   MediaScreenControllerProvider call({
     required CameraLensDirection cameraLensDirection,
-    required MediaSelectionMode mediaSelectionMode,
     required bool useCamera,
     required bool useChatSemantics,
   }) => MediaScreenControllerProvider._(
     argument: (
       cameraLensDirection: cameraLensDirection,
-      mediaSelectionMode: mediaSelectionMode,
       useCamera: useCamera,
       useChatSemantics: useChatSemantics,
     ),
@@ -114,18 +110,15 @@ abstract class _$MediaScreenController extends $Notifier<MediaScreenState> {
       ref.$arg
           as ({
             CameraLensDirection cameraLensDirection,
-            MediaSelectionMode mediaSelectionMode,
             bool useCamera,
             bool useChatSemantics,
           });
   CameraLensDirection get cameraLensDirection => _$args.cameraLensDirection;
-  MediaSelectionMode get mediaSelectionMode => _$args.mediaSelectionMode;
   bool get useCamera => _$args.useCamera;
   bool get useChatSemantics => _$args.useChatSemantics;
 
   MediaScreenState build({
     required CameraLensDirection cameraLensDirection,
-    required MediaSelectionMode mediaSelectionMode,
     required bool useCamera,
     required bool useChatSemantics,
   });
@@ -134,7 +127,6 @@ abstract class _$MediaScreenController extends $Notifier<MediaScreenState> {
   void runBuild() {
     final created = build(
       cameraLensDirection: _$args.cameraLensDirection,
-      mediaSelectionMode: _$args.mediaSelectionMode,
       useCamera: _$args.useCamera,
       useChatSemantics: _$args.useChatSemantics,
     );
