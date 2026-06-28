@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallStatus;
+    show AudioVideoCallParticipant, AudioVideoCallStatus;
 
 part 'active_call_state.freezed.dart';
 
@@ -28,5 +28,6 @@ abstract class ActiveCallState with _$ActiveCallState {
     @Default(false) bool hasHadPeer,
     @Default(false) bool isMinimized,
     @Default(true) bool isCameraEnabled,
+    AudioVideoCallParticipant? selfParticipant,
   }) = _ActiveCallState;
 }
