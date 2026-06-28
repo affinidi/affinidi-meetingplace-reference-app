@@ -105,7 +105,7 @@ melos:
     pubget:
       run: flutter pub get
       exec:
-        concurrency: 5
+        concurrency: 1
         orderDependents: true
       description: Get dependencies for all workspace packages
 
