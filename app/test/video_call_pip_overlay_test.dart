@@ -38,6 +38,10 @@ const _kMinimizedVideoState = ActiveCallState(
   isAudioOnly: false,
   isMinimized: true,
   isCameraEnabled: true,
+  selfParticipant: AudioVideoCallParticipant(
+    participantId: 'local',
+    isSelf: true,
+  ),
 );
 
 Widget _wrap(ActiveCallState? callState) => ProviderScope(

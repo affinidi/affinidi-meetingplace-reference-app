@@ -699,6 +699,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
         hasHadPeer: value.hasHadPeer,
         isMinimized: currentMinimized,
         isCameraEnabled: value.isCameraEnabled,
+        selfParticipant: value.participants.where((p) => p.isSelf).firstOrNull,
       ),
     );
   }

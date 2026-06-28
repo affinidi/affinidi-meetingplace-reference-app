@@ -43,21 +43,9 @@ class VideoCallPiPOverlay extends ConsumerWidget {
 
     final contactId = callState.contactId;
 
-    final session = ref.watch(
-      audioVideoCallScreenControllerProvider(
-        contactId,
-      ).select((s) => s.session),
-    );
-    final participant = ref.watch(
-      audioVideoCallScreenControllerProvider(
-        contactId,
-      ).select((s) => s.participants.where((p) => p.isSelf).firstOrNull),
-    );
-    final isCameraEnabled = ref.watch(
-      audioVideoCallScreenControllerProvider(
-        contactId,
-      ).select((s) => s.isCameraEnabled),
-    );
+    final session = ref.read(activeCallControllerProvider.notifier).session;
+    final participant = callState.selfParticipant;
+    final isCameraEnabled = callState.isCameraEnabled;
     final micPermissionError = ref.watch(
       audioVideoCallScreenControllerProvider(
         contactId,
