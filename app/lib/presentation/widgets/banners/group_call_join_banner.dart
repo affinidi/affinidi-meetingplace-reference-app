@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../infrastructure/providers/active_group_call_provider.dart';
 import '../../screens/chat/audio_video_call/audio_video_call_screen.dart';
+import '../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import '../../screens/chat/chat_screen_controller.dart';
+import 'active_call/active_call_controller.dart';
 
 class GroupCallJoinBanner extends ConsumerWidget {
   const GroupCallJoinBanner({super.key, required this.contactId});
@@ -16,15 +16,15 @@ class GroupCallJoinBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final channelDid = ref.watch(
-      contactsServiceProvider.select(
-        (s) => s.getContactById(contactId)?.channelDid,
+    final isActiveHere = ref.watch(
+      activeCallControllerProvider.select(
+        (s) =>
+            s != null &&
+            s.contactId == contactId &&
+            isConnectedCallStatus(s.status),
       ),
     );
-    if (channelDid == null) return const SizedBox.shrink();
-
-    final activeChannelDid = ref.watch(activeGroupCallProvider);
-    if (activeChannelDid != channelDid) return const SizedBox.shrink();
+    if (!isActiveHere) return const SizedBox.shrink();
 
     final isCallSupported = ref.watch(
       chatScreenControllerProvider(contactId).select((s) => s.isCallSupported),
