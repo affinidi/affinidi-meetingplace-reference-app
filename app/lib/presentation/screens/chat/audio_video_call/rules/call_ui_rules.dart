@@ -45,13 +45,25 @@ bool isLiveCallStatus(AudioVideoCallStatus status) =>
     status == AudioVideoCallStatus.connected ||
     status == AudioVideoCallStatus.active;
 
+/// Statuses in which a call is already underway and cannot be restarted.
+bool isCallInProgress(AudioVideoCallStatus status) =>
+    status == AudioVideoCallStatus.outgoingRinging ||
+    status == AudioVideoCallStatus.connecting ||
+    status == AudioVideoCallStatus.waitingForKeys ||
+    status == AudioVideoCallStatus.active;
+
 /// Statuses where the call is over and the UI shows an end-state.
-bool isTerminalCallStatus(AudioVideoCallStatus status) =>
+bool isEndedCallStatus(AudioVideoCallStatus status) =>
     status == AudioVideoCallStatus.ended ||
     status == AudioVideoCallStatus.disconnected ||
     status == AudioVideoCallStatus.error ||
     status == AudioVideoCallStatus.missed ||
     status == AudioVideoCallStatus.declined;
+
+/// Statuses where the local device has fully joined the call media session.
+bool isConnectedCallStatus(AudioVideoCallStatus status) =>
+    status == AudioVideoCallStatus.connected ||
+    status == AudioVideoCallStatus.active;
 
 /// Whether the participant list contains a remote (non-local) participant.
 bool hasRemoteParticipant(List<AudioVideoCallParticipant> participants) =>
@@ -78,7 +90,7 @@ CallUiPhase resolveCallUiPhase({
   required AudioVideoCallStatus status,
   required bool hasHadPeer,
 }) {
-  if (isTerminalCallStatus(status)) return CallUiPhase.ended;
+  if (isEndedCallStatus(status)) return CallUiPhase.ended;
   if (hasHadPeer) return CallUiPhase.inCall;
   if (status == AudioVideoCallStatus.outgoingRinging) {
     return CallUiPhase.ringing;

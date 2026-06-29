@@ -38,7 +38,6 @@ void main() {
     updates = [];
     handler = CallSessionHandler(
       logger: AppLogger.instance,
-      logKey: 'CallSessionHandlerTest',
       onUpdate: updates.add,
     );
   });
@@ -187,6 +186,175 @@ void main() {
       handler.attach(session);
       handler.dispose();
       expect(handler.dispose, returnsNormally);
+    });
+  });
+
+  group('ownRole passthrough', () {
+    test('emits ownRole from session state', () async {
+      handler.attach(session);
+
+      session.emit(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          ownRole: CallRole.caller,
+          participants: [_selfParticipant()],
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(updates.single.ownRole, CallRole.caller);
+    });
+
+    test('emits null ownRole when session has no role yet', () async {
+      handler.attach(session);
+
+      session.emit(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.connecting,
+          participants: [_selfParticipant()],
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(updates.single.ownRole, isNull);
+    });
+  });
+
+  group('media state from self participant', () {
+    test('isMicEnabled mirrors self hasAudio', () async {
+      handler.attach(session);
+
+      session.emit(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [
+            AudioVideoCallParticipant(
+              participantId: 'local',
+              isSelf: true,
+              hasAudio: false,
+            ),
+          ],
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(updates.single.isMicEnabled, isFalse);
+    });
+
+    test(
+      'isCameraEnabled is null until camera has been enabled once',
+      () async {
+        handler.attach(session);
+
+        session.emit(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [
+              AudioVideoCallParticipant(
+                participantId: 'local',
+                isSelf: true,
+                hasVideo: false,
+              ),
+            ],
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(updates.single.isCameraEnabled, isNull);
+      },
+    );
+
+    test(
+      'isCameraEnabled is reported after camera has been on at least once',
+      () async {
+        handler.attach(session);
+
+        session.emit(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [
+              AudioVideoCallParticipant(
+                participantId: 'local',
+                isSelf: true,
+                hasVideo: true,
+              ),
+            ],
+          ),
+        );
+        session.emit(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [
+              AudioVideoCallParticipant(
+                participantId: 'local',
+                isSelf: true,
+                hasVideo: false,
+              ),
+            ],
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(updates.last.isCameraEnabled, isFalse);
+      },
+    );
+  });
+
+  group('hasHadPeer latch', () {
+    test('is false when no remote has ever joined', () async {
+      handler.attach(session);
+
+      session.emit(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [_selfParticipant()],
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(updates.single.hasHadPeer, isFalse);
+    });
+
+    test(
+      'latches true once a remote joins and stays true after they leave',
+      () async {
+        handler.attach(session);
+
+        session.emit(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [_selfParticipant(), _peerParticipant('a')],
+          ),
+        );
+        session.emit(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [_selfParticipant()],
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(updates.last.hasHadPeer, isTrue);
+      },
+    );
+  });
+
+  group('re-attach', () {
+    test('cancels prior subscription when attached to a new session', () async {
+      handler.attach(session);
+
+      final session2 = _FakeCallSession();
+      handler.attach(session2);
+
+      session.emit(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [_selfParticipant(), _peerParticipant('a')],
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(updates, isEmpty);
     });
   });
 }

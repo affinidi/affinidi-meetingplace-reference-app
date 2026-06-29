@@ -190,6 +190,7 @@ class ActiveCallController extends _$ActiveCallController {
             .read(chatSessionServiceProvider(channelDid).notifier)
             .updateCallChatItem(messageId, status: status, duration: duration);
       },
+      isDisposed: () => _isDisposed,
       logger: _logger,
     )..attach(session);
     _sessionStateSub?.cancel();
@@ -233,7 +234,6 @@ class ActiveCallController extends _$ActiveCallController {
         isCaller: _ownRole == CallRole.caller,
         hasHadPeer: current.hasHadPeer,
         callDuration: Duration(seconds: current.callDurationSeconds),
-        isDisposed: () => _isDisposed,
       );
     }
     if (session != null) unawaited(session.hangUp());
@@ -255,7 +255,7 @@ class ActiveCallController extends _$ActiveCallController {
   /// True when call is visible (not in terminal state).
   bool isCallVisible(ActiveCallState? callState) {
     if (callState == null) return false;
-    return !isTerminalCallStatus(callState.status) &&
+    return !isEndedCallStatus(callState.status) &&
         callState.status != AudioVideoCallStatus.idle;
   }
 
@@ -288,7 +288,7 @@ class ActiveCallController extends _$ActiveCallController {
 
     if (peerJustJoined) startTimer();
 
-    if (isTerminalCallStatus(sessionState.status)) {
+    if (isEndedCallStatus(sessionState.status)) {
       _chatItemHandler?.endCallChatItem(
         outcome:
             (sessionState.status == AudioVideoCallStatus.declined ||
@@ -299,7 +299,6 @@ class ActiveCallController extends _$ActiveCallController {
         isCaller: _ownRole == CallRole.caller,
         hasHadPeer: hadRemote,
         callDuration: Duration(seconds: current.callDurationSeconds),
-        isDisposed: () => _isDisposed,
       );
       final endState = resolveCallEndState(sessionState.status);
       if (endState != null && current.isMinimized) {

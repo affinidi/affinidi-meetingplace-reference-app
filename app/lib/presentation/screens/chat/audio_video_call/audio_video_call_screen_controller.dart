@@ -5,10 +5,8 @@ import 'package:meeting_place_chat/meeting_place_chat.dart'
         AudioVideoCallPlugin,
         AudioVideoCallSession,
         AudioVideoCallStatus,
-        CallMediaType,
         CallRole,
         CallStatus;
-import 'package:permission_handler/permission_handler.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/chat_service/chat_session_service.dart';
@@ -27,19 +25,16 @@ import '../../../widgets/banners/active_call/active_call_state.dart';
 
 import 'audio_video_call_screen_state.dart';
 import 'audio_video_call_state_update.dart';
+import 'call_lifecycle_update.dart';
+import 'call_media_update.dart';
 import 'handlers/call_chat_item_handler.dart';
+import 'handlers/call_lifecycle_handler.dart';
+import 'handlers/call_media_toggle_handler.dart';
 import 'handlers/call_session_handler.dart';
 import 'rules/call_chat_item_rules.dart';
 import 'rules/call_ui_rules.dart';
 
 part 'audio_video_call_screen_controller.g.dart';
-
-const _inProgressStatuses = {
-  AudioVideoCallStatus.outgoingRinging,
-  AudioVideoCallStatus.connecting,
-  AudioVideoCallStatus.waitingForKeys,
-  AudioVideoCallStatus.active,
-};
 
 @riverpod
 class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
@@ -61,6 +56,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   bool _isCaller = false;
 
   late final CallChatItemHandler _chatItemHandler;
+  late final CallLifecycleHandler _lifecycleHandler;
+  late final CallMediaToggleHandler _mediaHandler;
 
   @override
   set state(AudioVideoCallScreenState value) {
@@ -103,13 +100,31 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
             .read(chatSessionServiceProvider(channelDid).notifier)
             .updateCallChatItem(messageId, status: status, duration: duration);
       },
+      isDisposed: () => _isDisposed,
       logger: _logger,
+    );
+
+    _lifecycleHandler = CallLifecycleHandler(
+      logger: _logger,
+      channelDid: _channelDid,
+      isGroupContact: _isGroupContact,
+      getState: () => state,
+      getPlugin: () => _plugin,
+      getSession: () => _session,
+      setSession: (session) => _session = session,
+      onUpdate: _applyLifecycleUpdate,
+    );
+
+    _mediaHandler = CallMediaToggleHandler(
+      logger: _logger,
+      getSession: () => _session,
+      getPermissionService: () => ref.read(permissionServiceProvider),
+      onUpdate: _applyMediaUpdate,
     );
 
     final rawPendingSession = ref.read(pendingCallSessionProvider);
     final banner = ref.read(activeCallControllerProvider);
-    final hasActiveBanner =
-        banner != null && !isTerminalCallStatus(banner.status);
+    final hasActiveBanner = banner != null && !isEndedCallStatus(banner.status);
     final pendingSession = hasActiveBanner ? rawPendingSession : null;
     final restoredBanner = pendingSession != null ? banner : null;
     if (rawPendingSession != null) {
@@ -158,7 +173,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
           name: _logKey,
         );
         Future.microtask(() {
-          if (!isTerminalCallStatus(_lastStatus) &&
+          if (!isEndedCallStatus(_lastStatus) &&
               _lastStatus != AudioVideoCallStatus.idle) {
             activeCallController.hangUpFromScreen(
               role: _isCaller ? CallRole.caller : CallRole.recipient,
@@ -230,10 +245,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   }
 
   /// Switches between front and rear camera.
-  Future<void> switchCamera() async {
-    _logger.info('switchCamera', name: _logKey);
-    await _session?.switchCamera();
-  }
+  Future<void> switchCamera() => _mediaHandler.switchCamera();
 
   /// Sets the participant displayed full-screen in focused layout.
   /// Pass null to return to the grid layout.
@@ -258,160 +270,26 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
   /// Checks initial microphone and camera permission status and updates state.
   ///
-  /// Only flags an error for [PermissionStatus.permanentlyDenied] (user
+  /// Only flags an error for `permanentlyDenied` permission status (user
   /// explicitly denied a previous prompt). Undetermined ("not yet asked") is
   /// not treated as an error — LiveKit requests the permission natively when
   /// it enables the mic/camera track, avoiding races with AVAudioSession setup.
-  Future<void> checkInitialPermissions() async {
-    final ps = ref.read(permissionServiceProvider);
-    final camStatus = await ps.getCameraPermissionStatus();
-    final micStatus = await ps.getMicrophonePermissionStatus();
-    if (_isDisposed) return;
-    state = state.copyWith(
-      cameraPermissionError: camStatus.isPermanentlyDenied,
-      micPermissionError: micStatus.isPermanentlyDenied,
-    );
-  }
+  Future<void> checkInitialPermissions() =>
+      _mediaHandler.checkInitialPermissions();
 
   /// Initiates a new outgoing call to the contact,
   /// acquiring the plugin session.
-  Future<void> joinCall() async {
-    if (_isDisposed) return;
-    if (!_canStartNewCall()) return;
-
-    final plugin = _plugin;
-    if (plugin == null) {
-      _logger.warning('joinCall: Plugin not available', name: _logKey);
-      state = state.copyWith(status: AudioVideoCallStatus.error);
-      return;
-    }
-
-    final channelDid = _channelDid;
-    if (channelDid == null) {
-      _logger.warning('joinCall: Contact has no channelDid', name: _logKey);
-      state = state.copyWith(status: AudioVideoCallStatus.error);
-      return;
-    }
-
-    await _startPluginCall(plugin, channelDid);
-  }
-
-  /// Returns true if a new outgoing call can be placed.
-  ///
-  /// Returns false (with a log) if a call is already in progress or a
-  /// pre-accepted incoming session is waiting.
-  bool _canStartNewCall() {
-    if (_inProgressStatuses.contains(state.status)) {
-      _logger.warning('joinCall: Already in progress', name: _logKey);
-      return false;
-    }
-    if (_session != null) {
-      _logger.info('joinCall: Using pre-accepted session', name: _logKey);
-      return false;
-    }
-    return true;
-  }
-
-  /// Places the call via the plugin and attaches the resulting session.
-  Future<void> _startPluginCall(
-    AudioVideoCallPlugin plugin,
-    String channelDid,
-  ) async {
-    final speakerphoneEnabled = _isGroupContact;
-    state = state.copyWith(
-      status: AudioVideoCallStatus.connecting,
-      isSpeakerEnabled: speakerphoneEnabled,
-    );
-    try {
-      final session = await plugin.startCall(
-        otherPartyChannelDid: channelDid,
-        mediaType: state.isAudioOnly
-            ? CallMediaType.audio
-            : CallMediaType.video,
-      );
-      _session = session;
-      await session.setSpeakerphoneEnabled(speakerphoneEnabled);
-      _attachSession(session);
-    } catch (e, stackTrace) {
-      _logger.error(
-        'joinCall: StartCall failed',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      if (!_isDisposed) {
-        state = state.copyWith(status: AudioVideoCallStatus.error);
-      }
-    }
-  }
+  Future<void> joinCall() => _lifecycleHandler.joinCall();
 
   /// Cancels an outgoing call that has not yet been answered.
-  Future<void> cancelCall() async {
-    if (_isDisposed) return;
-    try {
-      await _plugin?.leaveCurrentCall();
-      _session = null;
-    } catch (e, stackTrace) {
-      _logger.error(
-        'Failed to cancel call cleanly',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-    } finally {
-      if (!_isDisposed) {
-        _clearIncomingCallState();
-        state = state.copyWith(status: AudioVideoCallStatus.ended);
-        _chatItemHandler.endCallChatItem(
-          outcome: state.hasHadPeer
-              ? CallEndOutcome.hungUp
-              : CallEndOutcome.declined,
-          isCaller: _isCaller,
-          hasHadPeer: state.hasHadPeer,
-          callDuration: Duration(seconds: state.callDurationSeconds),
-          isDisposed: () => _isDisposed,
-        );
-      }
-    }
-  }
+  Future<void> cancelCall() => _lifecycleHandler.cancelCall();
 
   /// Hangs up the call, dispatching either a cancel
   /// (if still ringing) or leave.
-  Future<void> hangUp() async {
-    if (_isDisposed) return;
-    if (state.status == AudioVideoCallStatus.outgoingRinging ||
-        state.status == AudioVideoCallStatus.connecting) {
-      await cancelCall();
-    } else {
-      await leaveCall();
-    }
-  }
+  Future<void> hangUp() => _lifecycleHandler.hangUp();
 
   /// Ends the active call and transitions to ended state.
-  Future<void> leaveCall() async {
-    if (_isDisposed) return;
-    try {
-      await _plugin?.leaveCurrentCall();
-      _session = null;
-    } catch (e, stackTrace) {
-      _logger.error(
-        'Failed to hang up call cleanly',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      if (!_isDisposed) {
-        state = state.copyWith(
-          actionFailure: CallActionFailureEvent(CallActionFailure.hangUp),
-        );
-      }
-    } finally {
-      if (!_isDisposed) {
-        _clearIncomingCallState();
-        state = state.copyWith(status: AudioVideoCallStatus.ended);
-      }
-    }
-  }
+  Future<void> leaveCall() => _lifecycleHandler.leaveCall();
 
   /// Toggles microphone on/off.
   ///
@@ -419,67 +297,23 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// owns the AVAudioSession at that point and re-querying permission_handler
   /// can return a stale status. Only re-checks if a previous permission error
   /// was recorded.
-  Future<void> toggleMic() => _toggleDevice(
-    permission: () async {
-      if (!state.micPermissionError) return PermissionStatus.granted;
-      final ps = ref.read(permissionServiceProvider);
-      final current = await ps.getMicrophonePermissionStatus();
-      if (current.isDenied) return ps.requestMicrophonePermission();
-      return current;
-    },
-    isGranted: (s) => s.isGranted || s.isLimited,
-    onDenied: () => state = state.copyWith(micPermissionError: true),
+  Future<void> toggleMic() => _mediaHandler.toggleMic(
     currentValue: state.isMicEnabled,
-    apply: (v) async => _session?.setMicrophoneEnabled(v),
-    onSuccess: (v) =>
-        state = state.copyWith(isMicEnabled: v, micPermissionError: false),
-    failureType: CallActionFailure.microphone,
-    failureLabel: 'Failed to toggle microphone',
+    permissionError: state.micPermissionError,
   );
 
   /// Toggles camera on/off.
   ///
   /// Same skip-if-active logic as [toggleMic].
-  Future<void> toggleCamera() => _toggleDevice(
-    permission: () async {
-      if (!state.cameraPermissionError) return PermissionStatus.granted;
-      final ps = ref.read(permissionServiceProvider);
-      final current = await ps.getCameraPermissionStatus();
-      if (current.isDenied) return ps.requestCameraPermission();
-      return current;
-    },
-    isGranted: (s) => s.isGranted || s.isLimited,
-    onDenied: () => state = state.copyWith(cameraPermissionError: true),
+  Future<void> toggleCamera() => _mediaHandler.toggleCamera(
     currentValue: state.isCameraEnabled,
-    apply: (v) async => _session?.setCameraEnabled(v),
-    onSuccess: (v) => state = state.copyWith(
-      isCameraEnabled: v,
-      cameraPermissionError: false,
-    ),
-    failureType: CallActionFailure.camera,
-    failureLabel: 'Failed to toggle camera',
+    permissionError: state.cameraPermissionError,
   );
 
   /// Toggles speakerphone on/off.
-  Future<void> toggleSpeaker() async {
-    if (_isDisposed) return;
-    final next = !state.isSpeakerEnabled;
-    try {
-      await _session?.setSpeakerphoneEnabled(next);
-      if (!_isDisposed) state = state.copyWith(isSpeakerEnabled: next);
-    } catch (e, stackTrace) {
-      _logger.error(
-        'Failed to toggle speaker',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      if (!_isDisposed) {
-        state = state.copyWith(
-          actionFailure: CallActionFailureEvent(CallActionFailure.speaker),
-        );
-      }
-    }
+  Future<void> toggleSpeaker() {
+    if (_isDisposed) return Future.value();
+    return _mediaHandler.toggleSpeaker(currentValue: state.isSpeakerEnabled);
   }
 
   /// Attaches a new session, setting up the handler
@@ -517,7 +351,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     }
     final handler = CallSessionHandler(
       logger: _logger,
-      logKey: _logKey,
       onUpdate: _applySessionUpdate,
     )..attach(session);
     _sessionHandler = handler;
@@ -562,44 +395,67 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     if (update.peerJustJoined) {
       _clearIncomingCallState();
       ref.read(activeCallControllerProvider.notifier).startTimer();
-      _chatItemHandler.updateCallChatItemStatus(
-        CallStatus.inProgress,
-        isDisposed: () => _isDisposed,
-      );
+      _chatItemHandler.updateCallChatItemStatus(CallStatus.inProgress);
     }
 
     if (!_chatItemHandler.callChatItemEnded &&
         update.status == AudioVideoCallStatus.outgoingRinging &&
         !update.peerJustJoined) {
-      _chatItemHandler.updateCallChatItemStatus(
-        CallStatus.ringing,
-        isDisposed: () => _isDisposed,
-      );
+      _chatItemHandler.updateCallChatItemStatus(CallStatus.ringing);
     }
 
-    if (isTerminalCallStatus(update.status ?? state.status)) {
+    if (isEndedCallStatus(update.status ?? state.status)) {
       _clearIncomingCallState();
       ref.read(activeCallControllerProvider.notifier).stopTimer();
       _chatItemHandler.endCallChatItem(
-        outcome:
-            (_lastStatus == AudioVideoCallStatus.declined ||
-                _lastStatus == AudioVideoCallStatus.missed ||
-                !state.hasHadPeer)
-            ? CallEndOutcome.declined
-            : CallEndOutcome.hungUp,
+        outcome: resolveCallEndOutcome(
+          lastStatus: _lastStatus,
+          hasHadPeer: state.hasHadPeer,
+        ),
         isCaller: _isCaller,
         hasHadPeer: state.hasHadPeer,
         callDuration: Duration(seconds: state.callDurationSeconds),
-        isDisposed: () => _isDisposed,
       );
     }
 
     _syncActiveGroupCall(update.status ?? state.status);
   }
 
+  /// The contact's channel DID, or contactId if not found.
   String? get _channelDid {
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     return contact?.channelDid ?? contactId;
+  }
+
+  /// Applies lifecycle transitions: attaches sessions, clears incoming state,
+  /// updates status, records failures, and writes terminal chat items.
+  void _applyLifecycleUpdate(CallLifecycleUpdate update) {
+    if (_isDisposed) return;
+    if (update.attachedSession != null) {
+      _attachSession(update.attachedSession!);
+    }
+    if (update.clearIncomingCall) {
+      _clearIncomingCallState();
+    }
+    if (update.status != null || update.isSpeakerEnabled != null) {
+      state = state.copyWith(
+        status: update.status ?? state.status,
+        isSpeakerEnabled: update.isSpeakerEnabled ?? state.isSpeakerEnabled,
+      );
+    }
+    if (update.reportHangUpFailure) {
+      state = state.copyWith(
+        actionFailure: CallActionFailureEvent(CallActionFailure.hangUp),
+      );
+    }
+    if (update.endOutcome != null) {
+      _chatItemHandler.endCallChatItem(
+        outcome: update.endOutcome!,
+        isCaller: _isCaller,
+        hasHadPeer: state.hasHadPeer,
+        callDuration: Duration(seconds: state.callDurationSeconds),
+      );
+    }
   }
 
   /// Clears the kept-alive incoming-call state once the call leaves the
@@ -612,41 +468,20 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     ref.read(incomingCallStateProvider.notifier).clear();
   }
 
-  /// Generic device toggle helper that checks permissions,
-  /// applies the toggle, and handles errors.
-  Future<void> _toggleDevice({
-    required Future<PermissionStatus> Function() permission,
-    required bool Function(PermissionStatus) isGranted,
-    required void Function() onDenied,
-    required bool currentValue,
-    required Future<void> Function(bool) apply,
-    required void Function(bool) onSuccess,
-    required CallActionFailure failureType,
-    required String failureLabel,
-  }) async {
+  /// Applies media toggle updates (mic, camera, speaker, permissions) to state.
+  void _applyMediaUpdate(CallMediaUpdate update) {
     if (_isDisposed) return;
-    final status = await permission();
-    if (!isGranted(status)) {
-      onDenied();
-      return;
-    }
-    final next = !currentValue;
-    try {
-      await apply(next);
-      if (!_isDisposed) onSuccess(next);
-    } catch (e, stackTrace) {
-      _logger.error(
-        failureLabel,
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      if (!_isDisposed) {
-        state = state.copyWith(
-          actionFailure: CallActionFailureEvent(failureType),
-        );
-      }
-    }
+    state = state.copyWith(
+      isMicEnabled: update.isMicEnabled ?? state.isMicEnabled,
+      micPermissionError: update.micPermissionError ?? state.micPermissionError,
+      isCameraEnabled: update.isCameraEnabled ?? state.isCameraEnabled,
+      cameraPermissionError:
+          update.cameraPermissionError ?? state.cameraPermissionError,
+      isSpeakerEnabled: update.isSpeakerEnabled ?? state.isSpeakerEnabled,
+      actionFailure: update.failure != null
+          ? CallActionFailureEvent(update.failure!)
+          : state.actionFailure,
+    );
   }
 
   /// Fetches and caches group member contact cards by their DIDs.
@@ -708,15 +543,11 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// the active group contact ID.
   void _syncActiveGroupCall(AudioVideoCallStatus status) {
     final notifier = ref.read(activeGroupCallProvider.notifier);
-    if (_isGroupContact &&
-        (status == AudioVideoCallStatus.connected ||
-            status == AudioVideoCallStatus.active)) {
+    if (_isGroupContact && isConnectedCallStatus(status)) {
       notifier.state = contactId;
       return;
     }
-    if (status == AudioVideoCallStatus.ended ||
-        status == AudioVideoCallStatus.disconnected ||
-        status == AudioVideoCallStatus.error) {
+    if (isEndedCallStatus(status)) {
       if (ref.read(activeGroupCallProvider) == contactId) {
         notifier.state = null;
       }

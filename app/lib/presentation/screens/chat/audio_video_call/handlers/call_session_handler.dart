@@ -18,14 +18,11 @@ import '../rules/call_ui_rules.dart';
 /// Plain Dart class with no Riverpod dependency — unit-testable without a
 /// ProviderContainer.
 class CallSessionHandler {
-  CallSessionHandler({
-    required this.logger,
-    required this.logKey,
-    required this.onUpdate,
-  });
+  CallSessionHandler({required this.logger, required this.onUpdate});
+
+  static const _logKey = 'CallSessionHandler';
 
   final AppLogger logger;
-  final String logKey;
   final void Function(AudioVideoCallStateUpdate update) onUpdate;
 
   StreamSubscription<AudioVideoCallState>? _sub;
@@ -58,7 +55,7 @@ class CallSessionHandler {
   /// and forwards it to [onUpdate].
   void _onSessionState(AudioVideoCallState next) {
     if (_isDisposed) {
-      logger.info('_onSessionState: skipping, handler disposed', name: logKey);
+      logger.info('_onSessionState: skipping, handler disposed', name: _logKey);
       return;
     }
 

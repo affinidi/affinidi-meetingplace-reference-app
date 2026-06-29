@@ -33,12 +33,12 @@ void main() {
         AudioVideoCallStatus.missed,
         AudioVideoCallStatus.declined,
       ]) {
-        expect(isTerminalCallStatus(s), isTrue, reason: '$s');
+        expect(isEndedCallStatus(s), isTrue, reason: '$s');
       }
     });
 
     test('is false for live states', () {
-      expect(isTerminalCallStatus(AudioVideoCallStatus.active), isFalse);
+      expect(isEndedCallStatus(AudioVideoCallStatus.active), isFalse);
     });
   });
 
