@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' show CallMediaType;
 
 import '../../../application/services/contacts_service/contacts_service.dart';
-import '../../../application/services/incoming_call_service/incoming_call_service.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/providers/incoming_call_state_provider.dart';
@@ -48,8 +47,6 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(incomingCallServiceProvider);
-
     // Hide banner when a call is active
     final callState = ref.watch(activeCallControllerProvider);
     if (callState != null) return const SizedBox.shrink();
