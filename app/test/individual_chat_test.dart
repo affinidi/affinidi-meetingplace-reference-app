@@ -134,6 +134,26 @@ void main() {
       expect(find.text(contactName), findsOneWidget);
     });
 
+    testWidgets('exiting chat with a pending session update does not throw', (
+      tester,
+    ) async {
+      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+
+      chatSdk.simulateIncomingTextMessage(
+        text: 'Pending update while exiting',
+        recipientDid: FakeChannels.individualChannel.permanentChannelDid!,
+      );
+
+      final context = tester.element(findChatMessageInput());
+      Navigator.of(context).pop();
+
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(findChatMessageInput(), findsNothing);
+    });
+
     group('and there is an unsent message', () {
       testWidgets('it shows the unsent message in the text field', (
         tester,

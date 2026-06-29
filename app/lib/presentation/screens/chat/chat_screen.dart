@@ -158,7 +158,7 @@ class ChatScreen extends HookConsumerWidget {
         await controller.onScreenOpened();
       });
 
-      return () => unawaited(controller.stopVoicePlayback());
+      return controller.disposeVoicePlaybackResources;
     }, [_contactId]);
 
     ref.listen(
