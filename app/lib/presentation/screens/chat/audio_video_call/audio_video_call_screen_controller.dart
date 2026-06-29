@@ -80,25 +80,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     }
 
     _chatItemHandler = CallChatItemHandler(
-      resolveItemId: ({required bool isCaller}) async {
-        final bannerItemId = ref
-            .read(activeCallControllerProvider.notifier)
-            .callChatItemId;
-        if (bannerItemId != null) return bannerItemId;
-        if (_isDisposed) return null;
-        final channelDid = _channelDid;
-        if (channelDid == null) return null;
-        return ref
-            .read(chatSessionServiceProvider(channelDid).notifier)
-            .resolveIncomingCallChatItemId();
-      },
-      updateItem: (messageId, {required status, duration}) async {
-        final channelDid = _channelDid;
-        if (channelDid == null) return;
-        await ref
-            .read(chatSessionServiceProvider(channelDid).notifier)
-            .updateCallChatItem(messageId, status: status, duration: duration);
-      },
+      resolveItemId: _resolveCallChatItemId,
+      updateItem: _updateCallChatItem,
       isDisposed: () => _isDisposed,
       logger: _logger,
     );
@@ -421,6 +404,30 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   String? get _channelDid {
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     return contact?.channelDid ?? contactId;
+  }
+
+  Future<String?> _resolveCallChatItemId({required bool isCaller}) async {
+    final bannerItemId =
+        ref.read(activeCallControllerProvider.notifier).callChatItemId;
+    if (bannerItemId != null) return bannerItemId;
+    if (_isDisposed) return null;
+    final channelDid = _channelDid;
+    if (channelDid == null) return null;
+    return ref
+        .read(chatSessionServiceProvider(channelDid).notifier)
+        .resolveIncomingCallChatItemId();
+  }
+
+  Future<void> _updateCallChatItem(
+    String messageId, {
+    required CallStatus status,
+    Duration? duration,
+  }) async {
+    final channelDid = _channelDid;
+    if (channelDid == null) return;
+    await ref
+        .read(chatSessionServiceProvider(channelDid).notifier)
+        .updateCallChatItem(messageId, status: status, duration: duration);
   }
 
   /// Applies lifecycle transitions: attaches sessions, clears incoming state,
