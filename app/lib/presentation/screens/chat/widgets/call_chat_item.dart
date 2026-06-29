@@ -75,8 +75,7 @@ class CallChatItem extends ConsumerWidget {
                       .read(activeCallControllerProvider.notifier)
                       .session;
                   if (session != null) {
-                    ref.read(pendingCallSessionProvider.notifier).state =
-                        session;
+                    ref.read(pendingCallSessionProvider.notifier).set(session);
                   }
                 }
                 unawaited(

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallParticipant, AudioVideoCallStatus;
+    show AudioVideoCallParticipant, AudioVideoCallSession, AudioVideoCallStatus;
 import 'package:mpx_app_core/mpx_app_core.dart'
     show IncomingAudioVideoCallEvent;
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
@@ -33,6 +33,11 @@ class _FakeIncomingCallState extends IncomingCallState {
   IncomingAudioVideoCallEvent? build() => null;
 }
 
+class _FakePendingCallSession extends PendingCallSession {
+  @override
+  AudioVideoCallSession? build() => null;
+}
+
 class _FixedStateController extends AudioVideoCallScreenController {
   _FixedStateController(this._fixed);
 
@@ -56,7 +61,7 @@ Widget _wrap({required AudioVideoCallScreenState controllerState}) {
       audioVideoCallPluginProvider.overrideWith((ref) async => null),
       permissionServiceProvider.overrideWithValue(FakePermissionService()),
       incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-      pendingCallSessionProvider.overrideWith((ref) => null),
+      pendingCallSessionProvider.overrideWith(_FakePendingCallSession.new),
       activeCallControllerProvider.overrideWith(FakeActiveCallController.new),
       audioVideoCallScreenControllerProvider(
         _kContactId,
