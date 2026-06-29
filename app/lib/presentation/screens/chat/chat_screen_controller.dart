@@ -81,6 +81,7 @@ class ChatScreenController extends _$ChatScreenController
   late final _chatResumingLock = Lock();
   StreamSubscription<void>? _vrcPluginSubscription;
   StreamSubscription<Identity>? _rCardPluginSubscription;
+  VoicePlaybackService? _voicePlaybackController;
   bool _rCardListenerSet = false;
 
   late final Map<String, ProviderSubscription<void>>
@@ -109,6 +110,11 @@ class ChatScreenController extends _$ChatScreenController
   @override
   ChatScreenState build(String contactId) {
     WidgetsBinding.instance.addObserver(this);
+    final logger = _logger;
+    _voicePlaybackController = ref.read(
+      voicePlaybackServiceProvider(contactId).notifier,
+    );
+    ref.listen(voicePlaybackServiceProvider(contactId), (_, _) {});
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     final channelDid = contact?.channelDid;
@@ -126,6 +132,8 @@ class ChatScreenController extends _$ChatScreenController
       _chatService = sessionService;
       ref.listen(chatSessionProvider, (previous, next) {
         Future.microtask(() {
+          if (!ref.mounted) return;
+
           if (hasInitializedState) {
             pendingState = state;
           }
@@ -251,10 +259,6 @@ class ChatScreenController extends _$ChatScreenController
     messageTextController.addListener(_onMessageTextChanged);
     _subscribeToVrcPlugin();
 
-    final voicePlaybackController = ref.read(
-      voicePlaybackServiceProvider(contactId).notifier,
-    );
-
     ref.onDispose(() {
       _vrcPluginSubscription?.cancel();
       _rCardPluginSubscription?.cancel();
@@ -265,10 +269,8 @@ class ChatScreenController extends _$ChatScreenController
       messageTextController.dispose();
 
       _disposeConciergeLoadingControllers();
-
-      voicePlaybackController.disposePlaybackResources();
-
-      _logger.info('Chat session ended', name: _logKey);
+      unawaited(disposeVoicePlaybackResources());
+      logger.info('Chat session ended', name: _logKey);
 
       WidgetsBinding.instance.removeObserver(this);
     });
@@ -367,6 +369,7 @@ class ChatScreenController extends _$ChatScreenController
 
     _logger.info('Pausing chat session', name: _logKey);
     _isPaused = true;
+    await disposeVoicePlaybackResources();
     await _chatService?.pauseChat();
   }
 
@@ -994,6 +997,14 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
+  Future<void> stopVoicePlayback() {
+    return ref.read(voicePlaybackServiceProvider(contactId).notifier).stop();
+  }
+
+  Future<void> disposeVoicePlaybackResources() async {
+    await _voicePlaybackController?.disposePlaybackResources();
+  }
+
   Future<void> toggleVoicePlayback({
     required String clipId,
     Uint8List? bytes,
@@ -1010,10 +1021,6 @@ class ChatScreenController extends _$ChatScreenController
           mediaType: mediaType,
           initialDuration: initialDuration,
         );
-  }
-
-  Future<void> stopVoicePlayback() {
-    return ref.read(voicePlaybackServiceProvider(contactId).notifier).stop();
   }
 
   ProviderListenable<bool> voicePlaybackIsPlaying(String clipId) {

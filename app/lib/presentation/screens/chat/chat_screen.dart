@@ -158,8 +158,10 @@ class ChatScreen extends HookConsumerWidget {
         await controller.onScreenOpened();
       });
 
-      return () => unawaited(controller.stopVoicePlayback());
-    }, [_contactId]);
+      return () {
+        unawaited(controller.disposeVoicePlaybackResources());
+      };
+    }, [controller, _contactId]);
 
     ref.listen(
       chatScreenControllerProvider(
@@ -174,36 +176,41 @@ class ChatScreen extends HookConsumerWidget {
       },
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: context.colorScheme.primary,
-        foregroundColor: Colors.white,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment.bottomCenter,
-              radius: 1,
-              colors: [
-                context.colorScheme.primary,
-                const Color.fromARGB(159, 5, 19, 94),
-              ],
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) unawaited(controller.disposeVoicePlaybackResources());
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: context.colorScheme.primary,
+          foregroundColor: Colors.white,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.bottomCenter,
+                radius: 1,
+                colors: [
+                  context.colorScheme.primary,
+                  const Color.fromARGB(159, 5, 19, 94),
+                ],
+              ),
             ),
           ),
+          title: _ChatContactDisplayName(contactId: _contactId),
+          centerTitle: true,
         ),
-        title: _ChatContactDisplayName(contactId: _contactId),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: isInitialized
-                ? _ChatSection(
-                    contactId: _contactId,
-                    showHumanZkp: showHumanZkp,
-                  )
-                : const _LoadingSection(),
-          ),
-        ],
+        body: Column(
+          children: [
+            Expanded(
+              child: isInitialized
+                  ? _ChatSection(
+                      contactId: _contactId,
+                      showHumanZkp: showHumanZkp,
+                    )
+                  : const _LoadingSection(),
+            ),
+          ],
+        ),
       ),
     );
   }

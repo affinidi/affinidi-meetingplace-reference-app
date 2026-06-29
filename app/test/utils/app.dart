@@ -86,6 +86,7 @@ Future<void> startApp(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
+  List<dynamic> providerOverrides = const [],
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   addTearDown(() async {
@@ -261,6 +262,7 @@ Future<void> startApp(
         shareServiceProvider.overrideWith((ref) => shareService),
       if (qrCodeViewFactory != null)
         qrCodeViewFactoryProvider.overrideWith((ref) => qrCodeViewFactory),
+      ...providerOverrides.cast(),
     ],
     child: data == null
         ? App(locale: locale)
@@ -295,6 +297,7 @@ Future<void> navigateToLocation(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
+  List<dynamic> providerOverrides = const [],
 }) async {
   await startApp(
     tester,
@@ -317,6 +320,7 @@ Future<void> navigateToLocation(
     qrCodeViewFactory: qrCodeViewFactory,
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
+    providerOverrides: providerOverrides,
   );
 
   await tester.pumpAndSettle();
@@ -346,6 +350,7 @@ Future<void> navigateToChat(
   RCardsService Function()? rCardsServiceFactory,
   List<RCard> rCards = const [],
   MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
+  List<dynamic> providerOverrides = const [],
 }) async {
   await navigateToLocation(
     tester,
@@ -368,6 +373,7 @@ Future<void> navigateToChat(
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
     rCards: rCards,
+    providerOverrides: providerOverrides,
   );
   await tester.pumpAndSettle();
 }

@@ -21,7 +21,9 @@ class VoicePlaybackService extends _$VoicePlaybackService {
 
   @override
   VoicePlaybackState build(String contactId) {
-    ref.onDispose(_disposePlayer);
+    ref.onDispose(() {
+      unawaited(_disposePlayer());
+    });
     return const VoicePlaybackState();
   }
 
@@ -29,6 +31,14 @@ class VoicePlaybackService extends _$VoicePlaybackService {
       '$contactId\u0000$attachmentCacheKey';
 
   Future<void> stop() async {
+    await _haltPlayback();
+  }
+
+  Future<void> disposePlaybackResources() {
+    return _disposePlayer();
+  }
+
+  Future<void> _haltPlayback() async {
     final player = _player;
     if (player != null) {
       await player.stop();
@@ -36,10 +46,6 @@ class VoicePlaybackService extends _$VoicePlaybackService {
     _clearActiveSource();
     state = const VoicePlaybackState();
     _releasePlaybackKeepAlive();
-  }
-
-  void disposePlaybackResources() {
-    _disposePlayer();
   }
 
   Future<void> toggle({
@@ -125,20 +131,19 @@ class VoicePlaybackService extends _$VoicePlaybackService {
     ]);
   }
 
-  void _disposePlayer() {
-    for (final subscription in _subscriptions) {
-      unawaited(subscription.cancel());
-    }
-    _subscriptions.clear();
+  Future<void> _disposePlayer() async {
     _clearActiveSource();
     _releasePlaybackKeepAlive();
     final player = _player;
     _player = null;
+
+    for (final subscription in _subscriptions) {
+      await subscription.cancel();
+    }
+    _subscriptions.clear();
+
     if (player != null) {
-      unawaited(() async {
-        await player.stop();
-        await player.dispose();
-      }());
+      await player.dispose();
     }
   }
 }
