@@ -127,10 +127,11 @@ class MediaScreenController extends _$MediaScreenController {
     } else if (picked != null) {
       state = state.copyWith(pickedImageBytes: await picked.readAsBytes());
     } else {
-      final navigator = ref.read(navigatorProvider);
       if (state.cameraController != null) {
-        await closeCamera();
+        return;
       }
+
+      final navigator = ref.read(navigatorProvider);
       navigator.pop(MediaReviewResult.empty());
     }
   }

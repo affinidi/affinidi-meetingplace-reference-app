@@ -1170,6 +1170,10 @@
 	"@generalCamera": {
 		"type": "text"
 	},
+	"switchCamera": "Switch camera",
+	"@switchCamera": {
+		"type": "text"
+	},
 	"generalPhoto": "Photo",
 	"@generalPhoto": {
 		"type": "text"
