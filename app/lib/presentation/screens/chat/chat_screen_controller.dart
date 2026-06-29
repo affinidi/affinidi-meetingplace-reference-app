@@ -1016,6 +1016,21 @@ class ChatScreenController extends _$ChatScreenController
     return ref.read(voicePlaybackServiceProvider(contactId).notifier).stop();
   }
 
+  ProviderListenable<bool> voicePlaybackIsPlaying(String clipId) {
+    return voicePlaybackServiceProvider(contactId).isPlaying(clipId);
+  }
+
+  ProviderListenable<double> voicePlaybackProgress(String clipId) {
+    return voicePlaybackServiceProvider(contactId).progress(clipId);
+  }
+
+  ProviderListenable<Duration> voicePlaybackDuration(
+    String clipId,
+    Duration fallback,
+  ) {
+    return voicePlaybackServiceProvider(contactId).duration(clipId, fallback);
+  }
+
   String voiceClipId(String attachmentCacheKey) =>
       VoicePlaybackService.clipId(contactId, attachmentCacheKey);
 

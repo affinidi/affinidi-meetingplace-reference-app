@@ -116,7 +116,7 @@ class VoiceAttachmentWidget extends HookWidget {
       );
     }
 
-    return VoiceAttachmentPlayer(
+    return VoiceAttachmentPlaybackBubble(
       bytes: cachedBytes,
       mediaType: attachment.mediaType,
       initialDuration: Duration(milliseconds: durationMs),
@@ -124,16 +124,10 @@ class VoiceAttachmentWidget extends HookWidget {
       playbackClipId: playbackClipId,
       autoPlay: playRequested.value,
       onAutoPlayed: () => playRequested.value = false,
-      builder: (context, state) => VoiceAttachmentBubble(
-        isFromMe: isFromMe,
-        chatItemColor: chatItemColor,
-        isPlaying: state.isPlaying,
-        duration: state.duration,
-        levels: levels,
-        progress: state.progress,
-        avatarImage: avatarImage,
-        onPressed: state.toggle,
-      ),
+      isFromMe: isFromMe,
+      chatItemColor: chatItemColor,
+      levels: levels,
+      avatarImage: avatarImage,
     );
   }
 

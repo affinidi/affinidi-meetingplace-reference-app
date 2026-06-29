@@ -57,8 +57,8 @@ class _VoiceRecorderState {
 /// Owns voice-recording state and lifecycle, exposing the current state and
 /// the start, stop, discard, and send actions to its builder.
 ///
-/// Mirrors the [_VoicePlayer] builder pattern so the recording logic lives
-/// next to playback instead of inside the chat input widget.
+/// Keeps the voice-recording lifecycle local so it can stay alongside the
+/// playback widgets instead of expanding the chat input widget state.
 class _VoiceRecorder extends HookWidget {
   const _VoiceRecorder({
     required this._controller,
@@ -356,19 +356,13 @@ class _VoiceInputPreview extends HookConsumerWidget {
       chatScreenControllerProvider(_contactId).notifier,
     );
     if (!_isRecording && draft != null) {
-      return _VoicePlayer(
+      return _VoiceInputPlaybackPill(
         contactId: _contactId,
         clipId: controller.voiceClipId('voice-input-draft'),
         filePath: draft.path,
         mediaType: draft.mediaType,
         initialDuration: draft.duration,
-        builder: (context, state) => _VoiceInputPill(
-          icon: state.isPlaying ? Icons.pause : Icons.play_arrow,
-          duration: state.duration,
-          levels: draft.levels,
-          progress: state.progress,
-          onPressed: state.toggle,
-        ),
+        levels: draft.levels,
       );
     }
 
@@ -378,6 +372,47 @@ class _VoiceInputPreview extends HookConsumerWidget {
       levels: _levels,
       progress: null,
       onPressed: _onStopRecording,
+    );
+  }
+}
+
+class _VoiceInputPlaybackPill extends StatelessWidget {
+  const _VoiceInputPlaybackPill({
+    required this.contactId,
+    required this.clipId,
+    required this.filePath,
+    required this.mediaType,
+    required this.initialDuration,
+    required this.levels,
+  });
+
+  final String contactId;
+  final String filePath;
+  final String clipId;
+  final String? mediaType;
+  final Duration initialDuration;
+  final List<double> levels;
+
+  @override
+  Widget build(BuildContext context) {
+    return _VoiceInputPillFrame(
+      control: _VoicePlaybackControlButton(
+        contactId: contactId,
+        clipId: clipId,
+        filePath: filePath,
+        mediaType: mediaType,
+        initialDuration: initialDuration,
+      ),
+      progressIndicator: _VoicePlaybackProgressDots(
+        contactId: contactId,
+        clipId: clipId,
+        levels: levels,
+      ),
+      durationText: _VoicePlaybackDurationText(
+        contactId: contactId,
+        clipId: clipId,
+        initialDuration: initialDuration,
+      ),
     );
   }
 }
@@ -399,6 +434,34 @@ class _VoiceInputPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _VoiceInputPillFrame(
+      control: _VoiceControlButton(icon: _icon, onPressed: _onPressed),
+      progressIndicator: _VoiceProgressDots(
+        levels: _levels,
+        progress: _progress,
+        color: Colors.white,
+      ),
+      durationText: Text(
+        _formatVoiceDuration(_duration),
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+      ),
+    );
+  }
+}
+
+class _VoiceInputPillFrame extends StatelessWidget {
+  const _VoiceInputPillFrame({
+    required this.control,
+    required this.progressIndicator,
+    required this.durationText,
+  });
+
+  final Widget control;
+  final Widget progressIndicator;
+  final Widget durationText;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -408,84 +471,104 @@ class _VoiceInputPill extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _VoiceControlButton(icon: _icon, onPressed: _onPressed),
+          control,
           const SizedBox(width: 10),
-          Expanded(
-            child: _VoiceProgressDots(
-              levels: _levels,
-              progress: _progress,
-              color: Colors.white,
-            ),
-          ),
+          Expanded(child: progressIndicator),
           const SizedBox(width: 10),
-          Text(
-            _formatVoiceDuration(_duration),
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-          ),
+          durationText,
         ],
       ),
     );
   }
 }
 
-class _VoicePlayerState {
-  const _VoicePlayerState({
-    required this.isPlaying,
-    required this.duration,
-    required this.progress,
-    required this.toggle,
+class _VoicePlaybackControlButton extends ConsumerWidget {
+  const _VoicePlaybackControlButton({
+    required this.contactId,
+    required this.clipId,
+    required this.filePath,
+    required this.mediaType,
+    required this.initialDuration,
   });
 
-  final bool isPlaying;
-  final Duration duration;
-  final double progress;
-  final VoidCallback toggle;
-}
-
-class _VoicePlayer extends HookConsumerWidget {
-  const _VoicePlayer({
-    required this._contactId,
-    required this._clipId,
-    required this._initialDuration,
-    required this._builder,
-    this._filePath,
-    this._mediaType,
-  });
-
-  final String _contactId;
-  final String _clipId;
-  final String? _filePath;
-  final String? _mediaType;
-  final Duration _initialDuration;
-  final Widget Function(BuildContext context, _VoicePlayerState state) _builder;
+  final String contactId;
+  final String clipId;
+  final String filePath;
+  final String? mediaType;
+  final Duration initialDuration;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final playback = voicePlaybackServiceProvider(_contactId);
     final controller = ref.read(
-      chatScreenControllerProvider(_contactId).notifier,
+      chatScreenControllerProvider(contactId).notifier,
     );
-    final isPlaying = ref.watch(playback.isPlaying(_clipId));
-    final progress = ref.watch(playback.progress(_clipId));
-    final duration = ref.watch(playback.duration(_clipId, _initialDuration));
+    final isPlaying = ref.watch(controller.voicePlaybackIsPlaying(clipId));
 
-    Future<void> togglePlayback() async {
-      await controller.toggleVoicePlayback(
-        clipId: _clipId,
-        filePath: _filePath,
-        mediaType: _mediaType,
-        initialDuration: _initialDuration,
-      );
-    }
+    return _VoiceControlButton(
+      icon: isPlaying ? Icons.pause : Icons.play_arrow,
+      onPressed: () {
+        unawaited(
+          controller.toggleVoicePlayback(
+            clipId: clipId,
+            filePath: filePath,
+            mediaType: mediaType,
+            initialDuration: initialDuration,
+          ),
+        );
+      },
+    );
+  }
+}
 
-    return _builder(
-      context,
-      _VoicePlayerState(
-        isPlaying: isPlaying,
-        duration: duration,
-        progress: progress,
-        toggle: () => unawaited(togglePlayback()),
-      ),
+class _VoicePlaybackProgressDots extends ConsumerWidget {
+  const _VoicePlaybackProgressDots({
+    required this.contactId,
+    required this.clipId,
+    required this.levels,
+  });
+
+  final String contactId;
+  final String clipId;
+  final List<double> levels;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(
+      chatScreenControllerProvider(contactId).notifier,
+    );
+    final progress = ref.watch(controller.voicePlaybackProgress(clipId));
+
+    return _VoiceProgressDots(
+      levels: levels,
+      progress: progress,
+      color: Colors.white,
+    );
+  }
+}
+
+class _VoicePlaybackDurationText extends ConsumerWidget {
+  const _VoicePlaybackDurationText({
+    required this.contactId,
+    required this.clipId,
+    required this.initialDuration,
+  });
+
+  final String contactId;
+  final String clipId;
+  final Duration initialDuration;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(
+      chatScreenControllerProvider(contactId).notifier,
+    );
+    final duration = ref.watch(
+      controller.voicePlaybackDuration(clipId, initialDuration),
+    );
+
+    return Text(
+      _formatVoiceDuration(duration),
+      style: const TextStyle(color: Colors.white, fontSize: 14),
     );
   }
 }
