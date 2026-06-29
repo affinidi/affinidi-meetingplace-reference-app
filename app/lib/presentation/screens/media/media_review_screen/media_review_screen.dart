@@ -150,53 +150,61 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
               top: false,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: customColors.mediaSurfaceOverlay,
+                child: widget.useChatSemantics
+                    ? ClipRRect(
                         borderRadius: BorderRadius.circular(28),
-                        border: Border.all(
-                          color: customColors.mediaSurfaceBorder,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Row(
-                        mainAxisSize: widget.useChatSemantics
-                            ? MainAxisSize.max
-                            : MainAxisSize.min,
-                        children: [
-                          if (widget.useChatSemantics)
-                            Expanded(
-                              child: _MessageInput(
-                                controller: _messageController,
-                                isSending: _isSending,
-                                onSend: () => _submitResult(success: true),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: customColors.mediaSurfaceOverlay,
+                              borderRadius: BorderRadius.circular(28),
+                              border: Border.all(
+                                color: customColors.mediaSurfaceBorder,
                               ),
                             ),
-                          if (widget.useChatSemantics)
-                            const SizedBox(width: 10),
-                          if (_imageBytes != null)
-                            _ReviewActionButton(
-                              key: const Key('media_review_submit_button'),
-                              icon: widget.useChatSemantics
-                                  ? Icons.send_rounded
-                                  : Icons.check_rounded,
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primary,
-                              foregroundColor: Colors.white,
-                              onPressed: _isSending
-                                  ? null
-                                  : () => _submitResult(success: true),
+                            padding: const EdgeInsets.all(10),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Expanded(
+                                  child: _MessageInput(
+                                    controller: _messageController,
+                                    isSending: _isSending,
+                                    onSend: () => _submitResult(success: true),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                if (_imageBytes != null)
+                                  _ReviewActionButton(
+                                    key: const Key(
+                                      'media_review_submit_button',
+                                    ),
+                                    icon: Icons.send_rounded,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    foregroundColor: Colors.white,
+                                    onPressed: _isSending
+                                        ? null
+                                        : () => _submitResult(success: true),
+                                  ),
+                              ],
                             ),
-                        ],
+                          ),
+                        ),
+                      )
+                    : _imageBytes == null
+                    ? const SizedBox.shrink()
+                    : _ReviewActionButton(
+                        key: const Key('media_review_submit_button'),
+                        icon: Icons.check_rounded,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        onPressed: _isSending
+                            ? null
+                            : () => _submitResult(success: true),
                       ),
-                    ),
-                  ),
-                ),
               ),
             ),
           ),
