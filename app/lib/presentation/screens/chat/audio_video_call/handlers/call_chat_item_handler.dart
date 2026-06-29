@@ -24,6 +24,7 @@ class CallChatItemHandler {
     this._onInitiator,
     required this._resolveItemId,
     required this._updateItem,
+    required this._isDisposed,
     required this._logger,
   });
 
@@ -37,6 +38,7 @@ class CallChatItemHandler {
     Duration? duration,
   })
   _updateItem;
+  final bool Function() _isDisposed;
   final AppLogger _logger;
 
   StreamSubscription<AudioVideoCallState>? _sub;
@@ -69,6 +71,7 @@ class CallChatItemHandler {
     _sub = null;
   }
 
+  /// Detects the caller role and emits the call chat item exactly once.
   Future<void> _onSessionState(AudioVideoCallState state) async {
     final ownRole = state.ownRole;
     if (ownRole == null) return;
@@ -96,10 +99,7 @@ class CallChatItemHandler {
   ///
   /// No-op if the item has already been ended or if the message id cannot
   /// be resolved. The update runs in a [Future] so callers can fire-and-forget.
-  void updateCallChatItemStatus(
-    CallStatus status, {
-    required bool Function() isDisposed,
-  }) {
+  void updateCallChatItemStatus(CallStatus status) {
     if (_callChatItemEnded) {
       _logger.info(
         'updateCallChatItemStatus: Skipping, item already ended',
@@ -109,7 +109,7 @@ class CallChatItemHandler {
     }
     unawaited(
       Future(() async {
-        if (isDisposed()) {
+        if (_isDisposed()) {
           _logger.info(
             'updateCallChatItemStatus: Skipping, controller disposed',
             name: _logKey,
@@ -117,7 +117,7 @@ class CallChatItemHandler {
           return;
         }
         final messageId = await _resolveId();
-        if (messageId == null || _callChatItemEnded || isDisposed()) {
+        if (messageId == null || _callChatItemEnded || _isDisposed()) {
           _logger.info(
             'updateCallChatItemStatus: Skipping update '
             '(messageId=$messageId, ended=$_callChatItemEnded)',
@@ -139,7 +139,6 @@ class CallChatItemHandler {
     required bool isCaller,
     required bool hasHadPeer,
     required Duration callDuration,
-    required bool Function() isDisposed,
   }) {
     if (_callChatItemEnded) {
       _logger.info(
@@ -152,7 +151,7 @@ class CallChatItemHandler {
 
     unawaited(
       Future(() async {
-        if (isDisposed()) {
+        if (_isDisposed()) {
           _logger.info(
             'endCallChatItem: Skipping, controller disposed',
             name: _logKey,
@@ -160,7 +159,7 @@ class CallChatItemHandler {
           return;
         }
         final messageId = await _resolveId(isCaller: isCaller);
-        if (messageId == null || isDisposed()) {
+        if (messageId == null || _isDisposed()) {
           _logger.info(
             'endCallChatItem: Skipping update '
             '(messageId=$messageId)',
@@ -183,6 +182,8 @@ class CallChatItemHandler {
     );
   }
 
+  /// Resolves and caches the call chat item message ID, inferring role
+  /// from the caller flag if needed.
   Future<String?> _resolveId({bool isCaller = false}) async {
     if (_callChatItemId != null) return _callChatItemId;
     final resolved = await _resolveItemId(isCaller: isCaller);

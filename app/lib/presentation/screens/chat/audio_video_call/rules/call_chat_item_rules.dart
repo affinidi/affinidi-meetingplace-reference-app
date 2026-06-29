@@ -1,7 +1,8 @@
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart' show CallStatus;
+import 'package:meeting_place_chat/meeting_place_chat.dart'
+    show AudioVideoCallStatus, CallStatus;
 
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../presentation/themes/app_custom_colors.dart';
@@ -47,6 +48,22 @@ CallStatus resolveEndStatus({
   (false, CallEndOutcome.declined) => CallStatus.missed,
   (false, CallEndOutcome.hungUp) => CallStatus.ended,
 };
+
+/// Maps how a call ended into the [CallEndOutcome] persisted on the chat item.
+///
+/// A call counts as unanswered ([CallEndOutcome.declined]) when its last status
+/// was declined or missed, or when no remote ever joined. Otherwise both
+/// parties connected and it is a normal [CallEndOutcome.hungUp].
+CallEndOutcome resolveCallEndOutcome({
+  required AudioVideoCallStatus lastStatus,
+  required bool hasHadPeer,
+}) {
+  final unanswered =
+      lastStatus == AudioVideoCallStatus.declined ||
+      lastStatus == AudioVideoCallStatus.missed ||
+      !hasHadPeer;
+  return unanswered ? CallEndOutcome.declined : CallEndOutcome.hungUp;
+}
 
 // =========================================================================
 // Render predicates — driven by (status, isFromMe)
