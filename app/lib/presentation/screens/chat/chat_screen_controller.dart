@@ -1239,7 +1239,12 @@ extension ChatScreenControllerProviderSelectors
   }
 
   ProviderListenable<bool> get shouldDisable {
-    return select((state) => !state.isInitialized || state.isGroupDeleted);
+    return select(
+      (state) =>
+          !state.isInitialized ||
+          state.isGroupDeleted ||
+          state.isRemovedFromGroup,
+    );
   }
 
   ProviderListenable<bool> get supportsMedia {
@@ -1282,10 +1287,29 @@ extension ChatScreenControllerProviderSelectors
 extension _ChatScreenStateExtensions on ChatScreenState {
   bool get isGroupChat => contact?.isGroup ?? false;
   bool get isGroupDeleted {
+    if (group?.isDeleted ?? false) return true;
+
     return messages.whereType<chat.EventMessage>().any(
       (message) =>
           message.eventType == chat.EventMessageType.groupDeleted &&
           message.status == chat.ChatItemStatus.received,
+    );
+  }
+
+  bool get isRemovedFromGroup {
+    final did = myDid;
+    if (did == null) return false;
+
+    if (getGroupMemberByDid(did)?.status == GroupMemberStatus.deleted) {
+      return true;
+    }
+
+    return messages.whereType<chat.EventMessage>().any(
+      (message) =>
+          message.eventType == chat.EventMessageType.groupMemberLeftGroup &&
+          message.status == chat.ChatItemStatus.received &&
+          message.memberDid == did &&
+          message.isGroupMemberRemoved,
     );
   }
 }
