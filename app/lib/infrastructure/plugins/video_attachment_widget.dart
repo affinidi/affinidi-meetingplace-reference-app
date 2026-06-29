@@ -4,31 +4,36 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
+import '../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../presentation/screens/media/video_player_screen/video_player_screen.dart';
 import '../extensions/build_context_extensions.dart';
 import 'attachment_plugin_cache.dart';
 
-class VideoAttachmentWidget extends StatefulWidget {
+class VideoAttachmentWidget extends ConsumerStatefulWidget {
   const VideoAttachmentWidget({
     super.key,
     required this.attachment,
     required this.cacheManager,
     required this.cacheKey,
+    this.playbackScopeId,
     this.download,
   });
 
   final ChatAttachment attachment;
   final BaseCacheManager cacheManager;
   final String cacheKey;
+  final String? playbackScopeId;
   final Future<Uint8List> Function(ChatAttachment)? download;
 
   @override
-  State<VideoAttachmentWidget> createState() => _VideoAttachmentWidgetState();
+  ConsumerState<VideoAttachmentWidget> createState() =>
+      _VideoAttachmentWidgetState();
 }
 
-class _VideoAttachmentWidgetState extends State<VideoAttachmentWidget> {
+class _VideoAttachmentWidgetState extends ConsumerState<VideoAttachmentWidget> {
   Uint8List? _bytes;
   bool _isDownloading = false;
   bool _hasFailed = false;
@@ -89,11 +94,20 @@ class _VideoAttachmentWidgetState extends State<VideoAttachmentWidget> {
     }
   }
 
-  void _openPlayer() {
+  Future<void> _openPlayer() async {
     final bytes = _bytes;
     if (bytes == null) return;
 
-    Navigator.of(context, rootNavigator: true).push<void>(
+    final playbackScopeId = widget.playbackScopeId;
+    if (playbackScopeId != null) {
+      await ref
+          .read(voicePlaybackServiceProvider(playbackScopeId).notifier)
+          .stop();
+    }
+
+    if (!mounted) return;
+
+    await Navigator.of(context, rootNavigator: true).push<void>(
       MaterialPageRoute<void>(
         builder: (context) => VideoPlayerScreen(
           videoBytes: bytes,
@@ -166,7 +180,7 @@ class _VideoAttachmentWidgetState extends State<VideoAttachmentWidget> {
       height: 200,
       width: 200,
       child: GestureDetector(
-        onTap: _openPlayer,
+        onTap: () => unawaited(_openPlayer()),
         child: Card(
           color: const Color.fromARGB(0, 10, 10, 10),
           clipBehavior: Clip.hardEdge,
