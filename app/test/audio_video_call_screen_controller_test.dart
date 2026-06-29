@@ -199,7 +199,7 @@ void main() {
       );
     });
 
-    test('individual call keeps isSpeakerEnabled false', () async {
+    test('individual call enables isSpeakerEnabled by default', () async {
       final plugin = _FakePlugin();
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(plugin: plugin);
@@ -215,7 +215,7 @@ void main() {
         container
             .read(audioVideoCallScreenControllerProvider(contactId))
             .isSpeakerEnabled,
-        isFalse,
+        isTrue,
       );
     });
 

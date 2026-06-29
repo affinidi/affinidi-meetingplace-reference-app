@@ -64,7 +64,7 @@ final class MediaScreenControllerProvider
 }
 
 String _$mediaScreenControllerHash() =>
-    r'33eed68bb674af4b86d7b22945bf45571d803d99';
+    r'380970eb8117b8c52a16a192f9b0c0dcb9e262f5';
 
 final class MediaScreenControllerFamily extends $Family
     with
