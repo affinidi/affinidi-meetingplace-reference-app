@@ -59,24 +59,35 @@ The reference app showcases the core capabilities of a secure, private messaging
 | **Multiple Identities** | Set a primary identity for your main profile, plus create aliases for specific contexts (e.g. a hobbyist persona or professional profile). |
 | **Connect with Invitations** | Create and publish invitations with custom options: a custom phrase, a usage limit, or an expiry date. |
 | **Secure Messaging** | Individual and group chats with end-to-end privacy built in. |
-| **Matrix Transport** | Use Matrix for richer chat features like voice messages, message edit, message delete, reactions, media, and group chat. Individual chats can use DIDComm, Matrix, or both. Configure this with `ENABLED_INDIVIDUAL_CHAT_TRANSPORTS`. |
+| **Configurable Chat Transport** | Depending on your use case, use DIDComm, Matrix based transport, or both. DIDComm supports individual chats only and does not support group chats. Use Matrix for group chats and richer chat features like voice messages, message edit, message delete, reactions, and file/document/audio/video attachments. Configure transports with `ENABLED_INDIVIDUAL_CHAT_TRANSPORTS`. |
 | **Verified Identity (R-Card and VRC)** | Share your R-Card (a signed digital contact card) in any chat, or initiate a mutual VRC exchange to create a verifiable record of your relationship. See [Feature Demonstrations](#feature-demos). |
 | **Messaging Server** | Use the Affinidi-hosted messaging server or bring your own managed mediator. |
 | **Human ZKP Demo** | Prove a contact is human using a Zero Knowledge Proof; no biometric data or personal information is shared. See [Feature Demonstrations](#feature-demos). |
 
 For full SDK documentation, see the [Affinidi Meeting Place SDK docs](https://docs.affinidi.com/products/affinidi-messaging/meeting-place/).
 
-### Chat Transport Capabilities
+### DIDComm Based Transport vs Matrix Based Transport
 
-Individual chats can use DIDComm, Matrix, or both. Group chat always uses Matrix.
+Individual chats can use DIDComm based transport or Matrix based transport. DIDComm based transport supports individual chats only; group chats require Matrix based transport.
 
-| Scope | Supported features |
-|-------|--------------------|
-| **Matrix only** | Group chat, voice messages, edit messages, delete messages |
-| **DIDComm only** | Presence, which means online or last-seen status |
-| **Both** | Text, media attachments, reactions, typing indicators, delivery receipts, visual effects, contact details update |
+| Feature | DIDComm based transport | Matrix based transport |
+|---------|-------------------------|------------------------|
+| Individual chat | 🟢 | 🟢 |
+| Group chat | 🔴 | 🟢 |
+| Text messages | 🟢 | 🟢 |
+| Image attachments | 🟢<br><sub>Auto downloads</sub> | 🟢 |
+| File/document attachments | 🔴 | 🟢 |
+| Audio/video attachments | 🔴 | 🟢 |
+| Voice messages | 🔴 | 🟢 |
+| Message edit/delete | 🔴 | 🟢 |
+| Reactions | 🟢 | 🟢 |
+| Typing indicators | 🟢 | 🟢 |
+| Delivery receipts | 🟢 | 🟢 |
+| Visual effects | 🟢 | 🟢 |
+| Contact details update | 🟢 | 🟢 |
+| Presence Indicator | 🟢 | 🔴 |
 
-When both transports are enabled, the app shows a transport picker while creating an offer.
+> **Note:** When both transports are enabled, the app shows chat transport selection while creating an offer.
 
 ## Architecture Overview
 
@@ -237,19 +248,19 @@ A VRC is a mutual "verified relationship" credential. Unlike an R-Card, a VRC re
 </details>
 
 <details id="panel-matrix">
-<summary><strong>Matrix Chat</strong></summary>
+<summary><strong>Matrix based features</strong></summary>
 
 Matrix enables the richer chat features in this reference app.
 
 | Feature | What it shows |
 |---------|---------------|
-| **Transport picker** | Test DIDComm, Matrix, or both for individual chats. |
+| **Transport picker** | Test DIDcomm or matrix based chat for individual chat |
 | **Group chat** | Create and join Matrix-based group chats. |
 | **Voice messages** | Record and play audio messages in chat. |
 | **Message actions** | React to messages, edit sent messages, and delete messages. |
-| **Media messages** | Share files and images in chat. |
+| **Media messages** | Share images, videos, files, and documents in chat. |
 
-The screenshots below show the Matrix chat flow and rich message actions.
+The screenshots below show the Matrix based chat flow and rich message actions.
 
 <table>
 <tr>
