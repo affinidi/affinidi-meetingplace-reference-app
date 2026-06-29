@@ -148,37 +148,12 @@ class _VideoAttachmentWidgetState extends State<VideoAttachmentWidget> {
             child: Center(
               child: _isDownloading
                   ? const CircularProgressIndicator()
-                  : Column(
+                  : const Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.video_file,
-                          color: Colors.white70,
-                          size: 48,
-                        ),
-                        const SizedBox(height: 8),
-                        const Icon(
-                          Icons.download,
-                          color: Colors.white70,
-                          size: 24,
-                        ),
-                        if (widget.attachment.filename != null)
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              top: 8,
-                              left: 8,
-                              right: 8,
-                            ),
-                            child: Text(
-                              widget.attachment.filename!,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 11,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
+                        Icon(Icons.video_file, color: Colors.white70, size: 48),
+                        SizedBox(height: 8),
+                        Icon(Icons.download, color: Colors.white70, size: 24),
                       ],
                     ),
             ),

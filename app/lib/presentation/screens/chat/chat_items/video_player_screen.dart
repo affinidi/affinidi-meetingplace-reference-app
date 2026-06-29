@@ -73,13 +73,6 @@ class _VideoPlayerScreenState extends State<_VideoPlayerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: widget.filename != null
-            ? Text(
-                widget.filename!,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                overflow: TextOverflow.ellipsis,
-              )
-            : null,
       ),
       body: Center(child: _buildBody(context)),
     );
