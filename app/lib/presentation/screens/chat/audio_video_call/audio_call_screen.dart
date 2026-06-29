@@ -56,12 +56,12 @@ class _AudioCallScreen extends ConsumerWidget {
       provider.select((s) => s.cameraPermissionError),
     );
 
-    final calleeCard = ref
+    final peerCard = ref
         .read(contactsServiceProvider)
         .getContactById(contactId)
         ?.card;
-    final calleeAvatarImage = calleeCard?.hasProfilePic == true
-        ? calleeCard!.image(cacheManager: ref.read(cacheManagerProvider))
+    final peerAvatarImage = peerCard?.hasProfilePic == true
+        ? peerCard!.image(cacheManager: ref.read(cacheManagerProvider))
         : null;
 
     final controls = _CallControls(
@@ -91,7 +91,7 @@ class _AudioCallScreen extends ConsumerWidget {
 
     return _AudioCallScaffold(
       contactId: contactId,
-      calleeAvatarImage: calleeAvatarImage,
+      peerAvatarImage: peerAvatarImage,
       showControls: showControls,
       controls: controls,
       onToggleControls: controller.toggleControlsBar,
@@ -106,7 +106,7 @@ class _AudioCallScreen extends ConsumerWidget {
 class _AudioCallScaffold extends StatelessWidget {
   const _AudioCallScaffold({
     required this.contactId,
-    required this.calleeAvatarImage,
+    required this.peerAvatarImage,
     required this.showControls,
     required this.controls,
     required this.onToggleControls,
@@ -114,7 +114,7 @@ class _AudioCallScaffold extends StatelessWidget {
   });
 
   final String contactId;
-  final ImageProvider<Object>? calleeAvatarImage;
+  final ImageProvider<Object>? peerAvatarImage;
   final bool showControls;
   final _CallControls controls;
   final VoidCallback onToggleControls;
@@ -129,7 +129,7 @@ class _AudioCallScaffold extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            _AudioCallBackground(calleeAvatarImage: calleeAvatarImage),
+            _AudioCallBackground(peerAvatarImage: peerAvatarImage),
             Positioned.fill(
               child: SafeArea(
                 child: Stack(
@@ -142,7 +142,7 @@ class _AudioCallScaffold extends StatelessWidget {
                         onMinimize: onMinimize,
                       ),
                     ),
-                    if (calleeAvatarImage == null)
+                    if (peerAvatarImage == null)
                       const Center(child: _CallPersonAvatar()),
                     _AnimatedControlsOverlay(
                       visible: showControls,
@@ -161,15 +161,15 @@ class _AudioCallScaffold extends StatelessWidget {
 }
 
 class _AudioCallBackground extends StatelessWidget {
-  const _AudioCallBackground({required this.calleeAvatarImage});
+  const _AudioCallBackground({required this.peerAvatarImage});
 
-  final ImageProvider<Object>? calleeAvatarImage;
+  final ImageProvider<Object>? peerAvatarImage;
 
   @override
   Widget build(BuildContext context) {
-    if (calleeAvatarImage != null) {
+    if (peerAvatarImage != null) {
       return Image(
-        image: calleeAvatarImage!,
+        image: peerAvatarImage!,
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,
