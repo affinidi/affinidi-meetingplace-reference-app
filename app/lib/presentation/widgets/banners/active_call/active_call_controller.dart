@@ -6,7 +6,8 @@ import 'package:meeting_place_chat/meeting_place_chat.dart'
         AudioVideoCallState,
         AudioVideoCallStatus,
         CallMediaType,
-        CallRole;
+        CallRole,
+        CallStatus;
 import 'package:riverpod/misc.dart' show KeepAliveLink;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -32,6 +33,8 @@ class ActiveCallController extends _$ActiveCallController {
   StreamSubscription<AudioVideoCallState>? _sessionStateSub;
   CallRole? _ownRole;
   CallChatItemHandler? _chatItemHandler;
+  ChatSessionService? _chatService;
+  bool _isAudioOnly = false;
   bool _isDisposed = false;
 
   // Pins this controller alive for the lifetime of a call so its instance
@@ -166,30 +169,12 @@ class ActiveCallController extends _$ActiveCallController {
     }
 
     _chatItemHandler?.dispose();
+    _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
+    _isAudioOnly = isAudioOnly;
     _chatItemHandler = CallChatItemHandler(
-      onInitiator: () {
-        final mediaType = isAudioOnly
-            ? CallMediaType.audio
-            : CallMediaType.video;
-        return ref
-            .read(chatSessionServiceProvider(channelDid).notifier)
-            .sendOutgoingCallMessage(mediaType: mediaType);
-      },
-      resolveItemId: ({required bool isCaller}) async {
-        if (!ref.mounted) return null;
-        final service = ref.read(
-          chatSessionServiceProvider(channelDid).notifier,
-        );
-        return isCaller
-            ? await service.resolveOutgoingCallChatItemId()
-            : await service.resolveIncomingCallChatItemId();
-      },
-      updateItem: (messageId, {required status, duration}) async {
-        if (!ref.mounted) return;
-        await ref
-            .read(chatSessionServiceProvider(channelDid).notifier)
-            .updateCallChatItem(messageId, status: status, duration: duration);
-      },
+      onInitiator: _sendOutgoingCallMessage,
+      resolveItemId: _resolveCallChatItemId,
+      updateItem: _updateCallChatItem,
       isDisposed: () => _isDisposed,
       logger: _logger,
     )..attach(session);
@@ -313,5 +298,28 @@ class ActiveCallController extends _$ActiveCallController {
       }
       clear();
     }
+  }
+
+  Future<String?> _sendOutgoingCallMessage() {
+    final mediaType = _isAudioOnly ? CallMediaType.audio : CallMediaType.video;
+    return _chatService!.sendOutgoingCallMessage(mediaType: mediaType);
+  }
+
+  Future<String?> _resolveCallChatItemId({required bool isCaller}) {
+    return isCaller
+        ? _chatService!.resolveOutgoingCallChatItemId()
+        : _chatService!.resolveIncomingCallChatItemId();
+  }
+
+  Future<void> _updateCallChatItem(
+    String messageId, {
+    required CallStatus status,
+    Duration? duration,
+  }) {
+    return _chatService!.updateCallChatItem(
+      messageId,
+      status: status,
+      duration: duration,
+    );
   }
 }
