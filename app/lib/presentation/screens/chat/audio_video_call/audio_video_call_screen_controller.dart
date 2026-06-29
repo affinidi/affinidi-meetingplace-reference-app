@@ -13,7 +13,6 @@ import '../../../../application/services/chat_service/chat_session_service.dart'
 import '../../../../application/services/contacts_service/contacts_service.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
-import '../../../../infrastructure/providers/active_group_call_provider.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/audio_video_call_plugin_provider.dart';
 import '../../../../infrastructure/providers/incoming_call_state_provider.dart';
@@ -417,8 +416,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
         callDuration: Duration(seconds: state.callDurationSeconds),
       );
     }
-
-    _syncActiveGroupCall(update.status ?? state.status);
   }
 
   /// The contact's channel DID, or contactId if not found.
@@ -537,20 +534,5 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
         selfParticipant: value.participants.where((p) => p.isSelf).firstOrNull,
       ),
     );
-  }
-
-  /// Tracks the active group call state, setting or clearing
-  /// the active group contact ID.
-  void _syncActiveGroupCall(AudioVideoCallStatus status) {
-    final notifier = ref.read(activeGroupCallProvider.notifier);
-    if (_isGroupContact && isConnectedCallStatus(status)) {
-      notifier.state = contactId;
-      return;
-    }
-    if (isEndedCallStatus(status)) {
-      if (ref.read(activeGroupCallProvider) == contactId) {
-        notifier.state = null;
-      }
-    }
   }
 }
