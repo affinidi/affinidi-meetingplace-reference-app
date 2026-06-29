@@ -225,7 +225,7 @@ return $default(_that.status,_that.isGroupContact,_that.peerName,_that.memberCon
 
 
 class _AudioVideoCallScreenState extends AudioVideoCallScreenState {
-   _AudioVideoCallScreenState({this.status = AudioVideoCallStatus.idle, this.isGroupContact = false, this.peerName = '', final  Map<String, ContactCard> memberContactCards = const {}, this.isAudioOnly = false, this.isMicEnabled = true, this.isCameraEnabled = true, this.isSpeakerEnabled = false, final  List<AudioVideoCallParticipant> participants = const [], this.callDurationSeconds = 0, this.hasHadPeer = false, this.session, this.errorCode, this.micPermissionError = false, this.cameraPermissionError = false, this.participantEvent, this.actionFailure, this.showControlsBar = true, this.focusedParticipantIndex, this.miniGridExpanded = false}): _memberContactCards = memberContactCards,_participants = participants,super._();
+   _AudioVideoCallScreenState({this.status = AudioVideoCallStatus.idle, this.isGroupContact = false, this.peerName = '', final  Map<String, ContactCard> memberContactCards = const {}, this.isAudioOnly = false, this.isMicEnabled = true, this.isCameraEnabled = true, this.isSpeakerEnabled = true, final  List<AudioVideoCallParticipant> participants = const [], this.callDurationSeconds = 0, this.hasHadPeer = false, this.session, this.errorCode, this.micPermissionError = false, this.cameraPermissionError = false, this.participantEvent, this.actionFailure, this.showControlsBar = true, this.focusedParticipantIndex, this.miniGridExpanded = false}): _memberContactCards = memberContactCards,_participants = participants,super._();
   
 
 @override@JsonKey() final  AudioVideoCallStatus status;

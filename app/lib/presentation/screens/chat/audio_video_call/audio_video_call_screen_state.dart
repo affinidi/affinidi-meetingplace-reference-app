@@ -52,7 +52,7 @@ abstract class AudioVideoCallScreenState with _$AudioVideoCallScreenState {
     @Default(false) bool isAudioOnly,
     @Default(true) bool isMicEnabled,
     @Default(true) bool isCameraEnabled,
-    @Default(false) bool isSpeakerEnabled,
+    @Default(true) bool isSpeakerEnabled,
     @Default([]) List<AudioVideoCallParticipant> participants,
     @Default(0) int callDurationSeconds,
     @Default(false) bool hasHadPeer,
