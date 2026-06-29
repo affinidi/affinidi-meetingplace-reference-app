@@ -208,7 +208,7 @@ class ChatScreen extends HookConsumerWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.call),
-                  tooltip: context.l10n.videoCallCalling,
+                  tooltip: context.l10n.callChatItemAudioCall,
                   onPressed: canInitiateCall
                       ? () => context.push(
                           AudioVideoCallRoute(
@@ -220,7 +220,7 @@ class ChatScreen extends HookConsumerWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.videocam),
-                  tooltip: context.l10n.videoCallTitle,
+                  tooltip: context.l10n.callChatItemVideoCall,
                   onPressed: canInitiateCall
                       ? () => context.push(
                           AudioVideoCallRoute(contactId: _contactId).location,
