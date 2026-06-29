@@ -1,9 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallState, CallRole;
+    show AudioVideoCallState, CallRole, CallStatus;
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_log_entry.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_chat_item_rules.dart';
 
 import 'mocks/mock_app_logger.dart';
 import 'mocks/mock_audio_video_call_session.dart';
@@ -29,6 +30,7 @@ void main() {
           onInitiator: () async => itemId,
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
+          isDisposed: () => false,
           logger: fakeLogger,
         );
 
@@ -48,6 +50,7 @@ void main() {
           },
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
+          isDisposed: () => false,
           logger: fakeLogger,
         );
 
@@ -65,6 +68,7 @@ void main() {
           onInitiator: () async => 'id',
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
+          isDisposed: () => false,
           logger: _LogCapture(logMessages),
         );
 
@@ -89,6 +93,7 @@ void main() {
           },
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
+          isDisposed: () => false,
           logger: fakeLogger,
         );
 
@@ -106,6 +111,7 @@ void main() {
           onInitiator: () async => 'id',
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
+          isDisposed: () => false,
           logger: _LogCapture(logMessages),
         );
 
@@ -133,6 +139,7 @@ void main() {
           },
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
+          isDisposed: () => false,
           logger: fakeLogger,
         );
 
@@ -155,6 +162,7 @@ void main() {
           onInitiator: () async => 'id',
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
+          isDisposed: () => false,
           logger: fakeLogger,
         );
 
@@ -169,12 +177,219 @@ void main() {
           },
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
+          isDisposed: () => false,
           logger: fakeLogger,
         );
         await mockSession.emitState(callerState);
 
         expect(callCount, 0);
       });
+    });
+  });
+
+  group('updateCallChatItemStatus', () {
+    late FakeAppLogger logger;
+
+    setUp(() {
+      logger = FakeAppLogger();
+    });
+
+    CallChatItemHandler makeHandler({
+      String? seedId,
+      bool isDisposed = false,
+      List<({String messageId, CallStatus status})>? calls,
+    }) {
+      final recorded = calls ?? [];
+      final h = CallChatItemHandler(
+        resolveItemId: ({required bool isCaller}) async => seedId,
+        updateItem: (id, {required status, duration}) async {
+          recorded.add((messageId: id, status: status));
+        },
+        isDisposed: () => isDisposed,
+        logger: logger,
+      );
+      if (seedId != null) h.seedCallChatItemId(seedId);
+      return h;
+    }
+
+    test('writes status when item id is available', () async {
+      final calls = <({String messageId, CallStatus status})>[];
+      final handler = makeHandler(seedId: 'msg-1', calls: calls);
+
+      handler.updateCallChatItemStatus(CallStatus.ringing);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls, hasLength(1));
+      expect(calls.single.status, CallStatus.ringing);
+    });
+
+    test('skips write when callChatItemEnded is true', () async {
+      final calls = <({String messageId, CallStatus status})>[];
+      final handler = makeHandler(seedId: 'msg-1', calls: calls);
+
+      handler.endCallChatItem(
+        outcome: CallEndOutcome.hungUp,
+        isCaller: true,
+        hasHadPeer: true,
+        callDuration: const Duration(seconds: 30),
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      final countAfterEnd = calls.length;
+      handler.updateCallChatItemStatus(CallStatus.ringing);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls.length, countAfterEnd);
+    });
+
+    test('skips write when isDisposed returns true', () async {
+      final calls = <({String messageId, CallStatus status})>[];
+      final handler = makeHandler(
+        seedId: 'msg-1',
+        isDisposed: true,
+        calls: calls,
+      );
+
+      handler.updateCallChatItemStatus(CallStatus.inProgress);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls, isEmpty);
+    });
+  });
+
+  group('endCallChatItem', () {
+    late FakeAppLogger logger;
+
+    setUp(() => logger = FakeAppLogger());
+
+    CallChatItemHandler makeHandler({
+      required List<({String messageId, CallStatus status, Duration? duration})>
+      calls,
+      String? seedId,
+      bool isDisposed = false,
+    }) {
+      final h = CallChatItemHandler(
+        resolveItemId: ({required bool isCaller}) async => seedId,
+        updateItem: (id, {required status, duration}) async {
+          calls.add((messageId: id, status: status, duration: duration));
+        },
+        isDisposed: () => isDisposed,
+        logger: logger,
+      );
+      if (seedId != null) h.seedCallChatItemId(seedId);
+      return h;
+    }
+
+    test('caller + hungUp + hasHadPeer writes ended with duration', () async {
+      final calls =
+          <({String messageId, CallStatus status, Duration? duration})>[];
+      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+
+      handler.endCallChatItem(
+        outcome: CallEndOutcome.hungUp,
+        isCaller: true,
+        hasHadPeer: true,
+        callDuration: const Duration(seconds: 45),
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls.single.status, CallStatus.ended);
+      expect(calls.single.duration, const Duration(seconds: 45));
+    });
+
+    test('caller + declined writes declined with no duration', () async {
+      final calls =
+          <({String messageId, CallStatus status, Duration? duration})>[];
+      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+
+      handler.endCallChatItem(
+        outcome: CallEndOutcome.declined,
+        isCaller: true,
+        hasHadPeer: false,
+        callDuration: Duration.zero,
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls.single.status, CallStatus.declined);
+      expect(calls.single.duration, isNull);
+    });
+
+    test('recipient + declined writes missed', () async {
+      final calls =
+          <({String messageId, CallStatus status, Duration? duration})>[];
+      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+
+      handler.endCallChatItem(
+        outcome: CallEndOutcome.declined,
+        isCaller: false,
+        hasHadPeer: false,
+        callDuration: Duration.zero,
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls.single.status, CallStatus.missed);
+    });
+
+    test('is idempotent — second call produces no additional write', () async {
+      final calls =
+          <({String messageId, CallStatus status, Duration? duration})>[];
+      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+
+      handler.endCallChatItem(
+        outcome: CallEndOutcome.hungUp,
+        isCaller: true,
+        hasHadPeer: true,
+        callDuration: const Duration(seconds: 10),
+      );
+      handler.endCallChatItem(
+        outcome: CallEndOutcome.hungUp,
+        isCaller: true,
+        hasHadPeer: true,
+        callDuration: const Duration(seconds: 10),
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(calls, hasLength(1));
+    });
+
+    test('sets callChatItemEnded immediately (before async resolves)', () {
+      final calls =
+          <({String messageId, CallStatus status, Duration? duration})>[];
+      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+
+      handler.endCallChatItem(
+        outcome: CallEndOutcome.hungUp,
+        isCaller: true,
+        hasHadPeer: true,
+        callDuration: Duration.zero,
+      );
+
+      expect(handler.callChatItemEnded, isTrue);
+    });
+  });
+
+  group('seedCallChatItemId', () {
+    test('sets the id and does not overwrite if called again', () {
+      final logger = FakeAppLogger();
+      final handler = CallChatItemHandler(
+        resolveItemId: ({required bool isCaller}) async => 'from-service',
+        updateItem: (_, {required status, duration}) async {},
+        isDisposed: () => false,
+        logger: logger,
+      );
+
+      handler.seedCallChatItemId('first');
+      handler.seedCallChatItemId('second');
+
+      expect(handler.callChatItemId, 'first');
     });
   });
 }

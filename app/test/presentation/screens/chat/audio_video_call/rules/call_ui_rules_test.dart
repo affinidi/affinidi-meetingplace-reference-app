@@ -40,38 +40,32 @@ void main() {
 
   group('isTerminalCallStatus', () {
     test('returns true for ended', () {
-      expect(isTerminalCallStatus(AudioVideoCallStatus.ended), isTrue);
+      expect(isEndedCallStatus(AudioVideoCallStatus.ended), isTrue);
     });
 
     test('returns true for disconnected', () {
-      expect(isTerminalCallStatus(AudioVideoCallStatus.disconnected), isTrue);
+      expect(isEndedCallStatus(AudioVideoCallStatus.disconnected), isTrue);
     });
 
     test('returns true for error', () {
-      expect(isTerminalCallStatus(AudioVideoCallStatus.error), isTrue);
+      expect(isEndedCallStatus(AudioVideoCallStatus.error), isTrue);
     });
 
     test('returns true for missed', () {
-      expect(isTerminalCallStatus(AudioVideoCallStatus.missed), isTrue);
+      expect(isEndedCallStatus(AudioVideoCallStatus.missed), isTrue);
     });
 
     test('returns true for declined', () {
-      expect(isTerminalCallStatus(AudioVideoCallStatus.declined), isTrue);
+      expect(isEndedCallStatus(AudioVideoCallStatus.declined), isTrue);
     });
 
     test('returns false for non-terminal statuses', () {
-      expect(isTerminalCallStatus(AudioVideoCallStatus.idle), isFalse);
-      expect(isTerminalCallStatus(AudioVideoCallStatus.connecting), isFalse);
-      expect(
-        isTerminalCallStatus(AudioVideoCallStatus.outgoingRinging),
-        isFalse,
-      );
-      expect(
-        isTerminalCallStatus(AudioVideoCallStatus.waitingForKeys),
-        isFalse,
-      );
-      expect(isTerminalCallStatus(AudioVideoCallStatus.connected), isFalse);
-      expect(isTerminalCallStatus(AudioVideoCallStatus.active), isFalse);
+      expect(isEndedCallStatus(AudioVideoCallStatus.idle), isFalse);
+      expect(isEndedCallStatus(AudioVideoCallStatus.connecting), isFalse);
+      expect(isEndedCallStatus(AudioVideoCallStatus.outgoingRinging), isFalse);
+      expect(isEndedCallStatus(AudioVideoCallStatus.waitingForKeys), isFalse);
+      expect(isEndedCallStatus(AudioVideoCallStatus.connected), isFalse);
+      expect(isEndedCallStatus(AudioVideoCallStatus.active), isFalse);
     });
   });
 
