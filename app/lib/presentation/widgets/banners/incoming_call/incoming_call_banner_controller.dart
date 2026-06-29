@@ -13,6 +13,7 @@ class IncomingCallBannerController extends _$IncomingCallBannerController {
 
   @override
   bool build() {
+    ref.read(incomingCallServiceProvider);
     ref.listen(incomingCallStateProvider, (previous, next) {
       if (next != null && next != previous) state = false;
     });
