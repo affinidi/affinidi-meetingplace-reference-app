@@ -117,7 +117,7 @@ class _ExpandableOverlay extends HookConsumerWidget {
       final bannerNotifier = ref.read(activeCallControllerProvider.notifier);
       final activeSession = bannerNotifier.session;
       if (activeSession != null) {
-        ref.read(pendingCallSessionProvider.notifier).state = activeSession;
+        ref.read(pendingCallSessionProvider.notifier).set(activeSession);
       }
       ref
           .read(navigatorProvider)

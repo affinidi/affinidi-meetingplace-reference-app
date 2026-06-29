@@ -1,7 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallState, AudioVideoCallStatus, CallRole, CallStatus;
+    show
+        AudioVideoCallSession,
+        AudioVideoCallState,
+        AudioVideoCallStatus,
+        CallRole,
+        CallStatus;
 import 'package:mpx_app_core/mpx_app_core.dart'
     show IncomingAudioVideoCallEvent;
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
@@ -55,7 +60,9 @@ ProviderContainer _makeContainer({
       audioVideoCallPluginProvider.overrideWith((ref) async => null),
       permissionServiceProvider.overrideWith((ref) => _FakePermissionService()),
       incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-      pendingCallSessionProvider.overrideWith((ref) => pendingSession),
+      pendingCallSessionProvider.overrideWith(
+        () => _FakePendingCallSession(initialSession: pendingSession),
+      ),
     ],
   );
   addTearDown(container.dispose);
@@ -116,7 +123,7 @@ void main() {
             (ref) => _FakePermissionService(),
           ),
           incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith((ref) => null),
+          pendingCallSessionProvider.overrideWith(_FakePendingCallSession.new),
         ],
       );
       addTearDown(container.dispose);
@@ -158,7 +165,9 @@ void main() {
             (ref) => _FakePermissionService(),
           ),
           incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith((ref) => session),
+          pendingCallSessionProvider.overrideWith(
+            () => _FakePendingCallSession(initialSession: session),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -200,7 +209,9 @@ void main() {
             (ref) => _FakePermissionService(),
           ),
           incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith((ref) => session),
+          pendingCallSessionProvider.overrideWith(
+            () => _FakePendingCallSession(initialSession: session),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -242,7 +253,7 @@ void main() {
             (ref) => _FakePermissionService(),
           ),
           incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith((ref) => null),
+          pendingCallSessionProvider.overrideWith(_FakePendingCallSession.new),
         ],
       );
       addTearDown(container.dispose);
@@ -354,7 +365,9 @@ void main() {
             (ref) => _FakePermissionService(),
           ),
           incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith((ref) => session),
+          pendingCallSessionProvider.overrideWith(
+            () => _FakePendingCallSession(initialSession: session),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -393,7 +406,9 @@ void main() {
             (ref) => _FakePermissionService(),
           ),
           incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith((ref) => session),
+          pendingCallSessionProvider.overrideWith(
+            () => _FakePendingCallSession(initialSession: session),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -438,4 +453,13 @@ class _FakePermissionService extends PermissionService {
 class _FakeIncomingCallState extends IncomingCallState {
   @override
   IncomingAudioVideoCallEvent? build() => null;
+}
+
+class _FakePendingCallSession extends PendingCallSession {
+  _FakePendingCallSession({this.initialSession});
+
+  final AudioVideoCallSession? initialSession;
+
+  @override
+  AudioVideoCallSession? build() => initialSession;
 }

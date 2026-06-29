@@ -129,7 +129,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     final restoredBanner = pendingSession != null ? banner : null;
     if (rawPendingSession != null) {
       Future.microtask(
-        () => ref.read(pendingCallSessionProvider.notifier).state = null,
+        () => ref.read(pendingCallSessionProvider.notifier).clear(),
       );
     }
     if (pendingSession != null) {
