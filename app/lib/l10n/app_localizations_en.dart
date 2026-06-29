@@ -1179,6 +1179,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalCamera => 'Camera';
 
   @override
+  String get switchCamera => 'Switch camera';
+
+  @override
   String get generalPhoto => 'Photo';
 
   @override

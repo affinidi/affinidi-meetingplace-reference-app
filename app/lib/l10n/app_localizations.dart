@@ -1738,6 +1738,12 @@ abstract class AppLocalizations {
   /// **'Camera'**
   String get generalCamera;
 
+  /// No description provided for @switchCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch camera'**
+  String get switchCamera;
+
   /// No description provided for @generalPhoto.
   ///
   /// In en, this message translates to:

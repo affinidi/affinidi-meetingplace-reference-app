@@ -192,7 +192,7 @@ class MediaScreen extends HookConsumerWidget {
               MaterialLocalizations.of(context).closeButtonTooltip;
           final galleryTooltip = l10n?.chooseFromGallery ?? 'Gallery';
           final cameraTooltip = l10n?.generalCamera ?? 'Camera';
-          final switchCameraTooltip = l10n?.generalCamera ?? 'Switch camera';
+          final switchCameraTooltip = l10n?.switchCamera ?? 'Switch camera';
 
           return Stack(
             fit: StackFit.expand,
