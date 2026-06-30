@@ -415,10 +415,12 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   }
 
   Future<String?> _resolveCallChatItemId({required bool isCaller}) async {
-    final bannerItemId = ref
-        .read(activeCallControllerProvider.notifier)
-        .callChatItemId;
-    if (bannerItemId != null) return bannerItemId;
+    if (!_isDisposed) {
+      final bannerItemId = ref
+          .read(activeCallControllerProvider.notifier)
+          .callChatItemId;
+      if (bannerItemId != null) return bannerItemId;
+    }
     final chatService = _chatService;
     if (chatService == null) return null;
     return isCaller
