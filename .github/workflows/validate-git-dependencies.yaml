@@ -1,5 +1,5 @@
-# NOTE: Remove this workflow once meeting_place_matrix_livekit is published to pub.dev
-# and the git override in pubspec.yaml is removed.
+# NOTE: Remove this workflow once all SDK packages are published to pub.dev
+# with matching functionality and git overrides in pubspec.yaml are removed.
 
 name: Validate Git Dependencies
 
@@ -27,23 +27,19 @@ jobs:
         env:
           EXPECTED_SHA: "986b44c1d56fe6ea2a47ea6e5db03713714b1916"
         run: |
-          CURRENT_SHA=$(grep -A 5 "meeting_place_matrix_livekit:" pubspec.yaml | grep "ref:" | sed 's/.*ref: *//' | tr -d ' ')
+          PACKAGES="meeting_place_chat meeting_place_control_plane meeting_place_core meeting_place_drift_repository meeting_place_matrix_livekit meeting_place_mediator"
           
-          if [ "$CURRENT_SHA" != "$EXPECTED_SHA" ]; then
-            echo "::error::Git SHA mismatch for meeting_place_matrix_livekit"
-            echo "::error::Expected: $EXPECTED_SHA"
-            echo "::error::Found: $CURRENT_SHA"
-            echo ""
-            echo "SECURITY: Git dependency SHA has changed."
-            echo "If intentional, update EXPECTED_SHA in this workflow and document the change."
-            echo "Repository: https://github.com/affinidi/affinidi-meetingplace-sdk-dart"
-            exit 1
-          fi
-
-      - name: Check if package is published
-        run: |
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://pub.dev/api/packages/meeting_place_matrix_livekit")
-          
-          if [ "$HTTP_CODE" = "200" ]; then
-            echo "::warning::meeting_place_matrix_livekit is now on pub.dev - remove git override"
-          fi
+          for pkg in $PACKAGES; do
+            CURRENT_SHA=$(grep -A 5 "$pkg:" pubspec.yaml | grep "ref:" | sed 's/.*ref: *//' | tr -d ' ')
+            
+            if [ -n "$CURRENT_SHA" ] && [ "$CURRENT_SHA" != "$EXPECTED_SHA" ]; then
+              echo "::error::Git SHA mismatch for $pkg"
+              echo "::error::Expected: $EXPECTED_SHA"
+              echo "::error::Found: $CURRENT_SHA"
+              echo ""
+              echo "SECURITY: Git dependency SHA has changed."
+              echo "If intentional, update EXPECTED_SHA in this workflow and document the change."
+              echo "Repository: https://github.com/affinidi/affinidi-meetingplace-sdk-dart"
+              exit 1
+            fi
+          done
