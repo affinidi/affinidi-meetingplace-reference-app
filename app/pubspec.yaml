@@ -60,14 +60,16 @@ dependencies:
   hooks_riverpod: ^3.0.3
   image: ^4.5.4
   image_picker: ^1.2.0
+  image_picker_android: ^0.8.13+19
+  image_picker_platform_interface: ^2.11.0
   intl: any
   intl_phone_number_input: ^0.7.5
   local_auth: ^2.3.0
-  meeting_place_chat: ^0.0.1-dev.48
+  meeting_place_chat: ^0.0.1-dev.49
   meeting_place_control_plane: ^0.0.1-dev.20
-  meeting_place_core: ^0.0.1-dev.42
-  meeting_place_credentials: ^0.0.1-dev.7
-  meeting_place_drift_repository: ^0.0.1-dev.48
+  meeting_place_core: ^0.0.1-dev.43
+  meeting_place_credentials: ^0.0.1-dev.8
+  meeting_place_drift_repository: ^0.0.1-dev.49
   mobile_scanner: ^7.2.0
   mpx_app_core:
     path: ../packages/app-core

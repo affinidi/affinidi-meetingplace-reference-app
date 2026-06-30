@@ -32,6 +32,7 @@ class MediaScreenController extends _$MediaScreenController {
   @override
   MediaScreenState build({
     required CameraLensDirection cameraLensDirection,
+    required MediaSelectionMode mediaSelectionMode,
     required bool useCamera,
     required bool useChatSemantics,
   }) {
@@ -76,7 +77,7 @@ class MediaScreenController extends _$MediaScreenController {
   }
 
   Future<void> pickFromGallery() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, unsupportedFileType: false);
     final picker = ref.read(imagePickerProvider);
 
     final environment = ref.read(environmentProvider);
@@ -84,20 +85,30 @@ class MediaScreenController extends _$MediaScreenController {
         ? environment.chatImageConfig
         : environment.profileImageConfig;
 
-    final picked = useChatSemantics
-        ? await picker.pickMedia(
-            maxHeight: imageConfig.imageMaxSize.toDouble(),
-            maxWidth: imageConfig.imageMaxSize.toDouble(),
-            imageQuality: imageConfig.qualityPercentage,
-          )
-        : await picker.pickImage(
-            source: ImageSource.gallery,
-            maxHeight: imageConfig.imageMaxSize.toDouble(),
-            maxWidth: imageConfig.imageMaxSize.toDouble(),
-            imageQuality: imageConfig.qualityPercentage,
-          );
+    final picked = switch ((useChatSemantics, mediaSelectionMode)) {
+      (true, MediaSelectionMode.imagesAndVideos) => await picker.pickMedia(
+        maxHeight: imageConfig.imageMaxSize.toDouble(),
+        maxWidth: imageConfig.imageMaxSize.toDouble(),
+        imageQuality: imageConfig.qualityPercentage,
+      ),
+      (_, MediaSelectionMode.videosOnly) => await picker.pickVideo(
+        source: ImageSource.gallery,
+      ),
+      _ => await picker.pickImage(
+        source: ImageSource.gallery,
+        maxHeight: imageConfig.imageMaxSize.toDouble(),
+        maxWidth: imageConfig.imageMaxSize.toDouble(),
+        imageQuality: imageConfig.qualityPercentage,
+      ),
+    };
 
     state = state.copyWith(isLoading: false);
+
+    if (picked != null && !_isSupportedSelection(picked)) {
+      _logger.warning('Selected unsupported media type', name: _logKey);
+      state = state.copyWith(unsupportedFileType: true);
+      return;
+    }
 
     if (picked != null && _isVideo(picked)) {
       final sizeBytes = await picked.length();
@@ -144,6 +155,29 @@ class MediaScreenController extends _$MediaScreenController {
     return path.endsWith('.mp4') ||
         path.endsWith('.mov') ||
         path.endsWith('.m4v');
+  }
+
+  bool _isImage(XFile file) {
+    final mimeType = file.mimeType?.toLowerCase();
+    if (mimeType != null) return mimeType.startsWith('image/');
+
+    final path = file.path.toLowerCase();
+    return path.endsWith('.jpg') ||
+        path.endsWith('.jpeg') ||
+        path.endsWith('.png') ||
+        path.endsWith('.gif') ||
+        path.endsWith('.webp') ||
+        path.endsWith('.heic') ||
+        path.endsWith('.heif') ||
+        path.endsWith('.bmp');
+  }
+
+  bool _isSupportedSelection(XFile file) {
+    return switch (mediaSelectionMode) {
+      MediaSelectionMode.imagesOnly => _isImage(file),
+      MediaSelectionMode.videosOnly => _isVideo(file),
+      MediaSelectionMode.imagesAndVideos => _isImage(file) || _isVideo(file),
+    };
   }
 
   String _filenameFor(XFile file) {

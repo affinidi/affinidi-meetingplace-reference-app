@@ -38,8 +38,9 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context,
-  ) async => null;
+    BuildContext context, {
+    TransportCapabilities? capabilities,
+  }) async => null;
 
   @override
   Widget renderAttachment({

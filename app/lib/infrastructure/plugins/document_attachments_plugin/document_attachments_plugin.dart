@@ -52,8 +52,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context,
-  ) async {
+    BuildContext context, {
+    TransportCapabilities? capabilities,
+  }) async {
     final result = await _filePickerPlatform.pickFiles(
       type: FileType.custom,
       allowedExtensions: allowedExtensions,

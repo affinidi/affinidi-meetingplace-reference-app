@@ -46,8 +46,9 @@ class CameraAttachmentsPlugin
   /// and optional text message, or `null` if cancelled or failed.
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context,
-  ) async {
+    BuildContext context, {
+    TransportCapabilities? capabilities,
+  }) async {
     if (!context.mounted) return null;
 
     final result = await Navigator.push<MediaReviewResult>(

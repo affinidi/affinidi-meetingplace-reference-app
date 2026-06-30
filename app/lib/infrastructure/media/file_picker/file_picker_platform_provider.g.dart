@@ -55,4 +55,4 @@ final class FilePickerPlatformProvider
 }
 
 String _$filePickerPlatformHash() =>
-    r'b2e8f4a1c9d3065748392af0be7c5d8e3f1a9043';
+    r'bc5c89646dc7f3627ce685a0d0918f7ee2522092';

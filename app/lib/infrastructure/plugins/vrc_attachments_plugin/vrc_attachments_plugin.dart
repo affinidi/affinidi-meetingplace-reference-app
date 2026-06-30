@@ -52,8 +52,9 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context,
-  ) async {
+    BuildContext context, {
+    TransportCapabilities? capabilities,
+  }) async {
     _onPickController.add(null);
     return null;
   }

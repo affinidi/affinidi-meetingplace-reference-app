@@ -135,6 +135,9 @@ class _ChatMediaOptions extends ConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     ref.watch(provider);
+    final capabilities = ref.watch(
+      provider.select((state) => state.capabilities),
+    );
     final availableAttachmentPlugins = ref.read(
       availableAttachmentPluginsProvider,
     );
@@ -174,7 +177,10 @@ class _ChatMediaOptions extends ConsumerWidget {
         pickContext = rootNav.context;
       }
 
-      final result = await plugin.pickAttachments(pickContext);
+      final result = await plugin.pickAttachments(
+        pickContext,
+        capabilities: capabilities,
+      );
 
       if (result != null) {
         await controller.sendAttachment(result.text, result.attachments);
