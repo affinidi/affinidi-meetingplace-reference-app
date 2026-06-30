@@ -20,7 +20,7 @@ IconData _resolveAttachmentIcon(AttachmentPluginIcon icon) => switch (icon) {
   AssetIcon() => Icons.attachment,
 };
 
-IconData _resolveMediaOptionIcon(AttachmentPlugin plugin) => switch (plugin) {
+IconData _resolveMediaOptionIcon(AttachmentPicker plugin) => switch (plugin) {
   VrcAttachmentsPlugin() => Icons.handshake,
   RCardAttachmentsPlugin() => Icons.credit_card,
   _ => _resolveAttachmentIcon(plugin.icon),
@@ -167,7 +167,7 @@ class _ChatMediaOptions extends ConsumerWidget {
         !isOobChat &&
         ref.watch(provider.select((state) => state.shouldEnableVrcAttachment));
 
-    void attachFromPlugin(AttachmentPlugin plugin) async {
+    void attachFromPlugin(AttachmentPicker plugin) async {
       if (!context.mounted) return;
 
       var pickContext = context;
@@ -178,8 +178,7 @@ class _ChatMediaOptions extends ConsumerWidget {
       }
 
       final result = await plugin.pickAttachments(
-        pickContext,
-        capabilities: capabilities,
+        AttachmentPickRequest(context: pickContext, capabilities: capabilities),
       );
 
       if (result != null) {
@@ -204,6 +203,7 @@ class _ChatMediaOptions extends ConsumerWidget {
 
     final items = <_ChatMediaOptionItem>[
       ...availableAttachmentPlugins
+          .whereType<AttachmentPicker>()
           .where((plugin) => plugin.includeInMediaOptions)
           .where(
             (plugin) =>

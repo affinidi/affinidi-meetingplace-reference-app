@@ -231,14 +231,16 @@ class _AttachmentWidget extends HookConsumerWidget {
       playbackClipId: _playbackClipId(controller),
     );
 
-    for (final plugin in plugins) {
+    for (final plugin in plugins.whereType<AttachmentRenderer>()) {
       if (plugin.supportsFormat(_attachment)) {
         final child = plugin.renderAttachment(
-          attachment: _attachment,
-          isFromMe: _isFromMe,
-          chatItemColor: _chatItemColor,
-          renderContext: renderContext,
-          download: downloadCallback,
+          AttachmentRenderRequest(
+            attachment: _attachment,
+            isFromMe: _isFromMe,
+            chatItemColor: _chatItemColor,
+            renderContext: renderContext,
+            download: downloadCallback,
+          ),
         );
         if (_attachment.isRCard) {
           return LayoutBuilder(

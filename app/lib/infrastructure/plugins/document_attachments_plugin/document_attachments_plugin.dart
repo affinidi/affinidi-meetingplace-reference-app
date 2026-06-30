@@ -18,7 +18,8 @@ import '../attachment_plugin_cache.dart';
 import 'document_attachment.dart';
 
 /// A plugin for handling document file attachments.
-final class DocumentAttachmentsPlugin implements AttachmentPlugin {
+final class DocumentAttachmentsPlugin
+    implements AttachmentPicker, AttachmentRenderer {
   DocumentAttachmentsPlugin({
     required this._cacheManager,
     required this._filePickerPlatform,
@@ -52,9 +53,9 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context, {
-    TransportCapabilities? capabilities,
-  }) async {
+    AttachmentPickRequest request,
+  ) async {
+    final context = request.context;
     final result = await _filePickerPlatform.pickFiles(
       type: FileType.custom,
       allowedExtensions: allowedExtensions,
@@ -98,32 +99,22 @@ final class DocumentAttachmentsPlugin implements AttachmentPlugin {
   }
 
   @override
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => _DocumentAttachmentWidget(
-    attachment: attachment,
-    cacheManager: _cacheManager,
-    cacheKey: cacheKeyForDocumentAttachment(attachment.id ?? ''),
-    download: download,
-  );
+  Widget renderAttachment(AttachmentRenderRequest request) =>
+      _DocumentAttachmentWidget(
+        attachment: request.attachment,
+        cacheManager: _cacheManager,
+        cacheKey: cacheKeyForDocumentAttachment(request.attachment.id ?? ''),
+        download: request.download,
+      );
 
   @override
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => _ListDocumentAttachmentsWidget(
-    attachments: attachments,
-    cacheManager: _cacheManager,
-    cacheKeyForAttachment: cacheKeyForDocumentAttachment,
-    download: download,
-  );
+  Widget renderAttachments(AttachmentListRenderRequest request) =>
+      _ListDocumentAttachmentsWidget(
+        attachments: request.attachments,
+        cacheManager: _cacheManager,
+        cacheKeyForAttachment: cacheKeyForDocumentAttachment,
+        download: request.download,
+      );
 
   @override
   bool supportsFormat(ChatAttachment attachment) =>

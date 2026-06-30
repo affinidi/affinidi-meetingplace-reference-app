@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
@@ -20,7 +18,7 @@ import 'video_attachment.dart';
 /// - Render image and video attachments in chat
 class GalleryAttachmentsPlugin
     with ImageAttachmentRendererMixin
-    implements AttachmentPlugin {
+    implements AttachmentPicker, AttachmentRenderer {
   GalleryAttachmentsPlugin({required this._cacheManager});
 
   static const _pluginName = 'mpx_gallery_attachment_plugin';
@@ -45,12 +43,12 @@ class GalleryAttachmentsPlugin
   /// and optional text, or `null` if cancelled or failed.
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context, {
-    TransportCapabilities? capabilities,
-  }) async {
+    AttachmentPickRequest request,
+  ) async {
+    final context = request.context;
     if (!context.mounted) return null;
 
-    final mediaSelectionMode = _mediaSelectionModeFor(capabilities);
+    final mediaSelectionMode = _mediaSelectionModeFor(request.capabilities);
     if (mediaSelectionMode == null) {
       return null;
     }
@@ -107,47 +105,6 @@ class GalleryAttachmentsPlugin
           pluginName: _pluginName,
         ),
       ],
-    );
-  }
-
-  /// Renders a single image attachment as a tappable card widget.
-  ///
-  /// Creates a 200x200 card with rounded corners that displays the image.
-  /// Tapping opens the image in full-screen view via the shared image widget.
-  @override
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) {
-    return super.renderAttachment(
-      attachment: attachment,
-      isFromMe: isFromMe,
-      chatItemColor: chatItemColor,
-      renderContext: renderContext,
-      download: download,
-    );
-  }
-
-  /// Renders multiple image attachments as a scrollable list.
-  ///
-  /// Each attachment is rendered using [renderAttachment] in a vertical
-  /// ListView with disabled scrolling physics.
-  @override
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) {
-    return super.renderAttachments(
-      attachments: attachments,
-      isFromMe: isFromMe,
-      chatItemColor: chatItemColor,
-      download: download,
     );
   }
 

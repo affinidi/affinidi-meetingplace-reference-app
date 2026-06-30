@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
@@ -70,7 +70,9 @@ void main() {
 
     group('pickAttachments', () {
       test('returns null when user cancels', () async {
-        final result = await plugin.pickAttachments(_FakeBuildContext());
+        final result = await plugin.pickAttachments(
+          AttachmentPickRequest(context: _FakeBuildContext()),
+        );
         expect(result, isNull);
       });
 
@@ -86,7 +88,7 @@ void main() {
         );
 
         final result = await plugin.pickAttachments(
-          _FakeBuildContext(mounted: false),
+          AttachmentPickRequest(context: _FakeBuildContext(mounted: false)),
         );
         expect(result, isNull);
       });
@@ -101,7 +103,9 @@ void main() {
           ),
         );
 
-        final result = await plugin.pickAttachments(_FakeBuildContext());
+        final result = await plugin.pickAttachments(
+          AttachmentPickRequest(context: _FakeBuildContext()),
+        );
         expect(result, isNull);
       });
 
@@ -117,7 +121,9 @@ void main() {
           ),
         );
 
-        final result = await plugin.pickAttachments(_FakeBuildContext());
+        final result = await plugin.pickAttachments(
+          AttachmentPickRequest(context: _FakeBuildContext()),
+        );
         expect(result, isNotNull);
         expect(result!.attachments.length, 1);
         final a = result.attachments.first.toAttachment();
@@ -137,7 +143,9 @@ void main() {
           ),
         );
 
-        final result = await plugin.pickAttachments(_FakeBuildContext());
+        final result = await plugin.pickAttachments(
+          AttachmentPickRequest(context: _FakeBuildContext()),
+        );
         expect(result, isNotNull);
         final a = result!.attachments.first.toAttachment();
         expect(a.mediaType, contains('wordprocessingml'));
@@ -155,7 +163,9 @@ void main() {
           ),
         );
 
-        final result = await plugin.pickAttachments(_FakeBuildContext());
+        final result = await plugin.pickAttachments(
+          AttachmentPickRequest(context: _FakeBuildContext()),
+        );
         expect(result, isNotNull);
         final a = result!.attachments.first.toAttachment();
         expect(a.mediaType, 'application/octet-stream');
@@ -168,7 +178,9 @@ void main() {
           filePickerPlatform: platform,
         );
 
-        await plugin.pickAttachments(_FakeBuildContext());
+        await plugin.pickAttachments(
+          AttachmentPickRequest(context: _FakeBuildContext()),
+        );
 
         final allowedExtensions = DocumentAttachmentsPlugin.allowedExtensions;
 
