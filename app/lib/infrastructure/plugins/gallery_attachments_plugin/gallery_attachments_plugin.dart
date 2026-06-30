@@ -108,22 +108,6 @@ class GalleryAttachmentsPlugin
     );
   }
 
-  /// Renders a single image attachment as a tappable card widget.
-  ///
-  /// Creates a 200x200 card with rounded corners that displays the image.
-  /// Tapping opens the image in full-screen view via the shared image widget.
-  @override
-  Widget renderAttachment(AttachmentRenderRequest request) =>
-      super.renderAttachment(request);
-
-  /// Renders multiple image attachments as a scrollable list.
-  ///
-  /// Each attachment is rendered using [renderAttachment] in a vertical
-  /// ListView with disabled scrolling physics.
-  @override
-  Widget renderAttachments(AttachmentListRenderRequest request) =>
-      super.renderAttachments(request);
-
   /// Checks if this plugin supports the given attachment format.
   ///
   /// Returns `true` if the attachment format matches this plugin's name.
