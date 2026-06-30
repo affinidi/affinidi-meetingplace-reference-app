@@ -31,6 +31,7 @@ import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attac
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
+import '../../../infrastructure/providers/incoming_call_state_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../contacts_service/contacts_service.dart';
@@ -39,6 +40,7 @@ import 'chat_protocol_router.dart';
 import 'chat_service.dart';
 import 'chat_service_state.dart';
 import 'delegates/call_chat_item_manager.dart';
+import 'delegates/call_chat_item_reconciler.dart';
 import 'delegates/chat_concierge_messenger.dart';
 import 'delegates/chat_group_manager.dart';
 import 'delegates/interfaces/concierge_messaging.dart';
@@ -88,6 +90,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late RCardManager _rCardManager;
   late VrcManager _vrcManager;
   late CallChatItemManager _callChatItemManager;
+  late CallChatItemReconciler _callChatItemReconciler;
 
   TimedAction? _presenceTimedAction;
   final Map<String, TypingTimer> _typingTimedActions = {};
@@ -151,6 +154,13 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       ensureInitialized: _ensureChatSdkInitialized,
       getChatSdk: () => _chatSDK,
       logger: _logger,
+    );
+    _callChatItemReconciler = CallChatItemReconciler(
+      manager: _callChatItemManager,
+      isCallLive: () =>
+          ref.read(incomingCallStateProvider)?.otherPartyChannelDid ==
+          _otherPartyPermanentDid,
+      upsertItem: upsertChatItem,
     );
     _groupManager = ChatGroupManager(ref: ref);
     _setupChatProtocolRouter();
@@ -355,6 +365,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           await _rCardManager.replayPendingRCard();
         }),
       );
+
+      unawaited(_callChatItemReconciler.onSessionStart());
 
       _logger.info('Chat session started', name: _logKey);
     } catch (error, stackTrace) {
@@ -717,6 +729,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       }
       if (chatItem is Message && !chatItem.isFromMe) {
         _clearMembersTypingActivity(chatItem.senderDid);
+        unawaited(_callChatItemReconciler.onStreamItem(chatItem));
       }
       if (chatItem is Message &&
           _isHumanZkpActive &&

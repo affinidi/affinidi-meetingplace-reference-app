@@ -25,7 +25,6 @@ class CallLifecycleHandler {
   CallLifecycleHandler({
     required this._logger,
     required this._channelDid,
-    required this._isGroupContact,
     required this._getState,
     required this._getPlugin,
     required this._getSession,
@@ -37,7 +36,6 @@ class CallLifecycleHandler {
 
   final AppLogger _logger;
   final String? _channelDid;
-  final bool _isGroupContact;
   final AudioVideoCallScreenState Function() _getState;
   final AudioVideoCallPlugin? Function() _getPlugin;
   final AudioVideoCallSession? Function() _getSession;
@@ -145,9 +143,9 @@ class CallLifecycleHandler {
     AudioVideoCallPlugin plugin,
     String channelDid,
   ) async {
-    final speakerphoneEnabled = _isGroupContact;
+    const speakerphoneEnabled = true;
     _onUpdate(
-      CallLifecycleUpdate(
+      const CallLifecycleUpdate(
         status: AudioVideoCallStatus.connecting,
         isSpeakerEnabled: speakerphoneEnabled,
       ),
