@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/media/image_picker/image_picker_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
 import 'package:mpx_flutter_reference_app/navigation/navigator.dart'
@@ -97,6 +100,26 @@ void main() {
 
       expect(container.read(cameraServiceProvider).controller, isNull);
       expect(disposeCount, 1);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'image picker provider enables Android photo picker when available',
+    (tester) async {
+      final platform = ImagePickerAndroid();
+      final previousPlatform = ImagePickerPlatform.instance;
+      ImagePickerPlatform.instance = platform;
+      addTearDown(() => ImagePickerPlatform.instance = previousPlatform);
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final subscription = container.listen(imagePickerProvider, (_, _) {});
+      addTearDown(subscription.close);
+
+      container.read(imagePickerProvider);
+
+      expect(platform.useAndroidPhotoPicker, isTrue);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );

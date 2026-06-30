@@ -12,7 +12,10 @@ abstract interface class AttachmentPlugin {
   /// itself will not attempt to pop any route.
   bool get dismissSheetBeforePicking => false;
 
-  Future<AttachmentPluginPickResult?> pickAttachments(BuildContext context);
+  Future<AttachmentPluginPickResult?> pickAttachments(
+    BuildContext context, {
+    TransportCapabilities? capabilities,
+  });
 
   Widget renderAttachment({
     required ChatAttachment attachment,

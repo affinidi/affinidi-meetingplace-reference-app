@@ -46,8 +46,9 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context,
-  ) async {
+    BuildContext context, {
+    TransportCapabilities? capabilities,
+  }) async {
     if (!context.mounted) return null;
 
     final identity = await Navigator.of(context, rootNavigator: true)

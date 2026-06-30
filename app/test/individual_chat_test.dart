@@ -304,7 +304,7 @@ void main() {
         final didcommChatSdk = FakeChatSdk(
           capabilities: const TransportCapabilities({
             ChatFeature.textMessaging,
-            ChatFeature.mediaAttachments,
+            ChatFeature.imageAttachments,
             ChatFeature.reactions,
           }),
         );

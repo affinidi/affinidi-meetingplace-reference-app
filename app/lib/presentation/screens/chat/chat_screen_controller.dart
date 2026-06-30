@@ -887,9 +887,13 @@ class ChatScreenController extends _$ChatScreenController
     String text,
     List<MessageAttachment> messageAttachment,
   ) async {
-    final supportsMedia =
-        state.capabilities?.supports(chat.ChatFeature.mediaAttachments) ??
+    final supportsImages =
+        state.capabilities?.supports(chat.ChatFeature.imageAttachments) ??
         false;
+    final supportsVideos =
+        state.capabilities?.supports(chat.ChatFeature.videoAttachments) ??
+        false;
+    final supportsMedia = supportsImages || supportsVideos;
     if (!supportsMedia) {
       _logger.warning(
         'Media attachments are not supported on this chat transport; '
@@ -1253,10 +1257,28 @@ extension ChatScreenControllerProviderSelectors
     );
   }
 
+  ProviderListenable<bool> get supportsVideos {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.videoAttachments) ??
+          false,
+    );
+  }
+
   ProviderListenable<bool> get supportsMedia {
     return select(
       (state) =>
-          state.capabilities?.supports(chat.ChatFeature.mediaAttachments) ??
+          (state.capabilities?.supports(chat.ChatFeature.imageAttachments) ??
+              false) ||
+          (state.capabilities?.supports(chat.ChatFeature.videoAttachments) ??
+              false),
+    );
+  }
+
+  ProviderListenable<bool> get supportsImages {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.imageAttachments) ??
           false,
     );
   }

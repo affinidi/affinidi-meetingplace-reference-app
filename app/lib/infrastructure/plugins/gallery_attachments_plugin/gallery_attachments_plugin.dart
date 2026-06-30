@@ -45,15 +45,25 @@ class GalleryAttachmentsPlugin
   /// and optional text, or `null` if cancelled or failed.
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context,
-  ) async {
+    BuildContext context, {
+    TransportCapabilities? capabilities,
+  }) async {
     if (!context.mounted) return null;
+
+    final mediaSelectionMode = _mediaSelectionModeFor(capabilities);
+    if (mediaSelectionMode == null) {
+      return null;
+    }
 
     final result = await Navigator.push<MediaReviewResult>(
       context,
       MaterialPageRoute(
         builder: (context) {
-          return const MediaScreen(useCamera: false, useChatSemantics: true);
+          return MediaScreen(
+            useCamera: false,
+            useChatSemantics: true,
+            mediaSelectionMode: mediaSelectionMode,
+          );
         },
       ),
     );
@@ -162,4 +172,20 @@ class GalleryAttachmentsPlugin
 
   @override
   bool get includeInMediaOptions => true;
+
+  MediaSelectionMode? _mediaSelectionModeFor(
+    TransportCapabilities? capabilities,
+  ) {
+    final supportsImages =
+        capabilities?.supports(ChatFeature.imageAttachments) ?? true;
+    final supportsVideos =
+        capabilities?.supports(ChatFeature.videoAttachments) ?? true;
+
+    return switch ((supportsImages, supportsVideos)) {
+      (true, true) => MediaSelectionMode.imagesAndVideos,
+      (true, false) => MediaSelectionMode.imagesOnly,
+      (false, true) => MediaSelectionMode.videosOnly,
+      (false, false) => null,
+    };
+  }
 }

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
 /// A fake ImagePicker that returns mock image data for testing.
 ///
@@ -18,7 +19,13 @@ class FakeImagePicker extends ImagePicker {
 
   /// Creates a default fake image picker with a 1x1 red pixel PNG.
   factory FakeImagePicker.withDefaultImage() {
-    return FakeImagePicker(xFileToReturn: XFile.fromData(defaultImageBytes));
+    return FakeImagePicker(
+      xFileToReturn: XFile.fromData(
+        defaultImageBytes,
+        name: 'image.png',
+        mimeType: 'image/png',
+      ),
+    );
   }
 
   /// A minimal 1x1 red pixel PNG image as bytes.
@@ -151,4 +158,42 @@ class FakeImagePicker extends ImagePicker {
 
     return _xFileToReturn;
   }
+}
+
+class FakeImagePickerPlatform extends ImagePickerPlatform {
+  FakeImagePickerPlatform({this.useAndroidPhotoPicker = false});
+
+  bool useAndroidPhotoPicker;
+
+  @override
+  Future<XFile?> getImageFromSource({
+    required ImageSource source,
+    ImagePickerOptions options = const ImagePickerOptions(),
+  }) async => null;
+
+  @override
+  Future<List<XFile>> getMedia({required MediaOptions options}) async => [];
+
+  @override
+  Future<List<XFile>> getMultiImageWithOptions({
+    MultiImagePickerOptions options = const MultiImagePickerOptions(),
+  }) async => [];
+
+  @override
+  Future<List<XFile>> getMultiVideoWithOptions({
+    MultiVideoPickerOptions options = const MultiVideoPickerOptions(),
+  }) async => [];
+
+  @override
+  Future<XFile?> getVideo({
+    required ImageSource source,
+    CameraDevice preferredCameraDevice = CameraDevice.rear,
+    Duration? maxDuration,
+  }) async => null;
+
+  @override
+  Future<LostDataResponse> getLostData() async => LostDataResponse.empty();
+
+  @override
+  bool supportsImageSource(ImageSource source) => true;
 }

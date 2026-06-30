@@ -1,5 +1,5 @@
 export 'package:meeting_place_chat/meeting_place_chat.dart'
-    show ChatAttachment, ChatAttachmentData;
+    show ChatAttachment, ChatAttachmentData, ChatFeature, TransportCapabilities;
 export 'package:meeting_place_core/meeting_place_core.dart'
     show AttachmentMediaType;
 

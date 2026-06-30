@@ -16,7 +16,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   /// Mirrors an individual Matrix chat: the common case exercised by tests.
   static const _defaultCapabilities = TransportCapabilities({
     ChatFeature.textMessaging,
-    ChatFeature.mediaAttachments,
+    ChatFeature.imageAttachments,
+    ChatFeature.videoAttachments,
     ChatFeature.documentAttachments,
     ChatFeature.voiceMessages,
     ChatFeature.reactions,

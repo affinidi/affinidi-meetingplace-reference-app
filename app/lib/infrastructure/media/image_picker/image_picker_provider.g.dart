@@ -48,4 +48,4 @@ final class ImagePickerProvider
   }
 }
 
-String _$imagePickerHash() => r'7877699a862be48e962306635347623c45e91971';
+String _$imagePickerHash() => r'1eed39a888ed6571612f2cdaf4d98c94ec1b22bf';

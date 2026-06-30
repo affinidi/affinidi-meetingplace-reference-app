@@ -1883,6 +1883,10 @@
 			}
 		}
 	},
+	"unsupportedFileType": "Unsupported file type.",
+	"@unsupportedFileType": {
+		"description": "Snackbar shown when the picker returns a file that is not an allowed image or video type"
+	},
 	"voiceMessagePermissionDenied": "Microphone permission is required to record voice messages.",
 	"@voiceMessagePermissionDenied": {
 		"description": "Snackbar shown when voice-message recording cannot start because microphone permission is denied"

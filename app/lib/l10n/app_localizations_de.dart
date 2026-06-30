@@ -2003,6 +2003,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get unsupportedFileType => 'Nicht unterstützter Dateityp.';
+
+  @override
   String get voiceMessagePermissionDenied =>
       'Zum Aufnehmen von Sprachnachrichten ist Mikrofonzugriff erforderlich.';
 

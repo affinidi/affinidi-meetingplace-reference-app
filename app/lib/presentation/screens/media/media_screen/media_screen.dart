@@ -51,6 +51,8 @@ class MediaReviewResult {
   final int? videoByteCount;
 }
 
+enum MediaSelectionMode { imagesOnly, videosOnly, imagesAndVideos }
+
 class MediaScreen extends HookConsumerWidget {
   const MediaScreen({
     super.key,
@@ -58,16 +60,19 @@ class MediaScreen extends HookConsumerWidget {
     this.useCamera = true,
     this.useChatSemantics = false,
     this.messageText,
+    this.mediaSelectionMode = MediaSelectionMode.imagesOnly,
   });
 
   final CameraLensDirection cameraLensDirection;
   final bool useCamera;
   final bool useChatSemantics;
   final String? messageText;
+  final MediaSelectionMode mediaSelectionMode;
 
   void _pickImage(WidgetRef ref, BuildContext context) async {
     final mediaScreenProvider = mediaScreenControllerProvider(
       cameraLensDirection: cameraLensDirection,
+      mediaSelectionMode: mediaSelectionMode,
       useCamera: useCamera,
       useChatSemantics: useChatSemantics,
     );
@@ -112,6 +117,7 @@ class MediaScreen extends HookConsumerWidget {
 
     final provider = mediaScreenControllerProvider(
       cameraLensDirection: cameraLensDirection,
+      mediaSelectionMode: mediaSelectionMode,
       useCamera: useCamera,
       useChatSemantics: useChatSemantics,
     );
@@ -154,6 +160,19 @@ class MediaScreen extends HookConsumerWidget {
       return null;
     }, [state.videoTooLargeMaxMb]);
 
+    useEffect(() {
+      if (state.unsupportedFileType) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.unsupportedFileType)),
+          );
+          navigator.pop(MediaReviewResult.empty());
+        });
+      }
+      return null;
+    }, [state.unsupportedFileType]);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Builder(
@@ -166,6 +185,7 @@ class MediaScreen extends HookConsumerWidget {
             final controller = ref.read(
               mediaScreenControllerProvider(
                 cameraLensDirection: cameraLensDirection,
+                mediaSelectionMode: mediaSelectionMode,
                 useCamera: true,
                 useChatSemantics: useChatSemantics,
               ).notifier,
