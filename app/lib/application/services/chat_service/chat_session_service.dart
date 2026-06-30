@@ -245,14 +245,31 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     if (_chatSDK != null) return;
     await _channelLocks.synchronized(_otherPartyPermanentDid, () async {
       if (_chatSDK != null) return;
+      if (!ref.mounted) return;
 
       final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+      if (!ref.mounted) return;
+
       final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
         _otherPartyPermanentDid,
       );
-      if (channel == null) return;
+      if (channel == null) {
+        _logger.warning(
+          '_ensureChatSdkInitialized: channel not found for '
+          '${_otherPartyPermanentDid.topAndTail()} — '
+          'SDK may not have synced yet',
+          name: _logKey,
+        );
+        return;
+      }
+      if (!ref.mounted) return;
 
       _chatSDK = await ref.read(chatSdkProvider(channel).future);
+      if (!ref.mounted) {
+        _chatSDK = null;
+        return;
+      }
+
       _conciergeMessenger = ChatConciergeMessenger(chatSdk: _chatSDK!);
       _isGroupChat =
           ref
@@ -269,6 +286,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
       if (_isGroupChat) {
         final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
+        if (!ref.mounted) return;
         if (group != null) {
           state = state.copyWith(group: group);
         }
