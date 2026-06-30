@@ -1,0 +1,49 @@
+# NOTE: Remove this workflow once meeting_place_matrix_livekit is published to pub.dev
+# and the git override in pubspec.yaml is removed.
+
+name: Validate Git Dependencies
+
+on:
+  pull_request:
+    paths:
+      - 'pubspec.yaml'
+      - '.github/workflows/validate-git-dependencies.yaml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'pubspec.yaml'
+
+jobs:
+  validate-git-sha:
+    name: Validate Git Dependency SHA
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate git dependency SHA
+        env:
+          EXPECTED_SHA: "986b44c1d56fe6ea2a47ea6e5db03713714b1916"
+        run: |
+          CURRENT_SHA=$(grep -A 5 "meeting_place_matrix_livekit:" pubspec.yaml | grep "ref:" | sed 's/.*ref: *//' | tr -d ' ')
+          
+          if [ "$CURRENT_SHA" != "$EXPECTED_SHA" ]; then
+            echo "::error::Git SHA mismatch for meeting_place_matrix_livekit"
+            echo "::error::Expected: $EXPECTED_SHA"
+            echo "::error::Found: $CURRENT_SHA"
+            echo ""
+            echo "SECURITY: Git dependency SHA has changed."
+            echo "If intentional, update EXPECTED_SHA in this workflow and document the change."
+            echo "Repository: https://github.com/affinidi/affinidi-meetingplace-sdk-dart"
+            exit 1
+          fi
+
+      - name: Check if package is published
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://pub.dev/api/packages/meeting_place_matrix_livekit")
+          
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "::warning::meeting_place_matrix_livekit is now on pub.dev - remove git override"
+          fi
