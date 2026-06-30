@@ -889,13 +889,11 @@ class ChatScreenController extends _$ChatScreenController
     String text,
     List<MessageAttachment> messageAttachment,
   ) async {
-    final supportsImages =
-        state.capabilities?.supports(chat.ChatFeature.imageAttachments) ??
-        false;
-    final supportsVideos =
-        state.capabilities?.supports(chat.ChatFeature.videoAttachments) ??
-        false;
-    final supportsMedia = supportsImages || supportsVideos;
+    final supportsMedia =
+        (state.capabilities?.supports(chat.ChatFeature.imageAttachments) ??
+            false) ||
+        (state.capabilities?.supports(chat.ChatFeature.videoAttachments) ??
+            false);
     if (!supportsMedia) {
       _logger.warning(
         'Media attachments are not supported on this chat transport; '

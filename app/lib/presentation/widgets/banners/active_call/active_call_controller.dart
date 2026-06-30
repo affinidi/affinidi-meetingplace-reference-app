@@ -9,6 +9,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart'
         CallRole,
         CallStatus;
 import 'package:riverpod/misc.dart' show KeepAliveLink;
+import 'package:riverpod/riverpod.dart' show ProviderSubscription;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../../application/services/chat_service/chat_session_service.dart';
@@ -34,6 +35,7 @@ class ActiveCallController extends _$ActiveCallController {
   CallRole? _ownRole;
   CallChatItemHandler? _chatItemHandler;
   ChatSessionService? _chatService;
+  ProviderSubscription<Object?>? _chatServiceSub;
   bool _isAudioOnly = false;
   bool _isDisposed = false;
 
@@ -55,6 +57,8 @@ class ActiveCallController extends _$ActiveCallController {
       _isDisposed = true;
       _durationTimer?.cancel();
       _sessionStateSub?.cancel();
+      _chatServiceSub?.close();
+      _chatServiceSub = null;
     });
     return null;
   }
@@ -170,6 +174,11 @@ class ActiveCallController extends _$ActiveCallController {
 
     _chatItemHandler?.dispose();
     _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
+    _chatServiceSub?.close();
+    _chatServiceSub = ref.listen<Object?>(
+      chatSessionServiceProvider(channelDid),
+      (_, _) {},
+    );
     _isAudioOnly = isAudioOnly;
     _chatItemHandler = CallChatItemHandler(
       onInitiator: _sendOutgoingCallMessage,
@@ -179,7 +188,7 @@ class ActiveCallController extends _$ActiveCallController {
       logger: _logger,
     )..attach(session);
     _sessionStateSub?.cancel();
-    _sessionStateSub = session.state.listen(_onSessionState);
+    _sessionStateSub = session.state.listen(_onSessionState, onDone: clear);
   }
 
   /// Removes the registered session when the call is fully torn down.

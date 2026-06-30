@@ -54,6 +54,12 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   // Drives end-status resolution; the chat item itself is gated by the emitter.
   bool _isCaller = false;
 
+  // Eagerly captured in build() so endCallChatItem can write the final call
+  // chat item even after this autoDispose controller is torn down. The banner
+  // controller keeps chatSessionServiceProvider alive via its own subscription,
+  // so this reference stays valid across disposal.
+  ChatSessionService? _chatService;
+
   late final CallChatItemHandler _chatItemHandler;
   late final CallLifecycleHandler _lifecycleHandler;
   late final CallMediaToggleHandler _mediaHandler;
@@ -69,6 +75,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   AudioVideoCallScreenState build(String contactId) {
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     _isGroupContact = contact?.isGroup ?? false;
+    final channelDid = contact?.channelDid ?? contactId;
+    _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
     final incomingEvent = ref.read(incomingCallStateProvider);
     final expectedOtherPartyDid = contact?.channelDid ?? contactId;
     final isAcceptedIncomingForThisScreen =
@@ -82,7 +90,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     _chatItemHandler = CallChatItemHandler(
       resolveItemId: _resolveCallChatItemId,
       updateItem: _updateCallChatItem,
-      isDisposed: () => _isDisposed,
+      isDisposed: () => _chatService == null,
       logger: _logger,
     );
 
@@ -407,15 +415,15 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   }
 
   Future<String?> _resolveCallChatItemId({required bool isCaller}) async {
-    final bannerItemId =
-        ref.read(activeCallControllerProvider.notifier).callChatItemId;
+    final bannerItemId = ref
+        .read(activeCallControllerProvider.notifier)
+        .callChatItemId;
     if (bannerItemId != null) return bannerItemId;
-    if (_isDisposed) return null;
-    final channelDid = _channelDid;
-    if (channelDid == null) return null;
-    return ref
-        .read(chatSessionServiceProvider(channelDid).notifier)
-        .resolveIncomingCallChatItemId();
+    final chatService = _chatService;
+    if (chatService == null) return null;
+    return isCaller
+        ? chatService.resolveOutgoingCallChatItemId()
+        : chatService.resolveIncomingCallChatItemId();
   }
 
   Future<void> _updateCallChatItem(
@@ -423,11 +431,13 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     required CallStatus status,
     Duration? duration,
   }) async {
-    final channelDid = _channelDid;
-    if (channelDid == null) return;
-    await ref
-        .read(chatSessionServiceProvider(channelDid).notifier)
-        .updateCallChatItem(messageId, status: status, duration: duration);
+    final chatService = _chatService;
+    if (chatService == null) return;
+    await chatService.updateCallChatItem(
+      messageId,
+      status: status,
+      duration: duration,
+    );
   }
 
   /// Applies lifecycle transitions: attaches sessions, clears incoming state,
@@ -454,6 +464,17 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     if (update.endOutcome != null) {
       _chatItemHandler.endCallChatItem(
         outcome: update.endOutcome!,
+        isCaller: _isCaller,
+        hasHadPeer: state.hasHadPeer,
+        callDuration: Duration(seconds: state.callDurationSeconds),
+      );
+    } else if (isEndedCallStatus(update.status ?? state.status)) {
+      ref.read(activeCallControllerProvider.notifier).stopTimer();
+      _chatItemHandler.endCallChatItem(
+        outcome: resolveCallEndOutcome(
+          lastStatus: _lastStatus,
+          hasHadPeer: state.hasHadPeer,
+        ),
         isCaller: _isCaller,
         hasHadPeer: state.hasHadPeer,
         callDuration: Duration(seconds: state.callDurationSeconds),
@@ -521,6 +542,10 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       activeCallControllerProvider.notifier,
     );
     if (!value.isVisible) {
+      final bannerItemId = activeCallController.callChatItemId;
+      if (bannerItemId != null) {
+        _chatItemHandler.seedCallChatItemId(bannerItemId);
+      }
       activeCallController.clear();
       return;
     }

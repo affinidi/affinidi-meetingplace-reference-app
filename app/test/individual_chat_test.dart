@@ -306,6 +306,7 @@ void main() {
           capabilities: const TransportCapabilities({
             ChatFeature.textMessaging,
             ChatFeature.imageAttachments,
+            ChatFeature.videoAttachments,
             ChatFeature.reactions,
           }),
         );
