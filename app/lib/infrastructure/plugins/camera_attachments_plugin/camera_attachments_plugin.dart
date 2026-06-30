@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -21,7 +19,7 @@ import 'camera_image_attachment.dart';
 /// - Supports full-screen image viewing via the shared image attachment widget
 class CameraAttachmentsPlugin
     with ImageAttachmentRendererMixin
-    implements AttachmentPlugin {
+    implements AttachmentPicker, AttachmentRenderer {
   CameraAttachmentsPlugin({required this._cacheManager});
 
   static const _pluginName = 'mpx_camera_attachment_plugin';
@@ -46,9 +44,9 @@ class CameraAttachmentsPlugin
   /// and optional text message, or `null` if cancelled or failed.
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context, {
-    TransportCapabilities? capabilities,
-  }) async {
+    AttachmentPickRequest request,
+  ) async {
+    final context = request.context;
     if (!context.mounted) return null;
 
     final result = await Navigator.push<MediaReviewResult>(
@@ -93,42 +91,16 @@ class CameraAttachmentsPlugin
   /// Creates a 200x200 card with rounded corners that displays the image.
   /// Tapping opens the image in full-screen view via the shared image widget.
   @override
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) {
-    return super.renderAttachment(
-      attachment: attachment,
-      isFromMe: isFromMe,
-      chatItemColor: chatItemColor,
-      renderContext: renderContext,
-      download: download,
-    );
-  }
+  Widget renderAttachment(AttachmentRenderRequest request) =>
+      super.renderAttachment(request);
 
   /// Renders multiple image attachments as a scrollable list.
   ///
   /// Each attachment is rendered using [renderAttachment] in a vertical
   /// ListView with disabled scrolling physics.
   @override
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) {
-    return super.renderAttachments(
-      attachments: attachments,
-      isFromMe: isFromMe,
-      chatItemColor: chatItemColor,
-      renderContext: renderContext,
-      download: download,
-    );
-  }
+  Widget renderAttachments(AttachmentListRenderRequest request) =>
+      super.renderAttachments(request);
 
   /// Returns `true` if the attachment format matches this plugin.
   @override

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
@@ -12,8 +10,8 @@ import 'voice_attachment_widget.dart';
 /// Renders voice-message attachments recorded or received in chat.
 ///
 /// Voice notes are captured from the chat input rather than the attachment
-/// sheet, so [pickAttachments] is not used.
-final class AudioAttachmentsPlugin implements AttachmentPlugin {
+/// sheet, so this plugin only implements [AttachmentRenderer].
+final class AudioAttachmentsPlugin implements AttachmentRenderer {
   AudioAttachmentsPlugin({
     required this._cacheManager,
     required this._localVoiceStore,
@@ -28,64 +26,44 @@ final class AudioAttachmentsPlugin implements AttachmentPlugin {
       '$pluginName:$attachmentId';
 
   @override
-  bool get dismissSheetBeforePicking => false;
-
-  @override
   bool get isPlatformSupported => false;
 
   @override
-  bool get includeInMediaOptions => false;
+  Widget renderAttachment(AttachmentRenderRequest request) =>
+      VoiceAttachmentWidget(
+        attachment: request.attachment,
+        isFromMe: request.isFromMe,
+        chatItemColor: request.chatItemColor,
+        cacheManager: _cacheManager,
+        cacheKey: cacheKeyForAudioAttachment(request.attachment.id ?? ''),
+        localVoiceStore: _localVoiceStore,
+        avatarImage: request.renderContext?.avatarImage,
+        playbackScopeId: request.renderContext?.playbackScopeId,
+        playbackClipId: request.renderContext?.playbackClipId,
+        download: request.download,
+      );
 
   @override
-  Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context, {
-    TransportCapabilities? capabilities,
-  }) async => null;
-
-  @override
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => VoiceAttachmentWidget(
-    attachment: attachment,
-    isFromMe: isFromMe,
-    chatItemColor: chatItemColor,
-    cacheManager: _cacheManager,
-    cacheKey: cacheKeyForAudioAttachment(attachment.id ?? ''),
-    localVoiceStore: _localVoiceStore,
-    avatarImage: renderContext?.avatarImage,
-    playbackScopeId: renderContext?.playbackScopeId,
-    playbackClipId: renderContext?.playbackClipId,
-    download: download,
-  );
-
-  @override
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => ListView.builder(
-    physics: const NeverScrollableScrollPhysics(),
-    shrinkWrap: true,
-    itemCount: attachments.length,
-    itemBuilder: (context, index) => VoiceAttachmentWidget(
-      attachment: attachments[index],
-      isFromMe: isFromMe,
-      chatItemColor: chatItemColor,
-      cacheManager: _cacheManager,
-      cacheKey: cacheKeyForAudioAttachment(attachments[index].id ?? ''),
-      localVoiceStore: _localVoiceStore,
-      avatarImage: renderContext?.avatarImage,
-      playbackScopeId: renderContext?.playbackScopeId,
-      playbackClipId: renderContext?.playbackClipId,
-      download: download,
-    ),
-  );
+  Widget renderAttachments(AttachmentListRenderRequest request) =>
+      ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: request.attachments.length,
+        itemBuilder: (context, index) => VoiceAttachmentWidget(
+          attachment: request.attachments[index],
+          isFromMe: request.isFromMe,
+          chatItemColor: request.chatItemColor,
+          cacheManager: _cacheManager,
+          cacheKey: cacheKeyForAudioAttachment(
+            request.attachments[index].id ?? '',
+          ),
+          localVoiceStore: _localVoiceStore,
+          avatarImage: request.renderContext?.avatarImage,
+          playbackScopeId: request.renderContext?.playbackScopeId,
+          playbackClipId: request.renderContext?.playbackClipId,
+          download: request.download,
+        ),
+      );
 
   @override
   bool supportsFormat(ChatAttachment attachment) =>

@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
@@ -26,7 +24,7 @@ import 'vrc_attachment_state.dart';
 
 part 'select_vrc_identity_screen.dart';
 
-class VrcAttachmentsPlugin implements AttachmentPlugin {
+class VrcAttachmentsPlugin implements AttachmentPicker, AttachmentRenderer {
   VrcAttachmentsPlugin();
 
   final StreamController<void> _onPickController =
@@ -52,9 +50,8 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context, {
-    TransportCapabilities? capabilities,
-  }) async {
+    AttachmentPickRequest request,
+  ) async {
     _onPickController.add(null);
     return null;
   }
@@ -64,24 +61,20 @@ class VrcAttachmentsPlugin implements AttachmentPlugin {
       attachment.format == VrcAttachment.pluginFormat;
 
   @override
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => _VrcAttachmentWidget(attachment: attachment, isFromMe: isFromMe);
+  Widget renderAttachment(AttachmentRenderRequest request) =>
+      _VrcAttachmentWidget(
+        attachment: request.attachment,
+        isFromMe: request.isFromMe,
+      );
 
   @override
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => attachments.isEmpty
+  Widget renderAttachments(AttachmentListRenderRequest request) =>
+      request.attachments.isEmpty
       ? const SizedBox.shrink()
-      : _VrcAttachmentWidget(attachment: attachments.first, isFromMe: isFromMe);
+      : _VrcAttachmentWidget(
+          attachment: request.attachments.first,
+          isFromMe: request.isFromMe,
+        );
 }
 
 class _VrcAttachmentWidget extends ConsumerWidget {

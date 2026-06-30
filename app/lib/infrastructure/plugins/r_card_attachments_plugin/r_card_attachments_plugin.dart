@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -23,7 +21,7 @@ import 'r_card_attachment.dart';
 part 'r_card_attachment_widget.dart';
 part 'select_r_card_identity_screen.dart';
 
-class RCardAttachmentsPlugin implements AttachmentPlugin {
+class RCardAttachmentsPlugin implements AttachmentPicker, AttachmentRenderer {
   RCardAttachmentsPlugin({required this._cacheManager});
 
   final _startRCardController = StreamController<Identity>.broadcast();
@@ -46,9 +44,9 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
 
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context, {
-    TransportCapabilities? capabilities,
-  }) async {
+    AttachmentPickRequest request,
+  ) async {
+    final context = request.context;
     if (!context.mounted) return null;
 
     final identity = await Navigator.of(context, rootNavigator: true)
@@ -67,36 +65,25 @@ class RCardAttachmentsPlugin implements AttachmentPlugin {
       attachment.format == RCardAttachment.pluginFormat;
 
   @override
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => _RCardAttachmentWidget(
-    attachment: attachment,
-    cacheManager: _cacheManager,
-    chatItemColor: chatItemColor,
-    isFromMe: isFromMe,
-  );
+  Widget renderAttachment(AttachmentRenderRequest request) =>
+      _RCardAttachmentWidget(
+        attachment: request.attachment,
+        cacheManager: _cacheManager,
+        chatItemColor: request.chatItemColor,
+        isFromMe: request.isFromMe,
+      );
 
   @override
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) {
-    if (attachments.isEmpty) return const SizedBox.shrink();
+  Widget renderAttachments(AttachmentListRenderRequest request) {
+    if (request.attachments.isEmpty) return const SizedBox.shrink();
     return Column(
-      children: attachments
+      children: request.attachments
           .map(
             (attachment) => _RCardAttachmentWidget(
               attachment: attachment,
               cacheManager: _cacheManager,
-              chatItemColor: chatItemColor,
-              isFromMe: isFromMe,
+              chatItemColor: request.chatItemColor,
+              isFromMe: request.isFromMe,
             ),
           )
           .toList(),

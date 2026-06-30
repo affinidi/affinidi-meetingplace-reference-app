@@ -1,9 +1,8 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
-class FakeUnsupportedRCardPlugin implements AttachmentPlugin {
+class FakeUnsupportedRCardPlugin
+    implements AttachmentPicker, AttachmentRenderer {
   @override
   AttachmentPluginIcon get icon => const EmojiIcon('💳');
 
@@ -18,30 +17,19 @@ class FakeUnsupportedRCardPlugin implements AttachmentPlugin {
 
   @override
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context, {
-    TransportCapabilities? capabilities,
-  }) async => null;
+    AttachmentPickRequest request,
+  ) async => null;
 
   @override
   bool supportsFormat(ChatAttachment attachment) => false;
 
   @override
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => const SizedBox.shrink();
+  Widget renderAttachment(AttachmentRenderRequest request) =>
+      const SizedBox.shrink();
 
   @override
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => const SizedBox.shrink();
+  Widget renderAttachments(AttachmentListRenderRequest request) =>
+      const SizedBox.shrink();
 
   @override
   bool get includeInMediaOptions => true;

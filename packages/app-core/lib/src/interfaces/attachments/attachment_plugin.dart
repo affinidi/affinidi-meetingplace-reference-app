@@ -7,39 +7,69 @@ import '../../../mpx_app_core.dart';
 abstract interface class AttachmentPlugin {
   AttachmentPluginIcon get icon;
 
+  String localizedName(BuildContext context);
+
+  bool get isPlatformSupported => true;
+}
+
+abstract interface class AttachmentPicker implements AttachmentPlugin {
   /// When `true`, the consumer must dismiss the sheet (or any overlay that
   /// launched the plugin) **before** calling [pickAttachments]. The plugin
   /// itself will not attempt to pop any route.
   bool get dismissSheetBeforePicking => false;
 
   Future<AttachmentPluginPickResult?> pickAttachments(
-    BuildContext context, {
-    TransportCapabilities? capabilities,
-  });
-
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  });
-
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  });
-
-  bool supportsFormat(ChatAttachment format);
-
-  String localizedName(BuildContext context);
-
-  bool get isPlatformSupported => true;
+    AttachmentPickRequest request,
+  );
 
   bool get includeInMediaOptions => true;
+}
+
+abstract interface class AttachmentRenderer implements AttachmentPlugin {
+  bool supportsFormat(ChatAttachment format);
+
+  Widget renderAttachment(AttachmentRenderRequest request);
+
+  Widget renderAttachments(AttachmentListRenderRequest request);
+}
+
+class AttachmentPickRequest {
+  const AttachmentPickRequest({required this.context, this.capabilities});
+
+  final BuildContext context;
+  final TransportCapabilities? capabilities;
+}
+
+class AttachmentRenderRequest {
+  const AttachmentRenderRequest({
+    required this.attachment,
+    required this.isFromMe,
+    required this.chatItemColor,
+    this.renderContext,
+    this.download,
+  });
+
+  final ChatAttachment attachment;
+  final bool isFromMe;
+  final Color chatItemColor;
+  final AttachmentRenderContext? renderContext;
+  final Future<Uint8List> Function(ChatAttachment)? download;
+}
+
+class AttachmentListRenderRequest {
+  const AttachmentListRenderRequest({
+    required this.attachments,
+    required this.isFromMe,
+    required this.chatItemColor,
+    this.renderContext,
+    this.download,
+  });
+
+  final List<ChatAttachment> attachments;
+  final bool isFromMe;
+  final Color chatItemColor;
+  final AttachmentRenderContext? renderContext;
+  final Future<Uint8List> Function(ChatAttachment)? download;
 }
 
 class AttachmentRenderContext {

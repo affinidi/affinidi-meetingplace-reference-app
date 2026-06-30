@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
@@ -20,20 +18,15 @@ mixin ImageAttachmentRendererMixin {
     return attachment.mediaType?.toLowerCase().startsWith('video/') ?? false;
   }
 
-  Widget renderAttachment({
-    required ChatAttachment attachment,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) {
+  Widget renderAttachment(AttachmentRenderRequest request) {
+    final attachment = request.attachment;
     if (_isVideoAttachment(attachment)) {
       return VideoAttachmentWidget(
         attachment: attachment,
         cacheManager: attachmentRendererCacheManager,
         cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
-        playbackScopeId: renderContext?.playbackScopeId,
-        download: download,
+        playbackScopeId: request.renderContext?.playbackScopeId,
+        download: request.download,
       );
     }
 
@@ -41,27 +34,21 @@ mixin ImageAttachmentRendererMixin {
       attachment: attachment,
       cacheManager: attachmentRendererCacheManager,
       cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
-      download: download,
+      download: request.download,
     );
   }
 
-  Widget renderAttachments({
-    required List<ChatAttachment> attachments,
-    required bool isFromMe,
-    required Color chatItemColor,
-    AttachmentRenderContext? renderContext,
-    Future<Uint8List> Function(ChatAttachment)? download,
-  }) => Column(
-    children: List.generate(attachments.length, (index) {
-      final attachment = attachments[index];
+  Widget renderAttachments(AttachmentListRenderRequest request) => Column(
+    children: List.generate(request.attachments.length, (index) {
+      final attachment = request.attachments[index];
       if (_isVideoAttachment(attachment)) {
         return VideoAttachmentWidget(
           key: ValueKey(attachment.id ?? index),
           attachment: attachment,
           cacheManager: attachmentRendererCacheManager,
           cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
-          playbackScopeId: renderContext?.playbackScopeId,
-          download: download,
+          playbackScopeId: request.renderContext?.playbackScopeId,
+          download: request.download,
         );
       }
 
@@ -70,7 +57,7 @@ mixin ImageAttachmentRendererMixin {
         attachment: attachment,
         cacheManager: attachmentRendererCacheManager,
         cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
-        download: download,
+        download: request.download,
       );
     }, growable: false),
   );
