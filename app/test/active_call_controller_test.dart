@@ -67,6 +67,8 @@ void _registerSession(
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   setUpAll(() {
     AppLogger.initialize(
       File('${Directory.systemTemp.path}/active_call_controller_test.log'),
