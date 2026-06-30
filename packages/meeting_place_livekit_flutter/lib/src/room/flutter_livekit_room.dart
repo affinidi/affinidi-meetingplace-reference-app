@@ -131,7 +131,15 @@ class FlutterLiveKitRoom implements LiveKitRoom {
   @override
   Future<void> setCameraEnabled(bool enabled) async {
     _logger.info('setCameraEnabled: enabled=$enabled', name: _logKey);
-    await _room?.localParticipant?.setCameraEnabled(enabled);
+    try {
+      await _room?.localParticipant?.setCameraEnabled(enabled);
+    } catch (e) {
+      _logger.warning(
+        'setCameraEnabled: failed to ${enabled ? 'enable' : 'disable'} camera — '
+        'device may not have a camera (e.g. simulator): $e',
+        name: _logKey,
+      );
+    }
   }
 
   @override
