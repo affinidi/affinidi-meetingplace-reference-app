@@ -161,6 +161,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           ref.read(incomingCallStateProvider)?.otherPartyChannelDid ==
           _otherPartyPermanentDid,
       upsertItem: upsertChatItem,
+      ringTimeout: ref.read(environmentProvider).incomingCallRingTimeout,
     );
     _groupManager = ChatGroupManager(ref: ref);
     _setupChatProtocolRouter();

@@ -36,11 +36,13 @@ void main() {
       ],
     );
 
-    CallChatItemReconciler makeReconciler() => CallChatItemReconciler(
-      manager: manager,
-      isCallLive: () => callLive,
-      upsertItem: upserted.add,
-    );
+    CallChatItemReconciler makeReconciler({Duration? ringTimeout}) =>
+        CallChatItemReconciler(
+          manager: manager,
+          isCallLive: () => callLive,
+          upsertItem: upserted.add,
+          ringTimeout: ringTimeout,
+        );
 
     setUp(() {
       fakeChatSdk = FakeChatSdk();
@@ -196,6 +198,88 @@ void main() {
       );
     });
 
+    group('ringTimeout', () {
+      test('onSessionStart skips items younger than ringTimeout', () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'young',
+            isFromMe: false,
+            status: CallStatus.calling,
+            dateCreated: DateTime.now().toUtc().subtract(
+              const Duration(seconds: 20),
+            ),
+          ),
+        ];
+
+        await makeReconciler(
+          ringTimeout: const Duration(seconds: 60),
+        ).onSessionStart();
+
+        expect(upserted, isEmpty);
+      });
+
+      test(
+        'onSessionStart marks items older than ringTimeout as missed',
+        () async {
+          fakeChatSdk.sessionMessages = [
+            callMessage(
+              messageId: 'old',
+              isFromMe: false,
+              status: CallStatus.calling,
+              dateCreated: DateTime.now().toUtc().subtract(
+                const Duration(seconds: 90),
+              ),
+            ),
+          ];
+
+          await makeReconciler(
+            ringTimeout: const Duration(seconds: 60),
+          ).onSessionStart();
+
+          expect(upserted, hasLength(1));
+          expect(upserted.first.messageId, 'old');
+        },
+      );
+
+      test('onStreamItem skips items younger than ringTimeout', () async {
+        final young = callMessage(
+          messageId: 'young-stream',
+          isFromMe: false,
+          status: CallStatus.calling,
+          dateCreated: DateTime.now().toUtc().subtract(
+            const Duration(seconds: 20),
+          ),
+        );
+        fakeChatSdk.sessionMessages = [young];
+
+        await makeReconciler(
+          ringTimeout: const Duration(seconds: 60),
+        ).onStreamItem(young);
+
+        expect(upserted, isEmpty);
+      });
+
+      test(
+        'onStreamItem marks items older than ringTimeout as missed',
+        () async {
+          final old = callMessage(
+            messageId: 'old-stream',
+            isFromMe: false,
+            status: CallStatus.calling,
+            dateCreated: DateTime.now().toUtc().subtract(
+              const Duration(seconds: 90),
+            ),
+          );
+          fakeChatSdk.sessionMessages = [old];
+
+          await makeReconciler(
+            ringTimeout: const Duration(seconds: 60),
+          ).onStreamItem(old);
+
+          expect(upserted, hasLength(1));
+          expect(upserted.first.messageId, 'old-stream');
+        },
+      );
+    });
   });
 }
-
