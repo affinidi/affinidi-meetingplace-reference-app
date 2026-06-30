@@ -106,7 +106,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     _lifecycleHandler = CallLifecycleHandler(
       logger: _logger,
       channelDid: _channelDid,
-      isGroupContact: _isGroupContact,
       getState: () => state,
       getPlugin: () => _plugin,
       getSession: () => _session,

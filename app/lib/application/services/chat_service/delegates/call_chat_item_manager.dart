@@ -16,6 +16,8 @@ class CallChatItemManager {
   final MeetingPlaceChatSDK? Function() getChatSdk;
   final AppLogger logger;
 
+  /// Sends an outgoing call message with the specified [mediaType].
+  /// Returns the message ID on success, or `null` if send failed.
   Future<String?> sendOutgoingCallMessage({
     required CallMediaType mediaType,
   }) async {
@@ -60,12 +62,18 @@ class CallChatItemManager {
     }
   }
 
+  /// Returns the ID of the latest incoming call item that has not yet been
+  /// settled (not ended, missed, or declined), or `null` if none exist.
   Future<String?> resolveIncomingCallChatItemId() =>
       _resolveCallChatItemId(fromMe: false);
 
+  /// Returns the ID of the latest outgoing call item that has not yet been
+  /// settled (not ended, missed, or declined), or `null` if none exist.
   Future<String?> resolveOutgoingCallChatItemId() =>
       _resolveCallChatItemId(fromMe: true);
 
+  /// Finds the latest call item from the specified sender direction that is
+  /// not yet settled (not ended, missed, or declined).
   Future<String?> _resolveCallChatItemId({required bool fromMe}) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -104,6 +112,8 @@ class CallChatItemManager {
     }
   }
 
+  /// Marks the latest pending incoming call item as `missed`. A no-op if
+  /// no pending incoming call item exists.
   Future<void> markCallAsMissed() async {
     final messageId = await resolveIncomingCallChatItemId();
     if (messageId == null) {
@@ -116,6 +126,106 @@ class CallChatItemManager {
     await updateCallChatItem(messageId, status: CallStatus.missed);
   }
 
+  /// Whether [message] is an incoming call item still in a non-final status
+  /// (`calling`/`ringing`) and therefore eligible to be reconciled to
+  /// `missed`.
+  bool isStaleIncomingCall(Message message) {
+    if (message.isFromMe) return false;
+    final attachment = message.attachments.firstWhereOrNull(
+      CallMetadata.isCall,
+    );
+    if (attachment == null) return false;
+    final call = CallMetadata.maybeOf(attachment);
+    return call != null &&
+        (call.status == CallStatus.calling ||
+            call.status == CallStatus.ringing);
+  }
+
+  /// Marks the call item with [messageId] as `missed` and returns the
+  /// persisted [Message] after the update, or `null` if the item is no
+  /// longer found.
+  Future<Message?> markItemMissed(String messageId) async {
+    await updateCallChatItem(messageId, status: CallStatus.missed);
+    final chatSdk = getChatSdk();
+    if (chatSdk == null) return null;
+    final updated = await chatSdk.getMessageById(messageId);
+    return updated is Message ? updated : null;
+  }
+
+  /// Returns message IDs of incoming call items stuck in non-final status
+  /// (`calling`/`ringing`) that should be reconciled to `missed`.
+  /// If [liveIncomingCall] is true, excludes the most recent item to avoid
+  /// marking an actively ringing call as missed.
+  /// If [olderThan] is provided, only items whose [Message.dateCreated] is
+  /// older than that duration are included — items within the window may still
+  /// be genuinely ringing (e.g. after an app restart).
+  Future<List<String>> findStaleIncomingCallItemIds({
+    required bool liveIncomingCall,
+    Duration? olderThan,
+  }) async {
+    final messages = await findStaleIncomingCallMessages(
+      liveIncomingCall: liveIncomingCall,
+      olderThan: olderThan,
+    );
+    return messages.map((m) => m.messageId).toList();
+  }
+
+  /// Returns incoming call items stuck in non-final status
+  /// (`calling`/`ringing`). If [liveIncomingCall] is true, excludes the most
+  /// recent item. If [olderThan] is provided, only items older than that
+  /// duration are included.
+  Future<List<Message>> findStaleIncomingCallMessages({
+    required bool liveIncomingCall,
+    Duration? olderThan,
+  }) async {
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk == null) {
+      logger.warning(
+        'findStaleIncomingCallMessages: chat SDK unavailable',
+        name: _logKey,
+      );
+      return const [];
+    }
+    try {
+      final items = await chatSdk.messages;
+      final now = DateTime.now().toUtc();
+      final stale =
+          items
+              .whereType<Message>()
+              .where(isStaleIncomingCall)
+              .where(
+                (m) =>
+                    olderThan == null ||
+                    now.difference(m.dateCreated.toUtc()) > olderThan,
+              )
+              .toList()
+            ..sort((a, b) => a.dateCreated.compareTo(b.dateCreated));
+
+      if (stale.isEmpty) return const [];
+
+      final reconcilable = liveIncomingCall
+          ? stale.sublist(0, stale.length - 1)
+          : stale;
+      logger.info(
+        'findStaleIncomingCallMessages: ${reconcilable.length} stale item(s)',
+        name: _logKey,
+      );
+      return reconcilable;
+    } catch (e, stackTrace) {
+      logger.error(
+        'findStaleIncomingCallMessages failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return const [];
+    }
+  }
+
+  /// Updates the call item with [messageId] to the specified [status] and
+  /// optional [duration]. Persists the change to the SDK. Logs a warning if
+  /// the message is not found or does not contain a call attachment.
   Future<void> updateCallChatItem(
     String messageId, {
     required CallStatus status,
