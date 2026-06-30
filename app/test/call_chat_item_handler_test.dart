@@ -156,6 +156,58 @@ void main() {
       });
     });
 
+    group('attach onDone', () {
+      test(
+        'logs warning when stream closes before ownRole is determined',
+        () async {
+          final warnings = <String>[];
+          handler = CallChatItemHandler(
+            onInitiator: () async => 'id',
+            resolveItemId: ({required bool isCaller}) async => null,
+            updateItem: (_, {required status, duration}) async {},
+            isDisposed: () => false,
+            logger: _WarningCapture(warnings),
+          );
+
+          handler.attach(mockSession);
+          mockSession.dispose();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+
+          expect(
+            warnings,
+            contains(
+              'attach: Session stream ended before ownRole was determined; '
+              'outgoing call chat item will not be emitted',
+            ),
+          );
+        },
+      );
+
+      test(
+        'does not invoke onInitiator when stream closes before ownRole',
+        () async {
+          var callCount = 0;
+          handler = CallChatItemHandler(
+            onInitiator: () async {
+              callCount++;
+              return 'id';
+            },
+            resolveItemId: ({required bool isCaller}) async => null,
+            updateItem: (_, {required status, duration}) async {},
+            isDisposed: () => false,
+            logger: fakeLogger,
+          );
+
+          handler.attach(mockSession);
+          mockSession.dispose();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+
+          expect(callCount, 0);
+          expect(handler.callChatItemId, isNull);
+        },
+      );
+    });
+
     group('lifecycle', () {
       test('dispose cancels subscription', () async {
         handler = CallChatItemHandler(
@@ -405,6 +457,43 @@ class _LogCapture implements AppLogger {
 
   @override
   void warning(String message, {String name = '', dynamic error}) {}
+
+  @override
+  void error(
+    String message, {
+    String name = '',
+    dynamic error,
+    StackTrace? stackTrace,
+  }) {}
+
+  @override
+  void debug(String message, {String name = ''}) {}
+
+  @override
+  void clearLogs() {}
+
+  @override
+  String get logFilePath => '';
+
+  @override
+  Stream<AppLogEntry> get logStream => const Stream.empty();
+
+  @override
+  List<AppLogEntry> get logs => [];
+}
+
+/// Logger that captures only warning messages.
+class _WarningCapture implements AppLogger {
+  _WarningCapture(this.messages);
+
+  final List<String> messages;
+
+  @override
+  void info(String message, {String name = ''}) {}
+
+  @override
+  void warning(String message, {String name = '', dynamic error}) =>
+      messages.add(message);
 
   @override
   void error(

@@ -58,7 +58,6 @@ import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/banners/active_call/active_call_controller.dart';
-import '../../widgets/banners/group_call_join_banner.dart';
 import '../../widgets/bottom_sheet_menu.dart';
 import '../../widgets/images/default_profile_image.dart';
 import '../../widgets/info_banner.dart';
@@ -263,7 +262,6 @@ class _ChatSection extends StatelessWidget {
             _NotificationsUnavailableWarning(_contactId),
             _VrcBanner(_contactId),
             if (showHumanZkp) ChatZkpOverlay(contactId: _contactId),
-            GroupCallJoinBanner(contactId: _contactId),
             Expanded(child: _ChatMessageList(_contactId)),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),

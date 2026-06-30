@@ -62,7 +62,14 @@ class CallChatItemHandler {
   void attach(AudioVideoCallSession session) {
     if (_onInitiator == null) return;
     _sub?.cancel();
-    _sub = session.state.listen(_onSessionState);
+    _sub = session.state.listen(
+      _onSessionState,
+      onDone: () => _logger.warning(
+        'attach: Session stream ended before ownRole was determined; '
+        'outgoing call chat item will not be emitted',
+        name: _logKey,
+      ),
+    );
   }
 
   /// Cancels the session subscription. Safe to call multiple times.

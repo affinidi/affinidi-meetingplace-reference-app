@@ -536,6 +536,32 @@ void main() {
       expect(container.read(activeCallControllerProvider), isNull);
     });
   });
+
+  group('session stream onDone', () {
+    test(
+      'clears state when session stream closes without a terminal status',
+      () async {
+        final container = _makeContainer();
+        final ctrl = container.read(activeCallControllerProvider.notifier);
+        final session = MockAudioVideoCallSession();
+
+        ctrl.registerSession(
+          session,
+          channelDid: _kChannelDid,
+          isAudioOnly: false,
+          initialStatus: AudioVideoCallStatus.connecting,
+          peerName: _kPeerName,
+          isMicEnabled: true,
+          isMinimized: true,
+        );
+
+        session.dispose();
+        await _pumpAsync();
+
+        expect(container.read(activeCallControllerProvider), isNull);
+      },
+    );
+  });
 }
 
 AudioVideoCallParticipant _remotePeer() {
