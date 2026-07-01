@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/incoming_call_state_provider.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/incoming_call/incoming_call_banner_controller.dart';
 
 import '../../../../mocks/fake_app_logger.dart';
@@ -92,7 +92,7 @@ void main() {
       expect(container.read(incomingCallBannerControllerProvider), true);
 
       container
-          .read(incomingCallStateProvider.notifier)
+          .read(incomingCallProvider.notifier)
           .set(
             const IncomingAudioVideoCallEvent(
               callId: 'call-456',
@@ -114,7 +114,7 @@ void main() {
         expect(container.read(incomingCallBannerControllerProvider), true);
 
         container
-            .read(incomingCallStateProvider.notifier)
+            .read(incomingCallProvider.notifier)
             .set(
               const IncomingAudioVideoCallEvent(
                 callId: 'call-789',

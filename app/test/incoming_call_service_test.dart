@@ -6,10 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/audio_video_call_plugin_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/incoming_call_state_provider.dart';
 
 import 'mocks/fake_chat_session_service.dart';
 
@@ -77,7 +78,7 @@ void main() {
       await pumpEventQueue();
 
       expect(
-        container.read(incomingCallStateProvider)?.mediaType,
+        container.read(incomingCallProvider).eventOrNull?.mediaType,
         CallMediaType.audio,
       );
     });
@@ -95,7 +96,10 @@ void main() {
       plugin.emitIncoming(event);
       await pumpEventQueue();
 
-      expect(container.read(incomingCallStateProvider), same(event));
+      expect(
+        container.read(incomingCallProvider),
+        IncomingCallState.ringing(event),
+      );
     });
   });
 
@@ -120,7 +124,7 @@ void main() {
             .accept(callId: 'call-1');
         await pumpEventQueue();
 
-        expect(container.read(incomingCallStateProvider), isNotNull);
+        expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
         expect(plugin.acceptedCallIds, ['call-1']);
         expect(plugin.declinedCallIds, isEmpty);
       },
@@ -145,7 +149,7 @@ void main() {
           .decline(callId: 'call-1');
       await pumpEventQueue();
 
-      expect(container.read(incomingCallStateProvider), isNull);
+      expect(container.read(incomingCallProvider).eventOrNull, isNull);
       expect(plugin.declinedCallIds, ['call-1']);
       expect(plugin.acceptedCallIds, isEmpty);
     });
@@ -162,11 +166,11 @@ void main() {
 
         plugin.emitIncoming(_event());
         async.flushMicrotasks();
-        expect(container.read(incomingCallStateProvider), isNotNull);
+        expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
 
         async.elapse(const Duration(seconds: 15));
 
-        expect(container.read(incomingCallStateProvider), isNull);
+        expect(container.read(incomingCallProvider).eventOrNull, isNull);
         expect(plugin.declinedCallIds, ['call-1']);
 
         container.dispose();

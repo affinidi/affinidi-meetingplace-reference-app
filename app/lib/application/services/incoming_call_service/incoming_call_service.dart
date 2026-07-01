@@ -6,8 +6,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/audio_video_call_plugin_provider.dart';
-import '../../../infrastructure/providers/incoming_call_state_provider.dart';
 import '../chat_service/chat_session_service.dart';
+import 'incoming_call_notifier.dart';
+import 'incoming_call_state.dart';
 
 part 'incoming_call_service.g.dart';
 
@@ -28,8 +29,8 @@ class IncomingCallService extends _$IncomingCallService {
       fireImmediately: true,
     );
 
-    ref.listen(incomingCallStateProvider, (_, next) {
-      if (next == null) _cancelRingTimer();
+    ref.listen(incomingCallProvider, (_, next) {
+      if (next is IncomingCallIdle) _cancelRingTimer();
     });
 
     ref.onDispose(_cancelRingTimer);
@@ -50,7 +51,8 @@ class IncomingCallService extends _$IncomingCallService {
   void decline({required String callId}) {
     _logger.info('Declining call: $callId', name: _logKey);
     final channelDid = ref
-        .read(incomingCallStateProvider)
+        .read(incomingCallProvider)
+        .eventOrNull
         ?.otherPartyChannelDid;
     _clearRingState();
     _ensurePlugin((plugin) => unawaited(plugin.declineCall(callId: callId)));
@@ -74,15 +76,15 @@ class IncomingCallService extends _$IncomingCallService {
 
   void _onCallCancelled(String callId) {
     _logger.info('Caller cancelled call: $callId', name: _logKey);
-    final incomingState = ref.read(incomingCallStateProvider);
-    if (incomingState?.callId != callId) {
+    final incomingEvent = ref.read(incomingCallProvider).eventOrNull;
+    if (incomingEvent?.callId != callId) {
       _logger.info(
         'Ignore cancelled: active callId does not match $callId',
         name: _logKey,
       );
       return;
     }
-    final channelDid = incomingState?.otherPartyChannelDid;
+    final channelDid = incomingEvent?.otherPartyChannelDid;
     _clearRingState();
     if (channelDid != null) {
       _markCallAsMissed(channelDid);
@@ -96,7 +98,7 @@ class IncomingCallService extends _$IncomingCallService {
 
   void _onIncomingCall(IncomingAudioVideoCallEvent event) {
     _logger.info('Incoming call received: ${event.callId}', name: _logKey);
-    ref.read(incomingCallStateProvider.notifier).set(event);
+    ref.read(incomingCallProvider.notifier).set(event);
     _startRingTimer(event.callId);
   }
 
@@ -110,7 +112,8 @@ class IncomingCallService extends _$IncomingCallService {
           name: _logKey,
         );
         final channelDid = ref
-            .read(incomingCallStateProvider)
+            .read(incomingCallProvider)
+            .eventOrNull
             ?.otherPartyChannelDid;
         _clearRingState();
         _ensurePlugin(
@@ -124,7 +127,7 @@ class IncomingCallService extends _$IncomingCallService {
   void _clearRingState() {
     _logger.warning('Clearing incoming call state', name: _logKey);
     _cancelRingTimer();
-    ref.read(incomingCallStateProvider.notifier).clear();
+    ref.read(incomingCallProvider.notifier).clear();
   }
 
   void _cancelRingTimer() {

@@ -5,9 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/incoming_call_state_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/navigation/navigator.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
@@ -16,13 +17,13 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/banners/incoming_
 import 'fakes/fake_contacts_service.dart';
 import 'mocks/mock_navigator.dart';
 
-class _StubIncomingCallState extends IncomingCallState {
+class _StubIncomingCallState extends IncomingCallNotifier {
   _StubIncomingCallState(this._event);
 
   final IncomingAudioVideoCallEvent _event;
 
   @override
-  IncomingAudioVideoCallEvent? build() => _event;
+  IncomingCallState build() => IncomingCallState.ringing(_event);
 }
 
 class _RecordingIncomingCallService extends IncomingCallService {
@@ -67,9 +68,7 @@ void main() {
     overrides: [
       navigatorProvider.overrideWithValue(navigator),
       contactsServiceProvider.overrideWith(FakeContactsService.new),
-      incomingCallStateProvider.overrideWith(
-        () => _StubIncomingCallState(event),
-      ),
+      incomingCallProvider.overrideWith(() => _StubIncomingCallState(event)),
       incomingCallServiceProvider.overrideWith(() => callService),
     ],
     child: MaterialApp(
