@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallSession, AudioVideoCallState;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 /// Fake [AudioVideoCallSession] for testing that allows manual state emission.
 class MockAudioVideoCallSession implements AudioVideoCallSession {

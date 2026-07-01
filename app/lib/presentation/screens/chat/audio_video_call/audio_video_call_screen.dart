@@ -4,15 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show
-        AudioVideoCallErrorCode,
-        AudioVideoCallParticipant,
-        AudioVideoCallSession,
-        AudioVideoCallStatus,
-        CallMediaType;
 import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart'
     show AudioVideoCallView;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../application/services/contacts_service/contacts_service.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
@@ -27,14 +21,14 @@ import 'audio_video_call_screen_state.dart';
 import 'call_controls_bar.dart';
 import 'rules/call_ui_rules.dart';
 
-part 'call_top_bar.dart';
-part 'call_overlays.dart';
-part 'call_error_scaffold.dart';
 part 'audio_call_screen.dart';
-part 'video_call_screen.dart';
-part 'call_no_answer_screen.dart';
-part 'call_participant_grid.dart';
 part 'call_draggable_mini_grid.dart';
+part 'call_error_scaffold.dart';
+part 'call_no_answer_screen.dart';
+part 'call_overlays.dart';
+part 'call_participant_grid.dart';
+part 'call_top_bar.dart';
+part 'video_call_screen.dart';
 
 class AudioVideoCallScreen extends HookConsumerWidget {
   const AudioVideoCallScreen({

@@ -1,5 +1,4 @@
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallParticipant, AudioVideoCallStatus, CallMediaType;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 /// Single source of truth for what the call UI shows at every stage.
 ///

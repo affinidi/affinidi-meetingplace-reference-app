@@ -2695,7 +2695,7 @@ abstract class AppLocalizations {
   /// No description provided for @humanZkp.
   ///
   /// In en, this message translates to:
-  /// **'Human ZKP'**
+  /// **'Human Zero Knowledge Proof'**
   String get humanZkp;
 
   /// No description provided for @humanZkpAbbreviated.

@@ -5,13 +5,7 @@ import 'package:fake_async/fake_async.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show
-        AudioVideoCallParticipant,
-        AudioVideoCallSession,
-        AudioVideoCallState,
-        AudioVideoCallStatus,
-        CallRole;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';

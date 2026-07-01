@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallState, CallRole, CallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_log_entry.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';

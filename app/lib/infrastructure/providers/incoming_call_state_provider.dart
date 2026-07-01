@@ -1,4 +1,4 @@
-import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'incoming_call_state_provider.g.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart' show CallMediaType;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart'
+    show CallMediaType;
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../domain/models/contacts/contact_type.dart';

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';

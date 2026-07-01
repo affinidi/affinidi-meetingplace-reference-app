@@ -1,12 +1,6 @@
 import 'dart:async';
 
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show
-        AudioVideoCallPlugin,
-        AudioVideoCallSession,
-        AudioVideoCallStatus,
-        CallRole,
-        CallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/chat_service/chat_session_service.dart';
@@ -21,7 +15,6 @@ import '../../../../infrastructure/providers/pending_call_session_provider.dart'
 import '../../../../infrastructure/services/permission_service/permission_service.dart';
 import '../../../widgets/banners/active_call/active_call_controller.dart';
 import '../../../widgets/banners/active_call/active_call_state.dart';
-
 import 'audio_video_call_screen_state.dart';
 import 'audio_video_call_state_update.dart';
 import 'call_lifecycle_update.dart';

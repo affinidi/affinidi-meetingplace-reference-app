@@ -1,12 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show
-        AudioVideoCallParticipant,
-        AudioVideoCallState,
-        AudioVideoCallStatus,
-        CallRole,
-        CallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';

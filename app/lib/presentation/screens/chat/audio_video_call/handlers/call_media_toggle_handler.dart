@@ -1,5 +1,4 @@
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallSession;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../../infrastructure/loggers/app_logger/app_logger.dart';

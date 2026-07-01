@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart';
-import 'package:meeting_place_matrix_livekit/meeting_place_matrix_livekit.dart';
-import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../configuration/environment.dart';
 import 'app_logger_provider.dart';

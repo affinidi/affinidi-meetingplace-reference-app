@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:ssi/ssi.dart';
 
 import 'fake_publish_offer_result.dart';
 
-class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
+class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   FakeMeetingPlaceSDK({
     this._shouldFailToRegisterPushToken = false,
     this._offerToReturn,

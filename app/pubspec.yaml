@@ -72,7 +72,7 @@ dependencies:
   meeting_place_drift_repository: ^0.0.1-dev.50
   meeting_place_livekit_flutter: 
     path: ../packages/meeting_place_livekit_flutter
-  meeting_place_matrix_livekit: ^1.0.0
+  meeting_place_matrix: ^0.0.1-dev.0
   mobile_scanner: ^7.2.0
   mpx_app_core:
     path: ../packages/app-core

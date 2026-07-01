@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';

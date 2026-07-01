@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart' show CallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_chat_item_rules.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_custom_colors.dart';

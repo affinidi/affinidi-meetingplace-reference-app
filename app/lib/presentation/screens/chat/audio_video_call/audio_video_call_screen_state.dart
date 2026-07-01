@@ -1,10 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show
-        AudioVideoCallErrorCode,
-        AudioVideoCallParticipant,
-        AudioVideoCallSession,
-        AudioVideoCallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../domain/models/contact_card/contact_card.dart';
 

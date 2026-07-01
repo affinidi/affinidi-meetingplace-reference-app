@@ -282,7 +282,7 @@ Color _rCardBubbleColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
 bool _isCallOnlyMessage(chat.ChatItem chatItem) {
   if (chatItem is! chat.Message) return false;
   final attachments = chatItem.attachments;
-  return attachments.length == 1 && chat.CallMetadata.isCall(attachments.first);
+  return attachments.length == 1 && CallMetadata.isCall(attachments.first);
 }
 
 bool _isRCardOnlyMessage(chat.ChatItem chatItem) {

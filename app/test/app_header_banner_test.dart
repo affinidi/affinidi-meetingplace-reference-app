@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/authentication_service/authentication_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/settings_service/settings_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
