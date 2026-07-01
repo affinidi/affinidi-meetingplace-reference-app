@@ -146,6 +146,9 @@ class _CallScreenBody extends HookConsumerWidget {
           calleeAvatarImage: callIsAudioOnly ? calleeAvatarImage : null,
         );
       }
+      if (status == AudioVideoCallStatus.error) {
+        return const _ErrorScaffold();
+      }
       return const SizedBox.shrink();
     }
 
