@@ -195,6 +195,7 @@ class _IndividualVideoCallScaffold extends StatelessWidget {
     return Scaffold(
       backgroundColor: colors.grey900,
       body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onToggleControls,
         child: Stack(
           fit: StackFit.expand,
