@@ -3,12 +3,13 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import '../../presentation/screens/media/image_view_screen/image_view_screen.dart';
 import 'attachment_plugin_cache.dart';
 
-class ImageAttachmentWidget extends StatefulWidget {
+class ImageAttachmentWidget extends StatefulHookWidget {
   const ImageAttachmentWidget({
     super.key,
     required this.attachment,
@@ -28,93 +29,35 @@ class ImageAttachmentWidget extends StatefulWidget {
 
 class _ImageAttachmentWidgetState extends State<ImageAttachmentWidget>
     with AutomaticKeepAliveClientMixin {
-  Future<Uint8List>? _imageFuture;
-  Uint8List? _resolvedImageBytes;
-  late String _attachmentKey;
-
-  Future<Uint8List> _loadImageBytes(
-    ChatAttachment attachment,
-    Future<Uint8List> Function(ChatAttachment) downloadFn,
-  ) async {
-    return widget.cacheManager.downloadBytes(
-      cacheKey: widget.cacheKey,
-      download: () => downloadFn(attachment),
-    );
-  }
-
-  String _attachmentIdentityKey(ChatAttachment attachment) {
-    final id = attachment.id;
-    if (id.isNotEmpty) return 'id:$id';
-
-    final transportId = attachment.transportId;
-    if (transportId != null && transportId.isNotEmpty) {
-      return 'transport:$transportId';
-    }
-
-    final link = attachment.data?.links?.firstOrNull?.toString();
-    if (link != null && link.isNotEmpty) return 'link:$link';
-
-    final base64Data = attachment.data?.base64;
-    if (base64Data != null && base64Data.isNotEmpty) {
-      return 'base64:${base64Data.hashCode}';
-    }
-
-    return 'attachment:${identityHashCode(attachment)}';
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _attachmentKey = _attachmentIdentityKey(widget.attachment);
-    _imageFuture = _createImageFuture();
-  }
-
-  @override
-  void didUpdateWidget(ImageAttachmentWidget oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    final nextAttachmentKey = _attachmentIdentityKey(widget.attachment);
-    final downloadAvailabilityChanged =
-        (oldWidget.download == null) != (widget.download == null);
-    final cacheKeyChanged = oldWidget.cacheKey != widget.cacheKey;
-    if (_attachmentKey != nextAttachmentKey ||
-        downloadAvailabilityChanged ||
-        cacheKeyChanged) {
-      _attachmentKey = nextAttachmentKey;
-      _resolvedImageBytes = null;
-      _imageFuture = _createImageFuture();
-    }
-  }
-
-  Future<Uint8List>? _createImageFuture() {
-    final imageDataBase64 = widget.attachment.data?.base64;
-    if (imageDataBase64 != null) return null;
-
-    final downloadFn = widget.download;
-    if (downloadFn == null) return null;
-
-    return _loadImageBytes(widget.attachment, downloadFn);
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
-    final imageDataBase64 = widget.attachment.data?.base64;
-    if (imageDataBase64 != null) {
-      try {
-        return _ResolvedImage(base64Decode(imageDataBase64));
-      } catch (_) {
+    final attachmentKey = _attachmentIdentityKey(widget.attachment);
+    final downloadAvailable = widget.download != null;
+    final inlineImageBytes = useMemoized(
+      () => _resolveInlineImageBytes(widget.attachment),
+      [attachmentKey, widget.attachment.data?.base64],
+    );
+
+    final imageFuture = useMemoized(
+      () => _createImageFuture(
+        attachment: widget.attachment,
+        cacheManager: widget.cacheManager,
+        cacheKey: widget.cacheKey,
+        download: widget.download,
+      ),
+      [attachmentKey, widget.cacheKey, downloadAvailable],
+    );
+
+    if (widget.attachment.data?.base64 != null) {
+      if (inlineImageBytes == null || inlineImageBytes.isEmpty) {
         return const _ErrorImage();
       }
+
+      return _ResolvedImage(inlineImageBytes);
     }
 
-    final resolvedImageBytes = _resolvedImageBytes;
-    if (resolvedImageBytes != null) {
-      return _ResolvedImage(resolvedImageBytes);
-    }
-
-    final imageFuture = _imageFuture;
     if (imageFuture == null) return const SizedBox.shrink();
 
     return FutureBuilder<Uint8List>(
@@ -128,15 +71,78 @@ class _ImageAttachmentWidgetState extends State<ImageAttachmentWidget>
           return const _ErrorImage();
         }
 
-        final imageBytes = snapshot.data!;
-        _resolvedImageBytes ??= imageBytes;
-        return _ResolvedImage(imageBytes);
+        return _ResolvedImage(snapshot.data!);
       },
     );
   }
 
   @override
   bool get wantKeepAlive => true;
+}
+
+Future<Uint8List> _loadImageBytes({
+  required ChatAttachment attachment,
+  required BaseCacheManager cacheManager,
+  required String cacheKey,
+  required Future<Uint8List> Function(ChatAttachment) download,
+}) async {
+  return cacheManager.downloadBytes(
+    cacheKey: cacheKey,
+    download: () => download(attachment),
+  );
+}
+
+String _attachmentIdentityKey(ChatAttachment attachment) {
+  final id = attachment.id;
+  if (id.isNotEmpty) return 'id:$id';
+
+  final transportId = attachment.transportId;
+  if (transportId != null && transportId.isNotEmpty) {
+    return 'transport:$transportId';
+  }
+
+  final link = attachment.data?.links?.firstOrNull?.toString();
+  if (link != null && link.isNotEmpty) return 'link:$link';
+
+  final base64Data = attachment.data?.base64;
+  if (base64Data != null && base64Data.isNotEmpty) {
+    return 'base64:${base64Data.hashCode}';
+  }
+
+  return 'attachment:${identityHashCode(attachment)}';
+}
+
+Future<Uint8List>? _createImageFuture({
+  required ChatAttachment attachment,
+  required BaseCacheManager cacheManager,
+  required String cacheKey,
+  required Future<Uint8List> Function(ChatAttachment)? download,
+}) {
+  final imageDataBase64 = attachment.data?.base64;
+  if (imageDataBase64 != null) return null;
+
+  final downloadFn = download;
+  if (downloadFn == null) return null;
+
+  return _loadImageBytes(
+    attachment: attachment,
+    cacheManager: cacheManager,
+    cacheKey: cacheKey,
+    download: downloadFn,
+  );
+}
+
+Uint8List? _resolveInlineImageBytes(ChatAttachment attachment) {
+  final imageDataBase64 = attachment.data?.base64;
+  if (imageDataBase64 == null || imageDataBase64.isEmpty) {
+    return null;
+  }
+
+  try {
+    return base64Decode(imageDataBase64);
+  } catch (_) {
+    return null;
+  }
 }
 
 class _LoadingImage extends StatelessWidget {
