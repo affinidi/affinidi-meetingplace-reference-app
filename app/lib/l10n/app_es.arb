@@ -510,7 +510,7 @@
 	"videoCallWaitingForParticipants": "Esperando participantes...",
 	"videoCallFailedToJoin": "Error al unirse: {error}",
 	"videoCallUnknownError": "Error desconocido",
-	"videoCallHangUpFailed": "Couldn't hang up. Please try again.",
+	"videoCallHangUpFailed": "No se pudo colgar. Por favor, inténtalo de nuevo.",
 	"videoCallParticipantCount": "{count, plural, =1{1 participante} other{{count} participantes}}",
 	"videoCallMute": "Silenciar",
 	"videoCallUnmute": "Activar audio",
