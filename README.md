@@ -400,7 +400,7 @@ DEFAULT_MEDIATOR_DID=""
 
 The Matrix Homeserver is a messaging server that stores and relays messages between clients using the Matrix protocol.
 
-TBD
+Deploy a Matrix Synapse homeserver and configure it for JWT-based login (`org.matrix.login.jwt`) using the Control Plane's public key as the JWT secret and the Control Plane DID as the issuer. See the [Control Plane API: Matrix Authentication](https://github.com/affinidi/affinidi-meetingplace-controlplane-api-dart#matrix-authentication) section for full setup details.
 
 Setting up a Matrix Homeserver generates the homeserver URL that you can use to populate the `MATRIX_HOMESERVER` env variable.
 
