@@ -1,5 +1,4 @@
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallSession, AudioVideoCallStatus, CallRole;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart'
     show AudioVideoCallScreenController;
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';

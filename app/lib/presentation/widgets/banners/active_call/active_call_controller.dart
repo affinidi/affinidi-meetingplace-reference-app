@@ -1,13 +1,6 @@
 import 'dart:async';
 
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show
-        AudioVideoCallSession,
-        AudioVideoCallState,
-        AudioVideoCallStatus,
-        CallMediaType,
-        CallRole,
-        CallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod/misc.dart' show KeepAliveLink;
 import 'package:riverpod/riverpod.dart' show ProviderSubscription;
 import 'package:riverpod_annotation/riverpod_annotation.dart';

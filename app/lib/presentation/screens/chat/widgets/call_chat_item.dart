@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show CallMediaType, CallMetadata, CallStatus, ChatAttachment, Message;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/providers/pending_call_session_provider.dart';

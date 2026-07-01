@@ -1,6 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallParticipant, AudioVideoCallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 part 'active_call_state.freezed.dart';
 

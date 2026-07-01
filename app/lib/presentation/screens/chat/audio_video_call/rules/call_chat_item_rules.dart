@@ -1,8 +1,7 @@
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallStatus, CallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../presentation/themes/app_custom_colors.dart';

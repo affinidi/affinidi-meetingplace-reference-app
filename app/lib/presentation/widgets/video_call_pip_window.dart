@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallParticipant, AudioVideoCallSession;
 import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart'
     show AudioVideoCallView;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import 'video_call_pip_overlay.dart' show VideoCallPiPOverlay;

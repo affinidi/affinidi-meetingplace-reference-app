@@ -3,13 +3,14 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 import 'fake_chat.dart';
 
-class FakeChatSdk implements MeetingPlaceChatSDK {
+class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   FakeChatSdk({TransportCapabilities? capabilities})
     : _capabilities = capabilities ?? _defaultCapabilities;
 
@@ -36,10 +37,13 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
 
   set capabilities(TransportCapabilities caps) => _capabilities = caps;
 
+  @override
   String get did => 'fake-sender-did';
 
+  @override
   String get otherPartyDid => 'fake-other-party-did';
 
+  @override
   String get chatId => 'fake-chat-id';
 
   int _chatSessionStartedCalls = 0;

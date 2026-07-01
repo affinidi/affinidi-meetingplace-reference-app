@@ -1,7 +1,6 @@
 import 'dart:async';
 
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallSession, AudioVideoCallState, CallRole, CallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../rules/call_chat_item_rules.dart';

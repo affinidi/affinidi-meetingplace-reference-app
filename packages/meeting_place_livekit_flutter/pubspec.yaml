@@ -17,7 +17,7 @@ dependencies:
   matrix: ^7.2.2
   meeting_place_chat: ^0.0.1-dev.43
   meeting_place_core: ^0.0.1-dev.40
-  meeting_place_matrix_livekit: ^0.0.1-dev.0
+  meeting_place_matrix: ^0.0.1-dev.0
   permission_handler: ^12.0.1
   riverpod_annotation: ^3.0.3
   webrtc_interface: ^1.5.1

@@ -1,5 +1,4 @@
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallSession, AudioVideoCallStatus;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import 'rules/call_chat_item_rules.dart';
 

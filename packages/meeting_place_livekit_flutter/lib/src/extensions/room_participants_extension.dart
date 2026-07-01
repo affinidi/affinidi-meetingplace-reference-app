@@ -1,6 +1,5 @@
 import 'package:livekit_client/livekit_client.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart'
-    show AudioVideoCallParticipant;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import 'participant_video_extension.dart';
 
