@@ -20,11 +20,9 @@ final audioVideoCallPluginProvider = FutureProvider<AudioVideoCallPlugin?>((
   logger.info('Building audio/video call plugin', name: logKey);
   final sdk = await ref.read(meetingPlaceSdkProvider.future);
   final plugin = MeetingPlaceLiveKitCallPlugin(
-    options: MeetingPlaceLiveKitCallPluginOptions(
-      livekitServiceUrl: Uri.parse(Environment.instance.livekitServiceUrl),
-      livekitSfuUrl: Uri.tryParse(Environment.instance.livekitSfuUrl),
-      outgoingCallTimeout: Environment.instance.outgoingCallTimeout,
-    ),
+    livekitServiceUrl: Uri.parse(Environment.instance.livekitServiceUrl),
+    livekitSfuUrl: Uri.tryParse(Environment.instance.livekitSfuUrl),
+    outgoingCallTimeout: Environment.instance.outgoingCallTimeout,
     rtcDelegate: FlutterMatrixRTCDelegate(),
     roomFactory: (_) => FlutterLiveKitRoom(),
   );
