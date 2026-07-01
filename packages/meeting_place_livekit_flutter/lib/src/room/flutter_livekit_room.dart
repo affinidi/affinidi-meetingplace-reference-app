@@ -182,15 +182,26 @@ class FlutterLiveKitRoom implements LiveKitRoom {
       return;
     }
     for (final publication in participant.videoTrackPublications) {
-      _logger.info(
-        'forceRemoteKeyframe: Toggling subscription for '
-        '${participant.identity} track ${publication.sid} '
-        'to request a new keyframe',
-        name: _logKey,
-      );
-      await publication.disable();
-      await publication.enable();
+      await _resubscribeForKeyframe(participant.identity, publication);
     }
+  }
+
+  /// Drops and re-establishes the subscription for [publication] so the SFU
+  /// sends a fresh keyframe. After an E2EE key rotation the decoder cannot
+  /// decode inter-frames encrypted with the previous key, so it stays frozen
+  /// until the next keyframe. A full unsubscribe/subscribe cycle forces the
+  /// SFU to emit one immediately.
+  Future<void> _resubscribeForKeyframe(
+    String participantIdentity,
+    RemoteTrackPublication<RemoteVideoTrack> publication,
+  ) async {
+    _logger.info(
+      'forceRemoteKeyframe: re-subscribing $participantIdentity '
+      'track ${publication.sid} to request a new keyframe',
+      name: _logKey,
+    );
+    await publication.unsubscribe();
+    await publication.subscribe();
   }
 
   /// Returns the renderable video track for [participantId], or `null` when
