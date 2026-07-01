@@ -41,7 +41,7 @@ import FirebaseMessaging
             return
         }
         let channel = FlutterMethodChannel(
-            name: "com.affinidi.mpx.meetingplace/device_region",
+            name: "com.example.meetingplace/device_region",
             binaryMessenger: messenger
         )
         channel.setMethodCallHandler { (call, result) in

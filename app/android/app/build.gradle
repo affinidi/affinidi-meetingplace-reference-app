@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    namespace = "com.affinidi.mpx.meetingplace"
+    namespace = "com.example.meetingplace"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

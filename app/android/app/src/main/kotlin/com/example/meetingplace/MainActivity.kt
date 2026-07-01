@@ -1,4 +1,4 @@
-package com.affinidi.mpx.meetingplace
+package com.example.meetingplace
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -22,7 +22,7 @@ class MainActivity: FlutterFragmentActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
-            "com.affinidi.mpx.meetingplace/device_region"
+            "com.example.meetingplace/device_region"
         ).setMethodCallHandler { call, result ->
             if (call.method == "getRegionCode") {
                 result.success(java.util.Locale.getDefault().country)
