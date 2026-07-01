@@ -5,13 +5,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/chat_service/chat_session_service.dart';
 import '../../../../application/services/contacts_service/contacts_service.dart';
+import '../../../../application/services/incoming_call_service/incoming_call_notifier.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/audio_video_call_plugin_provider.dart';
-import '../../../../infrastructure/providers/incoming_call_state_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../../../../infrastructure/providers/pending_call_session_provider.dart';
 import '../../../../infrastructure/services/permission_service/permission_service.dart';
 import '../../../widgets/banners/active_call/active_call_controller.dart';
 import '../../../widgets/banners/active_call/active_call_state.dart';
@@ -70,7 +69,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     _isGroupContact = contact?.isGroup ?? false;
     final channelDid = contact?.channelDid ?? contactId;
     _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
-    final incomingEvent = ref.read(incomingCallStateProvider);
+    final incomingEvent = ref.read(incomingCallProvider).eventOrNull;
     final expectedOtherPartyDid = contact?.channelDid ?? contactId;
     final isAcceptedIncomingForThisScreen =
         incomingEvent != null &&
@@ -104,16 +103,12 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       onUpdate: _applyMediaUpdate,
     );
 
-    final rawPendingSession = ref.read(pendingCallSessionProvider);
     final banner = ref.read(activeCallControllerProvider);
     final hasActiveBanner = banner != null && !isEndedCallStatus(banner.status);
-    final pendingSession = hasActiveBanner ? rawPendingSession : null;
+    final pendingSession = hasActiveBanner
+        ? ref.read(activeCallControllerProvider.notifier).session
+        : null;
     final restoredBanner = pendingSession != null ? banner : null;
-    if (rawPendingSession != null) {
-      Future.microtask(
-        () => ref.read(pendingCallSessionProvider.notifier).clear(),
-      );
-    }
     if (pendingSession != null) {
       _session = pendingSession;
       _attachSession(
@@ -484,7 +479,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// dashboard incoming banner once the call is underway or over.
   void _clearIncomingCallState() {
     if (_isDisposed) return;
-    ref.read(incomingCallStateProvider.notifier).clear();
+    ref.read(incomingCallProvider.notifier).clear();
   }
 
   /// Applies media toggle updates (mic, camera, speaker, permissions) to state.

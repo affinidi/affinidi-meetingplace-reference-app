@@ -4,9 +4,9 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart'
     show CallMediaType;
 
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/incoming_call_service/incoming_call_notifier.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../infrastructure/providers/incoming_call_state_provider.dart';
 import '../../../navigation/navigator.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../banners/active_call/active_call_controller.dart';
@@ -55,7 +55,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
     final bannerController = ref.watch(incomingCallBannerControllerProvider);
     if (bannerController) return const SizedBox.shrink();
 
-    final event = ref.watch(incomingCallStateProvider);
+    final event = ref.watch(incomingCallProvider).eventOrNull;
     if (event == null) return const SizedBox.shrink();
 
     final contact = ref.watch(

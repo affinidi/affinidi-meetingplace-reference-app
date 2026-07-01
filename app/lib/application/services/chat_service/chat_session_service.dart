@@ -32,10 +32,10 @@ import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attac
 import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
-import '../../../infrastructure/providers/incoming_call_state_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../contacts_service/contacts_service.dart';
+import '../incoming_call_service/incoming_call_notifier.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
@@ -159,7 +159,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _callChatItemReconciler = CallChatItemReconciler(
       manager: _callChatItemManager,
       isCallLive: () =>
-          ref.read(incomingCallStateProvider)?.otherPartyChannelDid ==
+          ref.read(incomingCallProvider).eventOrNull?.otherPartyChannelDid ==
           _otherPartyPermanentDid,
       upsertItem: upsertChatItem,
       ringTimeout: ref.read(environmentProvider).incomingCallRingTimeout,

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/helpers/duration_formatter.dart';
-import '../../../../infrastructure/providers/pending_call_session_provider.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
 import '../../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
@@ -69,12 +68,6 @@ class ActiveCallBanner extends ConsumerWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.deferToChild,
               onTap: () {
-                final session = ref
-                    .read(activeCallControllerProvider.notifier)
-                    .session;
-                if (session != null) {
-                  ref.read(pendingCallSessionProvider.notifier).set(session);
-                }
                 ref
                     .read(navigatorProvider)
                     .go(

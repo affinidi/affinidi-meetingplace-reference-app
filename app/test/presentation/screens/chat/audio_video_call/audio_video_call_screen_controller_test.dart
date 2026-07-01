@@ -3,10 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/audio_video_call_plugin_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/incoming_call_state_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/pending_call_session_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
@@ -41,6 +41,7 @@ ProviderContainer _makeContainer({
       FakeActiveCallController(
         fixedCallChatItemId: _kMsgId,
         bannerState: _kActiveBannerState,
+        fixedSession: pendingSession,
       );
   final chat = chatService ?? FakeChatSessionService();
   final container = ProviderContainer(
@@ -51,10 +52,7 @@ ProviderContainer _makeContainer({
       chatSessionServiceProvider(_kContactId).overrideWith(() => chat),
       audioVideoCallPluginProvider.overrideWith((ref) async => null),
       permissionServiceProvider.overrideWith((ref) => _FakePermissionService()),
-      incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-      pendingCallSessionProvider.overrideWith(
-        () => _FakePendingCallSession(initialSession: pendingSession),
-      ),
+      incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
     ],
   );
   addTearDown(container.dispose);
@@ -114,8 +112,7 @@ void main() {
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
-          incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith(_FakePendingCallSession.new),
+          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
         ],
       );
       addTearDown(container.dispose);
@@ -149,6 +146,7 @@ void main() {
             () => FakeActiveCallController(
               fixedCallChatItemId: _kMsgId,
               bannerState: _kActiveBannerState,
+              fixedSession: session,
             ),
           ),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
@@ -156,10 +154,7 @@ void main() {
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
-          incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith(
-            () => _FakePendingCallSession(initialSession: session),
-          ),
+          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
         ],
       );
       addTearDown(container.dispose);
@@ -189,7 +184,10 @@ void main() {
     test('calls updateCallChatItem with CallStatus.ended', () async {
       final session = MockAudioVideoCallSession();
       final chatSvc = FakeChatSessionService(resolveIncomingResult: _kMsgId);
-      final banner = FakeActiveCallController(bannerState: _kActiveBannerState);
+      final banner = FakeActiveCallController(
+        bannerState: _kActiveBannerState,
+        fixedSession: session,
+      );
       final container = ProviderContainer(
         overrides: [
           appLoggerProvider.overrideWithValue(FakeAppLogger()),
@@ -200,10 +198,7 @@ void main() {
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
-          incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith(
-            () => _FakePendingCallSession(initialSession: session),
-          ),
+          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
         ],
       );
       addTearDown(container.dispose);
@@ -233,7 +228,7 @@ void main() {
     test('calls updateCallChatItem with CallStatus.missed', () async {
       final session = MockAudioVideoCallSession();
       final chatSvc = FakeChatSessionService(resolveIncomingResult: _kMsgId);
-      final banner = FakeActiveCallController();
+      final banner = FakeActiveCallController(fixedSession: session);
       final container = ProviderContainer(
         overrides: [
           appLoggerProvider.overrideWithValue(FakeAppLogger()),
@@ -244,8 +239,7 @@ void main() {
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
-          incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith(_FakePendingCallSession.new),
+          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
         ],
       );
       addTearDown(container.dispose);
@@ -345,6 +339,7 @@ void main() {
       final banner = FakeActiveCallController(
         fixedCallChatItemId: 'banner-msg',
         bannerState: _kActiveBannerState,
+        fixedSession: session,
       );
       final container = ProviderContainer(
         overrides: [
@@ -356,10 +351,7 @@ void main() {
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
-          incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith(
-            () => _FakePendingCallSession(initialSession: session),
-          ),
+          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
         ],
       );
       addTearDown(container.dispose);
@@ -386,7 +378,10 @@ void main() {
     test('resolveIncomingCallChatItemId is called when no banner id', () async {
       final session = MockAudioVideoCallSession();
       final chatSvc = FakeChatSessionService(resolveIncomingResult: 'svc-msg');
-      final banner = FakeActiveCallController(bannerState: _kActiveBannerState);
+      final banner = FakeActiveCallController(
+        bannerState: _kActiveBannerState,
+        fixedSession: session,
+      );
       final container = ProviderContainer(
         overrides: [
           appLoggerProvider.overrideWithValue(FakeAppLogger()),
@@ -397,10 +392,7 @@ void main() {
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
-          incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-          pendingCallSessionProvider.overrideWith(
-            () => _FakePendingCallSession(initialSession: session),
-          ),
+          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
         ],
       );
       addTearDown(container.dispose);
@@ -442,16 +434,7 @@ class _FakePermissionService extends PermissionService {
       PermissionStatus.granted;
 }
 
-class _FakeIncomingCallState extends IncomingCallState {
+class _FakeIncomingCallState extends IncomingCallNotifier {
   @override
-  IncomingAudioVideoCallEvent? build() => null;
-}
-
-class _FakePendingCallSession extends PendingCallSession {
-  _FakePendingCallSession({this.initialSession});
-
-  final AudioVideoCallSession? initialSession;
-
-  @override
-  AudioVideoCallSession? build() => initialSession;
+  IncomingCallState build() => const IncomingCallState.idle();
 }
