@@ -40,6 +40,7 @@ const _stalePhoto =
 const _voiceAvatarKey = Key('voice_sender_avatar');
 
 ChatAttachment _voiceAttachment() => ChatAttachment(
+  id: 'voice-avatar-attachment',
   mediaType: 'audio/mp4',
   filename: 'voice.m4a',
   format: AudioAttachmentsPlugin.pluginName,

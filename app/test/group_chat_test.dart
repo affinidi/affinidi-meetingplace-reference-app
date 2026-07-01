@@ -159,6 +159,7 @@ void main() {
         recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
         attachments: [
           ChatAttachment(
+            id: 'voice-attachment-1',
             mediaType: 'audio/mp4',
             filename: 'voice.m4a',
             format: AudioAttachmentsPlugin.pluginName,

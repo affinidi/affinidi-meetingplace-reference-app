@@ -44,7 +44,7 @@ class _ImageAttachmentWidgetState extends State<ImageAttachmentWidget>
 
   String _attachmentIdentityKey(ChatAttachment attachment) {
     final id = attachment.id;
-    if (id != null && id.isNotEmpty) return 'id:$id';
+    if (id.isNotEmpty) return 'id:$id';
 
     final transportId = attachment.transportId;
     if (transportId != null && transportId.isNotEmpty) {

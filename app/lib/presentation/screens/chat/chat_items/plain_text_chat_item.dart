@@ -203,7 +203,7 @@ class _AttachmentWidget extends HookConsumerWidget {
     required this._isFromMe,
     required this._chatItemColor,
   }) : _attachment = attachment,
-       super(key: ValueKey('chat_attachment_${attachment.id!}'));
+       super(key: ValueKey('chat_attachment_${attachment.id}'));
 
   final ChatAttachment _attachment;
   final chat.Message _chatItem;
@@ -261,7 +261,7 @@ class _AttachmentWidget extends HookConsumerWidget {
 
   String _playbackAttachmentKey(ChatAttachment attachment) {
     final id = attachment.id;
-    if (id != null && id.isNotEmpty) return 'chat_attachment_$id';
+    if (id.isNotEmpty) return 'chat_attachment_$id';
 
     final transportId = attachment.transportId;
     if (transportId != null && transportId.isNotEmpty) {
