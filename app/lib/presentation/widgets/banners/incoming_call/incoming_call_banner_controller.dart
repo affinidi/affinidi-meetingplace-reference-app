@@ -1,8 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/services/incoming_call_service/incoming_call_notifier.dart';
 import '../../../../application/services/incoming_call_service/incoming_call_service.dart';
+import '../../../../application/services/incoming_call_service/incoming_call_state.dart'
+    show IncomingCallRinging;
 import '../../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../../infrastructure/providers/incoming_call_state_provider.dart';
 
 part 'incoming_call_banner_controller.g.dart';
 
@@ -14,8 +16,8 @@ class IncomingCallBannerController extends _$IncomingCallBannerController {
   @override
   bool build() {
     ref.read(incomingCallServiceProvider);
-    ref.listen(incomingCallStateProvider, (previous, next) {
-      if (next != null && next != previous) state = false;
+    ref.listen(incomingCallProvider, (previous, next) {
+      if (next is IncomingCallRinging && next != previous) state = false;
     });
     return false;
   }
