@@ -2062,7 +2062,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get videoCallMemberNamesFailed => 'Couldn\'t load participant names.';
 
   @override
-  String get videoCallHangUpFailed => 'Couldn\'t hang up. Please try again.';
+  String get videoCallHangUpFailed =>
+      'Auflegen nicht möglich. Bitte versuchen Sie es erneut.';
 
   @override
   String videoCallParticipantCount(num count) {
