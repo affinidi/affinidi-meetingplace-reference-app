@@ -335,6 +335,7 @@ void main() {
         contacts: [FakeContacts.individualContact],
         rCards: [card],
         rCardsServiceFactory: () => FakeRCardsService([card]),
+        meetingPlaceChatSDK: FakeChatSdk(),
       );
       await tester.pumpAndSettle();
 
