@@ -103,10 +103,9 @@ melos:
       description: Generate HTML coverage report for app
 
     pubget:
-      run: flutter pub get
-      exec:
-        concurrency: 1
-        orderDependents: true
+      run: |
+        melos exec --concurrency 1 --order-dependents -- "flutter pub get"
+        rm -rf packages/app-core/build packages/meeting_place_livekit_flutter/build
       description: Get dependencies for all workspace packages
 
     ios-deps:
