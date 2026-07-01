@@ -96,6 +96,7 @@ class _GroupMembersList extends ConsumerWidget {
     final isDebugMode = ref.watch(
       provider.select((state) => state.isDebugMode),
     );
+    final cacheManager = ref.read(cacheManagerProvider);
 
     String getMemberText(GroupMember member) {
       final isYou = (member.did == contact?.channelDid);
@@ -124,18 +125,11 @@ class _GroupMembersList extends ConsumerWidget {
         final canRemove = isOwner && !isDeleted && !isSelf && !isAdmin;
 
         return ListTile(
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(6.0),
-            child: Container(
-              height: 24.0,
-              width: 24.0,
-              color: isDeleted ? Colors.red : Colors.blue,
-              child: _GroupMemberIcon(
-                memberDid: member.did,
-                myDid: contact?.channelDid,
-                isAdmin: isAdmin,
-              ),
-            ),
+          leading: ProfileCircleAvatar(
+            radius: 18,
+            image: ContactCardUtils.fromSdkContactCard(
+              member.contactCard,
+            ).image(cacheManager: cacheManager),
           ),
           title: Text(
             getMemberText(member),
@@ -179,33 +173,5 @@ class _GroupMembersList extends ConsumerWidget {
       },
       separatorBuilder: (context, index) => const Divider(),
     );
-  }
-}
-
-class _GroupMemberIcon extends StatelessWidget {
-  const _GroupMemberIcon({
-    required this._memberDid,
-    required this._myDid,
-    required this._isAdmin,
-  });
-
-  final String _memberDid;
-  final String? _myDid;
-  final bool _isAdmin;
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isAdmin) {
-      return const Icon(
-        Icons.admin_panel_settings_outlined,
-        color: Colors.white,
-        size: 18,
-      );
-    }
-
-    if (_memberDid == _myDid) {
-      return const Icon(Icons.person, color: Colors.white, size: 18);
-    }
-    return const Icon(Icons.person, color: Colors.white, size: 18);
   }
 }
