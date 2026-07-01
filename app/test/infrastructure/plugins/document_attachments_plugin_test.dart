@@ -50,6 +50,7 @@ void main() {
     group('supportsFormat', () {
       test('returns true for plugin format', () {
         final attachment = ChatAttachment(
+          id: 'doc-plugin-format',
           format: 'mpx_document_attachment_plugin',
         );
         expect(plugin.supportsFormat(attachment), isTrue);
@@ -57,13 +58,17 @@ void main() {
 
       test('returns false for audio plugin format', () {
         final attachment = ChatAttachment(
+          id: 'doc-audio-format',
           format: AudioAttachmentsPlugin.pluginName,
         );
         expect(plugin.supportsFormat(attachment), isFalse);
       });
 
       test('returns false for unrelated format', () {
-        final attachment = ChatAttachment(format: 'other_plugin');
+        final attachment = ChatAttachment(
+          id: 'doc-other-format',
+          format: 'other_plugin',
+        );
         expect(plugin.supportsFormat(attachment), isFalse);
       });
     });

@@ -90,13 +90,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     final transportId =
         'fake-transport-incoming-${DateTime.now().microsecondsSinceEpoch}';
     final normalizedAttachments = <ChatAttachment>[];
-    var attachmentIndex = 0;
     for (final attachment in attachments ?? const <ChatAttachment>[]) {
       normalizedAttachments.add(
         ChatAttachment(
-          id:
-              attachment.id ??
-              '''fake-attachment-${DateTime.now().microsecondsSinceEpoch}-${attachmentIndex++}''',
+          id: attachment.id,
           description: attachment.description,
           filename: attachment.filename,
           mediaType: attachment.mediaType,

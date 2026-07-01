@@ -105,7 +105,7 @@ class LocalVoiceAttachmentStore {
 
   String? _attachmentKey(ChatAttachment attachment) {
     final id = attachment.id;
-    if (id == null || id.isEmpty) return null;
+    if (id.isEmpty) return null;
     return id;
   }
 }
