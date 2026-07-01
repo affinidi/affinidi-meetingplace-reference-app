@@ -66,6 +66,13 @@ dependency_overrides:
   
 melos:
   scripts:
+    format:
+      description: Format lib and test directories (avoids build/ symlink issues with dart_style 3.1.x)
+      exec: dart format lib test
+      packageFilters:
+        dirExists: lib
+      noSelect: true
+
     analyze:
       run: melos run _analyze --no-select
     _analyze:
