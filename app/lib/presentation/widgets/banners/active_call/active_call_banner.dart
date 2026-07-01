@@ -30,16 +30,11 @@ class ActiveCallBanner extends ConsumerWidget {
       status: callState.status,
       hasHadPeer: callState.hasHadPeer,
     );
-    final String statusLabel;
-    switch (phase) {
-      case CallUiPhase.inCall:
-        statusLabel = formatDuration(callState.callDurationSeconds);
-      case CallUiPhase.ringing:
-        statusLabel = l10n.videoCallRinging;
-      case CallUiPhase.calling:
-      case CallUiPhase.ended:
-        statusLabel = l10n.videoCallCalling;
-    }
+    final statusLabel = switch (phase) {
+      CallUiPhase.inCall => formatDuration(callState.callDurationSeconds),
+      CallUiPhase.ringing => l10n.videoCallRinging,
+      CallUiPhase.calling || CallUiPhase.ended => l10n.videoCallCalling,
+    };
     final showDuration = phase == CallUiPhase.inCall;
 
     final callIcon = callState.isAudioOnly ? Icons.phone : Icons.videocam;
