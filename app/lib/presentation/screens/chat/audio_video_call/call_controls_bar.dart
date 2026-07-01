@@ -120,7 +120,7 @@ class _ControlButton extends StatelessWidget {
     return Opacity(
       opacity: isDisabled ? 0.4 : 1.0,
       child: GestureDetector(
-        onTap: isDisabled ? () {} : onTap,
+        onTap: isDisabled ? null : onTap,
         child: Container(
           width: 56,
           height: 56,
