@@ -530,7 +530,7 @@
 	"videoCallWaitingForParticipants": "Warte auf Teilnehmer...",
 	"videoCallFailedToJoin": "Beitreten fehlgeschlagen: {error}",
 	"videoCallUnknownError": "Unbekannter Fehler",
-	"videoCallHangUpFailed": "Couldn't hang up. Please try again.",
+	"videoCallHangUpFailed": "Auflegen nicht möglich. Bitte versuchen Sie es erneut.",
 	"videoCallParticipantCount": "{count, plural, =1{1 Teilnehmer} other{{count} Teilnehmer}}",
 	"videoCallMute": "Stummschalten",
 	"videoCallUnmute": "Stummschaltung aufheben",
