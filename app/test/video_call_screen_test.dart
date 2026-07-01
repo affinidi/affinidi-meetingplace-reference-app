@@ -3,32 +3,31 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('GestureDetector hit test behavior', () {
-    testWidgets(
-      'HitTestBehavior.opaque captures taps on full widget area',
-      (tester) async {
-        var tappedCount = 0;
+    testWidgets('HitTestBehavior.opaque captures taps on full widget area', (
+      tester,
+    ) async {
+      var tappedCount = 0;
 
-        final widget = MaterialApp(
-          home: Scaffold(
-            body: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => tappedCount++,
-              child: Container(color: Colors.grey[900]),
-            ),
+      final widget = MaterialApp(
+        home: Scaffold(
+          body: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => tappedCount++,
+            child: Container(color: Colors.grey[900]),
           ),
-        );
+        ),
+      );
 
-        await tester.pumpWidget(widget);
+      await tester.pumpWidget(widget);
 
-        // Tap anywhere on the body — should be captured by GestureDetector
-        await tester.tap(find.byType(GestureDetector));
-        expect(tappedCount, equals(1));
+      // Tap anywhere on the body — should be captured by GestureDetector
+      await tester.tap(find.byType(GestureDetector));
+      expect(tappedCount, equals(1));
 
-        // Tap again
-        await tester.tap(find.byType(GestureDetector));
-        expect(tappedCount, equals(2));
-      },
-    );
+      // Tap again
+      await tester.tap(find.byType(GestureDetector));
+      expect(tappedCount, equals(2));
+    });
 
     testWidgets(
       'HitTestBehavior.opaque captures taps even with zero-size child',
