@@ -562,6 +562,95 @@ void main() {
       },
     );
   });
+
+  group('clear and _releaseChatServiceAfter', () {
+    test('defers chat service disposal until endCallWrite completes', () async {
+      final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
+      final container = ProviderContainer(
+        overrides: [
+          appLoggerProvider.overrideWithValue(FakeAppLogger()),
+          chatSessionServiceProvider(_kChannelDid).overrideWith(() => chatSvc),
+          endCallBannerControllerProvider.overrideWith(
+            FakeEndCallBannerController.new,
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(activeCallControllerProvider, (_, _) {});
+
+      final ctrl = container.read(activeCallControllerProvider.notifier);
+      final session = MockAudioVideoCallSession();
+
+      ctrl.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: false,
+        initialStatus: AudioVideoCallStatus.connecting,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: true,
+      );
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.ended,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await _pumpAsync();
+
+      ctrl.clear();
+      await _pumpAsync();
+
+      expect(container.read(activeCallControllerProvider), isNull);
+    });
+
+    test(
+      'does not release chat service if subscription ID does not match',
+      () async {
+        final chatSvc = FakeChatSessionService(sendOutgoingResult: _kMsgId);
+        final container = ProviderContainer(
+          overrides: [
+            appLoggerProvider.overrideWithValue(FakeAppLogger()),
+            chatSessionServiceProvider(
+              _kChannelDid,
+            ).overrideWith(() => chatSvc),
+            endCallBannerControllerProvider.overrideWith(
+              FakeEndCallBannerController.new,
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        container.listen(activeCallControllerProvider, (_, _) {});
+
+        final ctrl = container.read(activeCallControllerProvider.notifier);
+        final session = MockAudioVideoCallSession();
+
+        ctrl.registerSession(
+          session,
+          channelDid: _kChannelDid,
+          isAudioOnly: false,
+          initialStatus: AudioVideoCallStatus.connecting,
+          peerName: _kPeerName,
+          isMicEnabled: true,
+          isMinimized: true,
+        );
+
+        await session.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            ownRole: CallRole.caller,
+          ),
+        );
+        await _pumpAsync();
+
+        ctrl.clear();
+        await _pumpAsync();
+
+        expect(container.read(activeCallControllerProvider), isNull);
+      },
+    );
+  });
 }
 
 AudioVideoCallParticipant _remotePeer() {

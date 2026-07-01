@@ -44,12 +44,18 @@ class CallChatItemHandler {
   StreamSubscription<AudioVideoCallState>? _sub;
   String? _callChatItemId;
   bool _callChatItemEnded = false;
+  Future<void>? _endCallWrite;
 
   /// The message id of the emitted call chat item, or null if not yet resolved.
   String? get callChatItemId => _callChatItemId;
 
   /// Whether [endCallChatItem] has already been called.
   bool get callChatItemEnded => _callChatItemEnded;
+
+  /// The in-flight end-call chat item write, or null if none has started.
+  /// Lets callers await the final write before tearing down dependencies it
+  /// relies on (e.g. the chat session).
+  Future<void>? get endCallWrite => _endCallWrite;
 
   /// Seeds the message id directly (e.g. when the screen controller reads the
   /// id from the banner controller before the banner clears).
@@ -156,37 +162,33 @@ class CallChatItemHandler {
     }
     _callChatItemEnded = true;
 
-    unawaited(
-      Future(() async {
-        if (_isDisposed()) {
-          _logger.info(
-            'endCallChatItem: Skipping, controller disposed',
-            name: _logKey,
-          );
-          return;
-        }
-        final messageId = await _resolveId(isCaller: isCaller);
-        if (messageId == null || _isDisposed()) {
-          _logger.info(
-            'endCallChatItem: Skipping update '
-            '(messageId=$messageId)',
-            name: _logKey,
-          );
-          return;
-        }
-        final endStatus = resolveEndStatus(
-          outcome: outcome,
-          isFromMe: isCaller,
+    _endCallWrite = Future(() async {
+      if (_isDisposed()) {
+        _logger.info(
+          'endCallChatItem: Skipping, controller disposed',
+          name: _logKey,
         );
-        await _updateItem(
-          messageId,
-          status: endStatus,
-          duration: (endStatus == CallStatus.ended && hasHadPeer)
-              ? callDuration
-              : null,
+        return;
+      }
+      final messageId = await _resolveId(isCaller: isCaller);
+      if (messageId == null || _isDisposed()) {
+        _logger.info(
+          'endCallChatItem: Skipping update '
+          '(messageId=$messageId)',
+          name: _logKey,
         );
-      }),
-    );
+        return;
+      }
+      final endStatus = resolveEndStatus(outcome: outcome, isFromMe: isCaller);
+      await _updateItem(
+        messageId,
+        status: endStatus,
+        duration: (endStatus == CallStatus.ended && hasHadPeer)
+            ? callDuration
+            : null,
+      );
+    });
+    unawaited(_endCallWrite);
   }
 
   /// Resolves and caches the call chat item message ID, inferring role

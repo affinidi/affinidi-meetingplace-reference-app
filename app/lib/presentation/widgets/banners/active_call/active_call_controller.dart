@@ -123,6 +123,7 @@ class ActiveCallController extends _$ActiveCallController {
     _sessionStateSub?.cancel();
     _sessionStateSub = null;
     _session = null;
+    final pendingEndWrite = _chatItemHandler?.endCallWrite;
     _chatItemHandler?.dispose();
     _ownRole = null;
     _chatItemHandler = null;
@@ -130,6 +131,23 @@ class ActiveCallController extends _$ActiveCallController {
     state = null;
     _keepAliveLink?.close();
     _keepAliveLink = null;
+    _releaseChatServiceAfter(pendingEndWrite);
+  }
+
+  /// Releases the chat session once the final call chat item write completes,
+  /// so the session (and its message-routing that advances the unread baseline)
+  /// is torn down when the call ends instead of lingering and suppressing the
+  /// badge for the next incoming call.
+  void _releaseChatServiceAfter(Future<void>? pendingWrite) {
+    final subToClose = _chatServiceSub;
+    if (subToClose == null) return;
+    (pendingWrite ?? Future<void>.value()).whenComplete(() {
+      if (!identical(_chatServiceSub, subToClose)) return;
+
+      _chatServiceSub = null;
+      _chatService = null;
+      subToClose.close();
+    });
   }
 
   /// The live session registered when the screen minimized.
