@@ -6,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
-import '../../infrastructure/providers/pending_call_session_provider.dart';
 import '../../navigation/navigator.dart';
 import '../../navigation/routes/dashboard_routes.dart';
 import '../app/app_header_banner.dart' show AppHeaderBanner;
@@ -113,11 +112,6 @@ class _ExpandableOverlay extends HookConsumerWidget {
 
     void maximize() {
       isExpanded.value = false;
-      final bannerNotifier = ref.read(activeCallControllerProvider.notifier);
-      final activeSession = bannerNotifier.session;
-      if (activeSession != null) {
-        ref.read(pendingCallSessionProvider.notifier).set(activeSession);
-      }
       ref
           .read(navigatorProvider)
           .go(

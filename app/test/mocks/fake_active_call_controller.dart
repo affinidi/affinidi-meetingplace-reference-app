@@ -8,10 +8,15 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_ca
 ///
 /// Records [registerSession] calls and exposes a configurable [callChatItemId].
 class FakeActiveCallController extends ActiveCallController {
-  FakeActiveCallController({this.fixedCallChatItemId, this.bannerState});
+  FakeActiveCallController({
+    this.fixedCallChatItemId,
+    this.bannerState,
+    this.fixedSession,
+  });
 
   final String? fixedCallChatItemId;
   final ActiveCallState? bannerState;
+  final AudioVideoCallSession? fixedSession;
 
   bool sessionRegistered = false;
   bool sessionCleared = false;
@@ -23,6 +28,9 @@ class FakeActiveCallController extends ActiveCallController {
 
   @override
   String? get callChatItemId => fixedCallChatItemId;
+
+  @override
+  AudioVideoCallSession? get session => fixedSession;
 
   @override
   void registerSession(

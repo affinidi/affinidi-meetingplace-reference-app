@@ -5,11 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/audio_video_call_plugin_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/incoming_call_state_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/pending_call_session_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen.dart';
@@ -25,14 +25,9 @@ import '../../../../mocks/fake_contacts_service.dart';
 
 const _kContactId = 'smoke-test-contact';
 
-class _FakeIncomingCallState extends IncomingCallState {
+class _FakeIncomingCallState extends IncomingCallNotifier {
   @override
-  IncomingAudioVideoCallEvent? build() => null;
-}
-
-class _FakePendingCallSession extends PendingCallSession {
-  @override
-  AudioVideoCallSession? build() => null;
+  IncomingCallState build() => const IncomingCallState.idle();
 }
 
 class _FixedStateController extends AudioVideoCallScreenController {
@@ -57,8 +52,7 @@ Widget _wrap({required AudioVideoCallScreenState controllerState}) {
       contactsServiceProvider.overrideWith(FakeContactsService.new),
       audioVideoCallPluginProvider.overrideWith((ref) async => null),
       permissionServiceProvider.overrideWithValue(FakePermissionService()),
-      incomingCallStateProvider.overrideWith(_FakeIncomingCallState.new),
-      pendingCallSessionProvider.overrideWith(_FakePendingCallSession.new),
+      incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
       activeCallControllerProvider.overrideWith(FakeActiveCallController.new),
       audioVideoCallScreenControllerProvider(
         _kContactId,

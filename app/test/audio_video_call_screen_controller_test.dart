@@ -6,9 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/audio_video_call_plugin_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/incoming_call_state_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
@@ -499,7 +499,7 @@ void main() {
         // Set the incoming event before the controller builds so its build()
         // sees isAcceptedIncomingForThisScreen = true.
         container
-            .read(incomingCallStateProvider.notifier)
+            .read(incomingCallProvider.notifier)
             .set(
               IncomingAudioVideoCallEvent(
                 callId: 'call-123',

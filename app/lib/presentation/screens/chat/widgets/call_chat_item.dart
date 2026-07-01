@@ -5,8 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../../infrastructure/providers/pending_call_session_provider.dart';
-import '../../../widgets/banners/active_call/active_call_controller.dart';
 import '../audio_video_call/audio_video_call_screen.dart';
 import '../audio_video_call/rules/call_chat_item_rules.dart';
 
@@ -69,14 +67,6 @@ class CallChatItem extends ConsumerWidget {
       child: GestureDetector(
         onTap: isTappable
             ? () {
-                if (call.status == CallStatus.inProgress) {
-                  final session = ref
-                      .read(activeCallControllerProvider.notifier)
-                      .session;
-                  if (session != null) {
-                    ref.read(pendingCallSessionProvider.notifier).set(session);
-                  }
-                }
                 unawaited(
                   Navigator.of(context).push<void>(
                     MaterialPageRoute(
