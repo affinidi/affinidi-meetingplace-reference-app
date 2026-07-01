@@ -12,12 +12,14 @@ import '../extensions/room_participants_extension.dart';
 /// Converts LiveKit events and participants into domain objects before
 /// publishing them through the interface.
 class FlutterLiveKitRoom implements LiveKitRoom {
-  FlutterLiveKitRoom({MeetingPlaceCoreSDKLogger? logger})
-    : _logger = logger ?? DefaultMeetingPlaceCoreSDKLogger(className: _logKey);
+  FlutterLiveKitRoom({MeetingPlaceCoreSDKLogger? logger, Hardware? hardware})
+    : _logger = logger ?? DefaultMeetingPlaceCoreSDKLogger(className: _logKey),
+      _hardware = hardware ?? Hardware.instance;
 
   static const _logKey = 'FlutterLiveKitRoom';
 
   final MeetingPlaceCoreSDKLogger _logger;
+  final Hardware _hardware;
   Room? _room;
   bool _isDisposed = false;
   EventsListener<RoomEvent>? _roomListener;
@@ -132,8 +134,8 @@ class FlutterLiveKitRoom implements LiveKitRoom {
       await _room?.localParticipant?.setCameraEnabled(enabled);
     } catch (e) {
       _logger.warning(
-        'setCameraEnabled: failed to ${enabled ? 'enable' : 'disable'} camera — '
-        'device may not have a camera (e.g. simulator): $e',
+        'setCameraEnabled: Failed to ${enabled ? 'enable' : 'disable'} '
+        'camera — device may not have a camera (e.g. simulator): $e',
         name: _logKey,
       );
     }
@@ -165,7 +167,7 @@ class FlutterLiveKitRoom implements LiveKitRoom {
   @override
   Future<void> setSpeakerphoneEnabled(bool enabled) async {
     _logger.info('setSpeakerphoneEnabled: enabled=$enabled', name: _logKey);
-    await Hardware.instance.setSpeakerphoneOn(enabled);
+    await _hardware.setSpeakerphoneOn(enabled);
   }
 
   @override
@@ -181,8 +183,9 @@ class FlutterLiveKitRoom implements LiveKitRoom {
     }
     for (final publication in participant.videoTrackPublications) {
       _logger.info(
-        'forceRemoteKeyframe: re-subscribing ${participant.identity} '
-        'track ${publication.sid}',
+        'forceRemoteKeyframe: Toggling subscription for '
+        '${participant.identity} track ${publication.sid} '
+        'to request a new keyframe',
         name: _logKey,
       );
       await publication.disable();
