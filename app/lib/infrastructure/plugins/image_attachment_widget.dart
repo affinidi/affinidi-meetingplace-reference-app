@@ -29,6 +29,74 @@ class ImageAttachmentWidget extends StatefulHookWidget {
 
 class _ImageAttachmentWidgetState extends State<ImageAttachmentWidget>
     with AutomaticKeepAliveClientMixin {
+  Future<Uint8List>? _imageFuture;
+  Uint8List? _resolvedImageBytes;
+  late String _attachmentKey;
+
+  Future<Uint8List> _loadImageBytes(
+    ChatAttachment attachment,
+    Future<Uint8List> Function(ChatAttachment) downloadFn,
+  ) async {
+    return widget.cacheManager.downloadBytes(
+      cacheKey: widget.cacheKey,
+      download: () => downloadFn(attachment),
+    );
+  }
+
+  String _attachmentIdentityKey(ChatAttachment attachment) {
+    final id = attachment.id;
+    if (id != null && id.isNotEmpty) return 'id:$id';
+
+    final transportId = attachment.transportId;
+    if (transportId != null && transportId.isNotEmpty) {
+      return 'transport:$transportId';
+    }
+
+    final link = attachment.data?.links?.firstOrNull?.toString();
+    if (link != null && link.isNotEmpty) return 'link:$link';
+
+    final base64Data = attachment.data?.base64;
+    if (base64Data != null && base64Data.isNotEmpty) {
+      return 'base64:${base64Data.hashCode}';
+    }
+
+    return 'attachment:${identityHashCode(attachment)}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _attachmentKey = _attachmentIdentityKey(widget.attachment);
+    _imageFuture = _createImageFuture();
+  }
+
+  @override
+  void didUpdateWidget(ImageAttachmentWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final nextAttachmentKey = _attachmentIdentityKey(widget.attachment);
+    final downloadAvailabilityChanged =
+        (oldWidget.download == null) != (widget.download == null);
+    final cacheKeyChanged = oldWidget.cacheKey != widget.cacheKey;
+    if (_attachmentKey != nextAttachmentKey ||
+        downloadAvailabilityChanged ||
+        cacheKeyChanged) {
+      _attachmentKey = nextAttachmentKey;
+      _resolvedImageBytes = null;
+      _imageFuture = _createImageFuture();
+    }
+  }
+
+  Future<Uint8List>? _createImageFuture() {
+    final imageDataBase64 = widget.attachment.data?.base64;
+    if (imageDataBase64 != null) return null;
+
+    final downloadFn = widget.download;
+    if (downloadFn == null) return null;
+
+    return _loadImageBytes(widget.attachment, downloadFn);
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
