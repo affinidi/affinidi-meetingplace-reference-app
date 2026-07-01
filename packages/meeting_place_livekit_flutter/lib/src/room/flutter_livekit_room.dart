@@ -14,12 +14,13 @@ import '../extensions/room_participants_extension.dart';
 class FlutterLiveKitRoom implements LiveKitRoom {
   FlutterLiveKitRoom({MeetingPlaceCoreSDKLogger? logger, Hardware? hardware})
     : _logger = logger ?? DefaultMeetingPlaceCoreSDKLogger(className: _logKey),
-      _hardware = hardware ?? Hardware.instance;
+      _hardwareOverride = hardware;
 
   static const _logKey = 'FlutterLiveKitRoom';
 
   final MeetingPlaceCoreSDKLogger _logger;
-  final Hardware _hardware;
+  final Hardware? _hardwareOverride;
+  Hardware get _hardware => _hardwareOverride ?? Hardware.instance;
   Room? _room;
   bool _isDisposed = false;
   EventsListener<RoomEvent>? _roomListener;
