@@ -390,7 +390,16 @@ class ContactsService extends _$ContactsService {
       return;
     }
 
-    final amendedContact = contact.copyWith(badgeCount: 0, hasBeenOpened: true);
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      channelDid,
+    );
+
+    final amendedContact = contact.copyWith(
+      badgeCount: 0,
+      hasBeenOpened: true,
+      currentMessageSeqNo: channel?.seqNo ?? contact.currentMessageSeqNo,
+    );
     await updateContact(amendedContact);
   }
 
