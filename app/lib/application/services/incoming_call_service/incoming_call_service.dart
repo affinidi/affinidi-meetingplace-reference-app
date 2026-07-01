@@ -75,8 +75,23 @@ class IncomingCallService extends _$IncomingCallService {
   void _onCallCancelled(String callId) {
     _logger.info('Caller cancelled call: $callId', name: _logKey);
     final incomingState = ref.read(incomingCallStateProvider);
-    if (incomingState?.callId == callId) _clearRingState();
-    _markCallAsMissed(callId);
+    if (incomingState?.callId != callId) {
+      _logger.info(
+        'Ignore cancelled: active callId does not match $callId',
+        name: _logKey,
+      );
+      return;
+    }
+    final channelDid = incomingState?.otherPartyChannelDid;
+    _clearRingState();
+    if (channelDid != null) {
+      _markCallAsMissed(channelDid);
+    } else {
+      _logger.warning(
+        'Skip markCallAsMissed: otherPartyChannelDid null for $callId',
+        name: _logKey,
+      );
+    }
   }
 
   void _onIncomingCall(IncomingAudioVideoCallEvent event) {
