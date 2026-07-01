@@ -66,7 +66,7 @@ dependency_overrides:
   
 melos:
   scripts:
-    format:
+    fmt:
       description: Format lib and test directories (avoids build/ symlink issues with dart_style 3.1.x)
       exec: dart format lib test
       packageFilters:
