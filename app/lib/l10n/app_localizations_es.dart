@@ -1627,11 +1627,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get removeMemberDialogTitle => 'Remove member';
+  String get removeMemberDialogTitle => 'Eliminar miembro';
 
   @override
   String removeMemberDialogBody(String name) {
-    return 'Remove $name from this group? They will no longer receive messages.';
+    return '¿Eliminar a $name de este grupo? Ya no recibirá mensajes.';
   }
 
   @override
@@ -1791,12 +1791,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String nameSelectedIdentity(String name) {
-    return '$name\'s selected identity';
+    return 'Identidad seleccionada de $name';
   }
 
   @override
   String selectIdentityToVerifyRelationshipPrompt(String name) {
-    return 'Swipe left or right to choose the identity you want to use to verify your relationship with $name.';
+    return 'Desliza hacia la izquierda o derecha para elegir la identidad que deseas usar para verificar tu relación con $name.';
   }
 
   @override
@@ -1804,7 +1804,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String trustedBy(int count) {
-    return 'Trusted by $count';
+    return 'Confiado por $count';
   }
 
   @override
@@ -1817,29 +1817,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get humanZeroKnowledgeProof => 'Prueba de conocimiento cero humana';
 
   @override
-  String get livenessCredential => 'Liveness Credential';
+  String get livenessCredential => 'Credencial de Vitalidad';
 
   @override
-  String get verifiableCredentialWallet => 'Verifiable Credential wallet';
+  String get verifiableCredentialWallet =>
+      'Cartera de Credenciales Verificables';
 
   @override
-  String get noCredentialsYet => 'You don\'t have any credentials yet.';
+  String get noCredentialsYet => 'Aún no tienes credenciales.';
 
   @override
   String get all => 'Todos';
 
   @override
   String get generatingZeroKnowledgeProof =>
-      'Generating Zero-Knowledge Proof...';
+      'Generando Prueba de Conocimiento Cero Humano...';
 
   @override
-  String get cancel => 'Cancel';
+  String get cancel => 'Cancelar';
 
   @override
-  String get generateCredential => 'Generate credential';
+  String get generateCredential => 'Generar credencial';
 
   @override
-  String get generateProof => 'Generate proof';
+  String get generateProof => 'Generar prueba';
 
   @override
   String get livenessCredentialRequest =>
@@ -1875,7 +1876,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mockLivenessCredentialNext =>
-      'You can now continue to generate a Human Zero-Knowledge proof.';
+      'Ahora puedes continuar para generar una Prueba de Conocimiento Cero Humana.';
 
   @override
   String get livenessEvidenceThresholdNotMet =>
@@ -1954,14 +1955,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get zkpProofAlreadyShared => 'Prueba ZKP ya compartida';
 
   @override
-  String get removeMemberConfirm => 'Remove';
+  String get removeMemberConfirm => 'Eliminar';
 
   @override
   String get removeMemberNotSupported =>
-      'Removing members isn\'t supported yet.';
+      'Eliminar miembros aún no está soportado.';
 
   @override
-  String get removeMemberSuccess => 'Member removed from group.';
+  String get removeMemberSuccess => 'Miembro eliminado del grupo.';
 
   @override
   String get generalVideo => 'Vídeo';
