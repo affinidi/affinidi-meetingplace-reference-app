@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 
@@ -35,6 +36,7 @@ class CallChatItemManager {
       final attachment = CallMetadata.buildAttachment(
         mediaType: mediaType,
         status: CallStatus.calling,
+        id: const Uuid().v4(),
       );
       final message = await chatSdk.sendTextMessage(
         '',
