@@ -691,7 +691,7 @@ void main() {
         isGroupContact: false,
       );
 
-      // Peer joins
+      // Peer joins via state so hasHadPeer latches
       await session.emitState(
         AudioVideoCallState(
           status: AudioVideoCallStatus.active,
@@ -700,11 +700,11 @@ void main() {
       );
       await _pumpAsync();
 
-      // Peer leaves
-      await session.emitState(
-        const AudioVideoCallState(
-          status: AudioVideoCallStatus.active,
-          participants: [],
+      // Peer leaves via participantEvent (the actual trigger path)
+      await session.emitParticipantEvent(
+        CallParticipantEvent(
+          type: CallParticipantEventType.left,
+          participant: _remotePeer(),
         ),
       );
       await _pumpAsync();
@@ -736,10 +736,10 @@ void main() {
       );
       await _pumpAsync();
 
-      await session.emitState(
-        const AudioVideoCallState(
-          status: AudioVideoCallStatus.active,
-          participants: [],
+      await session.emitParticipantEvent(
+        CallParticipantEvent(
+          type: CallParticipantEventType.left,
+          participant: _remotePeer(),
         ),
       );
       await _pumpAsync();
@@ -763,10 +763,11 @@ void main() {
         isGroupContact: false,
       );
 
-      await session.emitState(
-        const AudioVideoCallState(
-          status: AudioVideoCallStatus.active,
-          participants: [],
+      // No state emission — hasHadPeer stays false
+      await session.emitParticipantEvent(
+        CallParticipantEvent(
+          type: CallParticipantEventType.left,
+          participant: _remotePeer(),
         ),
       );
       await _pumpAsync();
