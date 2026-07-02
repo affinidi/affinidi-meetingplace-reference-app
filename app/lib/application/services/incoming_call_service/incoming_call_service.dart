@@ -64,10 +64,7 @@ class IncomingCallService extends _$IncomingCallService {
       _logger.warning('SDK not ready yet', name: _logKey);
       return;
     }
-    _logger.info(
-      'Binding to SDK, listening for incoming calls',
-      name: _logKey,
-    );
+    _logger.info('Binding to SDK, listening for incoming calls', name: _logKey);
     final incomingSub = sdk.incomingCalls.listen(_onIncomingCall);
     final cancelledSub = sdk.cancelledCalls.listen(_onCallCancelled);
     ref.onDispose(incomingSub.cancel);
@@ -116,9 +113,7 @@ class IncomingCallService extends _$IncomingCallService {
             .eventOrNull
             ?.otherPartyChannelDid;
         _clearRingState();
-        _ensureSDK(
-          (sdk) => unawaited(sdk.declineCall(callId: callId)),
-        );
+        _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
         if (channelDid != null) _markCallAsMissed(channelDid);
       },
     );

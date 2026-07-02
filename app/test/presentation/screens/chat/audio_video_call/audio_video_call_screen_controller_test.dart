@@ -112,8 +112,8 @@ void main() {
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
           meetingPlaceSdkProvider.overrideWith(
-        (ref) async => FakeMeetingPlaceMatrixSDK(),
-      ),
+            (ref) async => FakeMeetingPlaceMatrixSDK(),
+          ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -156,8 +156,8 @@ void main() {
           ),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
           meetingPlaceSdkProvider.overrideWith(
-        (ref) async => FakeMeetingPlaceMatrixSDK(),
-      ),
+            (ref) async => FakeMeetingPlaceMatrixSDK(),
+          ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -202,8 +202,8 @@ void main() {
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
           meetingPlaceSdkProvider.overrideWith(
-        (ref) async => FakeMeetingPlaceMatrixSDK(),
-      ),
+            (ref) async => FakeMeetingPlaceMatrixSDK(),
+          ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -245,8 +245,8 @@ void main() {
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
           meetingPlaceSdkProvider.overrideWith(
-        (ref) async => FakeMeetingPlaceMatrixSDK(),
-      ),
+            (ref) async => FakeMeetingPlaceMatrixSDK(),
+          ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -359,8 +359,8 @@ void main() {
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
           meetingPlaceSdkProvider.overrideWith(
-        (ref) async => FakeMeetingPlaceMatrixSDK(),
-      ),
+            (ref) async => FakeMeetingPlaceMatrixSDK(),
+          ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -402,8 +402,8 @@ void main() {
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
           meetingPlaceSdkProvider.overrideWith(
-        (ref) async => FakeMeetingPlaceMatrixSDK(),
-      ),
+            (ref) async => FakeMeetingPlaceMatrixSDK(),
+          ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
