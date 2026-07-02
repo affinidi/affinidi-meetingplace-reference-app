@@ -12,10 +12,12 @@ import '../../../../application/services/contacts_service/contacts_service.dart'
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../../../infrastructure/extensions/duration_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../../presentation/widgets/action_button.dart';
 import '../../../../presentation/widgets/profile_circle_avatar.dart';
 import '../../../../presentation/widgets/video_call_pip_window.dart';
+import '../../../widgets/call_ended/call_ended_controller.dart';
 import 'audio_video_call_screen_controller.dart';
 import 'audio_video_call_screen_state.dart';
 import 'call_controls_bar.dart';
@@ -124,25 +126,56 @@ class _CallScreenBody extends HookConsumerWidget {
 
     final phase = resolveCallUiPhase(status: status, hasHadPeer: hasHadPeer);
     final mediaType = getMediaTypeFromFlag(callIsAudioOnly);
+    final endState = phase == CallUiPhase.ended
+        ? resolveCallEndState(status, hasHadPeer: hasHadPeer)
+        : null;
+    final isCallEnded = endState == CallEndState.callEnded;
+
+    // Hand off to the global CallEnded overlay when a connected call ends.
+    // Deferred to avoid modifying a provider during build. Pops this route so
+    // the overlay renders above chat, matching the minimized-call path.
+    useEffect(() {
+      if (!isCallEnded) return null;
+      final durationSeconds = ref.read(
+        provider.select((s) => s.callDurationSeconds),
+      );
+      Future.microtask(() {
+        ref
+            .read(callEndedControllerProvider.notifier)
+            .show(
+              contactId: contactId,
+              peerName: peerName,
+              callDurationSeconds: durationSeconds,
+              isAudioOnly: callIsAudioOnly,
+            );
+        if (context.mounted && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+      });
+      return null;
+    }, [isCallEnded]);
 
     // Ended state: call finished (missed, declined, disconnected, error).
     if (phase == CallUiPhase.ended) {
-      final endState = resolveCallEndState(status);
+      if (isCallEnded) {
+        // The global overlay renders the Call Ended screen.
+        return const SizedBox.shrink();
+      }
+      final calleeCard = ref
+          .read(contactsServiceProvider)
+          .getContactById(contactId)
+          ?.card;
+      final calleeAvatarImage = calleeCard?.hasProfilePic == true
+          ? calleeCard!.image(cacheManager: ref.read(cacheManagerProvider))
+          : null;
       if (endState != null) {
-        final calleeCard = ref
-            .read(contactsServiceProvider)
-            .getContactById(contactId)
-            ?.card;
-        final calleeAvatarImage = calleeCard?.hasProfilePic == true
-            ? calleeCard!.image(cacheManager: ref.read(cacheManagerProvider))
-            : null;
         return _CallNoAnswerScreen(
           contactId: contactId,
           mediaType: mediaType,
           peerName: peerName,
           message: endState == CallEndState.missedCall
-              ? context.l10n.videoCallNoAnswer
-              : context.l10n.videoCallCallDeclined,
+              ? l10n.videoCallNoAnswer
+              : l10n.videoCallCallDeclined,
           calleeAvatarImage: callIsAudioOnly ? calleeAvatarImage : null,
         );
       }

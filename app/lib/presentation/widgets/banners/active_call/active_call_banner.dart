@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../../infrastructure/helpers/duration_formatter.dart';
+import '../../../../infrastructure/extensions/duration_extensions.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
 import '../../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
@@ -30,7 +30,9 @@ class ActiveCallBanner extends ConsumerWidget {
       hasHadPeer: callState.hasHadPeer,
     );
     final statusLabel = switch (phase) {
-      CallUiPhase.inCall => formatDuration(callState.callDurationSeconds),
+      CallUiPhase.inCall => Duration(
+        seconds: callState.callDurationSeconds,
+      ).label,
       CallUiPhase.ringing => l10n.videoCallRinging,
       CallUiPhase.calling || CallUiPhase.ended => l10n.videoCallCalling,
     };
@@ -99,7 +101,7 @@ class ActiveCallBanner extends ConsumerWidget {
                   ),
                   Text(
                     showDuration
-                        ? formatDuration(callState.callDurationSeconds)
+                        ? Duration(seconds: callState.callDurationSeconds).label
                         : statusLabel,
                     style: textStyle.copyWith(
                       color: colorScheme.onSurface.withAlpha(204),

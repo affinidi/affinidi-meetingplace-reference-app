@@ -1,12 +1,5 @@
 part of 'audio_video_call_screen.dart';
 
-String _formatDuration(int seconds) {
-  final h = seconds ~/ 3600;
-  final m = ((seconds % 3600) ~/ 60).toString().padLeft(2, '0');
-  final s = (seconds % 60).toString().padLeft(2, '0');
-  return h > 0 ? '$h:$m:$s' : '$m:$s';
-}
-
 /// Shared top bar: minimize button (left) + peer name and call status (center).
 ///
 /// Used by both [_AudioCallScreen] and [_VideoCallScreen].
@@ -71,7 +64,9 @@ class _CallTopBar extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 switch (phase) {
-                  CallUiPhase.inCall => _formatDuration(callDurationSeconds),
+                  CallUiPhase.inCall => Duration(
+                    seconds: callDurationSeconds,
+                  ).label,
                   CallUiPhase.ringing => context.l10n.videoCallRinging,
                   CallUiPhase.calling ||
                   CallUiPhase.ended => context.l10n.videoCallCalling,
