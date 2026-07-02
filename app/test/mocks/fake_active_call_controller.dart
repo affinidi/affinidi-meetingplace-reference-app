@@ -41,6 +41,7 @@ class FakeActiveCallController extends ActiveCallController {
     required String peerName,
     required bool isMicEnabled,
     required bool isMinimized,
+    required bool isGroupContact,
   }) {
     sessionRegistered = true;
   }

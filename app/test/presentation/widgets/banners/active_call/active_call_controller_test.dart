@@ -7,7 +7,10 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_ca
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/end_call_banner_controller.dart';
 
+import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_controller.dart';
+
 import '../../../../mocks/fake_app_logger.dart';
+import '../../../../mocks/fake_call_ended_controller.dart';
 import '../../../../mocks/fake_chat_session_service.dart';
 import '../../../../mocks/fake_end_call_banner_controller.dart';
 import '../../../../mocks/mock_audio_video_call_session.dart';
@@ -19,14 +22,17 @@ const _kPeerName = 'Alice';
 ProviderContainer _makeContainer({
   FakeChatSessionService? chatService,
   FakeEndCallBannerController? bannerController,
+  FakeCallEndedController? callEndedController,
 }) {
   final chat = chatService ?? FakeChatSessionService();
   final banner = bannerController ?? FakeEndCallBannerController();
+  final callEnded = callEndedController ?? FakeCallEndedController();
   final container = ProviderContainer(
     overrides: [
       appLoggerProvider.overrideWithValue(FakeAppLogger()),
       chatSessionServiceProvider(_kChannelDid).overrideWith(() => chat),
       endCallBannerControllerProvider.overrideWith(() => banner),
+      callEndedControllerProvider.overrideWith(() => callEnded),
     ],
   );
   addTearDown(container.dispose);
@@ -73,6 +79,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: false,
+        isGroupContact: false,
       );
 
       expect(container.read(activeCallControllerProvider), isNotNull);
@@ -93,6 +100,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: false,
+        isGroupContact: false,
       );
 
       expect(
@@ -114,6 +122,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       await session.emitState(
@@ -142,6 +151,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: false,
+        isGroupContact: false,
       );
 
       await session.emitState(
@@ -168,6 +178,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       await session.emitState(
@@ -194,6 +205,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       await session.emitState(
@@ -220,6 +232,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       ctrl.startTimer();
@@ -255,6 +268,7 @@ void main() {
           peerName: _kPeerName,
           isMicEnabled: true,
           isMinimized: true,
+          isGroupContact: false,
         );
 
         await session.emitState(
@@ -283,6 +297,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       await session.emitState(
@@ -314,6 +329,7 @@ void main() {
           peerName: _kPeerName,
           isMicEnabled: true,
           isMinimized: true,
+          isGroupContact: false,
         );
 
         await session.emitState(
@@ -361,6 +377,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       await session.emitState(
@@ -398,6 +415,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       await session.emitState(
@@ -428,6 +446,7 @@ void main() {
           peerName: _kPeerName,
           isMicEnabled: true,
           isMinimized: true,
+          isGroupContact: false,
         );
 
         await session.emitState(
@@ -460,6 +479,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       ctrl.hangUpFromScreen(role: CallRole.caller);
@@ -483,6 +503,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       await session.emitState(
@@ -547,6 +568,7 @@ void main() {
           peerName: _kPeerName,
           isMicEnabled: true,
           isMinimized: true,
+          isGroupContact: false,
         );
 
         session.dispose();
@@ -583,6 +605,7 @@ void main() {
         peerName: _kPeerName,
         isMicEnabled: true,
         isMinimized: true,
+        isGroupContact: false,
       );
 
       await session.emitState(
@@ -628,6 +651,7 @@ void main() {
           peerName: _kPeerName,
           isMicEnabled: true,
           isMinimized: true,
+          isGroupContact: false,
         );
 
         await session.emitState(
@@ -644,6 +668,170 @@ void main() {
         expect(container.read(activeCallControllerProvider), isNull);
       },
     );
+  });
+
+  // =========================================================================
+  // Peer-left auto-end (1-on-1 calls)
+  // =========================================================================
+
+  group('peer-left auto-end', () {
+    test('hangs up when peer leaves a 1-on-1 live call', () async {
+      final container = _makeContainer();
+      final ctrl = container.read(activeCallControllerProvider.notifier);
+      final session = MockAudioVideoCallSession();
+
+      ctrl.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: false,
+        initialStatus: AudioVideoCallStatus.connecting,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: true,
+        isGroupContact: false,
+      );
+
+      // Peer joins
+      await session.emitState(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [_remotePeer()],
+        ),
+      );
+      await _pumpAsync();
+
+      // Peer leaves
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [],
+        ),
+      );
+      await _pumpAsync();
+
+      expect(session.hangUpCalls, 1);
+    });
+
+    test('does not hang up when peer leaves a group call', () async {
+      final container = _makeContainer();
+      final ctrl = container.read(activeCallControllerProvider.notifier);
+      final session = MockAudioVideoCallSession();
+
+      ctrl.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: false,
+        initialStatus: AudioVideoCallStatus.connecting,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: true,
+        isGroupContact: true,
+      );
+
+      await session.emitState(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [_remotePeer()],
+        ),
+      );
+      await _pumpAsync();
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [],
+        ),
+      );
+      await _pumpAsync();
+
+      expect(session.hangUpCalls, 0);
+    });
+
+    test('does not hang up when no peer was ever connected', () async {
+      final container = _makeContainer();
+      final ctrl = container.read(activeCallControllerProvider.notifier);
+      final session = MockAudioVideoCallSession();
+
+      ctrl.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: false,
+        initialStatus: AudioVideoCallStatus.connecting,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: true,
+        isGroupContact: false,
+      );
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [],
+        ),
+      );
+      await _pumpAsync();
+
+      expect(session.hangUpCalls, 0);
+    });
+  });
+
+  // =========================================================================
+  // hangUp shows CallEnded overlay
+  // =========================================================================
+
+  group('hangUp shows CallEnded overlay', () {
+    test('shows CallEnded screen when peer was connected', () async {
+      final callEnded = FakeCallEndedController();
+      final container = _makeContainer(callEndedController: callEnded);
+      final ctrl = container.read(activeCallControllerProvider.notifier);
+      final session = MockAudioVideoCallSession();
+
+      ctrl.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: false,
+        initialStatus: AudioVideoCallStatus.connecting,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: true,
+        isGroupContact: false,
+      );
+      await session.emitState(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [_remotePeer()],
+        ),
+      );
+      await _pumpAsync();
+
+      ctrl.hangUp();
+      await _pumpAsync();
+
+      expect(callEnded.showCalls, hasLength(1));
+      expect(callEnded.showCalls.first.peerName, _kPeerName);
+    });
+
+    test('does not show CallEnded screen when no peer was connected', () {
+      final callEnded = FakeCallEndedController();
+      final container = _makeContainer(callEndedController: callEnded);
+      final ctrl = container.read(activeCallControllerProvider.notifier);
+      final session = MockAudioVideoCallSession();
+
+      ctrl.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: false,
+        initialStatus: AudioVideoCallStatus.connecting,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: false,
+        isGroupContact: false,
+      );
+
+      ctrl.hangUp();
+
+      expect(callEnded.showCalls, isEmpty);
+    });
   });
 }
 
