@@ -1537,10 +1537,19 @@
 	"rCardFieldIssuedAt": "Issued",
 	"rCardTitle": "R-Card",
 	"verifiableCredential": "Verifiable Credential",
+	"@verifiableCredential": {
+		"type": "text"
+	},
 	"verified": "Verified",
+	"@verified": {
+		"type": "text"
+	},
 	"verifiableCredentialDescription": "Secured digital credentials that can be verified for authenticity",
 	"secureAttachmentsTitle": "Secure Attachments",
 	"credentialDetails": "Credential Details",
+	"@credentialDetails": {
+		"type": "text"
+	},
 	"genRCard": "R-Card",
 	"rCardPickIdentitySubtitle": "Select the identity to share as an R-Card",
 	"rCardFooterSent": "R-Card has been sent.",
@@ -1556,7 +1565,9 @@
 	"selectIdentityToVerifyRelationshipWithName": "Select the identity that you would like to use to verify your relationship with {name}.",
 	"@selectIdentityToVerifyRelationshipWithName": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"verifiableRelationshipCredential": "Verifiable Relationship Credential",
@@ -1574,17 +1585,24 @@
 	"verifyRelationshipPrompt": "Verify your relationship with {firstName} by issuing a Verifiable Relationship Credential (VRC). Each VRC exchange increases your trust score.",
 	"@verifyRelationshipPrompt": {
 		"placeholders": {
-			"firstName": { "type": "String" }
+			"firstName": {
+				"type": "String"
+			}
 		}
 	},
 	"generateVrc": "Start now",
 	"generalVerify": "Confirm",
 	"doLater": "Do later",
+	"@doLater": {
+		"type": "text"
+	},
 	"vrcExchangeInitiated": "You've initiated the VRC exchange.",
 	"vrcRequestReceived": "{name} has initiated the VRC exchange.",
 	"@vrcRequestReceived": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcDoLater": "VRC exchange is paused. Tap + and select 'Verifiable Relationship Credential' to resume.",
@@ -1592,46 +1610,53 @@
 	"vrcVerifyPrompt": "Would you like to verify your relationship with {name}? Each VRC exchange increases your trust score.",
 	"@vrcVerifyPrompt": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"vrcStartNow": "Start Now",
 	"vrcDoLaterButton": "Do Later",
 	"vrcYesButton": "Yes",
-	"notShared": "Not shared",
 	"nameSelectedIdentity": "{name}'s selected identity",
 	"@nameSelectedIdentity": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"selectIdentityToVerifyRelationshipPrompt": "Swipe left or right to choose the identity you want to use to verify your relationship with {name}.",
 	"@selectIdentityToVerifyRelationshipPrompt": {
 		"placeholders": {
-			"name": { "type": "String" }
+			"name": {
+				"type": "String"
+			}
 		}
 	},
 	"sendVrc": "Send Relationship Credential",
 	"trustedBy": "Trusted by {count}",
 	"@trustedBy": {
 		"placeholders": {
-			"count": { "type": "int" }
+			"count": {
+				"type": "int"
+			}
 		}
 	},
-	"humanZkp": "Human ZKP",
-	"humanZkpAbbreviated": "Human ZKP",
+	"humanZkp": "Human Zero Knowledge Proof",
 	"@humanZkp": {
 		"type": "text"
 	},
-	"humanZeroKnowledgeProof": "Human Zero-Knowledge Proof",
+	"humanZkpAbbreviated": "Human ZKP",
+	"@humanZkpAbbreviated": {
+		"type": "text"
+	},
+	"humanZeroKnowledgeProof": "Human Zero Knowledge Proof",
 	"@humanZeroKnowledgeProof": {
 		"type": "text"
 	},
 	"livenessCredential": "Liveness Credential",
 	"@livenessCredential": {
-		"type": "text"
-	},
-	"@verifiableCredential": {
 		"type": "text"
 	},
 	"verifiableCredentialWallet": "Verifiable Credential wallet",
@@ -1646,10 +1671,7 @@
 	"@all": {
 		"type": "text"
 	},
-	"@credentialDetails": {
-		"type": "text"
-	},
-	"generatingZeroKnowledgeProof": "Generating Zero-Knowledge Proof...",
+	"generatingZeroKnowledgeProof": "Generating Human Zero Knowledge Proof...",
 	"@generatingZeroKnowledgeProof": {
 		"type": "text"
 	},
@@ -1677,7 +1699,7 @@
 	"@searchingForLivenessCredential": {
 		"type": "text"
 	},
-	"noLivenessCredentialFound": "No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Zero-Knowledge Proof (ZKP) is derived.",
+	"noLivenessCredentialFound": "No Liveness Credential was found.\n\nTo continue, a mock Liveness Credential will be generated locally.\nThis credential is used to demonstrate how a Human Zero Knowledge Proof (ZKP) is derived.",
 	"@noLivenessCredentialFound": {
 		"type": "text"
 	},
@@ -1697,7 +1719,7 @@
 	"@mockLivenessCredentialGenerated": {
 		"type": "text"
 	},
-	"mockLivenessCredentialNext": "You can now continue to generate a Human Zero-Knowledge proof.",
+	"mockLivenessCredentialNext": "You can now continue to generate a Human Zero Knowledge Proof.",
 	"@mockLivenessCredentialNext": {
 		"type": "text"
 	},
@@ -1707,12 +1729,6 @@
 	},
 	"livenessCredentialSessionMissing": "Your liveness credential is not available in this app session. Generate a new credential and try again.",
 	"@livenessCredentialSessionMissing": {
-		"type": "text"
-	},
-	"@doLater": {
-		"type": "text"
-	},
-	"@verified": {
 		"type": "text"
 	},
 	"issuedTo": "Issued to",
@@ -1743,7 +1759,7 @@
 	"@proofFlowContact": {
 		"type": "text"
 	},
-	"proofFlowCheckIfHuman": "Check if {contactName} is human using a Zero\u2011Knowledge Proof (ZKP) derived from a Liveness Credential.",
+	"proofFlowCheckIfHuman": "Check if {contactName} is human using a Zero‑Knowledge Proof (ZKP) derived from a Liveness Credential.",
 	"@proofFlowCheckIfHuman": {
 		"type": "text",
 		"placeholders": {
@@ -1774,15 +1790,24 @@
 			}
 		}
 	},
-	"zkpNoticePaused": "You paused the Human ZKP proof request. Tap the \"+\" icon to restart it.",
+	"zkpNoticePaused": "You paused a Human Zero Knowledge Proof request.",
 	"@zkpNoticePaused": {
 		"type": "text"
 	},
-	"zkpNoticeShared": "You have shared a Zero\u2011Knowledge Proof confirming you are human.\n*No personal data was shared.",
+	"zkpNoticeDeclined": "{contactName} has declined the Human Zero Knowledge Proof request. Tap the \"+\" icon to restart it.",
+	"@zkpNoticeDeclined": {
+		"type": "text",
+		"placeholders": {
+			"contactName": {
+				"type": "String"
+			}
+		}
+	},
+	"zkpNoticeShared": "You have shared a Zero‑Knowledge Proof confirming you are human.\n*No personal data was shared.",
 	"@zkpNoticeShared": {
 		"type": "text"
 	},
-	"zkpNoticeReceived": "{contactName} has shared a Zero\u2011Knowledge Proof confirming they are human.",
+	"zkpNoticeReceived": "{contactName} has shared a Zero‑Knowledge Proof confirming they are human.",
 	"@zkpNoticeReceived": {
 		"type": "text",
 		"placeholders": {
@@ -1791,7 +1816,7 @@
 			}
 		}
 	},
-	"zkpNoticeRequest": "{contactName} has requested a Zero\u2011Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.",
+	"zkpNoticeRequest": "{contactName} has requested a Human Zero Knowledge Proof to confirm you are human. You can generate the proof using an existing Liveness Credential or complete a quick liveness check.",
 	"@zkpNoticeRequest": {
 		"type": "text",
 		"placeholders": {
@@ -1800,12 +1825,8 @@
 			}
 		}
 	},
-	"zkpNoticeRequestInitiated": "You have initiated a Human ZKP request.",
+	"zkpNoticeRequestInitiated": "You have initiated a Human Zero Knowledge Proof request.",
 	"@zkpNoticeRequestInitiated": {
-		"type": "text"
-	},
-	"zkpNoticeDeclined": "You declined the Human ZKP proof request.",
-	"@zkpNoticeDeclined": {
 		"type": "text"
 	},
 	"zkpProofAlreadyShared": "ZKP Proof already shared",
@@ -1816,7 +1837,6 @@
 	"@removeMemberConfirm": {
 		"type": "text"
 	},
-
 	"removeMemberNotSupported": "Removing members isn't supported yet.",
 	"@removeMemberNotSupported": {
 		"type": "text"
@@ -1858,8 +1878,8 @@
 		"description": "Snackbar shown when a picked attachment exceeds the byte-size cap",
 		"placeholders": {
 			"maxMb": {
-				"type": "int",
-				"example": "25"
+				"example": "25",
+				"type": "int"
 			}
 		}
 	},
@@ -1879,38 +1899,154 @@
 	"@voiceMessageSendFailed": {
 		"description": "Snackbar shown when a recorded voice message could not be sent"
 	},
+	"generalEmail": "Email",
+	"vrcResponderIntro": "{name} has selected the following persona to verify the relationship:",
 	"videoCallTitle": "Group Call",
+	"@videoCallTitle": {
+		"type": "text"
+	},
 	"videoCallJoiningCall": "Joining call...",
+	"@videoCallJoiningCall": {
+		"type": "text"
+	},
 	"videoCallWaitingForParticipants": "Waiting for participants...",
+	"@videoCallWaitingForParticipants": {
+		"type": "text"
+	},
 	"videoCallShowMore": "{count, plural, =1{Show 1 more} other{Show {count} more}}",
+	"@videoCallShowMore": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"videoCallShowLess": "Show less",
+	"@videoCallShowLess": {
+		"type": "text"
+	},
 	"videoCallFailedToJoin": "Failed to join: {error}",
+	"@videoCallFailedToJoin": {
+		"type": "text",
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
 	"videoCallUnknownError": "Unknown error",
+	"@videoCallUnknownError": {
+		"type": "text"
+	},
 	"videoCallMicToggleFailed": "Couldn't change the microphone. Please try again.",
+	"@videoCallMicToggleFailed": {
+		"type": "text"
+	},
 	"videoCallCameraToggleFailed": "Couldn't change the camera. Please try again.",
+	"@videoCallCameraToggleFailed": {
+		"type": "text"
+	},
 	"videoCallSpeakerToggleFailed": "Couldn't change the speaker. Please try again.",
+	"@videoCallSpeakerToggleFailed": {
+		"type": "text"
+	},
 	"videoCallMemberNamesFailed": "Couldn't load participant names.",
+	"@videoCallMemberNamesFailed": {
+		"type": "text"
+	},
 	"videoCallHangUpFailed": "Couldn't hang up. Please try again.",
+	"@videoCallHangUpFailed": {
+		"type": "text"
+	},
 	"videoCallParticipantCount": "{count, plural, =1{1 participant} other{{count} participants}}",
+	"@videoCallParticipantCount": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"videoCallMute": "Mute",
+	"@videoCallMute": {
+		"type": "text"
+	},
 	"videoCallUnmute": "Unmute",
+	"@videoCallUnmute": {
+		"type": "text"
+	},
 	"videoCallEnd": "End",
+	"@videoCallEnd": {
+		"type": "text"
+	},
 	"videoCallMicPermissionDenied": "Microphone permission denied. Enable it in Settings.",
+	"@videoCallMicPermissionDenied": {
+		"type": "text"
+	},
 	"videoCallCameraPermissionDenied": "Camera permission denied. Enable it in Settings.",
+	"@videoCallCameraPermissionDenied": {
+		"type": "text"
+	},
 	"videoCallWaitingForEncryption": "Setting up encryption...",
+	"@videoCallWaitingForEncryption": {
+		"type": "text"
+	},
 	"videoCallYou": "You",
+	"@videoCallYou": {
+		"type": "text"
+	},
 	"videoCallRinging": "Ringing",
+	"@videoCallRinging": {
+		"type": "text"
+	},
 	"videoCallCalling": "Calling...",
+	"@videoCallCalling": {
+		"type": "text"
+	},
 	"videoCallCancelCall": "Cancel",
+	"@videoCallCancelCall": {
+		"type": "text"
+	},
 	"videoCallNoAnswer": "No answer",
+	"@videoCallNoAnswer": {
+		"type": "text"
+	},
 	"videoCallCallDeclined": "Call declined",
+	"@videoCallCallDeclined": {
+		"type": "text"
+	},
 	"videoCallCallEnded": "Call ended",
+	"@videoCallCallEnded": {
+		"type": "text"
+	},
 	"videoCallCancel": "Cancel",
+	"@videoCallCancel": {
+		"type": "text"
+	},
 	"videoCallAgain": "Call again",
+	"@videoCallAgain": {
+		"type": "text"
+	},
 	"videoCallGroupCallJoin": "Join",
+	"@videoCallGroupCallJoin": {
+		"type": "text"
+	},
 	"videoCallGroupCallActive": "Group call in progress",
+	"@videoCallGroupCallActive": {
+		"type": "text"
+	},
+	"videoCallSwitch": "Switch to video",
+	"@videoCallSwitch": {
+		"type": "text"
+	},
+	"videoCallSwitchToVideoTitle": "Switch to video call",
+	"@videoCallSwitchToVideoTitle": {
+		"type": "text"
+	},
 	"incomingCallBannerIsCalling": "{callerName} is calling",
 	"@incomingCallBannerIsCalling": {
+		"type": "text",
 		"placeholders": {
 			"callerName": {
 				"type": "String"
@@ -1918,48 +2054,82 @@
 		}
 	},
 	"incomingCallBannerAccept": "Accept",
+	"@incomingCallBannerAccept": {
+		"type": "text"
+	},
 	"incomingCallBannerDecline": "Decline",
+	"@incomingCallBannerDecline": {
+		"type": "text"
+	},
 	"incomingCallBannerUnknownCaller": "Unknown caller",
+	"@incomingCallBannerUnknownCaller": {
+		"type": "text"
+	},
 	"incomingCallBannerAudioCall": "MeetingPlace Audio",
+	"@incomingCallBannerAudioCall": {
+		"type": "text"
+	},
 	"incomingCallBannerVideoCall": "MeetingPlace Video",
+	"@incomingCallBannerVideoCall": {
+		"type": "text"
+	},
 	"callChatItemAudioCall": "Audio call",
+	"@callChatItemAudioCall": {
+		"type": "text"
+	},
 	"callChatItemVideoCall": "Video call",
+	"@callChatItemVideoCall": {
+		"type": "text"
+	},
 	"callChatItemCalling": "Calling...",
+	"@callChatItemCalling": {
+		"type": "text"
+	},
 	"callChatItemRinging": "Ringing",
+	"@callChatItemRinging": {
+		"type": "text"
+	},
 	"callChatItemIncoming": "Incoming call",
+	"@callChatItemIncoming": {
+		"type": "text"
+	},
 	"callChatItemTapToReturn": "Tap to return",
+	"@callChatItemTapToReturn": {
+		"type": "text"
+	},
 	"callChatItemMissed": "Missed",
+	"@callChatItemMissed": {
+		"type": "text"
+	},
 	"callChatItemNotAnswered": "Not answered",
+	"@callChatItemNotAnswered": {
+		"type": "text"
+	},
 	"callDurationHourFormat": "{count, plural, =1{1 h} other{{count} h}}",
 	"@callDurationHourFormat": {
-		"description": "Format for hours in call duration display",
+		"type": "text",
 		"placeholders": {
 			"count": {
-				"type": "int",
-				"example": "1"
+				"type": "int"
 			}
 		}
 	},
 	"callDurationMinuteFormat": "{count, plural, =1{1 m} other{{count} m}}",
 	"@callDurationMinuteFormat": {
-		"description": "Format for minutes in call duration display",
+		"type": "text",
 		"placeholders": {
 			"count": {
-				"type": "int",
-				"example": "30"
+				"type": "int"
 			}
 		}
 	},
 	"callDurationSecondFormat": "{count, plural, =1{1 s} other{{count} s}}",
 	"@callDurationSecondFormat": {
-		"description": "Format for seconds in call duration display",
+		"type": "text",
 		"placeholders": {
 			"count": {
-				"type": "int",
-				"example": "14"
+				"type": "int"
 			}
 		}
-	},
-	"videoCallSwitchToVideoTitle": "Switch to video call?",
-	"videoCallSwitch": "Switch"
+	}
 }

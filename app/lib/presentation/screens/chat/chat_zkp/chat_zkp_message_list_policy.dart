@@ -141,6 +141,9 @@ final class _Enabled extends ChatZkpMessageListPolicy {
                 ) ||
                 LivenessZkpAttachmentParser.matchesProofFormat(
                   att.toCoreAttachment(),
+                ) ||
+                LivenessZkpAttachmentParser.matchesDeclinedFormat(
+                  att.toCoreAttachment(),
                 ),
           )) {
         return true;

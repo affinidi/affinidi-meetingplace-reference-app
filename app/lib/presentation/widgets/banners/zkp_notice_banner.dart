@@ -22,7 +22,7 @@ enum ZkpNoticeType {
   /// User paused the ZKP flow
   paused,
 
-  /// User declined the ZKP proof request
+  /// Peer declined the ZKP request
   declined,
 }
 
@@ -79,18 +79,18 @@ class ZkpNoticeBanner extends ConsumerWidget {
           onGenerateProof: onGenerateProof,
           onDoLater: onDoLater,
         );
-
+      case ZkpNoticeType.declined:
+        return ConciergeMessage(
+          dateCreated: dateCreated,
+          message: context.l10n.zkpNoticeDeclined(
+            contactName ?? context.l10n.proofFlowContact,
+          ),
+        );
       case ZkpNoticeType.initiated:
         return ConciergeMessage(
           dateCreated: dateCreated,
           message: context.l10n.zkpNoticeRequestInitiated,
           fullWidth: true,
-        );
-
-      case ZkpNoticeType.declined:
-        return ConciergeMessage(
-          dateCreated: dateCreated,
-          message: context.l10n.zkpNoticeDeclined,
         );
     }
   }
@@ -190,7 +190,7 @@ class _ZkpBadge extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              context.l10n.humanZkp,
+              context.l10n.humanZkpAbbreviated,
               style: textTheme.bodyMedium?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,

@@ -1478,7 +1478,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String memberRemovedFromGroup(String memberName) {
-    return '$memberName has been removed';
+    return '$memberName wurde entfernt';
   }
 
   @override
@@ -1820,7 +1820,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get humanZkp => 'Human ZKP';
+  String get humanZkp => 'Human Zero-Knowledge-Beweis';
 
   @override
   String get humanZkpAbbreviated => 'Human ZKP';
@@ -1937,7 +1937,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get zkpNoticePaused =>
-      'Sie haben die Human-ZKP-Beweisanforderung pausiert. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
+      'Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis pausiert.';
+
+  @override
+  String zkpNoticeDeclined(String contactName) {
+    return '$contactName hat die Anfrage für einen Human Zero-Knowledge-Beweis abgelehnt. Tippen Sie auf das \"+\"-Symbol, um sie neu zu starten.';
+  }
 
   @override
   String get zkpNoticeShared =>
@@ -1955,11 +1960,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get zkpNoticeRequestInitiated =>
-      'You have initiated a Human ZKP request.';
-
-  @override
-  String get zkpNoticeDeclined =>
-      'Sie haben die Human-ZKP-Beweisanforderung abgelehnt.';
+      'Sie haben eine Anfrage für einen Human Zero-Knowledge-Beweis gestartet.';
 
   @override
   String get zkpProofAlreadyShared => 'ZKP-Beweis bereits geteilt';
@@ -2017,6 +2018,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Sprachnachricht kann nicht gesendet werden.';
 
   @override
+  String get generalEmail => 'E-Mail';
+
+  @override
+  String vrcResponderIntro(Object name) {
+    return '$name hat die folgende Persona zur Verifizierung der Beziehung ausgewählt:';
+  }
+
+  @override
   String get videoCallTitle => 'Gruppenanruf';
 
   @override
@@ -2026,7 +2035,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get videoCallWaitingForParticipants => 'Warte auf Teilnehmer...';
 
   @override
-  String videoCallShowMore(num count) {
+  String videoCallShowMore(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -2040,7 +2049,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get videoCallShowLess => 'Show less';
 
   @override
-  String videoCallFailedToJoin(Object error) {
+  String videoCallFailedToJoin(String error) {
     return 'Beitreten fehlgeschlagen: $error';
   }
 
@@ -2067,7 +2076,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Auflegen nicht möglich. Bitte versuchen Sie es erneut.';
 
   @override
-  String videoCallParticipantCount(num count) {
+  String videoCallParticipantCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -2130,6 +2139,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get videoCallGroupCallActive => 'Gruppenanruf läuft';
+
+  @override
+  String get videoCallSwitch => 'Wechsel';
+
+  @override
+  String get videoCallSwitchToVideoTitle => 'Zu Videoanruf wechseln?';
 
   @override
   String incomingCallBannerIsCalling(String callerName) {
@@ -2207,10 +2222,4 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get videoCallSwitchToVideoTitle => 'Zu Videoanruf wechseln?';
-
-  @override
-  String get videoCallSwitch => 'Wechsel';
 }
