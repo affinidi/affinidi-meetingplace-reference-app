@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../infrastructure/providers/audio_video_call_plugin_provider.dart';
+import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../chat_service/chat_session_service.dart';
 import 'incoming_call_notifier.dart';
 import 'incoming_call_state.dart';
@@ -24,8 +24,8 @@ class IncomingCallService extends _$IncomingCallService {
   void build() {
     _logger.info('Incoming call service initialized', name: _logKey);
     ref.listen(
-      audioVideoCallPluginProvider,
-      (_, next) => _bindToPlugin(next.value),
+      meetingPlaceSdkProvider,
+      (_, next) => _bindToSDK(next.value),
       fireImmediately: true,
     );
 
@@ -44,7 +44,7 @@ class IncomingCallService extends _$IncomingCallService {
   void accept({required String callId}) {
     _logger.info('Accepting call: $callId', name: _logKey);
     _cancelRingTimer();
-    _ensurePlugin((plugin) => unawaited(plugin.acceptCall(callId: callId)));
+    _ensureSDK((sdk) => unawaited(sdk.acceptCall(callId: callId)));
   }
 
   /// Declines the incoming call and marks it as missed in the chat history.
@@ -55,21 +55,21 @@ class IncomingCallService extends _$IncomingCallService {
         .eventOrNull
         ?.otherPartyChannelDid;
     _clearRingState();
-    _ensurePlugin((plugin) => unawaited(plugin.declineCall(callId: callId)));
+    _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
     if (channelDid != null) _markCallAsMissed(channelDid);
   }
 
-  void _bindToPlugin(AudioVideoCallPlugin? plugin) {
-    if (plugin == null) {
-      _logger.warning('Call plugin not ready yet', name: _logKey);
+  void _bindToSDK(MeetingPlaceMatrixSDK? sdk) {
+    if (sdk == null) {
+      _logger.warning('SDK not ready yet', name: _logKey);
       return;
     }
     _logger.info(
-      'Binding to call plugin, listening for incoming calls',
+      'Binding to SDK, listening for incoming calls',
       name: _logKey,
     );
-    final incomingSub = plugin.incomingCalls.listen(_onIncomingCall);
-    final cancelledSub = plugin.cancelledCalls.listen(_onCallCancelled);
+    final incomingSub = sdk.incomingCalls.listen(_onIncomingCall);
+    final cancelledSub = sdk.cancelledCalls.listen(_onCallCancelled);
     ref.onDispose(incomingSub.cancel);
     ref.onDispose(cancelledSub.cancel);
   }
@@ -116,8 +116,8 @@ class IncomingCallService extends _$IncomingCallService {
             .eventOrNull
             ?.otherPartyChannelDid;
         _clearRingState();
-        _ensurePlugin(
-          (plugin) => unawaited(plugin.declineCall(callId: callId)),
+        _ensureSDK(
+          (sdk) => unawaited(sdk.declineCall(callId: callId)),
         );
         if (channelDid != null) _markCallAsMissed(channelDid);
       },
@@ -136,19 +136,17 @@ class IncomingCallService extends _$IncomingCallService {
     _ringTimer = null;
   }
 
-  AudioVideoCallPlugin? get _plugin =>
-      ref.read(audioVideoCallPluginProvider).value;
+  MeetingPlaceMatrixSDK? get _sdk => ref.read(meetingPlaceSdkProvider).value;
 
-  /// Runs [action] with the active call plugin, or logs a warning if no
-  /// plugin is registered. Never fails silently.
-  void _ensurePlugin(void Function(AudioVideoCallPlugin plugin) action) {
-    final plugin = _plugin;
-    if (plugin == null) {
-      _logger.warning('Call plugin not available', name: _logKey);
+  /// Runs [action] with the active SDK, or logs a warning if not yet loaded.
+  void _ensureSDK(void Function(MeetingPlaceMatrixSDK sdk) action) {
+    final sdk = _sdk;
+    if (sdk == null) {
+      _logger.warning('SDK not available', name: _logKey);
       return;
     }
-    _logger.info('Executing action with call plugin', name: _logKey);
-    action(plugin);
+    _logger.info('Executing action with SDK', name: _logKey);
+    action(sdk);
   }
 
   /// Updates the incoming call chat item to [CallStatus.missed] for the given

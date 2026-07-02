@@ -79,6 +79,13 @@ final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
     mediatorDid: settingsState.selectedMediatorDid,
     controlPlaneDid: environment.controlPlaneDid,
     homeserver: Uri.parse(homeserver),
+    livekitServiceUrl: environment.livekitServiceUrl.isNotEmpty
+        ? Uri.parse(environment.livekitServiceUrl)
+        : null,
+    livekitSfuUrl: environment.livekitSfuUrl.isNotEmpty
+        ? Uri.parse(environment.livekitSfuUrl)
+        : null,
+    outgoingCallTimeout: environment.outgoingCallTimeout,
     deviceId: deviceId,
     serverName: environment.matrixServerName,
     databaseFactory: CallbackMatrixDatabaseFactory(

@@ -33,7 +33,6 @@ import '../../../infrastructure/plugins/audio_attachments_plugin/local_voice_att
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../infrastructure/providers/audio_video_call_plugin_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -114,7 +113,7 @@ class ChatScreenController extends _$ChatScreenController
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     final channelDid = contact?.channelDid;
     final isCallSupported = ref.watch(
-      audioVideoCallPluginProvider.select((v) => v.value?.isSupported ?? false),
+      meetingPlaceSdkProvider.select((v) => v.value?.isCallSupported ?? false),
     );
     var pendingState = ChatScreenState(
       contact: contact,

@@ -10,7 +10,7 @@ import '../rules/call_ui_rules.dart';
 /// up.
 ///
 /// Reads current call context from caller-supplied parameters and drives the
-/// plugin/session. All resulting state changes are reported through `onUpdate`
+/// SDK/session. All resulting state changes are reported through `onUpdate`
 /// as a single `CallLifecycleUpdate`, mirroring `CallMediaToggleHandler` and
 /// `CallSessionHandler`.
 ///
@@ -21,7 +21,7 @@ class CallLifecycleHandler {
     required this._logger,
     required this._channelDid,
     required this._getState,
-    required this._getPlugin,
+    required this._getSDK,
     required this._getSession,
     required this._setSession,
     required this._onUpdate,
@@ -32,7 +32,7 @@ class CallLifecycleHandler {
   final AppLogger _logger;
   final String? _channelDid;
   final AudioVideoCallScreenState Function() _getState;
-  final AudioVideoCallPlugin? Function() _getPlugin;
+  final MeetingPlaceMatrixSDK? Function() _getSDK;
   final AudioVideoCallSession? Function() _getSession;
   final void Function(AudioVideoCallSession? session) _setSession;
   final void Function(CallLifecycleUpdate update) _onUpdate;
@@ -41,9 +41,9 @@ class CallLifecycleHandler {
   Future<void> joinCall() async {
     if (!_canStartNewCall()) return;
 
-    final plugin = _getPlugin();
-    if (plugin == null) {
-      _logger.warning('joinCall: Plugin not available', name: _logKey);
+    final sdk = _getSDK();
+    if (sdk == null) {
+      _logger.warning('joinCall: SDK not available', name: _logKey);
       _onUpdate(const CallLifecycleUpdate(status: AudioVideoCallStatus.error));
       return;
     }
@@ -55,13 +55,13 @@ class CallLifecycleHandler {
       return;
     }
 
-    await _startPluginCall(plugin, channelDid);
+    await _startSDKCall(sdk, channelDid);
   }
 
   /// Cancels an outgoing call that has not yet been answered.
   Future<void> cancelCall() async {
     try {
-      await _getPlugin()?.leaveCurrentCall();
+      await _getSDK()?.leaveCurrentCall();
       _setSession(null);
     } catch (e, stackTrace) {
       _logger.error(
@@ -87,7 +87,7 @@ class CallLifecycleHandler {
   /// Ends the active call and transitions to ended state.
   Future<void> leaveCall() async {
     try {
-      await _getPlugin()?.leaveCurrentCall();
+      await _getSDK()?.leaveCurrentCall();
       _setSession(null);
     } catch (e, stackTrace) {
       _logger.error(
@@ -132,10 +132,10 @@ class CallLifecycleHandler {
     return true;
   }
 
-  /// Requests the plugin to start a call and emit either the attached session
+  /// Requests the SDK to start a call and emit either the attached session
   /// or an error status.
-  Future<void> _startPluginCall(
-    AudioVideoCallPlugin plugin,
+  Future<void> _startSDKCall(
+    MeetingPlaceMatrixSDK sdk,
     String channelDid,
   ) async {
     const speakerphoneEnabled = true;
@@ -146,7 +146,7 @@ class CallLifecycleHandler {
       ),
     );
     try {
-      final session = await plugin.startCall(
+      final session = await sdk.startCall(
         otherPartyChannelDid: channelDid,
         mediaType: _getState().isAudioOnly
             ? CallMediaType.audio

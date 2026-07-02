@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../application/services/authentication_service/authentication_service.dart';
@@ -16,8 +15,8 @@ import '../../application/services/r_cards_service/r_card_chat_notifier_service.
 import '../../application/services/settings_service/settings_service.dart';
 import '../../application/services/vrc_service/vrc_service.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
-import '../../infrastructure/providers/audio_video_call_plugin_provider.dart';
 import '../../infrastructure/providers/credentials_sdk_provider.dart';
+import '../../infrastructure/providers/meeting_place_sdk_provider.dart';
 
 part 'app_controller.g.dart';
 
@@ -61,10 +60,8 @@ class AppController extends _$AppController with WidgetsBindingObserver {
       unawaited(ref.read(appBadgeServiceProvider).clearBadge());
     }
     if (state == AppLifecycleState.detached) {
-      final plugin = ref.read(audioVideoCallPluginProvider).value;
-      if (plugin is MeetingPlaceLiveKitCallPlugin) {
-        unawaited(plugin.leaveCurrentCall());
-      }
+      final sdk = ref.read(meetingPlaceSdkProvider).value;
+      unawaited(sdk?.leaveCurrentCall());
     }
   }
 }

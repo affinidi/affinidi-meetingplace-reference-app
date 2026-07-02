@@ -9,7 +9,7 @@ import 'package:mpx_flutter_reference_app/application/services/incoming_call_ser
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/audio_video_call_plugin_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen.dart';
@@ -22,6 +22,7 @@ import '../../../../fakes/fake_permission_service.dart';
 import '../../../../mocks/fake_active_call_controller.dart';
 import '../../../../mocks/fake_app_logger.dart';
 import '../../../../mocks/fake_contacts_service.dart';
+import '../../../../mocks/fake_meeting_place_matrix_sdk.dart';
 
 const _kContactId = 'smoke-test-contact';
 
@@ -50,7 +51,9 @@ Widget _wrap({required AudioVideoCallScreenState controllerState}) {
     overrides: [
       appLoggerProvider.overrideWithValue(FakeAppLogger()),
       contactsServiceProvider.overrideWith(FakeContactsService.new),
-      audioVideoCallPluginProvider.overrideWith((ref) async => null),
+      meetingPlaceSdkProvider.overrideWith(
+        (ref) async => FakeMeetingPlaceMatrixSDK(),
+      ),
       permissionServiceProvider.overrideWithValue(FakePermissionService()),
       incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
       activeCallControllerProvider.overrideWith(FakeActiveCallController.new),

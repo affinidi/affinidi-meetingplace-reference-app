@@ -6,7 +6,7 @@ import 'package:mpx_flutter_reference_app/application/services/contacts_service/
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/providers/audio_video_call_plugin_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
@@ -17,6 +17,7 @@ import '../../../../mocks/fake_active_call_controller.dart';
 import '../../../../mocks/fake_app_logger.dart';
 import '../../../../mocks/fake_chat_session_service.dart';
 import '../../../../mocks/fake_contacts_service.dart';
+import '../../../../mocks/fake_meeting_place_matrix_sdk.dart';
 import '../../../../mocks/mock_audio_video_call_session.dart';
 
 const _kContactId = 'test-contact-id';
@@ -50,7 +51,9 @@ ProviderContainer _makeContainer({
       contactsServiceProvider.overrideWith(FakeContactsService.new),
       activeCallControllerProvider.overrideWith(() => banner),
       chatSessionServiceProvider(_kContactId).overrideWith(() => chat),
-      audioVideoCallPluginProvider.overrideWith((ref) async => null),
+      meetingPlaceSdkProvider.overrideWith(
+        (ref) async => FakeMeetingPlaceMatrixSDK(),
+      ),
       permissionServiceProvider.overrideWith((ref) => _FakePermissionService()),
       incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
     ],
@@ -108,7 +111,9 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          audioVideoCallPluginProvider.overrideWith((ref) async => null),
+          meetingPlaceSdkProvider.overrideWith(
+        (ref) async => FakeMeetingPlaceMatrixSDK(),
+      ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -150,7 +155,9 @@ void main() {
             ),
           ),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          audioVideoCallPluginProvider.overrideWith((ref) async => null),
+          meetingPlaceSdkProvider.overrideWith(
+        (ref) async => FakeMeetingPlaceMatrixSDK(),
+      ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -194,7 +201,9 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          audioVideoCallPluginProvider.overrideWith((ref) async => null),
+          meetingPlaceSdkProvider.overrideWith(
+        (ref) async => FakeMeetingPlaceMatrixSDK(),
+      ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -235,7 +244,9 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          audioVideoCallPluginProvider.overrideWith((ref) async => null),
+          meetingPlaceSdkProvider.overrideWith(
+        (ref) async => FakeMeetingPlaceMatrixSDK(),
+      ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -347,7 +358,9 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          audioVideoCallPluginProvider.overrideWith((ref) async => null),
+          meetingPlaceSdkProvider.overrideWith(
+        (ref) async => FakeMeetingPlaceMatrixSDK(),
+      ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),
@@ -388,7 +401,9 @@ void main() {
           contactsServiceProvider.overrideWith(FakeContactsService.new),
           activeCallControllerProvider.overrideWith(() => banner),
           chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          audioVideoCallPluginProvider.overrideWith((ref) async => null),
+          meetingPlaceSdkProvider.overrideWith(
+        (ref) async => FakeMeetingPlaceMatrixSDK(),
+      ),
           permissionServiceProvider.overrideWith(
             (ref) => _FakePermissionService(),
           ),

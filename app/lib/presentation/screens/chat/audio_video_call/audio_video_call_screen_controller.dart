@@ -9,7 +9,6 @@ import '../../../../application/services/incoming_call_service/incoming_call_not
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../../infrastructure/providers/audio_video_call_plugin_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../infrastructure/services/permission_service/permission_service.dart';
 import '../../../widgets/banners/active_call/active_call_controller.dart';
@@ -33,7 +32,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
   late final _logger = ref.read(appLoggerProvider);
 
-  AudioVideoCallPlugin? _plugin;
+  MeetingPlaceMatrixSDK? _sdk;
   AudioVideoCallSession? _session;
   CallSessionHandler? _sessionHandler;
   StreamSubscription<CallParticipantEvent>? _participantEventSub;
@@ -91,7 +90,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       logger: _logger,
       channelDid: _channelDid,
       getState: () => state,
-      getPlugin: () => _plugin,
+      getSDK: () => _sdk,
       getSession: () => _session,
       setSession: (session) => _session = session,
       onUpdate: _applyLifecycleUpdate,
@@ -129,8 +128,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       }
     });
 
-    ref.listen(audioVideoCallPluginProvider, (prev, next) {
-      _plugin = next.value;
+    ref.listen(meetingPlaceSdkProvider, (prev, next) {
+      _sdk = next.value;
     }, fireImmediately: true);
 
     final activeCallController = ref.read(

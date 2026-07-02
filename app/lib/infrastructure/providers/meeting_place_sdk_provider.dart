@@ -4,6 +4,7 @@ import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
+import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:ssi/ssi.dart';
 
@@ -77,6 +78,8 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
         ),
         config: await ref.read(matrixConfigProvider.future),
         logger: logger,
+        rtcDelegate: FlutterMatrixRTCDelegate(),
+        roomFactory: (_) => FlutterLiveKitRoom(),
         options: MeetingPlaceCoreSDKOptions(
           expectedMessageWrappingTypes: const [
             MessageWrappingType.authcryptPlaintext,
