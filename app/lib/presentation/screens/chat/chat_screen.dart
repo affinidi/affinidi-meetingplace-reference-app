@@ -193,17 +193,19 @@ class ChatScreen extends HookConsumerWidget {
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: isInitialized
-                ? _ChatSection(
-                    contactId: _contactId,
-                    showHumanZkp: showHumanZkp,
-                  )
-                : const _LoadingSection(),
-          ),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: isInitialized
+                  ? _ChatSection(
+                      contactId: _contactId,
+                      showHumanZkp: showHumanZkp,
+                    )
+                  : const _LoadingSection(),
+            ),
+          ],
+        ),
       ),
     );
   }
