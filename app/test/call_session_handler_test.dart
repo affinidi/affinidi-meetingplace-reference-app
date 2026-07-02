@@ -8,12 +8,21 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_session_handler.dart';
 
 class _FakeCallSession extends Fake implements AudioVideoCallSession {
-  final _controller = StreamController<AudioVideoCallState>.broadcast();
+  final _stateController = StreamController<AudioVideoCallState>.broadcast();
+  final _participantController =
+      StreamController<CallParticipantEvent>.broadcast();
 
-  void emit(AudioVideoCallState s) => _controller.add(s);
+  void emit(AudioVideoCallState s) => _stateController.add(s);
+
+  void emitParticipantEvent(CallParticipantEvent e) =>
+      _participantController.add(e);
 
   @override
-  Stream<AudioVideoCallState> get state => _controller.stream;
+  Stream<AudioVideoCallState> get state => _stateController.stream;
+
+  @override
+  Stream<CallParticipantEvent> get participantEvents =>
+      _participantController.stream;
 }
 
 AudioVideoCallParticipant _selfParticipant() =>
@@ -97,25 +106,15 @@ void main() {
     test('emits a joined event when a new remote appears mid-call', () async {
       handler.attach(session);
 
-      session.emit(
-        AudioVideoCallState(
-          status: AudioVideoCallStatus.active,
-          participants: [_selfParticipant(), _peerParticipant('a')],
-        ),
-      );
-      session.emit(
-        AudioVideoCallState(
-          status: AudioVideoCallStatus.active,
-          participants: [
-            _selfParticipant(),
-            _peerParticipant('a'),
-            _peerParticipant('b'),
-          ],
+      session.emitParticipantEvent(
+        CallParticipantEvent(
+          type: CallParticipantEventType.joined,
+          participant: _peerParticipant('b'),
         ),
       );
       await pumpEventQueue();
 
-      final event = updates.last.participantEvent;
+      final event = updates.single.participantEvent;
       expect(event, isNotNull);
       expect(event!.type, CallParticipantChangeType.joined);
       expect(event.count, 1);
@@ -124,25 +123,15 @@ void main() {
     test('emits a left event when a remote disappears mid-call', () async {
       handler.attach(session);
 
-      session.emit(
-        AudioVideoCallState(
-          status: AudioVideoCallStatus.active,
-          participants: [
-            _selfParticipant(),
-            _peerParticipant('a'),
-            _peerParticipant('b'),
-          ],
-        ),
-      );
-      session.emit(
-        AudioVideoCallState(
-          status: AudioVideoCallStatus.active,
-          participants: [_selfParticipant(), _peerParticipant('a')],
+      session.emitParticipantEvent(
+        CallParticipantEvent(
+          type: CallParticipantEventType.left,
+          participant: _peerParticipant('a'),
         ),
       );
       await pumpEventQueue();
 
-      final event = updates.last.participantEvent;
+      final event = updates.single.participantEvent;
       expect(event, isNotNull);
       expect(event!.type, CallParticipantChangeType.left);
       expect(event.count, 1);
@@ -350,6 +339,59 @@ void main() {
         AudioVideoCallState(
           status: AudioVideoCallStatus.active,
           participants: [_selfParticipant(), _peerParticipant('a')],
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(updates, isEmpty);
+    });
+  });
+
+  group('participantEvents forwarding', () {
+    test('forwards a joined event as a participantEvent update', () async {
+      handler.attach(session);
+
+      session.emitParticipantEvent(
+        CallParticipantEvent(
+          type: CallParticipantEventType.joined,
+          participant: _peerParticipant('p1'),
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(updates, hasLength(1));
+      expect(
+        updates.single.participantEvent?.type,
+        CallParticipantChangeType.joined,
+      );
+    });
+
+    test('forwards a left event as a participantEvent update', () async {
+      handler.attach(session);
+
+      session.emitParticipantEvent(
+        CallParticipantEvent(
+          type: CallParticipantEventType.left,
+          participant: _peerParticipant('p1'),
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(updates, hasLength(1));
+      expect(
+        updates.single.participantEvent?.type,
+        CallParticipantChangeType.left,
+      );
+    });
+
+    test('does not forward participant events after dispose', () async {
+      handler.attach(session);
+      handler.dispose();
+
+      session.emitParticipantEvent(
+        CallParticipantEvent(
+          type: CallParticipantEventType.left,
+          participant: _peerParticipant('p1'),
         ),
       );
       await pumpEventQueue();

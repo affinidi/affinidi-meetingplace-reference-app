@@ -26,6 +26,7 @@ class ActiveCallController extends _$ActiveCallController {
   AudioVideoCallSession? _session;
   Timer? _durationTimer;
   StreamSubscription<AudioVideoCallState>? _sessionStateSub;
+  StreamSubscription<CallParticipantEvent>? _participantEventSub;
   CallRole? _ownRole;
   CallChatItemHandler? _chatItemHandler;
   ChatSessionService? _chatService;
@@ -52,6 +53,7 @@ class ActiveCallController extends _$ActiveCallController {
       _isDisposed = true;
       _durationTimer?.cancel();
       _sessionStateSub?.cancel();
+      _participantEventSub?.cancel();
       _chatServiceSub?.close();
       _chatServiceSub = null;
     });
@@ -117,6 +119,8 @@ class ActiveCallController extends _$ActiveCallController {
     stopTimer();
     _sessionStateSub?.cancel();
     _sessionStateSub = null;
+    _participantEventSub?.cancel();
+    _participantEventSub = null;
     _session = null;
     final pendingEndWrite = _chatItemHandler?.endCallWrite;
     _chatItemHandler?.dispose();
@@ -203,7 +207,38 @@ class ActiveCallController extends _$ActiveCallController {
       logger: _logger,
     )..attach(session);
     _sessionStateSub?.cancel();
+    _participantEventSub?.cancel();
     _sessionStateSub = session.state.listen(_onSessionState, onDone: clear);
+    _participantEventSub = session.participantEvents.listen(
+      _onParticipantEvent,
+    );
+  }
+
+  /// Ends a minimized 1-on-1 call immediately when the only peer leaves.
+  void _onParticipantEvent(CallParticipantEvent event) {
+    if (_isDisposed) return;
+    if (event.type != CallParticipantEventType.left) return;
+    final current = state;
+    if (current == null || !current.isMinimized) return;
+    if (_isGroupContact) {
+      _logger.info(
+        '_onParticipantEvent: Peer left group call, call continues',
+        name: _logKey,
+      );
+      return;
+    }
+    if (!current.hasHadPeer) {
+      _logger.warning(
+        '_onParticipantEvent: Peer left but hasHadPeer=false, skipping',
+        name: _logKey,
+      );
+      return;
+    }
+    _logger.info(
+      '_onParticipantEvent: Peer left 1-on-1 call, ending call',
+      name: _logKey,
+    );
+    hangUp();
   }
 
   /// Removes the registered session when the call is fully torn down.
@@ -212,6 +247,8 @@ class ActiveCallController extends _$ActiveCallController {
     _logger.info('clearSession: Session released', name: _logKey);
     _sessionStateSub?.cancel();
     _sessionStateSub = null;
+    _participantEventSub?.cancel();
+    _participantEventSub = null;
     _session = null;
   }
 
@@ -306,22 +343,6 @@ class ActiveCallController extends _$ActiveCallController {
     );
 
     if (peerJustJoined) startTimer();
-
-    // In a 1-on-1 call, the peer leaving ends the call for self too.
-    // Group calls stay open while other participants remain.
-    if (shouldAutoEndCallForPeer(
-      isGroupContact: _isGroupContact,
-      hasHadPeer: hadPeer,
-      participants: sessionState.participants,
-      status: sessionState.status,
-    )) {
-      _logger.info(
-        '_onSessionState: Peer left 1-on-1 call, ending call',
-        name: _logKey,
-      );
-      hangUp();
-      return;
-    }
 
     if (isEndedCallStatus(sessionState.status)) {
       _chatItemHandler?.endCallChatItem(

@@ -14,11 +14,17 @@ class _FakeSession extends Fake implements AudioVideoCallSession {
   final List<bool> micCalls = [];
   int hangUpCalls = 0;
   final _stateController = StreamController<AudioVideoCallState>.broadcast();
+  final _participantController =
+      StreamController<CallParticipantEvent>.broadcast();
 
   void emit(AudioVideoCallState s) => _stateController.add(s);
 
   @override
   Stream<AudioVideoCallState> get state => _stateController.stream;
+
+  @override
+  Stream<CallParticipantEvent> get participantEvents =>
+      _participantController.stream;
 
   @override
   Future<void> setMicrophoneEnabled(bool enabled) async =>
