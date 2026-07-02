@@ -62,173 +62,187 @@ class _ChatMessageList extends HookConsumerWidget {
         children: [
           _AwaitingMembersWarning(contactId: _contactId),
           Expanded(
-            child: ListView.builder(
+            child: Scrollbar(
               controller: scrollController,
-              reverse: true,
-              findChildIndexCallback: (key) {
-                if (key is! ValueKey<String>) return null;
+              thumbVisibility: true,
+              child: ListView.builder(
+                controller: scrollController,
+                reverse: true,
+                findChildIndexCallback: (key) {
+                  if (key is! ValueKey<String>) return null;
 
-                final messageId = key.value;
-                final index = sortedMessages.indexWhere(
-                  (message) => message.messageId == messageId,
-                );
+                  final messageId = key.value;
+                  final index = sortedMessages.indexWhere(
+                    (message) => message.messageId == messageId,
+                  );
 
-                return index == -1 ? null : index;
-              },
-              itemCount: sortedMessages.length,
-              itemBuilder: (context, index) {
-                final chatItem = sortedMessages[index];
+                  return index == -1 ? null : index;
+                },
+                itemCount: sortedMessages.length,
+                itemBuilder: (context, index) {
+                  final chatItem = sortedMessages[index];
 
-                if (_isVrcRequestOnlyMessage(chatItem) ||
-                    zkpPolicy.shouldHide(chatItem)) {
-                  return const SizedBox.shrink();
-                }
-                var nextItemFromSameDid = false;
+                  if (_isVrcRequestOnlyMessage(chatItem) ||
+                      zkpPolicy.shouldHide(chatItem)) {
+                    return const SizedBox.shrink();
+                  }
+                  var nextItemFromSameDid = false;
 
-                var nextIndex = index + 1;
-                while (nextIndex < sortedMessages.length &&
-                    (_isVrcRequestOnlyMessage(sortedMessages[nextIndex]) ||
-                        zkpPolicy.shouldHide(sortedMessages[nextIndex]))) {
-                  nextIndex++;
-                }
+                  var nextIndex = index + 1;
+                  while (nextIndex < sortedMessages.length &&
+                      (_isVrcRequestOnlyMessage(sortedMessages[nextIndex]) ||
+                          zkpPolicy.shouldHide(sortedMessages[nextIndex]))) {
+                    nextIndex++;
+                  }
 
-                if (nextIndex < sortedMessages.length) {
-                  final chatItemNext = sortedMessages[nextIndex];
-                  nextItemFromSameDid =
-                      chatItemNext.senderDid == chatItem.senderDid;
-                }
+                  if (nextIndex < sortedMessages.length) {
+                    final chatItemNext = sortedMessages[nextIndex];
+                    nextItemFromSameDid =
+                        chatItemNext.senderDid == chatItem.senderDid;
+                  }
 
-                var thisItemStatus = '';
+                  var thisItemStatus = '';
 
-                if (chatItem.isFromMe && !_isRCardOnlyMessage(chatItem)) {
-                  if (index == indexOfLastMessageFromMe) {
-                    thisItemStatus = context.l10n.chatItemStatus(
-                      chatItem.status.toString(),
-                    );
-                    lastUsedChatItemStatus = consolidateChatItemStatus(
-                      chatItem,
-                    );
-                  } else {
-                    final indexOfNextMessageFromMe = ref
-                        .read(provider)
-                        .getIndexOfNextMessageFromMe(index);
-                    if (indexOfNextMessageFromMe != -1) {
-                      final chatItemNextFromMe =
-                          sortedMessages[indexOfNextMessageFromMe];
-                      if (consolidateChatItemStatus(chatItem) !=
-                          lastUsedChatItemStatus) {
-                        thisItemStatus = context.l10n.chatItemStatus(
-                          chatItemNextFromMe.status.toString(),
-                        );
-                        lastUsedChatItemStatus = consolidateChatItemStatus(
-                          chatItemNextFromMe,
-                        );
-                      }
-                      if (chatItem.status == chat.ChatItemStatus.error) {
-                        thisItemStatus = context.l10n.chatItemStatusError;
+                  if (chatItem.isFromMe && !_isRCardOnlyMessage(chatItem)) {
+                    if (index == indexOfLastMessageFromMe) {
+                      thisItemStatus = context.l10n.chatItemStatus(
+                        chatItem.status.toString(),
+                      );
+                      lastUsedChatItemStatus = consolidateChatItemStatus(
+                        chatItem,
+                      );
+                    } else {
+                      final indexOfNextMessageFromMe = ref
+                          .read(provider)
+                          .getIndexOfNextMessageFromMe(index);
+                      if (indexOfNextMessageFromMe != -1) {
+                        final chatItemNextFromMe =
+                            sortedMessages[indexOfNextMessageFromMe];
+                        if (consolidateChatItemStatus(chatItem) !=
+                            lastUsedChatItemStatus) {
+                          thisItemStatus = context.l10n.chatItemStatus(
+                            chatItemNextFromMe.status.toString(),
+                          );
+                          lastUsedChatItemStatus = consolidateChatItemStatus(
+                            chatItemNextFromMe,
+                          );
+                        }
+                        if (chatItem.status == chat.ChatItemStatus.error) {
+                          thisItemStatus = context.l10n.chatItemStatusError;
+                        }
                       }
                     }
                   }
-                }
 
-                return Padding(
-                  key: ValueKey(chatItem.messageId),
-                  padding: zkpPolicy.horizontalPadding(chatItem),
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment:
-                            (chatItem is EncryptionNotice ||
-                                chatItem is chat.ConciergeMessage ||
-                                chatItem.status ==
-                                    chat.ChatItemStatus.userInput)
-                            ? Alignment.center
-                            : (chatItem.isFromMe)
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Column(
-                          crossAxisAlignment:
+                  return Padding(
+                    key: ValueKey(chatItem.messageId),
+                    padding: zkpPolicy.horizontalPadding(chatItem),
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment:
                               (chatItem is EncryptionNotice ||
-                                  chatItem is chat.ConciergeMessage)
-                              ? CrossAxisAlignment.center
-                              : chatItem.isFromMe
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            if (!nextItemFromSameDid)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: _ChatItemFromInfo(
-                                  chatItem: chatItem,
-                                  contactId: _contactId,
-                                ),
-                              ),
-                            _isRCardOnlyMessage(chatItem)
-                                ? _RCardBubble(
+                                  chatItem is chat.ConciergeMessage ||
+                                  chatItem.status ==
+                                      chat.ChatItemStatus.userInput)
+                              ? Alignment.center
+                              : (chatItem.isFromMe)
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Column(
+                            crossAxisAlignment:
+                                (chatItem is EncryptionNotice ||
+                                    chatItem is chat.ConciergeMessage)
+                                ? CrossAxisAlignment.center
+                                : chatItem.isFromMe
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              if (!nextItemFromSameDid)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: _ChatItemFromInfo(
                                     chatItem: chatItem,
-                                    index: index,
                                     contactId: _contactId,
-                                    selectedReactionIndex:
-                                        selectedReactionIndex,
-                                    isGroupChat: isGroupChat,
-                                  )
-                                : _ZkpBubble(
-                                    chatItem: chatItem,
-                                    index: index,
-                                    contactId: _contactId,
-                                    selectedReactionIndex:
-                                        selectedReactionIndex,
-                                    policy: zkpPolicy,
-                                  ),
-                          ],
-                        ),
-                      ),
-                      if (chatItem is chat.Message) ...[
-                        chatItem.reactions.isNotEmpty
-                            ? Align(
-                                alignment: (chatItem.isFromMe)
-                                    ? Alignment.topRight
-                                    : Alignment.topLeft,
-                                child: Padding(
-                                  padding: (chatItem.isFromMe)
-                                      ? const EdgeInsets.fromLTRB(60, 0, 5, 8)
-                                      : const EdgeInsets.fromLTRB(5, 0, 60, 8),
-                                  child: _Reactions(
-                                    contactId: _contactId,
-                                    chatItem: chatItem,
                                   ),
                                 ),
-                              )
-                            : const SizedBox(height: 1),
-                        if (selectedReactionIndex == index)
-                          _ReactionPickerChatItem(
-                            chatItem: chatItem,
-                            contactId: _contactId,
+                              _isRCardOnlyMessage(chatItem)
+                                  ? _RCardBubble(
+                                      chatItem: chatItem,
+                                      index: index,
+                                      contactId: _contactId,
+                                      selectedReactionIndex:
+                                          selectedReactionIndex,
+                                      isGroupChat: isGroupChat,
+                                    )
+                                  : _ZkpBubble(
+                                      chatItem: chatItem,
+                                      index: index,
+                                      contactId: _contactId,
+                                      selectedReactionIndex:
+                                          selectedReactionIndex,
+                                      policy: zkpPolicy,
+                                    ),
+                            ],
                           ),
-                        thisItemStatus.isNotEmpty
-                            ? Align(
-                                alignment: (chatItem.isFromMe)
-                                    ? Alignment.topRight
-                                    : Alignment.topLeft,
-                                child: Padding(
-                                  padding: (chatItem.isFromMe)
-                                      ? const EdgeInsets.fromLTRB(60, 0, 5, 8)
-                                      : const EdgeInsets.fromLTRB(5, 0, 60, 8),
-                                  child: Text(
-                                    thisItemStatus,
-                                    style: const TextStyle(
-                                      color: Colors.blueGrey,
-                                      fontSize: 12,
+                        ),
+                        if (chatItem is chat.Message) ...[
+                          chatItem.reactions.isNotEmpty
+                              ? Align(
+                                  alignment: (chatItem.isFromMe)
+                                      ? Alignment.topRight
+                                      : Alignment.topLeft,
+                                  child: Padding(
+                                    padding: (chatItem.isFromMe)
+                                        ? const EdgeInsets.fromLTRB(60, 0, 5, 8)
+                                        : const EdgeInsets.fromLTRB(
+                                            5,
+                                            0,
+                                            60,
+                                            8,
+                                          ),
+                                    child: _Reactions(
+                                      contactId: _contactId,
+                                      chatItem: chatItem,
                                     ),
                                   ),
-                                ),
-                              )
-                            : const SizedBox(height: 1),
+                                )
+                              : const SizedBox(height: 1),
+                          if (selectedReactionIndex == index)
+                            _ReactionPickerChatItem(
+                              chatItem: chatItem,
+                              contactId: _contactId,
+                            ),
+                          thisItemStatus.isNotEmpty
+                              ? Align(
+                                  alignment: (chatItem.isFromMe)
+                                      ? Alignment.topRight
+                                      : Alignment.topLeft,
+                                  child: Padding(
+                                    padding: (chatItem.isFromMe)
+                                        ? const EdgeInsets.fromLTRB(60, 0, 5, 8)
+                                        : const EdgeInsets.fromLTRB(
+                                            5,
+                                            0,
+                                            60,
+                                            8,
+                                          ),
+                                    child: Text(
+                                      thisItemStatus,
+                                      style: const TextStyle(
+                                        color: Colors.blueGrey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox(height: 1),
+                        ],
                       ],
-                    ],
-                  ),
-                );
-              },
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],
