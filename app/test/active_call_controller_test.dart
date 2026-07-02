@@ -47,6 +47,7 @@ void _registerSession(
   ActiveCallController controller,
   _FakeSession session, {
   bool isMinimized = false,
+  bool isGroupContact = false,
   AudioVideoCallStatus initialStatus = AudioVideoCallStatus.outgoingRinging,
 }) {
   controller.registerSession(
@@ -57,6 +58,7 @@ void _registerSession(
     peerName: 'Alice',
     isMicEnabled: true,
     isMinimized: isMinimized,
+    isGroupContact: isGroupContact,
   );
 }
 
@@ -343,6 +345,7 @@ void main() {
           controller,
           session,
           isMinimized: true,
+          isGroupContact: false,
           initialStatus: AudioVideoCallStatus.waitingForKeys,
         );
 

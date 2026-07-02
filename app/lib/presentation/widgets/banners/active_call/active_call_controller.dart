@@ -11,6 +11,7 @@ import '../../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
 import '../../../screens/chat/audio_video_call/rules/call_chat_item_rules.dart';
 import '../../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
+import '../../call_ended/call_ended_controller.dart';
 import '../end_call/end_call_banner_controller.dart';
 import 'active_call_state.dart';
 
@@ -31,6 +32,7 @@ class ActiveCallController extends _$ActiveCallController {
   ProviderSubscription<Object?>? _chatServiceSub;
   bool _isAudioOnly = false;
   bool _isDisposed = false;
+  bool _isGroupContact = false;
 
   // Pins this controller alive for the lifetime of a call so its instance
   // (and the terminated guard below) survive the dismiss window, instead of
@@ -86,7 +88,7 @@ class ActiveCallController extends _$ActiveCallController {
 
   /// Starts the one-second duration timer. No-op if already running.
   ///
-  /// Call this when the first remote participant joins. The timer persists
+  /// Call this when the first peer participant joins. The timer persists
   /// through minimize/maximize because it lives in the banner controller,
   /// not in the screen controller.
   void startTimer() {
@@ -165,6 +167,7 @@ class ActiveCallController extends _$ActiveCallController {
     required String peerName,
     required bool isMicEnabled,
     required bool isMinimized,
+    required bool isGroupContact,
   }) {
     _logger.info('registerSession: Banner now owns session', name: _logKey);
     _keepAliveLink ??= ref.keepAlive();
@@ -191,6 +194,7 @@ class ActiveCallController extends _$ActiveCallController {
       (_, _) {},
     );
     _isAudioOnly = isAudioOnly;
+    _isGroupContact = isGroupContact;
     _chatItemHandler = CallChatItemHandler(
       onInitiator: _sendOutgoingCallMessage,
       resolveItemId: _resolveCallChatItemId,
@@ -240,6 +244,16 @@ class ActiveCallController extends _$ActiveCallController {
         hasHadPeer: current.hasHadPeer,
         callDuration: Duration(seconds: current.callDurationSeconds),
       );
+      if (current.hasHadPeer) {
+        ref
+            .read(callEndedControllerProvider.notifier)
+            .show(
+              contactId: current.contactId,
+              peerName: current.peerName,
+              callDurationSeconds: current.callDurationSeconds,
+              isAudioOnly: current.isAudioOnly,
+            );
+      }
     }
     if (session != null) unawaited(session.hangUp());
     clear();
@@ -257,7 +271,7 @@ class ActiveCallController extends _$ActiveCallController {
     hangUp();
   }
 
-  /// True when call is visible (not in terminal state).
+  /// True when call is visible (not in ended state).
   bool isCallVisible(ActiveCallState? callState) {
     if (callState == null) return false;
     return !isEndedCallStatus(callState.status) &&
@@ -276,16 +290,16 @@ class ActiveCallController extends _$ActiveCallController {
     final current = state;
     if (current == null) return;
 
-    final hadRemote = computeHasHadPeer(
+    final hadPeer = computeHasHadPeer(
       previous: current.hasHadPeer,
       participants: sessionState.participants,
       status: sessionState.status,
     );
-    final peerJustJoined = !current.hasHadPeer && hadRemote;
+    final peerJustJoined = !current.hasHadPeer && hadPeer;
 
     state = current.copyWith(
       status: sessionState.status,
-      hasHadPeer: hadRemote,
+      hasHadPeer: hadPeer,
       selfParticipant: sessionState.participants
           .where((p) => p.isSelf)
           .firstOrNull,
@@ -293,20 +307,48 @@ class ActiveCallController extends _$ActiveCallController {
 
     if (peerJustJoined) startTimer();
 
+    // In a 1-on-1 call, the peer leaving ends the call for self too.
+    // Group calls stay open while other participants remain.
+    if (shouldAutoEndCallForPeer(
+      isGroupContact: _isGroupContact,
+      hasHadPeer: hadPeer,
+      participants: sessionState.participants,
+      status: sessionState.status,
+    )) {
+      _logger.info(
+        '_onSessionState: Peer left 1-on-1 call, ending call',
+        name: _logKey,
+      );
+      hangUp();
+      return;
+    }
+
     if (isEndedCallStatus(sessionState.status)) {
       _chatItemHandler?.endCallChatItem(
         outcome:
             (sessionState.status == AudioVideoCallStatus.declined ||
                 sessionState.status == AudioVideoCallStatus.missed ||
-                !hadRemote)
+                !hadPeer)
             ? CallEndOutcome.declined
             : CallEndOutcome.hungUp,
         isCaller: _ownRole == CallRole.caller,
-        hasHadPeer: hadRemote,
+        hasHadPeer: hadPeer,
         callDuration: Duration(seconds: current.callDurationSeconds),
       );
-      final endState = resolveCallEndState(sessionState.status);
-      if (endState != null && current.isMinimized) {
+      final endState = resolveCallEndState(
+        sessionState.status,
+        hasHadPeer: hadPeer,
+      );
+      if (endState == CallEndState.callEnded) {
+        ref
+            .read(callEndedControllerProvider.notifier)
+            .show(
+              contactId: current.contactId,
+              peerName: current.peerName,
+              callDurationSeconds: current.callDurationSeconds,
+              isAudioOnly: current.isAudioOnly,
+            );
+      } else if (endState != null) {
         ref
             .read(endCallBannerControllerProvider.notifier)
             .show(
