@@ -20,12 +20,18 @@ import 'fakes/fake_permission_service.dart';
 
 class _FakeCallSession extends Fake implements AudioVideoCallSession {
   final _controller = StreamController<AudioVideoCallState>.broadcast();
+  final _participantEventsController =
+      StreamController<CallParticipantEvent>.broadcast();
   int hangUpCalls = 0;
 
   void emit(AudioVideoCallState s) => _controller.add(s);
 
   @override
   Stream<AudioVideoCallState> get state => _controller.stream;
+
+  @override
+  Stream<CallParticipantEvent> get participantEvents =>
+      _participantEventsController.stream;
 
   @override
   Future<void> setMicrophoneEnabled(bool enabled) async {}
