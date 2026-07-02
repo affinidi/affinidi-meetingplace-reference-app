@@ -8,7 +8,7 @@ part 'audio_video_call_screen_state.freezed.dart';
 /// Whether a participant change event represents people joining or leaving.
 enum CallParticipantChangeType { joined, left }
 
-/// A one-shot signal that remote participants joined or left the call.
+/// A one-shot signal that peer participants joined or left the call.
 ///
 /// A fresh instance is emitted for every change so the UI can react even to
 /// consecutive identical changes; intentionally has no value equality.

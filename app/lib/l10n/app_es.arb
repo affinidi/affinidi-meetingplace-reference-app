@@ -543,6 +543,7 @@
 	"videoCallCancelCall": "Cancelar",
 	"videoCallNoAnswer": "Sin respuesta",
 	"videoCallCallDeclined": "Llamada rechazada",
+	"videoCallCallEnded": "Llamada finalizada",
 	"videoCallCancel": "Cancelar",
 	"videoCallAgain": "Volver a llamar",
 	"videoCallGroupCallJoin": "Unirse",

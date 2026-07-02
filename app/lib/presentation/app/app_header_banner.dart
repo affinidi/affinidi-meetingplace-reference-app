@@ -9,6 +9,7 @@ import '../widgets/banners/end_call/end_call_banner.dart';
 import '../widgets/banners/end_call/end_call_banner_controller.dart';
 import '../widgets/banners/incoming_call_banner.dart';
 import '../widgets/banners/no_connection_banner.dart';
+import '../widgets/call_ended/call_ended_overlay.dart';
 import '../widgets/video_call_pip_overlay.dart';
 
 class AppHeaderBanner extends ConsumerWidget {
@@ -91,6 +92,7 @@ class AppHeaderBanner extends ConsumerWidget {
           ),
         ),
         const VideoCallPiPOverlay(),
+        const CallEndedOverlay(),
       ],
     );
   }

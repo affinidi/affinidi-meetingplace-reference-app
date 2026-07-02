@@ -1926,6 +1926,7 @@
 	"videoCallCancelCall": "Cancel",
 	"videoCallNoAnswer": "No answer",
 	"videoCallCallDeclined": "Call declined",
+	"videoCallCallEnded": "Call ended",
 	"videoCallCancel": "Cancel",
 	"videoCallAgain": "Call again",
 	"videoCallGroupCallJoin": "Join",

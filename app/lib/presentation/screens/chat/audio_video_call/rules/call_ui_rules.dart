@@ -12,10 +12,10 @@ enum CallUiPhase {
   /// Outgoing call, contacting the other party. Label: "Calling...".
   calling,
 
-  /// Outgoing call, the other party's device is ringing. Label: "Ringing...".
+  /// Outgoing call, the peer's device is ringing. Label: "Ringing...".
   ringing,
 
-  /// At least one remote participant has joined. Label: call duration timer.
+  /// At least one peer has joined. Label: call duration timer.
   inCall,
 
   /// Call finished. Label: ended / declined / missed message.
@@ -24,20 +24,23 @@ enum CallUiPhase {
 
 /// The specific end-state reason, derived purely from call status.
 enum CallEndState {
-  /// Remote did not answer the call.
+  /// Peer did not answer the call.
   missedCall,
 
-  /// Remote declined the incoming call.
+  /// Peer declined the incoming call.
   declinedCall,
+
+  /// Call ended normally after both parties were connected.
+  callEnded,
 }
 
 /// Converts the isAudioOnly flag to the SDK's CallMediaType enum.
 CallMediaType getMediaTypeFromFlag(bool isAudioOnly) =>
     isAudioOnly ? CallMediaType.audio : CallMediaType.video;
 
-/// Statuses in which a remote participant can legitimately be present.
+/// Statuses in which a peer participant can legitimately be present.
 ///
-/// A remote appearing in any earlier status (idle / connecting /
+/// A peer appearing in any earlier status (idle / connecting /
 /// outgoingRinging) is a phantom and must NOT start the timer.
 bool isLiveCallStatus(AudioVideoCallStatus status) =>
     status == AudioVideoCallStatus.waitingForKeys ||
@@ -59,16 +62,16 @@ bool isEndedCallStatus(AudioVideoCallStatus status) =>
     status == AudioVideoCallStatus.missed ||
     status == AudioVideoCallStatus.declined;
 
-/// Statuses where the local device has fully joined the call media session.
+/// Statuses where self has fully joined the call media session.
 bool isConnectedCallStatus(AudioVideoCallStatus status) =>
     status == AudioVideoCallStatus.connected ||
     status == AudioVideoCallStatus.active;
 
-/// Whether the participant list contains a remote (non-local) participant.
+/// Whether the participant list contains a peer (non-self) participant.
 bool hasRemoteParticipant(List<AudioVideoCallParticipant> participants) =>
     participants.any((p) => !p.isSelf);
 
-/// Latching rule: once a real remote participant has appeared during a live
+/// Latching rule: once a real peer participant has appeared during a live
 /// status, the result stays `true` for the rest of the call.
 ///
 /// Leave / rejoin and minimize / maximize never flip it back. This is the only
@@ -83,7 +86,7 @@ bool computeHasHadPeer({
 
 /// The single rule that maps call state to the displayed [CallUiPhase].
 ///
-/// Order matters: terminal wins, then in-call (timer) once a remote has ever
+/// Order matters: ended wins, then in-call (timer) once a peer has ever
 /// joined, then ringing, then calling.
 CallUiPhase resolveCallUiPhase({
   required AudioVideoCallStatus status,
@@ -98,12 +101,42 @@ CallUiPhase resolveCallUiPhase({
 }
 
 /// Maps a terminal call status to the specific end-state scaffold to render,
-/// or null if the call ended normally.
+/// or null if the call should be silently dismissed.
 ///
-/// Returns [CallEndState] for special endings (missed/declined) or null for
-/// normal ends, errors, etc. Only call this during [CallUiPhase.ended].
-CallEndState? resolveCallEndState(AudioVideoCallStatus status) {
+/// Returns [CallEndState.callEnded] for normal ends after a peer was connected,
+/// [CallEndState.missedCall] / [CallEndState.declinedCall] for unanswered calls,
+/// and null for errors and pre-connection endings. Only call this during
+/// [CallUiPhase.ended].
+CallEndState? resolveCallEndState(
+  AudioVideoCallStatus status, {
+  bool hasHadPeer = false,
+}) {
   if (status == AudioVideoCallStatus.missed) return CallEndState.missedCall;
   if (status == AudioVideoCallStatus.declined) return CallEndState.declinedCall;
+  if (hasHadPeer &&
+      (status == AudioVideoCallStatus.ended ||
+          status == AudioVideoCallStatus.disconnected)) {
+    return CallEndState.callEnded;
+  }
   return null;
 }
+
+/// Whether a 1-on-1 call should auto-end because the only peer has left.
+///
+/// True when all three conditions hold:
+/// - This is not a group call ([isGroupContact] is false)
+/// - A peer was connected at some point ([hasHadPeer] is true)
+/// - No peer is currently present and the call is still live
+///
+/// Group calls stay open when participants leave; only individual calls
+/// end automatically when the peer disconnects.
+bool shouldAutoEndCallForPeer({
+  required bool isGroupContact,
+  required bool hasHadPeer,
+  required List<AudioVideoCallParticipant> participants,
+  required AudioVideoCallStatus status,
+}) =>
+    !isGroupContact &&
+    hasHadPeer &&
+    !hasRemoteParticipant(participants) &&
+    isLiveCallStatus(status);

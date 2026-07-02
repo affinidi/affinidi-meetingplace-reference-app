@@ -324,6 +324,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
             peerName: state.peerName,
             isMicEnabled: state.isMicEnabled,
             isMinimized: _isMinimizing,
+            isGroupContact: _isGroupContact,
           );
     }
     final handler = CallSessionHandler(
@@ -373,6 +374,22 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       _clearIncomingCallState();
       ref.read(activeCallControllerProvider.notifier).startTimer();
       _chatItemHandler.updateCallChatItemStatus(CallStatus.inProgress);
+    }
+
+    // In a 1-on-1 call, the peer leaving ends the call for self too.
+    // Group calls stay open while other participants remain.
+    if (shouldAutoEndCallForPeer(
+      isGroupContact: _isGroupContact,
+      hasHadPeer: state.hasHadPeer,
+      participants: nextParticipants,
+      status: update.status ?? state.status,
+    )) {
+      _logger.info(
+        'applySessionUpdate: Peer left 1-on-1 call, ending call',
+        name: _logKey,
+      );
+      unawaited(hangUp());
+      return;
     }
 
     if (!_chatItemHandler.callChatItemEnded &&

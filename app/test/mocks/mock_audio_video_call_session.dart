@@ -16,8 +16,12 @@ class MockAudioVideoCallSession implements AudioVideoCallSession {
     return Future.microtask(() {});
   }
 
+  int hangUpCalls = 0;
+
   @override
-  Future<void> hangUp() async {}
+  Future<void> hangUp() async {
+    hangUpCalls++;
+  }
 
   @override
   Future<void> setMicrophoneEnabled(bool enabled) async {}

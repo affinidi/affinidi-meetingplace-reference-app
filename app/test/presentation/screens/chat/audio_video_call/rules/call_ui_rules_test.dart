@@ -354,11 +354,31 @@ void main() {
       );
     });
 
-    test('returns null for ended status', () {
+    test('returns callEnded for ended status when hasHadPeer is true', () {
+      expect(
+        resolveCallEndState(AudioVideoCallStatus.ended, hasHadPeer: true),
+        CallEndState.callEnded,
+      );
+    });
+
+    test(
+      'returns callEnded for disconnected status when hasHadPeer is true',
+      () {
+        expect(
+          resolveCallEndState(
+            AudioVideoCallStatus.disconnected,
+            hasHadPeer: true,
+          ),
+          CallEndState.callEnded,
+        );
+      },
+    );
+
+    test('returns null for ended status without hasHadPeer', () {
       expect(resolveCallEndState(AudioVideoCallStatus.ended), isNull);
     });
 
-    test('returns null for disconnected status', () {
+    test('returns null for disconnected status without hasHadPeer', () {
       expect(resolveCallEndState(AudioVideoCallStatus.disconnected), isNull);
     });
 
@@ -369,6 +389,74 @@ void main() {
     test('returns null for non-terminal statuses', () {
       expect(resolveCallEndState(AudioVideoCallStatus.idle), isNull);
       expect(resolveCallEndState(AudioVideoCallStatus.active), isNull);
+    });
+  });
+
+  group('shouldAutoEndCallForPeer', () {
+    final peer = const AudioVideoCallParticipant(participantId: 'peer-1');
+    final self = const AudioVideoCallParticipant(
+      participantId: 'self-1',
+      isSelf: true,
+    );
+
+    test('returns true for 1-on-1 when peer leaves during active call', () {
+      expect(
+        shouldAutoEndCallForPeer(
+          isGroupContact: false,
+          hasHadPeer: true,
+          participants: [self],
+          status: AudioVideoCallStatus.active,
+        ),
+        isTrue,
+      );
+    });
+
+    test('returns false for group contact when peer leaves', () {
+      expect(
+        shouldAutoEndCallForPeer(
+          isGroupContact: true,
+          hasHadPeer: true,
+          participants: [self],
+          status: AudioVideoCallStatus.active,
+        ),
+        isFalse,
+      );
+    });
+
+    test('returns false when hasHadPeer is false', () {
+      expect(
+        shouldAutoEndCallForPeer(
+          isGroupContact: false,
+          hasHadPeer: false,
+          participants: [self],
+          status: AudioVideoCallStatus.active,
+        ),
+        isFalse,
+      );
+    });
+
+    test('returns false when peer is still present', () {
+      expect(
+        shouldAutoEndCallForPeer(
+          isGroupContact: false,
+          hasHadPeer: true,
+          participants: [self, peer],
+          status: AudioVideoCallStatus.active,
+        ),
+        isFalse,
+      );
+    });
+
+    test('returns false when status is not a live call status', () {
+      expect(
+        shouldAutoEndCallForPeer(
+          isGroupContact: false,
+          hasHadPeer: true,
+          participants: [self],
+          status: AudioVideoCallStatus.ended,
+        ),
+        isFalse,
+      );
     });
   });
 }

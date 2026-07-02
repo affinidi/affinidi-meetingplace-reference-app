@@ -2126,6 +2126,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get videoCallCallDeclined => 'Anruf abgelehnt';
 
   @override
+  String get videoCallCallEnded => 'Anruf beendet';
+
+  @override
   String get videoCallCancel => 'Abbrechen';
 
   @override

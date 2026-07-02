@@ -81,7 +81,6 @@ void main() {
       final state = AudioVideoCallScreenState(
         status: AudioVideoCallStatus.connecting,
         peerName: '',
-        isGroupContact: true,
       );
 
       await tester.pumpWidget(_wrap(controllerState: state));
