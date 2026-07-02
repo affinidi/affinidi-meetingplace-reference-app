@@ -27,6 +27,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repositor
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import 'package:ssi/ssi.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../fakes/fake_app_badge_service.dart';
 import '../../../fakes/fake_channels.dart';
@@ -1028,6 +1029,7 @@ void main() {
       senderDid: isFromMe ? 'me' : channelDid,
       attachments: [
         CallMetadata.buildAttachment(
+          id: const Uuid().v4(),
           mediaType: CallMediaType.video,
           status: status,
         ),

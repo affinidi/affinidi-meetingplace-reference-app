@@ -3,6 +3,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/delegates/call_chat_item_manager.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/delegates/call_chat_item_reconciler.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../fakes/fake_chat_sdk.dart';
 import '../../../../mocks/mock_app_logger.dart';
@@ -31,6 +32,7 @@ void main() {
       senderDid: isFromMe ? 'me' : channelDid,
       attachments: [
         CallMetadata.buildAttachment(
+          id: const Uuid().v4(),
           mediaType: CallMediaType.video,
           status: status,
         ),

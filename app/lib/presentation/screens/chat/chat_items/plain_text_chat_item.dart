@@ -261,7 +261,7 @@ class _AttachmentWidget extends HookConsumerWidget {
 
   String _playbackAttachmentKey(ChatAttachment attachment) {
     final id = attachment.id;
-    if (id != null && id.isNotEmpty) return 'chat_attachment_$id';
+    if (id.isNotEmpty) return 'chat_attachment_$id';
 
     final transportId = attachment.transportId;
     if (transportId != null && transportId.isNotEmpty) {

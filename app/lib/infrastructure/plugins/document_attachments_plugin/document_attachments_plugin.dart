@@ -103,7 +103,7 @@ final class DocumentAttachmentsPlugin
       _DocumentAttachmentWidget(
         attachment: request.attachment,
         cacheManager: _cacheManager,
-        cacheKey: cacheKeyForDocumentAttachment(request.attachment.id ?? ''),
+        cacheKey: cacheKeyForDocumentAttachment(request.attachment.id),
         download: request.download,
       );
 
@@ -184,7 +184,7 @@ class _ListDocumentAttachmentsWidget extends StatelessWidget {
       itemBuilder: (context, index) => _DocumentAttachmentWidget(
         attachment: _attachments[index],
         cacheManager: _cacheManager,
-        cacheKey: _cacheKeyForAttachment(_attachments[index].id ?? ''),
+        cacheKey: _cacheKeyForAttachment(_attachments[index].id),
         download: _download,
       ),
     );

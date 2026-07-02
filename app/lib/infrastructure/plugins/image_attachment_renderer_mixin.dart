@@ -24,7 +24,7 @@ mixin ImageAttachmentRendererMixin {
       return VideoAttachmentWidget(
         attachment: attachment,
         cacheManager: attachmentRendererCacheManager,
-        cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
+        cacheKey: cacheKeyForImageAttachment(attachment.id),
         playbackScopeId: request.renderContext?.playbackScopeId,
         download: request.download,
       );
@@ -33,7 +33,7 @@ mixin ImageAttachmentRendererMixin {
     return ImageAttachmentWidget(
       attachment: attachment,
       cacheManager: attachmentRendererCacheManager,
-      cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
+      cacheKey: cacheKeyForImageAttachment(attachment.id),
       download: request.download,
     );
   }
@@ -46,7 +46,7 @@ mixin ImageAttachmentRendererMixin {
           key: ValueKey(attachment.id),
           attachment: attachment,
           cacheManager: attachmentRendererCacheManager,
-          cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
+          cacheKey: cacheKeyForImageAttachment(attachment.id),
           playbackScopeId: request.renderContext?.playbackScopeId,
           download: request.download,
         );
@@ -56,7 +56,7 @@ mixin ImageAttachmentRendererMixin {
         key: ValueKey(attachment.id),
         attachment: attachment,
         cacheManager: attachmentRendererCacheManager,
-        cacheKey: cacheKeyForImageAttachment(attachment.id ?? ''),
+        cacheKey: cacheKeyForImageAttachment(attachment.id),
         download: request.download,
       );
     }, growable: false),
