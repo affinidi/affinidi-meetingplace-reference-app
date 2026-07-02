@@ -34,11 +34,11 @@ class AudioVideoCallStateUpdate {
   /// mirrors this into initiator-dependent logic (end-status, chat item).
   final CallRole? ownRole;
 
-  /// The latched "a remote participant has joined at least once" value,
+  /// The latched "a peer participant has joined at least once" value,
   /// computed by the call UI rules. Controller mirrors this into screen state.
   final bool hasHadPeer;
 
-  /// True on the emission where the first remote participant joined.
+  /// True on the emission where the first peer participant joined.
   /// Controller starts the duration timer on this signal.
   final bool peerJustJoined;
 

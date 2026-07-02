@@ -3172,6 +3172,12 @@ abstract class AppLocalizations {
   /// **'Call declined'**
   String get videoCallCallDeclined;
 
+  /// No description provided for @videoCallCallEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Call ended'**
+  String get videoCallCallEnded;
+
   /// No description provided for @videoCallCancel.
   ///
   /// In en, this message translates to:

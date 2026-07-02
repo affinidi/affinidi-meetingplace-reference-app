@@ -11,7 +11,7 @@ import '../rules/call_ui_rules.dart';
 ///
 /// Subscribes to [AudioVideoCallSession.state], converts each emission into an
 /// [AudioVideoCallStateUpdate], and passes it to [onUpdate]. Also owns the
-/// call-duration timer and tracks remote participant identity to emit
+/// call-duration timer and tracks peer participant identity to emit
 /// join/leave events.
 ///
 /// Plain Dart class with no Riverpod dependency — unit-testable without a
@@ -91,7 +91,7 @@ class CallSessionHandler {
     );
   }
 
-  /// Diffs the remote participant set and returns a join or leave event, or
+  /// Diffs the peer participant set and returns a join or leave event, or
   /// null if nothing changed or the call is not yet active.
   CallParticipantChangeEvent? _resolveParticipantEvent(
     AudioVideoCallState next,

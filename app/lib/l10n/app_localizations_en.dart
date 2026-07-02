@@ -2069,6 +2069,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoCallCallDeclined => 'Call declined';
 
   @override
+  String get videoCallCallEnded => 'Call ended';
+
+  @override
   String get videoCallCancel => 'Cancel';
 
   @override
