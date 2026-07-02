@@ -26,8 +26,7 @@ class CallEndedOverlay extends ConsumerWidget {
         .read(contactsServiceProvider)
         .getContactById(contactId)
         ?.card;
-    final showAvatar =
-        calleeCard?.hasProfilePic == true && callEndedState.isAudioOnly;
+    final showAvatar = calleeCard?.hasProfilePic == true;
     final calleeAvatarImage = showAvatar
         ? calleeCard!.image(cacheManager: ref.read(cacheManagerProvider))
         : null;

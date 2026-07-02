@@ -32,7 +32,7 @@ class CallEndedScreen extends ConsumerWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
 
-    final backgroundColor = context.customColors.callControlSurface;
+    final backgroundColor = Colors.black;
 
     return Scaffold(
       backgroundColor: backgroundColor,
