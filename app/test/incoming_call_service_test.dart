@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +12,9 @@ import 'package:mpx_flutter_reference_app/application/services/incoming_call_ser
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/services/call_audio_session_service/call_audio_session_service.dart';
 
+import 'fakes/fake_audio_session.dart';
 import 'mocks/fake_chat_session_service.dart';
 
 class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
@@ -57,13 +60,21 @@ void main() {
     );
   });
 
-  ProviderContainer buildContainer(_FakeMeetingPlaceMatrixSDK fakeSDK) =>
-      ProviderContainer(
-        overrides: [
-          meetingPlaceSdkProvider.overrideWith((ref) async => fakeSDK),
-          chatSessionServiceProvider.overrideWith(FakeChatSessionService.new),
-        ],
-      );
+  ProviderContainer buildContainer(
+    _FakeMeetingPlaceMatrixSDK fakeSDK, {
+    FakeAudioSession? audioSession,
+    bool canUsePlatformAudioSession = false,
+  }) => ProviderContainer(
+    overrides: [
+      meetingPlaceSdkProvider.overrideWith((ref) async => fakeSDK),
+      chatSessionServiceProvider.overrideWith(FakeChatSessionService.new),
+      canUsePlatformAudioSessionProvider.overrideWith(
+        (ref) => canUsePlatformAudioSession,
+      ),
+      if (audioSession != null)
+        audioSessionProvider.overrideWith((ref) async => audioSession),
+    ],
+  );
 
   group('incoming call', () {
     test('preserves audio media type on the incoming call state', () async {
@@ -111,7 +122,12 @@ void main() {
       ' id to the SDK',
       () async {
         final fakeSDK = _FakeMeetingPlaceMatrixSDK();
-        final container = buildContainer(fakeSDK);
+        final audioSession = FakeAudioSession();
+        final container = buildContainer(
+          fakeSDK,
+          audioSession: audioSession,
+          canUsePlatformAudioSession: true,
+        );
         addTearDown(container.dispose);
 
         container.read(incomingCallServiceProvider);
@@ -129,6 +145,17 @@ void main() {
         expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
         expect(fakeSDK.acceptedCallIds, ['call-1']);
         expect(fakeSDK.declinedCallIds, isEmpty);
+        expect(
+          container.read(callAudioSessionServiceProvider).isAcquired,
+          isTrue,
+        );
+        expect(audioSession.configureCalls, 1);
+        expect(audioSession.setActiveCalls, 1);
+        expect(audioSession.lastSetActiveValue, isTrue);
+        expect(
+          audioSession.lastConfiguration?.avAudioSessionMode,
+          AVAudioSessionMode.videoChat,
+        );
       },
     );
   });

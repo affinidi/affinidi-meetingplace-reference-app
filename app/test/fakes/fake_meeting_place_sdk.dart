@@ -14,6 +14,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     this._createOobFlowException,
     this._acceptOobFlowException,
     this._isPhraseAvailable = true,
+    this.isCallSupported = true,
     Map<String, Channel>? channels,
     List<ConnectionOffer>? connectionOffers,
     this.offerToFind,
@@ -33,6 +34,15 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   final bool _isPhraseAvailable;
   final bool _shouldTimeout;
   final Map<String, Channel> _channels;
+  @override
+  final bool isCallSupported;
+
+  final _incomingCallsController =
+      StreamController<IncomingAudioVideoCallEvent>.broadcast();
+  final _cancelledCallsController = StreamController<String>.broadcast();
+  final acceptedCallIds = <String>[];
+  final declinedCallIds = <String>[];
+  int leaveCurrentCallCount = 0;
 
   DidKeyManager? _fakeDidManager;
 
@@ -360,6 +370,36 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
 
   @override
   Stream<ChannelAttachmentEvent> get channelAttachments => const Stream.empty();
+
+  @override
+  Stream<IncomingAudioVideoCallEvent> get incomingCalls =>
+      _incomingCallsController.stream;
+
+  @override
+  Stream<String> get cancelledCalls => _cancelledCallsController.stream;
+
+  void emitIncomingCall(IncomingAudioVideoCallEvent event) {
+    _incomingCallsController.add(event);
+  }
+
+  void emitCancelledCall(String callId) {
+    _cancelledCallsController.add(callId);
+  }
+
+  @override
+  Future<void> acceptCall({required String callId}) async {
+    acceptedCallIds.add(callId);
+  }
+
+  @override
+  Future<void> declineCall({required String callId}) async {
+    declinedCallIds.add(callId);
+  }
+
+  @override
+  Future<void> leaveCurrentCall() async {
+    leaveCurrentCallCount++;
+  }
 
   @override
   VdipClient get vdip => _fakeVdipClient;

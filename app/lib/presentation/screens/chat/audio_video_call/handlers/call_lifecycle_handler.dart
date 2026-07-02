@@ -1,6 +1,7 @@
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../../../infrastructure/services/call_audio_session_service/call_audio_session_service.dart';
 import '../audio_video_call_screen_state.dart';
 import '../call_lifecycle_update.dart';
 import '../rules/call_chat_item_rules.dart';
@@ -20,6 +21,7 @@ class CallLifecycleHandler {
   CallLifecycleHandler({
     required this._logger,
     required this._channelDid,
+    required this._audioSessionService,
     required this._getState,
     required this._getSDK,
     required this._getSession,
@@ -31,6 +33,7 @@ class CallLifecycleHandler {
 
   final AppLogger _logger;
   final String? _channelDid;
+  final CallAudioSessionService _audioSessionService;
   final AudioVideoCallScreenState Function() _getState;
   final MeetingPlaceMatrixSDK? Function() _getSDK;
   final AudioVideoCallSession? Function() _getSession;
@@ -71,6 +74,7 @@ class CallLifecycleHandler {
         name: _logKey,
       );
     } finally {
+      await _audioSessionService.release();
       final hasHadPeer = _getState().hasHadPeer;
       _onUpdate(
         CallLifecycleUpdate(
@@ -98,6 +102,7 @@ class CallLifecycleHandler {
       );
       _onUpdate(const CallLifecycleUpdate(reportHangUpFailure: true));
     } finally {
+      await _audioSessionService.release();
       _onUpdate(
         const CallLifecycleUpdate(
           status: AudioVideoCallStatus.ended,
@@ -139,6 +144,15 @@ class CallLifecycleHandler {
     String channelDid,
   ) async {
     const speakerphoneEnabled = true;
+    final acquiredAudioSession = await _audioSessionService.acquire(
+      isAudioOnly: _getState().isAudioOnly,
+    );
+    if (!acquiredAudioSession) {
+      _logger.warning(
+        'joinCall: Failed to acquire OS audio focus/session',
+        name: _logKey,
+      );
+    }
     _onUpdate(
       const CallLifecycleUpdate(
         status: AudioVideoCallStatus.connecting,
@@ -162,6 +176,7 @@ class CallLifecycleHandler {
         stackTrace: stackTrace,
         name: _logKey,
       );
+      await _audioSessionService.release();
       _onUpdate(const CallLifecycleUpdate(status: AudioVideoCallStatus.error));
     }
   }

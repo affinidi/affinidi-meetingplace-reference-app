@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
@@ -9,10 +10,12 @@ import 'package:mpx_flutter_reference_app/application/services/contacts_service/
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/services/call_audio_session_service/call_audio_session_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 
+import 'fakes/fake_audio_session.dart';
 import 'fakes/fake_chat_session_service.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_contacts_service.dart';
@@ -79,6 +82,8 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
 ProviderContainer _buildContainer({
   _FakeMeetingPlaceMatrixSDK? fakeSDK,
   FakePermissionService? permissionService,
+  FakeAudioSession? audioSession,
+  bool canUsePlatformAudioSession = false,
 }) {
   return ProviderContainer(
     overrides: [
@@ -90,6 +95,11 @@ ProviderContainer _buildContainer({
       permissionServiceProvider.overrideWith(
         (ref) => permissionService ?? FakePermissionService(),
       ),
+      canUsePlatformAudioSessionProvider.overrideWith(
+        (ref) => canUsePlatformAudioSession,
+      ),
+      if (audioSession != null)
+        audioSessionProvider.overrideWith((ref) async => audioSession),
     ],
   );
 }
@@ -162,6 +172,36 @@ void main() {
   });
 
   group('joinCall', () {
+    test('acquires the audio session when joining a call', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final audioSession = FakeAudioSession();
+      final contactId = FakeContacts.individualContact.id;
+      final container = _buildContainer(
+        fakeSDK: fakeSDK,
+        audioSession: audioSession,
+        canUsePlatformAudioSession: true,
+      );
+      addTearDown(container.dispose);
+
+      await container.read(meetingPlaceSdkProvider.future);
+
+      await container
+          .read(audioVideoCallScreenControllerProvider(contactId).notifier)
+          .joinCall();
+
+      expect(
+        container.read(callAudioSessionServiceProvider).isAcquired,
+        isTrue,
+      );
+      expect(audioSession.configureCalls, 1);
+      expect(audioSession.setActiveCalls, 1);
+      expect(audioSession.lastSetActiveValue, isTrue);
+      expect(
+        audioSession.lastConfiguration?.avAudioSessionMode,
+        AVAudioSessionMode.videoChat,
+      );
+    });
+
     test('sets status to connecting', () async {
       final fakeSDK = _FakeMeetingPlaceMatrixSDK();
       final contactId = FakeContacts.individualContact.id;
@@ -247,18 +287,69 @@ void main() {
 
   group('leaveCall', () {
     test('sets status to ended', () async {
-      final container = _buildContainer();
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final audioSession = FakeAudioSession();
+      final contactId = FakeContacts.individualContact.id;
+      final container = _buildContainer(
+        fakeSDK: fakeSDK,
+        audioSession: audioSession,
+        canUsePlatformAudioSession: true,
+      );
       addTearDown(container.dispose);
 
+      await container.read(meetingPlaceSdkProvider.future);
       await container
-          .read(audioVideoCallScreenControllerProvider('no-such-id').notifier)
+          .read(audioVideoCallScreenControllerProvider(contactId).notifier)
+          .joinCall();
+
+      await container
+          .read(audioVideoCallScreenControllerProvider(contactId).notifier)
           .leaveCall();
 
       expect(
         container
-            .read(audioVideoCallScreenControllerProvider('no-such-id'))
+            .read(audioVideoCallScreenControllerProvider(contactId))
             .status,
         AudioVideoCallStatus.ended,
+      );
+      expect(
+        container.read(callAudioSessionServiceProvider).isAcquired,
+        isFalse,
+      );
+      expect(audioSession.setActiveCalls, 2);
+      expect(audioSession.lastSetActiveValue, isFalse);
+      expect(
+        audioSession.lastSetActiveOptions,
+        AVAudioSessionSetActiveOptions.notifyOthersOnDeactivation,
+      );
+    });
+
+    test('releases the audio session when the call disconnects', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final audioSession = FakeAudioSession();
+      final contactId = FakeContacts.individualContact.id;
+      final container = _buildContainer(
+        fakeSDK: fakeSDK,
+        audioSession: audioSession,
+        canUsePlatformAudioSession: true,
+      );
+      addTearDown(container.dispose);
+
+      await container.read(meetingPlaceSdkProvider.future);
+      await container
+          .read(audioVideoCallScreenControllerProvider(contactId).notifier)
+          .joinCall();
+
+      fakeSDK.emitState(
+        const AudioVideoCallState(status: AudioVideoCallStatus.disconnected),
+      );
+      await pumpEventQueue();
+
+      expect(audioSession.setActiveCalls, 2);
+      expect(audioSession.lastSetActiveValue, isFalse);
+      expect(
+        container.read(callAudioSessionServiceProvider).isAcquired,
+        isFalse,
       );
     });
   });

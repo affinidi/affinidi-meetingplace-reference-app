@@ -6,6 +6,7 @@ import FlutterMacOS
 import Foundation
 
 import app_badge_plus
+import audio_session
 import audioplayers_darwin
 import connectivity_plus
 import device_info_plus
@@ -29,6 +30,7 @@ import video_player_avfoundation
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   AppBadgePlusPlugin.register(with: registry.registrar(forPlugin: "AppBadgePlusPlugin"))
+  AudioSessionPlugin.register(with: registry.registrar(forPlugin: "AudioSessionPlugin"))
   AudioplayersDarwinPlugin.register(with: registry.registrar(forPlugin: "AudioplayersDarwinPlugin"))
   ConnectivityPlusPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlusPlugin"))
   DeviceInfoPlusMacosPlugin.register(with: registry.registrar(forPlugin: "DeviceInfoPlusMacosPlugin"))

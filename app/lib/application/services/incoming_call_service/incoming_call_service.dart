@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../infrastructure/services/call_audio_session_service/call_audio_session_service.dart';
 import '../chat_service/chat_session_service.dart';
 import 'incoming_call_notifier.dart';
 import 'incoming_call_state.dart';
@@ -44,7 +45,7 @@ class IncomingCallService extends _$IncomingCallService {
   void accept({required String callId}) {
     _logger.info('Accepting call: $callId', name: _logKey);
     _cancelRingTimer();
-    _ensureSDK((sdk) => unawaited(sdk.acceptCall(callId: callId)));
+    _ensureSDK((sdk) => unawaited(_acceptCall(sdk, callId: callId)));
   }
 
   /// Declines the incoming call and marks it as missed in the chat history.
@@ -129,6 +130,35 @@ class IncomingCallService extends _$IncomingCallService {
     _logger.warning('Cancelling ring timer', name: _logKey);
     _ringTimer?.cancel();
     _ringTimer = null;
+  }
+
+  Future<void> _acceptCall(
+    MeetingPlaceMatrixSDK sdk, {
+    required String callId,
+  }) async {
+    final mediaType = ref.read(incomingCallProvider).eventOrNull?.mediaType;
+    final acquiredAudioSession = await ref
+        .read(callAudioSessionServiceProvider.notifier)
+        .acquire(isAudioOnly: mediaType == CallMediaType.audio);
+    if (!acquiredAudioSession) {
+      _logger.warning(
+        'accept: Failed to acquire OS audio focus/session',
+        name: _logKey,
+      );
+    }
+
+    try {
+      await sdk.acceptCall(callId: callId);
+    } catch (e, stackTrace) {
+      await ref.read(callAudioSessionServiceProvider.notifier).release();
+      _logger.error(
+        'accept: Failed to accept call $callId',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      rethrow;
+    }
   }
 
   MeetingPlaceMatrixSDK? get _sdk => ref.read(meetingPlaceSdkProvider).value;

@@ -15,14 +15,13 @@ dev_dependencies:
   melos: ^7.1.1
 
 dependency_overrides:
+  device_info_plus: ^13.0.0
   ffi: 2.2.0
   # TODO (earl): remove once meeting_place_matrix_livekit is published to pub.dev and
   # the git override below is no longer needed. The git-pinned livekit_client
   # transitively requires device_info_plus ^12.3.0 → win32 ^5.x, which
   # conflicts with file_picker ^12.x requiring win32 ^6.x.
   # flutter_secure_storage_windows 4.1.0 also requires win32 ^5.x.
-  device_info_plus: ^13.0.0
-  win32: ^6.2.0
   flutter_secure_storage_windows: ^4.2.2
   meeting_place_chat:
     git:
@@ -60,9 +59,9 @@ dependency_overrides:
       path: packages/meeting_place_mediator
       ref: 7dc4326b66abefa12fa46a9bffd5adb486273f7e
     # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/chore/matrix-package-livekit/packages/meeting_place_mediator
-
   meta: ^1.18.2
   test_api: ^0.7.12
+  win32: ^6.2.0
   
 melos:
   scripts:

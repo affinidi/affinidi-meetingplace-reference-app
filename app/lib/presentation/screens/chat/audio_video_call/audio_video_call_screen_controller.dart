@@ -10,6 +10,7 @@ import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../../infrastructure/services/call_audio_session_service/call_audio_session_service.dart';
 import '../../../../infrastructure/services/permission_service/permission_service.dart';
 import '../../../widgets/banners/active_call/active_call_controller.dart';
 import '../../../widgets/banners/active_call/active_call_state.dart';
@@ -86,9 +87,14 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       logger: _logger,
     );
 
+    final audioSessionService = ref.read(
+      callAudioSessionServiceProvider.notifier,
+    );
+
     _lifecycleHandler = CallLifecycleHandler(
       logger: _logger,
       channelDid: _channelDid,
+      audioSessionService: audioSessionService,
       getState: () => state,
       getSDK: () => _sdk,
       getSession: () => _session,
@@ -413,6 +419,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     }
 
     if (isEndedCallStatus(update.status ?? state.status)) {
+      unawaited(ref.read(callAudioSessionServiceProvider.notifier).release());
       _clearIncomingCallState();
       ref.read(activeCallControllerProvider.notifier).stopTimer();
       _chatItemHandler.endCallChatItem(
