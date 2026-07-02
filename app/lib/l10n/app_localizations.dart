@@ -3056,7 +3056,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{Show 1 more} other{Show {count} more}}'**
-  String videoCallShowMore(num count);
+  String videoCallShowMore(int count);
 
   /// No description provided for @videoCallShowLess.
   ///
@@ -3068,7 +3068,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Failed to join: {error}'**
-  String videoCallFailedToJoin(Object error);
+  String videoCallFailedToJoin(String error);
 
   /// No description provided for @videoCallUnknownError.
   ///
@@ -3110,7 +3110,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
-  String videoCallParticipantCount(num count);
+  String videoCallParticipantCount(int count);
 
   /// No description provided for @videoCallMute.
   ///
@@ -3214,6 +3214,18 @@ abstract class AppLocalizations {
   /// **'Group call in progress'**
   String get videoCallGroupCallActive;
 
+  /// No description provided for @videoCallSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to video'**
+  String get videoCallSwitch;
+
+  /// No description provided for @videoCallSwitchToVideoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to video call'**
+  String get videoCallSwitchToVideoTitle;
+
   /// No description provided for @incomingCallBannerIsCalling.
   ///
   /// In en, this message translates to:
@@ -3298,35 +3310,23 @@ abstract class AppLocalizations {
   /// **'Not answered'**
   String get callChatItemNotAnswered;
 
-  /// Format for hours in call duration display
+  /// No description provided for @callDurationHourFormat.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 h} other{{count} h}}'**
   String callDurationHourFormat(int count);
 
-  /// Format for minutes in call duration display
+  /// No description provided for @callDurationMinuteFormat.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 m} other{{count} m}}'**
   String callDurationMinuteFormat(int count);
 
-  /// Format for seconds in call duration display
+  /// No description provided for @callDurationSecondFormat.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 s} other{{count} s}}'**
   String callDurationSecondFormat(int count);
-
-  /// No description provided for @videoCallSwitchToVideoTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch to video call?'**
-  String get videoCallSwitchToVideoTitle;
-
-  /// No description provided for @videoCallSwitch.
-  ///
-  /// In en, this message translates to:
-  /// **'Switch'**
-  String get videoCallSwitch;
 }
 
 class _AppLocalizationsDelegate

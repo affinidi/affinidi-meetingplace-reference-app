@@ -2024,7 +2024,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get videoCallWaitingForParticipants => 'Esperando participantes...';
 
   @override
-  String videoCallShowMore(num count) {
+  String videoCallShowMore(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -2038,7 +2038,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get videoCallShowLess => 'Show less';
 
   @override
-  String videoCallFailedToJoin(Object error) {
+  String videoCallFailedToJoin(String error) {
     return 'Error al unirse: $error';
   }
 
@@ -2065,7 +2065,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudo colgar. Por favor, inténtalo de nuevo.';
 
   @override
-  String videoCallParticipantCount(num count) {
+  String videoCallParticipantCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
@@ -2127,6 +2127,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get videoCallGroupCallActive => 'Llamada grupal en curso';
+
+  @override
+  String get videoCallSwitch => 'Cambiar';
+
+  @override
+  String get videoCallSwitchToVideoTitle => '¿Cambiar a videollamada?';
 
   @override
   String incomingCallBannerIsCalling(String callerName) {
@@ -2204,10 +2210,4 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$_temp0';
   }
-
-  @override
-  String get videoCallSwitchToVideoTitle => '¿Cambiar a videollamada?';
-
-  @override
-  String get videoCallSwitch => 'Cambiar';
 }
