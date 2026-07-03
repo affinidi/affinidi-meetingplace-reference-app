@@ -29,7 +29,7 @@ class CallLifecycleUpdate {
   /// Whether the kept-alive incoming-call state should be cleared.
   final bool clearIncomingCall;
 
-  /// When set, the controller writes the terminal call chat item.
+  /// When set, the controller writes the ended call chat item.
   final CallEndOutcome? endOutcome;
 
   /// Whether a non-fatal hang-up failure should be surfaced to the UI.

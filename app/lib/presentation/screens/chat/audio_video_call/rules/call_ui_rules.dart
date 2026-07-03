@@ -100,7 +100,7 @@ CallUiPhase resolveCallUiPhase({
   return CallUiPhase.calling;
 }
 
-/// Maps a terminal call status to the specific end-state scaffold to render,
+/// Maps an ended call status to the specific end-state scaffold to render,
 /// or null if the call should be silently dismissed.
 ///
 /// Returns [CallEndState.callEnded] for normal ends after a peer was connected,

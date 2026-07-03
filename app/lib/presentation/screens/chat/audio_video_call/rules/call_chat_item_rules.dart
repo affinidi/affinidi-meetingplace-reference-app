@@ -51,7 +51,7 @@ CallStatus resolveEndStatus({
 /// Maps how a call ended into the [CallEndOutcome] persisted on the chat item.
 ///
 /// A call counts as unanswered ([CallEndOutcome.declined]) when its last status
-/// was declined or missed, or when no remote ever joined. Otherwise both
+/// was declined or missed, or when no peer ever joined. Otherwise both
 /// parties connected and it is a normal [CallEndOutcome.hungUp].
 CallEndOutcome resolveCallEndOutcome({
   required AudioVideoCallStatus lastStatus,

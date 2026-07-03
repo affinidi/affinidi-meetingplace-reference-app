@@ -143,8 +143,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     );
 
     // Read the logger eagerly here (outside the dispose lifecycle) and close
-    // over the local inside onDispose. Riverpod forbids ref.read while a
-    // provider is being disposed, which is when the onDispose callback runs.
+    // over the self reference inside onDispose. Riverpod forbids ref.read while
+    // a provider is being disposed, which is when the onDispose callback runs.
     final logger = _logger;
 
     ref.onDispose(() {
@@ -492,7 +492,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   }
 
   /// Applies lifecycle transitions: attaches sessions, clears incoming state,
-  /// updates status, records failures, and writes terminal chat items.
+  /// updates status, records failures, and writes ended chat items.
   void _applyLifecycleUpdate(CallLifecycleUpdate update) {
     if (_isDisposed) return;
     if (update.attachedSession != null) {

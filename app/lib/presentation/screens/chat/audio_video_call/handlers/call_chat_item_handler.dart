@@ -7,7 +7,7 @@ import '../rules/call_chat_item_rules.dart';
 
 /// Manages the full lifecycle of the call chat item: one-time creation when
 /// this device is the caller, and subsequent status updates through
-/// to the final terminal write.
+/// to the final ended write.
 ///
 /// Pass onInitiator to enable the emission phase (banner/initiator path).
 /// Omit it when the handler is used purely for updates (screen controller path
