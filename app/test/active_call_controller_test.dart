@@ -430,7 +430,7 @@ void main() {
       _registerSession(controller, session, isMinimized: true);
 
       // Simulate late arrival of session state (after screen disposed).
-      // hangUpFromScreen seeds the role before _onSessionState can.
+      // hangUpFromScreen sets the role before _onSessionState can.
       controller.hangUpFromScreen(role: CallRole.caller);
 
       // Session should be hung up and state cleared (contract met).

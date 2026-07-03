@@ -56,7 +56,7 @@ class CallChatItemHandler {
   /// relies on (e.g. the chat session).
   Future<void>? get endCallWrite => _endCallWrite;
 
-  /// Seeds the message id directly (e.g. when the screen controller reads the
+  /// Sets the message id directly (e.g. when the screen controller reads the
   /// id from the banner controller before the banner clears).
   void setCallChatItemId(String id) => _callChatItemId ??= id;
 
