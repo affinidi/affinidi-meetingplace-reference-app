@@ -575,6 +575,54 @@ void main() {
       expect(state.isAudioOnly, isFalse);
       expect(state.isCameraEnabled, isTrue);
     });
+
+    test(
+      'preserves isCameraEnabled=false when restoring a minimized call',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final contactId = FakeContacts.individualContact.id;
+        final container = _buildContainer(fakeSDK: fakeSDK);
+        addTearDown(container.dispose);
+
+        await container.read(meetingPlaceSdkProvider.future);
+        final controller = container.read(
+          audioVideoCallScreenControllerProvider(contactId).notifier,
+        );
+
+        // Start video call and turn camera off.
+        await controller.startCall(isAudioOnly: false);
+        await controller
+            .toggleCamera(); // turns camera off (isCameraEnabled: false)
+
+        // Verify camera is off before minimize.
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(contactId))
+              .isCameraEnabled,
+          isFalse,
+        );
+
+        // Simulate restore: inject a pending session so startCall detects
+        // restore.
+        final session = fakeSDK._session;
+        container
+            .read(audioVideoCallScreenControllerProvider(contactId).notifier)
+            .state = container
+            .read(audioVideoCallScreenControllerProvider(contactId))
+            .copyWith(session: session);
+
+        // startCall is called again on screen restore with isAudioOnly: false.
+        await controller.startCall(isAudioOnly: false);
+
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(contactId))
+              .isCameraEnabled,
+          isFalse,
+          reason: 'camera state must survive minimize/maximize',
+        );
+      },
+    );
   });
 
   group('dispose — terminal status skips hangUp', () {

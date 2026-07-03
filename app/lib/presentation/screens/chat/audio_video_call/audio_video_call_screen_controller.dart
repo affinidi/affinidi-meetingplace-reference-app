@@ -184,7 +184,9 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       callDurationSeconds: restoredBanner?.callDurationSeconds ?? 0,
       isMicEnabled: restoredBanner?.isMicEnabled ?? true,
       isAudioOnly: restoredBanner?.isAudioOnly ?? false,
-      isCameraEnabled: restoredBanner == null || !restoredBanner.isAudioOnly,
+      isCameraEnabled: restoredBanner != null
+          ? restoredBanner.isCameraEnabled
+          : true,
       session: pendingSession,
     );
   }
@@ -194,9 +196,10 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   Future<void> startCall({required bool isAudioOnly}) async {
     _isMinimizing = false;
     ref.read(activeCallControllerProvider.notifier).restore();
+    final isRestoring = state.session != null;
     state = state.copyWith(
       isAudioOnly: isAudioOnly,
-      isCameraEnabled: !isAudioOnly,
+      isCameraEnabled: isRestoring ? state.isCameraEnabled : !isAudioOnly,
     );
     await checkInitialPermissions();
     await joinCall();
