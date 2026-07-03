@@ -5,7 +5,11 @@ import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart
     show AudioVideoCallView;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
+import '../../application/services/identities_service/identities_service.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
+import '../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../infrastructure/providers/cache_manager_provider.dart';
+import '../widgets/profile_circle_avatar.dart';
 import 'video_call_pip_overlay.dart' show VideoCallPiPOverlay;
 
 /// Last snapped position of the PiP window — persisted across widget
@@ -210,43 +214,33 @@ class _SelfVideoView extends StatelessWidget {
   }
 }
 
-/// Gradient person icon shown when the camera has no active video track.
-class _SelfAvatarPlaceholder extends StatelessWidget {
+/// Avatar shown in the PiP window when the camera has no active video track.
+/// Displays the current identity's profile picture, falling back to a
+/// person icon if no profile picture is set.
+class _SelfAvatarPlaceholder extends ConsumerWidget {
   const _SelfAvatarPlaceholder();
 
   static const double _diameter = 40;
 
   @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final colors = context.customColors;
-
-    return Container(
-      width: _diameter,
-      height: _diameter,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [
-            Color.lerp(
-              colorScheme.surfaceContainerHigh,
-              colors.pureWhite,
-              0.3,
-            )!,
-            Color.lerp(
-              colorScheme.surfaceContainerHigh,
-              colors.pureWhite,
-              0.1,
-            )!,
-            colorScheme.surfaceContainerHigh,
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final identity = ref.watch(
+      identitiesServiceProvider.select(
+        (s) => s.currentIdentity ?? s.identities.firstOrNull,
       ),
+    );
+    final cacheManager = ref.read(cacheManagerProvider);
+    final image = identity != null && identity.card.hasProfilePic
+        ? identity.card.image(cacheManager: cacheManager)
+        : null;
+
+    return ProfileCircleAvatar(
+      radius: _diameter / 2,
+      image: image,
       child: Icon(
         Icons.person,
         size: _diameter / 2,
-        color: colorScheme.onSurface,
+        color: context.colorScheme.onSurface,
       ),
     );
   }
