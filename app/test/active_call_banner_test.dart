@@ -92,7 +92,9 @@ void main() {
       expect(find.textContaining('Ringing'), findsOneWidget);
     });
 
-    testWidgets('shows duration when call is active with peer', (tester) async {
+    testWidgets('shows "Tap to return" when call is active with peer', (
+      tester,
+    ) async {
       final state = _state(isAudioOnly: true).copyWith(
         status: AudioVideoCallStatus.active,
         callDurationSeconds: 45,
@@ -101,8 +103,7 @@ void main() {
       await tester.pumpWidget(wrap(state));
       await tester.pump();
 
-      // Should show duration (45 seconds = 0:45)
-      expect(find.textContaining(':'), findsOneWidget);
+      expect(find.textContaining('Tap to return'), findsOneWidget);
     });
 
     testWidgets('shows "No answer" when call ends', (tester) async {
