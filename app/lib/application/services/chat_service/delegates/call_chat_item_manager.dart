@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
@@ -12,6 +14,8 @@ class CallChatItemManager {
     required this.logger,
   });
 
+  static const _resolveCallChatItemRetryDelay = Duration(milliseconds: 50);
+  static const _resolveCallChatItemMaxAttempts = 10;
   static const _logKey = 'CallChatItemManager';
 
   final Future<void> Function() ensureInitialized;
@@ -67,17 +71,24 @@ class CallChatItemManager {
 
   /// Returns the ID of the latest incoming call item that has not yet been
   /// settled (not ended, missed, or declined), or `null` if none exist.
-  Future<String?> resolveIncomingCallChatItemId() =>
-      _resolveCallChatItemId(fromMe: false);
+  Future<String?> resolveIncomingCallChatItemId() => _resolveCallChatItemId(
+    fromMe: false,
+    attemptsRemaining: _resolveCallChatItemMaxAttempts,
+  );
 
   /// Returns the ID of the latest outgoing call item that has not yet been
   /// settled (not ended, missed, or declined), or `null` if none exist.
-  Future<String?> resolveOutgoingCallChatItemId() =>
-      _resolveCallChatItemId(fromMe: true);
+  Future<String?> resolveOutgoingCallChatItemId() => _resolveCallChatItemId(
+    fromMe: true,
+    attemptsRemaining: _resolveCallChatItemMaxAttempts,
+  );
 
   /// Finds the latest call item from the specified sender direction that is
   /// not yet settled (not ended, missed, or declined).
-  Future<String?> _resolveCallChatItemId({required bool fromMe}) async {
+  Future<String?> _resolveCallChatItemId({
+    required bool fromMe,
+    required int attemptsRemaining,
+  }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
     final label = fromMe
@@ -101,7 +112,14 @@ class CallChatItemManager {
             call.status != CallStatus.missed &&
             call.status != CallStatus.declined;
       });
-      if (match == null) return null;
+      if (match == null) {
+        if (attemptsRemaining <= 0) return null;
+        await Future<void>.delayed(_resolveCallChatItemRetryDelay);
+        return _resolveCallChatItemId(
+          fromMe: fromMe,
+          attemptsRemaining: attemptsRemaining - 1,
+        );
+      }
       logger.info('$label: ${match.messageId}', name: _logKey);
       return match.messageId;
     } catch (e, stackTrace) {

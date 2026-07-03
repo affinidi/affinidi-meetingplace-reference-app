@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
@@ -125,6 +128,68 @@ void main() {
 
       expect(ids, isEmpty);
     });
+
+    test('it waits for a late incoming item to resolve the messageId', () {
+      fakeAsync((async) {
+        fakeChatSdk.sessionMessages = [];
+
+        String? resolved;
+        unawaited(
+          manager.resolveIncomingCallChatItemId().then((value) {
+            resolved = value;
+          }),
+        );
+
+        async.flushMicrotasks();
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'late-incoming',
+            isFromMe: false,
+            status: CallStatus.calling,
+          ),
+        ];
+
+        async.elapse(const Duration(milliseconds: 50));
+        async.flushMicrotasks();
+
+        expect(resolved, 'late-incoming');
+      });
+    });
+
+    test(
+      'it waits for a late incoming item before updating to missed call',
+      () {
+        fakeAsync((async) {
+          fakeChatSdk.sessionMessages = [];
+
+          unawaited(manager.markCallAsMissed());
+
+          async.flushMicrotasks();
+          fakeChatSdk.sessionMessages = [
+            callMessage(
+              messageId: 'late-incoming',
+              isFromMe: false,
+              status: CallStatus.calling,
+            ),
+          ];
+
+          async.elapse(const Duration(milliseconds: 50));
+          async.flushMicrotasks();
+
+          expect(fakeChatSdk.updateMessageCalls, hasLength(1));
+          expect(
+            fakeChatSdk.updateMessageCalls.single.messageId,
+            'late-incoming',
+          );
+          final call = CallMetadata.maybeOf(
+            fakeChatSdk.updateMessageCalls.single.attachments.firstWhere(
+              CallMetadata.isCall,
+            ),
+          );
+          expect(call?.status, CallStatus.missed);
+        });
+      },
+    );
 
     test('excludes items younger than olderThan duration', () async {
       final recentDate = DateTime.now().toUtc().subtract(
