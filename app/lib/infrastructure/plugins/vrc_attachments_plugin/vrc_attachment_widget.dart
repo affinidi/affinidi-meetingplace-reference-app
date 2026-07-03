@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../extensions/build_context_extensions.dart';
 
-// TODO (earl): Rename to `VrcChatItem` for consistency
-class CredentialAttachmentWidget extends StatelessWidget {
-  const CredentialAttachmentWidget({super.key, required this.onTap});
+class VrcAttachmentWidget extends StatelessWidget {
+  const VrcAttachmentWidget({super.key, required this.onTap});
 
   final VoidCallback? onTap;
 
