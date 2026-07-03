@@ -119,6 +119,10 @@ class Environment {
       const bool.fromEnvironment('BIOMETRICS_ENABLED', defaultValue: true);
   bool get zkpEnabled =>
       const bool.fromEnvironment('ZKP_ENABLED', defaultValue: false);
+  bool get audioVideoCallsEnabled => const bool.fromEnvironment(
+    'AUDIO_VIDEO_CALLS_ENABLED',
+    defaultValue: false,
+  );
 
   String get appVersionName =>
       const String.fromEnvironment('APP_VERSION_NAME', defaultValue: '');

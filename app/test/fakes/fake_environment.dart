@@ -16,6 +16,7 @@ class FakeEnvironment implements Environment {
       ChannelTransport.didcomm,
       ChannelTransport.matrix,
     ],
+    this.audioVideoCallsEnabled = false,
   }) : defaultMediatorDid =
            defaultMediatorDid ?? FakeMediators.defaultMediator.mediatorDid;
 
@@ -84,6 +85,9 @@ class FakeEnvironment implements Environment {
 
   @override
   bool get zkpEnabled => false;
+
+  @override
+  final bool audioVideoCallsEnabled;
 
   @override
   String get appVersionName => '1.0.0-test';

@@ -117,6 +117,9 @@ class ChatScreen extends HookConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
+    final isAudioVideoCallsEnabled = ref
+        .read(environmentProvider)
+        .audioVideoCallsEnabled;
     final showHumanZkp = ref.watch(
       provider.select(
         (state) =>
@@ -127,6 +130,7 @@ class ChatScreen extends HookConsumerWidget {
     final isInitialized = ref.watch(
       provider.select((state) => state.isInitialized),
     );
+    final isGroupChat = ref.watch(provider.isGroupChat);
     final isCallSupported = ref.watch(
       provider.select((state) => state.isCallSupported),
     );
@@ -204,7 +208,7 @@ class ChatScreen extends HookConsumerWidget {
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
         actions: [
-          if (isCallSupported)
+          if (isAudioVideoCallsEnabled && isCallSupported && !isGroupChat)
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [

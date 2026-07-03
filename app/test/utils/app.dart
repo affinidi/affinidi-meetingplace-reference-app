@@ -85,6 +85,7 @@ Future<void> startApp(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
+  FakeEnvironment? environment,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   addTearDown(() async {
@@ -96,7 +97,7 @@ Future<void> startApp(
   });
   final sharedPreferences = await SharedPreferences.getInstance();
   final cacheManager = FakeCacheManager();
-  final effectiveEnvironment = FakeEnvironment();
+  final effectiveEnvironment = environment ?? FakeEnvironment();
   final effectiveSecureStorage = secureStorage ?? FakeSecureStorage();
   final documentsDirectory = Directory('/tmp');
   final databasePassphrase = await effectiveSecureStorage
@@ -294,6 +295,7 @@ Future<void> navigateToLocation(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
+  FakeEnvironment? environment,
 }) async {
   await startApp(
     tester,
@@ -316,6 +318,7 @@ Future<void> navigateToLocation(
     qrCodeViewFactory: qrCodeViewFactory,
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
+    environment: environment,
   );
 
   await tester.pumpAndSettle();
@@ -345,6 +348,7 @@ Future<void> navigateToChat(
   RCardsService Function()? rCardsServiceFactory,
   List<RCard> rCards = const [],
   MeetingPlaceMatrixSDK? meetingPlaceCoreSDK,
+  FakeEnvironment? environment,
 }) async {
   await navigateToLocation(
     tester,
@@ -367,6 +371,7 @@ Future<void> navigateToChat(
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
     rCards: rCards,
+    environment: environment,
   );
   await tester.pumpAndSettle();
 }
