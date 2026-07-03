@@ -10,6 +10,8 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/navigation/navigator.dart';
 import 'package:mpx_flutter_reference_app/presentation/app/app_header_banner.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_banner.dart';
@@ -25,6 +27,12 @@ import 'fakes/fake_authentication_service.dart';
 import 'fakes/fake_end_call_banner_controller.dart';
 import 'fakes/fake_settings_service.dart';
 import 'mocks/mock_navigator.dart';
+
+class _FakeScreenController extends AudioVideoCallScreenController {
+  @override
+  AudioVideoCallScreenState build(String contactId) =>
+      AudioVideoCallScreenState(isCameraEnabled: false, isMicEnabled: true);
+}
 
 ActiveCallState _minimizedState() => const ActiveCallState(
   contactId: 'contact-1',
@@ -44,6 +52,9 @@ Widget wrap(ActiveCallState? callState) => ProviderScope(
     settingsServiceProvider.overrideWith(FakeSettingsService.new),
     activeCallControllerProvider.overrideWith(
       () => FakeActiveCallController(callState),
+    ),
+    audioVideoCallScreenControllerProvider.overrideWith(
+      _FakeScreenController.new,
     ),
   ],
   child: MaterialApp(
