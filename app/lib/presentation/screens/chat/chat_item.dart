@@ -32,7 +32,7 @@ class ChatItem extends StatelessWidget {
         CallMetadata.isCall,
       );
       if (callAttachment != null) {
-        return CallChatItem(
+        return _CallChatItem(
           message: _chatItem,
           attachment: callAttachment,
           chatItemColor: _chatItemColor,

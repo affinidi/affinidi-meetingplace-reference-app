@@ -1,12 +1,4 @@
-import 'dart:async';
-
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meeting_place_matrix/meeting_place_matrix.dart';
-
-import '../../../../infrastructure/extensions/build_context_extensions.dart';
-import '../audio_video_call/audio_video_call_screen.dart';
-import '../audio_video_call/rules/call_chat_item_rules.dart';
+part of '../chat_screen.dart';
 
 /// Renders a call (audio / video) chat item as a thick-bordered card, modelled
 /// on the RCard chat tile.
@@ -14,9 +6,8 @@ import '../audio_video_call/rules/call_chat_item_rules.dart';
 /// The displayed status and visual treatment are derived purely from the
 /// stored [CallMetadata] and the message ownership. An optional return-to-call
 /// callback is invoked when the item is tappable (an active call to return to).
-class CallChatItem extends ConsumerWidget {
-  const CallChatItem({
-    super.key,
+class _CallChatItem extends ConsumerWidget {
+  const _CallChatItem({
     required this._message,
     required this._attachment,
     required this._chatItemColor,
