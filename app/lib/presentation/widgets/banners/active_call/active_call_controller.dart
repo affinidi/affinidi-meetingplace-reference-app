@@ -322,7 +322,7 @@ class ActiveCallController extends _$ActiveCallController {
   /// Hangs up the live session when the call screen is disposed mid-call
   /// (e.g. the user navigates back before answering).
   ///
-  /// [role] seeds the call role so the chat item resolves to the
+  /// [role] sets the call role so the chat item resolves to the
   /// correct end status even when the banner never observed the session's
   /// ownRole (the screen was disposed before it minimized).
   void hangUpFromScreen({required CallRole role}) {

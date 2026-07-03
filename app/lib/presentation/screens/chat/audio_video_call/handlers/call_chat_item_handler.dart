@@ -11,7 +11,7 @@ import '../rules/call_chat_item_rules.dart';
 ///
 /// Pass onInitiator to enable the emission phase (banner/initiator path).
 /// Omit it when the handler is used purely for updates (screen controller path
-/// that seeds the id via seedCallChatItemId).
+/// that sets the id via setCallChatItemId).
 ///
 /// Owns the idempotency flag and the cached message-id so both
 /// AudioVideoCallScreenController and ActiveCallController share the same
@@ -58,7 +58,7 @@ class CallChatItemHandler {
 
   /// Seeds the message id directly (e.g. when the screen controller reads the
   /// id from the banner controller before the banner clears).
-  void seedCallChatItemId(String id) => _callChatItemId ??= id;
+  void setCallChatItemId(String id) => _callChatItemId ??= id;
 
   /// Subscribes to session state to detect the caller role and emit the
   /// outgoing call chat item exactly once via onInitiator.

@@ -465,7 +465,7 @@ void main() {
   });
 
   group('hangUpFromScreen', () {
-    test('seeds _ownRole from role enum', () async {
+    test('sets _ownRole from role enum', () async {
       final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
       final container = _makeContainer(chatService: chatSvc);
       final ctrl = container.read(activeCallControllerProvider.notifier);

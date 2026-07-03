@@ -246,26 +246,26 @@ void main() {
     });
 
     CallChatItemHandler makeHandler({
-      String? seedId,
+      String? initialId,
       bool isDisposed = false,
       List<({String messageId, CallStatus status})>? calls,
     }) {
       final recorded = calls ?? [];
       final h = CallChatItemHandler(
-        resolveItemId: ({required bool isCaller}) async => seedId,
+        resolveItemId: ({required bool isCaller}) async => initialId,
         updateItem: (id, {required status, duration}) async {
           recorded.add((messageId: id, status: status));
         },
         isDisposed: () => isDisposed,
         logger: logger,
       );
-      if (seedId != null) h.seedCallChatItemId(seedId);
+      if (initialId != null) h.setCallChatItemId(initialId);
       return h;
     }
 
     test('writes status when item id is available', () async {
       final calls = <({String messageId, CallStatus status})>[];
-      final handler = makeHandler(seedId: 'msg-1', calls: calls);
+      final handler = makeHandler(initialId: 'msg-1', calls: calls);
 
       handler.updateCallChatItemStatus(CallStatus.ringing);
       await Future<void>.delayed(Duration.zero);
@@ -277,7 +277,7 @@ void main() {
 
     test('skips write when callChatItemEnded is true', () async {
       final calls = <({String messageId, CallStatus status})>[];
-      final handler = makeHandler(seedId: 'msg-1', calls: calls);
+      final handler = makeHandler(initialId: 'msg-1', calls: calls);
 
       handler.endCallChatItem(
         outcome: CallEndOutcome.hungUp,
@@ -299,7 +299,7 @@ void main() {
     test('skips write when isDisposed returns true', () async {
       final calls = <({String messageId, CallStatus status})>[];
       final handler = makeHandler(
-        seedId: 'msg-1',
+        initialId: 'msg-1',
         isDisposed: true,
         calls: calls,
       );
@@ -320,25 +320,25 @@ void main() {
     CallChatItemHandler makeHandler({
       required List<({String messageId, CallStatus status, Duration? duration})>
       calls,
-      String? seedId,
+      String? initialId,
       bool isDisposed = false,
     }) {
       final h = CallChatItemHandler(
-        resolveItemId: ({required bool isCaller}) async => seedId,
+        resolveItemId: ({required bool isCaller}) async => initialId,
         updateItem: (id, {required status, duration}) async {
           calls.add((messageId: id, status: status, duration: duration));
         },
         isDisposed: () => isDisposed,
         logger: logger,
       );
-      if (seedId != null) h.seedCallChatItemId(seedId);
+      if (initialId != null) h.setCallChatItemId(initialId);
       return h;
     }
 
     test('caller + hungUp + hasHadPeer writes ended with duration', () async {
       final calls =
           <({String messageId, CallStatus status, Duration? duration})>[];
-      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+      final handler = makeHandler(calls: calls, initialId: 'msg-1');
 
       handler.endCallChatItem(
         outcome: CallEndOutcome.hungUp,
@@ -356,7 +356,7 @@ void main() {
     test('caller + declined writes declined with no duration', () async {
       final calls =
           <({String messageId, CallStatus status, Duration? duration})>[];
-      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+      final handler = makeHandler(calls: calls, initialId: 'msg-1');
 
       handler.endCallChatItem(
         outcome: CallEndOutcome.declined,
@@ -374,7 +374,7 @@ void main() {
     test('recipient + declined writes missed', () async {
       final calls =
           <({String messageId, CallStatus status, Duration? duration})>[];
-      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+      final handler = makeHandler(calls: calls, initialId: 'msg-1');
 
       handler.endCallChatItem(
         outcome: CallEndOutcome.declined,
@@ -391,7 +391,7 @@ void main() {
     test('is idempotent — second call produces no additional write', () async {
       final calls =
           <({String messageId, CallStatus status, Duration? duration})>[];
-      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+      final handler = makeHandler(calls: calls, initialId: 'msg-1');
 
       handler.endCallChatItem(
         outcome: CallEndOutcome.hungUp,
@@ -414,7 +414,7 @@ void main() {
     test('sets callChatItemEnded immediately (before async resolves)', () {
       final calls =
           <({String messageId, CallStatus status, Duration? duration})>[];
-      final handler = makeHandler(calls: calls, seedId: 'msg-1');
+      final handler = makeHandler(calls: calls, initialId: 'msg-1');
 
       handler.endCallChatItem(
         outcome: CallEndOutcome.hungUp,
@@ -437,8 +437,8 @@ void main() {
         logger: logger,
       );
 
-      handler.seedCallChatItemId('first');
-      handler.seedCallChatItemId('second');
+      handler.setCallChatItemId('first');
+      handler.setCallChatItemId('second');
 
       expect(handler.callChatItemId, 'first');
     });

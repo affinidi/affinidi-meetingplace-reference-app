@@ -385,7 +385,7 @@ void main() {
 
   group('hangUpFromScreen', () {
     test(
-      'seeds caller role and hangs up the session, clearing banner state',
+      'sets caller role and hangs up the session, clearing banner state',
       () {
         final session = _FakeSession();
         _registerSession(controller, session);
@@ -397,7 +397,7 @@ void main() {
       },
     );
 
-    test('seeds recipient role and hangs up the session', () {
+    test('sets recipient role and hangs up the session', () {
       final session = _FakeSession();
       _registerSession(controller, session);
 
@@ -425,7 +425,7 @@ void main() {
       expect(container.read(activeCallControllerProvider), isNull);
     });
 
-    test('caller path seeds CallRole.caller', () {
+    test('caller path sets CallRole.caller', () {
       final session = _FakeSession();
       _registerSession(controller, session, isMinimized: true);
 

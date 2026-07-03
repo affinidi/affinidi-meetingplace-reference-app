@@ -411,7 +411,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
         .read(activeCallControllerProvider.notifier)
         .callChatItemId;
     if (bannerItemId != null) {
-      _chatItemHandler.seedCallChatItemId(bannerItemId);
+      _chatItemHandler.setCallChatItemId(bannerItemId);
     }
 
     if (update.ownRole != null) {
@@ -609,7 +609,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     if (!value.isVisible) {
       final bannerItemId = activeCallController.callChatItemId;
       if (bannerItemId != null) {
-        _chatItemHandler.seedCallChatItemId(bannerItemId);
+        _chatItemHandler.setCallChatItemId(bannerItemId);
       }
       activeCallController.clear();
       return;
