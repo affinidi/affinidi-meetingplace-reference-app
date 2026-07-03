@@ -214,7 +214,7 @@ class _IndividualVideoCallScaffold extends StatelessWidget {
                           onMinimize: onMinimize,
                         ),
                       ),
-                      if (selfParticipant != null && pipState.isCameraEnabled)
+                      if (selfParticipant != null)
                         VideoCallPiPWindow(
                           contactId: contactId,
                           session: session,

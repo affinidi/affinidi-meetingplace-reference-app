@@ -77,15 +77,38 @@ class ActiveCallController extends _$ActiveCallController {
   }
 
   /// Marks the call as minimized, transitioning to banner-only control.
-  void minimize() {
+  ///
+  /// The screen controller passes its authoritative media state so the banner
+  /// (and the PiP overlay) reflect any audio-to-video switch that happened
+  /// while the screen was open, without waiting for the next session event.
+  void minimize({
+    required bool isAudioOnly,
+    required bool isCameraEnabled,
+    AudioVideoCallParticipant? selfParticipant,
+  }) {
     final current = state;
-    if (current != null) state = current.copyWith(isMinimized: true);
+    if (current != null) {
+      state = current.copyWith(
+        isMinimized: true,
+        isAudioOnly: isAudioOnly,
+        isCameraEnabled: isCameraEnabled,
+        selfParticipant: selfParticipant ?? current.selfParticipant,
+      );
+    }
   }
 
   /// Marks the call as restored, bringing it back to full screen control.
   void restore() {
     final current = state;
     if (current != null) state = current.copyWith(isMinimized: false);
+  }
+
+  /// Updates banner state when the local user switches from audio-only
+  /// to video.
+  void switchToVideo() {
+    final current = state;
+    if (current == null) return;
+    state = current.copyWith(isAudioOnly: false, isCameraEnabled: true);
   }
 
   /// Starts the one-second duration timer. No-op if already running.

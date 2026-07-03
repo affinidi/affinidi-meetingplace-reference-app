@@ -64,9 +64,6 @@ class FakeActiveCallController extends ActiveCallController {
   void clear() {}
 
   @override
-  void minimize() {}
-
-  @override
   void restore() {}
 
   @override

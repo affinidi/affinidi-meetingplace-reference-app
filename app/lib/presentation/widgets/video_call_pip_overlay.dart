@@ -21,7 +21,9 @@ import 'video_call_pip_window.dart';
 /// Placed at the top of the [AppHeaderBanner] Stack. Renders only when:
 /// - a call is active and minimized (`isMinimized == true`)
 /// - the call is not audio-only
-/// - the camera is enabled
+///
+/// The self camera being off does not hide the window — it renders the self
+/// avatar, matching the in-screen self-view.
 ///
 /// Tapping once expands the window slightly as a hint; tapping again
 /// navigates back to [AudioVideoCallScreen].
@@ -32,10 +34,7 @@ class VideoCallPiPOverlay extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final callState = ref.watch(activeCallControllerProvider);
 
-    if (callState == null ||
-        !callState.isMinimized ||
-        callState.isAudioOnly ||
-        !callState.isCameraEnabled) {
+    if (callState == null || !callState.isMinimized || callState.isAudioOnly) {
       return const SizedBox.shrink();
     }
 

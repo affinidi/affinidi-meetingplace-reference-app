@@ -253,7 +253,16 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     _logger.info('minimize: Transitioning to banner control', name: _logKey);
     _isMinimizing = true;
     _clearIncomingCallState();
-    ref.read(activeCallControllerProvider.notifier).minimize();
+    final selfParticipant = state.participants
+        .where((p) => p.isSelf)
+        .firstOrNull;
+    ref
+        .read(activeCallControllerProvider.notifier)
+        .minimize(
+          isAudioOnly: state.isAudioOnly,
+          isCameraEnabled: state.isCameraEnabled,
+          selfParticipant: selfParticipant,
+        );
   }
 
   /// Checks initial microphone and camera permission status and updates state.
@@ -537,10 +546,21 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// Applies media toggle updates (mic, camera, speaker, permissions) to state.
   void _applyMediaUpdate(CallMediaUpdate update) {
     if (_isDisposed) return;
+
+    final newIsCameraEnabled = update.isCameraEnabled ?? state.isCameraEnabled;
+    // When enabling camera from audio-only call, switch to video mode.
+    final shouldSwitchToVideo =
+        update.isCameraEnabled == true && state.isAudioOnly;
+
+    if (shouldSwitchToVideo) {
+      ref.read(activeCallControllerProvider.notifier).switchToVideo();
+    }
+
     state = state.copyWith(
       isMicEnabled: update.isMicEnabled ?? state.isMicEnabled,
       micPermissionError: update.micPermissionError ?? state.micPermissionError,
-      isCameraEnabled: update.isCameraEnabled ?? state.isCameraEnabled,
+      isCameraEnabled: newIsCameraEnabled,
+      isAudioOnly: shouldSwitchToVideo ? false : state.isAudioOnly,
       cameraPermissionError:
           update.cameraPermissionError ?? state.cameraPermissionError,
       isSpeakerEnabled: update.isSpeakerEnabled ?? state.isSpeakerEnabled,

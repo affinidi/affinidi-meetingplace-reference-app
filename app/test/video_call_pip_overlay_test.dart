@@ -94,7 +94,7 @@ void main() {
       expect(find.byIcon(Icons.flip_camera_ios), findsNothing);
     });
 
-    testWidgets('renders nothing when camera is disabled on banner', (
+    testWidgets('renders the PiP with self avatar when camera is disabled', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -102,7 +102,12 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.flip_camera_ios), findsNothing);
+      // The window renders (camera-off shows the self avatar). Tapping reveals
+      // the control bar.
+      await tester.tap(find.byType(VideoCallPiPOverlay));
+      await tester.pump();
+
+      expect(find.byIcon(Icons.mic), findsOneWidget);
     });
   });
 

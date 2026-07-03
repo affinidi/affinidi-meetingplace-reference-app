@@ -649,6 +649,38 @@ void main() {
     });
 
     test(
+      'switches from audio to video when enabling camera in audio call',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final contactId = FakeContacts.individualContact.id;
+        final container = _buildContainer(fakeSDK: fakeSDK);
+        addTearDown(container.dispose);
+
+        await container.read(meetingPlaceSdkProvider.future);
+        final controller = container.read(
+          audioVideoCallScreenControllerProvider(contactId).notifier,
+        );
+
+        await controller.startCall(isAudioOnly: true);
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(contactId))
+              .isAudioOnly,
+          isTrue,
+        );
+
+        await controller.toggleCamera();
+
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(contactId))
+              .isAudioOnly,
+          isFalse,
+        );
+      },
+    );
+
+    test(
       'does not reconfigure audio session when enabling camera in video call',
       () async {
         final fakeSDK = _FakeMeetingPlaceMatrixSDK();

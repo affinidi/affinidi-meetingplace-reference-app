@@ -97,8 +97,16 @@ void main() {
   group('minimize / restore', () {
     test('minimize sets isMinimized true', () {
       controller.update(_state());
-      controller.minimize();
+      controller.minimize(isAudioOnly: false, isCameraEnabled: true);
       expect(container.read(activeCallControllerProvider)!.isMinimized, isTrue);
+    });
+
+    test('minimize syncs audio-to-video media state', () {
+      controller.update(_state());
+      controller.minimize(isAudioOnly: false, isCameraEnabled: true);
+      final state = container.read(activeCallControllerProvider)!;
+      expect(state.isAudioOnly, isFalse);
+      expect(state.isCameraEnabled, isTrue);
     });
 
     test('restore sets isMinimized false', () {
@@ -111,7 +119,7 @@ void main() {
     });
 
     test('minimize is a no-op when there is no state', () {
-      controller.minimize();
+      controller.minimize(isAudioOnly: false, isCameraEnabled: true);
       expect(container.read(activeCallControllerProvider), isNull);
     });
   });
@@ -227,7 +235,7 @@ void main() {
         controller.startTimer();
 
         async.elapse(const Duration(seconds: 2));
-        controller.minimize();
+        controller.minimize(isAudioOnly: false, isCameraEnabled: true);
         async.elapse(const Duration(seconds: 3));
         controller.restore();
         async.elapse(const Duration(seconds: 1));
