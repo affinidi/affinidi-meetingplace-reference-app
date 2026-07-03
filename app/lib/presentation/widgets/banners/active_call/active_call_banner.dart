@@ -43,12 +43,12 @@ class ActiveCallBanner extends ConsumerWidget {
 
     final bannerController = ref.read(activeCallControllerProvider.notifier);
 
-    const textStyle = TextStyle(
-      color: Colors.white,
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      decoration: TextDecoration.none,
-    );
+    final textStyle = (context.textTheme.bodyLarge ?? const TextStyle())
+        .copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          decoration: TextDecoration.none,
+        );
 
     return Container(
       width: double.infinity,

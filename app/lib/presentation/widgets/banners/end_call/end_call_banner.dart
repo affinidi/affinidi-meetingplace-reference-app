@@ -31,12 +31,12 @@ class EndCallBanner extends ConsumerWidget {
 
     final slideOffset = bannerState.slideOutOffset;
 
-    final textStyle = TextStyle(
-      color: colorScheme.onError,
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      decoration: TextDecoration.none,
-    );
+    final textStyle = (context.textTheme.bodyLarge ?? const TextStyle())
+        .copyWith(
+          color: colorScheme.onError,
+          fontWeight: FontWeight.w600,
+          decoration: TextDecoration.none,
+        );
 
     return SlideTransition(
       position: Tween<Offset>(begin: Offset.zero, end: const Offset(0, -1))
