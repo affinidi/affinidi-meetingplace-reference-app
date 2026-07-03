@@ -323,12 +323,17 @@ Future<void> navigateToLocation(
 
   await tester.pumpAndSettle();
 
+  await pushRoute(tester, location);
+}
+
+Future<void> pushRoute(WidgetTester tester, String location) async {
   final testRouteInformation = <String, dynamic>{'location': location};
   final message = const JSONMethodCodec().encodeMethodCall(
     MethodCall('pushRouteInformation', testRouteInformation),
   );
   await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .handlePlatformMessage('flutter/navigation', message, (_) {});
+  await tester.pumpAndSettle();
 }
 
 Future<void> navigateToChat(

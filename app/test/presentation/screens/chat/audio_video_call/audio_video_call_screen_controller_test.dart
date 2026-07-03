@@ -13,9 +13,9 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_ca
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../fakes/fake_chat_session_service.dart';
 import '../../../../mocks/fake_active_call_controller.dart';
 import '../../../../mocks/fake_app_logger.dart';
-import '../../../../mocks/fake_chat_session_service.dart';
 import '../../../../mocks/fake_contacts_service.dart';
 import '../../../../mocks/fake_meeting_place_matrix_sdk.dart';
 import '../../../../mocks/mock_audio_video_call_session.dart';

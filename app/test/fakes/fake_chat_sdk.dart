@@ -424,6 +424,32 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     );
   }
 
+  void setIncomingCallSessionMessage({
+    required String senderDid,
+    String messageId = 'late-incoming-call-item',
+    CallMediaType mediaType = CallMediaType.video,
+    CallStatus status = CallStatus.calling,
+  }) {
+    sessionMessages = [
+      Message(
+        chatId: chatId,
+        messageId: messageId,
+        value: '',
+        dateCreated: DateTime.now(),
+        status: ChatItemStatus.confirmed,
+        isFromMe: false,
+        senderDid: senderDid,
+        attachments: [
+          CallMetadata.buildAttachment(
+            id: 'call-attachment-${DateTime.now().microsecondsSinceEpoch}',
+            mediaType: mediaType,
+            status: status,
+          ),
+        ],
+      ),
+    ];
+  }
+
   void simulateIncomingPresenceMessage({
     required String timestamp,
     required String recipientDid,

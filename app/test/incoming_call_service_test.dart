@@ -15,7 +15,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place
 import 'package:mpx_flutter_reference_app/infrastructure/services/call_audio_session_service/call_audio_session_service.dart';
 
 import 'fakes/fake_audio_session.dart';
-import 'mocks/fake_chat_session_service.dart';
+import 'fakes/fake_chat_session_service.dart';
 
 class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
   final _incoming = StreamController<IncomingAudioVideoCallEvent>.broadcast();
@@ -76,8 +76,8 @@ void main() {
     ],
   );
 
-  group('incoming call', () {
-    test('preserves audio media type on the incoming call state', () async {
+  group('when there is an incoming call', () {
+    test('it preserves audio media type on the incoming call state', () async {
       final fakeSDK = _FakeMeetingPlaceMatrixSDK();
       final container = buildContainer(fakeSDK);
       addTearDown(container.dispose);
@@ -96,7 +96,7 @@ void main() {
       );
     });
 
-    test('sets the incoming call state when an event arrives', () async {
+    test('it sets the incoming call state when an event arrives', () async {
       final fakeSDK = _FakeMeetingPlaceMatrixSDK();
       final container = buildContainer(fakeSDK);
       addTearDown(container.dispose);
@@ -114,20 +114,54 @@ void main() {
         IncomingCallState.ringing(event),
       );
     });
-  });
 
-  group('accept', () {
-    test(
-      'preserves incoming-call state for the call screen and forwards the call'
-      ' id to the SDK',
-      () async {
+    group('and the recipient accepts the call', () {
+      test(
+        '''it preserves incoming-call state for the call screen and forwards the call id to the SDK''',
+        () async {
+          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final audioSession = FakeAudioSession();
+          final container = buildContainer(
+            fakeSDK,
+            audioSession: audioSession,
+            canUsePlatformAudioSession: true,
+          );
+          addTearDown(container.dispose);
+
+          container.read(incomingCallServiceProvider);
+          await container.read(meetingPlaceSdkProvider.future);
+          await pumpEventQueue();
+
+          fakeSDK.emitIncoming(_event());
+          await pumpEventQueue();
+
+          container
+              .read(incomingCallServiceProvider.notifier)
+              .accept(callId: 'call-1');
+          await pumpEventQueue();
+
+          expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
+          expect(fakeSDK.acceptedCallIds, ['call-1']);
+          expect(fakeSDK.declinedCallIds, isEmpty);
+          expect(
+            container.read(callAudioSessionServiceProvider).isAcquired,
+            isTrue,
+          );
+          expect(audioSession.configureCalls, 1);
+          expect(audioSession.setActiveCalls, 1);
+          expect(audioSession.lastSetActiveValue, isTrue);
+          expect(
+            audioSession.lastConfiguration?.avAudioSessionMode,
+            AVAudioSessionMode.videoChat,
+          );
+        },
+      );
+    });
+
+    group('and the recipient declines the call', () {
+      test('it clears the state and forwards the call id to the SDK', () async {
         final fakeSDK = _FakeMeetingPlaceMatrixSDK();
-        final audioSession = FakeAudioSession();
-        final container = buildContainer(
-          fakeSDK,
-          audioSession: audioSession,
-          canUsePlatformAudioSession: true,
-        );
+        final container = buildContainer(fakeSDK);
         addTearDown(container.dispose);
 
         container.read(incomingCallServiceProvider);
@@ -139,95 +173,80 @@ void main() {
 
         container
             .read(incomingCallServiceProvider.notifier)
-            .accept(callId: 'call-1');
+            .decline(callId: 'call-1');
         await pumpEventQueue();
-
-        expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
-        expect(fakeSDK.acceptedCallIds, ['call-1']);
-        expect(fakeSDK.declinedCallIds, isEmpty);
-        expect(
-          container.read(callAudioSessionServiceProvider).isAcquired,
-          isTrue,
-        );
-        expect(audioSession.configureCalls, 1);
-        expect(audioSession.setActiveCalls, 1);
-        expect(audioSession.lastSetActiveValue, isTrue);
-        expect(
-          audioSession.lastConfiguration?.avAudioSessionMode,
-          AVAudioSessionMode.videoChat,
-        );
-      },
-    );
-  });
-
-  group('decline', () {
-    test('clears the state and forwards the call id to the SDK', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
-      final container = buildContainer(fakeSDK);
-      addTearDown(container.dispose);
-
-      container.read(incomingCallServiceProvider);
-      await container.read(meetingPlaceSdkProvider.future);
-      await pumpEventQueue();
-
-      fakeSDK.emitIncoming(_event());
-      await pumpEventQueue();
-
-      container
-          .read(incomingCallServiceProvider.notifier)
-          .decline(callId: 'call-1');
-      await pumpEventQueue();
-
-      expect(container.read(incomingCallProvider).eventOrNull, isNull);
-      expect(fakeSDK.declinedCallIds, ['call-1']);
-      expect(fakeSDK.acceptedCallIds, isEmpty);
-    });
-  });
-
-  group('ring timeout', () {
-    test('auto-declines and clears the state after the timeout', () {
-      fakeAsync((async) {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
-        final container = buildContainer(fakeSDK);
-
-        container.read(incomingCallServiceProvider);
-        async.flushMicrotasks();
-
-        fakeSDK.emitIncoming(_event());
-        async.flushMicrotasks();
-        expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
-
-        async.elapse(const Duration(seconds: 15));
 
         expect(container.read(incomingCallProvider).eventOrNull, isNull);
         expect(fakeSDK.declinedCallIds, ['call-1']);
-
-        container.dispose();
+        expect(fakeSDK.acceptedCallIds, isEmpty);
       });
     });
 
-    test('does not auto-decline once the call is accepted', () {
-      fakeAsync((async) {
+    group('and the caller cancels the call', () {
+      test('it clears the incoming call state', () async {
         final fakeSDK = _FakeMeetingPlaceMatrixSDK();
         final container = buildContainer(fakeSDK);
+        addTearDown(container.dispose);
 
         container.read(incomingCallServiceProvider);
-        async.flushMicrotasks();
+        await container.read(meetingPlaceSdkProvider.future);
+        await pumpEventQueue();
 
         fakeSDK.emitIncoming(_event());
-        async.flushMicrotasks();
+        await pumpEventQueue();
 
-        container
-            .read(incomingCallServiceProvider.notifier)
-            .accept(callId: 'call-1');
-        async.flushMicrotasks();
+        fakeSDK.emitCancelled('call-1');
+        await pumpEventQueue();
 
-        async.elapse(const Duration(seconds: 30));
+        expect(container.read(incomingCallProvider).eventOrNull, isNull);
+      });
+    });
 
-        expect(fakeSDK.declinedCallIds, isEmpty);
-        expect(fakeSDK.acceptedCallIds, ['call-1']);
+    group('and the recipient does not respond', () {
+      test('auto-declines and clears the state after the timeout', () {
+        fakeAsync((async) {
+          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final container = buildContainer(fakeSDK);
 
-        container.dispose();
+          container.read(incomingCallServiceProvider);
+          async.flushMicrotasks();
+
+          fakeSDK.emitIncoming(_event());
+          async.flushMicrotasks();
+          expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
+
+          async.elapse(const Duration(seconds: 15));
+
+          expect(container.read(incomingCallProvider).eventOrNull, isNull);
+          expect(fakeSDK.declinedCallIds, ['call-1']);
+
+          container.dispose();
+        });
+      });
+
+      test('it does not auto-decline once the call is accepted', () {
+        fakeAsync((async) {
+          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final container = buildContainer(fakeSDK);
+
+          container.read(incomingCallServiceProvider);
+          async.flushMicrotasks();
+
+          fakeSDK.emitIncoming(_event());
+          async.flushMicrotasks();
+
+          container
+              .read(incomingCallServiceProvider.notifier)
+              .accept(callId: 'call-1');
+          async.flushMicrotasks();
+
+          async.elapse(const Duration(seconds: 30));
+
+          expect(fakeSDK.declinedCallIds, isEmpty);
+          expect(fakeSDK.acceptedCallIds, ['call-1']);
+
+          container.dispose();
+        });
       });
     });
   });

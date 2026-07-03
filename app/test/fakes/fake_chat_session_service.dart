@@ -7,7 +7,36 @@ import 'package:mpx_flutter_reference_app/application/services/chat_service/chat
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 
+/// Recorded arguments for a single updateCallChatItem call.
+typedef UpdateCallChatItemCall = ({
+  String messageId,
+  CallStatus status,
+  Duration? duration,
+});
+
 class FakeChatSessionService extends ChatSessionService {
+  FakeChatSessionService({
+    this.sendOutgoingResult,
+    this.resolveIncomingResult,
+    this.resolveOutgoingResult,
+    this.markCallAsMissedMessageId,
+    this.incomingItemAvailable = true,
+    this.resolveCallItemMaxAttempts = 0,
+  });
+
+  static const _resolveCallItemRetryDelay = Duration(milliseconds: 50);
+
+  String? sendOutgoingResult;
+  String? resolveIncomingResult;
+  String? resolveOutgoingResult;
+  String? markCallAsMissedMessageId;
+  bool incomingItemAvailable;
+  int resolveCallItemMaxAttempts;
+  int markCallAsMissedAttempts = 0;
+  int resolveIncomingCallChatItemIdAttempts = 0;
+
+  final List<UpdateCallChatItemCall> updateCalls = [];
+
   @override
   ChatServiceState build(String channelDid) => ChatServiceState();
 
@@ -114,20 +143,54 @@ class FakeChatSessionService extends ChatSessionService {
   @override
   Future<String?> sendOutgoingCallMessage({
     required CallMediaType mediaType,
-  }) async => null;
+  }) async => sendOutgoingResult;
 
   @override
-  Future<String?> resolveIncomingCallChatItemId() async => null;
+  Future<String?> resolveIncomingCallChatItemId() => _resolveCallChatItemId(
+    resolve: () => resolveIncomingResult,
+    onAttempt: () => resolveIncomingCallChatItemIdAttempts++,
+    attemptsRemaining: resolveCallItemMaxAttempts,
+  );
 
   @override
-  Future<String?> resolveOutgoingCallChatItemId() async => null;
+  Future<String?> resolveOutgoingCallChatItemId() => _resolveCallChatItemId(
+    resolve: () => resolveOutgoingResult,
+    attemptsRemaining: resolveCallItemMaxAttempts,
+  );
+
+  @override
+  Future<void> markCallAsMissed() async {
+    markCallAsMissedAttempts++;
+    final messageId =
+        markCallAsMissedMessageId ?? await resolveIncomingCallChatItemId();
+    if (!incomingItemAvailable || messageId == null) return;
+    await updateCallChatItem(messageId, status: CallStatus.missed);
+  }
+
+  Future<String?> _resolveCallChatItemId({
+    required String? Function() resolve,
+    required int attemptsRemaining,
+    void Function()? onAttempt,
+  }) async {
+    onAttempt?.call();
+    final messageId = resolve();
+    if (messageId != null || attemptsRemaining <= 0) return messageId;
+    await Future<void>.delayed(_resolveCallItemRetryDelay);
+    return _resolveCallChatItemId(
+      resolve: resolve,
+      attemptsRemaining: attemptsRemaining - 1,
+      onAttempt: onAttempt,
+    );
+  }
 
   @override
   Future<void> updateCallChatItem(
     String messageId, {
     required CallStatus status,
     Duration? duration,
-  }) async {}
+  }) async {
+    updateCalls.add((messageId: messageId, status: status, duration: duration));
+  }
 
   @override
   Future<void> sendChatContactDetailsUpdate(ConciergeMessage message) async {}

@@ -9,9 +9,9 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/
 
 import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_controller.dart';
 
+import '../../../../fakes/fake_chat_session_service.dart';
 import '../../../../mocks/fake_app_logger.dart';
 import '../../../../mocks/fake_call_ended_controller.dart';
-import '../../../../mocks/fake_chat_session_service.dart';
 import '../../../../mocks/fake_end_call_banner_controller.dart';
 import '../../../../mocks/mock_audio_video_call_session.dart';
 
