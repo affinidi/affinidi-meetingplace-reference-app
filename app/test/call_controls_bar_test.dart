@@ -67,6 +67,34 @@ void main() {
       expect(_containerColor(tester, Icons.mic_off), isNot(_gray));
       expect(tester.widget<Icon>(find.byIcon(Icons.mic_off)).color, Colors.red);
     });
+
+    testWidgets('speaker off is grey and speaker on is white', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          CallControlsBar(
+            mic: _btn(),
+            speaker: _btn(isEnabled: false),
+            camera: _btn(),
+            onEndCall: () {},
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(_containerColor(tester, Icons.volume_up), _gray);
+
+      await tester.pumpWidget(
+        _wrap(
+          CallControlsBar(
+            mic: _btn(),
+            speaker: _btn(isEnabled: true),
+            camera: _btn(),
+            onEndCall: () {},
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(_containerColor(tester, Icons.volume_up), isNot(_gray));
+    });
   });
 
   group('CallControlsBar', () {

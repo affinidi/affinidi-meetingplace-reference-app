@@ -126,7 +126,7 @@ void main() {
       expect(sdk.lastOtherPartyChannelDid, 'did:key:peer');
       expect(sdk.lastMediaType, CallMediaType.audio);
       expect(session.setSpeakerphoneEnabledCalls, 1);
-      expect(session.lastSpeakerphoneEnabled, isTrue);
+      expect(session.lastSpeakerphoneEnabled, isFalse);
       expect(updates.first.status, AudioVideoCallStatus.connecting);
       expect(updates.last.attachedSession, same(session));
     });

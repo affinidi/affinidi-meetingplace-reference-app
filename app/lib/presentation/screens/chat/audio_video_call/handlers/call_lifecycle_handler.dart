@@ -143,7 +143,7 @@ class CallLifecycleHandler {
     MeetingPlaceMatrixSDK sdk,
     String channelDid,
   ) async {
-    const speakerphoneEnabled = true;
+    const speakerphoneEnabled = false;
     final acquiredAudioSession = await _audioSessionService.acquire(
       isAudioOnly: _getState().isAudioOnly,
     );

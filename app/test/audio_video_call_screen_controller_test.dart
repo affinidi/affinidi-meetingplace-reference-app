@@ -244,7 +244,7 @@ void main() {
       );
     });
 
-    test('individual call enables isSpeakerEnabled by default', () async {
+    test('individual call disables isSpeakerEnabled by default', () async {
       final fakeSDK = _FakeMeetingPlaceMatrixSDK();
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
@@ -260,11 +260,11 @@ void main() {
         container
             .read(audioVideoCallScreenControllerProvider(contactId))
             .isSpeakerEnabled,
-        isTrue,
+        isFalse,
       );
     });
 
-    test('group call enables speakerphone', () async {
+    test('group call disables speakerphone by default', () async {
       final fakeSDK = _FakeMeetingPlaceMatrixSDK();
       final contactId = FakeContacts.groupContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
@@ -280,7 +280,7 @@ void main() {
         container
             .read(audioVideoCallScreenControllerProvider(contactId))
             .isSpeakerEnabled,
-        isTrue,
+        isFalse,
       );
     });
   });
