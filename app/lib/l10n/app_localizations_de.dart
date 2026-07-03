@@ -2039,14 +2039,14 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Show $count more',
-      one: 'Show 1 more',
+      other: 'Zeige $count weitere',
+      one: 'Zeige 1 weiteren',
     );
     return '$_temp0';
   }
 
   @override
-  String get videoCallShowLess => 'Show less';
+  String get videoCallShowLess => 'Weniger anzeigen';
 
   @override
   String videoCallFailedToJoin(String error) {
@@ -2058,18 +2058,19 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get videoCallMicToggleFailed =>
-      'Couldn\'t change the microphone. Please try again.';
+      'Mikrofon konnte nicht geändert werden. Bitte versuchen Sie es erneut.';
 
   @override
   String get videoCallCameraToggleFailed =>
-      'Couldn\'t change the camera. Please try again.';
+      'Konnte die Kamera nicht wechseln. Bitte versuchen Sie es erneut.';
 
   @override
   String get videoCallSpeakerToggleFailed =>
-      'Couldn\'t change the speaker. Please try again.';
+      'Lautsprecher konnte nicht geändert werden. Bitte versuchen Sie es erneut.';
 
   @override
-  String get videoCallMemberNamesFailed => 'Couldn\'t load participant names.';
+  String get videoCallMemberNamesFailed =>
+      'Teilnehmernamen konnten nicht geladen werden.';
 
   @override
   String get videoCallHangUpFailed =>
@@ -2114,7 +2115,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get videoCallRinging => 'Klingelt';
 
   @override
-  String get videoCallCalling => 'Calling...';
+  String get videoCallCalling => 'Anruf...';
 
   @override
   String get videoCallCancelCall => 'Abbrechen';

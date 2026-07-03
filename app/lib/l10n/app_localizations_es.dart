@@ -2028,14 +2028,14 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Show $count more',
-      one: 'Show 1 more',
+      other: 'Mostrar $count más',
+      one: 'Mostrar 1 más',
     );
     return '$_temp0';
   }
 
   @override
-  String get videoCallShowLess => 'Show less';
+  String get videoCallShowLess => 'Mostrar menos';
 
   @override
   String videoCallFailedToJoin(String error) {
@@ -2047,18 +2047,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get videoCallMicToggleFailed =>
-      'Couldn\'t change the microphone. Please try again.';
+      'No se pudo cambiar el micrófono. Por favor, inténtelo de nuevo.';
 
   @override
   String get videoCallCameraToggleFailed =>
-      'Couldn\'t change the camera. Please try again.';
+      'No se pudo cambiar la cámara. Por favor, inténtelo de nuevo.';
 
   @override
   String get videoCallSpeakerToggleFailed =>
-      'Couldn\'t change the speaker. Please try again.';
+      'No se pudo cambiar el altavoz. Por favor, inténtelo de nuevo.';
 
   @override
-  String get videoCallMemberNamesFailed => 'Couldn\'t load participant names.';
+  String get videoCallMemberNamesFailed =>
+      'No se pudieron cargar los nombres de los participantes.';
 
   @override
   String get videoCallHangUpFailed =>
@@ -2102,7 +2103,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get videoCallRinging => 'Llamando';
 
   @override
-  String get videoCallCalling => 'Calling...';
+  String get videoCallCalling => 'Llamando...';
 
   @override
   String get videoCallCancelCall => 'Cancelar';
@@ -2149,10 +2150,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get incomingCallBannerUnknownCaller => 'Llamante desconocido';
 
   @override
-  String get incomingCallBannerAudioCall => 'MeetingPlace Audio';
+  String get incomingCallBannerAudioCall => 'Audio de MeetingPlace';
 
   @override
-  String get incomingCallBannerVideoCall => 'MeetingPlace Video';
+  String get incomingCallBannerVideoCall => 'Video de MeetingPlace';
 
   @override
   String get callChatItemAudioCall => 'Llamada de audio';

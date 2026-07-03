@@ -591,5 +591,14 @@
 				"example": "14"
 			}
 		}
-	}
+	},
+	"incomingCallBannerAudioCall": "MeetingPlace Audio",
+	"incomingCallBannerVideoCall": "MeetingPlace Video",
+	"videoCallCalling": "Anruf...",
+	"videoCallCameraToggleFailed": "Konnte die Kamera nicht wechseln. Bitte versuchen Sie es erneut.",
+	"videoCallMemberNamesFailed": "Teilnehmernamen konnten nicht geladen werden.",
+	"videoCallMicToggleFailed": "Mikrofon konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
+	"videoCallShowLess": "Weniger anzeigen",
+	"videoCallShowMore": "{count, plural, =1{Zeige 1 weiteren} other{Zeige {count} weitere}}",
+	"videoCallSpeakerToggleFailed": "Lautsprecher konnte nicht geändert werden. Bitte versuchen Sie es erneut."
 }
