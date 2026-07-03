@@ -21,7 +21,54 @@ CallButtonConfig _btn({
   onTap: onTap ?? () {},
 );
 
+const _gray = Color.fromARGB(255, 37, 39, 42);
+
+Color _containerColor(WidgetTester tester, IconData icon) {
+  final container = tester.widget<Container>(
+    find
+        .ancestor(of: find.byIcon(icon), matching: find.byType(Container))
+        .first,
+  );
+  return (container.decoration as BoxDecoration).color!;
+}
+
 void main() {
+  group('CallControlsBar colors (Earl rule)', () {
+    testWidgets('unmuted mic is grey while camera-on is white', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          CallControlsBar(
+            mic: _btn(isEnabled: true),
+            speaker: _btn(isEnabled: false),
+            camera: _btn(isEnabled: true),
+            onEndCall: () {},
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(_containerColor(tester, Icons.mic), _gray);
+      expect(_containerColor(tester, Icons.videocam), isNot(_gray));
+    });
+
+    testWidgets('muted mic is white with a red icon', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          CallControlsBar(
+            mic: _btn(isEnabled: false),
+            speaker: _btn(isEnabled: false),
+            camera: _btn(isEnabled: false),
+            onEndCall: () {},
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(_containerColor(tester, Icons.mic_off), isNot(_gray));
+      expect(tester.widget<Icon>(find.byIcon(Icons.mic_off)).color, Colors.red);
+    });
+  });
+
   group('CallControlsBar', () {
     testWidgets('shows mic icon when mic is enabled', (tester) async {
       await tester.pumpWidget(

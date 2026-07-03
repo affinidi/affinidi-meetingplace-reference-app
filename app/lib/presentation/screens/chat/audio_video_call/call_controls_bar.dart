@@ -59,7 +59,7 @@ class CallControlsBar extends StatelessWidget {
               ),
               _ControlButton(
                 icon: mic.isEnabled ? Icons.mic : Icons.mic_off,
-                isActive: mic.isEnabled && !mic.isDisabled,
+                isActive: !mic.isEnabled && !mic.isDisabled,
                 isDisabled: mic.isDisabled,
                 onTap: mic.onTap,
                 isMic: true,
