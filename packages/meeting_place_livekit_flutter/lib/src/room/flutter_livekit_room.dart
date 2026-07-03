@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:livekit_client/livekit_client.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../extensions/participant_video_extension.dart';

@@ -1,13 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
-import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
+import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:ssi/ssi.dart';
-
 import '../../application/services/identities_service/identities_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
@@ -80,7 +79,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
         logger: logger,
         rtcDelegate: FlutterMatrixRTCDelegate(),
         roomFactory: (_) => FlutterLiveKitRoom(),
-        options: MeetingPlaceCoreSDKOptions(
+        options: MeetingPlaceMatrixSdkOptions(
           expectedMessageWrappingTypes: const [
             MessageWrappingType.authcryptPlaintext,
             MessageWrappingType.authcryptSignPlaintext,

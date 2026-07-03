@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
@@ -42,7 +43,7 @@ final chatSdkProvider = FutureProvider.autoDispose
           channel,
           coreSDK: coreSDK,
           chatRepository: await ref.read(chatRepositoryProvider.future),
-          options: MeetingPlaceChatSDKOptions(
+          options: MeetingPlaceMatrixChatSdkOptions(
             chatActivityExpiry: Duration(
               seconds: environment.chatActivityExpiresInSeconds,
             ),
