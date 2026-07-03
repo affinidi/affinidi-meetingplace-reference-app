@@ -397,12 +397,29 @@ void main() {
           .read(audioVideoCallScreenControllerProvider(contactId).notifier)
           .startCall(isAudioOnly: true);
 
-      expect(
-        container
-            .read(audioVideoCallScreenControllerProvider(contactId))
-            .isAudioOnly,
-        isTrue,
+      final state = container.read(
+        audioVideoCallScreenControllerProvider(contactId),
       );
+      expect(state.isAudioOnly, isTrue);
+      expect(state.isCameraEnabled, isFalse);
+    });
+
+    test('sets isCameraEnabled true for video call', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final contactId = FakeContacts.individualContact.id;
+      final container = _buildContainer(fakeSDK: fakeSDK);
+      addTearDown(container.dispose);
+
+      await container.read(meetingPlaceSdkProvider.future);
+      await container
+          .read(audioVideoCallScreenControllerProvider(contactId).notifier)
+          .startCall(isAudioOnly: false);
+
+      final state = container.read(
+        audioVideoCallScreenControllerProvider(contactId),
+      );
+      expect(state.isAudioOnly, isFalse);
+      expect(state.isCameraEnabled, isTrue);
     });
 
     test('places an outgoing call (status becomes connecting)', () async {
@@ -504,7 +521,36 @@ void main() {
       );
     });
 
-    test('sets isAudioOnly on the restarted call', () async {
+    test(
+      'sets isAudioOnly and isCameraEnabled=false on audio restart',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final contactId = FakeContacts.individualContact.id;
+        final container = _buildContainer(fakeSDK: fakeSDK);
+        addTearDown(container.dispose);
+
+        await container.read(meetingPlaceSdkProvider.future);
+        final controller = container.read(
+          audioVideoCallScreenControllerProvider(contactId).notifier,
+        );
+
+        await controller.joinCall();
+        fakeSDK.emitState(
+          const AudioVideoCallState(status: AudioVideoCallStatus.missed),
+        );
+        await Future<void>.microtask(() {});
+
+        await controller.restartCall(isAudioOnly: true);
+
+        final state = container.read(
+          audioVideoCallScreenControllerProvider(contactId),
+        );
+        expect(state.isAudioOnly, isTrue);
+        expect(state.isCameraEnabled, isFalse);
+      },
+    );
+
+    test('sets isCameraEnabled=true on video restart', () async {
       final fakeSDK = _FakeMeetingPlaceMatrixSDK();
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
@@ -521,14 +567,13 @@ void main() {
       );
       await Future<void>.microtask(() {});
 
-      await controller.restartCall(isAudioOnly: true);
+      await controller.restartCall(isAudioOnly: false);
 
-      expect(
-        container
-            .read(audioVideoCallScreenControllerProvider(contactId))
-            .isAudioOnly,
-        isTrue,
+      final state = container.read(
+        audioVideoCallScreenControllerProvider(contactId),
       );
+      expect(state.isAudioOnly, isFalse);
+      expect(state.isCameraEnabled, isTrue);
     });
   });
 
@@ -566,6 +611,69 @@ void main() {
         );
       });
     }
+  });
+
+  group('toggleCamera', () {
+    test('reconfigures audio session to videoChat when enabling camera in'
+        ' audio-only call', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final audioSession = FakeAudioSession();
+      final contactId = FakeContacts.individualContact.id;
+      final container = _buildContainer(
+        fakeSDK: fakeSDK,
+        audioSession: audioSession,
+        canUsePlatformAudioSession: true,
+      );
+      addTearDown(container.dispose);
+
+      await container.read(meetingPlaceSdkProvider.future);
+      final controller = container.read(
+        audioVideoCallScreenControllerProvider(contactId).notifier,
+      );
+
+      await controller.startCall(isAudioOnly: true);
+      // After audio-only join: voiceChat mode, 1 configure call.
+      expect(
+        audioSession.lastConfiguration?.avAudioSessionMode,
+        AVAudioSessionMode.voiceChat,
+      );
+      final configureCallsAfterJoin = audioSession.configureCalls;
+
+      await controller.toggleCamera();
+
+      expect(audioSession.configureCalls, configureCallsAfterJoin + 1);
+      expect(
+        audioSession.lastConfiguration?.avAudioSessionMode,
+        AVAudioSessionMode.videoChat,
+      );
+    });
+
+    test(
+      'does not reconfigure audio session when enabling camera in video call',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final audioSession = FakeAudioSession();
+        final contactId = FakeContacts.individualContact.id;
+        final container = _buildContainer(
+          fakeSDK: fakeSDK,
+          audioSession: audioSession,
+          canUsePlatformAudioSession: true,
+        );
+        addTearDown(container.dispose);
+
+        await container.read(meetingPlaceSdkProvider.future);
+        final controller = container.read(
+          audioVideoCallScreenControllerProvider(contactId).notifier,
+        );
+
+        await controller.startCall(isAudioOnly: false);
+        final configureCallsAfterJoin = audioSession.configureCalls;
+
+        await controller.toggleCamera();
+
+        expect(audioSession.configureCalls, configureCallsAfterJoin);
+      },
+    );
   });
 
   group('incoming call', () {

@@ -68,6 +68,17 @@ class CallAudioSessionService extends _$CallAudioSessionService {
     });
   }
 
+  /// Switches the audio session to video mode if it is currently acquired in
+  /// audio-only mode. No-op otherwise.
+  Future<void> reconfigureForVideoIfNeeded() async {
+    await _lock.synchronized(() async {
+      if (!state.isAcquired) return;
+      if (!ref.read(canUsePlatformAudioSessionProvider)) return;
+      final session = await ref.read(audioSessionProvider.future);
+      await session.configure(_configurationFor(isAudioOnly: false));
+    });
+  }
+
   AudioSessionConfiguration _configurationFor({required bool isAudioOnly}) {
     return AudioSessionConfiguration(
       avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,

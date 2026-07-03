@@ -194,7 +194,10 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   Future<void> startCall({required bool isAudioOnly}) async {
     _isMinimizing = false;
     ref.read(activeCallControllerProvider.notifier).restore();
-    state = state.copyWith(isAudioOnly: isAudioOnly);
+    state = state.copyWith(
+      isAudioOnly: isAudioOnly,
+      isCameraEnabled: !isAudioOnly,
+    );
     await checkInitialPermissions();
     await joinCall();
   }
@@ -212,6 +215,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       participants: [],
       session: null,
       isAudioOnly: isAudioOnly,
+      isCameraEnabled: !isAudioOnly,
     );
     await checkInitialPermissions();
     await joinCall();
@@ -288,11 +292,21 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
   /// Toggles camera on/off.
   ///
-  /// Same skip-if-active logic as [toggleMic].
-  Future<void> toggleCamera() => _mediaHandler.toggleCamera(
-    currentValue: state.isCameraEnabled,
-    permissionError: state.cameraPermissionError,
-  );
+  /// When enabling camera during an audio-only call, the OS audio session is
+  /// reconfigured to video mode before the camera track is published.
+  /// On iOS, the audio session mode must match the call type or the LiveKit
+  /// room disconnects.
+  Future<void> toggleCamera() async {
+    if (state.isAudioOnly) {
+      await ref
+          .read(callAudioSessionServiceProvider.notifier)
+          .reconfigureForVideoIfNeeded();
+    }
+    return _mediaHandler.toggleCamera(
+      currentValue: state.isCameraEnabled,
+      permissionError: state.cameraPermissionError,
+    );
+  }
 
   /// Toggles speakerphone on/off.
   Future<void> toggleSpeaker() {

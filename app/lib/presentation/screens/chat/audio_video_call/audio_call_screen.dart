@@ -79,8 +79,7 @@ class _AudioCallScreen extends ConsumerWidget {
         isDisabled: cameraPermissionError,
         onTap: () => _showSwitchToVideoDialog(
           context: context,
-          onConfirm: () =>
-              unawaited(controller.restartCall(isAudioOnly: false)),
+          onConfirm: () => unawaited(controller.toggleCamera()),
         ),
       ),
       onEndCall: () {

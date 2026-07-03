@@ -35,6 +35,8 @@ class _FixedStateController extends AudioVideoCallScreenController {
   _FixedStateController(this._fixed);
 
   final AudioVideoCallScreenState _fixed;
+  int toggleCameraCalls = 0;
+  int restartCallCalls = 0;
 
   @override
   AudioVideoCallScreenState build(String contactId) => _fixed;
@@ -43,7 +45,11 @@ class _FixedStateController extends AudioVideoCallScreenController {
   Future<void> startCall({bool isAudioOnly = false}) async {}
 
   @override
-  Future<void> restartCall({bool isAudioOnly = false}) async {}
+  Future<void> restartCall({bool isAudioOnly = false}) async =>
+      restartCallCalls++;
+
+  @override
+  Future<void> toggleCamera() async => toggleCameraCalls++;
 }
 
 Widget _wrap({required AudioVideoCallScreenState controllerState}) {
@@ -585,6 +591,91 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(AudioVideoCallScreen), findsOneWidget);
+    });
+  });
+
+  group('audio call screen — camera button', () {
+    testWidgets('tapping camera icon shows switch-to-video dialog', (
+      tester,
+    ) async {
+      final state = AudioVideoCallScreenState(
+        status: AudioVideoCallStatus.active,
+        peerName: 'Alice',
+        isAudioOnly: true,
+        hasHadPeer: true,
+        showControlsBar: true,
+      );
+
+      await tester.pumpWidget(_wrap(controllerState: state));
+      await tester.pump();
+
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(AudioVideoCallScreen)),
+      )!;
+
+      await tester.tap(find.byIcon(Icons.videocam_off));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.videoCallSwitchToVideoTitle), findsOneWidget);
+    });
+
+    testWidgets('camera button calls toggleCamera, not restartCall', (
+      tester,
+    ) async {
+      final state = AudioVideoCallScreenState(
+        status: AudioVideoCallStatus.active,
+        peerName: 'Alice',
+        isAudioOnly: true,
+        hasHadPeer: true,
+        showControlsBar: true,
+      );
+
+      late _FixedStateController controller;
+      final container = ProviderContainer(
+        overrides: [
+          appLoggerProvider.overrideWithValue(FakeAppLogger()),
+          contactsServiceProvider.overrideWith(FakeContactsService.new),
+          meetingPlaceSdkProvider.overrideWith(
+            (ref) async => FakeMeetingPlaceMatrixSDK(),
+          ),
+          permissionServiceProvider.overrideWithValue(FakePermissionService()),
+          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
+          activeCallControllerProvider.overrideWith(
+            FakeActiveCallController.new,
+          ),
+          audioVideoCallScreenControllerProvider(_kContactId).overrideWith(() {
+            controller = _FixedStateController(state);
+            return controller;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const AudioVideoCallScreen(contactId: _kContactId),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(AudioVideoCallScreen)),
+      )!;
+
+      await tester.tap(find.byIcon(Icons.videocam_off));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(l10n.videoCallSwitch));
+      await tester.pumpAndSettle();
+
+      expect(controller.toggleCameraCalls, 1);
+      expect(controller.restartCallCalls, 0);
     });
   });
 }
