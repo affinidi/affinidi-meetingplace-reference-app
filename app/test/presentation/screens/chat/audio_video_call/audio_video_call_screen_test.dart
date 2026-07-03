@@ -539,7 +539,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Mia'), findsOneWidget);
-      expect(find.text(l10n.videoCallCallDeclined), findsOneWidget);
+      expect(find.text(l10n.videoCallNoAnswer), findsOneWidget);
       expect(find.text(l10n.videoCallCancel), findsOneWidget);
       expect(find.text(l10n.videoCallAgain), findsOneWidget);
     });

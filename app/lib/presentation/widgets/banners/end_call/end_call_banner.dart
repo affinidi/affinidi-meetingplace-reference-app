@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
-import '../../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import 'end_call_banner_controller.dart';
 
 /// Banner shown when the user dismisses a missed or declined call screen.
@@ -26,9 +25,7 @@ class EndCallBanner extends ConsumerWidget {
     final l10n = context.l10n;
     final controller = ref.read(endCallBannerControllerProvider.notifier);
 
-    final statusLabel = bannerState.endState == CallEndState.missedCall
-        ? l10n.videoCallNoAnswer
-        : l10n.videoCallCallDeclined;
+    final statusLabel = l10n.videoCallNoAnswer;
 
     final callIcon = bannerState.isAudioOnly ? Icons.call : Icons.videocam;
 

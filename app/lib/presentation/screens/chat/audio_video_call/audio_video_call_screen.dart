@@ -173,9 +173,7 @@ class _CallScreenBody extends HookConsumerWidget {
           contactId: contactId,
           mediaType: mediaType,
           peerName: peerName,
-          message: endState == CallEndState.missedCall
-              ? l10n.videoCallNoAnswer
-              : l10n.videoCallCallDeclined,
+          message: l10n.videoCallNoAnswer,
           calleeAvatarImage: callIsAudioOnly ? calleeAvatarImage : null,
         );
       }

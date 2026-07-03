@@ -85,13 +85,33 @@ void main() {
       expect(find.textContaining('answer'), findsOneWidget);
     });
 
-    testWidgets('shows declined label for declined call', (tester) async {
+    testWidgets('shows no-answer label for declined call', (tester) async {
       await tester.pumpWidget(
         wrap(_state(endState: CallEndState.declinedCall, isAudioOnly: false)),
       );
       await tester.pump();
 
-      expect(find.textContaining('eclined'), findsOneWidget);
+      expect(find.textContaining('answer'), findsOneWidget);
+    });
+
+    testWidgets('both missed and declined show identical message', (
+      tester,
+    ) async {
+      // Missed call
+      await tester.pumpWidget(
+        wrap(_state(endState: CallEndState.missedCall, isAudioOnly: true)),
+      );
+      await tester.pump();
+      final missedText = find.textContaining('answer');
+      expect(missedText, findsOneWidget);
+
+      // Declined call - should show same message
+      await tester.pumpWidget(
+        wrap(_state(endState: CallEndState.declinedCall, isAudioOnly: false)),
+      );
+      await tester.pump();
+      final declinedText = find.textContaining('answer');
+      expect(declinedText, findsOneWidget);
     });
   });
 

@@ -71,6 +71,71 @@ void main() {
     });
   });
 
+  group('status label', () {
+    testWidgets('shows "Calling" during initial outgoing call', (tester) async {
+      final state = _state(
+        isAudioOnly: true,
+      ).copyWith(status: AudioVideoCallStatus.connecting);
+      await tester.pumpWidget(wrap(state));
+      await tester.pump();
+
+      expect(find.textContaining('Calling'), findsOneWidget);
+    });
+
+    testWidgets('shows "Ringing" when peer device is ringing', (tester) async {
+      final state = _state(
+        isAudioOnly: true,
+      ).copyWith(status: AudioVideoCallStatus.outgoingRinging);
+      await tester.pumpWidget(wrap(state));
+      await tester.pump();
+
+      expect(find.textContaining('Ringing'), findsOneWidget);
+    });
+
+    testWidgets('shows duration when call is active with peer', (tester) async {
+      final state = _state(isAudioOnly: true).copyWith(
+        status: AudioVideoCallStatus.active,
+        callDurationSeconds: 45,
+        hasHadPeer: true,
+      );
+      await tester.pumpWidget(wrap(state));
+      await tester.pump();
+
+      // Should show duration (45 seconds = 0:45)
+      expect(find.textContaining(':'), findsOneWidget);
+    });
+
+    testWidgets('shows "No answer" when call ends', (tester) async {
+      final state = _state(
+        isAudioOnly: true,
+      ).copyWith(status: AudioVideoCallStatus.ended);
+      await tester.pumpWidget(wrap(state));
+      await tester.pump();
+
+      expect(find.textContaining('answer'), findsOneWidget);
+    });
+
+    testWidgets('shows "No answer" for declined calls', (tester) async {
+      final state = _state(
+        isAudioOnly: false,
+      ).copyWith(status: AudioVideoCallStatus.declined);
+      await tester.pumpWidget(wrap(state));
+      await tester.pump();
+
+      expect(find.textContaining('answer'), findsOneWidget);
+    });
+
+    testWidgets('shows "No answer" for missed calls', (tester) async {
+      final state = _state(
+        isAudioOnly: true,
+      ).copyWith(status: AudioVideoCallStatus.missed);
+      await tester.pumpWidget(wrap(state));
+      await tester.pump();
+
+      expect(find.textContaining('answer'), findsOneWidget);
+    });
+  });
+
   group('tap navigation', () {
     testWidgets('preserves audio-only when reopening the call screen', (
       tester,

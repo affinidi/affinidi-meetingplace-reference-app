@@ -34,7 +34,8 @@ class ActiveCallBanner extends ConsumerWidget {
         seconds: callState.callDurationSeconds,
       ).label,
       CallUiPhase.ringing => l10n.videoCallRinging,
-      CallUiPhase.calling || CallUiPhase.ended => l10n.videoCallCalling,
+      CallUiPhase.calling => l10n.videoCallCalling,
+      CallUiPhase.ended => l10n.videoCallNoAnswer,
     };
     final showDuration = phase == CallUiPhase.inCall;
 
