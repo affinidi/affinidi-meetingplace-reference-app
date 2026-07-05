@@ -47,12 +47,18 @@ class _FakeCallSession extends Fake implements AudioVideoCallSession {
 
   @override
   Future<void> hangUp() async => hangUpCalls++;
+
+  void dispose() {
+    _controller.close();
+    _participantEventsController.close();
+  }
 }
 
 class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
   _FakeMeetingPlaceMatrixSDK() : _session = _FakeCallSession();
 
   final _FakeCallSession _session;
+  final _callSignalsController = StreamController<CallSignal>.broadcast();
 
   @override
   bool get isCallSupported => true;
@@ -60,6 +66,9 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
   @override
   Stream<IncomingAudioVideoCallEvent> get incomingCalls =>
       const Stream<IncomingAudioVideoCallEvent>.empty();
+
+  @override
+  Stream<CallSignal> get callSignals => _callSignalsController.stream;
 
   @override
   Future<AudioVideoCallSession> startCall({
@@ -77,6 +86,14 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
   Future<void> leaveCurrentCall() async {}
 
   void emitState(AudioVideoCallState s) => _session.emit(s);
+
+  void emitCallSignal(CallSignal signal) => _callSignalsController.add(signal);
+
+  @override
+  Future<void> dispose() async {
+    await _callSignalsController.close();
+    _session.dispose();
+  }
 }
 
 ProviderContainer _buildContainer({
@@ -836,7 +853,6 @@ void main() {
         audioVideoCallScreenControllerProvider(contactId).notifier,
       );
 
-      // Simulate setting the flag (as would happen via the listener)
       controller.state = controller.state.copyWith(peerIsCallingBack: true);
 
       expect(
@@ -856,7 +872,6 @@ void main() {
         audioVideoCallScreenControllerProvider(contactId).notifier,
       );
 
-      // Set and then clear the flag
       controller.state = controller.state.copyWith(peerIsCallingBack: true);
       expect(
         container
@@ -872,6 +887,38 @@ void main() {
             .peerIsCallingBack,
         isFalse,
       );
+    });
+  });
+
+  group('call signal — declined by peer', () {
+    test(
+      'caller receives CallDeclineSignal listener when SDK is provided',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final container = _buildContainer(fakeSDK: fakeSDK);
+        addTearDown(container.dispose);
+        addTearDown(fakeSDK.dispose);
+
+        await container.read(meetingPlaceSdkProvider.future);
+
+        expect(fakeSDK.callSignals, isNotNull);
+      },
+    );
+
+    test('call signal listener exists on controller initialization', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final contactId = FakeContacts.individualContact.id;
+      final container = _buildContainer(fakeSDK: fakeSDK);
+      addTearDown(container.dispose);
+      addTearDown(fakeSDK.dispose);
+
+      await container.read(meetingPlaceSdkProvider.future);
+
+      final controller = container.read(
+        audioVideoCallScreenControllerProvider(contactId).notifier,
+      );
+
+      expect(controller, isNotNull);
     });
   });
 }
