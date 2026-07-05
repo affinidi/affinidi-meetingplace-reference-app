@@ -61,6 +61,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
   @override
   set state(AudioVideoCallScreenState value) {
+    if (!ref.mounted) return;
     _lastStatus = value.status;
     super.state = value;
     _syncActiveCallBanner(value);
