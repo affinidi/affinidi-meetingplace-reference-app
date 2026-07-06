@@ -84,7 +84,11 @@ class ConnectionsScreenController extends _$ConnectionsScreenController {
   }
 
   Future<void> deleteSelectedConnections() async {
-    for (final connection in state.selectedConnections) {
+    final selectedConnections = List.of(
+      state.selectedConnections,
+      growable: false,
+    );
+    for (final connection in selectedConnections) {
       await ref
           .read(connectionsServiceProvider.notifier)
           .markConnectionOfferAsDeleted(connection);

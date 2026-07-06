@@ -183,7 +183,11 @@ class FlutterLiveKitRoom implements LiveKitRoom {
       );
       return;
     }
-    for (final publication in participant.videoTrackPublications) {
+    final publications = List.of(
+      participant.videoTrackPublications,
+      growable: false,
+    );
+    for (final publication in publications) {
       await _resubscribeForKeyframe(participant.identity, publication);
     }
   }
