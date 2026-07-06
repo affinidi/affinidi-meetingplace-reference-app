@@ -60,6 +60,7 @@ abstract class AudioVideoCallScreenState with _$AudioVideoCallScreenState {
     @Default(true) bool showControlsBar,
     int? focusedParticipantIndex,
     @Default(false) bool miniGridExpanded,
+    @Default(false) bool peerIsCallingBack,
   }) = _AudioVideoCallScreenState;
 
   bool get isVisible =>

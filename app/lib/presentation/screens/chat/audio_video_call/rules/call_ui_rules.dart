@@ -123,6 +123,20 @@ CallEndState? resolveCallEndState(
   return null;
 }
 
+/// Whether to show the no-answer scaffold when the call ends without a
+/// connection.
+///
+/// Returns false when the peer is calling back — in that case the screen stays
+/// neutral so the user can answer from the incoming-call banner without seeing
+/// a misleading "no answer" message.
+bool shouldShowNoAnswerScreen({
+  required CallEndState? endState,
+  required bool peerIsCallingBack,
+}) =>
+    endState != null &&
+    endState != CallEndState.callEnded &&
+    !peerIsCallingBack;
+
 /// Whether a 1-on-1 call should auto-end because the only peer has left.
 ///
 /// True when all three conditions hold:

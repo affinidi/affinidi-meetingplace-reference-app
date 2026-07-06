@@ -16,7 +16,7 @@ class _CallNoAnswerScreen extends ConsumerWidget {
   final String contactId;
   final CallMediaType mediaType;
   final String peerName;
-  final String message;
+  final String? message;
   final ImageProvider<Object>? calleeAvatarImage;
 
   @override
@@ -61,14 +61,15 @@ class _CallNoAnswerScreen extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
-                  Text(
-                    message,
-                    style: textTheme.headlineMedium?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.w500,
+                  if (message != null)
+                    Text(
+                      message!,
+                      style: textTheme.headlineMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
                   const Spacer(flex: 3),
                 ],
               ),

@@ -139,6 +139,16 @@ void main() {
       expect(state.isAudioOnly, isFalse);
       expect(state.errorCode, isNull);
     });
+
+    test('peerIsCallingBack defaults to false', () {
+      final container = _buildContainer();
+      addTearDown(container.dispose);
+
+      final state = container.read(
+        audioVideoCallScreenControllerProvider('no-such-id'),
+      );
+      expect(state.peerIsCallingBack, isFalse);
+    });
   });
   group('service state forwarding', () {
     test(
@@ -804,5 +814,64 @@ void main() {
         expect(sendOutgoingCallMessageCount, 0);
       },
     );
+  });
+
+  group('peer restart state', () {
+    test('peerIsCallingBack state field exists and defaults to false', () {
+      final container = _buildContainer();
+      addTearDown(container.dispose);
+
+      final state = container.read(
+        audioVideoCallScreenControllerProvider('no-such-id'),
+      );
+      expect(state.peerIsCallingBack, isFalse);
+    });
+
+    test('peerIsCallingBack can be set to true via state.copyWith', () {
+      final container = _buildContainer();
+      addTearDown(container.dispose);
+      final contactId = FakeContacts.individualContact.id;
+
+      final controller = container.read(
+        audioVideoCallScreenControllerProvider(contactId).notifier,
+      );
+
+      // Simulate setting the flag (as would happen via the listener)
+      controller.state = controller.state.copyWith(peerIsCallingBack: true);
+
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(contactId))
+            .peerIsCallingBack,
+        isTrue,
+      );
+    });
+
+    test('peerIsCallingBack flag can be cleared via state.copyWith', () {
+      final container = _buildContainer();
+      addTearDown(container.dispose);
+      final contactId = FakeContacts.individualContact.id;
+
+      final controller = container.read(
+        audioVideoCallScreenControllerProvider(contactId).notifier,
+      );
+
+      // Set and then clear the flag
+      controller.state = controller.state.copyWith(peerIsCallingBack: true);
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(contactId))
+            .peerIsCallingBack,
+        isTrue,
+      );
+
+      controller.state = controller.state.copyWith(peerIsCallingBack: false);
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(contactId))
+            .peerIsCallingBack,
+        isFalse,
+      );
+    });
   });
 }

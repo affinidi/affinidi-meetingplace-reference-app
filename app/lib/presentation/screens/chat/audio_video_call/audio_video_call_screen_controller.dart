@@ -14,6 +14,7 @@ import '../../../../infrastructure/services/call_audio_session_service/call_audi
 import '../../../../infrastructure/services/permission_service/permission_service.dart';
 import '../../../widgets/banners/active_call/active_call_controller.dart';
 import '../../../widgets/banners/active_call/active_call_state.dart';
+import '../../../widgets/call_ended/call_ended_controller.dart';
 import 'audio_video_call_screen_state.dart';
 import 'audio_video_call_state_update.dart';
 import 'call_lifecycle_update.dart';
@@ -134,6 +135,18 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       }
     });
 
+    ref.listen(incomingCallProvider, (_, incoming) {
+      final event = incoming.eventOrNull;
+      if (event == null) return;
+      final channelDid = _channelDid;
+      if (channelDid == null) return;
+      if (event.otherPartyChannelDid != channelDid) return;
+      if (_isDisposed) return;
+      state = state.copyWith(peerIsCallingBack: true);
+      ref.read(callEndedControllerProvider.notifier).dismiss();
+      unawaited(hangUp());
+    });
+
     ref.listen(meetingPlaceSdkProvider, (prev, next) {
       _sdk = next.value;
     }, fireImmediately: true);
@@ -224,6 +237,18 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     );
     await checkInitialPermissions();
     await joinCall();
+  }
+
+  /// Accepts a peer recall while the call screen is still visible.
+  ///
+  /// Called by the incoming-call banner when the peer that disconnected
+  /// (hot-restart, force-kill) is calling back and the screen is still open.
+  /// Clears the peer-calling-back flag and restarts the call in-place so the
+  /// screen reinitialises without any navigation, matching the WhatsApp UX.
+  Future<void> acceptRecall({required bool isAudioOnly}) async {
+    state = state.copyWith(peerIsCallingBack: false);
+    _clearIncomingCallState();
+    await restartCall(isAudioOnly: isAudioOnly);
   }
 
   /// Toggles top-bar and controls-bar visibility (tap-anywhere behaviour).

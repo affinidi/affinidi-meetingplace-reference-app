@@ -7,8 +7,7 @@ import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/incoming_call_service/incoming_call_notifier.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../navigation/navigator.dart';
-import '../../../navigation/routes/dashboard_routes.dart';
+import '../../screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import '../banners/active_call/active_call_controller.dart';
 import '../banners/incoming_call/incoming_call_banner_controller.dart';
 
@@ -75,16 +74,27 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
     );
 
     void onJoinOrAccept() {
-      bannerNotifier.accept(callId: event.callId);
       final routeContactId = contact?.id ?? event.otherPartyChannelDid;
-      ref
-          .read(navigatorProvider)
-          .go(
-            AudioVideoCallRoute(
-              contactId: routeContactId,
-              isAudioOnly: event.mediaType == CallMediaType.audio,
-            ).location,
-          );
+      final isAudioOnly = event.mediaType == CallMediaType.audio;
+      final callScreenProvider = audioVideoCallScreenControllerProvider(
+        routeContactId,
+      );
+
+      if (ref.exists(callScreenProvider) &&
+          ref.read(callScreenProvider).peerIsCallingBack) {
+        bannerNotifier.acceptRecall(
+          callId: event.callId,
+          contactId: routeContactId,
+          isAudioOnly: isAudioOnly,
+        );
+      } else {
+        bannerNotifier.accept(
+          callId: event.callId,
+          otherPartyChannelDid: event.otherPartyChannelDid,
+          mediaType: event.mediaType,
+          contactId: contact?.id,
+        );
+      }
     }
 
     return Padding(

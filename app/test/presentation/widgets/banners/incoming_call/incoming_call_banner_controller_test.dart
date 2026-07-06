@@ -4,21 +4,30 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
+import 'package:mpx_flutter_reference_app/navigation/navigator.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/end_call_banner_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/incoming_call/incoming_call_banner_controller.dart';
 
 import '../../../../mocks/fake_app_logger.dart';
 import '../../../../mocks/fake_incoming_call_service.dart';
+import '../../../../mocks/mock_navigator.dart';
 
 const _kCallId = 'call-123';
+const _kOtherPartyChannelDid = 'did:key:other-party';
+const _kContactId = 'contact-1';
 
-ProviderContainer _makeContainer({FakeIncomingCallService? service}) {
+ProviderContainer _makeContainer({
+  FakeIncomingCallService? service,
+  RecordingNavigator? navigator,
+}) {
   final fakeService = service ?? FakeIncomingCallService();
+  final fakeNavigator = navigator ?? RecordingNavigator();
   final container = ProviderContainer(
     overrides: [
       appLoggerProvider.overrideWithValue(FakeAppLogger()),
       incomingCallServiceProvider.overrideWith(() => fakeService),
+      navigatorProvider.overrideWithValue(fakeNavigator),
     ],
   );
   addTearDown(container.dispose);
@@ -39,7 +48,12 @@ void main() {
       final container = _makeContainer();
       container
           .read(incomingCallBannerControllerProvider.notifier)
-          .accept(callId: _kCallId);
+          .accept(
+            callId: _kCallId,
+            otherPartyChannelDid: _kOtherPartyChannelDid,
+            mediaType: CallMediaType.video,
+            contactId: _kContactId,
+          );
       expect(container.read(incomingCallBannerControllerProvider), true);
     });
 
@@ -48,7 +62,12 @@ void main() {
       final container = _makeContainer(service: service);
       container
           .read(incomingCallBannerControllerProvider.notifier)
-          .accept(callId: _kCallId);
+          .accept(
+            callId: _kCallId,
+            otherPartyChannelDid: _kOtherPartyChannelDid,
+            mediaType: CallMediaType.video,
+            contactId: _kContactId,
+          );
       expect(service.acceptedCallIds, [_kCallId]);
     });
   });
@@ -158,5 +177,71 @@ void main() {
         expect(container.read(incomingCallBannerControllerProvider), false);
       },
     );
+  });
+
+  group('accept', () {
+    test('forwards accept to IncomingCallService', () {
+      final service = FakeIncomingCallService();
+      final container = _makeContainer(service: service);
+      container
+          .read(incomingCallBannerControllerProvider.notifier)
+          .accept(
+            callId: _kCallId,
+            otherPartyChannelDid: _kOtherPartyChannelDid,
+            mediaType: CallMediaType.video,
+            contactId: _kContactId,
+          );
+
+      expect(service.acceptedCallIds, [_kCallId]);
+    });
+
+    test('navigates to the call screen with the resolved contact id', () {
+      final navigator = RecordingNavigator();
+      final container = _makeContainer(navigator: navigator);
+      container
+          .read(incomingCallBannerControllerProvider.notifier)
+          .accept(
+            callId: _kCallId,
+            otherPartyChannelDid: _kOtherPartyChannelDid,
+            mediaType: CallMediaType.video,
+            contactId: _kContactId,
+          );
+
+      expect(navigator.goCalls.length, 1);
+      expect(navigator.goCalls.single, contains(_kContactId));
+    });
+
+    test('navigates using channel did when no contact id', () {
+      final navigator = RecordingNavigator();
+      final container = _makeContainer(navigator: navigator);
+      container
+          .read(incomingCallBannerControllerProvider.notifier)
+          .accept(
+            callId: _kCallId,
+            otherPartyChannelDid: _kOtherPartyChannelDid,
+            mediaType: CallMediaType.audio,
+            contactId: null,
+          );
+
+      expect(navigator.goCalls.length, 1);
+      expect(
+        navigator.goCalls.single,
+        contains(_kOtherPartyChannelDid.replaceAll(':', '%3A')),
+      );
+    });
+
+    test('sets state to true', () {
+      final container = _makeContainer();
+      container
+          .read(incomingCallBannerControllerProvider.notifier)
+          .accept(
+            callId: _kCallId,
+            otherPartyChannelDid: _kOtherPartyChannelDid,
+            mediaType: CallMediaType.video,
+            contactId: _kContactId,
+          );
+
+      expect(container.read(incomingCallBannerControllerProvider), true);
+    });
   });
 }

@@ -130,11 +130,13 @@ class _CallScreenBody extends HookConsumerWidget {
     final endState = phase == CallUiPhase.ended
         ? resolveCallEndState(status, hasHadPeer: hasHadPeer)
         : null;
-    final isCallEnded = endState == CallEndState.callEnded;
 
-    // Hand off to the global CallEnded overlay when a connected call ends.
-    // Deferred to avoid modifying a provider during build. Pops this route so
-    // the overlay renders above chat, matching the minimized-call path.
+    final peerIsCallingBack = ref.watch(
+      provider.select((s) => s.peerIsCallingBack),
+    );
+    final isCallEnded =
+        endState == CallEndState.callEnded && !peerIsCallingBack;
+
     useEffect(() {
       if (!isCallEnded) return null;
       final durationSeconds = ref.read(
@@ -169,12 +171,24 @@ class _CallScreenBody extends HookConsumerWidget {
       final calleeAvatarImage = calleeCard?.hasProfilePic == true
           ? calleeCard!.image(cacheManager: ref.read(cacheManagerProvider))
           : null;
-      if (endState != null) {
+      if (shouldShowNoAnswerScreen(
+        endState: endState,
+        peerIsCallingBack: peerIsCallingBack,
+      )) {
         return _CallNoAnswerScreen(
           contactId: contactId,
           mediaType: mediaType,
           peerName: peerName,
           message: l10n.videoCallNoAnswer,
+          calleeAvatarImage: callIsAudioOnly ? calleeAvatarImage : null,
+        );
+      }
+      if (peerIsCallingBack) {
+        return _CallNoAnswerScreen(
+          contactId: contactId,
+          mediaType: mediaType,
+          peerName: peerName,
+          message: null,
           calleeAvatarImage: callIsAudioOnly ? calleeAvatarImage : null,
         );
       }
