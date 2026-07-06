@@ -374,6 +374,7 @@ class ActiveCallController extends _$ActiveCallController {
     final hadPeer = computeHasHadPeer(
       previous: current.hasHadPeer,
       status: sessionState.status,
+      participants: sessionState.participants,
     );
     final peerJustJoined = !current.hasHadPeer && hadPeer;
 

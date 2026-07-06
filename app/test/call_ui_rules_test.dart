@@ -2,6 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
 
+AudioVideoCallParticipant _selfParticipant() =>
+    const AudioVideoCallParticipant(participantId: 'local', isSelf: true);
+
+AudioVideoCallParticipant _peerParticipant([String id = 'peer']) =>
+    AudioVideoCallParticipant(participantId: id);
+
 void main() {
   group('isLiveCallStatus', () {
     test('is true for waitingForKeys, connected and active', () {
@@ -36,26 +42,38 @@ void main() {
   });
 
   group('computeHasHadPeer', () {
-    test('latches true when status reaches connected', () {
+    test('latches true when status reaches connected with peer present', () {
       final result = computeHasHadPeer(
         previous: false,
         status: AudioVideoCallStatus.connected,
+        participants: [_selfParticipant(), _peerParticipant()],
       );
       expect(result, isTrue);
     });
 
-    test('latches true when status reaches active', () {
+    test('latches true when status reaches active with peer present', () {
       final result = computeHasHadPeer(
         previous: false,
         status: AudioVideoCallStatus.active,
+        participants: [_selfParticipant(), _peerParticipant()],
       );
       expect(result, isTrue);
+    });
+
+    test('returns false when status is connected but no peer present', () {
+      final result = computeHasHadPeer(
+        previous: false,
+        status: AudioVideoCallStatus.connected,
+        participants: [_selfParticipant()],
+      );
+      expect(result, isFalse);
     });
 
     test('returns false when status is pre-connect', () {
       final result = computeHasHadPeer(
         previous: false,
         status: AudioVideoCallStatus.connecting,
+        participants: [_selfParticipant(), _peerParticipant()],
       );
       expect(result, isFalse);
     });
@@ -64,6 +82,7 @@ void main() {
       final result = computeHasHadPeer(
         previous: true,
         status: AudioVideoCallStatus.connecting,
+        participants: [_selfParticipant()],
       );
       expect(result, isTrue);
     });

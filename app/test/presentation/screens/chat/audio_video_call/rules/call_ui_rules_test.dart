@@ -2,6 +2,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
 
+AudioVideoCallParticipant _selfParticipant() => const AudioVideoCallParticipant(
+  participantId: 'local',
+  isSelf: true,
+  hasVideo: false,
+  hasAudio: true,
+  isSpeaking: false,
+);
+
+AudioVideoCallParticipant _peerParticipant([String id = 'peer']) =>
+    AudioVideoCallParticipant(
+      participantId: id,
+      isSelf: false,
+      hasVideo: true,
+      hasAudio: true,
+      isSpeaking: false,
+    );
+
 void main() {
   group('isLiveCallStatus', () {
     test('returns true for waitingForKeys', () {
@@ -146,6 +163,7 @@ void main() {
         computeHasHadPeer(
           previous: false,
           status: AudioVideoCallStatus.connecting,
+          participants: [],
         ),
         isFalse,
       );
@@ -156,51 +174,88 @@ void main() {
         computeHasHadPeer(
           previous: true,
           status: AudioVideoCallStatus.connecting,
+          participants: [_selfParticipant()],
         ),
-        isTrue,
-      );
-    });
-
-    test('returns true when status is connected for first time', () {
-      expect(
-        computeHasHadPeer(
-          previous: false,
-          status: AudioVideoCallStatus.connected,
-        ),
-        isTrue,
-      );
-    });
-
-    test('returns true when status is active for first time', () {
-      expect(
-        computeHasHadPeer(previous: false, status: AudioVideoCallStatus.active),
         isTrue,
       );
     });
 
     test(
-      'returns false when remote participant present but status not connected',
+      'returns false when status is connected but no peer participant present',
       () {
         expect(
           computeHasHadPeer(
             previous: false,
-            status: AudioVideoCallStatus.outgoingRinging,
+            status: AudioVideoCallStatus.connected,
+            participants: [_selfParticipant()],
           ),
           isFalse,
         );
       },
     );
 
-    test('stays true once true even when status drops back', () {
+    test('returns true when status is connected with peer participant', () {
+      expect(
+        computeHasHadPeer(
+          previous: false,
+          status: AudioVideoCallStatus.connected,
+          participants: [_selfParticipant(), _peerParticipant()],
+        ),
+        isTrue,
+      );
+    });
+
+    test(
+      'returns false when status is active but no peer participant present',
+      () {
+        expect(
+          computeHasHadPeer(
+            previous: false,
+            status: AudioVideoCallStatus.active,
+            participants: [_selfParticipant()],
+          ),
+          isFalse,
+        );
+      },
+    );
+
+    test('returns true when status is active with peer participant', () {
+      expect(
+        computeHasHadPeer(
+          previous: false,
+          status: AudioVideoCallStatus.active,
+          participants: [_selfParticipant(), _peerParticipant()],
+        ),
+        isTrue,
+      );
+    });
+
+    test(
+      'returns false when status not connected even with peer participant',
+      () {
+        expect(
+          computeHasHadPeer(
+            previous: false,
+            status: AudioVideoCallStatus.outgoingRinging,
+            participants: [_selfParticipant(), _peerParticipant()],
+          ),
+          isFalse,
+        );
+      },
+    );
+
+    test('stays true once true even when peer leaves', () {
       var hasHadPeer = computeHasHadPeer(
         previous: false,
         status: AudioVideoCallStatus.active,
+        participants: [_selfParticipant(), _peerParticipant()],
       );
       expect(hasHadPeer, isTrue);
 
       hasHadPeer = computeHasHadPeer(
         previous: hasHadPeer,
-        status: AudioVideoCallStatus.connecting,
+        status: AudioVideoCallStatus.active,
+        participants: [_selfParticipant()],
       );
       expect(hasHadPeer, isTrue);
     });

@@ -73,13 +73,18 @@ bool hasRemoteParticipant(List<AudioVideoCallParticipant> participants) =>
 
 /// Latching rule: once connected to a live peer, stays `true` for the call.
 ///
-/// Connection proven by connected status (peer established E2EE), not mere
-/// participant presence. Prevents false-connect/false-end from stale ghosts.
-/// Never flips back. This is the only place the latch is computed.
+/// Connection proven by connected status (peer established E2EE) AND peer
+/// presence. Prevents false-connect/false-end from stale ghosts or
+/// phantom participants. Never flips back. This is the only place the
+/// latch is computed.
 bool computeHasHadPeer({
   required bool previous,
   required AudioVideoCallStatus status,
-}) => previous || isConnectedCallStatus(status);
+  required List<AudioVideoCallParticipant> participants,
+}) {
+  if (previous) return true;
+  return isConnectedCallStatus(status) && hasRemoteParticipant(participants);
+}
 
 /// The single rule that maps call state to the displayed [CallUiPhase].
 ///
