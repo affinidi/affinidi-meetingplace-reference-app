@@ -85,7 +85,7 @@ void main() {
       expect(container.read(activeCallControllerProvider), isNotNull);
     });
 
-    test('does not overwrite existing state', () {
+    test('overwrites existing status with initialStatus', () {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
 
@@ -105,7 +105,7 @@ void main() {
 
       expect(
         container.read(activeCallControllerProvider)?.status,
-        AudioVideoCallStatus.active,
+        AudioVideoCallStatus.connecting,
       );
     });
 

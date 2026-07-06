@@ -270,7 +270,7 @@ void main() {
       expect(container.read(activeCallControllerProvider)!.isMinimized, isTrue);
     });
 
-    test('does not overwrite existing state', () {
+    test('overwrites existing status with initialStatus', () {
       final session = _FakeSession();
       controller.update(_state(status: AudioVideoCallStatus.active));
       _registerSession(
@@ -279,10 +279,10 @@ void main() {
         initialStatus: AudioVideoCallStatus.outgoingRinging,
       );
 
-      // Existing state (active) must not be overwritten by initial value.
+      // Status must be overwritten to the provided initialStatus.
       expect(
         container.read(activeCallControllerProvider)!.status,
-        AudioVideoCallStatus.active,
+        AudioVideoCallStatus.outgoingRinging,
       );
     });
   });

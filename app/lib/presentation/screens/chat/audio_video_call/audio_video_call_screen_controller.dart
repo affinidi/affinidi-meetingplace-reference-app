@@ -38,6 +38,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   AudioVideoCallSession? _session;
   CallSessionHandler? _sessionHandler;
   StreamSubscription<CallParticipantEvent>? _participantEventSub;
+  StreamSubscription<CallSignal>? _signalSub;
   bool _isDisposed = false;
   bool _isMinimizing = false;
   AudioVideoCallStatus _lastStatus = AudioVideoCallStatus.idle;
@@ -147,7 +148,26 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     });
 
     ref.listen(meetingPlaceSdkProvider, (prev, next) {
-      _sdk = next.value;
+      final sdk = next.value;
+      _sdk = sdk;
+
+      if (sdk == null || _isDisposed) return;
+
+      _signalSub?.cancel();
+
+      _signalSub = sdk.callSignals.listen((signal) {
+        if (_isDisposed) return;
+
+        if (signal is CallDeclineSignal && _isCaller) {
+          _logger.info(
+            'Call declined by peer, navigating to chat',
+            name: _logKey,
+          );
+          unawaited(hangUp());
+        }
+      });
+
+      ref.onDispose(_signalSub!.cancel);
     }, fireImmediately: true);
 
     final activeCallController = ref.read(
