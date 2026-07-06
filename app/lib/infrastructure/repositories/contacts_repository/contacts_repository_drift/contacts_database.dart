@@ -51,7 +51,7 @@ class ContactsDatabase extends _$ContactsDatabase {
   ContactsDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -184,6 +184,21 @@ class ContactsDatabase extends _$ContactsDatabase {
           ),
         );
       }
+
+      // Adds missed_call_count to track unread missed calls in the badge
+      // separately from the seqNo-derived unread message count.
+      if (from < 6) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+        final missedCallCountExists = result.any(
+          (row) => row.data['name'] == 'missed_call_count',
+        );
+        if (!missedCallCountExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN missed_call_count INTEGER NOT'
+            ' NULL DEFAULT 0',
+          );
+        }
+      }
     },
   );
 }
@@ -206,6 +221,7 @@ class Contacts extends Table {
       boolean().clientDefault(() => false)();
   IntColumn get badgeCount => integer().clientDefault(() => 0)();
   IntColumn get currentMessageSeqNo => integer().clientDefault(() => 0)();
+  IntColumn get missedCallCount => integer().clientDefault(() => 0)();
   BoolColumn get hasBeenOpened => boolean().clientDefault(() => false)();
   DateTimeColumn get lastKeepAliveMessage => dateTime().nullable()();
   BoolColumn get notificationBannerDismissed =>

@@ -35,6 +35,10 @@ part 'contact.g.dart';
 /// - `badgeCount` / `badgeUpdateInProgress` - Local unread/activity count and
 ///   processing flag.
 /// - `currentMessageSeqNo` - Message sequence numbers for ordering.
+/// - `missedCallCount` - Unread missed calls contributing to `badgeCount`.
+///   Tracked separately because missed calls are not represented in the
+///   channel sequence number, so they must survive the seqNo-derived badge
+///   recompute. Cleared together with `badgeCount` when the chat is opened.
 /// - `lastKeepAliveMessage` - Timestamp of the last keep-alive message received
 ///   (used to show liveness).
 @CopyWith()
@@ -56,6 +60,7 @@ class Contact {
     this.badgeUpdateInProgress = false,
     this.badgeCount = 0,
     this.currentMessageSeqNo = 0,
+    this.missedCallCount = 0,
     this.hasBeenOpened = false,
     this.lastKeepAliveMessage,
     this.notificationBannerDismissed = false,
@@ -79,6 +84,7 @@ class Contact {
   final bool badgeUpdateInProgress;
   final int badgeCount;
   final int currentMessageSeqNo;
+  final int missedCallCount;
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;
   final bool notificationBannerDismissed;

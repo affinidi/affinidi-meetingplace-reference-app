@@ -8,6 +8,7 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/call_audio_session_service/call_audio_session_service.dart';
 import '../chat_service/chat_session_service.dart';
+import '../contacts_service/contacts_service.dart';
 import 'incoming_call_notifier.dart';
 import 'incoming_call_state.dart';
 
@@ -175,7 +176,8 @@ class IncomingCallService extends _$IncomingCallService {
   }
 
   /// Updates the incoming call chat item to [CallStatus.missed] for the given
-  /// [contactId]. Runs asynchronously so the ring state can be cleared first.
+  /// [contactId] and increments the contact's unread badge. Runs asynchronously
+  /// so the ring state can be cleared first.
   void _markCallAsMissed(String contactId) {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
     unawaited(
@@ -184,6 +186,9 @@ class IncomingCallService extends _$IncomingCallService {
           await ref
               .read(chatSessionServiceProvider(contactId).notifier)
               .markCallAsMissed();
+          await ref
+              .read(contactsServiceProvider.notifier)
+              .incrementMissedCallBadge(contactId);
         } catch (e, stackTrace) {
           _logger.error(
             '_markCallAsMissed failed for $contactId',
