@@ -200,7 +200,11 @@ class _IndividualVideoCallScaffold extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            _VideoCallBackground(remotePeer: remotePeer, session: session),
+            VideoCallBackground(
+              contactId: contactId,
+              remotePeer: remotePeer,
+              session: session,
+            ),
             Positioned.fill(
               child: SafeArea(
                 child: LayoutBuilder(
@@ -247,29 +251,6 @@ class _IndividualVideoCallScaffold extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _VideoCallBackground extends StatelessWidget {
-  const _VideoCallBackground({required this.remotePeer, required this.session});
-
-  final AudioVideoCallParticipant? remotePeer;
-  final AudioVideoCallSession? session;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.customColors;
-
-    if (remotePeer == null) {
-      return Container(color: colors.grey900);
-    }
-
-    return AudioVideoCallView(
-      session: session,
-      participantId: remotePeer!.participantId,
-      hasVideo: remotePeer!.hasVideo,
-      mirror: false,
     );
   }
 }

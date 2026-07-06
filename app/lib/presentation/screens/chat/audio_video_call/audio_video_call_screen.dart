@@ -16,6 +16,7 @@ import '../../../../infrastructure/extensions/duration_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../../presentation/widgets/action_button.dart';
 import '../../../../presentation/widgets/profile_circle_avatar.dart';
+import '../../../../presentation/widgets/video_call_background.dart';
 import '../../../../presentation/widgets/video_call_pip_window.dart';
 import '../../../widgets/call_ended/call_ended_controller.dart';
 import 'audio_video_call_screen_controller.dart';

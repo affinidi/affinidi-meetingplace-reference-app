@@ -4,15 +4,20 @@ import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'fake_contacts.dart';
 
 class FakeContactsService extends ContactsService {
+  FakeContactsService({List<Contact>? contacts})
+    : contacts =
+          contacts ??
+          [
+            FakeContacts.individualContact,
+            FakeContacts.groupContact,
+            FakeContacts.pendingContact,
+            FakeContacts.newContactWithMessage,
+            FakeContacts.oobContact,
+            FakeContacts.oobContactDismissed,
+          ];
+
   String? resetBadgeCalledWith;
-  List<Contact> contacts = [
-    FakeContacts.individualContact,
-    FakeContacts.groupContact,
-    FakeContacts.pendingContact,
-    FakeContacts.newContactWithMessage,
-    FakeContacts.oobContact,
-    FakeContacts.oobContactDismissed,
-  ];
+  List<Contact> contacts;
 
   List<Map<String, dynamic>> addContactCalls = [];
   List<Map<String, dynamic>> updateContactCalls = [];
