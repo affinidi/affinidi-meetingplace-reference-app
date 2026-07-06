@@ -628,43 +628,40 @@ void main() {
       );
     });
 
-    test(
-      'declined status survives a later non-ended session status (no Calling flash)',
-      () async {
-        final session = MockAudioVideoCallSession();
-        final container = _makeContainer(pendingSession: session);
-        final ctrl = container.read(
-          audioVideoCallScreenControllerProvider(_kContactId).notifier,
-        );
-        container.listen(
-          audioVideoCallScreenControllerProvider(_kContactId),
-          (_, _) {},
-        );
+    test('declined status survives later non-ended session status', () async {
+      final session = MockAudioVideoCallSession();
+      final container = _makeContainer(pendingSession: session);
+      final ctrl = container.read(
+        audioVideoCallScreenControllerProvider(_kContactId).notifier,
+      );
+      container.listen(
+        audioVideoCallScreenControllerProvider(_kContactId),
+        (_, _) {},
+      );
 
-        await session.emitState(
-          const AudioVideoCallState(
-            status: AudioVideoCallStatus.outgoingRinging,
-            ownRole: CallRole.caller,
-          ),
-        );
-        await _pumpAsync();
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.outgoingRinging,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await _pumpAsync();
 
-        await ctrl.onPeerDeclined();
-        await _pumpAsync();
+      await ctrl.onPeerDeclined();
+      await _pumpAsync();
 
-        await session.emitState(
-          const AudioVideoCallState(status: AudioVideoCallStatus.connecting),
-        );
-        await _pumpAsync();
+      await session.emitState(
+        const AudioVideoCallState(status: AudioVideoCallStatus.connecting),
+      );
+      await _pumpAsync();
 
-        expect(
-          container
-              .read(audioVideoCallScreenControllerProvider(_kContactId))
-              .status,
-          AudioVideoCallStatus.declined,
-        );
-      },
-    );
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(_kContactId))
+            .status,
+        AudioVideoCallStatus.declined,
+      );
+    });
 
     test(
       'stale declined lifecycle update does not flash after Call Again',
