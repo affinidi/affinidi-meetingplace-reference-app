@@ -2,6 +2,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
 
+AudioVideoCallParticipant _selfParticipant() => const AudioVideoCallParticipant(
+  participantId: 'local',
+  isSelf: true,
+  hasVideo: false,
+  hasAudio: true,
+  isSpeaking: false,
+);
+
+AudioVideoCallParticipant _peerParticipant([String id = 'peer']) =>
+    AudioVideoCallParticipant(
+      participantId: id,
+      isSelf: false,
+      hasVideo: true,
+      hasAudio: true,
+      isSpeaking: false,
+    );
+
 void main() {
   group('isLiveCallStatus', () {
     test('returns true for waitingForKeys', () {
@@ -141,20 +158,12 @@ void main() {
   });
 
   group('computeHasHadPeer', () {
-    test('returns false when no previous peer and none now', () {
+    test('returns false when no previous peer and status not connected', () {
       expect(
         computeHasHadPeer(
           previous: false,
-          participants: [
-            const AudioVideoCallParticipant(
-              participantId: 'local',
-              isSelf: true,
-              hasVideo: false,
-              hasAudio: true,
-              isSpeaking: false,
-            ),
-          ],
           status: AudioVideoCallStatus.connecting,
+          participants: [],
         ),
         isFalse,
       );
@@ -164,113 +173,89 @@ void main() {
       expect(
         computeHasHadPeer(
           previous: true,
-          participants: [
-            const AudioVideoCallParticipant(
-              participantId: 'local',
-              isSelf: true,
-              hasVideo: false,
-              hasAudio: true,
-              isSpeaking: false,
-            ),
-          ],
           status: AudioVideoCallStatus.connecting,
+          participants: [_selfParticipant()],
         ),
         isTrue,
       );
     });
 
     test(
-      'returns true when in live status with remote participant for first time',
+      'returns false when status is connected but no peer participant present',
       () {
         expect(
           computeHasHadPeer(
             previous: false,
-            participants: [
-              const AudioVideoCallParticipant(
-                participantId: 'local',
-                isSelf: true,
-                hasVideo: false,
-                hasAudio: true,
-                isSpeaking: false,
-              ),
-              const AudioVideoCallParticipant(
-                participantId: 'remote-1',
-                isSelf: false,
-                hasVideo: true,
-                hasAudio: true,
-                isSpeaking: false,
-              ),
-            ],
-            status: AudioVideoCallStatus.active,
+            status: AudioVideoCallStatus.connected,
+            participants: [_selfParticipant()],
           ),
-          isTrue,
+          isFalse,
         );
       },
     );
 
-    test('returns false when remote participant in non-live status', () {
+    test('returns true when status is connected with peer participant', () {
       expect(
         computeHasHadPeer(
           previous: false,
-          participants: [
-            const AudioVideoCallParticipant(
-              participantId: 'local',
-              isSelf: true,
-              hasVideo: false,
-              hasAudio: true,
-              isSpeaking: false,
-            ),
-            const AudioVideoCallParticipant(
-              participantId: 'remote-1',
-              isSelf: false,
-              hasVideo: true,
-              hasAudio: true,
-              isSpeaking: false,
-            ),
-          ],
-          status: AudioVideoCallStatus.connecting,
+          status: AudioVideoCallStatus.connected,
+          participants: [_selfParticipant(), _peerParticipant()],
         ),
-        isFalse,
+        isTrue,
       );
     });
 
-    test('stays true once true (latch behavior)', () {
-      // First, set to true with a remote in active
+    test(
+      'returns false when status is active but no peer participant present',
+      () {
+        expect(
+          computeHasHadPeer(
+            previous: false,
+            status: AudioVideoCallStatus.active,
+            participants: [_selfParticipant()],
+          ),
+          isFalse,
+        );
+      },
+    );
+
+    test('returns true when status is active with peer participant', () {
+      expect(
+        computeHasHadPeer(
+          previous: false,
+          status: AudioVideoCallStatus.active,
+          participants: [_selfParticipant(), _peerParticipant()],
+        ),
+        isTrue,
+      );
+    });
+
+    test(
+      'returns false when status not connected even with peer participant',
+      () {
+        expect(
+          computeHasHadPeer(
+            previous: false,
+            status: AudioVideoCallStatus.outgoingRinging,
+            participants: [_selfParticipant(), _peerParticipant()],
+          ),
+          isFalse,
+        );
+      },
+    );
+
+    test('stays true once true even when peer leaves', () {
       var hasHadPeer = computeHasHadPeer(
         previous: false,
-        participants: [
-          const AudioVideoCallParticipant(
-            participantId: 'local',
-            isSelf: true,
-            hasVideo: false,
-            hasAudio: true,
-            isSpeaking: false,
-          ),
-          const AudioVideoCallParticipant(
-            participantId: 'remote-1',
-            isSelf: false,
-            hasVideo: true,
-            hasAudio: true,
-            isSpeaking: false,
-          ),
-        ],
         status: AudioVideoCallStatus.active,
+        participants: [_selfParticipant(), _peerParticipant()],
       );
       expect(hasHadPeer, isTrue);
 
-      // Remote leaves but previous is true — should stay true
       hasHadPeer = computeHasHadPeer(
         previous: hasHadPeer,
-        participants: [
-          const AudioVideoCallParticipant(
-            participantId: 'local',
-            isSelf: true,
-            hasVideo: false,
-            hasAudio: true,
-            isSpeaking: false,
-          ),
-        ],
         status: AudioVideoCallStatus.active,
+        participants: [_selfParticipant()],
       );
       expect(hasHadPeer, isTrue);
     });

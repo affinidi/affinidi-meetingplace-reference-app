@@ -71,18 +71,20 @@ bool isConnectedCallStatus(AudioVideoCallStatus status) =>
 bool hasRemoteParticipant(List<AudioVideoCallParticipant> participants) =>
     participants.any((p) => !p.isSelf);
 
-/// Latching rule: once a real peer participant has appeared during a live
-/// status, the result stays `true` for the rest of the call.
+/// Latching rule: once connected to a live peer, stays `true` for the call.
 ///
-/// Leave / rejoin and minimize / maximize never flip it back. This is the only
-/// place the latch is computed.
+/// Connection proven by connected status (peer established E2EE) AND peer
+/// presence. Prevents false-connect/false-end from stale ghosts or
+/// phantom participants. Never flips back. This is the only place the
+/// latch is computed.
 bool computeHasHadPeer({
   required bool previous,
-  required List<AudioVideoCallParticipant> participants,
   required AudioVideoCallStatus status,
-}) =>
-    previous ||
-    (isLiveCallStatus(status) && hasRemoteParticipant(participants));
+  required List<AudioVideoCallParticipant> participants,
+}) {
+  if (previous) return true;
+  return isConnectedCallStatus(status) && hasRemoteParticipant(participants);
+}
 
 /// The single rule that maps call state to the displayed [CallUiPhase].
 ///

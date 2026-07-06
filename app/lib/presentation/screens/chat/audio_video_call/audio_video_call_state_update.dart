@@ -20,6 +20,7 @@ class AudioVideoCallStateUpdate {
     this.hasHadPeer = false,
     this.peerJustJoined = false,
     this.tick = false,
+    this.callStartedAt,
   });
 
   final AudioVideoCallStatus? status;
@@ -44,4 +45,9 @@ class AudioVideoCallStateUpdate {
 
   /// True for timer tick emissions — only callDurationSeconds should change.
   final bool tick;
+
+  /// Shared call-start instant from the SDK, derived from the callId. The
+  /// duration timer anchors to this so both parties display the same elapsed
+  /// time. Null until the callId is resolved.
+  final DateTime? callStartedAt;
 }

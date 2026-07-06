@@ -59,8 +59,8 @@ class CallSessionHandler {
     final hadPeerBefore = _hasHadPeer;
     _hasHadPeer = computeHasHadPeer(
       previous: _hasHadPeer,
-      participants: next.participants,
       status: next.status,
+      participants: next.participants,
     );
     final justJoined = !hadPeerBefore && _hasHadPeer;
 
@@ -78,6 +78,7 @@ class CallSessionHandler {
         ownRole: next.ownRole,
         hasHadPeer: _hasHadPeer,
         peerJustJoined: justJoined,
+        callStartedAt: next.callStartedAt,
       ),
     );
   }
