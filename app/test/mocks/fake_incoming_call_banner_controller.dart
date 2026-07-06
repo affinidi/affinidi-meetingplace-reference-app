@@ -1,11 +1,10 @@
-import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_service.dart'
-    show IncomingCallService;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart'
+    show CallMediaType;
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/incoming_call/incoming_call_banner_controller.dart';
 
 /// Fake [IncomingCallBannerController] for testing.
 ///
-/// Records accept and dismiss calls for assertions without touching
-/// [IncomingCallService].
+/// Records accept, acceptRecall, and dismiss calls for assertions.
 class FakeIncomingCallBannerController extends IncomingCallBannerController {
   final List<String> acceptedCallIds = [];
   final List<String> dismissedCallIds = [];
@@ -14,7 +13,22 @@ class FakeIncomingCallBannerController extends IncomingCallBannerController {
   bool build() => false;
 
   @override
-  void accept({required String callId}) {
+  void accept({
+    required String callId,
+    required String otherPartyChannelDid,
+    required CallMediaType mediaType,
+    required String? contactId,
+  }) {
+    acceptedCallIds.add(callId);
+    state = true;
+  }
+
+  @override
+  void acceptRecall({
+    required String callId,
+    required String contactId,
+    required bool isAudioOnly,
+  }) {
     acceptedCallIds.add(callId);
     state = true;
   }

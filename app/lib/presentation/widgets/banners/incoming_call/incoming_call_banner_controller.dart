@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:meeting_place_matrix/meeting_place_matrix.dart'
+    show CallMediaType;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/incoming_call_service/incoming_call_notifier.dart';
@@ -5,6 +9,9 @@ import '../../../../application/services/incoming_call_service/incoming_call_ser
 import '../../../../application/services/incoming_call_service/incoming_call_state.dart'
     show IncomingCallRinging;
 import '../../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../../navigation/navigator.dart';
+import '../../../../navigation/routes/dashboard_routes.dart';
+import '../../../screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import '../end_call/end_call_banner_controller.dart';
 
 part 'incoming_call_banner_controller.g.dart';
@@ -26,14 +33,6 @@ class IncomingCallBannerController extends _$IncomingCallBannerController {
     return false;
   }
 
-  /// Marks the banner as accepted and forwards the accept to
-  /// [IncomingCallService].
-  void accept({required String callId}) {
-    ref.read(appLoggerProvider).info('accept callId=$callId', name: _logKey);
-    ref.read(incomingCallServiceProvider.notifier).accept(callId: callId);
-    state = true;
-  }
-
   /// Marks the banner as dismissed and forwards the decline to
   /// [IncomingCallService].
   void dismiss({required String callId}) {
@@ -43,5 +42,49 @@ class IncomingCallBannerController extends _$IncomingCallBannerController {
   }
 
   /// Resets the banner so it can show again for a new call.
-  void reset() => state = false;
+  void reset() {
+    ref.read(appLoggerProvider).info('reset', name: _logKey);
+    state = false;
+  }
+
+  /// Accepts a fresh incoming call and navigates to the call screen.
+  void accept({
+    required String callId,
+    required String otherPartyChannelDid,
+    required CallMediaType mediaType,
+    required String? contactId,
+  }) {
+    ref.read(appLoggerProvider).info('accept callId=$callId', name: _logKey);
+    ref.read(incomingCallServiceProvider.notifier).accept(callId: callId);
+    state = true;
+
+    final routeContactId = contactId ?? otherPartyChannelDid;
+    final isAudioOnly = mediaType == CallMediaType.audio;
+    ref
+        .read(navigatorProvider)
+        .go(
+          AudioVideoCallRoute(
+            contactId: routeContactId,
+            isAudioOnly: isAudioOnly,
+          ).location,
+        );
+  }
+
+  /// Accepts a re-invite from a peer restarting the call.
+  void acceptRecall({
+    required String callId,
+    required String contactId,
+    required bool isAudioOnly,
+  }) {
+    ref
+        .read(appLoggerProvider)
+        .info('acceptRecall callId=$callId', name: _logKey);
+    ref.read(incomingCallServiceProvider.notifier).accept(callId: callId);
+    state = true;
+    unawaited(
+      ref
+          .read(audioVideoCallScreenControllerProvider(contactId).notifier)
+          .acceptRecall(isAudioOnly: isAudioOnly),
+    );
+  }
 }

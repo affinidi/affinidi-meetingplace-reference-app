@@ -11,6 +11,8 @@ import 'package:mpx_flutter_reference_app/application/services/incoming_call_ser
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/navigation/navigator.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/incoming_call_banner.dart';
 
@@ -40,6 +42,24 @@ class _RecordingIncomingCallService extends IncomingCallService {
   void decline({required String callId}) => declinedCallIds.add(callId);
 }
 
+class _FakeScreenControllerWithPeerRecall
+    extends AudioVideoCallScreenController {
+  final List<bool> recallAccepts = [];
+
+  @override
+  AudioVideoCallScreenState build(String contactId) =>
+      AudioVideoCallScreenState(
+        isCameraEnabled: false,
+        isMicEnabled: true,
+        peerIsCallingBack: true,
+      );
+
+  @override
+  Future<void> acceptRecall({required bool isAudioOnly}) async {
+    recallAccepts.add(isAudioOnly);
+  }
+}
+
 IncomingAudioVideoCallEvent _event({
   String otherPartyChannelDid = 'did:key:individual-channel',
   bool isAudioOnly = false,
@@ -64,12 +84,19 @@ void main() {
     callService = _RecordingIncomingCallService();
   });
 
-  Widget wrap(IncomingAudioVideoCallEvent event) => ProviderScope(
+  Widget wrap(
+    IncomingAudioVideoCallEvent event, {
+    bool withPeerRecall = false,
+  }) => ProviderScope(
     overrides: [
       navigatorProvider.overrideWithValue(navigator),
       contactsServiceProvider.overrideWith(FakeContactsService.new),
       incomingCallProvider.overrideWith(() => _StubIncomingCallState(event)),
       incomingCallServiceProvider.overrideWith(() => callService),
+      if (withPeerRecall)
+        audioVideoCallScreenControllerProvider.overrideWith(
+          _FakeScreenControllerWithPeerRecall.new,
+        ),
     ],
     child: MaterialApp(
       theme: AppTheme.dark,
@@ -98,9 +125,7 @@ void main() {
   });
 
   group('accept', () {
-    testWidgets('accepts and navigates using the resolved contact id', (
-      tester,
-    ) async {
+    testWidgets('calls accept with the correct parameters', (tester) async {
       await tester.pumpWidget(wrap(_event()));
       await tester.pump();
 
@@ -111,9 +136,7 @@ void main() {
       expect(navigator.goCalls.single, contains('individual-contact-id'));
     });
 
-    testWidgets('falls back to the channel did when no contact is found', (
-      tester,
-    ) async {
+    testWidgets('uses channel did when no contact is resolved', (tester) async {
       await tester.pumpWidget(
         wrap(_event(otherPartyChannelDid: 'did:key:unknown')),
       );
@@ -136,6 +159,16 @@ void main() {
 
       expect(find.byIcon(Icons.call), findsNothing);
       expect(find.byType(SizedBox), findsWidgets);
+    });
+
+    testWidgets('calls accept when peer is calling back', (tester) async {
+      await tester.pumpWidget(wrap(_event(), withPeerRecall: true));
+      await tester.pump();
+
+      await tester.tap(find.byIcon(Icons.call));
+      await tester.pump();
+
+      expect(callService.acceptedCallIds, ['call-1']);
     });
   });
 
