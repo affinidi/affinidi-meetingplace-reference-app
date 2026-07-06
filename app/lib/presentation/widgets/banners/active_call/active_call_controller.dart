@@ -25,6 +25,7 @@ class ActiveCallController extends _$ActiveCallController {
 
   AudioVideoCallSession? _session;
   Timer? _durationTimer;
+  DateTime? _callStartedAt;
   StreamSubscription<AudioVideoCallState>? _sessionStateSub;
   StreamSubscription<CallParticipantEvent>? _participantEventSub;
   CallRole? _ownRole;
@@ -86,6 +87,7 @@ class ActiveCallController extends _$ActiveCallController {
     required bool isCameraEnabled,
     AudioVideoCallParticipant? selfParticipant,
   }) {
+    _logger.info('minimize: Updating banner state', name: _logKey);
     final current = state;
     if (current != null) {
       state = current.copyWith(
@@ -99,6 +101,7 @@ class ActiveCallController extends _$ActiveCallController {
 
   /// Marks the call as restored, bringing it back to full screen control.
   void restore() {
+    _logger.info('restore: Returning call to screen', name: _logKey);
     final current = state;
     if (current != null) state = current.copyWith(isMinimized: false);
   }
@@ -106,31 +109,30 @@ class ActiveCallController extends _$ActiveCallController {
   /// Updates banner state when the local user switches from audio-only
   /// to video.
   void switchToVideo() {
+    _logger.info('switchToVideo: Updating call media state', name: _logKey);
     final current = state;
     if (current == null) return;
     state = current.copyWith(isAudioOnly: false, isCameraEnabled: true);
   }
 
-  /// Starts the one-second duration timer. No-op if already running.
-  ///
-  /// Call this when the first peer participant joins. The timer persists
-  /// through minimize/maximize because it lives in the banner controller,
-  /// not in the screen controller.
-  void startTimer() {
+  /// Starts timer anchored to [callStartedAt] for synchronized elapsed time
+  /// across both parties. Falls back to count-up if null. Persists through
+  /// minimize/maximize. No-op if already running.
+  void startTimer([DateTime? callStartedAt]) {
+    _callStartedAt ??= callStartedAt;
     if (_durationTimer != null) return;
     _logger.info('startTimer: Duration timer started', name: _logKey);
-    _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      final current = state;
-      if (current != null) {
-        state = current.copyWith(
-          callDurationSeconds: current.callDurationSeconds + 1,
-        );
-      }
-    });
+
+    if (_callStartedAt != null) _tickDuration();
+    _durationTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => _tickDuration(),
+    );
   }
 
   /// Stops the duration timer.
   void stopTimer() {
+    _logger.info('stopTimer: Duration timer stopped', name: _logKey);
     _durationTimer?.cancel();
     _durationTimer = null;
   }
@@ -140,6 +142,7 @@ class ActiveCallController extends _$ActiveCallController {
     if (_isDisposed) return;
     _logger.info('clear: Releasing session', name: _logKey);
     stopTimer();
+    _callStartedAt = null;
     _sessionStateSub?.cancel();
     _sessionStateSub = null;
     _participantEventSub?.cancel();
@@ -154,22 +157,6 @@ class ActiveCallController extends _$ActiveCallController {
     _keepAliveLink?.close();
     _keepAliveLink = null;
     _releaseChatServiceAfter(pendingEndWrite);
-  }
-
-  /// Releases the chat session once the final call chat item write completes,
-  /// so the session (and its message-routing that advances the unread baseline)
-  /// is torn down when the call ends instead of lingering and suppressing the
-  /// badge for the next incoming call.
-  void _releaseChatServiceAfter(Future<void>? pendingWrite) {
-    final subToClose = _chatServiceSub;
-    if (subToClose == null) return;
-    (pendingWrite ?? Future<void>.value()).whenComplete(() {
-      if (!identical(_chatServiceSub, subToClose)) return;
-
-      _chatServiceSub = null;
-      _chatService = null;
-      subToClose.close();
-    });
   }
 
   /// The live session registered when the screen minimized.
@@ -200,6 +187,7 @@ class ActiveCallController extends _$ActiveCallController {
     _keepAliveLink ??= ref.keepAlive();
     _isTerminated = false;
     _session = session;
+    _callStartedAt = null;
 
     if (state == null) {
       state = ActiveCallState(
@@ -235,33 +223,6 @@ class ActiveCallController extends _$ActiveCallController {
     _participantEventSub = session.participantEvents.listen(
       _onParticipantEvent,
     );
-  }
-
-  /// Ends a minimized 1-on-1 call immediately when the only peer leaves.
-  void _onParticipantEvent(CallParticipantEvent event) {
-    if (_isDisposed) return;
-    if (event.type != CallParticipantEventType.left) return;
-    final current = state;
-    if (current == null || !current.isMinimized) return;
-    if (_isGroupContact) {
-      _logger.info(
-        '_onParticipantEvent: Peer left group call, call continues',
-        name: _logKey,
-      );
-      return;
-    }
-    if (!current.hasHadPeer) {
-      _logger.warning(
-        '_onParticipantEvent: Peer left but hasHadPeer=false, skipping',
-        name: _logKey,
-      );
-      return;
-    }
-    _logger.info(
-      '_onParticipantEvent: Peer left 1-on-1 call, ending call',
-      name: _logKey,
-    );
-    hangUp();
   }
 
   /// Removes the registered session when the call is fully torn down.
@@ -327,6 +288,7 @@ class ActiveCallController extends _$ActiveCallController {
   /// ownRole (the screen was disposed before it minimized).
   void hangUpFromScreen({required CallRole role}) {
     if (_isDisposed) return;
+    _logger.info('hangUpFromScreen: role=$role', name: _logKey);
     _ownRole ??= role;
     hangUp();
   }
@@ -336,6 +298,65 @@ class ActiveCallController extends _$ActiveCallController {
     if (callState == null) return false;
     return !isEndedCallStatus(callState.status) &&
         callState.status != AudioVideoCallStatus.idle;
+  }
+
+  // =========================================================================
+  // Private helpers
+  // =========================================================================
+
+  /// Advances the displayed call duration using the call start time when
+  /// available.
+  void _tickDuration() {
+    final current = state;
+    if (current == null) return;
+    final anchor = _callStartedAt;
+    final seconds = anchor != null
+        ? DateTime.now().difference(anchor).inSeconds
+        : current.callDurationSeconds + 1;
+    state = current.copyWith(callDurationSeconds: seconds < 0 ? 0 : seconds);
+  }
+
+  /// Releases the chat session once the final call chat item write completes,
+  /// so the session (and its message-routing that advances the unread baseline)
+  /// is torn down when the call ends instead of lingering and suppressing the
+  /// badge for the next incoming call.
+  void _releaseChatServiceAfter(Future<void>? pendingWrite) {
+    final subToClose = _chatServiceSub;
+    if (subToClose == null) return;
+    (pendingWrite ?? Future<void>.value()).whenComplete(() {
+      if (!identical(_chatServiceSub, subToClose)) return;
+
+      _chatServiceSub = null;
+      _chatService = null;
+      subToClose.close();
+    });
+  }
+
+  /// Ends a minimized 1-on-1 call immediately when the only peer leaves.
+  void _onParticipantEvent(CallParticipantEvent event) {
+    if (_isDisposed) return;
+    if (event.type != CallParticipantEventType.left) return;
+    final current = state;
+    if (current == null || !current.isMinimized) return;
+    if (_isGroupContact) {
+      _logger.info(
+        '_onParticipantEvent: Peer left group call, call continues',
+        name: _logKey,
+      );
+      return;
+    }
+    if (!current.hasHadPeer) {
+      _logger.warning(
+        '_onParticipantEvent: Peer left but hasHadPeer=false, skipping',
+        name: _logKey,
+      );
+      return;
+    }
+    _logger.info(
+      '_onParticipantEvent: Peer left 1-on-1 call, ending call',
+      name: _logKey,
+    );
+    hangUp();
   }
 
   void _onSessionState(AudioVideoCallState sessionState) {
@@ -352,7 +373,6 @@ class ActiveCallController extends _$ActiveCallController {
 
     final hadPeer = computeHasHadPeer(
       previous: current.hasHadPeer,
-      participants: sessionState.participants,
       status: sessionState.status,
     );
     final peerJustJoined = !current.hasHadPeer && hadPeer;
@@ -365,7 +385,11 @@ class ActiveCallController extends _$ActiveCallController {
           .firstOrNull,
     );
 
-    if (peerJustJoined) startTimer();
+    if (peerJustJoined) startTimer(sessionState.callStartedAt);
+
+    if (sessionState.callStartedAt != null) {
+      startTimer(sessionState.callStartedAt);
+    }
 
     if (isEndedCallStatus(sessionState.status)) {
       _chatItemHandler?.endCallChatItem(

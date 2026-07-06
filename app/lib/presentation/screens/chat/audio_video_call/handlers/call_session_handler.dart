@@ -57,11 +57,7 @@ class CallSessionHandler {
     final self = next.participants.where((p) => p.isSelf).firstOrNull;
 
     final hadPeerBefore = _hasHadPeer;
-    _hasHadPeer = computeHasHadPeer(
-      previous: _hasHadPeer,
-      participants: next.participants,
-      status: next.status,
-    );
+    _hasHadPeer = computeHasHadPeer(previous: _hasHadPeer, status: next.status);
     final justJoined = !hadPeerBefore && _hasHadPeer;
 
     final selfHasVideo = self?.hasVideo;
@@ -78,6 +74,7 @@ class CallSessionHandler {
         ownRole: next.ownRole,
         hasHadPeer: _hasHadPeer,
         peerJustJoined: justJoined,
+        callStartedAt: next.callStartedAt,
       ),
     );
   }

@@ -194,6 +194,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// Starts the call on screen entry: restores any minimized call still in
   /// progress, then places an outgoing call if none is active.
   Future<void> startCall({required bool isAudioOnly}) async {
+    _logger.info('startCall: isAudioOnly=$isAudioOnly', name: _logKey);
     _isMinimizing = false;
     ref.read(activeCallControllerProvider.notifier).restore();
     final isRestoring = state.session != null;
@@ -208,6 +209,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// Discards a finished call (missed or declined) and places a fresh
   /// outgoing call. Used by the "Call again" action on the end-call screen.
   Future<void> restartCall({required bool isAudioOnly}) async {
+    _logger.info('restartCall: isAudioOnly=$isAudioOnly', name: _logKey);
     _isMinimizing = false;
     _session = null;
     _sessionHandler?.dispose();
@@ -226,26 +228,39 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
   /// Toggles top-bar and controls-bar visibility (tap-anywhere behaviour).
   void toggleControlsBar() {
+    _logger.info(
+      'toggleControlsBar: visible=${!state.showControlsBar}',
+      name: _logKey,
+    );
     state = state.copyWith(showControlsBar: !state.showControlsBar);
   }
 
   /// Directly sets controls-bar visibility (used by scroll-driven hiding).
   void setControlsBarVisible({required bool visible}) {
     if (state.showControlsBar == visible) return;
+    _logger.info('setControlsBarVisible: visible=$visible', name: _logKey);
     state = state.copyWith(showControlsBar: visible);
   }
 
   /// Switches between front and rear camera.
-  Future<void> switchCamera() => _mediaHandler.switchCamera();
+  Future<void> switchCamera() {
+    _logger.info('switchCamera: Toggling camera', name: _logKey);
+    return _mediaHandler.switchCamera();
+  }
 
   /// Sets the participant displayed full-screen in focused layout.
   /// Pass null to return to the grid layout.
   void setFocusedParticipant(int? index) {
+    _logger.info('setFocusedParticipant: index=$index', name: _logKey);
     state = state.copyWith(focusedParticipantIndex: index);
   }
 
   /// Toggles the floating mini-grid between collapsed and expanded.
   void toggleMiniGridExpanded() {
+    _logger.info(
+      'toggleMiniGridExpanded: expanded=${!state.miniGridExpanded}',
+      name: _logKey,
+    );
     state = state.copyWith(miniGridExpanded: !state.miniGridExpanded);
   }
 
@@ -274,22 +289,36 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// explicitly denied a previous prompt). Undetermined ("not yet asked") is
   /// not treated as an error — LiveKit requests the permission natively when
   /// it enables the mic/camera track, avoiding races with AVAudioSession setup.
-  Future<void> checkInitialPermissions() =>
-      _mediaHandler.checkInitialPermissions();
+  Future<void> checkInitialPermissions() {
+    _logger.info('checkInitialPermissions', name: _logKey);
+    return _mediaHandler.checkInitialPermissions();
+  }
 
   /// Initiates a new outgoing call to the contact,
   /// acquiring the plugin session.
-  Future<void> joinCall() => _lifecycleHandler.joinCall();
+  Future<void> joinCall() {
+    _logger.info('joinCall', name: _logKey);
+    return _lifecycleHandler.joinCall();
+  }
 
   /// Cancels an outgoing call that has not yet been answered.
-  Future<void> cancelCall() => _lifecycleHandler.cancelCall();
+  Future<void> cancelCall() {
+    _logger.info('cancelCall', name: _logKey);
+    return _lifecycleHandler.cancelCall();
+  }
 
   /// Hangs up the call, dispatching either a cancel
   /// (if still ringing) or leave.
-  Future<void> hangUp() => _lifecycleHandler.hangUp();
+  Future<void> hangUp() {
+    _logger.info('hangUp', name: _logKey);
+    return _lifecycleHandler.hangUp();
+  }
 
   /// Ends the active call and transitions to ended state.
-  Future<void> leaveCall() => _lifecycleHandler.leaveCall();
+  Future<void> leaveCall() {
+    _logger.info('leaveCall', name: _logKey);
+    return _lifecycleHandler.leaveCall();
+  }
 
   /// Toggles microphone on/off.
   ///
@@ -297,10 +326,13 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// owns the AVAudioSession at that point and re-querying permission_handler
   /// can return a stale status. Only re-checks if a previous permission error
   /// was recorded.
-  Future<void> toggleMic() => _mediaHandler.toggleMic(
-    currentValue: state.isMicEnabled,
-    permissionError: state.micPermissionError,
-  );
+  Future<void> toggleMic() {
+    _logger.info('toggleMic: enabled=${!state.isMicEnabled}', name: _logKey);
+    return _mediaHandler.toggleMic(
+      currentValue: state.isMicEnabled,
+      permissionError: state.micPermissionError,
+    );
+  }
 
   /// Toggles camera on/off.
   ///
@@ -309,6 +341,10 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// On iOS, the audio session mode must match the call type or the LiveKit
   /// room disconnects.
   Future<void> toggleCamera() async {
+    _logger.info(
+      'toggleCamera: enabled=${!state.isCameraEnabled}',
+      name: _logKey,
+    );
     if (state.isAudioOnly) {
       await ref
           .read(callAudioSessionServiceProvider.notifier)
@@ -323,6 +359,10 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// Toggles speakerphone on/off.
   Future<void> toggleSpeaker() {
     if (_isDisposed) return Future.value();
+    _logger.info(
+      'toggleSpeaker: enabled=${!state.isSpeakerEnabled}',
+      name: _logKey,
+    );
     return _mediaHandler.toggleSpeaker(currentValue: state.isSpeakerEnabled);
   }
 

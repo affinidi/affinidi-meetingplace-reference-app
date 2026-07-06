@@ -2,12 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
 
-const _selfParticipant = AudioVideoCallParticipant(
-  participantId: 'local',
-  isSelf: true,
-);
-const _peerParticipant = AudioVideoCallParticipant(participantId: 'remote-1');
-
 void main() {
   group('isLiveCallStatus', () {
     test('is true for waitingForKeys, connected and active', () {
@@ -42,32 +36,26 @@ void main() {
   });
 
   group('computeHasHadPeer', () {
-    test(
-      'latches true when another participant is present during a live status',
-      () {
-        final result = computeHasHadPeer(
-          previous: false,
-          participants: const [_selfParticipant, _peerParticipant],
-          status: AudioVideoCallStatus.waitingForKeys,
-        );
-        expect(result, isTrue);
-      },
-    );
-
-    test('ignores a participant that appears before the call is live', () {
+    test('latches true when status reaches connected', () {
       final result = computeHasHadPeer(
         previous: false,
-        participants: const [_selfParticipant, _peerParticipant],
-        status: AudioVideoCallStatus.connecting,
+        status: AudioVideoCallStatus.connected,
       );
-      expect(result, isFalse);
+      expect(result, isTrue);
     });
 
-    test('ignores a participant list with no other participant', () {
+    test('latches true when status reaches active', () {
       final result = computeHasHadPeer(
         previous: false,
-        participants: const [_selfParticipant],
         status: AudioVideoCallStatus.active,
+      );
+      expect(result, isTrue);
+    });
+
+    test('returns false when status is pre-connect', () {
+      final result = computeHasHadPeer(
+        previous: false,
+        status: AudioVideoCallStatus.connecting,
       );
       expect(result, isFalse);
     });
@@ -75,8 +63,7 @@ void main() {
     test('never un-latches once true', () {
       final result = computeHasHadPeer(
         previous: true,
-        participants: const [_selfParticipant],
-        status: AudioVideoCallStatus.active,
+        status: AudioVideoCallStatus.connecting,
       );
       expect(result, isTrue);
     });

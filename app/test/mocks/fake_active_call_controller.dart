@@ -67,7 +67,7 @@ class FakeActiveCallController extends ActiveCallController {
   void restore() {}
 
   @override
-  void startTimer() {}
+  void startTimer([DateTime? callStartedAt]) {}
 
   @override
   void stopTimer() {}
