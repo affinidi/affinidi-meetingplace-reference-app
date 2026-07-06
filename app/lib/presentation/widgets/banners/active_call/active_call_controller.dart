@@ -200,10 +200,7 @@ class ActiveCallController extends _$ActiveCallController {
         isMinimized: isMinimized,
       );
     } else {
-      state = state!.copyWith(
-        callDurationSeconds: 0,
-        status: initialStatus,
-      );
+      state = state!.copyWith(callDurationSeconds: 0, status: initialStatus);
     }
 
     _chatItemHandler?.dispose();
