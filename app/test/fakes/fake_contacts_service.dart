@@ -22,6 +22,7 @@ class FakeContactsService extends ContactsService {
   List<Map<String, dynamic>> addContactCalls = [];
   List<Map<String, dynamic>> updateContactCalls = [];
   List<Map<String, dynamic>> resetBadgeCalls = [];
+  List<String> incrementMissedCallBadgeCalls = [];
 
   void setContacts(List<Contact> newContacts) {
     contacts = List<Contact>.from(newContacts);
@@ -31,7 +32,13 @@ class FakeContactsService extends ContactsService {
     addContactCalls.clear();
     updateContactCalls.clear();
     resetBadgeCalls.clear();
+    incrementMissedCallBadgeCalls.clear();
     resetBadgeCalledWith = null;
+  }
+
+  @override
+  Future<void> incrementMissedCallBadge(String channelDid) async {
+    incrementMissedCallBadgeCalls.add(channelDid);
   }
 
   @override

@@ -142,7 +142,8 @@ class ContactsService extends _$ContactsService {
           channel.seqNo - existingContact.currentMessageSeqNo;
       final updatedContact = existingContact.copyWith(
         status: ContactStatus.active,
-        badgeCount: max(0, calculatedBadgeCount),
+        badgeCount:
+            max(0, calculatedBadgeCount) + existingContact.missedCallCount,
         badgeUpdateInProgress: false,
       );
       await updateContact(updatedContact);
@@ -397,8 +398,38 @@ class ContactsService extends _$ContactsService {
 
     final amendedContact = contact.copyWith(
       badgeCount: 0,
+      missedCallCount: 0,
       hasBeenOpened: true,
       currentMessageSeqNo: channel?.seqNo ?? contact.currentMessageSeqNo,
+    );
+    await updateContact(amendedContact);
+  }
+
+  /// Increment the unread badge for a missed call.
+  ///
+  /// Missed calls are not reflected in the channel sequence number, so they are
+  /// tracked in [Contact.missedCallCount] to survive the seqNo-derived badge
+  /// recompute in [updateContactFromChannelActivity]. Both the durable
+  /// missed-call counter and the displayed [Contact.badgeCount] are bumped by
+  /// one. Cleared together by [resetContactBadgeCount] when the chat is opened.
+  ///
+  /// [channelDid] - The channel DID of the contact whose call was missed.
+  ///
+  /// Returns:
+  /// - `Future<void>` completes when the update and refresh finish.
+  Future<void> incrementMissedCallBadge(String channelDid) async {
+    final contact = state.getContactByChannelDid(channelDid);
+    if (contact == null) {
+      _logger.warning(
+        'incrementMissedCallBadge: no contact for $channelDid',
+        name: _logKey,
+      );
+      return;
+    }
+
+    final amendedContact = contact.copyWith(
+      missedCallCount: contact.missedCallCount + 1,
+      badgeCount: contact.badgeCount + 1,
     );
     await updateContact(amendedContact);
   }

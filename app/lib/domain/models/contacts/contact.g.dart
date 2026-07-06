@@ -35,6 +35,8 @@ abstract class _$ContactCWProxy {
 
   Contact currentMessageSeqNo(int currentMessageSeqNo);
 
+  Contact missedCallCount(int missedCallCount);
+
   Contact hasBeenOpened(bool hasBeenOpened);
 
   Contact lastKeepAliveMessage(DateTime? lastKeepAliveMessage);
@@ -63,6 +65,7 @@ abstract class _$ContactCWProxy {
     bool badgeUpdateInProgress,
     int badgeCount,
     int currentMessageSeqNo,
+    int missedCallCount,
     bool hasBeenOpened,
     DateTime? lastKeepAliveMessage,
     bool notificationBannerDismissed,
@@ -123,6 +126,10 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       call(currentMessageSeqNo: currentMessageSeqNo);
 
   @override
+  Contact missedCallCount(int missedCallCount) =>
+      call(missedCallCount: missedCallCount);
+
+  @override
   Contact hasBeenOpened(bool hasBeenOpened) =>
       call(hasBeenOpened: hasBeenOpened);
 
@@ -157,6 +164,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? badgeUpdateInProgress = const $CopyWithPlaceholder(),
     Object? badgeCount = const $CopyWithPlaceholder(),
     Object? currentMessageSeqNo = const $CopyWithPlaceholder(),
+    Object? missedCallCount = const $CopyWithPlaceholder(),
     Object? hasBeenOpened = const $CopyWithPlaceholder(),
     Object? lastKeepAliveMessage = const $CopyWithPlaceholder(),
     Object? notificationBannerDismissed = const $CopyWithPlaceholder(),
@@ -226,6 +234,12 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.currentMessageSeqNo
           // ignore: cast_nullable_to_non_nullable
           : currentMessageSeqNo as int,
+      missedCallCount:
+          missedCallCount == const $CopyWithPlaceholder() ||
+              missedCallCount == null
+          ? _value.missedCallCount
+          // ignore: cast_nullable_to_non_nullable
+          : missedCallCount as int,
       hasBeenOpened:
           hasBeenOpened == const $CopyWithPlaceholder() || hasBeenOpened == null
           ? _value.hasBeenOpened

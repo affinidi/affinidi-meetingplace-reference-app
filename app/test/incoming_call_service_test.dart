@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_state.dart';
@@ -16,6 +17,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/call_audio_ses
 
 import 'fakes/fake_audio_session.dart';
 import 'fakes/fake_chat_session_service.dart';
+import 'fakes/fake_contacts_service.dart';
 
 class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
   final _incoming = StreamController<IncomingAudioVideoCallEvent>.broadcast();
@@ -68,6 +70,7 @@ void main() {
     overrides: [
       meetingPlaceSdkProvider.overrideWith((ref) async => fakeSDK),
       chatSessionServiceProvider.overrideWith(FakeChatSessionService.new),
+      contactsServiceProvider.overrideWith(FakeContactsService.new),
       canUsePlatformAudioSessionProvider.overrideWith(
         (ref) => canUsePlatformAudioSession,
       ),
@@ -179,6 +182,12 @@ void main() {
         expect(container.read(incomingCallProvider).eventOrNull, isNull);
         expect(fakeSDK.declinedCallIds, ['call-1']);
         expect(fakeSDK.acceptedCallIds, isEmpty);
+        expect(
+          (container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService)
+              .incrementMissedCallBadgeCalls,
+          ['did:key:caller'],
+        );
       });
     });
 
@@ -199,6 +208,12 @@ void main() {
         await pumpEventQueue();
 
         expect(container.read(incomingCallProvider).eventOrNull, isNull);
+        expect(
+          (container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService)
+              .incrementMissedCallBadgeCalls,
+          ['did:key:caller'],
+        );
       });
     });
 
@@ -219,6 +234,13 @@ void main() {
 
           expect(container.read(incomingCallProvider).eventOrNull, isNull);
           expect(fakeSDK.declinedCallIds, ['call-1']);
+          async.flushMicrotasks();
+          expect(
+            (container.read(contactsServiceProvider.notifier)
+                    as FakeContactsService)
+                .incrementMissedCallBadgeCalls,
+            ['did:key:caller'],
+          );
 
           container.dispose();
         });
@@ -244,6 +266,12 @@ void main() {
 
           expect(fakeSDK.declinedCallIds, isEmpty);
           expect(fakeSDK.acceptedCallIds, ['call-1']);
+          expect(
+            (container.read(contactsServiceProvider.notifier)
+                    as FakeContactsService)
+                .incrementMissedCallBadgeCalls,
+            isEmpty,
+          );
 
           container.dispose();
         });
