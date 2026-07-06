@@ -12,7 +12,9 @@ import '../room/flutter_livekit_room.dart';
 ///
 /// Returns [SizedBox.shrink] when [hasVideo] is false, the session is not
 /// LiveKit-backed, or the room has no renderable track for [participantId].
-/// Pass [mirror] = true for the local camera preview.
+/// Pass [mirror] = true for the local camera preview: the view is then
+/// mirrored only while the front camera is active, and shown un-mirrored on
+/// the back camera. Remote participants are never mirrored.
 ///
 /// Example:
 /// ```dart
@@ -60,7 +62,7 @@ class AudioVideoCallView extends StatelessWidget {
     return VideoTrackRenderer(
       track,
       fit: VideoViewFit.cover,
-      mirrorMode: mirror ? VideoViewMirrorMode.mirror : VideoViewMirrorMode.off,
+      mirrorMode: mirror ? VideoViewMirrorMode.auto : VideoViewMirrorMode.off,
     );
   }
 }
