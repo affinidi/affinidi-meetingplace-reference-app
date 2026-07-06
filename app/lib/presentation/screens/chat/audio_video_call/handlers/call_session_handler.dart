@@ -29,6 +29,7 @@ class CallSessionHandler {
 
   bool _hasHadPeer = false;
   bool _cameraHasBeenEnabled = false;
+  bool _micHasBeenEnabled = false;
 
   /// Subscribes to [session] state and participant events.
   /// Cancels any existing subscriptions first.
@@ -68,12 +69,19 @@ class CallSessionHandler {
     if (selfHasVideo == true) _cameraHasBeenEnabled = true;
     final isCameraEnabled = _cameraHasBeenEnabled ? selfHasVideo : null;
 
+    // The local audio track publishes shortly after joining, so `hasAudio` is
+    // transiently false right after connect. Latch on first-enabled and report
+    // null until then, keeping the unmuted default instead of flashing muted.
+    final selfHasAudio = self?.hasAudio;
+    if (selfHasAudio == true) _micHasBeenEnabled = true;
+    final isMicEnabled = _micHasBeenEnabled ? selfHasAudio : null;
+
     onUpdate(
       AudioVideoCallStateUpdate(
         status: next.status,
         participants: next.participants,
         errorCode: next.errorCode,
-        isMicEnabled: self?.hasAudio,
+        isMicEnabled: isMicEnabled,
         isCameraEnabled: isCameraEnabled,
         ownRole: next.ownRole,
         hasHadPeer: _hasHadPeer,
