@@ -5,6 +5,7 @@ import '../../../../application/services/incoming_call_service/incoming_call_ser
 import '../../../../application/services/incoming_call_service/incoming_call_state.dart'
     show IncomingCallRinging;
 import '../../../../infrastructure/providers/app_logger_provider.dart';
+import '../end_call/end_call_banner_controller.dart';
 
 part 'incoming_call_banner_controller.g.dart';
 
@@ -17,7 +18,10 @@ class IncomingCallBannerController extends _$IncomingCallBannerController {
   bool build() {
     ref.read(incomingCallServiceProvider);
     ref.listen(incomingCallProvider, (previous, next) {
-      if (next is IncomingCallRinging && next != previous) state = false;
+      if (next is IncomingCallRinging && next != previous) {
+        ref.read(endCallBannerControllerProvider.notifier).dismiss();
+        state = false;
+      }
     });
     return false;
   }

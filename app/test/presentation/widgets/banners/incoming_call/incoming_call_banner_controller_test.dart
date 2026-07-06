@@ -4,6 +4,8 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/end_call_banner_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/incoming_call/incoming_call_banner_controller.dart';
 
 import '../../../../mocks/fake_app_logger.dart';
@@ -32,8 +34,8 @@ void main() {
     });
   });
 
-  group('accept', () {
-    test('sets state to true', () {
+  group('when accept is called', () {
+    test('it sets state to true', () {
       final container = _makeContainer();
       container
           .read(incomingCallBannerControllerProvider.notifier)
@@ -41,7 +43,7 @@ void main() {
       expect(container.read(incomingCallBannerControllerProvider), true);
     });
 
-    test('forwards accept to IncomingCallService', () {
+    test('it forwards accept to IncomingCallService', () {
       final service = FakeIncomingCallService();
       final container = _makeContainer(service: service);
       container
@@ -51,8 +53,8 @@ void main() {
     });
   });
 
-  group('dismiss', () {
-    test('sets state to true', () {
+  group('when dismiss is called', () {
+    test('it sets state to true', () {
       final container = _makeContainer();
       container
           .read(incomingCallBannerControllerProvider.notifier)
@@ -60,7 +62,7 @@ void main() {
       expect(container.read(incomingCallBannerControllerProvider), true);
     });
 
-    test('forwards decline to IncomingCallService', () {
+    test('it forwards decline to IncomingCallService', () {
       final service = FakeIncomingCallService();
       final container = _makeContainer(service: service);
       container
@@ -70,8 +72,8 @@ void main() {
     });
   });
 
-  group('reset', () {
-    test('sets state back to false after dismiss', () {
+  group('when reset is called', () {
+    test('it sets state back to false after dismiss', () {
       final container = _makeContainer();
       final ctrl = container.read(
         incomingCallBannerControllerProvider.notifier,
@@ -83,8 +85,8 @@ void main() {
     });
   });
 
-  group('new incoming call event', () {
-    test('resets dismissed state so the banner shows again', () {
+  group('when a new incoming call event occurs', () {
+    test('it resets dismissed state so the banner shows again', () {
       final container = _makeContainer();
       container
           .read(incomingCallBannerControllerProvider.notifier)
@@ -105,7 +107,37 @@ void main() {
     });
 
     test(
-      'resets dismissed state for an audio call so the banner shows again',
+      'it dismisses the end-call banner so the retry can take the top slot',
+      () {
+        final container = _makeContainer();
+
+        container
+            .read(endCallBannerControllerProvider.notifier)
+            .show(
+              contactId: 'contact-123',
+              peerName: 'Alice',
+              endState: CallEndState.declinedCall,
+              isAudioOnly: false,
+            );
+        expect(container.read(endCallBannerControllerProvider), isNotNull);
+
+        container
+            .read(incomingCallProvider.notifier)
+            .set(
+              const IncomingAudioVideoCallEvent(
+                callId: 'call-999',
+                otherPartyChannelDid: 'did:example:other',
+                mediaType: CallMediaType.video,
+              ),
+            );
+
+        expect(container.read(endCallBannerControllerProvider), isNull);
+        expect(container.read(incomingCallBannerControllerProvider), false);
+      },
+    );
+
+    test(
+      'it resets dismissed state for an audio call so the banner shows again',
       () {
         final container = _makeContainer();
         container
