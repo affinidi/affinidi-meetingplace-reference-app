@@ -528,8 +528,16 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
     if (update.peerJustJoined) {
       _clearIncomingCallState();
-      ref.read(activeCallControllerProvider.notifier).startTimer();
+      ref
+          .read(activeCallControllerProvider.notifier)
+          .startTimer(update.callStartedAt);
       _chatItemHandler.updateCallChatItemStatus(CallStatus.inProgress);
+    }
+
+    if (update.callStartedAt != null) {
+      ref
+          .read(activeCallControllerProvider.notifier)
+          .startTimer(update.callStartedAt);
     }
 
     if (!_chatItemHandler.callChatItemEnded &&
