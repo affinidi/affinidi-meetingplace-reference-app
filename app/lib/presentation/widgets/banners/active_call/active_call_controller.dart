@@ -199,6 +199,11 @@ class ActiveCallController extends _$ActiveCallController {
         isAudioOnly: isAudioOnly,
         isMinimized: isMinimized,
       );
+    } else {
+      state = state!.copyWith(
+        callDurationSeconds: 0,
+        status: initialStatus,
+      );
     }
 
     _chatItemHandler?.dispose();

@@ -144,7 +144,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       if (_isDisposed) return;
       state = state.copyWith(peerIsCallingBack: true);
       ref.read(callEndedControllerProvider.notifier).dismiss();
-      unawaited(hangUp());
     });
 
     ref.listen(meetingPlaceSdkProvider, (prev, next) {
