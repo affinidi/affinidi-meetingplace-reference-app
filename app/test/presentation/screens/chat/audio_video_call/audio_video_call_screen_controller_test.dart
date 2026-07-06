@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
@@ -428,6 +430,276 @@ void main() {
       expect(chatSvc.updateCalls, isNotEmpty);
       expect(chatSvc.updateCalls.first.messageId, 'svc-msg');
     });
+  });
+
+  group('_applySessionUpdate — ended status lock', () {
+    test(
+      'ended status from session is not overwritten by a later non-ended emit',
+      () async {
+        final session = MockAudioVideoCallSession();
+        final container = _makeContainer(pendingSession: session);
+        container.listen(
+          audioVideoCallScreenControllerProvider(_kContactId),
+          (_, _) {},
+        );
+
+        await session.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.ended,
+            ownRole: CallRole.caller,
+          ),
+        );
+        await _pumpAsync();
+
+        await session.emitState(
+          const AudioVideoCallState(status: AudioVideoCallStatus.connecting),
+        );
+        await _pumpAsync();
+
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(_kContactId))
+              .status,
+          AudioVideoCallStatus.ended,
+        );
+      },
+    );
+  });
+
+  group('cancelCall — caller hangs up before peer answers', () {
+    test('sets ended status when caller cancels with no peer', () async {
+      final session = MockAudioVideoCallSession();
+      final chatSvc = FakeChatSessionService();
+      final container = _makeContainer(
+        chatService: chatSvc,
+        pendingSession: session,
+      );
+      final ctrl = container.read(
+        audioVideoCallScreenControllerProvider(_kContactId).notifier,
+      );
+      container.listen(
+        audioVideoCallScreenControllerProvider(_kContactId),
+        (_, _) {},
+      );
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.outgoingRinging,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await _pumpAsync();
+
+      await ctrl.cancelCall();
+      await _pumpAsync();
+
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(_kContactId))
+            .status,
+        AudioVideoCallStatus.ended,
+      );
+    });
+
+    test(
+      'writes declined chat outcome when no peer was ever connected',
+      () async {
+        final session = MockAudioVideoCallSession();
+        final chatSvc = FakeChatSessionService();
+        final banner = FakeActiveCallController(
+          fixedCallChatItemId: _kMsgId,
+          bannerState: const ActiveCallState(
+            contactId: _kContactId,
+            peerName: 'Peer',
+            status: AudioVideoCallStatus.outgoingRinging,
+            callDurationSeconds: 0,
+            isMicEnabled: true,
+            isAudioOnly: false,
+          ),
+          fixedSession: session,
+        );
+        final container = ProviderContainer(
+          overrides: [
+            appLoggerProvider.overrideWithValue(FakeAppLogger()),
+            contactsServiceProvider.overrideWith(FakeContactsService.new),
+            activeCallControllerProvider.overrideWith(() => banner),
+            chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
+            meetingPlaceSdkProvider.overrideWith(
+              (ref) async => FakeMeetingPlaceMatrixSDK(),
+            ),
+            permissionServiceProvider.overrideWith(
+              (ref) => _FakePermissionService(),
+            ),
+            incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
+          ],
+        );
+        addTearDown(container.dispose);
+        final ctrl = container.read(
+          audioVideoCallScreenControllerProvider(_kContactId).notifier,
+        );
+        container.listen(
+          audioVideoCallScreenControllerProvider(_kContactId),
+          (_, _) {},
+        );
+
+        await session.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.outgoingRinging,
+            ownRole: CallRole.caller,
+          ),
+        );
+        await _pumpAsync();
+
+        await ctrl.cancelCall();
+        await _pumpAsync();
+
+        expect(chatSvc.updateCalls, isNotEmpty);
+        expect(chatSvc.updateCalls.last.status, CallStatus.declined);
+      },
+    );
+  });
+
+  group('onPeerDeclined — peer declines ringing call', () {
+    test(
+      'transitions status to declined so the decline screen renders',
+      () async {
+        final session = MockAudioVideoCallSession();
+        final container = _makeContainer(pendingSession: session);
+        final ctrl = container.read(
+          audioVideoCallScreenControllerProvider(_kContactId).notifier,
+        );
+        container.listen(
+          audioVideoCallScreenControllerProvider(_kContactId),
+          (_, _) {},
+        );
+
+        await session.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.outgoingRinging,
+            ownRole: CallRole.caller,
+          ),
+        );
+        await _pumpAsync();
+
+        await ctrl.onPeerDeclined();
+        await _pumpAsync();
+
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(_kContactId))
+              .status,
+          AudioVideoCallStatus.declined,
+        );
+      },
+    );
+
+    test('declined status survives a later terminal teardown status', () async {
+      final session = MockAudioVideoCallSession();
+      final container = _makeContainer(pendingSession: session);
+      final ctrl = container.read(
+        audioVideoCallScreenControllerProvider(_kContactId).notifier,
+      );
+      container.listen(
+        audioVideoCallScreenControllerProvider(_kContactId),
+        (_, _) {},
+      );
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.outgoingRinging,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await _pumpAsync();
+
+      await ctrl.onPeerDeclined();
+      await _pumpAsync();
+
+      await session.emitState(
+        const AudioVideoCallState(status: AudioVideoCallStatus.ended),
+      );
+      await _pumpAsync();
+
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(_kContactId))
+            .status,
+        AudioVideoCallStatus.declined,
+      );
+    });
+
+    test(
+      'declined status survives a later non-ended session status (no Calling flash)',
+      () async {
+        final session = MockAudioVideoCallSession();
+        final container = _makeContainer(pendingSession: session);
+        final ctrl = container.read(
+          audioVideoCallScreenControllerProvider(_kContactId).notifier,
+        );
+        container.listen(
+          audioVideoCallScreenControllerProvider(_kContactId),
+          (_, _) {},
+        );
+
+        await session.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.outgoingRinging,
+            ownRole: CallRole.caller,
+          ),
+        );
+        await _pumpAsync();
+
+        await ctrl.onPeerDeclined();
+        await _pumpAsync();
+
+        await session.emitState(
+          const AudioVideoCallState(status: AudioVideoCallStatus.connecting),
+        );
+        await _pumpAsync();
+
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(_kContactId))
+              .status,
+          AudioVideoCallStatus.declined,
+        );
+      },
+    );
+
+    test(
+      'stale declined lifecycle update does not flash after Call Again',
+      () async {
+        final session = MockAudioVideoCallSession();
+        final container = _makeContainer(pendingSession: session);
+        final ctrl = container.read(
+          audioVideoCallScreenControllerProvider(_kContactId).notifier,
+        );
+        container.listen(
+          audioVideoCallScreenControllerProvider(_kContactId),
+          (_, _) {},
+        );
+
+        await session.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.outgoingRinging,
+            ownRole: CallRole.caller,
+          ),
+        );
+        await _pumpAsync();
+
+        unawaited(ctrl.onPeerDeclined());
+
+        await ctrl.restartCall(isAudioOnly: true);
+        await _pumpAsync();
+
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(_kContactId))
+              .status,
+          isNot(AudioVideoCallStatus.declined),
+        );
+      },
+    );
   });
 }
 

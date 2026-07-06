@@ -160,11 +160,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
         if (_isDisposed) return;
 
         if (signal is CallDeclineSignal && _isCaller) {
-          _logger.info(
-            'Call declined by peer, navigating to chat',
-            name: _logKey,
-          );
-          unawaited(hangUp());
+          _logger.info('Call declined by peer, ending call', name: _logKey);
+          unawaited(onPeerDeclined());
         }
       });
 
@@ -359,6 +356,14 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     return _lifecycleHandler.hangUp();
   }
 
+  /// Ends an outgoing call the peer declined, transitioning to the declined
+  /// end-state so the UI shows the decline screen instead of a blank screen.
+  Future<void> onPeerDeclined() {
+    _logger.info('onPeerDeclined', name: _logKey);
+    state = state.copyWith(status: AudioVideoCallStatus.declined);
+    return _lifecycleHandler.onPeerDeclined();
+  }
+
   /// Ends the active call and transitions to ended state.
   Future<void> leaveCall() {
     _logger.info('leaveCall', name: _logKey);
@@ -506,8 +511,12 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     final nextParticipants = update.participants ?? state.participants;
     final anyHasVideo = nextParticipants.any((p) => p.hasVideo);
 
+    final nextStatus = isEndedCallStatus(state.status)
+        ? state.status
+        : update.status ?? state.status;
+
     state = state.copyWith(
-      status: update.status ?? state.status,
+      status: nextStatus,
       participants: nextParticipants,
       errorCode: update.errorCode,
       isMicEnabled: update.isMicEnabled ?? state.isMicEnabled,
@@ -590,8 +599,15 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       _clearIncomingCallState();
     }
     if (update.status != null || update.isSpeakerEnabled != null) {
+      final staleEndedUpdate =
+          update.status != null &&
+          isEndedCallStatus(update.status!) &&
+          state.status == AudioVideoCallStatus.idle;
+      final newStatus = (isEndedCallStatus(state.status) || staleEndedUpdate)
+          ? state.status
+          : update.status ?? state.status;
       state = state.copyWith(
-        status: update.status ?? state.status,
+        status: newStatus,
         isSpeakerEnabled: update.isSpeakerEnabled ?? state.isSpeakerEnabled,
       );
     }
