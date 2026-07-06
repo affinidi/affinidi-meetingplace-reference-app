@@ -22,7 +22,7 @@ import 'meeting_place_sdk_provider.dart';
 /// - Automatically disposes when no longer needed
 /// - Throws and logs errors if initialization fails
 final chatSdkProvider = FutureProvider.autoDispose
-    .family<MeetingPlaceMatrixChatSDK, Channel>((ref, channel) async {
+    .family<MeetingPlaceChatSDK, Channel>((ref, channel) async {
       const logKey = 'chatSdkProvider';
       final logger = ref.read(appLoggerProvider);
       final environment = ref.read(environmentProvider);
