@@ -126,26 +126,15 @@ class CallLifecycleHandler {
   /// Tears down an outgoing call that the peer explicitly declined and
   /// transitions to the declined end-state so the UI shows the decline screen.
   Future<void> onPeerDeclined() async {
-    try {
-      await _getSDK()?.leaveCurrentCall();
-      _setSession(null);
-    } catch (e, stackTrace) {
-      _logger.error(
-        'Failed to end declined call cleanly',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-    } finally {
-      await _audioSessionService.release();
-      _onUpdate(
-        const CallLifecycleUpdate(
-          status: AudioVideoCallStatus.declined,
-          clearIncomingCall: true,
-          endOutcome: CallEndOutcome.declined,
-        ),
-      );
-    }
+    _setSession(null);
+    await _audioSessionService.release();
+    _onUpdate(
+      const CallLifecycleUpdate(
+        status: AudioVideoCallStatus.declined,
+        clearIncomingCall: true,
+        endOutcome: CallEndOutcome.declined,
+      ),
+    );
   }
 
   /// Returns `true` if the call can start; blocks if already in progress or

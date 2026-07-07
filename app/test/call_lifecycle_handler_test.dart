@@ -9,6 +9,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/call_audio_ses
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/call_lifecycle_update.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_lifecycle_handler.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_chat_item_rules.dart';
 
 import 'fakes/fake_audio_session.dart';
 
@@ -170,6 +171,30 @@ void main() {
       );
       expect(currentSession, isNull);
       expect(updates.single.status, AudioVideoCallStatus.ended);
+      expect(updates.single.clearIncomingCall, isTrue);
+    });
+  });
+
+  group('onPeerDeclined', () {
+    test('does not call SDK leaveCurrentCall to prevent signal loop', () async {
+      currentSession = _FakeCallSession();
+      final handler = buildHandler();
+      await container
+          .read(callAudioSessionServiceProvider.notifier)
+          .acquire(isAudioOnly: false);
+
+      await handler.onPeerDeclined();
+
+      expect(sdk.leaveCurrentCallCount, 0);
+      expect(audioSession.setActiveCalls, 2);
+      expect(audioSession.lastSetActiveValue, isFalse);
+      expect(
+        container.read(callAudioSessionServiceProvider).isAcquired,
+        isFalse,
+      );
+      expect(currentSession, isNull);
+      expect(updates.single.status, AudioVideoCallStatus.declined);
+      expect(updates.single.endOutcome, CallEndOutcome.declined);
       expect(updates.single.clearIncomingCall, isTrue);
     });
   });

@@ -293,18 +293,18 @@ packages:
     dependency: transitive
     description:
       name: camera_android_camerax
-      sha256: "50c3fd81228826635af4875330febb193c74a2e12a4d19c1b95e2a67f0017bb3"
+      sha256: fc25a7a82b5a5065cbeb561b1c95002b01d445a65b30fad4be69de5dfd0bcb8c
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.3"
+    version: "0.7.4"
   camera_avfoundation:
     dependency: transitive
     description:
       name: camera_avfoundation
-      sha256: "90e4cc3fde331581a3b2d35d83be41dbb7393af0ab857eb27b732174289cb96d"
+      sha256: "866e9cd8370f8055d005c0413937a52dc1d7a472687f0ee3ce02392955aababa"
       url: "https://pub.dev"
     source: hosted
-    version: "0.10.1"
+    version: "0.10.2"
   camera_platform_interface:
     dependency: transitive
     description:
@@ -1393,8 +1393,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_chat"
-      ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
-      resolved-ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
+      ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
+      resolved-ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.50"
@@ -1402,8 +1402,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_control_plane"
-      ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
-      resolved-ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
+      ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
+      resolved-ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.20"
@@ -1411,8 +1411,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_core"
-      ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
-      resolved-ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
+      ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
+      resolved-ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.43"
@@ -1428,8 +1428,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_drift_repository"
-      ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
-      resolved-ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
+      ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
+      resolved-ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.50"
@@ -1437,8 +1437,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_matrix"
-      ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
-      resolved-ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
+      ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
+      resolved-ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.0"
@@ -1446,8 +1446,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_mediator"
-      ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
-      resolved-ref: e9dd93f97c9c141d24d5c13dee39964d50e0fd77
+      ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
+      resolved-ref: e0c9555e2c474304a45b1de67fcda6dfedc0a780
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.15"
@@ -2468,10 +2468,10 @@ packages:
     dependency: transitive
     description:
       name: video_player_platform_interface
-      sha256: e4ae5bc934b528e5b95c5e47be2812860186260cd3eed3ac62f5ed380fdd1613
+      sha256: "92c0fbabe20c788e71fd10d26cea998d0d253282e65d145aed0818731cf593ce"
       url: "https://pub.dev"
     source: hosted
-    version: "6.8.0"
+    version: "6.9.0"
   video_player_web:
     dependency: transitive
     description:
