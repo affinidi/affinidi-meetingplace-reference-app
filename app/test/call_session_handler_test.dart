@@ -210,7 +210,7 @@ void main() {
   });
 
   group('media state from self participant', () {
-    test('isMicEnabled mirrors self hasAudio', () async {
+    test('isMicEnabled is null until mic has been enabled once', () async {
       handler.attach(session);
 
       session.emit(
@@ -227,8 +227,43 @@ void main() {
       );
       await pumpEventQueue();
 
-      expect(updates.single.isMicEnabled, isFalse);
+      expect(updates.single.isMicEnabled, isNull);
     });
+
+    test(
+      'isMicEnabled is reported after mic has been on at least once',
+      () async {
+        handler.attach(session);
+
+        session.emit(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [
+              AudioVideoCallParticipant(
+                participantId: 'local',
+                isSelf: true,
+                hasAudio: true,
+              ),
+            ],
+          ),
+        );
+        session.emit(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [
+              AudioVideoCallParticipant(
+                participantId: 'local',
+                isSelf: true,
+                hasAudio: false,
+              ),
+            ],
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(updates.last.isMicEnabled, isFalse);
+      },
+    );
 
     test(
       'isCameraEnabled is null until camera has been enabled once',
