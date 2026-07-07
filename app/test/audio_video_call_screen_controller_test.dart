@@ -410,6 +410,39 @@ void main() {
         reason: 'banner must have state after first remote joins',
       );
     });
+
+    test('anchors the banner timer to callStartedAt when provided', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final contactId = FakeContacts.individualContact.id;
+      final container = _buildContainer(fakeSDK: fakeSDK);
+      addTearDown(container.dispose);
+
+      await container.read(meetingPlaceSdkProvider.future);
+      await container
+          .read(audioVideoCallScreenControllerProvider(contactId).notifier)
+          .joinCall();
+
+      final startedAt = DateTime.now().subtract(const Duration(seconds: 30));
+      fakeSDK.emitState(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          callStartedAt: startedAt,
+          participants: const [
+            AudioVideoCallParticipant(participantId: 'local', isSelf: true),
+            AudioVideoCallParticipant(participantId: 'remote-1'),
+          ],
+        ),
+      );
+      await Future<void>.microtask(() {});
+
+      expect(
+        container.read(activeCallControllerProvider)?.callDurationSeconds,
+        greaterThanOrEqualTo(29),
+        reason:
+            'on-screen duration must anchor to callStartedAt so both parties '
+            'show the same elapsed time, not count up from zero',
+      );
+    });
   });
 
   group('startCall', () {
