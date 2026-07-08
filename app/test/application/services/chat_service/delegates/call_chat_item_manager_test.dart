@@ -11,7 +11,7 @@ import '../../../../fakes/fake_chat_sdk.dart';
 import '../../../../mocks/mock_app_logger.dart';
 
 void main() {
-  group('CallChatItemManager.findStaleIncomingCallItemIds', () {
+  group('CallChatItemManager incoming call resolution', () {
     const channelDid = 'did:peer:other-party';
 
     late FakeChatSdk fakeChatSdk;
@@ -47,87 +47,6 @@ void main() {
         getChatSdk: () => fakeChatSdk,
         logger: FakeAppLogger(),
       );
-    });
-
-    test('returns incoming calling and ringing items', () async {
-      fakeChatSdk.sessionMessages = [
-        callMessage(
-          messageId: 'incoming-calling',
-          isFromMe: false,
-          status: CallStatus.calling,
-        ),
-        callMessage(
-          messageId: 'incoming-ringing',
-          isFromMe: false,
-          status: CallStatus.ringing,
-        ),
-      ];
-
-      final ids = await manager.findStaleIncomingCallItemIds(
-        liveIncomingCall: false,
-      );
-
-      expect(ids, containsAll(['incoming-calling', 'incoming-ringing']));
-    });
-
-    test('excludes final and outgoing call items', () async {
-      fakeChatSdk.sessionMessages = [
-        callMessage(
-          messageId: 'incoming-ended',
-          isFromMe: false,
-          status: CallStatus.ended,
-        ),
-        callMessage(
-          messageId: 'incoming-missed',
-          isFromMe: false,
-          status: CallStatus.missed,
-        ),
-        callMessage(
-          messageId: 'outgoing-calling',
-          isFromMe: true,
-          status: CallStatus.calling,
-        ),
-      ];
-
-      final ids = await manager.findStaleIncomingCallItemIds(
-        liveIncomingCall: false,
-      );
-
-      expect(ids, isEmpty);
-    });
-
-    test('preserves the most recent stale item when a call is ringing '
-        'live', () async {
-      fakeChatSdk.sessionMessages = [
-        callMessage(
-          messageId: 'older-incoming',
-          isFromMe: false,
-          status: CallStatus.calling,
-          dateCreated: DateTime(2026, 6, 29, 10),
-        ),
-        callMessage(
-          messageId: 'newest-incoming',
-          isFromMe: false,
-          status: CallStatus.calling,
-          dateCreated: DateTime(2026, 6, 29, 11),
-        ),
-      ];
-
-      final ids = await manager.findStaleIncomingCallItemIds(
-        liveIncomingCall: true,
-      );
-
-      expect(ids, ['older-incoming']);
-    });
-
-    test('returns an empty list when there are no call items', () async {
-      fakeChatSdk.sessionMessages = [];
-
-      final ids = await manager.findStaleIncomingCallItemIds(
-        liveIncomingCall: false,
-      );
-
-      expect(ids, isEmpty);
     });
 
     test('it waits for a late incoming item to resolve the messageId', () {
@@ -192,118 +111,90 @@ void main() {
       },
     );
 
-    test('excludes items younger than olderThan duration', () async {
-      final recentDate = DateTime.now().toUtc().subtract(
-        const Duration(seconds: 5),
+    test('isStaleIncomingCall is true for incoming calling/ringing items', () {
+      expect(
+        manager.isStaleIncomingCall(
+          callMessage(
+            messageId: 'a',
+            isFromMe: false,
+            status: CallStatus.calling,
+          ),
+        ),
+        isTrue,
       );
-      final oldDate = DateTime.now().toUtc().subtract(
-        const Duration(seconds: 30),
+      expect(
+        manager.isStaleIncomingCall(
+          callMessage(
+            messageId: 'b',
+            isFromMe: false,
+            status: CallStatus.ringing,
+          ),
+        ),
+        isTrue,
       );
+    });
+
+    test('isStaleIncomingCall is false for outgoing or final items', () {
+      expect(
+        manager.isStaleIncomingCall(
+          callMessage(
+            messageId: 'a',
+            isFromMe: true,
+            status: CallStatus.calling,
+          ),
+        ),
+        isFalse,
+      );
+      expect(
+        manager.isStaleIncomingCall(
+          callMessage(
+            messageId: 'b',
+            isFromMe: false,
+            status: CallStatus.missed,
+          ),
+        ),
+        isFalse,
+      );
+    });
+
+    test('resolveStaleIncomingCallItemIdBefore returns the latest stale item '
+        'at or before the cutoff', () async {
+      final cutoff = DateTime(2026, 6, 29, 11);
       fakeChatSdk.sessionMessages = [
         callMessage(
-          messageId: 'recent-stale',
+          messageId: 'older-incoming',
           isFromMe: false,
           status: CallStatus.calling,
-          dateCreated: recentDate,
+          dateCreated: DateTime(2026, 6, 29, 10),
         ),
         callMessage(
-          messageId: 'old-stale',
+          messageId: 'at-cutoff-incoming',
           isFromMe: false,
-          status: CallStatus.calling,
-          dateCreated: oldDate,
+          status: CallStatus.ringing,
+          dateCreated: cutoff,
         ),
       ];
 
-      final ids = await manager.findStaleIncomingCallItemIds(
-        liveIncomingCall: false,
-        olderThan: const Duration(seconds: 15),
-      );
+      final id = await manager.resolveStaleIncomingCallItemIdBefore(cutoff);
 
-      expect(ids, ['old-stale']);
-    });
-  });
-
-  group('CallChatItemManager.isStaleIncomingCall', () {
-    const channelDid = 'did:peer:other-party';
-
-    late CallChatItemManager manager;
-
-    Message callMessage({required bool isFromMe, required CallStatus status}) =>
-        Message(
-          chatId: 'fake-chat-id',
-          messageId: 'msg-id',
-          value: '',
-          dateCreated: DateTime.now(),
-          status: ChatItemStatus.confirmed,
-          isFromMe: isFromMe,
-          senderDid: isFromMe ? 'me' : channelDid,
-          attachments: [
-            CallMetadata.buildAttachment(
-              id: const Uuid().v4(),
-              mediaType: CallMediaType.video,
-              status: status,
-              callId: '',
-            ),
-          ],
-        );
-
-    setUp(() {
-      manager = CallChatItemManager(
-        ensureInitialized: () async {},
-        getChatSdk: FakeChatSdk.new,
-        logger: FakeAppLogger(),
-      );
+      expect(id, 'at-cutoff-incoming');
     });
 
-    test('is true for incoming calling and ringing items', () {
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(isFromMe: false, status: CallStatus.calling),
+    test('resolveStaleIncomingCallItemIdBefore ignores items created after '
+        'the cutoff so a newer ringing call is not marked missed', () async {
+      final cutoff = DateTime(2026, 6, 29, 11);
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'newer-ringing',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          dateCreated: DateTime(2026, 6, 29, 12),
         ),
-        isTrue,
-      );
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(isFromMe: false, status: CallStatus.ringing),
-        ),
-        isTrue,
-      );
-    });
+      ];
 
-    test('is false for outgoing or final call items', () {
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(isFromMe: true, status: CallStatus.calling),
-        ),
-        isFalse,
-      );
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(isFromMe: false, status: CallStatus.missed),
-        ),
-        isFalse,
-      );
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(isFromMe: false, status: CallStatus.ended),
-        ),
-        isFalse,
-      );
-    });
+      final id = await manager.resolveStaleIncomingCallItemIdBefore(cutoff);
 
-    test('is false for a non-call message', () {
-      final textMessage = Message(
-        chatId: 'fake-chat-id',
-        messageId: 'text-id',
-        value: 'hello',
-        dateCreated: DateTime.now(),
-        status: ChatItemStatus.confirmed,
-        isFromMe: false,
-        senderDid: channelDid,
-        attachments: const [],
-      );
-
-      expect(manager.isStaleIncomingCall(textMessage), isFalse);
+      expect(id, isNull);
     });
   });
 }

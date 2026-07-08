@@ -150,8 +150,7 @@ class CallChatItemManager {
   }
 
   /// Whether [message] is an incoming call item still in a non-final status
-  /// (`calling`/`ringing`) and therefore eligible to be reconciled to
-  /// `missed`.
+  /// (`calling`/`ringing`), eligible to be reconciled to `missed`.
   bool isStaleIncomingCall(Message message) {
     if (message.isFromMe) return false;
     final attachment = message.attachments.firstWhereOrNull(
@@ -164,85 +163,39 @@ class CallChatItemManager {
             call.status == CallStatus.ringing);
   }
 
-  /// Marks the call item with [messageId] as `missed` and returns the
-  /// persisted [Message] after the update, or `null` if the item is no
-  /// longer found.
-  Future<Message?> markItemMissed(String messageId) async {
-    await updateCallChatItem(messageId, status: CallStatus.missed);
-    final chatSdk = getChatSdk();
-    if (chatSdk == null) return null;
-    final updated = await chatSdk.getMessageById(messageId);
-    return updated is Message ? updated : null;
-  }
-
-  /// Returns message IDs of incoming call items stuck in non-final status
-  /// (`calling`/`ringing`) that should be reconciled to `missed`.
-  /// If [liveIncomingCall] is true, excludes the most recent item to avoid
-  /// marking an actively ringing call as missed.
-  /// If [olderThan] is provided, only items whose [Message.dateCreated] is
-  /// older than that duration are included — items within the window may still
-  /// be genuinely ringing (e.g. after an app restart).
-  Future<List<String>> findStaleIncomingCallItemIds({
-    required bool liveIncomingCall,
-    Duration? olderThan,
-  }) async {
-    final messages = await findStaleIncomingCallMessages(
-      liveIncomingCall: liveIncomingCall,
-      olderThan: olderThan,
-    );
-    return messages.map((m) => m.messageId).toList();
-  }
-
-  /// Returns incoming call items stuck in non-final status
-  /// (`calling`/`ringing`). If [liveIncomingCall] is true, excludes the most
-  /// recent item. If [olderThan] is provided, only items older than that
-  /// duration are included.
-  Future<List<Message>> findStaleIncomingCallMessages({
-    required bool liveIncomingCall,
-    Duration? olderThan,
-  }) async {
+  /// Returns the id of the latest stale incoming call item created at or before
+  /// [notAfter], or `null` if none. Single-pass (no retry): used by the
+  /// session-start replay once chat history is already loaded. The [notAfter]
+  /// guard prevents a newer, genuinely ringing call from being marked missed by
+  /// a stale pending-miss marker.
+  Future<String?> resolveStaleIncomingCallItemIdBefore(
+    DateTime notAfter,
+  ) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
     if (chatSdk == null) {
       logger.warning(
-        'findStaleIncomingCallMessages: chat SDK unavailable',
+        'resolveStaleIncomingCallItemIdBefore: Chat SDK unavailable',
         name: _logKey,
       );
-      return const [];
+      return null;
     }
     try {
       final items = await chatSdk.messages;
-      final now = DateTime.now().toUtc();
-      final stale =
-          items
-              .whereType<Message>()
-              .where(isStaleIncomingCall)
-              .where(
-                (m) =>
-                    olderThan == null ||
-                    now.difference(m.dateCreated.toUtc()) > olderThan,
-              )
-              .toList()
-            ..sort((a, b) => a.dateCreated.compareTo(b.dateCreated));
-
-      if (stale.isEmpty) return const [];
-
-      final reconcilable = liveIncomingCall
-          ? stale.sublist(0, stale.length - 1)
-          : stale;
-      logger.info(
-        'findStaleIncomingCallMessages: ${reconcilable.length} stale item(s)',
-        name: _logKey,
+      final match = items.whereType<Message>().lastWhereOrNull(
+        (m) =>
+            isStaleIncomingCall(m) &&
+            !m.dateCreated.toUtc().isAfter(notAfter.toUtc()),
       );
-      return reconcilable;
+      return match?.messageId;
     } catch (e, stackTrace) {
       logger.error(
-        'findStaleIncomingCallMessages failed',
+        'resolveStaleIncomingCallItemIdBefore failed',
         error: e,
         stackTrace: stackTrace,
         name: _logKey,
       );
-      return const [];
+      return null;
     }
   }
 
