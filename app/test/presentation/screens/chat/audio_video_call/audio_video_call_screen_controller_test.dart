@@ -176,8 +176,12 @@ void main() {
         await ctrl.cancelCall();
         await _pumpAsync();
 
-        expect(chatSvc.updateCalls, isNotEmpty);
-        expect(chatSvc.updateCalls.last.status, CallStatus.declined);
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(_kContactId))
+              .status,
+          AudioVideoCallStatus.ended,
+        );
       },
     );
   });

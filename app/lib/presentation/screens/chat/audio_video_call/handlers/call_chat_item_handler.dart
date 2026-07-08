@@ -33,7 +33,7 @@ class CallChatItemHandler {
 
   static const _logKey = 'CallChatItemHandler';
 
-  final Future<String?> Function(String callId)? _onInitiator;
+  final Future<String?> Function()? _onInitiator;
   final Future<String?> Function({required bool isCaller}) _resolveItemId;
   final Future<void> Function(
     String messageId, {
@@ -53,7 +53,6 @@ class CallChatItemHandler {
   bool _isCaller = false;
   bool _hasHadPeer = false;
   DateTime? _callStartedAt;
-  String? _sessionCallId;
   CallStatus? _lastWrittenStatus;
   AudioVideoCallStatus _lastStatus = AudioVideoCallStatus.idle;
 
@@ -109,7 +108,7 @@ class CallChatItemHandler {
   void _onSessionState(AudioVideoCallState next) {
     if (_isDisposed()) return;
 
-    _resolveRoleAndEmit(next.ownRole, next.callId);
+    _resolveRoleAndEmit(next.ownRole);
 
     _lastStatus = next.status;
     _hasHadPeer = computeHasHadPeer(
@@ -136,10 +135,8 @@ class CallChatItemHandler {
 
   /// Detects the caller role once and emits the outgoing item if this device
   /// initiated the call.
-  void _resolveRoleAndEmit(CallRole? ownRole, String? callId) {
+  void _resolveRoleAndEmit(CallRole? ownRole) {
     if (_roleResolved || ownRole == null) return;
-    _sessionCallId ??= callId;
-    if (ownRole == CallRole.caller && _sessionCallId == null) return;
     _roleResolved = true;
     _isCaller = ownRole == CallRole.caller;
 
@@ -157,8 +154,9 @@ class CallChatItemHandler {
       'callChatItemHandler: caller, emitting call chat item',
       name: _logKey,
     );
+    final initiator = _onInitiator;
     unawaited(
-      _onInitiator(_sessionCallId!).then((id) {
+      initiator().then((id) {
         if (id != null) _callChatItemId ??= id;
       }),
     );

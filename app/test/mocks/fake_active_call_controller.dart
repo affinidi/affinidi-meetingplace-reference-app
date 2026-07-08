@@ -59,7 +59,6 @@ class FakeActiveCallController extends ActiveCallController {
     hangUpFromScreenRole = role;
   }
 
-  @override
   Future<void> endCallChatItem({required CallRole role}) async {
     endCallChatItemCalled = true;
     endCallChatItemRole = role;
