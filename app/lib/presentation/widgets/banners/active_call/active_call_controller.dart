@@ -466,7 +466,15 @@ class ActiveCallController extends _$ActiveCallController {
     required CallStatus status,
     Duration? duration,
   }) {
-    return _chatService!.updateCallChatItem(
+    final chatService = _chatService;
+    if (chatService == null) {
+      _logger.info(
+        'updateCallChatItem: Skipped, chat service disposed',
+        name: _logKey,
+      );
+      return Future<void>.value();
+    }
+    return chatService.updateCallChatItem(
       messageId,
       status: status,
       duration: duration,

@@ -838,6 +838,49 @@ void main() {
     });
   });
 
+  group('disposal guard: _updateCallChatItem', () {
+    test('terminal write after clear does not crash', () async {
+      final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
+      final container = _makeContainer(chatService: chatSvc);
+      final session = MockAudioVideoCallSession();
+
+      final controller = container.read(activeCallControllerProvider.notifier);
+
+      controller.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: false,
+        initialStatus: AudioVideoCallStatus.outgoingRinging,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: true,
+        isGroupContact: false,
+      );
+
+      expect(
+        container.read(activeCallControllerProvider)?.peerName,
+        _kPeerName,
+      );
+
+      await session.emitState(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.declined,
+          participants: [],
+          ownRole: CallRole.caller,
+          callId: 'test-call-id',
+          callStartedAt: DateTime.now(),
+        ),
+      );
+      await _pumpAsync();
+
+      controller.clear();
+      await _pumpAsync();
+
+      expect(chatSvc.updateCalls, isNotEmpty);
+      expect(container.read(activeCallControllerProvider), isNull);
+    });
+  });
+
   group('endCallChatItem', () {
     test(
       'flushes the caller end status when the peer declined off-stream',
