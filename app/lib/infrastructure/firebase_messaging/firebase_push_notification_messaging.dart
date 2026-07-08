@@ -2,7 +2,6 @@
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-import '../loggers/app_logger/app_logger.dart';
 import '../providers/app_badge_provider.dart';
 import 'push_notification_messaging.dart';
 
@@ -14,11 +13,6 @@ import 'push_notification_messaging.dart';
 /// badge field.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  AppLogger.instance.info(
-    'Handling a background message: ${message.messageId}',
-    name: 'firebaseMessagingBackgroundHandler',
-  );
-
   await AppBadgeService.instance.setBadgeFromMessage(message);
 }
 
