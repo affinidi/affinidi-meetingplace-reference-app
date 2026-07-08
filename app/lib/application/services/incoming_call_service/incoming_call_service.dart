@@ -55,7 +55,7 @@ class IncomingCallService extends _$IncomingCallService {
     final channelDid = ref
         .read(incomingCallProvider)
         .eventOrNull
-        ?.otherPartyChannelDid;
+        ?.otherPartyPermanentChannelDid;
     _clearRingState();
     _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
     if (channelDid != null) _markCallAsMissed(channelDid);
@@ -76,14 +76,14 @@ class IncomingCallService extends _$IncomingCallService {
   void _onCallCancelled(String callId) {
     _logger.info('Caller cancelled call: $callId', name: _logKey);
     final incomingEvent = ref.read(incomingCallProvider).eventOrNull;
-    if (incomingEvent?.callId != callId) {
+    if (incomingEvent?.callerPermanentChannelDid != callId) {
       _logger.info(
         'Ignore cancelled: active callId does not match $callId',
         name: _logKey,
       );
       return;
     }
-    final channelDid = incomingEvent?.otherPartyChannelDid;
+    final channelDid = incomingEvent?.otherPartyPermanentChannelDid;
     _clearRingState();
     if (channelDid != null) {
       _markCallAsMissed(channelDid);
@@ -96,9 +96,10 @@ class IncomingCallService extends _$IncomingCallService {
   }
 
   void _onIncomingCall(IncomingAudioVideoCallEvent event) {
-    _logger.info('Incoming call received: ${event.callId}', name: _logKey);
+    final log = 'Incoming call received: ${event.callerPermanentChannelDid}';
+    _logger.info(log, name: _logKey);
     ref.read(incomingCallProvider.notifier).set(event);
-    _startRingTimer(event.callId);
+    _startRingTimer(event.callerPermanentChannelDid);
   }
 
   void _startRingTimer(String callId) {
@@ -113,7 +114,7 @@ class IncomingCallService extends _$IncomingCallService {
         final channelDid = ref
             .read(incomingCallProvider)
             .eventOrNull
-            ?.otherPartyChannelDid;
+            ?.otherPartyPermanentChannelDid;
         _clearRingState();
         _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
         if (channelDid != null) _markCallAsMissed(channelDid);

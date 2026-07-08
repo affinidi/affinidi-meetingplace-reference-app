@@ -847,8 +847,8 @@ void main() {
             .read(incomingCallProvider.notifier)
             .set(
               IncomingAudioVideoCallEvent(
-                callId: 'call-123',
-                otherPartyChannelDid: channelDid,
+                callerPermanentChannelDid: 'sim1@example.com',
+                otherPartyPermanentChannelDid: channelDid,
                 mediaType: CallMediaType.video,
               ),
             );

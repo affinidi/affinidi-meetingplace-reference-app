@@ -47,11 +47,11 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
 }
 
 IncomingAudioVideoCallEvent _event({
-  String callId = 'call-1',
+  String callerPermanentChannelDid = 'did:key:caller',
   CallMediaType mediaType = CallMediaType.video,
 }) => IncomingAudioVideoCallEvent(
-  callId: callId,
-  otherPartyChannelDid: 'did:key:caller',
+  callerPermanentChannelDid: callerPermanentChannelDid,
+  otherPartyPermanentChannelDid: 'did:key:caller',
   mediaType: mediaType,
 );
 
@@ -204,7 +204,7 @@ void main() {
         fakeSDK.emitIncoming(_event());
         await pumpEventQueue();
 
-        fakeSDK.emitCancelled('call-1');
+        fakeSDK.emitCancelled('did:key:caller');
         await pumpEventQueue();
 
         expect(container.read(incomingCallProvider).eventOrNull, isNull);
@@ -233,7 +233,7 @@ void main() {
           async.elapse(const Duration(seconds: 15));
 
           expect(container.read(incomingCallProvider).eventOrNull, isNull);
-          expect(fakeSDK.declinedCallIds, ['call-1']);
+          expect(fakeSDK.declinedCallIds, ['did:key:caller']);
           async.flushMicrotasks();
           expect(
             (container.read(contactsServiceProvider.notifier)

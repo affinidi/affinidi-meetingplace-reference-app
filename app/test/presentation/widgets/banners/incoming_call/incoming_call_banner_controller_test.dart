@@ -14,7 +14,7 @@ import '../../../../mocks/fake_incoming_call_service.dart';
 import '../../../../mocks/mock_navigator.dart';
 
 const _kCallId = 'call-123';
-const _kOtherPartyChannelDid = 'did:key:other-party';
+const _kOtherPartyPermanentChannelDid = 'did:key:other-party';
 const _kContactId = 'contact-1';
 
 ProviderContainer _makeContainer({
@@ -50,7 +50,7 @@ void main() {
           .read(incomingCallBannerControllerProvider.notifier)
           .accept(
             callId: _kCallId,
-            otherPartyChannelDid: _kOtherPartyChannelDid,
+            otherPartyChannelDid: _kOtherPartyPermanentChannelDid,
             mediaType: CallMediaType.video,
             contactId: _kContactId,
           );
@@ -64,7 +64,7 @@ void main() {
           .read(incomingCallBannerControllerProvider.notifier)
           .accept(
             callId: _kCallId,
-            otherPartyChannelDid: _kOtherPartyChannelDid,
+            otherPartyChannelDid: _kOtherPartyPermanentChannelDid,
             mediaType: CallMediaType.video,
             contactId: _kContactId,
           );
@@ -116,8 +116,8 @@ void main() {
           .read(incomingCallProvider.notifier)
           .set(
             const IncomingAudioVideoCallEvent(
-              callId: 'call-456',
-              otherPartyChannelDid: 'did:example:other',
+              callerPermanentChannelDid: 'did:example:other',
+              otherPartyPermanentChannelDid: 'did:example:other',
               mediaType: CallMediaType.video,
             ),
           );
@@ -144,8 +144,8 @@ void main() {
             .read(incomingCallProvider.notifier)
             .set(
               const IncomingAudioVideoCallEvent(
-                callId: 'call-999',
-                otherPartyChannelDid: 'did:example:other',
+                callerPermanentChannelDid: 'did:example:other',
+                otherPartyPermanentChannelDid: 'did:example:other',
                 mediaType: CallMediaType.video,
               ),
             );
@@ -168,8 +168,8 @@ void main() {
             .read(incomingCallProvider.notifier)
             .set(
               const IncomingAudioVideoCallEvent(
-                callId: 'call-789',
-                otherPartyChannelDid: 'did:example:other',
+                callerPermanentChannelDid: 'did:example:other',
+                otherPartyPermanentChannelDid: 'did:example:other',
                 mediaType: CallMediaType.audio,
               ),
             );
@@ -187,7 +187,7 @@ void main() {
           .read(incomingCallBannerControllerProvider.notifier)
           .accept(
             callId: _kCallId,
-            otherPartyChannelDid: _kOtherPartyChannelDid,
+            otherPartyChannelDid: _kOtherPartyPermanentChannelDid,
             mediaType: CallMediaType.video,
             contactId: _kContactId,
           );
@@ -202,7 +202,7 @@ void main() {
           .read(incomingCallBannerControllerProvider.notifier)
           .accept(
             callId: _kCallId,
-            otherPartyChannelDid: _kOtherPartyChannelDid,
+            otherPartyChannelDid: _kOtherPartyPermanentChannelDid,
             mediaType: CallMediaType.video,
             contactId: _kContactId,
           );
@@ -218,7 +218,7 @@ void main() {
           .read(incomingCallBannerControllerProvider.notifier)
           .accept(
             callId: _kCallId,
-            otherPartyChannelDid: _kOtherPartyChannelDid,
+            otherPartyChannelDid: _kOtherPartyPermanentChannelDid,
             mediaType: CallMediaType.audio,
             contactId: null,
           );
@@ -226,7 +226,7 @@ void main() {
       expect(navigator.goCalls.length, 1);
       expect(
         navigator.goCalls.single,
-        contains(_kOtherPartyChannelDid.replaceAll(':', '%3A')),
+        contains(_kOtherPartyPermanentChannelDid.replaceAll(':', '%3A')),
       );
     });
 
@@ -236,7 +236,7 @@ void main() {
           .read(incomingCallBannerControllerProvider.notifier)
           .accept(
             callId: _kCallId,
-            otherPartyChannelDid: _kOtherPartyChannelDid,
+            otherPartyChannelDid: _kOtherPartyPermanentChannelDid,
             mediaType: CallMediaType.video,
             contactId: _kContactId,
           );

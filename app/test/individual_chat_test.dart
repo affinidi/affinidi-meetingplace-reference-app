@@ -236,8 +236,9 @@ void main() {
             // chat item is not yet available
             coreSdk.emitIncomingCall(
               IncomingAudioVideoCallEvent(
-                callId: 'call-1',
-                otherPartyChannelDid:
+                callerPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                otherPartyPermanentChannelDid:
                     FakeChannels.individualChannel.permanentChannelDid!,
                 mediaType: CallMediaType.video,
               ),
@@ -246,7 +247,9 @@ void main() {
 
             // Simulate the caller cancelling the call before
             // the call chat item is available
-            coreSdk.emitCancelledCall('call-1');
+            coreSdk.emitCancelledCall(
+              FakeChannels.individualChannel.permanentChannelDid!,
+            );
             await tester.pump();
 
             // Simulate the call chat item being available after

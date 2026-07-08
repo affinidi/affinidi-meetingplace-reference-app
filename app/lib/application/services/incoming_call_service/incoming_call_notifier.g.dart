@@ -45,7 +45,7 @@ final class IncomingCallNotifierProvider
 }
 
 String _$incomingCallNotifierHash() =>
-    r'dce2ce2f6e63424cfdfad3b07b6a7db54ea36594';
+    r'26e05e541314afd1752868b95df898235d707456';
 
 /// Service that owns the current [IncomingCallState].
 

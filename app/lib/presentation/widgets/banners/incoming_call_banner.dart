@@ -59,7 +59,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
 
     final contact = ref.watch(
       contactsServiceProvider.select(
-        (s) => s.getContactByChannelDid(event.otherPartyChannelDid),
+        (s) => s.getContactByChannelDid(event.otherPartyPermanentChannelDid),
       ),
     );
 
@@ -74,7 +74,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
     );
 
     void onJoinOrAccept() {
-      final routeContactId = contact?.id ?? event.otherPartyChannelDid;
+      final routeContactId = contact?.id ?? event.otherPartyPermanentChannelDid;
       final isAudioOnly = event.mediaType == CallMediaType.audio;
       final callScreenProvider = audioVideoCallScreenControllerProvider(
         routeContactId,
@@ -83,14 +83,14 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
       if (ref.exists(callScreenProvider) &&
           ref.read(callScreenProvider).peerIsCallingBack) {
         bannerNotifier.acceptRecall(
-          callId: event.callId,
+          callId: event.callerPermanentChannelDid,
           contactId: routeContactId,
           isAudioOnly: isAudioOnly,
         );
       } else {
         bannerNotifier.accept(
-          callId: event.callId,
-          otherPartyChannelDid: event.otherPartyChannelDid,
+          callId: event.callerPermanentChannelDid,
+          otherPartyChannelDid: event.otherPartyPermanentChannelDid,
           mediaType: event.mediaType,
           contactId: contact?.id,
         );
@@ -105,7 +105,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
           if (details.velocity.pixelsPerSecond.dy < -300) {
             _slideController.forward().then((_) {
               if (!mounted) return;
-              bannerNotifier.dismiss(callId: event.callId);
+              bannerNotifier.dismiss(callId: event.callerPermanentChannelDid);
               // Restore the resting position after the banner is hidden so the
               // next call is not left off-screen (behind the notch).
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -162,7 +162,9 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
                       icon: Icons.call_end,
                       color: context.colorScheme.error,
                       semanticsLabel: context.l10n.incomingCallBannerDecline,
-                      onTap: () => bannerNotifier.dismiss(callId: event.callId),
+                      onTap: () => bannerNotifier.dismiss(
+                        callId: event.callerPermanentChannelDid,
+                      ),
                     ),
                   if (!isGroup) const SizedBox(width: 8),
                   if (isGroup)

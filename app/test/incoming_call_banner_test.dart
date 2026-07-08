@@ -61,11 +61,12 @@ class _FakeScreenControllerWithPeerRecall
 }
 
 IncomingAudioVideoCallEvent _event({
-  String otherPartyChannelDid = 'did:key:individual-channel',
+  String callerPermanentChannelDid = 'did:key:caller',
+  String otherPartyPermanentChannelDid = 'did:key:individual-channel',
   bool isAudioOnly = false,
 }) => IncomingAudioVideoCallEvent(
-  callId: 'call-1',
-  otherPartyChannelDid: otherPartyChannelDid,
+  callerPermanentChannelDid: callerPermanentChannelDid,
+  otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
   mediaType: isAudioOnly ? CallMediaType.audio : CallMediaType.video,
 );
 
@@ -132,20 +133,20 @@ void main() {
       await tester.tap(find.byIcon(Icons.call));
       await tester.pump();
 
-      expect(callService.acceptedCallIds, ['call-1']);
+      expect(callService.acceptedCallIds, ['did:key:caller']);
       expect(navigator.goCalls.single, contains('individual-contact-id'));
     });
 
     testWidgets('uses channel did when no contact is resolved', (tester) async {
       await tester.pumpWidget(
-        wrap(_event(otherPartyChannelDid: 'did:key:unknown')),
+        wrap(_event(otherPartyPermanentChannelDid: 'did:key:unknown')),
       );
       await tester.pump();
 
       await tester.tap(find.byIcon(Icons.call));
       await tester.pump();
 
-      expect(callService.acceptedCallIds, ['call-1']);
+      expect(callService.acceptedCallIds, ['did:key:caller']);
       expect(navigator.goCalls.single, contains('unknown'));
     });
 
@@ -168,7 +169,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.call));
       await tester.pump();
 
-      expect(callService.acceptedCallIds, ['call-1']);
+      expect(callService.acceptedCallIds, ['did:key:caller']);
     });
   });
 
@@ -180,7 +181,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.call_end));
       await tester.pump();
 
-      expect(callService.declinedCallIds, ['call-1']);
+      expect(callService.declinedCallIds, ['did:key:caller']);
       expect(navigator.goCalls, isEmpty);
     });
   });
@@ -199,7 +200,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(callService.declinedCallIds, ['call-1']);
+      expect(callService.declinedCallIds, ['did:key:caller']);
     });
 
     testWidgets(

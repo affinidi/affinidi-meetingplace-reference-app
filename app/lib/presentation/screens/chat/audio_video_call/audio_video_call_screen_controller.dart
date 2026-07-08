@@ -77,7 +77,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     final expectedOtherPartyDid = contact?.channelDid ?? contactId;
     final isAcceptedIncomingForThisScreen =
         incomingEvent != null &&
-        incomingEvent.otherPartyChannelDid == expectedOtherPartyDid;
+        incomingEvent.otherPartyPermanentChannelDid == expectedOtherPartyDid;
 
     if (_isGroupContact && contact != null) {
       unawaited(_loadGroupMemberNames(contact.offerLink));
@@ -142,7 +142,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       if (event == null) return;
       final channelDid = _channelDid;
       if (channelDid == null) return;
-      if (event.otherPartyChannelDid != channelDid) return;
+      if (event.otherPartyPermanentChannelDid != channelDid) return;
       if (_isDisposed) return;
       state = state.copyWith(peerIsCallingBack: true);
       ref.read(callEndedControllerProvider.notifier).dismiss();

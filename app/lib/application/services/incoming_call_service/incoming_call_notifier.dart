@@ -18,7 +18,7 @@ class IncomingCallNotifier extends _$IncomingCallNotifier {
 
   void set(IncomingAudioVideoCallEvent event) {
     _logger.info(
-      'set: Incoming call from ${event.otherPartyChannelDid}',
+      'set: Incoming call from ${event.otherPartyPermanentChannelDid}',
       name: _logKey,
     );
     state = IncomingCallState.ringing(event);

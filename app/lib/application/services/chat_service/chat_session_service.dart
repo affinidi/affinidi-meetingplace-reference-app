@@ -158,9 +158,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
     _callChatItemReconciler = CallChatItemReconciler(
       manager: _callChatItemManager,
-      isCallLive: () =>
-          ref.read(incomingCallProvider).eventOrNull?.otherPartyChannelDid ==
-          _otherPartyPermanentDid,
+      isCallLive: () {
+        final event = ref.read(incomingCallProvider).eventOrNull;
+        return event?.otherPartyPermanentChannelDid == _otherPartyPermanentDid;
+      },
       upsertItem: upsertChatItem,
       ringTimeout: ref.read(environmentProvider).incomingCallRingTimeout,
     );
