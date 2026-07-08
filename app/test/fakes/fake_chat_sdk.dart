@@ -444,6 +444,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
             id: 'call-attachment-${DateTime.now().microsecondsSinceEpoch}',
             mediaType: mediaType,
             status: status,
+            callId: 'test-call-id',
           ),
         ],
       ),

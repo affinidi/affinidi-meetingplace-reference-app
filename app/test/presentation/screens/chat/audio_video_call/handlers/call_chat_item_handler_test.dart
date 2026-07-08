@@ -1,14 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
-import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_chat_item_rules.dart';
 
 import '../../../../../mocks/fake_app_logger.dart';
+import '../../../../../mocks/fake_audio_video_call_participant.dart';
+import '../../../../../mocks/mock_audio_video_call_session.dart';
+
+typedef CallChatItemId = String;
 
 void main() {
   group('CallChatItemHandler', () {
     group('endCallWrite', () {
-      test('returns null before endCallChatItem is called', () {
+      test('returns null before endCall is called', () {
         final handler = CallChatItemHandler(
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem:
@@ -17,35 +20,23 @@ void main() {
           logger: FakeAppLogger(),
         );
 
-        final write = handler.endCallWrite;
-
-        expect(write, isNull);
+        expect(handler.endCallWrite, isNull);
       });
 
-      test(
-        'returns in-flight Future after endCallChatItem is called',
-        () async {
-          final handler = CallChatItemHandler(
-            resolveItemId: ({required bool isCaller}) async => 'msg-123',
-            updateItem:
-                (_, {required CallStatus status, Duration? duration}) async {},
-            isDisposed: () => false,
-            logger: FakeAppLogger(),
-          );
+      test('returns in-flight Future after endCall is called', () async {
+        final handler = CallChatItemHandler(
+          resolveItemId: ({required bool isCaller}) async => 'msg-123',
+          updateItem:
+              (_, {required CallStatus status, Duration? duration}) async {},
+          isDisposed: () => false,
+          logger: FakeAppLogger(),
+        );
 
-          handler.endCallChatItem(
-            outcome: CallEndOutcome.hungUp,
-            isCaller: true,
-            hasHadPeer: true,
-            callDuration: const Duration(seconds: 30),
-          );
+        handler.endCall(assumeRole: CallRole.caller);
 
-          final write = handler.endCallWrite;
-
-          expect(write, isNotNull);
-          expect(write, isA<Future<void>>());
-        },
-      );
+        expect(handler.endCallWrite, isNotNull);
+        expect(handler.endCallWrite, isA<Future<void>>());
+      });
 
       test('captures the same Future on repeated access', () async {
         final handler = CallChatItemHandler(
@@ -56,17 +47,9 @@ void main() {
           logger: FakeAppLogger(),
         );
 
-        handler.endCallChatItem(
-          outcome: CallEndOutcome.declined,
-          isCaller: false,
-          hasHadPeer: false,
-          callDuration: const Duration(seconds: 0),
-        );
+        handler.endCall(assumeRole: CallRole.recipient);
 
-        final write1 = handler.endCallWrite;
-        final write2 = handler.endCallWrite;
-
-        expect(write1, same(write2));
+        expect(handler.endCallWrite, same(handler.endCallWrite));
       });
 
       test('allows callers to await the write before cleanup', () async {
@@ -81,12 +64,7 @@ void main() {
           logger: FakeAppLogger(),
         );
 
-        handler.endCallChatItem(
-          outcome: CallEndOutcome.hungUp,
-          isCaller: true,
-          hasHadPeer: true,
-          callDuration: const Duration(seconds: 15),
-        );
+        handler.endCall(assumeRole: CallRole.caller);
 
         final pendingWrite = handler.endCallWrite;
         expect(updateCallCount, isZero);
@@ -97,8 +75,8 @@ void main() {
       });
     });
 
-    group('idempotency on endCallChatItem', () {
-      test('second call to endCallChatItem is a no-op', () async {
+    group('idempotency on endCall', () {
+      test('second call to endCall is a no-op', () async {
         var updateCallCount = 0;
         final handler = CallChatItemHandler(
           resolveItemId: ({required bool isCaller}) async => 'msg-abc',
@@ -110,22 +88,12 @@ void main() {
           logger: FakeAppLogger(),
         );
 
-        handler.endCallChatItem(
-          outcome: CallEndOutcome.hungUp,
-          isCaller: true,
-          hasHadPeer: true,
-          callDuration: const Duration(seconds: 20),
-        );
+        handler.endCall(assumeRole: CallRole.caller);
         await handler.endCallWrite;
 
         final firstCount = updateCallCount;
 
-        handler.endCallChatItem(
-          outcome: CallEndOutcome.declined,
-          isCaller: false,
-          hasHadPeer: false,
-          callDuration: Duration.zero,
-        );
+        handler.endCall(assumeRole: CallRole.recipient);
 
         expect(updateCallCount, equals(firstCount));
       });
@@ -139,23 +107,170 @@ void main() {
           logger: FakeAppLogger(),
         );
 
-        handler.endCallChatItem(
-          outcome: CallEndOutcome.hungUp,
-          isCaller: true,
-          hasHadPeer: true,
-          callDuration: const Duration(seconds: 10),
-        );
+        handler.endCall(assumeRole: CallRole.caller);
 
         expect(handler.callChatItemEnded, isTrue);
 
-        handler.endCallChatItem(
-          outcome: CallEndOutcome.declined,
-          isCaller: false,
-          hasHadPeer: false,
-          callDuration: Duration.zero,
-        );
+        handler.endCall(assumeRole: CallRole.recipient);
 
         expect(handler.endCallWrite, isNotNull);
+      });
+    });
+
+    group('stream lifecycle: caller', () {
+      test(
+        'emit outgoing item on first session state with caller role',
+        () async {
+          final emitted = <CallChatItemId>[];
+          final handler = CallChatItemHandler(
+            onInitiator: (_) async {
+              emitted.add('outgoing-item');
+              return 'outgoing-id';
+            },
+            resolveItemId: ({required bool isCaller}) async => null,
+            updateItem:
+                (_, {required CallStatus status, Duration? duration}) async {},
+            isDisposed: () => false,
+            logger: FakeAppLogger(),
+          );
+
+          final session = MockAudioVideoCallSession();
+          handler.attach(session);
+
+          // Emit first state with caller role
+          await session.emitState(
+            AudioVideoCallState(
+              status: AudioVideoCallStatus.outgoingRinging,
+              participants: [],
+              ownRole: CallRole.caller,
+              callId: 'test-call-id',
+              callStartedAt: DateTime.now(),
+            ),
+          );
+
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          expect(emitted, equals(['outgoing-item']));
+        },
+      );
+
+      test(
+        'terminal status from the stream overrides pending in-progress write',
+        () async {
+          final updates = <(String, CallStatus)>[];
+          final handler = CallChatItemHandler(
+            onInitiator: (_) async => 'outgoing-id',
+            resolveItemId: ({required bool isCaller}) async => 'msg-123',
+            updateItem:
+                (id, {required CallStatus status, Duration? duration}) async {
+                  updates.add((id, status));
+                },
+            isDisposed: () => false,
+            logger: FakeAppLogger(),
+          );
+
+          final session = MockAudioVideoCallSession();
+          handler.attach(session);
+
+          await session.emitState(
+            AudioVideoCallState(
+              status: AudioVideoCallStatus.outgoingRinging,
+              participants: [],
+              ownRole: CallRole.caller,
+              callId: 'test-call-id',
+              callStartedAt: DateTime.now(),
+            ),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+
+          await session.emitState(
+            AudioVideoCallState(
+              status: AudioVideoCallStatus.declined,
+              participants: [],
+              ownRole: CallRole.caller,
+              callId: 'test-call-id',
+              callStartedAt: DateTime.now(),
+            ),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+
+          expect(
+            updates.last.$2,
+            equals(CallStatus.declined),
+            reason:
+                'Terminal status must overwrite any pending in-progress '
+                'write',
+          );
+        },
+      );
+
+      test('transitions calling -> ringing -> inProgress -> ended', () async {
+        final updates = <(String, CallStatus)>[];
+        final handler = CallChatItemHandler(
+          onInitiator: (_) async => 'outgoing-id',
+          resolveItemId: ({required bool isCaller}) async => 'msg-456',
+          updateItem:
+              (id, {required CallStatus status, Duration? duration}) async {
+                updates.add((id, status));
+              },
+          isDisposed: () => false,
+          logger: FakeAppLogger(),
+        );
+
+        final session = MockAudioVideoCallSession();
+        final now = DateTime.now();
+        handler.attach(session);
+
+        // Caller emits calling (outgoingRinging before peer)
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.outgoingRinging,
+            participants: [],
+            ownRole: CallRole.caller,
+              callId: 'test-call-id',
+            callStartedAt: now,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        // Recipient picks up (peer joins); now it's ringing
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.outgoingRinging,
+            participants: [FakeAudioVideoCallParticipant()],
+            ownRole: CallRole.caller,
+              callId: 'test-call-id',
+            callStartedAt: now,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        // Recipient accepts (call connected)
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.connected,
+            participants: [FakeAudioVideoCallParticipant()],
+            ownRole: CallRole.caller,
+              callId: 'test-call-id',
+            callStartedAt: now,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        // Call ends
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.ended,
+            participants: [FakeAudioVideoCallParticipant()],
+            ownRole: CallRole.caller,
+              callId: 'test-call-id',
+            callStartedAt: now,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        // Verify that we wrote multiple transitions and final is ended
+        expect(updates.length, greaterThanOrEqualTo(2));
+        expect(updates.last.$2, equals(CallStatus.ended));
       });
     });
   });

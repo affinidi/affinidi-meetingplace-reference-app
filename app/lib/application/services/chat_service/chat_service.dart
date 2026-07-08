@@ -97,7 +97,10 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   /// returning its message id so the call lifecycle can update the item in
   /// place. The receiver gets the item automatically via the chat transport
   /// (isFromMe: false) and is offline-notified like any other message.
-  Future<String?> sendOutgoingCallMessage({required CallMediaType mediaType});
+  Future<String?> sendOutgoingCallMessage({
+    required CallMediaType mediaType,
+    required String callId,
+  });
 
   /// Resolves the message id of the latest incoming (not-from-me) call chat
   /// item that is still in a non-terminal state, so the receiver can update it

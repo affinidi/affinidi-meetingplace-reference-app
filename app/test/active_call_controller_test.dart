@@ -6,9 +6,12 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
+import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';
+
+import 'fakes/fake_chat_session_service.dart';
 
 class _FakeSession extends Fake implements AudioVideoCallSession {
   final List<bool> micCalls = [];
@@ -81,7 +84,13 @@ void main() {
   late ActiveCallController controller;
 
   setUp(() {
-    container = ProviderContainer();
+    container = ProviderContainer(
+      overrides: [
+        chatSessionServiceProvider(
+          'did:web:test',
+        ).overrideWith(FakeChatSessionService.new),
+      ],
+    );
     controller = container.read(activeCallControllerProvider.notifier);
   });
 
@@ -97,13 +106,27 @@ void main() {
   group('minimize / restore', () {
     test('minimize sets isMinimized true', () {
       controller.update(_state());
-      controller.minimize(isAudioOnly: false, isCameraEnabled: true);
+      controller.minimize(
+        contactId: 'contact-1',
+        status: AudioVideoCallStatus.outgoingRinging,
+        peerName: 'Alice',
+        isAudioOnly: false,
+        isCameraEnabled: true,
+        isMicEnabled: true,
+      );
       expect(container.read(activeCallControllerProvider)!.isMinimized, isTrue);
     });
 
     test('minimize syncs audio-to-video media state', () {
       controller.update(_state());
-      controller.minimize(isAudioOnly: false, isCameraEnabled: true);
+      controller.minimize(
+        contactId: 'contact-1',
+        status: AudioVideoCallStatus.outgoingRinging,
+        peerName: 'Alice',
+        isAudioOnly: false,
+        isCameraEnabled: true,
+        isMicEnabled: true,
+      );
       final state = container.read(activeCallControllerProvider)!;
       expect(state.isAudioOnly, isFalse);
       expect(state.isCameraEnabled, isTrue);
@@ -118,9 +141,19 @@ void main() {
       );
     });
 
-    test('minimize is a no-op when there is no state', () {
-      controller.minimize(isAudioOnly: false, isCameraEnabled: true);
-      expect(container.read(activeCallControllerProvider), isNull);
+    test('minimize creates banner state when none exists yet', () {
+      controller.minimize(
+        contactId: 'contact-1',
+        status: AudioVideoCallStatus.outgoingRinging,
+        peerName: 'Alice',
+        isAudioOnly: false,
+        isCameraEnabled: true,
+        isMicEnabled: true,
+      );
+      final state = container.read(activeCallControllerProvider);
+      expect(state, isNotNull);
+      expect(state!.isMinimized, isTrue);
+      expect(state.status, AudioVideoCallStatus.outgoingRinging);
     });
   });
 
@@ -235,7 +268,14 @@ void main() {
         controller.startTimer();
 
         async.elapse(const Duration(seconds: 2));
-        controller.minimize(isAudioOnly: false, isCameraEnabled: true);
+        controller.minimize(
+          contactId: 'contact-1',
+          status: AudioVideoCallStatus.outgoingRinging,
+          peerName: 'Alice',
+          isAudioOnly: false,
+          isCameraEnabled: true,
+          isMicEnabled: true,
+        );
         async.elapse(const Duration(seconds: 3));
         controller.restore();
         async.elapse(const Duration(seconds: 1));

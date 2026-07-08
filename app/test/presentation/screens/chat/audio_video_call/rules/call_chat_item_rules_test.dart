@@ -70,20 +70,6 @@ void main() {
   });
 
   group('isCallChatItemTappable', () {
-    test('returns true for calling status when isFromMe=false (receiver)', () {
-      expect(
-        isCallChatItemTappable(status: CallStatus.calling, isFromMe: false),
-        isTrue,
-      );
-    });
-
-    test('returns false for calling status when isFromMe=true (caller)', () {
-      expect(
-        isCallChatItemTappable(status: CallStatus.calling, isFromMe: true),
-        isFalse,
-      );
-    });
-
     test('returns true for inProgress status regardless of isFromMe', () {
       expect(
         isCallChatItemTappable(status: CallStatus.inProgress, isFromMe: true),
@@ -95,7 +81,15 @@ void main() {
       );
     });
 
-    test('returns false for ringing status', () {
+    test('returns false for calling and ringing statuses', () {
+      expect(
+        isCallChatItemTappable(status: CallStatus.calling, isFromMe: false),
+        isFalse,
+      );
+      expect(
+        isCallChatItemTappable(status: CallStatus.calling, isFromMe: true),
+        isFalse,
+      );
       expect(
         isCallChatItemTappable(status: CallStatus.ringing, isFromMe: false),
         isFalse,
