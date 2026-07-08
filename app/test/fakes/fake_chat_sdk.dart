@@ -28,6 +28,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     ChatFeature.messageDelete,
     ChatFeature.effects,
     ChatFeature.contactDetailsUpdate,
+    ChatFeature.audioVideoCalling,
   });
 
   TransportCapabilities _capabilities;

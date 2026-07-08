@@ -112,15 +112,11 @@ class ChatScreenController extends _$ChatScreenController
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     final channelDid = contact?.channelDid;
-    final isCallSupported = ref.watch(
-      meetingPlaceSdkProvider.select((v) => v.value?.isCallSupported ?? false),
-    );
     var pendingState = ChatScreenState(
       contact: contact,
       isActive: true,
       isInitialized: false,
       contactPresenceStatus: ContactPresenceStatus.unknown,
-      isCallSupported: isCallSupported,
     );
     var hasInitializedState = false;
 
@@ -506,7 +502,13 @@ class ChatScreenController extends _$ChatScreenController
 
     await _chatService?.updateContactSequenceNumber(channelDid);
     await _chatService?.startChatSession();
-    state = state.copyWith(capabilities: _chatService?.capabilities);
+    final capabilities = _chatService?.capabilities;
+    state = state.copyWith(
+      capabilities: capabilities,
+      isCallSupported:
+          coreSdk.isCallSupported &&
+          (capabilities?.supports(chat.ChatFeature.audioVideoCalling) ?? false),
+    );
 
     if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
