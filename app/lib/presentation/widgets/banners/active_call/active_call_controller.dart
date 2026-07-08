@@ -255,6 +255,22 @@ class ActiveCallController extends _$ActiveCallController {
     _session = null;
   }
 
+  /// Flushes the call chat item to end status before banner teardown.
+  /// Called when peer declines off-stream; idempotent if called again.
+  Future<void> endCallChatItem({required CallRole role}) async {
+    if (_isDisposed) {
+      _logger.info(
+        'endCallChatItem: Skipped, controller disposed',
+        name: _logKey,
+      );
+      return;
+    }
+    _logger.info('endCallChatItem: role=$role', name: _logKey);
+    _ownRole ??= role;
+    _chatItemHandler?.endCall(assumeRole: role);
+    await _chatItemHandler?.endCallWrite;
+  }
+
   /// Toggles the microphone on the live session and reflects it in the banner.
   void toggleMic() {
     final current = state;

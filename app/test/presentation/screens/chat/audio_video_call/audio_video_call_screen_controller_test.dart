@@ -325,6 +325,46 @@ void main() {
         );
       },
     );
+
+    test('awaits endCallChatItem before flipping to declined status', () async {
+      final session = MockAudioVideoCallSession();
+      final banner = FakeActiveCallController(
+        fixedCallChatItemId: _kMsgId,
+        bannerState: _kActiveBannerState,
+        fixedSession: session,
+      );
+      final container = _makeContainer(
+        bannerController: banner,
+        pendingSession: session,
+      );
+      final ctrl = container.read(
+        audioVideoCallScreenControllerProvider(_kContactId).notifier,
+      );
+      container.listen(
+        audioVideoCallScreenControllerProvider(_kContactId),
+        (_, _) {},
+      );
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.outgoingRinging,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await _pumpAsync();
+
+      await ctrl.onPeerDeclined();
+      await _pumpAsync();
+
+      expect(banner.endCallChatItemCalled, true);
+      expect(banner.endCallChatItemRole, CallRole.caller);
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(_kContactId))
+            .status,
+        AudioVideoCallStatus.declined,
+      );
+    });
   });
 }
 

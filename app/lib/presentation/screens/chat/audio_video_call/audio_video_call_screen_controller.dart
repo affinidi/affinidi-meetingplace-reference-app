@@ -341,10 +341,26 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     return _lifecycleHandler.hangUp();
   }
 
-  /// Ends an outgoing call the peer declined, transitioning to the declined
-  /// end-state so the UI shows the decline screen instead of a blank screen.
-  Future<void> onPeerDeclined() {
+  /// Flushes the outgoing call chat item and transitions to declined state.
+  /// The decline signal arrives off-stream, so the handler doesn't observe it.
+  /// The flush must complete before state changes trigger the banner teardown.
+  Future<void> onPeerDeclined() async {
     _logger.info('onPeerDeclined', name: _logKey);
+    final sessionBeforeFlush = _session;
+    await ref
+        .read(activeCallControllerProvider.notifier)
+        .endCallChatItem(role: CallRole.caller);
+
+    if (_isDisposed || !identical(_session, sessionBeforeFlush)) {
+      _logger.info(
+        'onPeerDeclined: Skipping stale decline '
+        '(disposed=$_isDisposed, '
+        'sessionSwapped=${!identical(_session, sessionBeforeFlush)})',
+        name: _logKey,
+      );
+      return;
+    }
+
     state = state.copyWith(status: AudioVideoCallStatus.declined);
     return _lifecycleHandler.onPeerDeclined();
   }
