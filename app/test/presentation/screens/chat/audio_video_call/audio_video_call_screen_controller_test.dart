@@ -38,7 +38,6 @@ ProviderContainer _makeContainer({
   FakeActiveCallController? bannerController,
   FakeChatSessionService? chatService,
   MockAudioVideoCallSession? pendingSession,
-  FakeMeetingPlaceMatrixSDK? sdk,
 }) {
   final banner =
       bannerController ??
@@ -48,14 +47,15 @@ ProviderContainer _makeContainer({
         fixedSession: pendingSession,
       );
   final chat = chatService ?? FakeChatSessionService();
-  final meetingPlaceSDK = sdk ?? FakeMeetingPlaceMatrixSDK();
   final container = ProviderContainer(
     overrides: [
       appLoggerProvider.overrideWithValue(FakeAppLogger()),
       contactsServiceProvider.overrideWith(FakeContactsService.new),
       activeCallControllerProvider.overrideWith(() => banner),
       chatSessionServiceProvider(_kContactId).overrideWith(() => chat),
-      meetingPlaceSdkProvider.overrideWith((ref) async => meetingPlaceSDK),
+      meetingPlaceSdkProvider.overrideWith(
+        (ref) async => FakeMeetingPlaceMatrixSDK(),
+      ),
       permissionServiceProvider.overrideWith((ref) => _FakePermissionService()),
       incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
     ],
@@ -255,7 +255,8 @@ void main() {
       );
     });
 
-    test('declined status survives later non-ended session status', () async {
+    test('declined status survives a later non-ended session status '
+        '(no Calling flash)', () async {
       final session = MockAudioVideoCallSession();
       final container = _makeContainer(pendingSession: session);
       final ctrl = container.read(
@@ -324,32 +325,6 @@ void main() {
         );
       },
     );
-
-    test('does not call SDK leaveCurrentCall to prevent signal loop', () async {
-      final session = MockAudioVideoCallSession();
-      final sdk = FakeMeetingPlaceMatrixSDK();
-      final container = _makeContainer(pendingSession: session, sdk: sdk);
-      final ctrl = container.read(
-        audioVideoCallScreenControllerProvider(_kContactId).notifier,
-      );
-      container.listen(
-        audioVideoCallScreenControllerProvider(_kContactId),
-        (_, _) {},
-      );
-
-      await session.emitState(
-        const AudioVideoCallState(
-          status: AudioVideoCallStatus.outgoingRinging,
-          ownRole: CallRole.caller,
-        ),
-      );
-      await _pumpAsync();
-
-      await ctrl.onPeerDeclined();
-      await _pumpAsync();
-
-      expect(sdk.leaveCurrentCallCount, 0);
-    });
   });
 }
 

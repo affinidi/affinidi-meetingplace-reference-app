@@ -26,6 +26,7 @@ class CallChatItemManager {
   /// Returns the message ID on success, or `null` if send failed.
   Future<String?> sendOutgoingCallMessage({
     required CallMediaType mediaType,
+    String? callId,
   }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -41,6 +42,7 @@ class CallChatItemManager {
         mediaType: mediaType,
         status: CallStatus.calling,
         id: const Uuid().v4(),
+        callId: callId ?? '',
       );
       final message = await chatSdk.sendTextMessage(
         '',
@@ -251,6 +253,7 @@ class CallChatItemManager {
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    String? callId,
   }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -285,6 +288,7 @@ class CallChatItemManager {
         status: status,
         durationMs: duration?.inMilliseconds ?? existing.durationMs,
         id: callAttachment!.id,
+        callId: callId ?? '',
       );
       item.attachments = [
         for (final a in item.attachments)
