@@ -54,6 +54,7 @@ import 'handlers/group_details_protocol_handler.dart';
 import 'handlers/presence_protocol_handler.dart';
 import 'handlers/typing_protocol_handler.dart';
 import 'handlers/zkp_attachment_protocol_handler.dart';
+import 'missed_call_manager.dart';
 import 'typing_timer.dart';
 
 part 'chat_session_service.g.dart';
@@ -74,7 +75,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   static final _channelLocks = KeyedLock<String>();
 
   late AppLogger _logger;
-  late String _otherPartyPermanentDid;
+  late String _otherPartyPermanentChannelDid;
   late VdipManager _vdipManager;
 
   MeetingPlaceChatSDK? _chatSDK;
@@ -89,6 +90,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late RCardManager _rCardManager;
   late VrcManager _vrcManager;
   late CallChatItemManager _callChatItemManager;
+  MissedCallManager? _missedCallManager;
 
   TimedAction? _presenceTimedAction;
   final Map<String, TypingTimer> _typingTimedActions = {};
@@ -120,7 +122,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   ChatServiceState build(String channelDid) {
-    _otherPartyPermanentDid = channelDid;
+    _otherPartyPermanentChannelDid = channelDid;
     _logger = ref.read(appLoggerProvider);
     _rCardManager = RCardManager(
       ref: ref,
@@ -233,7 +235,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   Future<void> _ensureChatSdkInitialized() async {
     if (_chatSDK != null) return;
-    await _channelLocks.synchronized(_otherPartyPermanentDid, () async {
+    await _channelLocks.synchronized(_otherPartyPermanentChannelDid, () async {
       if (_chatSDK != null) return;
       if (!ref.mounted) return;
 
@@ -241,12 +243,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       if (!ref.mounted) return;
 
       final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
-        _otherPartyPermanentDid,
+        _otherPartyPermanentChannelDid,
       );
       if (channel == null) {
         _logger.warning(
           '_ensureChatSdkInitialized: channel not found for '
-          '${_otherPartyPermanentDid.topAndTail()} — '
+          '${_otherPartyPermanentChannelDid.topAndTail()} — '
           'SDK may not have synced yet',
           name: _logKey,
         );
@@ -264,7 +266,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _isGroupChat =
           ref
               .read(contactsServiceProvider)
-              .getContactByChannelDid(_otherPartyPermanentDid)
+              .getContactByChannelDid(_otherPartyPermanentChannelDid)
               ?.isGroup ??
           false;
 
@@ -291,6 +293,15 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
     await _ensureChatSdkInitialized();
     if (_chatSDK == null) return;
+
+    _missedCallManager = MissedCallManager(
+      ref: ref,
+      otherPartyPermanentChannelDid: _otherPartyPermanentChannelDid,
+      callChatItemManager: _callChatItemManager,
+      getMessageById: (messageId) async =>
+          (await _chatSDK?.getMessageById(messageId)) as Message?,
+      onUpsertChatItem: upsertChatItem,
+    );
 
     await _vdipManager.subscribe();
 
@@ -339,7 +350,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
           _chatStreamRef = chatStream
             ..listen(
-              (data) => _onChannelMessagesData(data, _otherPartyPermanentDid),
+              (data) =>
+                  _onChannelMessagesData(data, _otherPartyPermanentChannelDid),
               onError: (Object error, StackTrace stackTrace) {
                 _logger.error(
                   'Error in chat stream subscription',
@@ -374,6 +386,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           await _rCardManager.replayPendingRCard();
         }),
       );
+
+      if (_missedCallManager != null) {
+        unawaited(_missedCallManager!.replayPendingMissedCall());
+      }
 
       _logger.info('Chat session started', name: _logKey);
     } catch (error, stackTrace) {
@@ -454,7 +470,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     if (sdk == null) return Future.value();
 
     return _channelLocks.synchronized(
-      _otherPartyPermanentDid,
+      _otherPartyPermanentChannelDid,
       sdk.endChatSession,
     );
   }
@@ -696,7 +712,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<void> _resetBadgeCount() async {
     await ref
         .read(contactsServiceProvider.notifier)
-        .resetContactBadgeCount(_otherPartyPermanentDid);
+        .resetContactBadgeCount(_otherPartyPermanentChannelDid);
   }
 
   // ---------------------------------------------------------------------------
@@ -736,6 +752,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       }
       if (chatItem is Message && !chatItem.isFromMe) {
         _clearMembersTypingActivity(chatItem.senderDid);
+        if (_missedCallManager != null) {
+          unawaited(
+            _missedCallManager!.healArrivedStaleCallItemIfPending(chatItem),
+          );
+        }
       }
       if (chatItem is Message &&
           _isHumanZkpActive &&
@@ -762,7 +783,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         ? _otherPartyFirstName!
         : ref
                   .read(contactsServiceProvider)
-                  .getContactByChannelDid(_otherPartyPermanentDid)
+                  .getContactByChannelDid(_otherPartyPermanentChannelDid)
                   ?.card
                   .firstName ??
               '';
@@ -835,7 +856,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           ? _otherPartyFirstName
           : ref
                 .read(contactsServiceProvider)
-                .getContactByChannelDid(_otherPartyPermanentDid)
+                .getContactByChannelDid(_otherPartyPermanentChannelDid)
                 ?.card
                 .firstName;
     }
@@ -987,7 +1008,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           ? _otherPartyFirstName
           : ref
                 .read(contactsServiceProvider)
-                .getContactByChannelDid(_otherPartyPermanentDid)
+                .getContactByChannelDid(_otherPartyPermanentChannelDid)
                 ?.card
                 .firstName;
     }
