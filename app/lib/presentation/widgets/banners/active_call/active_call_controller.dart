@@ -9,7 +9,6 @@ import '../../../../../application/services/chat_service/chat_session_service.da
 import '../../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
-import '../../../screens/chat/audio_video_call/rules/call_chat_item_rules.dart';
 import '../../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import '../../call_ended/call_ended_controller.dart';
 import '../end_call/end_call_banner_controller.dart';
@@ -83,8 +82,12 @@ class ActiveCallController extends _$ActiveCallController {
   /// (and the PiP overlay) reflect any audio-to-video switch that happened
   /// while the screen was open, without waiting for the next session event.
   void minimize({
+    required String contactId,
+    required AudioVideoCallStatus status,
+    required String peerName,
     required bool isAudioOnly,
     required bool isCameraEnabled,
+    required bool isMicEnabled,
     AudioVideoCallParticipant? selfParticipant,
   }) {
     _logger.info('minimize: Updating banner state', name: _logKey);
@@ -95,6 +98,19 @@ class ActiveCallController extends _$ActiveCallController {
         isAudioOnly: isAudioOnly,
         isCameraEnabled: isCameraEnabled,
         selfParticipant: selfParticipant ?? current.selfParticipant,
+      );
+    } else {
+      _keepAliveLink ??= ref.keepAlive();
+      state = ActiveCallState(
+        contactId: contactId,
+        peerName: peerName,
+        status: status,
+        callDurationSeconds: 0,
+        isMicEnabled: isMicEnabled,
+        isAudioOnly: isAudioOnly,
+        isCameraEnabled: isCameraEnabled,
+        isMinimized: true,
+        selfParticipant: selfParticipant,
       );
     }
   }
@@ -148,6 +164,7 @@ class ActiveCallController extends _$ActiveCallController {
     _participantEventSub?.cancel();
     _participantEventSub = null;
     _session = null;
+    _chatItemHandler?.endCall(assumeRole: _ownRole);
     final pendingEndWrite = _chatItemHandler?.endCallWrite;
     _chatItemHandler?.dispose();
     _ownRole = null;
@@ -259,14 +276,6 @@ class ActiveCallController extends _$ActiveCallController {
     final current = state;
     _logger.info('hangUp: Terminating call', name: _logKey);
     if (current != null) {
-      _chatItemHandler?.endCallChatItem(
-        outcome: current.hasHadPeer
-            ? CallEndOutcome.hungUp
-            : CallEndOutcome.declined,
-        isCaller: _ownRole == CallRole.caller,
-        hasHadPeer: current.hasHadPeer,
-        callDuration: Duration(seconds: current.callDurationSeconds),
-      );
       if (current.hasHadPeer) {
         ref
             .read(callEndedControllerProvider.notifier)
@@ -395,17 +404,6 @@ class ActiveCallController extends _$ActiveCallController {
     }
 
     if (isEndedCallStatus(sessionState.status)) {
-      _chatItemHandler?.endCallChatItem(
-        outcome:
-            (sessionState.status == AudioVideoCallStatus.declined ||
-                sessionState.status == AudioVideoCallStatus.missed ||
-                !hadPeer)
-            ? CallEndOutcome.declined
-            : CallEndOutcome.hungUp,
-        isCaller: _ownRole == CallRole.caller,
-        hasHadPeer: hadPeer,
-        callDuration: Duration(seconds: current.callDurationSeconds),
-      );
       final endState = resolveCallEndState(
         sessionState.status,
         hasHadPeer: hadPeer,

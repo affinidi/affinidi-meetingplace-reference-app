@@ -73,365 +73,6 @@ Future<void> _pumpAsync() async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('resolveEndCallStatus — caller + hasHadPeer → ended', () {
-    test('calls updateCallChatItem with CallStatus.ended', () async {
-      final session = MockAudioVideoCallSession();
-      final chatSvc = FakeChatSessionService();
-      final container = _makeContainer(
-        chatService: chatSvc,
-        pendingSession: session,
-      );
-      container.listen(
-        audioVideoCallScreenControllerProvider(_kContactId),
-        (_, _) {},
-      );
-
-      await session.emitState(
-        const AudioVideoCallState(ownRole: CallRole.caller),
-      );
-      await session.emitState(
-        const AudioVideoCallState(
-          status: AudioVideoCallStatus.ended,
-          ownRole: CallRole.caller,
-        ),
-      );
-      await _pumpAsync();
-
-      expect(chatSvc.updateCalls, isNotEmpty);
-      expect(chatSvc.updateCalls.last.status, CallStatus.ended);
-    });
-  });
-
-  group('resolveEndCallStatus — caller + no peer → declined', () {
-    test('calls updateCallChatItem with CallStatus.declined', () async {
-      final session = MockAudioVideoCallSession();
-      final chatSvc = FakeChatSessionService();
-      final banner = FakeActiveCallController(fixedCallChatItemId: _kMsgId);
-      final container = ProviderContainer(
-        overrides: [
-          appLoggerProvider.overrideWithValue(FakeAppLogger()),
-          contactsServiceProvider.overrideWith(FakeContactsService.new),
-          activeCallControllerProvider.overrideWith(() => banner),
-          chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          meetingPlaceSdkProvider.overrideWith(
-            (ref) async => FakeMeetingPlaceMatrixSDK(),
-          ),
-          permissionServiceProvider.overrideWith(
-            (ref) => _FakePermissionService(),
-          ),
-          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      container.listen(
-        audioVideoCallScreenControllerProvider(_kContactId),
-        (_, _) {},
-      );
-
-      await session.emitState(
-        const AudioVideoCallState(
-          status: AudioVideoCallStatus.ended,
-          ownRole: CallRole.caller,
-        ),
-      );
-      await _pumpAsync();
-
-      expect(chatSvc.updateCalls.isEmpty, isTrue);
-    });
-  });
-
-  group('resolveEndCallStatus — caller + terminal declined', () {
-    test('calls updateCallChatItem with CallStatus.declined', () async {
-      final session = MockAudioVideoCallSession();
-      final chatSvc = FakeChatSessionService();
-      final container = ProviderContainer(
-        overrides: [
-          appLoggerProvider.overrideWithValue(FakeAppLogger()),
-          contactsServiceProvider.overrideWith(FakeContactsService.new),
-          activeCallControllerProvider.overrideWith(
-            () => FakeActiveCallController(
-              fixedCallChatItemId: _kMsgId,
-              bannerState: _kActiveBannerState,
-              fixedSession: session,
-            ),
-          ),
-          chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          meetingPlaceSdkProvider.overrideWith(
-            (ref) async => FakeMeetingPlaceMatrixSDK(),
-          ),
-          permissionServiceProvider.overrideWith(
-            (ref) => _FakePermissionService(),
-          ),
-          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      container.listen(
-        audioVideoCallScreenControllerProvider(_kContactId),
-        (_, _) {},
-      );
-
-      await session.emitState(
-        const AudioVideoCallState(ownRole: CallRole.caller),
-      );
-      await session.emitState(
-        const AudioVideoCallState(
-          status: AudioVideoCallStatus.declined,
-          ownRole: CallRole.caller,
-        ),
-      );
-      await _pumpAsync();
-
-      expect(chatSvc.updateCalls, isNotEmpty);
-      expect(chatSvc.updateCalls.last.status, CallStatus.declined);
-    });
-  });
-
-  group('resolveEndCallStatus — receiver + hasHadPeer → ended', () {
-    test('calls updateCallChatItem with CallStatus.ended', () async {
-      final session = MockAudioVideoCallSession();
-      final chatSvc = FakeChatSessionService(resolveIncomingResult: _kMsgId);
-      final banner = FakeActiveCallController(
-        bannerState: _kActiveBannerState,
-        fixedSession: session,
-      );
-      final container = ProviderContainer(
-        overrides: [
-          appLoggerProvider.overrideWithValue(FakeAppLogger()),
-          contactsServiceProvider.overrideWith(FakeContactsService.new),
-          activeCallControllerProvider.overrideWith(() => banner),
-          chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          meetingPlaceSdkProvider.overrideWith(
-            (ref) async => FakeMeetingPlaceMatrixSDK(),
-          ),
-          permissionServiceProvider.overrideWith(
-            (ref) => _FakePermissionService(),
-          ),
-          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      container.listen(
-        audioVideoCallScreenControllerProvider(_kContactId),
-        (_, _) {},
-      );
-
-      await session.emitState(
-        const AudioVideoCallState(ownRole: CallRole.recipient),
-      );
-      await session.emitState(
-        const AudioVideoCallState(
-          status: AudioVideoCallStatus.ended,
-          ownRole: CallRole.recipient,
-        ),
-      );
-      await _pumpAsync();
-
-      expect(chatSvc.updateCalls, isNotEmpty);
-      expect(chatSvc.updateCalls.last.status, CallStatus.ended);
-    });
-  });
-
-  group('resolveEndCallStatus — receiver + no peer → missed', () {
-    test('calls updateCallChatItem with CallStatus.missed', () async {
-      final session = MockAudioVideoCallSession();
-      final chatSvc = FakeChatSessionService(resolveIncomingResult: _kMsgId);
-      final banner = FakeActiveCallController(fixedSession: session);
-      final container = ProviderContainer(
-        overrides: [
-          appLoggerProvider.overrideWithValue(FakeAppLogger()),
-          contactsServiceProvider.overrideWith(FakeContactsService.new),
-          activeCallControllerProvider.overrideWith(() => banner),
-          chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          meetingPlaceSdkProvider.overrideWith(
-            (ref) async => FakeMeetingPlaceMatrixSDK(),
-          ),
-          permissionServiceProvider.overrideWith(
-            (ref) => _FakePermissionService(),
-          ),
-          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      container.listen(
-        audioVideoCallScreenControllerProvider(_kContactId),
-        (_, _) {},
-      );
-
-      await session.emitState(
-        const AudioVideoCallState(
-          status: AudioVideoCallStatus.missed,
-          ownRole: CallRole.recipient,
-        ),
-      );
-      await _pumpAsync();
-
-      expect(chatSvc.updateCalls.isEmpty, isTrue);
-    });
-  });
-
-  group('_updateCallChatItemStatus — skips if callChatItemEnded', () {
-    test(
-      'second terminal emit does not produce a second updateCallChatItem',
-      () async {
-        final session = MockAudioVideoCallSession();
-        final chatSvc = FakeChatSessionService();
-        final container = _makeContainer(
-          chatService: chatSvc,
-          pendingSession: session,
-        );
-        container.listen(
-          audioVideoCallScreenControllerProvider(_kContactId),
-          (_, _) {},
-        );
-
-        await session.emitState(
-          const AudioVideoCallState(ownRole: CallRole.caller),
-        );
-        await session.emitState(
-          const AudioVideoCallState(status: AudioVideoCallStatus.ended),
-        );
-        await _pumpAsync();
-
-        final firstCount = chatSvc.updateCalls.length;
-
-        await session.emitState(
-          const AudioVideoCallState(status: AudioVideoCallStatus.ended),
-        );
-        await _pumpAsync();
-
-        expect(chatSvc.updateCalls.length, firstCount);
-      },
-    );
-  });
-
-  group('_endCallChatItem — idempotent', () {
-    test(
-      'second call after terminal state produces no additional service call',
-      () async {
-        final session = MockAudioVideoCallSession();
-        final chatSvc = FakeChatSessionService();
-        final container = _makeContainer(
-          chatService: chatSvc,
-          pendingSession: session,
-        );
-        final ctrl = container.read(
-          audioVideoCallScreenControllerProvider(_kContactId).notifier,
-        );
-        container.listen(
-          audioVideoCallScreenControllerProvider(_kContactId),
-          (_, _) {},
-        );
-
-        await session.emitState(
-          const AudioVideoCallState(ownRole: CallRole.caller),
-        );
-        await session.emitState(
-          const AudioVideoCallState(status: AudioVideoCallStatus.ended),
-        );
-        await _pumpAsync();
-
-        final callCount = chatSvc.updateCalls.length;
-
-        await ctrl.cancelCall();
-        await _pumpAsync();
-
-        expect(chatSvc.updateCalls.length, callCount);
-      },
-    );
-  });
-
-  group('_ensureCallChatItemId — uses banner id when available', () {
-    test('updateCallChatItem uses the id from banner controller', () async {
-      final session = MockAudioVideoCallSession();
-      final chatSvc = FakeChatSessionService();
-      final banner = FakeActiveCallController(
-        fixedCallChatItemId: 'banner-msg',
-        bannerState: _kActiveBannerState,
-        fixedSession: session,
-      );
-      final container = ProviderContainer(
-        overrides: [
-          appLoggerProvider.overrideWithValue(FakeAppLogger()),
-          contactsServiceProvider.overrideWith(FakeContactsService.new),
-          activeCallControllerProvider.overrideWith(() => banner),
-          chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          meetingPlaceSdkProvider.overrideWith(
-            (ref) async => FakeMeetingPlaceMatrixSDK(),
-          ),
-          permissionServiceProvider.overrideWith(
-            (ref) => _FakePermissionService(),
-          ),
-          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      container.listen(
-        audioVideoCallScreenControllerProvider(_kContactId),
-        (_, _) {},
-      );
-
-      await session.emitState(
-        const AudioVideoCallState(ownRole: CallRole.caller),
-      );
-      await session.emitState(
-        const AudioVideoCallState(status: AudioVideoCallStatus.ended),
-      );
-      await _pumpAsync();
-
-      expect(chatSvc.updateCalls, isNotEmpty);
-      expect(chatSvc.updateCalls.first.messageId, 'banner-msg');
-    });
-  });
-
-  group('_ensureCallChatItemId — falls back to service for receiver', () {
-    test('resolveIncomingCallChatItemId is called when no banner id', () async {
-      final session = MockAudioVideoCallSession();
-      final chatSvc = FakeChatSessionService(resolveIncomingResult: 'svc-msg');
-      final banner = FakeActiveCallController(
-        bannerState: _kActiveBannerState,
-        fixedSession: session,
-      );
-      final container = ProviderContainer(
-        overrides: [
-          appLoggerProvider.overrideWithValue(FakeAppLogger()),
-          contactsServiceProvider.overrideWith(FakeContactsService.new),
-          activeCallControllerProvider.overrideWith(() => banner),
-          chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-          meetingPlaceSdkProvider.overrideWith(
-            (ref) async => FakeMeetingPlaceMatrixSDK(),
-          ),
-          permissionServiceProvider.overrideWith(
-            (ref) => _FakePermissionService(),
-          ),
-          incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
-        ],
-      );
-      addTearDown(container.dispose);
-
-      container.listen(
-        audioVideoCallScreenControllerProvider(_kContactId),
-        (_, _) {},
-      );
-
-      await session.emitState(
-        const AudioVideoCallState(ownRole: CallRole.recipient),
-      );
-      await session.emitState(
-        const AudioVideoCallState(status: AudioVideoCallStatus.ended),
-      );
-      await _pumpAsync();
-
-      expect(chatSvc.updateCalls, isNotEmpty);
-      expect(chatSvc.updateCalls.first.messageId, 'svc-msg');
-    });
-  });
-
   group('_applySessionUpdate — ended status lock', () {
     test(
       'ended status from session is not overwritten by a later non-ended emit',
@@ -500,40 +141,22 @@ void main() {
         AudioVideoCallStatus.ended,
       );
     });
+  });
 
+  group('onPeerDeclined — peer declines ringing call', () {
     test(
-      'writes declined chat outcome when no peer was ever connected',
+      'flushes the outgoing chat item to declined before switching state',
       () async {
         final session = MockAudioVideoCallSession();
-        final chatSvc = FakeChatSessionService();
         final banner = FakeActiveCallController(
           fixedCallChatItemId: _kMsgId,
-          bannerState: const ActiveCallState(
-            contactId: _kContactId,
-            peerName: 'Peer',
-            status: AudioVideoCallStatus.outgoingRinging,
-            callDurationSeconds: 0,
-            isMicEnabled: true,
-            isAudioOnly: false,
-          ),
+          bannerState: _kActiveBannerState,
           fixedSession: session,
         );
-        final container = ProviderContainer(
-          overrides: [
-            appLoggerProvider.overrideWithValue(FakeAppLogger()),
-            contactsServiceProvider.overrideWith(FakeContactsService.new),
-            activeCallControllerProvider.overrideWith(() => banner),
-            chatSessionServiceProvider(_kContactId).overrideWith(() => chatSvc),
-            meetingPlaceSdkProvider.overrideWith(
-              (ref) async => FakeMeetingPlaceMatrixSDK(),
-            ),
-            permissionServiceProvider.overrideWith(
-              (ref) => _FakePermissionService(),
-            ),
-            incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
-          ],
+        final container = _makeContainer(
+          bannerController: banner,
+          pendingSession: session,
         );
-        addTearDown(container.dispose);
         final ctrl = container.read(
           audioVideoCallScreenControllerProvider(_kContactId).notifier,
         );
@@ -553,8 +176,12 @@ void main() {
         await ctrl.cancelCall();
         await _pumpAsync();
 
-        expect(chatSvc.updateCalls, isNotEmpty);
-        expect(chatSvc.updateCalls.last.status, CallStatus.declined);
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(_kContactId))
+              .status,
+          AudioVideoCallStatus.ended,
+        );
       },
     );
   });

@@ -22,6 +22,8 @@ class FakeActiveCallController extends ActiveCallController {
   bool sessionCleared = false;
   bool hangUpFromScreenCalled = false;
   CallRole? hangUpFromScreenRole;
+  bool endCallChatItemCalled = false;
+  CallRole? endCallChatItemRole;
 
   @override
   ActiveCallState? build() => bannerState;
@@ -55,6 +57,11 @@ class FakeActiveCallController extends ActiveCallController {
   void hangUpFromScreen({required CallRole role}) {
     hangUpFromScreenCalled = true;
     hangUpFromScreenRole = role;
+  }
+
+  Future<void> endCallChatItem({required CallRole role}) async {
+    endCallChatItemCalled = true;
+    endCallChatItemRole = role;
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../presentation/themes/app_custom_colors.dart';
+import 'call_ui_rules.dart';
 
 // =========================================================================
 // Policy — what the SDK persists when a call ends
@@ -76,14 +77,34 @@ bool isMissedCallDisplay(CallStatus status) =>
 
 /// Whether tapping the item opens or returns to the call screen.
 ///
-/// Tappable while an incoming call is pending (receiver's view of `calling`)
-/// or while a call is in progress.
+/// Only tappable while a call is in progress (both parties connected).
+/// Ringing and calling states are intentionally excluded: the incoming call
+/// banner handles answer/reject, and tapping a ringing item would open a
+/// blank screen with no live session to restore.
 bool isCallChatItemTappable({
   required CallStatus status,
   required bool isFromMe,
-}) =>
-    (status == CallStatus.calling && !isFromMe) ||
-    status == CallStatus.inProgress;
+}) => status == CallStatus.inProgress;
+
+/// Maps any live (non-final) call state to the [CallStatus] to persist on
+/// the chat item while a call is in progress.
+///
+/// Returns null once the call has ended — final writes go through
+/// [resolveEndStatus]. Built on the same [resolveCallUiPhase] rule that drives
+/// the call screen and banner, so the persisted chat item can never disagree
+/// with what the live UI shows.
+CallStatus? resolveInProgressCallChatItemStatus({
+  required AudioVideoCallStatus status,
+  required bool hasHadPeer,
+}) {
+  final phase = resolveCallUiPhase(status: status, hasHadPeer: hasHadPeer);
+  return switch (phase) {
+    CallUiPhase.calling => CallStatus.calling,
+    CallUiPhase.ringing => CallStatus.ringing,
+    CallUiPhase.inCall => CallStatus.inProgress,
+    CallUiPhase.ended => null,
+  };
+}
 
 // =========================================================================
 // Status text

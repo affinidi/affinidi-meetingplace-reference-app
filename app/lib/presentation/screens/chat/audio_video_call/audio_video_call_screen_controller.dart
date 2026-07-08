@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../application/services/chat_service/chat_session_service.dart';
 import '../../../../application/services/contacts_service/contacts_service.dart';
 import '../../../../application/services/incoming_call_service/incoming_call_notifier.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
@@ -19,11 +18,9 @@ import 'audio_video_call_screen_state.dart';
 import 'audio_video_call_state_update.dart';
 import 'call_lifecycle_update.dart';
 import 'call_media_update.dart';
-import 'handlers/call_chat_item_handler.dart';
 import 'handlers/call_lifecycle_handler.dart';
 import 'handlers/call_media_toggle_handler.dart';
 import 'handlers/call_session_handler.dart';
-import 'rules/call_chat_item_rules.dart';
 import 'rules/call_ui_rules.dart';
 
 part 'audio_video_call_screen_controller.g.dart';
@@ -49,13 +46,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   // Drives end-status resolution; the chat item itself is gated by the emitter.
   bool _isCaller = false;
 
-  // Eagerly captured in build() so endCallChatItem can write the final call
-  // chat item even after this autoDispose controller is torn down. The banner
-  // controller keeps chatSessionServiceProvider alive via its own subscription,
-  // so this reference stays valid across disposal.
-  ChatSessionService? _chatService;
-
-  late final CallChatItemHandler _chatItemHandler;
   late final CallLifecycleHandler _lifecycleHandler;
   late final CallMediaToggleHandler _mediaHandler;
 
@@ -71,8 +61,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   AudioVideoCallScreenState build(String contactId) {
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     _isGroupContact = contact?.isGroup ?? false;
-    final channelDid = contact?.channelDid ?? contactId;
-    _chatService = ref.read(chatSessionServiceProvider(channelDid).notifier);
     final incomingEvent = ref.read(incomingCallProvider).eventOrNull;
     final expectedOtherPartyDid = contact?.channelDid ?? contactId;
     final isAcceptedIncomingForThisScreen =
@@ -82,13 +70,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     if (_isGroupContact && contact != null) {
       unawaited(_loadGroupMemberNames(contact.offerLink));
     }
-
-    _chatItemHandler = CallChatItemHandler(
-      resolveItemId: _resolveCallChatItemId,
-      updateItem: _updateCallChatItem,
-      isDisposed: () => _chatService == null,
-      logger: _logger,
-    );
 
     final audioSessionService = ref.read(
       callAudioSessionServiceProvider.notifier,
@@ -319,8 +300,12 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     ref
         .read(activeCallControllerProvider.notifier)
         .minimize(
+          contactId: contactId,
+          status: state.status,
+          peerName: state.peerName,
           isAudioOnly: state.isAudioOnly,
           isCameraEnabled: state.isCameraEnabled,
+          isMicEnabled: state.isMicEnabled,
           selfParticipant: selfParticipant,
         );
   }
@@ -497,13 +482,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       return;
     }
 
-    final bannerItemId = ref
-        .read(activeCallControllerProvider.notifier)
-        .callChatItemId;
-    if (bannerItemId != null) {
-      _chatItemHandler.setCallChatItemId(bannerItemId);
-    }
-
     if (update.ownRole != null) {
       _isCaller = update.ownRole == CallRole.caller;
     }
@@ -531,34 +509,12 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       ref
           .read(activeCallControllerProvider.notifier)
           .startTimer(update.callStartedAt);
-      _chatItemHandler.updateCallChatItemStatus(CallStatus.inProgress);
-    }
-
-    if (update.callStartedAt != null) {
-      ref
-          .read(activeCallControllerProvider.notifier)
-          .startTimer(update.callStartedAt);
-    }
-
-    if (!_chatItemHandler.callChatItemEnded &&
-        update.status == AudioVideoCallStatus.outgoingRinging &&
-        !update.peerJustJoined) {
-      _chatItemHandler.updateCallChatItemStatus(CallStatus.ringing);
     }
 
     if (isEndedCallStatus(update.status ?? state.status)) {
       unawaited(ref.read(callAudioSessionServiceProvider.notifier).release());
       _clearIncomingCallState();
       ref.read(activeCallControllerProvider.notifier).stopTimer();
-      _chatItemHandler.endCallChatItem(
-        outcome: resolveCallEndOutcome(
-          lastStatus: _lastStatus,
-          hasHadPeer: state.hasHadPeer,
-        ),
-        isCaller: _isCaller,
-        hasHadPeer: state.hasHadPeer,
-        callDuration: Duration(seconds: state.callDurationSeconds),
-      );
     }
   }
 
@@ -566,34 +522,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   String? get _channelDid {
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     return contact?.channelDid ?? contactId;
-  }
-
-  Future<String?> _resolveCallChatItemId({required bool isCaller}) async {
-    if (!_isDisposed) {
-      final bannerItemId = ref
-          .read(activeCallControllerProvider.notifier)
-          .callChatItemId;
-      if (bannerItemId != null) return bannerItemId;
-    }
-    final chatService = _chatService;
-    if (chatService == null) return null;
-    return isCaller
-        ? chatService.resolveOutgoingCallChatItemId()
-        : chatService.resolveIncomingCallChatItemId();
-  }
-
-  Future<void> _updateCallChatItem(
-    String messageId, {
-    required CallStatus status,
-    Duration? duration,
-  }) async {
-    final chatService = _chatService;
-    if (chatService == null) return;
-    await chatService.updateCallChatItem(
-      messageId,
-      status: status,
-      duration: duration,
-    );
   }
 
   /// Applies lifecycle transitions: attaches sessions, clears incoming state,
@@ -624,24 +552,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
         actionFailure: CallActionFailureEvent(CallActionFailure.hangUp),
       );
     }
-    if (update.endOutcome != null) {
-      _chatItemHandler.endCallChatItem(
-        outcome: update.endOutcome!,
-        isCaller: _isCaller,
-        hasHadPeer: state.hasHadPeer,
-        callDuration: Duration(seconds: state.callDurationSeconds),
-      );
-    } else if (isEndedCallStatus(update.status ?? state.status)) {
+    if (isEndedCallStatus(update.status ?? state.status)) {
       ref.read(activeCallControllerProvider.notifier).stopTimer();
-      _chatItemHandler.endCallChatItem(
-        outcome: resolveCallEndOutcome(
-          lastStatus: _lastStatus,
-          hasHadPeer: state.hasHadPeer,
-        ),
-        isCaller: _isCaller,
-        hasHadPeer: state.hasHadPeer,
-        callDuration: Duration(seconds: state.callDurationSeconds),
-      );
     }
   }
 
@@ -716,10 +628,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       activeCallControllerProvider.notifier,
     );
     if (!value.isVisible) {
-      final bannerItemId = activeCallController.callChatItemId;
-      if (bannerItemId != null) {
-        _chatItemHandler.setCallChatItemId(bannerItemId);
-      }
       activeCallController.clear();
       return;
     }
