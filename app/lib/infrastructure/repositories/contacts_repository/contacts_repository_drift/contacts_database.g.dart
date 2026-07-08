@@ -171,6 +171,17 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
     requiredDuringInsert: false,
     clientDefault: () => 0,
   );
+  static const VerificationMeta _pendingMissedCallAtMeta =
+      const VerificationMeta('pendingMissedCallAt');
+  @override
+  late final GeneratedColumn<DateTime> pendingMissedCallAt =
+      GeneratedColumn<DateTime>(
+        'pending_missed_call_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _hasBeenOpenedMeta = const VerificationMeta(
     'hasBeenOpened',
   );
@@ -229,6 +240,7 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
     badgeCount,
     currentMessageSeqNo,
     missedCallCount,
+    pendingMissedCallAt,
     hasBeenOpened,
     lastKeepAliveMessage,
     notificationBannerDismissed,
@@ -327,6 +339,15 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         missedCallCount.isAcceptableOrUnknown(
           data['missed_call_count']!,
           _missedCallCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pending_missed_call_at')) {
+      context.handle(
+        _pendingMissedCallAtMeta,
+        pendingMissedCallAt.isAcceptableOrUnknown(
+          data['pending_missed_call_at']!,
+          _pendingMissedCallAtMeta,
         ),
       );
     }
@@ -434,6 +455,10 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         DriftSqlType.int,
         data['${effectivePrefix}missed_call_count'],
       )!,
+      pendingMissedCallAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}pending_missed_call_at'],
+      ),
       hasBeenOpened: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}has_been_opened'],
@@ -480,6 +505,7 @@ class Contact extends DataClass implements Insertable<Contact> {
   final int badgeCount;
   final int currentMessageSeqNo;
   final int missedCallCount;
+  final DateTime? pendingMissedCallAt;
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;
   final bool notificationBannerDismissed;
@@ -499,6 +525,7 @@ class Contact extends DataClass implements Insertable<Contact> {
     required this.badgeCount,
     required this.currentMessageSeqNo,
     required this.missedCallCount,
+    this.pendingMissedCallAt,
     required this.hasBeenOpened,
     this.lastKeepAliveMessage,
     required this.notificationBannerDismissed,
@@ -541,6 +568,9 @@ class Contact extends DataClass implements Insertable<Contact> {
     map['badge_count'] = Variable<int>(badgeCount);
     map['current_message_seq_no'] = Variable<int>(currentMessageSeqNo);
     map['missed_call_count'] = Variable<int>(missedCallCount);
+    if (!nullToAbsent || pendingMissedCallAt != null) {
+      map['pending_missed_call_at'] = Variable<DateTime>(pendingMissedCallAt);
+    }
     map['has_been_opened'] = Variable<bool>(hasBeenOpened);
     if (!nullToAbsent || lastKeepAliveMessage != null) {
       map['last_keep_alive_message'] = Variable<DateTime>(lastKeepAliveMessage);
@@ -574,6 +604,9 @@ class Contact extends DataClass implements Insertable<Contact> {
       badgeCount: Value(badgeCount),
       currentMessageSeqNo: Value(currentMessageSeqNo),
       missedCallCount: Value(missedCallCount),
+      pendingMissedCallAt: pendingMissedCallAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pendingMissedCallAt),
       hasBeenOpened: Value(hasBeenOpened),
       lastKeepAliveMessage: lastKeepAliveMessage == null && nullToAbsent
           ? const Value.absent()
@@ -607,6 +640,9 @@ class Contact extends DataClass implements Insertable<Contact> {
         json['currentMessageSeqNo'],
       ),
       missedCallCount: serializer.fromJson<int>(json['missedCallCount']),
+      pendingMissedCallAt: serializer.fromJson<DateTime?>(
+        json['pendingMissedCallAt'],
+      ),
       hasBeenOpened: serializer.fromJson<bool>(json['hasBeenOpened']),
       lastKeepAliveMessage: serializer.fromJson<DateTime?>(
         json['lastKeepAliveMessage'],
@@ -635,6 +671,7 @@ class Contact extends DataClass implements Insertable<Contact> {
       'badgeCount': serializer.toJson<int>(badgeCount),
       'currentMessageSeqNo': serializer.toJson<int>(currentMessageSeqNo),
       'missedCallCount': serializer.toJson<int>(missedCallCount),
+      'pendingMissedCallAt': serializer.toJson<DateTime?>(pendingMissedCallAt),
       'hasBeenOpened': serializer.toJson<bool>(hasBeenOpened),
       'lastKeepAliveMessage': serializer.toJson<DateTime?>(
         lastKeepAliveMessage,
@@ -661,6 +698,7 @@ class Contact extends DataClass implements Insertable<Contact> {
     int? badgeCount,
     int? currentMessageSeqNo,
     int? missedCallCount,
+    Value<DateTime?> pendingMissedCallAt = const Value.absent(),
     bool? hasBeenOpened,
     Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
     bool? notificationBannerDismissed,
@@ -682,6 +720,9 @@ class Contact extends DataClass implements Insertable<Contact> {
     badgeCount: badgeCount ?? this.badgeCount,
     currentMessageSeqNo: currentMessageSeqNo ?? this.currentMessageSeqNo,
     missedCallCount: missedCallCount ?? this.missedCallCount,
+    pendingMissedCallAt: pendingMissedCallAt.present
+        ? pendingMissedCallAt.value
+        : this.pendingMissedCallAt,
     hasBeenOpened: hasBeenOpened ?? this.hasBeenOpened,
     lastKeepAliveMessage: lastKeepAliveMessage.present
         ? lastKeepAliveMessage.value
@@ -722,6 +763,9 @@ class Contact extends DataClass implements Insertable<Contact> {
       missedCallCount: data.missedCallCount.present
           ? data.missedCallCount.value
           : this.missedCallCount,
+      pendingMissedCallAt: data.pendingMissedCallAt.present
+          ? data.pendingMissedCallAt.value
+          : this.pendingMissedCallAt,
       hasBeenOpened: data.hasBeenOpened.present
           ? data.hasBeenOpened.value
           : this.hasBeenOpened,
@@ -752,6 +796,7 @@ class Contact extends DataClass implements Insertable<Contact> {
           ..write('badgeCount: $badgeCount, ')
           ..write('currentMessageSeqNo: $currentMessageSeqNo, ')
           ..write('missedCallCount: $missedCallCount, ')
+          ..write('pendingMissedCallAt: $pendingMissedCallAt, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
           ..write('notificationBannerDismissed: $notificationBannerDismissed')
@@ -776,6 +821,7 @@ class Contact extends DataClass implements Insertable<Contact> {
     badgeCount,
     currentMessageSeqNo,
     missedCallCount,
+    pendingMissedCallAt,
     hasBeenOpened,
     lastKeepAliveMessage,
     notificationBannerDismissed,
@@ -799,6 +845,7 @@ class Contact extends DataClass implements Insertable<Contact> {
           other.badgeCount == this.badgeCount &&
           other.currentMessageSeqNo == this.currentMessageSeqNo &&
           other.missedCallCount == this.missedCallCount &&
+          other.pendingMissedCallAt == this.pendingMissedCallAt &&
           other.hasBeenOpened == this.hasBeenOpened &&
           other.lastKeepAliveMessage == this.lastKeepAliveMessage &&
           other.notificationBannerDismissed ==
@@ -821,6 +868,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
   final Value<int> badgeCount;
   final Value<int> currentMessageSeqNo;
   final Value<int> missedCallCount;
+  final Value<DateTime?> pendingMissedCallAt;
   final Value<bool> hasBeenOpened;
   final Value<DateTime?> lastKeepAliveMessage;
   final Value<bool> notificationBannerDismissed;
@@ -841,6 +889,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.badgeCount = const Value.absent(),
     this.currentMessageSeqNo = const Value.absent(),
     this.missedCallCount = const Value.absent(),
+    this.pendingMissedCallAt = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
     this.notificationBannerDismissed = const Value.absent(),
@@ -862,6 +911,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.badgeCount = const Value.absent(),
     this.currentMessageSeqNo = const Value.absent(),
     this.missedCallCount = const Value.absent(),
+    this.pendingMissedCallAt = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
     this.notificationBannerDismissed = const Value.absent(),
@@ -888,6 +938,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Expression<int>? badgeCount,
     Expression<int>? currentMessageSeqNo,
     Expression<int>? missedCallCount,
+    Expression<DateTime>? pendingMissedCallAt,
     Expression<bool>? hasBeenOpened,
     Expression<DateTime>? lastKeepAliveMessage,
     Expression<bool>? notificationBannerDismissed,
@@ -911,6 +962,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       if (currentMessageSeqNo != null)
         'current_message_seq_no': currentMessageSeqNo,
       if (missedCallCount != null) 'missed_call_count': missedCallCount,
+      if (pendingMissedCallAt != null)
+        'pending_missed_call_at': pendingMissedCallAt,
       if (hasBeenOpened != null) 'has_been_opened': hasBeenOpened,
       if (lastKeepAliveMessage != null)
         'last_keep_alive_message': lastKeepAliveMessage,
@@ -936,6 +989,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Value<int>? badgeCount,
     Value<int>? currentMessageSeqNo,
     Value<int>? missedCallCount,
+    Value<DateTime?>? pendingMissedCallAt,
     Value<bool>? hasBeenOpened,
     Value<DateTime?>? lastKeepAliveMessage,
     Value<bool>? notificationBannerDismissed,
@@ -958,6 +1012,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       badgeCount: badgeCount ?? this.badgeCount,
       currentMessageSeqNo: currentMessageSeqNo ?? this.currentMessageSeqNo,
       missedCallCount: missedCallCount ?? this.missedCallCount,
+      pendingMissedCallAt: pendingMissedCallAt ?? this.pendingMissedCallAt,
       hasBeenOpened: hasBeenOpened ?? this.hasBeenOpened,
       lastKeepAliveMessage: lastKeepAliveMessage ?? this.lastKeepAliveMessage,
       notificationBannerDismissed:
@@ -1024,6 +1079,11 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     if (missedCallCount.present) {
       map['missed_call_count'] = Variable<int>(missedCallCount.value);
     }
+    if (pendingMissedCallAt.present) {
+      map['pending_missed_call_at'] = Variable<DateTime>(
+        pendingMissedCallAt.value,
+      );
+    }
     if (hasBeenOpened.present) {
       map['has_been_opened'] = Variable<bool>(hasBeenOpened.value);
     }
@@ -1061,6 +1121,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
           ..write('badgeCount: $badgeCount, ')
           ..write('currentMessageSeqNo: $currentMessageSeqNo, ')
           ..write('missedCallCount: $missedCallCount, ')
+          ..write('pendingMissedCallAt: $pendingMissedCallAt, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
           ..write('notificationBannerDismissed: $notificationBannerDismissed, ')
@@ -1513,6 +1574,7 @@ typedef $$ContactsTableCreateCompanionBuilder =
       Value<int> badgeCount,
       Value<int> currentMessageSeqNo,
       Value<int> missedCallCount,
+      Value<DateTime?> pendingMissedCallAt,
       Value<bool> hasBeenOpened,
       Value<DateTime?> lastKeepAliveMessage,
       Value<bool> notificationBannerDismissed,
@@ -1535,6 +1597,7 @@ typedef $$ContactsTableUpdateCompanionBuilder =
       Value<int> badgeCount,
       Value<int> currentMessageSeqNo,
       Value<int> missedCallCount,
+      Value<DateTime?> pendingMissedCallAt,
       Value<bool> hasBeenOpened,
       Value<DateTime?> lastKeepAliveMessage,
       Value<bool> notificationBannerDismissed,
@@ -1653,6 +1716,11 @@ class $$ContactsTableFilterComposer
 
   ColumnFilters<int> get missedCallCount => $composableBuilder(
     column: $table.missedCallCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get pendingMissedCallAt => $composableBuilder(
+    column: $table.pendingMissedCallAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1781,6 +1849,11 @@ class $$ContactsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get pendingMissedCallAt => $composableBuilder(
+    column: $table.pendingMissedCallAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get hasBeenOpened => $composableBuilder(
     column: $table.hasBeenOpened,
     builder: (column) => ColumnOrderings(column),
@@ -1864,6 +1937,11 @@ class $$ContactsTableAnnotationComposer
 
   GeneratedColumn<int> get missedCallCount => $composableBuilder(
     column: $table.missedCallCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get pendingMissedCallAt => $composableBuilder(
+    column: $table.pendingMissedCallAt,
     builder: (column) => column,
   );
 
@@ -1951,6 +2029,7 @@ class $$ContactsTableTableManager
                 Value<int> badgeCount = const Value.absent(),
                 Value<int> currentMessageSeqNo = const Value.absent(),
                 Value<int> missedCallCount = const Value.absent(),
+                Value<DateTime?> pendingMissedCallAt = const Value.absent(),
                 Value<bool> hasBeenOpened = const Value.absent(),
                 Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
                 Value<bool> notificationBannerDismissed = const Value.absent(),
@@ -1971,6 +2050,7 @@ class $$ContactsTableTableManager
                 badgeCount: badgeCount,
                 currentMessageSeqNo: currentMessageSeqNo,
                 missedCallCount: missedCallCount,
+                pendingMissedCallAt: pendingMissedCallAt,
                 hasBeenOpened: hasBeenOpened,
                 lastKeepAliveMessage: lastKeepAliveMessage,
                 notificationBannerDismissed: notificationBannerDismissed,
@@ -1993,6 +2073,7 @@ class $$ContactsTableTableManager
                 Value<int> badgeCount = const Value.absent(),
                 Value<int> currentMessageSeqNo = const Value.absent(),
                 Value<int> missedCallCount = const Value.absent(),
+                Value<DateTime?> pendingMissedCallAt = const Value.absent(),
                 Value<bool> hasBeenOpened = const Value.absent(),
                 Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
                 Value<bool> notificationBannerDismissed = const Value.absent(),
@@ -2013,6 +2094,7 @@ class $$ContactsTableTableManager
                 badgeCount: badgeCount,
                 currentMessageSeqNo: currentMessageSeqNo,
                 missedCallCount: missedCallCount,
+                pendingMissedCallAt: pendingMissedCallAt,
                 hasBeenOpened: hasBeenOpened,
                 lastKeepAliveMessage: lastKeepAliveMessage,
                 notificationBannerDismissed: notificationBannerDismissed,

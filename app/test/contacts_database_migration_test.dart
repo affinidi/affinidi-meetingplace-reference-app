@@ -182,5 +182,66 @@ void main() {
       expect(contacts.first.missedCallCount, equals(0));
       expect(contacts.first.badgeCount, equals(3));
     });
+
+    test('v6 to v7: adds pending_missed_call_at column defaulting to '
+        'null', () async {
+      final rawDb = sqlite3.openInMemory();
+      rawDb.execute('PRAGMA user_version = 6');
+
+      // v6 contacts schema: has missed_call_count, no pending_missed_call_at.
+      rawDb.execute('''
+          CREATE TABLE contacts (
+            id TEXT NOT NULL PRIMARY KEY,
+            channel_did TEXT,
+            channel_did_sha256 TEXT,
+            date_added INTEGER NOT NULL,
+            offer_link TEXT NOT NULL DEFAULT '',
+            mediator_did TEXT NOT NULL DEFAULT '',
+            type INTEGER NOT NULL DEFAULT 0,
+            status INTEGER NOT NULL DEFAULT 0,
+            origin INTEGER NOT NULL DEFAULT 0,
+            category INTEGER NOT NULL DEFAULT 0,
+            display_name TEXT,
+            badge_update_in_progress INTEGER NOT NULL DEFAULT 0,
+            badge_count INTEGER NOT NULL DEFAULT 0,
+            current_message_seq_no INTEGER NOT NULL DEFAULT 0,
+            missed_call_count INTEGER NOT NULL DEFAULT 0,
+            has_been_opened INTEGER NOT NULL DEFAULT 0,
+            last_keep_alive_message INTEGER,
+            notification_banner_dismissed INTEGER NOT NULL DEFAULT 0
+          )
+        ''');
+      rawDb.execute('''
+          CREATE TABLE contact_cards (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            contact_id TEXT NOT NULL UNIQUE REFERENCES contacts(id) ON DELETE CASCADE,
+            did TEXT NOT NULL DEFAULT '',
+            type TEXT NOT NULL DEFAULT '',
+            contact_info_json TEXT NOT NULL DEFAULT '{}',
+            profile_pic TEXT
+          )
+        ''');
+
+      rawDb.execute('''
+          INSERT INTO contacts (id, date_added, offer_link, mediator_did, type,
+            status, origin, category, missed_call_count)
+          VALUES ('contact-1', 0, '', '', 0, 0, 1, 0, 2)
+        ''');
+
+      final db = ContactsDatabase.withExecutor(NativeDatabase.opened(rawDb));
+      addTearDown(db.close);
+
+      // Trigger migration.
+      final contacts = await db.select(db.contacts).get();
+      expect(contacts, hasLength(1));
+
+      final cols = await db.customSelect("PRAGMA table_info('contacts')").get();
+      final columnNames = cols.map((r) => r.data['name'] as String).toSet();
+      expect(columnNames, contains('pending_missed_call_at'));
+
+      // Existing rows default to null; unrelated columns are preserved.
+      expect(contacts.first.pendingMissedCallAt, isNull);
+      expect(contacts.first.missedCallCount, equals(2));
+    });
   });
 }

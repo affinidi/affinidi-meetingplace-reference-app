@@ -188,6 +188,12 @@ void main() {
               .incrementMissedCallBadgeCalls,
           ['did:key:caller'],
         );
+        expect(
+          (container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService)
+              .setPendingMissedCallCalls,
+          ['did:key:caller'],
+        );
       });
     });
 

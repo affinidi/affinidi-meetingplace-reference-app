@@ -51,7 +51,7 @@ class ContactsDatabase extends _$ContactsDatabase {
   ContactsDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -199,6 +199,20 @@ class ContactsDatabase extends _$ContactsDatabase {
           );
         }
       }
+
+      // Adds pending_missed_call_at so a missed incoming call can be reconciled
+      // to its chat item on the next chat open, surviving an app restart.
+      if (from < 7) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+        final pendingMissedCallAtExists = result.any(
+          (row) => row.data['name'] == 'pending_missed_call_at',
+        );
+        if (!pendingMissedCallAtExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN pending_missed_call_at INTEGER',
+          );
+        }
+      }
     },
   );
 }
@@ -222,6 +236,7 @@ class Contacts extends Table {
   IntColumn get badgeCount => integer().clientDefault(() => 0)();
   IntColumn get currentMessageSeqNo => integer().clientDefault(() => 0)();
   IntColumn get missedCallCount => integer().clientDefault(() => 0)();
+  DateTimeColumn get pendingMissedCallAt => dateTime().nullable()();
   BoolColumn get hasBeenOpened => boolean().clientDefault(() => false)();
   DateTimeColumn get lastKeepAliveMessage => dateTime().nullable()();
   BoolColumn get notificationBannerDismissed =>

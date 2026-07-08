@@ -434,6 +434,36 @@ class ContactsService extends _$ContactsService {
     await updateContact(amendedContact);
   }
 
+  /// Records that the current incoming call from [channelDid] was missed, so
+  /// the receiver's call chat item can be reconciled to `missed` even if the
+  /// caller's message has not synced yet or the app restarts before it does.
+  ///
+  /// Durable on [Contact.pendingMissedCallAt]; cleared by
+  /// [clearPendingMissedCall] once the item is healed.
+  Future<void> setPendingMissedCall(String channelDid) async {
+    final contact = state.getContactByChannelDid(channelDid);
+    if (contact == null) {
+      _logger.warning(
+        'setPendingMissedCall: no contact for $channelDid',
+        name: _logKey,
+      );
+      return;
+    }
+    await updateContact(
+      contact.copyWith(pendingMissedCallAt: DateTime.now().toUtc()),
+    );
+  }
+
+  /// Clears the pending missed-call marker for [channelDid] after the call chat
+  /// item has been reconciled to `missed`. A no-op when no marker is set.
+  Future<void> clearPendingMissedCall(String channelDid) async {
+    final contact = state.getContactByChannelDid(channelDid);
+    if (contact == null || contact.pendingMissedCallAt == null) {
+      return;
+    }
+    await updateContact(contact.copyWith(pendingMissedCallAt: null));
+  }
+
   /// Update an existing contact when a group invitation is accepted.
   ///
   /// Sets the contact status to pending approval and updates card/profile

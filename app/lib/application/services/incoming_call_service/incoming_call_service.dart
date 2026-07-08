@@ -176,23 +176,35 @@ class IncomingCallService extends _$IncomingCallService {
     action(sdk);
   }
 
-  /// Updates the incoming call chat item to [CallStatus.missed] for the given
-  /// [contactId] and increments the contact's unread badge. Runs asynchronously
-  /// so the ring state can be cleared first.
+  /// Records the missed call (badge + durable marker) and attempts immediate
+  /// heal via chat session. The marker survives restart for event-driven
+  /// reconciliation on the next chat open.
   void _markCallAsMissed(String contactId) {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
     unawaited(
       Future(() async {
         try {
           await ref
-              .read(chatSessionServiceProvider(contactId).notifier)
-              .markCallAsMissed();
-          await ref
               .read(contactsServiceProvider.notifier)
               .incrementMissedCallBadge(contactId);
+          await ref
+              .read(contactsServiceProvider.notifier)
+              .setPendingMissedCall(contactId);
         } catch (e, stackTrace) {
           _logger.error(
-            '_markCallAsMissed failed for $contactId',
+            '_markCallAsMissed: Recording missed call failed for $contactId',
+            error: e,
+            stackTrace: stackTrace,
+            name: _logKey,
+          );
+        }
+        try {
+          await ref
+              .read(chatSessionServiceProvider(contactId).notifier)
+              .markCallAsMissed();
+        } catch (e, stackTrace) {
+          _logger.error(
+            '_markCallAsMissed: Chat item update failed for $contactId',
             error: e,
             stackTrace: stackTrace,
             name: _logKey,

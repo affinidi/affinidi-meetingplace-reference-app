@@ -39,6 +39,10 @@ part 'contact.g.dart';
 ///   Tracked separately because missed calls are not represented in the
 ///   channel sequence number, so they must survive the seqNo-derived badge
 ///   recompute. Cleared together with `badgeCount` when the chat is opened.
+/// - `pendingMissedCallAt` - When a missed incoming call was recorded but its
+///   chat item has not yet been reconciled to `missed`. Durable so the receiver
+///   can heal the item on the next chat open (or via the stream) even after an
+///   app restart. Cleared once the item is marked missed.
 /// - `lastKeepAliveMessage` - Timestamp of the last keep-alive message received
 ///   (used to show liveness).
 @CopyWith()
@@ -61,6 +65,7 @@ class Contact {
     this.badgeCount = 0,
     this.currentMessageSeqNo = 0,
     this.missedCallCount = 0,
+    this.pendingMissedCallAt,
     this.hasBeenOpened = false,
     this.lastKeepAliveMessage,
     this.notificationBannerDismissed = false,
@@ -85,6 +90,7 @@ class Contact {
   final int badgeCount;
   final int currentMessageSeqNo;
   final int missedCallCount;
+  final DateTime? pendingMissedCallAt;
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;
   final bool notificationBannerDismissed;
