@@ -920,8 +920,13 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }) => _vrcManager.showSentVrcAttachment(vcBlob: vcBlob, senderDid: senderDid);
 
   @override
-  Future<String?> sendOutgoingCallMessage({required CallMediaType mediaType}) =>
-      _callChatItemManager.sendOutgoingCallMessage(mediaType: mediaType);
+  Future<String?> sendOutgoingCallMessage({
+    required CallMediaType mediaType,
+    required String callId,
+  }) => _callChatItemManager.sendOutgoingCallMessage(
+    mediaType: mediaType,
+    callId: callId,
+  );
 
   @override
   Future<String?> resolveIncomingCallChatItemId() =>

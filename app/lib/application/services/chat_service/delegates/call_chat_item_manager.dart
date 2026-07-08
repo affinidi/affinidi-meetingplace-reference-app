@@ -206,7 +206,6 @@ class CallChatItemManager {
     String messageId, {
     required CallStatus status,
     Duration? duration,
-    String? callId,
   }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -239,9 +238,9 @@ class CallChatItemManager {
       final updated = CallMetadata.buildAttachment(
         mediaType: existing.mediaType,
         status: status,
+        callId: existing.callId,
         durationMs: duration?.inMilliseconds ?? existing.durationMs,
         id: callAttachment!.id,
-        callId: callId ?? '',
       );
       item.attachments = [
         for (final a in item.attachments)

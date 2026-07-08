@@ -431,9 +431,12 @@ class ActiveCallController extends _$ActiveCallController {
     }
   }
 
-  Future<String?> _sendOutgoingCallMessage() {
+  Future<String?> _sendOutgoingCallMessage(String callId) {
     final mediaType = _isAudioOnly ? CallMediaType.audio : CallMediaType.video;
-    return _chatService!.sendOutgoingCallMessage(mediaType: mediaType);
+    return _chatService!.sendOutgoingCallMessage(
+      mediaType: mediaType,
+      callId: callId,
+    );
   }
 
   Future<String?> _resolveCallChatItemId({required bool isCaller}) {

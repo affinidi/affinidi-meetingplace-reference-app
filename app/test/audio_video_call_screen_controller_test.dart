@@ -129,6 +129,7 @@ class _SpyChatSessionService extends FakeChatSessionService {
   @override
   Future<String?> sendOutgoingCallMessage({
     required CallMediaType mediaType,
+    required String callId,
   }) async {
     onSendOutgoingCallMessage();
     return 'spy-call-item-id';

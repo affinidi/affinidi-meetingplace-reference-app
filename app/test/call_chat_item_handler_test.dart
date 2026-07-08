@@ -13,7 +13,10 @@ void main() {
     late FakeAppLogger fakeLogger;
     late CallChatItemHandler handler;
 
-    const callerState = AudioVideoCallState(ownRole: CallRole.caller);
+    const callerState = AudioVideoCallState(
+      ownRole: CallRole.caller,
+      callId: 'test-call-id',
+    );
     const recipientState = AudioVideoCallState(ownRole: CallRole.recipient);
 
     setUp(() {
@@ -25,7 +28,7 @@ void main() {
       test('invokes callback and stores id when ownRole is caller', () async {
         const itemId = 'call-item-123';
         handler = CallChatItemHandler(
-          onInitiator: () async => itemId,
+          onInitiator: (_) async => itemId,
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
@@ -42,7 +45,7 @@ void main() {
       test('fires callback exactly once', () async {
         var callCount = 0;
         handler = CallChatItemHandler(
-          onInitiator: () async {
+          onInitiator: (_) async {
             callCount++;
             return 'id';
           },
@@ -63,7 +66,7 @@ void main() {
       test('logs on emission', () async {
         final logMessages = <String>[];
         handler = CallChatItemHandler(
-          onInitiator: () async => 'id',
+          onInitiator: (_) async => 'id',
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
@@ -85,7 +88,7 @@ void main() {
       test('does not invoke callback when ownRole is recipient', () async {
         var callCount = 0;
         handler = CallChatItemHandler(
-          onInitiator: () async {
+          onInitiator: (_) async {
             callCount++;
             return 'id';
           },
@@ -106,7 +109,7 @@ void main() {
       test('logs joiner message and returns', () async {
         final logMessages = <String>[];
         handler = CallChatItemHandler(
-          onInitiator: () async => 'id',
+          onInitiator: (_) async => 'id',
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
@@ -131,7 +134,7 @@ void main() {
       test('waits for ownRole before emitting', () async {
         var callCount = 0;
         handler = CallChatItemHandler(
-          onInitiator: () async {
+          onInitiator: (_) async {
             callCount++;
             return 'id';
           },
@@ -160,7 +163,7 @@ void main() {
         () async {
           final warnings = <String>[];
           handler = CallChatItemHandler(
-            onInitiator: () async => 'id',
+            onInitiator: (_) async => 'id',
             resolveItemId: ({required bool isCaller}) async => null,
             updateItem: (_, {required status, duration}) async {},
             isDisposed: () => false,
@@ -186,7 +189,7 @@ void main() {
         () async {
           var callCount = 0;
           handler = CallChatItemHandler(
-            onInitiator: () async {
+            onInitiator: (_) async {
               callCount++;
               return 'id';
             },
@@ -209,7 +212,7 @@ void main() {
     group('lifecycle', () {
       test('dispose cancels subscription', () async {
         handler = CallChatItemHandler(
-          onInitiator: () async => 'id',
+          onInitiator: (_) async => 'id',
           resolveItemId: ({required bool isCaller}) async => null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
@@ -221,7 +224,7 @@ void main() {
 
         var callCount = 0;
         handler = CallChatItemHandler(
-          onInitiator: () async {
+          onInitiator: (_) async {
             callCount++;
             return 'id';
           },
@@ -250,7 +253,7 @@ void main() {
       List<({String messageId, CallStatus status})> calls,
     ) {
       return CallChatItemHandler(
-        onInitiator: () async => 'msg-1',
+        onInitiator: (_) async => 'msg-1',
         resolveItemId: ({required bool isCaller}) async => 'msg-1',
         updateItem: (id, {required status, duration}) async {
           calls.add((messageId: id, status: status));
@@ -358,7 +361,7 @@ void main() {
       bool isDisposed = false,
     }) {
       return CallChatItemHandler(
-        onInitiator: () async => 'msg-1',
+        onInitiator: (_) async => 'msg-1',
         resolveItemId: ({required bool isCaller}) async => 'msg-1',
         updateItem: (id, {required status, duration}) async {
           calls.add((messageId: id, status: status, duration: duration));
@@ -409,12 +412,14 @@ void main() {
           const AudioVideoCallState(
             status: AudioVideoCallStatus.outgoingRinging,
             ownRole: CallRole.caller,
+            callId: 'test-call-id',
           ),
         );
         await session.emitState(
           const AudioVideoCallState(
             status: AudioVideoCallStatus.disconnected,
             ownRole: CallRole.caller,
+            callId: 'test-call-id',
           ),
         );
         await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -450,6 +455,7 @@ void main() {
         const AudioVideoCallState(
           status: AudioVideoCallStatus.disconnected,
           ownRole: CallRole.caller,
+          callId: 'test-call-id',
         ),
       );
       handler.endCall();

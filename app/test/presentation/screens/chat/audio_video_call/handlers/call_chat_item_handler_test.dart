@@ -123,7 +123,7 @@ void main() {
         () async {
           final emitted = <CallChatItemId>[];
           final handler = CallChatItemHandler(
-            onInitiator: () async {
+            onInitiator: (_) async {
               emitted.add('outgoing-item');
               return 'outgoing-id';
             },
@@ -143,6 +143,7 @@ void main() {
               status: AudioVideoCallStatus.outgoingRinging,
               participants: [],
               ownRole: CallRole.caller,
+              callId: 'test-call-id',
               callStartedAt: DateTime.now(),
             ),
           );
@@ -157,7 +158,7 @@ void main() {
         () async {
           final updates = <(String, CallStatus)>[];
           final handler = CallChatItemHandler(
-            onInitiator: () async => 'outgoing-id',
+            onInitiator: (_) async => 'outgoing-id',
             resolveItemId: ({required bool isCaller}) async => 'msg-123',
             updateItem:
                 (id, {required CallStatus status, Duration? duration}) async {
@@ -175,6 +176,7 @@ void main() {
               status: AudioVideoCallStatus.outgoingRinging,
               participants: [],
               ownRole: CallRole.caller,
+              callId: 'test-call-id',
               callStartedAt: DateTime.now(),
             ),
           );
@@ -185,6 +187,7 @@ void main() {
               status: AudioVideoCallStatus.declined,
               participants: [],
               ownRole: CallRole.caller,
+              callId: 'test-call-id',
               callStartedAt: DateTime.now(),
             ),
           );
@@ -203,7 +206,7 @@ void main() {
       test('transitions calling -> ringing -> inProgress -> ended', () async {
         final updates = <(String, CallStatus)>[];
         final handler = CallChatItemHandler(
-          onInitiator: () async => 'outgoing-id',
+          onInitiator: (_) async => 'outgoing-id',
           resolveItemId: ({required bool isCaller}) async => 'msg-456',
           updateItem:
               (id, {required CallStatus status, Duration? duration}) async {
@@ -223,6 +226,7 @@ void main() {
             status: AudioVideoCallStatus.outgoingRinging,
             participants: [],
             ownRole: CallRole.caller,
+              callId: 'test-call-id',
             callStartedAt: now,
           ),
         );
@@ -234,6 +238,7 @@ void main() {
             status: AudioVideoCallStatus.outgoingRinging,
             participants: [FakeAudioVideoCallParticipant()],
             ownRole: CallRole.caller,
+              callId: 'test-call-id',
             callStartedAt: now,
           ),
         );
@@ -245,6 +250,7 @@ void main() {
             status: AudioVideoCallStatus.connected,
             participants: [FakeAudioVideoCallParticipant()],
             ownRole: CallRole.caller,
+              callId: 'test-call-id',
             callStartedAt: now,
           ),
         );
@@ -256,6 +262,7 @@ void main() {
             status: AudioVideoCallStatus.ended,
             participants: [FakeAudioVideoCallParticipant()],
             ownRole: CallRole.caller,
+              callId: 'test-call-id',
             callStartedAt: now,
           ),
         );

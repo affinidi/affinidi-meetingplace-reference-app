@@ -385,6 +385,7 @@ void main() {
           status: AudioVideoCallStatus.active,
           participants: [_remotePeer()],
           ownRole: CallRole.caller,
+          callId: 'test-call-id',
         ),
       );
       await _pumpAsync();
@@ -393,6 +394,7 @@ void main() {
         const AudioVideoCallState(
           status: AudioVideoCallStatus.ended,
           ownRole: CallRole.caller,
+          callId: 'test-call-id',
         ),
       );
       await _pumpAsync();
@@ -453,6 +455,7 @@ void main() {
           const AudioVideoCallState(
             status: AudioVideoCallStatus.ended,
             ownRole: CallRole.caller,
+            callId: 'test-call-id',
           ),
         );
         await _pumpAsync();
