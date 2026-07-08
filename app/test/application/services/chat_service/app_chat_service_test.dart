@@ -1032,6 +1032,7 @@ void main() {
           id: const Uuid().v4(),
           mediaType: CallMediaType.video,
           status: status,
+          callId: '',
         ),
       ],
     );
