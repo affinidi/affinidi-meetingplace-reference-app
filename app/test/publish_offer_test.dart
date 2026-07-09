@@ -7,7 +7,7 @@ import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_mediators.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 String switchKey(String switchName, String identityId) {
@@ -56,7 +56,7 @@ Future<void> setupPublishOfferTest(
   WidgetTester tester,
   String location,
   Identity testIdentity, {
-  FakeMeetingPlaceSDK? fakeSdk,
+  FakeMeetingPlaceMatrixSDK? fakeSdk,
   List<Vrc> vrcs = const [],
 }) async {
   await navigateToLocation(
@@ -208,7 +208,7 @@ void main() {
       tester,
     ) async {
       final l10n = await getL10n();
-      final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+      final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
       await setupPublishOfferTest(
         tester,
@@ -248,7 +248,7 @@ void main() {
     group('and group chat is enabled', () {
       testWidgets('it publishes the invitation as group chat', (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,
@@ -297,7 +297,7 @@ void main() {
     group('and generate a random phrase is disabled', () {
       testWidgets('it disables the publish button', (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,
@@ -332,7 +332,7 @@ void main() {
           tester,
         ) async {
           final l10n = await getL10n();
-          final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+          final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK(
             isPhraseAvailable: true,
           );
           const customPhrase = 'my-unique-custom-phrase';
@@ -396,7 +396,7 @@ void main() {
             tester,
           ) async {
             final l10n = await getL10n();
-            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK(
               isPhraseAvailable: true,
             );
             const customPhrase = 'my-unique-custom-phrase';
@@ -452,7 +452,7 @@ void main() {
             tester,
           ) async {
             final l10n = await getL10n();
-            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK(
               isPhraseAvailable: false,
             );
             const customPhrase = 'already-taken-phrase';
@@ -495,7 +495,7 @@ void main() {
             'it shows progress indicator and disables the publish button',
             (tester) async {
               final l10n = await getL10n();
-              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK(
                 isPhraseAvailable: true,
               );
               const customPhrase = 'validating-phrase';
@@ -541,7 +541,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,
@@ -597,7 +597,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,
@@ -656,7 +656,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
         const defaultExpiryDays = 3;
 
         await setupPublishOfferTest(
@@ -708,7 +708,7 @@ void main() {
         testWidgets('it publishes with the new expiry date', (tester) async {
           await withClock(Clock.fixed(DateTime(2026, 6, 15)), () async {
             final l10n = await getL10n();
-            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
             const expireAfterDays = 5;
 
             await setupPublishOfferTest(
@@ -783,7 +783,7 @@ void main() {
             (tester) async {
               await withClock(Clock.fixed(DateTime(2026, 6, 15)), () async {
                 final l10n = await getL10n();
-                final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+                final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
                 await setupPublishOfferTest(
                   tester,
@@ -850,7 +850,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,
@@ -893,7 +893,7 @@ void main() {
           tester,
         ) async {
           final l10n = await getL10n();
-          final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+          final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
           await setupPublishOfferTest(
             tester,
@@ -948,7 +948,7 @@ void main() {
             'switching back',
             (tester) async {
               final l10n = await getL10n();
-              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
               await setupPublishOfferTest(
                 tester,
@@ -1016,7 +1016,7 @@ void main() {
     group('and change the mediator', () {
       testWidgets('it publishes with the new mediator', (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,
@@ -1084,7 +1084,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,
@@ -1104,7 +1104,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,
@@ -1125,7 +1125,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,
@@ -1143,7 +1143,7 @@ void main() {
 
       testWidgets('it passes the VRC score for group offers', (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await setupPublishOfferTest(
           tester,

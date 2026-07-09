@@ -12,7 +12,7 @@ import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_image_picker.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
 
@@ -210,11 +210,11 @@ void main() {
     });
 
     group('and there is an incoming call', () {
-      late FakeMeetingPlaceSDK coreSdk;
+      late FakeMeetingPlaceMatrixSDK coreSdk;
       late FakeChatSdk chatSdk;
 
       setUp(() {
-        coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels);
+        coreSdk = FakeMeetingPlaceMatrixSDK(channels: FakeChannels.allChannels);
         chatSdk = FakeChatSdk()..sessionMessages = [];
       });
 

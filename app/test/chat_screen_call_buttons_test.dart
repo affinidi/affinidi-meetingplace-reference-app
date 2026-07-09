@@ -7,7 +7,7 @@ import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_environment.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 /// A Matrix chat SDK whose capabilities omit audio/video calling, matching a
@@ -32,7 +32,7 @@ Future<void> _openChat(
     contactId: contact.id,
     contacts: [contact],
     chatSdk: chatSdk,
-    meetingPlaceCoreSDK: FakeMeetingPlaceSDK(
+    meetingPlaceCoreSDK: FakeMeetingPlaceMatrixSDK(
       channels: FakeChannels.allChannels,
       isCallSupported: isCallSupported,
     ),

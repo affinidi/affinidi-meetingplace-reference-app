@@ -4,12 +4,12 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
 
+import 'fakes/fake_audio_video_call_session.dart';
 import 'mocks/mock_app_logger.dart';
-import 'mocks/mock_audio_video_call_session.dart';
 
 void main() {
   group('CallChatItemHandler', () {
-    late MockAudioVideoCallSession mockSession;
+    late FakeAudioVideoCallSession fakeSession;
     late FakeAppLogger fakeLogger;
     late CallChatItemHandler handler;
 
@@ -20,7 +20,7 @@ void main() {
     const recipientState = AudioVideoCallState(ownRole: CallRole.recipient);
 
     setUp(() {
-      mockSession = MockAudioVideoCallSession();
+      fakeSession = FakeAudioVideoCallSession();
       fakeLogger = FakeAppLogger();
     });
 
@@ -35,8 +35,8 @@ void main() {
           logger: fakeLogger,
         );
 
-        handler.attach(mockSession);
-        await mockSession.emitState(callerState);
+        handler.attach(fakeSession);
+        await fakeSession.emitState(callerState);
         await Future<void>.delayed(const Duration(milliseconds: 100));
 
         expect(handler.callChatItemId, itemId);
@@ -55,10 +55,10 @@ void main() {
           logger: fakeLogger,
         );
 
-        handler.attach(mockSession);
-        await mockSession.emitState(callerState);
+        handler.attach(fakeSession);
+        await fakeSession.emitState(callerState);
         await Future<void>.delayed(const Duration(milliseconds: 100));
-        await mockSession.emitState(callerState);
+        await fakeSession.emitState(callerState);
 
         expect(callCount, 1);
       });
@@ -73,8 +73,8 @@ void main() {
           logger: _LogCapture(logMessages),
         );
 
-        handler.attach(mockSession);
-        await mockSession.emitState(callerState);
+        handler.attach(fakeSession);
+        await fakeSession.emitState(callerState);
         await Future<void>.delayed(const Duration(milliseconds: 100));
 
         expect(
@@ -98,8 +98,8 @@ void main() {
           logger: fakeLogger,
         );
 
-        handler.attach(mockSession);
-        await mockSession.emitState(recipientState);
+        handler.attach(fakeSession);
+        await fakeSession.emitState(recipientState);
         await Future<void>.delayed(const Duration(milliseconds: 100));
 
         expect(callCount, 0);
@@ -116,8 +116,8 @@ void main() {
           logger: _LogCapture(logMessages),
         );
 
-        handler.attach(mockSession);
-        await mockSession.emitState(recipientState);
+        handler.attach(fakeSession);
+        await fakeSession.emitState(recipientState);
         await Future<void>.delayed(const Duration(milliseconds: 100));
 
         expect(
@@ -144,13 +144,13 @@ void main() {
           logger: fakeLogger,
         );
 
-        handler.attach(mockSession);
-        await mockSession.emitState(AudioVideoCallState.initial);
+        handler.attach(fakeSession);
+        await fakeSession.emitState(AudioVideoCallState.initial);
         await Future<void>.delayed(const Duration(milliseconds: 100));
 
         expect(callCount, 0);
 
-        await mockSession.emitState(callerState);
+        await fakeSession.emitState(callerState);
         await Future<void>.delayed(const Duration(milliseconds: 100));
 
         expect(callCount, 1);
@@ -170,8 +170,8 @@ void main() {
             logger: _WarningCapture(warnings),
           );
 
-          handler.attach(mockSession);
-          mockSession.dispose();
+          handler.attach(fakeSession);
+          fakeSession.dispose();
           await Future<void>.delayed(const Duration(milliseconds: 100));
 
           expect(
@@ -199,8 +199,8 @@ void main() {
             logger: fakeLogger,
           );
 
-          handler.attach(mockSession);
-          mockSession.dispose();
+          handler.attach(fakeSession);
+          fakeSession.dispose();
           await Future<void>.delayed(const Duration(milliseconds: 100));
 
           expect(callCount, 0);
@@ -219,7 +219,7 @@ void main() {
           logger: fakeLogger,
         );
 
-        handler.attach(mockSession);
+        handler.attach(fakeSession);
         handler.dispose();
 
         var callCount = 0;
@@ -233,7 +233,7 @@ void main() {
           isDisposed: () => false,
           logger: fakeLogger,
         );
-        await mockSession.emitState(callerState);
+        await fakeSession.emitState(callerState);
 
         expect(callCount, 0);
       });
@@ -242,11 +242,11 @@ void main() {
 
   group('in-progress transitions', () {
     late FakeAppLogger logger;
-    late MockAudioVideoCallSession session;
+    late FakeAudioVideoCallSession session;
 
     setUp(() {
       logger = FakeAppLogger();
-      session = MockAudioVideoCallSession();
+      session = FakeAudioVideoCallSession();
     });
 
     CallChatItemHandler makeHandler(
@@ -349,11 +349,11 @@ void main() {
 
   group('terminal write', () {
     late FakeAppLogger logger;
-    late MockAudioVideoCallSession session;
+    late FakeAudioVideoCallSession session;
 
     setUp(() {
       logger = FakeAppLogger();
-      session = MockAudioVideoCallSession();
+      session = FakeAudioVideoCallSession();
     });
 
     CallChatItemHandler makeHandler(

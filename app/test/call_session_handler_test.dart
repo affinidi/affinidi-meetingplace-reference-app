@@ -1,5 +1,5 @@
-import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
@@ -7,23 +7,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_state_update.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_session_handler.dart';
 
-class _FakeCallSession extends Fake implements AudioVideoCallSession {
-  final _stateController = StreamController<AudioVideoCallState>.broadcast();
-  final _participantController =
-      StreamController<CallParticipantEvent>.broadcast();
-
-  void emit(AudioVideoCallState s) => _stateController.add(s);
-
-  void emitParticipantEvent(CallParticipantEvent e) =>
-      _participantController.add(e);
-
-  @override
-  Stream<AudioVideoCallState> get state => _stateController.stream;
-
-  @override
-  Stream<CallParticipantEvent> get participantEvents =>
-      _participantController.stream;
-}
+import 'fakes/fake_audio_video_call_session.dart';
 
 AudioVideoCallParticipant _selfParticipant() =>
     const AudioVideoCallParticipant(participantId: 'local', isSelf: true);
@@ -38,12 +22,12 @@ void main() {
     );
   });
 
-  late _FakeCallSession session;
+  late FakeAudioVideoCallSession session;
   late List<AudioVideoCallStateUpdate> updates;
   late CallSessionHandler handler;
 
   setUp(() {
-    session = _FakeCallSession();
+    session = FakeAudioVideoCallSession();
     updates = [];
     handler = CallSessionHandler(
       logger: AppLogger.instance,
@@ -106,7 +90,7 @@ void main() {
     test('emits a joined event when a new remote appears mid-call', () async {
       handler.attach(session);
 
-      session.emitParticipantEvent(
+      await session.emitParticipantEvent(
         CallParticipantEvent(
           type: CallParticipantEventType.joined,
           participant: _peerParticipant('b'),
@@ -123,7 +107,7 @@ void main() {
     test('emits a left event when a remote disappears mid-call', () async {
       handler.attach(session);
 
-      session.emitParticipantEvent(
+      await session.emitParticipantEvent(
         CallParticipantEvent(
           type: CallParticipantEventType.left,
           participant: _peerParticipant('a'),
@@ -367,7 +351,7 @@ void main() {
     test('cancels prior subscription when attached to a new session', () async {
       handler.attach(session);
 
-      final session2 = _FakeCallSession();
+      final session2 = FakeAudioVideoCallSession();
       handler.attach(session2);
 
       session.emit(
@@ -386,7 +370,7 @@ void main() {
     test('forwards a joined event as a participantEvent update', () async {
       handler.attach(session);
 
-      session.emitParticipantEvent(
+      await session.emitParticipantEvent(
         CallParticipantEvent(
           type: CallParticipantEventType.joined,
           participant: _peerParticipant('p1'),
@@ -404,7 +388,7 @@ void main() {
     test('forwards a left event as a participantEvent update', () async {
       handler.attach(session);
 
-      session.emitParticipantEvent(
+      await session.emitParticipantEvent(
         CallParticipantEvent(
           type: CallParticipantEventType.left,
           participant: _peerParticipant('p1'),
@@ -423,7 +407,7 @@ void main() {
       handler.attach(session);
       handler.dispose();
 
-      session.emitParticipantEvent(
+      await session.emitParticipantEvent(
         CallParticipantEvent(
           type: CallParticipantEventType.left,
           participant: _peerParticipant('p1'),

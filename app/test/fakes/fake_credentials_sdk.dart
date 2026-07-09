@@ -6,7 +6,7 @@ import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/delegates/vdip_manager.dart'
     show VdipManager;
 
-import 'fake_meeting_place_sdk.dart';
+import 'fake_meeting_place_matrix_sdk.dart';
 import 'fake_r_card_repository.dart';
 import 'fake_vrc_repository.dart';
 
@@ -335,7 +335,7 @@ class _TrackedStreamSubscription<T> implements StreamSubscription<T> {
 class FakeCredentialsSdk extends MeetingPlaceCredentialsSDK {
   FakeCredentialsSdk()
     : super(
-        coreSDK: FakeMeetingPlaceSDK(),
+        coreSDK: FakeMeetingPlaceMatrixSDK(),
         rCardRepository: FakeNoOpRCardRepository(),
         vrcRepository: FakeNoOpVrcRepository(),
       );

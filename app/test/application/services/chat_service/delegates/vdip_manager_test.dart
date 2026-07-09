@@ -17,7 +17,7 @@ import 'package:ssi/ssi.dart';
 
 import '../../../../fakes/fake_chat_sdk.dart';
 import '../../../../fakes/fake_credentials_sdk.dart';
-import '../../../../fakes/fake_meeting_place_sdk.dart';
+import '../../../../fakes/fake_meeting_place_matrix_sdk.dart';
 import '../../../../fakes/fake_r_card_repository.dart';
 import '../../../../fakes/fake_vrc_repository.dart';
 
@@ -29,7 +29,7 @@ void main() {
 
   group('VdipManager', () {
     late ProviderContainer container;
-    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeMeetingPlaceMatrixSDK fakeCoreSdk;
     late StubVdipCredentialsSdk stub;
     late FakeChatSdk fakeChatSdk;
     late VdipManager manager;
@@ -83,7 +83,7 @@ void main() {
       persistedEventCompleter = null;
       fakeChatSdk = FakeChatSdk();
 
-      fakeCoreSdk = FakeMeetingPlaceSDK(
+      fakeCoreSdk = FakeMeetingPlaceMatrixSDK(
         channels: {
           otherPartyPermanentDid: Channel(
             permanentChannelDid: localPermanentDid,
@@ -502,7 +502,7 @@ void main() {
     test(
       'subscribe — completes without error when channel is not found',
       () async {
-        final emptyCoreSdk = FakeMeetingPlaceSDK(channels: {});
+        final emptyCoreSdk = FakeMeetingPlaceMatrixSDK(channels: {});
         final emptyContainer = ProviderContainer(
           overrides: [
             meetingPlaceSdkProvider.overrideWith((ref) async => emptyCoreSdk),
@@ -540,7 +540,7 @@ void main() {
     test(
       'replayPending — completes without error when channel is not found',
       () async {
-        final emptyCoreSdk = FakeMeetingPlaceSDK(channels: {});
+        final emptyCoreSdk = FakeMeetingPlaceMatrixSDK(channels: {});
         final emptyContainer = ProviderContainer(
           overrides: [
             meetingPlaceSdkProvider.overrideWith((ref) async => emptyCoreSdk),

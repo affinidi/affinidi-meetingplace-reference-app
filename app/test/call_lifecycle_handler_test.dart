@@ -12,51 +12,8 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_chat_item_rules.dart';
 
 import 'fakes/fake_audio_session.dart';
-
-class _FakeCallSession extends Fake implements AudioVideoCallSession {
-  int setSpeakerphoneEnabledCalls = 0;
-  bool? lastSpeakerphoneEnabled;
-
-  @override
-  Future<void> setSpeakerphoneEnabled(bool enabled) async {
-    setSpeakerphoneEnabledCalls++;
-    lastSpeakerphoneEnabled = enabled;
-  }
-}
-
-class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
-  _FakeMeetingPlaceMatrixSDK({
-    AudioVideoCallSession? session,
-    this.startCallError,
-  }) : leaveCurrentCallError = null,
-       session = session ?? _FakeCallSession();
-
-  final AudioVideoCallSession session;
-  final Exception? startCallError;
-  final Exception? leaveCurrentCallError;
-  int startCallCount = 0;
-  int leaveCurrentCallCount = 0;
-  String? lastOtherPartyChannelDid;
-  CallMediaType? lastMediaType;
-
-  @override
-  Future<AudioVideoCallSession> startCall({
-    required String otherPartyChannelDid,
-    required CallMediaType mediaType,
-  }) async {
-    startCallCount++;
-    lastOtherPartyChannelDid = otherPartyChannelDid;
-    lastMediaType = mediaType;
-    if (startCallError != null) throw startCallError!;
-    return session;
-  }
-
-  @override
-  Future<void> leaveCurrentCall() async {
-    leaveCurrentCallCount++;
-    if (leaveCurrentCallError != null) throw leaveCurrentCallError!;
-  }
-}
+import 'fakes/fake_audio_video_call_session.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 
 void main() {
   setUpAll(() {
@@ -70,7 +27,7 @@ void main() {
   late AudioVideoCallScreenState state;
   late AudioVideoCallSession? currentSession;
   late List<CallLifecycleUpdate> updates;
-  late _FakeMeetingPlaceMatrixSDK sdk;
+  late FakeMeetingPlaceMatrixSDK sdk;
 
   CallLifecycleHandler buildHandler({String? channelDid = 'did:key:peer'}) {
     return CallLifecycleHandler(
@@ -98,7 +55,7 @@ void main() {
     state = AudioVideoCallScreenState();
     currentSession = null;
     updates = [];
-    sdk = _FakeMeetingPlaceMatrixSDK();
+    sdk = FakeMeetingPlaceMatrixSDK(callSession: FakeAudioVideoCallSession());
   });
 
   tearDown(() => container.dispose());
@@ -106,8 +63,8 @@ void main() {
   group('joinCall', () {
     test('acquires audio session and starts an audio call', () async {
       state = state.copyWith(isAudioOnly: true);
-      final session = _FakeCallSession();
-      sdk = _FakeMeetingPlaceMatrixSDK(session: session);
+      final session = FakeAudioVideoCallSession();
+      sdk = FakeMeetingPlaceMatrixSDK(callSession: session);
       final handler = buildHandler();
 
       await handler.joinCall();
@@ -133,7 +90,10 @@ void main() {
     });
 
     test('releases audio session when startCall fails', () async {
-      sdk = _FakeMeetingPlaceMatrixSDK(startCallError: Exception('boom'));
+      sdk = FakeMeetingPlaceMatrixSDK(
+        callSession: FakeAudioVideoCallSession(),
+        startCallError: Exception('boom'),
+      );
       final handler = buildHandler();
 
       await handler.joinCall();
@@ -150,7 +110,7 @@ void main() {
 
   group('leaveCall', () {
     test('releases audio session and emits ended update', () async {
-      currentSession = _FakeCallSession();
+      currentSession = FakeAudioVideoCallSession();
       final handler = buildHandler();
       await container
           .read(callAudioSessionServiceProvider.notifier)
@@ -177,7 +137,7 @@ void main() {
 
   group('onPeerDeclined', () {
     test('does not call SDK leaveCurrentCall to prevent signal loop', () async {
-      currentSession = _FakeCallSession();
+      currentSession = FakeAudioVideoCallSession();
       final handler = buildHandler();
       await container
           .read(callAudioSessionServiceProvider.notifier)

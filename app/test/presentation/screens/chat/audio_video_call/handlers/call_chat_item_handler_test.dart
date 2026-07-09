@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
 
+import '../../../../../fakes/fake_audio_video_call_session.dart';
 import '../../../../../mocks/fake_app_logger.dart';
 import '../../../../../mocks/fake_audio_video_call_participant.dart';
-import '../../../../../mocks/mock_audio_video_call_session.dart';
 
 typedef CallChatItemId = String;
 
@@ -134,7 +134,7 @@ void main() {
             logger: FakeAppLogger(),
           );
 
-          final session = MockAudioVideoCallSession();
+          final session = FakeAudioVideoCallSession();
           handler.attach(session);
 
           // Emit first state with caller role
@@ -168,7 +168,7 @@ void main() {
             logger: FakeAppLogger(),
           );
 
-          final session = MockAudioVideoCallSession();
+          final session = FakeAudioVideoCallSession();
           handler.attach(session);
 
           await session.emitState(
@@ -216,7 +216,7 @@ void main() {
           logger: FakeAppLogger(),
         );
 
-        final session = MockAudioVideoCallSession();
+        final session = FakeAudioVideoCallSession();
         final now = DateTime.now();
         handler.attach(session);
 

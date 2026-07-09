@@ -39,7 +39,7 @@ import '../../../fakes/fake_credentials_sdk.dart';
 import '../../../fakes/fake_environment.dart';
 import '../../../fakes/fake_groups.dart';
 import '../../../fakes/fake_identities.dart';
-import '../../../fakes/fake_meeting_place_sdk.dart';
+import '../../../fakes/fake_meeting_place_matrix_sdk.dart';
 import '../../../fakes/fake_r_card_repository.dart';
 import '../../../fakes/fake_secure_storage.dart';
 import '../../../fakes/fake_vrc_repository.dart';
@@ -60,7 +60,7 @@ void main() {
   group('ChatSessionService - Session & SDK Delegation', () {
     late ProviderContainer container;
     late ChatSessionService chatService;
-    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeMeetingPlaceMatrixSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late FakeContactsService fakeContactsService;
 
@@ -68,7 +68,7 @@ void main() {
     final channelDid = testContact.channelDid!;
 
     setUp(() async {
-      fakeCoreSdk = FakeMeetingPlaceSDK(
+      fakeCoreSdk = FakeMeetingPlaceMatrixSDK(
         channels: {channelDid: FakeChannels.individualChannel},
       );
       fakeChatSdk = FakeChatSdk();
@@ -367,7 +367,7 @@ void main() {
   group('ChatSessionService - State Emissions', () {
     late ProviderContainer container;
     late ChatSessionService chatService;
-    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeMeetingPlaceMatrixSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late FakeContactsService fakeContactsService;
 
@@ -408,7 +408,7 @@ void main() {
     }
 
     setUp(() async {
-      fakeCoreSdk = FakeMeetingPlaceSDK(
+      fakeCoreSdk = FakeMeetingPlaceMatrixSDK(
         channels: {channelDid: FakeChannels.individualChannel},
       );
       fakeChatSdk = FakeChatSdk();
@@ -623,7 +623,7 @@ void main() {
       final groupChannelDid = groupContact.channelDid!;
       final knownGroup = FakeGroups.approvedGroup();
 
-      final groupCoreSdk = FakeMeetingPlaceSDK(
+      final groupCoreSdk = FakeMeetingPlaceMatrixSDK(
         channels: {groupChannelDid: FakeChannels.groupChannel},
       );
       groupCoreSdk.setMockGroup(knownGroup);
@@ -734,7 +734,7 @@ void main() {
   group('ChatSessionService - R-Card Integration', () {
     late ProviderContainer container;
     late ChatSessionService chatService;
-    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeMeetingPlaceMatrixSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late DidKeyManager issuerManager;
     late String issuerDid;
@@ -771,7 +771,7 @@ void main() {
       );
     }
 
-    ProviderContainer makeContainer(FakeMeetingPlaceSDK coreSdk) {
+    ProviderContainer makeContainer(FakeMeetingPlaceMatrixSDK coreSdk) {
       final c = ProviderContainer(
         overrides: [
           meetingPlaceSdkProvider.overrideWith((ref) async => coreSdk),
@@ -800,7 +800,9 @@ void main() {
 
     setUp(() {
       fakeChatSdk = FakeChatSdk();
-      fakeCoreSdk = FakeMeetingPlaceSDK(channels: {channelDid: makeChannel()});
+      fakeCoreSdk = FakeMeetingPlaceMatrixSDK(
+        channels: {channelDid: makeChannel()},
+      );
       fakeCoreSdk.setFakeDidManager(issuerManager);
       container = makeContainer(fakeCoreSdk);
       chatService = container.read(
@@ -819,7 +821,7 @@ void main() {
     });
 
     test('sendRCardFromPlugin is a no-op when channel is not found', () async {
-      final noChannelSdk = FakeMeetingPlaceSDK(channels: {});
+      final noChannelSdk = FakeMeetingPlaceMatrixSDK(channels: {});
       final noChannelContainer = makeContainer(noChannelSdk);
       addTearDown(noChannelContainer.dispose);
 
@@ -853,7 +855,7 @@ void main() {
         type: ChannelType.individual,
         isConnectionInitiator: false,
       );
-      final sdkWithIncompleteChannel = FakeMeetingPlaceSDK(
+      final sdkWithIncompleteChannel = FakeMeetingPlaceMatrixSDK(
         channels: {channelDid: incompleteChannel},
       );
       sdkWithIncompleteChannel.setFakeDidManager(issuerManager);
@@ -880,7 +882,7 @@ void main() {
 
   group('ChatSessionService - VRC Replay Ordering', () {
     late ProviderContainer container;
-    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeMeetingPlaceMatrixSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late DidKeyManager peerDidManager;
     late DidKeyManager localDidManager;
@@ -952,7 +954,9 @@ void main() {
         ),
       ];
 
-      fakeCoreSdk = FakeMeetingPlaceSDK(channels: {channelDid: makeChannel()});
+      fakeCoreSdk = FakeMeetingPlaceMatrixSDK(
+        channels: {channelDid: makeChannel()},
+      );
       fakeCoreSdk.setFakeDidManager(localDidManager);
 
       final pendingVrc = VrcIssuance(
@@ -1009,7 +1013,7 @@ void main() {
   group('ChatSessionService - Call Chat Item', () {
     late ProviderContainer container;
     late ChatSessionService chatService;
-    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeMeetingPlaceMatrixSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
 
     final testContact = FakeContacts.individualContact;
@@ -1038,7 +1042,7 @@ void main() {
     );
 
     setUp(() async {
-      fakeCoreSdk = FakeMeetingPlaceSDK(
+      fakeCoreSdk = FakeMeetingPlaceMatrixSDK(
         channels: {channelDid: FakeChannels.individualChannel},
       );
       fakeChatSdk = FakeChatSdk();

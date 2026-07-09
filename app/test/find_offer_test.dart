@@ -6,7 +6,7 @@ import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'fakes/fake_connection_offers.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_mediators.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 /// Helper function to setup test with navigation
@@ -115,7 +115,7 @@ void main() {
           location,
           identities: [testIdentity],
           mediators: FakeMediators.all,
-          meetingPlaceCoreSDK: FakeMeetingPlaceSDK(offerToFind: null),
+          meetingPlaceCoreSDK: FakeMeetingPlaceMatrixSDK(offerToFind: null),
         );
         await tester.pumpAndSettle();
 
@@ -143,7 +143,7 @@ void main() {
           location,
           identities: [testIdentity],
           mediators: FakeMediators.all,
-          meetingPlaceCoreSDK: FakeMeetingPlaceSDK(offerToFind: offer),
+          meetingPlaceCoreSDK: FakeMeetingPlaceMatrixSDK(offerToFind: offer),
         );
         await tester.pumpAndSettle();
 
@@ -181,7 +181,7 @@ void main() {
         'pressed',
         (tester) async {
           final offer = FakeConnectionOffers.testOffer;
-          final fakeSdk = FakeMeetingPlaceSDK(offerToFind: offer);
+          final fakeSdk = FakeMeetingPlaceMatrixSDK(offerToFind: offer);
           final l10n = await getL10n();
 
           await navigateToLocation(

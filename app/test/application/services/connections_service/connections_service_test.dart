@@ -13,7 +13,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 
 import '../../../fakes/fake_identities.dart';
-import '../../../fakes/fake_meeting_place_sdk.dart';
+import '../../../fakes/fake_meeting_place_matrix_sdk.dart';
 import '../../../fakes/fake_secure_storage.dart';
 import '../../../fakes/fake_vrc_service.dart';
 
@@ -50,7 +50,7 @@ class _FakeControlPlaneService extends ControlPlaneService {
 }
 
 ProviderContainer _makeContainer({
-  required FakeMeetingPlaceSDK fakeSdk,
+  required FakeMeetingPlaceMatrixSDK fakeSdk,
   int vrcCount = 0,
 }) {
   return ProviderContainer(
@@ -68,12 +68,12 @@ void main() {
   AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
 
   group('ConnectionsService.updatePublishedOffersScore', () {
-    late FakeMeetingPlaceSDK fakeSdk;
+    late FakeMeetingPlaceMatrixSDK fakeSdk;
     late ProviderContainer container;
     late ConnectionsService service;
 
     setUp(() {
-      fakeSdk = FakeMeetingPlaceSDK();
+      fakeSdk = FakeMeetingPlaceMatrixSDK();
     });
 
     tearDown(() => container.dispose());

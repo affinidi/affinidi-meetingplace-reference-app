@@ -6,8 +6,14 @@ import 'package:ssi/ssi.dart';
 
 import 'fake_publish_offer_result.dart';
 
-class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
-  FakeMeetingPlaceSDK({
+abstract interface class DisposableAudioVideoCallSession
+    implements AudioVideoCallSession {
+  void emitAudioVideoCallState(AudioVideoCallState state);
+  FutureOr<void> dispose();
+}
+
+class FakeMeetingPlaceMatrixSDK implements MeetingPlaceMatrixSDK {
+  FakeMeetingPlaceMatrixSDK({
     this._shouldFailToRegisterPushToken = false,
     this._offerToReturn,
     this._publishOfferException,
@@ -20,6 +26,9 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     this.offerToFind,
     this.findOfferHasError = false,
     this._shouldTimeout = false,
+    this.callSession,
+    this.startCallError,
+    this.leaveCurrentCallError,
   }) : _channels = channels ?? {} {
     if (connectionOffers != null) {
       _allConnectionOffers.addAll(connectionOffers);
@@ -34,15 +43,22 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   final bool _isPhraseAvailable;
   final bool _shouldTimeout;
   final Map<String, Channel> _channels;
+  final DisposableAudioVideoCallSession? callSession;
+  final Exception? startCallError;
+  final Exception? leaveCurrentCallError;
   @override
   final bool isCallSupported;
 
   final _incomingCallsController =
       StreamController<IncomingAudioVideoCallEvent>.broadcast();
   final _cancelledCallsController = StreamController<String>.broadcast();
+  final _callSignalsController = StreamController<CallSignal>.broadcast();
   final acceptedCallIds = <String>[];
   final declinedCallIds = <String>[];
+  int startCallCount = 0;
   int leaveCurrentCallCount = 0;
+  String? lastOtherPartyChannelDid;
+  CallMediaType? lastMediaType;
 
   DidKeyManager? _fakeDidManager;
 
@@ -378,12 +394,55 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   @override
   Stream<String> get cancelledCalls => _cancelledCallsController.stream;
 
+  @override
+  Stream<CallSignal> get callSignals => _callSignalsController.stream;
+
   void emitIncomingCall(IncomingAudioVideoCallEvent event) {
     _incomingCallsController.add(event);
   }
 
+  void emitIncoming(IncomingAudioVideoCallEvent event) {
+    emitIncomingCall(event);
+  }
+
   void emitCancelledCall(String callId) {
     _cancelledCallsController.add(callId);
+  }
+
+  void emitCancelled(String callId) {
+    emitCancelledCall(callId);
+  }
+
+  void emitCallSignal(CallSignal signal) {
+    _callSignalsController.add(signal);
+  }
+
+  void emitAudioVideoCallState(AudioVideoCallState state) {
+    final session = callSession;
+    if (session == null) {
+      throw StateError(
+        'FakeMeetingPlaceMatrixSDK.callSession must be provided',
+      );
+    }
+
+    session.emitAudioVideoCallState(state);
+  }
+
+  @override
+  Future<AudioVideoCallSession> startCall({
+    required String otherPartyChannelDid,
+    required CallMediaType mediaType,
+  }) async {
+    startCallCount++;
+    lastOtherPartyChannelDid = otherPartyChannelDid;
+    lastMediaType = mediaType;
+    if (startCallError != null) throw startCallError!;
+    if (callSession == null) {
+      throw StateError(
+        'FakeMeetingPlaceMatrixSDK.callSession must be provided',
+      );
+    }
+    return callSession!;
   }
 
   @override
@@ -399,6 +458,20 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   @override
   Future<void> leaveCurrentCall() async {
     leaveCurrentCallCount++;
+    if (leaveCurrentCallError != null) throw leaveCurrentCallError!;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _incomingCallsController.close();
+    await _cancelledCallsController.close();
+    await _callSignalsController.close();
+    await _controlPlaneEventStreamManager.close();
+
+    final session = callSession;
+    if (session == null) return;
+
+    await session.dispose();
   }
 
   @override

@@ -14,7 +14,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 
 import '../../../fakes/fake_contacts.dart';
-import '../../../fakes/fake_meeting_place_sdk.dart';
+import '../../../fakes/fake_meeting_place_matrix_sdk.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -22,11 +22,11 @@ void main() {
 
   group('ControlPlaneService', () {
     late ProviderContainer container;
-    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeMeetingPlaceMatrixSDK fakeCoreSdk;
     late ControlPlaneService controlPlaneService;
 
     setUp(() async {
-      fakeCoreSdk = FakeMeetingPlaceSDK(
+      fakeCoreSdk = FakeMeetingPlaceMatrixSDK(
         channels: {
           FakeContacts.individualContact.channelDid!: _channelWithStatus(
             ChannelStatus.inaugurated,
@@ -67,7 +67,7 @@ void main() {
 
       await runZonedGuarded(
         () async {
-          final scopedFakeSdk = FakeMeetingPlaceSDK(
+          final scopedFakeSdk = FakeMeetingPlaceMatrixSDK(
             channels: {
               FakeContacts.individualContact.channelDid!: _channelWithStatus(
                 ChannelStatus.inaugurated,

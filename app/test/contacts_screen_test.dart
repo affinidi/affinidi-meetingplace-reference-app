@@ -7,7 +7,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_exte
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 Future<void> navigateToContactsScreen(WidgetTester tester) async {
@@ -391,7 +391,7 @@ void main() {
     testWidgets('should update badge count when new message is received', (
       tester,
     ) async {
-      final fakeSdk = FakeMeetingPlaceSDK(
+      final fakeSdk = FakeMeetingPlaceMatrixSDK(
         channels: {
           FakeChannels.individualChannel.otherPartyPermanentChannelDid!:
               FakeChannels.individualChannel,

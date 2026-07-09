@@ -9,11 +9,11 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/
 
 import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_controller.dart';
 
+import '../../../../fakes/fake_audio_video_call_session.dart';
 import '../../../../fakes/fake_chat_session_service.dart';
 import '../../../../mocks/fake_app_logger.dart';
 import '../../../../mocks/fake_call_ended_controller.dart';
 import '../../../../mocks/fake_end_call_banner_controller.dart';
-import '../../../../mocks/mock_audio_video_call_session.dart';
 
 const _kChannelDid = 'did:test:channel';
 const _kMsgId = 'call-msg-01';
@@ -64,13 +64,17 @@ Future<void> _pumpAsync() async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  late FakeAudioVideoCallSession session;
+
+  setUp(() {
+    session = FakeAudioVideoCallSession();
+  });
 
   group('registerSession', () {
     test('sets state when state is null', () {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
 
-      final session = MockAudioVideoCallSession();
       ctrl.registerSession(
         session,
         channelDid: _kChannelDid,
@@ -91,7 +95,6 @@ void main() {
 
       ctrl.update(_baseState(status: AudioVideoCallStatus.active));
 
-      final session = MockAudioVideoCallSession();
       ctrl.registerSession(
         session,
         channelDid: _kChannelDid,
@@ -112,7 +115,6 @@ void main() {
     test('subscribes to session state stream', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -141,7 +143,6 @@ void main() {
     test('skips state updates when not minimized', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -168,7 +169,6 @@ void main() {
     test('updates status from session state when minimized', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -195,7 +195,6 @@ void main() {
     test('starts timer once when first peer joins', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -222,7 +221,6 @@ void main() {
     test('does not restart timer if already started', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -258,7 +256,6 @@ void main() {
           bannerController: banner,
         );
         final ctrl = container.read(activeCallControllerProvider.notifier);
-        final session = MockAudioVideoCallSession();
 
         ctrl.registerSession(
           session,
@@ -287,7 +284,6 @@ void main() {
       final chatSvc = FakeChatSessionService(resolveIncomingResult: _kMsgId);
       final container = _makeContainer(chatService: chatSvc);
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -319,7 +315,6 @@ void main() {
         final chatSvc = FakeChatSessionService(resolveIncomingResult: _kMsgId);
         final container = _makeContainer(chatService: chatSvc);
         final ctrl = container.read(activeCallControllerProvider.notifier);
-        final session = MockAudioVideoCallSession();
 
         ctrl.registerSession(
           session,
@@ -367,7 +362,6 @@ void main() {
       container.listen(chatSessionServiceProvider(_kChannelDid), (_, _) {});
 
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -407,7 +401,6 @@ void main() {
       final chatSvc = FakeChatSessionService(resolveIncomingResult: _kMsgId);
       final container = _makeContainer(chatService: chatSvc);
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -438,7 +431,6 @@ void main() {
         final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
         final container = _makeContainer(chatService: chatSvc);
         final ctrl = container.read(activeCallControllerProvider.notifier);
-        final session = MockAudioVideoCallSession();
 
         ctrl.registerSession(
           session,
@@ -472,7 +464,6 @@ void main() {
       final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
       final container = _makeContainer(chatService: chatSvc);
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -496,7 +487,6 @@ void main() {
       final chatSvc = FakeChatSessionService(resolveIncomingResult: _kMsgId);
       final container = _makeContainer(chatService: chatSvc);
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -561,7 +551,6 @@ void main() {
       () async {
         final container = _makeContainer();
         final ctrl = container.read(activeCallControllerProvider.notifier);
-        final session = MockAudioVideoCallSession();
 
         ctrl.registerSession(
           session,
@@ -598,7 +587,6 @@ void main() {
       container.listen(activeCallControllerProvider, (_, _) {});
 
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -644,7 +632,6 @@ void main() {
         container.listen(activeCallControllerProvider, (_, _) {});
 
         final ctrl = container.read(activeCallControllerProvider.notifier);
-        final session = MockAudioVideoCallSession();
 
         ctrl.registerSession(
           session,
@@ -681,7 +668,6 @@ void main() {
     test('hangs up when peer leaves a 1-on-1 live call', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -718,7 +704,6 @@ void main() {
     test('does not hang up when peer leaves a group call', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -753,7 +738,6 @@ void main() {
     test('does not hang up when no peer was ever connected', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -788,7 +772,6 @@ void main() {
       final callEnded = FakeCallEndedController();
       final container = _makeContainer(callEndedController: callEnded);
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -819,7 +802,6 @@ void main() {
       final callEnded = FakeCallEndedController();
       final container = _makeContainer(callEndedController: callEnded);
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,
@@ -842,7 +824,6 @@ void main() {
     test('terminal write after clear does not crash', () async {
       final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
       final container = _makeContainer(chatService: chatSvc);
-      final session = MockAudioVideoCallSession();
 
       final controller = container.read(activeCallControllerProvider.notifier);
 
@@ -888,7 +869,6 @@ void main() {
         final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
         final container = _makeContainer(chatService: chatSvc);
         final ctrl = container.read(activeCallControllerProvider.notifier);
-        final session = MockAudioVideoCallSession();
 
         ctrl.registerSession(
           session,
@@ -921,7 +901,6 @@ void main() {
       final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
       final container = _makeContainer(chatService: chatSvc);
       final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
 
       ctrl.registerSession(
         session,

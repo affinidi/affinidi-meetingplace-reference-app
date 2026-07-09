@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_session/audio_session.dart';
@@ -16,88 +15,17 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 
 import 'fakes/fake_audio_session.dart';
+import 'fakes/fake_audio_video_call_session.dart';
 import 'fakes/fake_chat_session_service.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_contacts_service.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'fakes/fake_permission_service.dart';
 
-class _FakeCallSession extends Fake implements AudioVideoCallSession {
-  final _controller = StreamController<AudioVideoCallState>.broadcast();
-  final _participantEventsController =
-      StreamController<CallParticipantEvent>.broadcast();
-  int hangUpCalls = 0;
-
-  void emit(AudioVideoCallState s) => _controller.add(s);
-
-  @override
-  Stream<AudioVideoCallState> get state => _controller.stream;
-
-  @override
-  Stream<CallParticipantEvent> get participantEvents =>
-      _participantEventsController.stream;
-
-  @override
-  Future<void> setMicrophoneEnabled(bool enabled) async {}
-
-  @override
-  Future<void> setCameraEnabled(bool enabled) async {}
-
-  @override
-  Future<void> setSpeakerphoneEnabled(bool enabled) async {}
-
-  @override
-  Future<void> hangUp() async => hangUpCalls++;
-
-  void dispose() {
-    _controller.close();
-    _participantEventsController.close();
-  }
-}
-
-class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
-  _FakeMeetingPlaceMatrixSDK() : _session = _FakeCallSession();
-
-  final _FakeCallSession _session;
-  final _callSignalsController = StreamController<CallSignal>.broadcast();
-
-  @override
-  bool get isCallSupported => true;
-
-  @override
-  Stream<IncomingAudioVideoCallEvent> get incomingCalls =>
-      const Stream<IncomingAudioVideoCallEvent>.empty();
-
-  @override
-  Stream<CallSignal> get callSignals => _callSignalsController.stream;
-
-  @override
-  Future<AudioVideoCallSession> startCall({
-    required String otherPartyChannelDid,
-    required CallMediaType mediaType,
-  }) async => _session;
-
-  @override
-  Future<void> acceptCall({required String callId}) async {}
-
-  @override
-  Future<void> declineCall({required String callId}) async {}
-
-  @override
-  Future<void> leaveCurrentCall() async {}
-
-  void emitState(AudioVideoCallState s) => _session.emit(s);
-
-  void emitCallSignal(CallSignal signal) => _callSignalsController.add(signal);
-
-  @override
-  Future<void> dispose() async {
-    await _callSignalsController.close();
-    _session.dispose();
-  }
-}
+late FakeMeetingPlaceMatrixSDK _testSdk;
 
 ProviderContainer _buildContainer({
-  _FakeMeetingPlaceMatrixSDK? fakeSDK,
+  FakeMeetingPlaceMatrixSDK? fakeSDK,
   FakePermissionService? permissionService,
   FakeAudioSession? audioSession,
   bool canUsePlatformAudioSession = false,
@@ -106,9 +34,7 @@ ProviderContainer _buildContainer({
     overrides: [
       contactsServiceProvider.overrideWith(FakeContactsService.new),
       chatSessionServiceProvider.overrideWith(FakeChatSessionService.new),
-      meetingPlaceSdkProvider.overrideWith(
-        (ref) async => fakeSDK ?? _FakeMeetingPlaceMatrixSDK(),
-      ),
+      meetingPlaceSdkProvider.overrideWith((ref) async => fakeSDK ?? _testSdk),
       permissionServiceProvider.overrideWith(
         (ref) => permissionService ?? FakePermissionService(),
       ),
@@ -143,6 +69,13 @@ void main() {
     );
   });
 
+  setUp(() {
+    _testSdk = FakeMeetingPlaceMatrixSDK(
+      callSession: FakeAudioVideoCallSession(),
+    );
+    addTearDown(_testSdk.dispose);
+  });
+
   group('initial state', () {
     test('status is idle and toggles default to enabled', () {
       final container = _buildContainer();
@@ -172,7 +105,7 @@ void main() {
     test(
       'status update from session stream is reflected in controller state',
       () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = _testSdk;
         final contactId = FakeContacts.individualContact.id;
         final container = _buildContainer(fakeSDK: fakeSDK);
         addTearDown(container.dispose);
@@ -184,7 +117,7 @@ void main() {
 
         await controller.joinCall();
 
-        fakeSDK.emitState(
+        fakeSDK.emitAudioVideoCallState(
           const AudioVideoCallState(status: AudioVideoCallStatus.connected),
         );
         await Future<void>.microtask(() {});
@@ -201,7 +134,7 @@ void main() {
 
   group('joinCall', () {
     test('acquires the audio session when joining a call', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final audioSession = FakeAudioSession();
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(
@@ -231,7 +164,7 @@ void main() {
     });
 
     test('sets status to connecting', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -251,7 +184,7 @@ void main() {
     });
 
     test('second joinCall while connecting is a no-op', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -273,7 +206,7 @@ void main() {
     });
 
     test('individual call disables isSpeakerEnabled by default', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -293,7 +226,7 @@ void main() {
     });
 
     test('group call disables speakerphone by default', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.groupContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -315,7 +248,7 @@ void main() {
 
   group('leaveCall', () {
     test('sets status to ended', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final audioSession = FakeAudioSession();
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(
@@ -353,7 +286,7 @@ void main() {
     });
 
     test('releases the audio session when the call disconnects', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final audioSession = FakeAudioSession();
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(
@@ -368,7 +301,7 @@ void main() {
           .read(audioVideoCallScreenControllerProvider(contactId).notifier)
           .joinCall();
 
-      fakeSDK.emitState(
+      fakeSDK.emitAudioVideoCallState(
         const AudioVideoCallState(status: AudioVideoCallStatus.disconnected),
       );
       await pumpEventQueue();
@@ -384,7 +317,7 @@ void main() {
 
   group('banner timer wiring', () {
     test('startTimer is called on banner when first remote joins', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -394,7 +327,7 @@ void main() {
           .read(audioVideoCallScreenControllerProvider(contactId).notifier)
           .joinCall();
 
-      fakeSDK.emitState(
+      fakeSDK.emitAudioVideoCallState(
         const AudioVideoCallState(
           status: AudioVideoCallStatus.active,
           participants: [
@@ -413,7 +346,7 @@ void main() {
     });
 
     test('anchors the banner timer to callStartedAt when provided', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -424,7 +357,7 @@ void main() {
           .joinCall();
 
       final startedAt = DateTime.now().subtract(const Duration(seconds: 30));
-      fakeSDK.emitState(
+      fakeSDK.emitAudioVideoCallState(
         AudioVideoCallState(
           status: AudioVideoCallStatus.active,
           callStartedAt: startedAt,
@@ -448,7 +381,7 @@ void main() {
 
   group('startCall', () {
     test('sets isAudioOnly on the state', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -466,7 +399,7 @@ void main() {
     });
 
     test('sets isCameraEnabled true for video call', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -484,7 +417,7 @@ void main() {
     });
 
     test('places an outgoing call (status becomes connecting)', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -505,7 +438,7 @@ void main() {
 
   group('restartCall', () {
     test('resets status to idle then starts a fresh outgoing call', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -517,7 +450,7 @@ void main() {
 
       // Simulate a missed call.
       await controller.joinCall();
-      fakeSDK.emitState(
+      fakeSDK.emitAudioVideoCallState(
         const AudioVideoCallState(status: AudioVideoCallStatus.missed),
       );
       await Future<void>.microtask(() {});
@@ -541,7 +474,7 @@ void main() {
     });
 
     test('clears hasHadPeer when restarting', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -554,7 +487,7 @@ void main() {
       await controller.joinCall();
 
       // Peer joins, latch flips to true.
-      fakeSDK.emitState(
+      fakeSDK.emitAudioVideoCallState(
         const AudioVideoCallState(
           status: AudioVideoCallStatus.active,
           participants: [
@@ -566,7 +499,7 @@ void main() {
       await Future<void>.microtask(() {});
 
       // Call ends as declined.
-      fakeSDK.emitState(
+      fakeSDK.emitAudioVideoCallState(
         const AudioVideoCallState(status: AudioVideoCallStatus.declined),
       );
       await Future<void>.microtask(() {});
@@ -585,7 +518,7 @@ void main() {
     test(
       'sets isAudioOnly and isCameraEnabled=false on audio restart',
       () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = _testSdk;
         final contactId = FakeContacts.individualContact.id;
         final container = _buildContainer(fakeSDK: fakeSDK);
         addTearDown(container.dispose);
@@ -596,7 +529,7 @@ void main() {
         );
 
         await controller.joinCall();
-        fakeSDK.emitState(
+        fakeSDK.emitAudioVideoCallState(
           const AudioVideoCallState(status: AudioVideoCallStatus.missed),
         );
         await Future<void>.microtask(() {});
@@ -612,7 +545,7 @@ void main() {
     );
 
     test('sets isCameraEnabled=true on video restart', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
@@ -623,7 +556,7 @@ void main() {
       );
 
       await controller.joinCall();
-      fakeSDK.emitState(
+      fakeSDK.emitAudioVideoCallState(
         const AudioVideoCallState(status: AudioVideoCallStatus.missed),
       );
       await Future<void>.microtask(() {});
@@ -640,7 +573,7 @@ void main() {
     test(
       'preserves isCameraEnabled=false when restoring a minimized call',
       () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = _testSdk;
         final contactId = FakeContacts.individualContact.id;
         final container = _buildContainer(fakeSDK: fakeSDK);
         addTearDown(container.dispose);
@@ -665,7 +598,7 @@ void main() {
 
         // Simulate restore: inject a pending session so startCall detects
         // restore.
-        final session = fakeSDK._session;
+        final session = fakeSDK.callSession!;
         container
             .read(audioVideoCallScreenControllerProvider(contactId).notifier)
             .state = container
@@ -695,7 +628,7 @@ void main() {
       AudioVideoCallStatus.error,
     ]) {
       test('does not call hangUp when disposing in $status state', () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = _testSdk;
         final contactId = FakeContacts.individualContact.id;
         final container = _buildContainer(fakeSDK: fakeSDK);
         addTearDown(container.dispose);
@@ -706,7 +639,7 @@ void main() {
         );
         await controller.joinCall();
 
-        fakeSDK.emitState(AudioVideoCallState(status: status));
+        fakeSDK.emitAudioVideoCallState(AudioVideoCallState(status: status));
         await Future<void>.microtask(() {});
 
         // Dispose the screen controller (simulates Navigator.pop).
@@ -714,7 +647,7 @@ void main() {
         await Future<void>.microtask(() {});
 
         expect(
-          fakeSDK._session.hangUpCalls,
+          (fakeSDK.callSession! as FakeAudioVideoCallSession).hangUpCalls,
           0,
           reason: 'hangUp must not be called when already in $status',
         );
@@ -725,7 +658,7 @@ void main() {
   group('toggleCamera', () {
     test('reconfigures audio session to videoChat when enabling camera in'
         ' audio-only call', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final audioSession = FakeAudioSession();
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(
@@ -760,7 +693,7 @@ void main() {
     test(
       'switches from audio to video when enabling camera in audio call',
       () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = _testSdk;
         final contactId = FakeContacts.individualContact.id;
         final container = _buildContainer(fakeSDK: fakeSDK);
         addTearDown(container.dispose);
@@ -792,7 +725,7 @@ void main() {
     test(
       'does not reconfigure audio session when enabling camera in video call',
       () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = _testSdk;
         final audioSession = FakeAudioSession();
         final contactId = FakeContacts.individualContact.id;
         final container = _buildContainer(
@@ -821,7 +754,7 @@ void main() {
     test(
       'does not send outgoing call chat item when accepting incoming call',
       () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = _testSdk;
         final contactId = FakeContacts.individualContact.id;
         final channelDid = FakeContacts.individualContact.channelDid!;
 
@@ -859,7 +792,7 @@ void main() {
             .read(audioVideoCallScreenControllerProvider(contactId).notifier)
             .joinCall();
 
-        fakeSDK.emitState(AudioVideoCallState.initial);
+        fakeSDK.emitAudioVideoCallState(AudioVideoCallState.initial);
         await Future<void>.delayed(const Duration(milliseconds: 100));
 
         expect(sendOutgoingCallMessageCount, 0);
@@ -928,10 +861,9 @@ void main() {
     test(
       'caller receives CallDeclineSignal listener when SDK is provided',
       () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = _testSdk;
         final container = _buildContainer(fakeSDK: fakeSDK);
         addTearDown(container.dispose);
-        addTearDown(fakeSDK.dispose);
 
         await container.read(meetingPlaceSdkProvider.future);
 
@@ -940,11 +872,10 @@ void main() {
     );
 
     test('call signal listener exists on controller initialization', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = _testSdk;
       final contactId = FakeContacts.individualContact.id;
       final container = _buildContainer(fakeSDK: fakeSDK);
       addTearDown(container.dispose);
-      addTearDown(fakeSDK.dispose);
 
       await container.read(meetingPlaceSdkProvider.future);
 

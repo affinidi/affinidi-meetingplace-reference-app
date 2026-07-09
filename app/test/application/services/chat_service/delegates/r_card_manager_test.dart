@@ -18,7 +18,7 @@ import '../../../../fakes/fake_chat_repository.dart';
 import '../../../../fakes/fake_chat_sdk.dart';
 import '../../../../fakes/fake_credentials_sdk.dart';
 import '../../../../fakes/fake_identities.dart';
-import '../../../../fakes/fake_meeting_place_sdk.dart';
+import '../../../../fakes/fake_meeting_place_matrix_sdk.dart';
 import '../../../../fakes/fake_r_card_repository.dart';
 import '../../../../fakes/fake_vrc_repository.dart';
 
@@ -56,7 +56,7 @@ void main() {
     const externalRefId = 'primary-identity-id';
 
     late ProviderContainer container;
-    late FakeMeetingPlaceSDK fakeCoreSdk;
+    late FakeMeetingPlaceMatrixSDK fakeCoreSdk;
     late StubRCardCredentialsSdk stub;
     late FakeChatSdk fakeChatSdk;
     late FakeInMemoryChatRepository fakeRepo;
@@ -68,7 +68,7 @@ void main() {
       fakeChatSdk = FakeChatSdk();
       fakeRepo = FakeInMemoryChatRepository();
 
-      fakeCoreSdk = FakeMeetingPlaceSDK(
+      fakeCoreSdk = FakeMeetingPlaceMatrixSDK(
         channels: {
           otherPartyDid: Channel(
             permanentChannelDid: localChannelDid,
@@ -177,7 +177,7 @@ void main() {
       final emptyContainer = ProviderContainer(
         overrides: [
           meetingPlaceSdkProvider.overrideWith(
-            (ref) async => FakeMeetingPlaceSDK(channels: {}),
+            (ref) async => FakeMeetingPlaceMatrixSDK(channels: {}),
           ),
           credentialsSdkProvider.overrideWith((ref) async => stub),
           chatRepositoryProvider.overrideWith((ref) async => fakeRepo),
@@ -251,7 +251,7 @@ void main() {
       final emptyContainer = ProviderContainer(
         overrides: [
           meetingPlaceSdkProvider.overrideWith(
-            (ref) async => FakeMeetingPlaceSDK(channels: {}),
+            (ref) async => FakeMeetingPlaceMatrixSDK(channels: {}),
           ),
           credentialsSdkProvider.overrideWith((ref) async => stub),
           chatRepositoryProvider.overrideWith((ref) async => fakeRepo),
@@ -309,7 +309,7 @@ void main() {
         final emptyContainer = ProviderContainer(
           overrides: [
             meetingPlaceSdkProvider.overrideWith(
-              (ref) async => FakeMeetingPlaceSDK(channels: {}),
+              (ref) async => FakeMeetingPlaceMatrixSDK(channels: {}),
             ),
             credentialsSdkProvider.overrideWith((ref) async => stub),
             chatRepositoryProvider.overrideWith((ref) async => fakeRepo),
@@ -352,7 +352,7 @@ void main() {
         final noIdentityContainer = ProviderContainer(
           overrides: [
             meetingPlaceSdkProvider.overrideWith(
-              (ref) async => FakeMeetingPlaceSDK(
+              (ref) async => FakeMeetingPlaceMatrixSDK(
                 channels: {
                   otherPartyDid: Channel(
                     permanentChannelDid: localChannelDid,

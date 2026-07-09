@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
 import 'fakes/fake_identities.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'fakes/fake_qr_code_view_factory.dart';
 import 'fakes/fake_share_service.dart';
 import 'utils/app.dart';
@@ -35,7 +35,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeSdk = FakeMeetingPlaceSDK();
+        final fakeSdk = FakeMeetingPlaceMatrixSDK();
 
         await navigateToLocation(
           tester,
@@ -53,7 +53,7 @@ void main() {
       testWidgets('should call createOobFlow on initialization', (
         tester,
       ) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
+        final fakeSdk = FakeMeetingPlaceMatrixSDK();
 
         await navigateToLocation(
           tester,
@@ -69,7 +69,7 @@ void main() {
       testWidgets('should pass correct contactCard to createOobFlow', (
         tester,
       ) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
+        final fakeSdk = FakeMeetingPlaceMatrixSDK();
 
         await navigateToLocation(
           tester,
@@ -88,7 +88,7 @@ void main() {
       testWidgets('should display QR code after successful OOB creation', (
         tester,
       ) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
+        final fakeSdk = FakeMeetingPlaceMatrixSDK();
 
         await navigateToLocation(
           tester,
@@ -107,7 +107,7 @@ void main() {
       testWidgets(
         'should navigate back with channel when connection established',
         (tester) async {
-          final fakeSdk = FakeMeetingPlaceSDK();
+          final fakeSdk = FakeMeetingPlaceMatrixSDK();
           final fakeChannel = Channel(
             offerLink: 'test-offer-link',
             publishOfferDid: 'test-publish-did',
@@ -139,7 +139,7 @@ void main() {
       testWidgets('should cancel flow when cancel button tapped', (
         tester,
       ) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
+        final fakeSdk = FakeMeetingPlaceMatrixSDK();
 
         await navigateToLocation(
           tester,
@@ -157,7 +157,7 @@ void main() {
       testWidgets('should call ShareService with correct params when share'
           ' CTA is tapped', (tester) async {
         final l10n = await getL10n();
-        final fakeSdk = FakeMeetingPlaceSDK();
+        final fakeSdk = FakeMeetingPlaceMatrixSDK();
         final fakeShareService = FakeShareService();
         final fakeQrCodeViewFactory = FakeQrCodeViewFactory();
 
@@ -190,7 +190,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeSdk = FakeMeetingPlaceSDK(
+        final fakeSdk = FakeMeetingPlaceMatrixSDK(
           createOobFlowException: Exception('Failed to create OOB flow'),
         );
 
@@ -227,7 +227,7 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeSdk = FakeMeetingPlaceSDK();
+        final fakeSdk = FakeMeetingPlaceMatrixSDK();
 
         await navigateToLocation(
           tester,
@@ -245,7 +245,7 @@ void main() {
       testWidgets('should handle connection established after cancellation', (
         tester,
       ) async {
-        final fakeSdk = FakeMeetingPlaceSDK();
+        final fakeSdk = FakeMeetingPlaceMatrixSDK();
 
         await navigateToLocation(
           tester,

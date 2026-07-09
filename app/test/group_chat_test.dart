@@ -11,7 +11,7 @@ import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_groups.dart';
 import 'fakes/fake_image_picker.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 Finder findChatMessageInput() => find.byKey(const Key('chat_message_input'));
@@ -968,7 +968,7 @@ void main() {
           final contactId = FakeContacts.groupContact.id;
           final chatSdk = FakeChatSdk();
           final deletedGroup = FakeGroups.approvedGroup()..markAsDeleted();
-          final coreSdk = FakeMeetingPlaceSDK(
+          final coreSdk = FakeMeetingPlaceMatrixSDK(
             channels: FakeChannels.allChannels,
           )..setMockGroup(deletedGroup);
 
@@ -1043,7 +1043,7 @@ void main() {
             created: DateTime.now(),
             publicKey: 'fake-public-key',
           );
-          final coreSdk = FakeMeetingPlaceSDK(
+          final coreSdk = FakeMeetingPlaceMatrixSDK(
             channels: FakeChannels.allChannels,
           )..setMockGroup(groupWithSelfRemoved);
 

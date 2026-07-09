@@ -7,17 +7,18 @@ import 'fakes/fake_connection_offers.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_groups.dart';
 import 'fakes/fake_identities.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 void main() {
   group('Connection details — group remove member', () {
     final groupContact = FakeContacts.groupContact;
 
-    FakeMeetingPlaceSDK buildCoreSdkWithGroup() => FakeMeetingPlaceSDK(
-      channels: FakeChannels.allChannels,
-      connectionOffers: [FakeConnectionOffers.groupOfferOwnedByMe],
-    )..setMockGroup(FakeGroups.approvedGroup());
+    FakeMeetingPlaceMatrixSDK buildCoreSdkWithGroup() =>
+        FakeMeetingPlaceMatrixSDK(
+          channels: FakeChannels.allChannels,
+          connectionOffers: [FakeConnectionOffers.groupOfferOwnedByMe],
+        )..setMockGroup(FakeGroups.approvedGroup());
 
     testWidgets(
       '''tapping remove and confirming calls SDK removeMember with the member did''',

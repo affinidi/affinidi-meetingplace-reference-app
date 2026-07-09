@@ -4,14 +4,14 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'fakes/fake_connection_offers.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_mediators.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 Future<void> _navigateToAcceptOffer(
   WidgetTester tester, {
   required ConnectionOffer offer,
 }) async {
-  final fakeSdk = FakeMeetingPlaceSDK(offerToFind: offer);
+  final fakeSdk = FakeMeetingPlaceMatrixSDK(offerToFind: offer);
   final identity = FakeIdentities.primaryIdentity;
 
   await navigateToLocation(

@@ -6,7 +6,7 @@ import 'fakes/fake_channels.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_mediators.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 ConnectionOffer _offerForContact({int? score}) => ConnectionOffer(
@@ -33,7 +33,7 @@ Future<void> _navigateToConnectionDetails(
   WidgetTester tester, {
   required ConnectionOffer connection,
 }) async {
-  final fakeSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels);
+  final fakeSdk = FakeMeetingPlaceMatrixSDK(channels: FakeChannels.allChannels);
   fakeSdk.setAllConnectionOffers([connection]);
 
   await navigateToLocation(

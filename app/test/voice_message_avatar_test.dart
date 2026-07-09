@@ -14,7 +14,7 @@ import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 // Four distinct, decodable 1x1 PNGs so each test can assert that the avatar
@@ -76,10 +76,10 @@ Contact _contactWithPhoto(String base64) =>
 
 /// Core SDK whose individual channel reports MY own contact card carrying
 /// [base64], so `myCard` is distinct from the contact card.
-FakeMeetingPlaceSDK _coreSdkWithMyPhoto(String base64) {
+FakeMeetingPlaceMatrixSDK _coreSdkWithMyPhoto(String base64) {
   final contact = FakeContacts.individualContact;
   final myCard = contact.card.copyWith(profilePic: base64).toSdkContactCard();
-  return FakeMeetingPlaceSDK(
+  return FakeMeetingPlaceMatrixSDK(
     channels: {
       contact.channelDid!: sdk.Channel(
         permanentChannelDid: contact.channelDid!,
@@ -109,7 +109,7 @@ Identity _identityWithPhoto(String base64) =>
 /// Core SDK whose individual channel links to identity [externalRef] but still
 /// stores [staleBase64] as its own contact card, so a test can prove `myCard`
 /// is resolved from the live identity rather than the stale channel snapshot.
-FakeMeetingPlaceSDK _coreSdkLinkedToIdentity({
+FakeMeetingPlaceMatrixSDK _coreSdkLinkedToIdentity({
   required String externalRef,
   required String staleBase64,
 }) {
@@ -117,7 +117,7 @@ FakeMeetingPlaceSDK _coreSdkLinkedToIdentity({
   final staleCard = contact.card
       .copyWith(profilePic: staleBase64)
       .toSdkContactCard();
-  return FakeMeetingPlaceSDK(
+  return FakeMeetingPlaceMatrixSDK(
     channels: {
       contact.channelDid!: sdk.Channel(
         permanentChannelDid: contact.channelDid!,
@@ -279,13 +279,14 @@ void main() {
       final groupContact = FakeContacts.groupContact;
       // The matched member is listed second so the test fails if the code
       // picks the first member instead of matching by sender DID.
-      final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
-        ..setMockGroup(
-          _groupWith([
-            _member(otherMemberDid, _otherMemberPhoto),
-            _member(senderDid, _memberPhoto),
-          ]),
-        );
+      final coreSdk =
+          FakeMeetingPlaceMatrixSDK(channels: FakeChannels.allChannels)
+            ..setMockGroup(
+              _groupWith([
+                _member(otherMemberDid, _otherMemberPhoto),
+                _member(senderDid, _memberPhoto),
+              ]),
+            );
       final chatSdk = FakeChatSdk();
 
       await navigateToChat(
@@ -310,10 +311,11 @@ void main() {
     testWidgets('received group voice falls back to the icon '
         'for an unknown sender', (tester) async {
       final groupContact = FakeContacts.groupContact;
-      final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
-        ..setMockGroup(
-          _groupWith([_member('did:key:photo-member', _memberPhoto)]),
-        );
+      final coreSdk =
+          FakeMeetingPlaceMatrixSDK(channels: FakeChannels.allChannels)
+            ..setMockGroup(
+              _groupWith([_member('did:key:photo-member', _memberPhoto)]),
+            );
       final chatSdk = FakeChatSdk();
 
       await navigateToChat(

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/navigation/routes/route_paths.dart';
 
 import 'fakes/fake_connectivity.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'fakes/fake_push_notification_messaging.dart';
 import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
@@ -18,7 +18,7 @@ void main() {
       );
 
       testWidgets('it shows a network error banner', (tester) async {
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         await navigateToLocation(
           tester,
@@ -39,7 +39,7 @@ void main() {
       });
 
       group('and connectivity is restored', () {
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK();
 
         testWidgets('it hides the network error banner', (tester) async {
           await navigateToLocation(
@@ -126,7 +126,7 @@ void main() {
         final deviceToken = 'a_device_token';
 
         group('and successfully registers it', () {
-          final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+          final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK(
             shouldFailToRegisterPushToken: false,
           );
           testWidgets('it does not show a network error banner', (
@@ -153,7 +153,7 @@ void main() {
             testWidgets('it does not try to register the same token again', (
               tester,
             ) async {
-              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK(
                 shouldFailToRegisterPushToken: false,
               );
 
@@ -188,7 +188,7 @@ void main() {
         group('and it fails to register it', () {
           final shouldFailToRegisterPushToken = true;
           testWidgets('it shows a network error banner', (tester) async {
-            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+            final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK(
               shouldFailToRegisterPushToken: shouldFailToRegisterPushToken,
             );
 
@@ -213,7 +213,7 @@ void main() {
             testWidgets('it attempts to register the token again', (
               tester,
             ) async {
-              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK(
                 shouldFailToRegisterPushToken: shouldFailToRegisterPushToken,
               );
 
@@ -248,7 +248,7 @@ void main() {
 
           group('and multiple tokens arrive in a short period', () {
             testWidgets('it handles them synchronously', (tester) async {
-              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+              final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceMatrixSDK(
                 shouldFailToRegisterPushToken: false,
               );
               final savingPushTokenDuration = 100;

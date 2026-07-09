@@ -7,7 +7,7 @@ import 'package:mpx_flutter_reference_app/presentation/dialogs/qr_code_picker/qr
 
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
-import 'fakes/fake_meeting_place_sdk.dart';
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 import 'utils/app.dart';
 
 const _mockCameras = [
@@ -45,7 +45,7 @@ void main() {
         testWidgets(
           'should call acceptOobFlow with correct params when QR is detected',
           (tester) async {
-            final fakeSdk = FakeMeetingPlaceSDK();
+            final fakeSdk = FakeMeetingPlaceMatrixSDK();
             final testQrUrl = 'https://example.com/oob?_oob=test-token';
 
             await navigateToLocation(
@@ -89,7 +89,7 @@ void main() {
         testWidgets('should show invalid QR-Code error message', (
           tester,
         ) async {
-          final fakeSdk = FakeMeetingPlaceSDK();
+          final fakeSdk = FakeMeetingPlaceMatrixSDK();
           final testQrUrl = '{"key": "This is not a url"}';
 
           await navigateToLocation(
@@ -121,7 +121,7 @@ void main() {
           tester,
         ) async {
           final errorCode = 'oob_invalid_type';
-          final fakeSdk = FakeMeetingPlaceSDK(
+          final fakeSdk = FakeMeetingPlaceMatrixSDK(
             acceptOobFlowException: MeetingPlaceCoreSDKException(
               message: 'Oob type is not supported',
               code: errorCode,
@@ -154,7 +154,7 @@ void main() {
       group('and there is a network error', () {
         testWidgets('should show network error message', (tester) async {
           final errorCode = 'network_error';
-          final fakeSdk = FakeMeetingPlaceSDK(
+          final fakeSdk = FakeMeetingPlaceMatrixSDK(
             acceptOobFlowException: MeetingPlaceCoreSDKException(
               message: 'Network error',
               code: errorCode,
@@ -189,7 +189,7 @@ void main() {
           tester,
         ) async {
           final errorCode = 'oob_invalid_data';
-          final fakeSdk = FakeMeetingPlaceSDK(
+          final fakeSdk = FakeMeetingPlaceMatrixSDK(
             acceptOobFlowException: MeetingPlaceCoreSDKException(
               message: 'Invalid OOB data',
               code: errorCode,
@@ -224,7 +224,7 @@ void main() {
           tester,
         ) async {
           final errorCode = 'oob_not_found';
-          final fakeSdk = FakeMeetingPlaceSDK(
+          final fakeSdk = FakeMeetingPlaceMatrixSDK(
             acceptOobFlowException: MeetingPlaceCoreSDKException(
               message: 'OOB offer not found',
               code: errorCode,
@@ -257,7 +257,7 @@ void main() {
       group('and there is an unexpected error', () {
         testWidgets('should show unexpected error message', (tester) async {
           final errorCode = 'generic';
-          final fakeSdk = FakeMeetingPlaceSDK(
+          final fakeSdk = FakeMeetingPlaceMatrixSDK(
             acceptOobFlowException: MeetingPlaceCoreSDKException(
               message: 'Unexpected error',
               code: errorCode,
@@ -290,7 +290,7 @@ void main() {
           testWidgets('should show timeout error message and stay on screen', (
             tester,
           ) async {
-            final fakeSdk = FakeMeetingPlaceSDK(shouldTimeout: true);
+            final fakeSdk = FakeMeetingPlaceMatrixSDK(shouldTimeout: true);
             final testQrUrl = 'https://example.com/oob?_oob=test-token';
 
             await navigateToLocation(
@@ -321,7 +321,7 @@ void main() {
           testWidgets(
             '''should dispose previous subscription before accepting new QR code''',
             (tester) async {
-              final fakeSdk = FakeMeetingPlaceSDK(shouldTimeout: true);
+              final fakeSdk = FakeMeetingPlaceMatrixSDK(shouldTimeout: true);
               final firstQrUrl = 'https://example.com/oob?_oob=first-token';
               final secondQrUrl = 'https://example.com/oob?_oob=second-token';
 

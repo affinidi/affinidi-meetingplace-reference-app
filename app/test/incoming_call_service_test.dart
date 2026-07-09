@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_session/audio_session.dart';
@@ -18,33 +17,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/call_audio_ses
 import 'fakes/fake_audio_session.dart';
 import 'fakes/fake_chat_session_service.dart';
 import 'fakes/fake_contacts_service.dart';
-
-class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
-  final _incoming = StreamController<IncomingAudioVideoCallEvent>.broadcast();
-  final _cancelled = StreamController<String>.broadcast();
-  final acceptedCallIds = <String>[];
-  final declinedCallIds = <String>[];
-
-  void emitIncoming(IncomingAudioVideoCallEvent event) => _incoming.add(event);
-  void emitCancelled(String callId) => _cancelled.add(callId);
-
-  @override
-  Stream<IncomingAudioVideoCallEvent> get incomingCalls => _incoming.stream;
-
-  @override
-  Stream<String> get cancelledCalls => _cancelled.stream;
-
-  @override
-  Future<void> acceptCall({required String callId}) async =>
-      acceptedCallIds.add(callId);
-
-  @override
-  Future<void> declineCall({required String callId}) async =>
-      declinedCallIds.add(callId);
-
-  @override
-  Future<void> leaveCurrentCall() async {}
-}
+import 'fakes/fake_meeting_place_matrix_sdk.dart';
 
 IncomingAudioVideoCallEvent _event({
   String callerPermanentChannelDid = 'did:key:caller',
@@ -63,7 +36,7 @@ void main() {
   });
 
   ProviderContainer buildContainer(
-    _FakeMeetingPlaceMatrixSDK fakeSDK, {
+    FakeMeetingPlaceMatrixSDK fakeSDK, {
     FakeAudioSession? audioSession,
     bool canUsePlatformAudioSession = false,
   }) => ProviderContainer(
@@ -81,7 +54,7 @@ void main() {
 
   group('when there is an incoming call', () {
     test('it preserves audio media type on the incoming call state', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = FakeMeetingPlaceMatrixSDK();
       final container = buildContainer(fakeSDK);
       addTearDown(container.dispose);
 
@@ -100,7 +73,7 @@ void main() {
     });
 
     test('it sets the incoming call state when an event arrives', () async {
-      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final fakeSDK = FakeMeetingPlaceMatrixSDK();
       final container = buildContainer(fakeSDK);
       addTearDown(container.dispose);
 
@@ -122,7 +95,7 @@ void main() {
       test(
         '''it preserves incoming-call state for the call screen and forwards the call id to the SDK''',
         () async {
-          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final fakeSDK = FakeMeetingPlaceMatrixSDK();
           final audioSession = FakeAudioSession();
           final container = buildContainer(
             fakeSDK,
@@ -163,7 +136,7 @@ void main() {
 
     group('and the recipient declines the call', () {
       test('it clears the state and forwards the call id to the SDK', () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = FakeMeetingPlaceMatrixSDK();
         final container = buildContainer(fakeSDK);
         addTearDown(container.dispose);
 
@@ -199,7 +172,7 @@ void main() {
 
     group('and the caller cancels the call', () {
       test('it clears the incoming call state', () async {
-        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final fakeSDK = FakeMeetingPlaceMatrixSDK();
         final container = buildContainer(fakeSDK);
         addTearDown(container.dispose);
 
@@ -226,7 +199,7 @@ void main() {
     group('and the recipient does not respond', () {
       test('auto-declines and clears the state after the timeout', () {
         fakeAsync((async) {
-          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final fakeSDK = FakeMeetingPlaceMatrixSDK();
           final container = buildContainer(fakeSDK);
 
           container.read(incomingCallServiceProvider);
@@ -254,7 +227,7 @@ void main() {
 
       test('it does not auto-decline once the call is accepted', () {
         fakeAsync((async) {
-          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final fakeSDK = FakeMeetingPlaceMatrixSDK();
           final container = buildContainer(fakeSDK);
 
           container.read(incomingCallServiceProvider);

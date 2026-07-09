@@ -55,7 +55,7 @@ import '../fakes/fake_contacts.dart';
 import '../fakes/fake_environment.dart';
 import '../fakes/fake_identities.dart';
 import '../fakes/fake_local_authentication.dart';
-import '../fakes/fake_meeting_place_sdk.dart';
+import '../fakes/fake_meeting_place_matrix_sdk.dart';
 import '../fakes/fake_permission_service.dart';
 import '../fakes/fake_push_notification_messaging.dart';
 import '../fakes/fake_secure_storage.dart';
@@ -215,7 +215,7 @@ Future<void> startApp(
       meetingPlaceSdkProvider.overrideWith(
         (ref) =>
             meetingPlaceCoreSDK ??
-            FakeMeetingPlaceSDK(
+            FakeMeetingPlaceMatrixSDK(
               channels: contacts.isNotEmpty ? FakeChannels.allChannels : null,
             ),
       ),
