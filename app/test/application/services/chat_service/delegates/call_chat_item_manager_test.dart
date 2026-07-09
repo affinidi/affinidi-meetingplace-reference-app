@@ -197,4 +197,98 @@ void main() {
       expect(id, isNull);
     });
   });
+
+  group('CallChatItemManager.sendOutgoingCallMessage', () {
+    late FakeChatSdk fakeChatSdk;
+    late CallChatItemManager manager;
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+      );
+    });
+
+    test(
+      'onSent callback is called immediately when message sent successfully',
+      () async {
+        Message? sentMessage;
+        final messageId = await manager.sendOutgoingCallMessage(
+          mediaType: CallMediaType.audio,
+          callId: 'test-call-id',
+          onSent: (message) {
+            sentMessage = message;
+          },
+        );
+
+        expect(messageId, isNotNull);
+        expect(sentMessage, isNotNull);
+        expect(sentMessage!.messageId, messageId);
+        expect(sentMessage!.isFromMe, isTrue);
+      },
+    );
+
+    test('onSent callback receives message with call attachment', () async {
+      Message? sentMessage;
+      await manager.sendOutgoingCallMessage(
+        mediaType: CallMediaType.video,
+        callId: 'test-call-id-123',
+        onSent: (message) {
+          sentMessage = message;
+        },
+      );
+
+      expect(sentMessage, isNotNull);
+      expect(sentMessage!.attachments, isNotEmpty);
+      final callMetadata = CallMetadata.maybeOf(sentMessage!.attachments.first);
+      expect(callMetadata, isNotNull);
+      expect(callMetadata!.mediaType, CallMediaType.video);
+    });
+
+    test('onSent callback is not called when SDK is unavailable', () async {
+      final managerWithNullSdk = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => null,
+        logger: FakeAppLogger(),
+      );
+      Message? sentMessage;
+      final messageId = await managerWithNullSdk.sendOutgoingCallMessage(
+        mediaType: CallMediaType.audio,
+        onSent: (message) {
+          sentMessage = message;
+        },
+      );
+
+      expect(messageId, isNull);
+      expect(sentMessage, isNull);
+    });
+
+    test('onSent callback is not called when send fails', () async {
+      Message? sentMessage;
+      fakeChatSdk.sendTextMessageFailuresRemaining = 1;
+
+      await expectLater(
+        manager.sendOutgoingCallMessage(
+          mediaType: CallMediaType.audio,
+          onSent: (message) {
+            sentMessage = message;
+          },
+        ),
+        completion(isNull),
+      );
+
+      expect(sentMessage, isNull);
+    });
+
+    test('onSent callback is optional', () async {
+      final messageId = await manager.sendOutgoingCallMessage(
+        mediaType: CallMediaType.audio,
+        callId: 'test-call-id',
+      );
+
+      expect(messageId, isNotNull);
+    });
+  });
 }

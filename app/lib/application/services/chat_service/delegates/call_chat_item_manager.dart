@@ -24,9 +24,15 @@ class CallChatItemManager {
 
   /// Sends an outgoing call message with the specified [mediaType].
   /// Returns the message ID on success, or `null` if send failed.
+  ///
+  /// [onSent] is called immediately after the message is confirmed by the
+  /// server, before the chat stream echoes it back. Use it to inject the item
+  /// into the UI right away so the caller doesn't wait for the stream
+  /// round-trip.
   Future<String?> sendOutgoingCallMessage({
     required CallMediaType mediaType,
     String? callId,
+    void Function(Message message)? onSent,
   }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -58,6 +64,7 @@ class CallChatItemManager {
           'sendOutgoingCallMessage: sent call item ${message.messageId}',
           name: _logKey,
         );
+        onSent?.call(message);
       }
       return message.messageId;
     } catch (e, stackTrace) {

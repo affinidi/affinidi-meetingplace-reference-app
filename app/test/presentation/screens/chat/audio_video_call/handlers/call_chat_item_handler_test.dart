@@ -226,7 +226,7 @@ void main() {
             status: AudioVideoCallStatus.outgoingRinging,
             participants: [],
             ownRole: CallRole.caller,
-              callId: 'test-call-id',
+            callId: 'test-call-id',
             callStartedAt: now,
           ),
         );
@@ -238,7 +238,7 @@ void main() {
             status: AudioVideoCallStatus.outgoingRinging,
             participants: [FakeAudioVideoCallParticipant()],
             ownRole: CallRole.caller,
-              callId: 'test-call-id',
+            callId: 'test-call-id',
             callStartedAt: now,
           ),
         );
@@ -250,7 +250,7 @@ void main() {
             status: AudioVideoCallStatus.connected,
             participants: [FakeAudioVideoCallParticipant()],
             ownRole: CallRole.caller,
-              callId: 'test-call-id',
+            callId: 'test-call-id',
             callStartedAt: now,
           ),
         );
@@ -262,7 +262,7 @@ void main() {
             status: AudioVideoCallStatus.ended,
             participants: [FakeAudioVideoCallParticipant()],
             ownRole: CallRole.caller,
-              callId: 'test-call-id',
+            callId: 'test-call-id',
             callStartedAt: now,
           ),
         );

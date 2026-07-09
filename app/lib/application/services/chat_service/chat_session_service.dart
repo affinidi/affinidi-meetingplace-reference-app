@@ -947,6 +947,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }) => _callChatItemManager.sendOutgoingCallMessage(
     mediaType: mediaType,
     callId: callId,
+    onSent: upsertChatItem,
   );
 
   @override
@@ -965,11 +966,14 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String messageId, {
     required CallStatus status,
     Duration? duration,
-  }) => _callChatItemManager.updateCallChatItem(
-    messageId,
-    status: status,
-    duration: duration,
-  );
+  }) async {
+    final updated = await _callChatItemManager.updateCallChatItem(
+      messageId,
+      status: status,
+      duration: duration,
+    );
+    if (updated != null) upsertChatItem(updated);
+  }
 
   void _removeChatItem(ChatItem item) {
     final messages = state.messages
