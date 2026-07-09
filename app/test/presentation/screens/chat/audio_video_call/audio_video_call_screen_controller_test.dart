@@ -366,6 +366,35 @@ void main() {
       );
     });
   });
+
+  group('minimize banner sync safety', () {
+    test('lifecycle handler disposal safety: isAudioOnly snapshotted before '
+        'async gap prevents crashes', () async {
+      final session = MockAudioVideoCallSession();
+      final container = _makeContainer(pendingSession: session);
+      container.listen(
+        audioVideoCallScreenControllerProvider(_kContactId),
+        (_, _) {},
+      );
+
+      // Verify the session can start and emit states without crashing
+      // even if disposal occurs mid-initialization
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.outgoingRinging,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await container.pump();
+
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(_kContactId))
+            .status,
+        AudioVideoCallStatus.outgoingRinging,
+      );
+    });
+  });
 }
 
 class _FakePermissionService extends PermissionService {

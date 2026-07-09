@@ -41,6 +41,19 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   AudioVideoCallStatus _lastStatus = AudioVideoCallStatus.idle;
   bool _isGroupContact = false;
 
+  // Resolved once in build() from the contact's channel DID (falling back to
+  // contactId). Cached as a field so disposal-safe paths never read ref.
+  String? _cachedChannelDid;
+  // Peer display name resolved once in build(), used by the post-dispose banner
+  // registration where reading contact state via ref is unsafe.
+  String _cachedPeerName = '';
+
+  // Captured on minimize-dispose so the session can still be forwarded to the
+  // banner controller after this provider is torn down.
+  ActiveCallController? _pendingBannerController;
+  // Last-known values snapshotted for the post-dispose banner registration.
+  bool _lastIsAudioOnly = false;
+
   // The device's call role, mirrored from the session's authoritative ownRole.
   // True once the SDK reports this device opened the call (CallRole.caller).
   // Drives end-status resolution; the chat item itself is gated by the emitter.
@@ -53,6 +66,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   set state(AudioVideoCallScreenState value) {
     if (!ref.mounted) return;
     _lastStatus = value.status;
+    _lastIsAudioOnly = value.isAudioOnly;
     super.state = value;
     _syncActiveCallBanner(value);
   }
@@ -61,6 +75,8 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   AudioVideoCallScreenState build(String contactId) {
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     _isGroupContact = contact?.isGroup ?? false;
+    _cachedChannelDid = contact?.channelDid ?? contactId;
+    _cachedPeerName = contact?.displayName ?? contact?.card.displayName ?? '';
     final incomingEvent = ref.read(incomingCallProvider).eventOrNull;
     final expectedOtherPartyDid = contact?.channelDid ?? contactId;
     final isAcceptedIncomingForThisScreen =
@@ -182,12 +198,13 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
           'onDispose: minimized; banner retains session',
           name: _logKey,
         );
+        _pendingBannerController = activeCallController;
       }
     });
 
     return AudioVideoCallScreenState(
       isGroupContact: _isGroupContact,
-      peerName: contact?.displayName ?? contact?.card.displayName ?? '',
+      peerName: _cachedPeerName,
       hasHadPeer: restoredBanner != null
           ? (restoredBanner.callDurationSeconds > 0)
           : isAcceptedIncomingForThisScreen || pendingSession != null,
@@ -490,7 +507,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// Applies handler-transformed session events to the screen
   /// state and syncs to banner.
   void _applySessionUpdate(AudioVideoCallStateUpdate update) {
-    if (_isDisposed) {
+    if (_isDisposed || !ref.mounted) {
       _logger.info(
         'applySessionUpdate: Skipping, controller disposed',
         name: _logKey,
@@ -535,15 +552,31 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   }
 
   /// The contact's channel DID, or contactId if not found.
-  String? get _channelDid {
-    final contact = ref.read(contactsServiceProvider).getContactById(contactId);
-    return contact?.channelDid ?? contactId;
-  }
+  ///
+  /// Resolved once in [build] and cached, so it is safe to read after the
+  /// provider is disposed (e.g. in the post-minimize forwarding path).
+  String? get _channelDid => _cachedChannelDid;
 
   /// Applies lifecycle transitions: attaches sessions, clears incoming state,
   /// updates status, records failures, and writes ended chat items.
   void _applyLifecycleUpdate(CallLifecycleUpdate update) {
-    if (_isDisposed) return;
+    if (_isDisposed || !ref.mounted) {
+      final pending = _pendingBannerController;
+      if (pending != null && update.attachedSession != null) {
+        _pendingBannerController = null;
+        pending.registerSession(
+          update.attachedSession!,
+          channelDid: _channelDid ?? contactId,
+          isAudioOnly: _lastIsAudioOnly,
+          initialStatus: AudioVideoCallStatus.connecting,
+          peerName: _cachedPeerName,
+          isMicEnabled: true,
+          isMinimized: true,
+          isGroupContact: _isGroupContact,
+        );
+      }
+      return;
+    }
     if (update.attachedSession != null) {
       _attachSession(update.attachedSession!);
     }
@@ -585,7 +618,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
   /// Applies media toggle updates (mic, camera, speaker, permissions) to state.
   void _applyMediaUpdate(CallMediaUpdate update) {
-    if (_isDisposed) return;
+    if (_isDisposed || !ref.mounted) return;
 
     final newIsCameraEnabled = update.isCameraEnabled ?? state.isCameraEnabled;
     // When enabling camera from audio-only call, switch to video mode.
@@ -640,6 +673,13 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   /// Syncs screen state to the banner controller,
   /// clearing if call is not visible.
   void _syncActiveCallBanner(AudioVideoCallScreenState value) {
+    if (_isMinimizing) {
+      _logger.info(
+        '_syncActiveCallBanner: Skipping, minimizing',
+        name: _logKey,
+      );
+      return;
+    }
     final activeCallController = ref.read(
       activeCallControllerProvider.notifier,
     );
