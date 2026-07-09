@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
 
+import '../../../../../fakes/fake_app_logger.dart';
 import '../../../../../fakes/fake_audio_video_call_session.dart';
-import '../../../../../mocks/fake_app_logger.dart';
 import '../../../../../mocks/fake_audio_video_call_participant.dart';
 
 typedef CallChatItemId = String;

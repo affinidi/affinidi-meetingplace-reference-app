@@ -7,8 +7,8 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/delegates/call_chat_item_manager.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../fakes/fake_app_logger.dart';
 import '../../../../fakes/fake_chat_sdk.dart';
-import '../../../../mocks/mock_app_logger.dart';
 
 void main() {
   group('CallChatItemManager incoming call resolution', () {

@@ -6,12 +6,11 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_pr
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/end_call_banner_controller.dart';
-
 import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_controller.dart';
 
+import '../../../../fakes/fake_app_logger.dart';
 import '../../../../fakes/fake_audio_video_call_session.dart';
 import '../../../../fakes/fake_chat_session_service.dart';
-import '../../../../mocks/fake_app_logger.dart';
 import '../../../../mocks/fake_call_ended_controller.dart';
 import '../../../../mocks/fake_end_call_banner_controller.dart';
 

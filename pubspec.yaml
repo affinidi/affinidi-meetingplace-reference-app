@@ -82,7 +82,7 @@ melos:
 
     test-flutter:
       description: Run tests in each flutter package
-      exec: flutter test --coverage
+      exec: flutter test --coverage -r expanded
       dirExists: test
       concurrency: 4
       failFast: true

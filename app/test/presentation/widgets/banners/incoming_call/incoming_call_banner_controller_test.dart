@@ -9,7 +9,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/end_call_banner_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/incoming_call/incoming_call_banner_controller.dart';
 
-import '../../../../mocks/fake_app_logger.dart';
+import '../../../../fakes/fake_app_logger.dart';
 import '../../../../mocks/fake_incoming_call_service.dart';
 import '../../../../mocks/mock_navigator.dart';
 

@@ -1,20 +1,16 @@
-import 'dart:io';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_state.dart';
 
-void main() {
-  setUpAll(() {
-    AppLogger.initialize(
-      File('${Directory.systemTemp.path}/call_ended_controller_test.log'),
-    );
-  });
+import '../../../fakes/fake_app_logger.dart';
 
+void main() {
   ProviderContainer buildContainer() {
-    final container = ProviderContainer();
+    final container = ProviderContainer(
+      overrides: [appLoggerProvider.overrideWithValue(FakeAppLogger())],
+    );
     addTearDown(container.dispose);
     return container;
   }

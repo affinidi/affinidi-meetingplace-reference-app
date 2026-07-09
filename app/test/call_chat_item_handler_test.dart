@@ -4,8 +4,8 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
 
+import 'fakes/fake_app_logger.dart';
 import 'fakes/fake_audio_video_call_session.dart';
-import 'mocks/mock_app_logger.dart';
 
 void main() {
   group('CallChatItemHandler', () {

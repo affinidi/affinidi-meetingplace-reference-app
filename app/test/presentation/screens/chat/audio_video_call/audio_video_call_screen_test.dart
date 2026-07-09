@@ -18,10 +18,10 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 
+import '../../../../fakes/fake_app_logger.dart';
 import '../../../../fakes/fake_meeting_place_matrix_sdk.dart';
 import '../../../../fakes/fake_permission_service.dart';
 import '../../../../mocks/fake_active_call_controller.dart';
-import '../../../../mocks/fake_app_logger.dart';
 import '../../../../mocks/fake_contacts_service.dart';
 
 const _kContactId = 'smoke-test-contact';

@@ -27,6 +27,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/plugins/document_attach
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_info_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/applications_documents_directory_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/connectivity_provider.dart';
@@ -46,6 +47,7 @@ import 'package:mpx_flutter_reference_app/presentation/app/app.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../fakes/fake_app_badge_service.dart';
+import '../fakes/fake_app_logger.dart';
 import '../fakes/fake_cache_manager.dart';
 import '../fakes/fake_camera_controller.dart';
 import '../fakes/fake_channels.dart';
@@ -91,7 +93,6 @@ Future<void> startApp(
   addTearDown(() async {
     await _closeChat(tester);
   });
-  AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
   SharedPreferences.setMockInitialValues({
     'alreadyOnboarded': alreadyOnboarded,
   });
@@ -129,6 +130,7 @@ Future<void> startApp(
 
   final app = ProviderScope(
     overrides: [
+      appLoggerProvider.overrideWithValue(FakeAppLogger()),
       cacheManagerProvider.overrideWith((ref) => cacheManager),
       appBadgeServiceProvider.overrideWithValue(FakeAppBadgeService()),
       appInfoProvider.overrideWith(

@@ -16,11 +16,11 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_ca
 import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import '../../../../fakes/fake_app_logger.dart';
 import '../../../../fakes/fake_audio_video_call_session.dart';
 import '../../../../fakes/fake_chat_session_service.dart';
 import '../../../../fakes/fake_meeting_place_matrix_sdk.dart';
 import '../../../../mocks/fake_active_call_controller.dart';
-import '../../../../mocks/fake_app_logger.dart';
 import '../../../../mocks/fake_contacts_service.dart';
 
 const _kContactId = 'test-contact-id';
@@ -73,12 +73,16 @@ Future<void> _pumpAsync() async {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  late FakeAudioVideoCallSession session;
+
+  setUp(() {
+    session = FakeAudioVideoCallSession();
+  });
 
   group('_applySessionUpdate — ended status lock', () {
     test(
       'ended status from session is not overwritten by a later non-ended emit',
       () async {
-        final session = FakeAudioVideoCallSession();
         final container = _makeContainer(pendingSession: session);
         container.listen(
           audioVideoCallScreenControllerProvider(_kContactId),
@@ -110,7 +114,6 @@ void main() {
 
   group('cancelCall — caller hangs up before peer answers', () {
     test('sets ended status when caller cancels with no peer', () async {
-      final session = FakeAudioVideoCallSession();
       final chatSvc = FakeChatSessionService();
       final container = _makeContainer(
         chatService: chatSvc,
@@ -146,7 +149,6 @@ void main() {
 
   group('endCallFromScreen — caller ends from the call screen', () {
     test('shows the call-ended overlay when a peer was connected', () async {
-      final session = FakeAudioVideoCallSession();
       final container = _makeContainer(pendingSession: session);
       final ctrl = container.read(
         audioVideoCallScreenControllerProvider(_kContactId).notifier,
@@ -176,7 +178,6 @@ void main() {
     });
 
     test('does not show the overlay when no peer ever connected', () async {
-      final session = FakeAudioVideoCallSession();
       final banner = FakeActiveCallController(
         fixedCallChatItemId: _kMsgId,
         bannerState: const ActiveCallState(
@@ -221,7 +222,6 @@ void main() {
     test(
       'flushes the outgoing chat item to declined before switching state',
       () async {
-        final session = FakeAudioVideoCallSession();
         final banner = FakeActiveCallController(
           fixedCallChatItemId: _kMsgId,
           bannerState: _kActiveBannerState,
@@ -264,7 +264,6 @@ void main() {
     test(
       'transitions status to declined so the decline screen renders',
       () async {
-        final session = FakeAudioVideoCallSession();
         final container = _makeContainer(pendingSession: session);
         final ctrl = container.read(
           audioVideoCallScreenControllerProvider(_kContactId).notifier,
@@ -295,7 +294,6 @@ void main() {
     );
 
     test('declined status survives a later terminal teardown status', () async {
-      final session = FakeAudioVideoCallSession();
       final container = _makeContainer(pendingSession: session);
       final ctrl = container.read(
         audioVideoCallScreenControllerProvider(_kContactId).notifier,
@@ -331,7 +329,6 @@ void main() {
 
     test('declined status survives a later non-ended session status '
         '(no Calling flash)', () async {
-      final session = FakeAudioVideoCallSession();
       final container = _makeContainer(pendingSession: session);
       final ctrl = container.read(
         audioVideoCallScreenControllerProvider(_kContactId).notifier,
@@ -368,7 +365,6 @@ void main() {
     test(
       'stale declined lifecycle update does not flash after Call Again',
       () async {
-        final session = FakeAudioVideoCallSession();
         final container = _makeContainer(pendingSession: session);
         final ctrl = container.read(
           audioVideoCallScreenControllerProvider(_kContactId).notifier,
@@ -401,7 +397,6 @@ void main() {
     );
 
     test('awaits endCallChatItem before flipping to declined status', () async {
-      final session = FakeAudioVideoCallSession();
       final banner = FakeActiveCallController(
         fixedCallChatItemId: _kMsgId,
         bannerState: _kActiveBannerState,
@@ -444,7 +439,6 @@ void main() {
   group('minimize banner sync safety', () {
     test('lifecycle handler disposal safety: isAudioOnly snapshotted before '
         'async gap prevents crashes', () async {
-      final session = FakeAudioVideoCallSession();
       final container = _makeContainer(pendingSession: session);
       container.listen(
         audioVideoCallScreenControllerProvider(_kContactId),
