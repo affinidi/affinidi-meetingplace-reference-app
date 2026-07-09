@@ -233,7 +233,7 @@ class ActiveCallController extends _$ActiveCallController {
       onInitiator: _sendOutgoingCallMessage,
       resolveItemId: _resolveCallChatItemId,
       updateItem: _updateCallChatItem,
-      isDisposed: () => _isDisposed,
+      isDisposed: () => _chatService == null,
       logger: _logger,
     )..attach(session);
     _sessionStateSub?.cancel();

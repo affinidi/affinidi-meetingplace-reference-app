@@ -24,11 +24,12 @@ class FakeCallChatItemManager extends CallChatItemManager {
   ) async => null;
 
   @override
-  Future<void> updateCallChatItem(
+  Future<Message?> updateCallChatItem(
     String messageId, {
     required CallStatus status,
     Duration? duration,
   }) async {
     updateCallCount++;
+    return null;
   }
 }

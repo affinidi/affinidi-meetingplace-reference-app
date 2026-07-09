@@ -291,4 +291,98 @@ void main() {
       expect(messageId, isNotNull);
     });
   });
+
+  group('updateCallChatItem return value for immediate UI refresh', () {
+    late FakeChatSdk fakeChatSdk;
+    late CallChatItemManager manager;
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+      );
+    });
+
+    test(
+      'returns non-null updated Message when status changes successfully',
+      () async {
+        final messageId = await manager.sendOutgoingCallMessage(
+          mediaType: CallMediaType.audio,
+        );
+        expect(messageId, isNotNull);
+
+        // Manually add the message to sessionMessages so getMessageById can
+        // find it
+        final originalMessage = Message(
+          chatId: 'fake-chat-id',
+          messageId: messageId!,
+          value: '',
+          dateCreated: DateTime.now(),
+          status: ChatItemStatus.sent,
+          isFromMe: true,
+          senderDid: 'fake-sender-did',
+          attachments: [
+            CallMetadata.buildAttachment(
+              mediaType: CallMediaType.audio,
+              status: CallStatus.calling,
+              callId: 'test-call-id',
+              durationMs: 0,
+              id: 'call-attachment-id',
+            ),
+          ],
+        );
+        fakeChatSdk.sessionMessages = [originalMessage];
+
+        final updated = await manager.updateCallChatItem(
+          messageId,
+          status: CallStatus.declined,
+        );
+
+        expect(
+          updated,
+          isNotNull,
+          reason:
+              'updateCallChatItem should return updated Message for immediate '
+              'UI refresh instead of waiting for stream echo',
+        );
+        expect(updated!.messageId, messageId);
+      },
+    );
+
+    test('returns null when message not found', () async {
+      fakeChatSdk.sessionMessages = [];
+
+      final updated = await manager.updateCallChatItem(
+        'nonexistent-message-id',
+        status: CallStatus.declined,
+      );
+
+      expect(
+        updated,
+        isNull,
+        reason: 'updateCallChatItem should return null when message not found',
+      );
+    });
+
+    test('returns null when SDK unavailable', () async {
+      final managerWithNullSdk = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => null,
+        logger: FakeAppLogger(),
+      );
+
+      final updated = await managerWithNullSdk.updateCallChatItem(
+        'any-id',
+        status: CallStatus.declined,
+      );
+
+      expect(
+        updated,
+        isNull,
+        reason: 'updateCallChatItem should return null when SDK unavailable',
+      );
+    });
+  });
 }
