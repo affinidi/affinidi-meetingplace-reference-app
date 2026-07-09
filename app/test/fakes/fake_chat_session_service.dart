@@ -143,6 +143,7 @@ class FakeChatSessionService extends ChatSessionService {
   @override
   Future<String?> sendOutgoingCallMessage({
     required CallMediaType mediaType,
+    required String callId,
   }) async => sendOutgoingResult;
 
   @override

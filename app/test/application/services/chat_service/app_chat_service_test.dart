@@ -1080,6 +1080,7 @@ void main() {
         'and returns its id', () async {
       final messageId = await chatService.sendOutgoingCallMessage(
         mediaType: CallMediaType.audio,
+        callId: 'test-call-id',
       );
 
       expect(messageId, isNotNull);

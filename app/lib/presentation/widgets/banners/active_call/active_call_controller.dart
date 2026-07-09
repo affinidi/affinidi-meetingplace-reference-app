@@ -233,7 +233,7 @@ class ActiveCallController extends _$ActiveCallController {
       onInitiator: _sendOutgoingCallMessage,
       resolveItemId: _resolveCallChatItemId,
       updateItem: _updateCallChatItem,
-      isDisposed: () => _isDisposed,
+      isDisposed: () => _isDisposed || _chatService == null,
       logger: _logger,
     )..attach(session);
     _sessionStateSub?.cancel();
@@ -253,6 +253,22 @@ class ActiveCallController extends _$ActiveCallController {
     _participantEventSub?.cancel();
     _participantEventSub = null;
     _session = null;
+  }
+
+  /// Flushes the call chat item to end status before banner teardown.
+  /// Called when peer declines off-stream; idempotent if called again.
+  Future<void> endCallChatItem({required CallRole role}) async {
+    if (_isDisposed) {
+      _logger.info(
+        'endCallChatItem: Skipped, controller disposed',
+        name: _logKey,
+      );
+      return;
+    }
+    _logger.info('endCallChatItem: role=$role', name: _logKey);
+    _ownRole ??= role;
+    _chatItemHandler?.endCall(assumeRole: role);
+    await _chatItemHandler?.endCallWrite;
   }
 
   /// Toggles the microphone on the live session and reflects it in the banner.
@@ -431,9 +447,12 @@ class ActiveCallController extends _$ActiveCallController {
     }
   }
 
-  Future<String?> _sendOutgoingCallMessage() {
+  Future<String?> _sendOutgoingCallMessage(String callId) {
     final mediaType = _isAudioOnly ? CallMediaType.audio : CallMediaType.video;
-    return _chatService!.sendOutgoingCallMessage(mediaType: mediaType);
+    return _chatService!.sendOutgoingCallMessage(
+      mediaType: mediaType,
+      callId: callId,
+    );
   }
 
   Future<String?> _resolveCallChatItemId({required bool isCaller}) {
@@ -446,8 +465,16 @@ class ActiveCallController extends _$ActiveCallController {
     String messageId, {
     required CallStatus status,
     Duration? duration,
-  }) {
-    return _chatService!.updateCallChatItem(
+  }) async {
+    final chatService = _chatService;
+    if (chatService == null) {
+      _logger.info(
+        'updateCallChatItem: Skipped, chat service disposed',
+        name: _logKey,
+      );
+      return;
+    }
+    await chatService.updateCallChatItem(
       messageId,
       status: status,
       duration: duration,

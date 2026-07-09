@@ -157,9 +157,10 @@ class CallLifecycleHandler {
     MeetingPlaceMatrixSDK sdk,
     String channelDid,
   ) async {
+    final isAudioOnly = _getState().isAudioOnly;
     const speakerphoneEnabled = false;
     final acquiredAudioSession = await _audioSessionService.acquire(
-      isAudioOnly: _getState().isAudioOnly,
+      isAudioOnly: isAudioOnly,
     );
     if (!acquiredAudioSession) {
       _logger.warning(
@@ -176,9 +177,7 @@ class CallLifecycleHandler {
     try {
       final session = await sdk.startCall(
         otherPartyChannelDid: channelDid,
-        mediaType: _getState().isAudioOnly
-            ? CallMediaType.audio
-            : CallMediaType.video,
+        mediaType: isAudioOnly ? CallMediaType.audio : CallMediaType.video,
       );
       _setSession(session);
       await session.setSpeakerphoneEnabled(speakerphoneEnabled);

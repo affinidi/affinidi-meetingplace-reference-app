@@ -24,9 +24,15 @@ class CallChatItemManager {
 
   /// Sends an outgoing call message with the specified [mediaType].
   /// Returns the message ID on success, or `null` if send failed.
+  ///
+  /// [onSent] is called immediately after the message is confirmed by the
+  /// server, before the chat stream echoes it back. Use it to inject the item
+  /// into the UI right away so the caller doesn't wait for the stream
+  /// round-trip.
   Future<String?> sendOutgoingCallMessage({
     required CallMediaType mediaType,
     String? callId,
+    void Function(Message message)? onSent,
   }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -58,6 +64,7 @@ class CallChatItemManager {
           'sendOutgoingCallMessage: sent call item ${message.messageId}',
           name: _logKey,
         );
+        onSent?.call(message);
       }
       return message.messageId;
     } catch (e, stackTrace) {
@@ -200,19 +207,20 @@ class CallChatItemManager {
   }
 
   /// Updates the call item with [messageId] to the specified [status] and
-  /// optional [duration]. Persists the change to the SDK. Logs a warning if
-  /// the message is not found or does not contain a call attachment.
-  Future<void> updateCallChatItem(
+  /// optional [duration]. Persists the change to the SDK and returns the
+  /// updated [Message] so callers can refresh the UI immediately instead of
+  /// waiting for the SDK stream echo. Returns `null` if the message is not
+  /// found or does not contain a call attachment.
+  Future<Message?> updateCallChatItem(
     String messageId, {
     required CallStatus status,
     Duration? duration,
-    String? callId,
   }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
     if (chatSdk == null) {
       logger.warning('updateCallChatItem: Chat SDK unavailable', name: _logKey);
-      return;
+      return null;
     }
     try {
       final item = await chatSdk.getMessageById(messageId);
@@ -221,7 +229,7 @@ class CallChatItemManager {
           'updateCallChatItem: message $messageId not found',
           name: _logKey,
         );
-        return;
+        return null;
       }
       final callAttachment = item.attachments.firstWhereOrNull(
         CallMetadata.isCall,
@@ -234,14 +242,14 @@ class CallChatItemManager {
           'updateCallChatItem: $messageId is not a call item',
           name: _logKey,
         );
-        return;
+        return null;
       }
       final updated = CallMetadata.buildAttachment(
         mediaType: existing.mediaType,
         status: status,
+        callId: existing.callId,
         durationMs: duration?.inMilliseconds ?? existing.durationMs,
         id: callAttachment!.id,
-        callId: callId ?? '',
       );
       item.attachments = [
         for (final a in item.attachments)
@@ -252,6 +260,7 @@ class CallChatItemManager {
         'updateCallChatItem: $messageId -> ${status.name}',
         name: _logKey,
       );
+      return item;
     } catch (e, stackTrace) {
       logger.error(
         'updateCallChatItem failed',
@@ -259,6 +268,7 @@ class CallChatItemManager {
         stackTrace: stackTrace,
         name: _logKey,
       );
+      return null;
     }
   }
 }

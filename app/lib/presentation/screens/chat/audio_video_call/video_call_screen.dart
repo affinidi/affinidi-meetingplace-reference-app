@@ -73,7 +73,7 @@ class _VideoCallScreen extends ConsumerWidget {
         onTap: controller.toggleCamera,
       ),
       onEndCall: () {
-        unawaited(controller.leaveCall());
+        unawaited(controller.endCallFromScreen());
         if (context.mounted) Navigator.of(context).pop();
       },
     );

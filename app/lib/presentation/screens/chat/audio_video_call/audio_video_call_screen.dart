@@ -151,7 +151,9 @@ class _CallScreenBody extends HookConsumerWidget {
               callDurationSeconds: durationSeconds,
               isAudioOnly: callIsAudioOnly,
             );
-        if (context.mounted && Navigator.of(context).canPop()) {
+        if (context.mounted &&
+            (ModalRoute.of(context)?.isCurrent ?? false) &&
+            Navigator.of(context).canPop()) {
           Navigator.of(context).pop();
         }
       });
