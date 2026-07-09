@@ -116,7 +116,7 @@ class Environment {
       const bool.fromEnvironment('ZKP_ENABLED', defaultValue: false);
   bool get audioVideoCallsEnabled => const bool.fromEnvironment(
     'AUDIO_VIDEO_CALLS_ENABLED',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   String get appVersionName =>
