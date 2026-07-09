@@ -176,17 +176,20 @@ class IncomingCallService extends _$IncomingCallService {
     action(sdk);
   }
 
-  /// Records the missed call (badge + durable marker) and attempts immediate
-  /// heal via chat session. The marker survives restart for event-driven
+  /// Records the missed incoming call: sets the durable marker so the chat item
+  /// can be reconciled to `missed`, and heals it immediately via the chat
+  /// session when open. The marker survives restart for event-driven
   /// reconciliation on the next chat open.
+  ///
+  /// The unread badge is not bumped here: the incoming call arrives as a chat
+  /// message that already advances the channel sequence number, so the missed
+  /// call is counted by the normal unread path. Bumping it again would
+  /// double-count.
   void _markCallAsMissed(String contactId) {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
     unawaited(
       Future(() async {
         try {
-          await ref
-              .read(contactsServiceProvider.notifier)
-              .incrementMissedCallBadge(contactId);
           await ref
               .read(contactsServiceProvider.notifier)
               .setPendingMissedCall(contactId);
