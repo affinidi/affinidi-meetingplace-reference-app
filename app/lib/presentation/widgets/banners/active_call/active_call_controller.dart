@@ -465,16 +465,16 @@ class ActiveCallController extends _$ActiveCallController {
     String messageId, {
     required CallStatus status,
     Duration? duration,
-  }) {
+  }) async {
     final chatService = _chatService;
     if (chatService == null) {
       _logger.info(
         'updateCallChatItem: Skipped, chat service disposed',
         name: _logKey,
       );
-      return Future<void>.value();
+      return;
     }
-    return chatService.updateCallChatItem(
+    await chatService.updateCallChatItem(
       messageId,
       status: status,
       duration: duration,
