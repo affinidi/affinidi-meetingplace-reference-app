@@ -31,6 +31,7 @@ class MissedCallManager {
   /// or before the caller's message synced. Heals the latest stale incoming
   /// call item created at or before the recorded time, then clears the marker.
   Future<void> replayPendingMissedCall() async {
+    if (!ref.mounted) return;
     final pendingAt = ref
         .read(contactsServiceProvider)
         .getContactByChannelDid(otherPartyPermanentChannelDid)
@@ -59,6 +60,7 @@ class MissedCallManager {
   /// (created at or before the marker time). Covers the item arriving via the
   /// stream after the decline was recorded off-screen.
   Future<void> healArrivedStaleCallItemIfPending(Message message) async {
+    if (!ref.mounted) return;
     if (!callChatItemManager.isStaleIncomingCall(message)) return;
     final pendingAt = ref
         .read(contactsServiceProvider)
@@ -70,12 +72,15 @@ class MissedCallManager {
   }
 
   Future<void> _healIncomingCallItemMissed(String messageId) async {
+    if (!ref.mounted) return;
     await callChatItemManager.updateCallChatItem(
       messageId,
       status: CallStatus.missed,
     );
+    if (!ref.mounted) return;
     final updated = await getMessageById(messageId);
-    if (updated is Message) onUpsertChatItem(updated);
+    if (updated != null) onUpsertChatItem(updated);
+    if (!ref.mounted) return;
     await ref
         .read(contactsServiceProvider.notifier)
         .clearPendingMissedCall(otherPartyPermanentChannelDid);

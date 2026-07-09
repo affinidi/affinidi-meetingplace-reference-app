@@ -148,6 +148,37 @@ void main() {
 
       expect(callItemManager.updateCallCount, 0);
     });
+
+    test('_healIncomingCallItemMissed clears marker even when getMessageById '
+        'returns null', () async {
+      final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+      final contact = FakeContacts.individualContact.copyWith(
+        channelDid: channelDid,
+        pendingMissedCallAt: markerTime,
+      );
+      final contactsService = FakeContactsService(contacts: [contact]);
+      final callItemManager = FakeCallChatItemManager(isStaleReturn: true);
+      final upsertCalls = <ChatItem>[];
+
+      final message = incomingCallMessage(
+        messageId: 'msg-no-fetch',
+        dateCreated: markerTime.subtract(const Duration(minutes: 1)),
+      );
+
+      final manager = MissedCallManager(
+        ref: _createTestRef(contactsService),
+        otherPartyPermanentChannelDid: channelDid,
+        callChatItemManager: callItemManager,
+        getMessageById: (_) async => null,
+        onUpsertChatItem: upsertCalls.add,
+      );
+
+      await manager.healArrivedStaleCallItemIfPending(message);
+
+      expect(callItemManager.updateCallCount, 1);
+      expect(upsertCalls, isEmpty);
+      expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
+    });
   });
 }
 
