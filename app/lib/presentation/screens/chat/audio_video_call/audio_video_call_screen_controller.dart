@@ -358,6 +358,26 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     return _lifecycleHandler.hangUp();
   }
 
+  /// Ends the call from the call screen: shows the call-ended overlay
+  /// immediately when a peer was connected, then hangs up. Showing the overlay
+  /// here (rather than from the widget's ended-state effect) keeps it
+  /// deterministic even though the screen is popped before the hang-up
+  /// completes.
+  Future<void> endCallFromScreen() async {
+    _logger.info('endCallFromScreen', name: _logKey);
+    if (state.hasHadPeer) {
+      ref
+          .read(callEndedControllerProvider.notifier)
+          .show(
+            contactId: contactId,
+            peerName: state.peerName,
+            callDurationSeconds: state.callDurationSeconds,
+            isAudioOnly: state.isAudioOnly,
+          );
+    }
+    await hangUp();
+  }
+
   /// Flushes the outgoing call chat item and transitions to declined state.
   /// The decline signal arrives off-stream, so the handler doesn't observe it.
   /// The flush must complete before state changes trigger the banner teardown.

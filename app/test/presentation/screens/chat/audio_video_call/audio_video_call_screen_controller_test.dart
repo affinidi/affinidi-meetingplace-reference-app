@@ -13,6 +13,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/permission_ser
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_controller.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../fakes/fake_chat_session_service.dart';
@@ -140,6 +141,79 @@ void main() {
             .status,
         AudioVideoCallStatus.ended,
       );
+    });
+  });
+
+  group('endCallFromScreen — caller ends from the call screen', () {
+    test('shows the call-ended overlay when a peer was connected', () async {
+      final session = MockAudioVideoCallSession();
+      final container = _makeContainer(pendingSession: session);
+      final ctrl = container.read(
+        audioVideoCallScreenControllerProvider(_kContactId).notifier,
+      );
+      container.listen(
+        audioVideoCallScreenControllerProvider(_kContactId),
+        (_, _) {},
+      );
+      container.listen(callEndedControllerProvider, (_, _) {});
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          ownRole: CallRole.caller,
+          participants: [
+            AudioVideoCallParticipant(participantId: 'local', isSelf: true),
+            AudioVideoCallParticipant(participantId: 'remote-1'),
+          ],
+        ),
+      );
+      await _pumpAsync();
+
+      await ctrl.endCallFromScreen();
+      await _pumpAsync();
+
+      expect(container.read(callEndedControllerProvider), isNotNull);
+    });
+
+    test('does not show the overlay when no peer ever connected', () async {
+      final session = MockAudioVideoCallSession();
+      final banner = FakeActiveCallController(
+        fixedCallChatItemId: _kMsgId,
+        bannerState: const ActiveCallState(
+          contactId: _kContactId,
+          peerName: 'Peer',
+          status: AudioVideoCallStatus.outgoingRinging,
+          callDurationSeconds: 0,
+          isMicEnabled: true,
+          isAudioOnly: false,
+        ),
+        fixedSession: session,
+      );
+      final container = _makeContainer(
+        bannerController: banner,
+        pendingSession: session,
+      );
+      final ctrl = container.read(
+        audioVideoCallScreenControllerProvider(_kContactId).notifier,
+      );
+      container.listen(
+        audioVideoCallScreenControllerProvider(_kContactId),
+        (_, _) {},
+      );
+      container.listen(callEndedControllerProvider, (_, _) {});
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.outgoingRinging,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await _pumpAsync();
+
+      await ctrl.endCallFromScreen();
+      await _pumpAsync();
+
+      expect(container.read(callEndedControllerProvider), isNull);
     });
   });
 

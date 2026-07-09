@@ -83,7 +83,7 @@ class _AudioCallScreen extends ConsumerWidget {
         ),
       ),
       onEndCall: () {
-        unawaited(controller.hangUp());
+        unawaited(controller.endCallFromScreen());
         if (context.mounted) Navigator.of(context).pop();
       },
     );
