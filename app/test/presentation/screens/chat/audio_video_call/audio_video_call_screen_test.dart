@@ -678,4 +678,140 @@ void main() {
       expect(controller.restartCallCalls, 0);
     });
   });
+
+  group('call ended screen — route guard', () {
+    testWidgets(
+      'does not pop when call ends and screen is not the current route',
+      (tester) async {
+        final popObserver = _PopTracker();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorObservers: [popObserver],
+            theme: AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Navigator(
+              observers: [popObserver],
+              pages: [
+                MaterialPage<void>(
+                  child: ProviderScope(
+                    overrides: [
+                      appLoggerProvider.overrideWithValue(FakeAppLogger()),
+                      contactsServiceProvider.overrideWith(
+                        FakeContactsService.new,
+                      ),
+                      meetingPlaceSdkProvider.overrideWith(
+                        (ref) async => FakeMeetingPlaceMatrixSDK(),
+                      ),
+                      permissionServiceProvider.overrideWithValue(
+                        FakePermissionService(),
+                      ),
+                      incomingCallProvider.overrideWith(
+                        _FakeIncomingCallState.new,
+                      ),
+                      activeCallControllerProvider.overrideWith(
+                        FakeActiveCallController.new,
+                      ),
+                      audioVideoCallScreenControllerProvider(
+                        _kContactId,
+                      ).overrideWith(
+                        () => _FixedStateController(
+                          AudioVideoCallScreenState(
+                            status: AudioVideoCallStatus.active,
+                            peerName: 'Test',
+                            hasHadPeer: true,
+                          ),
+                        ),
+                      ),
+                    ],
+                    child: const AudioVideoCallScreen(contactId: _kContactId),
+                  ),
+                ),
+                const MaterialPage<void>(
+                  child: Scaffold(body: Center(child: Text('Other Screen'))),
+                ),
+              ],
+              onDidRemovePage: (page) {},
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(popObserver.popCount, 0);
+
+        popObserver.reset();
+
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorObservers: [popObserver],
+            theme: AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Navigator(
+              observers: [popObserver],
+              pages: [
+                MaterialPage<void>(
+                  child: ProviderScope(
+                    overrides: [
+                      appLoggerProvider.overrideWithValue(FakeAppLogger()),
+                      contactsServiceProvider.overrideWith(
+                        FakeContactsService.new,
+                      ),
+                      meetingPlaceSdkProvider.overrideWith(
+                        (ref) async => FakeMeetingPlaceMatrixSDK(),
+                      ),
+                      permissionServiceProvider.overrideWithValue(
+                        FakePermissionService(),
+                      ),
+                      incomingCallProvider.overrideWith(
+                        _FakeIncomingCallState.new,
+                      ),
+                      activeCallControllerProvider.overrideWith(
+                        FakeActiveCallController.new,
+                      ),
+                      audioVideoCallScreenControllerProvider(
+                        _kContactId,
+                      ).overrideWith(
+                        () => _FixedStateController(
+                          AudioVideoCallScreenState(
+                            status: AudioVideoCallStatus.ended,
+                            peerName: 'Test',
+                            hasHadPeer: true,
+                          ),
+                        ),
+                      ),
+                    ],
+                    child: const AudioVideoCallScreen(contactId: _kContactId),
+                  ),
+                ),
+                const MaterialPage<void>(
+                  child: Scaffold(body: Center(child: Text('Other Screen'))),
+                ),
+              ],
+              onDidRemovePage: (page) {},
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await tester.pump();
+
+        expect(popObserver.popCount, 0);
+      },
+    );
+  });
+}
+
+class _PopTracker extends NavigatorObserver {
+  int popCount = 0;
+
+  void reset() => popCount = 0;
+
+  @override
+  void didPop(Route route, Route? previousRoute) {
+    popCount++;
+    super.didPop(route, previousRoute);
+  }
 }
