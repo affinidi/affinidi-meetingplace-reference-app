@@ -253,6 +253,8 @@ class ActiveCallController extends _$ActiveCallController {
     _participantEventSub?.cancel();
     _participantEventSub = null;
     _session = null;
+    _chatServiceSub?.close();
+    _chatServiceSub = null;
   }
 
   /// Flushes the call chat item to end status before banner teardown.

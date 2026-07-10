@@ -38,9 +38,12 @@ class _ContactsLayout extends ConsumerWidget {
         final sub = container.listen(provider, (_, _) {});
         try {
           await ref.read(provider.notifier).initialize();
-          await ChatRoute(contactId: contact.id).push<void>(context);
+          if (!context.mounted) return;
+          unawaited(ChatRoute(contactId: contact.id).push<void>(context));
         } finally {
-          sub.close();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            sub.close();
+          });
         }
         return;
       }
