@@ -134,4 +134,5 @@ flutter:
     - assets/icons/
     - assets/videos/
     - assets/zkp/
+    - assets/personal_ai_context_template.txt
 

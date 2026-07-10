@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_personal_agent/meeting_place_personal_agent.dart';
@@ -21,12 +22,47 @@ class PersonalAgentScreen extends ConsumerWidget {
     final isSettingUp = ref.watch(
       provider.select((state) => state.isSettingUp),
     );
+    final contextProvisioned = ref.watch(
+      provider.select((state) => state.contextProvisioned),
+    );
+    final contextUploading = ref.watch(
+      provider.select((state) => state.contextUploading),
+    );
+    final contextUploadError = ref.watch(
+      provider.select((state) => state.contextUploadError),
+    );
     final errorMessage = ref.watch(
       provider.select((state) => state.errorMessage),
     );
     final setupResult = ref.watch(
       provider.select((state) => state.setupResult),
     );
+
+    // When the MPX connection is ready but context has not been uploaded,
+    // show the first-time onboarding flow instead of the management screen.
+    if (isReady && !contextProvisioned) {
+      return ColoredBox(
+        color: colorScheme.surface,
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionBanner(
+                title: l10n.tabsTitle(Tabs.personalAgent.name),
+                subtitle: l10n.personalAgentPanelSubtitle,
+              ),
+              Expanded(
+                child: _ContextSetupView(
+                  isUploading: contextUploading,
+                  uploadError: contextUploadError,
+                  onUpload: controller.uploadContext,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return ColoredBox(
       color: colorScheme.surface,
@@ -42,7 +78,11 @@ class PersonalAgentScreen extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _StatusCard(isReady: isReady, isSettingUp: isSettingUp),
+                  _StatusCard(
+                    isReady: isReady,
+                    isSettingUp: isSettingUp,
+                    contextProvisioned: contextProvisioned,
+                  ),
                   const SizedBox(height: 16),
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
@@ -188,10 +228,15 @@ class _ConnectedSummary extends StatelessWidget {
 }
 
 class _StatusCard extends StatelessWidget {
-  const _StatusCard({required this.isReady, required this.isSettingUp});
+  const _StatusCard({
+    required this.isReady,
+    required this.isSettingUp,
+    required this.contextProvisioned,
+  });
 
   final bool isReady;
   final bool isSettingUp;
+  final bool contextProvisioned;
 
   @override
   Widget build(BuildContext context) {
@@ -199,15 +244,19 @@ class _StatusCard extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final title = isReady
+    final title = isReady && contextProvisioned
         ? l10n.personalAgentStatusConnected
+        : isReady
+        ? l10n.personalAgentStatusContextRequired
         : isSettingUp
         ? l10n.personalAgentStatusSettingUp
         : l10n.personalAgentStatusNotConnected;
-    final subtitle = isReady
+    final subtitle = isReady && contextProvisioned
         ? l10n.personalAgentStatusSubtitleConnected
         : l10n.personalAgentStatusSubtitleNotConnected;
-    final icon = isReady ? Icons.check_circle : Icons.pending_outlined;
+    final icon = isReady && contextProvisioned
+        ? Icons.check_circle
+        : Icons.pending_outlined;
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -294,6 +343,299 @@ class _WhatToExpectCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// First-time context onboarding flow. Shown when the MPX connection is
+/// ready but the user has not yet uploaded their context file.
+class _ContextSetupView extends StatefulWidget {
+  const _ContextSetupView({
+    required this.isUploading,
+    required this.uploadError,
+    required this.onUpload,
+  });
+
+  final bool isUploading;
+  final String? uploadError;
+  final Future<void> Function(String content) onUpload;
+
+  @override
+  State<_ContextSetupView> createState() => _ContextSetupViewState();
+}
+
+class _ContextSetupViewState extends State<_ContextSetupView> {
+  String? _fileName;
+  String? _fileContent;
+  bool _uploadSucceeded = false;
+
+  @override
+  void didUpdateWidget(_ContextSetupView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Detect transition: was uploading → no longer uploading with no error.
+    if (oldWidget.isUploading && !widget.isUploading && widget.uploadError == null) {
+      setState(() => _uploadSucceeded = true);
+    }
+    // Reset success flag if a new file is picked or an error appears.
+    if (widget.uploadError != null && _uploadSucceeded) {
+      setState(() => _uploadSucceeded = false);
+    }
+  }
+
+  Future<void> _pickFile() async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['txt'],
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+    final file = result.files.first;
+    final bytes = file.bytes;
+    if (bytes == null) return;
+    setState(() {
+      _fileName = file.name;
+      _fileContent = String.fromCharCodes(bytes);
+      _uploadSucceeded = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final l10n = context.l10n;
+
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        // Header icon
+        Center(
+          child: Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.psychology_outlined,
+              size: 36,
+              color: colorScheme.onPrimaryContainer,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // Title
+        Text(
+          l10n.personalAgentContextSetupTitle,
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 12),
+
+        // Description
+        Text(
+          l10n.personalAgentContextSetupDescription,
+          style: textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 28),
+
+        // What to include card
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHigh,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: colorScheme.outlineVariant),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.personalAgentContextWhatToIncludeTitle,
+                  style: textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (final item in [
+                  l10n.personalAgentContextWhatToIncludeItem1,
+                  l10n.personalAgentContextWhatToIncludeItem2,
+                  l10n.personalAgentContextWhatToIncludeItem3,
+                  l10n.personalAgentContextWhatToIncludeItem4,
+                ])
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('• '),
+                        Expanded(
+                          child: Text(
+                            item,
+                            style: textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+
+        // File picker area
+        InkWell(
+          onTap: widget.isUploading ? null : _pickFile,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: _fileContent != null
+                    ? colorScheme.primary
+                    : colorScheme.outlineVariant,
+                width: _fileContent != null ? 2 : 1,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              color: _fileContent != null
+                  ? colorScheme.primaryContainer.withValues(alpha: 0.3)
+                  : null,
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  _fileContent != null
+                      ? Icons.check_circle_outline
+                      : Icons.upload_file_outlined,
+                  size: 32,
+                  color: _fileContent != null
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _fileContent != null
+                      ? _fileName ?? l10n.personalAgentContextFileSelected
+                      : l10n.personalAgentContextPickFile,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: _fileContent != null
+                        ? colorScheme.primary
+                        : colorScheme.onSurfaceVariant,
+                    fontWeight: _fileContent != null ? FontWeight.w600 : null,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (_fileContent != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      l10n.personalAgentContextFileTapToChange,
+                      style: textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Upload error
+        if (widget.uploadError != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colorScheme.errorContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Text(
+                  widget.uploadError!,
+                  style: TextStyle(color: colorScheme.onErrorContainer),
+                ),
+              ),
+            ),
+          ),
+
+        // Upload success
+        if (_uploadSucceeded)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      color: colorScheme.primary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _fileName != null
+                            ? l10n.personalAgentContextUploadedFile(_fileName!)
+                            : l10n.personalAgentContextUploadSuccess,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+        // Upload button
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.35),
+            disabledForegroundColor: colorScheme.onPrimary,
+          ),
+          onPressed: widget.isUploading || _fileContent == null
+              ? null
+              : () async {
+                  if (_fileContent != null) {
+                    await widget.onUpload(_fileContent!);
+                  }
+                },
+          icon: widget.isUploading
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colorScheme.onPrimary,
+                  ),
+                )
+              : const Icon(Icons.cloud_upload_outlined),
+          label: Text(
+            widget.isUploading
+                ? l10n.personalAgentContextUploading
+                : l10n.personalAgentContextUploadButton,
+          ),
+        ),
+      ],
     );
   }
 }
