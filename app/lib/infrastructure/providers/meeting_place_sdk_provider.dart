@@ -64,6 +64,94 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
       );
       logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
+      final agentDidOverride = const String.fromEnvironment(
+        'MPX_AGENT_DID',
+        defaultValue: '',
+      ).trim();
+      if (agentDidOverride.isNotEmpty) {
+        logger.info(
+          'Using MPX agent DID override: $agentDidOverride',
+          name: logKey,
+        );
+      }
+
+      final onBuildAttachments =
+          (
+            Channel channel,
+            Future<DidManager> Function(String did) getDidManager,
+          ) async {
+            try {
+              await ref
+                  .read(identitiesServiceProvider.notifier)
+                  .ensureInitialized();
+
+              final externalRef = channel.externalRef;
+              if (externalRef == null || externalRef.isEmpty) return null;
+
+              final identity = ref
+                  .read(identitiesServiceProvider)
+                  .getIdentityById(externalRef);
+              if (identity == null || identity.did.isEmpty) return null;
+
+              final didManager = await getDidManager(identity.did);
+
+              return RCardDIDCommAttachmentBuilder.build(
+                issuerDid: identity.did,
+                card: identity.card.toRCardSubject(),
+                issuerDidManager: didManager,
+              );
+            } catch (_) {
+              return null;
+            }
+          };
+
+      final sdkOptionsNamed = <Symbol, dynamic>{
+        #expectedMessageWrappingTypes: const [
+          MessageWrappingType.authcryptPlaintext,
+          MessageWrappingType.authcryptSignPlaintext,
+        ],
+        #messageTypesForSequenceTracking: [
+          ChatProtocol.chatMessage.value,
+          VdipClient.requestIssuanceMessageType,
+          VdipClient.issuedCredentialMessageType,
+        ],
+        #onBuildAttachments: onBuildAttachments,
+      };
+      if (agentDidOverride.isNotEmpty) {
+        sdkOptionsNamed[#agentDid] = agentDidOverride;
+      }
+
+      MeetingPlaceCoreSDKOptions sdkOptions;
+      try {
+        sdkOptions = Function.apply(
+              MeetingPlaceCoreSDKOptions.new,
+              const [],
+              sdkOptionsNamed,
+            )
+            as MeetingPlaceCoreSDKOptions;
+        if (agentDidOverride.isNotEmpty) {
+          logger.info(
+            'MPX agent DID override applied to SDK options',
+            name: logKey,
+          );
+        }
+      } catch (_) {
+        // Compatibility fallback for SDK builds that do not yet expose `agentDid`.
+        sdkOptionsNamed.remove(#agentDid);
+        if (agentDidOverride.isNotEmpty) {
+          logger.warning(
+            'MPX_AGENT_DID was provided but current SDK options do not accept agentDid; override ignored',
+            name: logKey,
+          );
+        }
+        sdkOptions = Function.apply(
+              MeetingPlaceCoreSDKOptions.new,
+              const [],
+              sdkOptionsNamed,
+            )
+            as MeetingPlaceCoreSDKOptions;
+      }
+
       final sdk = await MeetingPlaceCoreSDK.create(
         wallet: wallet,
         repositoryConfig: RepositoryConfig(
@@ -76,46 +164,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
         ),
         config: await ref.read(matrixConfigProvider.future),
         logger: logger,
-        options: MeetingPlaceCoreSDKOptions(
-          expectedMessageWrappingTypes: const [
-            MessageWrappingType.authcryptPlaintext,
-            MessageWrappingType.authcryptSignPlaintext,
-          ],
-          messageTypesForSequenceTracking: [
-            ChatProtocol.chatMessage.value,
-            VdipClient.requestIssuanceMessageType,
-            VdipClient.issuedCredentialMessageType,
-          ],
-          onBuildAttachments:
-              (
-                Channel channel,
-                Future<DidManager> Function(String did) getDidManager,
-              ) async {
-                try {
-                  await ref
-                      .read(identitiesServiceProvider.notifier)
-                      .ensureInitialized();
-
-                  final externalRef = channel.externalRef;
-                  if (externalRef == null || externalRef.isEmpty) return null;
-
-                  final identity = ref
-                      .read(identitiesServiceProvider)
-                      .getIdentityById(externalRef);
-                  if (identity == null || identity.did.isEmpty) return null;
-
-                  final didManager = await getDidManager(identity.did);
-
-                  return RCardDIDCommAttachmentBuilder.build(
-                    issuerDid: identity.did,
-                    card: identity.card.toRCardSubject(),
-                    issuerDidManager: didManager,
-                  );
-                } catch (_) {
-                  return null;
-                }
-              },
-        ),
+        options: sdkOptions,
       );
 
       logger.info('Completed initializing MeetingPlace SDK', name: logKey);

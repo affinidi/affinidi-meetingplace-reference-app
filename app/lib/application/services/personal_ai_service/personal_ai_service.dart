@@ -10,6 +10,7 @@ import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
+import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../connections_service/connections_service.dart';
 import '../contacts_service/contacts_service.dart';
 import '../identities_service/identities_service.dart';
@@ -112,13 +113,21 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         request: PersonalAgentSetupRequest(holderDid: normalizedHolderDid),
       );
 
-      await _autoConnectPersonalAgent(
+      final offer = await _autoConnectPersonalAgent(
         result: result,
         holderDid: normalizedHolderDid,
       );
 
-      await _waitForPersonalAiContact(result.agentDid);
-      await _ensurePersonalAiContact(result);
+      final offerChannelDid = offer.channelDid?.trim();
+      await _ensurePersonalAiContactFromChannel(offerChannelDid);
+      await _waitForPersonalAiContact(
+        result.agentDid,
+        channelDid: offerChannelDid,
+      );
+      await _ensurePersonalAiContact(
+        result,
+        preferredChannelDid: offerChannelDid,
+      );
 
       state = state.copyWith(
         status: PersonalAiSetupStatus.ready,
@@ -134,7 +143,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     }
   }
 
-  Future<void> _autoConnectPersonalAgent({
+  Future<PersonalAgentOfferResult> _autoConnectPersonalAgent({
     required PersonalAgentSetupResult result,
     required String holderDid,
   }) async {
@@ -145,8 +154,24 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
     final offer = await _waitForOffer(setupId: setupId);
     final mnemonic = offer.mnemonic?.trim();
+    final status = offer.status.trim().toLowerCase();
+    final isAlreadyConnected =
+        status == 'inaugurated' ||
+        status == 'ready' ||
+        (offer.channelDid?.trim().isNotEmpty ?? false) ||
+        (offer.channelId?.trim().isNotEmpty ?? false);
+
+    // Resumed connector sessions may report a ready/inaugurated channel with
+    // no mnemonic. In that case setup is already connected and no accept-offer
+    // roundtrip is required.
+    if ((mnemonic == null || mnemonic.isEmpty) && isAlreadyConnected) {
+      return offer;
+    }
+
     if (mnemonic == null || mnemonic.isEmpty) {
-      throw StateError('Personal AI setup did not return an offer mnemonic.');
+      throw StateError(
+        'Personal AI setup did not return an offer mnemonic.',
+      );
     }
 
     final identitiesService = _ref.read(identitiesServiceProvider.notifier);
@@ -171,6 +196,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     }
 
     await connectionsService.acceptOffer(selectedOffer, identity: identity);
+
+    return await _waitForOffer(setupId: setupId);
   }
 
   Future<PersonalAgentOfferResult> _waitForOffer({
@@ -181,7 +208,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       try {
         final offer = await _sdk.fetchPersonalAgentOffer(setupId: setupId);
         final status = offer.status;
-        final hasMnemonic = (offer.mnemonic?.trim().isNotEmpty ?? false);
+        final hasMnemonic = offer.mnemonic?.trim().isNotEmpty ?? false;
         if (hasMnemonic || status == 'inaugurated' || status == 'ready') {
           return offer;
         }
@@ -197,22 +224,32 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
   Future<bool> _waitForPersonalAiContact(
     String agentDid, {
+    String? channelDid,
     int maxAttempts = 20,
     Duration pollEvery = const Duration(milliseconds: 500),
   }) async {
     final normalizedAgentDid = agentDid.trim();
-    if (normalizedAgentDid.isEmpty) {
-      throw StateError('Personal AI setup did not return an agent DID.');
+    final normalizedChannelDid = channelDid?.trim();
+    final lookupDids = <String>{};
+    if (normalizedAgentDid.isNotEmpty) {
+      lookupDids.add(normalizedAgentDid);
+    }
+    if (normalizedChannelDid != null && normalizedChannelDid.isNotEmpty) {
+      lookupDids.add(normalizedChannelDid);
+    }
+    if (lookupDids.isEmpty) {
+      throw StateError('Personal AI setup did not return a usable DID.');
     }
 
     final contactsService = _ref.read(contactsServiceProvider.notifier);
 
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       await contactsService.fetchContacts();
-      final contact = _ref
-          .read(contactsServiceProvider)
-          .getContactByChannelDid(normalizedAgentDid);
-      if (contact != null) {
+      final contactsState = _ref.read(contactsServiceProvider);
+      final found = lookupDids.any(
+        (did) => contactsState.getContactByChannelDid(did) != null,
+      );
+      if (found) {
         return true;
       }
 
@@ -225,14 +262,24 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     return false;
   }
 
-  Future<void> _ensurePersonalAiContact(PersonalAgentSetupResult result) async {
+  Future<void> _ensurePersonalAiContact(
+    PersonalAgentSetupResult result, {
+    String? preferredChannelDid,
+  }) async {
     final contactsService = _ref.read(contactsServiceProvider.notifier);
     await contactsService.ensureInitialized();
 
     final current = _ref.read(contactsServiceProvider).contacts;
-    var existing = current.where(
-      (contact) => contact.channelDid == result.agentDid,
-    );
+    final candidateDids = <String>{result.agentDid};
+    final normalizedPreferred = preferredChannelDid?.trim();
+    if (normalizedPreferred != null && normalizedPreferred.isNotEmpty) {
+      candidateDids.add(normalizedPreferred);
+    }
+
+    var existing = current.where((contact) {
+      final did = contact.channelDid;
+      return did != null && candidateDids.contains(did);
+    });
     if (existing.isEmpty) {
       // Do not create a synthetic contact before mnemonic acceptance.
       // Contacts are created/activated by real channel activity events.
@@ -268,6 +315,31 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
             : currentContact.card,
       ),
     );
+  }
+
+  Future<void> _ensurePersonalAiContactFromChannel(String? channelDid) async {
+    final normalized = channelDid?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      return;
+    }
+
+    final contactsService = _ref.read(contactsServiceProvider.notifier);
+    await contactsService.ensureInitialized();
+
+    final existing = _ref
+        .read(contactsServiceProvider)
+        .getContactByChannelDid(normalized);
+    if (existing != null) {
+      return;
+    }
+
+    final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
+    final channel =
+        await coreSdk.getChannelByOtherPartyPermanentDid(normalized) ??
+        await coreSdk.getChannelByDid(normalized);
+    if (channel != null) {
+      await contactsService.updateContactFromChannelActivity(channel);
+    }
   }
 }
 
