@@ -26,10 +26,10 @@ class MissedCallManager {
   final Future<Message?> Function(String messageId) getMessageById;
   final void Function(ChatItem) onUpsertChatItem;
 
-  /// Replays a pending missed-call marker recorded by
-  /// [ContactsService.setPendingMissedCall] while the chat screen was closed
-  /// or before the caller's message synced. Heals the latest stale incoming
-  /// call item created at or before the recorded time, then clears the marker.
+  /// Replays a pending missed-call marker and heals the stale incoming call
+  /// item. Uses chat-open time as the upper bound to handle items that sync in
+  /// after the marker was stamped (busy-reject timing, delivery lag, or clock
+  /// skew).
   Future<void> replayPendingMissedCall() async {
     if (!ref.mounted) return;
     final pendingAt = ref
@@ -39,7 +39,7 @@ class MissedCallManager {
     if (pendingAt == null) return;
 
     final messageId = await callChatItemManager
-        .resolveStaleIncomingCallItemIdBefore(pendingAt);
+        .resolveStaleIncomingCallItemIdBefore(DateTime.now().toUtc());
     if (messageId != null) {
       await _healIncomingCallItemMissed(messageId);
       return;

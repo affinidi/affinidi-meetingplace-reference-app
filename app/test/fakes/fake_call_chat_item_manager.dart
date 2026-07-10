@@ -5,7 +5,7 @@ import 'package:mpx_flutter_reference_app/application/services/chat_service/dele
 import '../mocks/mock_app_logger.dart';
 
 class FakeCallChatItemManager extends CallChatItemManager {
-  FakeCallChatItemManager({this.isStaleReturn = false})
+  FakeCallChatItemManager({this.isStaleReturn = false, this.resolveReturn})
     : super(
         ensureInitialized: () async {},
         getChatSdk: () => null,
@@ -13,7 +13,9 @@ class FakeCallChatItemManager extends CallChatItemManager {
       );
 
   final bool isStaleReturn;
+  final String? resolveReturn;
   int updateCallCount = 0;
+  DateTime? lastResolveBound;
 
   @override
   bool isStaleIncomingCall(Message message) => isStaleReturn;
@@ -21,7 +23,10 @@ class FakeCallChatItemManager extends CallChatItemManager {
   @override
   Future<String?> resolveStaleIncomingCallItemIdBefore(
     DateTime dateTime,
-  ) async => null;
+  ) async {
+    lastResolveBound = dateTime;
+    return resolveReturn;
+  }
 
   @override
   Future<Message?> updateCallChatItem(

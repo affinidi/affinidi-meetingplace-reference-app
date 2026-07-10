@@ -56,6 +56,33 @@ void main() {
       },
     );
 
+    test('replayPendingMissedCall heals a stale item that synced in after the '
+        'marker was stamped', () async {
+      final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+      final contact = FakeContacts.individualContact.copyWith(
+        channelDid: channelDid,
+        pendingMissedCallAt: markerTime,
+      );
+      final contactsService = FakeContactsService(contacts: [contact]);
+      final callItemManager = FakeCallChatItemManager(
+        resolveReturn: 'msg-late',
+      );
+
+      final manager = MissedCallManager(
+        ref: _createTestRef(contactsService),
+        otherPartyPermanentChannelDid: channelDid,
+        callChatItemManager: callItemManager,
+        getMessageById: (_) async => null,
+        onUpsertChatItem: (_) {},
+      );
+
+      await manager.replayPendingMissedCall();
+
+      expect(callItemManager.updateCallCount, 1);
+      expect(callItemManager.lastResolveBound!.isAfter(markerTime), isTrue);
+      expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
+    });
+
     test(
       'healArrivedStaleCallItemIfPending updates stale item before marker time',
       () async {
