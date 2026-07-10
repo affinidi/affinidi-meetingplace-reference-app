@@ -586,6 +586,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   Future<Message> sendTextMessage(
     String text, {
     List<ChatAttachment>? attachments,
+    List<ChatMention> mentions = const [],
   }) async {
     if (sendTextMessageFailuresRemaining > 0) {
       sendTextMessageFailuresRemaining--;
@@ -593,7 +594,11 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     }
 
     // Track the call
-    sendTextMessageCalls.add({'text': text, 'attachments': attachments});
+    sendTextMessageCalls.add({
+      'text': text,
+      'attachments': attachments,
+      'mentions': mentions,
+    });
 
     var normalizedAttachments = attachments ?? const <ChatAttachment>[];
     final firstAttachment = normalizedAttachments.firstOrNull;
@@ -775,8 +780,16 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   }
 
   @override
-  Future<void> editTextMessage(Message message, String newText) async {
-    editTextMessageCalls.add({'message': message, 'newText': newText});
+  Future<void> editTextMessage(
+    Message message,
+    String newText, {
+    List<ChatMention>? mentions,
+  }) async {
+    editTextMessageCalls.add({
+      'message': message,
+      'newText': newText,
+      'mentions': mentions,
+    });
     message.value = newText;
     message.editedAt = DateTime.now().toUtc();
     _emit(StreamData(chatItem: message));

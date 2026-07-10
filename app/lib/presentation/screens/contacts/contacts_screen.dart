@@ -9,6 +9,8 @@ import '../../../application/services/connections_service/connections_service.da
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_status.dart';
+import '../../../infrastructure/exceptions/app_exception.dart';
+import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../infrastructure/extensions/contact_image_extensions.dart';

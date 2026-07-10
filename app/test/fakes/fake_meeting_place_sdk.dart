@@ -125,6 +125,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     required SDKConnectionOfferType type,
     required String offerDescription,
     ChannelTransport transport = ChannelTransport.didcomm,
+    String? contextKey,
     String? customPhrase,
     DateTime? validUntil,
     int? maximumUsage,
@@ -139,6 +140,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
       'contactCard': contactCard.toJson(),
       'type': type,
       'offerDescription': offerDescription,
+      'contextKey': contextKey,
       'customPhrase': customPhrase,
       'validUntil': validUntil,
       'maximumUsage': maximumUsage,
@@ -177,12 +179,14 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>({
     required T connectionOffer,
     required ContactCard contactCard,
-    String? senderInfo,
+    String? contextKey,
     String? externalRef,
+    required String senderInfo,
   }) async {
     _acceptOfferCalls.add({
       'connectionOffer': connectionOffer,
       'contactCard': contactCard.toJson(),
+      'contextKey': contextKey,
       'senderInfo': senderInfo,
       'externalRef': externalRef,
     });

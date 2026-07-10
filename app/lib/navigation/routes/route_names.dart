@@ -4,6 +4,7 @@ class RouteNames {
   static const connections = 'connections';
   static const identities = 'identities';
   static const rCards = 'rCards';
+  static const personalAgent = 'personalAgent';
   static const credentials = 'credentials';
   static const settings = 'settings';
 

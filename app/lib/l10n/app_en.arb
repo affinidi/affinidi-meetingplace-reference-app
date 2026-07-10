@@ -3,7 +3,7 @@
 	"@appName": {
 		"type": "text"
 	},
-	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}",
+	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} personalAgent{Agent} credentials{Credentials} settings{Settings} other{Invalid}}",
 	"@tabsTitle": {
 		"type": "text",
 		"placeholders": {
@@ -12,6 +12,85 @@
 			}
 		}
 	},
+	"personalAgentPanelSubtitle": "Set up and manage your personal AI agent without exposing DID details.",
+	"personalAgentSetupInProgressButton": "Setting up and connecting...",
+	"personalAgentReconnectButton": "Reconnect Personal Agent",
+	"personalAgentConnectButton": "Connect Personal Agent",
+	"personalAgentReviewSetupPrompt": "Review setup prompt",
+	"personalAgentConnectedSectionTitle": "Connected",
+	"personalAgentSummaryContextId": "Context ID: {contextId}",
+	"@personalAgentSummaryContextId": {
+		"type": "text",
+		"placeholders": {
+			"contextId": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryContextCreated": "Context created: {value}",
+	"@personalAgentSummaryContextCreated": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryProfile": "Agent profile: {value}",
+	"@personalAgentSummaryProfile": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryAgentCreated": "Agent created: {value}",
+	"@personalAgentSummaryAgentCreated": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryMode": "Mode: {value}",
+	"@personalAgentSummaryMode": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummarySetupStatus": "Setup status: {value}",
+	"@personalAgentSummarySetupStatus": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryOfferAvailable": "Offer available: {value}",
+	"@personalAgentSummaryOfferAvailable": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentStatusConnected": "Personal AI connected",
+	"personalAgentStatusSettingUp": "Personal AI setup in progress",
+	"personalAgentStatusNotConnected": "Personal AI not connected",
+	"personalAgentStatusSubtitleConnected": "Your assistant is ready and will appear in contacts once the channel is active.",
+	"personalAgentStatusSubtitleNotConnected": "Connect your Personal AI in one tap. MPX stays usable throughout setup.",
+	"personalAgentWhatHappensNext": "What happens next",
+	"personalAgentStepCreateOffer": "A Personal AI offer is created for your current identity.",
+	"personalAgentStepFetchMnemonic": "MPX retrieves the mnemonic from backend offer API.",
+	"personalAgentStepAcceptOffer": "The app accepts the offer and waits for channel inauguration.",
+	"personalAgentStepContactAppears": "Personal AI appears in contacts when channel activity arrives.",
 	"rCardsPlaceholderMessage": "R-Cards will appear here.",
 	"@rCardsPlaceholderMessage": {
 		"type": "text"

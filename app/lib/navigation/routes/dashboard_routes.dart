@@ -17,6 +17,7 @@ import '../../presentation/screens/offer/offer_details/offer_details_screen.dart
 import '../../presentation/screens/offer/publish_offer_screen/publish_offer_screen.dart';
 import '../../presentation/screens/oob/oob_scan_qr_screen/oob_scan_qr_screen.dart';
 import '../../presentation/screens/oob/oob_share_qr_screen/oob_share_qr_screen.dart';
+import '../../presentation/screens/personal_agent/personal_agent_screen.dart';
 import '../../presentation/screens/r_cards/r_card_details_screen.dart';
 import '../../presentation/screens/r_cards/r_cards_screen.dart';
 import '../../presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
@@ -133,6 +134,14 @@ part 'vrc/vrc_details_route.dart';
         ),
       ],
     ),
+    TypedStatefulShellBranch<PersonalAgentBranchData>(
+      routes: [
+        TypedGoRoute<PersonalAgentRoute>(
+          path: RoutePaths.personalAgent,
+          name: RouteNames.personalAgent,
+        ),
+      ],
+    ),
     TypedStatefulShellBranch<CredentialsBranchData>(
       routes: [
         TypedGoRoute<CredentialsRoute>(
@@ -167,6 +176,7 @@ final _contactsNavigatorKey = GlobalKey<NavigatorState>();
 final _connectionsNavigatorKey = GlobalKey<NavigatorState>();
 final _identitiesNavigatorKey = GlobalKey<NavigatorState>();
 final _rCardsNavigatorKey = GlobalKey<NavigatorState>();
+final _personalAgentNavigatorKey = GlobalKey<NavigatorState>();
 final _credentialsNavigatorKey = GlobalKey<NavigatorState>();
 
 // Branch data classes for each tab
@@ -198,6 +208,14 @@ class RCardsBranchData extends StatefulShellBranchData {
 
   static final $navigatorKey = _rCardsNavigatorKey;
   static const String $restorationScopeId = 'rCardsBranchRestorationScopeId';
+}
+
+class PersonalAgentBranchData extends StatefulShellBranchData {
+  const PersonalAgentBranchData();
+
+  static final $navigatorKey = _personalAgentNavigatorKey;
+  static const String $restorationScopeId =
+      'personalAgentBranchRestorationScopeId';
 }
 
 class CredentialsBranchData extends StatefulShellBranchData {
@@ -239,6 +257,14 @@ class RCardsRoute extends GoRouteData with $RCardsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const RCardsScreen();
+}
+
+class PersonalAgentRoute extends GoRouteData with $PersonalAgentRoute {
+  const PersonalAgentRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const PersonalAgentScreen();
 }
 
 class CredentialsRoute extends GoRouteData with $CredentialsRoute {

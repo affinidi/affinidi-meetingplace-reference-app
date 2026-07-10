@@ -11,6 +11,9 @@ class FakeEnvironment implements Environment {
     this.matrixHomeserver = 'https://test-matrix.org',
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
+    this.personalAiEnabled = true,
+    this.personalAiBaseUrl = 'http://127.0.0.1:8790',
+    this.personalAiSetupEndpoint = '/personal-agent/setup',
     this._defaultMediators = const {},
     this.enabledIndividualChatTransports = const [
       ChannelTransport.didcomm,
@@ -35,6 +38,15 @@ class FakeEnvironment implements Environment {
 
   @override
   final int maxOfferUsages;
+
+  @override
+  final bool personalAiEnabled;
+
+  @override
+  final String personalAiBaseUrl;
+
+  @override
+  final String personalAiSetupEndpoint;
 
   @override
   final List<ChannelTransport> enabledIndividualChatTransports;
