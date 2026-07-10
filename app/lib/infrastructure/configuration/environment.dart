@@ -86,6 +86,18 @@ class Environment {
       const bool.fromEnvironment('BIOMETRICS_ENABLED', defaultValue: true);
   bool get zkpEnabled =>
       const bool.fromEnvironment('ZKP_ENABLED', defaultValue: false);
+  bool get personalAiEnabled =>
+      const bool.fromEnvironment('PERSONAL_AI_ENABLED', defaultValue: true);
+
+  String get personalAiBaseUrl => const String.fromEnvironment(
+    'PERSONAL_AI_BASE_URL',
+    defaultValue: 'http://127.0.0.1:8790',
+  );
+
+  String get personalAiSetupEndpoint => const String.fromEnvironment(
+    'PERSONAL_AI_SETUP_ENDPOINT',
+    defaultValue: '/personal-agent/setup',
+  );
 
   String get appVersionName =>
       const String.fromEnvironment('APP_VERSION_NAME', defaultValue: '');

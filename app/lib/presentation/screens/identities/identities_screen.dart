@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pie_menu/pie_menu.dart';
 
+import '../../../application/services/personal_ai_service/personal_ai_service.dart';
 import '../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/identities_extensions.dart';
@@ -74,6 +75,11 @@ class _IdentitiesPanel extends ConsumerWidget {
     final shouldSetupPrimaryIdentity = ref.watch(
       provider.select((state) => state.shouldSetupPrimaryIdentity),
     );
+    final currentIdentity = ref.watch(
+      provider.select((state) => state.currentIdentity),
+    );
+    final personalAiState = ref.watch(personalAiServiceProvider);
+    final personalAiController = ref.read(personalAiServiceProvider.notifier);
 
     Future<void> onAddIdentity() async {
       if (!context.mounted) return;
@@ -87,6 +93,92 @@ class _IdentitiesPanel extends ConsumerWidget {
 
     return Column(
       children: [
+        if (personalAiState.showSetupPrompt)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
+            child: Card(
+              color: context.colorScheme.primaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Set Up Your Personal AI',
+                      style: context.textTheme.titleMedium?.copyWith(
+                        color: context.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Connect your Personal AI now, or skip and continue using MPX without interruption.',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: context.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                    if (personalAiState.errorMessage != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        personalAiState.errorMessage!,
+                        style: TextStyle(color: context.colorScheme.error),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: context.colorScheme.primary,
+                            foregroundColor: context.colorScheme.onPrimary,
+                            disabledBackgroundColor: context
+                                .colorScheme
+                                .onPrimaryContainer
+                                .withValues(alpha: 0.28),
+                            disabledForegroundColor: context
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
+                          onPressed: personalAiState.isSettingUp
+                              ? null
+                              : () => personalAiController.setupPersonalAi(
+                                  holderDid: currentIdentity?.did ?? '',
+                                ),
+                          icon: personalAiState.isSettingUp
+                              ? SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: context.colorScheme.onPrimary,
+                                  ),
+                                )
+                              : const Icon(Icons.smart_toy_outlined),
+                          label: Text(
+                            personalAiState.isSettingUp
+                                ? 'Setting Up...'
+                                : 'Set Up My Personal AI',
+                          ),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: context
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
+                          onPressed: personalAiState.isSettingUp
+                              ? null
+                              : personalAiController.dismissSetupPrompt,
+                          child: const Text('Not now'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         _FiltersBar(),
         Padding(
           padding: const EdgeInsets.all(2),
@@ -165,6 +257,8 @@ class _ActionsBar extends ConsumerWidget {
         (state) => state.currentIdentity,
       ),
     );
+    final personalAiState = ref.watch(personalAiServiceProvider);
+    final personalAiController = ref.read(personalAiServiceProvider.notifier);
 
     final isDefault = currentIdentity?.isPrimary ?? false;
     final isPlaceholder = currentIdentity?.isPlaceholder ?? false;
@@ -189,6 +283,19 @@ class _ActionsBar extends ConsumerWidget {
         const Expanded(child: _SearchField()),
         Row(
           children: [
+            IconButton(
+              icon: Icon(
+                personalAiState.isReady
+                    ? Icons.smart_toy
+                    : Icons.smart_toy_outlined,
+              ),
+              tooltip: personalAiState.isReady
+                  ? 'Personal AI configured'
+                  : 'Set up Personal AI',
+              onPressed: personalAiState.isReady
+                  ? () => const PersonalAgentRoute().go(context)
+                  : personalAiController.openSetupPrompt,
+            ),
             IconButton(
               icon: const Icon(Icons.delete),
               onPressed: canDelete

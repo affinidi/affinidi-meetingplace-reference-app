@@ -18,12 +18,104 @@ class AppLocalizationsEn extends AppLocalizations {
       'contacts': 'Channels',
       'identities': 'Identities',
       'rCards': 'R-Cards',
+      'personalAgent': 'Agent',
       'credentials': 'Credentials',
       'settings': 'Settings',
       'other': 'Invalid',
     });
     return '$_temp0';
   }
+
+  @override
+  String get personalAgentPanelSubtitle =>
+      'Set up and manage your personal AI agent without exposing DID details.';
+
+  @override
+  String get personalAgentSetupInProgressButton =>
+      'Setting up and connecting...';
+
+  @override
+  String get personalAgentReconnectButton => 'Reconnect Personal Agent';
+
+  @override
+  String get personalAgentConnectButton => 'Connect Personal Agent';
+
+  @override
+  String get personalAgentReviewSetupPrompt => 'Review setup prompt';
+
+  @override
+  String get personalAgentConnectedSectionTitle => 'Connected';
+
+  @override
+  String personalAgentSummaryContextId(String contextId) {
+    return 'Context ID: $contextId';
+  }
+
+  @override
+  String personalAgentSummaryContextCreated(String value) {
+    return 'Context created: $value';
+  }
+
+  @override
+  String personalAgentSummaryProfile(String value) {
+    return 'Agent profile: $value';
+  }
+
+  @override
+  String personalAgentSummaryAgentCreated(String value) {
+    return 'Agent created: $value';
+  }
+
+  @override
+  String personalAgentSummaryMode(String value) {
+    return 'Mode: $value';
+  }
+
+  @override
+  String personalAgentSummarySetupStatus(String value) {
+    return 'Setup status: $value';
+  }
+
+  @override
+  String personalAgentSummaryOfferAvailable(String value) {
+    return 'Offer available: $value';
+  }
+
+  @override
+  String get personalAgentStatusConnected => 'Personal AI connected';
+
+  @override
+  String get personalAgentStatusSettingUp => 'Personal AI setup in progress';
+
+  @override
+  String get personalAgentStatusNotConnected => 'Personal AI not connected';
+
+  @override
+  String get personalAgentStatusSubtitleConnected =>
+      'Your assistant is ready and will appear in contacts once the channel is active.';
+
+  @override
+  String get personalAgentStatusSubtitleNotConnected =>
+      'Connect your Personal AI in one tap. MPX stays usable throughout setup.';
+
+  @override
+  String get personalAgentWhatHappensNext => 'What happens next';
+
+  @override
+  String get personalAgentStepCreateOffer =>
+      'A Personal AI offer is created for your current identity.';
+
+  @override
+  String get personalAgentStepFetchMnemonic =>
+      'MPX retrieves the mnemonic from backend offer API.';
+
+  @override
+  String get personalAgentStepAcceptOffer =>
+      'The app accepts the offer and waits for channel inauguration.';
+
+  @override
+  String get personalAgentStepContactAppears =>
+      'Personal AI appears in contacts when channel activity arrives.';
 
   @override
   String get rCardsPlaceholderMessage => 'R-Cards will appear here.';

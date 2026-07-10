@@ -18,12 +18,107 @@ class AppLocalizationsDe extends AppLocalizations {
       'contacts': 'Kanäle',
       'identities': 'Identitäten',
       'rCards': 'R-Karten',
+      'personalAgent': 'Agent',
       'credentials': 'Anmeldeinformationen',
       'settings': 'Einstellungen',
       'other': 'Ungültig',
     });
     return '$_temp0';
   }
+
+  @override
+  String get personalAgentPanelSubtitle =>
+      'Richten Sie Ihren persönlichen KI-Agenten ein und verwalten Sie ihn, ohne DID-Details offenzulegen.';
+
+  @override
+  String get personalAgentSetupInProgressButton =>
+      'Einrichtung und Verbindung läuft...';
+
+  @override
+  String get personalAgentReconnectButton =>
+      'Persönlichen Agenten erneut verbinden';
+
+  @override
+  String get personalAgentConnectButton => 'Persönlichen Agenten verbinden';
+
+  @override
+  String get personalAgentReviewSetupPrompt => 'Einrichtungshinweis ansehen';
+
+  @override
+  String get personalAgentConnectedSectionTitle => 'Verbunden';
+
+  @override
+  String personalAgentSummaryContextId(String contextId) {
+    return 'Kontext-ID: $contextId';
+  }
+
+  @override
+  String personalAgentSummaryContextCreated(String value) {
+    return 'Kontext erstellt: $value';
+  }
+
+  @override
+  String personalAgentSummaryProfile(String value) {
+    return 'Agentenprofil: $value';
+  }
+
+  @override
+  String personalAgentSummaryAgentCreated(String value) {
+    return 'Agent erstellt: $value';
+  }
+
+  @override
+  String personalAgentSummaryMode(String value) {
+    return 'Modus: $value';
+  }
+
+  @override
+  String personalAgentSummarySetupStatus(String value) {
+    return 'Einrichtungsstatus: $value';
+  }
+
+  @override
+  String personalAgentSummaryOfferAvailable(String value) {
+    return 'Angebot verfugbar: $value';
+  }
+
+  @override
+  String get personalAgentStatusConnected => 'Persönliche KI verbunden';
+
+  @override
+  String get personalAgentStatusSettingUp =>
+      'Einrichtung der persönlichen KI läuft';
+
+  @override
+  String get personalAgentStatusNotConnected =>
+      'Persönliche KI nicht verbunden';
+
+  @override
+  String get personalAgentStatusSubtitleConnected =>
+      'Ihr Assistent ist bereit und erscheint in den Kontakten, sobald der Kanal aktiv ist.';
+
+  @override
+  String get personalAgentStatusSubtitleNotConnected =>
+      'Verbinden Sie Ihre persönliche KI mit einem Tippen. MPX bleibt während der Einrichtung nutzbar.';
+
+  @override
+  String get personalAgentWhatHappensNext => 'So geht es weiter';
+
+  @override
+  String get personalAgentStepCreateOffer =>
+      'Für Ihre aktuelle Identität wird ein persönliches KI-Angebot erstellt.';
+
+  @override
+  String get personalAgentStepFetchMnemonic =>
+      'MPX ruft die Mnemonik aus der Backend-Angebots-API ab.';
+
+  @override
+  String get personalAgentStepAcceptOffer =>
+      'Die App akzeptiert das Angebot und wartet auf die Kanaleinrichtung.';
+
+  @override
+  String get personalAgentStepContactAppears =>
+      'Die persönliche KI erscheint in den Kontakten, wenn Kanalaktivität eintrifft.';
 
   @override
   String get rCardsPlaceholderMessage => 'R-Cards werden hier angezeigt.';

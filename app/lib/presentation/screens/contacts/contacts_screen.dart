@@ -15,6 +15,8 @@ import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/contact_newness_extensions.dart';
 import '../../../infrastructure/extensions/contact_origin_extensions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
+import '../../../infrastructure/exceptions/app_exception.dart';
+import '../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';

@@ -39,6 +39,14 @@ class _ContactsLayout extends ConsumerWidget {
         try {
           await ref.read(provider.notifier).initialize();
           await ChatRoute(contactId: contact.id).push<void>(context);
+        } on AppException catch (error) {
+          if (error.code == AppExceptionType.missingChannel.name) {
+            await ConnectionDetailsRoute(contactId: contact.id).push<void>(
+              context,
+            );
+            return;
+          }
+          rethrow;
         } finally {
           sub.close();
         }

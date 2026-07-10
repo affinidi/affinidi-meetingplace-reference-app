@@ -586,13 +586,13 @@ packages:
     source: hosted
     version: "1.2.1"
   didcomm:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: didcomm
-      sha256: "8fd4c7b14dc53bc125d788db16cc8a9381820f73c7526932bfd2b9a2a48eb629"
+      sha256: "3345d647b38a5f031eb23829ee8fd7f4aa195781c6bd46fc8b26f364ad95a8c9"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.3"
+    version: "2.3.4"
   dio:
     dependency: transitive
     description:
@@ -1373,6 +1373,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.1-dev.15"
+  meeting_place_personal_agent:
+    dependency: transitive
+    description:
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_personal_agent"
+      relative: true
+    source: path
+    version: "0.0.1-dev.1"
   melos:
     dependency: "direct dev"
     description:
@@ -2174,10 +2181,10 @@ packages:
     dependency: transitive
     description:
       name: ssi
-      sha256: ea7c7bc1a775cbe788df49079eb0d482660def1f594dedaba0d963b7df2d109d
+      sha256: "083f103dac2511cbffdabec1ea19dcdfea9272c7bca09cbe80d6fb69de2e3b6a"
       url: "https://pub.dev"
     source: hosted
-    version: "3.9.3"
+    version: "3.9.4"
   stack_trace:
     dependency: transitive
     description:
@@ -2410,6 +2417,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.0"
+  vta_dart_client:
+    dependency: transitive
+    description:
+      path: "../vta-dart-client"
+      relative: true
+    source: path
+    version: "1.0.0"
   watcher:
     dependency: transitive
     description:
@@ -2507,5 +2521,5 @@ packages:
     source: hosted
     version: "2.2.4"
 sdks:
-  dart: ">=3.12.0 <4.0.0"
+  dart: ">=3.12.1 <4.0.0"
   flutter: ">=3.44.0"

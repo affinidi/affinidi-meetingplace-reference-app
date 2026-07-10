@@ -7,6 +7,7 @@ enum Tabs {
   connections(serviceKey: NotificationCounterType.connections),
   identities(serviceKey: NotificationCounterType.identities),
   rCards(serviceKey: NotificationCounterType.rCards),
+  personalAgent(serviceKey: NotificationCounterType.personalAgent),
   credentials(serviceKey: NotificationCounterType.credentials);
 
   const Tabs({required this.serviceKey});
@@ -23,6 +24,8 @@ enum Tabs {
         return const Icon(Icons.fingerprint);
       case Tabs.rCards:
         return const Icon(Icons.credit_card);
+      case Tabs.personalAgent:
+        return const Icon(Icons.smart_toy);
       case Tabs.credentials:
         return const Icon(Icons.verified_user);
     }
@@ -34,6 +37,7 @@ enum TabTitleKey {
   contacts,
   identities,
   rCards,
+  personalAgent,
   credentials,
   settings,
 }

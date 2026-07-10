@@ -109,8 +109,146 @@ abstract class AppLocalizations {
   /// No description provided for @tabsTitle.
   ///
   /// In en, this message translates to:
-  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}'**
+  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} personalAgent{Agent} credentials{Credentials} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
+
+  /// No description provided for @personalAgentPanelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up and manage your personal AI agent without exposing DID details.'**
+  String get personalAgentPanelSubtitle;
+
+  /// No description provided for @personalAgentSetupInProgressButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting up and connecting...'**
+  String get personalAgentSetupInProgressButton;
+
+  /// No description provided for @personalAgentReconnectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect Personal Agent'**
+  String get personalAgentReconnectButton;
+
+  /// No description provided for @personalAgentConnectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Personal Agent'**
+  String get personalAgentConnectButton;
+
+  /// No description provided for @personalAgentReviewSetupPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Review setup prompt'**
+  String get personalAgentReviewSetupPrompt;
+
+  /// No description provided for @personalAgentConnectedSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get personalAgentConnectedSectionTitle;
+
+  /// No description provided for @personalAgentSummaryContextId.
+  ///
+  /// In en, this message translates to:
+  /// **'Context ID: {contextId}'**
+  String personalAgentSummaryContextId(String contextId);
+
+  /// No description provided for @personalAgentSummaryContextCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Context created: {value}'**
+  String personalAgentSummaryContextCreated(String value);
+
+  /// No description provided for @personalAgentSummaryProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent profile: {value}'**
+  String personalAgentSummaryProfile(String value);
+
+  /// No description provided for @personalAgentSummaryAgentCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent created: {value}'**
+  String personalAgentSummaryAgentCreated(String value);
+
+  /// No description provided for @personalAgentSummaryMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode: {value}'**
+  String personalAgentSummaryMode(String value);
+
+  /// No description provided for @personalAgentSummarySetupStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup status: {value}'**
+  String personalAgentSummarySetupStatus(String value);
+
+  /// No description provided for @personalAgentSummaryOfferAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer available: {value}'**
+  String personalAgentSummaryOfferAvailable(String value);
+
+  /// No description provided for @personalAgentStatusConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI connected'**
+  String get personalAgentStatusConnected;
+
+  /// No description provided for @personalAgentStatusSettingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI setup in progress'**
+  String get personalAgentStatusSettingUp;
+
+  /// No description provided for @personalAgentStatusNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI not connected'**
+  String get personalAgentStatusNotConnected;
+
+  /// No description provided for @personalAgentStatusSubtitleConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Your assistant is ready and will appear in contacts once the channel is active.'**
+  String get personalAgentStatusSubtitleConnected;
+
+  /// No description provided for @personalAgentStatusSubtitleNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect your Personal AI in one tap. MPX stays usable throughout setup.'**
+  String get personalAgentStatusSubtitleNotConnected;
+
+  /// No description provided for @personalAgentWhatHappensNext.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens next'**
+  String get personalAgentWhatHappensNext;
+
+  /// No description provided for @personalAgentStepCreateOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'A Personal AI offer is created for your current identity.'**
+  String get personalAgentStepCreateOffer;
+
+  /// No description provided for @personalAgentStepFetchMnemonic.
+  ///
+  /// In en, this message translates to:
+  /// **'MPX retrieves the mnemonic from backend offer API.'**
+  String get personalAgentStepFetchMnemonic;
+
+  /// No description provided for @personalAgentStepAcceptOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'The app accepts the offer and waits for channel inauguration.'**
+  String get personalAgentStepAcceptOffer;
+
+  /// No description provided for @personalAgentStepContactAppears.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI appears in contacts when channel activity arrives.'**
+  String get personalAgentStepContactAppears;
 
   /// No description provided for @rCardsPlaceholderMessage.
   ///

@@ -133,6 +133,17 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
       ],
     ),
     StatefulShellBranchData.$branch(
+      navigatorKey: PersonalAgentBranchData.$navigatorKey,
+      restorationScopeId: PersonalAgentBranchData.$restorationScopeId,
+      routes: [
+        GoRouteData.$route(
+          path: '/personal-agent',
+          name: 'personalAgent',
+          factory: $PersonalAgentRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
       navigatorKey: CredentialsBranchData.$navigatorKey,
       restorationScopeId: CredentialsBranchData.$restorationScopeId,
       routes: [
@@ -496,6 +507,27 @@ mixin $VrcDetailsRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/r-cards/${Uri.encodeComponent(_self.credentialId)}/vrc-details',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $PersonalAgentRoute on GoRouteData {
+  static PersonalAgentRoute _fromState(GoRouterState state) =>
+      const PersonalAgentRoute();
+
+  @override
+  String get location => GoRouteData.$location('/personal-agent');
 
   @override
   void go(BuildContext context) => context.go(location);

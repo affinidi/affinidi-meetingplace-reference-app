@@ -70,6 +70,8 @@ dependencies:
   meeting_place_core: ^0.0.1-dev.43
   meeting_place_credentials: ^0.0.1-dev.8
   meeting_place_drift_repository: ^0.0.1-dev.50
+  meeting_place_personal_agent:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_personal_agent
   mobile_scanner: ^7.2.0
   mpx_app_core:
     path: ../packages/app-core
@@ -105,6 +107,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   riverpod_generator: ^3.0.3
+
+dependency_overrides:
+  didcomm: ^2.3.4
 
 flutter:
   generate: true
