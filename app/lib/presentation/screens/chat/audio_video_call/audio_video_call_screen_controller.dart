@@ -424,20 +424,15 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
   /// Toggles camera on/off.
   ///
-  /// When enabling camera during an audio-only call, the OS audio session is
-  /// reconfigured to video mode before the camera track is published.
-  /// On iOS, the audio session mode must match the call type or the LiveKit
-  /// room disconnects.
+  /// LiveKit owns the iOS audio session, so the app does not reconfigure it
+  /// when switching to video. Reconfiguring it mid-call makes LiveKit treat the
+  /// change as an audio interruption and drop the room. Output routing
+  /// (earpiece/speaker) is driven through LiveKit instead.
   Future<void> toggleCamera() async {
     _logger.info(
       'toggleCamera: enabled=${!state.isCameraEnabled}',
       name: _logKey,
     );
-    if (state.isAudioOnly) {
-      await ref
-          .read(callAudioSessionServiceProvider.notifier)
-          .reconfigureForVideoIfNeeded();
-    }
     return _mediaHandler.toggleCamera(
       currentValue: state.isCameraEnabled,
       permissionError: state.cameraPermissionError,
