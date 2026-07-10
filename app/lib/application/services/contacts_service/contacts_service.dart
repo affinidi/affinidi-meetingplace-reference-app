@@ -22,8 +22,7 @@ import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/contacts_repository_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../../../navigation/router_config_provider.dart';
-import '../../../navigation/routes/dashboard_routes.dart';
+import '../chat_service/open_chat_registry.dart';
 import '../connections_service/connections_service.dart';
 import '../control_plane_service/control_plane_service.dart';
 import 'contacts_service_state.dart';
@@ -480,7 +479,7 @@ class ContactsService extends _$ContactsService {
     // outcome on screen, and the chat's open-time reset already cleared the
     // badge, so a bump here would only linger on the contact list after they
     // navigate back.
-    if (_isViewingContactChat(contact.id)) {
+    if (ref.read(openChatRegistryProvider.notifier).isOpen(contact.id)) {
       _logger.info(
         'incrementMissedCallBadge: chat open for ${contact.id}, skipping bump',
         name: _logKey,
@@ -493,19 +492,6 @@ class ContactsService extends _$ContactsService {
       badgeCount: contact.badgeCount + 1,
     );
     await updateContact(amendedContact);
-  }
-
-  /// Whether the current navigation stack is within [contactId]'s chat (the
-  /// chat screen itself or a page pushed on top of it), so a missed-call badge
-  /// bump can be skipped while the user is already in that chat.
-  bool _isViewingContactChat(String contactId) {
-    final chatLocation = ChatRoute(contactId: contactId).location;
-    final matches = ref
-        .read(routerConfigProvider)
-        .routerDelegate
-        .currentConfiguration
-        .matches;
-    return matches.any((match) => match.matchedLocation == chatLocation);
   }
 
   /// Records that the current incoming call from [channelDid] was missed, so
