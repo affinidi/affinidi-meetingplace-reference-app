@@ -16,6 +16,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
+import '../../../application/services/chat_service/open_chat_registry.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/voice_playback_service/voice_playback_service.dart';
@@ -109,6 +110,11 @@ class ChatScreenController extends _$ChatScreenController
   @override
   ChatScreenState build(String contactId) {
     WidgetsBinding.instance.addObserver(this);
+
+    final openChatRegistry = ref.read(openChatRegistryProvider.notifier);
+    Future.microtask(() {
+      if (ref.mounted) openChatRegistry.markOpened(contactId);
+    });
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     final channelDid = contact?.channelDid;
@@ -256,6 +262,7 @@ class ChatScreenController extends _$ChatScreenController
     );
 
     ref.onDispose(() {
+      Future.microtask(() => openChatRegistry.markClosed(contactId));
       _vrcPluginSubscription?.cancel();
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();

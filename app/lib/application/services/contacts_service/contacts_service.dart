@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:clock/clock.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,6 +22,7 @@ import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/contacts_repository_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../chat_service/open_chat_registry.dart';
 import '../connections_service/connections_service.dart';
 import '../control_plane_service/control_plane_service.dart';
 import 'contacts_service_state.dart';
@@ -77,7 +79,53 @@ class ContactsService extends _$ContactsService {
       Future.microtask(() => updateContactFromChannelActivity(channel));
     });
 
+    ref.listen(
+      meetingPlaceSdkProvider,
+      (_, next) => _bindToCallSignals(next.value),
+      fireImmediately: true,
+    );
+
     return ContactsServiceState(contacts: []);
+  }
+
+  StreamSubscription<CallSignal>? _callSignalSub;
+
+  /// Subscribes to call signals so the unread badge for an unanswered outgoing
+  /// call is owned here, next to the other channel-event handlers, rather than
+  /// bumped by the call UI.
+  ///
+  /// A [CallDeclineSignal] is only ever received by the caller: the recipient
+  /// emits it, both on an explicit decline and on ring timeout. So receiving
+  /// one always means this device's outgoing call went unanswered.
+  void _bindToCallSignals(MeetingPlaceMatrixSDK? sdk) {
+    if (sdk == null) return;
+    _callSignalSub?.cancel();
+    _callSignalSub = sdk.callSignals.listen((signal) {
+      if (signal is CallDeclineSignal) {
+        Future.microtask(
+          () => _recordDeclinedOutgoingCall(signal.ownChannelDid),
+        );
+      }
+    });
+    ref.onDispose(() => _callSignalSub?.cancel());
+  }
+
+  /// Bumps the contact's unread badge for an unanswered outgoing call.
+  ///
+  /// [ownChannelDid] is the local channel DID carried by the decline signal; it
+  /// is mapped to the contact through the channel's other-party DID.
+  Future<void> _recordDeclinedOutgoingCall(String ownChannelDid) async {
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    final channel = await coreSdk.getChannelByDid(ownChannelDid);
+    final otherPartyDid = channel?.otherPartyPermanentChannelDid;
+    if (otherPartyDid == null) {
+      _logger.warning(
+        '_recordDeclinedOutgoingCall: no channel for $ownChannelDid',
+        name: _logKey,
+      );
+      return;
+    }
+    await incrementMissedCallBadge(otherPartyDid);
   }
 
   Future<void>? initializing;
@@ -422,6 +470,18 @@ class ContactsService extends _$ContactsService {
     if (contact == null) {
       _logger.warning(
         'incrementMissedCallBadge: no contact for $channelDid',
+        name: _logKey,
+      );
+      return;
+    }
+
+    // Skip the bump while the user is viewing this chat: they see the call
+    // outcome on screen, and the chat's open-time reset already cleared the
+    // badge, so a bump here would only linger on the contact list after they
+    // navigate back.
+    if (ref.read(openChatRegistryProvider.notifier).isOpen(contact.id)) {
+      _logger.info(
+        'incrementMissedCallBadge: chat open for ${contact.id}, skipping bump',
         name: _logKey,
       );
       return;

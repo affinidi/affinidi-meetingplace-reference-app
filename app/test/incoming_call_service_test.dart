@@ -186,7 +186,7 @@ void main() {
           (container.read(contactsServiceProvider.notifier)
                   as FakeContactsService)
               .incrementMissedCallBadgeCalls,
-          ['did:key:caller'],
+          isEmpty,
         );
         expect(
           (container.read(contactsServiceProvider.notifier)
@@ -218,6 +218,12 @@ void main() {
           (container.read(contactsServiceProvider.notifier)
                   as FakeContactsService)
               .incrementMissedCallBadgeCalls,
+          isEmpty,
+        );
+        expect(
+          (container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService)
+              .setPendingMissedCallCalls,
           ['did:key:caller'],
         );
       });
@@ -245,6 +251,12 @@ void main() {
             (container.read(contactsServiceProvider.notifier)
                     as FakeContactsService)
                 .incrementMissedCallBadgeCalls,
+            isEmpty,
+          );
+          expect(
+            (container.read(contactsServiceProvider.notifier)
+                    as FakeContactsService)
+                .setPendingMissedCallCalls,
             ['did:key:caller'],
           );
 

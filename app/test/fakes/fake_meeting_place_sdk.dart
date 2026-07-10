@@ -40,6 +40,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   final _incomingCallsController =
       StreamController<IncomingAudioVideoCallEvent>.broadcast();
   final _cancelledCallsController = StreamController<String>.broadcast();
+  final _callSignalsController = StreamController<CallSignal>.broadcast();
   final acceptedCallIds = <String>[];
   final declinedCallIds = <String>[];
   int leaveCurrentCallCount = 0;
@@ -200,6 +201,18 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
     final channel = _channels[channelDid];
     return channel;
+  }
+
+  @override
+  Future<Channel?> getChannelByDid(String did) async {
+    if (_channels.containsKey(did)) return _channels[did];
+    for (final channel in _channels.values) {
+      if (channel.permanentChannelDid == did ||
+          channel.otherPartyPermanentChannelDid == did) {
+        return channel;
+      }
+    }
+    return null;
   }
 
   @override
@@ -377,6 +390,12 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
 
   @override
   Stream<String> get cancelledCalls => _cancelledCallsController.stream;
+
+  @override
+  Stream<CallSignal> get callSignals => _callSignalsController.stream;
+
+  /// Emits a call signal to subscribers, for tests.
+  void emitCallSignal(CallSignal signal) => _callSignalsController.add(signal);
 
   void emitIncomingCall(IncomingAudioVideoCallEvent event) {
     _incomingCallsController.add(event);
