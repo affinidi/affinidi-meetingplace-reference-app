@@ -196,6 +196,12 @@ abstract class AppLocalizations {
   /// **'Personal AI connected'**
   String get personalAgentStatusConnected;
 
+  /// No description provided for @personalAgentStatusContextRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Context setup required'**
+  String get personalAgentStatusContextRequired;
+
   /// No description provided for @personalAgentStatusSettingUp.
   ///
   /// In en, this message translates to:
@@ -219,6 +225,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connect your Personal AI in one tap. MPX stays usable throughout setup.'**
   String get personalAgentStatusSubtitleNotConnected;
+
+  /// No description provided for @personalAgentContextSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Up Your Personal AI'**
+  String get personalAgentContextSetupTitle;
+
+  /// No description provided for @personalAgentContextSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Help your Personal AI get to know you. Upload a text file with your background, preferences, and working style. This becomes the AI\'s long-term knowledge about you.'**
+  String get personalAgentContextSetupDescription;
+
+  /// No description provided for @personalAgentContextWhatToIncludeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to include in your file'**
+  String get personalAgentContextWhatToIncludeTitle;
+
+  /// No description provided for @personalAgentContextWhatToIncludeItem1.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, role, and professional background'**
+  String get personalAgentContextWhatToIncludeItem1;
+
+  /// No description provided for @personalAgentContextWhatToIncludeItem2.
+  ///
+  /// In en, this message translates to:
+  /// **'Working style and communication preferences'**
+  String get personalAgentContextWhatToIncludeItem2;
+
+  /// No description provided for @personalAgentContextWhatToIncludeItem3.
+  ///
+  /// In en, this message translates to:
+  /// **'Current responsibilities and focus areas'**
+  String get personalAgentContextWhatToIncludeItem3;
+
+  /// No description provided for @personalAgentContextWhatToIncludeItem4.
+  ///
+  /// In en, this message translates to:
+  /// **'Any other context you\'d like the AI to remember'**
+  String get personalAgentContextWhatToIncludeItem4;
+
+  /// No description provided for @personalAgentContextPickFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select a .txt file'**
+  String get personalAgentContextPickFile;
+
+  /// No description provided for @personalAgentContextFileSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'File selected'**
+  String get personalAgentContextFileSelected;
+
+  /// No description provided for @personalAgentContextFileTapToChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to choose a different file'**
+  String get personalAgentContextFileTapToChange;
+
+  /// No description provided for @personalAgentContextUploadButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Context File'**
+  String get personalAgentContextUploadButton;
+
+  /// No description provided for @personalAgentContextUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading...'**
+  String get personalAgentContextUploading;
+
+  /// No description provided for @personalAgentContextUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Context uploaded successfully'**
+  String get personalAgentContextUploadSuccess;
+
+  /// No description provided for @personalAgentContextUploadedFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded: {fileName}'**
+  String personalAgentContextUploadedFile(String fileName);
 
   /// No description provided for @personalAgentWhatHappensNext.
   ///

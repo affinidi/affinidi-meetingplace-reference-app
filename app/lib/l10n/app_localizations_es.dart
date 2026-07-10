@@ -85,6 +85,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get personalAgentStatusConnected => 'IA personal conectada';
 
   @override
+  String get personalAgentStatusContextRequired => 'Context setup required';
+
+  @override
   String get personalAgentStatusSettingUp =>
       'Configuración de IA personal en progreso';
 
@@ -98,6 +101,58 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get personalAgentStatusSubtitleNotConnected =>
       'Conecta tu IA personal con un toque. MPX sigue siendo utilizable durante la configuración.';
+
+  @override
+  String get personalAgentContextSetupTitle => 'Set Up Your Personal AI';
+
+  @override
+  String get personalAgentContextSetupDescription =>
+      'Help your Personal AI get to know you. Upload a text file with your background, preferences, and working style. This becomes the AI\'s long-term knowledge about you.';
+
+  @override
+  String get personalAgentContextWhatToIncludeTitle =>
+      'What to include in your file';
+
+  @override
+  String get personalAgentContextWhatToIncludeItem1 =>
+      'Name, role, and professional background';
+
+  @override
+  String get personalAgentContextWhatToIncludeItem2 =>
+      'Working style and communication preferences';
+
+  @override
+  String get personalAgentContextWhatToIncludeItem3 =>
+      'Current responsibilities and focus areas';
+
+  @override
+  String get personalAgentContextWhatToIncludeItem4 =>
+      'Any other context you\'d like the AI to remember';
+
+  @override
+  String get personalAgentContextPickFile => 'Tap to select a .txt file';
+
+  @override
+  String get personalAgentContextFileSelected => 'File selected';
+
+  @override
+  String get personalAgentContextFileTapToChange =>
+      'Tap to choose a different file';
+
+  @override
+  String get personalAgentContextUploadButton => 'Upload Context File';
+
+  @override
+  String get personalAgentContextUploading => 'Uploading...';
+
+  @override
+  String get personalAgentContextUploadSuccess =>
+      'Context uploaded successfully';
+
+  @override
+  String personalAgentContextUploadedFile(String fileName) {
+    return 'Uploaded: $fileName';
+  }
 
   @override
   String get personalAgentWhatHappensNext => 'Qué sucede a continuación';

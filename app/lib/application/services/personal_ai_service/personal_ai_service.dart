@@ -18,7 +18,7 @@ import 'personal_ai_service_state.dart';
 
 final personalAiServiceProvider =
     StateNotifierProvider<PersonalAiService, PersonalAiServiceState>(
-      (ref) => PersonalAiService(ref),
+      PersonalAiService.new,
     );
 
 class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
@@ -46,6 +46,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
   void _handleAppResumed() {
     unawaited(refreshPersonalAiContactSync());
+    unawaited(refreshContextStatus());
   }
 
   Future<void> refreshPersonalAiContactSync() async {
@@ -56,12 +57,30 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     if (setupResult == null) {
       return;
     }
+
+    // Fetch the current offer to get the permanent channel DID so the contact
+    // lookup can match by channelDid (the main agentDid and the channel DID are
+    // different — searching only by agentDid never finds the contact).
+    String? channelDid;
+    final setupId = setupResult.setupId?.trim() ?? '';
+    if (setupId.isNotEmpty) {
+      try {
+        final offer = await _sdk.fetchPersonalAgentOffer(setupId: setupId);
+        final cd = offer.channelDid?.trim() ?? '';
+        if (cd.isNotEmpty) channelDid = cd;
+      } catch (_) {
+        // Offer may be unavailable (server restarted) — proceed without it.
+      }
+    }
+
     await _waitForPersonalAiContact(
       setupResult.agentDid,
+      channelDid: channelDid,
       maxAttempts: 3,
       pollEvery: const Duration(milliseconds: 300),
     );
-    await _ensurePersonalAiContact(setupResult);
+    await _ensurePersonalAiContact(setupResult, 
+    preferredChannelDid: channelDid);
   }
 
   void onIdentityCreated() {
@@ -82,6 +101,82 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
   void dismissSetupPrompt() {
     state = state.copyWith(showSetupPrompt: false, promptDismissed: true);
+  }
+
+  /// Upload the user's context file and store it as the agent's initial memory.
+  Future<void> uploadContext({
+    required String setupId,
+    required String content,
+  }) async {
+    if (!_environment.personalAiEnabled) return;
+    if (state.contextUploading) return;
+
+    state = state.copyWith(
+      contextUploading: true,
+      clearContextUploadError: true,
+    );
+
+    try {
+      // Re-ensure the setup record exists on the backend before uploading.
+      // The Cierge console holds records in memory only, so a server restart
+      // between Connect and Upload invalidates the stored setup_id → 404.
+      final identity = _ref.read(
+        identitiesServiceProvider.currentIdentityOrPrimary,
+      );
+      // Fall back to the holderDid already recorded in the setup result so
+      // the re-register call works even if the identity provider is slow.
+      final holderDidFromIdentity = identity?.did.trim() ?? '';
+      final holderDid = holderDidFromIdentity.isNotEmpty
+          ? holderDidFromIdentity
+          : state.setupResult?.holderDid.trim() ?? '';
+      String effectiveSetupId = setupId;
+      if (holderDid.isNotEmpty) {
+        final freshSetup = await _sdk.ensurePersonalAgentSetup(
+          request: PersonalAgentSetupRequest(holderDid: holderDid),
+        );
+        effectiveSetupId = freshSetup.setupId ?? setupId;
+        // Only update setupResult if we didn't already have one — the
+        // re-registration response always returns agentCreated/contextCreated=false
+        // (idempotency markers), which would overwrite the original true values
+        // and show misleading info in the UI.
+        if (state.setupResult == null) {
+          state = state.copyWith(setupResult: freshSetup);
+        }
+      }
+
+      await _sdk.uploadPersonalAgentContext(
+        setupId: effectiveSetupId,
+        content: content,
+      );
+      state = state.copyWith(
+        contextProvisioned: true,
+        contextUploading: false,
+      );
+    } catch (error) {
+      state = state.copyWith(
+        contextUploading: false,
+        contextUploadError: error.toString(),
+      );
+    }
+  }
+
+  /// Refresh context provisioning status from the backend.
+  Future<void> refreshContextStatus() async {
+    if (!_environment.personalAiEnabled) return;
+    final setupId = state.setupResult?.setupId?.trim();
+    if (setupId == null || setupId.isEmpty) return;
+    if (state.contextProvisioned) return;
+
+    try {
+      final status = await _sdk.fetchPersonalAgentContextStatus(
+        setupId: setupId,
+      );
+      if (status.provisioned && !state.contextProvisioned) {
+        state = state.copyWith(contextProvisioned: true);
+      }
+    } catch (_) {
+      // Best-effort — don't surface transient check failures.
+    }
   }
 
   Future<void> setupPersonalAi({required String holderDid}) async {
@@ -197,7 +292,35 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
     await connectionsService.acceptOffer(selectedOffer, identity: identity);
 
-    return await _waitForOffer(setupId: setupId);
+    // After accepting, wait for the connector to process inauguration and
+    // write channel_did to the offer file. _waitForOffer would return
+    // immediately (mnemonic still present), leaving channel_did null and
+    // causing the contact name to never be set.
+    return await _waitForOfferChannelDid(setupId: setupId);
+  }
+
+  /// Polls the offer until [PersonalAgentOfferResult.channelDid] is populated.
+  /// Used after accepting an offer to wait for the connector's inauguration
+  /// handler to write the permanent channel DID into the offer file.
+  Future<PersonalAgentOfferResult> _waitForOfferChannelDid({
+    required String setupId,
+  }) async {
+    const maxAttempts = 20;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final offer = await _sdk.fetchPersonalAgentOffer(setupId: setupId);
+        final hasChannelDid = offer.channelDid?.trim().isNotEmpty ?? false;
+        if (hasChannelDid) {
+          return offer;
+        }
+      } on VtaClientException catch (_) {
+        // keep polling
+      }
+      await Future<void>.delayed(const Duration(seconds: 1));
+    }
+    // Connector did not write channel_did in time — fall back to a plain fetch
+    // so setup can still complete (name update may be deferred to next sync).
+    return _sdk.fetchPersonalAgentOffer(setupId: setupId);
   }
 
   Future<PersonalAgentOfferResult> _waitForOffer({

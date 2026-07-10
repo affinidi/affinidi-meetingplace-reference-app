@@ -46,9 +46,13 @@ class PersonalAgentScreenController
       holderDid: identity?.did,
       isReady: personalAiState.isReady,
       isSettingUp: personalAiState.isSettingUp,
+      contextProvisioned: personalAiState.contextProvisioned,
+      contextUploading: personalAiState.contextUploading,
       errorMessage: personalAiState.errorMessage,
+      contextUploadError: personalAiState.contextUploadError,
       setupResult: personalAiState.setupResult,
       clearErrorMessage: personalAiState.errorMessage == null,
+      clearContextUploadError: personalAiState.contextUploadError == null,
       clearSetupResult: personalAiState.setupResult == null,
     );
   }
@@ -61,5 +65,12 @@ class PersonalAgentScreenController
 
   void openSetupPrompt() {
     _ref.read(personalAiServiceProvider.notifier).openSetupPrompt();
+  }
+
+  Future<void> uploadContext(String content) {
+    final setupId = state.setupResult?.setupId ?? '';
+    return _ref
+        .read(personalAiServiceProvider.notifier)
+        .uploadContext(setupId: setupId, content: content);
   }
 }
