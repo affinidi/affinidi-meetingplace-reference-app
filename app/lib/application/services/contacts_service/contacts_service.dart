@@ -90,6 +90,19 @@ class ContactsService extends _$ContactsService {
 
   StreamSubscription<CallSignal>? _callSignalSub;
 
+  /// Channel DIDs already credited with a missed-call badge bump for their
+  /// current unread episode.
+  ///
+  /// A single missed/declined call can surface more than one decline signal on
+  /// this device — for example when the local user is busy and the SDK
+  /// auto-rejects a competing incoming call (call glare): the losing caller's
+  /// decline can be observed alongside the auto-reject, so a naive per-signal
+  /// bump over-counts and the contact badge exceeds its single call chat item.
+  /// Tracking credited contacts keeps the bump idempotent per episode; the
+  /// entry is cleared in [resetContactBadgeCount] when the chat is opened, so a
+  /// later call counts again.
+  final Set<String> _missedCallCreditedChannelDids = {};
+
   /// Subscribes to call signals so the unread badge for an unanswered outgoing
   /// call is owned here, next to the other channel-event handlers, rather than
   /// bumped by the call UI.
@@ -450,6 +463,7 @@ class ContactsService extends _$ContactsService {
       hasBeenOpened: true,
       currentMessageSeqNo: channel?.seqNo ?? contact.currentMessageSeqNo,
     );
+    _missedCallCreditedChannelDids.remove(channelDid);
     await updateContact(amendedContact);
   }
 
@@ -482,6 +496,18 @@ class ContactsService extends _$ContactsService {
     if (ref.read(openChatRegistryProvider.notifier).isOpen(contact.id)) {
       _logger.info(
         'incrementMissedCallBadge: chat open for ${contact.id}, skipping bump',
+        name: _logKey,
+      );
+      return;
+    }
+
+    // Idempotent per unread episode: a single missed call can raise more than
+    // one decline signal on this device (e.g. call glare while busy), so credit
+    // the contact at most once until the chat is opened and the badge reset.
+    if (!_missedCallCreditedChannelDids.add(channelDid)) {
+      _logger.info(
+        'incrementMissedCallBadge: already credited ${contact.id} this '
+        'episode, skipping bump',
         name: _logKey,
       );
       return;
