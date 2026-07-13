@@ -723,7 +723,7 @@ void main() {
   });
 
   group('toggleCamera', () {
-    test('reconfigures audio session to videoChat when enabling camera in'
+    test('does not reconfigure audio session when enabling camera in'
         ' audio-only call', () async {
       final fakeSDK = _FakeMeetingPlaceMatrixSDK();
       final audioSession = FakeAudioSession();
@@ -750,10 +750,13 @@ void main() {
 
       await controller.toggleCamera();
 
-      expect(audioSession.configureCalls, configureCallsAfterJoin + 1);
+      // LiveKit owns the iOS audio session, so switching to video must not
+      // reconfigure it. Reconfiguring mid-call reads as an audio interruption
+      // and drops the LiveKit room.
+      expect(audioSession.configureCalls, configureCallsAfterJoin);
       expect(
         audioSession.lastConfiguration?.avAudioSessionMode,
-        AVAudioSessionMode.videoChat,
+        AVAudioSessionMode.voiceChat,
       );
     });
 

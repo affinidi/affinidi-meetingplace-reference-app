@@ -113,44 +113,5 @@ void main() {
         AVAudioSessionMode.voiceChat,
       );
     });
-
-    group('reconfigureForVideoIfNeeded', () {
-      test('reconfigures to videoChat when session is acquired', () async {
-        final audioSession = _ControllableFakeAudioSession();
-        final container = buildContainer(audioSession);
-        addTearDown(container.dispose);
-
-        final service = container.read(
-          callAudioSessionServiceProvider.notifier,
-        );
-
-        final acquireFuture = service.acquire(isAudioOnly: true);
-        await audioSession.nextSetActiveCall();
-        audioSession.completeNextSetActive(true);
-        await acquireFuture;
-
-        await service.reconfigureForVideoIfNeeded();
-
-        expect(audioSession.configurations, hasLength(2));
-        expect(
-          audioSession.configurations.last.avAudioSessionMode,
-          AVAudioSessionMode.videoChat,
-        );
-      });
-
-      test('is a no-op when session is not acquired', () async {
-        final audioSession = _ControllableFakeAudioSession();
-        final container = buildContainer(audioSession);
-        addTearDown(container.dispose);
-
-        final service = container.read(
-          callAudioSessionServiceProvider.notifier,
-        );
-
-        await service.reconfigureForVideoIfNeeded();
-
-        expect(audioSession.configurations, isEmpty);
-      });
-    });
   });
 }
