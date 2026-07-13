@@ -26,6 +26,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../application/services/network_connectivity_service/network_connectivity_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -134,8 +135,6 @@ class ChatScreen extends HookConsumerWidget {
     final isCallSupported = ref.watch(
       provider.select((state) => state.isCallSupported),
     );
-    final activeCallState = ref.watch(activeCallControllerProvider);
-    final canInitiateCall = isCallSupported && activeCallState == null;
 
     Future<void> onVrcStart() async {
       final state = ref.read(chatScreenControllerProvider(_contactId));
@@ -209,32 +208,7 @@ class ChatScreen extends HookConsumerWidget {
         centerTitle: true,
         actions: [
           if (isAudioVideoCallsEnabled && isCallSupported && !isGroupChat)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.call),
-                  tooltip: context.l10n.callChatItemAudioCall,
-                  onPressed: canInitiateCall
-                      ? () => context.push(
-                          AudioVideoCallRoute(
-                            contactId: _contactId,
-                            isAudioOnly: true,
-                          ).location,
-                        )
-                      : null,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.videocam),
-                  tooltip: context.l10n.callChatItemVideoCall,
-                  onPressed: canInitiateCall
-                      ? () => context.push(
-                          AudioVideoCallRoute(contactId: _contactId).location,
-                        )
-                      : null,
-                ),
-              ],
-            ),
+            _AudioVideoCallActions(contactId: _contactId),
         ],
       ),
       body: SafeArea(
@@ -251,6 +225,53 @@ class ChatScreen extends HookConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AudioVideoCallActions extends ConsumerWidget {
+  _AudioVideoCallActions({required this._contactId});
+
+  final String _contactId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = chatScreenControllerProvider(_contactId);
+    final isCallSupported = ref.watch(
+      provider.select((state) => state.isCallSupported),
+    );
+    final activeCallState = ref.watch(activeCallControllerProvider);
+    final isConnected = ref.watch(
+      networkConnectivityServiceProvider.select((state) => state.isConnected),
+    );
+    final canInitiateCall =
+        isCallSupported && isConnected && activeCallState == null;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.call),
+          tooltip: context.l10n.callChatItemAudioCall,
+          onPressed: canInitiateCall
+              ? () => context.push(
+                  AudioVideoCallRoute(
+                    contactId: _contactId,
+                    isAudioOnly: true,
+                  ).location,
+                )
+              : null,
+        ),
+        IconButton(
+          icon: const Icon(Icons.videocam),
+          tooltip: context.l10n.callChatItemVideoCall,
+          onPressed: canInitiateCall
+              ? () => context.push(
+                  AudioVideoCallRoute(contactId: _contactId).location,
+                )
+              : null,
+        ),
+      ],
     );
   }
 }
