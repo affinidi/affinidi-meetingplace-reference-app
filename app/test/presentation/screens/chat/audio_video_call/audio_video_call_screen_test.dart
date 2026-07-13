@@ -99,13 +99,11 @@ void main() {
       final l10n = AppLocalizations.of(
         tester.element(find.byType(AudioVideoCallScreen)),
       )!;
+      final errorMessage = l10n.videoCallFailedToJoin(l10n.videoCallError(''));
 
       expect(tester.takeException(), isNull);
       expect(find.byType(Scaffold), findsOneWidget);
-      expect(
-        find.text(l10n.videoCallFailedToJoin(l10n.videoCallUnknownError)),
-        findsOneWidget,
-      );
+      expect(find.text(errorMessage), findsOneWidget);
     });
 
     testWidgets('shows peer name in audio outgoing ringing state', (
@@ -315,6 +313,29 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(AudioVideoCallScreen), findsOneWidget);
+    });
+
+    testWidgets('shows network error message in error ended state', (
+      tester,
+    ) async {
+      final state = AudioVideoCallScreenState(
+        status: AudioVideoCallStatus.error,
+        peerName: 'Nora',
+        errorCode: AudioVideoCallErrorCode.networkError,
+      );
+
+      await tester.pumpWidget(_wrap(controllerState: state));
+      await tester.pump();
+
+      final l10n = AppLocalizations.of(
+        tester.element(find.byType(AudioVideoCallScreen)),
+      )!;
+      final errorMessage = l10n.videoCallFailedToJoin(
+        l10n.videoCallError(AudioVideoCallErrorCode.networkError.name),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text(errorMessage), findsOneWidget);
     });
 
     testWidgets('shows peer name in ringing state without peer history', (

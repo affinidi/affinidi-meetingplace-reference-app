@@ -2015,7 +2015,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get videoCallTitle => 'Llamada grupal';
+  String get videoCallTitle => 'Llamar';
 
   @override
   String get videoCallJoiningCall => 'Uniéndose a la llamada...';
@@ -2043,7 +2043,13 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get videoCallUnknownError => 'Error desconocido';
+  String videoCallError(String errorCode) {
+    String _temp0 = intl.Intl.selectLogic(errorCode, {
+      'networkError': 'Error de red',
+      'other': 'Error desconocido',
+    });
+    return '$_temp0';
+  }
 
   @override
   String get videoCallMicToggleFailed =>

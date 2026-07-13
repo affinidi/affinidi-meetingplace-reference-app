@@ -525,11 +525,10 @@
 	"selectIdentityToVerifyRelationshipPrompt": "Wischen Sie nach links oder rechts, um die Identität auszuwählen, mit der Sie Ihre Beziehung zu {name} verifizieren möchten.",
 	"trustedBy": "Vertraut von {count}",
 	"verifiableCredentialWallet": "Verifizierbare Berechtigungs-Wallet",
-	"videoCallTitle": "Gruppenanruf",
+	"videoCallTitle": "Anruf",
 	"videoCallJoiningCall": "Anruf wird beigetreten...",
 	"videoCallWaitingForParticipants": "Warte auf Teilnehmer...",
 	"videoCallFailedToJoin": "Beitreten fehlgeschlagen: {error}",
-	"videoCallUnknownError": "Unbekannter Fehler",
 	"videoCallHangUpFailed": "Auflegen nicht möglich. Bitte versuchen Sie es erneut.",
 	"videoCallParticipantCount": "{count, plural, =1{1 Teilnehmer} other{{count} Teilnehmer}}",
 	"videoCallMute": "Stummschalten",
@@ -600,5 +599,6 @@
 	"videoCallMicToggleFailed": "Mikrofon konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
 	"videoCallShowLess": "Weniger anzeigen",
 	"videoCallShowMore": "{count, plural, =1{Zeige 1 weiteren} other{Zeige {count} weitere}}",
-	"videoCallSpeakerToggleFailed": "Lautsprecher konnte nicht geändert werden. Bitte versuchen Sie es erneut."
+	"videoCallSpeakerToggleFailed": "Lautsprecher konnte nicht geändert werden. Bitte versuchen Sie es erneut.",
+	"videoCallError": "{errorCode, select, networkError{Netzwerkfehler} other{Unbekannter Fehler}}"
 }

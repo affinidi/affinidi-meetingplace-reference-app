@@ -84,9 +84,7 @@ class _CallParticipantGrid extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            l10n.videoCallFailedToJoin(
-              errorCode?.name ?? l10n.videoCallUnknownError,
-            ),
+            l10n.videoCallError(errorCode?.name ?? ''),
             style: textTheme.bodyMedium?.copyWith(color: colors.rose),
             textAlign: TextAlign.center,
           ),

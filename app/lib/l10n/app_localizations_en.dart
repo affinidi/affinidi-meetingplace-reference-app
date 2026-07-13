@@ -1981,7 +1981,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get videoCallTitle => 'Group Call';
+  String get videoCallTitle => 'Call';
 
   @override
   String get videoCallJoiningCall => 'Joining call...';
@@ -2009,7 +2009,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get videoCallUnknownError => 'Unknown error';
+  String videoCallError(String errorCode) {
+    String _temp0 = intl.Intl.selectLogic(errorCode, {
+      'networkError': 'Network error',
+      'other': 'Unknown error',
+    });
+    return '$_temp0';
+  }
 
   @override
   String get videoCallMicToggleFailed =>

@@ -59,7 +59,7 @@ final class OpenChatRegistryProvider
   }
 }
 
-String _$openChatRegistryHash() => r'2bb57989d7d3ce6e86bf53b342111ddd2f250b04';
+String _$openChatRegistryHash() => r'c236c0e19c7c95e5842467b1ff7dd637a9e78cfe';
 
 /// Tracks which contact chats are currently open on screen.
 ///

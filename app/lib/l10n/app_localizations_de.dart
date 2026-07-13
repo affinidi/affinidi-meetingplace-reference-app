@@ -2026,7 +2026,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get videoCallTitle => 'Gruppenanruf';
+  String get videoCallTitle => 'Anruf';
 
   @override
   String get videoCallJoiningCall => 'Anruf wird beigetreten...';
@@ -2054,7 +2054,13 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get videoCallUnknownError => 'Unbekannter Fehler';
+  String videoCallError(String errorCode) {
+    String _temp0 = intl.Intl.selectLogic(errorCode, {
+      'networkError': 'Netzwerkfehler',
+      'other': 'Unbekannter Fehler',
+    });
+    return '$_temp0';
+  }
 
   @override
   String get videoCallMicToggleFailed =>
