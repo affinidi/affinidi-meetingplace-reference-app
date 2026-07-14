@@ -116,22 +116,19 @@ class IncomingCallService extends _$IncomingCallService {
 
   void _startRingTimer(String callId) {
     _ringTimer?.cancel();
-    _ringTimer = Timer(
-      ref.read(environmentProvider).incomingCallRingTimeout,
-      () {
-        _logger.info(
-          'Ring timeout reached for $callId, declining',
-          name: _logKey,
-        );
-        final channelDid = ref
-            .read(incomingCallProvider)
-            .eventOrNull
-            ?.otherPartyPermanentChannelDid;
-        _clearRingState();
-        _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
-        if (channelDid != null) unawaited(_markCallAsMissed(channelDid));
-      },
-    );
+    _ringTimer = Timer(ref.read(environmentProvider).callRingTimeout, () {
+      _logger.info(
+        'Ring timeout reached for $callId, declining',
+        name: _logKey,
+      );
+      final channelDid = ref
+          .read(incomingCallProvider)
+          .eventOrNull
+          ?.otherPartyPermanentChannelDid;
+      _clearRingState();
+      _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
+      if (channelDid != null) unawaited(_markCallAsMissed(channelDid));
+    });
   }
 
   void _clearRingState() {

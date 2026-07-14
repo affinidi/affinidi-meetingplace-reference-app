@@ -126,8 +126,5 @@ class FakeEnvironment implements Environment {
   String get matrixServerName => Uri.parse(matrixHomeserver).host;
 
   @override
-  Duration get incomingCallRingTimeout => const Duration(seconds: 15);
-
-  @override
-  Duration get outgoingCallTimeout => const Duration(seconds: 60);
+  Duration get callRingTimeout => const Duration(seconds: 60);
 }

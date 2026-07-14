@@ -85,7 +85,7 @@ final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
     livekitSfuUrl: environment.livekitSfuUrl.isNotEmpty
         ? Uri.parse(environment.livekitSfuUrl)
         : null,
-    outgoingCallTimeout: environment.outgoingCallTimeout,
+    outgoingCallTimeout: environment.callRingTimeout,
     deviceId: deviceId,
     serverName: environment.matrixServerName,
     databaseFactory: CallbackMatrixDatabaseFactory(
