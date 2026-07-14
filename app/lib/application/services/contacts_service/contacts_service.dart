@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:clock/clock.dart';
+import 'package:collection/collection.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -201,11 +202,17 @@ class ContactsService extends _$ContactsService {
 
       final calculatedBadgeCount =
           channel.seqNo - existingContact.currentMessageSeqNo;
+      final persistedContact = await _getPersistedContactByChannelDid(
+        channel.otherPartyPermanentChannelDid!,
+      );
       final updatedContact = existingContact.copyWith(
         status: ContactStatus.active,
         badgeCount:
             max(0, calculatedBadgeCount) + existingContact.missedCallCount,
         badgeUpdateInProgress: false,
+        pendingMissedCallAt:
+            persistedContact?.pendingMissedCallAt ??
+            existingContact.pendingMissedCallAt,
       );
       await updateContact(updatedContact);
     }
@@ -436,7 +443,12 @@ class ContactsService extends _$ContactsService {
       return;
     }
 
-    final amendedContact = contact.copyWith(currentMessageSeqNo: seqNo);
+    final persistedContact = await _getPersistedContactByChannelDid(did);
+    final amendedContact = contact.copyWith(
+      currentMessageSeqNo: seqNo,
+      pendingMissedCallAt:
+          persistedContact?.pendingMissedCallAt ?? contact.pendingMissedCallAt,
+    );
     await updateContact(amendedContact);
   }
 
@@ -456,12 +468,15 @@ class ContactsService extends _$ContactsService {
     final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
       channelDid,
     );
+    final persistedContact = await _getPersistedContactByChannelDid(channelDid);
 
     final amendedContact = contact.copyWith(
       badgeCount: 0,
       missedCallCount: 0,
       hasBeenOpened: true,
       currentMessageSeqNo: channel?.seqNo ?? contact.currentMessageSeqNo,
+      pendingMissedCallAt:
+          persistedContact?.pendingMissedCallAt ?? contact.pendingMissedCallAt,
     );
     _missedCallCreditedChannelDids.remove(channelDid);
     await updateContact(amendedContact);
@@ -535,9 +550,12 @@ class ContactsService extends _$ContactsService {
       );
       return;
     }
-    await updateContact(
-      contact.copyWith(pendingMissedCallAt: DateTime.now().toUtc()),
+    final pendingAt = DateTime.now().toUtc();
+    _logger.info(
+      'setPendingMissedCall: Marked contact ${contact.id}',
+      name: _logKey,
     );
+    await updateContact(contact.copyWith(pendingMissedCallAt: pendingAt));
   }
 
   /// Clears the pending missed-call marker for [channelDid] after the call chat
@@ -547,6 +565,10 @@ class ContactsService extends _$ContactsService {
     if (contact == null || contact.pendingMissedCallAt == null) {
       return;
     }
+    _logger.info(
+      'clearPendingMissedCall: Unmarked contact ${contact.id}',
+      name: _logKey,
+    );
     await updateContact(contact.copyWith(pendingMissedCallAt: null));
   }
 
@@ -604,6 +626,13 @@ class ContactsService extends _$ContactsService {
             ),
     );
     await updateContact(updatedContact);
+  }
+
+  /// Retrieves a persisted contact by channel DID.
+  Future<Contact?> _getPersistedContactByChannelDid(String channelDid) async {
+    _repository ??= await _ensureRepositoryInitialized();
+    final contacts = await _repository!.listContacts();
+    return contacts.firstWhereOrNull((c) => c.channelDid == channelDid);
   }
 
   /// Create a new contact when an invitation is accepted.

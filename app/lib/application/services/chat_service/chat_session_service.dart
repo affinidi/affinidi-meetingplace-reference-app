@@ -329,42 +329,37 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       state = state.copyWith(messages: messages, isInitialized: true);
       await _flushBufferedOutboundMessages();
 
-      // Reset must be fully committed before the stream listener is attached.
-      // Buffered events flush as soon as the listener attaches and would
-      // otherwise race with this update on a stale Contact snapshot, causing
-      // a seqNo write to clobber badgeCount=0 back to its previous value.
-      await _resetBadgeCount();
-      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
+      final chatStreamAttached = _chatSDK!.chatStreamSubscription.then((
+        chatStream,
+      ) {
+        if (_chatSDK == null) {
+          // pauseChat ran while we were waiting for the transport
+          // subscription. Drop the listener attachment to avoid leaking
+          // a subscription that has no disposal path.
+          return;
+        }
 
-      unawaited(
-        _chatSDK!.chatStreamSubscription.then((chatStream) {
-          if (_chatSDK == null) {
-            // pauseChat ran while we were waiting for the transport
-            // subscription. Drop the listener attachment to avoid leaking
-            // a subscription that has no disposal path.
-            return;
-          }
+        if (chatStream == null) {
+          _logger.warning('Chat stream is null', name: _logKey);
+          return;
+        }
 
-          if (chatStream == null) {
-            _logger.warning('Chat stream is null', name: _logKey);
-            return;
-          }
+        _chatStreamRef = chatStream
+          ..listen(
+            (data) =>
+                _onChannelMessagesData(data, _otherPartyPermanentChannelDid),
+            onError: (Object error, StackTrace stackTrace) {
+              _logger.error(
+                'Error in chat stream subscription',
+                error: error,
+                stackTrace: stackTrace,
+                name: _logKey,
+              );
+            },
+          );
+      });
 
-          _chatStreamRef = chatStream
-            ..listen(
-              (data) =>
-                  _onChannelMessagesData(data, _otherPartyPermanentChannelDid),
-              onError: (Object error, StackTrace stackTrace) {
-                _logger.error(
-                  'Error in chat stream subscription',
-                  error: error,
-                  stackTrace: stackTrace,
-                  name: _logKey,
-                );
-              },
-            );
-        }),
-      );
+      unawaited(chatStreamAttached);
 
       // Replay any VRC events that fired before the chat was opened
       // (e.g. while the user was offline). Must run AFTER:
@@ -379,9 +374,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         await _vdipManager.replayPending();
       }
 
-      await _resetBadgeCount();
-      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
-
       unawaited(
         _rCardManager.subscribeToIncomingRCards().then((_) async {
           if (!ref.mounted) return;
@@ -389,9 +381,14 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         }),
       );
 
+      await chatStreamAttached;
+
       if (_missedCallManager != null) {
-        unawaited(_missedCallManager!.replayPendingMissedCall());
+        await _missedCallManager!.replayPendingMissedCall();
       }
+
+      await _resetBadgeCount();
+      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
       _logger.info('Chat session started', name: _logKey);
     } catch (error, stackTrace) {
@@ -462,6 +459,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<void> _disposeChatSession() async {
     final sdk = _chatSDK;
     _chatSDK = null;
+    _chatId = null;
 
     _chatStreamRef?.dispose();
     _chatStreamRef = null;
@@ -961,7 +959,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _callChatItemManager.resolveOutgoingCallChatItemId();
 
   @override
-  Future<void> markCallAsMissed() => _callChatItemManager.markCallAsMissed();
+  Future<bool> markCallAsMissed() {
+    if (_chatId == null) return Future.value(false);
+    return _callChatItemManager.markCallAsMissed();
+  }
 
   @override
   Future<void> updateCallChatItem(

@@ -46,6 +46,17 @@ class IncomingCallService extends _$IncomingCallService {
   void accept({required String callId}) {
     _logger.info('Accepting call: $callId', name: _logKey);
     _cancelRingTimer();
+    final channelDid = ref
+        .read(incomingCallProvider)
+        .eventOrNull
+        ?.otherPartyPermanentChannelDid;
+    if (channelDid != null) {
+      unawaited(
+        ref
+            .read(contactsServiceProvider.notifier)
+            .clearPendingMissedCall(channelDid),
+      );
+    }
     _ensureSDK((sdk) => unawaited(_acceptCall(sdk, callId: callId)));
   }
 
@@ -201,9 +212,14 @@ class IncomingCallService extends _$IncomingCallService {
       );
     }
     try {
-      await ref
+      final marked = await ref
           .read(chatSessionServiceProvider(contactId).notifier)
           .markCallAsMissed();
+      if (marked) {
+        await ref
+            .read(contactsServiceProvider.notifier)
+            .clearPendingMissedCall(contactId);
+      }
     } catch (e, stackTrace) {
       _logger.error(
         '_markCallAsMissed: Chat item update failed for $contactId',

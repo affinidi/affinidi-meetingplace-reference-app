@@ -180,6 +180,27 @@ void main() {
       expect(id, 'at-cutoff-incoming');
     });
 
+    test('resolveStaleIncomingCallItemIdBefore waits for a stale item that '
+        'arrives during chat bootstrap', () async {
+      final cutoff = DateTime(2026, 6, 29, 11);
+      fakeChatSdk.sessionMessages = [];
+
+      Future<void>.delayed(const Duration(milliseconds: 75), () {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'bootstrapped-incoming',
+            isFromMe: false,
+            status: CallStatus.ringing,
+            dateCreated: cutoff,
+          ),
+        ];
+      });
+
+      final id = await manager.resolveStaleIncomingCallItemIdBefore(cutoff);
+
+      expect(id, 'bootstrapped-incoming');
+    });
+
     test('resolveStaleIncomingCallItemIdBefore ignores items created after '
         'the cutoff so a newer ringing call is not marked missed', () async {
       final cutoff = DateTime(2026, 6, 29, 11);

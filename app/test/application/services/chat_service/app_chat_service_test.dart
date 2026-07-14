@@ -13,6 +13,7 @@ import 'package:mpx_flutter_reference_app/application/services/chat_service/chat
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_presence_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
@@ -1011,6 +1012,7 @@ void main() {
     late ChatSessionService chatService;
     late FakeMeetingPlaceSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
+    late FakeContactsService fakeContactsService;
 
     final testContact = FakeContacts.individualContact;
     final channelDid = testContact.channelDid!;
@@ -1042,12 +1044,13 @@ void main() {
         channels: {channelDid: FakeChannels.individualChannel},
       );
       fakeChatSdk = FakeChatSdk();
+      fakeContactsService = FakeContactsService();
 
       container = ProviderContainer(
         overrides: [
           meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
           chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
-          contactsServiceProvider.overrideWith(FakeContactsService.new),
+          contactsServiceProvider.overrideWith(() => fakeContactsService),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
@@ -1233,6 +1236,7 @@ void main() {
         ),
       ];
 
+      await chatService.startChatSession();
       await chatService.markCallAsMissed();
 
       expect(fakeChatSdk.updateMessageCalls, hasLength(1));
@@ -1242,6 +1246,56 @@ void main() {
         updated.attachments.firstWhere(CallMetadata.isCall),
       );
       expect(call?.status, CallStatus.missed);
+    });
+
+    test('startChatSession replays a pending missed-call marker and heals the '
+        'stale incoming call item', () async {
+      fakeContactsService.setContacts([
+        Contact(
+          id: testContact.id,
+          channelDid: testContact.channelDid,
+          channelDidSha256: testContact.channelDidSha256,
+          offerLink: testContact.offerLink,
+          card: testContact.card,
+          dateAdded: testContact.dateAdded,
+          type: testContact.type,
+          status: testContact.status,
+          mediatorDid: testContact.mediatorDid,
+          origin: testContact.origin,
+          category: testContact.category,
+          otherPartyCard: testContact.otherPartyCard,
+          displayName: testContact.displayName,
+          badgeUpdateInProgress: testContact.badgeUpdateInProgress,
+          badgeCount: testContact.badgeCount,
+          currentMessageSeqNo: testContact.currentMessageSeqNo,
+          missedCallCount: testContact.missedCallCount,
+          pendingMissedCallAt: DateTime.now().toUtc().subtract(
+            const Duration(seconds: 5),
+          ),
+          hasBeenOpened: testContact.hasBeenOpened,
+          lastKeepAliveMessage: testContact.lastKeepAliveMessage,
+          notificationBannerDismissed: testContact.notificationBannerDismissed,
+        ),
+      ]);
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'outside-chat-incoming-call',
+          isFromMe: false,
+          status: CallStatus.ringing,
+        ),
+      ];
+
+      await chatService.startChatSession();
+      await pumpEventQueue();
+
+      expect(fakeChatSdk.updateMessageCalls, hasLength(1));
+      final updated = fakeChatSdk.updateMessageCalls.single;
+      expect(updated.messageId, 'outside-chat-incoming-call');
+      final call = CallMetadata.maybeOf(
+        updated.attachments.firstWhere(CallMetadata.isCall),
+      );
+      expect(call?.status, CallStatus.missed);
+      expect(fakeContactsService.clearPendingMissedCallCalls, [channelDid]);
     });
 
     test('markCallAsMissed is a no-op when there is no pending incoming call '
@@ -1254,6 +1308,7 @@ void main() {
         ),
       ];
 
+      await chatService.startChatSession();
       await chatService.markCallAsMissed();
 
       expect(fakeChatSdk.updateMessageCalls, isEmpty);

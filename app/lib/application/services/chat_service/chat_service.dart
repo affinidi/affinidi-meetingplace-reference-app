@@ -114,10 +114,11 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   Future<String?> resolveOutgoingCallChatItemId();
 
   /// Updates the receiver's pending incoming call chat item to
-  /// [CallStatus.missed]. No-op when no matching item is found.
+  /// [CallStatus.missed]. Returns `true` when an item was healed, `false` when
+  /// there was nothing to update or the session is not live.
   ///
   /// Called when the ring timer expires or the user declines before answering.
-  Future<void> markCallAsMissed();
+  Future<bool> markCallAsMissed();
 
   /// Updates the local-only [status] and participation [duration] of a
   /// previously emitted call chat item, in place. Per-side and local-only: it
