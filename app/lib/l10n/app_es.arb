@@ -525,11 +525,10 @@
 	"trustedBy": "Confiado por {count}",
 	"verifiableCredentialWallet": "Cartera de Credenciales Verificables",
 	"vrcAbbreviation": "VRC",
-	"videoCallTitle": "Llamada grupal",
+	"videoCallTitle": "Llamar",
 	"videoCallJoiningCall": "Uniéndose a la llamada...",
 	"videoCallWaitingForParticipants": "Esperando participantes...",
 	"videoCallFailedToJoin": "Error al unirse: {error}",
-	"videoCallUnknownError": "Error desconocido",
 	"videoCallHangUpFailed": "No se pudo colgar. Por favor, inténtalo de nuevo.",
 	"videoCallParticipantCount": "{count, plural, =1{1 participante} other{{count} participantes}}",
 	"videoCallMute": "Silenciar",
@@ -600,5 +599,6 @@
 	"videoCallMicToggleFailed": "No se pudo cambiar el micrófono. Por favor, inténtelo de nuevo.",
 	"videoCallShowLess": "Mostrar menos",
 	"videoCallShowMore": "{count, plural, =1{Mostrar 1 más} other{Mostrar {count} más}}",
-	"videoCallSpeakerToggleFailed": "No se pudo cambiar el altavoz. Por favor, inténtelo de nuevo."
+	"videoCallSpeakerToggleFailed": "No se pudo cambiar el altavoz. Por favor, inténtelo de nuevo.",
+	"videoCallError": "{errorCode, select, networkError{Error de red} other{Error desconocido}}"
 }

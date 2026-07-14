@@ -1901,7 +1901,7 @@
 	},
 	"generalEmail": "Email",
 	"vrcResponderIntro": "{name} has selected the following persona to verify the relationship:",
-	"videoCallTitle": "Group Call",
+	"videoCallTitle": "Call",
 	"@videoCallTitle": {
 		"type": "text"
 	},
@@ -1935,9 +1935,14 @@
 			}
 		}
 	},
-	"videoCallUnknownError": "Unknown error",
-	"@videoCallUnknownError": {
-		"type": "text"
+	"videoCallError": "{errorCode, select, networkError{Network error} other{Unknown error}}",
+	"@videoCallError": {
+		"type": "text",
+		"placeholders": {
+			"errorCode": {
+				"type": "String"
+			}
+		}
 	},
 	"videoCallMicToggleFailed": "Couldn't change the microphone. Please try again.",
 	"@videoCallMicToggleFailed": {

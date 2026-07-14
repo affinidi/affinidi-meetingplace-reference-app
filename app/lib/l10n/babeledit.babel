@@ -9178,6 +9178,25 @@
 						</translations>
 					</concept_node>
 					<concept_node>
+						<name>videoCallError</name>
+						<description/>
+						<comment/>
+						<translations>
+							<translation>
+								<language>de-DE</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>en-US</language>
+								<approved>false</approved>
+							</translation>
+							<translation>
+								<language>es-ES</language>
+								<approved>false</approved>
+							</translation>
+						</translations>
+					</concept_node>
+					<concept_node>
 						<name>videoCallFailedToJoin</name>
 						<description/>
 						<comment/>
@@ -9502,25 +9521,6 @@
 					</concept_node>
 					<concept_node>
 						<name>videoCallTitle</name>
-						<description/>
-						<comment/>
-						<translations>
-							<translation>
-								<language>de-DE</language>
-								<approved>false</approved>
-							</translation>
-							<translation>
-								<language>en-US</language>
-								<approved>false</approved>
-							</translation>
-							<translation>
-								<language>es-ES</language>
-								<approved>false</approved>
-							</translation>
-						</translations>
-					</concept_node>
-					<concept_node>
-						<name>videoCallUnknownError</name>
 						<description/>
 						<comment/>
 						<translations>

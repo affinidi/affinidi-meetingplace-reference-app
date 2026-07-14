@@ -3037,7 +3037,7 @@ abstract class AppLocalizations {
   /// No description provided for @videoCallTitle.
   ///
   /// In en, this message translates to:
-  /// **'Group Call'**
+  /// **'Call'**
   String get videoCallTitle;
 
   /// No description provided for @videoCallJoiningCall.
@@ -3070,11 +3070,11 @@ abstract class AppLocalizations {
   /// **'Failed to join: {error}'**
   String videoCallFailedToJoin(String error);
 
-  /// No description provided for @videoCallUnknownError.
+  /// No description provided for @videoCallError.
   ///
   /// In en, this message translates to:
-  /// **'Unknown error'**
-  String get videoCallUnknownError;
+  /// **'{errorCode, select, networkError{Network error} other{Unknown error}}'**
+  String videoCallError(String errorCode);
 
   /// No description provided for @videoCallMicToggleFailed.
   ///

@@ -195,7 +195,9 @@ class _CallScreenBody extends HookConsumerWidget {
         );
       }
       if (status == AudioVideoCallStatus.error) {
-        return const _ErrorScaffold();
+        return _ErrorScaffold(
+          errorCode: ref.read(provider.select((state) => state.errorCode)),
+        );
       }
       return const SizedBox.shrink();
     }
