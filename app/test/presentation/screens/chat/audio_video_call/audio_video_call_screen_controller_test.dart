@@ -469,6 +469,58 @@ void main() {
       );
     });
   });
+
+  group('startCall — restore keeps session-derived media type', () {
+    test('a stale audio-only route flag does not clobber a call that '
+        'gained video while minimized', () async {
+      final session = MockAudioVideoCallSession();
+      final banner = FakeActiveCallController(
+        fixedCallChatItemId: _kMsgId,
+        bannerState: const ActiveCallState(
+          contactId: _kContactId,
+          peerName: 'Peer',
+          status: AudioVideoCallStatus.active,
+          callDurationSeconds: 1,
+          isMicEnabled: true,
+          isAudioOnly: true,
+        ),
+        fixedSession: session,
+      );
+      final container = _makeContainer(bannerController: banner);
+      container.listen(
+        audioVideoCallScreenControllerProvider(_kContactId),
+        (_, _) {},
+      );
+
+      // The live session reports the peer's video (as the SDK replays on
+      // re-attach), so the screen state is promoted to video.
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [
+            AudioVideoCallParticipant(
+              participantId: 'remote-peer',
+              hasVideo: true,
+            ),
+          ],
+        ),
+      );
+      await _pumpAsync();
+
+      // Returning from minimize passes the banner's stale audio-only flag.
+      await container
+          .read(audioVideoCallScreenControllerProvider(_kContactId).notifier)
+          .startCall(isAudioOnly: true);
+      await _pumpAsync();
+
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(_kContactId))
+            .isAudioOnly,
+        isFalse,
+      );
+    });
+  });
 }
 
 class _FakePermissionService extends PermissionService {

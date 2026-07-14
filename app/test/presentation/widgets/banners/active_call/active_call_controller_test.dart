@@ -219,6 +219,65 @@ void main() {
       expect(container.read(activeCallControllerProvider)?.hasHadPeer, isTrue);
     });
 
+    test('promotes to video when a participant enables video '
+        'while minimized', () async {
+      final container = _makeContainer();
+      final ctrl = container.read(activeCallControllerProvider.notifier);
+      final session = MockAudioVideoCallSession();
+
+      ctrl.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: true,
+        initialStatus: AudioVideoCallStatus.active,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: true,
+        isGroupContact: false,
+      );
+
+      await session.emitState(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [_remotePeer().copyWith(hasVideo: true)],
+        ),
+      );
+      await _pumpAsync();
+
+      expect(
+        container.read(activeCallControllerProvider)?.isAudioOnly,
+        isFalse,
+      );
+    });
+
+    test('stays audio-only when no participant has video '
+        'while minimized', () async {
+      final container = _makeContainer();
+      final ctrl = container.read(activeCallControllerProvider.notifier);
+      final session = MockAudioVideoCallSession();
+
+      ctrl.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: true,
+        initialStatus: AudioVideoCallStatus.active,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: true,
+        isGroupContact: false,
+      );
+
+      await session.emitState(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [_remotePeer()],
+        ),
+      );
+      await _pumpAsync();
+
+      expect(container.read(activeCallControllerProvider)?.isAudioOnly, isTrue);
+    });
+
     test('does not restart timer if already started', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);

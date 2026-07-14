@@ -227,7 +227,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     ref.read(activeCallControllerProvider.notifier).restore();
     final isRestoring = state.session != null;
     state = state.copyWith(
-      isAudioOnly: isAudioOnly,
+      isAudioOnly: isRestoring ? state.isAudioOnly : isAudioOnly,
       isCameraEnabled: isRestoring ? state.isCameraEnabled : !isAudioOnly,
     );
     await checkInitialPermissions();

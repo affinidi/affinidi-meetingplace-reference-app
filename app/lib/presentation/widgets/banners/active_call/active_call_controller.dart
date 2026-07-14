@@ -410,6 +410,9 @@ class ActiveCallController extends _$ActiveCallController {
     state = current.copyWith(
       status: sessionState.status,
       hasHadPeer: hadPeer,
+      isAudioOnly:
+          current.isAudioOnly &&
+          !sessionState.participants.any((p) => p.hasVideo),
       selfParticipant: sessionState.participants
           .where((p) => p.isSelf)
           .firstOrNull,
