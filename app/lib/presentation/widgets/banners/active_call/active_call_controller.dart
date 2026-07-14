@@ -407,7 +407,7 @@ class ActiveCallController extends _$ActiveCallController {
     );
     final peerJustJoined = !current.hasHadPeer && hadPeer;
 
-    state = current.copyWith(
+    final updated = current.copyWith(
       status: sessionState.status,
       hasHadPeer: hadPeer,
       isAudioOnly:
@@ -417,6 +417,7 @@ class ActiveCallController extends _$ActiveCallController {
           .where((p) => p.isSelf)
           .firstOrNull,
     );
+    state = updated;
 
     if (peerJustJoined) startTimer(sessionState.callStartedAt);
 
@@ -436,7 +437,7 @@ class ActiveCallController extends _$ActiveCallController {
               contactId: current.contactId,
               peerName: current.peerName,
               callDurationSeconds: current.callDurationSeconds,
-              isAudioOnly: current.isAudioOnly,
+              isAudioOnly: updated.isAudioOnly,
             );
       } else if (endState != null) {
         ref
@@ -445,7 +446,7 @@ class ActiveCallController extends _$ActiveCallController {
               contactId: current.contactId,
               peerName: current.peerName,
               endState: endState,
-              isAudioOnly: current.isAudioOnly,
+              isAudioOnly: updated.isAudioOnly,
             );
       }
       clear();
