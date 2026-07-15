@@ -46,6 +46,17 @@ class IncomingCallService extends _$IncomingCallService {
   void accept({required String callId}) {
     _logger.info('Accepting call: $callId', name: _logKey);
     _cancelRingTimer();
+    final channelDid = ref
+        .read(incomingCallProvider)
+        .eventOrNull
+        ?.otherPartyPermanentChannelDid;
+    if (channelDid != null) {
+      unawaited(
+        ref
+            .read(contactsServiceProvider.notifier)
+            .clearPendingMissedCall(channelDid),
+      );
+    }
     _ensureSDK((sdk) => unawaited(_acceptCall(sdk, callId: callId)));
   }
 
@@ -58,7 +69,7 @@ class IncomingCallService extends _$IncomingCallService {
         ?.otherPartyPermanentChannelDid;
     _clearRingState();
     _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
-    if (channelDid != null) _markCallAsMissed(channelDid);
+    if (channelDid != null) unawaited(_markCallAsMissed(channelDid));
   }
 
   void _bindToSDK(MeetingPlaceMatrixSDK? sdk) {
@@ -73,25 +84,34 @@ class IncomingCallService extends _$IncomingCallService {
     ref.onDispose(cancelledSub.cancel);
   }
 
-  void _onCallCancelled(String callId) {
-    _logger.info('Caller cancelled call: $callId', name: _logKey);
+  void _onCallCancelled(IncomingAudioVideoCallEvent event) {
+    _logger.info('Caller cancelled call: ${event.callId}', name: _logKey);
     final incomingEvent = ref.read(incomingCallProvider).eventOrNull;
-    if (incomingEvent?.callerPermanentChannelDid != callId) {
-      _logger.info(
-        'Ignore cancelled: active callId does not match $callId',
-        name: _logKey,
-      );
-      return;
-    }
     final channelDid = incomingEvent?.otherPartyPermanentChannelDid;
-    _clearRingState();
-    if (channelDid != null) {
-      _markCallAsMissed(channelDid);
+
+    if (incomingEvent != null && incomingEvent.callId == event.callId) {
+      // Active ringing call was cancelled.
+      _clearRingState();
+      if (channelDid != null) {
+        unawaited(_markCallAsMissed(channelDid));
+      } else {
+        _logger.warning(
+          'Skip markCallAsMissed: otherPartyChannelDid null for '
+          '${event.callId}',
+          name: _logKey,
+        );
+      }
     } else {
-      _logger.warning(
-        'Skip markCallAsMissed: otherPartyChannelDid null for $callId',
+      // No matching active ring — caller's DID is in callerPermanentChannelDid.
+      // Do NOT use channelDid here: that holds the active call's contact DID
+      // and would mark the wrong contact for a busy auto-reject from a third
+      // party.
+      _logger.info(
+        'No active ring for ${event.callId} — recording missed-call marker '
+        'for ${event.callerPermanentChannelDid}',
         name: _logKey,
       );
+      unawaited(_markCallAsMissed(event.callerPermanentChannelDid));
     }
   }
 
@@ -99,27 +119,24 @@ class IncomingCallService extends _$IncomingCallService {
     final log = 'Incoming call received: ${event.callerPermanentChannelDid}';
     _logger.info(log, name: _logKey);
     ref.read(incomingCallProvider.notifier).set(event);
-    _startRingTimer(event.callerPermanentChannelDid);
+    _startRingTimer(event.callId);
   }
 
   void _startRingTimer(String callId) {
     _ringTimer?.cancel();
-    _ringTimer = Timer(
-      ref.read(environmentProvider).incomingCallRingTimeout,
-      () {
-        _logger.info(
-          'Ring timeout reached for $callId, declining',
-          name: _logKey,
-        );
-        final channelDid = ref
-            .read(incomingCallProvider)
-            .eventOrNull
-            ?.otherPartyPermanentChannelDid;
-        _clearRingState();
-        _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
-        if (channelDid != null) _markCallAsMissed(channelDid);
-      },
-    );
+    _ringTimer = Timer(ref.read(environmentProvider).callRingTimeout, () {
+      _logger.info(
+        'Ring timeout reached for $callId, declining',
+        name: _logKey,
+      );
+      final channelDid = ref
+          .read(incomingCallProvider)
+          .eventOrNull
+          ?.otherPartyPermanentChannelDid;
+      _clearRingState();
+      _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
+      if (channelDid != null) unawaited(_markCallAsMissed(channelDid));
+    });
   }
 
   void _clearRingState() {
@@ -185,35 +202,31 @@ class IncomingCallService extends _$IncomingCallService {
   /// message that already advances the channel sequence number, so the missed
   /// call is counted by the normal unread path. Bumping it again would
   /// double-count.
-  void _markCallAsMissed(String contactId) {
+  Future<void> _markCallAsMissed(String contactId) async {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
-    unawaited(
-      Future(() async {
-        try {
-          await ref
-              .read(contactsServiceProvider.notifier)
-              .setPendingMissedCall(contactId);
-        } catch (e, stackTrace) {
-          _logger.error(
-            '_markCallAsMissed: Recording missed call failed for $contactId',
-            error: e,
-            stackTrace: stackTrace,
-            name: _logKey,
-          );
-        }
-        try {
-          await ref
-              .read(chatSessionServiceProvider(contactId).notifier)
-              .markCallAsMissed();
-        } catch (e, stackTrace) {
-          _logger.error(
-            '_markCallAsMissed: Chat item update failed for $contactId',
-            error: e,
-            stackTrace: stackTrace,
-            name: _logKey,
-          );
-        }
-      }),
-    );
+    try {
+      await ref
+          .read(contactsServiceProvider.notifier)
+          .setPendingMissedCall(contactId);
+    } catch (e, stackTrace) {
+      _logger.error(
+        '_markCallAsMissed: Recording missed call failed for $contactId',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    }
+    try {
+      await ref
+          .read(chatSessionServiceProvider(contactId).notifier)
+          .markCallAsMissed();
+    } catch (e, stackTrace) {
+      _logger.error(
+        '_markCallAsMissed: Chat item update failed for $contactId',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    }
   }
 }

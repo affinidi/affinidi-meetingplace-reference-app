@@ -42,7 +42,7 @@ final class IncomingCallServiceProvider
 }
 
 String _$incomingCallServiceHash() =>
-    r'de838cf07473b47321cb2878bf96a0b720c07830';
+    r'52eaa7689c94c08cb5c4660c7846079d1aa21253';
 
 abstract class _$IncomingCallService extends $Notifier<void> {
   void build();

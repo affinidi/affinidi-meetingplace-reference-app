@@ -21,8 +21,8 @@ Finder findSendButton() => find.byKey(const Key('chat_send_button'));
 Finder findAddMediaButton() => find.byKey(const Key('chat_add_media_button'));
 Finder findGifButton() => find.byKey(const Key('chat_gif_button'));
 
-const _lateIncomingCallRetryInterval = Duration(milliseconds: 50);
-const _lateIncomingCallRetryCount = 6;
+const _lateIncomingCallRetryInterval = Duration(milliseconds: 250);
+const _lateIncomingCallRetryCount = 8;
 
 Future<void> enterChatMessage(WidgetTester tester, String message) async {
   await tester.enterText(findChatMessageInput(), message);
@@ -224,6 +224,9 @@ void main() {
             tester,
           ) async {
             final l10n = await getL10n();
+            final staleCallItemTime = DateTime.now().subtract(
+              const Duration(seconds: 1),
+            );
 
             await navigateToChat(
               tester,
@@ -236,6 +239,7 @@ void main() {
             // chat item is not yet available
             coreSdk.emitIncomingCall(
               IncomingAudioVideoCallEvent(
+                callId: 'call-1',
                 callerPermanentChannelDid:
                     FakeChannels.individualChannel.permanentChannelDid!,
                 otherPartyPermanentChannelDid:
@@ -248,7 +252,14 @@ void main() {
             // Simulate the caller cancelling the call before
             // the call chat item is available
             coreSdk.emitCancelledCall(
-              FakeChannels.individualChannel.permanentChannelDid!,
+              IncomingAudioVideoCallEvent(
+                callId: 'call-1',
+                callerPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                otherPartyPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                mediaType: CallMediaType.video,
+              ),
             );
             await tester.pump();
 
@@ -256,6 +267,7 @@ void main() {
             // the caller has cancelled
             chatSdk.setIncomingCallSessionMessage(
               senderDid: FakeChannels.individualChannel.permanentChannelDid!,
+              dateCreated: staleCallItemTime,
             );
 
             // Advance through six 50ms retry intervals so the delayed

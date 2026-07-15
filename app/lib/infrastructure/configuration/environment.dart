@@ -64,20 +64,8 @@ class Environment {
   int get numberOfTapsToUnlockDebug =>
       const int.fromEnvironment('TAPS_TO_UNLOCK_DEBUG', defaultValue: 7);
 
-  Duration get incomingCallRingTimeout => const Duration(
-    seconds: int.fromEnvironment(
-      'INCOMING_CALL_RING_TIMEOUT_SECONDS',
-      defaultValue: 15,
-    ),
-  );
-
-  /// Maximum time the caller waits in outgoing-ringing state before the call
-  /// is automatically cancelled. Configured via `OUTGOING_CALL_TIMEOUT_SECONDS`
-  Duration get outgoingCallTimeout => const Duration(
-    seconds: int.fromEnvironment(
-      'OUTGOING_CALL_TIMEOUT_SECONDS',
-      defaultValue: 60,
-    ),
+  Duration get callRingTimeout => const Duration(
+    seconds: int.fromEnvironment('CALL_RING_TIMEOUT_SECONDS', defaultValue: 60),
   );
 
   bool get isDatabaseLoggingEnabled =>

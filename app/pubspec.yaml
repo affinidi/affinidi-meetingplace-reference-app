@@ -92,7 +92,7 @@ dependencies:
   sqflite_sqlcipher: ^3.4.0
   sqlcipher_flutter_libs: ^0.6.8
   sqlite3: ^2.9.0
-  ssi: ^3.3.0
+  ssi: ^3.9.4
   stack_trace: ^1.12.1
   synchronized: ^3.4.0
   uuid: ^4.5.1

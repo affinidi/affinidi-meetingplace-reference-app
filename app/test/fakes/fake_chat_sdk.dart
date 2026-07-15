@@ -430,26 +430,36 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     String messageId = 'late-incoming-call-item',
     CallMediaType mediaType = CallMediaType.video,
     CallStatus status = CallStatus.calling,
+    DateTime? dateCreated,
   }) {
-    sessionMessages = [
-      Message(
-        chatId: chatId,
-        messageId: messageId,
-        value: '',
-        dateCreated: DateTime.now(),
-        status: ChatItemStatus.confirmed,
-        isFromMe: false,
-        senderDid: senderDid,
-        attachments: [
-          CallMetadata.buildAttachment(
-            id: 'call-attachment-${DateTime.now().microsecondsSinceEpoch}',
-            mediaType: mediaType,
-            status: status,
-            callId: '',
-          ),
-        ],
-      ),
-    ];
+    final createdAt = dateCreated ?? DateTime.now();
+    final message = Message(
+      chatId: chatId,
+      messageId: messageId,
+      value: '',
+      dateCreated: createdAt,
+      status: ChatItemStatus.confirmed,
+      isFromMe: false,
+      senderDid: senderDid,
+      attachments: [
+        CallMetadata.buildAttachment(
+          id: 'call-attachment-${DateTime.now().microsecondsSinceEpoch}',
+          mediaType: mediaType,
+          status: status,
+          callId: '',
+        ),
+      ],
+    );
+    sessionMessages = [message];
+
+    // Emit the message through the stream so the app knows to check for healing
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/message',
+      senderDid: senderDid,
+      body: {'timestamp': message.dateCreated.toIso8601String()},
+      createdTime: createdAt,
+    );
+    _emit(StreamData(event: chatEvent, chatItem: message));
   }
 
   void simulateIncomingPresenceMessage({

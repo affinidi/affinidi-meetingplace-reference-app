@@ -142,18 +142,19 @@ class CallChatItemManager {
     }
   }
 
-  /// Marks the latest pending incoming call item as `missed`. A no-op if
-  /// no pending incoming call item exists.
-  Future<void> markCallAsMissed() async {
+  /// Marks the latest pending incoming call item as `missed`. Returns `true`
+  /// when an item was found and updated, `false` otherwise.
+  Future<bool> markCallAsMissed() async {
     final messageId = await resolveIncomingCallChatItemId();
     if (messageId == null) {
       logger.info(
         'markCallAsMissed: No pending incoming call item found',
         name: _logKey,
       );
-      return;
+      return false;
     }
     await updateCallChatItem(messageId, status: CallStatus.missed);
+    return true;
   }
 
   /// Whether [message] is an incoming call item still in a non-final status
@@ -170,39 +171,95 @@ class CallChatItemManager {
             call.status == CallStatus.ringing);
   }
 
-  /// Returns the id of the latest stale incoming call item created at or before
-  /// [notAfter], or `null` if none. Single-pass (no retry): used by the
-  /// session-start replay once chat history is already loaded. The [notAfter]
-  /// guard prevents a newer, genuinely ringing call from being marked missed by
-  /// a stale pending-miss marker.
+  /// Returns the id of the latest stale incoming call item created at or
+  /// before [notAfter], or `null` if none. Retries up to
+  /// [_resolveCallChatItemMaxAttempts] times to handle delayed chat history
+  /// bootstrap. The [notAfter] guard prevents a newer, genuinely ringing call
+  /// from being marked missed.
   Future<String?> resolveStaleIncomingCallItemIdBefore(
     DateTime notAfter,
   ) async {
+    final methodName = 'resolveStaleIncomingCallItemIdBefore';
     await ensureInitialized();
     final chatSdk = getChatSdk();
     if (chatSdk == null) {
-      logger.warning(
-        'resolveStaleIncomingCallItemIdBefore: Chat SDK unavailable',
-        name: _logKey,
-      );
+      logger.warning('$methodName: Chat SDK unavailable', name: _logKey);
       return null;
     }
+
+    for (
+      var attempt = 0;
+      attempt < _resolveCallChatItemMaxAttempts;
+      attempt++
+    ) {
+      try {
+        final items = await chatSdk.messages;
+        final match = items
+            .whereType<Message>()
+            .where(isStaleIncomingCall)
+            .where((m) => !m.dateCreated.toUtc().isAfter(notAfter.toUtc()))
+            .lastOrNull;
+
+        if (match != null) {
+          logger.info('$methodName: Found ${match.messageId}', name: _logKey);
+          return match.messageId;
+        }
+
+        if (attempt < _resolveCallChatItemMaxAttempts - 1) {
+          await Future<void>.delayed(_resolveCallChatItemRetryDelay);
+        }
+      } catch (e, stackTrace) {
+        logger.error(
+          '$methodName failed',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+        return null;
+      }
+    }
+
+    logger.info('$methodName: No stale item found', name: _logKey);
+    return null;
+  }
+
+  /// Returns all stale incoming call item ids created at or before [notAfter].
+  /// Used by replay healing to settle delayed historical items from the same
+  /// ended call episode before the pending marker is cleared.
+  Future<List<String>> resolveStaleIncomingCallItemIdsBefore(
+    DateTime notAfter,
+  ) async {
+    const methodName = 'resolveStaleIncomingCallItemIdsBefore';
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk == null) {
+      logger.warning('$methodName: Chat SDK unavailable', name: _logKey);
+      return const [];
+    }
+
     try {
       final items = await chatSdk.messages;
-      final match = items.whereType<Message>().lastWhereOrNull(
-        (m) =>
-            isStaleIncomingCall(m) &&
-            !m.dateCreated.toUtc().isAfter(notAfter.toUtc()),
+      final matches = items
+          .whereType<Message>()
+          .where(isStaleIncomingCall)
+          .where((m) => !m.dateCreated.toUtc().isAfter(notAfter.toUtc()))
+          .map((m) => m.messageId)
+          .toList(growable: false);
+
+      logger.info(
+        '$methodName: Found ${matches.length} item(s) before '
+        '${notAfter.toUtc().toIso8601String()}',
+        name: _logKey,
       );
-      return match?.messageId;
+      return matches;
     } catch (e, stackTrace) {
       logger.error(
-        'resolveStaleIncomingCallItemIdBefore failed',
+        '$methodName failed',
         error: e,
         stackTrace: stackTrace,
         name: _logKey,
       );
-      return null;
+      return const [];
     }
   }
 

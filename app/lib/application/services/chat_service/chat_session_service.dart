@@ -298,10 +298,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       ref: ref,
       otherPartyPermanentChannelDid: _otherPartyPermanentChannelDid,
       callChatItemManager: _callChatItemManager,
-      getMessageById: (messageId) async {
-        final item = await _chatSDK?.getMessageById(messageId);
-        return item is Message ? item : null;
-      },
       onUpsertChatItem: upsertChatItem,
     );
 
@@ -329,42 +325,37 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       state = state.copyWith(messages: messages, isInitialized: true);
       await _flushBufferedOutboundMessages();
 
-      // Reset must be fully committed before the stream listener is attached.
-      // Buffered events flush as soon as the listener attaches and would
-      // otherwise race with this update on a stale Contact snapshot, causing
-      // a seqNo write to clobber badgeCount=0 back to its previous value.
-      await _resetBadgeCount();
-      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
+      final chatStreamAttached = _chatSDK!.chatStreamSubscription.then((
+        chatStream,
+      ) {
+        if (_chatSDK == null) {
+          // pauseChat ran while we were waiting for the transport
+          // subscription. Drop the listener attachment to avoid leaking
+          // a subscription that has no disposal path.
+          return;
+        }
 
-      unawaited(
-        _chatSDK!.chatStreamSubscription.then((chatStream) {
-          if (_chatSDK == null) {
-            // pauseChat ran while we were waiting for the transport
-            // subscription. Drop the listener attachment to avoid leaking
-            // a subscription that has no disposal path.
-            return;
-          }
+        if (chatStream == null) {
+          _logger.warning('Chat stream is null', name: _logKey);
+          return;
+        }
 
-          if (chatStream == null) {
-            _logger.warning('Chat stream is null', name: _logKey);
-            return;
-          }
+        _chatStreamRef = chatStream
+          ..listen(
+            (data) =>
+                _onChannelMessagesData(data, _otherPartyPermanentChannelDid),
+            onError: (Object error, StackTrace stackTrace) {
+              _logger.error(
+                'Error in chat stream subscription',
+                error: error,
+                stackTrace: stackTrace,
+                name: _logKey,
+              );
+            },
+          );
+      });
 
-          _chatStreamRef = chatStream
-            ..listen(
-              (data) =>
-                  _onChannelMessagesData(data, _otherPartyPermanentChannelDid),
-              onError: (Object error, StackTrace stackTrace) {
-                _logger.error(
-                  'Error in chat stream subscription',
-                  error: error,
-                  stackTrace: stackTrace,
-                  name: _logKey,
-                );
-              },
-            );
-        }),
-      );
+      unawaited(chatStreamAttached);
 
       // Replay any VRC events that fired before the chat was opened
       // (e.g. while the user was offline). Must run AFTER:
@@ -379,9 +370,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         await _vdipManager.replayPending();
       }
 
-      await _resetBadgeCount();
-      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
-
       unawaited(
         _rCardManager.subscribeToIncomingRCards().then((_) async {
           if (!ref.mounted) return;
@@ -389,9 +377,15 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         }),
       );
 
+      await chatStreamAttached;
+
       if (_missedCallManager != null) {
-        unawaited(_missedCallManager!.replayPendingMissedCall());
+        await _missedCallManager!.replayPendingMissedCall();
+        _missedCallManager!.scheduleReplayPendingMissedCallFollowUp();
       }
+
+      await _resetBadgeCount();
+      unawaited(ref.read(appBadgeServiceProvider).clearBadge());
 
       _logger.info('Chat session started', name: _logKey);
     } catch (error, stackTrace) {
@@ -462,6 +456,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<void> _disposeChatSession() async {
     final sdk = _chatSDK;
     _chatSDK = null;
+    _chatId = null;
 
     _chatStreamRef?.dispose();
     _chatStreamRef = null;
@@ -774,10 +769,46 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   void upsertChatItem(ChatItem item) {
     final existing = state.messages;
     final idx = existing.indexWhere((m) => m.messageId == item.messageId);
+    if (idx != -1 && _shouldKeepExistingChatItem(existing[idx], item)) {
+      _logger.info(
+        'upsertChatItem: Keeping final call item ${item.messageId} over '
+        'non-final stream update',
+        name: _logKey,
+      );
+      return;
+    }
     final messages = idx == -1
         ? existing.insertSorted(item)
         : existing.replaceItemAtIndex(idx, item);
     state = state.copyWith(messages: messages);
+  }
+
+  /// Returns whether [existing] should win over a newer non-final call item.
+  bool _shouldKeepExistingChatItem(ChatItem existing, ChatItem next) {
+    if (existing is! Message || next is! Message) return false;
+
+    final existingCall = _callMetadataOf(existing);
+    final nextCall = _callMetadataOf(next);
+    if (existingCall == null || nextCall == null) return false;
+
+    return _isFinalCallStatus(existingCall.status) &&
+        !_isFinalCallStatus(nextCall.status);
+  }
+
+  /// Returns the call metadata attachment carried by [message], if any.
+  CallMetadata? _callMetadataOf(Message message) {
+    for (final attachment in message.attachments) {
+      if (!CallMetadata.isCall(attachment)) continue;
+      return CallMetadata.maybeOf(attachment);
+    }
+    return null;
+  }
+
+  /// Returns whether [status] is terminal for a call chat item.
+  bool _isFinalCallStatus(CallStatus status) {
+    return status == CallStatus.missed ||
+        status == CallStatus.declined ||
+        status == CallStatus.ended;
   }
 
   String _peerFirstNameForZkpUi() {
@@ -961,7 +992,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _callChatItemManager.resolveOutgoingCallChatItemId();
 
   @override
-  Future<void> markCallAsMissed() => _callChatItemManager.markCallAsMissed();
+  Future<bool> markCallAsMissed() {
+    if (_chatId == null || _missedCallManager == null) {
+      return Future.value(false);
+    }
+    return _missedCallManager!.reconcilePendingMissedCall();
+  }
 
   @override
   Future<void> updateCallChatItem(

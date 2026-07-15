@@ -851,6 +851,7 @@ void main() {
             .read(incomingCallProvider.notifier)
             .set(
               IncomingAudioVideoCallEvent(
+                callId: 'call-1',
                 callerPermanentChannelDid: 'sim1@example.com',
                 otherPartyPermanentChannelDid: channelDid,
                 mediaType: CallMediaType.video,

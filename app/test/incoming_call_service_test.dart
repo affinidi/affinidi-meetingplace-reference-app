@@ -21,18 +21,19 @@ import 'fakes/fake_contacts_service.dart';
 
 class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
   final _incoming = StreamController<IncomingAudioVideoCallEvent>.broadcast();
-  final _cancelled = StreamController<String>.broadcast();
+  final _cancelled = StreamController<IncomingAudioVideoCallEvent>.broadcast();
   final acceptedCallIds = <String>[];
   final declinedCallIds = <String>[];
 
   void emitIncoming(IncomingAudioVideoCallEvent event) => _incoming.add(event);
-  void emitCancelled(String callId) => _cancelled.add(callId);
+  void emitCancelled(IncomingAudioVideoCallEvent event) =>
+      _cancelled.add(event);
 
   @override
   Stream<IncomingAudioVideoCallEvent> get incomingCalls => _incoming.stream;
 
   @override
-  Stream<String> get cancelledCalls => _cancelled.stream;
+  Stream<IncomingAudioVideoCallEvent> get cancelledCalls => _cancelled.stream;
 
   @override
   Future<void> acceptCall({required String callId}) async =>
@@ -47,11 +48,14 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
 }
 
 IncomingAudioVideoCallEvent _event({
+  String callId = 'call-1',
   String callerPermanentChannelDid = 'did:key:caller',
+  String otherPartyPermanentChannelDid = 'did:key:caller',
   CallMediaType mediaType = CallMediaType.video,
 }) => IncomingAudioVideoCallEvent(
+  callId: callId,
   callerPermanentChannelDid: callerPermanentChannelDid,
-  otherPartyPermanentChannelDid: 'did:key:caller',
+  otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
   mediaType: mediaType,
 );
 
@@ -210,7 +214,7 @@ void main() {
         fakeSDK.emitIncoming(_event());
         await pumpEventQueue();
 
-        fakeSDK.emitCancelled('did:key:caller');
+        fakeSDK.emitCancelled(_event());
         await pumpEventQueue();
 
         expect(container.read(incomingCallProvider).eventOrNull, isNull);
@@ -225,6 +229,44 @@ void main() {
                   as FakeContactsService)
               .setPendingMissedCallCalls,
           ['did:key:caller'],
+        );
+      });
+
+      test('it marks the third-party call as missed when busy auto-reject fires'
+          ' while already in another call', () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final container = buildContainer(fakeSDK);
+        addTearDown(container.dispose);
+
+        container.read(incomingCallServiceProvider);
+        await container.read(meetingPlaceSdkProvider.future);
+        await pumpEventQueue();
+
+        // A is ringing for the first caller (simulates an accepted/active call
+        // where incomingCallProvider still holds the first caller's event).
+        fakeSDK.emitIncoming(_event(callId: 'call-1'));
+        await pumpEventQueue();
+        expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
+
+        // A third party calls while A is busy — SDK auto-rejects and surfaces
+        // the event on cancelledCalls with a different callId and caller DID.
+        const thirdPartyDid = 'did:key:third-party';
+        fakeSDK.emitCancelled(
+          _event(
+            callId: 'call-2',
+            callerPermanentChannelDid: thirdPartyDid,
+            otherPartyPermanentChannelDid: thirdPartyDid,
+          ),
+        );
+        await pumpEventQueue();
+
+        // The missed-call marker must be written to the third-party's DID,
+        // not to the first caller's DID.
+        expect(
+          (container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService)
+              .setPendingMissedCallCalls,
+          [thirdPartyDid],
         );
       });
     });
@@ -242,11 +284,11 @@ void main() {
           async.flushMicrotasks();
           expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
 
-          async.elapse(const Duration(seconds: 15));
+          async.elapse(const Duration(seconds: 60));
+          async.flushMicrotasks();
 
           expect(container.read(incomingCallProvider).eventOrNull, isNull);
-          expect(fakeSDK.declinedCallIds, ['did:key:caller']);
-          async.flushMicrotasks();
+          expect(fakeSDK.declinedCallIds, ['call-1']);
           expect(
             (container.read(contactsServiceProvider.notifier)
                     as FakeContactsService)

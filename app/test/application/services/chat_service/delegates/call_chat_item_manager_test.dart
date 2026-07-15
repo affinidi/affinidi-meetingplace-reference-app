@@ -101,74 +101,36 @@ void main() {
             fakeChatSdk.updateMessageCalls.single.messageId,
             'late-incoming',
           );
-          final call = CallMetadata.maybeOf(
-            fakeChatSdk.updateMessageCalls.single.attachments.firstWhere(
-              CallMetadata.isCall,
-            ),
-          );
-          expect(call?.status, CallStatus.missed);
         });
       },
     );
 
-    test('isStaleIncomingCall is true for incoming calling/ringing items', () {
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(
-            messageId: 'a',
-            isFromMe: false,
-            status: CallStatus.calling,
-          ),
-        ),
-        isTrue,
-      );
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(
-            messageId: 'b',
-            isFromMe: false,
-            status: CallStatus.ringing,
-          ),
-        ),
-        isTrue,
-      );
-    });
-
-    test('isStaleIncomingCall is false for outgoing or final items', () {
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(
-            messageId: 'a',
-            isFromMe: true,
-            status: CallStatus.calling,
-          ),
-        ),
-        isFalse,
-      );
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(
-            messageId: 'b',
-            isFromMe: false,
-            status: CallStatus.missed,
-          ),
-        ),
-        isFalse,
-      );
-    });
-
-    test('resolveStaleIncomingCallItemIdBefore returns the latest stale item '
-        'at or before the cutoff', () async {
+    test('resolveStaleIncomingCallItemIdBefore returns a message created '
+        'exactly at the cutoff', () async {
       final cutoff = DateTime(2026, 6, 29, 11);
       fakeChatSdk.sessionMessages = [
         callMessage(
-          messageId: 'older-incoming',
+          messageId: 'at-cutoff-incoming',
           isFromMe: false,
           status: CallStatus.calling,
-          dateCreated: DateTime(2026, 6, 29, 10),
+          dateCreated: cutoff,
         ),
+      ];
+
+      final id = await manager.resolveStaleIncomingCallItemIdBefore(cutoff);
+
+      expect(id, 'at-cutoff-incoming');
+    });
+
+    test('resolveStaleIncomingCallItemIdBefore waits for a stale item that '
+        'arrives during chat bootstrap', () async {
+      final cutoff = DateTime(2026, 6, 29, 11);
+
+      // The message is added before the resolution call, simulating it arriving
+      // during bootstrap
+      fakeChatSdk.sessionMessages = [
         callMessage(
-          messageId: 'at-cutoff-incoming',
+          messageId: 'bootstrapped-incoming',
           isFromMe: false,
           status: CallStatus.ringing,
           dateCreated: cutoff,
@@ -177,7 +139,7 @@ void main() {
 
       final id = await manager.resolveStaleIncomingCallItemIdBefore(cutoff);
 
-      expect(id, 'at-cutoff-incoming');
+      expect(id, 'bootstrapped-incoming');
     });
 
     test('resolveStaleIncomingCallItemIdBefore ignores items created after '

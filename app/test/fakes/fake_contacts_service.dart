@@ -48,11 +48,26 @@ class FakeContactsService extends ContactsService {
   @override
   Future<void> setPendingMissedCall(String channelDid) async {
     setPendingMissedCallCalls.add(channelDid);
+    final contact = getContactByChannelDid(channelDid);
+    if (contact == null) return;
+    contacts.removeWhere((c) => c.id == contact.id);
+    contacts.add(contact.copyWith(pendingMissedCallAt: DateTime.now().toUtc()));
   }
 
   @override
   Future<void> clearPendingMissedCall(String channelDid) async {
     clearPendingMissedCallCalls.add(channelDid);
+    final contact = getContactByChannelDid(channelDid);
+    if (contact == null) return;
+    contacts.removeWhere((c) => c.id == contact.id);
+    contacts.add(
+      contact.copyWith(pendingMissedCallAt: null, pendingMissedCallId: null),
+    );
+  }
+
+  @override
+  Future<DateTime?> getPendingMissedCallAt(String channelDid) async {
+    return getContactByChannelDid(channelDid)?.pendingMissedCallAt;
   }
 
   @override
@@ -66,6 +81,18 @@ class FakeContactsService extends ContactsService {
     );
     contacts.removeWhere((c) => c.channelDid == channelDid);
     contacts.add(contact.copyWith(badgeCount: 0, hasBeenOpened: true));
+  }
+
+  @override
+  Future<void> updateContactSequenceNumber(String did, int seqNo) async {
+    final contact = getContactByChannelDid(did);
+    if (contact == null) return;
+    contacts.removeWhere((c) => c.id == contact.id);
+    contacts.add(contact.copyWith(currentMessageSeqNo: seqNo));
+    updateContactCalls.add({
+      'contact': getContactByChannelDid(did),
+      'sequenceNumber': seqNo,
+    });
   }
 
   @override
@@ -87,7 +114,10 @@ class FakeContactsService extends ContactsService {
   }
 
   @override
-  Future<void> updateContact(Contact contact) async {
+  Future<void> updateContact(
+    Contact contact, {
+    bool preservePendingMissedCallState = true,
+  }) async {
     updateContactCalls.add({'contact': contact});
     contacts.removeWhere((c) => c.id == contact.id);
     contacts.add(contact);

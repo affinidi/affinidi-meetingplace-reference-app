@@ -99,4 +99,60 @@ void main() {
       expect(badgeOf(openContact.id), openBadgeBefore);
     },
   );
+
+  testWidgets(
+    'repeated decline signals for the same unread episode bump the badge once '
+    'and count again after the chat is opened',
+    (tester) async {
+      final openContact = FakeContacts.individualContact;
+      final otherContact = FakeContacts.oobContact;
+      final sdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels);
+
+      await navigateToChat(
+        tester,
+        contactId: openContact.id,
+        contacts: [openContact, otherContact],
+        meetingPlaceCoreSDK: sdk,
+      );
+
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(Scaffold).first),
+      );
+      final contactsService = container.read(contactsServiceProvider.notifier);
+      await contactsService.ensureInitialized();
+      await tester.pumpAndSettle();
+
+      int badgeOf(String id) =>
+          container
+              .read(contactsServiceProvider)
+              .getContactById(id)
+              ?.badgeCount ??
+          -1;
+
+      final before = badgeOf(otherContact.id);
+
+      // Call glare: one missed call surfaces two decline signals on this
+      // device. The badge must only rise by one, matching the single call item.
+      sdk.emitCallSignal(
+        CallDeclineSignal(ownChannelDid: otherContact.channelDid!),
+      );
+      sdk.emitCallSignal(
+        CallDeclineSignal(ownChannelDid: otherContact.channelDid!),
+      );
+      await tester.pumpAndSettle();
+      expect(badgeOf(otherContact.id), before + 1);
+
+      // Opening the chat resets the badge and clears the episode credit, so a
+      // later call counts again.
+      await contactsService.resetContactBadgeCount(otherContact.channelDid!);
+      await tester.pumpAndSettle();
+      expect(badgeOf(otherContact.id), 0);
+
+      sdk.emitCallSignal(
+        CallDeclineSignal(ownChannelDid: otherContact.channelDid!),
+      );
+      await tester.pumpAndSettle();
+      expect(badgeOf(otherContact.id), 1);
+    },
+  );
 }

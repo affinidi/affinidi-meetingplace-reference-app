@@ -116,6 +116,7 @@ void main() {
           .read(incomingCallProvider.notifier)
           .set(
             const IncomingAudioVideoCallEvent(
+              callId: 'call-1',
               callerPermanentChannelDid: 'did:example:other',
               otherPartyPermanentChannelDid: 'did:example:other',
               mediaType: CallMediaType.video,
@@ -144,6 +145,7 @@ void main() {
             .read(incomingCallProvider.notifier)
             .set(
               const IncomingAudioVideoCallEvent(
+                callId: 'call-1',
                 callerPermanentChannelDid: 'did:example:other',
                 otherPartyPermanentChannelDid: 'did:example:other',
                 mediaType: CallMediaType.video,
@@ -168,6 +170,7 @@ void main() {
             .read(incomingCallProvider.notifier)
             .set(
               const IncomingAudioVideoCallEvent(
+                callId: 'call-1',
                 callerPermanentChannelDid: 'did:example:other',
                 otherPartyPermanentChannelDid: 'did:example:other',
                 mediaType: CallMediaType.audio,
