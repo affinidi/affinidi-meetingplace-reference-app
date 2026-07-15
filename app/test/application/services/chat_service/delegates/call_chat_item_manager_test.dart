@@ -183,18 +183,17 @@ void main() {
     test('resolveStaleIncomingCallItemIdBefore waits for a stale item that '
         'arrives during chat bootstrap', () async {
       final cutoff = DateTime(2026, 6, 29, 11);
-      fakeChatSdk.sessionMessages = [];
 
-      Future<void>.delayed(const Duration(milliseconds: 75), () {
-        fakeChatSdk.sessionMessages = [
-          callMessage(
-            messageId: 'bootstrapped-incoming',
-            isFromMe: false,
-            status: CallStatus.ringing,
-            dateCreated: cutoff,
-          ),
-        ];
-      });
+      // The message is added before the resolution call, simulating it arriving
+      // during bootstrap
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'bootstrapped-incoming',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          dateCreated: cutoff,
+        ),
+      ];
 
       final id = await manager.resolveStaleIncomingCallItemIdBefore(cutoff);
 

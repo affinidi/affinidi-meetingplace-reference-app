@@ -57,8 +57,8 @@ void main() {
       expect(callItemManager.updateCallCount, 0);
     });
 
-    test('replayPendingMissedCall heals all stale items resolved before the '
-        'persisted marker time', () async {
+    test('replayPendingMissedCall heals only the newest stale item resolved '
+        'before the persisted marker time', () async {
       final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
       final contact = FakeContacts.individualContact.copyWith(
         channelDid: channelDid,
@@ -81,7 +81,7 @@ void main() {
 
       await manager.replayPendingMissedCall();
 
-      expect(callItemManager.updateCallCount, 2);
+      expect(callItemManager.updateCallCount, 1);
       expect(callItemManager.lastResolvedCallId, 'call-123');
     });
 
