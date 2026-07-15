@@ -19,9 +19,7 @@ class FakeCallChatItemManager extends CallChatItemManager {
   final String? resolveReturn;
   final List<String> resolveIdsReturn;
   int updateCallCount = 0;
-  String? lastHealedMessageId;
   DateTime? lastResolveBound;
-  String? lastResolvedCallId;
 
   @override
   bool isStaleIncomingCall(Message message) => isStaleReturn;
@@ -43,28 +41,12 @@ class FakeCallChatItemManager extends CallChatItemManager {
   }
 
   @override
-  Future<List<String>> resolveStaleIncomingCallItemIdsByCallId(
-    String callId,
-  ) async {
-    lastResolvedCallId = callId;
-    return resolveIdsReturn;
-  }
-
-  @override
-  String? callIdOf(Message message) {
-    return CallMetadata.maybeOf(
-      message.attachments.firstWhere(CallMetadata.isCall),
-    )?.callId;
-  }
-
-  @override
   Future<Message?> updateCallChatItem(
     String messageId, {
     required CallStatus status,
     Duration? duration,
   }) async {
     updateCallCount++;
-    lastHealedMessageId = messageId;
     return null;
   }
 }

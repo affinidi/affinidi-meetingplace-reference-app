@@ -40,16 +40,9 @@ class MissedCallManager {
   /// Replays a pending missed-call marker and heals stale incoming call items
   /// at chat open. Marker exists only for unanswered calls; skipped if a call
   /// is ringing. Durable across restarts.
-  ///
-  /// Also handles crash-recovery: if the app died while the incoming banner
-  /// was showing (before `_markCallAsMissed` ran), the `activeIncomingCallId`
-  /// marker is used to reconstruct the missed-call state and heal the item.
   Future<void> replayPendingMissedCall() async {
     final methodName = 'replayPendingMissedCall';
-    if (!ref.mounted) {
-      _logger.info('$methodName: Skip, ref not mounted', name: _className);
-      return;
-    }
+    if (!ref.mounted) return;
     if (_isRingingForContact()) {
       _logger.info(
         '$methodName: Skip, call is still ringing',
@@ -57,14 +50,14 @@ class MissedCallManager {
       );
       return;
     }
-    final pendingCallId = await _pendingMissedCallId();
-    if (pendingCallId == null) {
-      await _replayFromCrashRecoveryIfNeeded(methodName);
+    final pendingAt = await _pendingMissedCallAt();
+    if (pendingAt == null) {
+      _logger.info('$methodName: Skip, no pending marker', name: _className);
       return;
     }
-    final healedAny = await _healStaleIncomingCallItemsByCallId(
-      pendingCallId,
-      clearPendingMarker: true,
+    final healedAny = await _healStaleIncomingCallItemsBefore(
+      pendingAt,
+      clearPendingMarker: false,
     );
     if (!healedAny) {
       _logger.info('$methodName: No stale item found', name: _className);
@@ -78,10 +71,7 @@ class MissedCallManager {
   /// healed by this manager instead of by upstream services.
   Future<bool> reconcilePendingMissedCall() async {
     const methodName = 'reconcilePendingMissedCall';
-    if (!ref.mounted) {
-      _logger.info('$methodName: Skip, ref not mounted', name: _className);
-      return false;
-    }
+    if (!ref.mounted) return false;
     if (_isRingingForContact()) {
       _logger.info(
         '$methodName: Skip, call is still ringing',
@@ -90,34 +80,72 @@ class MissedCallManager {
       return false;
     }
 
-    final pendingCallId = await _pendingMissedCallId();
-    if (pendingCallId == null) {
+    final pendingAt = await _pendingMissedCallAt();
+    if (pendingAt == null) {
       _logger.info('$methodName: Skip, no pending marker', name: _className);
       return false;
     }
 
-    final healedAny = await _healStaleIncomingCallItemsByCallId(
-      pendingCallId,
-      clearPendingMarker: true,
+    final healedAny = await _healStaleIncomingCallItemsBefore(
+      pendingAt,
+      clearPendingMarker: false,
     );
-    if (!healedAny) {
-      scheduleReplayPendingMissedCallFollowUp();
-    }
+    scheduleReplayPendingMissedCallFollowUp();
     return healedAny;
   }
 
   /// Schedules a short follow-up replay window for chat-open cases where the
   /// stale call item arrives after the first bootstrap pass.
   void scheduleReplayPendingMissedCallFollowUp() {
-    if (_backgroundReplayScheduled) {
-      _logger.info(
-        'scheduleReplayPendingMissedCallFollowUp: Skip, already scheduled',
-        name: _className,
-      );
-      return;
-    }
+    if (_backgroundReplayScheduled) return;
     _backgroundReplayScheduled = true;
     unawaited(_runReplayPendingMissedCallFollowUp());
+  }
+
+  Future<void> _runReplayPendingMissedCallFollowUp() async {
+    final methodName = '_runReplayPendingMissedCallFollowUp';
+    try {
+      for (var attempt = 0; attempt < _backgroundReplayMaxAttempts; attempt++) {
+        if (!ref.mounted) return;
+        if (!await _hasPendingMissedCallMarker()) {
+          _logger.info(
+            '$methodName: Stop, no pending marker',
+            name: _className,
+          );
+          return;
+        }
+        if (_isRingingForContact()) {
+          _logger.info('$methodName: Stop, call is ringing', name: _className);
+          return;
+        }
+
+        final pendingAt = await _pendingMissedCallAt();
+        if (pendingAt == null) {
+          _logger.info(
+            '$methodName: Stop, no pending marker',
+            name: _className,
+          );
+          return;
+        }
+
+        final healedAny = await _healStaleIncomingCallItemsBefore(
+          pendingAt,
+          clearPendingMarker: false,
+        );
+        if (healedAny && attempt == _backgroundReplayMaxAttempts - 1) {
+          await _clearPendingMissedCall();
+          return;
+        }
+
+        if (attempt < _backgroundReplayMaxAttempts - 1) {
+          await Future<void>.delayed(_backgroundReplayRetryDelay);
+        } else {
+          await _clearPendingMissedCall();
+        }
+      }
+    } finally {
+      _backgroundReplayScheduled = false;
+    }
   }
 
   /// Heals [message] to `missed` when a stale incoming call item arrives via
@@ -126,10 +154,7 @@ class MissedCallManager {
   /// healed. The marker is cleared once an ended call's item is healed.
   Future<void> healArrivedStaleCallItemIfPending(Message message) async {
     final methodName = 'healArrivedStaleCallItemIfPending';
-    if (!ref.mounted) {
-      _logger.info('$methodName: Skip, ref not mounted', name: _className);
-      return;
-    }
+    if (!ref.mounted) return;
     if (!callChatItemManager.isStaleIncomingCall(message)) {
       _logger.info(
         '$methodName: Skip, not a stale incoming call',
@@ -145,69 +170,22 @@ class MissedCallManager {
       return;
     }
 
-    final pendingCallId = await _pendingMissedCallId();
-    if (pendingCallId == null) {
+    final pendingAt = await _pendingMissedCallAt();
+    if (pendingAt == null) {
       _logger.info('$methodName: Skip, no pending marker', name: _className);
       return;
     }
-    if (!callChatItemManager.matchesPendingCallId(message, pendingCallId)) {
+    if (message.dateCreated.toUtc().isAfter(pendingAt.toUtc())) {
       _logger.info(
-        '$methodName: Skip, message callId does not match pending marker',
+        '$methodName: Skip, message is newer than pending marker',
         name: _className,
       );
       return;
     }
     await _healIncomingCallItemMissed(
       message.messageId,
-      clearPendingMarker: true,
+      clearPendingMarker: false,
     );
-  }
-
-  /// Retries replay healing for delayed history while the marker remains set.
-  Future<void> _runReplayPendingMissedCallFollowUp() async {
-    final methodName = '_runReplayPendingMissedCallFollowUp';
-    try {
-      for (var attempt = 0; attempt < _backgroundReplayMaxAttempts; attempt++) {
-        if (!ref.mounted) {
-          _logger.info('$methodName: Stop, ref not mounted', name: _className);
-          return;
-        }
-        if (!await _hasPendingMissedCallMarker()) {
-          _logger.info(
-            '$methodName: Stop, no pending marker',
-            name: _className,
-          );
-          return;
-        }
-        if (_isRingingForContact()) {
-          _logger.info('$methodName: Stop, call is ringing', name: _className);
-          return;
-        }
-
-        final pendingCallId = await _pendingMissedCallId();
-        if (pendingCallId == null) {
-          _logger.info(
-            '$methodName: Stop, no pending marker',
-            name: _className,
-          );
-          return;
-        }
-
-        final healedAny = await _healStaleIncomingCallItemsByCallId(
-          pendingCallId,
-          clearPendingMarker: true,
-        );
-        if (healedAny) return;
-
-        if (attempt < _backgroundReplayMaxAttempts - 1) {
-          await Future<void>.delayed(_backgroundReplayRetryDelay);
-        } else {
-          await _clearPendingMissedCall();
-        }
-      }
-    } finally {
-      _backgroundReplayScheduled = false;
-    }
   }
 
   /// Returns true if a call for this contact is currently ringing.
@@ -219,84 +197,8 @@ class MissedCallManager {
     return ringingDid == otherPartyPermanentChannelDid;
   }
 
-  /// Handles crash-recovery: if `activeIncomingCallId` is set but
-  /// `pendingMissedCallId` is not, the app died before `_markCallAsMissed`
-  /// ran. Promotes the active call marker to a pending missed marker and heals.
-  Future<void> _replayFromCrashRecoveryIfNeeded(String callerMethod) async {
-    final activeCallId = await _activeIncomingCallId();
-    if (activeCallId == null) {
-      _logger.info(
-        '$callerMethod: Skip, no pending marker and no crash-recovery marker',
-        name: _className,
-      );
-      return;
-    }
-    _logger.info(
-      '$callerMethod: Crash-recovery — promoting activeIncomingCallId '
-      '$activeCallId to pending missed marker',
-      name: _className,
-    );
-    await ref
-        .read(contactsServiceProvider.notifier)
-        .setPendingMissedCall(
-          otherPartyPermanentChannelDid,
-          callId: activeCallId,
-        );
-    await _clearActiveIncomingCall();
-    final healedAny = await _healStaleIncomingCallItemsByCallId(
-      activeCallId,
-      clearPendingMarker: true,
-    );
-    if (!healedAny) {
-      _logger.info(
-        '$callerMethod: Crash-recovery — no stale item yet, follow-up armed',
-        name: _className,
-      );
-      scheduleReplayPendingMissedCallFollowUp();
-    }
-  }
-
-  /// Returns the pending missed-call id for this contact, if any.
-  Future<String?> _pendingMissedCallId() {
-    return ref
-        .read(contactsServiceProvider.notifier)
-        .getPendingMissedCallId(otherPartyPermanentChannelDid);
-  }
-
-  /// Returns whether a pending missed-call marker still exists.
   Future<bool> _hasPendingMissedCallMarker() async {
-    return await _pendingMissedCallId() != null;
-  }
-
-  /// Heals the newest stale incoming call item matching [callId].
-  ///
-  /// Only the most recent match is healed to prevent older stale items from
-  /// different call episodes sharing the same roomId prefix from being settled
-  /// by an unrelated marker.
-  Future<bool> _healStaleIncomingCallItemsByCallId(
-    String callId, {
-    required bool clearPendingMarker,
-  }) async {
-    const methodName = '_healStaleIncomingCallItemsByCallId';
-    final messageIds = await callChatItemManager
-        .resolveStaleIncomingCallItemIdsByCallId(callId);
-    if (messageIds.isEmpty) {
-      _logger.info(
-        '$methodName: Skip, no stale items found for $callId',
-        name: _className,
-      );
-      return false;
-    }
-
-    await _healIncomingCallItemMissed(
-      messageIds.last,
-      clearPendingMarker: false,
-    );
-
-    if (clearPendingMarker) {
-      await _clearPendingMissedCall();
-    }
-    return true;
+    return await _pendingMissedCallAt() != null;
   }
 
   /// Updates a stale incoming call item to missed.
@@ -305,10 +207,7 @@ class MissedCallManager {
     required bool clearPendingMarker,
   }) async {
     final methodName = '_healIncomingCallItemMissed';
-    if (!ref.mounted) {
-      _logger.info('$methodName: Skip, ref not mounted', name: _className);
-      return;
-    }
+    if (!ref.mounted) return;
     _logger.info(
       '$methodName: Updating message to missed: messageId=$messageId',
       name: _className,
@@ -317,53 +216,36 @@ class MissedCallManager {
       messageId,
       status: CallStatus.missed,
     );
-    if (!ref.mounted) {
-      _logger.info(
-        '$methodName: Stop, ref not mounted after update',
-        name: _className,
-      );
-      return;
-    }
-    if (updated != null) {
-      onUpsertChatItem(updated);
-    } else {
-      _logger.info(
-        '$methodName: Skip, call item update returned null for $messageId',
-        name: _className,
-      );
-    }
-    if (!ref.mounted) {
-      _logger.info(
-        '$methodName: Stop, ref not mounted before clearing marker',
-        name: _className,
-      );
-      return;
-    }
-    if (!clearPendingMarker) {
-      _logger.info(
-        '$methodName: Skip, marker clear not requested for $messageId',
-        name: _className,
-      );
-      return;
-    }
+    if (!ref.mounted) return;
+    if (updated != null) onUpsertChatItem(updated);
+    if (!ref.mounted || !clearPendingMarker) return;
     await _clearPendingMissedCall();
   }
 
-  /// Returns the active incoming call id for this contact, if any.
-  Future<String?> _activeIncomingCallId() {
+  Future<DateTime?> _pendingMissedCallAt() {
     return ref
         .read(contactsServiceProvider.notifier)
-        .getActiveIncomingCallId(otherPartyPermanentChannelDid);
+        .getPendingMissedCallAt(otherPartyPermanentChannelDid);
   }
 
-  /// Clears the active incoming call marker for this contact.
-  Future<void> _clearActiveIncomingCall() {
-    return ref
-        .read(contactsServiceProvider.notifier)
-        .clearActiveIncomingCall(otherPartyPermanentChannelDid);
+  Future<bool> _healStaleIncomingCallItemsBefore(
+    DateTime notAfter, {
+    required bool clearPendingMarker,
+  }) async {
+    final messageIds = await callChatItemManager
+        .resolveStaleIncomingCallItemIdsBefore(notAfter);
+    if (messageIds.isEmpty) return false;
+
+    for (final messageId in messageIds) {
+      await _healIncomingCallItemMissed(messageId, clearPendingMarker: false);
+    }
+
+    if (clearPendingMarker) {
+      await _clearPendingMissedCall();
+    }
+    return true;
   }
 
-  /// Clears the pending missed-call marker for this contact.
   Future<void> _clearPendingMissedCall() {
     return ref
         .read(contactsServiceProvider.notifier)

@@ -1021,7 +1021,6 @@ void main() {
       required String messageId,
       required bool isFromMe,
       required CallStatus status,
-      String callId = '',
     }) => Message(
       chatId: 'fake-chat-id',
       messageId: messageId,
@@ -1035,7 +1034,7 @@ void main() {
           id: const Uuid().v4(),
           mediaType: CallMediaType.video,
           status: status,
-          callId: callId,
+          callId: '',
         ),
       ],
     );
@@ -1235,15 +1234,11 @@ void main() {
           messageId: 'incoming-call',
           isFromMe: false,
           status: CallStatus.calling,
-          callId: 'test-call-id',
         ),
       ];
 
       await chatService.startChatSession();
-      await fakeContactsService.setPendingMissedCall(
-        channelDid,
-        callId: 'test-call-id',
-      );
+      await fakeContactsService.setPendingMissedCall(channelDid);
       final healed = await chatService.markCallAsMissed();
 
       expect(healed, isTrue);

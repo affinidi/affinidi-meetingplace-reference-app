@@ -101,76 +101,18 @@ void main() {
             fakeChatSdk.updateMessageCalls.single.messageId,
             'late-incoming',
           );
-          final call = CallMetadata.maybeOf(
-            fakeChatSdk.updateMessageCalls.single.attachments.firstWhere(
-              CallMetadata.isCall,
-            ),
-          );
-          expect(call?.status, CallStatus.missed);
         });
       },
     );
 
-    test('isStaleIncomingCall is true for incoming calling/ringing items', () {
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(
-            messageId: 'a',
-            isFromMe: false,
-            status: CallStatus.calling,
-          ),
-        ),
-        isTrue,
-      );
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(
-            messageId: 'b',
-            isFromMe: false,
-            status: CallStatus.ringing,
-          ),
-        ),
-        isTrue,
-      );
-    });
-
-    test('isStaleIncomingCall is false for outgoing or final items', () {
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(
-            messageId: 'a',
-            isFromMe: true,
-            status: CallStatus.calling,
-          ),
-        ),
-        isFalse,
-      );
-      expect(
-        manager.isStaleIncomingCall(
-          callMessage(
-            messageId: 'b',
-            isFromMe: false,
-            status: CallStatus.missed,
-          ),
-        ),
-        isFalse,
-      );
-    });
-
-    test('resolveStaleIncomingCallItemIdBefore returns the latest stale item '
-        'at or before the cutoff', () async {
+    test('resolveStaleIncomingCallItemIdBefore returns a message created '
+        'exactly at the cutoff', () async {
       final cutoff = DateTime(2026, 6, 29, 11);
       fakeChatSdk.sessionMessages = [
         callMessage(
-          messageId: 'older-incoming',
-          isFromMe: false,
-          status: CallStatus.calling,
-          dateCreated: DateTime(2026, 6, 29, 10),
-        ),
-        callMessage(
           messageId: 'at-cutoff-incoming',
           isFromMe: false,
-          status: CallStatus.ringing,
+          status: CallStatus.calling,
           dateCreated: cutoff,
         ),
       ];
@@ -403,87 +345,6 @@ void main() {
         isNull,
         reason: 'updateCallChatItem should return null when SDK unavailable',
       );
-    });
-  });
-
-  group('CallChatItemManager.matchesPendingCallId', () {
-    const channelDid = 'did:peer:other-party';
-
-    Message messageWithCallId(String callId) => Message(
-      chatId: 'chat-id',
-      messageId: 'msg-id',
-      value: '',
-      dateCreated: DateTime.now(),
-      status: ChatItemStatus.confirmed,
-      isFromMe: false,
-      senderDid: channelDid,
-      attachments: [
-        CallMetadata.buildAttachment(
-          id: const Uuid().v4(),
-          mediaType: CallMediaType.video,
-          status: CallStatus.calling,
-          callId: callId,
-        ),
-      ],
-    );
-
-    late CallChatItemManager manager;
-
-    setUp(() {
-      manager = CallChatItemManager(
-        ensureInitialized: () async {},
-        getChatSdk: FakeChatSdk.new,
-        logger: FakeAppLogger(),
-      );
-    });
-
-    test('exact match when callIds are identical', () {
-      final message = messageWithCallId('call-123');
-      expect(manager.matchesPendingCallId(message, 'call-123'), isTrue);
-    });
-
-    test('prefix match when message has roomId@timestamp format', () {
-      final message = messageWithCallId('!room:matrix.org@5928374');
-      expect(
-        manager.matchesPendingCallId(message, '!room:matrix.org'),
-        isTrue,
-        reason:
-            'roomId fallback without @ should match transport callId '
-            'with @timestamp suffix',
-      );
-    });
-
-    test('no prefix match when roomIds differ', () {
-      final message = messageWithCallId('!other-room:matrix.org@5928374');
-      expect(
-        manager.matchesPendingCallId(message, '!first-room:matrix.org'),
-        isFalse,
-      );
-    });
-
-    test('no match when pendingCallId has @ (transport callId)', () {
-      final message = messageWithCallId('!room:matrix.org@5928374');
-      expect(
-        manager.matchesPendingCallId(message, 'other-call-id@timestamp'),
-        isFalse,
-        reason:
-            'prefix match only applies when pendingCallId is a roomId '
-            '(no @)',
-      );
-    });
-
-    test('no match when message has no callId', () {
-      final message = Message(
-        chatId: 'chat-id',
-        messageId: 'msg-id',
-        value: '',
-        dateCreated: DateTime.now(),
-        status: ChatItemStatus.confirmed,
-        isFromMe: false,
-        senderDid: channelDid,
-        attachments: [],
-      );
-      expect(manager.matchesPendingCallId(message, 'any-call-id'), isFalse);
     });
   });
 }

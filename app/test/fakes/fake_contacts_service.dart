@@ -24,7 +24,6 @@ class FakeContactsService extends ContactsService {
   List<Map<String, dynamic>> resetBadgeCalls = [];
   List<String> incrementMissedCallBadgeCalls = [];
   List<String> setPendingMissedCallCalls = [];
-  List<String> setPendingMissedCallIds = [];
   List<String> clearPendingMissedCallCalls = [];
 
   void setContacts(List<Contact> newContacts) {
@@ -37,7 +36,6 @@ class FakeContactsService extends ContactsService {
     resetBadgeCalls.clear();
     incrementMissedCallBadgeCalls.clear();
     setPendingMissedCallCalls.clear();
-    setPendingMissedCallIds.clear();
     clearPendingMissedCallCalls.clear();
     resetBadgeCalledWith = null;
   }
@@ -48,21 +46,12 @@ class FakeContactsService extends ContactsService {
   }
 
   @override
-  Future<void> setPendingMissedCall(
-    String channelDid, {
-    required String callId,
-  }) async {
+  Future<void> setPendingMissedCall(String channelDid) async {
     setPendingMissedCallCalls.add(channelDid);
-    setPendingMissedCallIds.add(callId);
     final contact = getContactByChannelDid(channelDid);
     if (contact == null) return;
     contacts.removeWhere((c) => c.id == contact.id);
-    contacts.add(
-      contact.copyWith(
-        pendingMissedCallAt: DateTime.now().toUtc(),
-        pendingMissedCallId: callId,
-      ),
-    );
+    contacts.add(contact.copyWith(pendingMissedCallAt: DateTime.now().toUtc()));
   }
 
   @override
@@ -79,35 +68,6 @@ class FakeContactsService extends ContactsService {
   @override
   Future<DateTime?> getPendingMissedCallAt(String channelDid) async {
     return getContactByChannelDid(channelDid)?.pendingMissedCallAt;
-  }
-
-  @override
-  Future<String?> getPendingMissedCallId(String channelDid) async {
-    return getContactByChannelDid(channelDid)?.pendingMissedCallId;
-  }
-
-  @override
-  Future<void> setActiveIncomingCall(
-    String channelDid, {
-    required String callId,
-  }) async {
-    final contact = getContactByChannelDid(channelDid);
-    if (contact == null) return;
-    contacts.removeWhere((c) => c.id == contact.id);
-    contacts.add(contact.copyWith(activeIncomingCallId: callId));
-  }
-
-  @override
-  Future<void> clearActiveIncomingCall(String channelDid) async {
-    final contact = getContactByChannelDid(channelDid);
-    if (contact == null) return;
-    contacts.removeWhere((c) => c.id == contact.id);
-    contacts.add(contact.copyWith(activeIncomingCallId: null));
-  }
-
-  @override
-  Future<String?> getActiveIncomingCallId(String channelDid) async {
-    return getContactByChannelDid(channelDid)?.activeIncomingCallId;
   }
 
   @override

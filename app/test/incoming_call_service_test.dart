@@ -50,11 +50,12 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
 IncomingAudioVideoCallEvent _event({
   String callId = 'call-1',
   String callerPermanentChannelDid = 'did:key:caller',
+  String otherPartyPermanentChannelDid = 'did:key:caller',
   CallMediaType mediaType = CallMediaType.video,
 }) => IncomingAudioVideoCallEvent(
   callId: callId,
   callerPermanentChannelDid: callerPermanentChannelDid,
-  otherPartyPermanentChannelDid: 'did:key:caller',
+  otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
   mediaType: mediaType,
 );
 
@@ -228,6 +229,44 @@ void main() {
                   as FakeContactsService)
               .setPendingMissedCallCalls,
           ['did:key:caller'],
+        );
+      });
+
+      test('it marks the third-party call as missed when busy auto-reject fires'
+          ' while already in another call', () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final container = buildContainer(fakeSDK);
+        addTearDown(container.dispose);
+
+        container.read(incomingCallServiceProvider);
+        await container.read(meetingPlaceSdkProvider.future);
+        await pumpEventQueue();
+
+        // A is ringing for the first caller (simulates an accepted/active call
+        // where incomingCallProvider still holds the first caller's event).
+        fakeSDK.emitIncoming(_event(callId: 'call-1'));
+        await pumpEventQueue();
+        expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
+
+        // A third party calls while A is busy — SDK auto-rejects and surfaces
+        // the event on cancelledCalls with a different callId and caller DID.
+        const thirdPartyDid = 'did:key:third-party';
+        fakeSDK.emitCancelled(
+          _event(
+            callId: 'call-2',
+            callerPermanentChannelDid: thirdPartyDid,
+            otherPartyPermanentChannelDid: thirdPartyDid,
+          ),
+        );
+        await pumpEventQueue();
+
+        // The missed-call marker must be written to the third-party's DID,
+        // not to the first caller's DID.
+        expect(
+          (container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService)
+              .setPendingMissedCallCalls,
+          [thirdPartyDid],
         );
       });
     });

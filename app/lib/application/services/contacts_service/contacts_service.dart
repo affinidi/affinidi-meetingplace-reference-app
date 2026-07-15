@@ -213,9 +213,6 @@ class ContactsService extends _$ContactsService {
         pendingMissedCallAt:
             persistedContact?.pendingMissedCallAt ??
             existingContact.pendingMissedCallAt,
-        pendingMissedCallId:
-            persistedContact?.pendingMissedCallId ??
-            existingContact.pendingMissedCallId,
       );
       await updateContact(updatedContact);
     }
@@ -393,9 +390,6 @@ class ContactsService extends _$ContactsService {
   /// Update an existing contact and refresh state.
   ///
   /// [contact] - The contact to update.
-  /// [preservePendingMissedCallState] - Whether durable pending missed-call
-  /// marker fields should be merged from persisted storage to protect against
-  /// stale concurrent writes. Set false only for explicit marker writes.
   ///
   /// Returns:
   /// - `Future<void>` completes when the update and refresh finish.
@@ -409,6 +403,28 @@ class ContactsService extends _$ContactsService {
         : contact;
     await _repository!.updateContact(mergedContact);
     await fetchContacts();
+  }
+
+  /// Preserves durable contact state that should survive concurrent stale
+  /// writes from unrelated contact-update flows.
+  Future<Contact> _mergeContactForPersistence(Contact contact) async {
+    final channelDid = contact.channelDid;
+    if (channelDid == null) return contact;
+
+    final persistedContact = await _getPersistedContactByChannelDid(channelDid);
+    if (persistedContact?.pendingMissedCallAt == null ||
+        contact.pendingMissedCallAt != null) {
+      return contact;
+    }
+
+    _logger.info(
+      '_mergeContactForPersistence: preserving pendingMissedCallAt for '
+      '${contact.id}',
+      name: _logKey,
+    );
+    return contact.copyWith(
+      pendingMissedCallAt: persistedContact!.pendingMissedCallAt,
+    );
   }
 
   /// Update the contact card for a contact identified by channel DID.
@@ -460,8 +476,6 @@ class ContactsService extends _$ContactsService {
       currentMessageSeqNo: seqNo,
       pendingMissedCallAt:
           persistedContact?.pendingMissedCallAt ?? contact.pendingMissedCallAt,
-      pendingMissedCallId:
-          persistedContact?.pendingMissedCallId ?? contact.pendingMissedCallId,
     );
     await updateContact(amendedContact);
   }
@@ -491,8 +505,6 @@ class ContactsService extends _$ContactsService {
       currentMessageSeqNo: channel?.seqNo ?? contact.currentMessageSeqNo,
       pendingMissedCallAt:
           persistedContact?.pendingMissedCallAt ?? contact.pendingMissedCallAt,
-      pendingMissedCallId:
-          persistedContact?.pendingMissedCallId ?? contact.pendingMissedCallId,
     );
     _missedCallCreditedChannelDids.remove(channelDid);
     await updateContact(amendedContact);
@@ -557,15 +569,13 @@ class ContactsService extends _$ContactsService {
   ///
   /// Durable on [Contact.pendingMissedCallAt]; cleared by
   /// [clearPendingMissedCall] once the item is healed.
-  Future<void> setPendingMissedCall(
-    String channelDid, {
-    required String callId,
-  }) async {
+  Future<void> setPendingMissedCall(String channelDid) async {
     final contact = await _getPersistedContactByChannelDid(channelDid);
     if (contact == null) {
-      _logger.warning(
-        'setPendingMissedCall: No contact for '
-        '${channelDid.topAndTail()}, skipping marker write',
+      _logger.error(
+        'setPendingMissedCall: CRITICAL — no contact exists for $channelDid; '
+        'marker cannot be written. Incoming call chat item will not be '
+        'reconciled to missed on replay.',
         name: _logKey,
       );
       return;
@@ -575,21 +585,14 @@ class ContactsService extends _$ContactsService {
       'setPendingMissedCall: Marked contact ${contact.id}',
       name: _logKey,
     );
-    await updateContact(
-      contact.copyWith(
-        pendingMissedCallAt: pendingAt,
-        pendingMissedCallId: callId,
-      ),
-    );
+    await updateContact(contact.copyWith(pendingMissedCallAt: pendingAt));
   }
 
   /// Clears the pending missed-call marker for [channelDid] after the call chat
   /// item has been reconciled to `missed`. A no-op when no marker is set.
   Future<void> clearPendingMissedCall(String channelDid) async {
     final contact = await _getPersistedContactByChannelDid(channelDid);
-    if (contact == null ||
-        (contact.pendingMissedCallAt == null &&
-            contact.pendingMissedCallId == null)) {
+    if (contact == null || contact.pendingMissedCallAt == null) {
       return;
     }
     _logger.info(
@@ -597,7 +600,7 @@ class ContactsService extends _$ContactsService {
       name: _logKey,
     );
     await updateContact(
-      contact.copyWith(pendingMissedCallAt: null, pendingMissedCallId: null),
+      contact.copyWith(pendingMissedCallAt: null),
       preservePendingMissedCallState: false,
     );
   }
@@ -607,84 +610,6 @@ class ContactsService extends _$ContactsService {
     return (await _getPersistedContactByChannelDid(
       channelDid,
     ))?.pendingMissedCallAt;
-  }
-
-  /// Returns the durable pending missed-call transport id for [channelDid].
-  Future<String?> getPendingMissedCallId(String channelDid) async {
-    return (await _getPersistedContactByChannelDid(
-      channelDid,
-    ))?.pendingMissedCallId;
-  }
-
-  /// Records that the banner for an incoming call from [channelDid] is shown.
-  ///
-  /// Persisted so crash-recovery replay can reconstruct the missed-call marker
-  /// if the app dies before `_markCallAsMissed` runs. Cleared on accept,
-  /// decline, cancel, timeout, or successful crash-recovery heal.
-  Future<void> setActiveIncomingCall(
-    String channelDid, {
-    required String callId,
-  }) async {
-    final contact = await _getPersistedContactByChannelDid(channelDid);
-    if (contact == null) {
-      _logger.warning(
-        'setActiveIncomingCall: no contact for '
-        '${channelDid.topAndTail()}, skipping',
-        name: _logKey,
-      );
-      return;
-    }
-    _logger.info('setActiveIncomingCall: contact ${contact.id}', name: _logKey);
-    await updateContact(contact.copyWith(activeIncomingCallId: callId));
-  }
-
-  /// Clears the active incoming call marker for [channelDid].
-  Future<void> clearActiveIncomingCall(String channelDid) async {
-    final contact = await _getPersistedContactByChannelDid(channelDid);
-    if (contact == null || contact.activeIncomingCallId == null) return;
-    _logger.info(
-      'clearActiveIncomingCall: contact ${contact.id}',
-      name: _logKey,
-    );
-    await updateContact(
-      contact.copyWith(activeIncomingCallId: null),
-      preservePendingMissedCallState: false,
-    );
-  }
-
-  /// Returns the active incoming call id for [channelDid], if any.
-  Future<String?> getActiveIncomingCallId(String channelDid) async {
-    return (await _getPersistedContactByChannelDid(
-      channelDid,
-    ))?.activeIncomingCallId;
-  }
-
-  /// Preserves durable contact state that should survive concurrent stale
-  /// writes from unrelated contact-update flows.
-  Future<Contact> _mergeContactForPersistence(Contact contact) async {
-    final channelDid = contact.channelDid;
-    if (channelDid == null) return contact;
-
-    final persistedContact = await _getPersistedContactByChannelDid(channelDid);
-    if ((persistedContact?.pendingMissedCallAt == null ||
-            contact.pendingMissedCallAt != null) &&
-        (persistedContact?.pendingMissedCallId == null ||
-            contact.pendingMissedCallId != null) &&
-        (persistedContact?.activeIncomingCallId == null ||
-            contact.activeIncomingCallId != null)) {
-      return contact;
-    }
-
-    _logger.info(
-      '_mergeContactForPersistence: preserving pendingMissedCallAt for '
-      '${contact.id}',
-      name: _logKey,
-    );
-    return contact.copyWith(
-      pendingMissedCallAt: persistedContact!.pendingMissedCallAt,
-      pendingMissedCallId: persistedContact.pendingMissedCallId,
-      activeIncomingCallId: persistedContact.activeIncomingCallId,
-    );
   }
 
   /// Update an existing contact when a group invitation is accepted.

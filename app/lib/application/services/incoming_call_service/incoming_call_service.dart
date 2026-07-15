@@ -56,11 +56,6 @@ class IncomingCallService extends _$IncomingCallService {
             .read(contactsServiceProvider.notifier)
             .clearPendingMissedCall(channelDid),
       );
-      unawaited(
-        ref
-            .read(contactsServiceProvider.notifier)
-            .clearActiveIncomingCall(channelDid),
-      );
     }
     _ensureSDK((sdk) => unawaited(_acceptCall(sdk, callId: callId)));
   }
@@ -74,9 +69,7 @@ class IncomingCallService extends _$IncomingCallService {
         ?.otherPartyPermanentChannelDid;
     _clearRingState();
     _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
-    if (channelDid != null) {
-      unawaited(_markCallAsMissed(channelDid, callId: callId));
-    }
+    if (channelDid != null) unawaited(_markCallAsMissed(channelDid));
   }
 
   void _bindToSDK(MeetingPlaceMatrixSDK? sdk) {
@@ -97,10 +90,10 @@ class IncomingCallService extends _$IncomingCallService {
     final channelDid = incomingEvent?.otherPartyPermanentChannelDid;
 
     if (incomingEvent != null && incomingEvent.callId == event.callId) {
-      // Active ringing call was cancelled
+      // Active ringing call was cancelled.
       _clearRingState();
       if (channelDid != null) {
-        unawaited(_markCallAsMissed(channelDid, callId: event.callId));
+        unawaited(_markCallAsMissed(channelDid));
       } else {
         _logger.warning(
           'Skip markCallAsMissed: otherPartyChannelDid null for '
@@ -109,16 +102,16 @@ class IncomingCallService extends _$IncomingCallService {
         );
       }
     } else {
-      // No active ringing, or cancel is for a different call
-      // Try to mark using the event's channel DID, fallback to callId if
-      // no event
-      final targetDid = channelDid ?? event.otherPartyPermanentChannelDid;
+      // No matching active ring — caller's DID is in callerPermanentChannelDid.
+      // Do NOT use channelDid here: that holds the active call's contact DID
+      // and would mark the wrong contact for a busy auto-reject from a third
+      // party.
       _logger.info(
-        'No active ring for ${event.callId} — recording missed-call marker for '
-        '$targetDid',
+        'No active ring for ${event.callId} — recording missed-call marker '
+        'for ${event.callerPermanentChannelDid}',
         name: _logKey,
       );
-      unawaited(_markCallAsMissed(targetDid, callId: event.callId));
+      unawaited(_markCallAsMissed(event.callerPermanentChannelDid));
     }
   }
 
@@ -127,14 +120,6 @@ class IncomingCallService extends _$IncomingCallService {
     _logger.info(log, name: _logKey);
     ref.read(incomingCallProvider.notifier).set(event);
     _startRingTimer(event.callId);
-    unawaited(
-      ref
-          .read(contactsServiceProvider.notifier)
-          .setActiveIncomingCall(
-            event.otherPartyPermanentChannelDid,
-            callId: event.callId,
-          ),
-    );
   }
 
   void _startRingTimer(String callId) {
@@ -150,9 +135,7 @@ class IncomingCallService extends _$IncomingCallService {
           ?.otherPartyPermanentChannelDid;
       _clearRingState();
       _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
-      if (channelDid != null) {
-        unawaited(_markCallAsMissed(channelDid, callId: callId));
-      }
+      if (channelDid != null) unawaited(_markCallAsMissed(channelDid));
     });
   }
 
@@ -219,18 +202,12 @@ class IncomingCallService extends _$IncomingCallService {
   /// message that already advances the channel sequence number, so the missed
   /// call is counted by the normal unread path. Bumping it again would
   /// double-count.
-  Future<void> _markCallAsMissed(
-    String contactId, {
-    required String callId,
-  }) async {
+  Future<void> _markCallAsMissed(String contactId) async {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
     try {
       await ref
           .read(contactsServiceProvider.notifier)
-          .setPendingMissedCall(contactId, callId: callId);
-      await ref
-          .read(contactsServiceProvider.notifier)
-          .clearActiveIncomingCall(contactId);
+          .setPendingMissedCall(contactId);
     } catch (e, stackTrace) {
       _logger.error(
         '_markCallAsMissed: Recording missed call failed for $contactId',
