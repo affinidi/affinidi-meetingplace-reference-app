@@ -40,6 +40,10 @@ class MissedCallManager {
   /// Replays a pending missed-call marker and heals stale incoming call items
   /// at chat open. Marker exists only for unanswered calls; skipped if a call
   /// is ringing. Durable across restarts.
+  ///
+  /// Also handles crash-recovery: if the app died while the incoming banner
+  /// was showing (before `_markCallAsMissed` ran), the `activeIncomingCallId`
+  /// marker is used to reconstruct the missed-call state and heal the item.
   Future<void> replayPendingMissedCall() async {
     final methodName = 'replayPendingMissedCall';
     if (!ref.mounted) {
@@ -55,7 +59,7 @@ class MissedCallManager {
     }
     final pendingCallId = await _pendingMissedCallId();
     if (pendingCallId == null) {
-      _logger.info('$methodName: Skip, no pending marker', name: _className);
+      await _replayFromCrashRecoveryIfNeeded(methodName);
       return;
     }
     final healedAny = await _healStaleIncomingCallItemsByCallId(
@@ -215,6 +219,43 @@ class MissedCallManager {
     return ringingDid == otherPartyPermanentChannelDid;
   }
 
+  /// Handles crash-recovery: if `activeIncomingCallId` is set but
+  /// `pendingMissedCallId` is not, the app died before `_markCallAsMissed`
+  /// ran. Promotes the active call marker to a pending missed marker and heals.
+  Future<void> _replayFromCrashRecoveryIfNeeded(String callerMethod) async {
+    final activeCallId = await _activeIncomingCallId();
+    if (activeCallId == null) {
+      _logger.info(
+        '$callerMethod: Skip, no pending marker and no crash-recovery marker',
+        name: _className,
+      );
+      return;
+    }
+    _logger.info(
+      '$callerMethod: Crash-recovery — promoting activeIncomingCallId '
+      '$activeCallId to pending missed marker',
+      name: _className,
+    );
+    await ref
+        .read(contactsServiceProvider.notifier)
+        .setPendingMissedCall(
+          otherPartyPermanentChannelDid,
+          callId: activeCallId,
+        );
+    await _clearActiveIncomingCall();
+    final healedAny = await _healStaleIncomingCallItemsByCallId(
+      activeCallId,
+      clearPendingMarker: true,
+    );
+    if (!healedAny) {
+      _logger.info(
+        '$callerMethod: Crash-recovery — no stale item yet, follow-up armed',
+        name: _className,
+      );
+      scheduleReplayPendingMissedCallFollowUp();
+    }
+  }
+
   /// Returns the pending missed-call id for this contact, if any.
   Future<String?> _pendingMissedCallId() {
     return ref
@@ -227,7 +268,11 @@ class MissedCallManager {
     return await _pendingMissedCallId() != null;
   }
 
-  /// Heals stale incoming call items that match [callId].
+  /// Heals the newest stale incoming call item matching [callId].
+  ///
+  /// Only the most recent match is healed to prevent older stale items from
+  /// different call episodes sharing the same roomId prefix from being settled
+  /// by an unrelated marker.
   Future<bool> _healStaleIncomingCallItemsByCallId(
     String callId, {
     required bool clearPendingMarker,
@@ -243,9 +288,10 @@ class MissedCallManager {
       return false;
     }
 
-    for (final messageId in messageIds) {
-      await _healIncomingCallItemMissed(messageId, clearPendingMarker: false);
-    }
+    await _healIncomingCallItemMissed(
+      messageIds.last,
+      clearPendingMarker: false,
+    );
 
     if (clearPendingMarker) {
       await _clearPendingMissedCall();
@@ -301,6 +347,20 @@ class MissedCallManager {
       return;
     }
     await _clearPendingMissedCall();
+  }
+
+  /// Returns the active incoming call id for this contact, if any.
+  Future<String?> _activeIncomingCallId() {
+    return ref
+        .read(contactsServiceProvider.notifier)
+        .getActiveIncomingCallId(otherPartyPermanentChannelDid);
+  }
+
+  /// Clears the active incoming call marker for this contact.
+  Future<void> _clearActiveIncomingCall() {
+    return ref
+        .read(contactsServiceProvider.notifier)
+        .clearActiveIncomingCall(otherPartyPermanentChannelDid);
   }
 
   /// Clears the pending missed-call marker for this contact.

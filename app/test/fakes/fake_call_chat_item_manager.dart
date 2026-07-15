@@ -19,6 +19,7 @@ class FakeCallChatItemManager extends CallChatItemManager {
   final String? resolveReturn;
   final List<String> resolveIdsReturn;
   int updateCallCount = 0;
+  String? lastHealedMessageId;
   DateTime? lastResolveBound;
   String? lastResolvedCallId;
 
@@ -63,6 +64,7 @@ class FakeCallChatItemManager extends CallChatItemManager {
     Duration? duration,
   }) async {
     updateCallCount++;
+    lastHealedMessageId = messageId;
     return null;
   }
 }

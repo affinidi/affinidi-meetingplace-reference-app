@@ -56,6 +56,11 @@ class IncomingCallService extends _$IncomingCallService {
             .read(contactsServiceProvider.notifier)
             .clearPendingMissedCall(channelDid),
       );
+      unawaited(
+        ref
+            .read(contactsServiceProvider.notifier)
+            .clearActiveIncomingCall(channelDid),
+      );
     }
     _ensureSDK((sdk) => unawaited(_acceptCall(sdk, callId: callId)));
   }
@@ -122,6 +127,14 @@ class IncomingCallService extends _$IncomingCallService {
     _logger.info(log, name: _logKey);
     ref.read(incomingCallProvider.notifier).set(event);
     _startRingTimer(event.callId);
+    unawaited(
+      ref
+          .read(contactsServiceProvider.notifier)
+          .setActiveIncomingCall(
+            event.otherPartyPermanentChannelDid,
+            callId: event.callId,
+          ),
+    );
   }
 
   void _startRingTimer(String callId) {
@@ -215,6 +228,9 @@ class IncomingCallService extends _$IncomingCallService {
       await ref
           .read(contactsServiceProvider.notifier)
           .setPendingMissedCall(contactId, callId: callId);
+      await ref
+          .read(contactsServiceProvider.notifier)
+          .clearActiveIncomingCall(contactId);
     } catch (e, stackTrace) {
       _logger.error(
         '_markCallAsMissed: Recording missed call failed for $contactId',

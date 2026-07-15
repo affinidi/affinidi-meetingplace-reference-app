@@ -616,6 +616,49 @@ class ContactsService extends _$ContactsService {
     ))?.pendingMissedCallId;
   }
 
+  /// Records that the banner for an incoming call from [channelDid] is shown.
+  ///
+  /// Persisted so crash-recovery replay can reconstruct the missed-call marker
+  /// if the app dies before `_markCallAsMissed` runs. Cleared on accept,
+  /// decline, cancel, timeout, or successful crash-recovery heal.
+  Future<void> setActiveIncomingCall(
+    String channelDid, {
+    required String callId,
+  }) async {
+    final contact = await _getPersistedContactByChannelDid(channelDid);
+    if (contact == null) {
+      _logger.warning(
+        'setActiveIncomingCall: no contact for '
+        '${channelDid.topAndTail()}, skipping',
+        name: _logKey,
+      );
+      return;
+    }
+    _logger.info('setActiveIncomingCall: contact ${contact.id}', name: _logKey);
+    await updateContact(contact.copyWith(activeIncomingCallId: callId));
+  }
+
+  /// Clears the active incoming call marker for [channelDid].
+  Future<void> clearActiveIncomingCall(String channelDid) async {
+    final contact = await _getPersistedContactByChannelDid(channelDid);
+    if (contact == null || contact.activeIncomingCallId == null) return;
+    _logger.info(
+      'clearActiveIncomingCall: contact ${contact.id}',
+      name: _logKey,
+    );
+    await updateContact(
+      contact.copyWith(activeIncomingCallId: null),
+      preservePendingMissedCallState: false,
+    );
+  }
+
+  /// Returns the active incoming call id for [channelDid], if any.
+  Future<String?> getActiveIncomingCallId(String channelDid) async {
+    return (await _getPersistedContactByChannelDid(
+      channelDid,
+    ))?.activeIncomingCallId;
+  }
+
   /// Preserves durable contact state that should survive concurrent stale
   /// writes from unrelated contact-update flows.
   Future<Contact> _mergeContactForPersistence(Contact contact) async {
@@ -626,7 +669,9 @@ class ContactsService extends _$ContactsService {
     if ((persistedContact?.pendingMissedCallAt == null ||
             contact.pendingMissedCallAt != null) &&
         (persistedContact?.pendingMissedCallId == null ||
-            contact.pendingMissedCallId != null)) {
+            contact.pendingMissedCallId != null) &&
+        (persistedContact?.activeIncomingCallId == null ||
+            contact.activeIncomingCallId != null)) {
       return contact;
     }
 
@@ -638,6 +683,7 @@ class ContactsService extends _$ContactsService {
     return contact.copyWith(
       pendingMissedCallAt: persistedContact!.pendingMissedCallAt,
       pendingMissedCallId: persistedContact.pendingMissedCallId,
+      activeIncomingCallId: persistedContact.activeIncomingCallId,
     );
   }
 

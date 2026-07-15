@@ -382,6 +382,109 @@ void main() {
       expect(callItemManager.updateCallCount, 1);
       expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
     });
+
+    test(
+      'containment fix: _healStaleIncomingCallItemsByCallId heals only the '
+      'newest matching item, not older stale items sharing the same roomId',
+      () async {
+        // Two stale items share the same roomId prefix (e.g. two consecutive
+        // missed calls from the same contact while offline). The marker for the
+        // second call should heal only msg-2, not msg-1.
+        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: channelDid,
+          pendingMissedCallAt: markerTime,
+          pendingMissedCallId: 'call-456',
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final callItemManager = FakeCallChatItemManager(
+          resolveIdsReturn: ['msg-1', 'msg-2'],
+        );
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(contactsService),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          getMessageById: (_) async => null,
+          onUpsertChatItem: (_) {},
+        );
+
+        await manager.replayPendingMissedCall();
+
+        expect(
+          callItemManager.updateCallCount,
+          1,
+          reason: 'only the newest item should be healed',
+        );
+        expect(
+          callItemManager.lastHealedMessageId,
+          'msg-2',
+          reason: 'msg-2 is the newest match and should be the one healed',
+        );
+      },
+    );
+
+    test(
+      'crash-recovery: replayPendingMissedCall heals via activeIncomingCallId '
+      'when pendingMissedCallId is not set',
+      () async {
+        // Banner was showing (activeIncomingCallId set) but app crashed before
+        // _markCallAsMissed() ran (no pendingMissedCallId).
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: channelDid,
+          activeIncomingCallId: 'call-crash',
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final callItemManager = FakeCallChatItemManager(
+          resolveIdsReturn: ['msg-orphan'],
+        );
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(contactsService),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          getMessageById: (_) async => null,
+          onUpsertChatItem: (_) {},
+        );
+
+        await manager.replayPendingMissedCall();
+
+        expect(callItemManager.updateCallCount, 1);
+        expect(
+          contactsService.setPendingMissedCallIds,
+          contains('call-crash'),
+          reason: 'crash-recovery must promote activeIncomingCallId to marker',
+        );
+        expect(
+          contactsService.clearPendingMissedCallCalls,
+          contains(channelDid),
+          reason: 'marker must be cleared after successful heal',
+        );
+      },
+    );
+
+    test('crash-recovery: skipped when call is still ringing', () async {
+      final contact = FakeContacts.individualContact.copyWith(
+        channelDid: channelDid,
+        activeIncomingCallId: 'call-live',
+      );
+      final contactsService = FakeContactsService(contacts: [contact]);
+      final callItemManager = FakeCallChatItemManager(
+        resolveIdsReturn: ['msg-live'],
+      );
+
+      final manager = MissedCallManager(
+        ref: _createTestRef(contactsService, ringingDid: channelDid),
+        otherPartyPermanentChannelDid: channelDid,
+        callChatItemManager: callItemManager,
+        getMessageById: (_) async => null,
+        onUpsertChatItem: (_) {},
+      );
+
+      await manager.replayPendingMissedCall();
+
+      expect(callItemManager.updateCallCount, 0);
+    });
   });
 }
 

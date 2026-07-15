@@ -87,6 +87,30 @@ class FakeContactsService extends ContactsService {
   }
 
   @override
+  Future<void> setActiveIncomingCall(
+    String channelDid, {
+    required String callId,
+  }) async {
+    final contact = getContactByChannelDid(channelDid);
+    if (contact == null) return;
+    contacts.removeWhere((c) => c.id == contact.id);
+    contacts.add(contact.copyWith(activeIncomingCallId: callId));
+  }
+
+  @override
+  Future<void> clearActiveIncomingCall(String channelDid) async {
+    final contact = getContactByChannelDid(channelDid);
+    if (contact == null) return;
+    contacts.removeWhere((c) => c.id == contact.id);
+    contacts.add(contact.copyWith(activeIncomingCallId: null));
+  }
+
+  @override
+  Future<String?> getActiveIncomingCallId(String channelDid) async {
+    return getContactByChannelDid(channelDid)?.activeIncomingCallId;
+  }
+
+  @override
   Future<void> resetContactBadgeCount(String channelDid) async {
     resetBadgeCalledWith = channelDid;
     resetBadgeCalls.add({'channelDid': channelDid});
