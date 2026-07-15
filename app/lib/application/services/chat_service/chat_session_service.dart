@@ -298,10 +298,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       ref: ref,
       otherPartyPermanentChannelDid: _otherPartyPermanentChannelDid,
       callChatItemManager: _callChatItemManager,
-      getMessageById: (messageId) async {
-        final item = await _chatSDK?.getMessageById(messageId);
-        return item is Message ? item : null;
-      },
       onUpsertChatItem: upsertChatItem,
     );
 

@@ -48,7 +48,6 @@ void main() {
         ref: _createTestRef(contactsService),
         otherPartyPermanentChannelDid: channelDid,
         callChatItemManager: callItemManager,
-        getMessageById: (_) async => null,
         onUpsertChatItem: (_) {},
       );
 
@@ -74,7 +73,6 @@ void main() {
         ref: _createTestRef(contactsService),
         otherPartyPermanentChannelDid: channelDid,
         callChatItemManager: callItemManager,
-        getMessageById: (_) async => null,
         onUpsertChatItem: (_) {},
       );
 
@@ -102,7 +100,6 @@ void main() {
           ref: _createTestRef(contactsService),
           otherPartyPermanentChannelDid: channelDid,
           callChatItemManager: callItemManager,
-          getMessageById: (_) async => null,
           onUpsertChatItem: (_) {},
         );
 
@@ -131,7 +128,6 @@ void main() {
           ref: _createTestRef(contactsService, ringingDid: channelDid),
           otherPartyPermanentChannelDid: channelDid,
           callChatItemManager: callItemManager,
-          getMessageById: (_) async => null,
           onUpsertChatItem: (_) {},
         );
 
@@ -157,7 +153,6 @@ void main() {
           ref: _createTestRef(contactsService),
           otherPartyPermanentChannelDid: channelDid,
           callChatItemManager: callItemManager,
-          getMessageById: (_) async => null,
           onUpsertChatItem: (_) {},
         );
 
@@ -190,7 +185,6 @@ void main() {
           ref: _createTestRef(contactsService),
           otherPartyPermanentChannelDid: channelDid,
           callChatItemManager: callItemManager,
-          getMessageById: (_) async => message,
           onUpsertChatItem: (_) {},
         );
 
@@ -222,7 +216,6 @@ void main() {
           ref: _createTestRef(contactsService),
           otherPartyPermanentChannelDid: channelDid,
           callChatItemManager: callItemManager,
-          getMessageById: (_) async => message,
           onUpsertChatItem: (_) {},
         );
 
@@ -254,7 +247,6 @@ void main() {
           ref: _createTestRef(contactsService, ringingDid: channelDid),
           otherPartyPermanentChannelDid: channelDid,
           callChatItemManager: callItemManager,
-          getMessageById: (_) async => message,
           onUpsertChatItem: (_) {},
         );
 
@@ -283,7 +275,6 @@ void main() {
         ref: _createTestRef(contactsService),
         otherPartyPermanentChannelDid: channelDid,
         callChatItemManager: callItemManager,
-        getMessageById: (_) async => message,
         onUpsertChatItem: (_) {},
       );
 
@@ -311,7 +302,6 @@ void main() {
         ref: _createTestRef(contactsService),
         otherPartyPermanentChannelDid: channelDid,
         callChatItemManager: callItemManager,
-        getMessageById: (_) async => message,
         onUpsertChatItem: (_) {},
       );
 
@@ -340,7 +330,6 @@ void main() {
         ref: _createTestRef(contactsService),
         otherPartyPermanentChannelDid: channelDid,
         callChatItemManager: callItemManager,
-        getMessageById: (_) async => null,
         onUpsertChatItem: upsertCalls.add,
       );
 

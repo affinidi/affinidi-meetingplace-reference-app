@@ -430,12 +430,14 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     String messageId = 'late-incoming-call-item',
     CallMediaType mediaType = CallMediaType.video,
     CallStatus status = CallStatus.calling,
+    DateTime? dateCreated,
   }) {
+    final createdAt = dateCreated ?? DateTime.now();
     final message = Message(
       chatId: chatId,
       messageId: messageId,
       value: '',
-      dateCreated: DateTime.now(),
+      dateCreated: createdAt,
       status: ChatItemStatus.confirmed,
       isFromMe: false,
       senderDid: senderDid,
@@ -455,7 +457,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
       type: 'https://affinidi.com/chat/1.0/message',
       senderDid: senderDid,
       body: {'timestamp': message.dateCreated.toIso8601String()},
-      createdTime: message.dateCreated,
+      createdTime: createdAt,
     );
     _emit(StreamData(event: chatEvent, chatItem: message));
   }

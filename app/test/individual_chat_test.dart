@@ -21,8 +21,8 @@ Finder findSendButton() => find.byKey(const Key('chat_send_button'));
 Finder findAddMediaButton() => find.byKey(const Key('chat_add_media_button'));
 Finder findGifButton() => find.byKey(const Key('chat_gif_button'));
 
-const _lateIncomingCallRetryInterval = Duration(milliseconds: 50);
-const _lateIncomingCallRetryCount = 6;
+const _lateIncomingCallRetryInterval = Duration(milliseconds: 250);
+const _lateIncomingCallRetryCount = 8;
 
 Future<void> enterChatMessage(WidgetTester tester, String message) async {
   await tester.enterText(findChatMessageInput(), message);
@@ -220,73 +220,75 @@ void main() {
 
       group('and the call chat item is not yet available', () {
         group('and the caller cancels it', () {
-          testWidgets(
-            'it shows the call as missed when reopening chat',
-            skip: true,
-            (tester) async {
-              final l10n = await getL10n();
+          testWidgets('it shows the call as missed when reopening chat', (
+            tester,
+          ) async {
+            final l10n = await getL10n();
+            final staleCallItemTime = DateTime.now().subtract(
+              const Duration(seconds: 1),
+            );
 
-              await navigateToChat(
-                tester,
-                contactId: contactId,
-                chatSdk: chatSdk,
-                meetingPlaceCoreSDK: coreSdk,
-              );
+            await navigateToChat(
+              tester,
+              contactId: contactId,
+              chatSdk: chatSdk,
+              meetingPlaceCoreSDK: coreSdk,
+            );
 
-              // Receive incoming call event, but the call
-              // chat item is not yet available
-              coreSdk.emitIncomingCall(
-                IncomingAudioVideoCallEvent(
-                  callId: 'call-1',
-                  callerPermanentChannelDid:
-                      FakeChannels.individualChannel.permanentChannelDid!,
-                  otherPartyPermanentChannelDid:
-                      FakeChannels.individualChannel.permanentChannelDid!,
-                  mediaType: CallMediaType.video,
-                ),
-              );
-              await tester.pump();
+            // Receive incoming call event, but the call
+            // chat item is not yet available
+            coreSdk.emitIncomingCall(
+              IncomingAudioVideoCallEvent(
+                callId: 'call-1',
+                callerPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                otherPartyPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                mediaType: CallMediaType.video,
+              ),
+            );
+            await tester.pump();
 
-              // Simulate the caller cancelling the call before
-              // the call chat item is available
-              coreSdk.emitCancelledCall(
-                IncomingAudioVideoCallEvent(
-                  callId: 'call-1',
-                  callerPermanentChannelDid:
-                      FakeChannels.individualChannel.permanentChannelDid!,
-                  otherPartyPermanentChannelDid:
-                      FakeChannels.individualChannel.permanentChannelDid!,
-                  mediaType: CallMediaType.video,
-                ),
-              );
-              await tester.pump();
+            // Simulate the caller cancelling the call before
+            // the call chat item is available
+            coreSdk.emitCancelledCall(
+              IncomingAudioVideoCallEvent(
+                callId: 'call-1',
+                callerPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                otherPartyPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                mediaType: CallMediaType.video,
+              ),
+            );
+            await tester.pump();
 
-              // Simulate the call chat item being available after
-              // the caller has cancelled
-              chatSdk.setIncomingCallSessionMessage(
-                senderDid: FakeChannels.individualChannel.permanentChannelDid!,
-              );
+            // Simulate the call chat item being available after
+            // the caller has cancelled
+            chatSdk.setIncomingCallSessionMessage(
+              senderDid: FakeChannels.individualChannel.permanentChannelDid!,
+              dateCreated: staleCallItemTime,
+            );
 
-              // Advance through six 50ms retry intervals so the delayed
-              // missed-call reconciliation has enough fake time to complete.
-              await tester.pump(
-                _lateIncomingCallRetryInterval * _lateIncomingCallRetryCount,
-              );
-              await tester.pumpAndSettle();
+            // Advance through six 50ms retry intervals so the delayed
+            // missed-call reconciliation has enough fake time to complete.
+            await tester.pump(
+              _lateIncomingCallRetryInterval * _lateIncomingCallRetryCount,
+            );
+            await tester.pumpAndSettle();
 
-              expect(chatSdk.updateMessageCalls, hasLength(1));
-              final updatedMessage = chatSdk.updateMessageCalls.single;
-              final updatedCall = CallMetadata.maybeOf(
-                updatedMessage.attachments.first,
-              );
-              expect(updatedCall?.status, CallStatus.missed);
+            expect(chatSdk.updateMessageCalls, hasLength(1));
+            final updatedMessage = chatSdk.updateMessageCalls.single;
+            final updatedCall = CallMetadata.maybeOf(
+              updatedMessage.attachments.first,
+            );
+            expect(updatedCall?.status, CallStatus.missed);
 
-              await pushRoute(tester, '/contacts');
-              await pushRoute(tester, '/contacts/$contactId/chat');
+            await pushRoute(tester, '/contacts');
+            await pushRoute(tester, '/contacts/$contactId/chat');
 
-              expect(find.text(l10n.callChatItemMissed), findsOneWidget);
-            },
-          );
+            expect(find.text(l10n.callChatItemMissed), findsOneWidget);
+          });
         });
       });
     });

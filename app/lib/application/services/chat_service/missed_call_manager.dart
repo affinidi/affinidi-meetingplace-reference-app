@@ -20,7 +20,6 @@ class MissedCallManager {
     required this.ref,
     required this.otherPartyPermanentChannelDid,
     required this.callChatItemManager,
-    required this.getMessageById,
     required this.onUpsertChatItem,
   });
   static const _backgroundReplayRetryDelay = Duration(milliseconds: 250);
@@ -29,7 +28,6 @@ class MissedCallManager {
   final Ref ref;
   final String otherPartyPermanentChannelDid;
   final CallChatItemManager callChatItemManager;
-  final Future<Message?> Function(String messageId) getMessageById;
   final void Function(ChatItem) onUpsertChatItem;
   bool _backgroundReplayScheduled = false;
 
