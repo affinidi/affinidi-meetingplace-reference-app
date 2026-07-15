@@ -76,6 +76,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
     void onJoinOrAccept() {
       final routeContactId = contact?.id ?? event.otherPartyPermanentChannelDid;
       final isAudioOnly = event.mediaType == CallMediaType.audio;
+      final callId = event.callId;
       final callScreenProvider = audioVideoCallScreenControllerProvider(
         routeContactId,
       );
@@ -83,13 +84,13 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
       if (ref.exists(callScreenProvider) &&
           ref.read(callScreenProvider).peerIsCallingBack) {
         bannerNotifier.acceptRecall(
-          callId: event.callId,
+          callId: callId,
           contactId: routeContactId,
           isAudioOnly: isAudioOnly,
         );
       } else {
         bannerNotifier.accept(
-          callId: event.callId,
+          callId: callId,
           otherPartyChannelDid: event.otherPartyPermanentChannelDid,
           mediaType: event.mediaType,
           contactId: contact?.id,

@@ -244,7 +244,7 @@ void main() {
 
         // A is ringing for the first caller (simulates an accepted/active call
         // where incomingCallProvider still holds the first caller's event).
-        fakeSDK.emitIncoming(_event(callId: 'call-1'));
+        fakeSDK.emitIncoming(_event());
         await pumpEventQueue();
         expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
 

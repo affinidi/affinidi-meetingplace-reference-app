@@ -17,48 +17,7 @@ dev_dependencies:
 dependency_overrides:
   device_info_plus: ^13.0.0
   ffi: 2.2.0
-  # TODO (earl): remove once meeting_place_matrix_livekit is published to pub.dev and
-  # the git override below is no longer needed. The git-pinned livekit_client
-  # transitively requires device_info_plus ^12.3.0 → win32 ^5.x, which
-  # conflicts with file_picker ^12.x requiring win32 ^6.x.
-  # flutter_secure_storage_windows 4.1.0 also requires win32 ^5.x.
   flutter_secure_storage_windows: ^4.2.2
-  meeting_place_chat:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_chat
-      ref: ef05c581c809
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
-  meeting_place_control_plane:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_control_plane
-      ref: ef05c581c809
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_control_plane
-  meeting_place_core:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_core
-      ref: ef05c581c809
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_core
-  meeting_place_drift_repository:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_drift_repository
-      ref: ef05c581c809
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
-  meeting_place_matrix:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_matrix
-      ref: ef05c581c809
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_matrix
-  meeting_place_mediator:
-    git:
-      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      path: packages/meeting_place_mediator
-      ref: ef05c581c809
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_mediator
   meta: ^1.18.2
   test_api: ^0.7.12
   win32: ^6.2.0
