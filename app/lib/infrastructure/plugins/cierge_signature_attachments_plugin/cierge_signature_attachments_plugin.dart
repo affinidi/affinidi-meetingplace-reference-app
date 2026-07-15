@@ -118,7 +118,7 @@ class _SignedResponseBadge extends StatelessWidget {
     const badgeTextColor = Colors.white;
     const badgeBg = Color(0xFF2F3F64);
     const badgeBorder = Color(0xFF9BB2E6);
-    const badge = 'Verified response';
+    final badge = _contextBadgeText(proof.context);
 
     return Padding(
       padding: const EdgeInsets.only(top: 6),
@@ -235,7 +235,7 @@ Future<void> _showSignedResponseSheet(
                         border: Border.all(color: color.withAlpha(130)),
                       ),
                       child: Text(
-                        'Verified',
+                        _contextBadgeText(proof.context),
                         style: textTheme.labelMedium?.copyWith(
                           color: color,
                           fontWeight: FontWeight.w700,
@@ -248,6 +248,7 @@ Future<void> _showSignedResponseSheet(
                 row('Domain DID', proof.signerDid),
                 row('Model', proof.model),
                 row('Timestamp', proof.timestamp),
+                row('Context', _contextBadgeText(proof.context)),
                 row('Memory', proof.memory),
                 row('Message ID', proof.messageId),
                 row('Token ID', proof.tokenId),
@@ -259,4 +260,14 @@ Future<void> _showSignedResponseSheet(
       );
     },
   );
+}
+
+String _contextBadgeText(String? contextKey) {
+  final normalized = contextKey?.trim().toLowerCase();
+  return switch (normalized) {
+    'ctx-0' || 'ctx-a' => 'Work (ctx-0)',
+    'ctx-1' || 'ctx-b' => 'Personal (ctx-1)',
+    String value when value.isNotEmpty => 'Context ($value)',
+    _ => 'Context (-)',
+  };
 }
