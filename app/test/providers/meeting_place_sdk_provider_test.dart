@@ -22,6 +22,15 @@ void main() {
     );
   });
 
+  // SharedPreferences instance with hasMnemonic=true, used so that
+  // meetingPlaceSdkProvider proceeds past the mnemonic-configured guard.
+  Future<SharedPreferences> _mnemonicPrefs() async {
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesKeys.hasMnemonic.name: true,
+    });
+    return SharedPreferences.getInstance();
+  }
+
   group('meetingPlaceSdkProvider bootstrap ordering', () {
     test(
       '''fails with vodozemac error before SDK is created when fvod.init() throws''',
@@ -32,6 +41,7 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             appLoggerProvider.overrideWithValue(AppLogger.instance),
+            sharedPreferencesProvider.overrideWithValue(await _mnemonicPrefs()),
             secureStorageProvider.overrideWith(
               (ref) async => FakeSecureStorage(),
             ),
@@ -69,6 +79,7 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             appLoggerProvider.overrideWithValue(AppLogger.instance),
+            sharedPreferencesProvider.overrideWithValue(await _mnemonicPrefs()),
             secureStorageProvider.overrideWith(
               (ref) async => FakeSecureStorage(),
             ),
@@ -93,6 +104,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           appLoggerProvider.overrideWithValue(AppLogger.instance),
+          sharedPreferencesProvider.overrideWithValue(await _mnemonicPrefs()),
           secureStorageProvider.overrideWith(
             (ref) async => FakeSecureStorage(),
           ),
@@ -124,7 +136,9 @@ void main() {
       final callLog = <String>[];
       final connectionOfferRepositoryReached = Completer<void>();
 
-      SharedPreferences.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({
+        SharedPreferencesKeys.hasMnemonic.name: true,
+      });
       final sharedPreferences = await SharedPreferences.getInstance();
 
       // When vodozemacInit succeeds, the provider must continue into the

@@ -43,6 +43,9 @@ class RoutePaths {
   // Authentication
   static const authentication = '/authentication';
 
+  // Mnemonic
+  static const mnemonic = '/mnemonic';
+
   // Onboarding
   static const String onboarding = '/onboarding';
 }

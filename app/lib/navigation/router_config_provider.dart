@@ -7,7 +7,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../application/services/authentication_service/authentication_service.dart';
 import '../application/services/identities_service/identities_service.dart';
 import '../application/services/settings_service/settings_service.dart';
+import '../infrastructure/providers/mnemonic_configured_provider.dart';
 import '../presentation/screens/authentication/authentication_screen/authentication_screen.dart';
+import '../presentation/screens/mnemonic/mnemonic_screen.dart';
 import '../presentation/screens/onboarding/onboarding_screen/onboarding_screen.dart';
 import '../presentation/screens/settings/settings_screen.dart';
 import 'routes/app_routes.dart';
@@ -56,6 +58,11 @@ Future<String?> _guard(
     return RoutePaths.authentication;
   }
 
+  final needsMnemonic = !ref.read(mnemonicConfiguredProvider);
+  if (needsMnemonic) {
+    return RoutePaths.mnemonic;
+  }
+
   if (!alreadyOnboarded) {
     return RoutePaths.onboarding;
   }
@@ -66,6 +73,7 @@ Future<String?> _guard(
 
   if ((state.matchedLocation == RoutePaths.authentication &&
           isAuthenticated == true) ||
+      (state.matchedLocation == RoutePaths.mnemonic && !needsMnemonic) ||
       (state.matchedLocation == RoutePaths.onboarding &&
           alreadyOnboarded == true)) {
     if (await _shouldRedirectToIdentities(ref)) {
@@ -105,6 +113,15 @@ class GoRouterRefreshNotifier extends ChangeNotifier {
       },
       fireImmediately: true,
     );
+
+    ref.listen(
+      mnemonicConfiguredProvider,
+      (previous, next) {
+        if (previous != next) {
+          notifyListeners();
+        }
+      },
+    );
   }
   final Ref ref;
 }
@@ -141,6 +158,11 @@ GoRouter routerConfig(Ref ref) {
         path: RoutePaths.authentication,
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: AuthenticationScreen()),
+      ),
+      GoRoute(
+        path: RoutePaths.mnemonic,
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: MnemonicScreen()),
       ),
       GoRoute(
         path: RoutePaths.onboarding,
