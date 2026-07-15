@@ -615,6 +615,14 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
+  Future<void> sendSuggestionRequest({
+    required String messageId,
+    required String text,
+  }) async {
+    await _chatSDK?.sendSuggestionRequest(messageId: messageId, text: text);
+  }
+
+  @override
   Future<void> deleteMessage(
     Message message, {
     bool deleteForMeOnly = false,

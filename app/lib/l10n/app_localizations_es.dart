@@ -1094,6 +1094,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chatMessageActionCopy => 'Copiar mensaje';
 
   @override
+  String get chatMessageActionAskSuggestion => 'Solicitar sugerencia';
+
+  @override
   String get chatMessageActionEdit => 'Editar mensaje';
 
   @override
@@ -1116,6 +1119,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get chatMessageDeleteFailed => 'No se pudo eliminar el mensaje';
+
+  @override
+  String get chatSuggestionRequestFailed =>
+      'No se pudo solicitar la sugerencia';
 
   @override
   String chatItemStatus(String status) {
