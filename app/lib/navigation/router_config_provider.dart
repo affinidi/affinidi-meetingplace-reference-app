@@ -114,14 +114,6 @@ class GoRouterRefreshNotifier extends ChangeNotifier {
       fireImmediately: true,
     );
 
-    ref.listen(
-      mnemonicConfiguredProvider,
-      (previous, next) {
-        if (previous != next) {
-          notifyListeners();
-        }
-      },
-    );
   }
   final Ref ref;
 }
