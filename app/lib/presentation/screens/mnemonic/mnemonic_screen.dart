@@ -30,8 +30,21 @@ class MnemonicScreen extends HookConsumerWidget {
 
     Future<void> onContinue() async {
       final saved = await controller.saveMnemonic(mnemonicController.text);
-      if (saved && context.mounted) {
+      if (!context.mounted) return;
+      if (saved) {
         context.go('/');
+      } else {
+        final errorMessage =
+            ref.read(provider).errorMessage ?? 'An error occurred.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: colorScheme.errorContainer,
+            showCloseIcon: true,
+            closeIconColor: colorScheme.onErrorContainer,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
 
@@ -126,22 +139,6 @@ class MnemonicScreen extends HookConsumerWidget {
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(color: Colors.white),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: colorScheme.error,
-                          ),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: colorScheme.error,
-                          ),
-                        ),
-                        errorText: state.isError ? state.errorMessage : null,
-                        errorStyle: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.error,
                         ),
                       ),
                     ),

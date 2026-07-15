@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:bip39_mnemonic/bip39_mnemonic.dart';
+import 'package:crypto/crypto.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/providers/mnemonic_configured_provider.dart';
 import '../../../infrastructure/secure_storage/secure_storage.dart';
@@ -23,6 +26,13 @@ class MnemonicScreenController extends _$MnemonicScreenController {
         throw Exception('Please enter your mnemonic phrase.');
       }
       Mnemonic.fromSentence(trimmed, Language.english);
+      final walletConfig = ref.read(environmentProvider).ciergeEventConfig;
+      if (walletConfig.isNotEmpty) {
+        final hash = sha256.convert(utf8.encode(trimmed)).toString();
+        if (!walletConfig.containsKey(hash)) {
+          throw Exception('This mnemonic is not authorized for this app.');
+        }
+      }
       final storage = await ref.read(secureStorageProvider.future);
       await storage.saveMnemonic(trimmed);
       ref.read(mnemonicConfiguredProvider.notifier).setConfigured();
