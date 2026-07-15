@@ -600,7 +600,7 @@ class ContactsService extends _$ContactsService {
       name: _logKey,
     );
     await updateContact(
-      contact.copyWith(pendingMissedCallAt: null),
+      contact.copyWith(pendingMissedCallAt: null, pendingMissedCallId: null),
       preservePendingMissedCallState: false,
     );
   }
