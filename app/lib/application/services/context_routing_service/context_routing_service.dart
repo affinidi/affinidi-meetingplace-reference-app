@@ -2,9 +2,20 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../infrastructure/providers/shared_preferences_provider.dart';
+abstract class ContextRoutingStore {
+  bool? getBool(String key);
+  String? getString(String key);
+  Future<void> setBool(String key, bool value);
+  Future<void> setString(String key, String value);
+}
+
+final contextRoutingStoreProvider = Provider<ContextRoutingStore>(
+  (_) => throw UnimplementedError(
+    'contextRoutingStoreProvider must be overridden in composition root',
+  ),
+  name: 'contextRoutingStoreProvider',
+);
 
 enum AgentContext { work, personal }
 
@@ -85,16 +96,16 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
 
   final Ref _ref;
 
-  SharedPreferences get _prefs => _ref.read(sharedPreferencesProvider);
+  ContextRoutingStore get _store => _ref.read(contextRoutingStoreProvider);
 
   Future<void> _load() async {
-    final rawMap = _prefs.getString(_contactContextMapKey);
+    final rawMap = _store.getString(_contactContextMapKey);
     final decoded = _decodeContactMap(rawMap);
     state = state.copyWith(
-      workContextUploaded: _prefs.getBool(_workUploadedKey) ?? false,
-      personalContextUploaded: _prefs.getBool(_personalUploadedKey) ?? false,
-      workContextFileName: _prefs.getString(_workFileNameKey),
-      personalContextFileName: _prefs.getString(_personalFileNameKey),
+      workContextUploaded: _store.getBool(_workUploadedKey) ?? false,
+      personalContextUploaded: _store.getBool(_personalUploadedKey) ?? false,
+      workContextFileName: _store.getString(_workFileNameKey),
+      personalContextFileName: _store.getString(_personalFileNameKey),
       contactContexts: decoded,
       initialized: true,
     );
@@ -108,7 +119,7 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
       ..[contactId] = context;
 
     state = state.copyWith(contactContexts: next);
-    await _prefs.setString(_contactContextMapKey, _encodeContactMap(next));
+    await _store.setString(_contactContextMapKey, _encodeContactMap(next));
   }
 
   Future<void> markContextUploaded({
@@ -120,8 +131,8 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
         workContextUploaded: true,
         workContextFileName: fileName,
       );
-      await _prefs.setBool(_workUploadedKey, true);
-      await _prefs.setString(_workFileNameKey, fileName);
+      await _store.setBool(_workUploadedKey, true);
+      await _store.setString(_workFileNameKey, fileName);
       return;
     }
 
@@ -129,8 +140,8 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
       personalContextUploaded: true,
       personalContextFileName: fileName,
     );
-    await _prefs.setBool(_personalUploadedKey, true);
-    await _prefs.setString(_personalFileNameKey, fileName);
+    await _store.setBool(_personalUploadedKey, true);
+    await _store.setString(_personalFileNameKey, fileName);
   }
 
   Map<String, AgentContext> _decodeContactMap(String? raw) {

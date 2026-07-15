@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'package:sqlite3/open.dart' as sqlite_open;
 
+import 'application/services/context_routing_service/context_routing_service.dart';
 import 'infrastructure/configuration/environment.dart';
 import 'infrastructure/firebase_messaging/firebase_options.dart';
 import 'infrastructure/firebase_messaging/firebase_push_notification_messaging.dart';
@@ -33,6 +34,7 @@ import 'infrastructure/providers/channel_repository_provider.dart';
 import 'infrastructure/providers/chat_repository_provider.dart';
 import 'infrastructure/providers/connection_offer_repository_provider.dart';
 import 'infrastructure/providers/contacts_repository_provider.dart';
+import 'infrastructure/providers/context_routing_store_provider.dart';
 import 'infrastructure/providers/group_repository_provider.dart';
 import 'infrastructure/providers/identities_repository_provider.dart';
 import 'infrastructure/providers/liveness_credentials_repository_provider.dart';
@@ -135,6 +137,11 @@ void main() async {
                 ..setBackgroundHandler(firebaseMessagingBackgroundHandler),
         ),
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+        contextRoutingStoreProvider.overrideWith(
+          (ref) => SharedPreferencesContextRoutingStore(
+            ref.read(sharedPreferencesProvider),
+          ),
+        ),
       ],
       observers: [ProviderDebugLogger()],
       child: const App(),
