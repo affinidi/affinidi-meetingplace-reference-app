@@ -38,17 +38,11 @@ class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
     final inlineProof = CiergeSignatureProof.fromAttachment(request.attachment);
     if (inlineProof != null) {
       developer.log(
-        'inline proof parsed context=${inlineProof.context ?? '-'} '
+        'inline proof parsed '
         'memory=${inlineProof.memory ?? '-'}',
         name: 'CiergeSignaturePlugin',
       );
-      final contextLabel = inlineProof.context?.trim();
-      return _SignedResponseBadge(
-        proof: inlineProof,
-        contextLabel: contextLabel == null || contextLabel.isEmpty
-            ? null
-            : contextLabel,
-      );
+      return _SignedResponseBadge(proof: inlineProof);
     }
 
     final download = request.download;
@@ -83,17 +77,11 @@ class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
           return const SizedBox.shrink();
         }
         developer.log(
-          'download proof parsed context=${proof.context ?? '-'} '
+          'download proof parsed '
           'memory=${proof.memory ?? '-'}',
           name: 'CiergeSignaturePlugin',
         );
-        final contextLabel = proof.context?.trim();
-        return _SignedResponseBadge(
-          proof: proof,
-          contextLabel: contextLabel == null || contextLabel.isEmpty
-              ? null
-              : contextLabel,
-        );
+        return _SignedResponseBadge(proof: proof);
       },
     );
   }
@@ -121,17 +109,16 @@ class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
 }
 
 class _SignedResponseBadge extends StatelessWidget {
-  const _SignedResponseBadge({required this.proof, required this.contextLabel});
+  const _SignedResponseBadge({required this.proof});
 
   final CiergeSignatureProof proof;
-  final String? contextLabel;
 
   @override
   Widget build(BuildContext context) {
     const badgeTextColor = Colors.white;
     const badgeBg = Color(0xFF2F3F64);
     const badgeBorder = Color(0xFF9BB2E6);
-    final badge = _contextBadgeLabel(contextLabel);
+    const badge = 'Verified response';
 
     return Padding(
       padding: const EdgeInsets.only(top: 6),
@@ -258,7 +245,6 @@ Future<void> _showSignedResponseSheet(
                   ],
                 ),
                 const SizedBox(height: 16),
-                row('Context', proof.context),
                 row('Domain DID', proof.signerDid),
                 row('Model', proof.model),
                 row('Timestamp', proof.timestamp),
@@ -273,22 +259,4 @@ Future<void> _showSignedResponseSheet(
       );
     },
   );
-}
-
-String _contextBadgeLabel(String? rawContext) {
-  final value = rawContext?.trim().toLowerCase();
-  if (value == null || value.isEmpty) return 'Verified response';
-  if (value == 'ctx-a' ||
-      value == 'ctx-0' ||
-      value == 'ctx0' ||
-      value == 'work') {
-    return 'Work ctx 0';
-  }
-  if (value == 'ctx-b' ||
-      value == 'ctx-1' ||
-      value == 'ctx1' ||
-      value == 'personal') {
-    return 'Personal ctx 1';
-  }
-  return rawContext!;
 }
