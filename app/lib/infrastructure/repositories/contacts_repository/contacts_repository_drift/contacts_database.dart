@@ -51,7 +51,7 @@ class ContactsDatabase extends _$ContactsDatabase {
   ContactsDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -213,6 +213,18 @@ class ContactsDatabase extends _$ContactsDatabase {
           );
         }
       }
+
+      if (from < 8) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+        final pendingMissedCallIdExists = result.any(
+          (row) => row.data['name'] == 'pending_missed_call_id',
+        );
+        if (!pendingMissedCallIdExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN pending_missed_call_id TEXT',
+          );
+        }
+      }
     },
   );
 }
@@ -237,6 +249,7 @@ class Contacts extends Table {
   IntColumn get currentMessageSeqNo => integer().clientDefault(() => 0)();
   IntColumn get missedCallCount => integer().clientDefault(() => 0)();
   DateTimeColumn get pendingMissedCallAt => dateTime().nullable()();
+  TextColumn get pendingMissedCallId => text().nullable()();
   BoolColumn get hasBeenOpened => boolean().clientDefault(() => false)();
   DateTimeColumn get lastKeepAliveMessage => dateTime().nullable()();
   BoolColumn get notificationBannerDismissed =>

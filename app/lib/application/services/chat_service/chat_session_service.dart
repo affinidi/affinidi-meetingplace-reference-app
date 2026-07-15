@@ -385,6 +385,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
       if (_missedCallManager != null) {
         await _missedCallManager!.replayPendingMissedCall();
+        _missedCallManager!.scheduleReplayPendingMissedCallFollowUp();
       }
 
       await _resetBadgeCount();
@@ -772,10 +773,46 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   void upsertChatItem(ChatItem item) {
     final existing = state.messages;
     final idx = existing.indexWhere((m) => m.messageId == item.messageId);
+    if (idx != -1 && _shouldKeepExistingChatItem(existing[idx], item)) {
+      _logger.info(
+        'upsertChatItem: Keeping final call item ${item.messageId} over '
+        'non-final stream update',
+        name: _logKey,
+      );
+      return;
+    }
     final messages = idx == -1
         ? existing.insertSorted(item)
         : existing.replaceItemAtIndex(idx, item);
     state = state.copyWith(messages: messages);
+  }
+
+  /// Returns whether [existing] should win over a newer non-final call item.
+  bool _shouldKeepExistingChatItem(ChatItem existing, ChatItem next) {
+    if (existing is! Message || next is! Message) return false;
+
+    final existingCall = _callMetadataOf(existing);
+    final nextCall = _callMetadataOf(next);
+    if (existingCall == null || nextCall == null) return false;
+
+    return _isFinalCallStatus(existingCall.status) &&
+        !_isFinalCallStatus(nextCall.status);
+  }
+
+  /// Returns the call metadata attachment carried by [message], if any.
+  CallMetadata? _callMetadataOf(Message message) {
+    for (final attachment in message.attachments) {
+      if (!CallMetadata.isCall(attachment)) continue;
+      return CallMetadata.maybeOf(attachment);
+    }
+    return null;
+  }
+
+  /// Returns whether [status] is terminal for a call chat item.
+  bool _isFinalCallStatus(CallStatus status) {
+    return status == CallStatus.missed ||
+        status == CallStatus.declined ||
+        status == CallStatus.ended;
   }
 
   String _peerFirstNameForZkpUi() {
@@ -960,8 +997,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   Future<bool> markCallAsMissed() {
-    if (_chatId == null) return Future.value(false);
-    return _callChatItemManager.markCallAsMissed();
+    if (_chatId == null || _missedCallManager == null) {
+      return Future.value(false);
+    }
+    return _missedCallManager!.reconcilePendingMissedCall();
   }
 
   @override

@@ -63,6 +63,7 @@ class ContactsRepositoryDrift implements ContactsRepository {
               currentMessageSeqNo: Value(contact.currentMessageSeqNo),
               missedCallCount: Value(contact.missedCallCount),
               pendingMissedCallAt: Value(contact.pendingMissedCallAt),
+              pendingMissedCallId: Value(contact.pendingMissedCallId),
               hasBeenOpened: Value(contact.hasBeenOpened),
               lastKeepAliveMessage: Value(contact.lastKeepAliveMessage),
               notificationBannerDismissed: Value(
@@ -160,6 +161,7 @@ class ContactsRepositoryDrift implements ContactsRepository {
           currentMessageSeqNo: Value(contact.currentMessageSeqNo),
           missedCallCount: Value(contact.missedCallCount),
           pendingMissedCallAt: Value(contact.pendingMissedCallAt),
+          pendingMissedCallId: Value(contact.pendingMissedCallId),
           hasBeenOpened: Value(contact.hasBeenOpened),
           lastKeepAliveMessage: Value(contact.lastKeepAliveMessage),
           notificationBannerDismissed: Value(
@@ -224,6 +226,7 @@ class _ContactMapper {
       currentMessageSeqNo: contact.currentMessageSeqNo,
       missedCallCount: contact.missedCallCount,
       pendingMissedCallAt: contact.pendingMissedCallAt,
+      pendingMissedCallId: contact.pendingMissedCallId,
       hasBeenOpened: contact.hasBeenOpened,
       channelDid: contact.channelDid,
       channelDidSha256: contact.channelDidSha256,

@@ -39,6 +39,8 @@ abstract class _$ContactCWProxy {
 
   Contact pendingMissedCallAt(DateTime? pendingMissedCallAt);
 
+  Contact pendingMissedCallId(String? pendingMissedCallId);
+
   Contact hasBeenOpened(bool hasBeenOpened);
 
   Contact lastKeepAliveMessage(DateTime? lastKeepAliveMessage);
@@ -69,6 +71,7 @@ abstract class _$ContactCWProxy {
     int currentMessageSeqNo,
     int missedCallCount,
     DateTime? pendingMissedCallAt,
+    String? pendingMissedCallId,
     bool hasBeenOpened,
     DateTime? lastKeepAliveMessage,
     bool notificationBannerDismissed,
@@ -137,6 +140,10 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       call(pendingMissedCallAt: pendingMissedCallAt);
 
   @override
+  Contact pendingMissedCallId(String? pendingMissedCallId) =>
+      call(pendingMissedCallId: pendingMissedCallId);
+
+  @override
   Contact hasBeenOpened(bool hasBeenOpened) =>
       call(hasBeenOpened: hasBeenOpened);
 
@@ -173,6 +180,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? currentMessageSeqNo = const $CopyWithPlaceholder(),
     Object? missedCallCount = const $CopyWithPlaceholder(),
     Object? pendingMissedCallAt = const $CopyWithPlaceholder(),
+    Object? pendingMissedCallId = const $CopyWithPlaceholder(),
     Object? hasBeenOpened = const $CopyWithPlaceholder(),
     Object? lastKeepAliveMessage = const $CopyWithPlaceholder(),
     Object? notificationBannerDismissed = const $CopyWithPlaceholder(),
@@ -252,6 +260,10 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.pendingMissedCallAt
           // ignore: cast_nullable_to_non_nullable
           : pendingMissedCallAt as DateTime?,
+      pendingMissedCallId: pendingMissedCallId == const $CopyWithPlaceholder()
+          ? _value.pendingMissedCallId
+          // ignore: cast_nullable_to_non_nullable
+          : pendingMissedCallId as String?,
       hasBeenOpened:
           hasBeenOpened == const $CopyWithPlaceholder() || hasBeenOpened == null
           ? _value.hasBeenOpened

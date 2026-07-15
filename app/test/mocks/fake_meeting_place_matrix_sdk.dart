@@ -13,7 +13,8 @@ class FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
   Stream<IncomingAudioVideoCallEvent> get incomingCalls => const Stream.empty();
 
   @override
-  Stream<String> get cancelledCalls => const Stream.empty();
+  Stream<IncomingAudioVideoCallEvent> get cancelledCalls =>
+      const Stream.empty();
 
   @override
   Stream<CallSignal> get callSignals => const Stream.empty();

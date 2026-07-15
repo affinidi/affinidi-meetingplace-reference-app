@@ -211,5 +211,40 @@ void main() {
         );
       },
     );
+
+    test('clearPendingMissedCall clears persisted marker state instead of '
+        'preserving it back from storage', () async {
+      final channelDid = FakeContacts.individualContact.channelDid!;
+      final markerTime = DateTime(2026, 7, 14, 18, 27, 5).toUtc();
+
+      final persistedContact = FakeContacts.individualContact.copyWith(
+        pendingMissedCallAt: markerTime,
+        pendingMissedCallId: 'call-123',
+      );
+      final repository = FakeContactsRepository(contacts: [persistedContact]);
+
+      final container = _makeContainer(repository: repository);
+      addTearDown(container.dispose);
+
+      final service = container.read(contactsServiceProvider.notifier);
+
+      await service.clearPendingMissedCall(channelDid);
+
+      final updated = repository.contacts.firstWhere(
+        (c) => c.channelDid == channelDid,
+      );
+      expect(
+        updated.pendingMissedCallAt,
+        isNull,
+        reason:
+            'an explicit clear must not be overwritten by the preservation '
+            'merge',
+      );
+      expect(
+        updated.pendingMissedCallId,
+        isNull,
+        reason: 'call-id marker must be cleared together with the timestamp',
+      );
+    });
   });
 }

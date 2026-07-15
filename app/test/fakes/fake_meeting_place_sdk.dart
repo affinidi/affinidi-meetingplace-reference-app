@@ -39,7 +39,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
 
   final _incomingCallsController =
       StreamController<IncomingAudioVideoCallEvent>.broadcast();
-  final _cancelledCallsController = StreamController<String>.broadcast();
+  final _cancelledCallsController =
+      StreamController<IncomingAudioVideoCallEvent>.broadcast();
   final _callSignalsController = StreamController<CallSignal>.broadcast();
   final acceptedCallIds = <String>[];
   final declinedCallIds = <String>[];
@@ -389,7 +390,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
       _incomingCallsController.stream;
 
   @override
-  Stream<String> get cancelledCalls => _cancelledCallsController.stream;
+  Stream<IncomingAudioVideoCallEvent> get cancelledCalls =>
+      _cancelledCallsController.stream;
 
   @override
   Stream<CallSignal> get callSignals => _callSignalsController.stream;
@@ -401,8 +403,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     _incomingCallsController.add(event);
   }
 
-  void emitCancelledCall(String callId) {
-    _cancelledCallsController.add(callId);
+  void emitCancelledCall(IncomingAudioVideoCallEvent event) {
+    _cancelledCallsController.add(event);
   }
 
   @override

@@ -1021,6 +1021,7 @@ void main() {
       required String messageId,
       required bool isFromMe,
       required CallStatus status,
+      String callId = '',
     }) => Message(
       chatId: 'fake-chat-id',
       messageId: messageId,
@@ -1034,7 +1035,7 @@ void main() {
           id: const Uuid().v4(),
           mediaType: CallMediaType.video,
           status: status,
-          callId: '',
+          callId: callId,
         ),
       ],
     );
@@ -1226,19 +1227,26 @@ void main() {
       },
     );
 
-    test('markCallAsMissed updates the latest non-terminal incoming call item '
-        'to missed', () async {
+    test('markCallAsMissed returns true and updates the latest non-terminal '
+        'incoming call item to missed', () async {
+      fakeContactsService.setContacts([FakeContacts.individualContact]);
       fakeChatSdk.sessionMessages = [
         callMessage(
           messageId: 'incoming-call',
           isFromMe: false,
           status: CallStatus.calling,
+          callId: 'test-call-id',
         ),
       ];
 
       await chatService.startChatSession();
-      await chatService.markCallAsMissed();
+      await fakeContactsService.setPendingMissedCall(
+        channelDid,
+        callId: 'test-call-id',
+      );
+      final healed = await chatService.markCallAsMissed();
 
+      expect(healed, isTrue);
       expect(fakeChatSdk.updateMessageCalls, hasLength(1));
       final updated = fakeChatSdk.updateMessageCalls.single;
       expect(updated.messageId, 'incoming-call');
@@ -1248,55 +1256,50 @@ void main() {
       expect(call?.status, CallStatus.missed);
     });
 
-    test('startChatSession replays a pending missed-call marker and heals the '
-        'stale incoming call item', () async {
-      fakeContactsService.setContacts([
-        Contact(
-          id: testContact.id,
-          channelDid: testContact.channelDid,
-          channelDidSha256: testContact.channelDidSha256,
-          offerLink: testContact.offerLink,
-          card: testContact.card,
-          dateAdded: testContact.dateAdded,
-          type: testContact.type,
-          status: testContact.status,
-          mediatorDid: testContact.mediatorDid,
-          origin: testContact.origin,
-          category: testContact.category,
-          otherPartyCard: testContact.otherPartyCard,
-          displayName: testContact.displayName,
-          badgeUpdateInProgress: testContact.badgeUpdateInProgress,
-          badgeCount: testContact.badgeCount,
-          currentMessageSeqNo: testContact.currentMessageSeqNo,
-          missedCallCount: testContact.missedCallCount,
-          pendingMissedCallAt: DateTime.now().toUtc().subtract(
-            const Duration(seconds: 5),
+    test(
+      'startChatSession keeps the pending missed-call marker available for '
+      'follow-up healing when no stale item exists during initial replay',
+      () async {
+        fakeContactsService.setContacts([
+          Contact(
+            id: testContact.id,
+            channelDid: testContact.channelDid,
+            channelDidSha256: testContact.channelDidSha256,
+            offerLink: testContact.offerLink,
+            card: testContact.card,
+            dateAdded: testContact.dateAdded,
+            type: testContact.type,
+            status: testContact.status,
+            mediatorDid: testContact.mediatorDid,
+            origin: testContact.origin,
+            category: testContact.category,
+            otherPartyCard: testContact.otherPartyCard,
+            displayName: testContact.displayName,
+            badgeUpdateInProgress: testContact.badgeUpdateInProgress,
+            badgeCount: testContact.badgeCount,
+            currentMessageSeqNo: testContact.currentMessageSeqNo,
+            missedCallCount: testContact.missedCallCount,
+            pendingMissedCallAt: DateTime.now().toUtc().subtract(
+              const Duration(seconds: 5),
+            ),
+            hasBeenOpened: testContact.hasBeenOpened,
+            lastKeepAliveMessage: testContact.lastKeepAliveMessage,
+            notificationBannerDismissed:
+                testContact.notificationBannerDismissed,
           ),
-          hasBeenOpened: testContact.hasBeenOpened,
-          lastKeepAliveMessage: testContact.lastKeepAliveMessage,
-          notificationBannerDismissed: testContact.notificationBannerDismissed,
-        ),
-      ]);
-      fakeChatSdk.sessionMessages = [
-        callMessage(
-          messageId: 'outside-chat-incoming-call',
-          isFromMe: false,
-          status: CallStatus.ringing,
-        ),
-      ];
+        ]);
+        fakeChatSdk.sessionMessages = [fakeChatSdk.fakeMessage()];
 
-      await chatService.startChatSession();
-      await pumpEventQueue();
+        await chatService.startChatSession();
+        await pumpEventQueue();
 
-      expect(fakeChatSdk.updateMessageCalls, hasLength(1));
-      final updated = fakeChatSdk.updateMessageCalls.single;
-      expect(updated.messageId, 'outside-chat-incoming-call');
-      final call = CallMetadata.maybeOf(
-        updated.attachments.firstWhere(CallMetadata.isCall),
-      );
-      expect(call?.status, CallStatus.missed);
-      expect(fakeContactsService.clearPendingMissedCallCalls, [channelDid]);
-    });
+        expect(fakeChatSdk.updateMessageCalls, isEmpty);
+        expect(
+          await fakeContactsService.getPendingMissedCallAt(channelDid),
+          isNotNull,
+        );
+      },
+    );
 
     test('markCallAsMissed is a no-op when there is no pending incoming call '
         'item', () async {
@@ -1309,8 +1312,9 @@ void main() {
       ];
 
       await chatService.startChatSession();
-      await chatService.markCallAsMissed();
+      final healed = await chatService.markCallAsMissed();
 
+      expect(healed, isFalse);
       expect(fakeChatSdk.updateMessageCalls, isEmpty);
     });
   });

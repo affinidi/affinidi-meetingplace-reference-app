@@ -61,10 +61,12 @@ class _FakeScreenControllerWithPeerRecall
 }
 
 IncomingAudioVideoCallEvent _event({
+  String callId = 'call-1',
   String callerPermanentChannelDid = 'did:key:caller',
   String otherPartyPermanentChannelDid = 'did:key:individual-channel',
   bool isAudioOnly = false,
 }) => IncomingAudioVideoCallEvent(
+  callId: callId,
   callerPermanentChannelDid: callerPermanentChannelDid,
   otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
   mediaType: isAudioOnly ? CallMediaType.audio : CallMediaType.video,
@@ -133,7 +135,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.call));
       await tester.pump();
 
-      expect(callService.acceptedCallIds, ['did:key:caller']);
+      expect(callService.acceptedCallIds, ['call-1']);
       expect(navigator.goCalls.single, contains('individual-contact-id'));
     });
 
@@ -146,7 +148,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.call));
       await tester.pump();
 
-      expect(callService.acceptedCallIds, ['did:key:caller']);
+      expect(callService.acceptedCallIds, ['call-1']);
       expect(navigator.goCalls.single, contains('unknown'));
     });
 
@@ -169,7 +171,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.call));
       await tester.pump();
 
-      expect(callService.acceptedCallIds, ['did:key:caller']);
+      expect(callService.acceptedCallIds, ['call-1']);
     });
   });
 
@@ -181,7 +183,7 @@ void main() {
       await tester.tap(find.byIcon(Icons.call_end));
       await tester.pump();
 
-      expect(callService.declinedCallIds, ['did:key:caller']);
+      expect(callService.declinedCallIds, ['call-1']);
       expect(navigator.goCalls, isEmpty);
     });
   });
@@ -200,7 +202,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(callService.declinedCallIds, ['did:key:caller']);
+      expect(callService.declinedCallIds, ['call-1']);
     });
 
     testWidgets(

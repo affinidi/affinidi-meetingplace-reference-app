@@ -171,6 +171,30 @@ class CallChatItemManager {
             call.status == CallStatus.ringing);
   }
 
+  /// Returns the transport call id carried by [message], or null when it is
+  /// not a call item.
+  String? callIdOf(Message message) {
+    final attachment = message.attachments.firstWhereOrNull(
+      CallMetadata.isCall,
+    );
+    return attachment == null ? null : CallMetadata.maybeOf(attachment)?.callId;
+  }
+
+  /// Whether [message] belongs to the pending incoming call identified by
+  /// [pendingCallId].
+  ///
+  /// When the SDK has not yet observed the caller's live MatrixRTC membership,
+  /// the incoming banner falls back to the Matrix room id. Call items still
+  /// carry the full MatrixRTC callId in the form `roomId@timestamp`, so prefix
+  /// matching preserves deterministic healing without relying on local time.
+  bool matchesPendingCallId(Message message, String pendingCallId) {
+    final messageCallId = callIdOf(message);
+    if (messageCallId == null) return false;
+    if (messageCallId == pendingCallId) return true;
+    return !pendingCallId.contains('@') &&
+        messageCallId.startsWith('$pendingCallId@');
+  }
+
   /// Returns the id of the latest stale incoming call item created at or
   /// before [notAfter], or `null` if none. Retries up to
   /// [_resolveCallChatItemMaxAttempts] times to handle delayed chat history
@@ -179,48 +203,36 @@ class CallChatItemManager {
   Future<String?> resolveStaleIncomingCallItemIdBefore(
     DateTime notAfter,
   ) async {
-    final methodName = 'resolveStaleIncomingCallItemIdBefore';
-    await ensureInitialized();
-    final chatSdk = getChatSdk();
-    if (chatSdk == null) {
-      logger.warning('$methodName: Chat SDK unavailable', name: _logKey);
-      return null;
-    }
+    final match = await _resolveStaleIncomingCallItems(
+      methodName: 'resolveStaleIncomingCallItemIdBefore',
+      messageFilter: (message) =>
+          !message.dateCreated.toUtc().isAfter(notAfter.toUtc()),
+    );
+    return match.lastOrNull;
+  }
 
-    for (
-      var attempt = 0;
-      attempt < _resolveCallChatItemMaxAttempts;
-      attempt++
-    ) {
-      try {
-        final items = await chatSdk.messages;
-        final match = items
-            .whereType<Message>()
-            .where(isStaleIncomingCall)
-            .where((m) => !m.dateCreated.toUtc().isAfter(notAfter.toUtc()))
-            .lastOrNull;
+  /// Returns stale incoming call item ids created at or before [notAfter].
+  ///
+  /// Replay healing uses this to settle delayed history from the same ended
+  /// call episode before the pending marker is cleared.
+  Future<List<String>> resolveStaleIncomingCallItemIdsBefore(
+    DateTime notAfter,
+  ) async {
+    return _resolveStaleIncomingCallItems(
+      methodName: 'resolveStaleIncomingCallItemIdsBefore',
+      messageFilter: (message) =>
+          !message.dateCreated.toUtc().isAfter(notAfter.toUtc()),
+    );
+  }
 
-        if (match != null) {
-          logger.info('$methodName: Found ${match.messageId}', name: _logKey);
-          return match.messageId;
-        }
-
-        if (attempt < _resolveCallChatItemMaxAttempts - 1) {
-          await Future<void>.delayed(_resolveCallChatItemRetryDelay);
-        }
-      } catch (e, stackTrace) {
-        logger.error(
-          '$methodName failed',
-          error: e,
-          stackTrace: stackTrace,
-          name: _logKey,
-        );
-        return null;
-      }
-    }
-
-    logger.info('$methodName: No stale item found', name: _logKey);
-    return null;
+  /// Returns all stale incoming call item ids for [callId].
+  Future<List<String>> resolveStaleIncomingCallItemIdsByCallId(
+    String callId,
+  ) async {
+    return _resolveStaleIncomingCallItems(
+      methodName: 'resolveStaleIncomingCallItemIdsByCallId',
+      messageFilter: (message) => matchesPendingCallId(message, callId),
+    );
   }
 
   /// Updates the call item with [messageId] to the specified [status] and
@@ -286,6 +298,43 @@ class CallChatItemManager {
         name: _logKey,
       );
       return null;
+    }
+  }
+
+  /// Returns stale incoming call item ids that satisfy [messageFilter].
+  Future<List<String>> _resolveStaleIncomingCallItems({
+    required String methodName,
+    required bool Function(Message message) messageFilter,
+  }) async {
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk == null) {
+      logger.warning('$methodName: Chat SDK unavailable', name: _logKey);
+      return const [];
+    }
+
+    try {
+      final items = await chatSdk.messages;
+      final matches = items
+          .whereType<Message>()
+          .where(isStaleIncomingCall)
+          .where(messageFilter)
+          .map((message) => message.messageId)
+          .toList(growable: false);
+
+      logger.info(
+        '$methodName: Found ${matches.length} item(s)',
+        name: _logKey,
+      );
+      return matches;
+    } catch (e, stackTrace) {
+      logger.error(
+        '$methodName failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return const [];
     }
   }
 }
