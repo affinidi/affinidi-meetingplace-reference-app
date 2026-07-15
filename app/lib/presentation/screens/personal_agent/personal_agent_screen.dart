@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_personal_agent/meeting_place_personal_agent.dart';
@@ -43,34 +42,12 @@ class PersonalAgentScreen extends ConsumerWidget {
     );
 
     Future<void> uploadRoutingContext(AgentContext target) async {
-      final picked = await FilePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['txt'],
-      );
-      if (picked == null || picked.files.isEmpty || !context.mounted) return;
-      final file = picked.files.first;
-      final bytes = await file.readAsBytes();
-      if (bytes.isEmpty) return;
-
-      // Keep local per-channel routing state in sync with the uploaded file.
-      // This is used by channel-level context selection.
-      final content = String.fromCharCodes(bytes);
-
-      await ref
-          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
-          .markContextUploaded(context: target, fileName: file.name);
-
-      // Also upload the selected file to the Personal AI setup backend so the
-      // agent memory is actually updated (previously this action only updated
-      // local UI state).
-      if (setupResult?.setupId?.isNotEmpty == true) {
-        await controller.uploadContext(content);
-      }
-
+      final outcome = await controller.uploadRoutingContext(target);
+      if (!outcome.uploaded) return;
       if (!context.mounted) return;
       final label = target == AgentContext.work ? 'Work AI' : 'Personal AI';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$label context uploaded: ${file.name}')),
+        SnackBar(content: Text('$label context uploaded: ${outcome.fileName}')),
       );
     }
 
@@ -100,6 +77,7 @@ class PersonalAgentScreen extends ConsumerWidget {
                 child: _ContextSetupView(
                   isUploading: contextUploading,
                   uploadError: contextUploadError,
+                  onPickFile: controller.pickContextSetupFile,
                   onUpload: controller.uploadContext,
                 ),
               ),
@@ -526,11 +504,13 @@ class _ContextSetupView extends StatefulWidget {
   const _ContextSetupView({
     required this.isUploading,
     required this.uploadError,
+    required this.onPickFile,
     required this.onUpload,
   });
 
   final bool isUploading;
   final String? uploadError;
+  final Future<PickedTextFile?> Function() onPickFile;
   final Future<void> Function(String content) onUpload;
 
   @override
@@ -558,18 +538,11 @@ class _ContextSetupViewState extends State<_ContextSetupView> {
   }
 
   Future<void> _pickFile() async {
-    // TODO (AB): should use filePickerPlatformProvider
-    final result = await FilePicker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['txt'],
-    );
-    if (result == null || result.files.isEmpty) return;
-    final file = result.files.first;
-    final bytes = await file.readAsBytes();
-    if (bytes.isEmpty) return;
+    final picked = await widget.onPickFile();
+    if (picked == null) return;
     setState(() {
-      _fileName = file.name;
-      _fileContent = String.fromCharCodes(bytes);
+      _fileName = picked.fileName;
+      _fileContent = picked.content;
       _uploadSucceeded = false;
     });
   }

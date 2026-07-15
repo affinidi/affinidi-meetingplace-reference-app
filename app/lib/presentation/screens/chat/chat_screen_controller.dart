@@ -16,8 +16,8 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
+import '../../../application/services/chat_service/context_route_attachment_builder_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
-import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
@@ -635,26 +635,9 @@ class ChatScreenController extends _$ChatScreenController
       return null;
     }
 
-    final selectedContext = ref
-        .read(contextRoutingServiceProvider)
-        .contextForContactId(contactId);
-    final contextValue = selectedContext == AgentContext.work
-        ? 'ctx-0'
-        : 'ctx-1';
-    final timestamp = DateTime.now().microsecondsSinceEpoch;
-    final payload = jsonEncode({'context': contextValue});
-
-    return chat.ChatAttachment(
-      id: 'cierge-context-route-$timestamp-'
-        '$contextValue',
-      mediaType: 'application/json',
-      filename: 'cierge-context-route.json',
-      format: 'cierge/context-route',
-      data: chat.ChatAttachmentData(
-        json: payload,
-        base64: base64Encode(utf8.encode(payload)),
-      ),
-    );
+    return ref
+        .read(contextRouteAttachmentBuilderServiceProvider)
+        .buildForContactId(contactId);
   }
 
   Future<void> sendChatActivity() async {
