@@ -193,7 +193,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       state = state.copyWith(
         status: PersonalAiSetupStatus.failed,
         errorMessage:
-            '''Unable to set up Personal AI because the current identity is missing a DID.''',
+            'Unable to set up Personal AI because the current identity '
+            'is missing a DID.',
       );
       return;
     }

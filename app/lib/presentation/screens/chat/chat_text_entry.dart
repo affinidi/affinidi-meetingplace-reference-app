@@ -9,6 +9,11 @@ class _ChatTextEntry extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
+    final activeContext = ref.watch<AgentContext>(
+      contextRoutingServiceProvider.select(
+        (ContextRoutingState state) => state.contextForContactId(_contactId),
+      ),
+    );
     final otherPartyName = ref.watch(provider.otherPartyName);
     final isGroupChat = ref.watch(provider.isGroupChat);
     final shouldDisable = ref.watch(provider.shouldDisable);
@@ -58,15 +63,29 @@ class _ChatTextEntry extends HookConsumerWidget {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: _VoiceRecorder(
-          controller: controller,
-          shouldDisable: shouldDisable,
-          hasMessageText: hasMessageText,
-          onRequestKeyboard: showKeyboard,
-          builder: (context, voice) => Row(
-            spacing: 10,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 6, bottom: 6),
+              child: Text(
+                'Signature context: ${_contextDisplayName(activeContext)}',
+                style: context.textTheme.labelSmall?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            _VoiceRecorder(
+              controller: controller,
+              shouldDisable: shouldDisable,
+              hasMessageText: hasMessageText,
+              onRequestKeyboard: showKeyboard,
+              builder: (context, voice) => Row(
+                spacing: 10,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
               if (!voice.isVoiceMode && supportsMedia)
                 Material(
                   color: shouldDisable
@@ -249,8 +268,10 @@ class _ChatTextEntry extends HookConsumerWidget {
                   ),
                 ),
               ),
-            ],
-          ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

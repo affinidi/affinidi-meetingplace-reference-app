@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_personal_agent/meeting_place_personal_agent.dart';
 
+import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/section_banner.dart';
@@ -37,6 +38,41 @@ class PersonalAgentScreen extends ConsumerWidget {
     final setupResult = ref.watch(
       provider.select((state) => state.setupResult),
     );
+    final contextRoutingState = ref.watch<ContextRoutingState>(
+      contextRoutingServiceProvider,
+    );
+
+    Future<void> uploadRoutingContext(AgentContext target) async {
+      final picked = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['txt'],
+      );
+      if (picked == null || picked.files.isEmpty || !context.mounted) return;
+      final file = picked.files.first;
+      final bytes = await file.readAsBytes();
+      if (bytes.isEmpty) return;
+
+      // Keep local per-channel routing state in sync with the uploaded file.
+      // This is used by channel-level context selection.
+      final content = String.fromCharCodes(bytes);
+
+      await ref
+          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
+          .markContextUploaded(context: target, fileName: file.name);
+
+      // Also upload the selected file to the Personal AI setup backend so the
+      // agent memory is actually updated (previously this action only updated
+      // local UI state).
+      if (setupResult?.setupId?.isNotEmpty == true) {
+        await controller.uploadContext(content);
+      }
+
+      if (!context.mounted) return;
+      final label = target == AgentContext.work ? 'Work AI' : 'Personal AI';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$label context uploaded: ${file.name}')),
+      );
+    }
 
     // When the MPX connection is ready but context has not been uploaded,
     // show the first-time onboarding flow instead of the management screen.
@@ -50,6 +86,15 @@ class PersonalAgentScreen extends ConsumerWidget {
               SectionBanner(
                 title: l10n.tabsTitle(Tabs.personalAgent.name),
                 subtitle: l10n.personalAgentPanelSubtitle,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: _ContextRoutingUploadsCard(
+                  state: contextRoutingState,
+                  onUploadWork: () => uploadRoutingContext(AgentContext.work),
+                  onUploadPersonal: () =>
+                      uploadRoutingContext(AgentContext.personal),
+                ),
               ),
               Expanded(
                 child: _ContextSetupView(
@@ -137,6 +182,13 @@ class PersonalAgentScreen extends ConsumerWidget {
                     ),
                   ],
                   const SizedBox(height: 16),
+                  _ContextRoutingUploadsCard(
+                    state: contextRoutingState,
+                    onUploadWork: () => uploadRoutingContext(AgentContext.work),
+                    onUploadPersonal: () =>
+                        uploadRoutingContext(AgentContext.personal),
+                  ),
+                  const SizedBox(height: 16),
                   _WhatToExpectCard(isReady: isReady),
                   if (setupResult != null) ...[
                     const SizedBox(height: 24),
@@ -148,6 +200,127 @@ class PersonalAgentScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ContextRoutingUploadsCard extends StatelessWidget {
+  const _ContextRoutingUploadsCard({
+    required this.state,
+    required this.onUploadWork,
+    required this.onUploadPersonal,
+  });
+
+  final ContextRoutingState state;
+  final VoidCallback onUploadWork;
+  final VoidCallback onUploadPersonal;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    String subtitleFor(AgentContext contextTarget) {
+      final file = state.fileNameForContext(contextTarget);
+      if (file == null || file.isEmpty) return 'Not uploaded yet';
+      return 'Uploaded: $file';
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Channel Context Files',
+              style: textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Upload one file for Work AI and one for Personal AI. '
+              'You can choose either context per channel.',
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _ContextUploadRow(
+              title: 'Work AI (ctx0)',
+              subtitle: subtitleFor(AgentContext.work),
+              uploaded: state.workContextUploaded,
+              onPressed: onUploadWork,
+            ),
+            const SizedBox(height: 10),
+            _ContextUploadRow(
+              title: 'Personal AI (ctx1)',
+              subtitle: subtitleFor(AgentContext.personal),
+              uploaded: state.personalContextUploaded,
+              onPressed: onUploadPersonal,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ContextUploadRow extends StatelessWidget {
+  const _ContextUploadRow({
+    required this.title,
+    required this.subtitle,
+    required this.uploaded,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String subtitle;
+  final bool uploaded;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        OutlinedButton.icon(
+          onPressed: onPressed,
+          icon: Icon(uploaded ? Icons.sync : Icons.upload_file_outlined),
+          label: Text(uploaded ? 'Re-upload' : 'Upload'),
+        ),
+      ],
     );
   }
 }
@@ -389,12 +562,11 @@ class _ContextSetupViewState extends State<_ContextSetupView> {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['txt'],
-      withData: true,
     );
     if (result == null || result.files.isEmpty) return;
     final file = result.files.first;
-    final bytes = file.bytes;
-    if (bytes == null) return;
+    final bytes = await file.readAsBytes();
+    if (bytes.isEmpty) return;
     setState(() {
       _fileName = file.name;
       _fileContent = String.fromCharCodes(bytes);

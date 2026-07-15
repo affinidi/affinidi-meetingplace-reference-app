@@ -155,12 +155,13 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
           );
         }
       } catch (_) {
-        // Compatibility fallback for SDK builds that do not yet
-        // expose `agentDid`.
+        // Compatibility fallback for SDK builds that do not yet expose
+        // `agentDid`.
         sdkOptionsNamed.remove(#agentDid);
         if (ciergeConnectorDid != null) {
           logger.warning(
-            '''MPX_AGENT_DID was provided but current SDK options do not accept agentDid; override ignored''',
+            'MPX_AGENT_DID was provided but current SDK options do '
+            'not accept agentDid; override ignored',
             name: logKey,
           );
         }
