@@ -634,7 +634,7 @@ class ChatScreenController extends _$ChatScreenController
     final routeAttachment = _buildContextRouteAttachment();
     final combinedAttachments = <ChatAttachment>[
       ...?attachments,
-      if (routeAttachment != null) routeAttachment,
+      ?routeAttachment,
     ];
 
     await (_chatService?.sendTextMessage(

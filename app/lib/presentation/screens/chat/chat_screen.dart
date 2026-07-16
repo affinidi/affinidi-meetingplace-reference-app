@@ -27,8 +27,8 @@ import 'package:video_player/video_player.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/context_routing_service/context_routing_service.dart';
-import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
+import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';

@@ -8,13 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:ssi/ssi.dart';
 
-import '../../application/services/identities_service/identities_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
-import '../extensions/contact_card_extensions.dart';
 import '../secure_storage/secure_storage.dart';
 import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
@@ -93,34 +90,35 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
       final ciergeConnectorDid =
           eventCfg[mnemonicHash]?['ciergeConnectorDid'] as String?;
 
-      Future<List<Attachment>?> onBuildAttachments(
-        Channel channel,
-        Future<DidManager> Function(String did) getDidManager,
-      ) async {
-        try {
-          await ref
-              .read(identitiesServiceProvider.notifier)
-              .ensureInitialized();
+      // TODO: disabling signature on rcards for mnemonic
+      // Future<List<Attachment>?> onBuildAttachments(
+      //   Channel channel,
+      //   Future<DidManager> Function(String did) getDidManager,
+      // ) async {
+      //   try {
+      //     await ref
+      //         .read(identitiesServiceProvider.notifier)
+      //         .ensureInitialized();
 
-          final externalRef = channel.externalRef;
-          if (externalRef == null || externalRef.isEmpty) return null;
+      //     final externalRef = channel.externalRef;
+      //     if (externalRef == null || externalRef.isEmpty) return null;
 
-          final identity = ref
-              .read(identitiesServiceProvider)
-              .getIdentityById(externalRef);
-          if (identity == null || identity.did.isEmpty) return null;
+      //     final identity = ref
+      //         .read(identitiesServiceProvider)
+      //         .getIdentityById(externalRef);
+      //     if (identity == null || identity.did.isEmpty) return null;
 
-          final didManager = await getDidManager(identity.did);
+      //     final didManager = await getDidManager(identity.did);
 
-          return RCardDIDCommAttachmentBuilder.build(
-            issuerDid: identity.did,
-            card: identity.card.toRCardSubject(),
-            issuerDidManager: didManager,
-          );
-        } catch (_) {
-          return null;
-        }
-      }
+      //     return RCardDIDCommAttachmentBuilder.build(
+      //       issuerDid: identity.did,
+      //       card: identity.card.toRCardSubject(),
+      //       issuerDidManager: didManager,
+      //     );
+      //   } catch (_) {
+      //     return null;
+      //   }
+      // }
 
       final sdkOptionsNamed = <Symbol, dynamic>{
         #expectedMessageWrappingTypes: const [
@@ -132,8 +130,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
           VdipClient.requestIssuanceMessageType,
           VdipClient.issuedCredentialMessageType,
         ],
-        #onBuildAttachments: onBuildAttachments,
-        #signatureScheme: SignatureScheme.ecdsa_secp256k1_sha256,
+        // #onBuildAttachments: onBuildAttachments,
       };
       if (ciergeConnectorDid != null) {
         sdkOptionsNamed[#agentDid] = ciergeConnectorDid;

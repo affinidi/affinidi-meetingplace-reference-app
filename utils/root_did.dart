@@ -13,7 +13,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:ascii_qr/ascii_qr.dart';
 import 'package:bip39_mnemonic/bip39_mnemonic.dart';
 import 'package:crypto/crypto.dart';
 import 'package:image/image.dart' as img;
@@ -46,12 +45,10 @@ Future<void> main() async {
   stdout.writeln('sha256:   $hash');
   stdout.writeln('root_did: ${didDoc.id}');
   stdout.writeln('');
-  stdout.writeln(AsciiQrGenerator.generate(sentence, horizontalScale: 2));
-  stdout.writeln('');
   stdout.writeln('For development environment, set WALLET_CONFIG to:');
   stdout.writeln(
     jsonEncode({
-      hash: {"ciergeConnectorDid": '<agent-connector-did>'},
+      hash: {'ciergeConnectorDid': '<agent-connector-did>'},
     }),
   );
 
