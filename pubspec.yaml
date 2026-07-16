@@ -53,6 +53,8 @@ dependency_overrides:
     # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_mediator
   meta: ^1.18.2
   test_api: ^0.7.12
+  vta_dart_client:
+    path: ../vta-dart-client
   
 melos:
   scripts:

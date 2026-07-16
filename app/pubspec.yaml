@@ -96,6 +96,8 @@ dependencies:
   uuid: ^4.5.1
   vc_zkp: ^1.2.5
   video_player: ^2.11.1
+  vta_dart_client:
+    path: ../../vta-dart-client
 
 dev_dependencies:
   build_runner: ^2.15.0

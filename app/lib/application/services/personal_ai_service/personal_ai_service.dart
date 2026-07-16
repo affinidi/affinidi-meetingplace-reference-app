@@ -132,7 +132,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       final holderDid = holderDidFromIdentity.isNotEmpty
           ? holderDidFromIdentity
           : state.setupResult?.holderDid.trim() ?? '';
-      String effectiveSetupId = setupId;
+      var effectiveSetupId = setupId;
       if (holderDid.isNotEmpty) {
         final freshSetup = await _sdk.ensurePersonalAgentSetup(
           request: PersonalAgentSetupRequest(holderDid: holderDid),
@@ -193,7 +193,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       state = state.copyWith(
         status: PersonalAiSetupStatus.failed,
         errorMessage:
-            'Unable to set up Personal AI because the current identity is missing a DID.',
+            '''Unable to set up Personal AI because the current identity is missing a DID.''',
       );
       return;
     }

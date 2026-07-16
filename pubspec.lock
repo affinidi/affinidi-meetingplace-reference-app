@@ -2424,7 +2424,7 @@ packages:
     source: hosted
     version: "0.5.0"
   vta_dart_client:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../vta-dart-client"
       relative: true

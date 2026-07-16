@@ -385,6 +385,7 @@ class _ContextSetupViewState extends State<_ContextSetupView> {
   }
 
   Future<void> _pickFile() async {
+    // TODO (AB): should use filePickerPlatformProvider
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['txt'],

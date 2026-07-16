@@ -111,7 +111,7 @@ class _IdentitiesPanel extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Connect your Personal AI now, or skip and continue using MPX without interruption.',
+                      '''Connect your Personal AI now, or skip and continue using MPX without interruption.''',
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onPrimaryContainer,
                       ),
