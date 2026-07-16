@@ -51,7 +51,7 @@ class ContactsDatabase extends _$ContactsDatabase {
   ContactsDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -184,6 +184,61 @@ class ContactsDatabase extends _$ContactsDatabase {
           ),
         );
       }
+
+      // Adds missed_call_count to track unread missed calls in the badge
+      // separately from the seqNo-derived unread message count.
+      if (from < 6) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+        final missedCallCountExists = result.any(
+          (row) => row.data['name'] == 'missed_call_count',
+        );
+        if (!missedCallCountExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN missed_call_count INTEGER NOT'
+            ' NULL DEFAULT 0',
+          );
+        }
+      }
+
+      // Adds pending_missed_call_at so a missed incoming call can be reconciled
+      // to its chat item on the next chat open, surviving an app restart.
+      if (from < 7) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+        final pendingMissedCallAtExists = result.any(
+          (row) => row.data['name'] == 'pending_missed_call_at',
+        );
+        if (!pendingMissedCallAtExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN pending_missed_call_at INTEGER',
+          );
+        }
+      }
+
+      if (from < 8) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+        final pendingMissedCallIdExists = result.any(
+          (row) => row.data['name'] == 'pending_missed_call_id',
+        );
+        if (!pendingMissedCallIdExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN pending_missed_call_id TEXT',
+          );
+        }
+      }
+
+      // Adds active_incoming_call_id so crash-recovery replay can reconstruct
+      // the missed-call marker when the app dies while the banner is visible.
+      if (from < 9) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+        final activeIncomingCallIdExists = result.any(
+          (row) => row.data['name'] == 'active_incoming_call_id',
+        );
+        if (!activeIncomingCallIdExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN active_incoming_call_id TEXT',
+          );
+        }
+      }
     },
   );
 }
@@ -206,6 +261,10 @@ class Contacts extends Table {
       boolean().clientDefault(() => false)();
   IntColumn get badgeCount => integer().clientDefault(() => 0)();
   IntColumn get currentMessageSeqNo => integer().clientDefault(() => 0)();
+  IntColumn get missedCallCount => integer().clientDefault(() => 0)();
+  DateTimeColumn get pendingMissedCallAt => dateTime().nullable()();
+  TextColumn get pendingMissedCallId => text().nullable()();
+  TextColumn get activeIncomingCallId => text().nullable()();
   BoolColumn get hasBeenOpened => boolean().clientDefault(() => false)();
   DateTimeColumn get lastKeepAliveMessage => dateTime().nullable()();
   BoolColumn get notificationBannerDismissed =>

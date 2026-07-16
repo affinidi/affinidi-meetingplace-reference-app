@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+echo "Running package formatting..."
+find . -name '*.dart' -not -path '*/build/*' -not -path '*/.dart_tool/*' | xargs dart format -l 80
+
+echo "Running analyze..."
+dart analyze --fatal-infos app/
+dart analyze --fatal-infos packages/app-core/
+
+echo "✅ Format and analyze passed. Proceeding with commit."

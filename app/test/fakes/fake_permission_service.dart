@@ -8,13 +8,14 @@ class FakePermissionService extends PermissionService {
     this.cameraPermissionStatus = PermissionStatus.granted,
     PermissionStatus? requestedCameraPermissionStatus,
     this.onRequestCameraPermission,
+    this.microphonePermissionStatus = PermissionStatus.granted,
   }) : requestedCameraPermissionStatus =
            requestedCameraPermissionStatus ?? cameraPermissionStatus;
 
   final Future<PermissionStatus> Function()? onRequestCameraPermission;
   final PermissionStatus requestedCameraPermissionStatus;
-
   final PermissionStatus cameraPermissionStatus;
+  final PermissionStatus microphonePermissionStatus;
 
   @override
   Future<PermissionStatus> getCameraPermissionStatus() async {
@@ -27,5 +28,15 @@ class FakePermissionService extends PermissionService {
       return onRequestCameraPermission!();
     }
     return requestedCameraPermissionStatus;
+  }
+
+  @override
+  Future<PermissionStatus> getMicrophonePermissionStatus() async {
+    return microphonePermissionStatus;
+  }
+
+  @override
+  Future<PermissionStatus> requestMicrophonePermission() async {
+    return microphonePermissionStatus;
   }
 }

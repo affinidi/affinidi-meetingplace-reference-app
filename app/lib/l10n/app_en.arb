@@ -1900,5 +1900,241 @@
 		"description": "Snackbar shown when a recorded voice message could not be sent"
 	},
 	"generalEmail": "Email",
-	"vrcResponderIntro": "{name} has selected the following persona to verify the relationship:"
+	"vrcResponderIntro": "{name} has selected the following persona to verify the relationship:",
+	"videoCallTitle": "Call",
+	"@videoCallTitle": {
+		"type": "text"
+	},
+	"videoCallJoiningCall": "Joining call...",
+	"@videoCallJoiningCall": {
+		"type": "text"
+	},
+	"videoCallWaitingForParticipants": "Waiting for participants...",
+	"@videoCallWaitingForParticipants": {
+		"type": "text"
+	},
+	"videoCallShowMore": "{count, plural, =1{Show 1 more} other{Show {count} more}}",
+	"@videoCallShowMore": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"videoCallShowLess": "Show less",
+	"@videoCallShowLess": {
+		"type": "text"
+	},
+	"videoCallFailedToJoin": "Failed to join: {error}",
+	"@videoCallFailedToJoin": {
+		"type": "text",
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"videoCallError": "{errorCode, select, networkError{Network error} other{Unknown error}}",
+	"@videoCallError": {
+		"type": "text",
+		"placeholders": {
+			"errorCode": {
+				"type": "String"
+			}
+		}
+	},
+	"videoCallMicToggleFailed": "Couldn't change the microphone. Please try again.",
+	"@videoCallMicToggleFailed": {
+		"type": "text"
+	},
+	"videoCallCameraToggleFailed": "Couldn't change the camera. Please try again.",
+	"@videoCallCameraToggleFailed": {
+		"type": "text"
+	},
+	"videoCallSpeakerToggleFailed": "Couldn't change the speaker. Please try again.",
+	"@videoCallSpeakerToggleFailed": {
+		"type": "text"
+	},
+	"videoCallMemberNamesFailed": "Couldn't load participant names.",
+	"@videoCallMemberNamesFailed": {
+		"type": "text"
+	},
+	"videoCallHangUpFailed": "Couldn't hang up. Please try again.",
+	"@videoCallHangUpFailed": {
+		"type": "text"
+	},
+	"videoCallParticipantCount": "{count, plural, =1{1 participant} other{{count} participants}}",
+	"@videoCallParticipantCount": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"videoCallMute": "Mute",
+	"@videoCallMute": {
+		"type": "text"
+	},
+	"videoCallUnmute": "Unmute",
+	"@videoCallUnmute": {
+		"type": "text"
+	},
+	"videoCallEnd": "End",
+	"@videoCallEnd": {
+		"type": "text"
+	},
+	"videoCallMicPermissionDenied": "Microphone permission denied. Enable it in Settings.",
+	"@videoCallMicPermissionDenied": {
+		"type": "text"
+	},
+	"videoCallCameraPermissionDenied": "Camera permission denied. Enable it in Settings.",
+	"@videoCallCameraPermissionDenied": {
+		"type": "text"
+	},
+	"videoCallWaitingForEncryption": "Setting up encryption...",
+	"@videoCallWaitingForEncryption": {
+		"type": "text"
+	},
+	"videoCallYou": "You",
+	"@videoCallYou": {
+		"type": "text"
+	},
+	"videoCallRinging": "Ringing",
+	"@videoCallRinging": {
+		"type": "text"
+	},
+	"videoCallCalling": "Calling...",
+	"@videoCallCalling": {
+		"type": "text"
+	},
+	"videoCallCancelCall": "Cancel",
+	"@videoCallCancelCall": {
+		"type": "text"
+	},
+	"videoCallNoAnswer": "No answer",
+	"@videoCallNoAnswer": {
+		"type": "text"
+	},
+	"videoCallCallDeclined": "Call declined",
+	"@videoCallCallDeclined": {
+		"type": "text"
+	},
+	"videoCallCallEnded": "Call ended",
+	"@videoCallCallEnded": {
+		"type": "text"
+	},
+	"videoCallCancel": "Cancel",
+	"@videoCallCancel": {
+		"type": "text"
+	},
+	"videoCallAgain": "Call again",
+	"@videoCallAgain": {
+		"type": "text"
+	},
+	"videoCallGroupCallJoin": "Join",
+	"@videoCallGroupCallJoin": {
+		"type": "text"
+	},
+	"videoCallGroupCallActive": "Group call in progress",
+	"@videoCallGroupCallActive": {
+		"type": "text"
+	},
+	"videoCallSwitch": "Switch to video",
+	"@videoCallSwitch": {
+		"type": "text"
+	},
+	"videoCallSwitchToVideoTitle": "Switch to video call",
+	"@videoCallSwitchToVideoTitle": {
+		"type": "text"
+	},
+	"incomingCallBannerIsCalling": "{callerName} is calling",
+	"@incomingCallBannerIsCalling": {
+		"type": "text",
+		"placeholders": {
+			"callerName": {
+				"type": "String"
+			}
+		}
+	},
+	"incomingCallBannerAccept": "Accept",
+	"@incomingCallBannerAccept": {
+		"type": "text"
+	},
+	"incomingCallBannerDecline": "Decline",
+	"@incomingCallBannerDecline": {
+		"type": "text"
+	},
+	"incomingCallBannerUnknownCaller": "Unknown caller",
+	"@incomingCallBannerUnknownCaller": {
+		"type": "text"
+	},
+	"incomingCallBannerAudioCall": "MeetingPlace Audio",
+	"@incomingCallBannerAudioCall": {
+		"type": "text"
+	},
+	"incomingCallBannerVideoCall": "MeetingPlace Video",
+	"@incomingCallBannerVideoCall": {
+		"type": "text"
+	},
+	"callChatItemAudioCall": "Audio call",
+	"@callChatItemAudioCall": {
+		"type": "text"
+	},
+	"callChatItemVideoCall": "Video call",
+	"@callChatItemVideoCall": {
+		"type": "text"
+	},
+	"callChatItemCalling": "Calling...",
+	"@callChatItemCalling": {
+		"type": "text"
+	},
+	"callChatItemRinging": "Ringing",
+	"@callChatItemRinging": {
+		"type": "text"
+	},
+	"callChatItemIncoming": "Incoming call",
+	"@callChatItemIncoming": {
+		"type": "text"
+	},
+	"callChatItemTapToReturn": "Tap to return",
+	"@callChatItemTapToReturn": {
+		"type": "text"
+	},
+	"callChatItemMissed": "Missed",
+	"@callChatItemMissed": {
+		"type": "text"
+	},
+	"callChatItemNotAnswered": "Not answered",
+	"@callChatItemNotAnswered": {
+		"type": "text"
+	},
+	"callDurationHourFormat": "{count, plural, =1{1 h} other{{count} h}}",
+	"@callDurationHourFormat": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"callDurationMinuteFormat": "{count, plural, =1{1 m} other{{count} m}}",
+	"@callDurationMinuteFormat": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"callDurationSecondFormat": "{count, plural, =1{1 s} other{{count} s}}",
+	"@callDurationSecondFormat": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	}
 }

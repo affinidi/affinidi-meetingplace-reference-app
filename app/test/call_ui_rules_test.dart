@@ -1,0 +1,160 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
+
+AudioVideoCallParticipant _selfParticipant() =>
+    const AudioVideoCallParticipant(participantId: 'local', isSelf: true);
+
+AudioVideoCallParticipant _peerParticipant([String id = 'peer']) =>
+    AudioVideoCallParticipant(participantId: id);
+
+void main() {
+  group('isLiveCallStatus', () {
+    test('is true for waitingForKeys, connected and active', () {
+      expect(isLiveCallStatus(AudioVideoCallStatus.waitingForKeys), isTrue);
+      expect(isLiveCallStatus(AudioVideoCallStatus.connected), isTrue);
+      expect(isLiveCallStatus(AudioVideoCallStatus.active), isTrue);
+    });
+
+    test('is false before the call is live', () {
+      expect(isLiveCallStatus(AudioVideoCallStatus.idle), isFalse);
+      expect(isLiveCallStatus(AudioVideoCallStatus.connecting), isFalse);
+      expect(isLiveCallStatus(AudioVideoCallStatus.outgoingRinging), isFalse);
+    });
+  });
+
+  group('isTerminalCallStatus', () {
+    test('is true for all end states', () {
+      for (final s in [
+        AudioVideoCallStatus.ended,
+        AudioVideoCallStatus.disconnected,
+        AudioVideoCallStatus.error,
+        AudioVideoCallStatus.missed,
+        AudioVideoCallStatus.declined,
+      ]) {
+        expect(isEndedCallStatus(s), isTrue, reason: '$s');
+      }
+    });
+
+    test('is false for live states', () {
+      expect(isEndedCallStatus(AudioVideoCallStatus.active), isFalse);
+    });
+  });
+
+  group('computeHasHadPeer', () {
+    test('latches true when status reaches connected with peer present', () {
+      final result = computeHasHadPeer(
+        previous: false,
+        status: AudioVideoCallStatus.connected,
+        participants: [_selfParticipant(), _peerParticipant()],
+      );
+      expect(result, isTrue);
+    });
+
+    test('latches true when status reaches active with peer present', () {
+      final result = computeHasHadPeer(
+        previous: false,
+        status: AudioVideoCallStatus.active,
+        participants: [_selfParticipant(), _peerParticipant()],
+      );
+      expect(result, isTrue);
+    });
+
+    test('returns false when status is connected but no peer present', () {
+      final result = computeHasHadPeer(
+        previous: false,
+        status: AudioVideoCallStatus.connected,
+        participants: [_selfParticipant()],
+      );
+      expect(result, isFalse);
+    });
+
+    test('returns false when status is pre-connect', () {
+      final result = computeHasHadPeer(
+        previous: false,
+        status: AudioVideoCallStatus.connecting,
+        participants: [_selfParticipant(), _peerParticipant()],
+      );
+      expect(result, isFalse);
+    });
+
+    test('never un-latches once true', () {
+      final result = computeHasHadPeer(
+        previous: true,
+        status: AudioVideoCallStatus.connecting,
+        participants: [_selfParticipant()],
+      );
+      expect(result, isTrue);
+    });
+  });
+
+  group('resolveCallUiPhase', () {
+    test('is ended for terminal statuses regardless of latch', () {
+      expect(
+        resolveCallUiPhase(
+          status: AudioVideoCallStatus.ended,
+          hasHadPeer: true,
+        ),
+        CallUiPhase.ended,
+      );
+    });
+
+    test('is inCall once a remote has joined', () {
+      expect(
+        resolveCallUiPhase(
+          status: AudioVideoCallStatus.waitingForKeys,
+          hasHadPeer: true,
+        ),
+        CallUiPhase.inCall,
+      );
+    });
+
+    test('is ringing while outgoingRinging and no remote yet', () {
+      expect(
+        resolveCallUiPhase(
+          status: AudioVideoCallStatus.outgoingRinging,
+          hasHadPeer: false,
+        ),
+        CallUiPhase.ringing,
+      );
+    });
+
+    test('is calling while connecting and no remote yet', () {
+      expect(
+        resolveCallUiPhase(
+          status: AudioVideoCallStatus.connecting,
+          hasHadPeer: false,
+        ),
+        CallUiPhase.calling,
+      );
+    });
+  });
+
+  group('resolveCallEndState', () {
+    test('returns missedCall for missed status', () {
+      expect(
+        resolveCallEndState(AudioVideoCallStatus.missed),
+        CallEndState.missedCall,
+      );
+    });
+
+    test('returns declinedCall for declined status', () {
+      expect(
+        resolveCallEndState(AudioVideoCallStatus.declined),
+        CallEndState.declinedCall,
+      );
+    });
+
+    test('returns null for ended (normal end)', () {
+      expect(resolveCallEndState(AudioVideoCallStatus.ended), isNull);
+    });
+
+    test('returns null for error', () {
+      expect(resolveCallEndState(AudioVideoCallStatus.error), isNull);
+    });
+
+    test('returns null for disconnected', () {
+      expect(resolveCallEndState(AudioVideoCallStatus.disconnected), isNull);
+    });
+  });
+}

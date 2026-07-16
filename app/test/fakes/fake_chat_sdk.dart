@@ -3,13 +3,14 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 import 'fake_chat.dart';
 
-class FakeChatSdk implements MeetingPlaceChatSDK {
+class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   FakeChatSdk({TransportCapabilities? capabilities})
     : _capabilities = capabilities ?? _defaultCapabilities;
 
@@ -27,6 +28,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     ChatFeature.messageDelete,
     ChatFeature.effects,
     ChatFeature.contactDetailsUpdate,
+    ChatFeature.audioVideoCalling,
   });
 
   TransportCapabilities _capabilities;
@@ -35,6 +37,15 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   TransportCapabilities get capabilities => _capabilities;
 
   set capabilities(TransportCapabilities caps) => _capabilities = caps;
+
+  @override
+  String get did => 'fake-sender-did';
+
+  @override
+  String get otherPartyDid => 'fake-other-party-did';
+
+  @override
+  String get chatId => 'fake-chat-id';
 
   int _chatSessionStartedCalls = 0;
   int _startedChatPresenceUpdates = 0;
@@ -414,6 +425,43 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     );
   }
 
+  void setIncomingCallSessionMessage({
+    required String senderDid,
+    String messageId = 'late-incoming-call-item',
+    CallMediaType mediaType = CallMediaType.video,
+    CallStatus status = CallStatus.calling,
+    DateTime? dateCreated,
+  }) {
+    final createdAt = dateCreated ?? DateTime.now();
+    final message = Message(
+      chatId: chatId,
+      messageId: messageId,
+      value: '',
+      dateCreated: createdAt,
+      status: ChatItemStatus.confirmed,
+      isFromMe: false,
+      senderDid: senderDid,
+      attachments: [
+        CallMetadata.buildAttachment(
+          id: 'call-attachment-${DateTime.now().microsecondsSinceEpoch}',
+          mediaType: mediaType,
+          status: status,
+          callId: '',
+        ),
+      ],
+    );
+    sessionMessages = [message];
+
+    // Emit the message through the stream so the app knows to check for healing
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/message',
+      senderDid: senderDid,
+      body: {'timestamp': message.dateCreated.toIso8601String()},
+      createdTime: createdAt,
+    );
+    _emit(StreamData(event: chatEvent, chatItem: message));
+  }
+
   void simulateIncomingPresenceMessage({
     required String timestamp,
     required String recipientDid,
@@ -597,6 +645,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   List<ChatItem>? sessionMessages;
 
   @override
+  Future<List<ChatItem>> get messages async =>
+      sessionMessages ?? const <ChatItem>[];
+
+  @override
   Future<Chat> startChatSession() async {
     _chatSessionStartedCalls++;
     if (shouldThrowOnStartSession) {
@@ -698,6 +750,19 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     message.value = newText;
     message.editedAt = DateTime.now().toUtc();
     _emit(StreamData(chatItem: message));
+  }
+
+  final List<Message> updateMessageCalls = [];
+
+  @override
+  Future<ChatItem?> getMessageById(String id) async => sessionMessages
+      ?.whereType<Message>()
+      .cast<Message?>()
+      .firstWhere((m) => m?.messageId == id, orElse: () => null);
+
+  @override
+  Future<void> updateMessage(Message message) async {
+    updateMessageCalls.add(message);
   }
 
   @override

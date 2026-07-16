@@ -32,6 +32,14 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
               name: 'chat',
               parentNavigatorKey: ChatRoute.$parentNavigatorKey,
               factory: $ChatRoute._fromState,
+              routes: [
+                GoRouteData.$route(
+                  path: 'audio-video-call',
+                  name: 'audioVideoCall',
+                  parentNavigatorKey: AudioVideoCallRoute.$parentNavigatorKey,
+                  factory: $AudioVideoCallRoute._fromState,
+                ),
+              ],
             ),
           ],
         ),
@@ -205,6 +213,44 @@ mixin $ChatRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/contacts/${Uri.encodeComponent(_self.contactId)}/chat',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AudioVideoCallRoute on GoRouteData {
+  static AudioVideoCallRoute _fromState(GoRouterState state) =>
+      AudioVideoCallRoute(
+        contactId: state.pathParameters['contactId']!,
+        isAudioOnly:
+            _$convertMapValue(
+              'is-audio-only',
+              state.uri.queryParameters,
+              _$boolConverter,
+            ) ??
+            false,
+      );
+
+  AudioVideoCallRoute get _self => this as AudioVideoCallRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/contacts/${Uri.encodeComponent(_self.contactId)}/chat/audio-video-call',
+    queryParams: {
+      if (_self.isAudioOnly != false)
+        'is-audio-only': _self.isAudioOnly.toString(),
+    },
   );
 
   @override
@@ -530,4 +576,24 @@ mixin $CredentialsRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+T? _$convertMapValue<T>(
+  String key,
+  Map<String, String> map,
+  T? Function(String) converter,
+) {
+  final value = map[key];
+  return value == null ? null : converter(value);
+}
+
+bool _$boolConverter(String value) {
+  switch (value) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      throw UnsupportedError('Cannot convert "$value" into a bool.');
+  }
 }

@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:ssi/ssi.dart';
 
 import 'fake_publish_offer_result.dart';
 
-class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
+class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   FakeMeetingPlaceSDK({
     this._shouldFailToRegisterPushToken = false,
     this._offerToReturn,
@@ -13,6 +14,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     this._createOobFlowException,
     this._acceptOobFlowException,
     this._isPhraseAvailable = true,
+    this.isCallSupported = true,
     Map<String, Channel>? channels,
     List<ConnectionOffer>? connectionOffers,
     this.offerToFind,
@@ -32,6 +34,17 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final bool _isPhraseAvailable;
   final bool _shouldTimeout;
   final Map<String, Channel> _channels;
+  @override
+  final bool isCallSupported;
+
+  final _incomingCallsController =
+      StreamController<IncomingAudioVideoCallEvent>.broadcast();
+  final _cancelledCallsController =
+      StreamController<IncomingAudioVideoCallEvent>.broadcast();
+  final _callSignalsController = StreamController<CallSignal>.broadcast();
+  final acceptedCallIds = <String>[];
+  final declinedCallIds = <String>[];
+  int leaveCurrentCallCount = 0;
 
   DidKeyManager? _fakeDidManager;
 
@@ -189,6 +202,18 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
     final channel = _channels[channelDid];
     return channel;
+  }
+
+  @override
+  Future<Channel?> getChannelByDid(String did) async {
+    if (_channels.containsKey(did)) return _channels[did];
+    for (final channel in _channels.values) {
+      if (channel.permanentChannelDid == did ||
+          channel.otherPartyPermanentChannelDid == did) {
+        return channel;
+      }
+    }
+    return null;
   }
 
   @override
@@ -359,6 +384,43 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
 
   @override
   Stream<ChannelAttachmentEvent> get channelAttachments => const Stream.empty();
+
+  @override
+  Stream<IncomingAudioVideoCallEvent> get incomingCalls =>
+      _incomingCallsController.stream;
+
+  @override
+  Stream<IncomingAudioVideoCallEvent> get cancelledCalls =>
+      _cancelledCallsController.stream;
+
+  @override
+  Stream<CallSignal> get callSignals => _callSignalsController.stream;
+
+  /// Emits a call signal to subscribers, for tests.
+  void emitCallSignal(CallSignal signal) => _callSignalsController.add(signal);
+
+  void emitIncomingCall(IncomingAudioVideoCallEvent event) {
+    _incomingCallsController.add(event);
+  }
+
+  void emitCancelledCall(IncomingAudioVideoCallEvent event) {
+    _cancelledCallsController.add(event);
+  }
+
+  @override
+  Future<void> acceptCall({required String callId}) async {
+    acceptedCallIds.add(callId);
+  }
+
+  @override
+  Future<void> declineCall({required String callId}) async {
+    declinedCallIds.add(callId);
+  }
+
+  @override
+  Future<void> leaveCurrentCall() async {
+    leaveCurrentCallCount++;
+  }
 
   @override
   VdipClient get vdip => _fakeVdipClient;

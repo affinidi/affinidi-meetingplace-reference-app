@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../application/services/identities_service/identities_service.dart';
 import '../configuration/environment.dart';
@@ -13,8 +14,8 @@ import 'meeting_place_sdk_provider.dart';
 /// for a given [Channel].
 ///
 /// This provider:
-/// - Sets up the [MeetingPlaceChatSDK] with the correct channel, repository,
-///   and identity ContactCard
+/// - Sets up the [MeetingPlaceChatSDK] with the correct channel,
+///   repository, and identity ContactCard
 /// - Configures chat activity expiration and presence send intervals from
 ///   environment settings
 /// - Logs both successful and failed initialization attempts
@@ -38,7 +39,7 @@ final chatSdkProvider = FutureProvider.autoDispose
 
       try {
         final coreSDK = await ref.read(meetingPlaceSdkProvider.future);
-        final sdk = await MeetingPlaceChatSDK.initialiseFromChannel(
+        final sdk = await MeetingPlaceMatrixChatSDK.initialiseFromChannel(
           channel,
           coreSDK: coreSDK,
           chatRepository: await ref.read(chatRepositoryProvider.future),
@@ -57,7 +58,6 @@ final chatSdkProvider = FutureProvider.autoDispose
             ),
           ),
           card: sdkContactCard,
-          logger: logger,
         );
 
         logger.info('Completed initializing Chat SDK', name: logKey);

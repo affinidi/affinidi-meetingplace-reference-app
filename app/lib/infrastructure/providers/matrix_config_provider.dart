@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_sqlcipher/sqflite.dart' as sqlite;
 
@@ -79,7 +79,15 @@ final matrixConfigProvider = FutureProvider<MatrixConfig>((ref) async {
     mediatorDid: settingsState.selectedMediatorDid,
     controlPlaneDid: environment.controlPlaneDid,
     homeserver: Uri.parse(homeserver),
+    livekitServiceUrl: environment.livekitServiceUrl.isNotEmpty
+        ? Uri.parse(environment.livekitServiceUrl)
+        : null,
+    livekitSfuUrl: environment.livekitSfuUrl.isNotEmpty
+        ? Uri.parse(environment.livekitSfuUrl)
+        : null,
+    outgoingCallTimeout: environment.callRingTimeout,
     deviceId: deviceId,
+    serverName: environment.matrixServerName,
     databaseFactory: CallbackMatrixDatabaseFactory(
       openDatabase: (context) async {
         final safeDatabaseName = p

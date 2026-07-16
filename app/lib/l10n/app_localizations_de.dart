@@ -2024,4 +2024,209 @@ class AppLocalizationsDe extends AppLocalizations {
   String vrcResponderIntro(Object name) {
     return '$name hat die folgende Persona zur Verifizierung der Beziehung ausgewählt:';
   }
+
+  @override
+  String get videoCallTitle => 'Anruf';
+
+  @override
+  String get videoCallJoiningCall => 'Anruf wird beigetreten...';
+
+  @override
+  String get videoCallWaitingForParticipants => 'Warte auf Teilnehmer...';
+
+  @override
+  String videoCallShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Zeige $count weitere',
+      one: 'Zeige 1 weiteren',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoCallShowLess => 'Weniger anzeigen';
+
+  @override
+  String videoCallFailedToJoin(String error) {
+    return 'Beitreten fehlgeschlagen: $error';
+  }
+
+  @override
+  String videoCallError(String errorCode) {
+    String _temp0 = intl.Intl.selectLogic(errorCode, {
+      'networkError': 'Netzwerkfehler',
+      'other': 'Unbekannter Fehler',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get videoCallMicToggleFailed =>
+      'Mikrofon konnte nicht geändert werden. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get videoCallCameraToggleFailed =>
+      'Konnte die Kamera nicht wechseln. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get videoCallSpeakerToggleFailed =>
+      'Lautsprecher konnte nicht geändert werden. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get videoCallMemberNamesFailed =>
+      'Teilnehmernamen konnten nicht geladen werden.';
+
+  @override
+  String get videoCallHangUpFailed =>
+      'Auflegen nicht möglich. Bitte versuchen Sie es erneut.';
+
+  @override
+  String videoCallParticipantCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Teilnehmer',
+      one: '1 Teilnehmer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoCallMute => 'Stummschalten';
+
+  @override
+  String get videoCallUnmute => 'Stummschaltung aufheben';
+
+  @override
+  String get videoCallEnd => 'Beenden';
+
+  @override
+  String get videoCallMicPermissionDenied =>
+      'Mikrofonberechtigung verweigert. Aktivieren Sie es in den Einstellungen.';
+
+  @override
+  String get videoCallCameraPermissionDenied =>
+      'Kameraberechtigung verweigert. Aktivieren Sie es in den Einstellungen.';
+
+  @override
+  String get videoCallWaitingForEncryption =>
+      'Verschlüsselung wird eingerichtet...';
+
+  @override
+  String get videoCallYou => 'Du';
+
+  @override
+  String get videoCallRinging => 'Klingelt';
+
+  @override
+  String get videoCallCalling => 'Anruf...';
+
+  @override
+  String get videoCallCancelCall => 'Abbrechen';
+
+  @override
+  String get videoCallNoAnswer => 'Keine Antwort';
+
+  @override
+  String get videoCallCallDeclined => 'Anruf abgelehnt';
+
+  @override
+  String get videoCallCallEnded => 'Anruf beendet';
+
+  @override
+  String get videoCallCancel => 'Abbrechen';
+
+  @override
+  String get videoCallAgain => 'Erneut anrufen';
+
+  @override
+  String get videoCallGroupCallJoin => 'Beitreten';
+
+  @override
+  String get videoCallGroupCallActive => 'Gruppenanruf läuft';
+
+  @override
+  String get videoCallSwitch => 'Wechsel';
+
+  @override
+  String get videoCallSwitchToVideoTitle => 'Zu Videoanruf wechseln?';
+
+  @override
+  String incomingCallBannerIsCalling(String callerName) {
+    return '$callerName ruft an';
+  }
+
+  @override
+  String get incomingCallBannerAccept => 'Annehmen';
+
+  @override
+  String get incomingCallBannerDecline => 'Ablehnen';
+
+  @override
+  String get incomingCallBannerUnknownCaller => 'Unbekannter Anrufer';
+
+  @override
+  String get incomingCallBannerAudioCall => 'MeetingPlace Audio';
+
+  @override
+  String get incomingCallBannerVideoCall => 'MeetingPlace Video';
+
+  @override
+  String get callChatItemAudioCall => 'Audioanruf';
+
+  @override
+  String get callChatItemVideoCall => 'Videoanruf';
+
+  @override
+  String get callChatItemCalling => 'Anrufen...';
+
+  @override
+  String get callChatItemRinging => 'Klingelt';
+
+  @override
+  String get callChatItemIncoming => 'Eingehender Anruf';
+
+  @override
+  String get callChatItemTapToReturn => 'Zum Zurückkehren tippen';
+
+  @override
+  String get callChatItemMissed => 'Verpasst';
+
+  @override
+  String get callChatItemNotAnswered => 'Nicht beantwortet';
+
+  @override
+  String callDurationHourFormat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Std.',
+      one: '1 Std.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationMinuteFormat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Min.',
+      one: '1 Min.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationSecondFormat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Sek.',
+      one: '1 Sek.',
+    );
+    return '$_temp0';
+  }
 }

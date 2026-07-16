@@ -1979,4 +1979,206 @@ class AppLocalizationsEn extends AppLocalizations {
   String vrcResponderIntro(Object name) {
     return '$name has selected the following persona to verify the relationship:';
   }
+
+  @override
+  String get videoCallTitle => 'Call';
+
+  @override
+  String get videoCallJoiningCall => 'Joining call...';
+
+  @override
+  String get videoCallWaitingForParticipants => 'Waiting for participants...';
+
+  @override
+  String videoCallShowMore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Show $count more',
+      one: 'Show 1 more',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoCallShowLess => 'Show less';
+
+  @override
+  String videoCallFailedToJoin(String error) {
+    return 'Failed to join: $error';
+  }
+
+  @override
+  String videoCallError(String errorCode) {
+    String _temp0 = intl.Intl.selectLogic(errorCode, {
+      'networkError': 'Network error',
+      'other': 'Unknown error',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get videoCallMicToggleFailed =>
+      'Couldn\'t change the microphone. Please try again.';
+
+  @override
+  String get videoCallCameraToggleFailed =>
+      'Couldn\'t change the camera. Please try again.';
+
+  @override
+  String get videoCallSpeakerToggleFailed =>
+      'Couldn\'t change the speaker. Please try again.';
+
+  @override
+  String get videoCallMemberNamesFailed => 'Couldn\'t load participant names.';
+
+  @override
+  String get videoCallHangUpFailed => 'Couldn\'t hang up. Please try again.';
+
+  @override
+  String videoCallParticipantCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get videoCallMute => 'Mute';
+
+  @override
+  String get videoCallUnmute => 'Unmute';
+
+  @override
+  String get videoCallEnd => 'End';
+
+  @override
+  String get videoCallMicPermissionDenied =>
+      'Microphone permission denied. Enable it in Settings.';
+
+  @override
+  String get videoCallCameraPermissionDenied =>
+      'Camera permission denied. Enable it in Settings.';
+
+  @override
+  String get videoCallWaitingForEncryption => 'Setting up encryption...';
+
+  @override
+  String get videoCallYou => 'You';
+
+  @override
+  String get videoCallRinging => 'Ringing';
+
+  @override
+  String get videoCallCalling => 'Calling...';
+
+  @override
+  String get videoCallCancelCall => 'Cancel';
+
+  @override
+  String get videoCallNoAnswer => 'No answer';
+
+  @override
+  String get videoCallCallDeclined => 'Call declined';
+
+  @override
+  String get videoCallCallEnded => 'Call ended';
+
+  @override
+  String get videoCallCancel => 'Cancel';
+
+  @override
+  String get videoCallAgain => 'Call again';
+
+  @override
+  String get videoCallGroupCallJoin => 'Join';
+
+  @override
+  String get videoCallGroupCallActive => 'Group call in progress';
+
+  @override
+  String get videoCallSwitch => 'Switch to video';
+
+  @override
+  String get videoCallSwitchToVideoTitle => 'Switch to video call';
+
+  @override
+  String incomingCallBannerIsCalling(String callerName) {
+    return '$callerName is calling';
+  }
+
+  @override
+  String get incomingCallBannerAccept => 'Accept';
+
+  @override
+  String get incomingCallBannerDecline => 'Decline';
+
+  @override
+  String get incomingCallBannerUnknownCaller => 'Unknown caller';
+
+  @override
+  String get incomingCallBannerAudioCall => 'MeetingPlace Audio';
+
+  @override
+  String get incomingCallBannerVideoCall => 'MeetingPlace Video';
+
+  @override
+  String get callChatItemAudioCall => 'Audio call';
+
+  @override
+  String get callChatItemVideoCall => 'Video call';
+
+  @override
+  String get callChatItemCalling => 'Calling...';
+
+  @override
+  String get callChatItemRinging => 'Ringing';
+
+  @override
+  String get callChatItemIncoming => 'Incoming call';
+
+  @override
+  String get callChatItemTapToReturn => 'Tap to return';
+
+  @override
+  String get callChatItemMissed => 'Missed';
+
+  @override
+  String get callChatItemNotAnswered => 'Not answered';
+
+  @override
+  String callDurationHourFormat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count h',
+      one: '1 h',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationMinuteFormat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count m',
+      one: '1 m',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationSecondFormat(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count s',
+      one: '1 s',
+    );
+    return '$_temp0';
+  }
 }

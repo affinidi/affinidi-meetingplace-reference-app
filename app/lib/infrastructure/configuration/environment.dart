@@ -37,6 +37,18 @@ class Environment {
   String get matrixHomeserver =>
       const String.fromEnvironment('MATRIX_HOMESERVER');
 
+  /// The Matrix server name derived from [matrixHomeserver]. Used for Matrix
+  /// user ID derivation (`@hash:<serverName>`).
+  String get matrixServerName {
+    final uri = Uri.tryParse(matrixHomeserver);
+    return uri?.host ?? matrixHomeserver;
+  }
+
+  String get livekitServiceUrl =>
+      const String.fromEnvironment('LIVEKIT_SERVICE_URL');
+
+  String get livekitSfuUrl => const String.fromEnvironment('LIVEKIT_SFU_URL');
+
   FirebaseEnvironment get firebase => FirebaseEnvironment.instance;
 
   int get maxOfferUsages => 100;
@@ -51,6 +63,10 @@ class Environment {
   Duration get initialTimeOffset => const Duration(minutes: 3);
   int get numberOfTapsToUnlockDebug =>
       const int.fromEnvironment('TAPS_TO_UNLOCK_DEBUG', defaultValue: 7);
+
+  Duration get callRingTimeout => const Duration(
+    seconds: int.fromEnvironment('CALL_RING_TIMEOUT_SECONDS', defaultValue: 60),
+  );
 
   bool get isDatabaseLoggingEnabled =>
       const bool.fromEnvironment('DATABASE_LOGGING_ENABLED') && kDebugMode;
@@ -86,6 +102,10 @@ class Environment {
       const bool.fromEnvironment('BIOMETRICS_ENABLED', defaultValue: true);
   bool get zkpEnabled =>
       const bool.fromEnvironment('ZKP_ENABLED', defaultValue: false);
+  bool get audioVideoCallsEnabled => const bool.fromEnvironment(
+    'AUDIO_VIDEO_CALLS_ENABLED',
+    defaultValue: false,
+  );
 
   String get appVersionName =>
       const String.fromEnvironment('APP_VERSION_NAME', defaultValue: '');

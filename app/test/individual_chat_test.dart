@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
@@ -11,6 +12,7 @@ import 'fakes/fake_connectivity.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_image_picker.dart';
+import 'fakes/fake_meeting_place_sdk.dart';
 import 'fakes/fake_secure_storage.dart';
 import 'utils/app.dart';
 
@@ -18,6 +20,9 @@ Finder findChatMessageInput() => find.byKey(const Key('chat_message_input'));
 Finder findSendButton() => find.byKey(const Key('chat_send_button'));
 Finder findAddMediaButton() => find.byKey(const Key('chat_add_media_button'));
 Finder findGifButton() => find.byKey(const Key('chat_gif_button'));
+
+const _lateIncomingCallRetryInterval = Duration(milliseconds: 250);
+const _lateIncomingCallRetryCount = 8;
 
 Future<void> enterChatMessage(WidgetTester tester, String message) async {
   await tester.enterText(findChatMessageInput(), message);
@@ -204,6 +209,90 @@ void main() {
       });
     });
 
+    group('and there is an incoming call', () {
+      late FakeMeetingPlaceSDK coreSdk;
+      late FakeChatSdk chatSdk;
+
+      setUp(() {
+        coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels);
+        chatSdk = FakeChatSdk()..sessionMessages = [];
+      });
+
+      group('and the call chat item is not yet available', () {
+        group('and the caller cancels it', () {
+          testWidgets('it shows the call as missed when reopening chat', (
+            tester,
+          ) async {
+            final l10n = await getL10n();
+            final staleCallItemTime = DateTime.now().subtract(
+              const Duration(seconds: 1),
+            );
+
+            await navigateToChat(
+              tester,
+              contactId: contactId,
+              chatSdk: chatSdk,
+              meetingPlaceCoreSDK: coreSdk,
+            );
+
+            // Receive incoming call event, but the call
+            // chat item is not yet available
+            coreSdk.emitIncomingCall(
+              IncomingAudioVideoCallEvent(
+                callId: 'call-1',
+                callerPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                otherPartyPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                mediaType: CallMediaType.video,
+              ),
+            );
+            await tester.pump();
+
+            // Simulate the caller cancelling the call before
+            // the call chat item is available
+            coreSdk.emitCancelledCall(
+              IncomingAudioVideoCallEvent(
+                callId: 'call-1',
+                callerPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                otherPartyPermanentChannelDid:
+                    FakeChannels.individualChannel.permanentChannelDid!,
+                mediaType: CallMediaType.video,
+              ),
+            );
+            await tester.pump();
+
+            // Simulate the call chat item being available after
+            // the caller has cancelled
+            chatSdk.setIncomingCallSessionMessage(
+              senderDid: FakeChannels.individualChannel.permanentChannelDid!,
+              dateCreated: staleCallItemTime,
+            );
+
+            // Advance through six 50ms retry intervals so the delayed
+            // missed-call reconciliation has enough fake time to complete.
+            await tester.pump(
+              _lateIncomingCallRetryInterval * _lateIncomingCallRetryCount,
+            );
+            await tester.pumpAndSettle();
+
+            expect(chatSdk.updateMessageCalls, hasLength(1));
+            final updatedMessage = chatSdk.updateMessageCalls.single;
+            final updatedCall = CallMetadata.maybeOf(
+              updatedMessage.attachments.first,
+            );
+            expect(updatedCall?.status, CallStatus.missed);
+
+            await pushRoute(tester, '/contacts');
+            await pushRoute(tester, '/contacts/$contactId/chat');
+
+            expect(find.text(l10n.callChatItemMissed), findsOneWidget);
+          });
+        });
+      });
+    });
+
     group('and sending a message', () {
       final chatSdk = FakeChatSdk();
 
@@ -294,6 +383,7 @@ void main() {
         expect(find.text(l10n.generalCamera), findsOneWidget);
         expect(find.text(l10n.generalPhoto), findsOneWidget);
         expect(find.text(l10n.generalDocument), findsOneWidget);
+        expect(find.text(l10n.generalVideo), findsNothing);
         expect(find.text(l10n.generalBalloons), findsNothing);
         expect(find.text(l10n.generalConfetti), findsNothing);
       });
@@ -305,6 +395,7 @@ void main() {
           capabilities: const TransportCapabilities({
             ChatFeature.textMessaging,
             ChatFeature.imageAttachments,
+            ChatFeature.videoAttachments,
             ChatFeature.reactions,
           }),
         );

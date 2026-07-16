@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/identity/identity.dart';
@@ -91,4 +92,40 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
     required String senderDid,
   });
   void upsertChatItem(ChatItem item);
+
+  /// Sends a call chat item over the wire and persists it for the sender,
+  /// returning its message id so the call lifecycle can update the item in
+  /// place. The receiver gets the item automatically via the chat transport
+  /// (isFromMe: false) and is offline-notified like any other message.
+  Future<String?> sendOutgoingCallMessage({
+    required CallMediaType mediaType,
+    required String callId,
+  });
+
+  /// Resolves the message id of the latest incoming (not-from-me) call chat
+  /// item that is still in a non-terminal state, so the receiver can update it
+  /// in place. Returns null when no such item exists.
+  Future<String?> resolveIncomingCallChatItemId();
+
+  /// Resolves the message id of the latest outgoing (isFromMe) call chat item
+  /// that is still in a non-terminal state. Used by the caller when the emitter
+  /// has not yet resolved the id (e.g. fast cancel during connecting phase).
+  /// Returns null when no such item exists.
+  Future<String?> resolveOutgoingCallChatItemId();
+
+  /// Updates the receiver's pending incoming call chat item to
+  /// [CallStatus.missed]. Returns `true` when an item was healed, `false` when
+  /// there was nothing to update or the session is not live.
+  ///
+  /// Called when the ring timer expires or the user declines before answering.
+  Future<bool> markCallAsMissed();
+
+  /// Updates the local-only [status] and participation [duration] of a
+  /// previously emitted call chat item, in place. Per-side and local-only: it
+  /// does not propagate to the other party.
+  Future<void> updateCallChatItem(
+    String messageId, {
+    required CallStatus status,
+    Duration? duration,
+  });
 }

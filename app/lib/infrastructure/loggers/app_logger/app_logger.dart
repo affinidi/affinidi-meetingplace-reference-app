@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import 'app_log_entry.dart';
 import 'console_logger_target.dart';
@@ -9,7 +9,7 @@ import 'debug_log_collector_target.dart';
 import 'logger_target.dart';
 
 class AppLogger
-    implements MeetingPlaceChatSDKLogger, MeetingPlaceCoreSDKLogger {
+    implements MeetingPlaceCoreSDKLogger, MeetingPlaceMatrixSDKLogger {
   AppLogger._(this._debugCollector, this._loggers);
 
   static AppLogger? _instance;
@@ -92,6 +92,7 @@ class AppLogger
 
   Object? _getOriginalException(Object? error) {
     if (error == null) return null;
+    // TODO(SR): Add matrix SDK exception handling
     if (error is MeetingPlaceCoreSDKException) return error.innerException;
     return null;
   }

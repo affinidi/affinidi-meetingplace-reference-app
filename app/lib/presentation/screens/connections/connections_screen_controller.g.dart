@@ -44,7 +44,7 @@ final class ConnectionsScreenControllerProvider
 }
 
 String _$connectionsScreenControllerHash() =>
-    r'c8fd0a49c97669a8368862676d20821d245745d4';
+    r'6465b7e410caded087706da74e7bb801d2ba3fb4';
 
 abstract class _$ConnectionsScreenController
     extends $Notifier<ConnectionsScreenState> {

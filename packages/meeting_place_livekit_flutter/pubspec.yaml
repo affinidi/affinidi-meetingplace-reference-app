@@ -1,0 +1,28 @@
+name: meeting_place_livekit_flutter
+description: "Flutter implementation of meeting_place_matrix_livekit LiveKitRoom interface with MatrixRTC delegates and video widgets."
+version: 0.0.1-dev.0
+publish_to: none
+
+resolution: workspace
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.0.3
+  flutter_webrtc: ^1.4.0
+  livekit_client: ^2.7.0
+  matrix: ^8.1.0
+  meeting_place_chat: ^0.0.1-dev.53
+  meeting_place_core: ^0.0.1-dev.46
+  meeting_place_matrix: ^0.0.1-dev.4
+  permission_handler: ^12.0.1
+  riverpod_annotation: ^3.0.3
+  webrtc_interface: ^1.5.1
+
+dev_dependencies:
+  dart_flutter_team_lints: ^3.2.1
+  flutter_test:
+    sdk: flutter

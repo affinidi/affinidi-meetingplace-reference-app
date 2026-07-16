@@ -3033,6 +3033,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} has selected the following persona to verify the relationship:'**
   String vrcResponderIntro(Object name);
+
+  /// No description provided for @videoCallTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get videoCallTitle;
+
+  /// No description provided for @videoCallJoiningCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Joining call...'**
+  String get videoCallJoiningCall;
+
+  /// No description provided for @videoCallWaitingForParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for participants...'**
+  String get videoCallWaitingForParticipants;
+
+  /// No description provided for @videoCallShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Show 1 more} other{Show {count} more}}'**
+  String videoCallShowMore(int count);
+
+  /// No description provided for @videoCallShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get videoCallShowLess;
+
+  /// No description provided for @videoCallFailedToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to join: {error}'**
+  String videoCallFailedToJoin(String error);
+
+  /// No description provided for @videoCallError.
+  ///
+  /// In en, this message translates to:
+  /// **'{errorCode, select, networkError{Network error} other{Unknown error}}'**
+  String videoCallError(String errorCode);
+
+  /// No description provided for @videoCallMicToggleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change the microphone. Please try again.'**
+  String get videoCallMicToggleFailed;
+
+  /// No description provided for @videoCallCameraToggleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change the camera. Please try again.'**
+  String get videoCallCameraToggleFailed;
+
+  /// No description provided for @videoCallSpeakerToggleFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change the speaker. Please try again.'**
+  String get videoCallSpeakerToggleFailed;
+
+  /// No description provided for @videoCallMemberNamesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load participant names.'**
+  String get videoCallMemberNamesFailed;
+
+  /// No description provided for @videoCallHangUpFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t hang up. Please try again.'**
+  String get videoCallHangUpFailed;
+
+  /// No description provided for @videoCallParticipantCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
+  String videoCallParticipantCount(int count);
+
+  /// No description provided for @videoCallMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get videoCallMute;
+
+  /// No description provided for @videoCallUnmute.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get videoCallUnmute;
+
+  /// No description provided for @videoCallEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End'**
+  String get videoCallEnd;
+
+  /// No description provided for @videoCallMicPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission denied. Enable it in Settings.'**
+  String get videoCallMicPermissionDenied;
+
+  /// No description provided for @videoCallCameraPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission denied. Enable it in Settings.'**
+  String get videoCallCameraPermissionDenied;
+
+  /// No description provided for @videoCallWaitingForEncryption.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting up encryption...'**
+  String get videoCallWaitingForEncryption;
+
+  /// No description provided for @videoCallYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get videoCallYou;
+
+  /// No description provided for @videoCallRinging.
+  ///
+  /// In en, this message translates to:
+  /// **'Ringing'**
+  String get videoCallRinging;
+
+  /// No description provided for @videoCallCalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Calling...'**
+  String get videoCallCalling;
+
+  /// No description provided for @videoCallCancelCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get videoCallCancelCall;
+
+  /// No description provided for @videoCallNoAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'No answer'**
+  String get videoCallNoAnswer;
+
+  /// No description provided for @videoCallCallDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Call declined'**
+  String get videoCallCallDeclined;
+
+  /// No description provided for @videoCallCallEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Call ended'**
+  String get videoCallCallEnded;
+
+  /// No description provided for @videoCallCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get videoCallCancel;
+
+  /// No description provided for @videoCallAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Call again'**
+  String get videoCallAgain;
+
+  /// No description provided for @videoCallGroupCallJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get videoCallGroupCallJoin;
+
+  /// No description provided for @videoCallGroupCallActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Group call in progress'**
+  String get videoCallGroupCallActive;
+
+  /// No description provided for @videoCallSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to video'**
+  String get videoCallSwitch;
+
+  /// No description provided for @videoCallSwitchToVideoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to video call'**
+  String get videoCallSwitchToVideoTitle;
+
+  /// No description provided for @incomingCallBannerIsCalling.
+  ///
+  /// In en, this message translates to:
+  /// **'{callerName} is calling'**
+  String incomingCallBannerIsCalling(String callerName);
+
+  /// No description provided for @incomingCallBannerAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get incomingCallBannerAccept;
+
+  /// No description provided for @incomingCallBannerDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get incomingCallBannerDecline;
+
+  /// No description provided for @incomingCallBannerUnknownCaller.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown caller'**
+  String get incomingCallBannerUnknownCaller;
+
+  /// No description provided for @incomingCallBannerAudioCall.
+  ///
+  /// In en, this message translates to:
+  /// **'MeetingPlace Audio'**
+  String get incomingCallBannerAudioCall;
+
+  /// No description provided for @incomingCallBannerVideoCall.
+  ///
+  /// In en, this message translates to:
+  /// **'MeetingPlace Video'**
+  String get incomingCallBannerVideoCall;
+
+  /// No description provided for @callChatItemAudioCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio call'**
+  String get callChatItemAudioCall;
+
+  /// No description provided for @callChatItemVideoCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Video call'**
+  String get callChatItemVideoCall;
+
+  /// No description provided for @callChatItemCalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Calling...'**
+  String get callChatItemCalling;
+
+  /// No description provided for @callChatItemRinging.
+  ///
+  /// In en, this message translates to:
+  /// **'Ringing'**
+  String get callChatItemRinging;
+
+  /// No description provided for @callChatItemIncoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming call'**
+  String get callChatItemIncoming;
+
+  /// No description provided for @callChatItemTapToReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to return'**
+  String get callChatItemTapToReturn;
+
+  /// No description provided for @callChatItemMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed'**
+  String get callChatItemMissed;
+
+  /// No description provided for @callChatItemNotAnswered.
+  ///
+  /// In en, this message translates to:
+  /// **'Not answered'**
+  String get callChatItemNotAnswered;
+
+  /// No description provided for @callDurationHourFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 h} other{{count} h}}'**
+  String callDurationHourFormat(int count);
+
+  /// No description provided for @callDurationMinuteFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 m} other{{count} m}}'**
+  String callDurationMinuteFormat(int count);
+
+  /// No description provided for @callDurationSecondFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 s} other{{count} s}}'**
+  String callDurationSecondFormat(int count);
 }
 
 class _AppLocalizationsDelegate

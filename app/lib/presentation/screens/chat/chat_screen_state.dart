@@ -37,6 +37,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     @Default(false) bool shouldShowVrcBanner,
     @Default(false) bool shouldStartVrcExchangeFromAttachment,
     chat.TransportCapabilities? capabilities,
+    @Default(false) bool isCallSupported,
   }) = _ChatScreenState;
 
   bool get hasPendingVrcConcierge => messages.any(

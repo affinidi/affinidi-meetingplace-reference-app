@@ -28,6 +28,17 @@ class ChatItem extends StatelessWidget {
     }
 
     if (_chatItem is chat.Message) {
+      final callAttachment = _chatItem.attachments.firstWhereOrNull(
+        CallMetadata.isCall,
+      );
+      if (callAttachment != null) {
+        return _CallChatItem(
+          message: _chatItem,
+          attachment: callAttachment,
+          chatItemColor: _chatItemColor,
+          contactId: _contactId,
+        );
+      }
       return _PlainTextChatItem(
         chatItem: _chatItem,
         contactId: _contactId,

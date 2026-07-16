@@ -16,6 +16,7 @@ class FakeEnvironment implements Environment {
       ChannelTransport.didcomm,
       ChannelTransport.matrix,
     ],
+    this.audioVideoCallsEnabled = false,
   }) : defaultMediatorDid =
            defaultMediatorDid ?? FakeMediators.defaultMediator.mediatorDid;
 
@@ -86,6 +87,9 @@ class FakeEnvironment implements Environment {
   bool get zkpEnabled => false;
 
   @override
+  final bool audioVideoCallsEnabled;
+
+  @override
   String get appVersionName => '1.0.0-test';
 
   @override
@@ -111,4 +115,16 @@ class FakeEnvironment implements Environment {
 
   @override
   String? get directInteractiveOobType => null;
+
+  @override
+  String get livekitServiceUrl => '';
+
+  @override
+  String get livekitSfuUrl => '';
+
+  @override
+  String get matrixServerName => Uri.parse(matrixHomeserver).host;
+
+  @override
+  Duration get callRingTimeout => const Duration(seconds: 60);
 }

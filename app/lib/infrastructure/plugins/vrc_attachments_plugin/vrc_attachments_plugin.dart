@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
@@ -13,7 +14,6 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/vrc_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
-import '../../../presentation/screens/chat/widgets/credential_attachment_widget.dart';
 import '../../../presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
 import '../../../presentation/widgets/buttons/elevated_loading_button.dart';
 import '../../../presentation/widgets/identity_picker/identity_picker.dart';
@@ -21,6 +21,7 @@ import '../../../presentation/widgets/profile_picture.dart';
 import 'vrc_attachment.dart';
 import 'vrc_attachment_controller.dart';
 import 'vrc_attachment_state.dart';
+import 'vrc_attachment_widget.dart';
 
 part 'select_vrc_identity_screen.dart';
 
@@ -112,7 +113,7 @@ class _VrcAttachmentWidget extends ConsumerWidget {
         loading: () => true,
         orElse: () => false,
       ),
-      child: CredentialAttachmentWidget(
+      child: VrcAttachmentWidget(
         onTap: () {
           verificationState.maybeWhen(
             success: (credential) => _openDetails(context, credential),

@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
-import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
+import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
+import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:ssi/ssi.dart';
-
 import '../../application/services/identities_service/identities_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
@@ -44,8 +45,8 @@ final vodozemacInitProvider = FutureProvider<void>(
 /// - Uses mediator DID from settings and control plane DID from environment
 /// - Provides comprehensive logging throughout the initialization process
 /// - Handles initialization errors gracefully with proper error logging
-final FutureProvider<MeetingPlaceCoreSDK>
-meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
+final FutureProvider<MeetingPlaceMatrixSDK>
+meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
   (ref) async {
     const logKey = 'meetingPlaceSdkProvider';
     final logger = ref.read(appLoggerProvider);
@@ -64,7 +65,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
       );
       logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
-      final sdk = await MeetingPlaceCoreSDK.create(
+      final sdk = await MeetingPlaceMatrixSDK.create(
         wallet: wallet,
         repositoryConfig: RepositoryConfig(
           connectionOfferRepository: await ref.read(
@@ -76,7 +77,9 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
         ),
         config: await ref.read(matrixConfigProvider.future),
         logger: logger,
-        options: MeetingPlaceCoreSDKOptions(
+        rtcDelegate: FlutterMatrixRTCDelegate(),
+        roomFactory: (_) => FlutterLiveKitRoom(),
+        options: MeetingPlaceMatrixSdkOptions(
           expectedMessageWrappingTypes: const [
             MessageWrappingType.authcryptPlaintext,
             MessageWrappingType.authcryptSignPlaintext,

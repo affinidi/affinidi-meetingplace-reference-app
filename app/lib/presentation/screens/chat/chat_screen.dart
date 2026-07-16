@@ -12,11 +12,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -24,6 +26,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../application/services/network_connectivity_service/network_connectivity_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -56,10 +59,13 @@ import '../../effects/screen_effect.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
+import '../../widgets/banners/active_call/active_call_controller.dart';
 import '../../widgets/bottom_sheet_menu.dart';
 import '../../widgets/images/default_profile_image.dart';
 import '../../widgets/info_banner.dart';
 import '../../widgets/profile_circle_avatar.dart';
+import 'audio_video_call/audio_video_call_screen.dart';
+import 'audio_video_call/rules/call_chat_item_rules.dart';
 import 'chat_activity_progress_indicator.dart';
 import 'chat_items/chat_encryption_notice.dart';
 import 'chat_items/chat_r_card_updated_by_me_notice.dart';
@@ -83,6 +89,7 @@ part 'chat_contact_display_name.dart';
 part 'chat_contact_presence_status.dart';
 part 'chat_effect.dart';
 part 'chat_item.dart';
+part 'chat_items/call_chat_item.dart';
 part 'chat_items/chat_item_from_info.dart';
 part 'chat_items/concierge_join_group_request_chat_item.dart';
 part 'chat_items/concierge_update_profile_request_chat_item.dart';
@@ -111,6 +118,9 @@ class ChatScreen extends HookConsumerWidget {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
+    final isAudioVideoCallsEnabled = ref
+        .read(environmentProvider)
+        .audioVideoCallsEnabled;
     final showHumanZkp = ref.watch(
       provider.select(
         (state) =>
@@ -120,6 +130,10 @@ class ChatScreen extends HookConsumerWidget {
     );
     final isInitialized = ref.watch(
       provider.select((state) => state.isInitialized),
+    );
+    final isGroupChat = ref.watch(provider.isGroupChat);
+    final isCallSupported = ref.watch(
+      provider.select((state) => state.isCallSupported),
     );
 
     Future<void> onVrcStart() async {
@@ -192,6 +206,10 @@ class ChatScreen extends HookConsumerWidget {
         ),
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
+        actions: [
+          if (isAudioVideoCallsEnabled && isCallSupported && !isGroupChat)
+            _AudioVideoCallActions(contactId: _contactId),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -207,6 +225,53 @@ class ChatScreen extends HookConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AudioVideoCallActions extends ConsumerWidget {
+  _AudioVideoCallActions({required this._contactId});
+
+  final String _contactId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = chatScreenControllerProvider(_contactId);
+    final isCallSupported = ref.watch(
+      provider.select((state) => state.isCallSupported),
+    );
+    final activeCallState = ref.watch(activeCallControllerProvider);
+    final isConnected = ref.watch(
+      networkConnectivityServiceProvider.select((state) => state.isConnected),
+    );
+    final canInitiateCall =
+        isCallSupported && isConnected && activeCallState == null;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.call),
+          tooltip: context.l10n.callChatItemAudioCall,
+          onPressed: canInitiateCall
+              ? () => context.push(
+                  AudioVideoCallRoute(
+                    contactId: _contactId,
+                    isAudioOnly: true,
+                  ).location,
+                )
+              : null,
+        ),
+        IconButton(
+          icon: const Icon(Icons.videocam),
+          tooltip: context.l10n.callChatItemVideoCall,
+          onPressed: canInitiateCall
+              ? () => context.push(
+                  AudioVideoCallRoute(contactId: _contactId).location,
+                )
+              : null,
+        ),
+      ],
     );
   }
 }

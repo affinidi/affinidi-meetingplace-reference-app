@@ -524,5 +524,81 @@
 	"selectIdentityToVerifyRelationshipPrompt": "Desliza hacia la izquierda o derecha para elegir la identidad que deseas usar para verificar tu relación con {name}.",
 	"trustedBy": "Confiado por {count}",
 	"verifiableCredentialWallet": "Cartera de Credenciales Verificables",
-	"vrcAbbreviation": "VRC"
+	"vrcAbbreviation": "VRC",
+	"videoCallTitle": "Llamar",
+	"videoCallJoiningCall": "Uniéndose a la llamada...",
+	"videoCallWaitingForParticipants": "Esperando participantes...",
+	"videoCallFailedToJoin": "Error al unirse: {error}",
+	"videoCallHangUpFailed": "No se pudo colgar. Por favor, inténtalo de nuevo.",
+	"videoCallParticipantCount": "{count, plural, =1{1 participante} other{{count} participantes}}",
+	"videoCallMute": "Silenciar",
+	"videoCallUnmute": "Activar audio",
+	"videoCallEnd": "Terminar",
+	"videoCallMicPermissionDenied": "Permiso de micrófono denegado. Actívalo en Configuración.",
+	"videoCallCameraPermissionDenied": "Permiso de cámara denegado. Actívalo en Configuración.",
+	"videoCallWaitingForEncryption": "Configurando el cifrado...",
+	"videoCallYou": "Tú",
+	"videoCallRinging": "Llamando",
+	"videoCallCancelCall": "Cancelar",
+	"videoCallNoAnswer": "Sin respuesta",
+	"videoCallCallDeclined": "Llamada rechazada",
+	"videoCallCallEnded": "Llamada finalizada",
+	"videoCallCancel": "Cancelar",
+	"videoCallAgain": "Volver a llamar",
+	"videoCallGroupCallJoin": "Unirse",
+	"videoCallGroupCallActive": "Llamada grupal en curso",
+	"videoCallSwitchToVideoTitle": "¿Cambiar a videollamada?",
+	"videoCallSwitch": "Cambiar",
+	"callChatItemAudioCall": "Llamada de audio",
+	"callChatItemVideoCall": "Videollamada",
+	"callChatItemCalling": "Llamando...",
+	"callChatItemRinging": "Sonando",
+	"callChatItemIncoming": "Llamada entrante",
+	"callChatItemTapToReturn": "Toca para volver",
+	"callChatItemMissed": "Perdida",
+	"callChatItemNotAnswered": "Sin respuesta",
+	"incomingCallBannerIsCalling": "{callerName} está llamando",
+	"incomingCallBannerAccept": "Aceptar",
+	"incomingCallBannerDecline": "Rechazar",
+	"incomingCallBannerUnknownCaller": "Llamante desconocido",
+	"callDurationHourFormat": "{count, plural, =1{1 h} other{{count} h}}",
+	"@callDurationHourFormat": {
+		"description": "Format for hours in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "1"
+			}
+		}
+	},
+	"callDurationMinuteFormat": "{count, plural, =1{1 m} other{{count} m}}",
+	"@callDurationMinuteFormat": {
+		"description": "Format for minutes in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "30"
+			}
+		}
+	},
+	"callDurationSecondFormat": "{count, plural, =1{1 s} other{{count} s}}",
+	"@callDurationSecondFormat": {
+		"description": "Format for seconds in call duration display",
+		"placeholders": {
+			"count": {
+				"type": "int",
+				"example": "14"
+			}
+		}
+	},
+	"incomingCallBannerAudioCall": "Audio de MeetingPlace",
+	"incomingCallBannerVideoCall": "Video de MeetingPlace",
+	"videoCallCalling": "Llamando...",
+	"videoCallCameraToggleFailed": "No se pudo cambiar la cámara. Por favor, inténtelo de nuevo.",
+	"videoCallMemberNamesFailed": "No se pudieron cargar los nombres de los participantes.",
+	"videoCallMicToggleFailed": "No se pudo cambiar el micrófono. Por favor, inténtelo de nuevo.",
+	"videoCallShowLess": "Mostrar menos",
+	"videoCallShowMore": "{count, plural, =1{Mostrar 1 más} other{Mostrar {count} más}}",
+	"videoCallSpeakerToggleFailed": "No se pudo cambiar el altavoz. Por favor, inténtelo de nuevo.",
+	"videoCallError": "{errorCode, select, networkError{Error de red} other{Error desconocido}}"
 }

@@ -7,10 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:meeting_place_chat/meeting_place_chat.dart';
-import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:meeting_place_drift_repository/meeting_place_drift_repository.dart';
+import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/r_cards_service/r_cards_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
@@ -70,8 +69,8 @@ Future<void> startApp(
   bool alreadyOnboarded = true,
   PushNotificationMessaging? pushNotificationMessaging,
   Connectivity? connectivity,
-  MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
-  MeetingPlaceChatSDK? meetingPlaceChatSDK,
+  MeetingPlaceMatrixSDK? meetingPlaceCoreSDK,
+  MeetingPlaceMatrixChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   FilePickerPlatform? filePickerPlatform,
   List<CameraDescription>? mockCameras,
@@ -86,6 +85,7 @@ Future<void> startApp(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
+  FakeEnvironment? environment,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   addTearDown(() async {
@@ -97,7 +97,7 @@ Future<void> startApp(
   });
   final sharedPreferences = await SharedPreferences.getInstance();
   final cacheManager = FakeCacheManager();
-  final effectiveEnvironment = FakeEnvironment();
+  final effectiveEnvironment = environment ?? FakeEnvironment();
   final effectiveSecureStorage = secureStorage ?? FakeSecureStorage();
   final documentsDirectory = Directory('/tmp');
   final databasePassphrase = await effectiveSecureStorage
@@ -285,8 +285,8 @@ Future<void> navigateToLocation(
   List<Vrc> vrcs = const [],
   PushNotificationMessaging? pushNotificationMessaging,
   Connectivity? connectivity,
-  MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
-  MeetingPlaceChatSDK? meetingPlaceChatSDK,
+  MeetingPlaceMatrixSDK? meetingPlaceCoreSDK,
+  MeetingPlaceMatrixChatSDK? meetingPlaceChatSDK,
   ImagePicker? imagePicker,
   List<CameraDescription>? cameras,
   PermissionStatus? cameraPermissionStatus = PermissionStatus.granted,
@@ -295,6 +295,7 @@ Future<void> navigateToLocation(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
+  FakeEnvironment? environment,
 }) async {
   await startApp(
     tester,
@@ -317,16 +318,22 @@ Future<void> navigateToLocation(
     qrCodeViewFactory: qrCodeViewFactory,
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
+    environment: environment,
   );
 
   await tester.pumpAndSettle();
 
+  await pushRoute(tester, location);
+}
+
+Future<void> pushRoute(WidgetTester tester, String location) async {
   final testRouteInformation = <String, dynamic>{'location': location};
   final message = const JSONMethodCodec().encodeMethodCall(
     MethodCall('pushRouteInformation', testRouteInformation),
   );
   await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .handlePlatformMessage('flutter/navigation', message, (_) {});
+  await tester.pumpAndSettle();
 }
 
 Future<void> navigateToChat(
@@ -345,7 +352,8 @@ Future<void> navigateToChat(
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
   List<RCard> rCards = const [],
-  MeetingPlaceCoreSDK? meetingPlaceCoreSDK,
+  MeetingPlaceMatrixSDK? meetingPlaceCoreSDK,
+  FakeEnvironment? environment,
 }) async {
   await navigateToLocation(
     tester,
@@ -368,6 +376,7 @@ Future<void> navigateToChat(
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
     rCards: rCards,
+    environment: environment,
   );
   await tester.pumpAndSettle();
 }
