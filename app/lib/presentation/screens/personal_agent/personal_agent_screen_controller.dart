@@ -1,3 +1,4 @@
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -67,10 +68,6 @@ class PersonalAgentScreenController
   final Ref _ref;
 
   void syncFromDependencies() {
-    _ref
-        .read(personalAiServiceProvider.notifier)
-        .refreshPersonalAiContactSync();
-
     final identity = _ref.read(
       identitiesServiceProvider.currentIdentityOrPrimary,
     );
@@ -282,3 +279,4 @@ class PersonalAgentScreenController
     return normalizedContextId.startsWith(normalizedTarget);
   }
 }
+

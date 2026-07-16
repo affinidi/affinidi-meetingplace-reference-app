@@ -1,5 +1,7 @@
+
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_category.dart';
+import '../../../domain/models/contacts/contact_status.dart';
 import '../context_routing_service/context_routing_service.dart';
 
 String canonicalPersonalAiContextName({
@@ -78,6 +80,7 @@ Contact? findPersonalAiContactForContext({
     if (byOfferLink.isNotEmpty) {
       return byOfferLink.first;
     }
+    return null;
   }
 
   final normalizedChannelDid = channelDid?.trim();
@@ -101,3 +104,34 @@ Contact? findPersonalAiContactForContext({
 
   return null;
 }
+
+bool isEstablishedPersonalAiContact({
+  required Contact contact,
+  required AgentContext targetContext,
+  required Map<String, AgentContext> contactContexts,
+}) {
+  return contact.category == ContactCategory.robot &&
+      contact.status == ContactStatus.active &&
+      contactContexts[contact.id] == targetContext;
+}
+
+bool shouldRenamePersonalAiContact({
+  required Contact contact,
+  required String desiredName,
+  required bool isInitialSetup,
+}) {
+  if (desiredName.isEmpty) {
+    return false;
+  }
+  if (!isInitialSetup &&
+      (contact.displayName?.trim().isNotEmpty ?? false)) {
+    return false;
+  }
+
+  return contact.displayName == null ||
+      contact.displayName!.trim().isEmpty ||
+      contact.displayName != desiredName ||
+      contact.card.displayName.trim().isEmpty ||
+      contact.card.displayName != desiredName;
+}
+

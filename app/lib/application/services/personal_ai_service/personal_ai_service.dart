@@ -1,3 +1,4 @@
+
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -66,13 +67,17 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
           : const <PersonalAgentSetupResult>[]);
 
     for (final setupResult in setups) {
-      await _syncPersonalAiContactForSetup(setupResult);
+      await _syncPersonalAiContactForSetup(
+        setupResult,
+        isInitialSetup: false,
+      );
     }
   }
 
   Future<void> _syncPersonalAiContactForSetup(
-    PersonalAgentSetupResult setupResult,
-  ) async {
+    PersonalAgentSetupResult setupResult, {
+    required bool isInitialSetup,
+  }) async {
     String? channelDid;
     String? offerLink;
     final setupId = setupResult.setupId?.trim() ?? '';
@@ -101,6 +106,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       setupResult,
       preferredChannelDid: channelDid,
       offerLink: offerLink,
+      isInitialSetup: isInitialSetup,
     );
   }
 
@@ -320,6 +326,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         setupSnapshot,
         preferredChannelDid: offerChannelDid,
         offerLink: offerLink,
+        isInitialSetup: true,
       );
 
       _updateSetupResult(setupSnapshot, contextName: contextName);
@@ -645,6 +652,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     PersonalAgentSetupResult result, {
     String? preferredChannelDid,
     String? offerLink,
+    required bool isInitialSetup,
   }) async {
     final contactsService = _ref.read(contactsServiceProvider.notifier);
     await contactsService.ensureInitialized();
@@ -692,18 +700,38 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       return;
     }
 
+    final normalizedOfferLink = resolvedOfferLink?.trim();
+    if (normalizedOfferLink != null &&
+        normalizedOfferLink.isNotEmpty &&
+        currentContact.offerLink != normalizedOfferLink) {
+      return;
+    }
+
+    if (isEstablishedPersonalAiContact(
+      contact: currentContact,
+      targetContext: targetContext,
+      contactContexts: routingState.contactContexts,
+    )) {
+      if (!isInitialSetup) {
+        await _ref
+            .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
+            .assignContactContext(currentContact.id, targetContext);
+        return;
+      }
+    }
+
     final desiredName = result.profile.displayName.trim();
     final needsCategoryUpdate =
         currentContact.category != ContactCategory.robot;
-    final needsNameUpdate =
-        desiredName.isNotEmpty &&
-        (currentContact.displayName == null ||
-            currentContact.displayName!.trim().isEmpty ||
-            currentContact.displayName != desiredName ||
-            currentContact.card.displayName.trim().isEmpty ||
-            currentContact.card.displayName != desiredName);
+    final needsNameUpdate = shouldRenamePersonalAiContact(
+      contact: currentContact,
+      desiredName: desiredName,
+      isInitialSetup: isInitialSetup,
+    );
     final shouldMarkPending =
-        needsCategoryUpdate && currentContact.status == ContactStatus.active;
+        isInitialSetup &&
+        needsCategoryUpdate &&
+        currentContact.status == ContactStatus.active;
 
     if (!needsNameUpdate && !shouldMarkPending && !needsCategoryUpdate) {
       await _ref
@@ -803,8 +831,13 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       return;
     }
 
-    if (contactsState.getContactByChannelDid(normalized) != null) {
-      return;
+    final existingByChannelDid = contactsState.getContactByChannelDid(normalized);
+    if (existingByChannelDid != null) {
+      if (normalizedOfferLink == null ||
+          normalizedOfferLink.isEmpty ||
+          existingByChannelDid.offerLink == normalizedOfferLink) {
+        return;
+      }
     }
 
     final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
@@ -829,3 +862,4 @@ class _PersonalAiLifecycleObserver extends WidgetsBindingObserver {
     }
   }
 }
+
