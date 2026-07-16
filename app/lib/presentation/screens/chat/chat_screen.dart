@@ -25,7 +25,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/context_routing_service/context_routing_service.dart';
+import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
@@ -115,11 +117,6 @@ class ChatScreen extends HookConsumerWidget {
     final controller = ref.read(provider.notifier);
     final contextRoutingState = ref.watch<ContextRoutingState>(
       contextRoutingServiceProvider,
-    );
-    final activeContext = ref.watch<AgentContext>(
-      contextRoutingServiceProvider.select(
-        (ContextRoutingState state) => state.contextForContactId(_contactId),
-      ),
     );
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     final showHumanZkp = ref.watch(
@@ -248,13 +245,6 @@ class ChatScreen extends HookConsumerWidget {
         ),
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(30),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: _ContextHeaderChip(context: activeContext),
-          ),
-        ),
         actions: [
           PopupMenuButton<String>(
             icon: const Icon(Icons.account_tree_outlined),
@@ -277,11 +267,11 @@ class ChatScreen extends HookConsumerWidget {
             itemBuilder: (_) => [
               const PopupMenuItem<String>(
                 value: 'use_work',
-                child: Text('Use Work AI (ctx0)'),
+                child: Text('Use Work AI'),
               ),
               const PopupMenuItem<String>(
                 value: 'use_personal',
-                child: Text('Use Personal AI (ctx1)'),
+                child: Text('Use Personal AI'),
               ),
               const PopupMenuDivider(),
               PopupMenuItem<String>(
@@ -370,35 +360,6 @@ class _LoadingSection extends StatelessWidget {
   }
 }
 
-class _ContextHeaderChip extends StatelessWidget {
-  const _ContextHeaderChip({required this.context});
-
-  final AgentContext context;
-
-  @override
-  Widget build(BuildContext context) {
-    final isWork = this.context == AgentContext.work;
-    final bg = isWork ? const Color(0xFF334D2E) : const Color(0xFF2F3F64);
-    final border = isWork ? const Color(0xFF9DD486) : const Color(0xFF9BB2E6);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: border),
-      ),
-      child: Text(
-        _contextDisplayName(this.context),
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: Colors.white,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
 String _contextDisplayName(AgentContext context) {
-  return context == AgentContext.work ? 'WORK AI (ctx0)' : 'PERSONAL AI (ctx1)';
+  return context == AgentContext.work ? 'Work AI' : 'Personal AI';
 }

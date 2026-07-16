@@ -19,7 +19,7 @@ class _ContactsListView extends ConsumerWidget {
     );
 
     return ListView.builder(
-      // TODO(MA): Remove shrink wrap to enable lazy loading
+      //  c
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: contacts.length,
@@ -69,11 +69,6 @@ class _ContactListItem extends ConsumerWidget {
       Localizations.localeOf(context).toString(),
     ).format(contact.dateAdded);
     final statusColor = contact.getStatusColor(context, asAvatar: true);
-    final activeContext = ref.watch<AgentContext>(
-      contextRoutingServiceProvider.select(
-        (state) => state.contextForContactId(contact.id),
-      ),
-    );
 
     Future<void> onContextSelected(AgentContext next) async {
       await ref
@@ -81,12 +76,10 @@ class _ContactListItem extends ConsumerWidget {
           .assignContactContext(contact.id, next);
 
       if (!context.mounted) return;
-      final label = next == AgentContext.work
-          ? 'WORK AI (ctx0)'
-          : 'PERSONAL AI (ctx1)';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Channel context set to $label')),
-      );
+      final label = next == AgentContext.work ? 'Work AI' : 'Personal AI';
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Channel context set to $label')));
     }
 
     final child = _ContactTile(
@@ -103,7 +96,6 @@ class _ContactListItem extends ConsumerWidget {
       onLongPress: () => onLongPress(contact: contact),
       onEditModeCheckChanged: (checked) =>
           onTap(contact: contact, isSelected: isSelected),
-      activeContext: activeContext,
       onContextSelected: onContextSelected,
     );
 
@@ -159,7 +151,6 @@ class _ContactTile extends StatelessWidget {
     required this.onDoubleTap,
     required this.onLongPress,
     required this.onEditModeCheckChanged,
-    required this.activeContext,
     required this.onContextSelected,
   });
 
@@ -176,7 +167,6 @@ class _ContactTile extends StatelessWidget {
   final VoidCallback onDoubleTap;
   final VoidCallback? onLongPress;
   final ValueChanged<bool?>? onEditModeCheckChanged;
-  final AgentContext activeContext;
   final Future<void> Function(AgentContext context) onContextSelected;
 
   @override
@@ -280,46 +270,7 @@ class _ContactTile extends StatelessWidget {
                     visualDensity: VisualDensity.adaptivePlatformDensity,
                     onChanged: onEditModeCheckChanged,
                   )
-                : PopupMenuButton<AgentContext>(
-                    tooltip: 'Select channel context',
-                    onSelected: (value) async {
-                      await onContextSelected(value);
-                    },
-                    itemBuilder: (_) => const [
-                      PopupMenuItem<AgentContext>(
-                        value: AgentContext.work,
-                        child: Text('Use Work AI (ctx0)'),
-                      ),
-                      PopupMenuItem<AgentContext>(
-                        value: AgentContext.personal,
-                        child: Text('Use Personal AI (ctx1)'),
-                      ),
-                    ],
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: activeContext == AgentContext.work
-                            ? const Color(0xFF334D2E)
-                            : const Color(0xFF2F3F64),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(
-                          color: activeContext == AgentContext.work
-                              ? const Color(0xFF9DD486)
-                              : const Color(0xFF9BB2E6),
-                        ),
-                      ),
-                      child: Text(
-                        activeContext == AgentContext.work ? 'ctx0' : 'ctx1',
-                        style: context.textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
+                : null,
           ),
         ),
       ),

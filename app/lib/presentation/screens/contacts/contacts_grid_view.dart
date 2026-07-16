@@ -73,25 +73,6 @@ class _ContactGridItem extends ConsumerWidget {
         (state) => state.selectedContacts.contains(contact),
       ),
     );
-    final activeContext = ref.watch<AgentContext>(
-      contextRoutingServiceProvider.select(
-        (state) => state.contextForContactId(contact.id),
-      ),
-    );
-
-    Future<void> onContextSelected(AgentContext next) async {
-      await ref
-          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
-          .assignContactContext(contact.id, next);
-
-      if (!context.mounted) return;
-      final label = next == AgentContext.work
-          ? 'WORK AI (ctx0)'
-          : 'PERSONAL AI (ctx1)';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Channel context set to $label')),
-      );
-    }
 
     return Stack(
       children: [
@@ -196,51 +177,6 @@ class _ContactGridItem extends ConsumerWidget {
               value: isSelected,
               visualDensity: VisualDensity.adaptivePlatformDensity,
               onChanged: (_) => onTap(contact: contact, isSelected: isSelected),
-            ),
-          ),
-        if (!isEditMode)
-          Positioned(
-            top: -8,
-            right: -4,
-            child: PopupMenuButton<AgentContext>(
-              tooltip: 'Select channel context',
-              onSelected: (value) async {
-                await onContextSelected(value);
-              },
-              itemBuilder: (_) => const [
-                PopupMenuItem<AgentContext>(
-                  value: AgentContext.work,
-                  child: Text('Use Work AI (ctx0)'),
-                ),
-                PopupMenuItem<AgentContext>(
-                  value: AgentContext.personal,
-                  child: Text('Use Personal AI (ctx1)'),
-                ),
-              ],
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: activeContext == AgentContext.work
-                      ? const Color(0xFF334D2E)
-                      : const Color(0xFF2F3F64),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: activeContext == AgentContext.work
-                        ? const Color(0xFF9DD486)
-                        : const Color(0xFF9BB2E6),
-                  ),
-                ),
-                child: Text(
-                  activeContext == AgentContext.work ? 'ctx0' : 'ctx1',
-                  style: context.textTheme.labelSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
             ),
           ),
       ],

@@ -147,7 +147,7 @@ class ContactsScreenController extends _$ContactsScreenController {
   Future<void> applyFilter(ContactsScreenFilter filter) async {
     final allContacts = ref.read(contactsServiceProvider).contacts;
     final filteredContacts = allContacts.where((contact) {
-      return filter.categories.contains(contact.category);
+      return _matchesFilter(contact, filter);
     }).toList();
 
     state = state.copyWith(
@@ -227,8 +227,27 @@ class ContactsScreenController extends _$ContactsScreenController {
     }
 
     return contacts
-        .where((contact) => state.filter.categories.contains(contact.category))
+        .where((contact) => _matchesFilter(contact, state.filter))
         .toList();
+  }
+
+  bool _matchesFilter(Contact contact, ContactsScreenFilter filter) {
+    if (filter.categories.contains(contact.category)) {
+      return true;
+    }
+
+    // Some AI contacts can arrive before category normalization (for example
+    // while a channel is pending inauguration). Keep them visible under the
+    // AI Agent tab by matching AI card type/name hints.
+    if (filter == ContactsScreenFilter.service) {
+      final cardType = contact.card.type.trim().toLowerCase();
+      final displayName = (contact.displayName ?? contact.card.displayName)
+          .trim()
+          .toLowerCase();
+      return cardType == 'ai-agent' || displayName.contains('agent');
+    }
+
+    return false;
   }
 }
 

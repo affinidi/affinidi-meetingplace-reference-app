@@ -9,11 +9,76 @@ class _ChatTextEntry extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final activeContext = ref.watch<AgentContext>(
-      contextRoutingServiceProvider.select(
-        (ContextRoutingState state) => state.contextForContactId(_contactId),
-      ),
+    final routingState = ref.watch(contextRoutingServiceProvider);
+    final contactsState = ref.watch(contactsServiceProvider);
+    final contact = ref.watch(
+      contactsServiceProvider.select((state) => state.getContactById(_contactId)),
     );
+
+    AgentContext inferredDefaultContext() {
+      final mapped = routingState.contactContexts[_contactId];
+      if (mapped != null) return mapped;
+
+      if (contact == null) return AgentContext.personal;
+      final isAiContact =
+          contact.category == ContactCategory.robot ||
+          contact.card.type.trim().toLowerCase() == 'ai-agent';
+      if (!isAiContact) return AgentContext.personal;
+
+      final label = [
+        contact.displayName ?? '',
+        contact.card.displayName,
+        contact.card.firstName,
+      ].join(' ').toLowerCase();
+      if (label.contains('work')) return AgentContext.work;
+      if (label.contains('personal')) return AgentContext.personal;
+
+      final aiContacts = contactsState.contacts
+          .where(
+            (c) =>
+                c.category == ContactCategory.robot ||
+                c.card.type.trim().toLowerCase() == 'ai-agent',
+          )
+          .toList()
+        ..sort((a, b) => a.id.compareTo(b.id));
+      if (aiContacts.length >= 2) {
+        final idx = aiContacts.indexWhere((c) => c.id == contact.id);
+        if (idx == 0) return AgentContext.work;
+        if (idx == 1) return AgentContext.personal;
+      }
+
+      return AgentContext.personal;
+    }
+
+    final activeContext = inferredDefaultContext();
+
+    useEffect(() {
+      final mapped = routingState.contactContexts[_contactId];
+      if (mapped != null || contact == null) {
+        return null;
+      }
+
+      final isAiContact =
+          contact.category == ContactCategory.robot ||
+          contact.card.type.trim().toLowerCase() == 'ai-agent';
+      if (!isAiContact) {
+        return null;
+      }
+
+      Future.microtask(() {
+        ref
+            .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
+            .assignContactContext(_contactId, activeContext);
+      });
+      return null;
+    }, [
+      _contactId,
+      contact?.id,
+      contact?.displayName,
+      contact?.card.displayName,
+      contact?.card.type,
+      routingState.contactContexts[_contactId],
+    ]);
     final otherPartyName = ref.watch(provider.otherPartyName);
     final isGroupChat = ref.watch(provider.isGroupChat);
     final shouldDisable = ref.watch(provider.shouldDisable);

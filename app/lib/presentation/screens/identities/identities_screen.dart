@@ -75,9 +75,6 @@ class _IdentitiesPanel extends ConsumerWidget {
     final shouldSetupPrimaryIdentity = ref.watch(
       provider.select((state) => state.shouldSetupPrimaryIdentity),
     );
-    final currentIdentity = ref.watch(
-      provider.select((state) => state.currentIdentity),
-    );
     final personalAiState = ref.watch(personalAiServiceProvider);
     final personalAiController = ref.read(personalAiServiceProvider.notifier);
 
@@ -104,15 +101,14 @@ class _IdentitiesPanel extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Set Up Your Personal AI',
+                      'Set up my agent',
                       style: context.textTheme.titleMedium?.copyWith(
                         color: context.colorScheme.onPrimaryContainer,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Connect your Personal AI now, or skip and continue '
-                      'using MPX without interruption.',
+                      'Choose Work or Personal in the Agent tab.',
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onPrimaryContainer,
                       ),
@@ -142,9 +138,12 @@ class _IdentitiesPanel extends ConsumerWidget {
                           ),
                           onPressed: personalAiState.isSettingUp
                               ? null
-                              : () => personalAiController.setupPersonalAi(
-                                  holderDid: currentIdentity?.did ?? '',
-                                ),
+                              : () {
+                                  personalAiController.dismissSetupPrompt();
+                                  if (context.mounted) {
+                                    const PersonalAgentRoute().go(context);
+                                  }
+                                },
                           icon: personalAiState.isSettingUp
                               ? SizedBox(
                                   width: 16,
@@ -158,7 +157,7 @@ class _IdentitiesPanel extends ConsumerWidget {
                           label: Text(
                             personalAiState.isSettingUp
                                 ? 'Setting Up...'
-                                : 'Set Up My Personal AI',
+                                : 'Set up my agent',
                           ),
                         ),
                         TextButton(
@@ -289,11 +288,12 @@ class _ActionsBar extends ConsumerWidget {
                     : Icons.smart_toy_outlined,
               ),
               tooltip: personalAiState.isReady
-                  ? 'Personal AI configured'
-                  : 'Set up Personal AI',
-              onPressed: personalAiState.isReady
-                  ? () => const PersonalAgentRoute().go(context)
-                  : personalAiController.openSetupPrompt,
+                  ? 'Agent configured'
+                  : 'Set up my agent',
+              onPressed: () {
+                personalAiController.dismissSetupPrompt();
+                const PersonalAgentRoute().go(context);
+              },
             ),
             IconButton(
               icon: const Icon(Icons.delete),

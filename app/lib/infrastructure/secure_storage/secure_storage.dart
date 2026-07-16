@@ -22,6 +22,7 @@ enum _Key {
   zkpLivenessCredentials,
   livenessIssuerDid,
   mnemonic,
+  personalAiHolderDid,
 }
 
 /// Secure storage wrapper implementing [KeyRepository] and [KeyStore].
@@ -322,12 +323,28 @@ class SecureStorage implements KeyRepository, KeyStore {
     await _secureStorage.write(key: _Key.livenessIssuerDid.name, value: did);
   }
 
+<<<<<<< HEAD
   Future<String?> getMnemonic() async {
     return _secureStorage.read(key: _Key.mnemonic.name);
   }
 
   Future<void> saveMnemonic(String mnemonic) async {
     await _secureStorage.write(key: _Key.mnemonic.name, value: mnemonic);
+=======
+  /// Reads the holder DID associated with a successful Personal AI setup.
+  Future<String?> readPersonalAiHolderDid() async {
+    return _secureStorage.read(key: _Key.personalAiHolderDid.name);
+  }
+
+  /// Persists the holder DID associated with Personal AI setup.
+  Future<void> writePersonalAiHolderDid(String did) async {
+    await _secureStorage.write(key: _Key.personalAiHolderDid.name, value: did);
+  }
+
+  /// Clears the persisted Personal AI setup holder DID marker.
+  Future<void> clearPersonalAiHolderDid() async {
+    await _secureStorage.delete(key: _Key.personalAiHolderDid.name);
+>>>>>>> 38b4dc7d (chore: create two agent channels)
   }
 }
 

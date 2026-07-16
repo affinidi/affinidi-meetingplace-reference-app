@@ -12,7 +12,8 @@ class PersonalAiServiceState {
     this.errorMessage,
     this.contextUploadError,
     this.setupResult,
-  });
+    Map<String, PersonalAgentSetupResult>? setupResultsByContext,
+  }) : setupResultsByContext = setupResultsByContext ?? const {};
 
   const PersonalAiServiceState.initial()
     : status = PersonalAiSetupStatus.notConfigured,
@@ -22,7 +23,8 @@ class PersonalAiServiceState {
       contextUploading = false,
       errorMessage = null,
       contextUploadError = null,
-      setupResult = null;
+      setupResult = null,
+      setupResultsByContext = const {};
 
   final PersonalAiSetupStatus status;
   final bool showSetupPrompt;
@@ -39,7 +41,18 @@ class PersonalAiServiceState {
   /// Error from the most recent context upload attempt.
   final String? contextUploadError;
 
+  /// Stores the most recently set up setup result (for backward compatibility).
+  /// For multi-context setups, use setupResultsByContext to access results by context name.
   final PersonalAgentSetupResult? setupResult;
+
+  /// Maps context name (e.g., 'work-ai', 'personal-ai') to its setup result.
+  /// Allows tracking multiple concurrent agent setups.
+  final Map<String, PersonalAgentSetupResult> setupResultsByContext;
+
+  /// Get setup result for a specific context.
+  PersonalAgentSetupResult? getSetupResultForContext(String contextName) {
+    return setupResultsByContext[contextName];
+  }
 
   bool get isReady => status == PersonalAiSetupStatus.ready;
   bool get isSettingUp => status == PersonalAiSetupStatus.settingUp;
@@ -53,6 +66,7 @@ class PersonalAiServiceState {
     String? errorMessage,
     String? contextUploadError,
     PersonalAgentSetupResult? setupResult,
+    Map<String, PersonalAgentSetupResult>? setupResultsByContext,
     bool clearErrorMessage = false,
     bool clearContextUploadError = false,
     bool clearSetupResult = false,
@@ -70,6 +84,8 @@ class PersonalAiServiceState {
           ? null
           : (contextUploadError ?? this.contextUploadError),
       setupResult: clearSetupResult ? null : (setupResult ?? this.setupResult),
+      setupResultsByContext:
+          setupResultsByContext ?? this.setupResultsByContext,
     );
   }
 }
