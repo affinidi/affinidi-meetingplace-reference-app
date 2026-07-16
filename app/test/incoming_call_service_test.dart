@@ -190,7 +190,7 @@ void main() {
           (container.read(contactsServiceProvider.notifier)
                   as FakeContactsService)
               .incrementMissedCallBadgeCalls,
-          isEmpty,
+          ['did:key:caller'],
         );
         expect(
           (container.read(contactsServiceProvider.notifier)
@@ -222,7 +222,7 @@ void main() {
           (container.read(contactsServiceProvider.notifier)
                   as FakeContactsService)
               .incrementMissedCallBadgeCalls,
-          isEmpty,
+          ['did:key:caller'],
         );
         expect(
           (container.read(contactsServiceProvider.notifier)
@@ -268,6 +268,14 @@ void main() {
               .setPendingMissedCallCalls,
           [thirdPartyDid],
         );
+        // A busy auto-reject of a third party is recorded only in the chat
+        // log, without an unread badge.
+        expect(
+          (container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService)
+              .incrementMissedCallBadgeCalls,
+          isEmpty,
+        );
       });
     });
 
@@ -293,7 +301,7 @@ void main() {
             (container.read(contactsServiceProvider.notifier)
                     as FakeContactsService)
                 .incrementMissedCallBadgeCalls,
-            isEmpty,
+            ['did:key:caller'],
           );
           expect(
             (container.read(contactsServiceProvider.notifier)

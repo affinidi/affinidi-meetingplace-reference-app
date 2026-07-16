@@ -111,7 +111,9 @@ class IncomingCallService extends _$IncomingCallService {
         'for ${event.callerPermanentChannelDid}',
         name: _logKey,
       );
-      unawaited(_markCallAsMissed(event.callerPermanentChannelDid));
+      unawaited(
+        _markCallAsMissed(event.callerPermanentChannelDid, bumpBadge: false),
+      );
     }
   }
 
@@ -193,17 +195,40 @@ class IncomingCallService extends _$IncomingCallService {
     action(sdk);
   }
 
-  /// Records the missed incoming call: sets the durable marker so the chat item
-  /// can be reconciled to `missed`, and heals it immediately via the chat
-  /// session when open. The marker survives restart for event-driven
-  /// reconciliation on the next chat open.
+  /// Records the missed incoming call: bumps the unread badge, sets the durable
+  /// marker so the chat item can be reconciled to `missed`, and heals it
+  /// immediately via the chat session when open. The marker survives restart
+  /// for event-driven reconciliation on the next chat open.
   ///
-  /// The unread badge is not bumped here: the incoming call arrives as a chat
-  /// message that already advances the channel sequence number, so the missed
-  /// call is counted by the normal unread path. Bumping it again would
-  /// double-count.
-  Future<void> _markCallAsMissed(String contactId) async {
+  /// The badge is bumped explicitly because call events are `mpx.call.invite` /
+  /// `mpx.call.item`, not `m.room.message`, so they never advance the channel
+  /// sequence number and the seqNo-derived unread path does not count them.
+  /// [ContactsService.incrementMissedCallBadge] is idempotent per unread
+  /// episode and skips the bump while the chat is open, so a call that raises
+  /// more than one missed signal on this device is still counted once.
+  ///
+  /// [bumpBadge] is false for a busy auto-reject of a third party while already
+  /// in another call: that call is only recorded in the chat log, without an
+  /// unread badge, so an incidental auto-reject does not surface a badge.
+  Future<void> _markCallAsMissed(
+    String contactId, {
+    bool bumpBadge = true,
+  }) async {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
+    if (bumpBadge) {
+      try {
+        await ref
+            .read(contactsServiceProvider.notifier)
+            .incrementMissedCallBadge(contactId);
+      } catch (e, stackTrace) {
+        _logger.error(
+          '_markCallAsMissed: Badge bump failed for $contactId',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
+    }
     try {
       await ref
           .read(contactsServiceProvider.notifier)
