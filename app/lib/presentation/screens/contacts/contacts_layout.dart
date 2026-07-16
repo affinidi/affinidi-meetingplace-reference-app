@@ -41,9 +41,9 @@ class _ContactsLayout extends ConsumerWidget {
           await ChatRoute(contactId: contact.id).push<void>(context);
         } on AppException catch (error) {
           if (error.code == AppExceptionType.missingChannel.name) {
-            await ConnectionDetailsRoute(contactId: contact.id).push<void>(
-              context,
-            );
+            await ConnectionDetailsRoute(
+              contactId: contact.id,
+            ).push<void>(context);
             return;
           }
           rethrow;

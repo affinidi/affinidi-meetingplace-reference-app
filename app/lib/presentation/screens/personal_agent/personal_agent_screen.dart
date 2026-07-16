@@ -373,7 +373,9 @@ class _ContextSetupViewState extends State<_ContextSetupView> {
   void didUpdateWidget(_ContextSetupView oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Detect transition: was uploading → no longer uploading with no error.
-    if (oldWidget.isUploading && !widget.isUploading && widget.uploadError == null) {
+    if (oldWidget.isUploading &&
+        !widget.isUploading &&
+        widget.uploadError == null) {
       setState(() => _uploadSucceeded = true);
     }
     // Reset success flag if a new file is picked or an error appears.
@@ -475,12 +477,7 @@ class _ContextSetupViewState extends State<_ContextSetupView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text('• '),
-                        Expanded(
-                          child: Text(
-                            item,
-                            style: textTheme.bodySmall,
-                          ),
-                        ),
+                        Expanded(child: Text(item, style: textTheme.bodySmall)),
                       ],
                     ),
                   ),
@@ -609,7 +606,9 @@ class _ContextSetupViewState extends State<_ContextSetupView> {
         // Upload button
         FilledButton.icon(
           style: FilledButton.styleFrom(
-            disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.35),
+            disabledBackgroundColor: colorScheme.primary.withValues(
+              alpha: 0.35,
+            ),
             disabledForegroundColor: colorScheme.onPrimary,
           ),
           onPressed: widget.isUploading || _fileContent == null
