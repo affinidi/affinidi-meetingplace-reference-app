@@ -3273,6 +3273,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} has selected the following persona to verify the relationship:'**
   String vrcResponderIntro(Object name);
+
+  /// No description provided for @agentContextWorkAiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work AI'**
+  String get agentContextWorkAiLabel;
+
+  /// No description provided for @agentContextPersonalAiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI'**
+  String get agentContextPersonalAiLabel;
+
+  /// No description provided for @contactsChannelContextSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Channel context set to {label}'**
+  String contactsChannelContextSet(String label);
+
+  /// No description provided for @chatContextUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} context uploaded: {fileName}'**
+  String chatContextUploaded(String label, String fileName);
+
+  /// No description provided for @chatUploadFileFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload {fileName} first.'**
+  String chatUploadFileFirst(String fileName);
+
+  /// No description provided for @chatChannelUsesContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Channel now uses {label}.'**
+  String chatChannelUsesContext(String label);
+
+  /// No description provided for @chatMenuUseWorkAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Work AI'**
+  String get chatMenuUseWorkAi;
+
+  /// No description provided for @chatMenuUsePersonalAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Personal AI'**
+  String get chatMenuUsePersonalAi;
+
+  /// No description provided for @chatMenuUploadWorkContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload work-context.txt'**
+  String get chatMenuUploadWorkContext;
+
+  /// No description provided for @chatMenuReuploadWorkContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-upload work-context.txt'**
+  String get chatMenuReuploadWorkContext;
+
+  /// No description provided for @chatMenuUploadPersonalContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload personal-context.txt'**
+  String get chatMenuUploadPersonalContext;
+
+  /// No description provided for @chatMenuReuploadPersonalContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-upload personal-context.txt'**
+  String get chatMenuReuploadPersonalContext;
+
+  /// No description provided for @identitiesSetupMyAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up my agent'**
+  String get identitiesSetupMyAgent;
+
+  /// No description provided for @identitiesSetupPromptDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Work or Personal in the Agent tab.'**
+  String get identitiesSetupPromptDescription;
+
+  /// No description provided for @identitiesSettingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting Up...'**
+  String get identitiesSettingUp;
+
+  /// No description provided for @identitiesNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get identitiesNotNow;
+
+  /// No description provided for @identitiesAgentConfiguredTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent configured'**
+  String get identitiesAgentConfiguredTooltip;
+
+  /// No description provided for @personalAgentNoContextCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'No context created'**
+  String get personalAgentNoContextCreated;
+
+  /// No description provided for @personalAgentContextUploadedSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} uploaded: {fileName}'**
+  String personalAgentContextUploadedSnackBar(String label, String fileName);
+
+  /// No description provided for @personalAgentSetupSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your AI. Choose what context to set up.'**
+  String get personalAgentSetupSectionSubtitle;
+
+  /// No description provided for @personalAgentChooseFileToSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file to set up'**
+  String get personalAgentChooseFileToSetUp;
+
+  /// No description provided for @personalAgentAlreadySetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Already set up: {fileName}'**
+  String personalAgentAlreadySetUp(String fileName);
+
+  /// No description provided for @personalAgentSetupCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your AI'**
+  String get personalAgentSetupCardTitle;
+
+  /// No description provided for @personalAgentSetupCardDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what context to set up.'**
+  String get personalAgentSetupCardDescription;
+
+  /// No description provided for @personalAgentConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting {label}...'**
+  String personalAgentConnecting(String label);
+
+  /// No description provided for @personalAgentDefaultConnectingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'agent'**
+  String get personalAgentDefaultConnectingLabel;
+
+  /// No description provided for @personalAgentWorkAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Work Agent'**
+  String get personalAgentWorkAgentTitle;
+
+  /// No description provided for @personalAgentPersonalAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Agent'**
+  String get personalAgentPersonalAgentTitle;
+
+  /// No description provided for @mnemonicErrorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.'**
+  String get mnemonicErrorOccurred;
+
+  /// No description provided for @mnemonicEntrySelectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like\nto enter your wallet?'**
+  String get mnemonicEntrySelectionTitle;
+
+  /// No description provided for @mnemonicScanQrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get mnemonicScanQrTitle;
+
+  /// No description provided for @mnemonicScanQrSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your camera to scan a wallet QR code'**
+  String get mnemonicScanQrSubtitle;
+
+  /// No description provided for @mnemonicEnterManuallyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter manually'**
+  String get mnemonicEnterManuallyTitle;
+
+  /// No description provided for @mnemonicEnterManuallySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the mnemonic phrase that was shared with you'**
+  String get mnemonicEnterManuallySubtitle;
+
+  /// No description provided for @mnemonicManualEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your mnemonic'**
+  String get mnemonicManualEntryTitle;
+
+  /// No description provided for @mnemonicManualEntrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the mnemonic phrase that was shared with you.'**
+  String get mnemonicManualEntrySubtitle;
+
+  /// No description provided for @mnemonicManualHint.
+  ///
+  /// In en, this message translates to:
+  /// **'word1 word2 word3 ...'**
+  String get mnemonicManualHint;
+
+  /// No description provided for @mnemonicContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get mnemonicContinue;
+
+  /// No description provided for @mnemonicSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set!'**
+  String get mnemonicSuccessTitle;
+
+  /// No description provided for @mnemonicSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy MeetingPlace and get engaged\nwith your personal AI agent.'**
+  String get mnemonicSuccessSubtitle;
 }
 
 class _AppLocalizationsDelegate

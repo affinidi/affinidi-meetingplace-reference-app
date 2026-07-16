@@ -65,7 +65,8 @@ class PersonalAgentScreen extends ConsumerWidget {
         if (!context.mounted) return;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('No context created')));
+        ).showSnackBar(SnackBar(content: Text(
+          l10n.personalAgentNoContextCreated)));
         return;
       }
 
@@ -80,13 +81,21 @@ class PersonalAgentScreen extends ConsumerWidget {
       if (!outcome.uploaded) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('No context created')));
+        ).showSnackBar(SnackBar(content: Text(
+          l10n.personalAgentNoContextCreated)));
         return;
       }
 
-      final label = target == AgentContext.work ? 'Work AI' : 'Personal AI';
+      final label = target == AgentContext.work
+          ? l10n.agentContextWorkAiLabel
+          : l10n.agentContextPersonalAiLabel;
+      final uploadedFileName = outcome.fileName ?? pickedFile.fileName;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$label uploaded: ${outcome.fileName}')),
+        SnackBar(
+          content: Text(
+            l10n.personalAgentContextUploadedSnackBar(label, uploadedFileName),
+          ),
+        ),
       );
     }
 
@@ -98,7 +107,7 @@ class PersonalAgentScreen extends ConsumerWidget {
           children: [
             SectionBanner(
               title: l10n.tabsTitle(Tabs.personalAgent.name),
-              subtitle: 'Set up your AI. Choose what context to set up.',
+              subtitle: l10n.personalAgentSetupSectionSubtitle,
             ),
             Expanded(
               child: ListView(
@@ -162,13 +171,16 @@ class _AgentContextSetupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final colorScheme = context.colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
     String subtitleFor(AgentContext contextTarget) {
       final file = state.fileNameForContext(contextTarget);
-      if (file == null || file.isEmpty) return 'Choose a file to set up';
-      return 'Already set up: $file';
+      if (file == null || file.isEmpty) {
+        return l10n.personalAgentChooseFileToSetUp;
+      }
+      return l10n.personalAgentAlreadySetUp(file);
     }
 
     Widget buildRow({
@@ -239,14 +251,14 @@ class _AgentContextSetupCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Set up your AI',
+              l10n.personalAgentSetupCardTitle,
               style: textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              'Choose what context to set up.',
+              l10n.personalAgentSetupCardDescription,
               style: textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -258,7 +270,9 @@ class _AgentContextSetupCard extends StatelessWidget {
             if (isConnecting) ...[
               const SizedBox(height: 10),
               Text(
-                'Connecting ${connectingLabel ?? 'agent'}...',
+                l10n.personalAgentConnecting(
+                  connectingLabel ?? l10n.personalAgentDefaultConnectingLabel,
+                ),
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -268,14 +282,14 @@ class _AgentContextSetupCard extends StatelessWidget {
             ],
             const SizedBox(height: 12),
             buildRow(
-              title: 'Work Agent',
+              title: l10n.personalAgentWorkAgentTitle,
               subtitle: subtitleFor(AgentContext.work),
               isLocked: state.workContextUploaded,
               onPressed: onUploadWork,
             ),
             const SizedBox(height: 10),
             buildRow(
-              title: 'Personal Agent',
+              title: l10n.personalAgentPersonalAgentTitle,
               subtitle: subtitleFor(AgentContext.personal),
               isLocked: state.personalContextUploaded,
               onPressed: onUploadPersonal,
