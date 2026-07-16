@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:bip39_mnemonic/bip39_mnemonic.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
@@ -16,6 +21,7 @@ import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
 import 'group_repository_provider.dart';
 import 'matrix_config_provider.dart';
+import 'mnemonic_configured_provider.dart';
 
 /// Initializes the vodozemac cryptographic library.
 ///
@@ -49,11 +55,29 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
   (ref) async {
     const logKey = 'meetingPlaceSdkProvider';
     final logger = ref.read(appLoggerProvider);
+
+    // Must be watched before the first `await` so Riverpod tracks the
+    // dependency and rebuilds this provider when the value changes.
+    // Stays in loading state until the mnemonic screen is completed.
+    if (!ref.watch(mnemonicConfiguredProvider)) {
+      return Completer<MeetingPlaceCoreSDK>().future;
+    }
+
     final secureStorage = await ref.read(secureStorageProvider.future);
 
     try {
       await ref.read(vodozemacInitProvider.future);
-      final wallet = PersistentWallet(secureStorage);
+
+      final mnemonic = await secureStorage.getMnemonic();
+      logger.info(
+        'Using mnemonic hash: ${sha256.convert(utf8.encode(mnemonic ?? ''))}',
+        name: logKey,
+      );
+      final wallet = Bip32Wallet.fromSeed(
+        Uint8List.fromList(
+          Mnemonic.fromSentence(mnemonic!, Language.english).seed,
+        ),
+      );
       final settingsState = ref.read(settingsServiceProvider);
       final initialMediatorDid = settingsState.selectedMediatorDid;
       logger.info('Starting MeetingPlace SDK initialization', name: logKey);
@@ -64,16 +88,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
       );
       logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
-      final agentDidOverride = const String.fromEnvironment(
-        'MPX_AGENT_DID',
-        defaultValue: '',
-      ).trim();
-      if (agentDidOverride.isNotEmpty) {
-        logger.info(
-          'Using MPX agent DID override: $agentDidOverride',
-          name: logKey,
-        );
-      }
+      final mnemonicHash = sha256.convert(utf8.encode(mnemonic)).toString();
+      final eventCfg = ref.read(environmentProvider).ciergeEventConfig;
+      final ciergeConnectorDid =
+          eventCfg[mnemonicHash]?['ciergeConnectorDid'] as String?;
 
       Future<List<Attachment>?> onBuildAttachments(
         Channel channel,
@@ -115,9 +133,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
           VdipClient.issuedCredentialMessageType,
         ],
         #onBuildAttachments: onBuildAttachments,
+        #signatureScheme: SignatureScheme.ecdsa_secp256k1_sha256,
       };
-      if (agentDidOverride.isNotEmpty) {
-        sdkOptionsNamed[#agentDid] = agentDidOverride;
+      if (ciergeConnectorDid != null) {
+        sdkOptionsNamed[#agentDid] = ciergeConnectorDid;
       }
 
       MeetingPlaceCoreSDKOptions sdkOptions;
@@ -129,7 +148,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
                   sdkOptionsNamed,
                 )
                 as MeetingPlaceCoreSDKOptions;
-        if (agentDidOverride.isNotEmpty) {
+        if (ciergeConnectorDid != null) {
           logger.info(
             'MPX agent DID override applied to SDK options',
             name: logKey,
@@ -139,7 +158,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
         // Compatibility fallback for SDK builds that do not yet
         // expose `agentDid`.
         sdkOptionsNamed.remove(#agentDid);
-        if (agentDidOverride.isNotEmpty) {
+        if (ciergeConnectorDid != null) {
           logger.warning(
             '''MPX_AGENT_DID was provided but current SDK options do not accept agentDid; override ignored''',
             name: logKey,

@@ -82,6 +82,22 @@ class Environment {
     ),
   );
 
+  /// Event configuration keyed by sha256 hex of the wallet mnemonic.
+  ///
+  /// Each entry maps to a nested map of event options, e.g.:
+  /// `{"<sha256>": {"ciergeConnectorDid": "did:key:..."}}`.
+  /// Sourced from the `WALLET_CONFIG` compile-time environment variable
+  /// as a JSON string. Returns an empty map when not set.
+  late final Map<String, Map<String, dynamic>> ciergeEventConfig = () {
+    final raw = const String.fromEnvironment('WALLET_CONFIG');
+    if (raw.isEmpty) return <String, Map<String, dynamic>>{};
+    final decoded = _tryJsonDecode(raw);
+    if (decoded is! Map) return <String, Map<String, dynamic>>{};
+    return decoded.map(
+      (k, v) => MapEntry(k as String, Map<String, dynamic>.from(v as Map)),
+    );
+  }();
+
   bool get isBiometricsEnabled =>
       const bool.fromEnvironment('BIOMETRICS_ENABLED', defaultValue: true);
   bool get zkpEnabled =>

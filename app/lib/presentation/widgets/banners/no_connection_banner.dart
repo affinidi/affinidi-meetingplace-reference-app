@@ -6,6 +6,7 @@ import '../../../application/services/control_plane_service/control_plane_servic
 import '../../../application/services/network_connectivity_service/network_connectivity_service.dart';
 import '../../../application/services/settings_service/settings_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/providers/mnemonic_configured_provider.dart';
 
 class NoConnectionBanner extends ConsumerWidget {
   const NoConnectionBanner();
@@ -27,6 +28,10 @@ class NoConnectionBanner extends ConsumerWidget {
 
     // Show banner only when user is onBoarded
     if (!alreadyOnboarded) {
+      return const SizedBox.shrink();
+    }
+
+    if (!ref.watch(mnemonicConfiguredProvider)) {
       return const SizedBox.shrink();
     }
 

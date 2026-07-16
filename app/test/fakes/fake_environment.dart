@@ -123,4 +123,7 @@ class FakeEnvironment implements Environment {
 
   @override
   String? get directInteractiveOobType => null;
+
+  @override
+  Map<String, Map<String, dynamic>> get ciergeEventConfig => const {};
 }
