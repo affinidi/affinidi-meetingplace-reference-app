@@ -16,6 +16,7 @@ import '../context_routing_service/context_routing_service.dart';
 import '../connections_service/connections_service.dart';
 import '../contacts_service/contacts_service.dart';
 import '../identities_service/identities_service.dart';
+import 'personal_ai_contact_resolution.dart';
 import 'personal_ai_service_state.dart';
 
 final personalAiServiceProvider =
@@ -57,37 +58,49 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     if (!_environment.personalAiEnabled) {
       return;
     }
-    final setupResult = state.setupResult;
-    if (setupResult == null) {
-      return;
-    }
 
-    // Fetch the current offer to get the permanent channel DID so the contact
-    // lookup can match by channelDid (the main agentDid and the channel DID are
-    // different — searching only by agentDid never finds the contact).
+    final setups = state.setupResultsByContext.isNotEmpty
+        ? state.setupResultsByContext.values.toList()
+      : (state.setupResult != null
+          ? [state.setupResult!]
+          : const <PersonalAgentSetupResult>[]);
+
+    for (final setupResult in setups) {
+      await _syncPersonalAiContactForSetup(setupResult);
+    }
+  }
+
+  Future<void> _syncPersonalAiContactForSetup(
+    PersonalAgentSetupResult setupResult,
+  ) async {
     String? channelDid;
+    String? offerLink;
     final setupId = setupResult.setupId?.trim() ?? '';
     if (setupId.isNotEmpty) {
       try {
         final offer = await _sdk.fetchPersonalAgentOffer(setupId: setupId);
         final cd = offer.channelDid?.trim() ?? '';
-        if (cd.isNotEmpty) channelDid = cd;
+        if (cd.isNotEmpty) {
+          channelDid = cd;
+        }
+        offerLink = await _resolveOfferLinkForChannelDid(channelDid);
       } catch (_) {
         // Offer may be unavailable (server restarted) — proceed without it.
       }
     }
 
-    await _ensurePersonalAiContactFromChannel(channelDid);
+    await _ensurePersonalAiContactFromChannel(channelDid, offerLink: offerLink);
 
     await _waitForPersonalAiContact(
-      setupResult.agentDid,
       channelDid: channelDid,
+      offerLink: offerLink,
       maxAttempts: 3,
       pollEvery: const Duration(milliseconds: 300),
     );
     await _ensurePersonalAiContact(
       setupResult,
       preferredChannelDid: channelDid,
+      offerLink: offerLink,
     );
   }
 
@@ -117,7 +130,11 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     PersonalAgentSetupResult result, {
     String? contextName,
   }) {
-    final contextKey = contextName ?? result.contextId.trim().toLowerCase();
+    final contextKey = canonicalPersonalAiContextName(
+      explicitContextName: contextName,
+      contextId: result.contextId,
+      displayName: result.profile.displayName,
+    );
     final updatedMap = Map<String, PersonalAgentSetupResult>.from(
       state.setupResultsByContext,
     );
@@ -290,14 +307,19 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       }
 
       final offerChannelDid = offer.channelDid?.trim();
-      await _ensurePersonalAiContactFromChannel(offerChannelDid);
+      final offerLink = await _resolveOfferLinkForChannelDid(offerChannelDid);
+      await _ensurePersonalAiContactFromChannel(
+        offerChannelDid,
+        offerLink: offerLink,
+      );
       await _waitForPersonalAiContact(
-        setupSnapshot.agentDid,
         channelDid: offerChannelDid,
+        offerLink: offerLink,
       );
       await _ensurePersonalAiContact(
         setupSnapshot,
         preferredChannelDid: offerChannelDid,
+        offerLink: offerLink,
       );
 
       _updateSetupResult(setupSnapshot, contextName: contextName);
@@ -396,11 +418,20 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         return;
       }
 
-      final result = await _sdk.ensurePersonalAgentSetup(
-        request: PersonalAgentSetupRequest(holderDid: currentHolderDid),
-      );
+      for (final contextName in const ['work-ai', 'personal-ai']) {
+        try {
+          final contextResult = await _sdk.ensurePersonalAgentSetup(
+            request: PersonalAgentSetupRequest(
+              holderDid: currentHolderDid,
+              contextName: contextName,
+            ),
+          );
+          _updateSetupResult(contextResult, contextName: contextName);
+        } catch (_) {
+          // Best-effort restore for each configured context.
+        }
+      }
 
-      _updateSetupResult(result);
       state = state.copyWith(
         status: PersonalAiSetupStatus.ready,
         showSetupPrompt: false,
@@ -445,9 +476,19 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
     // Resumed connector sessions may report a ready/inaugurated channel with
     // no mnemonic. In that case setup is already connected and no accept-offer
-    // roundtrip is required.
+    // roundtrip is required when the channel belongs to this context.
     if ((mnemonic == null || mnemonic.isEmpty) && isAlreadyConnected) {
-      return offer;
+      final canReuseChannel = await _canReuseConnectedOffer(
+        result: result,
+        offer: offer,
+      );
+      if (canReuseChannel) {
+        return offer;
+      }
+      throw StateError(
+        'AI offer reports connected but no channel is available for '
+        '${result.profile.displayName.trim()}.',
+      );
     }
 
     if (mnemonic == null || mnemonic.isEmpty) {
@@ -564,23 +605,17 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     throw StateError('Timed out waiting for Personal AI offer details.');
   }
 
-  Future<bool> _waitForPersonalAiContact(
-    String agentDid, {
+  Future<bool> _waitForPersonalAiContact({
     String? channelDid,
+    String? offerLink,
     int maxAttempts = 20,
     Duration pollEvery = const Duration(milliseconds: 500),
   }) async {
-    final normalizedAgentDid = agentDid.trim();
     final normalizedChannelDid = channelDid?.trim();
-    final lookupDids = <String>{};
-    if (normalizedAgentDid.isNotEmpty) {
-      lookupDids.add(normalizedAgentDid);
-    }
-    if (normalizedChannelDid != null && normalizedChannelDid.isNotEmpty) {
-      lookupDids.add(normalizedChannelDid);
-    }
-    if (lookupDids.isEmpty) {
-      throw StateError('Personal AI setup did not return a usable DID.');
+    final normalizedOfferLink = offerLink?.trim();
+    if ((normalizedChannelDid == null || normalizedChannelDid.isEmpty) &&
+        (normalizedOfferLink == null || normalizedOfferLink.isEmpty)) {
+      return false;
     }
 
     final contactsService = _ref.read(contactsServiceProvider.notifier);
@@ -588,76 +623,72 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       await contactsService.fetchContacts();
       final contactsState = _ref.read(contactsServiceProvider);
-      final found = lookupDids.any(
-        (did) => contactsState.getContactByChannelDid(did) != null,
-      );
-      if (found) {
+      final foundByOffer =
+          normalizedOfferLink != null &&
+          normalizedOfferLink.isNotEmpty &&
+          contactsState.getContactByOfferLink(normalizedOfferLink) != null;
+      final foundByChannel =
+          normalizedChannelDid != null &&
+          normalizedChannelDid.isNotEmpty &&
+          contactsState.getContactByChannelDid(normalizedChannelDid) != null;
+      if (foundByOffer || foundByChannel) {
         return true;
       }
 
       await Future<void>.delayed(pollEvery);
     }
 
-    // Control-plane/contact propagation can be delayed (especially when app
-    // notifications are not delivered in background). Do not fail setup for
-    // this; we retry sync on app resume and subsequent refreshes.
     return false;
   }
 
   Future<void> _ensurePersonalAiContact(
     PersonalAgentSetupResult result, {
     String? preferredChannelDid,
+    String? offerLink,
   }) async {
     final contactsService = _ref.read(contactsServiceProvider.notifier);
     await contactsService.ensureInitialized();
 
-    final current = _ref.read(contactsServiceProvider).contacts;
-    final candidateDids = <String>{result.agentDid};
+    final routingState = _ref.read(contextRoutingServiceProvider);
+    final targetContext = agentContextForSetup(
+      contextId: result.contextId,
+      displayName: result.profile.displayName,
+    );
     final normalizedPreferred = preferredChannelDid?.trim();
-    if (normalizedPreferred != null && normalizedPreferred.isNotEmpty) {
-      candidateDids.add(normalizedPreferred);
-    }
+    final resolvedOfferLink =
+        offerLink ?? await _resolveOfferLinkForChannelDid(normalizedPreferred);
 
-    var existing = current.where((contact) {
-      final did = contact.channelDid;
-      return did != null && candidateDids.contains(did);
-    });
-    if (existing.isEmpty) {
-      await _ensurePersonalAiContactFromChannel(normalizedPreferred);
+    var currentContact = findPersonalAiContactForContext(
+      contacts: _ref.read(contactsServiceProvider).contacts,
+      contactContexts: routingState.contactContexts,
+      targetContext: targetContext,
+      offerLink: resolvedOfferLink,
+      channelDid: normalizedPreferred,
+    );
 
-      final refreshed = _ref.read(contactsServiceProvider).contacts;
-      existing = refreshed.where((contact) {
-        final did = contact.channelDid;
-        return did != null && candidateDids.contains(did);
-      });
-      if (existing.isEmpty) {
-        // Never rebind an arbitrary AI contact when we cannot match by
-        // channel DID. In dual-context flows this can overwrite the first
-        // established work/personal contact with the newer setup.
+    if (currentContact == null) {
+      await _ensurePersonalAiContactFromChannel(
+        normalizedPreferred,
+        offerLink: resolvedOfferLink,
+      );
+
+      currentContact = findPersonalAiContactForContext(
+        contacts: _ref.read(contactsServiceProvider).contacts,
+        contactContexts: routingState.contactContexts,
+        targetContext: targetContext,
+        offerLink: resolvedOfferLink,
+        channelDid: normalizedPreferred,
+      );
+      if (currentContact == null) {
         return;
       }
     }
 
-    final currentContact =
-        (normalizedPreferred != null && normalizedPreferred.isNotEmpty)
-        ? existing.firstWhere(
-            (contact) => contact.channelDid == normalizedPreferred,
-            orElse: () => existing.first,
-          )
-        : existing.first;
-
-    // Context isolation guard: if this contact is already an AI contact
-    // assigned to a DIFFERENT context (e.g., work-AI contact found while
-    // processing personal-AI setup), leave it completely untouched —
-    // no name, no card, no status, no category changes.
-    final targetContext = _inferAgentContext(result, currentContact);
-    final routingState = _ref.read<ContextRoutingState>(
-      contextRoutingServiceProvider,
-    );
-    final assignedContext = routingState.contactContexts[currentContact.id];
-    if (assignedContext != null &&
-        assignedContext != targetContext &&
-        currentContact.category == ContactCategory.robot) {
+    if (isAiContactBoundToOtherContext(
+      contact: currentContact,
+      targetContext: targetContext,
+      contactContexts: routingState.contactContexts,
+    )) {
       return;
     }
 
@@ -671,15 +702,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
             currentContact.displayName != desiredName ||
             currentContact.card.displayName.trim().isEmpty ||
             currentContact.card.displayName != desiredName);
-    // Only mark as pending when first categorising a contact as a robot
-    // (transitioning from non-robot to robot). An already-active robot
-    // contact must NOT be pushed back to pendingInauguration on every
-    // refresh — that is what caused the "blue light stuck" bug where the
-    // work-AI contact regressed every time refreshPersonalAiContactSync
-    // fired during personal-AI setup.
     final shouldMarkPending =
-        needsCategoryUpdate &&
-        currentContact.status == ContactStatus.active;
+        needsCategoryUpdate && currentContact.status == ContactStatus.active;
 
     if (!needsNameUpdate && !shouldMarkPending && !needsCategoryUpdate) {
       await _ref
@@ -710,35 +734,59 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         .assignContactContext(updatedContact.id, targetContext);
   }
 
-  AgentContext _inferAgentContext(
-    PersonalAgentSetupResult result,
-    Contact contact,
-  ) {
-    final contextId = result.contextId.trim().toLowerCase();
-    if (contextId.startsWith('work-ai')) {
-      return AgentContext.work;
-    }
-    if (contextId.startsWith('personal-ai')) {
-      return AgentContext.personal;
+  Future<String?> _resolveOfferLinkForChannelDid(String? channelDid) async {
+    final normalized = channelDid?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      return null;
     }
 
-    final hints = [
-      result.profile.displayName,
-      contact.displayName ?? '',
-      contact.card.displayName,
-      contact.card.firstName,
-    ].join(' ').toLowerCase();
-
-    if (hints.contains('work')) {
-      return AgentContext.work;
+    final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
+    final channel =
+        await coreSdk.getChannelByOtherPartyPermanentDid(normalized) ??
+        await coreSdk.getChannelByDid(normalized);
+    final offerLink = channel?.offerLink.trim();
+    if (offerLink == null || offerLink.isEmpty) {
+      return null;
     }
-    if (hints.contains('personal')) {
-      return AgentContext.personal;
-    }
-    return AgentContext.personal;
+    return offerLink;
   }
 
-  Future<void> _ensurePersonalAiContactFromChannel(String? channelDid) async {
+  Future<bool> _canReuseConnectedOffer({
+    required PersonalAgentSetupResult result,
+    required PersonalAgentOfferResult offer,
+  }) async {
+    final channelDid = offer.channelDid?.trim();
+    if (channelDid == null || channelDid.isEmpty) {
+      return false;
+    }
+
+    final offerLink = await _resolveOfferLinkForChannelDid(channelDid);
+    if (offerLink == null) {
+      return false;
+    }
+
+    final targetContext = agentContextForSetup(
+      contextId: result.contextId,
+      displayName: result.profile.displayName,
+    );
+    final contactsState = _ref.read(contactsServiceProvider);
+    final routingState = _ref.read(contextRoutingServiceProvider);
+    final existingContact = contactsState.getContactByOfferLink(offerLink);
+    if (existingContact == null) {
+      return true;
+    }
+
+    return !isAiContactBoundToOtherContext(
+      contact: existingContact,
+      targetContext: targetContext,
+      contactContexts: routingState.contactContexts,
+    );
+  }
+
+  Future<void> _ensurePersonalAiContactFromChannel(
+    String? channelDid, {
+    String? offerLink,
+  }) async {
     final normalized = channelDid?.trim();
     if (normalized == null || normalized.isEmpty) {
       return;
@@ -747,10 +795,15 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     final contactsService = _ref.read(contactsServiceProvider.notifier);
     await contactsService.ensureInitialized();
 
-    final existing = _ref
-        .read(contactsServiceProvider)
-        .getContactByChannelDid(normalized);
-    if (existing != null) {
+    final contactsState = _ref.read(contactsServiceProvider);
+    final normalizedOfferLink = offerLink?.trim();
+    if (normalizedOfferLink != null &&
+        normalizedOfferLink.isNotEmpty &&
+        contactsState.getContactByOfferLink(normalizedOfferLink) != null) {
+      return;
+    }
+
+    if (contactsState.getContactByChannelDid(normalized) != null) {
       return;
     }
 
