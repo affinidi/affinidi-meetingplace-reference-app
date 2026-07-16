@@ -265,6 +265,16 @@ void main() {
       expect(fakeChatSdk.lastReaction, '👍');
     });
 
+    test('delegates sendSuggestionRequest to SDK', () async {
+      await chatService.startChatSession();
+      await chatService.sendSuggestionRequest(
+        messageId: 'message-123',
+        text: 'Incoming text',
+      );
+      expect(fakeChatSdk.lastSuggestionRequestMessageId, 'message-123');
+      expect(fakeChatSdk.lastSuggestionRequestText, 'Incoming text');
+    });
+
     test('delegates sendEffect to SDK', () async {
       await chatService.startChatSession();
       await chatService.sendEffect(Effect.confetti);

@@ -80,8 +80,10 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       maxAttempts: 3,
       pollEvery: const Duration(milliseconds: 300),
     );
-    await _ensurePersonalAiContact(setupResult, 
-    preferredChannelDid: channelDid);
+    await _ensurePersonalAiContact(
+      setupResult,
+      preferredChannelDid: channelDid,
+    );
   }
 
   void onIdentityCreated() {
@@ -130,7 +132,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       final holderDid = holderDidFromIdentity.isNotEmpty
           ? holderDidFromIdentity
           : state.setupResult?.holderDid.trim() ?? '';
-      String effectiveSetupId = setupId;
+      var effectiveSetupId = setupId;
       if (holderDid.isNotEmpty) {
         final freshSetup = await _sdk.ensurePersonalAgentSetup(
           request: PersonalAgentSetupRequest(holderDid: holderDid),
@@ -149,10 +151,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         setupId: effectiveSetupId,
         content: content,
       );
-      state = state.copyWith(
-        contextProvisioned: true,
-        contextUploading: false,
-      );
+      state = state.copyWith(contextProvisioned: true, contextUploading: false);
     } catch (error) {
       state = state.copyWith(
         contextUploading: false,

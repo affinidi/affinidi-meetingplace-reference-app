@@ -1570,6 +1570,12 @@ abstract class AppLocalizations {
   /// **'Copy message'**
   String get chatMessageActionCopy;
 
+  /// No description provided for @chatMessageActionAskSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for suggestion'**
+  String get chatMessageActionAskSuggestion;
+
   /// No description provided for @chatMessageActionEdit.
   ///
   /// In en, this message translates to:
@@ -1617,6 +1623,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not delete message'**
   String get chatMessageDeleteFailed;
+
+  /// No description provided for @chatSuggestionRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not request suggestion'**
+  String get chatSuggestionRequestFailed;
 
   /// No description provided for @chatItemStatus.
   ///

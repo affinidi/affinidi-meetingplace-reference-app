@@ -18,6 +18,9 @@ class _ChatMessageList extends HookConsumerWidget {
     final selectedReactionIndex = ref.watch(
       provider.select((state) => state.selectedReactionIndex),
     );
+    final supportsSuggestionRequests = ref.watch(
+      provider.supportsSuggestionRequests,
+    );
     final zkpPolicy = ChatZkpMessageListPolicy.fromMessages(
       enabled:
           ref.read(environmentProvider).zkpEnabled &&
@@ -134,6 +137,21 @@ class _ChatMessageList extends HookConsumerWidget {
                     }
                   }
 
+                  final showSuggestionAction =
+                      supportsSuggestionRequests &&
+                      selectedReactionIndex == index &&
+                      chatItem is chat.Message &&
+                      !chatItem.isFromMe &&
+                      chatItem.value.trim().isNotEmpty;
+                  final showReactionPicker =
+                      selectedReactionIndex == index &&
+                      chatItem is chat.Message &&
+                      !chatItem.isFromMe;
+                  final showReactionPickerAbove =
+                      showReactionPicker && showSuggestionAction;
+                  final showReactionPickerBelow =
+                      showReactionPicker && !showReactionPickerAbove;
+
                   return Padding(
                     key: ValueKey(chatItem.messageId),
                     padding: zkpPolicy.horizontalPadding(chatItem),
@@ -165,6 +183,11 @@ class _ChatMessageList extends HookConsumerWidget {
                                     chatItem: chatItem,
                                     contactId: _contactId,
                                   ),
+                                ),
+                              if (showReactionPickerAbove)
+                                _ReactionPickerChatItem(
+                                  chatItem: chatItem,
+                                  contactId: _contactId,
                                 ),
                               _isCallOnlyMessage(chatItem)
                                   ? _CallBubble(
@@ -216,9 +239,14 @@ class _ChatMessageList extends HookConsumerWidget {
                                   ),
                                 )
                               : const SizedBox(height: 1),
-                          if (selectedReactionIndex == index)
+                          if (showReactionPickerBelow)
                             _ReactionPickerChatItem(
                               chatItem: chatItem,
+                              contactId: _contactId,
+                            ),
+                          if (showSuggestionAction)
+                            _SuggestionActionChatItem(
+                              messageId: chatItem.messageId,
                               contactId: _contactId,
                             ),
                           thisItemStatus.isNotEmpty

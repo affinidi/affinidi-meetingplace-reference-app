@@ -97,6 +97,7 @@ part 'chat_items/concierge_update_profile_request_chat_item.dart';
 part 'chat_items/concierge_vrc_chat_item.dart';
 part 'chat_items/plain_text_chat_item.dart';
 part 'chat_items/reaction_picker_chat_item.dart';
+part 'chat_items/suggestion_action_chat_item.dart';
 part 'chat_items/unknown_chat_item.dart';
 part 'chat_items/video_player_screen.dart';
 part 'chat_media_options.dart';

@@ -1407,12 +1407,13 @@ packages:
     source: git
     version: "0.0.1-dev.58"
   meeting_place_control_plane:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_control_plane
-      sha256: "342f26fdf64b1513c8b510095fd79f445133edbdbc65bf4bdbd3cf63c62b9118"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/meeting_place_control_plane"
+      ref: "720939c96c77dc9dcc7a9e048744dfe4749a3b2c"
+      resolved-ref: "720939c96c77dc9dcc7a9e048744dfe4749a3b2c"
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
     version: "0.0.1-dev.23"
   meeting_place_core:
     dependency: "direct overridden"
@@ -1451,12 +1452,13 @@ packages:
     source: git
     version: "0.0.1-dev.12"
   meeting_place_mediator:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: meeting_place_mediator
-      sha256: "5b38cba1162a88cff8c09eaef4f1edccb64c62e93cf76c929a427814cae36c34"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/meeting_place_mediator"
+      ref: "720939c96c77dc9dcc7a9e048744dfe4749a3b2c"
+      resolved-ref: "720939c96c77dc9dcc7a9e048744dfe4749a3b2c"
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
     version: "0.0.1-dev.16"
   meeting_place_personal_agent:
     dependency: "direct overridden"
