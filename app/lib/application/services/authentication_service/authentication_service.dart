@@ -8,6 +8,7 @@ import '../../../infrastructure/biometrics/local_auth_provider.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_repository_provider.dart';
+import '../../../infrastructure/providers/mnemonic_configured_provider.dart';
 import '../../../presentation/screens/connections/connections_screen_controller.dart';
 import '../../../presentation/screens/contacts/contacts_screen_controller.dart';
 import '../../../presentation/screens/identities/identities_screen_controller.dart';
@@ -50,8 +51,14 @@ class AuthenticationService extends _$AuthenticationService {
     await ref.read(contactsServiceProvider.notifier).ensureInitialized();
     ref.read(contactsScreenControllerProvider.notifier);
 
-    await ref.read(connectionsServiceProvider.notifier).ensureInitialized();
-    ref.read(connectionsScreenControllerProvider);
+    // connectionsService depends on the SDK, which only initializes after the
+    // mnemonic is configured. Skip it here when mnemonic is absent so the
+    // warmup (and therefore authenticate()) can complete and the router can
+    // redirect to the mnemonic screen.
+    if (ref.read(mnemonicConfiguredProvider)) {
+      await ref.read(connectionsServiceProvider.notifier).ensureInitialized();
+      ref.read(connectionsScreenControllerProvider);
+    }
 
     await ref
         .read(settingsScreenControllerProvider.notifier)

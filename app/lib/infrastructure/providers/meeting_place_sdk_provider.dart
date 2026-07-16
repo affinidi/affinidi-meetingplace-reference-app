@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:bip39_mnemonic/bip39_mnemonic.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
@@ -7,6 +12,7 @@ import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:ssi/ssi.dart';
+
 import '../../application/services/identities_service/identities_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
@@ -17,6 +23,7 @@ import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
 import 'group_repository_provider.dart';
 import 'matrix_config_provider.dart';
+import 'mnemonic_configured_provider.dart';
 
 /// Initializes the vodozemac cryptographic library.
 ///
@@ -50,11 +57,29 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
   (ref) async {
     const logKey = 'meetingPlaceSdkProvider';
     final logger = ref.read(appLoggerProvider);
+
+    // Must be watched before the first `await` so Riverpod tracks the
+    // dependency and rebuilds this provider when the value changes.
+    // Stays in loading state until the mnemonic screen is completed.
+    if (!ref.watch(mnemonicConfiguredProvider)) {
+      return Completer<MeetingPlaceMatrixSDK>().future;
+    }
+
     final secureStorage = await ref.read(secureStorageProvider.future);
 
     try {
       await ref.read(vodozemacInitProvider.future);
-      final wallet = PersistentWallet(secureStorage);
+
+      final mnemonic = await secureStorage.getMnemonic();
+      logger.info(
+        'Using mnemonic hash: ${sha256.convert(utf8.encode(mnemonic ?? ''))}',
+        name: logKey,
+      );
+      final wallet = Bip32Wallet.fromSeed(
+        Uint8List.fromList(
+          Mnemonic.fromSentence(mnemonic!, Language.english).seed,
+        ),
+      );
       final settingsState = ref.read(settingsServiceProvider);
       final initialMediatorDid = settingsState.selectedMediatorDid;
       logger.info('Starting MeetingPlace SDK initialization', name: logKey);
@@ -65,13 +90,26 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
       );
       logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
+      final mnemonicHash = sha256.convert(utf8.encode(mnemonic)).toString();
+      final eventCfg = ref.read(environmentProvider).ciergeEventConfig;
+      final ciergeConnectorDid =
+          eventCfg[mnemonicHash]?['ciergeConnectorDid'] as String?;
       final agentDidOverride = const String.fromEnvironment(
         'MPX_AGENT_DID',
         defaultValue: '',
       ).trim();
+      final configuredAgentDid = agentDidOverride.isNotEmpty
+          ? agentDidOverride
+          : ciergeConnectorDid;
+
       if (agentDidOverride.isNotEmpty) {
         logger.info(
           'Using MPX agent DID override: $agentDidOverride',
+          name: logKey,
+        );
+      } else if (ciergeConnectorDid != null) {
+        logger.info(
+          'Using mnemonic-mapped Cierge connector DID: $ciergeConnectorDid',
           name: logKey,
         );
       }
@@ -116,9 +154,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
           VdipClient.issuedCredentialMessageType,
         ],
         #onBuildAttachments: onBuildAttachments,
+        #signatureScheme: SignatureScheme.ecdsa_secp256k1_sha256,
       };
-      if (agentDidOverride.isNotEmpty) {
-        sdkOptionsNamed[#agentDid] = agentDidOverride;
+      if (configuredAgentDid != null) {
+        sdkOptionsNamed[#agentDid] = configuredAgentDid;
       }
 
       MeetingPlaceMatrixSdkOptions sdkOptions;
@@ -130,7 +169,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
                   sdkOptionsNamed,
                 )
                 as MeetingPlaceMatrixSdkOptions;
-        if (agentDidOverride.isNotEmpty) {
+        if (configuredAgentDid != null) {
           logger.info(
             'MPX agent DID override applied to SDK options',
             name: logKey,
@@ -140,9 +179,9 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
         // Compatibility fallback for SDK builds that
         // do not yet expose `agentDid`.
         sdkOptionsNamed.remove(#agentDid);
-        if (agentDidOverride.isNotEmpty) {
+        if (configuredAgentDid != null) {
           logger.warning(
-            '''MPX_AGENT_DID was provided but current SDK options do not accept agentDid; override ignored''',
+            '''An agent DID override was provided but current SDK options do not accept agentDid; override ignored''',
             name: logKey,
           );
         }

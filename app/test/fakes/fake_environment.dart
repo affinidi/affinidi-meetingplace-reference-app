@@ -139,4 +139,7 @@ class FakeEnvironment implements Environment {
 
   @override
   Duration get callRingTimeout => const Duration(seconds: 60);
+
+  @override
+  Map<String, Map<String, dynamic>> get ciergeEventConfig => const {};
 }

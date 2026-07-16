@@ -18,6 +18,7 @@ dependency_overrides:
   device_info_plus: ^13.0.0
   ffi: 2.2.0
   flutter_secure_storage_windows: ^4.2.2
+  json_annotation: ^4.8.0
   meeting_place_chat:
     git:  
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git

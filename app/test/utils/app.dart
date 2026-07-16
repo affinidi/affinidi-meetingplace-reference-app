@@ -66,6 +66,7 @@ Future<void> startApp(
   Locale locale = const Locale('en', 'US'),
   bool isAuthenticated = true,
   bool hasNetworkConnection = true,
+  bool hasMnemonicConfigured = true,
   bool alreadyOnboarded = true,
   PushNotificationMessaging? pushNotificationMessaging,
   Connectivity? connectivity,
@@ -94,6 +95,7 @@ Future<void> startApp(
   AppLogger.initialize(File('${Directory.systemTemp.path}/app_debug_test.log'));
   SharedPreferences.setMockInitialValues({
     'alreadyOnboarded': alreadyOnboarded,
+    SharedPreferencesKeys.hasMnemonic.name: hasMnemonicConfigured,
   });
   final sharedPreferences = await SharedPreferences.getInstance();
   final cacheManager = FakeCacheManager();
@@ -278,6 +280,7 @@ Future<void> navigateToLocation(
   String location, {
   bool isAuthenticated = true,
   bool alreadyOnboarded = true,
+  bool hasMnemonicConfigured = true,
   List<Identity> identities = const [],
   List<Mediator> mediators = const [],
   List<Contact> contacts = const [],
@@ -301,6 +304,7 @@ Future<void> navigateToLocation(
     tester,
     isAuthenticated: isAuthenticated,
     alreadyOnboarded: alreadyOnboarded,
+    hasMnemonicConfigured: hasMnemonicConfigured,
     identities: identities,
     pushNotificationMessaging: pushNotificationMessaging,
     connectivity: connectivity,
@@ -349,6 +353,7 @@ Future<void> navigateToChat(
   PermissionStatus? cameraPermissionStatus,
   bool isAuthenticated = true,
   bool alreadyOnboarded = true,
+  bool hasMnemonicConfigured = true,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
   List<RCard> rCards = const [],
@@ -373,6 +378,7 @@ Future<void> navigateToChat(
     cameraPermissionStatus: cameraPermissionStatus,
     isAuthenticated: isAuthenticated,
     alreadyOnboarded: alreadyOnboarded,
+    hasMnemonicConfigured: hasMnemonicConfigured,
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
     rCards: rCards,
