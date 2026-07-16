@@ -313,7 +313,7 @@ class MnemonicScreen extends HookConsumerWidget {
                           ),
                             child: Text(
                               l10n.mnemonicContinue,
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       const Spacer(),

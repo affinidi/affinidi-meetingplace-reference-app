@@ -44,6 +44,7 @@ import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/message_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/media/file_picker/file_picker_platform_provider.dart';
 import '../../../infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
@@ -184,7 +185,8 @@ class ChatScreen extends HookConsumerWidget {
     );
 
     Future<void> uploadContextFor(AgentContext target) async {
-      final picked = await FilePicker.pickFiles(
+      final filePicker = ref.read(filePickerPlatformProvider);
+      final picked = await filePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['txt'],
       );
@@ -224,7 +226,8 @@ class ChatScreen extends HookConsumerWidget {
 
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.chatChannelUsesContext(_contextDisplayName(context, target)))),
+        SnackBar(content: Text(l10n.chatChannelUsesContext(_contextDisplayName(
+          context, target)))),
       );
     }
 
