@@ -27,8 +27,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   }
 
   final Ref _ref;
-  late final _lifecycleObserver =
-      _PersonalAiLifecycleObserver(onResumed: _handleAppResumed);
+  late final _lifecycleObserver = _PersonalAiLifecycleObserver(
+    onResumed: _handleAppResumed,
+  );
 
   Environment get _environment => _ref.read(environmentProvider);
 
@@ -79,8 +80,10 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       maxAttempts: 3,
       pollEvery: const Duration(milliseconds: 300),
     );
-    await _ensurePersonalAiContact(setupResult, 
-    preferredChannelDid: channelDid);
+    await _ensurePersonalAiContact(
+      setupResult,
+      preferredChannelDid: channelDid,
+    );
   }
 
   void onIdentityCreated() {
@@ -129,7 +132,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       final holderDid = holderDidFromIdentity.isNotEmpty
           ? holderDidFromIdentity
           : state.setupResult?.holderDid.trim() ?? '';
-      String effectiveSetupId = setupId;
+      var effectiveSetupId = setupId;
       if (holderDid.isNotEmpty) {
         final freshSetup = await _sdk.ensurePersonalAgentSetup(
           request: PersonalAgentSetupRequest(holderDid: holderDid),
@@ -148,10 +151,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         setupId: effectiveSetupId,
         content: content,
       );
-      state = state.copyWith(
-        contextProvisioned: true,
-        contextUploading: false,
-      );
+      state = state.copyWith(contextProvisioned: true, contextUploading: false);
     } catch (error) {
       state = state.copyWith(
         contextUploading: false,
@@ -193,7 +193,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       state = state.copyWith(
         status: PersonalAiSetupStatus.failed,
         errorMessage:
-            'Unable to set up Personal AI because the current identity is missing a DID.',
+            '''Unable to set up Personal AI because the current identity is missing a DID.''',
       );
       return;
     }
@@ -264,9 +264,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     }
 
     if (mnemonic == null || mnemonic.isEmpty) {
-      throw StateError(
-        'Personal AI setup did not return an offer mnemonic.',
-      );
+      throw StateError('Personal AI setup did not return an offer mnemonic.');
     }
 
     final identitiesService = _ref.read(identitiesServiceProvider.notifier);
@@ -411,13 +409,15 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
     final currentContact = existing.first;
     final desiredName = result.profile.displayName.trim();
-    final needsNameUpdate = desiredName.isNotEmpty &&
+    final needsNameUpdate =
+        desiredName.isNotEmpty &&
         (currentContact.displayName == null ||
             currentContact.displayName!.trim().isEmpty ||
             currentContact.displayName != desiredName ||
             currentContact.card.displayName.trim().isEmpty ||
             currentContact.card.displayName != desiredName);
-    final shouldMarkPending = currentContact.status == ContactStatus.active &&
+    final shouldMarkPending =
+        currentContact.status == ContactStatus.active &&
         currentContact.category == ContactCategory.robot;
 
     if (!needsNameUpdate && !shouldMarkPending) {

@@ -35,7 +35,9 @@ class PersonalAgentScreenController
   final Ref _ref;
 
   void syncFromDependencies() {
-    _ref.read(personalAiServiceProvider.notifier).refreshPersonalAiContactSync();
+    _ref
+        .read(personalAiServiceProvider.notifier)
+        .refreshPersonalAiContactSync();
 
     final identity = _ref.read(
       identitiesServiceProvider.currentIdentityOrPrimary,

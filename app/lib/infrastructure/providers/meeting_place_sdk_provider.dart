@@ -75,35 +75,34 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
         );
       }
 
-      final onBuildAttachments =
-          (
-            Channel channel,
-            Future<DidManager> Function(String did) getDidManager,
-          ) async {
-            try {
-              await ref
-                  .read(identitiesServiceProvider.notifier)
-                  .ensureInitialized();
+      Future<List<Attachment>?> onBuildAttachments(
+        Channel channel,
+        Future<DidManager> Function(String did) getDidManager,
+      ) async {
+        try {
+          await ref
+              .read(identitiesServiceProvider.notifier)
+              .ensureInitialized();
 
-              final externalRef = channel.externalRef;
-              if (externalRef == null || externalRef.isEmpty) return null;
+          final externalRef = channel.externalRef;
+          if (externalRef == null || externalRef.isEmpty) return null;
 
-              final identity = ref
-                  .read(identitiesServiceProvider)
-                  .getIdentityById(externalRef);
-              if (identity == null || identity.did.isEmpty) return null;
+          final identity = ref
+              .read(identitiesServiceProvider)
+              .getIdentityById(externalRef);
+          if (identity == null || identity.did.isEmpty) return null;
 
-              final didManager = await getDidManager(identity.did);
+          final didManager = await getDidManager(identity.did);
 
-              return RCardDIDCommAttachmentBuilder.build(
-                issuerDid: identity.did,
-                card: identity.card.toRCardSubject(),
-                issuerDidManager: didManager,
-              );
-            } catch (_) {
-              return null;
-            }
-          };
+          return RCardDIDCommAttachmentBuilder.build(
+            issuerDid: identity.did,
+            card: identity.card.toRCardSubject(),
+            issuerDidManager: didManager,
+          );
+        } catch (_) {
+          return null;
+        }
+      }
 
       final sdkOptionsNamed = <Symbol, dynamic>{
         #expectedMessageWrappingTypes: const [
@@ -123,12 +122,13 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
 
       MeetingPlaceCoreSDKOptions sdkOptions;
       try {
-        sdkOptions = Function.apply(
-              MeetingPlaceCoreSDKOptions.new,
-              const [],
-              sdkOptionsNamed,
-            )
-            as MeetingPlaceCoreSDKOptions;
+        sdkOptions =
+            Function.apply(
+                  MeetingPlaceCoreSDKOptions.new,
+                  const [],
+                  sdkOptionsNamed,
+                )
+                as MeetingPlaceCoreSDKOptions;
         if (agentDidOverride.isNotEmpty) {
           logger.info(
             'MPX agent DID override applied to SDK options',
@@ -136,20 +136,22 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
           );
         }
       } catch (_) {
-        // Compatibility fallback for SDK builds that do not yet expose `agentDid`.
+        // Compatibility fallback for SDK builds that do not yet
+        // expose `agentDid`.
         sdkOptionsNamed.remove(#agentDid);
         if (agentDidOverride.isNotEmpty) {
           logger.warning(
-            'MPX_AGENT_DID was provided but current SDK options do not accept agentDid; override ignored',
+            '''MPX_AGENT_DID was provided but current SDK options do not accept agentDid; override ignored''',
             name: logKey,
           );
         }
-        sdkOptions = Function.apply(
-              MeetingPlaceCoreSDKOptions.new,
-              const [],
-              sdkOptionsNamed,
-            )
-            as MeetingPlaceCoreSDKOptions;
+        sdkOptions =
+            Function.apply(
+                  MeetingPlaceCoreSDKOptions.new,
+                  const [],
+                  sdkOptionsNamed,
+                )
+                as MeetingPlaceCoreSDKOptions;
       }
 
       final sdk = await MeetingPlaceCoreSDK.create(

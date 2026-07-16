@@ -790,6 +790,39 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
+  Future<void> askForSuggestion(String messageId) async {
+    if (!(state.capabilities?.supports(chat.ChatFeature.suggestionRequests) ??
+        false)) {
+      clearSelectedReaction();
+      return;
+    }
+
+    try {
+      _showActivity();
+      final message =
+          state.messages.firstWhereOrNull((m) => m.messageId == messageId)
+              as chat.Message?;
+
+      if (message == null) {
+        throw AppException(
+          'Unable to find message with id $messageId',
+          code: AppExceptionType.missingMessage.name,
+        );
+      }
+
+      final text = message.value.trim();
+      if (text.isEmpty) return;
+
+      await _chatService?.sendSuggestionRequest(
+        messageId: message.messageId,
+        text: text,
+      );
+    } finally {
+      clearSelectedReaction();
+      _hideActivity();
+    }
+  }
+
   /// Maximum age at which the original sender can still delete their own
   /// message for everyone. Defers to the chat service (SDK option, falling
   /// back to the environment-configured default before the SDK is ready).
@@ -1294,6 +1327,14 @@ extension ChatScreenControllerProviderSelectors
     return select(
       (state) =>
           state.capabilities?.supports(chat.ChatFeature.messageEdit) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsSuggestionRequests {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.suggestionRequests) ??
+          false,
     );
   }
 

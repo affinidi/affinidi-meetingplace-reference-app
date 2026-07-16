@@ -949,6 +949,10 @@
 	"@chatMessageActionCopy": {
 		"type": "text"
 	},
+	"chatMessageActionAskSuggestion": "Ask for suggestion",
+	"@chatMessageActionAskSuggestion": {
+		"type": "text"
+	},
 	"chatMessageActionEdit": "Edit message",
 	"@chatMessageActionEdit": {
 		"type": "text"
@@ -979,6 +983,10 @@
 	},
 	"chatMessageDeleteFailed": "Could not delete message",
 	"@chatMessageDeleteFailed": {
+		"type": "text"
+	},
+	"chatSuggestionRequestFailed": "Could not request suggestion",
+	"@chatSuggestionRequestFailed": {
 		"type": "text"
 	},
 	"chatItemStatus": "{status, select, queued{Queued} delivered{Delivered} sending{Sending} sent{Sent} error{Error} groupDeleted{Group deleted} other{}}",

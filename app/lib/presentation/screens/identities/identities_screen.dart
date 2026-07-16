@@ -111,7 +111,7 @@ class _IdentitiesPanel extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Connect your Personal AI now, or skip and continue using MPX without interruption.',
+                      '''Connect your Personal AI now, or skip and continue using MPX without interruption.''',
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onPrimaryContainer,
                       ),
@@ -136,9 +136,8 @@ class _IdentitiesPanel extends ConsumerWidget {
                                 .colorScheme
                                 .onPrimaryContainer
                                 .withValues(alpha: 0.28),
-                            disabledForegroundColor: context
-                                .colorScheme
-                                .onPrimaryContainer,
+                            disabledForegroundColor:
+                                context.colorScheme.onPrimaryContainer,
                           ),
                           onPressed: personalAiState.isSettingUp
                               ? null
@@ -163,9 +162,8 @@ class _IdentitiesPanel extends ConsumerWidget {
                         ),
                         TextButton(
                           style: TextButton.styleFrom(
-                            foregroundColor: context
-                                .colorScheme
-                                .onPrimaryContainer,
+                            foregroundColor:
+                                context.colorScheme.onPrimaryContainer,
                           ),
                           onPressed: personalAiState.isSettingUp
                               ? null

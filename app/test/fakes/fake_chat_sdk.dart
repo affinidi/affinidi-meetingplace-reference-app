@@ -27,6 +27,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     ChatFeature.messageDelete,
     ChatFeature.effects,
     ChatFeature.contactDetailsUpdate,
+    ChatFeature.suggestionRequests,
   });
 
   TransportCapabilities _capabilities;
@@ -52,6 +53,8 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   ConciergeMessage? lastContactDetailsUpdateRejected;
   Message? lastReactionMessage;
   String? lastReaction;
+  String? lastSuggestionRequestMessageId;
+  String? lastSuggestionRequestText;
   bool sessionEnded = false;
   String? lastEffectSent;
   bool shouldThrowOnStartSession = false;
@@ -63,6 +66,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
   final List<Map<String, dynamic>> reactOnMessageCalls = [];
+  final List<Map<String, dynamic>> sendSuggestionRequestCalls = [];
   final List<Map<String, dynamic>> approveConnectionRequestCalls = [];
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
@@ -485,6 +489,16 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     lastReactionMessage = message;
     lastReaction = reaction;
     reactOnMessageCalls.add({'message': message, 'reaction': reaction});
+  }
+
+  @override
+  Future<void> sendSuggestionRequest({
+    required String messageId,
+    required String text,
+  }) async {
+    lastSuggestionRequestMessageId = messageId;
+    lastSuggestionRequestText = text;
+    sendSuggestionRequestCalls.add({'messageId': messageId, 'text': text});
   }
 
   @override
