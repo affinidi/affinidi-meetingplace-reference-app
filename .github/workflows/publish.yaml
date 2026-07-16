@@ -1,4 +1,4 @@
-name: Publish All Pckages
+name: Publish All Packages
 on:
   push:
     tags:
