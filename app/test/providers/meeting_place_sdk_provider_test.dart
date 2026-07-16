@@ -24,7 +24,7 @@ void main() {
 
   // SharedPreferences instance with hasMnemonic=true, used so that
   // meetingPlaceSdkProvider proceeds past the mnemonic-configured guard.
-  Future<SharedPreferences> _mnemonicPrefs() async {
+  Future<SharedPreferences> mnemonicPrefs() async {
     SharedPreferences.setMockInitialValues({
       SharedPreferencesKeys.hasMnemonic.name: true,
     });
@@ -41,7 +41,7 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             appLoggerProvider.overrideWithValue(AppLogger.instance),
-            sharedPreferencesProvider.overrideWithValue(await _mnemonicPrefs()),
+            sharedPreferencesProvider.overrideWithValue(await mnemonicPrefs()),
             secureStorageProvider.overrideWith(
               (ref) async => FakeSecureStorage(),
             ),
@@ -79,7 +79,7 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             appLoggerProvider.overrideWithValue(AppLogger.instance),
-            sharedPreferencesProvider.overrideWithValue(await _mnemonicPrefs()),
+            sharedPreferencesProvider.overrideWithValue(await mnemonicPrefs()),
             secureStorageProvider.overrideWith(
               (ref) async => FakeSecureStorage(),
             ),
@@ -104,7 +104,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           appLoggerProvider.overrideWithValue(AppLogger.instance),
-          sharedPreferencesProvider.overrideWithValue(await _mnemonicPrefs()),
+          sharedPreferencesProvider.overrideWithValue(await mnemonicPrefs()),
           secureStorageProvider.overrideWith(
             (ref) async => FakeSecureStorage(),
           ),

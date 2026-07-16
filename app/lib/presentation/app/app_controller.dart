@@ -40,14 +40,11 @@ class AppController extends _$AppController with WidgetsBindingObserver {
       fireImmediately: true,
     );
 
-    ref.listen(
-      mnemonicConfiguredProvider,
-      (prev, next) async {
-        if (next && ref.read(authenticationServiceProvider).isAuthenticated) {
-          await _initializeServices();
-        }
-      },
-    );
+    ref.listen(mnemonicConfiguredProvider, (prev, next) async {
+      if (next && ref.read(authenticationServiceProvider).isAuthenticated) {
+        await _initializeServices();
+      }
+    });
 
     ref.read(settingsServiceProvider);
     ref.read(networkConnectivityServiceProvider);

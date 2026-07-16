@@ -69,7 +69,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
       await ref.read(vodozemacInitProvider.future);
 
       final mnemonic = await secureStorage.getMnemonic();
-      // mnemonicConfiguredProvider being true guarantees this is non-null.
+      logger.info(
+        'Using mnemonic hash: ${sha256.convert(utf8.encode(mnemonic ?? ''))}',
+        name: logKey,
+      );
       final wallet = Bip32Wallet.fromSeed(
         Uint8List.fromList(
           Mnemonic.fromSentence(mnemonic!, Language.english).seed,
@@ -130,6 +133,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
           VdipClient.issuedCredentialMessageType,
         ],
         #onBuildAttachments: onBuildAttachments,
+        #signatureScheme: SignatureScheme.ecdsa_secp256k1_sha256,
       };
       if (ciergeConnectorDid != null) {
         sdkOptionsNamed[#agentDid] = ciergeConnectorDid;

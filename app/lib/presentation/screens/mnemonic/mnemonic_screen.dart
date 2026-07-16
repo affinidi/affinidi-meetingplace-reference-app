@@ -142,7 +142,8 @@ class MnemonicScreen extends HookConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    minHeight: MediaQuery.of(context).size.height -
+                    minHeight:
+                        MediaQuery.of(context).size.height -
                         MediaQuery.of(context).padding.top -
                         MediaQuery.of(context).padding.bottom,
                   ),
@@ -177,8 +178,7 @@ class MnemonicScreen extends HookConsumerWidget {
                         _OptionCard(
                           icon: Icons.qr_code_scanner,
                           title: 'Scan QR Code',
-                          subtitle:
-                              'Use your camera to scan a wallet QR code',
+                          subtitle: 'Use your camera to scan a wallet QR code',
                           enabled: isCameraAvailable,
                           onTap: onScanQr,
                         ),
@@ -186,7 +186,8 @@ class MnemonicScreen extends HookConsumerWidget {
                         _OptionCard(
                           icon: Icons.keyboard_alt_outlined,
                           title: 'Enter manually',
-                          subtitle: 'Type the mnemonic phrase'
+                          subtitle:
+                              'Type the mnemonic phrase'
                               ' that was shared with you',
                           onTap: () => mode.value = _Mode.manual,
                         ),
@@ -226,7 +227,8 @@ class MnemonicScreen extends HookConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height -
+                  minHeight:
+                      MediaQuery.of(context).size.height -
                       MediaQuery.of(context).padding.top -
                       MediaQuery.of(context).padding.bottom,
                 ),
@@ -284,8 +286,7 @@ class MnemonicScreen extends HookConsumerWidget {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide:
-                                const BorderSide(color: Colors.white),
+                            borderSide: const BorderSide(color: Colors.white),
                           ),
                         ),
                       ),
@@ -306,8 +307,7 @@ class MnemonicScreen extends HookConsumerWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: colorScheme.primary,
-                            padding:
-                                const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -336,10 +336,7 @@ class MnemonicScreen extends HookConsumerWidget {
 // ---------------------------------------------------------------------------
 
 class _SuccessScreen extends HookWidget {
-  const _SuccessScreen({
-    required this.background,
-    required this.onComplete,
-  });
+  const _SuccessScreen({required this.background, required this.onComplete});
 
   final Widget background;
   final VoidCallback onComplete;
@@ -398,9 +395,7 @@ class _SuccessScreen extends HookWidget {
                     animation: checkProgress,
                     builder: (context, _) => CustomPaint(
                       size: const Size(120, 120),
-                      painter: _CheckmarkPainter(
-                        progress: checkProgress.value,
-                      ),
+                      painter: _CheckmarkPainter(progress: checkProgress.value),
                     ),
                   ),
                 ),
@@ -411,9 +406,7 @@ class _SuccessScreen extends HookWidget {
                     children: [
                       Text(
                         'You\'re all set!',
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
+                        style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -421,12 +414,11 @@ class _SuccessScreen extends HookWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Enjoy MeetingPlace and get engaged\nwith your personal AI agent.',
+                        '''Enjoy MeetingPlace and get engaged\nwith your personal AI agent.''',
                         textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(color: Colors.white),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleMedium?.copyWith(color: Colors.white),
                       ),
                     ],
                   ),
@@ -523,10 +515,7 @@ class _OptionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           onTap: enabled ? onTap : null,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 18,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
             child: Row(
               children: [
                 Icon(icon, color: Colors.white, size: 32),

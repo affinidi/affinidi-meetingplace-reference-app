@@ -25,7 +25,6 @@ const _rootKeyId = "m/44'/60'/0'/0'/0'";
 
 const _outPath = 'mnemonic_qr.png';
 
-
 Future<void> main() async {
   final mnemonic = Mnemonic.generate(
     Language.english,
@@ -48,6 +47,13 @@ Future<void> main() async {
   stdout.writeln('root_did: ${didDoc.id}');
   stdout.writeln('');
   stdout.writeln(AsciiQrGenerator.generate(sentence, horizontalScale: 2));
+  stdout.writeln('');
+  stdout.writeln('For development environment, set WALLET_CONFIG to:');
+  stdout.writeln(
+    jsonEncode({
+      hash: {"ciergeConnectorDid": '<agent-connector-did>'},
+    }),
+  );
 
   await _writePng(sentence);
   stdout.writeln('wrote $_outPath');

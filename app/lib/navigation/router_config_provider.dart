@@ -113,7 +113,6 @@ class GoRouterRefreshNotifier extends ChangeNotifier {
       },
       fireImmediately: true,
     );
-
   }
   final Ref ref;
 }

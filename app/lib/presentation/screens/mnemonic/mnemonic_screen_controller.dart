@@ -26,10 +26,10 @@ class MnemonicScreenController extends _$MnemonicScreenController {
         throw Exception('Please enter your mnemonic phrase.');
       }
       Mnemonic.fromSentence(trimmed, Language.english);
-      final walletConfig = ref.read(environmentProvider).ciergeEventConfig;
-      if (walletConfig.isNotEmpty) {
+      final ciergeConfig = ref.read(environmentProvider).ciergeEventConfig;
+      if (ciergeConfig.isNotEmpty) {
         final hash = sha256.convert(utf8.encode(trimmed)).toString();
-        if (!walletConfig.containsKey(hash)) {
+        if (!ciergeConfig.containsKey(hash)) {
           throw Exception('This mnemonic is not authorized for this app.');
         }
       }

@@ -165,7 +165,7 @@ class FakeSecureStorage extends SecureStorage {
 
   @override
   Future<String?> getMnemonic() async =>
-      'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
+      '''abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about''';
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
