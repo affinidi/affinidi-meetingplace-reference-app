@@ -42,7 +42,6 @@ class PersonalAiServiceState {
   final String? contextUploadError;
 
   /// Stores the most recently set up setup result (for backward compatibility).
-  /// For multi-context setups, use setupResultsByContext to access results by context name.
   final PersonalAgentSetupResult? setupResult;
 
   /// Maps context name (e.g., 'work-ai', 'personal-ai') to its setup result.

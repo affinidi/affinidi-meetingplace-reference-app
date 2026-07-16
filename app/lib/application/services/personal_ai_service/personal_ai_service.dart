@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -13,9 +12,9 @@ import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/secure_storage/secure_storage.dart';
-import '../context_routing_service/context_routing_service.dart';
 import '../connections_service/connections_service.dart';
 import '../contacts_service/contacts_service.dart';
+import '../context_routing_service/context_routing_service.dart';
 import '../identities_service/identities_service.dart';
 import 'personal_ai_contact_resolution.dart';
 import 'personal_ai_service_state.dart';
@@ -62,15 +61,12 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
     final setups = state.setupResultsByContext.isNotEmpty
         ? state.setupResultsByContext.values.toList()
-      : (state.setupResult != null
-          ? [state.setupResult!]
-          : const <PersonalAgentSetupResult>[]);
+        : (state.setupResult != null
+              ? [state.setupResult!]
+              : const <PersonalAgentSetupResult>[]);
 
     for (final setupResult in setups) {
-      await _syncPersonalAiContactForSetup(
-        setupResult,
-        isInitialSetup: false,
-      );
+      await _syncPersonalAiContactForSetup(setupResult, isInitialSetup: false);
     }
   }
 
@@ -130,7 +126,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     state = state.copyWith(showSetupPrompt: false, promptDismissed: true);
   }
 
-  /// Helper method to update setupResult while maintaining the context-aware map.
+  /// Helper method to update setupResult while maintaining the
+  /// context-aware map.
   /// Both backward-compat setupResult and setupResultsByContext are updated.
   void _updateSetupResult(
     PersonalAgentSetupResult result, {
@@ -186,7 +183,6 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
           identitiesServiceProvider.currentIdentityOrPrimary,
         );
         final holderDidFromIdentity = identity?.did.trim() ?? '';
-        // Try to get holderDid from context-specific setup first, then fall back to any setup result
         final contextSpecificSetup =
             state.setupResultsByContext[setupContextName];
         final holderDid = holderDidFromIdentity.isNotEmpty
@@ -831,7 +827,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       return;
     }
 
-    final existingByChannelDid = contactsState.getContactByChannelDid(normalized);
+    final existingByChannelDid = contactsState.getContactByChannelDid(
+      normalized,
+    );
     if (existingByChannelDid != null) {
       if (normalizedOfferLink == null ||
           normalizedOfferLink.isEmpty ||
@@ -862,4 +860,3 @@ class _PersonalAiLifecycleObserver extends WidgetsBindingObserver {
     }
   }
 }
-

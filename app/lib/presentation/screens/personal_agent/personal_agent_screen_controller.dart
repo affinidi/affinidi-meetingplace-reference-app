@@ -1,14 +1,11 @@
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:meeting_place_personal_agent/meeting_place_personal_agent.dart';
 
-import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/personal_ai_service/personal_ai_service.dart';
-import '../../../infrastructure/media/file_picker/file_picker_platform_provider.dart';
 import 'personal_agent_screen_state.dart';
 
 class RoutingContextUploadOutcome {
@@ -31,11 +28,32 @@ class RoutingContextUploadOutcome {
   final AgentContext? target;
 }
 
-class PickedTextFile {
-  const PickedTextFile({required this.fileName, required this.content});
+class _RoutingTargetSpec {
+  const _RoutingTargetSpec({
+    required this.target,
+    required this.contextName,
+    required this.displayName,
+  });
 
-  final String fileName;
-  final String content;
+  factory _RoutingTargetSpec.from(AgentContext target) {
+    if (target == AgentContext.work) {
+      return const _RoutingTargetSpec(
+        target: AgentContext.work,
+        contextName: 'work-ai',
+        displayName: 'Work AI',
+      );
+    }
+
+    return const _RoutingTargetSpec(
+      target: AgentContext.personal,
+      contextName: 'personal-ai',
+      displayName: 'Personal AI',
+    );
+  }
+
+  final AgentContext target;
+  final String contextName;
+  final String displayName;
 }
 
 final personalAgentScreenControllerProvider =
@@ -88,109 +106,52 @@ class PersonalAgentScreenController
     );
   }
 
-  Future<void> uploadContext(String content) {
-    final setupId = state.setupResult?.setupId ?? '';
-    return _ref
-        .read(personalAiServiceProvider.notifier)
-        .uploadContext(setupId: setupId, content: content);
-  }
-
-  Future<PickedTextFile?> pickContextSetupFile() => _pickTextFile();
-
   Future<RoutingContextUploadOutcome> uploadRoutingContext(
-    AgentContext target,
-  ) async {
-    final pickedFile = await _pickTextFile();
-    if (pickedFile == null) {
+    AgentContext target, {
+    required String fileName,
+    required String content,
+  }) async {
+    final spec = _RoutingTargetSpec.from(target);
+    if (fileName.trim().isEmpty || content.trim().isEmpty) {
       return const RoutingContextUploadOutcome.skipped();
     }
 
-    final identity = _ref.read(
-      identitiesServiceProvider.currentIdentityOrPrimary,
-    );
-    final holderDid = (identity?.did ?? state.holderDid ?? '').trim();
+    final holderDid = _currentHolderDid();
     if (holderDid.isEmpty) {
       return const RoutingContextUploadOutcome.skipped();
     }
 
-    final contextName = _setupContextNameForTarget(target);
-    final displayName = _agentDisplayNameForTarget(target);
-
-    // Get the setup result for this specific context (not just the global one)
-    final personalAiState = _ref.read(personalAiServiceProvider);
-    final contextSpecificSetup = personalAiState.getSetupResultForContext(
-      contextName,
-    );
-
-    final existingSetup = contextSpecificSetup ?? state.setupResult;
+    final existingSetup = _setupForContext(spec.contextName);
     final canReuseExistingSetup =
         existingSetup != null &&
         state.isReady &&
-        _matchesTargetContext(existingSetup, contextName) &&
+        _matchesTargetContext(existingSetup, spec.contextName) &&
         (existingSetup.setupId?.trim().isNotEmpty ?? false);
 
-    state = state.copyWith(
-      isConnecting: true,
-      connectingLabel: displayName,
-      clearContextUploadError: true,
-    );
+    _setConnecting(spec.displayName);
 
     try {
       if (!canReuseExistingSetup) {
-        await _ref
-            .read(personalAiServiceProvider.notifier)
-            .setupPersonalAi(
-              holderDid: holderDid,
-              contextName: contextName,
-              agentDisplayName: displayName,
-            );
-        syncFromDependencies();
-
-        // After setup, get the context-specific result
-        final updatedPersonalAiState = _ref.read(personalAiServiceProvider);
-        var setupResult =
-            updatedPersonalAiState.getSetupResultForContext(contextName) ??
-            updatedPersonalAiState.setupResult;
-        final connectionKnownReady =
-            state.isReady &&
-            setupResult != null &&
-            _matchesTargetContext(setupResult, contextName);
-
-        if (!connectionKnownReady &&
-            (setupResult == null || !_isConnectionReady(setupResult))) {
-          setupResult = await _ref
-              .read(personalAiServiceProvider.notifier)
-              .waitUntilConnected(
-                holderDid: holderDid,
-                contextName: contextName,
-                agentDisplayName: displayName,
-              );
-          syncFromDependencies();
-        }
+        await _ensureSetupAndConnection(spec: spec, holderDid: holderDid);
       }
 
-      // Get the context-specific setup result for upload
-      final updatedPersonalAiState = _ref.read(personalAiServiceProvider);
-      final setupResult =
-          updatedPersonalAiState.getSetupResultForContext(contextName) ??
-          updatedPersonalAiState.setupResult;
+      final setupResult = _setupForContext(spec.contextName);
       final connected =
           setupResult != null &&
-          _matchesTargetContext(setupResult, contextName) &&
+          _matchesTargetContext(setupResult, spec.contextName) &&
           (_isConnectionReady(setupResult) || state.isReady);
       if (!connected) {
         state = state.copyWith(
           contextUploadError:
-              '$displayName is still connecting. Upload is available once the connection is active.',
-          isConnecting: false,
-          connectingLabel: null,
+              '${spec.displayName} is still connecting.',
         );
+        _clearConnecting();
         return const RoutingContextUploadOutcome.skipped();
       }
 
       final setupId = setupResult.setupId?.trim() ?? '';
       if (setupId.isEmpty) {
-        state = state.copyWith(isConnecting: false, connectingLabel: null);
+        _clearConnecting();
         return const RoutingContextUploadOutcome.skipped();
       }
 
@@ -198,35 +159,92 @@ class PersonalAgentScreenController
           .read(personalAiServiceProvider.notifier)
           .uploadContext(
             setupId: setupId,
-            content: pickedFile.content,
-            setupContextName: contextName,
-            agentDisplayName: displayName,
+            content: content,
+            setupContextName: spec.contextName,
+            agentDisplayName: spec.displayName,
           );
       syncFromDependencies();
 
       if (state.contextUploadError != null) {
-        state = state.copyWith(isConnecting: false, connectingLabel: null);
+        _clearConnecting();
         return const RoutingContextUploadOutcome.skipped();
       }
 
       await _ref
           .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
-          .markContextUploaded(context: target, fileName: pickedFile.fileName);
+          .markContextUploaded(context: spec.target, fileName: fileName);
 
       await _ref
           .read(personalAiServiceProvider.notifier)
           .refreshPersonalAiContactSync();
       await _ref.read(contactsServiceProvider.notifier).fetchContacts();
 
-      state = state.copyWith(isConnecting: false, connectingLabel: null);
+      _clearConnecting();
       return RoutingContextUploadOutcome.uploaded(
-        fileName: pickedFile.fileName,
-        target: target,
+        fileName: fileName,
+        target: spec.target,
       );
     } catch (_) {
-      state = state.copyWith(isConnecting: false, connectingLabel: null);
+      _clearConnecting();
       rethrow;
     }
+  }
+
+  Future<void> _ensureSetupAndConnection({
+    required _RoutingTargetSpec spec,
+    required String holderDid,
+  }) async {
+    await _ref
+        .read(personalAiServiceProvider.notifier)
+        .setupPersonalAi(
+          holderDid: holderDid,
+          contextName: spec.contextName,
+          agentDisplayName: spec.displayName,
+        );
+    syncFromDependencies();
+
+    var setupResult = _setupForContext(spec.contextName);
+    final connectionKnownReady =
+        state.isReady &&
+        setupResult != null &&
+        _matchesTargetContext(setupResult, spec.contextName);
+
+    if (!connectionKnownReady &&
+        (setupResult == null || !_isConnectionReady(setupResult))) {
+      setupResult = await _ref
+          .read(personalAiServiceProvider.notifier)
+          .waitUntilConnected(
+            holderDid: holderDid,
+            contextName: spec.contextName,
+            agentDisplayName: spec.displayName,
+          );
+      syncFromDependencies();
+    }
+  }
+
+  PersonalAgentSetupResult? _setupForContext(String contextName) {
+    final personalAiState = _ref.read(personalAiServiceProvider);
+    return personalAiState.getSetupResultForContext(contextName) ??
+        personalAiState.setupResult;
+  }
+
+  String _currentHolderDid() {
+    final identity = _ref.read(
+      identitiesServiceProvider.currentIdentityOrPrimary,
+    );
+    return (identity?.did ?? state.holderDid ?? '').trim();
+  }
+
+  void _setConnecting(String label) {
+    state = state.copyWith(
+      isConnecting: true,
+      connectingLabel: label,
+      clearContextUploadError: true,
+    );
+  }
+
+  void _clearConnecting() {
+    state = state.copyWith(isConnecting: false, clearConnectingLabel: true);
   }
 
   bool _isConnectionReady(PersonalAgentSetupResult setupResult) {
@@ -240,36 +258,6 @@ class PersonalAgentScreenController
     return setupResult.availableInContacts == true;
   }
 
-  Future<PickedTextFile?> _pickTextFile() async {
-    final picker = _ref.read(filePickerPlatformProvider);
-    final picked = await picker.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: const ['txt'],
-    );
-    if (picked == null || picked.files.isEmpty) {
-      return null;
-    }
-
-    final file = picked.files.first;
-    final bytes = await file.readAsBytes();
-    if (bytes.isEmpty) {
-      return null;
-    }
-
-    return PickedTextFile(
-      fileName: file.name,
-      content: String.fromCharCodes(bytes),
-    );
-  }
-
-  String _setupContextNameForTarget(AgentContext target) {
-    return target == AgentContext.work ? 'work-ai' : 'personal-ai';
-  }
-
-  String _agentDisplayNameForTarget(AgentContext target) {
-    return target == AgentContext.work ? 'Work AI' : 'Personal AI';
-  }
-
   bool _matchesTargetContext(
     PersonalAgentSetupResult result,
     String contextName,
@@ -279,4 +267,3 @@ class PersonalAgentScreenController
     return normalizedContextId.startsWith(normalizedTarget);
   }
 }
-

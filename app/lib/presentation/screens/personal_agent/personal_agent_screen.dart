@@ -1,14 +1,37 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/media/file_picker/file_picker_platform_provider.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/section_banner.dart';
 import 'personal_agent_screen_controller.dart';
 
 class PersonalAgentScreen extends ConsumerWidget {
   const PersonalAgentScreen({super.key});
+
+  Future<({String fileName, String content})?> _pickTextFile(
+    WidgetRef ref,
+  ) async {
+    final picker = ref.read(filePickerPlatformProvider);
+    final picked = await picker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['txt'],
+    );
+    if (picked == null || picked.files.isEmpty) {
+      return null;
+    }
+
+    final file = picked.files.first;
+    final bytes = await file.readAsBytes();
+    if (bytes.isEmpty) {
+      return null;
+    }
+
+    return (fileName: file.name, content: String.fromCharCodes(bytes));
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,7 +60,20 @@ class PersonalAgentScreen extends ConsumerWidget {
     );
 
     Future<void> uploadRoutingContext(AgentContext target) async {
-      final outcome = await controller.uploadRoutingContext(target);
+      final pickedFile = await _pickTextFile(ref);
+      if (pickedFile == null) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('No context created')));
+        return;
+      }
+
+      final outcome = await controller.uploadRoutingContext(
+        target,
+        fileName: pickedFile.fileName,
+        content: pickedFile.content,
+      );
 
       if (!context.mounted) return;
 
@@ -48,9 +84,7 @@ class PersonalAgentScreen extends ConsumerWidget {
         return;
       }
 
-      final label = target == AgentContext.work
-          ? 'Work AI'
-          : 'Personal AI';
+      final label = target == AgentContext.work ? 'Work AI' : 'Personal AI';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('$label uploaded: ${outcome.fileName}')),
       );
@@ -146,7 +180,7 @@ class _AgentContextSetupCard extends StatelessWidget {
       return SizedBox(
         width: double.infinity,
         child: FilledButton(
-            onPressed: (isUploading || isConnecting || isLocked)
+          onPressed: (isUploading || isConnecting || isLocked)
               ? null
               : onPressed,
           style: FilledButton.styleFrom(

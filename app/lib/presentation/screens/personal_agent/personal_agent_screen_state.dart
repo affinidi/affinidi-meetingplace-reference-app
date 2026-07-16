@@ -56,13 +56,16 @@ class PersonalAgentScreenState {
     bool clearErrorMessage = false,
     bool clearContextUploadError = false,
     bool clearSetupResult = false,
+    bool clearConnectingLabel = false,
   }) {
     return PersonalAgentScreenState(
       holderDid: holderDid ?? this.holderDid,
       isReady: isReady ?? this.isReady,
       isSettingUp: isSettingUp ?? this.isSettingUp,
       isConnecting: isConnecting ?? this.isConnecting,
-      connectingLabel: connectingLabel ?? this.connectingLabel,
+      connectingLabel: clearConnectingLabel
+          ? null
+          : (connectingLabel ?? this.connectingLabel),
       contextProvisioned: contextProvisioned ?? this.contextProvisioned,
       contextUploading: contextUploading ?? this.contextUploading,
       errorMessage: clearErrorMessage

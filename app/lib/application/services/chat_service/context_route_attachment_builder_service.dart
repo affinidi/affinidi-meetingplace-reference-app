@@ -40,7 +40,9 @@ class ContextRouteAttachmentBuilderService {
   }
 
   AgentContext _inferDefaultContext(String contactId) {
-    final contact = _ref.read(contactsServiceProvider).getContactById(contactId);
+    final contact = _ref
+        .read(contactsServiceProvider)
+        .getContactById(contactId);
     if (contact == null) {
       return AgentContext.personal;
     }
@@ -61,16 +63,17 @@ class ContextRouteAttachmentBuilderService {
     if (label.contains('work')) return AgentContext.work;
     if (label.contains('personal')) return AgentContext.personal;
 
-    final aiContacts = _ref
-        .read(contactsServiceProvider)
-        .contacts
-        .where(
-          (c) =>
-              c.category == ContactCategory.robot ||
-              c.card.type.trim().toLowerCase() == 'ai-agent',
-        )
-        .toList()
-      ..sort((a, b) => a.id.compareTo(b.id));
+    final aiContacts =
+        _ref
+            .read(contactsServiceProvider)
+            .contacts
+            .where(
+              (c) =>
+                  c.category == ContactCategory.robot ||
+                  c.card.type.trim().toLowerCase() == 'ai-agent',
+            )
+            .toList()
+          ..sort((a, b) => a.id.compareTo(b.id));
     if (aiContacts.length >= 2) {
       final idx = aiContacts.indexWhere((c) => c.id == contact.id);
       if (idx == 0) return AgentContext.work;
