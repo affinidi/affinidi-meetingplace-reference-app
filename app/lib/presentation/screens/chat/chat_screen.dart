@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -24,7 +25,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
+import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/contacts/contact_origin.dart';
 import '../../../domain/models/contacts/contact_presence_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
@@ -111,6 +115,9 @@ class ChatScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
+    final contextRoutingState = ref.watch<ContextRoutingState>(
+      contextRoutingServiceProvider,
+    );
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     final showHumanZkp = ref.watch(
       provider.select(
@@ -175,6 +182,51 @@ class ChatScreen extends HookConsumerWidget {
       },
     );
 
+    Future<void> uploadContextFor(AgentContext target) async {
+      final picked = await FilePicker.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['txt'],
+      );
+      if (picked == null || picked.files.isEmpty || !context.mounted) return;
+      final file = picked.files.first;
+      final bytes = await file.readAsBytes();
+      if (bytes.isEmpty) return;
+
+      await ref
+          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
+          .markContextUploaded(context: target, fileName: file.name);
+
+      if (!context.mounted) return;
+      final label = target == AgentContext.work ? 'Work AI' : 'Personal AI';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$label context uploaded: ${file.name}')),
+      );
+    }
+
+    Future<void> useContextForChannel(AgentContext target) async {
+      if (!contextRoutingState.isContextUploaded(target)) {
+        if (!context.mounted) return;
+        final requiredFile = target == AgentContext.work
+            ? 'work-context.txt'
+            : 'personal-context.txt';
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Upload $requiredFile first.')));
+        return;
+      }
+
+      await ref
+          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
+          .assignContactContext(_contactId, target);
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Channel now uses ${_contextDisplayName(target)}.'),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: context.colorScheme.primary,
@@ -193,6 +245,54 @@ class ChatScreen extends HookConsumerWidget {
         ),
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.account_tree_outlined),
+            onSelected: (value) async {
+              switch (value) {
+                case 'use_work':
+                  await useContextForChannel(AgentContext.work);
+                  break;
+                case 'use_personal':
+                  await useContextForChannel(AgentContext.personal);
+                  break;
+                case 'upload_work':
+                  await uploadContextFor(AgentContext.work);
+                  break;
+                case 'upload_personal':
+                  await uploadContextFor(AgentContext.personal);
+                  break;
+              }
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem<String>(
+                value: 'use_work',
+                child: Text('Use Work AI'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'use_personal',
+                child: Text('Use Personal AI'),
+              ),
+              const PopupMenuDivider(),
+              PopupMenuItem<String>(
+                value: 'upload_work',
+                child: Text(
+                  contextRoutingState.workContextUploaded
+                      ? 'Re-upload work-context.txt'
+                      : 'Upload work-context.txt',
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'upload_personal',
+                child: Text(
+                  contextRoutingState.personalContextUploaded
+                      ? 'Re-upload personal-context.txt'
+                      : 'Upload personal-context.txt',
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -258,4 +358,8 @@ class _LoadingSection extends StatelessWidget {
       ),
     );
   }
+}
+
+String _contextDisplayName(AgentContext context) {
+  return context == AgentContext.work ? 'Work AI' : 'Personal AI';
 }
