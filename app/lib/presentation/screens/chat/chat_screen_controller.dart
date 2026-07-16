@@ -16,6 +16,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
+import '../../../application/services/chat_service/context_route_attachment_builder_service.dart';
 import '../../../application/services/chat_service/open_chat_registry.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
@@ -651,9 +652,31 @@ class ChatScreenController extends _$ChatScreenController
     if (trimmedMessage.isEmpty) return;
     if (trimmedMessage.length > _maxChatMessageLength) return;
 
-    unawaited(_chatService?.sendTextMessage(trimmedMessage) ?? Future.value());
-    _sendChatActivityTimedAction?.cancel();
-    messageTextController.clear();
+    final routeAttachment = _buildContextRouteAttachment();
+    final attachments = routeAttachment == null
+        ? const <chat.ChatAttachment>[]
+        : <chat.ChatAttachment>[routeAttachment];
+
+    try {
+      await (_chatService?.sendTextMessage(
+            trimmedMessage,
+            attachments: attachments,
+          ) ??
+          Future<void>.value());
+      _sendChatActivityTimedAction?.cancel();
+      messageTextController.clear();
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to send chat message',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      messageTextController.text = originalText;
+      messageTextController.selection = TextSelection.collapsed(
+        offset: messageTextController.text.length,
+      );
+    }
   }
 
   /// Sends a message directly with optional attachments
@@ -668,11 +691,28 @@ class ChatScreenController extends _$ChatScreenController
       return;
     }
 
+    final routeAttachment = _buildContextRouteAttachment();
+    final combinedAttachments = <ChatAttachment>[
+      ...?attachments,
+      ?routeAttachment,
+    ];
+
     await (_chatService?.sendTextMessage(
           trimmedMessage,
-          attachments: attachments,
+          attachments: combinedAttachments,
         ) ??
         Future<void>.value());
+  }
+
+  chat.ChatAttachment? _buildContextRouteAttachment() {
+    final contact = state.contact;
+    if (contact == null) {
+      return null;
+    }
+
+    return ref
+        .read(contextRouteAttachmentBuilderServiceProvider)
+        .buildForContactId(contactId);
   }
 
   Future<void> sendChatActivity() async {

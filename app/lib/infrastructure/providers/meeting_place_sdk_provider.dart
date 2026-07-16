@@ -7,16 +7,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:ssi/ssi.dart';
 
-import '../../application/services/identities_service/identities_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../configuration/environment.dart';
-import '../extensions/contact_card_extensions.dart';
 import '../secure_storage/secure_storage.dart';
 import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
@@ -114,34 +111,35 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
         );
       }
 
-      Future<List<Attachment>?> onBuildAttachments(
-        Channel channel,
-        Future<DidManager> Function(String did) getDidManager,
-      ) async {
-        try {
-          await ref
-              .read(identitiesServiceProvider.notifier)
-              .ensureInitialized();
+      // TODO: disabling signature on rcards for mnemonic
+      // Future<List<Attachment>?> onBuildAttachments(
+      //   Channel channel,
+      //   Future<DidManager> Function(String did) getDidManager,
+      // ) async {
+      //   try {
+      //     await ref
+      //         .read(identitiesServiceProvider.notifier)
+      //         .ensureInitialized();
 
-          final externalRef = channel.externalRef;
-          if (externalRef == null || externalRef.isEmpty) return null;
+      //     final externalRef = channel.externalRef;
+      //     if (externalRef == null || externalRef.isEmpty) return null;
 
-          final identity = ref
-              .read(identitiesServiceProvider)
-              .getIdentityById(externalRef);
-          if (identity == null || identity.did.isEmpty) return null;
+      //     final identity = ref
+      //         .read(identitiesServiceProvider)
+      //         .getIdentityById(externalRef);
+      //     if (identity == null || identity.did.isEmpty) return null;
 
-          final didManager = await getDidManager(identity.did);
+      //     final didManager = await getDidManager(identity.did);
 
-          return RCardDIDCommAttachmentBuilder.build(
-            issuerDid: identity.did,
-            card: identity.card.toRCardSubject(),
-            issuerDidManager: didManager,
-          );
-        } catch (_) {
-          return null;
-        }
-      }
+      //     return RCardDIDCommAttachmentBuilder.build(
+      //       issuerDid: identity.did,
+      //       card: identity.card.toRCardSubject(),
+      //       issuerDidManager: didManager,
+      //     );
+      //   } catch (_) {
+      //     return null;
+      //   }
+      // }
 
       final sdkOptionsNamed = <Symbol, dynamic>{
         #expectedMessageWrappingTypes: const [
@@ -153,8 +151,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
           VdipClient.requestIssuanceMessageType,
           VdipClient.issuedCredentialMessageType,
         ],
-        #onBuildAttachments: onBuildAttachments,
-        #signatureScheme: SignatureScheme.ecdsa_secp256k1_sha256,
+        // #onBuildAttachments: onBuildAttachments,
       };
       if (configuredAgentDid != null) {
         sdkOptionsNamed[#agentDid] = configuredAgentDid;
@@ -176,12 +173,13 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
           );
         }
       } catch (_) {
-        // Compatibility fallback for SDK builds that
-        // do not yet expose `agentDid`.
+        // Compatibility fallback for SDK builds that do not yet expose
+        // `agentDid`.
         sdkOptionsNamed.remove(#agentDid);
         if (configuredAgentDid != null) {
           logger.warning(
-            '''An agent DID override was provided but current SDK options do not accept agentDid; override ignored''',
+            'MPX_AGENT_DID was provided but current SDK options do '
+            'not accept agentDid; override ignored',
             name: logKey,
           );
         }

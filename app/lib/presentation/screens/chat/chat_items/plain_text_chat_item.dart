@@ -109,6 +109,12 @@ class _PlainTextChatItem extends ConsumerWidget {
         emojiCount > 0 &&
         emojiCount <= _maximumEmojisForLargeScale;
     final attachments = chatItem.attachments;
+    final signatureAttachments = attachments
+        .where((a) => a.format == chat.CiergeSignatureProof.attachmentFormat)
+        .toList(growable: false);
+    final nonSignatureAttachments = attachments
+        .where((a) => a.format != chat.CiergeSignatureProof.attachmentFormat)
+        .toList(growable: false);
 
     return GestureDetector(
       onLongPress: onLongPress,
@@ -118,13 +124,13 @@ class _PlainTextChatItem extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (attachments.isNotEmpty)
+          if (nonSignatureAttachments.isNotEmpty)
             ListView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
-              itemCount: attachments.length,
+              itemCount: nonSignatureAttachments.length,
               itemBuilder: (context, index) {
-                final attachment = attachments[index];
+                final attachment = nonSignatureAttachments[index];
                 return _AttachmentWidget(
                   contactId: _contactId,
                   chatItem: chatItem,
@@ -136,12 +142,28 @@ class _PlainTextChatItem extends ConsumerWidget {
             ),
           if (chatItem.value.isNotEmpty)
             Padding(
-              padding: EdgeInsets.all(attachments.isEmpty ? 0 : 8),
+              padding: EdgeInsets.all(nonSignatureAttachments.isEmpty ? 0 : 8),
               child: _TextMessage(
                 text: chatItem.value,
                 shouldScaleEmojis: shouldScaleEmojis,
                 isEdited: chatItem.editedAt != null,
               ),
+            ),
+          if (signatureAttachments.isNotEmpty)
+            ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: signatureAttachments.length,
+              itemBuilder: (context, index) {
+                final attachment = signatureAttachments[index];
+                return _AttachmentWidget(
+                  contactId: _contactId,
+                  chatItem: chatItem,
+                  attachment: attachment,
+                  isFromMe: chatItem.isFromMe,
+                  chatItemColor: _chatItemColor,
+                );
+              },
             ),
         ],
       ),

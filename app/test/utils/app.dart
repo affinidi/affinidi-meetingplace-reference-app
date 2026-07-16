@@ -11,6 +11,7 @@ import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:meeting_place_drift_repository/meeting_place_drift_repository.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:mpx_flutter_reference_app/application/services/context_routing_service/context_routing_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/r_cards_service/r_cards_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
@@ -52,6 +53,7 @@ import '../fakes/fake_channels.dart';
 import '../fakes/fake_chat_sdk.dart';
 import '../fakes/fake_connectivity.dart';
 import '../fakes/fake_contacts.dart';
+import '../fakes/fake_context_routing_store.dart';
 import '../fakes/fake_environment.dart';
 import '../fakes/fake_identities.dart';
 import '../fakes/fake_local_authentication.dart';
@@ -185,6 +187,9 @@ Future<void> startApp(
       }),
       pushNotificationMessagingProvider.overrideWith(
         (ref) => pushNotificationMessaging ?? FakePushNotificationMessaging(),
+      ),
+      contextRoutingStoreProvider.overrideWith(
+        (ref) => FakeContextRoutingStore(),
       ),
       groupsRepositoryProvider.overrideWith(groupsRepositoryInMemoryDrift),
       rCardsRepositoryProvider.overrideWith((ref) async {

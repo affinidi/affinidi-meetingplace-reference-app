@@ -5,6 +5,8 @@ class PersonalAgentScreenState {
     required this.holderDid,
     required this.isReady,
     required this.isSettingUp,
+    required this.isConnecting,
+    required this.connectingLabel,
     required this.contextProvisioned,
     required this.contextUploading,
     required this.errorMessage,
@@ -16,6 +18,8 @@ class PersonalAgentScreenState {
     : holderDid = null,
       isReady = false,
       isSettingUp = false,
+      isConnecting = false,
+      connectingLabel = null,
       contextProvisioned = false,
       contextUploading = false,
       errorMessage = null,
@@ -25,6 +29,8 @@ class PersonalAgentScreenState {
   final String? holderDid;
   final bool isReady;
   final bool isSettingUp;
+  final bool isConnecting;
+  final String? connectingLabel;
 
   /// Whether the user has uploaded their context file.
   final bool contextProvisioned;
@@ -40,6 +46,8 @@ class PersonalAgentScreenState {
     String? holderDid,
     bool? isReady,
     bool? isSettingUp,
+    bool? isConnecting,
+    String? connectingLabel,
     bool? contextProvisioned,
     bool? contextUploading,
     String? errorMessage,
@@ -48,11 +56,16 @@ class PersonalAgentScreenState {
     bool clearErrorMessage = false,
     bool clearContextUploadError = false,
     bool clearSetupResult = false,
+    bool clearConnectingLabel = false,
   }) {
     return PersonalAgentScreenState(
       holderDid: holderDid ?? this.holderDid,
       isReady: isReady ?? this.isReady,
       isSettingUp: isSettingUp ?? this.isSettingUp,
+      isConnecting: isConnecting ?? this.isConnecting,
+      connectingLabel: clearConnectingLabel
+          ? null
+          : (connectingLabel ?? this.connectingLabel),
       contextProvisioned: contextProvisioned ?? this.contextProvisioned,
       contextUploading: contextUploading ?? this.contextUploading,
       errorMessage: clearErrorMessage

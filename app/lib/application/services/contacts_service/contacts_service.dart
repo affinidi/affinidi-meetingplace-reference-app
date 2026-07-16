@@ -137,9 +137,37 @@ class ContactsService extends _$ContactsService {
       name: _logKey,
     );
 
-    final existingContact = state.getContactByChannelDid(
-      channel.otherPartyPermanentChannelDid!,
-    );
+    // AI work/personal setups can share the same remote DID while using
+    // different offer links. Prefer offer-link matching first to avoid
+    // collapsing both contexts into a single contact.
+    Contact? existingContact;
+    final existingByOfferLink = state.contacts.where((contact) {
+      return contact.offerLink == channel.offerLink;
+    });
+    if (existingByOfferLink.isNotEmpty) {
+      existingContact = existingByOfferLink.first;
+    } else {
+      final otherPartyDid = channel.otherPartyPermanentChannelDid;
+      if (otherPartyDid != null && otherPartyDid.isNotEmpty) {
+        final existingByDid = state.getContactByChannelDid(otherPartyDid);
+        if (existingByDid != null) {
+          final remoteType =
+              channel.otherPartyContactCard?.type.trim().toLowerCase();
+          final sameDidDifferentOffer =
+              existingByDid.offerLink != channel.offerLink;
+          final isAiContact =
+              existingByDid.category == ContactCategory.robot ||
+              remoteType == 'ai-agent';
+
+          // For AI contacts, keep one contact per offer link (work/personal)
+          // even when the remote DID is the same.
+          if (!(sameDidDifferentOffer && isAiContact)) {
+            existingContact = existingByDid;
+          }
+        }
+      }
+    }
+
     if (existingContact == null) {
       _logger.info(
         'Contact does not exist - creating new contact',
@@ -845,6 +873,25 @@ class ContactsService extends _$ContactsService {
       );
     }
 
+    final existing = _findExistingContactForChannel(channel);
+    if (existing != null) {
+      await updateContact(
+        existing.copyWith(
+          channelDid: contact.channelDid,
+          channelDidSha256: contact.channelDidSha256,
+          offerLink: contact.offerLink,
+          mediatorDid: contact.mediatorDid,
+          type: contact.type,
+          status: contact.status,
+          origin: contact.origin,
+          category: contact.category,
+          displayName: contact.displayName,
+          card: contact.card,
+        ),
+      );
+      return;
+    }
+
     await addContact(contact);
   }
 
@@ -892,7 +939,58 @@ class ContactsService extends _$ContactsService {
       );
     }
 
+    final existing = _findExistingContactForChannel(channel);
+    if (existing != null) {
+      await updateContact(
+        existing.copyWith(
+          channelDid: contact.channelDid,
+          channelDidSha256: contact.channelDidSha256,
+          offerLink: contact.offerLink,
+          mediatorDid: contact.mediatorDid,
+          type: contact.type,
+          status: contact.status,
+          origin: contact.origin,
+          category: contact.category,
+          displayName: contact.displayName,
+          card: contact.card,
+        ),
+      );
+      return;
+    }
+
     await addContact(contact);
+  }
+
+  Contact? _findExistingContactForChannel(sdk.Channel channel) {
+    final existingByOfferLink = state.contacts.where(
+      (contact) => contact.offerLink == channel.offerLink,
+    );
+    if (existingByOfferLink.isNotEmpty) {
+      return existingByOfferLink.first;
+    }
+
+    final otherPartyDid = channel.otherPartyPermanentChannelDid;
+    if (otherPartyDid == null || otherPartyDid.isEmpty) {
+      return null;
+    }
+
+    final existingByDid = state.getContactByChannelDid(otherPartyDid);
+    if (existingByDid == null) {
+      return null;
+    }
+
+    final remoteType = channel.otherPartyContactCard?.type.trim().toLowerCase();
+    final sameDidDifferentOffer = existingByDid.offerLink != channel.offerLink;
+    final isAiContact =
+        existingByDid.category == ContactCategory.robot ||
+        remoteType == 'ai-agent';
+
+    // For AI contacts, preserve separate contacts when the offer link differs.
+    if (sameDidDifferentOffer && isAiContact) {
+      return null;
+    }
+
+    return existingByDid;
   }
 
   /// Ensure and return the initialized contacts repository.
