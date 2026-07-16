@@ -66,6 +66,9 @@ class ContactsRepositoryDrift implements ContactsRepository {
               notificationBannerDismissed: Value(
                 contact.notificationBannerDismissed,
               ),
+              personalAgentAuthorizationSnapshot: Value(
+                contact.personalAgentAuthorizationSnapshot,
+              ),
             ),
           );
 
@@ -161,6 +164,9 @@ class ContactsRepositoryDrift implements ContactsRepository {
           notificationBannerDismissed: Value(
             contact.notificationBannerDismissed,
           ),
+          personalAgentAuthorizationSnapshot: Value(
+            contact.personalAgentAuthorizationSnapshot,
+          ),
         ),
       );
 
@@ -224,6 +230,8 @@ class _ContactMapper {
       displayName: contact.displayName,
       lastKeepAliveMessage: contact.lastKeepAliveMessage,
       notificationBannerDismissed: contact.notificationBannerDismissed,
+      personalAgentAuthorizationSnapshot:
+          contact.personalAgentAuthorizationSnapshot,
     );
   }
 }

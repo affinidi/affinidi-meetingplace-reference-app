@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -12,6 +13,7 @@ import '../../../../application/services/connections_service/connections_service
 import '../../../../application/services/contacts_service/contacts_service.dart';
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../application/services/mediator_service/mediator_service.dart';
+import '../../../../application/services/personal_ai_service/personal_ai_service.dart';
 import '../../../../application/services/settings_service/settings_service.dart';
 import '../../../../domain/models/contacts/contact.dart';
 import '../../../../domain/models/contacts/contact_category.dart';
@@ -111,6 +113,7 @@ class ConnectionDetailsScreenController
         connection: connection,
         mediatorName: mediator?.mediatorName ?? '',
       );
+      unawaited(_refreshAuthorizationSnapshot());
       return;
     }
 
@@ -149,6 +152,36 @@ class ConnectionDetailsScreenController
       mediatorName: mediator?.mediatorName ?? '',
       identity: identity,
     );
+    unawaited(_refreshAuthorizationSnapshot());
+  }
+
+  Future<void> _refreshAuthorizationSnapshot() async {
+    final channelDid = state.contact?.channelDid?.trim();
+    if (channelDid == null || channelDid.isEmpty) {
+      return;
+    }
+
+    state = state.copyWith(
+      authorizationRefreshing: true,
+      authorizationError: null,
+    );
+    try {
+      await ref
+          .read(personalAiServiceProvider.notifier)
+          .refreshAuthorizationSnapshotForChannel(
+            channelDid,
+            suppressErrors: false,
+          );
+      state = state.copyWith(
+        authorizationRefreshing: false,
+        authorizationError: null,
+      );
+    } catch (error) {
+      state = state.copyWith(
+        authorizationRefreshing: false,
+        authorizationError: error.toString(),
+      );
+    }
   }
 
   String _makeContactName(

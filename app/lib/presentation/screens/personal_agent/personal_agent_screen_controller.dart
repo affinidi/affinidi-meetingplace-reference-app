@@ -5,6 +5,9 @@ import 'package:meeting_place_personal_agent/meeting_place_personal_agent.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
+import '../../../application/services/personal_ai_service/disconnect_agent_context_service.dart';
+import '../../../application/services/personal_ai_service/personal_ai_authorization_snapshot.dart';
+import '../../../application/services/personal_ai_service/personal_ai_contact_resolution.dart';
 import '../../../application/services/personal_ai_service/personal_ai_service.dart';
 import 'personal_agent_screen_state.dart';
 
@@ -75,6 +78,18 @@ final personalAgentScreenControllerProvider =
         fireImmediately: true,
       );
 
+      ref.listen(
+        contactsServiceProvider,
+        (_, _) => controller.syncFromDependencies(),
+        fireImmediately: true,
+      );
+
+      ref.listen(
+        contextRoutingServiceProvider,
+        (_, _) => controller.syncFromDependencies(),
+        fireImmediately: true,
+      );
+
       return controller;
     });
 
@@ -90,6 +105,27 @@ class PersonalAgentScreenController
       identitiesServiceProvider.currentIdentityOrPrimary,
     );
     final personalAiState = _ref.read(personalAiServiceProvider);
+    final contactsState = _ref.read(contactsServiceProvider);
+    final contextRoutingState = _ref.read(contextRoutingServiceProvider);
+
+    final workContact = findPersonalAiContactForContext(
+      contacts: contactsState.contacts,
+      contactContexts: contextRoutingState.contactContexts,
+      targetContext: AgentContext.work,
+    );
+    final personalContact = findPersonalAiContactForContext(
+      contacts: contactsState.contacts,
+      contactContexts: contextRoutingState.contactContexts,
+      targetContext: AgentContext.personal,
+    );
+
+    final workAuthorizationSnapshot = PersonalAiAuthorizationSnapshot.tryDecode(
+      workContact?.personalAgentAuthorizationSnapshot,
+    );
+    final personalAuthorizationSnapshot =
+        PersonalAiAuthorizationSnapshot.tryDecode(
+          personalContact?.personalAgentAuthorizationSnapshot,
+        );
 
     state = state.copyWith(
       holderDid: identity?.did,
@@ -100,6 +136,19 @@ class PersonalAgentScreenController
       errorMessage: personalAiState.errorMessage,
       contextUploadError: personalAiState.contextUploadError,
       setupResult: personalAiState.setupResult,
+      workContact: workContact,
+      personalContact: personalContact,
+      workAuthorizationSnapshot: workAuthorizationSnapshot,
+      personalAuthorizationSnapshot: personalAuthorizationSnapshot,
+      showWorkAuthorization:
+          workContact != null && contextRoutingState.workContextUploaded,
+      showPersonalAuthorization:
+          personalContact != null &&
+          contextRoutingState.personalContextUploaded,
+      workContextUploaded: contextRoutingState.workContextUploaded,
+      personalContextUploaded: contextRoutingState.personalContextUploaded,
+      workContextFileName: contextRoutingState.workContextFileName,
+      personalContextFileName: contextRoutingState.personalContextFileName,
       clearErrorMessage: personalAiState.errorMessage == null,
       clearContextUploadError: personalAiState.contextUploadError == null,
       clearSetupResult: personalAiState.setupResult == null,
@@ -265,5 +314,20 @@ class PersonalAgentScreenController
     final normalizedContextId = result.contextId.trim().toLowerCase();
     final normalizedTarget = contextName.trim().toLowerCase();
     return normalizedContextId.startsWith(normalizedTarget);
+  }
+
+  Future<void> disconnectRoutingContext(AgentContext target) async {
+    _setConnecting(target == AgentContext.work ? 'Work AI' : 'Personal AI');
+
+    try {
+      await _ref
+          .read(disconnectAgentContextServiceProvider)
+          .disconnect(target);
+      syncFromDependencies();
+      _clearConnecting();
+    } catch (_) {
+      _clearConnecting();
+      rethrow;
+    }
   }
 }

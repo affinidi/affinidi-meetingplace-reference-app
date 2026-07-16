@@ -42,7 +42,7 @@ final class MnemonicScreenControllerProvider
 }
 
 String _$mnemonicScreenControllerHash() =>
-    r'181ccee4f8a9702daa933060fc9bb5216ae5c053';
+    r'7905423a53b4fd536484a3245648964284e869d5';
 
 abstract class _$MnemonicScreenController
     extends $Notifier<MnemonicScreenState> {

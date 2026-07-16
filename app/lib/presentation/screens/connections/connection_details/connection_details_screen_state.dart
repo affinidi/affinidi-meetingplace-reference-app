@@ -23,5 +23,7 @@ abstract class ConnectionDetailsScreenState
     @Default(false) bool showMnemonic,
     @Default(false) bool showQrIcon,
     @Default(false) bool showQrView,
+    @Default(false) bool authorizationRefreshing,
+    String? authorizationError,
   }) = _ConnectionDetailsScreenState;
 }

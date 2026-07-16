@@ -41,6 +41,10 @@ abstract class _$ContactCWProxy {
 
   Contact notificationBannerDismissed(bool notificationBannerDismissed);
 
+  Contact personalAgentAuthorizationSnapshot(
+    String? personalAgentAuthorizationSnapshot,
+  );
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Contact(...).copyWith.fieldName(value)`.
   ///
@@ -66,6 +70,7 @@ abstract class _$ContactCWProxy {
     bool hasBeenOpened,
     DateTime? lastKeepAliveMessage,
     bool notificationBannerDismissed,
+    String? personalAgentAuthorizationSnapshot,
   });
 }
 
@@ -135,6 +140,13 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       call(notificationBannerDismissed: notificationBannerDismissed);
 
   @override
+  Contact personalAgentAuthorizationSnapshot(
+    String? personalAgentAuthorizationSnapshot,
+  ) => call(
+    personalAgentAuthorizationSnapshot: personalAgentAuthorizationSnapshot,
+  );
+
+  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Contact(...).copyWith.fieldName(value)`.
   ///
@@ -160,6 +172,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? hasBeenOpened = const $CopyWithPlaceholder(),
     Object? lastKeepAliveMessage = const $CopyWithPlaceholder(),
     Object? notificationBannerDismissed = const $CopyWithPlaceholder(),
+    Object? personalAgentAuthorizationSnapshot = const $CopyWithPlaceholder(),
   }) {
     return Contact(
       id: _value.id,
@@ -241,6 +254,11 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.notificationBannerDismissed
           // ignore: cast_nullable_to_non_nullable
           : notificationBannerDismissed as bool,
+      personalAgentAuthorizationSnapshot:
+          personalAgentAuthorizationSnapshot == const $CopyWithPlaceholder()
+          ? _value.personalAgentAuthorizationSnapshot
+          // ignore: cast_nullable_to_non_nullable
+          : personalAgentAuthorizationSnapshot as String?,
     );
   }
 }

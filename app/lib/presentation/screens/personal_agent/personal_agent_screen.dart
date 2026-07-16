@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../application/services/context_routing_service/context_routing_service.dart';
+import '../../../application/services/personal_ai_service/personal_ai_authorization_snapshot.dart';
+import '../../../domain/models/contacts/contact.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/media/file_picker/file_picker_platform_provider.dart';
 import '../../../navigation/tabs/tabs.dart';
@@ -40,23 +42,26 @@ class PersonalAgentScreen extends ConsumerWidget {
     final provider = personalAgentScreenControllerProvider;
     final controller = ref.read(provider.notifier);
 
-    final contextUploading = ref.watch(
-      provider.select((state) => state.contextUploading),
-    );
-    final isConnecting = ref.watch(
-      provider.select((state) => state.isConnecting),
-    );
-    final connectingLabel = ref.watch(
-      provider.select((state) => state.connectingLabel),
-    );
-    final contextUploadError = ref.watch(
-      provider.select((state) => state.contextUploadError),
-    );
-    final errorMessage = ref.watch(
-      provider.select((state) => state.errorMessage),
-    );
-    final contextRoutingState = ref.watch<ContextRoutingState>(
-      contextRoutingServiceProvider,
+    final ui = ref.watch(
+      provider.select(
+        (state) => (
+          contextUploading: state.contextUploading,
+          isConnecting: state.isConnecting,
+          connectingLabel: state.connectingLabel,
+          contextUploadError: state.contextUploadError,
+          errorMessage: state.errorMessage,
+          workContact: state.workContact,
+          personalContact: state.personalContact,
+          workSnapshot: state.workAuthorizationSnapshot,
+          personalSnapshot: state.personalAuthorizationSnapshot,
+          showWorkAuthorization: state.showWorkAuthorization,
+          showPersonalAuthorization: state.showPersonalAuthorization,
+          workContextUploaded: state.workContextUploaded,
+          personalContextUploaded: state.personalContextUploaded,
+          workContextFileName: state.workContextFileName,
+          personalContextFileName: state.personalContextFileName,
+        ),
+      ),
     );
 
     Future<void> uploadRoutingContext(AgentContext target) async {
@@ -99,6 +104,49 @@ class PersonalAgentScreen extends ConsumerWidget {
       );
     }
 
+    Future<void> cancelRoutingContext(AgentContext target) async {
+      final label = target == AgentContext.work ? 'Work AI' : 'Personal AI';
+      final agentLabel = target == AgentContext.work
+          ? 'Work agent'
+          : 'Personal agent';
+      final shouldCancel = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text('Cancel $label connection?'),
+          content: Text(
+            'This will remove your connection to the $agentLabel.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('Keep connection'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('Cancel connection'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldCancel != true) {
+        return;
+      }
+
+      try {
+        await controller.disconnectRoutingContext(target);
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$label connection cancelled.')),
+        );
+      } catch (_) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Unable to cancel $label connection.')),
+        );
+      }
+    }
+
     return ColoredBox(
       color: colorScheme.surface,
       child: SafeArea(
@@ -113,7 +161,7 @@ class PersonalAgentScreen extends ConsumerWidget {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  if (errorMessage != null) ...[
+                  if (ui.errorMessage != null) ...[
                     const SizedBox(height: 8),
                     DecoratedBox(
                       decoration: BoxDecoration(
@@ -123,7 +171,7 @@ class PersonalAgentScreen extends ConsumerWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Text(
-                          errorMessage,
+                          ui.errorMessage!,
                           style: TextStyle(color: colorScheme.onErrorContainer),
                         ),
                       ),
@@ -131,16 +179,166 @@ class PersonalAgentScreen extends ConsumerWidget {
                   ],
                   const SizedBox(height: 16),
                   _AgentContextSetupCard(
-                    state: contextRoutingState,
-                    isUploading: contextUploading,
-                    isConnecting: isConnecting,
-                    connectingLabel: connectingLabel,
-                    uploadError: contextUploadError,
+                    workContextUploaded: ui.workContextUploaded,
+                    personalContextUploaded: ui.personalContextUploaded,
+                    workContextFileName: ui.workContextFileName,
+                    personalContextFileName: ui.personalContextFileName,
+                    isUploading: ui.contextUploading,
+                    isConnecting: ui.isConnecting,
+                    connectingLabel: ui.connectingLabel,
+                    uploadError: ui.contextUploadError,
                     onUploadWork: () => uploadRoutingContext(AgentContext.work),
                     onUploadPersonal: () =>
                         uploadRoutingContext(AgentContext.personal),
                   ),
+                  if (
+                    ui.showWorkAuthorization ||
+                    ui.showPersonalAuthorization
+                  ) ...[
+                    const SizedBox(height: 16),
+                    if (ui.showWorkAuthorization)
+                      _AgentAuthorizationCard(
+                        title: 'My Work AI',
+                        contextLabel: 'Work (ctx 0)',
+                        snapshot: ui.workSnapshot,
+                        contact: ui.workContact,
+                        onCancel: () =>
+                            cancelRoutingContext(AgentContext.work),
+                      ),
+                    if (
+                      ui.showWorkAuthorization &&
+                      ui.showPersonalAuthorization
+                    )
+                      const SizedBox(height: 12),
+                    if (ui.showPersonalAuthorization)
+                      _AgentAuthorizationCard(
+                        title: 'My Personal AI',
+                        contextLabel: 'Personal (ctx 1)',
+                        snapshot: ui.personalSnapshot,
+                        contact: ui.personalContact,
+                        onCancel: () =>
+                          cancelRoutingContext(AgentContext.personal),
+                      ),
+                  ],
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AgentAuthorizationCard extends StatelessWidget {
+  const _AgentAuthorizationCard({
+    required this.title,
+    required this.contextLabel,
+    required this.snapshot,
+    required this.contact,
+    required this.onCancel,
+  });
+
+  final String title;
+  final String contextLabel;
+  final PersonalAiAuthorizationSnapshot? snapshot;
+  final Contact? contact;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final capabilities = snapshot?.capabilities.join(' + ') ?? 'Not available';
+    final provisionStatus =
+        (snapshot?.provision?['status'] as String?) ?? 'Not available';
+    final updatedAt = snapshot?.lastUpdated?.toLocal().toString() ??
+        'No snapshot yet';
+
+    Widget row(String label, String value) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 120,
+              child: Text(
+                label,
+                style: textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                value,
+                style: textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: colorScheme.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.smart_toy_outlined, color: colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Text(
+                  contact == null ? 'Not set up' : 'Connected',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: contact == null
+                        ? colorScheme.onSurfaceVariant
+                        : colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              contextLabel,
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            row('Agent DID', snapshot?.agentDid ?? 'Not available'),
+            row('ACL role', snapshot?.aclRole ?? 'Not available'),
+            row('Capabilities', capabilities),
+            row('Context scope', snapshot?.contextScope ?? 'Not available'),
+            row('Domain ID', snapshot?.domainId ?? 'Not available'),
+            row('Provision', provisionStatus),
+            row('Updated', updatedAt),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: contact == null ? null : onCancel,
+                icon: const Icon(Icons.link_off_outlined),
+                label: const Text('Cancel connection'),
               ),
             ),
           ],
@@ -152,7 +350,10 @@ class PersonalAgentScreen extends ConsumerWidget {
 
 class _AgentContextSetupCard extends StatelessWidget {
   const _AgentContextSetupCard({
-    required this.state,
+    required this.workContextUploaded,
+    required this.personalContextUploaded,
+    required this.workContextFileName,
+    required this.personalContextFileName,
     required this.isUploading,
     required this.isConnecting,
     required this.connectingLabel,
@@ -161,7 +362,10 @@ class _AgentContextSetupCard extends StatelessWidget {
     required this.onUploadPersonal,
   });
 
-  final ContextRoutingState state;
+  final bool workContextUploaded;
+  final bool personalContextUploaded;
+  final String? workContextFileName;
+  final String? personalContextFileName;
   final bool isUploading;
   final bool isConnecting;
   final String? connectingLabel;
@@ -176,7 +380,9 @@ class _AgentContextSetupCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     String subtitleFor(AgentContext contextTarget) {
-      final file = state.fileNameForContext(contextTarget);
+      final file = contextTarget == AgentContext.work
+          ? workContextFileName
+          : personalContextFileName;
       if (file == null || file.isEmpty) {
         return l10n.personalAgentChooseFileToSetUp;
       }
@@ -284,14 +490,14 @@ class _AgentContextSetupCard extends StatelessWidget {
             buildRow(
               title: l10n.personalAgentWorkAgentTitle,
               subtitle: subtitleFor(AgentContext.work),
-              isLocked: state.workContextUploaded,
+              isLocked: workContextUploaded,
               onPressed: onUploadWork,
             ),
             const SizedBox(height: 10),
             buildRow(
               title: l10n.personalAgentPersonalAgentTitle,
               subtitle: subtitleFor(AgentContext.personal),
-              isLocked: state.personalContextUploaded,
+              isLocked: personalContextUploaded,
               onPressed: onUploadPersonal,
             ),
           ],
