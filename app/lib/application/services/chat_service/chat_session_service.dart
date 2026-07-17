@@ -80,7 +80,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late VdipManager _vdipManager;
 
   MeetingPlaceChatSDK? _chatSDK;
-  Channel? _chatSdkChannel;
   String? _chatId;
   bool _isGroupChat = false;
   String? _otherPartyFirstName;
@@ -261,7 +260,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _chatSDK = await ref.read(chatSdkProvider(channel).future);
       if (!ref.mounted) {
         _chatSDK = null;
-        _chatSdkChannel = null;
         return;
       }
 
@@ -486,9 +484,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   Future<void> _disposeChatSession() async {
     final sdk = _chatSDK;
-    final sdkChannel = _chatSdkChannel;
     _chatSDK = null;
-    _chatSdkChannel = null;
     _chatId = null;
 
     _chatStreamRef?.dispose();
@@ -497,21 +493,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     _rCardManager.cancelSubscription();
     await _vdipManager.cancelSubscriptions();
 
-    if (sdk == null) {
-      if (sdkChannel != null && ref.mounted) {
-        ref.invalidate(chatSdkProvider(sdkChannel));
-      }
-      return Future.value();
-    }
+    if (sdk == null) return Future.value();
 
     await _channelLocks.synchronized(
       _otherPartyPermanentChannelDid,
       sdk.endChatSession,
     );
-
-    if (sdkChannel != null && ref.mounted) {
-      ref.invalidate(chatSdkProvider(sdkChannel));
-    }
   }
 
   @override
