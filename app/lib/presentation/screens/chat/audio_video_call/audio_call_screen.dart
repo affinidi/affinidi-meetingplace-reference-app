@@ -178,7 +178,7 @@ class _AudioCallScaffold extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            const _AudioCallBackground(peerAvatarImage: null),
+            _AudioCallBackground(peerAvatarImage: viewData.peerAvatarImage),
             Positioned.fill(
               child: SafeArea(
                 child: Stack(

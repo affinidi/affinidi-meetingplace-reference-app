@@ -441,8 +441,9 @@ class ContactsService extends _$ContactsService {
       return;
     }
     final amendedContact = contact.copyWith(card: card);
-    unawaited(updateContact(amendedContact));
-    notifyContactCardUpdated(did);
+    unawaited(
+      updateContact(amendedContact).then((_) => notifyContactCardUpdated(did)),
+    );
   }
 
   /// Notify listeners that a contact card has been updated.

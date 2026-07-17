@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../audio_video_call/audio_video_call_screen_controller.dart';
+
 import 'group_audio_call_state.dart';
 
 part 'group_audio_call_controller.g.dart';
@@ -43,11 +45,17 @@ class GroupAudioCallController extends _$GroupAudioCallController {
   /// Toggle microphone.
   Future<void> toggleMic() async {
     if (_isDisposed) return;
+    await ref
+        .read(audioVideoCallScreenControllerProvider(groupContactId).notifier)
+        .toggleMic();
   }
 
   /// Leave the call.
   Future<void> leaveCall() async {
     if (_isDisposed) return;
+    await ref
+        .read(audioVideoCallScreenControllerProvider(groupContactId).notifier)
+        .leaveCall();
   }
 
   /// Cleanup.
