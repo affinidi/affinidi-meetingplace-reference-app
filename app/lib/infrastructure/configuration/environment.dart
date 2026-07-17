@@ -115,6 +115,11 @@ class Environment {
     defaultValue: '/personal-agent/setup',
   );
 
+  String get vtaDid => const String.fromEnvironment('VTA_DID');
+
+  String get vtaMediatorUrl =>
+      const String.fromEnvironment('VTA_MEDIATOR_URL');
+
   String get appVersionName =>
       const String.fromEnvironment('APP_VERSION_NAME', defaultValue: '');
 
