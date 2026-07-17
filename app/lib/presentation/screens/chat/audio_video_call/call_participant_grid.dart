@@ -1,27 +1,5 @@
 part of 'audio_video_call_screen.dart';
 
-/// Resolves the label shown beneath a participant tile.
-///
-/// The self participant is always "You". A group member is resolved to their
-/// name via [memberContactCards], keyed by the participant's DID. A single
-/// peer in a 1:1 call falls back to the contact name.
-String _displayNameFor(
-  AudioVideoCallParticipant participant, {
-  required String youLabel,
-  required String peerName,
-  required int remoteCount,
-  required Map<String, ContactCard> memberContactCards,
-}) {
-  if (participant.isSelf) return youLabel;
-  final did = participant.did;
-  if (did != null) {
-    final name = memberContactCards[did]?.displayName;
-    if (name != null && name.isNotEmpty) return name;
-  }
-  if (remoteCount <= 1) return peerName;
-  return '';
-}
-
 class _CallParticipantGrid extends ConsumerWidget {
   const _CallParticipantGrid({
     required this.contactId,
@@ -220,6 +198,10 @@ class _CallGridLayout extends HookWidget {
                       participant: participant,
                       session: session,
                       isAudioOnly: isAudioOnly,
+                      contactCard: _contactCardFor(
+                        participant,
+                        memberContactCards: memberContactCards,
+                      ),
                       displayName: _displayNameFor(
                         participant,
                         youLabel: youLabel,
@@ -320,6 +302,10 @@ class _CallFocusedLayout extends StatelessWidget {
                 participant: participants[fi],
                 session: session,
                 isAudioOnly: isAudioOnly,
+                contactCard: _contactCardFor(
+                  participants[fi],
+                  memberContactCards: memberContactCards,
+                ),
               ),
             ),
           ),
@@ -394,6 +380,7 @@ class _CallFocusedLayout extends StatelessWidget {
                   onTapParticipant: (tappedIdx) {
                     onSetFocused(others[tappedIdx]);
                   },
+                  memberContactCards: memberContactCards,
                 ),
               ),
             ),
@@ -408,20 +395,47 @@ class _CallFocusedLayout extends StatelessWidget {
   }
 }
 
-class _CallFocusedTile extends StatelessWidget {
+class _CallFocusedTile extends ConsumerWidget {
   const _CallFocusedTile({
     required this.participant,
     required this.session,
     required this.isAudioOnly,
+    required this.contactCard,
   });
 
   final AudioVideoCallParticipant participant;
   final AudioVideoCallSession? session;
   final bool isAudioOnly;
+  final ContactCard? contactCard;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.customColors;
+    final cacheManager = ref.read(cacheManagerProvider);
+    final participantDid = participant.did;
+    final identityCard = ref.watch(
+      identitiesServiceProvider.select(
+        (state) =>
+            state.currentIdentity?.card ?? state.identities.firstOrNull?.card,
+      ),
+    );
+    final contactStoreCard = participantDid == null || participantDid.isEmpty
+        ? null
+        : ref.watch(
+            contactsServiceProvider.select(
+              (state) =>
+                  state.getContactByChannelDid(participantDid)?.card ??
+                  state.getContactByCardDid(participantDid)?.card,
+            ),
+          );
+    final resolvedContactCard = _bestAvatarCard([
+      if (participant.isSelf) identityCard,
+      contactCard,
+      contactStoreCard,
+    ]);
+    final image =
+        resolvedContactCard?.image(cacheManager: cacheManager) ??
+        defaultProfileImage;
 
     return Container(
       color: colors.grey900,
@@ -434,18 +448,17 @@ class _CallFocusedTile extends StatelessWidget {
                 mirror: participant.isSelf,
               ),
             )
-          : Center(
-              child: Icon(Icons.person, color: colors.whiteOverlay30, size: 48),
-            ),
+          : Center(child: ProfileCircleAvatar(radius: 60, image: image)),
     );
   }
 }
 
-class _CallParticipantTile extends StatelessWidget {
+class _CallParticipantTile extends ConsumerWidget {
   const _CallParticipantTile({
     required this.participant,
     required this.session,
     required this.isAudioOnly,
+    required this.contactCard,
     required this.displayName,
     this.borderRadius = 12,
   });
@@ -453,14 +466,40 @@ class _CallParticipantTile extends StatelessWidget {
   final AudioVideoCallParticipant participant;
   final AudioVideoCallSession? session;
   final bool isAudioOnly;
+  final ContactCard? contactCard;
   final String displayName;
   final double borderRadius;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.customColors;
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
+    final cacheManager = ref.read(cacheManagerProvider);
+    final participantDid = participant.did;
+    final identityCard = ref.watch(
+      identitiesServiceProvider.select(
+        (state) =>
+            state.currentIdentity?.card ?? state.identities.firstOrNull?.card,
+      ),
+    );
+    final contactStoreCard = participantDid == null || participantDid.isEmpty
+        ? null
+        : ref.watch(
+            contactsServiceProvider.select(
+              (state) =>
+                  state.getContactByChannelDid(participantDid)?.card ??
+                  state.getContactByCardDid(participantDid)?.card,
+            ),
+          );
+    final resolvedContactCard = _bestAvatarCard([
+      if (participant.isSelf) identityCard,
+      contactCard,
+      contactStoreCard,
+    ]);
+    final image =
+        resolvedContactCard?.image(cacheManager: cacheManager) ??
+        defaultProfileImage;
 
     final showVideo = !isAudioOnly && participant.hasVideo;
 
@@ -485,13 +524,7 @@ class _CallParticipantTile extends StatelessWidget {
                 ),
               )
             else
-              Center(
-                child: Icon(
-                  Icons.person,
-                  color: colors.whiteOverlay30,
-                  size: 48,
-                ),
-              ),
+              Center(child: ProfileCircleAvatar(radius: 36, image: image)),
             if (displayName.isNotEmpty)
               Positioned(
                 bottom: 8,
