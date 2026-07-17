@@ -144,6 +144,31 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
     await _store.setString(_personalFileNameKey, fileName);
   }
 
+  Future<void> clearContext({required AgentContext context}) async {
+    final next = Map<String, AgentContext>.from(state.contactContexts)
+      ..removeWhere((_, assigned) => assigned == context);
+
+    if (context == AgentContext.work) {
+      state = state.copyWith(
+        workContextUploaded: false,
+        clearWorkContextFileName: true,
+        contactContexts: next,
+      );
+      await _store.setBool(_workUploadedKey, false);
+      await _store.setString(_workFileNameKey, '');
+    } else {
+      state = state.copyWith(
+        personalContextUploaded: false,
+        clearPersonalContextFileName: true,
+        contactContexts: next,
+      );
+      await _store.setBool(_personalUploadedKey, false);
+      await _store.setString(_personalFileNameKey, '');
+    }
+
+    await _store.setString(_contactContextMapKey, _encodeContactMap(next));
+  }
+
   Map<String, AgentContext> _decodeContactMap(String? raw) {
     if (raw == null || raw.isEmpty) return const {};
     try {

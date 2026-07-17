@@ -16,6 +16,7 @@ import '../connections_service/connections_service.dart';
 import '../contacts_service/contacts_service.dart';
 import '../context_routing_service/context_routing_service.dart';
 import '../identities_service/identities_service.dart';
+import 'personal_ai_authorization_snapshot.dart';
 import 'personal_ai_contact_resolution.dart';
 import 'personal_ai_service_state.dart';
 
@@ -67,6 +68,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
     for (final setupResult in setups) {
       await _syncPersonalAiContactForSetup(setupResult, isInitialSetup: false);
+      await _refreshAuthorizationSnapshotForSetup(setupResult);
     }
   }
 
@@ -323,6 +325,10 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         preferredChannelDid: offerChannelDid,
         offerLink: offerLink,
         isInitialSetup: true,
+      );
+      await _refreshAuthorizationSnapshotForSetup(
+        setupSnapshot,
+        preferredChannelDid: offerChannelDid,
       );
 
       _updateSetupResult(setupSnapshot, contextName: contextName);
@@ -845,6 +851,115 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     if (channel != null) {
       await contactsService.updateContactFromChannelActivity(channel);
     }
+  }
+
+  Future<void> refreshAuthorizationSnapshotForChannel(
+    String channelDid, {
+    bool suppressErrors = true,
+  }) async {
+    final normalized = channelDid.trim();
+    if (!_environment.personalAiEnabled || normalized.isEmpty) {
+      return;
+    }
+
+    final setups = state.setupResultsByContext.values.toList();
+    for (final setup in setups) {
+      final contextName = canonicalPersonalAiContextName(
+        contextId: setup.contextId,
+        displayName: setup.profile.displayName,
+      );
+
+      final setupResultForContext = state.getSetupResultForContext(contextName);
+      if (setupResultForContext == null) {
+        continue;
+      }
+
+      final contact = await _findContactForSetup(setupResultForContext);
+      if (contact?.channelDid == normalized) {
+        await _refreshAuthorizationSnapshotForSetup(
+          setupResultForContext,
+          preferredChannelDid: normalized,
+          suppressErrors: suppressErrors,
+        );
+        return;
+      }
+    }
+  }
+
+  Future<void> _refreshAuthorizationSnapshotForSetup(
+    PersonalAgentSetupResult setupResult, {
+    String? preferredChannelDid,
+    bool suppressErrors = true,
+  }) async {
+    final setupId = setupResult.setupId?.trim();
+    if (setupId == null || setupId.isEmpty) {
+      return;
+    }
+
+    Contact? contact;
+    try {
+      contact = await _findContactForSetup(
+        setupResult,
+        preferredChannelDid: preferredChannelDid,
+      );
+      if (contact == null) {
+        return;
+      }
+
+      final sdkSnapshot = await _sdk.fetchPersonalAgentAuthorizationSnapshot(
+        setupId: setupId,
+      );
+      final snapshot = PersonalAiAuthorizationSnapshot.fromSdk(sdkSnapshot);
+      final encoded = snapshot.toEncodedJson();
+      if (contact.personalAgentAuthorizationSnapshot == encoded) {
+        return;
+      }
+
+      final updatedContact = contact.copyWith(
+        personalAgentAuthorizationSnapshot: encoded,
+      );
+      await _ref
+          .read(contactsServiceProvider.notifier)
+          .updateContact(updatedContact);
+    } catch (_) {
+      if (!suppressErrors) {
+        rethrow;
+      }
+      // Authorization refresh is best-effort and must never block chat/setup.
+    }
+  }
+
+  Future<Contact?> _findContactForSetup(
+    PersonalAgentSetupResult setupResult, {
+    String? preferredChannelDid,
+  }) async {
+    final routingState = _ref.read(contextRoutingServiceProvider);
+    final contactsState = _ref.read(contactsServiceProvider);
+    final targetContext = agentContextForSetup(
+      contextId: setupResult.contextId,
+      displayName: setupResult.profile.displayName,
+    );
+
+    final setupId = setupResult.setupId?.trim();
+    String? offerLink;
+    var channelDid = preferredChannelDid?.trim();
+    if (setupId != null && setupId.isNotEmpty) {
+      try {
+        final offer = await _sdk.fetchPersonalAgentOffer(setupId: setupId);
+        offerLink = await _resolveOfferLinkForChannelDid(offer.channelDid);
+        channelDid ??= offer.channelDid?.trim();
+      } catch (_) {
+        // Continue with local-contact resolution.
+      }
+    }
+
+    return findPersonalAiContactForContext(
+      contacts: contactsState.contacts,
+      contactContexts: routingState.contactContexts,
+      targetContext: targetContext,
+      offerLink: offerLink,
+      channelDid: channelDid,
+    );
   }
 }
 
