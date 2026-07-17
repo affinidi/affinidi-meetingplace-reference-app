@@ -47,6 +47,7 @@ import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/message_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/media/file_picker/file_picker_platform_provider.dart';
 import '../../../infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
@@ -121,6 +122,7 @@ class ChatScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
     final contextRoutingState = ref.watch<ContextRoutingState>(
@@ -197,7 +199,8 @@ class ChatScreen extends HookConsumerWidget {
     );
 
     Future<void> uploadContextFor(AgentContext target) async {
-      final picked = await FilePicker.pickFiles(
+      final filePicker = ref.read(filePickerPlatformProvider);
+      final picked = await filePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['txt'],
       );
@@ -211,9 +214,9 @@ class ChatScreen extends HookConsumerWidget {
           .markContextUploaded(context: target, fileName: file.name);
 
       if (!context.mounted) return;
-      final label = target == AgentContext.work ? 'Work AI' : 'Personal AI';
+      final label = _contextDisplayName(context, target);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$label context uploaded: ${file.name}')),
+        SnackBar(content: Text(l10n.chatContextUploaded(label, file.name))),
       );
     }
 
@@ -223,9 +226,9 @@ class ChatScreen extends HookConsumerWidget {
         final requiredFile = target == AgentContext.work
             ? 'work-context.txt'
             : 'personal-context.txt';
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Upload $requiredFile first.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.chatUploadFileFirst(requiredFile))),
+        );
         return;
       }
 
@@ -236,7 +239,9 @@ class ChatScreen extends HookConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Channel now uses ${_contextDisplayName(target)}.'),
+          content: Text(
+            l10n.chatChannelUsesContext(_contextDisplayName(context, target)),
+          ),
         ),
       );
     }
@@ -281,29 +286,29 @@ class ChatScreen extends HookConsumerWidget {
               }
             },
             itemBuilder: (_) => [
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'use_work',
-                child: Text('Use Work AI'),
+                child: Text(l10n.chatMenuUseWorkAi),
               ),
-              const PopupMenuItem<String>(
+              PopupMenuItem<String>(
                 value: 'use_personal',
-                child: Text('Use Personal AI'),
+                child: Text(l10n.chatMenuUsePersonalAi),
               ),
               const PopupMenuDivider(),
               PopupMenuItem<String>(
                 value: 'upload_work',
                 child: Text(
                   contextRoutingState.workContextUploaded
-                      ? 'Re-upload work-context.txt'
-                      : 'Upload work-context.txt',
+                      ? l10n.chatMenuReuploadWorkContext
+                      : l10n.chatMenuUploadWorkContext,
                 ),
               ),
               PopupMenuItem<String>(
                 value: 'upload_personal',
                 child: Text(
                   contextRoutingState.personalContextUploaded
-                      ? 'Re-upload personal-context.txt'
-                      : 'Upload personal-context.txt',
+                      ? l10n.chatMenuReuploadPersonalContext
+                      : l10n.chatMenuUploadPersonalContext,
                 ),
               ),
             ],
@@ -424,6 +429,9 @@ class _LoadingSection extends StatelessWidget {
   }
 }
 
-String _contextDisplayName(AgentContext context) {
-  return context == AgentContext.work ? 'Work AI' : 'Personal AI';
+String _contextDisplayName(BuildContext context, AgentContext value) {
+  final l10n = context.l10n;
+  return value == AgentContext.work
+      ? l10n.agentContextWorkAiLabel
+      : l10n.agentContextPersonalAiLabel;
 }

@@ -142,8 +142,7 @@ class PersonalAgentScreenController
           (_isConnectionReady(setupResult) || state.isReady);
       if (!connected) {
         state = state.copyWith(
-          contextUploadError:
-              '${spec.displayName} is still connecting.',
+          contextUploadError: '${spec.displayName} is still connecting.',
         );
         _clearConnecting();
         return const RoutingContextUploadOutcome.skipped();

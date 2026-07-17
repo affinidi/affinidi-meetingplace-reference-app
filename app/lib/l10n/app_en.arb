@@ -2008,6 +2008,101 @@
 	},
 	"generalEmail": "Email",
 	"vrcResponderIntro": "{name} has selected the following persona to verify the relationship:",
+	"agentContextWorkAiLabel": "Work AI",
+	"agentContextPersonalAiLabel": "Personal AI",
+	"contactsChannelContextSet": "Channel context set to {label}",
+	"@contactsChannelContextSet": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			}
+		}
+	},
+	"chatContextUploaded": "{label} context uploaded: {fileName}",
+	"@chatContextUploaded": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			},
+			"fileName": {
+				"type": "String"
+			}
+		}
+	},
+	"chatUploadFileFirst": "Upload {fileName} first.",
+	"@chatUploadFileFirst": {
+		"placeholders": {
+			"fileName": {
+				"type": "String"
+			}
+		}
+	},
+	"chatChannelUsesContext": "Channel now uses {label}.",
+	"@chatChannelUsesContext": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			}
+		}
+	},
+	"chatMenuUseWorkAi": "Use Work AI",
+	"chatMenuUsePersonalAi": "Use Personal AI",
+	"chatMenuUploadWorkContext": "Upload work-context.txt",
+	"chatMenuReuploadWorkContext": "Re-upload work-context.txt",
+	"chatMenuUploadPersonalContext": "Upload personal-context.txt",
+	"chatMenuReuploadPersonalContext": "Re-upload personal-context.txt",
+	"identitiesSetupMyAgent": "Set up my agent",
+	"identitiesSetupPromptDescription": "Choose Work or Personal in the Agent tab.",
+	"identitiesSettingUp": "Setting Up...",
+	"identitiesNotNow": "Not now",
+	"identitiesAgentConfiguredTooltip": "Agent configured",
+	"personalAgentNoContextCreated": "No context created",
+	"personalAgentContextUploadedSnackBar": "{label} uploaded: {fileName}",
+	"@personalAgentContextUploadedSnackBar": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			},
+			"fileName": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSetupSectionSubtitle": "Set up your AI. Choose what context to set up.",
+	"personalAgentChooseFileToSetUp": "Choose a file to set up",
+	"personalAgentAlreadySetUp": "Already set up: {fileName}",
+	"@personalAgentAlreadySetUp": {
+		"placeholders": {
+			"fileName": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSetupCardTitle": "Set up your AI",
+	"personalAgentSetupCardDescription": "Choose what context to set up.",
+	"personalAgentConnecting": "Connecting {label}...",
+	"@personalAgentConnecting": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentDefaultConnectingLabel": "agent",
+	"personalAgentWorkAgentTitle": "Work Agent",
+	"personalAgentPersonalAgentTitle": "Personal Agent",
+	"mnemonicErrorOccurred": "An error occurred.",
+	"mnemonicEntrySelectionTitle": "How would you like\nto enter your wallet?",
+	"mnemonicScanQrTitle": "Scan QR Code",
+	"mnemonicScanQrSubtitle": "Use your camera to scan a wallet QR code",
+	"mnemonicEnterManuallyTitle": "Enter manually",
+	"mnemonicEnterManuallySubtitle": "Type the mnemonic phrase that was shared with you",
+	"mnemonicManualEntryTitle": "Enter your mnemonic",
+	"mnemonicManualEntrySubtitle": "Enter the mnemonic phrase that was shared with you.",
+	"mnemonicManualHint": "word1 word2 word3 ...",
+	"mnemonicContinue": "Continue",
+	"mnemonicSuccessTitle": "You're all set!",
+	"mnemonicSuccessSubtitle": "Enjoy MeetingPlace and get engaged\nwith your personal AI agent.",
 	"videoCallTitle": "Call",
 	"@videoCallTitle": {
 		"type": "text"

@@ -2183,6 +2183,150 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get agentContextWorkAiLabel => 'Work AI';
+
+  @override
+  String get agentContextPersonalAiLabel => 'Personal AI';
+
+  @override
+  String contactsChannelContextSet(String label) {
+    return 'Kanal-Kontext gesetzt auf $label';
+  }
+
+  @override
+  String chatContextUploaded(String label, String fileName) {
+    return '$label-Kontext hochgeladen: $fileName';
+  }
+
+  @override
+  String chatUploadFileFirst(String fileName) {
+    return 'Laden Sie zuerst $fileName hoch.';
+  }
+
+  @override
+  String chatChannelUsesContext(String label) {
+    return 'Kanal verwendet jetzt $label.';
+  }
+
+  @override
+  String get chatMenuUseWorkAi => 'Work AI verwenden';
+
+  @override
+  String get chatMenuUsePersonalAi => 'Personal AI verwenden';
+
+  @override
+  String get chatMenuUploadWorkContext => 'work-context.txt hochladen';
+
+  @override
+  String get chatMenuReuploadWorkContext => 'work-context.txt erneut hochladen';
+
+  @override
+  String get chatMenuUploadPersonalContext => 'personal-context.txt hochladen';
+
+  @override
+  String get chatMenuReuploadPersonalContext =>
+      'personal-context.txt erneut hochladen';
+
+  @override
+  String get identitiesSetupMyAgent => 'Meinen Agenten einrichten';
+
+  @override
+  String get identitiesSetupPromptDescription =>
+      'Wählen Sie im Agent-Tab Work oder Personal.';
+
+  @override
+  String get identitiesSettingUp => 'Wird eingerichtet...';
+
+  @override
+  String get identitiesNotNow => 'Nicht jetzt';
+
+  @override
+  String get identitiesAgentConfiguredTooltip => 'Agent eingerichtet';
+
+  @override
+  String get personalAgentNoContextCreated => 'Kein Kontext erstellt';
+
+  @override
+  String personalAgentContextUploadedSnackBar(String label, String fileName) {
+    return '$label hochgeladen: $fileName';
+  }
+
+  @override
+  String get personalAgentSetupSectionSubtitle =>
+      'Richten Sie Ihre KI ein. Wählen Sie, welchen Kontext Sie einrichten möchten.';
+
+  @override
+  String get personalAgentChooseFileToSetUp =>
+      'Wählen Sie eine Datei zur Einrichtung';
+
+  @override
+  String personalAgentAlreadySetUp(String fileName) {
+    return 'Bereits eingerichtet: $fileName';
+  }
+
+  @override
+  String get personalAgentSetupCardTitle => 'Richten Sie Ihre KI ein';
+
+  @override
+  String get personalAgentSetupCardDescription =>
+      'Wählen Sie, welchen Kontext Sie einrichten möchten.';
+
+  @override
+  String personalAgentConnecting(String label) {
+    return 'Verbinde $label...';
+  }
+
+  @override
+  String get personalAgentDefaultConnectingLabel => 'Agent';
+
+  @override
+  String get personalAgentWorkAgentTitle => 'Work Agent';
+
+  @override
+  String get personalAgentPersonalAgentTitle => 'Personal Agent';
+
+  @override
+  String get mnemonicErrorOccurred => 'Ein Fehler ist aufgetreten.';
+
+  @override
+  String get mnemonicEntrySelectionTitle =>
+      'Wie möchten Sie\nIhr Wallet eingeben?';
+
+  @override
+  String get mnemonicScanQrTitle => 'QR-Code scannen';
+
+  @override
+  String get mnemonicScanQrSubtitle =>
+      'Verwenden Sie Ihre Kamera, um einen Wallet-QR-Code zu scannen';
+
+  @override
+  String get mnemonicEnterManuallyTitle => 'Manuell eingeben';
+
+  @override
+  String get mnemonicEnterManuallySubtitle =>
+      'Geben Sie die mit Ihnen geteilte Mnemonic-Phrase ein';
+
+  @override
+  String get mnemonicManualEntryTitle => 'Geben Sie Ihre Mnemonic ein';
+
+  @override
+  String get mnemonicManualEntrySubtitle =>
+      'Geben Sie die mit Ihnen geteilte Mnemonic-Phrase ein.';
+
+  @override
+  String get mnemonicManualHint => 'wort1 wort2 wort3 ...';
+
+  @override
+  String get mnemonicContinue => 'Weiter';
+
+  @override
+  String get mnemonicSuccessTitle => 'Alles bereit!';
+
+  @override
+  String get mnemonicSuccessSubtitle =>
+      'Viel Freude mit MeetingPlace und Ihrem persönlichen KI-Agenten.';
+
+  @override
   String get videoCallTitle => 'Anruf';
 
   @override

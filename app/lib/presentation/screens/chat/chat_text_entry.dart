@@ -143,7 +143,7 @@ class _ChatTextEntry extends HookConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(left: 6, bottom: 6),
               child: Text(
-                'Signature context: ${_contextDisplayName(activeContext)}',
+                'Signature context: ${_contextDisplayName(context, activeContext)}',
                 style: context.textTheme.labelSmall?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w600,

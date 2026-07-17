@@ -1,4 +1,3 @@
-
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/contacts/contact_status.dart';
@@ -123,8 +122,7 @@ bool shouldRenamePersonalAiContact({
   if (desiredName.isEmpty) {
     return false;
   }
-  if (!isInitialSetup &&
-      (contact.displayName?.trim().isNotEmpty ?? false)) {
+  if (!isInitialSetup && (contact.displayName?.trim().isNotEmpty ?? false)) {
     return false;
   }
 
@@ -134,4 +132,3 @@ bool shouldRenamePersonalAiContact({
       contact.card.displayName.trim().isEmpty ||
       contact.card.displayName != desiredName;
 }
-

@@ -135,10 +135,13 @@ class _ContactListItem extends ConsumerWidget {
           .assignContactContext(contact.id, next);
 
       if (!context.mounted) return;
-      final label = next == AgentContext.work ? 'Work AI' : 'Personal AI';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Channel context set to $label')));
+      final l10n = context.l10n;
+      final label = next == AgentContext.work
+          ? l10n.agentContextWorkAiLabel
+          : l10n.agentContextPersonalAiLabel;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.contactsChannelContextSet(label))),
+      );
     }
 
     final child = _ContactTile(

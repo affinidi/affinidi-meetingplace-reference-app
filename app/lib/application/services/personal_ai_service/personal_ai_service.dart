@@ -255,7 +255,6 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     String contextName = 'personal-ai',
     String agentDisplayName = 'My Personal AI',
   }) async {
-
     if (!_environment.personalAiEnabled) {
       return;
     }
