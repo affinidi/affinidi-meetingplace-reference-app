@@ -2136,5 +2136,33 @@
 				"type": "int"
 			}
 		}
+	},
+	"groupCallWaitingForOthers": "Waiting for others...",
+	"@groupCallWaitingForOthers": {
+		"type": "text"
+	},
+	"groupCallParticipant": "participant",
+	"@groupCallParticipant": {
+		"type": "text"
+	},
+	"groupCallParticipants": "participants",
+	"@groupCallParticipants": {
+		"type": "text"
+	},
+	"groupCallEndCall": "End Call",
+	"@groupCallEndCall": {
+		"type": "text"
+	},
+	"groupCallNoParticipants": "No participants",
+	"@groupCallNoParticipants": {
+		"type": "text"
+	},
+	"groupCallMute": "Mute",
+	"@groupCallMute": {
+		"type": "text"
+	},
+	"groupCallLeave": "Leave",
+	"@groupCallLeave": {
+		"type": "text"
 	}
 }

@@ -600,5 +600,12 @@
 	"videoCallShowLess": "Mostrar menos",
 	"videoCallShowMore": "{count, plural, =1{Mostrar 1 más} other{Mostrar {count} más}}",
 	"videoCallSpeakerToggleFailed": "No se pudo cambiar el altavoz. Por favor, inténtelo de nuevo.",
-	"videoCallError": "{errorCode, select, networkError{Error de red} other{Error desconocido}}"
+	"videoCallError": "{errorCode, select, networkError{Error de red} other{Error desconocido}}",
+	"groupCallWaitingForOthers": "Esperando a otros...",
+	"groupCallParticipant": "participante",
+	"groupCallParticipants": "participantes",
+	"groupCallEndCall": "Finalizar llamada",
+	"groupCallNoParticipants": "Sin participantes",
+	"groupCallMute": "Silenciar",
+	"groupCallLeave": "Salir"
 }
