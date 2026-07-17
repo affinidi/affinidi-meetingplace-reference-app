@@ -63,7 +63,7 @@ final class GroupAudioCallControllerProvider
 }
 
 String _$groupAudioCallControllerHash() =>
-    r'c002e1b8677c2f21609a884fcf47962c146e0f02';
+    r'29b53316f6818c54f0332e913d3ce780b363c534';
 
 /// Controller for group audio call state.
 

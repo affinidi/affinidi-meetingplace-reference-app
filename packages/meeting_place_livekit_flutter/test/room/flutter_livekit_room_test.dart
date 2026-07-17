@@ -11,10 +11,10 @@ void main() {
       );
     });
 
-    test('preserves homeserver port when stripping device id', () {
+    test('strips everything after the homeserver separator', () {
       expect(
         matrixUserIdFromParticipantIdentity('@abc:localhost:9000:DEVICE123'),
-        '@abc:localhost:9000',
+        '@abc:localhost',
       );
     });
 

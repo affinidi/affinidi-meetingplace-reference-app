@@ -128,15 +128,15 @@ void main() {
     group('and it is a group chat', () {
       final contact = FakeContacts.groupContact;
 
-      testWidgets('it hides audio and video call buttons', (tester) async {
+      testWidgets('it shows audio and video call buttons', (tester) async {
         await _openChat(
           tester,
           audioVideoCallsEnabled: audioVideoCallsEnabled,
           contact: contact,
         );
 
-        expect(find.byIcon(Icons.call), findsNothing);
-        expect(find.byIcon(Icons.videocam), findsNothing);
+        expect(find.byIcon(Icons.call), findsOneWidget);
+        expect(find.byIcon(Icons.videocam), findsOneWidget);
       });
     });
   });

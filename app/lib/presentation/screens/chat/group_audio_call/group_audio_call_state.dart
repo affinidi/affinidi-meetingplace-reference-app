@@ -15,8 +15,7 @@ abstract class GroupAudioCallParticipant with _$GroupAudioCallParticipant {
 
 /// State for group audio call screen.
 @freezed
-// ignore: non_abstract_class_inherits_abstract_member
-class GroupAudioCallState with _$GroupAudioCallState {
+abstract class GroupAudioCallState with _$GroupAudioCallState {
   const factory GroupAudioCallState({
     /// Participants currently in the call (self + remotes).
     required List<GroupAudioCallParticipant> participants,
