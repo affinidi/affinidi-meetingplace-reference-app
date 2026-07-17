@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/call_audio_session_service/call_audio_session_service.dart';
@@ -19,6 +22,7 @@ import 'fakes/fake_audio_session.dart';
 import 'fakes/fake_chat_session_service.dart';
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_contacts_service.dart';
+import 'fakes/fake_groups.dart';
 import 'fakes/fake_permission_service.dart';
 
 class _FakeCallSession extends Fake implements AudioVideoCallSession {
@@ -59,6 +63,7 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
 
   final _FakeCallSession _session;
   final _callSignalsController = StreamController<CallSignal>.broadcast();
+  sdk.Group? _mockGroup;
 
   @override
   bool get isCallSupported => true;
@@ -85,6 +90,13 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
   @override
   Future<void> leaveCurrentCall() async {}
 
+  @override
+  Future<sdk.Group?> getGroupByOfferLink(String offerLink) async => _mockGroup;
+
+  void setMockGroup(sdk.Group group) {
+    _mockGroup = group;
+  }
+
   void emitState(AudioVideoCallState s) => _session.emit(s);
 
   void emitCallSignal(CallSignal signal) => _callSignalsController.add(signal);
@@ -94,6 +106,71 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
     await _callSignalsController.close();
     _session.dispose();
   }
+}
+
+class _GroupAwareContactsService extends FakeContactsService {
+  _GroupAwareContactsService({super.contacts});
+
+  final _updates = StreamController<String>.broadcast();
+
+  @override
+  Stream<String> get onContactCardUpdated => _updates.stream;
+
+  @override
+  void notifyContactCardUpdated(String did) {
+    _updates.add(did);
+  }
+
+  @override
+  void updateContactCard(String did, ContactCard card) {
+    final contact = getContactByChannelDid(did);
+    if (contact == null) return;
+    final amendedContact = contact.copyWith(
+      card: card,
+      displayName: card.displayName,
+    );
+    contacts = [
+      for (final existingContact in contacts)
+        if (existingContact.id == amendedContact.id)
+          amendedContact
+        else
+          existingContact,
+    ];
+    state = state.copyWith(contacts: contacts);
+    _updates.add(did);
+  }
+
+  Future<void> disposeService() => _updates.close();
+}
+
+Contact _groupMemberContact({
+  required String id,
+  required String channelDid,
+  required String displayName,
+  String? profilePic,
+}) {
+  final card = FakeContacts.individualContact.card.copyWith(
+    did: channelDid,
+    firstName: displayName,
+    displayName: displayName,
+    profilePic: profilePic,
+  );
+  return Contact(
+    id: id,
+    channelDid: channelDid,
+    channelDidSha256: '$channelDid-sha256',
+    offerLink: FakeContacts.individualContact.offerLink,
+    card: card,
+    otherPartyCard: FakeContacts.individualContact.otherPartyCard,
+    dateAdded: FakeContacts.individualContact.dateAdded,
+    type: FakeContacts.individualContact.type,
+    status: FakeContacts.individualContact.status,
+    mediatorDid: FakeContacts.individualContact.mediatorDid,
+    origin: FakeContacts.individualContact.origin,
+    category: FakeContacts.individualContact.category,
+    displayName: displayName,
+    hasBeenOpened: FakeContacts.individualContact.hasBeenOpened,
+  );
 }
 
 ProviderContainer _buildContainer({
@@ -197,6 +274,225 @@ void main() {
         );
       },
     );
+  });
+
+  group('group member contact cards', () {
+    test(
+      'loads live contact cards for group participants on first fetch',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK()
+          ..setMockGroup(FakeGroups.approvedGroup());
+        final contactsService = _GroupAwareContactsService(
+          contacts: [
+            FakeContacts.individualContact,
+            FakeContacts.groupContact,
+            _groupMemberContact(
+              id: 'group-member-contact',
+              channelDid: FakeGroups.removableMemberDid,
+              displayName: 'Updated Bob',
+              profilePic: 'live-avatar',
+            ),
+          ],
+        );
+        addTearDown(contactsService.disposeService);
+
+        final container = ProviderContainer(
+          overrides: [
+            contactsServiceProvider.overrideWith(() => contactsService),
+            chatSessionServiceProvider.overrideWith(FakeChatSessionService.new),
+            meetingPlaceSdkProvider.overrideWith((ref) async => fakeSDK),
+            permissionServiceProvider.overrideWith(
+              (ref) => FakePermissionService(),
+            ),
+            canUsePlatformAudioSessionProvider.overrideWith((ref) => false),
+          ],
+        );
+        addTearDown(container.dispose);
+        final subscription = container.listen(
+          audioVideoCallScreenControllerProvider(FakeContacts.groupContact.id),
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
+
+        await container.read(meetingPlaceSdkProvider.future);
+        await pumpEventQueue();
+
+        final state = container.read(
+          audioVideoCallScreenControllerProvider(FakeContacts.groupContact.id),
+        );
+
+        expect(
+          state.memberContactCards[FakeGroups.removableMemberDid]?.displayName,
+          'Updated Bob',
+        );
+        expect(
+          state.memberContactCards[FakeGroups.removableMemberDid]?.profilePic,
+          'live-avatar',
+        );
+      },
+    );
+
+    test('refreshes active group member cards after profile updates', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK()
+        ..setMockGroup(FakeGroups.approvedGroup());
+      final contactsService = _GroupAwareContactsService(
+        contacts: [
+          FakeContacts.individualContact,
+          FakeContacts.groupContact,
+          _groupMemberContact(
+            id: 'group-member-contact',
+            channelDid: FakeGroups.removableMemberDid,
+            displayName: 'Initial Bob',
+            profilePic: 'initial-avatar',
+          ),
+        ],
+      );
+      addTearDown(contactsService.disposeService);
+
+      final container = ProviderContainer(
+        overrides: [
+          contactsServiceProvider.overrideWith(() => contactsService),
+          chatSessionServiceProvider.overrideWith(FakeChatSessionService.new),
+          meetingPlaceSdkProvider.overrideWith((ref) async => fakeSDK),
+          permissionServiceProvider.overrideWith(
+            (ref) => FakePermissionService(),
+          ),
+          canUsePlatformAudioSessionProvider.overrideWith((ref) => false),
+        ],
+      );
+      addTearDown(container.dispose);
+      final subscription = container.listen(
+        audioVideoCallScreenControllerProvider(FakeContacts.groupContact.id),
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+
+      await container.read(meetingPlaceSdkProvider.future);
+      await pumpEventQueue();
+
+      contactsService.updateContactCard(
+        FakeGroups.removableMemberDid,
+        FakeContacts.individualContact.card.copyWith(
+          did: FakeGroups.removableMemberDid,
+          firstName: 'Renamed Bob',
+          displayName: 'Renamed Bob',
+          profilePic: 'updated-avatar',
+        ),
+      );
+      await pumpEventQueue();
+
+      final state = container.read(
+        audioVideoCallScreenControllerProvider(FakeContacts.groupContact.id),
+      );
+
+      expect(
+        state.memberContactCards[FakeGroups.removableMemberDid]?.displayName,
+        'Renamed Bob',
+      );
+      expect(
+        state.memberContactCards[FakeGroups.removableMemberDid]?.profilePic,
+        'updated-avatar',
+      );
+    });
+
+    test('refreshes active group member cards from group updates '
+        'without direct contact', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK()
+        ..setMockGroup(FakeGroups.approvedGroup());
+      final contactsService = _GroupAwareContactsService(
+        contacts: [FakeContacts.individualContact, FakeContacts.groupContact],
+      );
+      addTearDown(contactsService.disposeService);
+
+      final container = ProviderContainer(
+        overrides: [
+          contactsServiceProvider.overrideWith(() => contactsService),
+          chatSessionServiceProvider.overrideWith(FakeChatSessionService.new),
+          meetingPlaceSdkProvider.overrideWith((ref) async => fakeSDK),
+          permissionServiceProvider.overrideWith(
+            (ref) => FakePermissionService(),
+          ),
+          canUsePlatformAudioSessionProvider.overrideWith((ref) => false),
+        ],
+      );
+      addTearDown(container.dispose);
+      final subscription = container.listen(
+        audioVideoCallScreenControllerProvider(FakeContacts.groupContact.id),
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+
+      await container.read(meetingPlaceSdkProvider.future);
+      await pumpEventQueue();
+
+      fakeSDK.setMockGroup(
+        sdk.Group(
+          id: 'group-id',
+          did: 'group-did',
+          offerLink: FakeContacts.groupContact.offerLink,
+          members: [
+            sdk.GroupMember(
+              did: 'did:key:member',
+              dateAdded: DateTime.now(),
+              status: sdk.GroupMemberStatus.approved,
+              membershipType: sdk.GroupMembershipType.member,
+              contactCard: FakeContacts.sdkContactCard,
+              publicKey: 'fake-public-key',
+            ),
+            sdk.GroupMember(
+              did: FakeGroups.removableMemberDid,
+              dateAdded: DateTime.now(),
+              status: sdk.GroupMemberStatus.approved,
+              membershipType: sdk.GroupMembershipType.member,
+              contactCard: sdk.ContactCard(
+                did: FakeGroups.removableMemberDid,
+                type: FakeContacts.sdkContactCard.type,
+                contactInfo: {
+                  'n': {'given': 'Fresh Bob', 'surname': 'Builder'},
+                  'photo': 'group-updated-avatar',
+                },
+              ),
+              publicKey: 'fake-public-key-2',
+            ),
+            sdk.GroupMember(
+              did: FakeGroups.adminMemberDid,
+              dateAdded: DateTime.now(),
+              status: sdk.GroupMemberStatus.approved,
+              membershipType: sdk.GroupMembershipType.admin,
+              contactCard: sdk.ContactCard(
+                did: FakeGroups.adminMemberDid,
+                type: FakeContacts.sdkContactCard.type,
+                contactInfo: {
+                  'n': {
+                    'given': FakeGroups.adminMemberFirstName,
+                    'surname': 'Owner',
+                  },
+                },
+              ),
+              publicKey: 'fake-public-key-3',
+            ),
+          ],
+          created: DateTime.now(),
+          publicKey: 'fake-public-key',
+        ),
+      );
+
+      contactsService.notifyContactCardUpdated(FakeGroups.removableMemberDid);
+      await pumpEventQueue();
+
+      final state = container.read(
+        audioVideoCallScreenControllerProvider(FakeContacts.groupContact.id),
+      );
+
+      expect(
+        state.memberContactCards[FakeGroups.removableMemberDid]?.displayName,
+        'Fresh Bob Builder',
+      );
+      expect(
+        state.memberContactCards[FakeGroups.removableMemberDid]?.profilePic,
+        'group-updated-avatar',
+      );
+    });
   });
 
   group('joinCall', () {

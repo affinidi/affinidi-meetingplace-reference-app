@@ -4,27 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
+import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_peer_placeholder.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_pip_overlay.dart';
 
 import 'fakes/fake_active_call_controller.dart';
-
-class _FakeScreenController extends AudioVideoCallScreenController {
-  @override
-  AudioVideoCallScreenState build(String contactId) =>
-      AudioVideoCallScreenState(
-        isCameraEnabled: true,
-        isMicEnabled: true,
-        participants: const [
-          AudioVideoCallParticipant(participantId: 'local', isSelf: true),
-        ],
-      );
-}
+import 'fakes/fake_audio_video_call_screen_controller.dart';
+import 'fakes/fake_contacts.dart';
+import 'fakes/fake_contacts_service.dart';
+import 'fakes/fake_identities.dart';
+import 'fakes/fake_identities_service.dart';
 
 const _kContactId = 'contact-1';
 
@@ -48,8 +46,16 @@ Widget _wrap(ActiveCallState? callState) => ProviderScope(
     activeCallControllerProvider.overrideWith(
       () => FakeActiveCallController(callState),
     ),
+    contactsServiceProvider.overrideWith(
+      () => FakeContactsService(contacts: [FakeContacts.individualContact]),
+    ),
+    identitiesServiceProvider.overrideWith(
+      () => FakeIdentitiesService(
+        IdentitiesServiceState(currentIdentity: FakeIdentities.primaryIdentity),
+      ),
+    ),
     audioVideoCallScreenControllerProvider.overrideWith(
-      _FakeScreenController.new,
+      FakeAudioVideoCallScreenController.new,
     ),
   ],
   child: MaterialApp(
@@ -108,6 +114,54 @@ void main() {
       await tester.pump();
 
       expect(find.byIcon(Icons.mic), findsOneWidget);
+    });
+
+    testWidgets('shows remote primary placeholder with local inset', (
+      tester,
+    ) async {
+      final screenState = AudioVideoCallScreenState(
+        isCameraEnabled: false,
+        isMicEnabled: true,
+        participants: const [
+          AudioVideoCallParticipant(participantId: 'local', isSelf: true),
+          AudioVideoCallParticipant(participantId: 'remote'),
+        ],
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            activeCallControllerProvider.overrideWith(
+              () => FakeActiveCallController(_kMinimizedVideoState),
+            ),
+            contactsServiceProvider.overrideWith(
+              () => FakeContactsService(
+                contacts: [FakeContacts.individualContact],
+              ),
+            ),
+            identitiesServiceProvider.overrideWith(
+              () => FakeIdentitiesService(
+                IdentitiesServiceState(
+                  currentIdentity: FakeIdentities.primaryIdentity,
+                ),
+              ),
+            ),
+            audioVideoCallScreenControllerProvider.overrideWith(
+              () => FakeAudioVideoCallScreenController(screenState),
+            ),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.dark,
+            home: const Scaffold(
+              body: Stack(children: [VideoCallPiPOverlay()]),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(VideoCallPeerPlaceholder), findsOneWidget);
+      expect(find.byType(ProfileCircleAvatar), findsNWidgets(2));
     });
   });
 

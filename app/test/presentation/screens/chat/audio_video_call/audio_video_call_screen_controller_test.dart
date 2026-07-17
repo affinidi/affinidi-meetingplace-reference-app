@@ -162,8 +162,8 @@ void main() {
           status: AudioVideoCallStatus.active,
           ownRole: CallRole.caller,
           participants: [
-            AudioVideoCallParticipant(participantId: 'local', isSelf: true),
-            AudioVideoCallParticipant(participantId: 'remote-1'),
+            AudioVideoCallParticipant(participantId: 'self', isSelf: true),
+            AudioVideoCallParticipant(participantId: 'peer-1'),
           ],
         ),
       );
@@ -294,7 +294,7 @@ void main() {
       },
     );
 
-    test('declined status survives a later terminal teardown status', () async {
+    test('declined status survives a later final teardown status', () async {
       final session = MockAudioVideoCallSession();
       final container = _makeContainer(pendingSession: session);
       final ctrl = container.read(
@@ -499,7 +499,7 @@ void main() {
           status: AudioVideoCallStatus.active,
           participants: [
             AudioVideoCallParticipant(
-              participantId: 'remote-peer',
+              participantId: 'peer-participant',
               hasVideo: true,
             ),
           ],
