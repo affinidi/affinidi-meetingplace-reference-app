@@ -1,5 +1,31 @@
 # Change Log
 
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## 2026-07-17
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`meeting_place_livekit_flutter` - `v0.0.1-dev.1`](#meeting_place_livekit_flutter---v001-dev1)
+
+---
+
+#### `meeting_place_livekit_flutter` - `v0.0.1-dev.1`
+
+ - **FEAT**: publish meeting_place_livekit_flutter (#248).
+ - **FEAT**: add meeting_place_livekit_flutter package with audio/video call rendering (#196).
+
+# Change Log
+
 ## 2026-06-23
 
 ## Highlights

@@ -1,3 +1,8 @@
+## 0.0.1-dev.1
+
+ - **FEAT**: publish meeting_place_livekit_flutter (#248).
+ - **FEAT**: add meeting_place_livekit_flutter package with audio/video call rendering (#196).
+
 # Change Log
 
 ## 0.0.1-dev.0
