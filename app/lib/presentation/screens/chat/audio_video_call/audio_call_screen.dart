@@ -1,5 +1,48 @@
 part of 'audio_video_call_screen.dart';
 
+/// Minimizes the active call and dismisses the current call screen.
+void _minimizeAndPop(
+  BuildContext context,
+  AudioVideoCallScreenController controller,
+) {
+  controller.minimize();
+  if (context.mounted) Navigator.of(context).pop();
+}
+
+class _AudioCallViewData {
+  const _AudioCallViewData({
+    required this.contactId,
+    required this.peerAvatarImage,
+    required this.isGroupContact,
+    required this.participants,
+    required this.session,
+    required this.peerName,
+    required this.memberContactCards,
+    required this.showControls,
+    required this.controls,
+  });
+
+  final String contactId;
+  final ImageProvider<Object>? peerAvatarImage;
+  final bool isGroupContact;
+  final List<AudioVideoCallParticipant> participants;
+  final AudioVideoCallSession? session;
+  final String peerName;
+  final Map<String, ContactCard> memberContactCards;
+  final bool showControls;
+  final _CallControls controls;
+}
+
+class _AudioCallActions {
+  const _AudioCallActions({
+    required this.onToggleControls,
+    required this.onMinimize,
+  });
+
+  final VoidCallback onToggleControls;
+  final VoidCallback onMinimize;
+}
+
 /// Shows a confirmation dialog to switch from audio to video call.
 Future<void> _showSwitchToVideoDialog({
   required BuildContext context,
@@ -43,6 +86,13 @@ class _AudioCallScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = audioVideoCallScreenControllerProvider(contactId);
     final showControls = ref.watch(provider.select((s) => s.showControlsBar));
+    final isGroupContact = ref.watch(provider.select((s) => s.isGroupContact));
+    final participants = ref.watch(provider.select((s) => s.participants));
+    final session = ref.watch(provider.select((s) => s.session));
+    final peerName = ref.watch(provider.select((s) => s.peerName));
+    final memberContactCards = ref.watch(
+      provider.select((s) => s.memberContactCards),
+    );
     final controller = ref.read(provider.notifier);
 
     final isMicEnabled = ref.watch(provider.select((s) => s.isMicEnabled));
@@ -63,6 +113,7 @@ class _AudioCallScreen extends ConsumerWidget {
     final peerAvatarImage = peerCard?.hasProfilePic == true
         ? peerCard!.image(cacheManager: ref.read(cacheManagerProvider))
         : null;
+    final effectivePeerAvatarImage = isGroupContact ? null : peerAvatarImage;
 
     final controls = _CallControls(
       mic: CallButtonConfig(
@@ -89,64 +140,68 @@ class _AudioCallScreen extends ConsumerWidget {
     );
 
     return _AudioCallScaffold(
-      contactId: contactId,
-      peerAvatarImage: peerAvatarImage,
-      showControls: showControls,
-      controls: controls,
-      onToggleControls: controller.toggleControlsBar,
-      onMinimize: () {
-        controller.minimize();
-        if (context.mounted) Navigator.of(context).pop();
-      },
+      viewData: _AudioCallViewData(
+        contactId: contactId,
+        peerAvatarImage: effectivePeerAvatarImage,
+        isGroupContact: isGroupContact,
+        participants: participants,
+        session: session,
+        peerName: peerName,
+        memberContactCards: memberContactCards,
+        showControls: showControls,
+        controls: controls,
+      ),
+      actions: _AudioCallActions(
+        onToggleControls: controller.toggleControlsBar,
+        onMinimize: () => _minimizeAndPop(context, controller),
+      ),
     );
   }
 }
 
 class _AudioCallScaffold extends StatelessWidget {
-  const _AudioCallScaffold({
-    required this.contactId,
-    required this.peerAvatarImage,
-    required this.showControls,
-    required this.controls,
-    required this.onToggleControls,
-    required this.onMinimize,
-  });
+  const _AudioCallScaffold({required this.viewData, required this.actions});
 
-  final String contactId;
-  final ImageProvider<Object>? peerAvatarImage;
-  final bool showControls;
-  final _CallControls controls;
-  final VoidCallback onToggleControls;
-  final VoidCallback onMinimize;
+  final _AudioCallViewData viewData;
+  final _AudioCallActions actions;
 
   @override
   Widget build(BuildContext context) {
+    if (viewData.isGroupContact) {
+      return _GroupAudioCallScaffold(viewData: viewData, actions: actions);
+    }
+
     return Scaffold(
       backgroundColor: context.colorScheme.surface,
       body: GestureDetector(
-        onTap: onToggleControls,
+        onTap: actions.onToggleControls,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            _AudioCallBackground(peerAvatarImage: peerAvatarImage),
+            const _AudioCallBackground(peerAvatarImage: null),
             Positioned.fill(
               child: SafeArea(
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
                     _CallTopBarOverlay(
-                      visible: showControls,
+                      visible: viewData.showControls,
                       child: _CallTopBar(
-                        contactId: contactId,
-                        onMinimize: onMinimize,
+                        contactId: viewData.contactId,
+                        onMinimize: actions.onMinimize,
                       ),
                     ),
-                    if (peerAvatarImage == null)
-                      const Center(child: _CallPersonAvatar()),
+                    Center(
+                      child: _IndividualAudioCallAvatar(
+                        peerAvatarImage: viewData.peerAvatarImage,
+                      ),
+                    ),
                     _AnimatedControlsOverlay(
-                      visible: showControls,
+                      visible: viewData.showControls,
                       duration: const Duration(milliseconds: 100),
-                      child: _ControlsOverlayContent(controls: controls),
+                      child: _ControlsOverlayContent(
+                        controls: viewData.controls,
+                      ),
                     ),
                   ],
                 ),
@@ -155,6 +210,152 @@ class _AudioCallScaffold extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _GroupAudioCallScaffold extends StatelessWidget {
+  const _GroupAudioCallScaffold({
+    required this.viewData,
+    required this.actions,
+  });
+
+  final _AudioCallViewData viewData;
+  final _AudioCallActions actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: context.colorScheme.surface,
+      body: GestureDetector(
+        onTap: actions.onToggleControls,
+        child: Column(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 100),
+                opacity: viewData.showControls ? 1.0 : 0.0,
+                child: IgnorePointer(
+                  ignoring: !viewData.showControls,
+                  child: _CallTopBar.group(
+                    contactId: viewData.contactId,
+                    onMinimize: actions.onMinimize,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _AudioCallBackground(
+                    peerAvatarImage: viewData.peerAvatarImage,
+                  ),
+                  MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: _GroupAudioCallContent(
+                      participants: viewData.participants,
+                      session: viewData.session,
+                      peerName: viewData.peerName,
+                      memberContactCards: viewData.memberContactCards,
+                    ),
+                  ),
+                  _AnimatedControlsOverlay(
+                    visible: viewData.showControls,
+                    duration: const Duration(milliseconds: 100),
+                    child: _ControlsOverlayContent(controls: viewData.controls),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GroupAudioCallContent extends ConsumerWidget {
+  const _GroupAudioCallContent({
+    required this.participants,
+    required this.session,
+    required this.peerName,
+    required this.memberContactCards,
+  });
+
+  final List<AudioVideoCallParticipant> participants;
+  final AudioVideoCallSession? session;
+  final String peerName;
+  final Map<String, ContactCard> memberContactCards;
+
+  double _bottomContentInset(BuildContext context) {
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    return bottomInset + 124;
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final remoteParticipants = participants.where((p) => !p.isSelf).toList();
+    final remoteCount = remoteParticipants.length;
+    final bottomInset = _bottomContentInset(context);
+
+    if (remoteCount == 0) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: bottomInset),
+        child: const Center(child: _CallPersonAvatar(isGroup: true)),
+      );
+    }
+
+    if (remoteCount == 1) {
+      final participant = remoteParticipants.first;
+      return Padding(
+        padding: EdgeInsets.only(top: 16, bottom: bottomInset),
+        child: _SingleRemoteGroupAudioParticipant(
+          participant: participant,
+          contactCard: _contactCardFor(
+            participant,
+            memberContactCards: memberContactCards,
+          ),
+          displayName: _displayNameFor(
+            participant,
+            youLabel: context.l10n.videoCallYou,
+            peerName: peerName,
+            remoteCount: remoteCount,
+            memberContactCards: memberContactCards,
+          ),
+        ),
+      );
+    }
+
+    return GridView.builder(
+      padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+      ),
+      itemCount: participants.length,
+      itemBuilder: (_, index) {
+        final participant = participants[index];
+        return _CallParticipantTile(
+          participant: participant,
+          session: session,
+          isAudioOnly: true,
+          contactCard: _contactCardFor(
+            participant,
+            memberContactCards: memberContactCards,
+          ),
+          displayName: _displayNameFor(
+            participant,
+            youLabel: context.l10n.videoCallYou,
+            peerName: peerName,
+            remoteCount: remoteCount,
+            memberContactCards: memberContactCards,
+          ),
+        );
+      },
     );
   }
 }
@@ -176,5 +377,97 @@ class _AudioCallBackground extends StatelessWidget {
     }
 
     return Container(color: context.colorScheme.surface);
+  }
+}
+
+class _IndividualAudioCallAvatar extends StatelessWidget {
+  const _IndividualAudioCallAvatar({required this.peerAvatarImage});
+
+  final ImageProvider<Object>? peerAvatarImage;
+
+  static const double _diameter = 192;
+
+  @override
+  Widget build(BuildContext context) {
+    if (peerAvatarImage == null) {
+      return const _CallPersonAvatar();
+    }
+
+    return ProfileCircleAvatar(
+      radius: _diameter / 2,
+      image: peerAvatarImage,
+      child: Icon(
+        Icons.person,
+        size: _diameter / 2,
+        color: context.colorScheme.onSurface,
+      ),
+    );
+  }
+}
+
+class _SingleRemoteGroupAudioParticipant extends ConsumerWidget {
+  const _SingleRemoteGroupAudioParticipant({
+    required this.participant,
+    required this.contactCard,
+    required this.displayName,
+  });
+
+  final AudioVideoCallParticipant participant;
+  final ContactCard? contactCard;
+  final String displayName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.customColors;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+    final cacheManager = ref.read(cacheManagerProvider);
+    final participantDid = participant.did;
+    final contactStoreCard = participantDid == null || participantDid.isEmpty
+        ? null
+        : ref.watch(
+            contactsServiceProvider.select(
+              (state) =>
+                  state.getContactByChannelDid(participantDid)?.card ??
+                  state.getContactByCardDid(participantDid)?.card,
+            ),
+          );
+    final resolvedContactCard = _bestAvatarCard([
+      contactCard,
+      contactStoreCard,
+    ]);
+    final image =
+        resolvedContactCard?.image(cacheManager: cacheManager) ??
+        defaultProfileImage;
+
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+      decoration: BoxDecoration(
+        color: colors.grey900,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.24)),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ProfileCircleAvatar(radius: 52, image: image),
+            if (displayName.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text(
+                displayName,
+                style: textTheme.titleMedium?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }

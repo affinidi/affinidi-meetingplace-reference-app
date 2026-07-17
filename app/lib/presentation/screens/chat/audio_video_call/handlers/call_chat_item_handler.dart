@@ -14,10 +14,10 @@ import '../rules/call_ui_rules.dart';
 ///   - emits the outgoing item exactly once when this device is the caller,
 ///   - advances the persisted status (calling → ringing → in-progress) as the
 ///     call progresses, using [resolveInProgressCallChatItemStatus],
-///   - writes the terminal status exactly once when the call ends, using the
+///   - writes the final status exactly once when the call ends, using the
 ///     caller role and peer history it tracked off the stream.
 ///
-/// Consumers only [attach] the session and, on a local teardown that races the
+/// Consumers only [attach] the session and, on a self teardown that races the
 /// stream, call [endCall] before disposing. All status resolution lives here so
 /// the foreground screen and the minimized banner can never disagree.
 ///
@@ -60,7 +60,7 @@ class CallChatItemHandler {
   /// The message id of the emitted call chat item, or null if not yet resolved.
   String? get callChatItemId => _callChatItemId;
 
-  /// Whether the terminal status has already been written.
+  /// Whether the final status has already been written.
   bool get callChatItemEnded => _callChatItemEnded;
 
   /// The in-flight end-call chat item write, or null if none has started.
@@ -92,11 +92,11 @@ class CallChatItemHandler {
     _sub = null;
   }
 
-  /// Writes the terminal status now, resolving the outcome from the state
+  /// Writes the final status now, resolving the outcome from the state
   /// tracked off the stream. Idempotent.
   ///
-  /// Used on a local teardown (hang up) that disposes this handler before the
-  /// stream delivers its terminal status. [assumeRole] supplies the caller role
+  /// Used on a self teardown (hang up) that disposes this handler before the
+  /// stream delivers its final status. [assumeRole] supplies the caller role
   /// for the edge case where the stream never reported `ownRole` (e.g. the user
   /// backs out of an outgoing call before it connects).
   void endCall({CallRole? assumeRole}) {
@@ -182,12 +182,12 @@ class CallChatItemHandler {
     );
   }
 
-  void _writeTerminalStatus(AudioVideoCallStatus terminalStatus) {
+  void _writeTerminalStatus(AudioVideoCallStatus finalStatus) {
     if (_callChatItemEnded) return;
     _callChatItemEnded = true;
 
     final outcome = resolveCallEndOutcome(
-      lastStatus: terminalStatus,
+      lastStatus: finalStatus,
       hasHadPeer: _hasHadPeer,
     );
     final isCaller = _isCaller;

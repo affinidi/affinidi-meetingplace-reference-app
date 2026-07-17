@@ -154,7 +154,7 @@ void main() {
       );
 
       test(
-        'terminal status from the stream overrides pending in-progress write',
+        'final status from the stream overrides pending in-progress write',
         () async {
           final updates = <(String, CallStatus)>[];
           final handler = CallChatItemHandler(
@@ -197,7 +197,7 @@ void main() {
             updates.last.$2,
             equals(CallStatus.declined),
             reason:
-                'Terminal status must overwrite any pending in-progress '
+                'Final status must overwrite any pending in-progress '
                 'write',
           );
         },

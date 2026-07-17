@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -9,14 +11,17 @@ import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../application/services/contacts_service/contacts_service.dart';
+import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/extensions/duration_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../../presentation/widgets/action_button.dart';
+import '../../../../presentation/widgets/images/default_profile_image.dart';
 import '../../../../presentation/widgets/profile_circle_avatar.dart';
 import '../../../../presentation/widgets/video_call_background.dart';
+import '../../../../presentation/widgets/video_call_peer_placeholder.dart';
 import '../../../../presentation/widgets/video_call_pip_window.dart';
 import '../../../widgets/call_ended/call_ended_controller.dart';
 import 'audio_video_call_screen_controller.dart';
@@ -28,6 +33,7 @@ part 'audio_call_screen.dart';
 part 'call_draggable_mini_grid.dart';
 part 'call_error_scaffold.dart';
 part 'call_no_answer_screen.dart';
+part 'call_participant_identity.dart';
 part 'call_overlays.dart';
 part 'call_participant_grid.dart';
 part 'call_top_bar.dart';

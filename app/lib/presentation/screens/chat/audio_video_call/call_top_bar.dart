@@ -4,10 +4,27 @@ part of 'audio_video_call_screen.dart';
 ///
 /// Used by both [_AudioCallScreen] and [_VideoCallScreen].
 class _CallTopBar extends ConsumerWidget {
-  const _CallTopBar({required this.contactId, required this.onMinimize});
+  const _CallTopBar({required this.contactId, required this.onMinimize})
+    : trailingIcon = null,
+      onTrailingPressed = null;
+
+  const _CallTopBar.group({required this.contactId, required this.onMinimize})
+    : trailingIcon = Icons.people_alt_outlined,
+      onTrailingPressed = _noop;
+
+  const _CallTopBar.cameraSwitch({
+    required this.contactId,
+    required this.onMinimize,
+    required VoidCallback onSwitchCamera,
+  }) : trailingIcon = Icons.flip_camera_ios,
+       onTrailingPressed = onSwitchCamera;
 
   final String contactId;
   final VoidCallback onMinimize;
+  final IconData? trailingIcon;
+  final VoidCallback? onTrailingPressed;
+
+  static void _noop() {}
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,63 +40,87 @@ class _CallTopBar extends ConsumerWidget {
     );
     final isRinging = phase != CallUiPhase.inCall;
 
-    final colors = context.customColors;
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Stack(
-        alignment: Alignment.center,
+      child: Row(
         children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: onMinimize,
-              child: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: colors.darkGrey,
-                  shape: BoxShape.circle,
+          _CallTopBarActionButton(
+            icon: Icons.close_fullscreen,
+            onPressed: onMinimize,
+          ),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  peerName,
+                  style: textTheme.headlineMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                child: Icon(
-                  Icons.close_fullscreen,
-                  color: colorScheme.onSurface,
-                  size: 22,
+                const SizedBox(height: 4),
+                Text(
+                  switch (phase) {
+                    CallUiPhase.inCall => Duration(
+                      seconds: callDurationSeconds,
+                    ).label,
+                    CallUiPhase.ringing => context.l10n.videoCallRinging,
+                    CallUiPhase.calling ||
+                    CallUiPhase.ended => context.l10n.videoCallCalling,
+                  },
+                  style: textTheme.titleMedium?.copyWith(
+                    color: isRinging
+                        ? colorScheme.onSurface.withAlpha(153)
+                        : colorScheme.onSurface,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
+              ],
             ),
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                peerName,
-                style: textTheme.headlineMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                switch (phase) {
-                  CallUiPhase.inCall => Duration(
-                    seconds: callDurationSeconds,
-                  ).label,
-                  CallUiPhase.ringing => context.l10n.videoCallRinging,
-                  CallUiPhase.calling ||
-                  CallUiPhase.ended => context.l10n.videoCallCalling,
-                },
-                style: textTheme.titleMedium?.copyWith(
-                  color: isRinging
-                      ? colorScheme.onSurface.withAlpha(153)
-                      : colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
+          if (trailingIcon != null && onTrailingPressed != null)
+            _CallTopBarActionButton(
+              icon: trailingIcon!,
+              onPressed: onTrailingPressed!,
+            )
+          else
+            const SizedBox(width: 48, height: 48),
         ],
+      ),
+    );
+  }
+}
+
+class _CallTopBarActionButton extends StatelessWidget {
+  const _CallTopBarActionButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.customColors;
+    final colorScheme = context.colorScheme;
+
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: colors.darkGrey,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: colorScheme.onSurface, size: 22),
       ),
     );
   }
@@ -110,9 +151,11 @@ class _CallTopBarOverlay extends StatelessWidget {
 ///
 /// Used in [_AudioCallScreen] (large center avatar when no profile picture).
 class _CallPersonAvatar extends StatelessWidget {
-  const _CallPersonAvatar();
+  const _CallPersonAvatar({this.isGroup = false});
 
   static const double _diameter = 192;
+
+  final bool isGroup;
 
   @override
   Widget build(BuildContext context) {
@@ -142,9 +185,9 @@ class _CallPersonAvatar extends StatelessWidget {
         ),
       ),
       child: Icon(
-        Icons.person,
+        isGroup ? Icons.group : Icons.person,
         size: _diameter / 2,
-        color: colorScheme.onSurface,
+        color: colors.pureWhite,
       ),
     );
   }

@@ -69,7 +69,7 @@ class CallSessionHandler {
     if (selfHasVideo == true) _cameraHasBeenEnabled = true;
     final isCameraEnabled = _cameraHasBeenEnabled ? selfHasVideo : null;
 
-    // The local audio track publishes shortly after joining, so `hasAudio` is
+    // The self audio track publishes shortly after joining, so `hasAudio` is
     // transiently false right after connect. Latch on first-enabled and report
     // null until then, keeping the unmuted default instead of flashing muted.
     final selfHasAudio = self?.hasAudio;
@@ -80,6 +80,7 @@ class CallSessionHandler {
       AudioVideoCallStateUpdate(
         status: next.status,
         participants: next.participants,
+        participantContactCardsByDid: next.participantContactCardsByDid,
         errorCode: next.errorCode,
         isMicEnabled: isMicEnabled,
         isCameraEnabled: isCameraEnabled,

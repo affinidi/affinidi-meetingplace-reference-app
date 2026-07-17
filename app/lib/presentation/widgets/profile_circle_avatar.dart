@@ -14,7 +14,7 @@ class ProfileCircleAvatar extends StatelessWidget {
         backgroundColor: Colors.transparent,
         radius: radius,
         foregroundImage: image,
-        child: child,
+        child: image == null ? child : null,
       ),
     );
   }
