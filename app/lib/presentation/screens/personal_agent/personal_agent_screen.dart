@@ -142,7 +142,8 @@ class PersonalAgentScreen extends ConsumerWidget {
       } catch (_) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.personalAgentCancelConnectionError(label))),
+          SnackBar(content: Text(l10n.personalAgentCancelConnectionError(
+            label))),
         );
       }
     }
@@ -250,9 +251,11 @@ class _AgentAuthorizationCard extends StatelessWidget {
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final capabilities = snapshot?.capabilities.join(' + ') ?? l10n.personalAgentNotAvailable;
+    final capabilities = snapshot?.capabilities.join(' + ') ?? 
+    l10n.personalAgentNotAvailable;
     final provisionStatus =
-        (snapshot?.provision?['status'] as String?) ?? l10n.personalAgentNotAvailable;
+        (snapshot?.provision?['status'] as String?) ?? 
+        l10n.personalAgentNotAvailable;
     final updatedAt = snapshot?.lastUpdated?.toLocal().toString() ??
         l10n.personalAgentNoSnapshotYet;
 
@@ -308,7 +311,8 @@ class _AgentAuthorizationCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  contact == null ? l10n.personalAgentNotSetUp : l10n.personalAgentConnectedSectionTitle,
+                  contact == null ? l10n.personalAgentNotSetUp :
+                   l10n.personalAgentConnectedSectionTitle,
                   style: textTheme.labelSmall?.copyWith(
                     color: contact == null
                         ? colorScheme.onSurfaceVariant
@@ -326,11 +330,15 @@ class _AgentAuthorizationCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            row(l10n.personalAgentAuthAgentDid, snapshot?.agentDid ?? l10n.personalAgentNotAvailable),
-            row(l10n.personalAgentAuthAclRole, snapshot?.aclRole ?? l10n.personalAgentNotAvailable),
+            row(l10n.personalAgentAuthAgentDid, snapshot?.agentDid ?? 
+            l10n.personalAgentNotAvailable),
+            row(l10n.personalAgentAuthAclRole, snapshot?.aclRole ?? 
+            l10n.personalAgentNotAvailable),
             row(l10n.personalAgentAuthCapabilities, capabilities),
-            row(l10n.personalAgentAuthContextScope, snapshot?.contextScope ?? l10n.personalAgentNotAvailable),
-            row(l10n.personalAgentAuthDomainId, snapshot?.domainId ?? l10n.personalAgentNotAvailable),
+            row(l10n.personalAgentAuthContextScope, snapshot?.contextScope ?? 
+            l10n.personalAgentNotAvailable),
+            row(l10n.personalAgentAuthDomainId, snapshot?.domainId ?? 
+            l10n.personalAgentNotAvailable),
             row(l10n.personalAgentAuthProvision, provisionStatus),
             row(l10n.personalAgentAuthUpdated, updatedAt),
             const SizedBox(height: 12),
