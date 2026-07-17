@@ -1,0 +1,17 @@
+name: meeting_place_livekit_flutter_example
+description: Example app demonstrating meeting_place_livekit_flutter usage.
+publish_to: none
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  meeting_place_livekit_flutter:
+    path: ../
+
+dev_dependencies:
+  dart_flutter_team_lints: ^3.2.1
+  flutter_test:
+    sdk: flutter
