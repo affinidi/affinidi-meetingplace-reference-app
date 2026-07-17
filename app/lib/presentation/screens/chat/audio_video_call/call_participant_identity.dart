@@ -9,7 +9,7 @@ String _displayNameFor(
   AudioVideoCallParticipant participant, {
   required String youLabel,
   required String peerName,
-  required int peerCount,
+  required int remoteCount,
   required Map<String, ContactCard> memberContactCards,
 }) {
   if (participant.isSelf) return youLabel;
@@ -18,7 +18,7 @@ String _displayNameFor(
     memberContactCards: memberContactCards,
   )?.displayName;
   if (name != null && name.isNotEmpty) return name;
-  if (peerCount <= 1) return peerName;
+  if (remoteCount <= 1) return peerName;
   return '';
 }
 
