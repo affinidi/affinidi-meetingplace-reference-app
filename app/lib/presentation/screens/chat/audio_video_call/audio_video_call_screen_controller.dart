@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:meeting_place_core/meeting_place_core.dart' as core;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/contacts_service/contacts_service.dart';
+import '../../../../application/services/contacts_service/contacts_service_state.dart';
 import '../../../../application/services/incoming_call_service/incoming_call_notifier.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -34,12 +36,14 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   MeetingPlaceMatrixSDK? _sdk;
   AudioVideoCallSession? _session;
   CallSessionHandler? _sessionHandler;
+  StreamSubscription<String>? _contactCardUpdatedSub;
   StreamSubscription<CallParticipantEvent>? _participantEventSub;
   StreamSubscription<CallSignal>? _signalSub;
   bool _isDisposed = false;
   bool _isMinimizing = false;
   AudioVideoCallStatus _lastStatus = AudioVideoCallStatus.idle;
   bool _isGroupContact = false;
+  String? _groupOfferLink;
 
   // Resolved once in build() from the contact's channel DID (falling back to
   // contactId). Cached as a field so disposal-safe paths never read ref.
@@ -58,6 +62,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   // True once the SDK reports this device opened the call (CallRole.caller).
   // Drives end-status resolution; the chat item itself is gated by the emitter.
   bool _isCaller = false;
+  Set<String> _groupMemberDids = const <String>{};
 
   late final CallLifecycleHandler _lifecycleHandler;
   late final CallMediaToggleHandler _mediaHandler;
@@ -75,6 +80,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   AudioVideoCallScreenState build(String contactId) {
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
     _isGroupContact = contact?.isGroup ?? false;
+    _groupOfferLink = contact?.offerLink;
     _cachedChannelDid = contact?.channelDid ?? contactId;
     _cachedPeerName = contact?.displayName ?? contact?.card.displayName ?? '';
     final incomingEvent = ref.read(incomingCallProvider).eventOrNull;
@@ -84,6 +90,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
         incomingEvent.otherPartyPermanentChannelDid == expectedOtherPartyDid;
 
     if (_isGroupContact && contact != null) {
+      _subscribeToGroupMemberCardUpdates();
       unawaited(_loadGroupMemberNames(contact.offerLink));
     }
 
@@ -177,6 +184,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     ref.onDispose(() {
       _isDisposed = true;
       _sessionHandler?.dispose();
+      _contactCardUpdatedSub?.cancel();
       _participantEventSub?.cancel();
       if (!_isMinimizing) {
         logger.info(
@@ -535,7 +543,18 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     }
 
     final nextParticipants = update.participants ?? state.participants;
+    final nextMemberContactCards = _mergeMemberContactCards(
+      update.participantContactCardsByDid,
+    );
     final anyHasVideo = nextParticipants.any((p) => p.hasVideo);
+
+    _groupMemberDids = {
+      ..._groupMemberDids,
+      ...nextParticipants
+          .map((participant) => participant.did)
+          .whereType<String>(),
+      ...nextMemberContactCards.keys,
+    };
 
     final nextStatus = isEndedCallStatus(state.status)
         ? state.status
@@ -544,6 +563,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     state = state.copyWith(
       status: nextStatus,
       participants: nextParticipants,
+      memberContactCards: nextMemberContactCards,
       errorCode: update.errorCode,
       isMicEnabled: update.isMicEnabled ?? state.isMicEnabled,
       isCameraEnabled: update.isCameraEnabled ?? state.isCameraEnabled,
@@ -658,16 +678,26 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     );
   }
 
-  /// Fetches and caches group member contact cards by their DIDs.
+  /// Loads the initial group member cards before the first SDK state update
+  /// arrives.
   Future<void> _loadGroupMemberNames(String offerLink) async {
     try {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
       final group = await sdk.getGroupByOfferLink(offerLink);
       if (group == null || _isDisposed) return;
-      final cards = <String, ContactCard>{
-        for (final member in group.members)
-          member.did: ContactCardUtils.fromSdkContactCard(member.contactCard),
-      };
+      final contactsState = ref.read(contactsServiceProvider);
+      final cards = <String, ContactCard>{...state.memberContactCards};
+      for (final member in group.members) {
+        final resolvedCard = _resolveGroupMemberContactCard(
+          memberDid: member.did,
+          groupCard: ContactCardUtils.fromSdkContactCard(member.contactCard),
+          contactsState: contactsState,
+        );
+        if (resolvedCard != null) {
+          cards.putIfAbsent(member.did, () => resolvedCard);
+        }
+      }
+      _groupMemberDids = {..._groupMemberDids, ...cards.keys};
       if (_isDisposed) return;
       state = state.copyWith(memberContactCards: cards);
     } catch (e, stackTrace) {
@@ -683,6 +713,87 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
         );
       }
     }
+  }
+
+  /// Keeps the group member card cache in sync with contact-card updates.
+  void _subscribeToGroupMemberCardUpdates() {
+    _contactCardUpdatedSub?.cancel();
+    _contactCardUpdatedSub = ref
+        .read(contactsServiceProvider.notifier)
+        .onContactCardUpdated
+        .listen(_onGroupMemberContactCardUpdated);
+  }
+
+  /// Refreshes one group member card when the contacts store updates it.
+  void _onGroupMemberContactCardUpdated(String did) {
+    if (_isDisposed || !ref.mounted || !_groupMemberDids.contains(did)) return;
+    final contactsState = ref.read(contactsServiceProvider);
+    final liveContact =
+        contactsState.getContactByChannelDid(did) ??
+        contactsState.getContactByCardDid(did);
+    if (liveContact == null) {
+      unawaited(_refreshGroupMemberContactCard(did));
+      return;
+    }
+    final updatedCard = _resolveGroupMemberContactCard(
+      memberDid: did,
+      groupCard: state.memberContactCards[did],
+      contactsState: contactsState,
+    );
+    if (updatedCard == null) return;
+    state = state.copyWith(
+      memberContactCards: {...state.memberContactCards, did: updatedCard},
+    );
+  }
+
+  /// Fetches and updates a group member's contact card from the SDK.
+  Future<void> _refreshGroupMemberContactCard(String did) async {
+    final offerLink = _groupOfferLink;
+    if (offerLink == null || _isDisposed || !ref.mounted) return;
+
+    final sdk = await ref.read(meetingPlaceSdkProvider.future);
+    final group = await sdk.getGroupByOfferLink(offerLink);
+    if (group == null || _isDisposed || !ref.mounted) return;
+
+    final member = group.members
+        .where((member) => member.did == did)
+        .firstOrNull;
+    if (member == null) return;
+
+    state = state.copyWith(
+      memberContactCards: {
+        ...state.memberContactCards,
+        did: ContactCardUtils.fromSdkContactCard(member.contactCard),
+      },
+    );
+  }
+
+  /// Resolves the best available contact card for a group member DID.
+  ContactCard? _resolveGroupMemberContactCard({
+    required String memberDid,
+    required ContactsServiceState contactsState,
+    ContactCard? groupCard,
+  }) {
+    final liveContact =
+        contactsState.getContactByChannelDid(memberDid) ??
+        contactsState.getContactByCardDid(memberDid);
+    return liveContact?.card ?? groupCard;
+  }
+
+  /// Adds the initial SDK participant cards without overwriting newer live
+  /// contact cards.
+  Map<String, ContactCard> _mergeMemberContactCards(
+    Map<String, core.ContactCard>? sdkCards,
+  ) {
+    if (sdkCards == null || sdkCards.isEmpty) return state.memberContactCards;
+    final mergedCards = <String, ContactCard>{...state.memberContactCards};
+    for (final entry in sdkCards.entries) {
+      mergedCards.putIfAbsent(
+        entry.key,
+        () => ContactCardUtils.fromSdkContactCard(entry.value),
+      );
+    }
+    return mergedCards;
   }
 
   /// Syncs screen state to the banner controller,

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as core;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
@@ -206,6 +208,32 @@ void main() {
       await pumpEventQueue();
 
       expect(updates.single.ownRole, isNull);
+    });
+  });
+
+  group('participant contact cards passthrough', () {
+    test('emits participant contact cards from session state', () async {
+      handler.attach(session);
+
+      final card = core.ContactCard(
+        did: 'did:test:peer',
+        type: 'individual',
+        contactInfo: {'name': 'Peer'},
+      );
+
+      session.emit(
+        AudioVideoCallState(
+          status: AudioVideoCallStatus.active,
+          participants: [_selfParticipant(), _peerParticipant('peer')],
+          participantContactCardsByDid: {'did:test:peer': card},
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(
+        updates.single.participantContactCardsByDid?['did:test:peer'],
+        same(card),
+      );
     });
   });
 

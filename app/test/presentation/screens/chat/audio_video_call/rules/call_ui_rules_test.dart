@@ -3,7 +3,7 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
 
 AudioVideoCallParticipant _selfParticipant() => const AudioVideoCallParticipant(
-  participantId: 'local',
+  participantId: 'self',
   isSelf: true,
   hasVideo: false,
   hasAudio: true,
@@ -45,7 +45,7 @@ void main() {
       expect(isLiveCallStatus(AudioVideoCallStatus.outgoingRinging), isFalse);
     });
 
-    test('returns false for terminal statuses', () {
+    test('returns false for final statuses', () {
       expect(isLiveCallStatus(AudioVideoCallStatus.ended), isFalse);
       expect(isLiveCallStatus(AudioVideoCallStatus.disconnected), isFalse);
       expect(isLiveCallStatus(AudioVideoCallStatus.error), isFalse);
@@ -75,7 +75,7 @@ void main() {
       expect(isEndedCallStatus(AudioVideoCallStatus.declined), isTrue);
     });
 
-    test('returns false for non-terminal statuses', () {
+    test('returns false for non-final statuses', () {
       expect(isEndedCallStatus(AudioVideoCallStatus.idle), isFalse);
       expect(isEndedCallStatus(AudioVideoCallStatus.connecting), isFalse);
       expect(isEndedCallStatus(AudioVideoCallStatus.outgoingRinging), isFalse);
@@ -85,16 +85,16 @@ void main() {
     });
   });
 
-  group('hasRemoteParticipant', () {
+  group('hasPeerParticipant', () {
     test('returns false for empty list', () {
-      expect(hasRemoteParticipant([]), isFalse);
+      expect(hasPeerParticipant([]), isFalse);
     });
 
-    test('returns false when only local participant present', () {
+    test('returns false when only self participant present', () {
       expect(
-        hasRemoteParticipant([
+        hasPeerParticipant([
           const AudioVideoCallParticipant(
-            participantId: 'local',
+            participantId: 'self',
             isSelf: true,
             hasVideo: false,
             hasAudio: true,
@@ -105,18 +105,18 @@ void main() {
       );
     });
 
-    test('returns true when remote participant present', () {
+    test('returns true when peer participant present', () {
       expect(
-        hasRemoteParticipant([
+        hasPeerParticipant([
           const AudioVideoCallParticipant(
-            participantId: 'local',
+            participantId: 'self',
             isSelf: true,
             hasVideo: false,
             hasAudio: true,
             isSpeaking: false,
           ),
           const AudioVideoCallParticipant(
-            participantId: 'remote-1',
+            participantId: 'peer-1',
             isSelf: false,
             hasVideo: true,
             hasAudio: true,
@@ -127,25 +127,25 @@ void main() {
       );
     });
 
-    test('returns true with multiple remotes', () {
+    test('returns true with multiple peers', () {
       expect(
-        hasRemoteParticipant([
+        hasPeerParticipant([
           const AudioVideoCallParticipant(
-            participantId: 'local',
+            participantId: 'self',
             isSelf: true,
             hasVideo: false,
             hasAudio: true,
             isSpeaking: false,
           ),
           const AudioVideoCallParticipant(
-            participantId: 'remote-1',
+            participantId: 'peer-1',
             isSelf: false,
             hasVideo: true,
             hasAudio: true,
             isSpeaking: false,
           ),
           const AudioVideoCallParticipant(
-            participantId: 'remote-2',
+            participantId: 'peer-2',
             isSelf: false,
             hasVideo: true,
             hasAudio: false,
@@ -262,7 +262,7 @@ void main() {
   });
 
   group('resolveCallUiPhase', () {
-    test('returns ended for terminal statuses regardless of hasHadPeer', () {
+    test('returns ended for final statuses regardless of hasHadPeer', () {
       expect(
         resolveCallUiPhase(
           status: AudioVideoCallStatus.ended,
@@ -371,7 +371,7 @@ void main() {
       expect(resolveCallEndState(AudioVideoCallStatus.error), isNull);
     });
 
-    test('returns null for non-terminal statuses', () {
+    test('returns null for non-final statuses', () {
       expect(resolveCallEndState(AudioVideoCallStatus.idle), isNull);
       expect(resolveCallEndState(AudioVideoCallStatus.active), isNull);
     });

@@ -88,6 +88,26 @@ void main() {
     });
   });
 
+  group('primaryParticipantForMinimizedVideoCall', () {
+    test('returns the first remote participant', () {
+      final participant = primaryParticipantForMinimizedVideoCall([
+        _selfParticipant(),
+        _peerParticipant('peer-1'),
+        _peerParticipant('peer-2'),
+      ]);
+
+      expect(participant?.participantId, 'peer-1');
+    });
+
+    test('returns null when only self is present', () {
+      final participant = primaryParticipantForMinimizedVideoCall([
+        _selfParticipant(),
+      ]);
+
+      expect(participant, isNull);
+    });
+  });
+
   group('resolveCallUiPhase', () {
     test('is ended for terminal statuses regardless of latch', () {
       expect(
