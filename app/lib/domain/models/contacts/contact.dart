@@ -59,6 +59,7 @@ class Contact {
     this.hasBeenOpened = false,
     this.lastKeepAliveMessage,
     this.notificationBannerDismissed = false,
+    this.personalAgentAuthorizationSnapshot,
   });
 
   @CopyWithField(immutable: true)
@@ -82,6 +83,7 @@ class Contact {
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;
   final bool notificationBannerDismissed;
+  final String? personalAgentAuthorizationSnapshot;
 
   bool get isGroup => type == ContactType.group;
   bool get isIndividual => type == ContactType.individual;

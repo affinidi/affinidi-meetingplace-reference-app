@@ -2091,6 +2091,46 @@
 	"personalAgentDefaultConnectingLabel": "agent",
 	"personalAgentWorkAgentTitle": "Work Agent",
 	"personalAgentPersonalAgentTitle": "Personal Agent",
+	"personalAgentMyWorkAiTitle": "My Work AI",
+	"personalAgentWorkContextLabel": "Work (ctx 0)",
+	"personalAgentMyPersonalAiTitle": "My Personal AI",
+	"personalAgentPersonalContextLabel": "Personal (ctx 1)",
+	"personalAgentCancelConnectionTitle": "Cancel {label} connection?",
+	"@personalAgentCancelConnectionTitle": {
+		"placeholders": {
+			"label": { "type": "String" }
+		}
+	},
+	"personalAgentCancelConnectionContent": "This will remove your connection to the {agentLabel}.",
+	"@personalAgentCancelConnectionContent": {
+		"placeholders": {
+			"agentLabel": { "type": "String" }
+		}
+	},
+	"personalAgentKeepConnection": "Keep connection",
+	"personalAgentCancelConnection": "Cancel connection",
+	"personalAgentConnectionCancelled": "{label} connection cancelled.",
+	"@personalAgentConnectionCancelled": {
+		"placeholders": {
+			"label": { "type": "String" }
+		}
+	},
+	"personalAgentCancelConnectionError": "Unable to cancel {label} connection.",
+	"@personalAgentCancelConnectionError": {
+		"placeholders": {
+			"label": { "type": "String" }
+		}
+	},
+	"personalAgentNotAvailable": "Not available",
+	"personalAgentNoSnapshotYet": "No snapshot yet",
+	"personalAgentNotSetUp": "Not set up",
+	"personalAgentAuthAgentDid": "Agent DID",
+	"personalAgentAuthAclRole": "ACL role",
+	"personalAgentAuthCapabilities": "Capabilities",
+	"personalAgentAuthContextScope": "Context scope",
+	"personalAgentAuthDomainId": "Domain ID",
+	"personalAgentAuthProvision": "Provision",
+	"personalAgentAuthUpdated": "Updated",
 	"mnemonicErrorOccurred": "An error occurred.",
 	"mnemonicEntrySelectionTitle": "How would you like\nto enter your wallet?",
 	"mnemonicScanQrTitle": "Scan QR Code",

@@ -51,7 +51,7 @@ class ContactsDatabase extends _$ContactsDatabase {
   ContactsDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -184,6 +184,21 @@ class ContactsDatabase extends _$ContactsDatabase {
           ),
         );
       }
+
+      if (from < 6) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+
+        final authSnapshotExists = result.any(
+          (row) => row.data['name'] == 'personal_agent_authorization_snapshot',
+        );
+
+        if (!authSnapshotExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN '
+            'personal_agent_authorization_snapshot TEXT',
+          );
+        }
+      }
     },
   );
 }
@@ -210,6 +225,7 @@ class Contacts extends Table {
   DateTimeColumn get lastKeepAliveMessage => dateTime().nullable()();
   BoolColumn get notificationBannerDismissed =>
       boolean().clientDefault(() => false)();
+  TextColumn get personalAgentAuthorizationSnapshot => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

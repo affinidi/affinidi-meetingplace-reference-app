@@ -19,6 +19,7 @@ import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/chat_service/context_route_attachment_builder_service.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
+import '../../../application/services/personal_ai_service/personal_ai_service.dart';
 import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
@@ -313,6 +314,15 @@ class ChatScreenController extends _$ChatScreenController
     }
 
     await _restoreUnsentMessage();
+
+    final channelDid = state.contact?.channelDid?.trim();
+    if (channelDid != null && channelDid.isNotEmpty) {
+      unawaited(
+        ref
+            .read(personalAiServiceProvider.notifier)
+            .refreshAuthorizationSnapshotForChannel(channelDid),
+      );
+    }
   }
 
   @override

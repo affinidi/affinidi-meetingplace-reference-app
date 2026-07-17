@@ -2286,6 +2286,74 @@ class AppLocalizationsDe extends AppLocalizations {
   String get personalAgentPersonalAgentTitle => 'Personal Agent';
 
   @override
+  String get personalAgentMyWorkAiTitle => 'Meine Work-KI';
+
+  @override
+  String get personalAgentWorkContextLabel => 'Work (Kontext 0)';
+
+  @override
+  String get personalAgentMyPersonalAiTitle => 'Meine persönliche KI';
+
+  @override
+  String get personalAgentPersonalContextLabel => 'Persönlich (Kontext 1)';
+
+  @override
+  String personalAgentCancelConnectionTitle(String label) {
+    return '$label-Verbindung abbrechen?';
+  }
+
+  @override
+  String personalAgentCancelConnectionContent(String agentLabel) {
+    return 'Dies entfernt Ihre Verbindung zum $agentLabel.';
+  }
+
+  @override
+  String get personalAgentKeepConnection => 'Verbindung behalten';
+
+  @override
+  String get personalAgentCancelConnection => 'Verbindung abbrechen';
+
+  @override
+  String personalAgentConnectionCancelled(String label) {
+    return '$label-Verbindung abgebrochen.';
+  }
+
+  @override
+  String personalAgentCancelConnectionError(String label) {
+    return '$label-Verbindung konnte nicht abgebrochen werden.';
+  }
+
+  @override
+  String get personalAgentNotAvailable => 'Nicht verfügbar';
+
+  @override
+  String get personalAgentNoSnapshotYet => 'Noch kein Snapshot';
+
+  @override
+  String get personalAgentNotSetUp => 'Nicht eingerichtet';
+
+  @override
+  String get personalAgentAuthAgentDid => 'Agent-DID';
+
+  @override
+  String get personalAgentAuthAclRole => 'ACL-Rolle';
+
+  @override
+  String get personalAgentAuthCapabilities => 'Fähigkeiten';
+
+  @override
+  String get personalAgentAuthContextScope => 'Kontext-Umfang';
+
+  @override
+  String get personalAgentAuthDomainId => 'Domain-ID';
+
+  @override
+  String get personalAgentAuthProvision => 'Bereitstellung';
+
+  @override
+  String get personalAgentAuthUpdated => 'Aktualisiert';
+
+  @override
   String get mnemonicErrorOccurred => 'Ein Fehler ist aufgetreten.';
 
   @override
