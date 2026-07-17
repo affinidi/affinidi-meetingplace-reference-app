@@ -37,11 +37,6 @@ class ContactCardProtocolHandler implements ChatProtocolHandler {
 
   @override
   Future<void> handle(StreamData data, String channelDid) async {
-    if (_isGroupChat()) {
-      _onGroupDetailsUpdated(data.event!, channelDid);
-      return;
-    }
-
     if (data.event is! ChatContactDetailsUpdateEvent) {
       throw AppException(
         'Unexpected event type: ${data.event.runtimeType}',
@@ -49,6 +44,14 @@ class ContactCardProtocolHandler implements ChatProtocolHandler {
       );
     }
     final event = data.event as ChatContactDetailsUpdateEvent;
+
+    if (_isGroupChat()) {
+      _ref
+          .read(contactsServiceProvider.notifier)
+          .notifyContactCardUpdated(event.senderDid);
+      _onGroupDetailsUpdated(event, channelDid);
+      return;
+    }
 
     final domainCard = ContactCardUtils.fromSdkContactCard(event.contactCard);
     _logger.info('Received contact card update', name: _logKey);

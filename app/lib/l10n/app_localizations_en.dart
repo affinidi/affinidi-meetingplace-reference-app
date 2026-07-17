@@ -2181,4 +2181,25 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get groupCallWaitingForOthers => 'Waiting for others...';
+
+  @override
+  String get groupCallParticipant => 'participant';
+
+  @override
+  String get groupCallParticipants => 'participants';
+
+  @override
+  String get groupCallEndCall => 'End Call';
+
+  @override
+  String get groupCallNoParticipants => 'No participants';
+
+  @override
+  String get groupCallMute => 'Mute';
+
+  @override
+  String get groupCallLeave => 'Leave';
 }

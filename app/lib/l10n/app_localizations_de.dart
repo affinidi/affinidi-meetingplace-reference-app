@@ -2229,4 +2229,25 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get groupCallWaitingForOthers => 'Warte auf andere...';
+
+  @override
+  String get groupCallParticipant => 'Teilnehmer';
+
+  @override
+  String get groupCallParticipants => 'Teilnehmer';
+
+  @override
+  String get groupCallEndCall => 'Anruf beenden';
+
+  @override
+  String get groupCallNoParticipants => 'Keine Teilnehmer';
+
+  @override
+  String get groupCallMute => 'Stummschalten';
+
+  @override
+  String get groupCallLeave => 'Verlassen';
 }
