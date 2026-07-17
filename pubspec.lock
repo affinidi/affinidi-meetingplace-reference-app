@@ -1401,8 +1401,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_control_plane"
-      ref: "874eab88fc65f6ecb33967c7f8ec7d2fcc42b855"
-      resolved-ref: "874eab88fc65f6ecb33967c7f8ec7d2fcc42b855"
+      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.22"
@@ -1410,8 +1410,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_core"
-      ref: "874eab88fc65f6ecb33967c7f8ec7d2fcc42b855"
-      resolved-ref: "874eab88fc65f6ecb33967c7f8ec7d2fcc42b855"
+      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.46"
@@ -1419,8 +1419,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_credentials"
-      ref: "874eab88fc65f6ecb33967c7f8ec7d2fcc42b855"
-      resolved-ref: "874eab88fc65f6ecb33967c7f8ec7d2fcc42b855"
+      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.11"
@@ -1444,8 +1444,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_mediator"
-      ref: "874eab88fc65f6ecb33967c7f8ec7d2fcc42b855"
-      resolved-ref: "874eab88fc65f6ecb33967c7f8ec7d2fcc42b855"
+      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.16"
