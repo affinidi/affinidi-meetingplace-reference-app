@@ -55,6 +55,10 @@ final chatSdkProvider = FutureProvider.autoDispose
             deleteMessageWindow: Duration(
               seconds: environment.deleteMessageWindowInSeconds,
             ),
+            resolveCurrentContactCard: () => identitiesService
+                .getIdentityById(channel.externalRef)
+                ?.card
+                .toSdkContactCard(),
           ),
           card: sdkContactCard,
         );
