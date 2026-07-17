@@ -71,6 +71,7 @@ class IdentitiesScreen extends ConsumerWidget {
 class _IdentitiesPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final provider = identitiesScreenControllerProvider;
     final shouldSetupPrimaryIdentity = ref.watch(
       provider.select((state) => state.shouldSetupPrimaryIdentity),
@@ -101,14 +102,14 @@ class _IdentitiesPanel extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Set up my agent',
+                      l10n.identitiesSetupMyAgent,
                       style: context.textTheme.titleMedium?.copyWith(
                         color: context.colorScheme.onPrimaryContainer,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Choose Work or Personal in the Agent tab.',
+                      l10n.identitiesSetupPromptDescription,
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onPrimaryContainer,
                       ),
@@ -156,8 +157,8 @@ class _IdentitiesPanel extends ConsumerWidget {
                               : const Icon(Icons.smart_toy_outlined),
                           label: Text(
                             personalAiState.isSettingUp
-                                ? 'Setting Up...'
-                                : 'Set up my agent',
+                                ? l10n.identitiesSettingUp
+                                : l10n.identitiesSetupMyAgent,
                           ),
                         ),
                         TextButton(
@@ -168,7 +169,7 @@ class _IdentitiesPanel extends ConsumerWidget {
                           onPressed: personalAiState.isSettingUp
                               ? null
                               : personalAiController.dismissSetupPrompt,
-                          child: const Text('Not now'),
+                          child: Text(l10n.identitiesNotNow),
                         ),
                       ],
                     ),
@@ -244,6 +245,7 @@ class _ActionsBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final controller = ref.read(identitiesScreenControllerProvider.notifier);
     final shouldShowFilter = ref.watch(
       identitiesScreenControllerProvider.select(
@@ -288,8 +290,8 @@ class _ActionsBar extends ConsumerWidget {
                     : Icons.smart_toy_outlined,
               ),
               tooltip: personalAiState.isReady
-                  ? 'Agent configured'
-                  : 'Set up my agent',
+                  ? l10n.identitiesAgentConfiguredTooltip
+                  : l10n.identitiesSetupMyAgent,
               onPressed: () {
                 personalAiController.dismissSetupPrompt();
                 const PersonalAgentRoute().go(context);

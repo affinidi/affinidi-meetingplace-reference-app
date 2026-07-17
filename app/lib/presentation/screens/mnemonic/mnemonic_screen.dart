@@ -17,6 +17,7 @@ class MnemonicScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
 
@@ -44,7 +45,7 @@ class MnemonicScreen extends HookConsumerWidget {
         mode.value = _Mode.success;
       } else {
         final errorMessage =
-            ref.read(provider).errorMessage ?? 'An error occurred.';
+            ref.read(provider).errorMessage ?? l10n.mnemonicErrorOccurred;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMessage),
@@ -101,7 +102,7 @@ class MnemonicScreen extends HookConsumerWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Meeting Place',
+          l10n.appName,
           textAlign: TextAlign.center,
           style: textTheme.bodyLarge,
         ),
@@ -153,7 +154,7 @@ class MnemonicScreen extends HookConsumerWidget {
                       children: [
                         header(),
                         Text(
-                          'How would you like\nto enter your wallet?',
+                          l10n.mnemonicEntrySelectionTitle,
                           textAlign: TextAlign.center,
                           style: textTheme.headlineMedium?.copyWith(
                             color: Colors.white,
@@ -177,18 +178,16 @@ class MnemonicScreen extends HookConsumerWidget {
                         const SizedBox(height: 24),
                         _OptionCard(
                           icon: Icons.qr_code_scanner,
-                          title: 'Scan QR Code',
-                          subtitle: 'Use your camera to scan a wallet QR code',
+                          title: l10n.mnemonicScanQrTitle,
+                          subtitle: l10n.mnemonicScanQrSubtitle,
                           enabled: isCameraAvailable,
                           onTap: onScanQr,
                         ),
                         const SizedBox(height: 12),
                         _OptionCard(
                           icon: Icons.keyboard_alt_outlined,
-                          title: 'Enter manually',
-                          subtitle:
-                              'Type the mnemonic phrase'
-                              ' that was shared with you',
+                          title: l10n.mnemonicEnterManuallyTitle,
+                          subtitle: l10n.mnemonicEnterManuallySubtitle,
                           onTap: () => mode.value = _Mode.manual,
                         ),
                         if (state.isLoading) ...[
@@ -238,7 +237,7 @@ class MnemonicScreen extends HookConsumerWidget {
                     children: [
                       header(showBack: true),
                       Text(
-                        'Enter your mnemonic',
+                        l10n.mnemonicManualEntryTitle,
                         textAlign: TextAlign.center,
                         style: textTheme.titleMedium?.copyWith(
                           color: Colors.white,
@@ -247,7 +246,7 @@ class MnemonicScreen extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Enter the mnemonic phrase that was shared with you.',
+                        l10n.mnemonicManualEntrySubtitle,
                         textAlign: TextAlign.center,
                         style: textTheme.bodyMedium?.copyWith(
                           color: Colors.white70,
@@ -266,7 +265,7 @@ class MnemonicScreen extends HookConsumerWidget {
                           color: Colors.white,
                         ),
                         decoration: InputDecoration(
-                          hintText: 'word1 word2 word3 ...',
+                          hintText: l10n.mnemonicManualHint,
                           hintStyle: textTheme.bodyMedium?.copyWith(
                             color: Colors.white38,
                           ),
@@ -312,9 +311,9 @@ class MnemonicScreen extends HookConsumerWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            'Continue',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            child: Text(
+                              l10n.mnemonicContinue,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                       const Spacer(),
@@ -405,7 +404,7 @@ class _SuccessScreen extends HookWidget {
                   child: Column(
                     children: [
                       Text(
-                        'You\'re all set!',
+                        context.l10n.mnemonicSuccessTitle,
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
                               color: Colors.white,
@@ -414,7 +413,7 @@ class _SuccessScreen extends HookWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '''Enjoy MeetingPlace and get engaged\nwith your personal AI agent.''',
+                        context.l10n.mnemonicSuccessSubtitle,
                         textAlign: TextAlign.center,
                         style: Theme.of(
                           context,

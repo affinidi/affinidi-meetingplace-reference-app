@@ -2132,4 +2132,147 @@ class AppLocalizationsEn extends AppLocalizations {
   String vrcResponderIntro(Object name) {
     return '$name has selected the following persona to verify the relationship:';
   }
+
+  @override
+  String get agentContextWorkAiLabel => 'Work AI';
+
+  @override
+  String get agentContextPersonalAiLabel => 'Personal AI';
+
+  @override
+  String contactsChannelContextSet(String label) {
+    return 'Channel context set to $label';
+  }
+
+  @override
+  String chatContextUploaded(String label, String fileName) {
+    return '$label context uploaded: $fileName';
+  }
+
+  @override
+  String chatUploadFileFirst(String fileName) {
+    return 'Upload $fileName first.';
+  }
+
+  @override
+  String chatChannelUsesContext(String label) {
+    return 'Channel now uses $label.';
+  }
+
+  @override
+  String get chatMenuUseWorkAi => 'Use Work AI';
+
+  @override
+  String get chatMenuUsePersonalAi => 'Use Personal AI';
+
+  @override
+  String get chatMenuUploadWorkContext => 'Upload work-context.txt';
+
+  @override
+  String get chatMenuReuploadWorkContext => 'Re-upload work-context.txt';
+
+  @override
+  String get chatMenuUploadPersonalContext => 'Upload personal-context.txt';
+
+  @override
+  String get chatMenuReuploadPersonalContext =>
+      'Re-upload personal-context.txt';
+
+  @override
+  String get identitiesSetupMyAgent => 'Set up my agent';
+
+  @override
+  String get identitiesSetupPromptDescription =>
+      'Choose Work or Personal in the Agent tab.';
+
+  @override
+  String get identitiesSettingUp => 'Setting Up...';
+
+  @override
+  String get identitiesNotNow => 'Not now';
+
+  @override
+  String get identitiesAgentConfiguredTooltip => 'Agent configured';
+
+  @override
+  String get personalAgentNoContextCreated => 'No context created';
+
+  @override
+  String personalAgentContextUploadedSnackBar(String label, String fileName) {
+    return '$label uploaded: $fileName';
+  }
+
+  @override
+  String get personalAgentSetupSectionSubtitle =>
+      'Set up your AI. Choose what context to set up.';
+
+  @override
+  String get personalAgentChooseFileToSetUp => 'Choose a file to set up';
+
+  @override
+  String personalAgentAlreadySetUp(String fileName) {
+    return 'Already set up: $fileName';
+  }
+
+  @override
+  String get personalAgentSetupCardTitle => 'Set up your AI';
+
+  @override
+  String get personalAgentSetupCardDescription =>
+      'Choose what context to set up.';
+
+  @override
+  String personalAgentConnecting(String label) {
+    return 'Connecting $label...';
+  }
+
+  @override
+  String get personalAgentDefaultConnectingLabel => 'agent';
+
+  @override
+  String get personalAgentWorkAgentTitle => 'Work Agent';
+
+  @override
+  String get personalAgentPersonalAgentTitle => 'Personal Agent';
+
+  @override
+  String get mnemonicErrorOccurred => 'An error occurred.';
+
+  @override
+  String get mnemonicEntrySelectionTitle =>
+      'How would you like\nto enter your wallet?';
+
+  @override
+  String get mnemonicScanQrTitle => 'Scan QR Code';
+
+  @override
+  String get mnemonicScanQrSubtitle =>
+      'Use your camera to scan a wallet QR code';
+
+  @override
+  String get mnemonicEnterManuallyTitle => 'Enter manually';
+
+  @override
+  String get mnemonicEnterManuallySubtitle =>
+      'Type the mnemonic phrase that was shared with you';
+
+  @override
+  String get mnemonicManualEntryTitle => 'Enter your mnemonic';
+
+  @override
+  String get mnemonicManualEntrySubtitle =>
+      'Enter the mnemonic phrase that was shared with you.';
+
+  @override
+  String get mnemonicManualHint => 'word1 word2 word3 ...';
+
+  @override
+  String get mnemonicContinue => 'Continue';
+
+  @override
+  String get mnemonicSuccessTitle => 'You\'re all set!';
+
+  @override
+  String get mnemonicSuccessSubtitle =>
+      'Enjoy MeetingPlace and get engaged\nwith your personal AI agent.';
 }
