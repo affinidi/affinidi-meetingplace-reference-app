@@ -621,10 +621,10 @@ packages:
     dependency: transitive
     description:
       name: dlibphonenumber
-      sha256: "17c5b080729641c31eb9a987adb1912ce3bf173d819b7ef79a163eb66d087c79"
+      sha256: "57fab742d305fb1ef943d2471183a8fb8915c05575d5a880aee32cdbf8008efe"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.67"
+    version: "1.1.68"
   drift:
     dependency: transitive
     description:
@@ -1336,9 +1336,11 @@ packages:
   meeting_place_chat:
     dependency: "direct overridden"
     description:
-      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat"
-      relative: true
-    source: path
+      path: "packages/meeting_place_chat"
+      ref: "38cdd9bac07d4846639cd12a1982fce0b971e96e"
+      resolved-ref: "38cdd9bac07d4846639cd12a1982fce0b971e96e"
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
     version: "0.0.1-dev.50"
   meeting_place_control_plane:
     dependency: "direct overridden"
@@ -1352,9 +1354,11 @@ packages:
   meeting_place_core:
     dependency: "direct overridden"
     description:
-      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_core"
-      relative: true
-    source: path
+      path: "packages/meeting_place_core"
+      ref: "38cdd9bac07d4846639cd12a1982fce0b971e96e"
+      resolved-ref: "38cdd9bac07d4846639cd12a1982fce0b971e96e"
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
     version: "0.0.1-dev.43"
   meeting_place_credentials:
     dependency: "direct overridden"
@@ -1368,9 +1372,11 @@ packages:
   meeting_place_drift_repository:
     dependency: "direct overridden"
     description:
-      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository"
-      relative: true
-    source: path
+      path: "packages/meeting_place_drift_repository"
+      ref: "38cdd9bac07d4846639cd12a1982fce0b971e96e"
+      resolved-ref: "38cdd9bac07d4846639cd12a1982fce0b971e96e"
+      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
+    source: git
     version: "0.0.1-dev.50"
   meeting_place_mediator:
     dependency: "direct overridden"
@@ -1416,10 +1422,10 @@ packages:
     dependency: transitive
     description:
       name: mobile_scanner
-      sha256: "30f7dc342094eb257ead933572f7e442dfd9d8aa6f3fa5506c3206f7837d1615"
+      sha256: ce3f059ebd6dbfab7292bba0e893e354b46730636820d3c9ef69005ce2d55bce
       url: "https://pub.dev"
     source: hosted
-    version: "7.2.1"
+    version: "7.4.0"
   mockito:
     dependency: transitive
     description:
@@ -1648,10 +1654,10 @@ packages:
     dependency: transitive
     description:
       name: pie_menu
-      sha256: "4628a0c83a7c0237b3f6e70785cb91fa530ea9f052450cb4632ccbe4e490a858"
+      sha256: "513d4a0a7a8af2791027b9c0956967ad3f62810f4b8337dc7ad45c8104615c08"
       url: "https://pub.dev"
     source: hosted
-    version: "3.8.1"
+    version: "3.8.2"
   pinenacl:
     dependency: transitive
     description:
@@ -2381,10 +2387,10 @@ packages:
     dependency: transitive
     description:
       name: video_player_android
-      sha256: "5121de08444d00363efdda630a69ad4d27a208a9f7586482d4909a44a1cdbc63"
+      sha256: e229676f8fade3e0124482495aaa2b548872cc4018b6268adfca4868be16aa74
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.0"
+    version: "2.12.0"
   video_player_avfoundation:
     dependency: transitive
     description:

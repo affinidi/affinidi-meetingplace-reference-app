@@ -27,6 +27,17 @@ class ChatItem extends StatelessWidget {
       );
     }
 
+    if (_chatItem is chat.ConciergeMessage &&
+        (_chatItem as chat.ConciergeMessage).conciergeType ==
+            chat.ConciergeMessageType.fromJson(
+              chat.CiergeSignDocumentRequest.conciergeTypeName,
+            )) {
+      return _SignDocumentRequestChatItem(
+        chatItem: _chatItem as chat.ConciergeMessage,
+        contactId: _contactId,
+      );
+    }
+
     if (_chatItem is chat.Message) {
       return _PlainTextChatItem(
         chatItem: _chatItem,
