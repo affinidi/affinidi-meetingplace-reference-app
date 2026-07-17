@@ -297,22 +297,22 @@ class _GroupAudioCallContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final remoteParticipants = participants.where((p) => !p.isSelf).toList();
-    final remoteCount = remoteParticipants.length;
+    final peerParticipants = participants.where((p) => !p.isSelf).toList();
+    final peerCount = peerParticipants.length;
     final bottomInset = _bottomContentInset(context);
 
-    if (remoteCount == 0) {
+    if (peerCount == 0) {
       return Padding(
         padding: EdgeInsets.only(bottom: bottomInset),
         child: const Center(child: _CallPersonAvatar(isGroup: true)),
       );
     }
 
-    if (remoteCount == 1) {
-      final participant = remoteParticipants.first;
+    if (peerCount == 1) {
+      final participant = peerParticipants.first;
       return Padding(
         padding: EdgeInsets.only(top: 16, bottom: bottomInset),
-        child: _SingleRemoteGroupAudioParticipant(
+        child: _SinglePeerGroupAudioParticipant(
           participant: participant,
           contactCard: _contactCardFor(
             participant,
@@ -322,7 +322,7 @@ class _GroupAudioCallContent extends ConsumerWidget {
             participant,
             youLabel: context.l10n.videoCallYou,
             peerName: peerName,
-            remoteCount: remoteCount,
+            peerCount: peerCount,
             memberContactCards: memberContactCards,
           ),
         ),
@@ -351,7 +351,7 @@ class _GroupAudioCallContent extends ConsumerWidget {
             participant,
             youLabel: context.l10n.videoCallYou,
             peerName: peerName,
-            remoteCount: remoteCount,
+            peerCount: peerCount,
             memberContactCards: memberContactCards,
           ),
         );
@@ -405,8 +405,8 @@ class _IndividualAudioCallAvatar extends StatelessWidget {
   }
 }
 
-class _SingleRemoteGroupAudioParticipant extends ConsumerWidget {
-  const _SingleRemoteGroupAudioParticipant({
+class _SinglePeerGroupAudioParticipant extends ConsumerWidget {
+  const _SinglePeerGroupAudioParticipant({
     required this.participant,
     required this.contactCard,
     required this.displayName,

@@ -35,6 +35,7 @@ import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../contacts_service/contacts_service.dart';
+import '../identities_service/identities_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
@@ -257,6 +258,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       if (!ref.mounted) return;
 
       _chatSDK = await ref.read(chatSdkProvider(channel).future);
+      final currentIdentityCard = ref
+          .read(identitiesServiceProvider.notifier)
+          .getIdentityById(channel.externalRef)
+          ?.card
+          .toSdkContactCard();
+      await _chatSDK?.refreshCurrentContactCard(currentIdentityCard);
       if (!ref.mounted) {
         _chatSDK = null;
         return;
@@ -283,6 +290,21 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           state = state.copyWith(group: group);
         }
       }
+
+      ref.listen(identitiesServiceProvider, (previous, next) {
+        if (!ref.mounted || _chatSDK == null) return;
+
+        final previousCard = previous
+            ?.getIdentityById(channel.externalRef)
+            ?.card;
+        final nextCard = next.getIdentityById(channel.externalRef)?.card;
+        if (previousCard == nextCard) return;
+
+        unawaited(
+          _chatSDK?.refreshCurrentContactCard(nextCard?.toSdkContactCard()) ??
+              Future<void>.value(),
+        );
+      });
     });
   }
 

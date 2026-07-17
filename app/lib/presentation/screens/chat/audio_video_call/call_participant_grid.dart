@@ -143,7 +143,7 @@ class _CallGridLayout extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final youLabel = context.l10n.videoCallYou;
-    final remoteCount = participants.where((p) => !p.isSelf).length;
+    final peerCount = participants.where((p) => !p.isSelf).length;
     final scrollController = useScrollController();
     final pointerDownPixels = useRef(0.0);
 
@@ -206,7 +206,7 @@ class _CallGridLayout extends HookWidget {
                         participant,
                         youLabel: youLabel,
                         peerName: peerName,
-                        remoteCount: remoteCount,
+                        peerCount: peerCount,
                         memberContactCards: memberContactCards,
                       ),
                     ),
@@ -261,7 +261,7 @@ class _CallFocusedLayout extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final youLabel = context.l10n.videoCallYou;
-    final remoteCount = participants.where((p) => !p.isSelf).length;
+    final peerCount = participants.where((p) => !p.isSelf).length;
 
     final fi = focusedIndex;
     final others = <int>[];
@@ -278,7 +278,7 @@ class _CallFocusedLayout extends StatelessWidget {
           participants[idx],
           youLabel: youLabel,
           peerName: peerName,
-          remoteCount: remoteCount,
+          peerCount: peerCount,
           memberContactCards: memberContactCards,
         ),
       );
@@ -288,7 +288,7 @@ class _CallFocusedLayout extends StatelessWidget {
       participants[fi],
       youLabel: youLabel,
       peerName: peerName,
-      remoteCount: remoteCount,
+      peerCount: peerCount,
       memberContactCards: memberContactCards,
     );
 

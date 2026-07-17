@@ -4,7 +4,12 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 class FakeIdentitiesService extends IdentitiesService {
   FakeIdentitiesService(this._state);
 
-  final IdentitiesServiceState _state;
+  IdentitiesServiceState _state;
+
+  void setState(IdentitiesServiceState next) {
+    _state = next;
+    state = next;
+  }
 
   @override
   IdentitiesServiceState build() => _state;

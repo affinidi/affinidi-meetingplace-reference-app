@@ -11,6 +11,8 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
@@ -40,6 +42,7 @@ import '../../../fakes/fake_credentials_sdk.dart';
 import '../../../fakes/fake_environment.dart';
 import '../../../fakes/fake_groups.dart';
 import '../../../fakes/fake_identities.dart';
+import '../../../fakes/fake_identities_service.dart';
 import '../../../fakes/fake_meeting_place_sdk.dart';
 import '../../../fakes/fake_r_card_repository.dart';
 import '../../../fakes/fake_secure_storage.dart';
@@ -159,6 +162,167 @@ void main() {
       await chatService.sendChatContactDetailsUpdate(fakeMessage);
       expect(fakeChatSdk.lastContactDetailsUpdateSent, fakeMessage);
     });
+
+    test(
+      'refreshes current contact card on start from active identity',
+      () async {
+        final identity = FakeIdentities.primaryIdentity;
+        final baseChannel = FakeChannels.individualChannel;
+        final channel = Channel(
+          permanentChannelDid: baseChannel.permanentChannelDid,
+          otherPartyPermanentChannelDid:
+              baseChannel.otherPartyPermanentChannelDid,
+          offerLink: baseChannel.offerLink,
+          contactCard: baseChannel.contactCard,
+          otherPartyContactCard: baseChannel.otherPartyContactCard,
+          otherPartyNotificationToken: baseChannel.otherPartyNotificationToken,
+          seqNo: baseChannel.seqNo,
+          type: baseChannel.type,
+          publishOfferDid: baseChannel.publishOfferDid,
+          mediatorDid: baseChannel.mediatorDid,
+          status: baseChannel.status,
+          isConnectionInitiator: baseChannel.isConnectionInitiator,
+          externalRef: identity.id,
+        );
+        fakeCoreSdk = FakeMeetingPlaceSDK(channels: {channelDid: channel});
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
+            chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+            contactsServiceProvider.overrideWith(() => fakeContactsService),
+            identitiesServiceProvider.overrideWith(
+              () => FakeIdentitiesService(
+                IdentitiesServiceState(
+                  identities: [identity],
+                  currentIdentity: identity,
+                ),
+              ),
+            ),
+            environmentProvider.overrideWithValue(FakeEnvironment()),
+            appBadgeServiceProvider.overrideWith(
+              (ref) => FakeAppBadgeService(),
+            ),
+            rCardsRepositoryProvider.overrideWith(
+              (ref) async => FakeNoOpRCardRepository(),
+            ),
+            vrcRepositoryProvider.overrideWith(
+              (ref) async => FakeNoOpVrcRepository(),
+            ),
+            secureStorageProvider.overrideWith(
+              (ref) async => FakeSecureStorage(),
+            ),
+            networkConnectivityServiceProvider.overrideWith(
+              _FakeNetworkConnectivityService.new,
+            ),
+          ],
+        );
+        container.listen(
+          chatSessionServiceProvider(channelDid),
+          (previous, value) {},
+          fireImmediately: true,
+        );
+        chatService = container.read(
+          chatSessionServiceProvider(channelDid).notifier,
+        );
+
+        await chatService.startChatSession();
+
+        expect(fakeChatSdk.refreshCurrentContactCardCallCount, equals(1));
+        expect(fakeChatSdk.lastRefreshedCurrentContactCard, isNotNull);
+        expect(
+          fakeChatSdk.lastRefreshedCurrentContactCard!.toJson()['contactInfo'],
+          equals(identity.card.toSdkContactCard().toJson()['contactInfo']),
+        );
+      },
+    );
+
+    test(
+      'refreshes current contact card again when identity changes mid-session',
+      () async {
+        final identity = FakeIdentities.primaryIdentity;
+        final updatedIdentity = identity.copyWith(
+          card: identity.card.copyWith(displayName: 'John Updated'),
+        );
+        final baseChannel = FakeChannels.individualChannel;
+        final channel = Channel(
+          permanentChannelDid: baseChannel.permanentChannelDid,
+          otherPartyPermanentChannelDid:
+              baseChannel.otherPartyPermanentChannelDid,
+          offerLink: baseChannel.offerLink,
+          contactCard: baseChannel.contactCard,
+          otherPartyContactCard: baseChannel.otherPartyContactCard,
+          otherPartyNotificationToken: baseChannel.otherPartyNotificationToken,
+          seqNo: baseChannel.seqNo,
+          type: baseChannel.type,
+          publishOfferDid: baseChannel.publishOfferDid,
+          mediatorDid: baseChannel.mediatorDid,
+          status: baseChannel.status,
+          isConnectionInitiator: baseChannel.isConnectionInitiator,
+          externalRef: identity.id,
+        );
+        final fakeIdentitiesService = FakeIdentitiesService(
+          IdentitiesServiceState(
+            identities: [identity],
+            currentIdentity: identity,
+          ),
+        );
+
+        fakeCoreSdk = FakeMeetingPlaceSDK(channels: {channelDid: channel});
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
+            chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+            contactsServiceProvider.overrideWith(() => fakeContactsService),
+            identitiesServiceProvider.overrideWith(() => fakeIdentitiesService),
+            environmentProvider.overrideWithValue(FakeEnvironment()),
+            appBadgeServiceProvider.overrideWith(
+              (ref) => FakeAppBadgeService(),
+            ),
+            rCardsRepositoryProvider.overrideWith(
+              (ref) async => FakeNoOpRCardRepository(),
+            ),
+            vrcRepositoryProvider.overrideWith(
+              (ref) async => FakeNoOpVrcRepository(),
+            ),
+            secureStorageProvider.overrideWith(
+              (ref) async => FakeSecureStorage(),
+            ),
+            networkConnectivityServiceProvider.overrideWith(
+              _FakeNetworkConnectivityService.new,
+            ),
+          ],
+        );
+        container.listen(
+          chatSessionServiceProvider(channelDid),
+          (previous, value) {},
+          fireImmediately: true,
+        );
+        chatService = container.read(
+          chatSessionServiceProvider(channelDid).notifier,
+        );
+
+        await chatService.startChatSession();
+        expect(fakeChatSdk.refreshCurrentContactCardCallCount, equals(1));
+
+        fakeIdentitiesService.setState(
+          IdentitiesServiceState(
+            identities: [updatedIdentity],
+            currentIdentity: updatedIdentity,
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(fakeChatSdk.refreshCurrentContactCardCallCount, equals(2));
+        expect(
+          fakeChatSdk.lastRefreshedCurrentContactCard!.toJson()['contactInfo'],
+          equals(
+            updatedIdentity.card.toSdkContactCard().toJson()['contactInfo'],
+          ),
+        );
+      },
+    );
 
     test('delegates rejectChatContactDetailsUpdate to SDK', () async {
       await chatService.startChatSession();

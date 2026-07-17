@@ -23,7 +23,7 @@ abstract class GroupAudioCallState with _$GroupAudioCallState {
     /// Whether the call is in ringing state (waiting for first join).
     required bool isRinging,
 
-    /// Time when the first remote participant joined (null if none yet).
+    /// Time when the first peer joined (null if none yet).
     DateTime? firstJoinedAt,
 
     /// Error message if something went wrong (null if no error).

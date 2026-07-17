@@ -14,7 +14,7 @@ import '../room/flutter_livekit_room.dart';
 /// LiveKit-backed, or the room has no renderable track for [participantId].
 /// Pass [mirror] = true for the local camera preview: the view is then
 /// mirrored only while the front camera is active, and shown un-mirrored on
-/// the back camera. Remote participants are never mirrored.
+/// the back camera. Peers are never mirrored.
 ///
 /// Example:
 /// ```dart
