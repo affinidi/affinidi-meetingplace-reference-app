@@ -3442,6 +3442,126 @@ abstract class AppLocalizations {
   /// **'Personal Agent'**
   String get personalAgentPersonalAgentTitle;
 
+  /// No description provided for @personalAgentMyWorkAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Work AI'**
+  String get personalAgentMyWorkAiTitle;
+
+  /// No description provided for @personalAgentWorkContextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work (ctx 0)'**
+  String get personalAgentWorkContextLabel;
+
+  /// No description provided for @personalAgentMyPersonalAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Personal AI'**
+  String get personalAgentMyPersonalAiTitle;
+
+  /// No description provided for @personalAgentPersonalContextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal (ctx 1)'**
+  String get personalAgentPersonalContextLabel;
+
+  /// No description provided for @personalAgentCancelConnectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel {label} connection?'**
+  String personalAgentCancelConnectionTitle(String label);
+
+  /// No description provided for @personalAgentCancelConnectionContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove your connection to the {agentLabel}.'**
+  String personalAgentCancelConnectionContent(String agentLabel);
+
+  /// No description provided for @personalAgentKeepConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep connection'**
+  String get personalAgentKeepConnection;
+
+  /// No description provided for @personalAgentCancelConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel connection'**
+  String get personalAgentCancelConnection;
+
+  /// No description provided for @personalAgentConnectionCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} connection cancelled.'**
+  String personalAgentConnectionCancelled(String label);
+
+  /// No description provided for @personalAgentCancelConnectionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to cancel {label} connection.'**
+  String personalAgentCancelConnectionError(String label);
+
+  /// No description provided for @personalAgentNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get personalAgentNotAvailable;
+
+  /// No description provided for @personalAgentNoSnapshotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No snapshot yet'**
+  String get personalAgentNoSnapshotYet;
+
+  /// No description provided for @personalAgentNotSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set up'**
+  String get personalAgentNotSetUp;
+
+  /// No description provided for @personalAgentAuthAgentDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent DID'**
+  String get personalAgentAuthAgentDid;
+
+  /// No description provided for @personalAgentAuthAclRole.
+  ///
+  /// In en, this message translates to:
+  /// **'ACL role'**
+  String get personalAgentAuthAclRole;
+
+  /// No description provided for @personalAgentAuthCapabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Capabilities'**
+  String get personalAgentAuthCapabilities;
+
+  /// No description provided for @personalAgentAuthContextScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Context scope'**
+  String get personalAgentAuthContextScope;
+
+  /// No description provided for @personalAgentAuthDomainId.
+  ///
+  /// In en, this message translates to:
+  /// **'Domain ID'**
+  String get personalAgentAuthDomainId;
+
+  /// No description provided for @personalAgentAuthProvision.
+  ///
+  /// In en, this message translates to:
+  /// **'Provision'**
+  String get personalAgentAuthProvision;
+
+  /// No description provided for @personalAgentAuthUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get personalAgentAuthUpdated;
+
   /// No description provided for @mnemonicErrorOccurred.
   ///
   /// In en, this message translates to:

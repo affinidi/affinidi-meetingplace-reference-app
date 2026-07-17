@@ -2236,6 +2236,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personalAgentPersonalAgentTitle => 'Personal Agent';
 
   @override
+  String get personalAgentMyWorkAiTitle => 'My Work AI';
+
+  @override
+  String get personalAgentWorkContextLabel => 'Work (ctx 0)';
+
+  @override
+  String get personalAgentMyPersonalAiTitle => 'My Personal AI';
+
+  @override
+  String get personalAgentPersonalContextLabel => 'Personal (ctx 1)';
+
+  @override
+  String personalAgentCancelConnectionTitle(String label) {
+    return 'Cancel $label connection?';
+  }
+
+  @override
+  String personalAgentCancelConnectionContent(String agentLabel) {
+    return 'This will remove your connection to the $agentLabel.';
+  }
+
+  @override
+  String get personalAgentKeepConnection => 'Keep connection';
+
+  @override
+  String get personalAgentCancelConnection => 'Cancel connection';
+
+  @override
+  String personalAgentConnectionCancelled(String label) {
+    return '$label connection cancelled.';
+  }
+
+  @override
+  String personalAgentCancelConnectionError(String label) {
+    return 'Unable to cancel $label connection.';
+  }
+
+  @override
+  String get personalAgentNotAvailable => 'Not available';
+
+  @override
+  String get personalAgentNoSnapshotYet => 'No snapshot yet';
+
+  @override
+  String get personalAgentNotSetUp => 'Not set up';
+
+  @override
+  String get personalAgentAuthAgentDid => 'Agent DID';
+
+  @override
+  String get personalAgentAuthAclRole => 'ACL role';
+
+  @override
+  String get personalAgentAuthCapabilities => 'Capabilities';
+
+  @override
+  String get personalAgentAuthContextScope => 'Context scope';
+
+  @override
+  String get personalAgentAuthDomainId => 'Domain ID';
+
+  @override
+  String get personalAgentAuthProvision => 'Provision';
+
+  @override
+  String get personalAgentAuthUpdated => 'Updated';
+
+  @override
   String get mnemonicErrorOccurred => 'An error occurred.';
 
   @override

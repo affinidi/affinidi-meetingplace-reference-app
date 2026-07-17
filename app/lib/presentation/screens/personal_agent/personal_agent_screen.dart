@@ -105,25 +105,25 @@ class PersonalAgentScreen extends ConsumerWidget {
     }
 
     Future<void> cancelRoutingContext(AgentContext target) async {
-      final label = target == AgentContext.work ? 'Work AI' : 'Personal AI';
+      final label = target == AgentContext.work
+          ? l10n.agentContextWorkAiLabel
+          : l10n.agentContextPersonalAiLabel;
       final agentLabel = target == AgentContext.work
-          ? 'Work agent'
-          : 'Personal agent';
+          ? l10n.personalAgentWorkAgentTitle
+          : l10n.personalAgentPersonalAgentTitle;
       final shouldCancel = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: Text('Cancel $label connection?'),
-          content: Text(
-            'This will remove your connection to the $agentLabel.',
-          ),
+          title: Text(l10n.personalAgentCancelConnectionTitle(label)),
+          content: Text(l10n.personalAgentCancelConnectionContent(agentLabel)),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Keep connection'),
+              child: Text(l10n.personalAgentKeepConnection),
             ),
             FilledButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Cancel connection'),
+              child: Text(l10n.personalAgentCancelConnection),
             ),
           ],
         ),
@@ -137,12 +137,12 @@ class PersonalAgentScreen extends ConsumerWidget {
         await controller.disconnectRoutingContext(target);
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$label connection cancelled.')),
+          SnackBar(content: Text(l10n.personalAgentConnectionCancelled(label))),
         );
       } catch (_) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Unable to cancel $label connection.')),
+          SnackBar(content: Text(l10n.personalAgentCancelConnectionError(label))),
         );
       }
     }
@@ -198,8 +198,8 @@ class PersonalAgentScreen extends ConsumerWidget {
                     const SizedBox(height: 16),
                     if (ui.showWorkAuthorization)
                       _AgentAuthorizationCard(
-                        title: 'My Work AI',
-                        contextLabel: 'Work (ctx 0)',
+                        title: l10n.personalAgentMyWorkAiTitle,
+                        contextLabel: l10n.personalAgentWorkContextLabel,
                         snapshot: ui.workSnapshot,
                         contact: ui.workContact,
                         onCancel: () =>
@@ -212,8 +212,8 @@ class PersonalAgentScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                     if (ui.showPersonalAuthorization)
                       _AgentAuthorizationCard(
-                        title: 'My Personal AI',
-                        contextLabel: 'Personal (ctx 1)',
+                        title: l10n.personalAgentMyPersonalAiTitle,
+                        contextLabel: l10n.personalAgentPersonalContextLabel,
                         snapshot: ui.personalSnapshot,
                         contact: ui.personalContact,
                         onCancel: () =>
@@ -247,13 +247,14 @@ class _AgentAuthorizationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final colorScheme = context.colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final capabilities = snapshot?.capabilities.join(' + ') ?? 'Not available';
+    final capabilities = snapshot?.capabilities.join(' + ') ?? l10n.personalAgentNotAvailable;
     final provisionStatus =
-        (snapshot?.provision?['status'] as String?) ?? 'Not available';
+        (snapshot?.provision?['status'] as String?) ?? l10n.personalAgentNotAvailable;
     final updatedAt = snapshot?.lastUpdated?.toLocal().toString() ??
-        'No snapshot yet';
+        l10n.personalAgentNoSnapshotYet;
 
     Widget row(String label, String value) {
       return Padding(
@@ -307,7 +308,7 @@ class _AgentAuthorizationCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  contact == null ? 'Not set up' : 'Connected',
+                  contact == null ? l10n.personalAgentNotSetUp : l10n.personalAgentConnectedSectionTitle,
                   style: textTheme.labelSmall?.copyWith(
                     color: contact == null
                         ? colorScheme.onSurfaceVariant
@@ -325,20 +326,20 @@ class _AgentAuthorizationCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            row('Agent DID', snapshot?.agentDid ?? 'Not available'),
-            row('ACL role', snapshot?.aclRole ?? 'Not available'),
-            row('Capabilities', capabilities),
-            row('Context scope', snapshot?.contextScope ?? 'Not available'),
-            row('Domain ID', snapshot?.domainId ?? 'Not available'),
-            row('Provision', provisionStatus),
-            row('Updated', updatedAt),
+            row(l10n.personalAgentAuthAgentDid, snapshot?.agentDid ?? l10n.personalAgentNotAvailable),
+            row(l10n.personalAgentAuthAclRole, snapshot?.aclRole ?? l10n.personalAgentNotAvailable),
+            row(l10n.personalAgentAuthCapabilities, capabilities),
+            row(l10n.personalAgentAuthContextScope, snapshot?.contextScope ?? l10n.personalAgentNotAvailable),
+            row(l10n.personalAgentAuthDomainId, snapshot?.domainId ?? l10n.personalAgentNotAvailable),
+            row(l10n.personalAgentAuthProvision, provisionStatus),
+            row(l10n.personalAgentAuthUpdated, updatedAt),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: contact == null ? null : onCancel,
                 icon: const Icon(Icons.link_off_outlined),
-                label: const Text('Cancel connection'),
+                label: Text(l10n.personalAgentCancelConnection),
               ),
             ),
           ],
