@@ -121,6 +121,7 @@ void main() {
               otherPartyPermanentChannelDid: 'did:example:other',
               invitedAt: DateTime.utc(2026),
               mediaType: CallMediaType.video,
+              invitedAt: DateTime.now(),
             ),
           );
 
@@ -151,6 +152,7 @@ void main() {
                 otherPartyPermanentChannelDid: 'did:example:other',
                 invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.video,
+                invitedAt: DateTime.now(),
               ),
             );
 
@@ -177,6 +179,7 @@ void main() {
                 otherPartyPermanentChannelDid: 'did:example:other',
                 invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.audio,
+                invitedAt: DateTime.now(),
               ),
             );
 

@@ -20,9 +20,11 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_overlay.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_peer_placeholder.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_pip_window.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../../fakes/fake_contacts.dart';
 import '../../../../fakes/fake_contacts_service.dart';
@@ -70,13 +72,17 @@ class _FixedStateController extends AudioVideoCallScreenController {
 Widget _wrap({
   required AudioVideoCallScreenState controllerState,
   _FixedStateController? controller,
+  FakeContactsService? contactsService,
 }) {
   final fixedController = controller ?? _FixedStateController(controllerState);
+  final fakeContactsService =
+      contactsService ??
+      FakeContactsService(contacts: [FakeContacts.groupContact]);
 
   return ProviderScope(
     overrides: [
       appLoggerProvider.overrideWithValue(FakeAppLogger()),
-      contactsServiceProvider.overrideWith(FakeContactsService.new),
+      contactsServiceProvider.overrideWith(() => fakeContactsService),
       meetingPlaceSdkProvider.overrideWith(
         (ref) async => FakeMeetingPlaceMatrixSDK(),
       ),
@@ -91,7 +97,12 @@ Widget _wrap({
       theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const AudioVideoCallScreen(contactId: _kContactId),
+      home: const Stack(
+        children: [
+          AudioVideoCallScreen(contactId: _kContactId),
+          CallEndedOverlay(),
+        ],
+      ),
     ),
   );
 }
@@ -115,11 +126,12 @@ void main() {
 
       await tester.pumpWidget(_wrap(controllerState: state));
       await tester.pump();
+      await tester.pump();
 
       final l10n = AppLocalizations.of(
         tester.element(find.byType(AudioVideoCallScreen)),
       )!;
-      final errorMessage = l10n.videoCallFailedToJoin(l10n.videoCallError(''));
+      final errorMessage = l10n.videoCallError('');
 
       expect(tester.takeException(), isNull);
       expect(find.byType(Scaffold), findsOneWidget);
@@ -287,6 +299,145 @@ void main() {
       expect(find.text('Bob'), findsOneWidget);
       expect(find.byType(VideoCallPiPWindow), findsNothing);
       expect(find.byType(VideoCallPeerPlaceholder), findsOneWidget);
+    });
+
+    testWidgets('shows audio-like group video scaffold with self full stage', (
+      tester,
+    ) async {
+      final state = AudioVideoCallScreenState(
+        status: AudioVideoCallStatus.active,
+        peerName: 'Study Group',
+        isGroupContact: true,
+        isAudioOnly: false,
+        isCameraEnabled: true,
+        participants: const [
+          AudioVideoCallParticipant(
+            participantId: 'self-1',
+            did: 'did:key:group-channel',
+            isSelf: true,
+            hasVideo: true,
+            hasAudio: true,
+            isSpeaking: false,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-1',
+            did: 'did:key:peer-1',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: true,
+            isSpeaking: true,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-2',
+            did: 'did:key:peer-2',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: false,
+            isSpeaking: false,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        _wrap(
+          controllerState: state,
+          contactsService: FakeContactsService(
+            contacts: [FakeContacts.groupContact],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(VideoCallPiPWindow), findsNothing);
+      expect(find.byType(AudioVideoCallView), findsOneWidget);
+      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
+    });
+
+    testWidgets('shows audio-like group video scaffold for overflow groups', (
+      tester,
+    ) async {
+      final state = AudioVideoCallScreenState(
+        status: AudioVideoCallStatus.active,
+        peerName: 'Study Group',
+        isGroupContact: true,
+        isAudioOnly: false,
+        isCameraEnabled: true,
+        participants: const [
+          AudioVideoCallParticipant(
+            participantId: 'self-1',
+            did: 'did:key:group-channel',
+            isSelf: true,
+            hasVideo: true,
+            hasAudio: true,
+            isSpeaking: false,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-1',
+            did: 'did:key:peer-1',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: true,
+            isSpeaking: true,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-2',
+            did: 'did:key:peer-2',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: true,
+            isSpeaking: false,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-3',
+            did: 'did:key:peer-3',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: true,
+            isSpeaking: false,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-4',
+            did: 'did:key:peer-4',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: true,
+            isSpeaking: false,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-5',
+            did: 'did:key:peer-5',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: true,
+            isSpeaking: false,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-6',
+            did: 'did:key:peer-6',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: true,
+            isSpeaking: false,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-7',
+            did: 'did:key:peer-7',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: true,
+            isSpeaking: false,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(_wrap(controllerState: state));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SmoothPageIndicator), findsNothing);
+      expect(find.byIcon(Icons.close_fullscreen), findsOneWidget);
+      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
     });
 
     testWidgets('shows self video full screen while ringing '
@@ -476,14 +627,9 @@ void main() {
 
         expect(tester.takeException(), isNull);
         expect(find.byType(AudioVideoCallScreen), findsOneWidget);
-        expect(find.text('Group Call'), findsOneWidget);
+        expect(find.byType(VideoCallPiPWindow), findsNothing);
         expect(find.byIcon(Icons.close_fullscreen), findsOneWidget);
-        expect(find.byIcon(Icons.people_alt_outlined), findsOneWidget);
-
-        await tester.tap(find.byIcon(Icons.close_fullscreen));
-        await tester.pumpAndSettle();
-
-        expect(controller.minimizeCalls, 1);
+        expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
       },
     );
 
@@ -511,7 +657,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byIcon(Icons.close_fullscreen), findsOneWidget);
-      expect(find.byIcon(Icons.people_alt_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
     });
 
     testWidgets('shows no-answer screen with peer name for missed call', (
@@ -587,16 +733,41 @@ void main() {
 
       await tester.pumpWidget(_wrap(controllerState: state));
       await tester.pump();
+      await tester.pump();
 
       final l10n = AppLocalizations.of(
         tester.element(find.byType(AudioVideoCallScreen)),
       )!;
-      final errorMessage = l10n.videoCallFailedToJoin(
-        l10n.videoCallError(AudioVideoCallErrorCode.networkError.name),
+      final errorMessage = l10n.videoCallError(
+        AudioVideoCallErrorCode.networkError.name,
       );
 
       expect(tester.takeException(), isNull);
       expect(find.text(errorMessage), findsOneWidget);
+      expect(find.text(l10n.videoCallCallEnded), findsNothing);
+      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+    });
+
+    testWidgets('dismisses ended overlay when closing error banner screen', (
+      tester,
+    ) async {
+      final state = AudioVideoCallScreenState(
+        status: AudioVideoCallStatus.error,
+        peerName: 'Nora',
+        errorCode: AudioVideoCallErrorCode.networkError,
+      );
+
+      await tester.pumpWidget(_wrap(controllerState: state));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.error_outline), findsNothing);
+      expect(find.byIcon(Icons.close), findsNothing);
     });
 
     testWidgets('shows peer name in ringing state without peer history', (
@@ -615,46 +786,44 @@ void main() {
       expect(find.text('Kim'), findsOneWidget);
     });
 
-    testWidgets('renders group video connecting state with loading spinner', (
-      tester,
-    ) async {
-      final state = AudioVideoCallScreenState(
-        status: AudioVideoCallStatus.connecting,
-        peerName: 'Loading Group',
-        isGroupContact: true,
-        isAudioOnly: false,
-        participants: const [
-          AudioVideoCallParticipant(
-            participantId: 'peer-1',
-            isSelf: false,
-            hasVideo: false,
-            hasAudio: true,
-            isSpeaking: false,
-          ),
-          AudioVideoCallParticipant(
-            participantId: 'peer-2',
-            isSelf: false,
-            hasVideo: false,
-            hasAudio: true,
-            isSpeaking: false,
-          ),
-        ],
-      );
+    testWidgets(
+      'renders group video connecting state without loading spinner',
+      (tester) async {
+        final state = AudioVideoCallScreenState(
+          status: AudioVideoCallStatus.connecting,
+          peerName: 'Loading Group',
+          isGroupContact: true,
+          isAudioOnly: false,
+          participants: const [
+            AudioVideoCallParticipant(
+              participantId: 'peer-1',
+              isSelf: false,
+              hasVideo: false,
+              hasAudio: true,
+              isSpeaking: false,
+            ),
+            AudioVideoCallParticipant(
+              participantId: 'peer-2',
+              isSelf: false,
+              hasVideo: false,
+              hasAudio: true,
+              isSpeaking: false,
+            ),
+          ],
+        );
 
-      await tester.pumpWidget(_wrap(controllerState: state));
-      await tester.pump();
+        await tester.pumpWidget(_wrap(controllerState: state));
+        await tester.pump();
 
-      final l10n = AppLocalizations.of(
-        tester.element(find.byType(AudioVideoCallScreen)),
-      )!;
-
-      expect(tester.takeException(), isNull);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.text(l10n.videoCallJoiningCall), findsOneWidget);
-    });
+        expect(tester.takeException(), isNull);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byType(AudioVideoCallScreen), findsOneWidget);
+        expect(find.byType(ProfileCircleAvatar), findsOneWidget);
+      },
+    );
 
     testWidgets(
-      'renders group video waitingForKeys state with loading spinner',
+      'renders group video waitingForKeys state without loading spinner',
       (tester) async {
         final state = AudioVideoCallScreenState(
           status: AudioVideoCallStatus.waitingForKeys,
@@ -682,13 +851,10 @@ void main() {
         await tester.pumpWidget(_wrap(controllerState: state));
         await tester.pump();
 
-        final l10n = AppLocalizations.of(
-          tester.element(find.byType(AudioVideoCallScreen)),
-        )!;
-
         expect(tester.takeException(), isNull);
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
-        expect(find.text(l10n.videoCallWaitingForEncryption), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byType(AudioVideoCallScreen), findsOneWidget);
+        expect(find.byType(ProfileCircleAvatar), findsOneWidget);
       },
     );
 
@@ -730,13 +896,9 @@ void main() {
       await tester.pumpWidget(_wrap(controllerState: state));
       await tester.pump();
 
-      final l10n = AppLocalizations.of(
-        tester.element(find.byType(AudioVideoCallScreen)),
-      )!;
-
       expect(tester.takeException(), isNull);
-      expect(find.byIcon(Icons.grid_view_rounded), findsOneWidget);
-      expect(find.text(l10n.videoCallYou), findsOneWidget);
+      expect(find.byType(VideoCallPiPWindow), findsNothing);
+      expect(find.byType(AudioVideoCallView), findsAtLeastNWidgets(1));
     });
 
     testWidgets('renders focused participant layout for group video', (
@@ -777,13 +939,9 @@ void main() {
       await tester.pumpWidget(_wrap(controllerState: state));
       await tester.pump();
 
-      final l10n = AppLocalizations.of(
-        tester.element(find.byType(AudioVideoCallScreen)),
-      )!;
-
       expect(tester.takeException(), isNull);
-      expect(find.byIcon(Icons.grid_view_rounded), findsOneWidget);
-      expect(find.text(l10n.videoCallYou), findsOneWidget);
+      expect(find.byType(VideoCallPiPWindow), findsNothing);
+      expect(find.byType(AudioVideoCallView), findsAtLeastNWidgets(1));
     });
 
     testWidgets('shows no-answer screen for video missed call', (tester) async {

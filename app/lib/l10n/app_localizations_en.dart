@@ -2004,14 +2004,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoCallShowLess => 'Show less';
 
   @override
-  String videoCallFailedToJoin(String error) {
-    return 'Failed to join: $error';
-  }
-
-  @override
   String videoCallError(String errorCode) {
     String _temp0 = intl.Intl.selectLogic(errorCode, {
+      'channelNotFound': 'Call channel not found',
+      'tokenFetchFailed': 'Failed to get call credentials',
+      'connectionFailed':
+          'Failed to connect to the call. Check room access or try again.',
+      'groupCallPermissionDenied':
+          'You do not have permission to join this group call. Check room access or ask a group admin.',
+      'callInviteFailed': 'Failed to notify other participants about the call',
       'networkError': 'Network error',
+      'unexpected': 'Unexpected call error',
       'other': 'Unknown error',
     });
     return '$_temp0';
@@ -2083,6 +2086,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get videoCallCallDeclined => 'Call declined';
+
+  @override
+  String get videoCallCallFailed => 'Call failed';
 
   @override
   String get videoCallCallEnded => 'Call ended';

@@ -18,6 +18,7 @@ class CallEndedScreen extends ConsumerWidget {
     required this.durationSeconds,
     required this.isAudioOnly,
     this.calleeAvatarImage,
+    this.errorMessage,
   });
 
   final String contactId;
@@ -25,17 +26,17 @@ class CallEndedScreen extends ConsumerWidget {
   final int durationSeconds;
   final bool isAudioOnly;
   final ImageProvider<Object>? calleeAvatarImage;
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final callEndedController = ref.read(callEndedControllerProvider.notifier);
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
-
-    final backgroundColor = Colors.black;
+    final hasErrorMessage = errorMessage != null && errorMessage!.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Stack(
           children: [
@@ -55,23 +56,61 @@ class CallEndedScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    context.l10n.videoCallCallEnded,
+                    hasErrorMessage
+                        ? context.l10n.videoCallCallFailed
+                        : context.l10n.videoCallCallEnded,
                     style: textTheme.titleLarge?.copyWith(
                       color: colorScheme.onSurface.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w500,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    Duration(seconds: durationSeconds).label,
-                    style: textTheme.titleMedium?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.5),
-                      fontWeight: FontWeight.w400,
+                  if (!hasErrorMessage) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      Duration(seconds: durationSeconds).label,
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.w400,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
+                  ],
                   const Spacer(flex: 3),
+                  if (hasErrorMessage)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: colorScheme.error,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: colorScheme.onError,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  errorMessage!,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onError,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

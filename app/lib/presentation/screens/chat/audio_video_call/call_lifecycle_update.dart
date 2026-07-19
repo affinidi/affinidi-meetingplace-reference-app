@@ -10,6 +10,7 @@ import 'rules/call_chat_item_rules.dart';
 class CallLifecycleUpdate {
   const CallLifecycleUpdate({
     this.status,
+    this.errorCode,
     this.isSpeakerEnabled,
     this.attachedSession,
     this.clearIncomingCall = false,
@@ -19,6 +20,9 @@ class CallLifecycleUpdate {
 
   /// New call status, if the transition changes it.
   final AudioVideoCallStatus? status;
+
+  /// Localized by the app when a join attempt fails before a session attaches.
+  final AudioVideoCallErrorCode? errorCode;
 
   /// New speakerphone state, set when a call starts.
   final bool? isSpeakerEnabled;

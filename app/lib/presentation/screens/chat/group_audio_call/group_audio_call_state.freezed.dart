@@ -279,7 +279,7 @@ mixin _$GroupAudioCallState {
 
 /// Participants currently in the call (self + remotes).
  List<GroupAudioCallParticipant> get participants;/// Whether the call is in ringing state (waiting for first join).
- bool get isRinging;/// Time when the first remote participant joined (null if none yet).
+ bool get isRinging;/// Time when the first peer joined (null if none yet).
  DateTime? get firstJoinedAt;/// Error message if something went wrong (null if no error).
  String? get errorMessage;/// Whether controls (mute button) should be visible.
  bool get showControls;
@@ -492,7 +492,7 @@ class _GroupAudioCallState extends GroupAudioCallState {
 
 /// Whether the call is in ringing state (waiting for first join).
 @override final  bool isRinging;
-/// Time when the first remote participant joined (null if none yet).
+/// Time when the first peer joined (null if none yet).
 @override final  DateTime? firstJoinedAt;
 /// Error message if something went wrong (null if no error).
 @override final  String? errorMessage;

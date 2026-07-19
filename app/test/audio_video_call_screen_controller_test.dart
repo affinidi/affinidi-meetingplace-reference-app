@@ -1152,6 +1152,7 @@ void main() {
                 otherPartyPermanentChannelDid: channelDid,
                 invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.video,
+                invitedAt: DateTime.now(),
               ),
             );
 

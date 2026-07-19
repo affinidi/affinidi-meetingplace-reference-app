@@ -359,6 +359,7 @@ Ref _createTestRef(ContactsService contactsService, {String? ringingDid}) {
             otherPartyPermanentChannelDid: ringingDid,
             invitedAt: DateTime.utc(2026),
             mediaType: CallMediaType.video,
+            invitedAt: DateTime.now(),
           ),
         );
   }

@@ -7,6 +7,7 @@ typedef CallEndedShowCall = ({
   String peerName,
   int callDurationSeconds,
   bool isAudioOnly,
+  String? errorMessage,
 });
 
 /// Fake [CallEndedController] for testing.
@@ -24,18 +25,21 @@ class FakeCallEndedController extends CallEndedController {
     required String peerName,
     required int callDurationSeconds,
     required bool isAudioOnly,
+    String? errorMessage,
   }) {
     showCalls.add((
       contactId: contactId,
       peerName: peerName,
       callDurationSeconds: callDurationSeconds,
       isAudioOnly: isAudioOnly,
+      errorMessage: errorMessage,
     ));
     state = CallEndedState(
       contactId: contactId,
       peerName: peerName,
       callDurationSeconds: callDurationSeconds,
       isAudioOnly: isAudioOnly,
+      errorMessage: errorMessage,
     );
   }
 }

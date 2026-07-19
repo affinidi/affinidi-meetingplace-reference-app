@@ -27,6 +27,7 @@ import '../../../widgets/call_ended/call_ended_controller.dart';
 import 'audio_video_call_screen_controller.dart';
 import 'audio_video_call_screen_state.dart';
 import 'call_controls_bar.dart';
+import 'group_video_call_screen.dart';
 import 'rules/call_ui_rules.dart';
 
 part 'audio_call_screen.dart';
@@ -136,15 +137,20 @@ class _CallScreenBody extends HookConsumerWidget {
     final endState = phase == CallUiPhase.ended
         ? resolveCallEndState(status, hasHadPeer: hasHadPeer)
         : null;
+    final errorCode = ref.watch(provider.select((s) => s.errorCode));
 
     final peerIsCallingBack = ref.watch(
       provider.select((s) => s.peerIsCallingBack),
     );
     final isCallEnded =
         endState == CallEndState.callEnded && !peerIsCallingBack;
+    final isJoinFailure = status == AudioVideoCallStatus.error;
+    final localizedJoinError = errorCode == null
+        ? l10n.videoCallError('')
+        : l10n.videoCallError(errorCode.name);
 
     useEffect(() {
-      if (!isCallEnded) return null;
+      if (!isCallEnded && !isJoinFailure) return null;
       final durationSeconds = ref.read(
         provider.select((s) => s.callDurationSeconds),
       );
@@ -156,6 +162,7 @@ class _CallScreenBody extends HookConsumerWidget {
               peerName: peerName,
               callDurationSeconds: durationSeconds,
               isAudioOnly: callIsAudioOnly,
+              errorMessage: isJoinFailure ? localizedJoinError : null,
             );
         if (context.mounted &&
             (ModalRoute.of(context)?.isCurrent ?? false) &&
@@ -164,7 +171,7 @@ class _CallScreenBody extends HookConsumerWidget {
         }
       });
       return null;
-    }, [isCallEnded]);
+    }, [isCallEnded, isJoinFailure, localizedJoinError]);
 
     // Ended state: call finished (missed, declined, disconnected, error).
     if (phase == CallUiPhase.ended) {
@@ -201,9 +208,7 @@ class _CallScreenBody extends HookConsumerWidget {
         );
       }
       if (status == AudioVideoCallStatus.error) {
-        return _ErrorScaffold(
-          errorCode: ref.read(provider.select((state) => state.errorCode)),
-        );
+        return const SizedBox.shrink();
       }
       return const SizedBox.shrink();
     }

@@ -38,6 +38,7 @@ class CallEndedOverlay extends ConsumerWidget {
         durationSeconds: callEndedState.callDurationSeconds,
         isAudioOnly: callEndedState.isAudioOnly,
         calleeAvatarImage: calleeAvatarImage,
+        errorMessage: callEndedState.errorMessage,
       ),
     );
   }

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CallEndedState {
 
- String get contactId; String get peerName; int get callDurationSeconds; bool get isAudioOnly;
+ String get contactId; String get peerName; int get callDurationSeconds; bool get isAudioOnly; String? get errorMessage;
 /// Create a copy of CallEndedState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $CallEndedStateCopyWith<CallEndedState> get copyWith => _$CallEndedStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallEndedState&&(identical(other.contactId, contactId) || other.contactId == contactId)&&(identical(other.peerName, peerName) || other.peerName == peerName)&&(identical(other.callDurationSeconds, callDurationSeconds) || other.callDurationSeconds == callDurationSeconds)&&(identical(other.isAudioOnly, isAudioOnly) || other.isAudioOnly == isAudioOnly));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CallEndedState&&(identical(other.contactId, contactId) || other.contactId == contactId)&&(identical(other.peerName, peerName) || other.peerName == peerName)&&(identical(other.callDurationSeconds, callDurationSeconds) || other.callDurationSeconds == callDurationSeconds)&&(identical(other.isAudioOnly, isAudioOnly) || other.isAudioOnly == isAudioOnly)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contactId,peerName,callDurationSeconds,isAudioOnly);
+int get hashCode => Object.hash(runtimeType,contactId,peerName,callDurationSeconds,isAudioOnly,errorMessage);
 
 @override
 String toString() {
-  return 'CallEndedState(contactId: $contactId, peerName: $peerName, callDurationSeconds: $callDurationSeconds, isAudioOnly: $isAudioOnly)';
+  return 'CallEndedState(contactId: $contactId, peerName: $peerName, callDurationSeconds: $callDurationSeconds, isAudioOnly: $isAudioOnly, errorMessage: $errorMessage)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $CallEndedStateCopyWith<$Res>  {
   factory $CallEndedStateCopyWith(CallEndedState value, $Res Function(CallEndedState) _then) = _$CallEndedStateCopyWithImpl;
 @useResult
 $Res call({
- String contactId, String peerName, int callDurationSeconds, bool isAudioOnly
+ String contactId, String peerName, int callDurationSeconds, bool isAudioOnly, String? errorMessage
 });
 
 
@@ -62,13 +62,14 @@ class _$CallEndedStateCopyWithImpl<$Res>
 
 /// Create a copy of CallEndedState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? contactId = null,Object? peerName = null,Object? callDurationSeconds = null,Object? isAudioOnly = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? contactId = null,Object? peerName = null,Object? callDurationSeconds = null,Object? isAudioOnly = null,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
 contactId: null == contactId ? _self.contactId : contactId // ignore: cast_nullable_to_non_nullable
 as String,peerName: null == peerName ? _self.peerName : peerName // ignore: cast_nullable_to_non_nullable
 as String,callDurationSeconds: null == callDurationSeconds ? _self.callDurationSeconds : callDurationSeconds // ignore: cast_nullable_to_non_nullable
 as int,isAudioOnly: null == isAudioOnly ? _self.isAudioOnly : isAudioOnly // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String contactId,  String peerName,  int callDurationSeconds,  bool isAudioOnly)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String contactId,  String peerName,  int callDurationSeconds,  bool isAudioOnly,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CallEndedState() when $default != null:
-return $default(_that.contactId,_that.peerName,_that.callDurationSeconds,_that.isAudioOnly);case _:
+return $default(_that.contactId,_that.peerName,_that.callDurationSeconds,_that.isAudioOnly,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.contactId,_that.peerName,_that.callDurationSeconds,_that.i
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String contactId,  String peerName,  int callDurationSeconds,  bool isAudioOnly)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String contactId,  String peerName,  int callDurationSeconds,  bool isAudioOnly,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _CallEndedState():
-return $default(_that.contactId,_that.peerName,_that.callDurationSeconds,_that.isAudioOnly);case _:
+return $default(_that.contactId,_that.peerName,_that.callDurationSeconds,_that.isAudioOnly,_that.errorMessage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +195,10 @@ return $default(_that.contactId,_that.peerName,_that.callDurationSeconds,_that.i
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String contactId,  String peerName,  int callDurationSeconds,  bool isAudioOnly)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String contactId,  String peerName,  int callDurationSeconds,  bool isAudioOnly,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _CallEndedState() when $default != null:
-return $default(_that.contactId,_that.peerName,_that.callDurationSeconds,_that.isAudioOnly);case _:
+return $default(_that.contactId,_that.peerName,_that.callDurationSeconds,_that.isAudioOnly,_that.errorMessage);case _:
   return null;
 
 }
@@ -209,13 +210,14 @@ return $default(_that.contactId,_that.peerName,_that.callDurationSeconds,_that.i
 
 
 class _CallEndedState implements CallEndedState {
-  const _CallEndedState({required this.contactId, required this.peerName, required this.callDurationSeconds, required this.isAudioOnly});
+  const _CallEndedState({required this.contactId, required this.peerName, required this.callDurationSeconds, required this.isAudioOnly, this.errorMessage});
   
 
 @override final  String contactId;
 @override final  String peerName;
 @override final  int callDurationSeconds;
 @override final  bool isAudioOnly;
+@override final  String? errorMessage;
 
 /// Create a copy of CallEndedState
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +229,16 @@ _$CallEndedStateCopyWith<_CallEndedState> get copyWith => __$CallEndedStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CallEndedState&&(identical(other.contactId, contactId) || other.contactId == contactId)&&(identical(other.peerName, peerName) || other.peerName == peerName)&&(identical(other.callDurationSeconds, callDurationSeconds) || other.callDurationSeconds == callDurationSeconds)&&(identical(other.isAudioOnly, isAudioOnly) || other.isAudioOnly == isAudioOnly));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CallEndedState&&(identical(other.contactId, contactId) || other.contactId == contactId)&&(identical(other.peerName, peerName) || other.peerName == peerName)&&(identical(other.callDurationSeconds, callDurationSeconds) || other.callDurationSeconds == callDurationSeconds)&&(identical(other.isAudioOnly, isAudioOnly) || other.isAudioOnly == isAudioOnly)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contactId,peerName,callDurationSeconds,isAudioOnly);
+int get hashCode => Object.hash(runtimeType,contactId,peerName,callDurationSeconds,isAudioOnly,errorMessage);
 
 @override
 String toString() {
-  return 'CallEndedState(contactId: $contactId, peerName: $peerName, callDurationSeconds: $callDurationSeconds, isAudioOnly: $isAudioOnly)';
+  return 'CallEndedState(contactId: $contactId, peerName: $peerName, callDurationSeconds: $callDurationSeconds, isAudioOnly: $isAudioOnly, errorMessage: $errorMessage)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$CallEndedStateCopyWith<$Res> implements $CallEndedStateCo
   factory _$CallEndedStateCopyWith(_CallEndedState value, $Res Function(_CallEndedState) _then) = __$CallEndedStateCopyWithImpl;
 @override @useResult
 $Res call({
- String contactId, String peerName, int callDurationSeconds, bool isAudioOnly
+ String contactId, String peerName, int callDurationSeconds, bool isAudioOnly, String? errorMessage
 });
 
 
@@ -264,13 +266,14 @@ class __$CallEndedStateCopyWithImpl<$Res>
 
 /// Create a copy of CallEndedState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? contactId = null,Object? peerName = null,Object? callDurationSeconds = null,Object? isAudioOnly = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? contactId = null,Object? peerName = null,Object? callDurationSeconds = null,Object? isAudioOnly = null,Object? errorMessage = freezed,}) {
   return _then(_CallEndedState(
 contactId: null == contactId ? _self.contactId : contactId // ignore: cast_nullable_to_non_nullable
 as String,peerName: null == peerName ? _self.peerName : peerName // ignore: cast_nullable_to_non_nullable
 as String,callDurationSeconds: null == callDurationSeconds ? _self.callDurationSeconds : callDurationSeconds // ignore: cast_nullable_to_non_nullable
 as int,isAudioOnly: null == isAudioOnly ? _self.isAudioOnly : isAudioOnly // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
