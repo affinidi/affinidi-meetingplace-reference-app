@@ -2195,5 +2195,40 @@
 				"type": "String"
 			}
 		}
+	},
+	"callParticipantsConnectedCount": "{count} connected",
+	"@callParticipantsConnectedCount": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"callParticipantsConnectedSection": "Connected",
+	"@callParticipantsConnectedSection": {
+		"type": "text"
+	},
+	"callParticipantsNotConnectedSection": "Not connected",
+	"@callParticipantsNotConnectedSection": {
+		"type": "text"
+	},
+	"callParticipantCallAction": "Call {name}",
+	"@callParticipantCallAction": {
+		"type": "text",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"callParticipantRingingAction": "Ringing {name}",
+	"@callParticipantRingingAction": {
+		"type": "text",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
 	}
 }

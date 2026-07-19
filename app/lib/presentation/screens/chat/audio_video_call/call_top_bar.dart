@@ -11,14 +11,16 @@ class _CallTopBar extends ConsumerWidget {
   }) : trailingIcon = null,
        onTrailingPressed = null,
        trailing = null,
+       opensParticipantList = false,
        crossAxisAlignment = CrossAxisAlignment.start,
        centerPadding = EdgeInsets.zero;
 
   const _CallTopBar.group({required this.contactId, required this.onMinimize})
     : trailingIcon = Icons.people_alt_outlined,
-      onTrailingPressed = _noopPressed,
+      onTrailingPressed = null,
       trailing = null,
       statusPill = null,
+      opensParticipantList = true,
       crossAxisAlignment = CrossAxisAlignment.center,
       centerPadding = EdgeInsets.zero;
 
@@ -30,6 +32,7 @@ class _CallTopBar extends ConsumerWidget {
        onTrailingPressed = onSwitchCamera,
        trailing = null,
        statusPill = null,
+       opensParticipantList = false,
        crossAxisAlignment = CrossAxisAlignment.center,
        centerPadding = EdgeInsets.zero;
 
@@ -39,10 +42,11 @@ class _CallTopBar extends ConsumerWidget {
   final IconData? trailingIcon;
   final VoidCallback? onTrailingPressed;
   final Widget? trailing;
+
+  /// When true the trailing button opens the group participant list sheet.
+  final bool opensParticipantList;
   final CrossAxisAlignment crossAxisAlignment;
   final EdgeInsetsGeometry centerPadding;
-
-  static void _noopPressed() {}
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +54,9 @@ class _CallTopBar extends ConsumerWidget {
       contactId: contactId,
       onMinimize: onMinimize,
       trailingIcon: trailingIcon,
-      onTrailingPressed: onTrailingPressed,
+      onTrailingPressed: opensParticipantList
+          ? () => CallParticipantsSheet.show(context, contactId: contactId)
+          : onTrailingPressed,
       trailing: trailing,
       statusPill: statusPill,
       crossAxisAlignment: crossAxisAlignment,
