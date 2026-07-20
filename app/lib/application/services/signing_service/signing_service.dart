@@ -261,7 +261,11 @@ class SigningService extends StateNotifier<SigningServiceState> {
 
     _logger.info(
       'Relayed step-up approval: '
-      'sessionId=${payload['sessionId']}',
+      'sessionId=${payload['sessionId']} '
+      'challenge=${payload['challenge']} '
+      'subject=${payload['subject']} '
+      'holderDid=${_approvalOp?.holderDid} '
+      'keys=${payload.keys.toList()}',
       name: _logKey,
     );
 
@@ -273,8 +277,33 @@ class SigningService extends StateNotifier<SigningServiceState> {
       throw StateError('Signing service not initialized');
     }
 
-    await _approvalOp!.approve(approveRequest: payload);
-    _logger.info('Relayed step-up approved and submitted', name: _logKey);
+    // The relayed approve-request's payload.subject is the agent's DID (the
+    // caller whose VTA session needs elevation). VTA validates that
+    // approve-response.payload.subject == pending.subject (agent's DID), so we
+    // must NOT override it — pass it through as-is.
+    _logger.info(
+      'Submitting approve-response: '
+      'issuer(phone)=${_approvalOp!.holderDid} '
+      'subject(agent)=${payload['subject']} '
+      'sessionId=${payload['sessionId']} '
+      'challenge=${payload['challenge']}',
+      name: _logKey,
+    );
+
+    try {
+      await _approvalOp!.approve(approveRequest: payload);
+      _logger.info('Relayed step-up approved and submitted', name: _logKey);
+    } catch (e) {
+      final msg = e.toString();
+      if (msg.contains('challenge_unknown') || msg.contains('challenge_expired')) {
+        _logger.info(
+          'Relayed approval already consumed (likely approved via DIDComm coordinator): $msg',
+          name: _logKey,
+        );
+        return;
+      }
+      rethrow;
+    }
   }
 
   void approveCurrentRequest() {

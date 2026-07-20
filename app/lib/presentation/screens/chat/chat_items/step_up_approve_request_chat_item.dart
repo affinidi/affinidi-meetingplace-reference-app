@@ -15,12 +15,17 @@ class _StepUpApproveRequestChatItem extends ConsumerStatefulWidget {
 }
 
 class _StepUpApproveRequestChatItemState
-    extends ConsumerState<_StepUpApproveRequestChatItem> {
+    extends ConsumerState<_StepUpApproveRequestChatItem>
+    with AutomaticKeepAliveClientMixin {
   bool _processing = false;
   String? _result;
 
   @override
+  bool get wantKeepAlive => _result != null || _processing;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     final signingStatus = ref.watch(
       signingServiceProvider.select((s) => s.status),
     );
@@ -169,12 +174,15 @@ class _StepUpApproveRequestChatItemState
       final controller = ref.read(
         chatScreenControllerProvider(widget.contactId).notifier,
       );
+      final sessionId = (approveRequest['payload']
+              as Map<String, dynamic>?)?['sessionId'] ??
+          approveRequest['sessionId'];
       await controller.sendMessageDirect(
-        '{"type":"cierge/stepUpApproved"}',
+        '{"type":"cierge/stepUpApproved","sessionId":"$sessionId"}',
       );
-      if (mounted) setState(() { _result = 'Approved'; _processing = false; });
+      if (mounted) setState(() { _result = 'Approved'; _processing = false; updateKeepAlive(); });
     } catch (e) {
-      if (mounted) setState(() { _result = 'Failed: $e'; _processing = false; });
+      if (mounted) setState(() { _result = 'Failed: $e'; _processing = false; updateKeepAlive(); });
     }
   }
 
