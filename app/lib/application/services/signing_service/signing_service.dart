@@ -71,6 +71,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
   VtaDidCommChannel? _channel;
   VtaMediatorSession? _mediatorSession;
   VtaStepUpApprovalCoordinator? _coordinator;
+  VtaStepUpApprovalOperation? _approvalOp;
 
   static const _vtaKeyId = "m/44'/60'/0'/0'/0'";
 
@@ -172,7 +173,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
         channel: _channel!,
         packer: PlaintextDidCommPacker(didManager: didManager),
         protocolConfig: const VtaMediatorProtocolConfig(
-          enableHandshake: false,
+          enableHandshake: true,
           enablePickup: false,
           enableAck: false,
         ),
@@ -195,6 +196,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
         signer: signer,
         accessToken: authResult.tokens.accessToken,
       );
+      _approvalOp = approvalOp;
 
       _coordinator = VtaStepUpApprovalCoordinator(
         mediatorSession: _mediatorSession!,
@@ -249,6 +251,30 @@ class SigningService extends StateNotifier<SigningServiceState> {
       name: _logKey,
     );
     return VtaStepUpApprovalDecision(approved: approved);
+  }
+
+  Future<void> handleRelayedApproveRequest(
+    Map<String, dynamic> approveRequest,
+  ) async {
+    final payload =
+        approveRequest['payload'] as Map<String, dynamic>? ?? approveRequest;
+
+    _logger.info(
+      'Relayed step-up approval: '
+      'sessionId=${payload['sessionId']}',
+      name: _logKey,
+    );
+
+    if (_approvalOp == null) {
+      _logger.warning(
+        'Cannot approve: signing service not initialized',
+        name: _logKey,
+      );
+      throw StateError('Signing service not initialized');
+    }
+
+    await _approvalOp!.approve(approveRequest: payload);
+    _logger.info('Relayed step-up approved and submitted', name: _logKey);
   }
 
   void approveCurrentRequest() {
