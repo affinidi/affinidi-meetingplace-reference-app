@@ -31,6 +31,15 @@ final Future<void> _vodozemacInit = fvod.init();
 Duration? _disableRetry(int retryCount, Object error) => null;
 
 @visibleForTesting
+String? normalizeCiergeConnectorDid(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) return null;
+  if (trimmed.startsWith('did:')) return trimmed;
+  if (trimmed.startsWith('z')) return 'did:key:$trimmed';
+  return trimmed;
+}
+
+@visibleForTesting
 final vodozemacInitProvider = FutureProvider<void>(
   (ref) => _vodozemacInit,
   name: 'vodozemacInitProvider',
@@ -90,9 +99,9 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
       final eventCfg = environment.ciergeEventConfig;
       final ciergeConnectorDid =
           eventCfg[mnemonicHash]?['ciergeConnectorDid'] as String?;
-      final resolvedAgentDid = ciergeConnectorDid?.trim().isNotEmpty == true
-          ? ciergeConnectorDid!.trim()
-          : null;
+      final resolvedAgentDid = normalizeCiergeConnectorDid(
+        ciergeConnectorDid,
+      );
 
       if (environment.personalAiEnabled &&
           eventCfg.isNotEmpty &&

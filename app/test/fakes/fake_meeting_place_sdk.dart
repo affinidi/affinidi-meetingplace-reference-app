@@ -118,6 +118,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     String? mediatorDid,
     String? metadata,
     String? externalRef,
+    String? contextKey,
     int? score,
   }) async {
     // Record the call parameters
@@ -132,6 +133,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
       'mediatorDid': mediatorDid,
       'metadata': metadata,
       'externalRef': externalRef,
+      'contextKey': contextKey,
       'score': score,
       'transport': transport,
     });
@@ -164,14 +166,16 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>({
     required T connectionOffer,
     required ContactCard contactCard,
-    String? senderInfo,
+    required String senderInfo,
     String? externalRef,
+    String? contextKey,
   }) async {
     _acceptOfferCalls.add({
       'connectionOffer': connectionOffer,
       'contactCard': contactCard.toJson(),
       'senderInfo': senderInfo,
       'externalRef': externalRef,
+      'contextKey': contextKey,
     });
 
     return _FakeAcceptOfferResult<T>(connectionOffer: connectionOffer);
