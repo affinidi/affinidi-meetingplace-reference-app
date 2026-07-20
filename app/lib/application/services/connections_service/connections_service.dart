@@ -249,11 +249,25 @@ class ConnectionsService extends _$ConnectionsService {
     required Identity identity,
   }) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
-    await sdk.acceptOffer(
+    final result = await sdk.acceptOffer(
       connectionOffer: connectionOffer,
       contactCard: identity.card.toSdkContactCard(),
       externalRef: identity.id,
       senderInfo: identity.card.firstName,
+    );
+    final acceptOfferDidDocument = await result.acceptOfferDid.getDidDocument();
+    await sdk.mediator.updateAcl(
+      ownerDidManager: result.acceptOfferDid,
+      acl: AccessListAdd(
+        ownerDid: acceptOfferDidDocument.id,
+        granteeDids: [connectionOffer.publishOfferDid],
+      ),
+    );
+    _logger.info(
+      'Ensured accept-offer ACL grant: '
+      'acceptOfferDid=${acceptOfferDidDocument.id}, '
+      'publishOfferDid=${connectionOffer.publishOfferDid}',
+      name: _logKey,
     );
     await fetchConnections();
   }
