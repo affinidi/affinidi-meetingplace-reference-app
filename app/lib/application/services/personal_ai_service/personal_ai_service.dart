@@ -531,7 +531,10 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     }
 
     final connectionsService = _ref.read(connectionsServiceProvider.notifier);
-    await connectionsService.acceptOffer(foundOffer, identity: identity);
+    await connectionsService.acceptOffer(
+      foundOffer,
+      identity: identity,
+    );
 
     // After accepting, wait for the connector to process inauguration and
     // write channel_did to the offer file. _waitForOffer would return
