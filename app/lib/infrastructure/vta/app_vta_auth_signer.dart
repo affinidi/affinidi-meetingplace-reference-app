@@ -1,22 +1,23 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:ssi/ssi.dart';
 import 'package:vta_dart_client/vta_dart_client.dart';
-
-import '../secure_storage/secure_storage.dart';
 
 class AppVtaAuthSigner implements VtaAuthSigner {
   AppVtaAuthSigner({
-    required SecureStorage secureStorage,
+    required this.wallet,
+    required this.rootKeyId,
     required this.holderDid,
     required this.verificationMethod,
-  }) : _secureStorage = secureStorage;
+  });
 
-  final SecureStorage _secureStorage;
+  final Wallet wallet;
+  final String rootKeyId;
   final String holderDid;
   final String verificationMethod;
 
-  static final _ed25519 = Ed25519();
   static final _sha256 = Sha256();
 
   @override
@@ -24,11 +25,6 @@ class AppVtaAuthSigner implements VtaAuthSigner {
     required Map<String, dynamic> trustTask,
     required String operation,
   }) async {
-    final keyPair = await _secureStorage.getKeyPair(holderDid);
-    if (keyPair == null) {
-      throw StateError('No key pair found for DID: $holderDid');
-    }
-
     final proofConfig = <String, dynamic>{
       'type': 'DataIntegrityProof',
       'cryptosuite': 'eddsa-jcs-2022',
@@ -46,11 +42,11 @@ class AppVtaAuthSigner implements VtaAuthSigner {
         (await _sha256.hash(utf8.encode(canonicalDoc))).bytes;
     final signingInput = <int>[...proofDigest, ...docDigest];
 
-    final edKeyPair = await _ed25519.newKeyPairFromSeed(
-      keyPair.privateKeyBytes,
+    final signature = await wallet.sign(
+      Uint8List.fromList(signingInput),
+      keyId: rootKeyId,
     );
-    final signature = await _ed25519.sign(signingInput, keyPair: edKeyPair);
-    final proofValue = 'z${_base58Encode(signature.bytes)}';
+    final proofValue = 'z${_base58Encode(signature)}';
 
     return <String, dynamic>{...proofConfig, 'proofValue': proofValue};
   }
