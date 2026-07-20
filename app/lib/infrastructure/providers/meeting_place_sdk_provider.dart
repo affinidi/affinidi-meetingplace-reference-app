@@ -86,9 +86,24 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
       logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
       final mnemonicHash = sha256.convert(utf8.encode(mnemonic)).toString();
-      final eventCfg = ref.read(environmentProvider).ciergeEventConfig;
+      final environment = ref.read(environmentProvider);
+      final eventCfg = environment.ciergeEventConfig;
       final ciergeConnectorDid =
           eventCfg[mnemonicHash]?['ciergeConnectorDid'] as String?;
+      final resolvedAgentDid = ciergeConnectorDid?.trim().isNotEmpty == true
+          ? ciergeConnectorDid!.trim()
+          : null;
+
+      if (environment.personalAiEnabled &&
+          eventCfg.isNotEmpty &&
+          resolvedAgentDid == null) {
+        logger.warning(
+          'Personal AI is enabled but WALLET_CONFIG has no non-empty '
+          'ciergeConnectorDid for mnemonic hash $mnemonicHash. '
+          'Agent channel identity handshake is disabled for this wallet.',
+          name: logKey,
+        );
+      }
 
       // TODO: disabling signature on rcards for mnemonic
       // Future<List<Attachment>?> onBuildAttachments(
@@ -132,8 +147,8 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
         ],
         // #onBuildAttachments: onBuildAttachments,
       };
-      if (ciergeConnectorDid != null) {
-        sdkOptionsNamed[#agentDid] = ciergeConnectorDid;
+      if (resolvedAgentDid != null) {
+        sdkOptionsNamed[#agentDid] = resolvedAgentDid;
       }
 
       MeetingPlaceCoreSDKOptions sdkOptions;
@@ -145,9 +160,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
                   sdkOptionsNamed,
                 )
                 as MeetingPlaceCoreSDKOptions;
-        if (ciergeConnectorDid != null) {
+        if (resolvedAgentDid != null) {
           logger.info(
-            'MPX agent DID override applied to SDK options',
+            'MPX agent DID override applied to SDK options '
+            '(source=WALLET_CONFIG)',
             name: logKey,
           );
         }
@@ -155,10 +171,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
         // Compatibility fallback for SDK builds that do not yet expose
         // `agentDid`.
         sdkOptionsNamed.remove(#agentDid);
-        if (ciergeConnectorDid != null) {
+        if (resolvedAgentDid != null) {
           logger.warning(
-            'MPX_AGENT_DID was provided but current SDK options do '
-            'not accept agentDid; override ignored',
+            'Agent DID override was provided (WALLET_CONFIG) but '
+            'current SDK options do not accept agentDid; override ignored',
             name: logKey,
           );
         }
