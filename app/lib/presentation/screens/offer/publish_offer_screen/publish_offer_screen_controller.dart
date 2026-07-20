@@ -9,6 +9,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/connections_service/connections_service.dart';
 import '../../../../application/services/connections_service/publish_offer_request.dart';
+import '../../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../application/services/mediator_service/mediator_service.dart';
 import '../../../../application/services/settings_service/settings_service.dart';
@@ -314,7 +315,10 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
     }
   }
 
-  Future<void> publishOffer({required PublishOfferFormData formData}) async {
+  Future<void> publishOffer({
+    required PublishOfferFormData formData,
+    AgentContext? agentContext,
+  }) async {
     await ref.read(publishOfferLoadingController.notifier).start(() async {
       final selectedIdentity = state.selectedIdentity;
       if (selectedIdentity == null) {
@@ -363,6 +367,11 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
         customPhrase: updatedFormData.customPhrase,
         score: updatedFormData.score,
         transport: updatedFormData.transport,
+        contextKey: agentContext == AgentContext.work
+            ? 'work'
+            : agentContext == AgentContext.personal
+            ? 'personal'
+            : null,
       );
 
       await ref

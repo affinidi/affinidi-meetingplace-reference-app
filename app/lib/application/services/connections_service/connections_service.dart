@@ -207,7 +207,10 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      await sdk.approveConnectionRequest(channel: channel);
+      await sdk.approveConnectionRequest(
+        channel: channel,
+        contextKey: connectionOffer.contextKey,
+      );
 
       _logger.info('Connection request approved successfully', name: _logKey);
     } catch (error, stackTrace) {
@@ -247,12 +250,14 @@ class ConnectionsService extends _$ConnectionsService {
   Future<void> acceptOffer(
     ConnectionOffer connectionOffer, {
     required Identity identity,
+    String? contextKey,
   }) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
     final result = await sdk.acceptOffer(
       connectionOffer: connectionOffer,
       contactCard: identity.card.toSdkContactCard(),
       externalRef: identity.id,
+      contextKey: contextKey,
       senderInfo: identity.card.firstName,
     );
     final acceptOfferDidDocument = await result.acceptOfferDid.getDidDocument();
@@ -344,6 +349,7 @@ class ConnectionsService extends _$ConnectionsService {
         maximumUsage: data.maxUsages,
         mediatorDid: data.selectedMediatorDid,
         externalRef: identity.id,
+        contextKey: data.contextKey,
         score: data.score,
         transport: isGroupOffer ? ChannelTransport.matrix : data.transport,
       );

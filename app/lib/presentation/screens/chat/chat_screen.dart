@@ -5,7 +5,6 @@ import 'dart:ui';
 
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -44,7 +43,6 @@ import '../../../infrastructure/extensions/contact_image_extensions.dart';
 import '../../../infrastructure/extensions/message_extensions.dart';
 import '../../../infrastructure/extensions/string_emoji_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
-import '../../../infrastructure/media/file_picker/file_picker_platform_provider.dart';
 import '../../../infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
@@ -114,12 +112,8 @@ class ChatScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final contextRoutingState = ref.watch<ContextRoutingState>(
-      contextRoutingServiceProvider,
-    );
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     final showHumanZkp = ref.watch(
       provider.select(
@@ -184,53 +178,6 @@ class ChatScreen extends HookConsumerWidget {
       },
     );
 
-    Future<void> uploadContextFor(AgentContext target) async {
-      final filePicker = ref.read(filePickerPlatformProvider);
-      final picked = await filePicker.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['txt'],
-      );
-      if (picked == null || picked.files.isEmpty || !context.mounted) return;
-      final file = picked.files.first;
-      final bytes = await file.readAsBytes();
-      if (bytes.isEmpty) return;
-
-      await ref
-          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
-          .markContextUploaded(context: target, fileName: file.name);
-
-      if (!context.mounted) return;
-      final label = _contextDisplayName(context, target);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.chatContextUploaded(label, file.name))),
-      );
-    }
-
-    Future<void> useContextForChannel(AgentContext target) async {
-      if (!contextRoutingState.isContextUploaded(target)) {
-        if (!context.mounted) return;
-        final requiredFile = target == AgentContext.work
-            ? 'work-context.txt'
-            : 'personal-context.txt';
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
-          SnackBar(content: Text(l10n.chatUploadFileFirst(requiredFile))),
-        );
-        return;
-      }
-
-      await ref
-          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
-          .assignContactContext(_contactId, target);
-
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.chatChannelUsesContext(_contextDisplayName(
-          context, target)))),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: context.colorScheme.primary,
@@ -249,54 +196,6 @@ class ChatScreen extends HookConsumerWidget {
         ),
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.account_tree_outlined),
-            onSelected: (value) async {
-              switch (value) {
-                case 'use_work':
-                  await useContextForChannel(AgentContext.work);
-                  break;
-                case 'use_personal':
-                  await useContextForChannel(AgentContext.personal);
-                  break;
-                case 'upload_work':
-                  await uploadContextFor(AgentContext.work);
-                  break;
-                case 'upload_personal':
-                  await uploadContextFor(AgentContext.personal);
-                  break;
-              }
-            },
-            itemBuilder: (_) => [
-              PopupMenuItem<String>(
-                value: 'use_work',
-                child: Text(l10n.chatMenuUseWorkAi),
-              ),
-              PopupMenuItem<String>(
-                value: 'use_personal',
-                child: Text(l10n.chatMenuUsePersonalAi),
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem<String>(
-                value: 'upload_work',
-                child: Text(
-                  contextRoutingState.workContextUploaded
-                      ? l10n.chatMenuReuploadWorkContext
-                      : l10n.chatMenuUploadWorkContext,
-                ),
-              ),
-              PopupMenuItem<String>(
-                value: 'upload_personal',
-                child: Text(
-                  contextRoutingState.personalContextUploaded
-                      ? l10n.chatMenuReuploadPersonalContext
-                      : l10n.chatMenuUploadPersonalContext,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
       body: SafeArea(
         child: Column(
@@ -362,11 +261,4 @@ class _LoadingSection extends StatelessWidget {
       ),
     );
   }
-}
-
-String _contextDisplayName(BuildContext context, AgentContext value) {
-  final l10n = context.l10n;
-  return value == AgentContext.work
-      ? l10n.agentContextWorkAiLabel
-      : l10n.agentContextPersonalAiLabel;
 }

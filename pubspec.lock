@@ -1370,11 +1370,9 @@ packages:
   meeting_place_drift_repository:
     dependency: "direct overridden"
     description:
-      path: "packages/meeting_place_drift_repository"
-      ref: "4e7b728e545fa714f77df0e6201576d4ecb523a1"
-      resolved-ref: "4e7b728e545fa714f77df0e6201576d4ecb523a1"
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
+      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository"
+      relative: true
+    source: path
     version: "0.0.1-dev.50"
   meeting_place_mediator:
     dependency: "direct overridden"
