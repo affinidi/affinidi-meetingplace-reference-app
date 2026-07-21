@@ -147,6 +147,21 @@ class PersonalAgentScreen extends ConsumerWidget {
       }
     }
 
+    Future<void> connectWorkOneDrive() async {
+      try {
+        final outcome = await controller.connectWorkOneDrive();
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(outcome.message)));
+      } catch (error) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
+      }
+    }
+
     return ColoredBox(
       color: colorScheme.surface,
       child: SafeArea(
@@ -187,7 +202,7 @@ class PersonalAgentScreen extends ConsumerWidget {
                     isConnecting: ui.isConnecting,
                     connectingLabel: ui.connectingLabel,
                     uploadError: ui.contextUploadError,
-                    onUploadWork: () => uploadRoutingContext(AgentContext.work),
+                    onUploadWork: connectWorkOneDrive,
                     onUploadPersonal: () =>
                         uploadRoutingContext(AgentContext.personal),
                   ),
@@ -396,6 +411,9 @@ class _AgentContextSetupCard extends StatelessWidget {
       final file = contextTarget == AgentContext.work
           ? workContextFileName
           : personalContextFileName;
+      if (contextTarget == AgentContext.work) {
+        return 'Connect OneDrive to set up work context';
+      }
       if (file == null || file.isEmpty) {
         return l10n.personalAgentChooseFileToSetUp;
       }
@@ -422,9 +440,7 @@ class _AgentContextSetupCard extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                isLocked
-                    ? Icons.check_circle_outline
-                    : Icons.upload_file_outlined,
+                isLocked ? Icons.check_circle_outline : Icons.cloud_outlined,
               ),
               const SizedBox(width: 12),
               Expanded(
