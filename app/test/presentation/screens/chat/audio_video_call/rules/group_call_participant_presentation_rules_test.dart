@@ -61,6 +61,18 @@ void main() {
 
       expect(config.showOverlayLabel, isFalse);
     });
+
+    test('suppresses inline label in full-screen focused self stage', () {
+      final config = resolveGroupCallParticipantPresentation(
+        participant: _participant(isSelf: true, hasVideo: false),
+        isCameraEnabled: false,
+        isFocusedStage: true,
+        isFullScreen: true,
+      );
+
+      expect(config.showInlineLabel, isFalse);
+      expect(config.showOverlayLabel, isFalse);
+    });
   });
 
   group('resolveGroupCallParticipantPresentation for peer', () {

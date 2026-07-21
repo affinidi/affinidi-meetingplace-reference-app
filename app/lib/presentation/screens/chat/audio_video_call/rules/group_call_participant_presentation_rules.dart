@@ -27,13 +27,14 @@ GroupCallParticipantPresentationConfig resolveGroupCallParticipantPresentation({
   required bool isFocusedStage,
   required bool isFullScreen,
 }) {
+  final isFocusedFullScreenSelf =
+      isFullScreen && participant.isSelf && isFocusedStage;
   final showVideo = participant.isSelf ? isCameraEnabled : participant.hasVideo;
-  final showOverlayLabel =
-      showVideo && !(isFullScreen && participant.isSelf && isFocusedStage);
+  final showOverlayLabel = showVideo && !isFocusedFullScreenSelf;
 
   return GroupCallParticipantPresentationConfig(
     showVideo: showVideo,
     showOverlayLabel: showOverlayLabel,
-    showInlineLabel: !showVideo,
+    showInlineLabel: !showVideo && !isFocusedFullScreenSelf,
   );
 }

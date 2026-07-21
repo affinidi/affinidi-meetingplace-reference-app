@@ -37,7 +37,7 @@ class _FocusedParticipantStage extends StatelessWidget {
               session: session,
               memberContactCards: memberContactCards,
               isCameraEnabled: isCameraEnabled,
-              avatarRadius: 58,
+              avatarRadius: isFullScreen ? 96 : 58,
               label: presentation.showInlineLabel ? label : null,
               showVideo: presentation.showVideo,
               labelStyle: context.textTheme.titleMedium?.copyWith(
