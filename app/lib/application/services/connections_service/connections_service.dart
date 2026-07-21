@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/models/identity/identity.dart';
@@ -12,7 +11,6 @@ import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../control_plane_service/control_plane_service.dart';
-import '../identities_service/identities_service.dart';
 import '../vrc_service/vrc_service.dart';
 import 'connections_service_state.dart';
 import 'publish_offer_request.dart';
@@ -209,12 +207,7 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      final rCardAttachments = await _buildRCardAttachments(sdk, channel);
-
-      await sdk.approveConnectionRequest(
-        channel: channel,
-        attachments: rCardAttachments,
-      );
+      await sdk.approveConnectionRequest(channel: channel);
 
       _logger.info('Connection request approved successfully', name: _logKey);
     } catch (error, stackTrace) {
@@ -483,56 +476,6 @@ class ConnectionsService extends _$ConnectionsService {
     }
 
     state = state.copyWith(selectedOffer: result.connectionOffer);
-  }
-
-  Future<List<Attachment>?> _buildRCardAttachments(
-    MeetingPlaceCoreSDK sdk,
-    Channel channel,
-  ) async {
-    await ref.read(identitiesServiceProvider.notifier).ensureInitialized();
-
-    final externalRef = channel.externalRef;
-    if (externalRef == null || externalRef.isEmpty) {
-      _logger.warning(
-        'Skipping R-Card attachment: channel has no externalRef',
-        name: _logKey,
-      );
-      return null;
-    }
-
-    final identity = ref
-        .read(identitiesServiceProvider)
-        .getIdentityById(externalRef);
-    if (identity == null || identity.did.isEmpty) {
-      _logger.warning(
-        'Skipping R-Card attachment: no identity found for'
-        ' externalRef $externalRef',
-        name: _logKey,
-      );
-      return null;
-    }
-
-    try {
-      final didManager = await sdk.getDidManager(identity.did);
-      return RCardDIDCommAttachmentBuilder.build(
-        issuerDid: identity.did,
-        card: RCardSubject(
-          firstName: identity.card.firstName,
-          lastName: identity.card.lastName,
-          email: identity.card.email,
-          phone: identity.card.mobile,
-        ),
-        issuerDidManager: didManager,
-      );
-    } catch (error, stackTrace) {
-      _logger.error(
-        'Failed to build R-Card attachments',
-        error: error,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      return null;
-    }
   }
 
   /// Updates the VRC trust score for all published offers associated with

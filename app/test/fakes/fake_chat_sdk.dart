@@ -98,7 +98,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   int get startedChatPresenceUpdatesCount => _startedChatPresenceUpdates;
 
   /// Simulates an incoming text message by emitting it through the stream
-  void simulateIncomingTextMessage({
+  Message simulateIncomingTextMessage({
     required String text,
     required String recipientDid,
     List<ChatAttachment>? attachments,
@@ -126,7 +126,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     }
     final message = Message(
       chatId: 'fake-chat-id',
-      messageId: 'msg-incoming-${DateTime.now().millisecondsSinceEpoch}',
+      messageId: 'msg-incoming-${DateTime.now().microsecondsSinceEpoch}',
       value: text,
       dateCreated: DateTime.now(),
       status: ChatItemStatus.confirmed,
@@ -143,6 +143,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     );
 
     _emit(StreamData(event: chatEvent, chatItem: message));
+    return message;
   }
 
   /// Simulates an incoming concierge message for join group requests
@@ -503,6 +504,24 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     _emit(StreamData(event: ChatEffectEvent(effectName: effectName)));
   }
 
+  void simulateIncomingSuggestion({
+    required String relatedMessageId,
+    required String text,
+    required String recipientDid,
+    String? senderDid = 'fake-sender-did',
+  }) {
+    _emit(
+      StreamData(
+        event: ChatSuggestionEvent(
+          senderDid: senderDid,
+          relatedMessageId: relatedMessageId,
+          text: text,
+          createdTime: DateTime.now().toUtc(),
+        ),
+      ),
+    );
+  }
+
   void simulateIncomingGroupDetailsUpdate({required String recipientDid}) {
     _emit(StreamData(event: const ChatGroupDetailsUpdateEvent()));
   }
@@ -776,7 +795,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   void simulateSentTextMessage({required String text}) {
     final message = Message(
       chatId: 'fake-chat-id',
-      messageId: 'msg-sent-${DateTime.now().millisecondsSinceEpoch}',
+      messageId: 'msg-sent-${DateTime.now().microsecondsSinceEpoch}',
       value: text,
       dateCreated: DateTime.now(),
       status: ChatItemStatus.confirmed,
