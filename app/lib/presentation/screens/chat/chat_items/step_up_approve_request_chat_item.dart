@@ -19,6 +19,7 @@ class _StepUpApproveRequestChatItemState
     with AutomaticKeepAliveClientMixin {
   bool _processing = false;
   String? _result;
+  bool _vtaExpanded = false;
 
   @override
   bool get wantKeepAlive => _result != null || _processing;
@@ -36,6 +37,8 @@ class _StepUpApproveRequestChatItemState
     final payload =
         approveRequest['payload'] as Map<String, dynamic>? ?? approveRequest;
     final reason = payload['reason'] as String? ?? 'Step-up approval required';
+    final alreadyConfirmed =
+        widget.chatItem.status == chat.ChatItemStatus.confirmed;
     final isActionable = isOwner &&
         widget.chatItem.status == chat.ChatItemStatus.userInput &&
         _result == null;
@@ -105,13 +108,53 @@ class _StepUpApproveRequestChatItemState
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
-          if (_result != null) ...[
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => setState(() => _vtaExpanded = !_vtaExpanded),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _vtaExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.white38,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  _vtaExpanded ? 'Hide VTA details' : 'VTA details',
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          if (_vtaExpanded) ...[
+            const SizedBox(height: 6),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: SelectableText(
+                const JsonEncoder.withIndent('  ').convert(payload),
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 11,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ),
+          ],
+          if (_result != null || alreadyConfirmed) ...[
             const SizedBox(height: 12),
             Text(
-              _result!,
+              _result ?? 'Approved',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: _result == 'Approved' ? Colors.greenAccent : Colors.redAccent,
+                color: (_result ?? 'Approved') == 'Approved'
+                    ? Colors.greenAccent
+                    : Colors.redAccent,
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
@@ -174,6 +217,9 @@ class _StepUpApproveRequestChatItemState
         approveRequest,
         mediatorDid: contact!.mediatorDid,
       );
+      widget.chatItem.status = chat.ChatItemStatus.confirmed;
+      final repository = await ref.read(chatRepositoryProvider.future);
+      await repository.updateMesssage(widget.chatItem);
       if (mounted) setState(() { _result = 'Approved'; _processing = false; updateKeepAlive(); });
     } catch (e) {
       if (mounted) setState(() { _result = 'Failed: $e'; _processing = false; updateKeepAlive(); });

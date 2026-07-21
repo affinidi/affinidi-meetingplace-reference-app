@@ -21,9 +21,7 @@ class _SignDocumentRequestChatItem extends ConsumerStatefulWidget {
   final Color? statusColor;
   final IconData? statusIcon;
 
-  static chat.CiergeSignDocumentRequest? matchPlainMessage(
-    chat.ChatItem item,
-  ) {
+  static chat.CiergeSignDocumentRequest? matchPlainMessage(chat.ChatItem item) {
     if (item is! chat.Message) return null;
     return chat.CiergeSignDocumentRequest.fromMessageText(item.value);
   }
@@ -53,6 +51,7 @@ class _SignDocumentRequestChatItem extends ConsumerStatefulWidget {
 class _SignDocumentRequestChatItemState
     extends ConsumerState<_SignDocumentRequestChatItem> {
   bool _expanded = false;
+  bool _vtaExpanded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -64,17 +63,25 @@ class _SignDocumentRequestChatItemState
     }
 
     final statusData = ref.watch(
-      chatScreenControllerProvider(widget.contactId).select(
-        (state) {
-          final msgs = state.messages;
-          for (var i = 0; i < widget.messageIndex; i++) {
-            final parsed =
-                _SignDocumentRequestChatItem.parseStatusMessage(msgs[i]);
-            if (parsed != null) return parsed;
+      chatScreenControllerProvider(widget.contactId).select((state) {
+        final msgs = state.messages;
+        for (var i = widget.messageIndex - 1; i >= 0; i--) {
+          final msg = msgs[i];
+          if (_SignDocumentRequestChatItem.matchPlainMessage(msg) != null) {
+            return null;
           }
-          return null;
-        },
-      ),
+          if (msg is chat.ConciergeMessage &&
+              msg.conciergeType ==
+                  chat.ConciergeMessageType.fromJson(
+                    chat.CiergeSignDocumentRequest.conciergeTypeName,
+                  )) {
+            return null;
+          }
+          final parsed = _SignDocumentRequestChatItem.parseStatusMessage(msg);
+          if (parsed != null) return parsed;
+        }
+        return null;
+      }),
     );
 
     final String label;
@@ -101,11 +108,7 @@ class _SignDocumentRequestChatItemState
           Colors.redAccent,
           Icons.error_outline,
         ),
-        _ => (
-          'Signing request sent',
-          Colors.white54,
-          Icons.send_outlined,
-        ),
+        _ => ('Signing request sent', Colors.white54, Icons.send_outlined),
       };
     }
 
@@ -165,30 +168,6 @@ class _SignDocumentRequestChatItemState
                         ),
                       ],
                     ),
-                    if (challenge != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Challenge: $challenge',
-                        style: const TextStyle(
-                          color: Colors.white38,
-                          fontSize: 11,
-                          fontFamily: 'monospace',
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    if (subject != null) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        'Subject: $subject',
-                        style: const TextStyle(
-                          color: Colors.white38,
-                          fontSize: 11,
-                          fontFamily: 'monospace',
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -224,8 +203,47 @@ class _SignDocumentRequestChatItemState
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: SelectableText(
-                  const JsonEncoder.withIndent('  ')
-                      .convert(widget.rawPayload),
+                  const JsonEncoder.withIndent('  ').convert(widget.rawPayload),
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 11,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ),
+            ],
+          ],
+          if (statusData != null) ...[
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => setState(() => _vtaExpanded = !_vtaExpanded),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _vtaExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.white38,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _vtaExpanded ? 'Hide VTA details' : 'VTA details',
+                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            if (_vtaExpanded) ...[
+              const SizedBox(height: 6),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: SelectableText(
+                  const JsonEncoder.withIndent('  ').convert(statusData),
                   style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 11,

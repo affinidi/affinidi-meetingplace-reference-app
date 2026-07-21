@@ -71,11 +71,7 @@ class ChatItem extends StatelessWidget {
 
     if (_SignedDocumentChatItem.matchPlainMessage(_chatItem)
         case final parsed?) {
-      final payload = parsed['payload'] as Map<String, dynamic>? ?? {};
-      return _SignedDocumentChatItem(
-        title: payload['title'] as String? ?? 'Untitled Document',
-        issuer: parsed['issuer'] as String? ?? '',
-      );
+      return _SignedDocumentChatItem(data: parsed);
     }
 
     if (_chatItem is chat.Message) {
