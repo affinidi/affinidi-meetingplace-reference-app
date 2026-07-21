@@ -258,12 +258,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       if (!ref.mounted) return;
 
       _chatSDK = await ref.read(chatSdkProvider(channel).future);
-      final currentIdentityCard = ref
-          .read(identitiesServiceProvider.notifier)
-          .getIdentityById(channel.externalRef)
-          ?.card
-          .toSdkContactCard();
-      await _chatSDK?.refreshCurrentContactCard(currentIdentityCard);
+
       if (!ref.mounted) {
         _chatSDK = null;
         return;
@@ -282,6 +277,19 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           ? ContactCardUtils.fromSdkContactCard(srcCard)
           : null;
       _otherPartyFirstName = initialCard?.firstName;
+
+      final currentIdentityCard = ref
+          .read(identitiesServiceProvider)
+          .getIdentityById(channel.externalRef)
+          ?.card;
+      if (currentIdentityCard != null) {
+        unawaited(
+          _chatSDK?.refreshCurrentContactCard(
+                currentIdentityCard.toSdkContactCard(),
+              ) ??
+              Future<void>.value(),
+        );
+      }
 
       if (_isGroupChat) {
         final group = await coreSdk.getGroupByOfferLink(channel.offerLink);

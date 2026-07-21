@@ -107,7 +107,7 @@ class _AudioCallScreen extends ConsumerWidget {
     );
 
     final peerCard = ref
-        .read(contactsServiceProvider)
+        .watch(contactsServiceProvider)
         .getContactById(contactId)
         ?.card;
     final peerAvatarImage = peerCard?.hasProfilePic == true

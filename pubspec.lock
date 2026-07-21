@@ -1393,8 +1393,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_chat"
-      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
-      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      ref: e45e8002669e61d9a1c4da38698f86da539943e7
+      resolved-ref: e45e8002669e61d9a1c4da38698f86da539943e7
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.53"
@@ -1402,8 +1402,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_control_plane"
-      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
-      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      ref: e45e8002669e61d9a1c4da38698f86da539943e7
+      resolved-ref: e45e8002669e61d9a1c4da38698f86da539943e7
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.22"
@@ -1411,8 +1411,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_core"
-      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
-      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      ref: e45e8002669e61d9a1c4da38698f86da539943e7
+      resolved-ref: e45e8002669e61d9a1c4da38698f86da539943e7
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.46"
@@ -1420,8 +1420,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_credentials"
-      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
-      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      ref: e45e8002669e61d9a1c4da38698f86da539943e7
+      resolved-ref: e45e8002669e61d9a1c4da38698f86da539943e7
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.11"
@@ -1429,8 +1429,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_drift_repository"
-      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
-      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      ref: e45e8002669e61d9a1c4da38698f86da539943e7
+      resolved-ref: e45e8002669e61d9a1c4da38698f86da539943e7
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.53"
@@ -1438,17 +1438,17 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_matrix"
-      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
-      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      ref: e45e8002669e61d9a1c4da38698f86da539943e7
+      resolved-ref: e45e8002669e61d9a1c4da38698f86da539943e7
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
-    version: "0.0.1-dev.4"
+    version: "0.0.1-dev.5"
   meeting_place_mediator:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_mediator"
-      ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
-      resolved-ref: "78f73ec0759a3703f0d8e2a232960ef07455657f"
+      ref: e45e8002669e61d9a1c4da38698f86da539943e7
+      resolved-ref: e45e8002669e61d9a1c4da38698f86da539943e7
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "0.0.1-dev.16"
@@ -1488,10 +1488,10 @@ packages:
     dependency: transitive
     description:
       name: mobile_scanner
-      sha256: "59ad810aee674633e208f286516464b05003614e686075ef2d4fa7ee2e82ba4b"
+      sha256: ce3f059ebd6dbfab7292bba0e893e354b46730636820d3c9ef69005ce2d55bce
       url: "https://pub.dev"
     source: hosted
-    version: "7.3.0"
+    version: "7.4.0"
   mockito:
     dependency: transitive
     description:
@@ -1720,10 +1720,10 @@ packages:
     dependency: transitive
     description:
       name: pie_menu
-      sha256: "4628a0c83a7c0237b3f6e70785cb91fa530ea9f052450cb4632ccbe4e490a858"
+      sha256: "513d4a0a7a8af2791027b9c0956967ad3f62810f4b8337dc7ad45c8104615c08"
       url: "https://pub.dev"
     source: hosted
-    version: "3.8.1"
+    version: "3.8.2"
   pinenacl:
     dependency: transitive
     description:

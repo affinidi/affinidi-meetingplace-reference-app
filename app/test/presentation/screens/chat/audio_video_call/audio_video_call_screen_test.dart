@@ -8,23 +8,27 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_state.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/permission_service/permission_service.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
+import 'package:mpx_flutter_reference_app/presentation/painting/cached_base64_image.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_peer_placeholder.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_pip_window.dart';
 
+import '../../../../fakes/fake_contacts.dart';
+import '../../../../fakes/fake_contacts_service.dart';
 import '../../../../fakes/fake_permission_service.dart';
 import '../../../../mocks/fake_active_call_controller.dart';
 import '../../../../mocks/fake_app_logger.dart';
-import '../../../../mocks/fake_contacts_service.dart';
 import '../../../../mocks/fake_meeting_place_matrix_sdk.dart';
 
 const _kContactId = 'smoke-test-contact';
@@ -958,5 +962,136 @@ void main() {
       expect(controller.toggleCameraCalls, 1);
       expect(controller.restartCallCalls, 0);
     });
+  });
+
+  group('audio call screen — peer avatar refresh', () {
+    testWidgets(
+      'rebuilds peer avatar when contact card profile picture changes',
+      (tester) async {
+        final baseContact = FakeContacts.newIndividualContact(
+          id: _kContactId,
+          channelDid: FakeContacts.individualContact.channelDid!,
+        );
+        final contactWithInitialAvatar = Contact(
+          id: baseContact.id,
+          channelDid: baseContact.channelDid,
+          channelDidSha256: baseContact.channelDidSha256,
+          offerLink: baseContact.offerLink,
+          card: FakeContacts.individualContact.card.copyWith(
+            profilePic: 'initial-base64-avatar',
+          ),
+          dateAdded: baseContact.dateAdded,
+          type: baseContact.type,
+          status: baseContact.status,
+          mediatorDid: baseContact.mediatorDid,
+          origin: baseContact.origin,
+          category: baseContact.category,
+          otherPartyCard: baseContact.otherPartyCard,
+          displayName: baseContact.displayName,
+          badgeUpdateInProgress: baseContact.badgeUpdateInProgress,
+          badgeCount: baseContact.badgeCount,
+          currentMessageSeqNo: baseContact.currentMessageSeqNo,
+          missedCallCount: baseContact.missedCallCount,
+          pendingMissedCallAt: baseContact.pendingMissedCallAt,
+          pendingMissedCallId: baseContact.pendingMissedCallId,
+          activeIncomingCallId: baseContact.activeIncomingCallId,
+          hasBeenOpened: baseContact.hasBeenOpened,
+          lastKeepAliveMessage: baseContact.lastKeepAliveMessage,
+          notificationBannerDismissed: baseContact.notificationBannerDismissed,
+        );
+        final contactsService = FakeContactsService(
+          contacts: [contactWithInitialAvatar],
+        );
+
+        final state = AudioVideoCallScreenState(
+          status: AudioVideoCallStatus.active,
+          peerName: 'Alice',
+          isAudioOnly: true,
+          hasHadPeer: true,
+          showControlsBar: true,
+        );
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              appLoggerProvider.overrideWithValue(FakeAppLogger()),
+              contactsServiceProvider.overrideWith(() => contactsService),
+              meetingPlaceSdkProvider.overrideWith(
+                (ref) async => FakeMeetingPlaceMatrixSDK(),
+              ),
+              permissionServiceProvider.overrideWithValue(
+                FakePermissionService(),
+              ),
+              incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
+              activeCallControllerProvider.overrideWith(
+                FakeActiveCallController.new,
+              ),
+              audioVideoCallScreenControllerProvider(
+                _kContactId,
+              ).overrideWith(() => _FixedStateController(state)),
+            ],
+            child: MaterialApp(
+              theme: AppTheme.dark,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: const AudioVideoCallScreen(contactId: _kContactId),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        var avatar = tester.widget<ProfileCircleAvatar>(
+          find.byType(ProfileCircleAvatar),
+        );
+        expect(avatar.image, isNotNull);
+        expect(avatar.image, isA<CachedBase64Image>());
+        expect(
+          (avatar.image! as CachedBase64Image).base64String,
+          'initial-base64-avatar',
+        );
+
+        contactsService.setContacts([
+          Contact(
+            id: baseContact.id,
+            channelDid: baseContact.channelDid,
+            channelDidSha256: baseContact.channelDidSha256,
+            offerLink: baseContact.offerLink,
+            card: FakeContacts.individualContact.card.copyWith(
+              profilePic: 'updated-base64-avatar',
+            ),
+            dateAdded: baseContact.dateAdded,
+            type: baseContact.type,
+            status: baseContact.status,
+            mediatorDid: baseContact.mediatorDid,
+            origin: baseContact.origin,
+            category: baseContact.category,
+            otherPartyCard: baseContact.otherPartyCard,
+            displayName: baseContact.displayName,
+            badgeUpdateInProgress: baseContact.badgeUpdateInProgress,
+            badgeCount: baseContact.badgeCount,
+            currentMessageSeqNo: baseContact.currentMessageSeqNo,
+            missedCallCount: baseContact.missedCallCount,
+            pendingMissedCallAt: baseContact.pendingMissedCallAt,
+            pendingMissedCallId: baseContact.pendingMissedCallId,
+            activeIncomingCallId: baseContact.activeIncomingCallId,
+            hasBeenOpened: baseContact.hasBeenOpened,
+            lastKeepAliveMessage: baseContact.lastKeepAliveMessage,
+            notificationBannerDismissed:
+                baseContact.notificationBannerDismissed,
+          ),
+        ]);
+        await tester.pump();
+
+        avatar = tester.widget<ProfileCircleAvatar>(
+          find.byType(ProfileCircleAvatar),
+        );
+        expect(avatar.image, isNotNull);
+        expect(avatar.image, isA<CachedBase64Image>());
+        expect(
+          (avatar.image! as CachedBase64Image).base64String,
+          'updated-base64-avatar',
+        );
+      },
+    );
   });
 }
