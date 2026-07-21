@@ -1,3 +1,7 @@
+## 0.0.1-dev.2
+
+ - **FIX**: show participant tiles, names, and avatars in group audio calls (#252).
+
 ## 0.0.1-dev.1
 
  - **FEAT**: publish meeting_place_livekit_flutter (#248).

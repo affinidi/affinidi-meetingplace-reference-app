@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-07-21
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`meeting_place_livekit_flutter` - `v0.0.1-dev.2`](#meeting_place_livekit_flutter---v001-dev2)
+
+---
+
+#### `meeting_place_livekit_flutter` - `v0.0.1-dev.2`
+
+ - **FIX**: show participant tiles, names, and avatars in group audio calls (#252).
+
+
 ## 2026-07-17
 
 ### Changes
