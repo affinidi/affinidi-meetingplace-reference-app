@@ -14,6 +14,10 @@ class FakeEnvironment implements Environment {
     this.personalAiEnabled = false,
     this.personalAiBaseUrl = 'http://127.0.0.1:8790',
     this.personalAiSetupEndpoint = '/personal-agent/setup',
+    this._vtaBaseUrl = '',
+    this._vtaDid = '',
+    this.vtaMediatorUrl = '',
+    this.vtaMediatorDid = '',
     this._defaultMediators = const {},
     this.enabledIndividualChatTransports = const [
       ChannelTransport.didcomm,
@@ -142,4 +146,20 @@ class FakeEnvironment implements Environment {
 
   @override
   Map<String, Map<String, dynamic>> get ciergeEventConfig => const {};
+
+  @override
+  String get vtaBaseUrl => _vtaBaseUrl;
+
+  @override
+  String get vtaDid => _vtaDid;
+
+  final String _vtaBaseUrl;
+
+  final String _vtaDid;
+
+  @override
+  final String vtaMediatorDid;
+
+  @override
+  final String vtaMediatorUrl;
 }
