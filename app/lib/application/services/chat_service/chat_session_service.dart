@@ -641,6 +641,14 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
+  Future<void> dismissSuggestion(String relatedMessageId) async {
+    if (state.latestSuggestion?.relatedMessageId != relatedMessageId) {
+      return;
+    }
+    state = state.copyWith(latestSuggestion: null);
+  }
+
+  @override
   Future<void> deleteMessage(
     Message message, {
     bool deleteForMeOnly = false,

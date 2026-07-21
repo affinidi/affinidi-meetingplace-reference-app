@@ -1576,6 +1576,18 @@ abstract class AppLocalizations {
   /// **'Ask for suggestion'**
   String get chatMessageActionAskSuggestion;
 
+  /// No description provided for @chatSuggestionActionIgnore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get chatSuggestionActionIgnore;
+
+  /// No description provided for @chatSuggestionActionSendAsMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Send as Me'**
+  String get chatSuggestionActionSendAsMe;
+
   /// No description provided for @chatMessageActionEdit.
   ///
   /// In en, this message translates to:

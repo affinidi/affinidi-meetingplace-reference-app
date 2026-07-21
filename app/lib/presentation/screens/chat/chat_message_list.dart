@@ -256,6 +256,7 @@ class _ChatMessageList extends HookConsumerWidget {
                             ),
                           if (matchingSuggestion != null)
                             _SuggestionNoticeChatItem(
+                              contactId: _contactId,
                               suggestion: matchingSuggestion,
                               isFromMe: chatItem.isFromMe,
                             ),

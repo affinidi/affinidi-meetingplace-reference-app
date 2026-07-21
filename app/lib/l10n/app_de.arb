@@ -181,6 +181,8 @@
 	"chatMessageActionDeleteLocal": "Für mich löschen",
 	"chatMessageActionCopy": "Nachricht kopieren",
 	"chatMessageActionAskSuggestion": "Vorschlag anfragen",
+	"chatSuggestionActionIgnore": "Ignorieren",
+	"chatSuggestionActionSendAsMe": "Als mich senden",
 	"chatMessageActionEdit": "Nachricht bearbeiten",
 	"chatMessageEditedLabel": "bearbeitet",
 	"chatMessageEditFailed": "Nachricht konnte nicht bearbeitet werden",

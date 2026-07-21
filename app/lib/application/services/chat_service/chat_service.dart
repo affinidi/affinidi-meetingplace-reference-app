@@ -61,6 +61,7 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
     required String messageId,
     required String text,
   });
+  Future<void> dismissSuggestion(String relatedMessageId);
   Future<void> deleteMessage(Message message, {bool deleteForMeOnly = false});
   Future<void> editTextMessage(Message message, String newText);
   Future<void> sendEffect(Effect effectType);

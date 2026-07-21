@@ -1078,6 +1078,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatMessageActionAskSuggestion => 'Ask for suggestion';
 
   @override
+  String get chatSuggestionActionIgnore => 'Ignore';
+
+  @override
+  String get chatSuggestionActionSendAsMe => 'Send as Me';
+
+  @override
   String get chatMessageActionEdit => 'Edit message';
 
   @override
