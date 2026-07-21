@@ -197,6 +197,7 @@ class ChatScreenController extends _$ChatScreenController
 
           pendingState = pendingState.copyWith(
             messages: messages,
+            latestSuggestion: next.latestSuggestion,
             membersTyping: next.membersTyping,
             contactPresenceStatus: next.contactPresenceStatus,
             isActive: next.isActive,

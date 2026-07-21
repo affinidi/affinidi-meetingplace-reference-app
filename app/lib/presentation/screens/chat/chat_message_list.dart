@@ -18,6 +18,9 @@ class _ChatMessageList extends HookConsumerWidget {
     final selectedReactionIndex = ref.watch(
       provider.select((state) => state.selectedReactionIndex),
     );
+    final latestSuggestion = ref.watch(
+      provider.select((state) => state.latestSuggestion),
+    );
     final supportsSuggestionRequests = ref.watch(
       provider.supportsSuggestionRequests,
     );
@@ -151,6 +154,12 @@ class _ChatMessageList extends HookConsumerWidget {
                       selectedReactionIndex == index &&
                       chatItem is chat.Message &&
                       !chatItem.isFromMe;
+                  final matchingSuggestion =
+                      chatItem is chat.Message &&
+                          latestSuggestion?.relatedMessageId ==
+                              chatItem.messageId
+                      ? latestSuggestion
+                      : null;
                   final showReactionPickerAbove =
                       showReactionPicker && showSuggestionAction;
                   final showReactionPickerBelow =
@@ -244,6 +253,11 @@ class _ChatMessageList extends HookConsumerWidget {
                             _SuggestionActionChatItem(
                               messageId: chatItem.messageId,
                               contactId: _contactId,
+                            ),
+                          if (matchingSuggestion != null)
+                            _SuggestionNoticeChatItem(
+                              suggestion: matchingSuggestion,
+                              isFromMe: chatItem.isFromMe,
                             ),
                           thisItemStatus.isNotEmpty
                               ? Align(

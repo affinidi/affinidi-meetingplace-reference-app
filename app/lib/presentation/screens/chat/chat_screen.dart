@@ -25,6 +25,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../application/services/chat_service/chat_service_state.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
@@ -95,6 +96,7 @@ part 'chat_items/concierge_vrc_chat_item.dart';
 part 'chat_items/plain_text_chat_item.dart';
 part 'chat_items/reaction_picker_chat_item.dart';
 part 'chat_items/suggestion_action_chat_item.dart';
+part 'chat_items/suggestion_notice_chat_item.dart';
 part 'chat_items/unknown_chat_item.dart';
 part 'chat_items/video_player_screen.dart';
 part 'chat_media_options.dart';
@@ -212,9 +214,7 @@ class ChatScreen extends HookConsumerWidget {
         final requiredFile = target == AgentContext.work
             ? 'work-context.txt'
             : 'personal-context.txt';
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.chatUploadFileFirst(requiredFile))),
         );
         return;
@@ -226,8 +226,11 @@ class ChatScreen extends HookConsumerWidget {
 
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.chatChannelUsesContext(_contextDisplayName(
-          context, target)))),
+        SnackBar(
+          content: Text(
+            l10n.chatChannelUsesContext(_contextDisplayName(context, target)),
+          ),
+        ),
       );
     }
 
