@@ -687,6 +687,35 @@ void main() {
       );
     });
 
+    test('removes wrapping double quotes from incoming suggestions', () async {
+      await chatService.startChatSession();
+
+      late String relatedMessageId;
+      await waitForState(
+        (state) => state.messages.whereType<Message>().any(
+          (message) => message.value == 'quoted suggestion target',
+        ),
+        () {
+          final message = fakeChatSdk.simulateIncomingTextMessage(
+            text: 'quoted suggestion target',
+            recipientDid: channelDid,
+          );
+          relatedMessageId = message.messageId;
+        },
+      );
+
+      await waitForState(
+        (state) => state.latestSuggestion?.relatedMessageId == relatedMessageId,
+        () => fakeChatSdk.simulateIncomingSuggestion(
+          relatedMessageId: relatedMessageId,
+          text: '"Latest suggestion"',
+          recipientDid: channelDid,
+        ),
+      );
+
+      expect(serviceState().latestSuggestion?.text, 'Latest suggestion');
+    });
+
     test('ignores suggestions whose related message is absent', () async {
       await chatService.startChatSession();
 

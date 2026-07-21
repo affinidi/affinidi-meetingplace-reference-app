@@ -98,7 +98,7 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.auto_awesome, size: 18, color: Colors.white),
+                  const Icon(Icons.auto_awesome, size: 18, color: Colors.white),
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
@@ -153,16 +153,14 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
                 ],
               ),
               if (isBusy.value)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4, left: 8),
+                const Padding(
+                  padding: EdgeInsets.only(top: 4, left: 8),
                   child: SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Colors.white,
-                      ),
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ),
                 ),

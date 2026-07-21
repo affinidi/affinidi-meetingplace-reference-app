@@ -227,14 +227,24 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
     if (!hasRelatedMessage) return;
 
+    final suggestionText = _normalizeSuggestionText(event.text);
+
     state = state.copyWith(
       latestSuggestion: ChatSuggestion(
         relatedMessageId: event.relatedMessageId,
-        text: event.text,
+        text: suggestionText,
         senderDid: event.senderDid,
         createdTime: event.createdTime,
       ),
     );
+  }
+
+  String _normalizeSuggestionText(String text) {
+    if (text.length < 2) return text;
+    if (text.startsWith('"') && text.endsWith('"')) {
+      return text.substring(1, text.length - 1);
+    }
+    return text;
   }
 
   // ---------------------------------------------------------------------------
