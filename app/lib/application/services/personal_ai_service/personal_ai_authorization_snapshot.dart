@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:meeting_place_personal_agent/meeting_place_personal_agent.dart';
 
 class PersonalAiAuthorizationSnapshot {
-
   factory PersonalAiAuthorizationSnapshot.fromSdk(
     PersonalAgentAuthorizationSnapshot snapshot,
   ) {
@@ -20,7 +19,8 @@ class PersonalAiAuthorizationSnapshot {
   }
 
   factory PersonalAiAuthorizationSnapshot.fromJson(Map<String, dynamic> json) {
-    final capabilities = (json['capabilities'] as List?)
+    final capabilities =
+        (json['capabilities'] as List?)
             ?.whereType<String>()
             .map((value) => value.trim())
             .where((value) => value.isNotEmpty)

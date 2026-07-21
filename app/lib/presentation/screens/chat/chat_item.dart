@@ -27,6 +27,53 @@ class ChatItem extends StatelessWidget {
       );
     }
 
+    if (_chatItem is chat.ConciergeMessage &&
+        _chatItem.conciergeType ==
+            chat.ConciergeMessageType.fromJson(
+              chat.CiergeSignDocumentRequest.conciergeTypeName,
+            )) {
+      final data = _chatItem.data;
+      final doc = data['document'] as Map<String, dynamic>? ?? {};
+      return _SignDocumentRequestChatItem(
+        title: doc['title'] as String? ?? 'Untitled Document',
+        contactId: _contactId,
+        messageIndex: _index,
+        status: _chatItem.status,
+        rawPayload: data,
+      );
+    }
+
+    if (_chatItem is chat.ConciergeMessage &&
+        _chatItem.conciergeType ==
+            chat.ConciergeMessageType.fromJson(
+              chat.CiergeStepUpApproveRequest.conciergeTypeName,
+            )) {
+      return _StepUpApproveRequestChatItem(
+        chatItem: _chatItem,
+        contactId: _contactId,
+      );
+    }
+
+    if (_SignDocumentRequestChatItem.matchPlainMessage(_chatItem)
+        case final parsed?) {
+      return _SignDocumentRequestChatItem(
+        title: parsed.title ?? 'Untitled Document',
+        contactId: _contactId,
+        messageIndex: _index,
+        status: _chatItem.status,
+        rawPayload: parsed.document,
+      );
+    }
+
+    if (_SignDocumentRequestChatItem.matchStatusMessage(_chatItem)) {
+      return const SizedBox.shrink();
+    }
+
+    if (_SignedDocumentChatItem.matchPlainMessage(_chatItem)
+        case final parsed?) {
+      return _SignedDocumentChatItem(data: parsed);
+    }
+
     if (_chatItem is chat.Message) {
       return _PlainTextChatItem(
         chatItem: _chatItem,

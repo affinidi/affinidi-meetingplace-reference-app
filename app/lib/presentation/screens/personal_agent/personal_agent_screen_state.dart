@@ -118,15 +118,15 @@ class PersonalAgentScreenState {
           ? null
           : (contextUploadError ?? this.contextUploadError),
       setupResult: clearSetupResult ? null : (setupResult ?? this.setupResult),
-        workContact: workContact ?? this.workContact,
-        personalContact: personalContact ?? this.personalContact,
-        workAuthorizationSnapshot:
+      workContact: workContact ?? this.workContact,
+      personalContact: personalContact ?? this.personalContact,
+      workAuthorizationSnapshot:
           workAuthorizationSnapshot ?? this.workAuthorizationSnapshot,
-        personalAuthorizationSnapshot:
+      personalAuthorizationSnapshot:
           personalAuthorizationSnapshot ?? this.personalAuthorizationSnapshot,
-        showWorkAuthorization:
+      showWorkAuthorization:
           showWorkAuthorization ?? this.showWorkAuthorization,
-        showPersonalAuthorization:
+      showPersonalAuthorization:
           showPersonalAuthorization ?? this.showPersonalAuthorization,
       workContextUploaded: workContextUploaded ?? this.workContextUploaded,
       personalContextUploaded:

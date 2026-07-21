@@ -99,9 +99,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
       final eventCfg = environment.ciergeEventConfig;
       final ciergeConnectorDid =
           eventCfg[mnemonicHash]?['ciergeConnectorDid'] as String?;
-      final resolvedAgentDid = normalizeCiergeConnectorDid(
-        ciergeConnectorDid,
-      );
+      final resolvedAgentDid = normalizeCiergeConnectorDid(ciergeConnectorDid);
 
       if (environment.personalAiEnabled &&
           eventCfg.isNotEmpty &&

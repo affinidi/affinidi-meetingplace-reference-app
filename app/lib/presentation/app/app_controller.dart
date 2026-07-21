@@ -12,6 +12,7 @@ import '../../application/services/control_plane_service/control_plane_service.d
 import '../../application/services/network_connectivity_service/network_connectivity_service.dart';
 import '../../application/services/r_cards_service/r_card_chat_notifier_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
+import '../../application/services/signing_service/signing_service.dart';
 import '../../application/services/vrc_service/vrc_service.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
 import '../../infrastructure/providers/credentials_sdk_provider.dart';
@@ -57,6 +58,7 @@ class AppController extends _$AppController with WidgetsBindingObserver {
     await ref.read(contactsServiceProvider.notifier).ensureInitialized();
     await ref.read(connectionsServiceProvider.notifier).ensureInitialized();
     ref.read(contactsConnectionsServiceProvider);
+    ref.read(signingServiceProvider);
   }
 
   @override

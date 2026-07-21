@@ -257,7 +257,6 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     String contextName = 'personal-ai',
     String agentDisplayName = 'My Personal AI',
   }) async {
-
     if (!_environment.personalAiEnabled) {
       return;
     }
@@ -919,9 +918,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       final updatedContact = contact.copyWith(
         personalAgentAuthorizationSnapshot: encoded,
       );
-      await _ref.read(contactsServiceProvider.notifier).updateContact(
-        updatedContact,
-      );
+      await _ref
+          .read(contactsServiceProvider.notifier)
+          .updateContact(updatedContact);
     } catch (_) {
       if (!suppressErrors) {
         rethrow;

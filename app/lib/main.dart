@@ -27,6 +27,7 @@ import 'infrastructure/plugins/device_region_plugin/device_region_plugin.dart';
 import 'infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
 import 'infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import 'infrastructure/plugins/sign_document_plugin/sign_document_plugin.dart';
 import 'infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import 'infrastructure/providers/available_attachment_plugins_provider.dart';
 import 'infrastructure/providers/cache_manager_provider.dart';
@@ -116,6 +117,9 @@ void main() async {
               localVoiceStore: ref.read(localVoiceAttachmentStoreProvider),
             ),
             CiergeSignatureAttachmentsPlugin(),
+            SignDocumentPlugin(
+              filePickerPlatform: ref.read(filePickerPlatformProvider),
+            ),
           ],
         ),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),

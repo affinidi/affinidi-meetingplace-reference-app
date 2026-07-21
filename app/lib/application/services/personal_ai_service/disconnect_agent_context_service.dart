@@ -23,9 +23,9 @@ class DisconnectAgentContextService {
     );
 
     if (contact != null) {
-      await _ref
-          .read(contactsServiceProvider.notifier)
-          .deleteContacts([contact]);
+      await _ref.read(contactsServiceProvider.notifier).deleteContacts([
+        contact,
+      ]);
     }
 
     await _ref

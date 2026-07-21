@@ -68,10 +68,9 @@ class PersonalAgentScreen extends ConsumerWidget {
       final pickedFile = await _pickTextFile(ref);
       if (pickedFile == null) {
         if (!context.mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(
-          l10n.personalAgentNoContextCreated)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.personalAgentNoContextCreated)),
+        );
         return;
       }
 
@@ -84,10 +83,9 @@ class PersonalAgentScreen extends ConsumerWidget {
       if (!context.mounted) return;
 
       if (!outcome.uploaded) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(
-          l10n.personalAgentNoContextCreated)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.personalAgentNoContextCreated)),
+        );
         return;
       }
 
@@ -142,8 +140,9 @@ class PersonalAgentScreen extends ConsumerWidget {
       } catch (_) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.personalAgentCancelConnectionError(
-            label))),
+          SnackBar(
+            content: Text(l10n.personalAgentCancelConnectionError(label)),
+          ),
         );
       }
     }
@@ -192,10 +191,8 @@ class PersonalAgentScreen extends ConsumerWidget {
                     onUploadPersonal: () =>
                         uploadRoutingContext(AgentContext.personal),
                   ),
-                  if (
-                    ui.showWorkAuthorization ||
-                    ui.showPersonalAuthorization
-                  ) ...[
+                  if (ui.showWorkAuthorization ||
+                      ui.showPersonalAuthorization) ...[
                     const SizedBox(height: 16),
                     if (ui.showWorkAuthorization)
                       _AgentAuthorizationCard(
@@ -203,13 +200,10 @@ class PersonalAgentScreen extends ConsumerWidget {
                         contextLabel: l10n.personalAgentWorkContextLabel,
                         snapshot: ui.workSnapshot,
                         contact: ui.workContact,
-                        onCancel: () =>
-                            cancelRoutingContext(AgentContext.work),
+                        onCancel: () => cancelRoutingContext(AgentContext.work),
                       ),
-                    if (
-                      ui.showWorkAuthorization &&
-                      ui.showPersonalAuthorization
-                    )
+                    if (ui.showWorkAuthorization &&
+                        ui.showPersonalAuthorization)
                       const SizedBox(height: 12),
                     if (ui.showPersonalAuthorization)
                       _AgentAuthorizationCard(
@@ -218,7 +212,7 @@ class PersonalAgentScreen extends ConsumerWidget {
                         snapshot: ui.personalSnapshot,
                         contact: ui.personalContact,
                         onCancel: () =>
-                          cancelRoutingContext(AgentContext.personal),
+                            cancelRoutingContext(AgentContext.personal),
                       ),
                   ],
                 ],
@@ -251,12 +245,13 @@ class _AgentAuthorizationCard extends StatelessWidget {
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final capabilities = snapshot?.capabilities.join(' + ') ?? 
-    l10n.personalAgentNotAvailable;
+    final capabilities =
+        snapshot?.capabilities.join(' + ') ?? l10n.personalAgentNotAvailable;
     final provisionStatus =
-        (snapshot?.provision?['status'] as String?) ?? 
+        (snapshot?.provision?['status'] as String?) ??
         l10n.personalAgentNotAvailable;
-    final updatedAt = snapshot?.lastUpdated?.toLocal().toString() ??
+    final updatedAt =
+        snapshot?.lastUpdated?.toLocal().toString() ??
         l10n.personalAgentNoSnapshotYet;
 
     Widget row(String label, String value) {
@@ -311,8 +306,9 @@ class _AgentAuthorizationCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  contact == null ? l10n.personalAgentNotSetUp :
-                   l10n.personalAgentConnectedSectionTitle,
+                  contact == null
+                      ? l10n.personalAgentNotSetUp
+                      : l10n.personalAgentConnectedSectionTitle,
                   style: textTheme.labelSmall?.copyWith(
                     color: contact == null
                         ? colorScheme.onSurfaceVariant
@@ -330,15 +326,23 @@ class _AgentAuthorizationCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            row(l10n.personalAgentAuthAgentDid, snapshot?.agentDid ?? 
-            l10n.personalAgentNotAvailable),
-            row(l10n.personalAgentAuthAclRole, snapshot?.aclRole ?? 
-            l10n.personalAgentNotAvailable),
+            row(
+              l10n.personalAgentAuthAgentDid,
+              snapshot?.agentDid ?? l10n.personalAgentNotAvailable,
+            ),
+            row(
+              l10n.personalAgentAuthAclRole,
+              snapshot?.aclRole ?? l10n.personalAgentNotAvailable,
+            ),
             row(l10n.personalAgentAuthCapabilities, capabilities),
-            row(l10n.personalAgentAuthContextScope, snapshot?.contextScope ?? 
-            l10n.personalAgentNotAvailable),
-            row(l10n.personalAgentAuthDomainId, snapshot?.domainId ?? 
-            l10n.personalAgentNotAvailable),
+            row(
+              l10n.personalAgentAuthContextScope,
+              snapshot?.contextScope ?? l10n.personalAgentNotAvailable,
+            ),
+            row(
+              l10n.personalAgentAuthDomainId,
+              snapshot?.domainId ?? l10n.personalAgentNotAvailable,
+            ),
             row(l10n.personalAgentAuthProvision, provisionStatus),
             row(l10n.personalAgentAuthUpdated, updatedAt),
             const SizedBox(height: 12),
