@@ -40,6 +40,17 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
       }
     }
 
+    Future<void> editSuggestion() async {
+      if (isBusy.value) return;
+
+      isBusy.value = true;
+      try {
+        await controller.editLatestSuggestion();
+      } finally {
+        isBusy.value = false;
+      }
+    }
+
     return Align(
       alignment: isFromMe ? Alignment.topRight : Alignment.topLeft,
       child: Container(
@@ -92,6 +103,18 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
                     visualDensity: VisualDensity.compact,
                   ),
                   child: Text(context.l10n.chatSuggestionActionIgnore),
+                ),
+                const SizedBox(width: 4),
+                TextButton(
+                  onPressed: isBusy.value ? null : editSuggestion,
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.amber.shade900,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(0, 36),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  child: Text(context.l10n.chatSuggestionActionEdit),
                 ),
                 const SizedBox(width: 4),
                 TextButton(

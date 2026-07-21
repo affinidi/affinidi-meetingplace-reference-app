@@ -1081,6 +1081,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chatSuggestionActionIgnore => 'Ignore';
 
   @override
+  String get chatSuggestionActionEdit => 'Edit';
+
+  @override
   String get chatSuggestionActionSendAsMe => 'Send as Me';
 
   @override

@@ -670,6 +670,17 @@ class ChatScreenController extends _$ChatScreenController
     await _chatService?.dismissSuggestion(suggestion.relatedMessageId);
   }
 
+  Future<void> editLatestSuggestion() async {
+    final suggestion = state.latestSuggestion;
+    if (suggestion == null) return;
+
+    messageTextController.value = TextEditingValue(
+      text: suggestion.text,
+      selection: TextSelection.collapsed(offset: suggestion.text.length),
+    );
+    await _chatService?.dismissSuggestion(suggestion.relatedMessageId);
+  }
+
   chat.ChatAttachment? _buildContextRouteAttachment() {
     final contact = state.contact;
     if (contact == null) {

@@ -182,6 +182,7 @@
 	"chatMessageActionCopy": "Nachricht kopieren",
 	"chatMessageActionAskSuggestion": "Vorschlag anfragen",
 	"chatSuggestionActionIgnore": "Ignorieren",
+	"chatSuggestionActionEdit": "Bearbeiten",
 	"chatSuggestionActionSendAsMe": "Als mich senden",
 	"chatMessageActionEdit": "Nachricht bearbeiten",
 	"chatMessageEditedLabel": "bearbeitet",
