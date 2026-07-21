@@ -146,9 +146,9 @@ class _ChatMessageList extends HookConsumerWidget {
 
                   final showSuggestionAction =
                       supportsSuggestionRequests &&
-                      selectedReactionIndex == index &&
                       chatItem is chat.Message &&
                       !chatItem.isFromMe &&
+                      selectedReactionIndex == index &&
                       chatItem.value.trim().isNotEmpty;
                   final showReactionPicker =
                       selectedReactionIndex == index &&

@@ -54,101 +54,118 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
 
     return Align(
       alignment: isFromMe ? Alignment.topRight : Alignment.topLeft,
-      child: Container(
+      child: TweenAnimationBuilder<double>(
         key: ValueKey('chat_suggestion_${suggestion.relatedMessageId}'),
-        margin: isFromMe
-            ? const EdgeInsets.fromLTRB(60, 8, 5, 0)
-            : const EdgeInsets.fromLTRB(5, 8, 60, 0),
-        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-        decoration: BoxDecoration(
-          gradient: const RadialGradient(
-            center: Alignment.bottomCenter,
-            radius: 2,
-            colors: [
-              AppCustomColors.conciergeCardGradientStart,
-              AppCustomColors.conciergeCardGradientEnd,
-            ],
+        duration: const Duration(milliseconds: 320),
+        curve: Curves.easeOutCubic,
+        tween: Tween(begin: 0, end: 1),
+        builder: (context, value, child) {
+          return ClipRect(
+            child: Opacity(
+              opacity: value,
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: value,
+                child: child,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          margin: isFromMe
+              ? const EdgeInsets.fromLTRB(60, 8, 5, 0)
+              : const EdgeInsets.fromLTRB(5, 8, 60, 0),
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+          decoration: BoxDecoration(
+            gradient: const RadialGradient(
+              center: Alignment.bottomCenter,
+              radius: 2,
+              colors: [
+                AppCustomColors.conciergeCardGradientStart,
+                AppCustomColors.conciergeCardGradientEnd,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: customColors.whiteOverlay30),
           ),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: customColors.whiteOverlay30),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.auto_awesome, size: 18, color: Colors.white),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    suggestion.text,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.auto_awesome, size: 18, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      suggestion.text,
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextButton(
-                  onPressed: isBusy.value ? null : ignoreSuggestion,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    disabledForegroundColor: Colors.white54,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: const Size(0, 36),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextButton(
+                    onPressed: isBusy.value ? null : ignoreSuggestion,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      disabledForegroundColor: Colors.white54,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: const Size(0, 36),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    child: Text(context.l10n.chatSuggestionActionIgnore),
                   ),
-                  child: Text(context.l10n.chatSuggestionActionIgnore),
-                ),
-                const SizedBox(width: 4),
-                TextButton(
-                  onPressed: isBusy.value ? null : editSuggestion,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    disabledForegroundColor: Colors.white54,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: const Size(0, 36),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
+                  const SizedBox(width: 4),
+                  TextButton(
+                    onPressed: isBusy.value ? null : editSuggestion,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      disabledForegroundColor: Colors.white54,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: const Size(0, 36),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    child: Text(context.l10n.chatSuggestionActionEdit),
                   ),
-                  child: Text(context.l10n.chatSuggestionActionEdit),
-                ),
-                const SizedBox(width: 4),
-                TextButton(
-                  onPressed: isBusy.value ? null : sendAsMe,
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    disabledForegroundColor: Colors.white54,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    minimumSize: const Size(0, 36),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
+                  const SizedBox(width: 4),
+                  TextButton(
+                    onPressed: isBusy.value ? null : sendAsMe,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      disabledForegroundColor: Colors.white54,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      minimumSize: const Size(0, 36),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    child: Text(context.l10n.chatSuggestionActionSendAsMe),
                   ),
-                  child: Text(context.l10n.chatSuggestionActionSendAsMe),
-                ),
-              ],
-            ),
-            if (isBusy.value)
-              Padding(
-                padding: const EdgeInsets.only(top: 4, left: 8),
-                child: SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      Colors.white,
+                ],
+              ),
+              if (isBusy.value)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, left: 8),
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

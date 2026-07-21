@@ -61,6 +61,7 @@ class ChatScreenController extends _$ChatScreenController
 
   static const _logKey = 'UXCHAT';
   static final _maxChatMessageLength = MaxLengthValidatorType.extraLong.value;
+  static const _suggestionRequestTimeout = Duration(seconds: 12);
 
   late final messageTextController = TextEditingController();
   late final _logger = ref.read(appLoggerProvider);
@@ -79,6 +80,8 @@ class ChatScreenController extends _$ChatScreenController
 
   TimedAction? _sendChatActivityTimedAction;
   Timer? _saveUnsentMessageDebouncer;
+  Timer? _suggestionRequestTimeoutTimer;
+  Completer<void>? _pendingSuggestionCompleter;
   bool _isPaused = false;
   late final _chatResumingLock = Lock();
   StreamSubscription<void>? _vrcPluginSubscription;
@@ -195,6 +198,18 @@ class ChatScreenController extends _$ChatScreenController
               .read(localVoiceAttachmentStoreProvider)
               .withLocalVoiceMetadata(next.messages);
 
+          final matchingPendingSuggestionMessageId =
+              pendingState.pendingSuggestionMessageId;
+          final resolvedSuggestion = next.latestSuggestion;
+          if (matchingPendingSuggestionMessageId != null &&
+              resolvedSuggestion?.relatedMessageId ==
+                  matchingPendingSuggestionMessageId) {
+            _completePendingSuggestionRequest();
+            pendingState = pendingState.copyWith(
+              pendingSuggestionMessageId: null,
+            );
+          }
+
           pendingState = pendingState.copyWith(
             messages: messages,
             latestSuggestion: next.latestSuggestion,
@@ -263,6 +278,10 @@ class ChatScreenController extends _$ChatScreenController
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
+      _suggestionRequestTimeoutTimer?.cancel();
+      _failPendingSuggestionRequest(
+        StateError('Chat screen disposed before suggestion arrived'),
+      );
 
       messageTextController.removeListener(_onMessageTextChanged);
       messageTextController.dispose();
@@ -874,6 +893,11 @@ class ChatScreenController extends _$ChatScreenController
       return;
     }
 
+    if (state.pendingSuggestionMessageId != null) {
+      clearSelectedReaction();
+      return;
+    }
+
     try {
       _showActivity();
       final message =
@@ -890,13 +914,68 @@ class ChatScreenController extends _$ChatScreenController
       final text = message.value.trim();
       if (text.isEmpty) return;
 
+      _startPendingSuggestionRequest(message.messageId);
+      clearSelectedReaction();
+
       await _chatService?.sendSuggestionRequest(
         messageId: message.messageId,
         text: text,
       );
+
+      await _pendingSuggestionCompleter?.future;
+    } catch (error) {
+      if (error is TimeoutException) {
+        rethrow;
+      }
+
+      _clearPendingSuggestionRequest();
+      rethrow;
     } finally {
-      clearSelectedReaction();
       _hideActivity();
+    }
+  }
+
+  void _startPendingSuggestionRequest(String messageId) {
+    _suggestionRequestTimeoutTimer?.cancel();
+    _failPendingSuggestionRequest(
+      StateError('Suggestion request replaced by a newer request'),
+    );
+
+    state = state.copyWith(pendingSuggestionMessageId: messageId);
+    _pendingSuggestionCompleter = Completer<void>();
+    _suggestionRequestTimeoutTimer = Timer(_suggestionRequestTimeout, () {
+      if (!ref.mounted) return;
+      if (state.pendingSuggestionMessageId != messageId) return;
+
+      _clearPendingSuggestionRequest();
+      _failPendingSuggestionRequest(
+        TimeoutException('Suggestion request timed out'),
+      );
+    });
+  }
+
+  void _completePendingSuggestionRequest() {
+    _suggestionRequestTimeoutTimer?.cancel();
+    _suggestionRequestTimeoutTimer = null;
+
+    final completer = _pendingSuggestionCompleter;
+    _pendingSuggestionCompleter = null;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
+  }
+
+  void _clearPendingSuggestionRequest() {
+    _suggestionRequestTimeoutTimer?.cancel();
+    _suggestionRequestTimeoutTimer = null;
+    state = state.copyWith(pendingSuggestionMessageId: null);
+  }
+
+  void _failPendingSuggestionRequest(Object error) {
+    final completer = _pendingSuggestionCompleter;
+    _pendingSuggestionCompleter = null;
+    if (completer != null && !completer.isCompleted) {
+      completer.completeError(error);
     }
   }
 
