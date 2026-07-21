@@ -207,7 +207,10 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      await sdk.approveConnectionRequest(channel: channel);
+      await sdk.approveConnectionRequest(
+        channel: channel,
+        contextKey: connectionOffer.contextKey,
+      );
 
       _logger.info('Connection request approved successfully', name: _logKey);
     } catch (error, stackTrace) {
@@ -247,13 +250,29 @@ class ConnectionsService extends _$ConnectionsService {
   Future<void> acceptOffer(
     ConnectionOffer connectionOffer, {
     required Identity identity,
+    String? contextKey,
   }) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
-    await sdk.acceptOffer(
+    final result = await sdk.acceptOffer(
       connectionOffer: connectionOffer,
       contactCard: identity.card.toSdkContactCard(),
       externalRef: identity.id,
+      contextKey: contextKey,
       senderInfo: identity.card.firstName,
+    );
+    final acceptOfferDidDocument = await result.acceptOfferDid.getDidDocument();
+    await sdk.mediator.updateAcl(
+      ownerDidManager: result.acceptOfferDid,
+      acl: AccessListAdd(
+        ownerDid: acceptOfferDidDocument.id,
+        granteeDids: [connectionOffer.publishOfferDid],
+      ),
+    );
+    _logger.info(
+      'Ensured accept-offer ACL grant: '
+      'acceptOfferDid=${acceptOfferDidDocument.id}, '
+      'publishOfferDid=${connectionOffer.publishOfferDid}',
+      name: _logKey,
     );
     await fetchConnections();
   }
@@ -330,6 +349,7 @@ class ConnectionsService extends _$ConnectionsService {
         maximumUsage: data.maxUsages,
         mediatorDid: data.selectedMediatorDid,
         externalRef: identity.id,
+        contextKey: data.contextKey,
         score: data.score,
         transport: isGroupOffer ? ChannelTransport.matrix : data.transport,
       );

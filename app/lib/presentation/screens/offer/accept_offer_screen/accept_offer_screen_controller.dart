@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/connections_service/connections_service.dart';
+import '../../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
@@ -63,7 +64,7 @@ class AcceptOfferScreenController extends _$AcceptOfferScreenController {
     state = state.copyWith(offer: null);
   }
 
-  Future<void> acceptOffer() async {
+  Future<void> acceptOffer({AgentContext? agentContext}) async {
     await ref.read(acceptOfferLoadingController.notifier).start(() async {
       final offer = state.offer;
       if (offer == null) {
@@ -83,7 +84,15 @@ class AcceptOfferScreenController extends _$AcceptOfferScreenController {
 
       await ref
           .read(connectionsServiceProvider.notifier)
-          .acceptOffer(offer, identity: selectedIdentity);
+          .acceptOffer(
+            offer,
+            identity: selectedIdentity,
+            contextKey: agentContext == AgentContext.work
+                ? 'work'
+                : agentContext == AgentContext.personal
+                ? 'personal'
+                : null,
+          );
       await Future(() {
         ref.read(navigatorProvider).go(const ConnectionsRoute().location);
       });
