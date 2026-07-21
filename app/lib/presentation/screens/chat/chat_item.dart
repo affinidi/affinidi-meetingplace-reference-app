@@ -32,9 +32,14 @@ class ChatItem extends StatelessWidget {
             chat.ConciergeMessageType.fromJson(
               chat.CiergeSignDocumentRequest.conciergeTypeName,
             )) {
+      final data = (_chatItem as chat.ConciergeMessage).data;
+      final doc = data['document'] as Map<String, dynamic>? ?? {};
       return _SignDocumentRequestChatItem(
-        chatItem: _chatItem as chat.ConciergeMessage,
+        title: doc['title'] as String? ?? 'Untitled Document',
         contactId: _contactId,
+        messageIndex: _index,
+        status: _chatItem.status,
+        rawPayload: data,
       );
     }
 
@@ -46,6 +51,30 @@ class ChatItem extends StatelessWidget {
       return _StepUpApproveRequestChatItem(
         chatItem: _chatItem as chat.ConciergeMessage,
         contactId: _contactId,
+      );
+    }
+
+    if (_SignDocumentRequestChatItem.matchPlainMessage(_chatItem)
+        case final parsed?) {
+      return _SignDocumentRequestChatItem(
+        title: parsed.title ?? 'Untitled Document',
+        contactId: _contactId,
+        messageIndex: _index,
+        status: _chatItem.status,
+        rawPayload: parsed.document,
+      );
+    }
+
+    if (_SignDocumentRequestChatItem.matchStatusMessage(_chatItem)) {
+      return const SizedBox.shrink();
+    }
+
+    if (_SignedDocumentChatItem.matchPlainMessage(_chatItem)
+        case final parsed?) {
+      final payload = parsed['payload'] as Map<String, dynamic>? ?? {};
+      return _SignedDocumentChatItem(
+        title: payload['title'] as String? ?? 'Untitled Document',
+        issuer: parsed['issuer'] as String? ?? '',
       );
     }
 

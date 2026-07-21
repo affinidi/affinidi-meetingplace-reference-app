@@ -1,19 +1,116 @@
 part of '../chat_screen.dart';
 
-class _SignDocumentRequestChatItem extends StatelessWidget {
+class _SignDocumentRequestChatItem extends ConsumerStatefulWidget {
   const _SignDocumentRequestChatItem({
-    required this.chatItem,
+    required this.title,
     required this.contactId,
+    required this.messageIndex,
+    this.status,
+    this.rawPayload,
+    this.statusLabel,
+    this.statusColor,
+    this.statusIcon,
   });
 
-  final chat.ConciergeMessage chatItem;
+  final String title;
   final String contactId;
+  final int messageIndex;
+  final chat.ChatItemStatus? status;
+  final Map<String, dynamic>? rawPayload;
+  final String? statusLabel;
+  final Color? statusColor;
+  final IconData? statusIcon;
+
+  static chat.CiergeSignDocumentRequest? matchPlainMessage(
+    chat.ChatItem item,
+  ) {
+    if (item is! chat.Message) return null;
+    return chat.CiergeSignDocumentRequest.fromMessageText(item.value);
+  }
+
+  static Map<String, dynamic>? parseStatusMessage(chat.ChatItem item) {
+    if (item is! chat.Message) return null;
+    try {
+      final decoded = jsonDecode(item.value);
+      if (decoded is! Map<String, dynamic>) return null;
+      if (decoded['type'] == 'cierge/sign-document-status' &&
+          decoded['status'] == 'awaiting_approval') {
+        return decoded;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  static bool matchStatusMessage(chat.ChatItem item) {
+    return parseStatusMessage(item) != null;
+  }
+
+  @override
+  ConsumerState<_SignDocumentRequestChatItem> createState() =>
+      _SignDocumentRequestChatItemState();
+}
+
+class _SignDocumentRequestChatItemState
+    extends ConsumerState<_SignDocumentRequestChatItem> {
+  bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
-    final document = chatItem.data['document'] as Map<String, dynamic>? ?? {};
-    final title = document['title'] as String? ?? 'Untitled Document';
-    final isActionable = chatItem.status == chat.ChatItemStatus.userInput;
+    final signingStatus = ref.watch(
+      signingServiceProvider.select((s) => s.status),
+    );
+    if (signingStatus == SigningServiceStatus.connected) {
+      return const SizedBox.shrink();
+    }
+
+    final statusData = ref.watch(
+      chatScreenControllerProvider(widget.contactId).select(
+        (state) {
+          final msgs = state.messages;
+          for (var i = 0; i < widget.messageIndex; i++) {
+            final parsed =
+                _SignDocumentRequestChatItem.parseStatusMessage(msgs[i]);
+            if (parsed != null) return parsed;
+          }
+          return null;
+        },
+      ),
+    );
+
+    final String label;
+    final Color color;
+    final IconData icon;
+
+    if (widget.statusLabel != null) {
+      label = widget.statusLabel!;
+      color = widget.statusColor ?? Colors.white54;
+      icon = widget.statusIcon ?? Icons.info_outline;
+    } else if (statusData != null) {
+      label = 'Awaiting approval';
+      color = Colors.amber;
+      icon = Icons.hourglass_top;
+    } else {
+      (label, color, icon) = switch (widget.status) {
+        chat.ChatItemStatus.confirmed => (
+          'Document signed',
+          Colors.greenAccent,
+          Icons.check_circle_outline,
+        ),
+        chat.ChatItemStatus.error => (
+          'Signing failed',
+          Colors.redAccent,
+          Icons.error_outline,
+        ),
+        _ => (
+          'Signing request sent',
+          Colors.white54,
+          Icons.send_outlined,
+        ),
+      };
+    }
+
+    final challenge = statusData?['challenge'] as String?;
+    final subject = statusData?['subject'] as String?;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 600),
@@ -31,66 +128,112 @@ class _SignDocumentRequestChatItem extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.description_outlined, color: Colors.white, size: 32),
-          const SizedBox(height: 8),
-          const Text(
-            'Document Signing Request',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-          ),
-          if (isActionable) ...[
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    minimumSize: const Size(90, 32),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                      side: BorderSide(color: Colors.white, width: 1),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.description_outlined,
+                color: Colors.white70,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(icon, color: color, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          label,
+                          style: TextStyle(color: color, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    if (challenge != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        'Challenge: $challenge',
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 11,
+                          fontFamily: 'monospace',
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    if (subject != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Subject: $subject',
+                        style: const TextStyle(
+                          color: Colors.white38,
+                          fontSize: 11,
+                          fontFamily: 'monospace',
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (widget.rawPayload != null) ...[
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () => setState(() => _expanded = !_expanded),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _expanded ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.white38,
+                    size: 16,
                   ),
-                  onPressed: () {
-                    // TODO: wire up VTA signing flow
-                  },
-                  child: const Text(
-                    'Sign',
-                    style: TextStyle(color: Colors.white),
+                  const SizedBox(width: 4),
+                  Text(
+                    _expanded ? 'Hide details' : 'More details',
+                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            if (_expanded) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.black26,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: SelectableText(
+                  const JsonEncoder.withIndent('  ')
+                      .convert(widget.rawPayload),
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 11,
+                    fontFamily: 'monospace',
                   ),
                 ),
-                const SizedBox(width: 12),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    minimumSize: const Size(90, 32),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                      side: BorderSide(color: Colors.white54, width: 1),
-                    ),
-                  ),
-                  onPressed: () {
-                    // TODO: mark as declined
-                  },
-                  child: const Text(
-                    'Decline',
-                    style: TextStyle(color: Colors.white54),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ],
         ],
       ),
