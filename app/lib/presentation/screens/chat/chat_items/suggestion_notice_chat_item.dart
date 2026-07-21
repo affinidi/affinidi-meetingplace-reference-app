@@ -14,6 +14,7 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isBusy = useState(false);
+    final customColors = context.customColors;
     final controller = ref.read(
       chatScreenControllerProvider(contactId).notifier,
     );
@@ -60,9 +61,16 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
             : const EdgeInsets.fromLTRB(5, 8, 60, 0),
         padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
         decoration: BoxDecoration(
-          color: Colors.amber.shade50,
+          gradient: const RadialGradient(
+            center: Alignment.bottomCenter,
+            radius: 2,
+            colors: [
+              AppCustomColors.conciergeCardGradientStart,
+              AppCustomColors.conciergeCardGradientEnd,
+            ],
+          ),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.amber.shade200),
+          border: Border.all(color: customColors.whiteOverlay30),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -72,19 +80,12 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.auto_awesome,
-                  size: 18,
-                  color: Colors.amber.shade800,
-                ),
+                Icon(Icons.auto_awesome, size: 18, color: Colors.white),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
                     suggestion.text,
-                    style: TextStyle(
-                      color: Colors.amber.shade900,
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ),
               ],
@@ -96,7 +97,8 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
                 TextButton(
                   onPressed: isBusy.value ? null : ignoreSuggestion,
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.amber.shade900,
+                    foregroundColor: Colors.white,
+                    disabledForegroundColor: Colors.white54,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     minimumSize: const Size(0, 36),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -108,7 +110,8 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
                 TextButton(
                   onPressed: isBusy.value ? null : editSuggestion,
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.amber.shade900,
+                    foregroundColor: Colors.white,
+                    disabledForegroundColor: Colors.white54,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     minimumSize: const Size(0, 36),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -120,7 +123,8 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
                 TextButton(
                   onPressed: isBusy.value ? null : sendAsMe,
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.amber.shade900,
+                    foregroundColor: Colors.white,
+                    disabledForegroundColor: Colors.white54,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     minimumSize: const Size(0, 36),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -138,8 +142,8 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.amber.shade800,
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      Colors.white,
                     ),
                   ),
                 ),
