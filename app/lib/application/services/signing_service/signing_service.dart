@@ -424,26 +424,40 @@ class SigningService extends StateNotifier<SigningServiceState> {
 
   Future<bool> getStepUpEnabled() async {
     if (_vtaClient == null || _authWorkflow == null) return false;
-    final token = await _authWorkflow!.getValidAccessToken();
-    _vtaClient!.setAuthToken(token);
-    final policy = await _vtaClient!.stepUpPolicy.getPolicy();
-    return policy['enabled'] as bool? ?? false;
+    return _withReauth(() async {
+      final policy = await _vtaClient!.stepUpPolicy.getPolicy();
+      return policy['enabled'] as bool? ?? false;
+    });
   }
 
   Future<void> setStepUpEnabled(bool enabled) async {
     if (_vtaClient == null || _authWorkflow == null) {
       throw StateError('VTA not connected');
     }
-    final token = await _authWorkflow!.getValidAccessToken();
-    _vtaClient!.setAuthToken(token);
-    await _vtaClient!.stepUpPolicy.setPolicy(
-      enabled: enabled,
-      floors: enabled
-          ? [
-              {'operation': 'vault/sign-trust-task', 'mode': 'delegated'},
-            ]
-          : [],
-    );
+    await _withReauth(() async {
+      await _vtaClient!.stepUpPolicy.setPolicy(
+        enabled: enabled,
+        floors: enabled
+            ? [
+                {'operation': 'vault/sign-trust-task', 'mode': 'delegated'},
+              ]
+            : [],
+      );
+    });
+  }
+
+  Future<T> _withReauth<T>(Future<T> Function() action) async {
+    try {
+      final token = await _authWorkflow!.getValidAccessToken();
+      _vtaClient!.setAuthToken(token);
+      return await action();
+    } on VtaAuthException {
+      _logger.info('VTA session expired, reconnecting...', name: _logKey);
+      await _authWorkflow!.reconnect();
+      final newToken = await _authWorkflow!.getValidAccessToken();
+      _vtaClient!.setAuthToken(newToken);
+      return action();
+    }
   }
 
   @override
