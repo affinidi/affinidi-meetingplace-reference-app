@@ -14,6 +14,8 @@ class _AudioCallViewData {
     required this.contactId,
     required this.peerAvatarImage,
     required this.isGroupContact,
+    required this.peerName,
+    required this.isPeerMuted,
     required this.session,
     required this.audioCallData,
     required this.showControls,
@@ -23,6 +25,8 @@ class _AudioCallViewData {
   final String contactId;
   final ImageProvider<Object>? peerAvatarImage;
   final bool isGroupContact;
+  final String peerName;
+  final bool isPeerMuted;
   final AudioVideoCallSession? session;
   final GroupAudioCallData audioCallData;
   final bool showControls;
@@ -90,6 +94,12 @@ class _AudioCallScreen extends ConsumerWidget {
       provider.select((s) => s.memberContactCards),
     );
     final controller = ref.read(provider.notifier);
+    final peerParticipants = participants.where(
+      (participant) => participant.isSelf == false,
+    );
+    final peerParticipant = peerParticipants.isEmpty
+        ? null
+        : peerParticipants.first;
 
     final isMicEnabled = ref.watch(provider.select((s) => s.isMicEnabled));
     final isSpeakerEnabled = ref.watch(
@@ -140,6 +150,8 @@ class _AudioCallScreen extends ConsumerWidget {
         contactId: contactId,
         peerAvatarImage: effectivePeerAvatarImage,
         isGroupContact: isGroupContact,
+        peerName: peerName,
+        isPeerMuted: peerParticipant?.hasAudio == false,
         session: session,
         audioCallData: resolveGroupAudioCallView(
           participants: participants,
@@ -188,6 +200,11 @@ class _AudioCallScaffold extends StatelessWidget {
                       child: _CallTopBar(
                         contactId: viewData.contactId,
                         onMinimize: actions.onMinimize,
+                        statusPill: viewData.isPeerMuted
+                            ? _IndividualAudioMutedPill(
+                                peerName: viewData.peerName,
+                              )
+                            : null,
                       ),
                     ),
                     Center(
@@ -337,16 +354,7 @@ class _AudioCallBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (peerAvatarImage != null) {
-      return Image(
-        image: peerAvatarImage!,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-      );
-    }
-
-    return Container(color: context.colorScheme.surface);
+    return Container(color: Colors.black);
   }
 }
 
@@ -370,6 +378,36 @@ class _IndividualAudioCallAvatar extends StatelessWidget {
         Icons.person,
         size: _diameter / 2,
         color: context.colorScheme.onSurface,
+      ),
+    );
+  }
+}
+
+class _IndividualAudioMutedPill extends StatelessWidget {
+  const _IndividualAudioMutedPill({required this.peerName});
+
+  final String peerName;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.customColors;
+    final colorScheme = context.colorScheme;
+    final textTheme = context.textTheme;
+    final label = peerName.isEmpty ? 'Muted' : '$peerName is muted';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: colors.darkGrey,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: textTheme.labelLarge?.copyWith(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w500,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }

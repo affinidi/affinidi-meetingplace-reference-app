@@ -17,6 +17,7 @@ class CallTopBarWidget extends ConsumerWidget {
     this.trailingIcon,
     this.onTrailingPressed,
     this.trailing,
+    this.statusPill,
     this.crossAxisAlignment = CrossAxisAlignment.center,
     this.centerPadding = EdgeInsets.zero,
   });
@@ -26,6 +27,7 @@ class CallTopBarWidget extends ConsumerWidget {
   final IconData? trailingIcon;
   final VoidCallback? onTrailingPressed;
   final Widget? trailing;
+  final Widget? statusPill;
   final CrossAxisAlignment crossAxisAlignment;
   final EdgeInsetsGeometry centerPadding;
 
@@ -90,6 +92,10 @@ class CallTopBarWidget extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (statusPill != null) ...[
+                    const SizedBox(height: 8),
+                    statusPill!,
+                  ],
                 ],
               ),
             ),

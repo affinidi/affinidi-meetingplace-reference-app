@@ -678,6 +678,46 @@ void main() {
       expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
     });
 
+    testWidgets('truncates long peer names and keeps muted pill in '
+        'the header', (tester) async {
+      const longPeerName =
+          'This is a very long peer name that should be ellipsized in the '
+          'header';
+      final state = AudioVideoCallScreenState(
+        status: AudioVideoCallStatus.active,
+        peerName: longPeerName,
+        isGroupContact: false,
+        isAudioOnly: true,
+        participants: const [
+          AudioVideoCallParticipant(
+            participantId: 'self-1',
+            isSelf: true,
+            hasVideo: false,
+            hasAudio: true,
+            isSpeaking: false,
+          ),
+          AudioVideoCallParticipant(
+            participantId: 'peer-1',
+            isSelf: false,
+            hasVideo: false,
+            hasAudio: false,
+            isSpeaking: false,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(_wrap(controllerState: state));
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('This is a very long peer name'), findsNothing);
+      expect(find.textContaining('is muted'), findsOneWidget);
+
+      final peerNameText = tester.widget<Text>(find.text(longPeerName));
+      expect(peerNameText.maxLines, 1);
+      expect(peerNameText.overflow, TextOverflow.ellipsis);
+    });
+
     testWidgets('shows no-answer screen with peer name for missed call', (
       tester,
     ) async {

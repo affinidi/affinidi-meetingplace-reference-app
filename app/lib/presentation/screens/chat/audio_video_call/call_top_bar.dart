@@ -4,17 +4,21 @@ part of 'audio_video_call_screen.dart';
 ///
 /// Used by both [_AudioCallScreen] and [_VideoCallScreen].
 class _CallTopBar extends ConsumerWidget {
-  const _CallTopBar({required this.contactId, required this.onMinimize})
-    : trailingIcon = null,
-      onTrailingPressed = null,
-      trailing = null,
-      crossAxisAlignment = CrossAxisAlignment.center,
-      centerPadding = EdgeInsets.zero;
+  const _CallTopBar({
+    required this.contactId,
+    required this.onMinimize,
+    this.statusPill,
+  }) : trailingIcon = null,
+       onTrailingPressed = null,
+       trailing = null,
+       crossAxisAlignment = CrossAxisAlignment.start,
+       centerPadding = EdgeInsets.zero;
 
   const _CallTopBar.group({required this.contactId, required this.onMinimize})
     : trailingIcon = Icons.people_alt_outlined,
       onTrailingPressed = _noopPressed,
       trailing = null,
+      statusPill = null,
       crossAxisAlignment = CrossAxisAlignment.center,
       centerPadding = EdgeInsets.zero;
 
@@ -25,11 +29,13 @@ class _CallTopBar extends ConsumerWidget {
   }) : trailingIcon = Icons.flip_camera_ios,
        onTrailingPressed = onSwitchCamera,
        trailing = null,
+       statusPill = null,
        crossAxisAlignment = CrossAxisAlignment.center,
        centerPadding = EdgeInsets.zero;
 
   final String contactId;
   final VoidCallback onMinimize;
+  final Widget? statusPill;
   final IconData? trailingIcon;
   final VoidCallback? onTrailingPressed;
   final Widget? trailing;
@@ -46,6 +52,7 @@ class _CallTopBar extends ConsumerWidget {
       trailingIcon: trailingIcon,
       onTrailingPressed: onTrailingPressed,
       trailing: trailing,
+      statusPill: statusPill,
       crossAxisAlignment: crossAxisAlignment,
       centerPadding: centerPadding,
     );
