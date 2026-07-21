@@ -1,3 +1,4 @@
+import 'package:meeting_place_core/meeting_place_core.dart' as core;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import 'audio_video_call_screen_state.dart';
@@ -12,6 +13,7 @@ class AudioVideoCallStateUpdate {
   const AudioVideoCallStateUpdate({
     this.status,
     this.participants,
+    this.participantContactCardsByDid,
     this.errorCode,
     this.isMicEnabled,
     this.isCameraEnabled,
@@ -25,6 +27,7 @@ class AudioVideoCallStateUpdate {
 
   final AudioVideoCallStatus? status;
   final List<AudioVideoCallParticipant>? participants;
+  final Map<String, core.ContactCard>? participantContactCardsByDid;
   final AudioVideoCallErrorCode? errorCode;
   final bool? isMicEnabled;
   final bool? isCameraEnabled;

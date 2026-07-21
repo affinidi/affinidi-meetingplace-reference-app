@@ -1,7 +1,31 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_livekit_flutter/src/extensions/room_participants_extension.dart';
 import 'package:meeting_place_livekit_flutter/src/room/flutter_livekit_room.dart';
 
 void main() {
+  group('matrixUserIdFromParticipantIdentity', () {
+    test('strips device id from MatrixRTC identity', () {
+      expect(
+        matrixUserIdFromParticipantIdentity('@abc:example.org:DEVICE123'),
+        '@abc:example.org',
+      );
+    });
+
+    test('strips everything after the homeserver separator', () {
+      expect(
+        matrixUserIdFromParticipantIdentity('@abc:localhost:9000:DEVICE123'),
+        '@abc:localhost',
+      );
+    });
+
+    test('leaves bare Matrix user id unchanged', () {
+      expect(
+        matrixUserIdFromParticipantIdentity('@abc:example.org'),
+        '@abc:example.org',
+      );
+    });
+  });
+
   group('FlutterLiveKitRoom', () {
     test('participants returns empty list when room is not connected', () {
       final room = FlutterLiveKitRoom();

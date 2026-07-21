@@ -26,8 +26,15 @@ class FakeContactsService extends ContactsService {
   List<String> setPendingMissedCallCalls = [];
   List<String> clearPendingMissedCallCalls = [];
 
+  void _syncStateIfReady() {
+    try {
+      state = ContactsServiceState(contacts: contacts);
+    } catch (_) {}
+  }
+
   void setContacts(List<Contact> newContacts) {
     contacts = List<Contact>.from(newContacts);
+    _syncStateIfReady();
   }
 
   void resetCallTracking() {
@@ -111,6 +118,7 @@ class FakeContactsService extends ContactsService {
   Future<void> addContact(Contact contact) async {
     addContactCalls.add({'contact': contact});
     contacts.add(contact);
+    _syncStateIfReady();
   }
 
   @override
@@ -121,6 +129,7 @@ class FakeContactsService extends ContactsService {
     updateContactCalls.add({'contact': contact});
     contacts.removeWhere((c) => c.id == contact.id);
     contacts.add(contact);
+    _syncStateIfReady();
   }
 
   @override

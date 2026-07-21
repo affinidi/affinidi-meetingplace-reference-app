@@ -115,10 +115,11 @@ void main() {
       container
           .read(incomingCallProvider.notifier)
           .set(
-            const IncomingAudioVideoCallEvent(
+            IncomingAudioVideoCallEvent(
               callId: 'call-1',
               callerPermanentChannelDid: 'did:example:other',
               otherPartyPermanentChannelDid: 'did:example:other',
+              invitedAt: DateTime.utc(2026),
               mediaType: CallMediaType.video,
             ),
           );
@@ -144,10 +145,11 @@ void main() {
         container
             .read(incomingCallProvider.notifier)
             .set(
-              const IncomingAudioVideoCallEvent(
+              IncomingAudioVideoCallEvent(
                 callId: 'call-1',
                 callerPermanentChannelDid: 'did:example:other',
                 otherPartyPermanentChannelDid: 'did:example:other',
+                invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.video,
               ),
             );
@@ -169,10 +171,11 @@ void main() {
         container
             .read(incomingCallProvider.notifier)
             .set(
-              const IncomingAudioVideoCallEvent(
+              IncomingAudioVideoCallEvent(
                 callId: 'call-1',
                 callerPermanentChannelDid: 'did:example:other',
                 otherPartyPermanentChannelDid: 'did:example:other',
+                invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.audio,
               ),
             );

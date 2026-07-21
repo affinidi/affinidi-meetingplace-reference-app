@@ -84,34 +84,6 @@ class _ControlsOverlayContent extends StatelessWidget {
   }
 }
 
-class _InCallFlipCameraButton extends StatelessWidget {
-  const _InCallFlipCameraButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.customColors;
-
-    return Positioned(
-      top: 10,
-      right: 10,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: colors.darkGrey.withValues(alpha: 0.75),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.flip_camera_ios, color: colors.pureWhite, size: 16),
-        ),
-      ),
-    );
-  }
-}
-
 class _InCallMuteButton extends StatelessWidget {
   const _InCallMuteButton({
     required this.isMicEnabled,

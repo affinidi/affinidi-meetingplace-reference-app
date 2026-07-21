@@ -435,12 +435,25 @@ class ContactsService extends _$ContactsService {
   /// [did] - Channel DID identifying the contact to update.
   /// [card] - New ContactCard to set on the contact.
   void updateContactCard(String did, ContactCard card) async {
-    final contact = state.getContactByChannelDid(did);
+    final contact =
+        state.getContactByChannelDid(did) ?? state.getContactByCardDid(did);
     if (contact == null) {
       return;
     }
     final amendedContact = contact.copyWith(card: card);
-    unawaited(updateContact(amendedContact));
+    unawaited(
+      updateContact(amendedContact).then((_) => notifyContactCardUpdated(did)),
+    );
+  }
+
+  /// Notify listeners that a contact card has been updated.
+  ///
+  /// This emits a signal on [onContactCardUpdated] stream with the DID of the
+  /// contact whose card was updated. Used by active call controllers to refresh
+  /// mid-call member profile pictures.
+  ///
+  /// [did] - The contact DID that was updated.
+  void notifyContactCardUpdated(String did) {
     _contactCardUpdatedController.add(did);
   }
 

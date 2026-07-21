@@ -244,6 +244,7 @@ void main() {
                     FakeChannels.individualChannel.permanentChannelDid!,
                 otherPartyPermanentChannelDid:
                     FakeChannels.individualChannel.permanentChannelDid!,
+                invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.video,
               ),
             );
@@ -258,6 +259,7 @@ void main() {
                     FakeChannels.individualChannel.permanentChannelDid!,
                 otherPartyPermanentChannelDid:
                     FakeChannels.individualChannel.permanentChannelDid!,
+                invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.video,
               ),
             );

@@ -10,7 +10,7 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_peer_p
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_contacts_service.dart';
 
-Widget _wrap({required AudioVideoCallParticipant? remotePeer}) {
+Widget _wrap({required AudioVideoCallParticipant? peerParticipant}) {
   return ProviderScope(
     overrides: [
       contactsServiceProvider.overrideWith(
@@ -22,7 +22,7 @@ Widget _wrap({required AudioVideoCallParticipant? remotePeer}) {
       home: Scaffold(
         body: VideoCallBackground(
           contactId: FakeContacts.individualContact.id,
-          remotePeer: remotePeer,
+          peerParticipant: peerParticipant,
           session: null,
         ),
       ),
@@ -40,7 +40,7 @@ AudioVideoCallParticipant _peer({required bool hasVideo}) =>
 void main() {
   group('When the peer has not joined', () {
     testWidgets('it shows the peer placeholder', (tester) async {
-      await tester.pumpWidget(_wrap(remotePeer: null));
+      await tester.pumpWidget(_wrap(peerParticipant: null));
       await tester.pump();
 
       expect(find.byType(VideoCallPeerPlaceholder), findsOneWidget);
@@ -49,16 +49,32 @@ void main() {
 
   group('When the peer camera has no video', () {
     testWidgets('it shows the peer placeholder', (tester) async {
-      await tester.pumpWidget(_wrap(remotePeer: _peer(hasVideo: false)));
+      await tester.pumpWidget(_wrap(peerParticipant: _peer(hasVideo: false)));
       await tester.pump();
 
       expect(find.byType(VideoCallPeerPlaceholder), findsOneWidget);
+    });
+
+    testWidgets('it uses a black fallback background', (tester) async {
+      await tester.pumpWidget(_wrap(peerParticipant: _peer(hasVideo: false)));
+      await tester.pump();
+
+      final coloredBox = tester.widget<ColoredBox>(
+        find
+            .ancestor(
+              of: find.byType(VideoCallPeerPlaceholder),
+              matching: find.byType(ColoredBox),
+            )
+            .first,
+      );
+
+      expect(coloredBox.color, Colors.black);
     });
   });
 
   group('When the peer video feed is ready', () {
     testWidgets('it hides the peer placeholder', (tester) async {
-      await tester.pumpWidget(_wrap(remotePeer: _peer(hasVideo: true)));
+      await tester.pumpWidget(_wrap(peerParticipant: _peer(hasVideo: true)));
       await tester.pump();
 
       expect(find.byType(VideoCallPeerPlaceholder), findsNothing);

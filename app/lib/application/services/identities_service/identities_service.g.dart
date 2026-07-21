@@ -71,7 +71,7 @@ final class IdentitiesServiceProvider
   }
 }
 
-String _$identitiesServiceHash() => r'8e71d9deae681da21d20290e3405c7fc0ccdc520';
+String _$identitiesServiceHash() => r'6ef7a6234526025991b6d35547fe037463f7a71c';
 
 /// Service responsible for managing identities and the current contact card.
 ///

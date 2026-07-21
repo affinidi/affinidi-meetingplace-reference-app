@@ -68,8 +68,22 @@ bool isConnectedCallStatus(AudioVideoCallStatus status) =>
     status == AudioVideoCallStatus.active;
 
 /// Whether the participant list contains a peer (non-self) participant.
-bool hasRemoteParticipant(List<AudioVideoCallParticipant> participants) =>
+bool hasPeerParticipant(List<AudioVideoCallParticipant> participants) =>
     participants.any((p) => !p.isSelf);
+
+/// The peer participant owns the main canvas in the minimized 1:1 video UI.
+///
+/// The self participant stays in a smaller lower-right inset so restoring the
+/// call preserves the same mental model as the full-screen video layout:
+/// peer is primary once available, self is secondary.
+AudioVideoCallParticipant? primaryParticipantForMinimizedVideoCall(
+  List<AudioVideoCallParticipant> participants,
+) {
+  for (final participant in participants) {
+    if (!participant.isSelf) return participant;
+  }
+  return null;
+}
 
 /// Latching rule: once connected to a live peer, stays `true` for the call.
 ///
@@ -83,7 +97,7 @@ bool computeHasHadPeer({
   required List<AudioVideoCallParticipant> participants,
 }) {
   if (previous) return true;
-  return isConnectedCallStatus(status) && hasRemoteParticipant(participants);
+  return isConnectedCallStatus(status) && hasPeerParticipant(participants);
 }
 
 /// The single rule that maps call state to the displayed [CallUiPhase].
@@ -154,5 +168,5 @@ bool shouldAutoEndCallForPeer({
 }) =>
     !isGroupContact &&
     hasHadPeer &&
-    !hasRemoteParticipant(participants) &&
+    !hasPeerParticipant(participants) &&
     isLiveCallStatus(status);

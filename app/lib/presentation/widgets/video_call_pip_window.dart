@@ -41,6 +41,8 @@ class VideoCallPiPWindow extends HookConsumerWidget {
     required this.participant,
     required this.isCameraEnabled,
     required this.availableSize,
+    this.primaryChild,
+    this.useCameraSizedWindowWhenVideoOff = false,
     this.showControlsBar = false,
     this.onTap,
     this.additionalSize = 0.0,
@@ -51,6 +53,8 @@ class VideoCallPiPWindow extends HookConsumerWidget {
   final AudioVideoCallSession? session;
   final AudioVideoCallParticipant participant;
   final bool isCameraEnabled;
+  final Widget? primaryChild;
+  final bool useCameraSizedWindowWhenVideoOff;
 
   /// The space in which the window can be dragged.
   /// In the call screen this is the SafeArea LayoutBuilder constraints.
@@ -87,7 +91,9 @@ class VideoCallPiPWindow extends HookConsumerWidget {
     final colors = context.customColors;
 
     final cameraOn = isCameraEnabled && participant.hasVideo;
-    final baseHeight = cameraOn ? _cameraHeight : _offHeight;
+    final baseHeight = cameraOn || useCameraSizedWindowWhenVideoOff
+        ? _cameraHeight
+        : _offHeight;
     final windowWidth = _windowWidth + additionalSize;
     final windowHeight = baseHeight + additionalSize;
 
@@ -174,13 +180,15 @@ class VideoCallPiPWindow extends HookConsumerWidget {
               fit: StackFit.expand,
               children: [
                 IgnorePointer(
-                  child: cameraOn
-                      ? _SelfVideoView(
-                          session: session,
-                          participantId: participant.participantId,
-                          hasVideo: participant.hasVideo,
-                        )
-                      : const Center(child: _SelfAvatarPlaceholder()),
+                  child:
+                      primaryChild ??
+                      (cameraOn
+                          ? _SelfVideoView(
+                              session: session,
+                              participantId: participant.participantId,
+                              hasVideo: participant.hasVideo,
+                            )
+                          : const Center(child: _SelfAvatarPlaceholder())),
                 ),
                 ...overlayChildren,
               ],

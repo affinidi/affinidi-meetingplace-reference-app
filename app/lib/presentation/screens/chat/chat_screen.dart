@@ -131,7 +131,6 @@ class ChatScreen extends HookConsumerWidget {
     final isInitialized = ref.watch(
       provider.select((state) => state.isInitialized),
     );
-    final isGroupChat = ref.watch(provider.isGroupChat);
     final isCallSupported = ref.watch(
       provider.select((state) => state.isCallSupported),
     );
@@ -207,7 +206,7 @@ class ChatScreen extends HookConsumerWidget {
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
         actions: [
-          if (isAudioVideoCallsEnabled && isCallSupported && !isGroupChat)
+          if (isAudioVideoCallsEnabled && isCallSupported)
             _AudioVideoCallActions(contactId: _contactId),
         ],
       ),

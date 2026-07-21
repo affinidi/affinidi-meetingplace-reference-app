@@ -9,6 +9,7 @@ class _CallDraggableMiniGrid extends HookWidget {
     required this.miniGridExpanded,
     required this.onToggleMiniGridExpanded,
     required this.onTapParticipant,
+    required this.memberContactCards,
   });
 
   final List<AudioVideoCallParticipant> participants;
@@ -18,6 +19,7 @@ class _CallDraggableMiniGrid extends HookWidget {
   final bool miniGridExpanded;
   final VoidCallback onToggleMiniGridExpanded;
   final void Function(int index) onTapParticipant;
+  final Map<String, ContactCard> memberContactCards;
 
   static const double _tileSize = 64;
   static const double _spacing = 4;
@@ -152,6 +154,7 @@ class _CallDraggableMiniGrid extends HookWidget {
                         displayNames: displayNames,
                         isAudioOnly: isAudioOnly,
                         onTapParticipant: onTapParticipant,
+                        memberContactCards: memberContactCards,
                       )
                     : needsScroll
                     ? Listener(
@@ -182,6 +185,7 @@ class _CallDraggableMiniGrid extends HookWidget {
                               }
                               onTapParticipant(i);
                             },
+                            memberContactCards: memberContactCards,
                           ),
                         ),
                       )
@@ -195,6 +199,7 @@ class _CallDraggableMiniGrid extends HookWidget {
                         displayNames: displayNames,
                         isAudioOnly: isAudioOnly,
                         onTapParticipant: onTapParticipant,
+                        memberContactCards: memberContactCards,
                       ),
               ),
               if (hasOverflow)
@@ -251,6 +256,7 @@ class _CallMiniGridTileWrap extends StatelessWidget {
     required this.displayNames,
     required this.isAudioOnly,
     required this.onTapParticipant,
+    required this.memberContactCards,
     this.expandedNotifier,
     this.onCollapse,
   });
@@ -262,6 +268,7 @@ class _CallMiniGridTileWrap extends StatelessWidget {
   final List<String> displayNames;
   final bool isAudioOnly;
   final void Function(int index) onTapParticipant;
+  final Map<String, ContactCard> memberContactCards;
   final ValueNotifier<bool>? expandedNotifier;
   final VoidCallback? onCollapse;
 
@@ -291,6 +298,10 @@ class _CallMiniGridTileWrap extends StatelessWidget {
                   isAudioOnly: isAudioOnly,
                   displayName: displayNames[i],
                   borderRadius: 8,
+                  contactCard: _contactCardFor(
+                    participants[i],
+                    memberContactCards: memberContactCards,
+                  ),
                 ),
               ),
             ),

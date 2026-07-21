@@ -26,15 +26,14 @@ final chatSdkProvider = FutureProvider.autoDispose
       const logKey = 'chatSdkProvider';
       final logger = ref.read(appLoggerProvider);
       final environment = ref.read(environmentProvider);
+      final identitiesService = ref.read(identitiesServiceProvider.notifier);
 
       logger.info(
         '''From: ${channel.permanentChannelDid} - To: ${channel.otherPartyPermanentChannelDid}''',
         name: logKey,
       );
 
-      final identity = ref
-          .read(identitiesServiceProvider)
-          .getIdentityById(channel.externalRef);
+      final identity = identitiesService.getIdentityById(channel.externalRef);
       final sdkContactCard = identity?.card.toSdkContactCard();
 
       try {

@@ -40,6 +40,9 @@ class IdentitiesService extends _$IdentitiesService {
     await initializing;
   }
 
+  /// Returns the identity for [id], if it is present in the current state.
+  Identity? getIdentityById(String? id) => state.getIdentityById(id);
+
   /// Set the current identity by its identifier.
   ///
   /// [id] - Identity id to select.

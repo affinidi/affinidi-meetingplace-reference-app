@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
@@ -65,6 +66,8 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   String? lastReaction;
   bool sessionEnded = false;
   String? lastEffectSent;
+  sdk.ContactCard? lastRefreshedCurrentContactCard;
+  int refreshCurrentContactCardCallCount = 0;
   bool shouldThrowOnStartSession = false;
   int sendTextMessageFailuresRemaining = 0;
   String? lastRemovedMemberDid;
@@ -661,6 +664,12 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   @override
   Future<void> startChatPresenceUpdates() async {
     _startedChatPresenceUpdates += 1;
+  }
+
+  @override
+  Future<void> refreshCurrentContactCard(sdk.ContactCard? card) async {
+    lastRefreshedCurrentContactCard = card;
+    refreshCurrentContactCardCallCount += 1;
   }
 
   @override

@@ -3327,6 +3327,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 s} other{{count} s}}'**
   String callDurationSecondFormat(int count);
+
+  /// No description provided for @groupCallWaitingForOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for others...'**
+  String get groupCallWaitingForOthers;
+
+  /// No description provided for @groupCallParticipant.
+  ///
+  /// In en, this message translates to:
+  /// **'participant'**
+  String get groupCallParticipant;
+
+  /// No description provided for @groupCallParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'participants'**
+  String get groupCallParticipants;
+
+  /// No description provided for @groupCallEndCall.
+  ///
+  /// In en, this message translates to:
+  /// **'End Call'**
+  String get groupCallEndCall;
+
+  /// No description provided for @groupCallNoParticipants.
+  ///
+  /// In en, this message translates to:
+  /// **'No participants'**
+  String get groupCallNoParticipants;
+
+  /// No description provided for @groupCallMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get groupCallMute;
+
+  /// No description provided for @groupCallLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave'**
+  String get groupCallLeave;
 }
 
 class _AppLocalizationsDelegate
