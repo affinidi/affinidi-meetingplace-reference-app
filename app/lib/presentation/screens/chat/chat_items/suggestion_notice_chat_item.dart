@@ -5,11 +5,13 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
     required this.suggestion,
     required this.isFromMe,
     required this.contactId,
+    required this.onSendAsMe,
   });
 
   final ChatSuggestion suggestion;
   final bool isFromMe;
   final String contactId;
+  final Future<void> Function() onSendAsMe;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,7 +37,7 @@ class _SuggestionNoticeChatItem extends HookConsumerWidget {
 
       isBusy.value = true;
       try {
-        await controller.sendLatestSuggestionAsMe();
+        await onSendAsMe();
       } finally {
         isBusy.value = false;
       }

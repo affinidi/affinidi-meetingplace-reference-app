@@ -259,6 +259,17 @@ class _ChatMessageList extends HookConsumerWidget {
                               contactId: _contactId,
                               suggestion: matchingSuggestion,
                               isFromMe: chatItem.isFromMe,
+                              onSendAsMe: () async {
+                                await controller.sendLatestSuggestionAsMe();
+                                if (!scrollController.hasClients) return;
+                                if (scrollController.offset <= 24) return;
+
+                                await scrollController.animateTo(
+                                  0,
+                                  duration: const Duration(milliseconds: 260),
+                                  curve: Curves.easeOutCubic,
+                                );
+                              },
                             ),
                           thisItemStatus.isNotEmpty
                               ? Align(
