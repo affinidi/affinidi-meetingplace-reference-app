@@ -162,6 +162,11 @@ void main() {
 
       expect(find.byType(VideoCallPeerPlaceholder), findsOneWidget);
       expect(find.byType(ProfileCircleAvatar), findsNWidgets(2));
+
+      final remoteAvatar = tester
+          .widgetList<ProfileCircleAvatar>(find.byType(ProfileCircleAvatar))
+          .first;
+      expect(remoteAvatar.radius, 32);
     });
   });
 

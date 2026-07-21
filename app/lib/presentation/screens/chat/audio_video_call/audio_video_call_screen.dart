@@ -20,6 +20,8 @@ import '../../../../presentation/widgets/call/call_participant_mute_badge.dart';
 import '../../../../presentation/widgets/call/call_top_bar_widget.dart';
 import '../../../../presentation/widgets/call/video_call_background.dart';
 import '../../../../presentation/widgets/call/video_call_peer_placeholder.dart';
+import '../../../../presentation/widgets/call/video_call_pip_action_buttons.dart';
+import '../../../../presentation/widgets/call/video_call_pip_window.dart';
 import '../../../../presentation/widgets/images/default_profile_image.dart';
 import '../../../../presentation/widgets/profile_circle_avatar.dart';
 import '../../../widgets/call_ended/call_ended_controller.dart';

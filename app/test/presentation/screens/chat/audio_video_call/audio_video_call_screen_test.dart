@@ -571,12 +571,12 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Frank'), findsOneWidget);
-      expect(find.byType(VideoCallPiPWindow), findsNothing);
+      expect(find.byType(VideoCallPiPWindow), findsOneWidget);
       expect(find.byType(VideoCallPeerPlaceholder), findsOneWidget);
       expect(find.byIcon(Icons.people_alt_outlined), findsNothing);
-      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
+      expect(find.byIcon(Icons.flip_camera_ios), findsNWidgets(2));
 
-      await tester.tap(find.byIcon(Icons.flip_camera_ios));
+      await tester.tap(find.byIcon(Icons.flip_camera_ios).first);
       await tester.pump();
 
       expect(controller.switchCameraCalls, 1);

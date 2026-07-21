@@ -14,6 +14,47 @@ import 'video_call_pip_overlay.dart' show VideoCallPiPOverlay;
 
 Offset? _lastPiPPosition;
 
+/// Clears the remembered PiP drag position so the next call starts from the
+/// default resting spot.
+void resetVideoCallPiPPosition() {
+  _lastPiPPosition = null;
+}
+
+@visibleForTesting
+Offset resolveVideoCallPiPRestingPosition({
+  required Size availableSize,
+  required double windowWidth,
+  required double baseHeight,
+  required double bottomInset,
+  required bool showControlsBar,
+  required double systemGestureLeft,
+  Offset? rememberedPosition,
+}) {
+  final maxX = availableSize.width - windowWidth - VideoCallPiPWindow._margin;
+  final maxY = showControlsBar
+      ? availableSize.height -
+            baseHeight -
+            VideoCallPiPWindow._controlsBarHeight
+      : availableSize.height - baseHeight - VideoCallPiPWindow._margin;
+
+  final minX =
+      VideoCallPiPWindow._margin +
+      (systemGestureLeft - VideoCallPiPWindow._margin).clamp(
+        0.0,
+        VideoCallPiPWindow._margin,
+      );
+  const minY = VideoCallPiPWindow._margin;
+
+  final defaultY =
+      availableSize.height -
+      bottomInset -
+      VideoCallPiPWindow._controlsBarHeight -
+      baseHeight;
+  final rawPos = rememberedPosition ?? Offset(maxX, defaultY);
+
+  return Offset(rawPos.dx.clamp(minX, maxX), rawPos.dy.clamp(minY, maxY));
+}
+
 /// Draggable self-camera PiP window shared between the in-call screen and
 /// [VideoCallPiPOverlay].
 ///
@@ -112,13 +153,14 @@ class VideoCallPiPWindow extends HookConsumerWidget {
     final posAtDragStart = useRef<Offset>(Offset.zero);
 
     final bottomInset = context.mediaQuery.padding.bottom;
-    final defaultY =
-        availableHeight - bottomInset - _controlsBarHeight - baseHeight;
-    final rawPos = position.value ?? Offset(maxX, defaultY);
-
-    final pos = Offset(
-      rawPos.dx.clamp(minX, maxX),
-      rawPos.dy.clamp(minY, maxY),
+    final pos = resolveVideoCallPiPRestingPosition(
+      availableSize: availableSize,
+      windowWidth: windowWidth,
+      baseHeight: windowHeight,
+      bottomInset: bottomInset,
+      showControlsBar: showControlsBar,
+      systemGestureLeft: systemGestureLeft,
+      rememberedPosition: position.value,
     );
 
     return AnimatedPositioned(
@@ -225,7 +267,7 @@ class _SelfVideoView extends StatelessWidget {
 class _SelfAvatarPlaceholder extends ConsumerWidget {
   const _SelfAvatarPlaceholder();
 
-  static const double _diameter = 40;
+  static const double _diameter = 64;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

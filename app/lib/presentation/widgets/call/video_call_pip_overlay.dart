@@ -193,7 +193,7 @@ class _MinimizedPeerPrimary extends StatelessWidget {
     required this.peerParticipant,
   });
 
-  static const double _placeholderDiameter = 88;
+  static const double _placeholderDiameter = 64;
 
   final String contactId;
   final AudioVideoCallSession? session;
