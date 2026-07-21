@@ -67,7 +67,7 @@ final class ConnectionDetailsScreenControllerProvider
 }
 
 String _$connectionDetailsScreenControllerHash() =>
-    r'1f9c1d5e32674695110db20135db64b3ac4671db';
+    r'e7863e573e32c72f3b05a5aadb42a29fb978394e';
 
 final class ConnectionDetailsScreenControllerFamily extends $Family
     with

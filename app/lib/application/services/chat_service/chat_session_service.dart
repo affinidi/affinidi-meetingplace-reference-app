@@ -50,6 +50,7 @@ import 'handlers/contact_card_protocol_handler.dart';
 import 'handlers/effect_protocol_handler.dart';
 import 'handlers/group_details_protocol_handler.dart';
 import 'handlers/presence_protocol_handler.dart';
+import 'handlers/suggestion_protocol_handler.dart';
 import 'handlers/typing_protocol_handler.dart';
 import 'handlers/zkp_attachment_protocol_handler.dart';
 import 'typing_timer.dart';
@@ -194,6 +195,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           logger: _logger,
         ),
         EffectProtocolHandler(onEffect: _onEffect, logger: _logger),
+        SuggestionProtocolHandler(onSuggestion: _onSuggestion, logger: _logger),
         ContactCardProtocolHandler(
           ref: ref,
           isGroupChat: () => _isGroupChat,
@@ -215,6 +217,22 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       zkpAttachmentEvent: ZkpAttachmentEvent(
         chatItem: chatItem,
         channelDid: channelDid,
+      ),
+    );
+  }
+
+  void _onSuggestion(ChatSuggestionEvent event, String channelDid) {
+    final hasRelatedMessage = state.messages.any(
+      (message) => message.messageId == event.relatedMessageId,
+    );
+    if (!hasRelatedMessage) return;
+
+    state = state.copyWith(
+      latestSuggestion: ChatSuggestion(
+        relatedMessageId: event.relatedMessageId,
+        text: event.text,
+        senderDid: event.senderDid,
+        createdTime: event.createdTime,
       ),
     );
   }
@@ -736,7 +754,20 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     final messages = idx == -1
         ? existing.insertSorted(item)
         : existing.replaceItemAtIndex(idx, item);
-    state = state.copyWith(messages: messages);
+    state = state.copyWith(
+      messages: messages,
+      latestSuggestion: _latestSuggestionIfPresent(messages),
+    );
+  }
+
+  ChatSuggestion? _latestSuggestionIfPresent(List<ChatItem> messages) {
+    final latestSuggestion = state.latestSuggestion;
+    if (latestSuggestion == null) return null;
+
+    final hasRelatedMessage = messages.any(
+      (message) => message.messageId == latestSuggestion.relatedMessageId,
+    );
+    return hasRelatedMessage ? latestSuggestion : null;
   }
 
   String _peerFirstNameForZkpUi() {
@@ -905,7 +936,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     final messages = state.messages
         .where((m) => m.messageId != item.messageId)
         .toList();
-    state = state.copyWith(messages: messages);
+    state = state.copyWith(
+      messages: messages,
+      latestSuggestion: _latestSuggestionIfPresent(messages),
+    );
   }
 
   Future<void> _refreshGroup() async {

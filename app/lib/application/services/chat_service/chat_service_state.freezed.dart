@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChatServiceState {
 
- Contact? get contact; Group? get group; ContactCard? get otherPartyCard; List<chat.ChatItem> get messages; ZkpAttachmentEvent? get zkpAttachmentEvent; List<String> get membersTyping; bool get isActive; bool get isInitialized; ContactPresenceStatus get contactPresenceStatus; chat.Effect? get effect;
+ Contact? get contact; Group? get group; ContactCard? get otherPartyCard; List<chat.ChatItem> get messages; ZkpAttachmentEvent? get zkpAttachmentEvent; ChatSuggestion? get latestSuggestion; List<String> get membersTyping; bool get isActive; bool get isInitialized; ContactPresenceStatus get contactPresenceStatus; chat.Effect? get effect;
 /// Create a copy of ChatServiceState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ChatServiceStateCopyWith<ChatServiceState> get copyWith => _$ChatServiceStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatServiceState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.zkpAttachmentEvent, zkpAttachmentEvent) || other.zkpAttachmentEvent == zkpAttachmentEvent)&&const DeepCollectionEquality().equals(other.membersTyping, membersTyping)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&(identical(other.effect, effect) || other.effect == effect));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatServiceState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other.messages, messages)&&(identical(other.zkpAttachmentEvent, zkpAttachmentEvent) || other.zkpAttachmentEvent == zkpAttachmentEvent)&&(identical(other.latestSuggestion, latestSuggestion) || other.latestSuggestion == latestSuggestion)&&const DeepCollectionEquality().equals(other.membersTyping, membersTyping)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&(identical(other.effect, effect) || other.effect == effect));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contact,group,otherPartyCard,const DeepCollectionEquality().hash(messages),zkpAttachmentEvent,const DeepCollectionEquality().hash(membersTyping),isActive,isInitialized,contactPresenceStatus,effect);
+int get hashCode => Object.hash(runtimeType,contact,group,otherPartyCard,const DeepCollectionEquality().hash(messages),zkpAttachmentEvent,latestSuggestion,const DeepCollectionEquality().hash(membersTyping),isActive,isInitialized,contactPresenceStatus,effect);
 
 @override
 String toString() {
-  return 'ChatServiceState(contact: $contact, group: $group, otherPartyCard: $otherPartyCard, messages: $messages, zkpAttachmentEvent: $zkpAttachmentEvent, membersTyping: $membersTyping, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect)';
+  return 'ChatServiceState(contact: $contact, group: $group, otherPartyCard: $otherPartyCard, messages: $messages, zkpAttachmentEvent: $zkpAttachmentEvent, latestSuggestion: $latestSuggestion, membersTyping: $membersTyping, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ChatServiceStateCopyWith<$Res>  {
   factory $ChatServiceStateCopyWith(ChatServiceState value, $Res Function(ChatServiceState) _then) = _$ChatServiceStateCopyWithImpl;
 @useResult
 $Res call({
- Contact? contact, Group? group, ContactCard? otherPartyCard, List<chat.ChatItem> messages, ZkpAttachmentEvent? zkpAttachmentEvent, List<String> membersTyping, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, chat.Effect? effect
+ Contact? contact, Group? group, ContactCard? otherPartyCard, List<chat.ChatItem> messages, ZkpAttachmentEvent? zkpAttachmentEvent, ChatSuggestion? latestSuggestion, List<String> membersTyping, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, chat.Effect? effect
 });
 
 
@@ -62,14 +62,15 @@ class _$ChatServiceStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatServiceState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? contact = freezed,Object? group = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? zkpAttachmentEvent = freezed,Object? membersTyping = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? effect = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? contact = freezed,Object? group = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? zkpAttachmentEvent = freezed,Object? latestSuggestion = freezed,Object? membersTyping = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? effect = freezed,}) {
   return _then(_self.copyWith(
 contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
 as Contact?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as Group?,otherPartyCard: freezed == otherPartyCard ? _self.otherPartyCard : otherPartyCard // ignore: cast_nullable_to_non_nullable
 as ContactCard?,messages: null == messages ? _self.messages : messages // ignore: cast_nullable_to_non_nullable
 as List<chat.ChatItem>,zkpAttachmentEvent: freezed == zkpAttachmentEvent ? _self.zkpAttachmentEvent : zkpAttachmentEvent // ignore: cast_nullable_to_non_nullable
-as ZkpAttachmentEvent?,membersTyping: null == membersTyping ? _self.membersTyping : membersTyping // ignore: cast_nullable_to_non_nullable
+as ZkpAttachmentEvent?,latestSuggestion: freezed == latestSuggestion ? _self.latestSuggestion : latestSuggestion // ignore: cast_nullable_to_non_nullable
+as ChatSuggestion?,membersTyping: null == membersTyping ? _self.membersTyping : membersTyping // ignore: cast_nullable_to_non_nullable
 as List<String>,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,isInitialized: null == isInitialized ? _self.isInitialized : isInitialized // ignore: cast_nullable_to_non_nullable
 as bool,contactPresenceStatus: null == contactPresenceStatus ? _self.contactPresenceStatus : contactPresenceStatus // ignore: cast_nullable_to_non_nullable
@@ -171,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  ZkpAttachmentEvent? zkpAttachmentEvent,  List<String> membersTyping,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  chat.Effect? effect)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  ZkpAttachmentEvent? zkpAttachmentEvent,  ChatSuggestion? latestSuggestion,  List<String> membersTyping,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  chat.Effect? effect)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatServiceState() when $default != null:
-return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_that.zkpAttachmentEvent,_that.membersTyping,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect);case _:
+return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_that.zkpAttachmentEvent,_that.latestSuggestion,_that.membersTyping,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect);case _:
   return orElse();
 
 }
@@ -192,10 +193,10 @@ return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  ZkpAttachmentEvent? zkpAttachmentEvent,  List<String> membersTyping,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  chat.Effect? effect)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Contact? contact,  Group? group,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  ZkpAttachmentEvent? zkpAttachmentEvent,  ChatSuggestion? latestSuggestion,  List<String> membersTyping,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  chat.Effect? effect)  $default,) {final _that = this;
 switch (_that) {
 case _ChatServiceState():
-return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_that.zkpAttachmentEvent,_that.membersTyping,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect);case _:
+return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_that.zkpAttachmentEvent,_that.latestSuggestion,_that.membersTyping,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +213,10 @@ return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Contact? contact,  Group? group,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  ZkpAttachmentEvent? zkpAttachmentEvent,  List<String> membersTyping,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  chat.Effect? effect)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Contact? contact,  Group? group,  ContactCard? otherPartyCard,  List<chat.ChatItem> messages,  ZkpAttachmentEvent? zkpAttachmentEvent,  ChatSuggestion? latestSuggestion,  List<String> membersTyping,  bool isActive,  bool isInitialized,  ContactPresenceStatus contactPresenceStatus,  chat.Effect? effect)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatServiceState() when $default != null:
-return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_that.zkpAttachmentEvent,_that.membersTyping,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect);case _:
+return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_that.zkpAttachmentEvent,_that.latestSuggestion,_that.membersTyping,_that.isActive,_that.isInitialized,_that.contactPresenceStatus,_that.effect);case _:
   return null;
 
 }
@@ -227,7 +228,7 @@ return $default(_that.contact,_that.group,_that.otherPartyCard,_that.messages,_t
 
 
 class _ChatServiceState extends ChatServiceState {
-   _ChatServiceState({this.contact, this.group, this.otherPartyCard, final  List<chat.ChatItem> messages = const [], this.zkpAttachmentEvent, final  List<String> membersTyping = const [], this.isActive = false, this.isInitialized = false, this.contactPresenceStatus = ContactPresenceStatus.unknown, this.effect}): _messages = messages,_membersTyping = membersTyping,super._();
+   _ChatServiceState({this.contact, this.group, this.otherPartyCard, final  List<chat.ChatItem> messages = const [], this.zkpAttachmentEvent, this.latestSuggestion, final  List<String> membersTyping = const [], this.isActive = false, this.isInitialized = false, this.contactPresenceStatus = ContactPresenceStatus.unknown, this.effect}): _messages = messages,_membersTyping = membersTyping,super._();
   
 
 @override final  Contact? contact;
@@ -241,6 +242,7 @@ class _ChatServiceState extends ChatServiceState {
 }
 
 @override final  ZkpAttachmentEvent? zkpAttachmentEvent;
+@override final  ChatSuggestion? latestSuggestion;
  final  List<String> _membersTyping;
 @override@JsonKey() List<String> get membersTyping {
   if (_membersTyping is EqualUnmodifiableListView) return _membersTyping;
@@ -263,16 +265,16 @@ _$ChatServiceStateCopyWith<_ChatServiceState> get copyWith => __$ChatServiceStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatServiceState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other._messages, _messages)&&(identical(other.zkpAttachmentEvent, zkpAttachmentEvent) || other.zkpAttachmentEvent == zkpAttachmentEvent)&&const DeepCollectionEquality().equals(other._membersTyping, _membersTyping)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&(identical(other.effect, effect) || other.effect == effect));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatServiceState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.group, group) || other.group == group)&&(identical(other.otherPartyCard, otherPartyCard) || other.otherPartyCard == otherPartyCard)&&const DeepCollectionEquality().equals(other._messages, _messages)&&(identical(other.zkpAttachmentEvent, zkpAttachmentEvent) || other.zkpAttachmentEvent == zkpAttachmentEvent)&&(identical(other.latestSuggestion, latestSuggestion) || other.latestSuggestion == latestSuggestion)&&const DeepCollectionEquality().equals(other._membersTyping, _membersTyping)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isInitialized, isInitialized) || other.isInitialized == isInitialized)&&(identical(other.contactPresenceStatus, contactPresenceStatus) || other.contactPresenceStatus == contactPresenceStatus)&&(identical(other.effect, effect) || other.effect == effect));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contact,group,otherPartyCard,const DeepCollectionEquality().hash(_messages),zkpAttachmentEvent,const DeepCollectionEquality().hash(_membersTyping),isActive,isInitialized,contactPresenceStatus,effect);
+int get hashCode => Object.hash(runtimeType,contact,group,otherPartyCard,const DeepCollectionEquality().hash(_messages),zkpAttachmentEvent,latestSuggestion,const DeepCollectionEquality().hash(_membersTyping),isActive,isInitialized,contactPresenceStatus,effect);
 
 @override
 String toString() {
-  return 'ChatServiceState(contact: $contact, group: $group, otherPartyCard: $otherPartyCard, messages: $messages, zkpAttachmentEvent: $zkpAttachmentEvent, membersTyping: $membersTyping, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect)';
+  return 'ChatServiceState(contact: $contact, group: $group, otherPartyCard: $otherPartyCard, messages: $messages, zkpAttachmentEvent: $zkpAttachmentEvent, latestSuggestion: $latestSuggestion, membersTyping: $membersTyping, isActive: $isActive, isInitialized: $isInitialized, contactPresenceStatus: $contactPresenceStatus, effect: $effect)';
 }
 
 
@@ -283,7 +285,7 @@ abstract mixin class _$ChatServiceStateCopyWith<$Res> implements $ChatServiceSta
   factory _$ChatServiceStateCopyWith(_ChatServiceState value, $Res Function(_ChatServiceState) _then) = __$ChatServiceStateCopyWithImpl;
 @override @useResult
 $Res call({
- Contact? contact, Group? group, ContactCard? otherPartyCard, List<chat.ChatItem> messages, ZkpAttachmentEvent? zkpAttachmentEvent, List<String> membersTyping, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, chat.Effect? effect
+ Contact? contact, Group? group, ContactCard? otherPartyCard, List<chat.ChatItem> messages, ZkpAttachmentEvent? zkpAttachmentEvent, ChatSuggestion? latestSuggestion, List<String> membersTyping, bool isActive, bool isInitialized, ContactPresenceStatus contactPresenceStatus, chat.Effect? effect
 });
 
 
@@ -300,14 +302,15 @@ class __$ChatServiceStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatServiceState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? contact = freezed,Object? group = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? zkpAttachmentEvent = freezed,Object? membersTyping = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? effect = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? contact = freezed,Object? group = freezed,Object? otherPartyCard = freezed,Object? messages = null,Object? zkpAttachmentEvent = freezed,Object? latestSuggestion = freezed,Object? membersTyping = null,Object? isActive = null,Object? isInitialized = null,Object? contactPresenceStatus = null,Object? effect = freezed,}) {
   return _then(_ChatServiceState(
 contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
 as Contact?,group: freezed == group ? _self.group : group // ignore: cast_nullable_to_non_nullable
 as Group?,otherPartyCard: freezed == otherPartyCard ? _self.otherPartyCard : otherPartyCard // ignore: cast_nullable_to_non_nullable
 as ContactCard?,messages: null == messages ? _self._messages : messages // ignore: cast_nullable_to_non_nullable
 as List<chat.ChatItem>,zkpAttachmentEvent: freezed == zkpAttachmentEvent ? _self.zkpAttachmentEvent : zkpAttachmentEvent // ignore: cast_nullable_to_non_nullable
-as ZkpAttachmentEvent?,membersTyping: null == membersTyping ? _self._membersTyping : membersTyping // ignore: cast_nullable_to_non_nullable
+as ZkpAttachmentEvent?,latestSuggestion: freezed == latestSuggestion ? _self.latestSuggestion : latestSuggestion // ignore: cast_nullable_to_non_nullable
+as ChatSuggestion?,membersTyping: null == membersTyping ? _self._membersTyping : membersTyping // ignore: cast_nullable_to_non_nullable
 as List<String>,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
 as bool,isInitialized: null == isInitialized ? _self.isInitialized : isInitialized // ignore: cast_nullable_to_non_nullable
 as bool,contactPresenceStatus: null == contactPresenceStatus ? _self.contactPresenceStatus : contactPresenceStatus // ignore: cast_nullable_to_non_nullable

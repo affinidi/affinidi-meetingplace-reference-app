@@ -16,6 +16,20 @@ class ZkpAttachmentEvent {
   final String channelDid;
 }
 
+class ChatSuggestion {
+  const ChatSuggestion({
+    required this.relatedMessageId,
+    required this.text,
+    required this.senderDid,
+    required this.createdTime,
+  });
+
+  final String relatedMessageId;
+  final String text;
+  final String? senderDid;
+  final DateTime createdTime;
+}
+
 /// Contains all chat-session data that the controller observes. UI-only fields
 /// (selectedReactionIndex, attachmentsDataCache) live in `ChatScreenState`.
 @Freezed(fromJson: false, toJson: false)
@@ -28,6 +42,7 @@ abstract class ChatServiceState with _$ChatServiceState {
     ContactCard? otherPartyCard,
     @Default([]) List<chat.ChatItem> messages,
     ZkpAttachmentEvent? zkpAttachmentEvent,
+    ChatSuggestion? latestSuggestion,
     @Default([]) List<String> membersTyping,
     @Default(false) bool isActive,
     @Default(false) bool isInitialized,
