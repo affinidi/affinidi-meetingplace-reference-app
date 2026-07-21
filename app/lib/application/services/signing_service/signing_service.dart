@@ -1,15 +1,19 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:bip39_mnemonic/bip39_mnemonic.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:ssi/ssi.dart';
 import 'package:vta_dart_client/vta_dart_client.dart';
 
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/secure_storage/secure_storage.dart';
 import '../../../infrastructure/vta/app_vta_auth_signer.dart';
 import '../../../infrastructure/vta/authenticated_websocket_channel.dart';
@@ -43,18 +47,18 @@ class SigningServiceState {
   }) {
     return SigningServiceState(
       status: status ?? this.status,
-      pendingApproval:
-          pendingApproval != null ? pendingApproval() : this.pendingApproval,
-      errorMessage:
-          errorMessage != null ? errorMessage() : this.errorMessage,
+      pendingApproval: pendingApproval != null
+          ? pendingApproval()
+          : this.pendingApproval,
+      errorMessage: errorMessage != null ? errorMessage() : this.errorMessage,
     );
   }
 }
 
 final signingServiceProvider =
     StateNotifierProvider<SigningService, SigningServiceState>(
-  SigningService.new,
-);
+      SigningService.new,
+    );
 
 class SigningService extends StateNotifier<SigningServiceState> {
   SigningService(this._ref) : super(const SigningServiceState()) {
@@ -81,9 +85,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
     final vtaDid = env.vtaDid;
     final vtaMediatorDid = env.vtaMediatorDid;
 
-    if (vtaBaseUrl.isEmpty ||
-        vtaDid.isEmpty ||
-        vtaMediatorDid.isEmpty) {
+    if (vtaBaseUrl.isEmpty || vtaDid.isEmpty || vtaMediatorDid.isEmpty) {
       _logger.info(
         'VTA not configured '
         '(VTA_BASE_URL / VTA_DID / VTA_MEDIATOR_DID missing), '
@@ -96,8 +98,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
     state = state.copyWith(status: SigningServiceStatus.connecting);
 
     try {
-      final secureStorage =
-          await _ref.read(secureStorageProvider.future);
+      final secureStorage = await _ref.read(secureStorageProvider.future);
       final mnemonic = await secureStorage.getMnemonic();
       if (mnemonic == null || mnemonic.isEmpty) {
         _logger.warning('No mnemonic available', name: _logKey);
@@ -124,10 +125,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
       final verificationMethod =
           '$holderDid#${holderDid.substring('did:key:'.length)}';
 
-      _logger.info(
-        'VTA holder DID (Ed25519): $holderDid',
-        name: _logKey,
-      );
+      _logger.info('VTA holder DID (Ed25519): $holderDid', name: _logKey);
 
       final vtaClient = VtaClient(baseUrl: vtaBaseUrl);
       final signer = AppVtaAuthSigner(
@@ -136,8 +134,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
         holderDid: holderDid,
         verificationMethod: verificationMethod,
       );
-      final protocol =
-          TrustTaskVtaAuthProtocol(signer: signer);
+      final protocol = TrustTaskVtaAuthProtocol(signer: signer);
       _authWorkflow = VtaAuthWorkflow(
         client: vtaClient,
         holderDid: holderDid,
@@ -147,10 +144,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
 
       _logger.info('Authenticating with VTA...', name: _logKey);
       final authResult = await _authWorkflow!.connect();
-      _logger.info(
-        'Authenticated, setting up mediator...',
-        name: _logKey,
-      );
+      _logger.info('Authenticated, setting up mediator...', name: _logKey);
 
       final mediatorDidDoc = DidPeer.resolve(vtaMediatorDid);
       final mediatorAccessToken = await MediatorAuthHelper.authenticate(
@@ -183,13 +177,9 @@ class SigningService extends StateNotifier<SigningServiceState> {
         expectedSenderDid: vtaDid,
       );
       await _mediatorSession!.connect();
-      _logger.info(
-        'Mediator session connected',
-        name: _logKey,
-      );
+      _logger.info('Mediator session connected', name: _logKey);
 
-      final approvalOp =
-          VtaStepUpApprovalOperation.forClient(
+      final approvalOp = VtaStepUpApprovalOperation.forClient(
         client: vtaClient,
         holderDid: holderDid,
         vtaDid: vtaDid,
@@ -198,18 +188,24 @@ class SigningService extends StateNotifier<SigningServiceState> {
       );
       _approvalOp = approvalOp;
 
-      _coordinator = VtaStepUpApprovalCoordinator(
-        mediatorSession: _mediatorSession!,
-        onApproveRequest: _handleApproveRequest,
-        approvalOperation: approvalOp,
-      );
-      await _coordinator!.start();
-
-      state = state.copyWith(
-        status: SigningServiceStatus.connected,
-      );
       _logger.info(
-        'Step-up coordinator started',
+        'VTA TOKEN: ${authResult.tokens.accessToken}',
+        name: _logKey,
+      );
+
+      // Coordinator disabled: approval is handled exclusively via the
+      // chat-item path which sends cierge/stepUpApproved back to the
+      // connector, triggering the agent retry.
+      // _coordinator = VtaStepUpApprovalCoordinator(
+      //   mediatorSession: _mediatorSession!,
+      //   onApproveRequest: _handleApproveRequest,
+      //   approvalOperation: approvalOp,
+      // );
+      // await _coordinator!.start();
+
+      state = state.copyWith(status: SigningServiceStatus.connected);
+      _logger.info(
+        'Signing service connected (chat-item approval only)',
         name: _logKey,
       );
     } catch (e, s) {
@@ -238,8 +234,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
 
     final completer = Completer<bool>();
     state = state.copyWith(
-      pendingApproval: () =>
-          PendingApproval(approveRequest, completer),
+      pendingApproval: () => PendingApproval(approveRequest, completer),
     );
 
     final approved = await completer.future;
@@ -295,7 +290,8 @@ class SigningService extends StateNotifier<SigningServiceState> {
       _logger.info('Relayed step-up approved and submitted', name: _logKey);
     } catch (e) {
       final msg = e.toString();
-      if (msg.contains('challenge_unknown') || msg.contains('challenge_expired')) {
+      if (msg.contains('challenge_unknown') ||
+          msg.contains('challenge_expired')) {
         _logger.info(
           'Relayed approval already consumed (likely approved via DIDComm coordinator): $msg',
           name: _logKey,
@@ -303,6 +299,84 @@ class SigningService extends StateNotifier<SigningServiceState> {
         return;
       }
       rethrow;
+    }
+
+    await _notifyAgentApproved(payload['sessionId'] as String?);
+  }
+
+  Future<void> _notifyAgentApproved(String? sessionId) async {
+    try {
+      final sdk = await _ref.read(meetingPlaceSdkProvider.future);
+      final env = _ref.read(environmentProvider);
+
+      final secureStorage = await _ref.read(secureStorageProvider.future);
+      final mnemonic = await secureStorage.getMnemonic();
+      if (mnemonic == null || mnemonic.isEmpty) {
+        _logger.warning('Cannot notify agent: no mnemonic', name: _logKey);
+        return;
+      }
+      final mnemonicHash = sha256.convert(utf8.encode(mnemonic)).toString();
+      final agentDid =
+          env.ciergeEventConfig[mnemonicHash]?['ciergeConnectorDid'] as String?;
+      if (agentDid == null || agentDid.isEmpty) {
+        _logger.warning(
+          'Cannot notify agent: no ciergeConnectorDid in config',
+          name: _logKey,
+        );
+        return;
+      }
+
+      final rootDid = sdk.rootDid;
+      final channel =
+          await sdk.getChannelByDid(agentDid) ??
+          await sdk.getChannelByOtherPartyPermanentDid(agentDid);
+      if (channel == null) {
+        _logger.warning(
+          'Cannot notify agent: no channel found for $agentDid',
+          name: _logKey,
+        );
+        return;
+      }
+      final mediatorDid = channel.mediatorDid;
+
+      final body = {
+        'text': jsonEncode({
+          'type': 'cierge/stepUpApproved',
+          'sessionId': sessionId,
+        }),
+        'seq_no': 0,
+        'timestamp': DateTime.now().toUtc().toIso8601String(),
+      };
+
+      final message = DidCommOutgoingMessage(
+        senderDid: rootDid,
+        recipientDid: agentDid,
+        mediatorDid: mediatorDid,
+        payload: PlainTextMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          type: Uri.parse(
+            'https://affinidi.com/didcomm/protocols/meeting-place-chat/1.0/message',
+          ),
+          from: rootDid,
+          to: [agentDid],
+          body: body,
+          createdTime: DateTime.now().toUtc(),
+        ),
+      );
+
+      await sdk.sendMessage(message);
+      _logger.info(
+        'Notified agent via DIDComm: sessionId=$sessionId '
+        'agentDid=$agentDid',
+        name: _logKey,
+      );
+    } catch (e, s) {
+      _logger.error(
+        'Failed to notify agent of approval',
+        error: e,
+        stackTrace: s,
+        name: _logKey,
+      );
     }
   }
 

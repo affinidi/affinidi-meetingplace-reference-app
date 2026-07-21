@@ -170,16 +170,6 @@ class _StepUpApproveRequestChatItemState
     try {
       final signingService = ref.read(signingServiceProvider.notifier);
       await signingService.handleRelayedApproveRequest(approveRequest);
-      // Notify the connector that approval succeeded so the agent can retry.
-      final controller = ref.read(
-        chatScreenControllerProvider(widget.contactId).notifier,
-      );
-      final sessionId = (approveRequest['payload']
-              as Map<String, dynamic>?)?['sessionId'] ??
-          approveRequest['sessionId'];
-      await controller.sendMessageDirect(
-        '{"type":"cierge/stepUpApproved","sessionId":"$sessionId"}',
-      );
       if (mounted) setState(() { _result = 'Approved'; _processing = false; updateKeepAlive(); });
     } catch (e) {
       if (mounted) setState(() { _result = 'Failed: $e'; _processing = false; updateKeepAlive(); });
