@@ -49,7 +49,10 @@ class _FocusedParticipantStage extends StatelessWidget {
         Positioned(
           top: 16,
           left: 16,
-          child: _MuteBadge(isMuted: participant.hasAudio == false),
+          child: Visibility(
+            visible: participant.hasAudio == false,
+            child: const CallParticipantMuteBadge(),
+          ),
         ),
         if (presentation.showOverlayLabel)
           Positioned(

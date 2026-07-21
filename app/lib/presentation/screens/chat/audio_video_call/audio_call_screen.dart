@@ -382,6 +382,9 @@ class _SinglePeerGroupAudioParticipant extends ConsumerWidget {
     required this.displayName,
   });
 
+  static const double _avatarDiameter = 192;
+  static const double _muteBadgeSize = 36;
+
   final AudioVideoCallParticipant participant;
   final ContactCard? contactCard;
   final String displayName;
@@ -413,30 +416,45 @@ class _SinglePeerGroupAudioParticipant extends ConsumerWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
       decoration: BoxDecoration(
         color: colors.grey900,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: colorScheme.outline.withValues(alpha: 0.24)),
       ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ProfileCircleAvatar(radius: 52, image: image),
-            if (displayName.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                displayName,
-                style: textTheme.titleMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w500,
-                ),
-                textAlign: TextAlign.center,
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ProfileCircleAvatar(
+                    radius: _avatarDiameter / 2,
+                    image: image,
+                  ),
+                  if (displayName.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      displayName,
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ],
               ),
-            ],
-          ],
-        ),
+            ),
+          ),
+          if (participant.hasAudio == false)
+            const Positioned(
+              top: 16,
+              left: 16,
+              child: CallParticipantMuteBadge(size: _muteBadgeSize),
+            ),
+        ],
       ),
     );
   }

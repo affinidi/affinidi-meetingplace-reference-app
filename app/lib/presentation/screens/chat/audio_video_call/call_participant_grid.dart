@@ -72,6 +72,12 @@ class _CallParticipantTile extends ConsumerWidget {
               )
             else
               Center(child: ProfileCircleAvatar(radius: 36, image: image)),
+            if (participant.hasAudio == false)
+              const Positioned(
+                top: 8,
+                left: 8,
+                child: CallParticipantMuteBadge(size: 24),
+              ),
             if (displayName.isNotEmpty)
               Positioned(
                 bottom: 8,

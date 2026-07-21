@@ -149,8 +149,9 @@ class _ParticipantTile extends StatelessWidget {
                 Positioned(
                   top: 8,
                   left: 8,
-                  child: _MuteBadge(
-                    isMuted: entry.participant.hasAudio == false,
+                  child: Visibility(
+                    visible: entry.participant.hasAudio == false,
+                    child: const CallParticipantMuteBadge(),
                   ),
                 ),
                 if (presentation.showOverlayLabel)
@@ -286,31 +287,6 @@ class _ParticipantVideoOrAvatar extends ConsumerWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class _MuteBadge extends StatelessWidget {
-  const _MuteBadge({required this.isMuted});
-
-  final bool isMuted;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isMuted) return const SizedBox.shrink();
-
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        Icons.mic_off,
-        size: 14,
-        color: context.customColors.pureWhite,
       ),
     );
   }

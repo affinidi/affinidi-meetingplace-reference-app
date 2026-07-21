@@ -54,6 +54,16 @@ void main() {
       );
 
       expect(find.byIcon(Icons.mic_off), findsOneWidget);
+      final badgeContainer = tester.widget<Container>(
+        find
+            .ancestor(
+              of: find.byIcon(Icons.mic_off),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      final decoration = badgeContainer.decoration as BoxDecoration?;
+      expect(decoration?.shape, BoxShape.circle);
     });
 
     testWidgets('does not show mic_off icon when not muted', (

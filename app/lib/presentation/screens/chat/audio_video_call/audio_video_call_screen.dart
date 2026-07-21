@@ -16,6 +16,7 @@ import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../../presentation/widgets/action_button.dart';
 import '../../../../presentation/widgets/call/call_overlay_widgets.dart';
+import '../../../../presentation/widgets/call/call_participant_mute_badge.dart';
 import '../../../../presentation/widgets/call/call_top_bar_widget.dart';
 import '../../../../presentation/widgets/call/video_call_background.dart';
 import '../../../../presentation/widgets/call/video_call_peer_placeholder.dart';
