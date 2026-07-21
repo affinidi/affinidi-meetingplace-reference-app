@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
 
+import '../../../../application/services/context_routing_service/context_routing_service.dart';
+import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/extensions/widget_ref_extensions.dart';
@@ -345,6 +348,35 @@ class _ActionBar extends ConsumerWidget {
     final hasErrors = ref.watch(
       provider.select((state) => state.error != null),
     );
+    final offer = ref.watch(provider.select((state) => state.offer));
+
+    Future<AgentContext?> selectAgentContext() {
+      return showDialog<AgentContext>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Select agent context'),
+          content: const Text(
+            'Choose which Personal AI context this connection should use.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(AgentContext.work),
+              child: Text(context.l10n.agentContextWorkAiLabel),
+            ),
+            TextButton(
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(AgentContext.personal),
+              child: Text(context.l10n.agentContextPersonalAiLabel),
+            ),
+          ],
+        ),
+      );
+    }
 
     void clearSelectedOffer() async {
       if (!context.mounted) return;
@@ -357,7 +389,16 @@ class _ActionBar extends ConsumerWidget {
     void acceptOffer() async {
       if (!context.mounted) return;
 
-      await controller.acceptOffer();
+      AgentContext? agentContext;
+      if (offer != null &&
+          offer.type == ConnectionOfferType.meetingPlaceInvitation &&
+          offer.contactCard.type != 'ai-agent' &&
+          ref.read(environmentProvider).personalAiEnabled) {
+        agentContext = await selectAgentContext();
+        if (agentContext == null) return;
+      }
+
+      await controller.acceptOffer(agentContext: agentContext);
     }
 
     return Padding(

@@ -140,16 +140,6 @@ class _ChatTextEntry extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 6, bottom: 6),
-              child: Text(
-                '''Signature context: ${_contextDisplayName(context, activeContext)}''',
-                style: context.textTheme.labelSmall?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
             _VoiceRecorder(
               controller: controller,
               shouldDisable: shouldDisable,

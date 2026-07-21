@@ -33,6 +33,15 @@ final Future<void> _vodozemacInit = fvod.init();
 Duration? _disableRetry(int retryCount, Object error) => null;
 
 @visibleForTesting
+String? normalizeCiergeConnectorDid(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) return null;
+  if (trimmed.startsWith('did:')) return trimmed;
+  if (trimmed.startsWith('z')) return 'did:key:$trimmed';
+  return trimmed;
+}
+
+@visibleForTesting
 final vodozemacInitProvider = FutureProvider<void>(
   (ref) => _vodozemacInit,
   name: 'vodozemacInitProvider',
@@ -88,25 +97,37 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
       logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
       final mnemonicHash = sha256.convert(utf8.encode(mnemonic)).toString();
-      final eventCfg = ref.read(environmentProvider).ciergeEventConfig;
+      final environment = ref.read(environmentProvider);
+      final eventCfg = environment.ciergeEventConfig;
       final ciergeConnectorDid =
           eventCfg[mnemonicHash]?['ciergeConnectorDid'] as String?;
       final agentDidOverride = const String.fromEnvironment(
         'MPX_AGENT_DID',
         defaultValue: '',
       ).trim();
-      final configuredAgentDid = agentDidOverride.isNotEmpty
-          ? agentDidOverride
-          : ciergeConnectorDid;
+      final resolvedAgentDid = normalizeCiergeConnectorDid(
+        agentDidOverride.isNotEmpty ? agentDidOverride : ciergeConnectorDid,
+      );
 
       if (agentDidOverride.isNotEmpty) {
         logger.info(
           'Using MPX agent DID override: $agentDidOverride',
           name: logKey,
         );
-      } else if (ciergeConnectorDid != null) {
+      } else if (resolvedAgentDid != null) {
         logger.info(
-          'Using mnemonic-mapped Cierge connector DID: $ciergeConnectorDid',
+          'Using mnemonic-mapped Cierge connector DID: $resolvedAgentDid',
+          name: logKey,
+        );
+      }
+
+      if (environment.personalAiEnabled &&
+          eventCfg.isNotEmpty &&
+          resolvedAgentDid == null) {
+        logger.warning(
+          'Personal AI is enabled but WALLET_CONFIG has no non-empty '
+          'ciergeConnectorDid for mnemonic hash $mnemonicHash. '
+          'Agent channel identity handshake is disabled for this wallet.',
           name: logKey,
         );
       }
@@ -153,8 +174,8 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
         ],
         // #onBuildAttachments: onBuildAttachments,
       };
-      if (configuredAgentDid != null) {
-        sdkOptionsNamed[#agentDid] = configuredAgentDid;
+      if (resolvedAgentDid != null) {
+        sdkOptionsNamed[#agentDid] = resolvedAgentDid;
       }
 
       MeetingPlaceMatrixSdkOptions sdkOptions;
@@ -166,9 +187,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
                   sdkOptionsNamed,
                 )
                 as MeetingPlaceMatrixSdkOptions;
-        if (configuredAgentDid != null) {
+        if (resolvedAgentDid != null) {
           logger.info(
-            'MPX agent DID override applied to SDK options',
+            'MPX agent DID override applied to SDK options '
+            '(source=WALLET_CONFIG)',
             name: logKey,
           );
         }
@@ -176,10 +198,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
         // Compatibility fallback for SDK builds that do not yet expose
         // `agentDid`.
         sdkOptionsNamed.remove(#agentDid);
-        if (configuredAgentDid != null) {
+        if (resolvedAgentDid != null) {
           logger.warning(
-            'MPX_AGENT_DID was provided but current SDK options do '
-            'not accept agentDid; override ignored',
+            'Agent DID override was provided (WALLET_CONFIG) but '
+            'current SDK options do not accept agentDid; override ignored',
             name: logKey,
           );
         }

@@ -71,6 +71,7 @@ import '../../widgets/bottom_sheet_menu.dart';
 import '../../widgets/images/default_profile_image.dart';
 import '../../widgets/info_banner.dart';
 import '../../widgets/profile_circle_avatar.dart';
+import '../personal_agent/personal_agent_screen_controller.dart';
 import 'audio_video_call/audio_video_call_screen.dart';
 import 'audio_video_call/rules/call_chat_item_rules.dart';
 import 'chat_activity_progress_indicator.dart';
@@ -127,9 +128,7 @@ class ChatScreen extends HookConsumerWidget {
     final l10n = context.l10n;
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
-    final contextRoutingState = ref.watch<ContextRoutingState>(
-      contextRoutingServiceProvider,
-    );
+    final contextRoutingState = ref.watch(contextRoutingServiceProvider);
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     final isAudioVideoCallsEnabled = ref
         .read(environmentProvider)
@@ -200,49 +199,73 @@ class ChatScreen extends HookConsumerWidget {
       },
     );
 
-    Future<void> uploadContextFor(AgentContext target) async {
-      final filePicker = ref.read(filePickerPlatformProvider);
-      final picked = await filePicker.pickFiles(
+    Future<({String fileName, String content})?> pickContextFile() async {
+      final picker = ref.read(filePickerPlatformProvider);
+      final picked = await picker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['txt'],
+        allowedExtensions: const ['txt'],
       );
-      if (picked == null || picked.files.isEmpty || !context.mounted) return;
+      if (picked == null || picked.files.isEmpty) {
+        return null;
+      }
+
       final file = picked.files.first;
       final bytes = await file.readAsBytes();
-      if (bytes.isEmpty) return;
+      if (bytes.isEmpty) {
+        return null;
+      }
 
-      await ref
-          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
-          .markContextUploaded(context: target, fileName: file.name);
-
-      if (!context.mounted) return;
-      final label = _contextDisplayName(context, target);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.chatContextUploaded(label, file.name))),
-      );
+      return (fileName: file.name, content: String.fromCharCodes(bytes));
     }
 
     Future<void> useContextForChannel(AgentContext target) async {
-      if (!contextRoutingState.isContextUploaded(target)) {
-        if (!context.mounted) return;
-        final requiredFile = target == AgentContext.work
-            ? 'work-context.txt'
-            : 'personal-context.txt';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.chatUploadFileFirst(requiredFile))),
-        );
-        return;
-      }
-
       await ref
           .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
           .assignContactContext(_contactId, target);
 
       if (!context.mounted) return;
+      final label = target == AgentContext.work
+          ? l10n.agentContextWorkAiLabel
+          : l10n.agentContextPersonalAiLabel;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.chatChannelUsesContext(label))),
+      );
+    }
+
+    Future<void> uploadContextFor(AgentContext target) async {
+      final pickedFile = await pickContextFile();
+      if (pickedFile == null) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.personalAgentNoContextCreated)),
+        );
+        return;
+      }
+
+      final outcome = await ref
+          .read(personalAgentScreenControllerProvider.notifier)
+          .uploadRoutingContext(
+            target,
+            fileName: pickedFile.fileName,
+            content: pickedFile.content,
+          );
+
+      if (!context.mounted) return;
+      if (!outcome.uploaded) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.personalAgentNoContextCreated)),
+        );
+        return;
+      }
+
+      final label = target == AgentContext.work
+          ? l10n.agentContextWorkAiLabel
+          : l10n.agentContextPersonalAiLabel;
+      final uploadedFileName = outcome.fileName ?? pickedFile.fileName;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            l10n.chatChannelUsesContext(_contextDisplayName(context, target)),
+            l10n.personalAgentContextUploadedSnackBar(label, uploadedFileName),
           ),
         ),
       );
@@ -429,11 +452,4 @@ class _LoadingSection extends StatelessWidget {
       ),
     );
   }
-}
-
-String _contextDisplayName(BuildContext context, AgentContext value) {
-  final l10n = context.l10n;
-  return value == AgentContext.work
-      ? l10n.agentContextWorkAiLabel
-      : l10n.agentContextPersonalAiLabel;
 }

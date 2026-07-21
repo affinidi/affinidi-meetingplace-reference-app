@@ -11,6 +11,7 @@ class PublishOfferRequest {
     this.maxUsages,
     this.score,
     this.customPhrase,
+    this.contextKey,
   });
 
   final String headline;
@@ -21,5 +22,6 @@ class PublishOfferRequest {
   final int? maxUsages;
   final int? score;
   final String? customPhrase;
+  final String? contextKey;
   final ChannelTransport transport;
 }
