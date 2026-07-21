@@ -13,7 +13,7 @@ dependencies:
     sdk: flutter
   flutter_riverpod: ^3.0.3
   flutter_webrtc: ^1.4.0
-  livekit_client: ^2.7.0
+  livekit_client: ^2.8.1
   matrix: ^8.1.0
   meeting_place_chat: ^0.0.1-dev.53
   meeting_place_core: ^0.0.1-dev.46

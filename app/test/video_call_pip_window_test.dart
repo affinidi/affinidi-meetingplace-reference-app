@@ -8,8 +8,8 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_pip_window.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_pip_window.dart';
 
 import 'fakes/fake_identities.dart';
 

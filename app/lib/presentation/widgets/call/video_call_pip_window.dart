@@ -5,16 +5,13 @@ import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart
     show AudioVideoCallView;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
-import '../../application/services/identities_service/identities_service.dart';
-import '../../infrastructure/extensions/build_context_extensions.dart';
-import '../../infrastructure/extensions/contact_card_extensions.dart';
-import '../../infrastructure/providers/cache_manager_provider.dart';
-import '../widgets/profile_circle_avatar.dart';
+import '../../../application/services/identities_service/identities_service.dart';
+import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../../infrastructure/providers/cache_manager_provider.dart';
+import '../profile_circle_avatar.dart';
 import 'video_call_pip_overlay.dart' show VideoCallPiPOverlay;
 
-/// Last snapped position of the PiP window — persisted across widget
-/// rebuilds so the position is restored when switching between the in-call
-/// screen and [VideoCallPiPOverlay].
 Offset? _lastPiPPosition;
 
 /// Draggable self-camera PiP window shared between the in-call screen and
@@ -68,7 +65,7 @@ class VideoCallPiPWindow extends HookConsumerWidget {
   /// Tap callback. Null absorbs the tap without side-effects.
   final VoidCallback? onTap;
 
-  /// Extra pixels added equally to width and height — used for the
+  /// Extra pixels added equally to width and height. Used for the
   /// first-tap expand animation in [VideoCallPiPOverlay].
   final double additionalSize;
 

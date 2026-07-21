@@ -6,122 +6,48 @@ part of 'audio_video_call_screen.dart';
 class _CallTopBar extends ConsumerWidget {
   const _CallTopBar({required this.contactId, required this.onMinimize})
     : trailingIcon = null,
-      onTrailingPressed = null;
+      onTrailingPressed = null,
+      trailing = null,
+      crossAxisAlignment = CrossAxisAlignment.center,
+      centerPadding = EdgeInsets.zero;
 
   const _CallTopBar.group({required this.contactId, required this.onMinimize})
     : trailingIcon = Icons.people_alt_outlined,
-      onTrailingPressed = _noop;
+      onTrailingPressed = _noopPressed,
+      trailing = null,
+      crossAxisAlignment = CrossAxisAlignment.center,
+      centerPadding = EdgeInsets.zero;
 
   const _CallTopBar.cameraSwitch({
     required this.contactId,
     required this.onMinimize,
     required VoidCallback onSwitchCamera,
   }) : trailingIcon = Icons.flip_camera_ios,
-       onTrailingPressed = onSwitchCamera;
+       onTrailingPressed = onSwitchCamera,
+       trailing = null,
+       crossAxisAlignment = CrossAxisAlignment.center,
+       centerPadding = EdgeInsets.zero;
 
   final String contactId;
   final VoidCallback onMinimize;
   final IconData? trailingIcon;
   final VoidCallback? onTrailingPressed;
+  final Widget? trailing;
+  final CrossAxisAlignment crossAxisAlignment;
+  final EdgeInsetsGeometry centerPadding;
 
-  static void _noop() {}
+  static void _noopPressed() {}
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = audioVideoCallScreenControllerProvider(contactId);
-    final peerName = ref.watch(provider.select((s) => s.peerName));
-    final phase = ref.watch(
-      provider.select(
-        (s) => resolveCallUiPhase(status: s.status, hasHadPeer: s.hasHadPeer),
-      ),
-    );
-    final callDurationSeconds = ref.watch(
-      provider.select((s) => s.callDurationSeconds),
-    );
-    final isRinging = phase != CallUiPhase.inCall;
-
-    final colorScheme = context.colorScheme;
-    final textTheme = context.textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          _CallTopBarActionButton(
-            icon: Icons.close_fullscreen,
-            onPressed: onMinimize,
-          ),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  peerName,
-                  style: textTheme.headlineMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  switch (phase) {
-                    CallUiPhase.inCall => Duration(
-                      seconds: callDurationSeconds,
-                    ).label,
-                    CallUiPhase.ringing => context.l10n.videoCallRinging,
-                    CallUiPhase.calling ||
-                    CallUiPhase.ended => context.l10n.videoCallCalling,
-                  },
-                  style: textTheme.titleMedium?.copyWith(
-                    color: isRinging
-                        ? colorScheme.onSurface.withAlpha(153)
-                        : colorScheme.onSurface,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          if (trailingIcon != null && onTrailingPressed != null)
-            _CallTopBarActionButton(
-              icon: trailingIcon!,
-              onPressed: onTrailingPressed!,
-            )
-          else
-            const SizedBox(width: 48, height: 48),
-        ],
-      ),
-    );
-  }
-}
-
-class _CallTopBarActionButton extends StatelessWidget {
-  const _CallTopBarActionButton({required this.icon, required this.onPressed});
-
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.customColors;
-    final colorScheme = context.colorScheme;
-
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: colors.darkGrey,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, color: colorScheme.onSurface, size: 22),
-      ),
+    return CallTopBarWidget(
+      contactId: contactId,
+      onMinimize: onMinimize,
+      trailingIcon: trailingIcon,
+      onTrailingPressed: onTrailingPressed,
+      trailing: trailing,
+      crossAxisAlignment: crossAxisAlignment,
+      centerPadding: centerPadding,
     );
   }
 }
@@ -134,16 +60,7 @@ class _CallTopBarOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 0,
-      left: 0,
-      right: 0,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 100),
-        opacity: visible ? 1.0 : 0.0,
-        child: IgnorePointer(ignoring: !visible, child: child),
-      ),
-    );
+    return CallTopBarOverlay(visible: visible, child: child);
   }
 }
 

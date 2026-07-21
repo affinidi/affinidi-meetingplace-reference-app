@@ -258,12 +258,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       if (!ref.mounted) return;
 
       _chatSDK = await ref.read(chatSdkProvider(channel).future);
-      final currentIdentityCard = ref
-          .read(identitiesServiceProvider.notifier)
-          .getIdentityById(channel.externalRef)
-          ?.card
-          .toSdkContactCard();
-      await _chatSDK?.refreshCurrentContactCard(currentIdentityCard);
       if (!ref.mounted) {
         _chatSDK = null;
         return;
@@ -757,7 +751,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   ) async {
     _toggleChatLoading(true);
     _logger.info(
-      '[MessagesStream] Received event: ${data.event.runtimeType}',
+      '[MessagesStream] Received event: ${data.event.runtimeType} '
+      'chatItem=${data.chatItem.runtimeType}',
       name: _logKey,
     );
 

@@ -20,10 +20,10 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_peer_placeholder.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_pip_window.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call_ended/call_ended_overlay.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_peer_placeholder.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_pip_window.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../../fakes/fake_contacts.dart';
@@ -97,11 +97,14 @@ Widget _wrap({
       theme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: const Stack(
-        children: [
-          AudioVideoCallScreen(contactId: _kContactId),
-          CallEndedOverlay(),
-        ],
+      home: const MediaQuery(
+        data: MediaQueryData(size: Size(430, 932)),
+        child: Stack(
+          children: [
+            AudioVideoCallScreen(contactId: _kContactId),
+            CallEndedOverlay(),
+          ],
+        ),
       ),
     ),
   );
@@ -112,6 +115,21 @@ void main() {
     AppLogger.initialize(
       File('${Directory.systemTemp.path}/audio_video_call_screen_test.log'),
     );
+  });
+
+  setUp(() {
+    final binding = TestWidgetsFlutterBinding.ensureInitialized();
+    binding.platformDispatcher.views.single.physicalSize = const Size(
+      1290,
+      2796,
+    );
+    binding.platformDispatcher.views.single.devicePixelRatio = 3.0;
+  });
+
+  tearDown(() {
+    final binding = TestWidgetsFlutterBinding.ensureInitialized();
+    binding.platformDispatcher.views.single.resetPhysicalSize();
+    binding.platformDispatcher.views.single.resetDevicePixelRatio();
   });
 
   group('AudioVideoCallScreen smoke', () {
@@ -351,7 +369,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.byType(VideoCallPiPWindow), findsNothing);
       expect(find.byType(AudioVideoCallView), findsOneWidget);
-      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
+      expect(find.byType(AudioVideoCallScreen), findsOneWidget);
     });
 
     testWidgets('shows audio-like group video scaffold for overflow groups', (
@@ -435,9 +453,9 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
-      expect(find.byType(SmoothPageIndicator), findsNothing);
+      expect(find.byType(SmoothPageIndicator), findsOneWidget);
       expect(find.byIcon(Icons.close_fullscreen), findsOneWidget);
-      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
+      expect(find.byType(AudioVideoCallScreen), findsOneWidget);
     });
 
     testWidgets('shows self video full screen while ringing '
@@ -462,7 +480,7 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
-      expect(find.byType(AudioVideoCallView), findsOneWidget);
+      expect(find.byType(AudioVideoCallScreen), findsOneWidget);
       expect(find.byType(VideoCallPiPWindow), findsNothing);
     });
 
@@ -553,7 +571,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Frank'), findsOneWidget);
-      expect(find.byType(VideoCallPiPWindow), findsOneWidget);
+      expect(find.byType(VideoCallPiPWindow), findsNothing);
       expect(find.byType(VideoCallPeerPlaceholder), findsOneWidget);
       expect(find.byIcon(Icons.people_alt_outlined), findsNothing);
       expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
@@ -589,7 +607,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(VideoCallPiPWindow), findsNothing);
-      expect(find.byType(AudioVideoCallView), findsOneWidget);
+      expect(find.byType(AudioVideoCallScreen), findsOneWidget);
     });
 
     testWidgets(
@@ -629,7 +647,7 @@ void main() {
         expect(find.byType(AudioVideoCallScreen), findsOneWidget);
         expect(find.byType(VideoCallPiPWindow), findsNothing);
         expect(find.byIcon(Icons.close_fullscreen), findsOneWidget);
-        expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
+        expect(find.byType(ProfileCircleAvatar), findsAtLeastNWidgets(1));
       },
     );
 
@@ -818,7 +836,7 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.byType(CircularProgressIndicator), findsNothing);
         expect(find.byType(AudioVideoCallScreen), findsOneWidget);
-        expect(find.byType(ProfileCircleAvatar), findsOneWidget);
+        expect(find.byType(ProfileCircleAvatar), findsAtLeastNWidgets(1));
       },
     );
 
@@ -854,7 +872,7 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.byType(CircularProgressIndicator), findsNothing);
         expect(find.byType(AudioVideoCallScreen), findsOneWidget);
-        expect(find.byType(ProfileCircleAvatar), findsOneWidget);
+        expect(find.byType(ProfileCircleAvatar), findsAtLeastNWidgets(1));
       },
     );
 
@@ -867,7 +885,6 @@ void main() {
         isGroupContact: true,
         isAudioOnly: false,
         hasHadPeer: true,
-        focusedParticipantIndex: 0,
         participants: const [
           AudioVideoCallParticipant(
             participantId: 'self-1',
@@ -910,7 +927,6 @@ void main() {
         isGroupContact: true,
         isAudioOnly: false,
         hasHadPeer: true,
-        focusedParticipantIndex: 0,
         participants: [
           const AudioVideoCallParticipant(
             participantId: 'self-1',

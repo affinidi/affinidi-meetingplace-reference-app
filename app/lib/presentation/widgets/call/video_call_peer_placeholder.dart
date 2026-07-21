@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../application/services/contacts_service/contacts_service.dart';
-import '../../application/services/identities_service/identities_service.dart';
-import '../../infrastructure/extensions/build_context_extensions.dart';
-import '../../infrastructure/extensions/contact_card_extensions.dart';
-import '../../infrastructure/providers/cache_manager_provider.dart';
-import 'profile_circle_avatar.dart';
+import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/identities_service/identities_service.dart';
+import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../../infrastructure/providers/cache_manager_provider.dart';
+import '../profile_circle_avatar.dart';
 
 /// Avatar placeholder shown full-screen behind a 1:1 video call when the
 /// peer has no active video track (camera turned off mid-call, or the

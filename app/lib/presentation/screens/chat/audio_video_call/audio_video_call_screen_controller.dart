@@ -298,9 +298,12 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
   /// Sets the participant displayed full-screen in focused layout.
   /// Pass null to return to the grid layout.
-  void setFocusedParticipant(int? index) {
-    _logger.info('setFocusedParticipant: index=$index', name: _logKey);
-    state = state.copyWith(focusedParticipantIndex: index);
+  void setFocusedParticipant(String? participantId) {
+    _logger.info(
+      'setFocusedParticipant: participantId=$participantId',
+      name: _logKey,
+    );
+    state = state.copyWith(focusedParticipantId: participantId);
   }
 
   /// Toggles the floating mini-grid between collapsed and expanded.

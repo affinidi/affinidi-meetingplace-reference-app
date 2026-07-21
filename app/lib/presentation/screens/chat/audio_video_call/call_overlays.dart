@@ -51,19 +51,10 @@ class _AnimatedControlsOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 0,
-      child: AnimatedSlide(
-        duration: duration,
-        offset: visible ? Offset.zero : const Offset(0, 1),
-        child: AnimatedOpacity(
-          duration: duration,
-          opacity: visible ? 1.0 : 0.0,
-          child: child,
-        ),
-      ),
+    return CallControlsOverlay(
+      visible: visible,
+      duration: duration,
+      child: child,
     );
   }
 }
@@ -80,49 +71,6 @@ class _ControlsOverlayContent extends StatelessWidget {
       speaker: controls.speaker,
       camera: controls.camera,
       onEndCall: controls.onEndCall,
-    );
-  }
-}
-
-class _InCallMuteButton extends StatelessWidget {
-  const _InCallMuteButton({
-    required this.isMicEnabled,
-    required this.isPermissionError,
-    required this.onTap,
-  });
-
-  final bool isMicEnabled;
-  final bool isPermissionError;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.customColors;
-
-    return Positioned(
-      top: 10,
-      left: 10,
-      child: Opacity(
-        opacity: isPermissionError ? 0.4 : 1.0,
-        child: GestureDetector(
-          onTap: isPermissionError ? null : onTap,
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: isMicEnabled
-                  ? colors.darkGrey.withValues(alpha: 0.75)
-                  : colors.pureWhite,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isMicEnabled ? Icons.mic : Icons.mic_off,
-              color: isMicEnabled ? colors.pureWhite : colors.rose,
-              size: 16,
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

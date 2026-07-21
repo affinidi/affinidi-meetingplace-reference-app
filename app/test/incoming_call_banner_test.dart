@@ -69,7 +69,6 @@ IncomingAudioVideoCallEvent _event({
   callId: callId,
   callerPermanentChannelDid: callerPermanentChannelDid,
   otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
-  invitedAt: DateTime.utc(2026),
   mediaType: isAudioOnly ? CallMediaType.audio : CallMediaType.video,
   invitedAt: DateTime.now(),
 );

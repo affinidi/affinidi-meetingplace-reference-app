@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../domain/models/contact_card/contact_card.dart';
+import 'rules/group_video_call_view_rules.dart';
 
 part 'audio_video_call_screen_state.freezed.dart';
 
@@ -58,10 +59,35 @@ abstract class AudioVideoCallScreenState with _$AudioVideoCallScreenState {
     CallParticipantChangeEvent? participantEvent,
     CallActionFailureEvent? actionFailure,
     @Default(true) bool showControlsBar,
-    int? focusedParticipantIndex,
+    String? focusedParticipantId,
     @Default(false) bool miniGridExpanded,
     @Default(false) bool peerIsCallingBack,
   }) = _AudioVideoCallScreenState;
+
+  /// Resolves the current group video call data from controller-owned state.
+  ///
+  /// Includes the local preview fallback so widgets can render a stable self
+  /// stage before LiveKit reports participants.
+  GroupVideoCallData groupVideoCallData({required String youLabel}) {
+    final resolvedParticipants = participants.isEmpty
+        ? [
+            AudioVideoCallParticipant(
+              participantId: 'local-preview',
+              isSelf: true,
+              hasVideo: isCameraEnabled,
+              hasAudio: true,
+              isSpeaking: false,
+            ),
+          ]
+        : participants;
+
+    return resolveGroupVideoCallView(
+      participants: resolvedParticipants,
+      focusedParticipantId: focusedParticipantId,
+      memberContactCards: memberContactCards,
+      youLabel: youLabel,
+    );
+  }
 
   bool get isVisible =>
       status != AudioVideoCallStatus.idle &&

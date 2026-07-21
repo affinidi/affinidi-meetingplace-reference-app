@@ -298,7 +298,7 @@ class _CallMiniGridTileWrap extends StatelessWidget {
                   isAudioOnly: isAudioOnly,
                   displayName: displayNames[i],
                   borderRadius: 8,
-                  contactCard: _contactCardFor(
+                  contactCard: resolveCallParticipantContactCard(
                     participants[i],
                     memberContactCards: memberContactCards,
                   ),

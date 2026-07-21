@@ -13,9 +13,9 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_peer_placeholder.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_pip_overlay.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_peer_placeholder.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_pip_overlay.dart';
 
 import 'fakes/fake_active_call_controller.dart';
 import 'fakes/fake_audio_video_call_screen_controller.dart';

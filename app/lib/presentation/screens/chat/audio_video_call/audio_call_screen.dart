@@ -14,10 +14,8 @@ class _AudioCallViewData {
     required this.contactId,
     required this.peerAvatarImage,
     required this.isGroupContact,
-    required this.participants,
     required this.session,
-    required this.peerName,
-    required this.memberContactCards,
+    required this.audioCallData,
     required this.showControls,
     required this.controls,
   });
@@ -25,10 +23,8 @@ class _AudioCallViewData {
   final String contactId;
   final ImageProvider<Object>? peerAvatarImage;
   final bool isGroupContact;
-  final List<AudioVideoCallParticipant> participants;
   final AudioVideoCallSession? session;
-  final String peerName;
-  final Map<String, ContactCard> memberContactCards;
+  final GroupAudioCallData audioCallData;
   final bool showControls;
   final _CallControls controls;
 }
@@ -144,10 +140,13 @@ class _AudioCallScreen extends ConsumerWidget {
         contactId: contactId,
         peerAvatarImage: effectivePeerAvatarImage,
         isGroupContact: isGroupContact,
-        participants: participants,
         session: session,
-        peerName: peerName,
-        memberContactCards: memberContactCards,
+        audioCallData: resolveGroupAudioCallView(
+          participants: participants,
+          memberContactCards: memberContactCards,
+          youLabel: context.l10n.videoCallYou,
+          peerName: peerName,
+        ),
         showControls: showControls,
         controls: controls,
       ),
@@ -256,10 +255,8 @@ class _GroupAudioCallScaffold extends StatelessWidget {
                     context: context,
                     removeTop: true,
                     child: _GroupAudioCallContent(
-                      participants: viewData.participants,
+                      view: viewData.audioCallData,
                       session: viewData.session,
-                      peerName: viewData.peerName,
-                      memberContactCards: viewData.memberContactCards,
                     ),
                   ),
                   _AnimatedControlsOverlay(
@@ -277,18 +274,11 @@ class _GroupAudioCallScaffold extends StatelessWidget {
   }
 }
 
-class _GroupAudioCallContent extends ConsumerWidget {
-  const _GroupAudioCallContent({
-    required this.participants,
-    required this.session,
-    required this.peerName,
-    required this.memberContactCards,
-  });
+class _GroupAudioCallContent extends StatelessWidget {
+  const _GroupAudioCallContent({required this.view, required this.session});
 
-  final List<AudioVideoCallParticipant> participants;
+  final GroupAudioCallData view;
   final AudioVideoCallSession? session;
-  final String peerName;
-  final Map<String, ContactCard> memberContactCards;
 
   double _bottomContentInset(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
@@ -296,35 +286,24 @@ class _GroupAudioCallContent extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final peerParticipants = participants.where((p) => !p.isSelf).toList();
-    final peerCount = peerParticipants.length;
+  Widget build(BuildContext context) {
     final bottomInset = _bottomContentInset(context);
 
-    if (peerCount == 0) {
+    if (view.peerCount == 0) {
       return Padding(
         padding: EdgeInsets.only(bottom: bottomInset),
         child: const Center(child: _CallPersonAvatar(isGroup: true)),
       );
     }
 
-    if (peerCount == 1) {
-      final participant = peerParticipants.first;
+    final singlePeerTile = view.singlePeerTile;
+    if (singlePeerTile != null) {
       return Padding(
         padding: EdgeInsets.only(top: 16, bottom: bottomInset),
         child: _SinglePeerGroupAudioParticipant(
-          participant: participant,
-          contactCard: _contactCardFor(
-            participant,
-            memberContactCards: memberContactCards,
-          ),
-          displayName: _displayNameFor(
-            participant,
-            youLabel: context.l10n.videoCallYou,
-            peerName: peerName,
-            peerCount: peerCount,
-            memberContactCards: memberContactCards,
-          ),
+          participant: singlePeerTile.participant,
+          contactCard: singlePeerTile.contactCard,
+          displayName: singlePeerTile.displayName,
         ),
       );
     }
@@ -336,24 +315,15 @@ class _GroupAudioCallContent extends ConsumerWidget {
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
       ),
-      itemCount: participants.length,
+      itemCount: view.tiles.length,
       itemBuilder: (_, index) {
-        final participant = participants[index];
+        final tile = view.tiles[index];
         return _CallParticipantTile(
-          participant: participant,
+          participant: tile.participant,
           session: session,
           isAudioOnly: true,
-          contactCard: _contactCardFor(
-            participant,
-            memberContactCards: memberContactCards,
-          ),
-          displayName: _displayNameFor(
-            participant,
-            youLabel: context.l10n.videoCallYou,
-            peerName: peerName,
-            peerCount: peerCount,
-            memberContactCards: memberContactCards,
-          ),
+          contactCard: tile.contactCard,
+          displayName: tile.displayName,
         );
       },
     );
@@ -432,7 +402,7 @@ class _SinglePeerGroupAudioParticipant extends ConsumerWidget {
                   state.getContactByCardDid(participantDid)?.card,
             ),
           );
-    final resolvedContactCard = _bestAvatarCard([
+    final resolvedContactCard = resolveBestAvatarCard([
       contactCard,
       contactStoreCard,
     ]);

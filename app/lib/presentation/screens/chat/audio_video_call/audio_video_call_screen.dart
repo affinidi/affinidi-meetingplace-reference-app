@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -15,26 +13,27 @@ import '../../../../application/services/identities_service/identities_service.d
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
-import '../../../../infrastructure/extensions/duration_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../../presentation/widgets/action_button.dart';
+import '../../../../presentation/widgets/call/call_overlay_widgets.dart';
+import '../../../../presentation/widgets/call/call_top_bar_widget.dart';
+import '../../../../presentation/widgets/call/video_call_background.dart';
+import '../../../../presentation/widgets/call/video_call_peer_placeholder.dart';
 import '../../../../presentation/widgets/images/default_profile_image.dart';
 import '../../../../presentation/widgets/profile_circle_avatar.dart';
-import '../../../../presentation/widgets/video_call_background.dart';
-import '../../../../presentation/widgets/video_call_peer_placeholder.dart';
-import '../../../../presentation/widgets/video_call_pip_window.dart';
 import '../../../widgets/call_ended/call_ended_controller.dart';
 import 'audio_video_call_screen_controller.dart';
 import 'audio_video_call_screen_state.dart';
 import 'call_controls_bar.dart';
 import 'group_video_call_screen.dart';
+import 'rules/call_participant_identity_rules.dart';
 import 'rules/call_ui_rules.dart';
+import 'rules/group_audio_call_view_rules.dart';
 
 part 'audio_call_screen.dart';
 part 'call_draggable_mini_grid.dart';
 part 'call_error_scaffold.dart';
 part 'call_no_answer_screen.dart';
-part 'call_participant_identity.dart';
 part 'call_overlays.dart';
 part 'call_participant_grid.dart';
 part 'call_top_bar.dart';
