@@ -179,12 +179,12 @@ class SigningService extends StateNotifier<SigningServiceState> {
       await _mediatorSession!.connect();
       _logger.info('Mediator session connected', name: _logKey);
 
-      final approvalOp = VtaStepUpApprovalOperation.forClient(
+      final approvalOp = VtaStepUpApprovalOperation.withTokenProvider(
         client: vtaClient,
         holderDid: holderDid,
         vtaDid: vtaDid,
         signer: signer,
-        accessToken: authResult.tokens.accessToken,
+        tokenProvider: () => _authWorkflow!.getValidAccessToken(),
       );
       _approvalOp = approvalOp;
 
