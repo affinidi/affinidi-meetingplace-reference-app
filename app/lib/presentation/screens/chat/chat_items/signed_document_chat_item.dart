@@ -26,12 +26,11 @@ class _SignedDocumentChatItemState extends State<_SignedDocumentChatItem> {
 
   @override
   Widget build(BuildContext context) {
-    final payload =
-        widget.data['payload'] as Map<String, dynamic>? ?? {};
-    final proof =
-        widget.data['proof'] as Map<String, dynamic>? ?? {};
+    final payload = widget.data['payload'] as Map<String, dynamic>? ?? {};
+    final proof = widget.data['proof'] as Map<String, dynamic>? ?? {};
     final title = payload['title'] as String? ?? 'Untitled Document';
     final issuer = widget.data['issuer'] as String? ?? '';
+    final issuerName = widget.data['issuerName'] as String?;
     final issuedAt = widget.data['issuedAt'] as String? ?? '';
     final proofType = proof['type'] as String? ?? '';
     final cryptosuite = proof['cryptosuite'] as String? ?? '';
@@ -116,7 +115,11 @@ class _SignedDocumentChatItemState extends State<_SignedDocumentChatItem> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.shield_outlined, color: Colors.white38, size: 14),
+              const Icon(
+                Icons.shield_outlined,
+                color: Colors.white38,
+                size: 14,
+              ),
               const SizedBox(width: 4),
               Text(
                 '$proofType · $cryptosuite',
@@ -129,11 +132,7 @@ class _SignedDocumentChatItemState extends State<_SignedDocumentChatItem> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.access_time,
-                  color: Colors.white38,
-                  size: 14,
-                ),
+                const Icon(Icons.access_time, color: Colors.white38, size: 14),
                 const SizedBox(width: 4),
                 Text(
                   'Signed at $proofCreated',
@@ -176,6 +175,26 @@ class _SignedDocumentChatItemState extends State<_SignedDocumentChatItem> {
                   color: Colors.white54,
                   fontSize: 11,
                   fontFamily: 'monospace',
+                ),
+              ),
+            ),
+          ],
+          if (issuerName != null) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white10,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Text(
+                'Signed by Agent using context "$issuerName"',
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.3,
                 ),
               ),
             ),
