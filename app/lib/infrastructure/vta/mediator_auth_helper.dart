@@ -23,8 +23,7 @@ class MediatorAuthHelper {
 
     final didKeyId = matchedKeyIds.first;
     final keyPair = await didManager.getKeyPairByDidKeyId(didKeyId);
-    final signer =
-        await didManager.getSigner(didManager.authentication.first);
+    final signer = await didManager.getSigner(didManager.authentication.first);
     final did = getDidFromId(didKeyId);
 
     final authUrl = _findAuthEndpoint(mediatorDidDocument);
@@ -34,10 +33,9 @@ class MediatorAuthHelper {
       );
     }
 
-    final dio = Dio(BaseOptions(
-      baseUrl: authUrl,
-      contentType: 'application/json',
-    ));
+    final dio = Dio(
+      BaseOptions(baseUrl: authUrl, contentType: 'application/json'),
+    );
 
     final challengeResponse = await dio.post<Map<String, dynamic>>(
       '/challenge',
@@ -59,14 +57,14 @@ class MediatorAuthHelper {
 
     final encryptedMessage =
         await DidcommMessage.packIntoSignedAndEncryptedMessages(
-      plainTextMessage,
-      keyPair: keyPair,
-      didKeyId: didKeyId,
-      recipientDidDocuments: [mediatorDidDocument],
-      encryptionAlgorithm: EncryptionAlgorithm.a256cbc,
-      keyWrappingAlgorithm: KeyWrappingAlgorithm.ecdh1Pu,
-      signer: signer,
-    );
+          plainTextMessage,
+          keyPair: keyPair,
+          didKeyId: didKeyId,
+          recipientDidDocuments: [mediatorDidDocument],
+          encryptionAlgorithm: EncryptionAlgorithm.a256cbc,
+          keyWrappingAlgorithm: KeyWrappingAlgorithm.ecdh1Pu,
+          signer: signer,
+        );
 
     final authenticateResponse = await dio.post<Map<String, dynamic>>(
       '',

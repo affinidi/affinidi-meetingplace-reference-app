@@ -31,7 +31,6 @@ class _SignedDocumentChatItemState extends State<_SignedDocumentChatItem> {
     final title = payload['title'] as String? ?? 'Untitled Document';
     final issuer = widget.data['issuer'] as String? ?? '';
     final issuerName = widget.data['issuerName'] as String?;
-    final issuedAt = widget.data['issuedAt'] as String? ?? '';
     final proofType = proof['type'] as String? ?? '';
     final cryptosuite = proof['cryptosuite'] as String? ?? '';
     final proofCreated = proof['created'] as String? ?? '';

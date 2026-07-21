@@ -4,10 +4,7 @@ import 'package:vta_dart_client/vta_dart_client.dart';
 import 'package:web_socket_channel/io.dart';
 
 class AuthenticatedWebSocketChannel implements VtaDidCommChannel {
-  AuthenticatedWebSocketChannel({
-    required this.uri,
-    required this.accessToken,
-  });
+  AuthenticatedWebSocketChannel({required this.uri, required this.accessToken});
 
   final Uri uri;
   final String accessToken;

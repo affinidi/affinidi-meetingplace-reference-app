@@ -126,4 +126,20 @@ class FakeEnvironment implements Environment {
 
   @override
   Map<String, Map<String, dynamic>> get ciergeEventConfig => const {};
+
+  @override
+  // TODO: implement vtaBaseUrl
+  String get vtaBaseUrl => throw UnimplementedError();
+
+  @override
+  // TODO: implement vtaDid
+  String get vtaDid => throw UnimplementedError();
+
+  @override
+  // TODO: implement vtaMediatorDid
+  String get vtaMediatorDid => throw UnimplementedError();
+
+  @override
+  // TODO: implement vtaMediatorUrl
+  String get vtaMediatorUrl => throw UnimplementedError();
 }

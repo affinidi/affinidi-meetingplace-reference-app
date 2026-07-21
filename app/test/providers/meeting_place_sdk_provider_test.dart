@@ -24,10 +24,7 @@ void main() {
 
   group('normalizeCiergeConnectorDid', () {
     test('keeps full DID values unchanged', () {
-      expect(
-        normalizeCiergeConnectorDid(' did:key:zQ3abc '),
-        'did:key:zQ3abc',
-      );
+      expect(normalizeCiergeConnectorDid(' did:key:zQ3abc '), 'did:key:zQ3abc');
       expect(
         normalizeCiergeConnectorDid('did:web:example.com:user:alice'),
         'did:web:example.com:user:alice',

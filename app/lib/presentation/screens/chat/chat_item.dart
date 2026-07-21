@@ -28,11 +28,11 @@ class ChatItem extends StatelessWidget {
     }
 
     if (_chatItem is chat.ConciergeMessage &&
-        (_chatItem as chat.ConciergeMessage).conciergeType ==
+        _chatItem.conciergeType ==
             chat.ConciergeMessageType.fromJson(
               chat.CiergeSignDocumentRequest.conciergeTypeName,
             )) {
-      final data = (_chatItem as chat.ConciergeMessage).data;
+      final data = _chatItem.data;
       final doc = data['document'] as Map<String, dynamic>? ?? {};
       return _SignDocumentRequestChatItem(
         title: doc['title'] as String? ?? 'Untitled Document',
@@ -44,12 +44,12 @@ class ChatItem extends StatelessWidget {
     }
 
     if (_chatItem is chat.ConciergeMessage &&
-        (_chatItem as chat.ConciergeMessage).conciergeType ==
+        _chatItem.conciergeType ==
             chat.ConciergeMessageType.fromJson(
               chat.CiergeStepUpApproveRequest.conciergeTypeName,
             )) {
       return _StepUpApproveRequestChatItem(
-        chatItem: _chatItem as chat.ConciergeMessage,
+        chatItem: _chatItem,
         contactId: _contactId,
       );
     }

@@ -311,8 +311,8 @@ class MnemonicScreen extends HookConsumerWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                            child: Text(
-                              l10n.mnemonicContinue,
+                          child: Text(
+                            l10n.mnemonicContinue,
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),

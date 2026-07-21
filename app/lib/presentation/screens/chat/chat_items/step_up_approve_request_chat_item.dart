@@ -39,7 +39,8 @@ class _StepUpApproveRequestChatItemState
     final reason = payload['reason'] as String? ?? 'Step-up approval required';
     final alreadyConfirmed =
         widget.chatItem.status == chat.ChatItemStatus.confirmed;
-    final isActionable = isOwner &&
+    final isActionable =
+        isOwner &&
         widget.chatItem.status == chat.ChatItemStatus.userInput &&
         _result == null;
 
@@ -91,7 +92,11 @@ class _StepUpApproveRequestChatItemState
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.verified_user_outlined, color: Colors.white, size: 32),
+          const Icon(
+            Icons.verified_user_outlined,
+            color: Colors.white,
+            size: 32,
+          ),
           const SizedBox(height: 8),
           const Text(
             'Approval Required',
@@ -211,7 +216,9 @@ class _StepUpApproveRequestChatItemState
   Future<void> _handleApproval(Map<String, dynamic> approveRequest) async {
     setState(() => _processing = true);
     try {
-      final contact = ref.read(contactsServiceProvider).getContactById(widget.contactId);
+      final contact = ref
+          .read(contactsServiceProvider)
+          .getContactById(widget.contactId);
       final signingService = ref.read(signingServiceProvider.notifier);
       await signingService.handleRelayedApproveRequest(
         approveRequest,
@@ -220,9 +227,21 @@ class _StepUpApproveRequestChatItemState
       widget.chatItem.status = chat.ChatItemStatus.confirmed;
       final repository = await ref.read(chatRepositoryProvider.future);
       await repository.updateMesssage(widget.chatItem);
-      if (mounted) setState(() { _result = 'Approved'; _processing = false; updateKeepAlive(); });
+      if (mounted) {
+        setState(() {
+          _result = 'Approved';
+          _processing = false;
+          updateKeepAlive();
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() { _result = 'Failed: $e'; _processing = false; updateKeepAlive(); });
+      if (mounted) {
+        setState(() {
+          _result = 'Failed: $e';
+          _processing = false;
+          updateKeepAlive();
+        });
+      }
     }
   }
 

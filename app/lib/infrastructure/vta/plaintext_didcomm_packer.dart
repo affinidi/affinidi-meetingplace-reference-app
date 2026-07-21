@@ -19,9 +19,7 @@ class PlaintextDidCommPacker implements VtaDidCommPacker {
   }
 
   @override
-  Future<VtaDidCommUnpackResult> unpack({
-    required String packedMessage,
-  }) async {
+  Future<VtaDidCommUnpackResult> unpack({required String packedMessage}) async {
     final decoded = jsonDecode(packedMessage);
     if (decoded is! Map<String, dynamic>) {
       return VtaDidCommUnpackResult(
@@ -41,13 +39,15 @@ class PlaintextDidCommPacker implements VtaDidCommPacker {
         final messageMap = <String, dynamic>{
           'id': plainText.id,
           'type': plainText.type.toString(),
-          if (from != null) 'from': from,
+          'from': ?from,
           if (plainText.to != null) 'to': plainText.to,
           'body': plainText.body,
         };
         final json = jsonEncode(messageMap);
-        dev.log('PACKER DECRYPTED from=$from, type=${plainText.type}',
-            name: 'SIGNSVC');
+        dev.log(
+          'PACKER DECRYPTED from=$from, type=${plainText.type}',
+          name: 'SIGNSVC',
+        );
         return VtaDidCommUnpackResult(
           messageJson: json,
           senderAuthenticated: true,

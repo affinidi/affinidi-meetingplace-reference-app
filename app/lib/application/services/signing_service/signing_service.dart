@@ -222,32 +222,6 @@ class SigningService extends StateNotifier<SigningServiceState> {
     }
   }
 
-  Future<VtaStepUpApprovalDecision> _handleApproveRequest(
-    Map<String, dynamic> approveRequest,
-    VtaDidCommMessage message,
-  ) async {
-    _logger.info(
-      'Step-up approval request received: '
-      'sessionId=${approveRequest['sessionId']}',
-      name: _logKey,
-    );
-
-    final completer = Completer<bool>();
-    state = state.copyWith(
-      pendingApproval: () => PendingApproval(approveRequest, completer),
-    );
-
-    final approved = await completer.future;
-    state = state.copyWith(pendingApproval: () => null);
-
-    _logger.info(
-      'Step-up decision: '
-      '${approved ? 'approved' : 'rejected'}',
-      name: _logKey,
-    );
-    return VtaStepUpApprovalDecision(approved: approved);
-  }
-
   Future<void> handleRelayedApproveRequest(
     Map<String, dynamic> approveRequest, {
     required String mediatorDid,
@@ -294,7 +268,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
       if (msg.contains('challenge_unknown') ||
           msg.contains('challenge_expired')) {
         _logger.info(
-          'Relayed approval already consumed (likely approved via DIDComm coordinator): $msg',
+          '''Relayed approval already consumed (likely approved via DIDComm coordinator): $msg''',
           name: _logKey,
         );
         return;

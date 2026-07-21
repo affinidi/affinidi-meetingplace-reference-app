@@ -191,8 +191,7 @@ class PersonalAgentScreenController
           (_isConnectionReady(setupResult) || state.isReady);
       if (!connected) {
         state = state.copyWith(
-          contextUploadError:
-              '${spec.displayName} is still connecting.',
+          contextUploadError: '${spec.displayName} is still connecting.',
         );
         _clearConnecting();
         return const RoutingContextUploadOutcome.skipped();
@@ -320,9 +319,7 @@ class PersonalAgentScreenController
     _setConnecting(target == AgentContext.work ? 'Work AI' : 'Personal AI');
 
     try {
-      await _ref
-          .read(disconnectAgentContextServiceProvider)
-          .disconnect(target);
+      await _ref.read(disconnectAgentContextServiceProvider).disconnect(target);
       syncFromDependencies();
       _clearConnecting();
     } catch (_) {

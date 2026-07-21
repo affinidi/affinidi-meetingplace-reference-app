@@ -80,9 +80,7 @@ class _ContactListItem extends ConsumerWidget {
       final label = next == AgentContext.work
           ? l10n.agentContextWorkAiLabel
           : l10n.agentContextPersonalAiLabel;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.contactsChannelContextSet(label))),
       );
     }

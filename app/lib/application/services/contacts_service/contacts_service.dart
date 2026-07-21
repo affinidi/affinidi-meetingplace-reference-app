@@ -119,8 +119,9 @@ class ContactsService extends _$ContactsService {
       if (otherPartyDid != null && otherPartyDid.isNotEmpty) {
         final existingByDid = state.getContactByChannelDid(otherPartyDid);
         if (existingByDid != null) {
-          final remoteType =
-              channel.otherPartyContactCard?.type.trim().toLowerCase();
+          final remoteType = channel.otherPartyContactCard?.type
+              .trim()
+              .toLowerCase();
           final sameDidDifferentOffer =
               existingByDid.offerLink != channel.offerLink;
           final isAiContact =

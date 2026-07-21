@@ -16,8 +16,7 @@ final class SignDocumentPlugin implements AttachmentPicker {
   static const _allowedExtensions = ['pdf', 'doc', 'docx', 'txt'];
 
   @override
-  AttachmentPluginIcon get icon =>
-      const MaterialIcon(Icons.draw_outlined);
+  AttachmentPluginIcon get icon => const MaterialIcon(Icons.draw_outlined);
 
   @override
   String localizedName(BuildContext context) => 'Sign Document';
@@ -58,19 +57,16 @@ final class SignDocumentPlugin implements AttachmentPicker {
       },
     });
 
-    return AttachmentPluginPickResult(
-      text: payload,
-      attachments: [],
-    );
+    return AttachmentPluginPickResult(text: payload, attachments: []);
   }
 
   String _mimeType(String? ext) => switch (ext?.toLowerCase()) {
-        'pdf' => 'application/pdf',
-        'doc' => 'application/msword',
-        'docx' =>
-          'application/vnd.openxmlformats-officedocument'
-              '.wordprocessingml.document',
-        'txt' => 'text/plain',
-        _ => 'application/octet-stream',
-      };
+    'pdf' => 'application/pdf',
+    'doc' => 'application/msword',
+    'docx' =>
+      'application/vnd.openxmlformats-officedocument'
+          '.wordprocessingml.document',
+    'txt' => 'text/plain',
+    _ => 'application/octet-stream',
+  };
 }

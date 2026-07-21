@@ -7,10 +7,9 @@ class _SignDocumentRequestChatItem extends ConsumerStatefulWidget {
     required this.messageIndex,
     this.status,
     this.rawPayload,
-    this.statusLabel,
-    this.statusColor,
-    this.statusIcon,
-  });
+  }) : statusColor = null,
+       statusLabel = null,
+       statusIcon = null;
 
   final String title;
   final String contactId;
@@ -111,9 +110,6 @@ class _SignDocumentRequestChatItemState
         _ => ('Signing request sent', Colors.white54, Icons.send_outlined),
       };
     }
-
-    final challenge = statusData?['challenge'] as String?;
-    final subject = statusData?['subject'] as String?;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 600),

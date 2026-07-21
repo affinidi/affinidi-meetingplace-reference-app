@@ -36,10 +36,8 @@ class AppVtaAuthSigner implements VtaAuthSigner {
     final canonicalDoc = _canonicalizeJson(trustTask);
     final canonicalProof = _canonicalizeJson(proofConfig);
 
-    final proofDigest =
-        (await _sha256.hash(utf8.encode(canonicalProof))).bytes;
-    final docDigest =
-        (await _sha256.hash(utf8.encode(canonicalDoc))).bytes;
+    final proofDigest = (await _sha256.hash(utf8.encode(canonicalProof))).bytes;
+    final docDigest = (await _sha256.hash(utf8.encode(canonicalDoc))).bytes;
     final signingInput = <int>[...proofDigest, ...docDigest];
 
     final signature = await wallet.sign(
@@ -59,10 +57,11 @@ class AppVtaAuthSigner implements VtaAuthSigner {
       return '[${value.map(_canonicalizeJson).join(',')}]';
     }
     if (value is Map) {
-      final entries = value.entries
-          .map((e) => MapEntry(e.key.toString(), e.value))
-          .toList(growable: false)
-        ..sort((a, b) => a.key.compareTo(b.key));
+      final entries =
+          value.entries
+              .map((e) => MapEntry(e.key.toString(), e.value))
+              .toList(growable: false)
+            ..sort((a, b) => a.key.compareTo(b.key));
       final buffer = StringBuffer('{');
       for (var i = 0; i < entries.length; i++) {
         if (i > 0) buffer.write(',');
