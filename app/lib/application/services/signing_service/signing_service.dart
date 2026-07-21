@@ -249,8 +249,9 @@ class SigningService extends StateNotifier<SigningServiceState> {
   }
 
   Future<void> handleRelayedApproveRequest(
-    Map<String, dynamic> approveRequest,
-  ) async {
+    Map<String, dynamic> approveRequest, {
+    required String mediatorDid,
+  }) async {
     final payload =
         approveRequest['payload'] as Map<String, dynamic>? ?? approveRequest;
 
@@ -301,10 +302,16 @@ class SigningService extends StateNotifier<SigningServiceState> {
       rethrow;
     }
 
-    await _notifyAgentApproved(payload['sessionId'] as String?);
+    await _notifyAgentApproved(
+      payload['sessionId'] as String?,
+      mediatorDid: mediatorDid,
+    );
   }
 
-  Future<void> _notifyAgentApproved(String? sessionId) async {
+  Future<void> _notifyAgentApproved(
+    String? sessionId, {
+    required String mediatorDid,
+  }) async {
     try {
       final sdk = await _ref.read(meetingPlaceSdkProvider.future);
       final env = _ref.read(environmentProvider);
@@ -327,17 +334,6 @@ class SigningService extends StateNotifier<SigningServiceState> {
       }
 
       final rootDid = sdk.rootDid;
-      final channel =
-          await sdk.getChannelByDid(agentDid) ??
-          await sdk.getChannelByOtherPartyPermanentDid(agentDid);
-      if (channel == null) {
-        _logger.warning(
-          'Cannot notify agent: no channel found for $agentDid',
-          name: _logKey,
-        );
-        return;
-      }
-      final mediatorDid = channel.mediatorDid;
 
       final body = {
         'text': jsonEncode({

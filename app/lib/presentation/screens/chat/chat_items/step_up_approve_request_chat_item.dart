@@ -168,8 +168,12 @@ class _StepUpApproveRequestChatItemState
   Future<void> _handleApproval(Map<String, dynamic> approveRequest) async {
     setState(() => _processing = true);
     try {
+      final contact = ref.read(contactsServiceProvider).getContactById(widget.contactId);
       final signingService = ref.read(signingServiceProvider.notifier);
-      await signingService.handleRelayedApproveRequest(approveRequest);
+      await signingService.handleRelayedApproveRequest(
+        approveRequest,
+        mediatorDid: contact!.mediatorDid,
+      );
       if (mounted) setState(() { _result = 'Approved'; _processing = false; updateKeepAlive(); });
     } catch (e) {
       if (mounted) setState(() { _result = 'Failed: $e'; _processing = false; updateKeepAlive(); });
