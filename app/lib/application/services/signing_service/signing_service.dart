@@ -422,6 +422,30 @@ class SigningService extends StateNotifier<SigningServiceState> {
     return null;
   }
 
+  Future<bool> getStepUpEnabled() async {
+    if (_vtaClient == null || _authWorkflow == null) return false;
+    final token = await _authWorkflow!.getValidAccessToken();
+    _vtaClient!.setAuthToken(token);
+    final policy = await _vtaClient!.stepUpPolicy.getPolicy();
+    return policy['enabled'] as bool? ?? false;
+  }
+
+  Future<void> setStepUpEnabled(bool enabled) async {
+    if (_vtaClient == null || _authWorkflow == null) {
+      throw StateError('VTA not connected');
+    }
+    final token = await _authWorkflow!.getValidAccessToken();
+    _vtaClient!.setAuthToken(token);
+    await _vtaClient!.stepUpPolicy.setPolicy(
+      enabled: enabled,
+      floors: enabled
+          ? [
+              {'operation': 'vault/sign-trust-task', 'mode': 'delegated'},
+            ]
+          : [],
+    );
+  }
+
   @override
   void dispose() {
     final pending = state.pendingApproval;

@@ -62,6 +62,8 @@ class PersonalAgentScreen extends ConsumerWidget {
           personalContextUploaded: state.personalContextUploaded,
           workContextFileName: state.workContextFileName,
           personalContextFileName: state.personalContextFileName,
+          autoResponseEnabled: state.autoResponseEnabled,
+          autoResponseLoading: state.autoResponseLoading,
         ),
       ),
     );
@@ -204,6 +206,51 @@ class PersonalAgentScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  if (ui.showWorkAuthorization ||
+                      ui.showPersonalAuthorization) ...[
+                    const SizedBox(height: 16),
+                    if (ui.showWorkAuthorization)
+                      _AgentAuthorizationCard(
+                        title: l10n.personalAgentMyWorkAiTitle,
+                        contextLabel: l10n.personalAgentWorkContextLabel,
+                        snapshot: ui.workSnapshot,
+                        contact: ui.workContact,
+                        onCancel: () => cancelRoutingContext(AgentContext.work),
+                      ),
+                    if (ui.showWorkAuthorization &&
+                        ui.showPersonalAuthorization)
+                      const SizedBox(height: 12),
+                    if (ui.showPersonalAuthorization)
+                      _AgentAuthorizationCard(
+                        title: l10n.personalAgentMyPersonalAiTitle,
+                        contextLabel: l10n.personalAgentPersonalContextLabel,
+                        snapshot: ui.personalSnapshot,
+                        contact: ui.personalContact,
+                        onCancel: () =>
+                            cancelRoutingContext(AgentContext.personal),
+                      ),
+                    const SizedBox(height: 16),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: colorScheme.outlineVariant),
+                      ),
+                      child: SwitchListTile(
+                        title: const Text('Auto Response'),
+                        subtitle: const Text(
+                          'Agent responds without approval when enabled',
+                        ),
+                        value: ui.autoResponseEnabled,
+                        onChanged: ui.autoResponseLoading
+                            ? null
+                            : (_) => controller.toggleAutoResponse(),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
                 _AgentContextSetupCard(
                   workContextUploaded: ui.workContextUploaded,
