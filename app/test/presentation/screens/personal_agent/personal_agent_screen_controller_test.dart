@@ -28,58 +28,46 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
-          identitiesServiceProvider.overrideWith(
-            () => _FakeIdentitiesService(),
-          ),
+          identitiesServiceProvider.overrideWith(_FakeIdentitiesService.new),
           personalAiServiceProvider.overrideWith(
             (ref) => _FakePersonalAiNotifier(),
           ),
-          contactsServiceProvider.overrideWith(
-            () => _FakeContactsService(),
-          ),
+          contactsServiceProvider.overrideWith(_FakeContactsService.new),
           contextRoutingServiceProvider.overrideWith(
             (ref) => _FakeContextRoutingNotifier(),
           ),
-          signingServiceProvider.overrideWith(
-            (ref) => fakeSigningNotifier,
-          ),
+          signingServiceProvider.overrideWith((ref) => fakeSigningNotifier),
         ],
       );
       addTearDown(container.dispose);
       return container;
     }
 
-    test(
-      'loadAutoResponseState sets autoResponseEnabled to true '
-      'when step-up is disabled',
-      () async {
-        final container = makeContainer(stepUpEnabled: false);
-        final controller = container.read(
-          personalAgentScreenControllerProvider.notifier,
-        );
+    test('loadAutoResponseState sets autoResponseEnabled to true '
+        'when step-up is disabled', () async {
+      final container = makeContainer(stepUpEnabled: false);
+      final controller = container.read(
+        personalAgentScreenControllerProvider.notifier,
+      );
 
-        await controller.loadAutoResponseState();
+      await controller.loadAutoResponseState();
 
-        final state = container.read(personalAgentScreenControllerProvider);
-        expect(state.autoResponseEnabled, isTrue);
-      },
-    );
+      final state = container.read(personalAgentScreenControllerProvider);
+      expect(state.autoResponseEnabled, isTrue);
+    });
 
-    test(
-      'loadAutoResponseState sets autoResponseEnabled to false '
-      'when step-up is enabled',
-      () async {
-        final container = makeContainer(stepUpEnabled: true);
-        final controller = container.read(
-          personalAgentScreenControllerProvider.notifier,
-        );
+    test('loadAutoResponseState sets autoResponseEnabled to false '
+        'when step-up is enabled', () async {
+      final container = makeContainer(stepUpEnabled: true);
+      final controller = container.read(
+        personalAgentScreenControllerProvider.notifier,
+      );
 
-        await controller.loadAutoResponseState();
+      await controller.loadAutoResponseState();
 
-        final state = container.read(personalAgentScreenControllerProvider);
-        expect(state.autoResponseEnabled, isFalse);
-      },
-    );
+      final state = container.read(personalAgentScreenControllerProvider);
+      expect(state.autoResponseEnabled, isFalse);
+    });
 
     test('toggleAutoResponse flips from disabled to enabled', () async {
       final container = makeContainer(stepUpEnabled: true);
@@ -88,7 +76,9 @@ void main() {
       );
       await controller.loadAutoResponseState();
       expect(
-        container.read(personalAgentScreenControllerProvider).autoResponseEnabled,
+        container
+            .read(personalAgentScreenControllerProvider)
+            .autoResponseEnabled,
         isFalse,
       );
 
@@ -107,7 +97,9 @@ void main() {
       );
       await controller.loadAutoResponseState();
       expect(
-        container.read(personalAgentScreenControllerProvider).autoResponseEnabled,
+        container
+            .read(personalAgentScreenControllerProvider)
+            .autoResponseEnabled,
         isTrue,
       );
 
@@ -144,8 +136,9 @@ void main() {
 
       final loadingStates = <bool>[];
       container.listen(
-        personalAgentScreenControllerProvider
-            .select((s) => s.autoResponseLoading),
+        personalAgentScreenControllerProvider.select(
+          (s) => s.autoResponseLoading,
+        ),
         (_, loading) => loadingStates.add(loading),
       );
 
@@ -161,12 +154,8 @@ void main() {
 
 class _FakeSigningNotifier extends StateNotifier<SigningServiceState>
     implements SigningService {
-  _FakeSigningNotifier({
-    required this.stepUpEnabled,
-    this.shouldFail = false,
-  }) : super(const SigningServiceState(
-          status: SigningServiceStatus.connected,
-        ));
+  _FakeSigningNotifier({required this.stepUpEnabled, this.shouldFail = false})
+    : super(const SigningServiceState(status: SigningServiceStatus.connected));
 
   bool stepUpEnabled;
   final bool shouldFail;
@@ -195,8 +184,7 @@ class _FakeIdentitiesService extends IdentitiesService {
 
 class _FakePersonalAiNotifier extends StateNotifier<PersonalAiServiceState>
     implements PersonalAiService {
-  _FakePersonalAiNotifier()
-      : super(const PersonalAiServiceState.initial());
+  _FakePersonalAiNotifier() : super(const PersonalAiServiceState.initial());
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
