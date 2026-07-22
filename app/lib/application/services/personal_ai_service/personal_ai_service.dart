@@ -333,7 +333,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
       _updateSetupResult(setupSnapshot, contextName: contextName);
       state = state.copyWith(
-        status: PersonalAiSetupStatus.ready,
+        status: _isConnectionReady(setupSnapshot)
+            ? PersonalAiSetupStatus.ready
+            : PersonalAiSetupStatus.settingUp,
         showSetupPrompt: false,
         promptDismissed: true,
       );
@@ -394,10 +396,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     if (setupStatus == 'inaugurated' || setupStatus == 'ready') {
       return true;
     }
-    if (result.mpxConnectionCreated == true) {
-      return true;
-    }
-    return result.availableInContacts == true;
+    return false;
   }
 
   Future<void> _restoreSessionAfterRestart() async {

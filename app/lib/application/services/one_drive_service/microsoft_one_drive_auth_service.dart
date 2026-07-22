@@ -25,6 +25,28 @@ class OneDriveContextImportResult {
   bool get hasContent => content.trim().isNotEmpty;
 }
 
+class MicrosoftOneDriveOAuthResult {
+  const MicrosoftOneDriveOAuthResult({
+    required this.accessToken,
+    required this.refreshToken,
+    required this.clientId,
+    required this.tenantId,
+    required this.redirectUrl,
+    required this.scopes,
+    this.tokenType,
+    this.accessTokenExpirationDateTime,
+  });
+
+  final String accessToken;
+  final String refreshToken;
+  final String clientId;
+  final String tenantId;
+  final String redirectUrl;
+  final List<String> scopes;
+  final String? tokenType;
+  final DateTime? accessTokenExpirationDateTime;
+}
+
 class MicrosoftOneDriveAuthService {
   MicrosoftOneDriveAuthService(
     this._ref, {
@@ -49,12 +71,17 @@ class MicrosoftOneDriveAuthService {
     required String setupId,
     required String holderDid,
   }) async {
-    final normalizedSetupId = setupId.trim();
-    final normalizedHolderDid = holderDid.trim();
+    final oauthResult = await authorize();
+    return storeAndImport(
+      setupId: setupId,
+      holderDid: holderDid,
+      oauthResult: oauthResult,
+    );
+  }
+
+  Future<MicrosoftOneDriveOAuthResult> authorize() async {
     _logger.info(
-      'Starting Microsoft OneDrive OAuth connection '
-      '(setupId=${_redact(normalizedSetupId)}, '
-      'holderDid=${_redact(normalizedHolderDid)})',
+      'Starting Microsoft OneDrive OAuth connection.',
       name: _logKey,
     );
 
@@ -141,6 +168,34 @@ class MicrosoftOneDriveAuthService {
       throw StateError('Microsoft did not return an access token.');
     }
 
+    return MicrosoftOneDriveOAuthResult(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      clientId: clientId,
+      tenantId: tenantId,
+      redirectUrl: _environment.microsoftOAuthRedirectUrl,
+      scopes:
+          response.scopes ??
+          const [
+            'openid',
+            'profile',
+            'offline_access',
+            'User.Read',
+            'Files.Read',
+          ],
+      tokenType: response.tokenType,
+      accessTokenExpirationDateTime: response.accessTokenExpirationDateTime,
+    );
+  }
+
+  Future<OneDriveContextImportResult> storeAndImport({
+    required String setupId,
+    required String holderDid,
+    required MicrosoftOneDriveOAuthResult oauthResult,
+  }) async {
+    final normalizedSetupId = setupId.trim();
+    final normalizedHolderDid = holderDid.trim();
+
     final client = VtaClient(baseUrl: _environment.personalAiBaseUrl);
     final endpoint = _setupResourcePath(
       setupId,
@@ -148,7 +203,9 @@ class MicrosoftOneDriveAuthService {
     );
     _logger.info(
       'Storing OneDrive OAuth refresh token via personal AI endpoint '
-      '(baseUrl=${_environment.personalAiBaseUrl}, endpoint=$endpoint)',
+      '(baseUrl=${_environment.personalAiBaseUrl}, endpoint=$endpoint, '
+      'setupId=${_redact(normalizedSetupId)}, '
+      'holderDid=${_redact(normalizedHolderDid)})',
       name: _logKey,
     );
 
@@ -158,22 +215,16 @@ class MicrosoftOneDriveAuthService {
         body: <String, dynamic>{
           'holder_did': normalizedHolderDid,
           'context_key': 'ctx-0',
-          'refresh_token': refreshToken,
-          'client_id': clientId,
-          'tenant_id': tenantId,
-          'redirect_url': _environment.microsoftOAuthRedirectUrl,
-          'scopes':
-              response.scopes ??
-              const [
-                'openid',
-                'profile',
-                'offline_access',
-                'User.Read',
-                'Files.Read',
-              ],
-          if (response.tokenType != null) 'token_type': response.tokenType,
-          if (response.accessTokenExpirationDateTime != null)
-            'access_token_expires_at': response.accessTokenExpirationDateTime!
+          'refresh_token': oauthResult.refreshToken,
+          'client_id': oauthResult.clientId,
+          'tenant_id': oauthResult.tenantId,
+          'redirect_url': oauthResult.redirectUrl,
+          'scopes': oauthResult.scopes,
+          if (oauthResult.tokenType != null)
+            'token_type': oauthResult.tokenType,
+          if (oauthResult.accessTokenExpirationDateTime != null)
+            'access_token_expires_at': oauthResult
+                .accessTokenExpirationDateTime!
                 .toUtc()
                 .toIso8601String(),
         },
@@ -218,7 +269,7 @@ class MicrosoftOneDriveAuthService {
       name: _logKey,
     );
 
-    return _importOneDriveContext(accessToken: accessToken);
+    return _importOneDriveContext(accessToken: oauthResult.accessToken);
   }
 
   Future<OneDriveContextImportResult> _importOneDriveContext({

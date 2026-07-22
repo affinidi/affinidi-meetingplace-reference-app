@@ -188,8 +188,8 @@ class PersonalAgentScreenController
     final existingSetup = _setupForContext(spec.contextName);
     final canReuseExistingSetup =
         existingSetup != null &&
-        state.isReady &&
         _matchesTargetContext(existingSetup, spec.contextName) &&
+        _isConnectionReady(existingSetup) &&
         (existingSetup.setupId?.trim().isNotEmpty ?? false);
 
     _setConnecting(spec.displayName);
@@ -203,7 +203,7 @@ class PersonalAgentScreenController
       final connected =
           setupResult != null &&
           _matchesTargetContext(setupResult, spec.contextName) &&
-          (_isConnectionReady(setupResult) || state.isReady);
+          _isConnectionReady(setupResult);
       if (!connected) {
         state = state.copyWith(
           contextUploadError: '${spec.displayName} is still connecting.',
@@ -277,35 +277,50 @@ class PersonalAgentScreenController
     final existingSetup = _setupForContext(spec.contextName);
     final canReuseExistingSetup =
         existingSetup != null &&
-        state.isReady &&
         _matchesTargetContext(existingSetup, spec.contextName) &&
+        _isConnectionReady(existingSetup) &&
         (existingSetup.setupId?.trim().isNotEmpty ?? false);
 
     _setConnecting(spec.displayName);
 
     try {
+      Object? setupError;
+      StackTrace? setupStackTrace;
+      Future<void>? setupFuture;
       if (!canReuseExistingSetup) {
         _logger.info(
-          'Ensuring Work AI setup before OneDrive OAuth.',
+          'Starting Work AI setup while OneDrive OAuth opens.',
           name: _logKey,
         );
-        await _ensureSetupAndConnection(spec: spec, holderDid: holderDid);
+        setupFuture =
+            _ensureSetupAndConnection(
+              spec: spec,
+              holderDid: holderDid,
+            ).catchError((Object error, StackTrace stackTrace) {
+              setupError = error;
+              setupStackTrace = stackTrace;
+            });
       } else {
         _logger.info(
           'Reusing existing Work AI setup for OneDrive OAuth '
           '(setupId=${_redact(existingSetup.setupId ?? '')})',
           name: _logKey,
         );
-        await _ref
-            .read(personalAiServiceProvider.notifier)
-            .waitUntilConnected(
-              holderDid: holderDid,
-              contextName: spec.contextName,
-              agentDisplayName: spec.displayName,
-              maxAttempts: 1,
-              pollEvery: Duration.zero,
-            );
-        syncFromDependencies();
+      }
+
+      final oneDriveAuthService = _ref.read(
+        microsoftOneDriveAuthServiceProvider,
+      );
+      final oauthResult = await oneDriveAuthService.authorize();
+
+      if (setupFuture != null) {
+        await setupFuture;
+        if (setupError != null) {
+          Error.throwWithStackTrace(
+            setupError!,
+            setupStackTrace ?? StackTrace.current,
+          );
+        }
       }
 
       final setupId = _setupForContext(spec.contextName)?.setupId?.trim() ?? '';
@@ -328,9 +343,11 @@ class PersonalAgentScreenController
         name: _logKey,
       );
 
-      final importResult = await _ref
-          .read(microsoftOneDriveAuthServiceProvider)
-          .connectStoreAndImport(setupId: setupId, holderDid: holderDid);
+      final importResult = await oneDriveAuthService.storeAndImport(
+        setupId: setupId,
+        holderDid: holderDid,
+        oauthResult: oauthResult,
+      );
 
       _logger.info(
         'OneDrive OAuth storage and import completed '
@@ -431,9 +448,9 @@ class PersonalAgentScreenController
       name: _logKey,
     );
     final connectionKnownReady =
-        state.isReady &&
         setupResult != null &&
-        _matchesTargetContext(setupResult, spec.contextName);
+        _matchesTargetContext(setupResult, spec.contextName) &&
+        _isConnectionReady(setupResult);
 
     if (!connectionKnownReady &&
         (setupResult == null || !_isConnectionReady(setupResult))) {
@@ -485,10 +502,7 @@ class PersonalAgentScreenController
     if (setupStatus == 'inaugurated' || setupStatus == 'ready') {
       return true;
     }
-    if (setupResult.mpxConnectionCreated == true) {
-      return true;
-    }
-    return setupResult.availableInContacts == true;
+    return false;
   }
 
   bool _matchesTargetContext(
