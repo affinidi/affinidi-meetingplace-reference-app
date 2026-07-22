@@ -212,6 +212,9 @@ class _SignedDocumentChatItemState
 
   Widget _buildAgentDetailsSection() {
     final issuerName = widget.data['issuerName'] as String?;
+    final isOwner =
+        ref.watch(signingServiceProvider.select((s) => s.status)) ==
+        SigningServiceStatus.connected;
 
     return Container(
       width: double.infinity,
@@ -224,12 +227,13 @@ class _SignedDocumentChatItemState
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (issuerName != null) ...[
-            _detailRow('Context', issuerName),
-            const SizedBox(height: 8),
-          ],
-          const Text(
-            'Trust Task',
+          if (isOwner) ...[
+            if (issuerName != null) ...[
+              _detailRow('Context', issuerName),
+              const SizedBox(height: 8),
+            ],
+            const Text(
+              'Trust Task',
             style: TextStyle(
               color: Colors.white54,
               fontSize: 11,
@@ -261,6 +265,7 @@ class _SignedDocumentChatItemState
               'No audit entry found',
               style: TextStyle(color: Colors.white38, fontSize: 10),
             ),
+          ],
           const SizedBox(height: 10),
           const Text(
             'Raw Envelope',
