@@ -114,45 +114,45 @@ dependency_overrides:
   meeting_place_chat:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 78f73ec0759a3703f0d8e2a232960ef07455657f
+      ref: d876843d45994fa0045f0b7c522295f59bf3814c
       path: packages/meeting_place_chat
-    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-call-participant-identity-profile-metadata/packages/meeting_place_chat
+    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-video-focus-pagination/packages/meeting_place_chat
   meeting_place_control_plane:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 78f73ec0759a3703f0d8e2a232960ef07455657f
+      ref: d876843d45994fa0045f0b7c522295f59bf3814c
       path: packages/meeting_place_control_plane
-    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-call-participant-identity-profile-metadata/packages/meeting_place_control_plane
+    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-video-focus-pagination/packages/meeting_place_control_plane
   meeting_place_core:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 78f73ec0759a3703f0d8e2a232960ef07455657f
+      ref: d876843d45994fa0045f0b7c522295f59bf3814c
       path: packages/meeting_place_core
-    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-call-participant-identity-profile-metadata/packages/meeting_place_core
+    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-video-focus-pagination/packages/meeting_place_core
   meeting_place_credentials:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 78f73ec0759a3703f0d8e2a232960ef07455657f
+      ref: d876843d45994fa0045f0b7c522295f59bf3814c
       path: packages/meeting_place_credentials
-    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-call-participant-identity-profile-metadata/packages/meeting_place_credentials
+    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-video-focus-pagination/packages/meeting_place_credentials
   meeting_place_drift_repository:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 78f73ec0759a3703f0d8e2a232960ef07455657f
+      ref: d876843d45994fa0045f0b7c522295f59bf3814c
       path: packages/meeting_place_drift_repository
-    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-call-participant-identity-profile-metadata/packages/meeting_place_drift_repository
+    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-video-focus-pagination/packages/meeting_place_drift_repository
   meeting_place_matrix:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 78f73ec0759a3703f0d8e2a232960ef07455657f
+      ref: d876843d45994fa0045f0b7c522295f59bf3814c
       path: packages/meeting_place_matrix
-    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-call-participant-identity-profile-metadata/packages/meeting_place_matrix
+    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-video-focus-pagination/packages/meeting_place_matrix
   meeting_place_mediator:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 78f73ec0759a3703f0d8e2a232960ef07455657f
+      ref: d876843d45994fa0045f0b7c522295f59bf3814c
       path: packages/meeting_place_mediator
-    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-call-participant-identity-profile-metadata/packages/meeting_place_mediator
+    # path: ../../../../../affinidi-meetingplace-sdk-dart/worktrees/fix/group-video-focus-pagination/packages/meeting_place_mediator
 
 flutter:
   generate: true
