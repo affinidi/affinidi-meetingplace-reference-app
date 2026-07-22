@@ -231,5 +231,9 @@ Color _standardBubbleColor(ColorScheme colorScheme, chat.ChatItem item) {
     if (item.status == chat.ChatItemStatus.error) return Colors.red;
     return colorScheme.primary;
   }
+  if (item is chat.Message &&
+      item.attachments.any((a) => a.format == 'cierge/trust-task')) {
+    return const Color.fromARGB(248, 30, 60, 80);
+  }
   return const Color.fromARGB(248, 107, 65, 162);
 }
