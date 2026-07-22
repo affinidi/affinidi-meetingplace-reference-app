@@ -199,7 +199,7 @@ class _SignDocumentRequestChatItemState
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: SelectableText(
-                  const JsonEncoder.withIndent('  ').convert(widget.rawPayload),
+                  _truncatedPayloadJson(widget.rawPayload!),
                   style: const TextStyle(
                     color: Colors.white54,
                     fontSize: 11,
@@ -252,5 +252,23 @@ class _SignDocumentRequestChatItemState
         ],
       ),
     );
+  }
+
+  static String _truncatedPayloadJson(Map<String, dynamic> data) {
+    const maxChars = 200;
+    final copy = Map<String, dynamic>.from(data);
+    for (final key in copy.keys.toList()) {
+      final value = copy[key];
+      if (value is Map<String, dynamic>) {
+        final valJson = jsonEncode(value);
+        if (valJson.length > maxChars) {
+          copy[key] =
+              '${valJson.substring(0, maxChars)}... (truncated)';
+        }
+      } else if (value is String && value.length > maxChars) {
+        copy[key] = '${value.substring(0, maxChars)}... (truncated)';
+      }
+    }
+    return const JsonEncoder.withIndent('  ').convert(copy);
   }
 }

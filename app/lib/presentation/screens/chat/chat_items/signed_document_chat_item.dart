@@ -277,7 +277,7 @@ class _SignedDocumentChatItemState
           ),
           const SizedBox(height: 6),
           SelectableText(
-            const JsonEncoder.withIndent('  ').convert(widget.data),
+            _truncatedEnvelopeJson(widget.data),
             style: const TextStyle(
               color: Colors.white54,
               fontSize: 10,
@@ -760,5 +760,23 @@ class _SignedDocumentChatItemState
   static String _truncateDid(String did) {
     if (did.length <= 32) return did;
     return '${did.substring(0, 16)}...${did.substring(did.length - 12)}';
+  }
+
+  static String _truncatedEnvelopeJson(Map<String, dynamic> data) {
+    const maxChars = 200;
+    final copy = Map<String, dynamic>.from(data);
+    for (final key in copy.keys.toList()) {
+      final value = copy[key];
+      if (value is Map<String, dynamic>) {
+        final valJson = jsonEncode(value);
+        if (valJson.length > maxChars) {
+          copy[key] =
+              '${valJson.substring(0, maxChars)}... (truncated)';
+        }
+      } else if (value is String && value.length > maxChars) {
+        copy[key] = '${value.substring(0, maxChars)}... (truncated)';
+      }
+    }
+    return const JsonEncoder.withIndent('  ').convert(copy);
   }
 }
