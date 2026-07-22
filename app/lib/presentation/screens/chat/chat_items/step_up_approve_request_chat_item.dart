@@ -34,6 +34,10 @@ class _StepUpApproveRequestChatItemState
     final payload =
         approveRequest['payload'] as Map<String, dynamic>? ?? approveRequest;
     final reason = payload['reason'] as String? ?? 'Step-up approval required';
+    final document =
+        widget.chatItem.data['document'] as Map<String, dynamic>?;
+    final documentTitle = document?['title'] as String?;
+    final documentMediaType = document?['mediaType'] as String?;
     final alreadyConfirmed =
         widget.chatItem.status == chat.ChatItemStatus.confirmed;
     final isActionable =
@@ -110,6 +114,54 @@ class _StepUpApproveRequestChatItemState
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white70, fontSize: 13),
           ),
+          if (documentTitle != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.description_outlined,
+                    color: Colors.white70,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          documentTitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                        if (documentMediaType != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            documentMediaType,
+                            style: const TextStyle(
+                              color: Colors.white38,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           GestureDetector(
             onTap: () => setState(() => _vtaExpanded = !_vtaExpanded),
