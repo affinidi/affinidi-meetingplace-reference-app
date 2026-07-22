@@ -1,6 +1,6 @@
 part of '../chat_screen.dart';
 
-class _SignedDocumentChatItem extends StatefulWidget {
+class _SignedDocumentChatItem extends ConsumerStatefulWidget {
   const _SignedDocumentChatItem({required this.data});
 
   final Map<String, dynamic> data;
@@ -17,12 +17,17 @@ class _SignedDocumentChatItem extends StatefulWidget {
   }
 
   @override
-  State<_SignedDocumentChatItem> createState() =>
+  ConsumerState<_SignedDocumentChatItem> createState() =>
       _SignedDocumentChatItemState();
 }
 
-class _SignedDocumentChatItemState extends State<_SignedDocumentChatItem> {
+class _SignedDocumentChatItemState
+    extends ConsumerState<_SignedDocumentChatItem> {
   bool _detailsExpanded = false;
+  bool _auditExpanded = false;
+  bool _auditLoading = false;
+  Map<String, dynamic>? _auditEntry;
+  String? _auditError;
 
   @override
   Widget build(BuildContext context) {
@@ -178,6 +183,54 @@ class _SignedDocumentChatItemState extends State<_SignedDocumentChatItem> {
               ),
             ),
           ],
+          const SizedBox(height: 4),
+          GestureDetector(
+            onTap: _toggleAuditDetails,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _auditExpanded ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.white38,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  _auditExpanded
+                      ? 'Hide trust task details'
+                      : 'Trust task details',
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          if (_auditExpanded) ...[
+            const SizedBox(height: 8),
+            if (_auditLoading)
+              const Padding(
+                padding: EdgeInsets.all(8),
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white38,
+                  ),
+                ),
+              )
+            else if (_auditError != null)
+              Text(
+                _auditError!,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 11),
+              )
+            else if (_auditEntry != null)
+              _buildAuditDetails(_auditEntry!)
+            else
+              const Text(
+                'No audit entry found',
+                style: TextStyle(color: Colors.white38, fontSize: 11),
+              ),
+          ],
           if (issuerName != null) ...[
             const SizedBox(height: 8),
             Container(
@@ -201,5 +254,168 @@ class _SignedDocumentChatItemState extends State<_SignedDocumentChatItem> {
         ],
       ),
     );
+  }
+
+  void _toggleAuditDetails() {
+    setState(() => _auditExpanded = !_auditExpanded);
+    if (_auditExpanded && _auditEntry == null && !_auditLoading) {
+      _fetchAuditDetails();
+    }
+  }
+
+  Future<void> _fetchAuditDetails() async {
+    setState(() {
+      _auditLoading = true;
+      _auditError = null;
+    });
+
+    try {
+      final signingService = ref.read(signingServiceProvider.notifier);
+      final logs = await signingService.getSigningAuditLogs();
+      final match = _findMatchingAuditEntry(logs);
+      if (mounted) {
+        setState(() {
+          _auditEntry = match;
+          _auditLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _auditError = 'Failed to load: $e';
+          _auditLoading = false;
+        });
+      }
+    }
+  }
+
+  Map<String, dynamic>? _findMatchingAuditEntry(
+    List<Map<String, dynamic>> entries,
+  ) {
+    final proof = widget.data['proof'] as Map<String, dynamic>? ?? {};
+    final proofCreated = proof['created'] as String? ?? '';
+    final envelopeId = widget.data['id'] as String?;
+
+    for (final entry in entries) {
+      final detail = entry['detail'] as Map<String, dynamic>?;
+      if (detail != null && envelopeId != null) {
+        if (detail['envelope_id'] == envelopeId) return entry;
+      }
+    }
+
+    if (proofCreated.isEmpty) return entries.isNotEmpty ? entries.first : null;
+
+    final proofTime = DateTime.tryParse(proofCreated);
+    if (proofTime == null) return entries.isNotEmpty ? entries.first : null;
+
+    Map<String, dynamic>? closest;
+    var minDiff = Duration.zero;
+    for (final entry in entries) {
+      final ts = entry['timestamp'];
+      DateTime? entryTime;
+      if (ts is int) {
+        entryTime = DateTime.fromMillisecondsSinceEpoch(ts * 1000, isUtc: true);
+      } else if (ts is String) {
+        entryTime = DateTime.tryParse(ts);
+      }
+      if (entryTime == null) continue;
+      final diff = proofTime.difference(entryTime).abs();
+      if (closest == null || diff < minDiff) {
+        closest = entry;
+        minDiff = diff;
+      }
+    }
+
+    return closest;
+  }
+
+  Widget _buildAuditDetails(Map<String, dynamic> entry) {
+    final detail = entry['detail'] as Map<String, dynamic>?;
+    final items = <MapEntry<String, String>>[
+      MapEntry('Operation', entry['action'] as String? ?? 'unknown'),
+      MapEntry('Actor', _truncateDid(entry['actor'] as String? ?? '')),
+      MapEntry('Outcome', entry['outcome'] as String? ?? ''),
+      if (entry['resource'] != null)
+        MapEntry('Vault Entry', entry['resource'] as String),
+      if (entry['context_id'] != null)
+        MapEntry('Context', entry['context_id'] as String),
+      if (entry['channel'] != null)
+        MapEntry('Channel', entry['channel'] as String),
+      if (detail != null) ...[
+        if (detail['envelope_id'] != null)
+          MapEntry('Envelope ID', detail['envelope_id'] as String),
+        if (detail['envelope_type'] != null)
+          MapEntry('Envelope Type', detail['envelope_type'] as String),
+        if (detail['envelope_recipient'] != null)
+          MapEntry(
+            'Recipient',
+            _truncateDid(detail['envelope_recipient'] as String),
+          ),
+      ],
+    ];
+
+    final ts = entry['timestamp'];
+    String? timestamp;
+    if (ts is int) {
+      timestamp = DateTime.fromMillisecondsSinceEpoch(
+        ts * 1000,
+        isUtc: true,
+      ).toIso8601String();
+    } else if (ts is String) {
+      timestamp = ts;
+    }
+    if (timestamp != null) {
+      items.add(MapEntry('Timestamp', timestamp));
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final item in items)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 100,
+                    child: Text(
+                      item.key,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: SelectableText(
+                      item.value,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 10,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  static String _truncateDid(String did) {
+    if (did.length <= 32) return did;
+    return '${did.substring(0, 16)}...${did.substring(did.length - 12)}';
   }
 }

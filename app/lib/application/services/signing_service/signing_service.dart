@@ -72,6 +72,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
   late final AppLogger _logger;
 
   VtaAuthWorkflow? _authWorkflow;
+  VtaClient? _vtaClient;
   VtaDidCommChannel? _channel;
   VtaMediatorSession? _mediatorSession;
   VtaStepUpApprovalCoordinator? _coordinator;
@@ -128,6 +129,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
       _logger.info('VTA holder DID (Ed25519): $holderDid', name: _logKey);
 
       final vtaClient = VtaClient(baseUrl: vtaBaseUrl);
+      _vtaClient = vtaClient;
       final signer = AppVtaAuthSigner(
         wallet: ed25519Wallet,
         rootKeyId: _vtaKeyId,
@@ -348,6 +350,34 @@ class SigningService extends StateNotifier<SigningServiceState> {
         name: _logKey,
       );
     }
+  }
+
+  Future<T> _withReauth<T>(Future<T> Function() action) async {
+    try {
+      final token = await _authWorkflow!.getValidAccessToken();
+      _vtaClient!.setAuthToken(token);
+      return await action();
+    } on VtaAuthException {
+      _logger.info('VTA session expired, reconnecting...', name: _logKey);
+      await _authWorkflow!.reconnect();
+      final newToken = await _authWorkflow!.getValidAccessToken();
+      _vtaClient!.setAuthToken(newToken);
+      return action();
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getSigningAuditLogs({
+    int pageSize = 10,
+  }) async {
+    if (_vtaClient == null || _authWorkflow == null) return [];
+    return _withReauth(() async {
+      final result = await _vtaClient!.auditLog.listLogs(
+        action: 'vault.sign-trust-task',
+        outcome: 'success',
+        pageSize: pageSize,
+      );
+      return (result['entries'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+    });
   }
 
   void approveCurrentRequest() {
