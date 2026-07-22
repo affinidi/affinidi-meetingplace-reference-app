@@ -28,6 +28,19 @@ class _SignedDocumentChatItemState
   bool _auditLoading = false;
   Map<String, dynamic>? _auditEntry;
   String? _auditError;
+  bool _verifying = false;
+  bool? _verificationResult;
+  String? _verificationError;
+  int _verifyStep = 0;
+
+  static const _verifySteps = [
+    'Canonicalizing document with JCS (RFC 8785)...',
+    'Computing SHA-256 hash of document...',
+    'Canonicalizing proof configuration...',
+    'Computing SHA-256 hash of proof...',
+    'Resolving DID to obtain public key...',
+    'Verifying Ed25519 signature...',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +158,8 @@ class _SignedDocumentChatItemState
               ],
             ),
           ],
+          const SizedBox(height: 10),
+          _buildVerifyButton(),
           const SizedBox(height: 8),
           GestureDetector(
             onTap: () => setState(() => _detailsExpanded = !_detailsExpanded),
@@ -254,6 +269,250 @@ class _SignedDocumentChatItemState
         ],
       ),
     );
+  }
+
+  Widget _buildVerifyButton() {
+    if (_verifying) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < _verifySteps.length; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (i < _verifyStep)
+                      const Icon(
+                        Icons.check_circle,
+                        color: Colors.greenAccent,
+                        size: 14,
+                      )
+                    else if (i == _verifyStep)
+                      const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.greenAccent,
+                        ),
+                      )
+                    else
+                      const Icon(
+                        Icons.circle_outlined,
+                        color: Colors.white12,
+                        size: 14,
+                      ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        i <= _verifyStep
+                            ? _verifySteps[i]
+                            : _verifySteps[i].replaceAll('...', ''),
+                        style: TextStyle(
+                          color: i < _verifyStep
+                              ? Colors.greenAccent.withValues(alpha: 0.7)
+                              : i == _verifyStep
+                                  ? Colors.white70
+                                  : Colors.white24,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
+    if (_verificationResult != null) {
+      final isValid = _verificationResult!;
+      final proof = widget.data['proof'] as Map<String, dynamic>? ?? {};
+      final verificationMethod = proof['verificationMethod'] as String? ?? '';
+      final cryptosuite = proof['cryptosuite'] as String? ?? '';
+      final proofPurpose = proof['proofPurpose'] as String? ?? '';
+      final created = proof['created'] as String? ?? '';
+      final issuer = widget.data['issuer'] as String? ?? '';
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: (isValid ? Colors.greenAccent : Colors.redAccent)
+              .withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: (isValid ? Colors.greenAccent : Colors.redAccent)
+                .withValues(alpha: 0.3),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isValid ? Icons.verified_user : Icons.gpp_bad,
+                  color: isValid ? Colors.greenAccent : Colors.redAccent,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  isValid
+                      ? 'Cryptographic Signature Verified'
+                      : 'Signature Verification Failed',
+                  style: TextStyle(
+                    color: isValid ? Colors.greenAccent : Colors.redAccent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            if (isValid) ...[
+              const SizedBox(height: 10),
+              _verifyDetailRow('Cryptosuite', cryptosuite),
+              _verifyDetailRow('Purpose', proofPurpose),
+              _verifyDetailRow('Signer', _truncateDid(issuer)),
+              _verifyDetailRow(
+                'Key',
+                _truncateDid(verificationMethod),
+              ),
+              if (created.isNotEmpty)
+                _verifyDetailRow('Signed at', created),
+              const SizedBox(height: 6),
+              const Text(
+                'The document has not been tampered with and was signed '
+                'by the holder of the private key.',
+                style: TextStyle(color: Colors.white38, fontSize: 10),
+              ),
+            ],
+            if (_verificationError != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                _verificationError!,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 10),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: _verifySignature,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.fingerprint, color: Colors.greenAccent, size: 18),
+            SizedBox(width: 8),
+            Text(
+              'Verify Signature',
+              style: TextStyle(
+                color: Colors.greenAccent,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _verifyDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white38,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 10,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _verifySignature() async {
+    setState(() {
+      _verifying = true;
+      _verifyStep = 0;
+    });
+
+    try {
+      final proof = widget.data['proof'] as Map<String, dynamic>? ?? {};
+      final verificationMethod = proof['verificationMethod'] as String? ?? '';
+      final verifierDid = verificationMethod.contains('#')
+          ? verificationMethod.substring(0, verificationMethod.indexOf('#'))
+          : verificationMethod;
+
+      for (var i = 0; i < _verifySteps.length - 1; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        if (!mounted) return;
+        setState(() => _verifyStep = i + 1);
+      }
+
+      final verifier = DataIntegrityEddsaJcsVerifier(
+        verifierDid: verifierDid,
+      );
+      final result = await verifier.verify(widget.data);
+
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      if (mounted) {
+        setState(() {
+          _verifying = false;
+          _verificationResult = result.isValid;
+          _verificationError =
+              result.isValid ? null : result.toString();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _verifying = false;
+          _verificationResult = false;
+          _verificationError = e.toString();
+        });
+      }
+    }
   }
 
   void _toggleAuditDetails() {

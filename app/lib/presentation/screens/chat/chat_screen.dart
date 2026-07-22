@@ -23,6 +23,7 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
+import 'package:ssi/ssi.dart' show DataIntegrityEddsaJcsVerifier;
 import 'package:video_player/video_player.dart';
 
 import '../../../application/services/chat_service/chat_service_state.dart';
