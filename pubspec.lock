@@ -293,10 +293,10 @@ packages:
     dependency: transitive
     description:
       name: camera_android_camerax
-      sha256: cf6c248ef3d3c4846e99e488de9487d95927437e083c396e5fed2c1ece7f93a7
+      sha256: "4fb17b62dc25f97ec752596b749a31e80ccc9829ef95412badfdf0bc6c43a166"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.4+1"
+    version: "0.7.4+2"
   camera_avfoundation:
     dependency: transitive
     description:
@@ -842,10 +842,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_cache_manager
-      sha256: "400b6592f16a4409a7f2bb929a9a7e38c72cceb8ffb99ee57bbf2cb2cecf8386"
+      sha256: "1de7849213b4c73c85aca7e0ac687a9a5d82ccdb594366b9dcc26cb6a2189cd2"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.1"
+    version: "3.4.2"
   flutter_card_swiper:
     dependency: transitive
     description:
@@ -1041,10 +1041,10 @@ packages:
     dependency: transitive
     description:
       name: go_router_builder
-      sha256: d67db3885eb0255e3782369c265be2d56050481ad9e56eec010cbffd7bf53ae2
+      sha256: "53253ae5bd3d3bfc38c5488ca844f6b054c4b905683667db4544e7ab995fddcc"
       url: "https://pub.dev"
     source: hosted
-    version: "4.3.1"
+    version: "4.4.0"
   graphs:
     dependency: transitive
     description:
@@ -1393,10 +1393,10 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_chat
-      sha256: "0304b1534feb5d601fce648145bbc0b0fb8ed88f9c6a69a52d5a1983ef06779e"
+      sha256: "890d93f4d949fbce91439da494ba38149b447cadb39100f8b52aee95ebc5bf5e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.54"
+    version: "0.0.1-dev.55"
   meeting_place_control_plane:
     dependency: transitive
     description:
@@ -1425,18 +1425,18 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_drift_repository
-      sha256: c68fbf29f6b20cdd05387bfb2c33ab052ae2e9ce579766ee7d5794f8513b56b5
+      sha256: d569020cef48fcb2b98b7e88b5dca9f124342552cc7a576f1cf2c3c61694d3ec
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.54"
+    version: "0.0.1-dev.55"
   meeting_place_matrix:
     dependency: transitive
     description:
       name: meeting_place_matrix
-      sha256: "7b588dcbdffea64f54397823176c6de0ac6b2f735203f035933d5c96edf86269"
+      sha256: "5ca5733e72ef3daeb906f351bbdab4d91d3067d4f35faacf47e0f6dff8e4f3be"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.6"
+    version: "0.0.1-dev.7"
   meeting_place_mediator:
     dependency: transitive
     description:
@@ -2446,10 +2446,10 @@ packages:
     dependency: transitive
     description:
       name: video_player_android
-      sha256: "5121de08444d00363efdda630a69ad4d27a208a9f7586482d4909a44a1cdbc63"
+      sha256: e229676f8fade3e0124482495aaa2b548872cc4018b6268adfca4868be16aa74
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.0"
+    version: "2.12.0"
   video_player_avfoundation:
     dependency: transitive
     description:

@@ -164,80 +164,6 @@ void main() {
     });
 
     test(
-      'refreshes current contact card on start from active identity',
-      () async {
-        final identity = FakeIdentities.primaryIdentity;
-        final baseChannel = FakeChannels.individualChannel;
-        final channel = Channel(
-          permanentChannelDid: baseChannel.permanentChannelDid,
-          otherPartyPermanentChannelDid:
-              baseChannel.otherPartyPermanentChannelDid,
-          offerLink: baseChannel.offerLink,
-          contactCard: baseChannel.contactCard,
-          otherPartyContactCard: baseChannel.otherPartyContactCard,
-          otherPartyNotificationToken: baseChannel.otherPartyNotificationToken,
-          seqNo: baseChannel.seqNo,
-          type: baseChannel.type,
-          publishOfferDid: baseChannel.publishOfferDid,
-          mediatorDid: baseChannel.mediatorDid,
-          status: baseChannel.status,
-          isConnectionInitiator: baseChannel.isConnectionInitiator,
-          externalRef: identity.id,
-        );
-        fakeCoreSdk = FakeMeetingPlaceSDK(channels: {channelDid: channel});
-        container.dispose();
-        container = ProviderContainer(
-          overrides: [
-            meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
-            chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
-            contactsServiceProvider.overrideWith(() => fakeContactsService),
-            identitiesServiceProvider.overrideWith(
-              () => FakeIdentitiesService(
-                IdentitiesServiceState(
-                  identities: [identity],
-                  currentIdentity: identity,
-                ),
-              ),
-            ),
-            environmentProvider.overrideWithValue(FakeEnvironment()),
-            appBadgeServiceProvider.overrideWith(
-              (ref) => FakeAppBadgeService(),
-            ),
-            rCardsRepositoryProvider.overrideWith(
-              (ref) async => FakeNoOpRCardRepository(),
-            ),
-            vrcRepositoryProvider.overrideWith(
-              (ref) async => FakeNoOpVrcRepository(),
-            ),
-            secureStorageProvider.overrideWith(
-              (ref) async => FakeSecureStorage(),
-            ),
-            networkConnectivityServiceProvider.overrideWith(
-              _FakeNetworkConnectivityService.new,
-            ),
-          ],
-        );
-        container.listen(
-          chatSessionServiceProvider(channelDid),
-          (previous, value) {},
-          fireImmediately: true,
-        );
-        chatService = container.read(
-          chatSessionServiceProvider(channelDid).notifier,
-        );
-
-        await chatService.startChatSession();
-
-        expect(fakeChatSdk.refreshCurrentContactCardCallCount, equals(1));
-        expect(fakeChatSdk.lastRefreshedCurrentContactCard, isNotNull);
-        expect(
-          fakeChatSdk.lastRefreshedCurrentContactCard!.toJson()['contactInfo'],
-          equals(identity.card.toSdkContactCard().toJson()['contactInfo']),
-        );
-      },
-    );
-
-    test(
       'refreshes current contact card again when identity changes mid-session',
       () async {
         final identity = FakeIdentities.primaryIdentity;
@@ -304,7 +230,7 @@ void main() {
         );
 
         await chatService.startChatSession();
-        expect(fakeChatSdk.refreshCurrentContactCardCallCount, equals(1));
+        expect(fakeChatSdk.refreshCurrentContactCardCallCount, equals(0));
 
         fakeIdentitiesService.setState(
           IdentitiesServiceState(
@@ -314,7 +240,7 @@ void main() {
         );
         await Future<void>.delayed(Duration.zero);
 
-        expect(fakeChatSdk.refreshCurrentContactCardCallCount, equals(2));
+        expect(fakeChatSdk.refreshCurrentContactCardCallCount, equals(1));
         expect(
           fakeChatSdk.lastRefreshedCurrentContactCard!.toJson()['contactInfo'],
           equals(

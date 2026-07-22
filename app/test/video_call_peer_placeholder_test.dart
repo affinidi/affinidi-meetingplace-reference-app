@@ -7,8 +7,8 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/cache_manager_provider.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_peer_placeholder.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_peer_placeholder.dart';
 
 import 'fakes/fake_cache_manager.dart';
 import 'fakes/fake_contacts.dart';

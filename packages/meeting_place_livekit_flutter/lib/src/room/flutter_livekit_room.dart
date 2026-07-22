@@ -117,9 +117,17 @@ class FlutterLiveKitRoom implements LiveKitRoom {
     _isDisposed = true;
     await _roomListener?.dispose();
     _roomListener = null;
-    await _room?.disconnect();
+    final room = _room;
     _room = null;
     _keyProvider = null;
+    try {
+      await room?.disconnect();
+    } on TimeoutException {
+      _logger.info(
+        'disconnect: Server disconnect ack timed out; room released anyway',
+        name: _logKey,
+      );
+    }
     _logger.info('disconnect: Done', name: _logKey);
   }
 

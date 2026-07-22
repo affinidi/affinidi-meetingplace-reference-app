@@ -10,8 +10,8 @@ class _VideoCallViewData {
     required this.peerName,
     required this.memberContactCards,
     required this.peerParticipant,
-    required this.selfParticipant,
-    required this.pipState,
+    required this.showControls,
+    required this.isCameraEnabled,
     required this.controls,
   });
 
@@ -23,8 +23,8 @@ class _VideoCallViewData {
   final String peerName;
   final Map<String, ContactCard> memberContactCards;
   final AudioVideoCallParticipant? peerParticipant;
-  final AudioVideoCallParticipant? selfParticipant;
-  final _PiPState pipState;
+  final bool showControls;
+  final bool isCameraEnabled;
   final _CallControls controls;
 }
 
@@ -42,30 +42,14 @@ class _VideoCallActions {
   final VoidCallback onToggleMic;
 }
 
-/// State needed to render the self-view PiP overlay in a 1:1 video call.
-class _PiPState {
-  const _PiPState({
-    required this.isCameraEnabled,
-    required this.isMicEnabled,
-    required this.micPermissionError,
-    required this.showControls,
-  });
-
-  final bool isCameraEnabled;
-  final bool isMicEnabled;
-  final bool micPermissionError;
-  final bool showControls;
-}
-
-/// Video call screen: peer camera full-screen with self-view PiP and call
+/// Video call screen: peer camera full-screen with call
 /// overlays.
 ///
 /// For 1:1 calls (at most one peer): the peer's camera fills the
-/// background, with a draggable self-view window and the same top-bar and
-/// controls overlay as the audio call screen.
+/// background, with the same top-bar and controls overlay as the audio call
+/// screen.
 ///
-/// For group calls (two or more peers): falls back to
-/// [_CallParticipantGrid] with a tiled layout.
+/// For group calls (two or more peers): displays a grid layout.
 class _VideoCallScreen extends ConsumerWidget {
   const _VideoCallScreen({required this.contactId});
 
@@ -122,8 +106,6 @@ class _VideoCallScreen extends ConsumerWidget {
     );
 
     final peerParticipant = participants.where((p) => !p.isSelf).firstOrNull;
-    final selfParticipant = participants.where((p) => p.isSelf).firstOrNull;
-
     final viewData = _VideoCallViewData(
       contactId: contactId,
       status: status,
@@ -133,13 +115,8 @@ class _VideoCallScreen extends ConsumerWidget {
       peerName: peerName,
       memberContactCards: memberContactCards,
       peerParticipant: peerParticipant,
-      selfParticipant: selfParticipant,
-      pipState: _PiPState(
-        isCameraEnabled: isCameraEnabled,
-        isMicEnabled: isMicEnabled,
-        micPermissionError: micPermissionError,
-        showControls: showControls,
-      ),
+      showControls: showControls,
+      isCameraEnabled: isCameraEnabled,
       controls: controls,
     );
 
@@ -169,39 +146,11 @@ class _GroupVideoCallScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Column(
-        children: [
-          ColoredBox(
-            color: Colors.black,
-            child: SafeArea(
-              bottom: false,
-              child: _CallTopBar.group(
-                contactId: viewData.contactId,
-                onMinimize: actions.onMinimize,
-              ),
-            ),
-          ),
-          Expanded(
-            child: MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              child: _CallParticipantGrid(
-                contactId: viewData.contactId,
-                status: viewData.status,
-                errorCode: viewData.errorCode,
-                isAudioOnly: false,
-                participants: viewData.participants,
-                session: viewData.session,
-                peerName: viewData.peerName,
-                memberContactCards: viewData.memberContactCards,
-                controls: _ControlsOverlayContent(controls: viewData.controls),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return GroupVideoCallScreen(
+      contactId: viewData.contactId,
+      controls: _ControlsOverlayContent(controls: viewData.controls),
+      onMinimize: actions.onMinimize,
+      onSwitchCamera: actions.onSwitchCamera,
     );
   }
 }
@@ -217,6 +166,10 @@ class _IndividualVideoCallScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selfParticipant = viewData.participants
+        .where((participant) => participant.isSelf)
+        .firstOrNull;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: GestureDetector(
@@ -225,13 +178,28 @@ class _IndividualVideoCallScaffold extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            _IndividualVideoCallStage(
-              contactId: viewData.contactId,
-              session: viewData.session,
-              peerParticipant: viewData.peerParticipant,
-              selfParticipant: viewData.selfParticipant,
-              isCameraEnabled: viewData.pipState.isCameraEnabled,
-            ),
+            if (viewData.peerParticipant != null && selfParticipant != null)
+              _IndividualVideoCallWithPiPStage(
+                contactId: viewData.contactId,
+                peerParticipant: viewData.peerParticipant!,
+                selfParticipant: selfParticipant,
+                session: viewData.session,
+                isCameraEnabled: viewData.isCameraEnabled,
+                showControlsBar: viewData.showControls,
+                isMicEnabled: viewData.controls.mic.isEnabled,
+                micPermissionError: viewData.controls.mic.isDisabled,
+                cameraPermissionError:
+                    viewData.controls.camera?.isDisabled ?? false,
+                onToggleMic: actions.onToggleMic,
+                onSwitchCamera: actions.onSwitchCamera,
+              )
+            else
+              _IndividualVideoCallStage(
+                contactId: viewData.contactId,
+                session: viewData.session,
+                peerParticipant: viewData.peerParticipant,
+                isCameraEnabled: viewData.isCameraEnabled,
+              ),
             Positioned.fill(
               child: SafeArea(
                 child: LayoutBuilder(
@@ -239,35 +207,15 @@ class _IndividualVideoCallScaffold extends StatelessWidget {
                     fit: StackFit.expand,
                     children: [
                       _CallTopBarOverlay(
-                        visible: viewData.pipState.showControls,
+                        visible: viewData.showControls,
                         child: _CallTopBar.cameraSwitch(
                           contactId: viewData.contactId,
                           onMinimize: actions.onMinimize,
                           onSwitchCamera: actions.onSwitchCamera,
                         ),
                       ),
-                      if (viewData.peerParticipant != null &&
-                          viewData.selfParticipant != null)
-                        VideoCallPiPWindow(
-                          contactId: viewData.contactId,
-                          session: viewData.session,
-                          participant: viewData.selfParticipant!,
-                          isCameraEnabled: viewData.pipState.isCameraEnabled,
-                          availableSize: constraints.biggest,
-                          useCameraSizedWindowWhenVideoOff: true,
-                          showControlsBar: viewData.pipState.showControls,
-                          overlayChildren: [
-                            if (!viewData.pipState.showControls)
-                              _InCallMuteButton(
-                                isMicEnabled: viewData.pipState.isMicEnabled,
-                                isPermissionError:
-                                    viewData.pipState.micPermissionError,
-                                onTap: actions.onToggleMic,
-                              ),
-                          ],
-                        ),
                       _AnimatedControlsOverlay(
-                        visible: viewData.pipState.showControls,
+                        visible: viewData.showControls,
                         duration: const Duration(milliseconds: 100),
                         child: _ControlsOverlayContent(
                           controls: viewData.controls,
@@ -290,14 +238,12 @@ class _IndividualVideoCallStage extends StatelessWidget {
     required this.contactId,
     required this.session,
     required this.peerParticipant,
-    required this.selfParticipant,
     required this.isCameraEnabled,
   });
 
   final String contactId;
   final AudioVideoCallSession? session;
   final AudioVideoCallParticipant? peerParticipant;
-  final AudioVideoCallParticipant? selfParticipant;
   final bool isCameraEnabled;
 
   @override
@@ -311,42 +257,87 @@ class _IndividualVideoCallStage extends StatelessWidget {
       );
     }
 
-    final self = selfParticipant;
-    final selfPreviewParticipantId = switch (session) {
-      LiveKitCallSession liveKitSession => liveKitSession.room.ownParticipantId,
-      _ => null,
-    };
-    final showSelfVideo =
-        isCameraEnabled &&
-        ((self != null && self.hasVideo) || selfPreviewParticipantId != null);
-
-    if (showSelfVideo) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          ColoredBox(
-            color: Colors.black,
-            child: VideoCallPeerPlaceholder(
-              contactId: contactId,
-              showCurrentIdentity: false,
-            ),
-          ),
-          AudioVideoCallView(
-            session: session,
-            participantId: self?.participantId ?? selfPreviewParticipantId!,
-            hasVideo: true,
-            mirror: true,
-          ),
-        ],
-      );
-    }
-
     return ColoredBox(
       color: Colors.black,
       child: VideoCallPeerPlaceholder(
         contactId: contactId,
         showCurrentIdentity: false,
       ),
+    );
+  }
+}
+
+class _IndividualVideoCallWithPiPStage extends StatelessWidget {
+  const _IndividualVideoCallWithPiPStage({
+    required this.contactId,
+    required this.peerParticipant,
+    required this.selfParticipant,
+    required this.session,
+    required this.isCameraEnabled,
+    required this.showControlsBar,
+    required this.isMicEnabled,
+    required this.micPermissionError,
+    required this.cameraPermissionError,
+    required this.onToggleMic,
+    required this.onSwitchCamera,
+  });
+
+  final String contactId;
+  final AudioVideoCallParticipant peerParticipant;
+  final AudioVideoCallParticipant selfParticipant;
+  final AudioVideoCallSession? session;
+  final bool isCameraEnabled;
+  final bool showControlsBar;
+  final bool isMicEnabled;
+  final bool micPermissionError;
+  final bool cameraPermissionError;
+  final VoidCallback onToggleMic;
+  final VoidCallback onSwitchCamera;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _IndividualVideoCallStage(
+          contactId: contactId,
+          session: session,
+          peerParticipant: peerParticipant,
+          isCameraEnabled: isCameraEnabled,
+        ),
+        Positioned.fill(
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) => Stack(
+                fit: StackFit.expand,
+                children: [
+                  VideoCallPiPWindow(
+                    contactId: contactId,
+                    session: session,
+                    participant: selfParticipant,
+                    isCameraEnabled: isCameraEnabled,
+                    availableSize: constraints.biggest,
+                    useCameraSizedWindowWhenVideoOff: true,
+                    showControlsBar: showControlsBar,
+                    overlayChildren: [
+                      if (!showControlsBar)
+                        VideoCallPiPMuteButton(
+                          isMicEnabled: isMicEnabled,
+                          isPermissionError: micPermissionError,
+                          onTap: onToggleMic,
+                        ),
+                      VideoCallPiPFlipCameraButton(
+                        isPermissionError: cameraPermissionError,
+                        onTap: onSwitchCamera,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

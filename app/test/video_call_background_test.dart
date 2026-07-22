@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_background.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_peer_placeholder.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_background.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_peer_placeholder.dart';
 
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_contacts_service.dart';

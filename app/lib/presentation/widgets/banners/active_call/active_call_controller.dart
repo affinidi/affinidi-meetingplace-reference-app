@@ -10,6 +10,7 @@ import '../../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
 import '../../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
+import '../../call/video_call_pip_window.dart';
 import '../../call_ended/call_ended_controller.dart';
 import '../end_call/end_call_banner_controller.dart';
 import 'active_call_state.dart';
@@ -157,6 +158,7 @@ class ActiveCallController extends _$ActiveCallController {
   void clear() {
     if (_isDisposed) return;
     _logger.info('clear: Releasing session', name: _logKey);
+    resetVideoCallPiPPosition();
     stopTimer();
     _callStartedAt = null;
     _sessionStateSub?.cancel();
@@ -248,6 +250,7 @@ class ActiveCallController extends _$ActiveCallController {
   void clearSession() {
     if (_isDisposed) return;
     _logger.info('clearSession: Session released', name: _logKey);
+    resetVideoCallPiPPosition();
     _sessionStateSub?.cancel();
     _sessionStateSub = null;
     _participantEventSub?.cancel();

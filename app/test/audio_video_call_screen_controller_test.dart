@@ -1150,8 +1150,8 @@ void main() {
                 callId: 'call-1',
                 callerPermanentChannelDid: 'sim1@example.com',
                 otherPartyPermanentChannelDid: channelDid,
-                invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.video,
+                invitedAt: DateTime.now(),
               ),
             );
 

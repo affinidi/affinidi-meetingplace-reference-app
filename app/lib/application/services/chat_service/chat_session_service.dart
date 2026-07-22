@@ -258,7 +258,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       if (!ref.mounted) return;
 
       _chatSDK = await ref.read(chatSdkProvider(channel).future);
-
       if (!ref.mounted) {
         _chatSDK = null;
         return;
@@ -277,19 +276,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           ? ContactCardUtils.fromSdkContactCard(srcCard)
           : null;
       _otherPartyFirstName = initialCard?.firstName;
-
-      final currentIdentityCard = ref
-          .read(identitiesServiceProvider)
-          .getIdentityById(channel.externalRef)
-          ?.card;
-      if (currentIdentityCard != null) {
-        unawaited(
-          _chatSDK?.refreshCurrentContactCard(
-                currentIdentityCard.toSdkContactCard(),
-              ) ??
-              Future<void>.value(),
-        );
-      }
 
       if (_isGroupChat) {
         final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
@@ -752,7 +738,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   ) async {
     _toggleChatLoading(true);
     _logger.info(
-      '[MessagesStream] Received event: ${data.event.runtimeType}',
+      '[MessagesStream] Received event: ${data.event.runtimeType} '
+      'chatItem=${data.chatItem.runtimeType}',
       name: _logKey,
     );
 

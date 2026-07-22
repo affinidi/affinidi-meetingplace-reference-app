@@ -1926,16 +1926,7 @@
 	"@videoCallShowLess": {
 		"type": "text"
 	},
-	"videoCallFailedToJoin": "Failed to join: {error}",
-	"@videoCallFailedToJoin": {
-		"type": "text",
-		"placeholders": {
-			"error": {
-				"type": "String"
-			}
-		}
-	},
-	"videoCallError": "{errorCode, select, networkError{Network error} other{Unknown error}}",
+	"videoCallError": "{errorCode, select, channelNotFound{Call channel not found} tokenFetchFailed{Failed to get call credentials} connectionFailed{Failed to connect to the call. Check room access or try again.} groupCallPermissionDenied{You do not have permission to join this group call. Check room access or ask a group admin.} callInviteFailed{Failed to notify other participants about the call} networkError{Network error} unexpected{Unexpected call error} other{Unknown error}}",
 	"@videoCallError": {
 		"type": "text",
 		"placeholders": {
@@ -2019,6 +2010,10 @@
 	},
 	"videoCallCallDeclined": "Call declined",
 	"@videoCallCallDeclined": {
+		"type": "text"
+	},
+	"videoCallCallFailed": "Call failed",
+	"@videoCallCallFailed": {
 		"type": "text"
 	},
 	"videoCallCallEnded": "Call ended",
@@ -2164,5 +2159,18 @@
 	"groupCallLeave": "Leave",
 	"@groupCallLeave": {
 		"type": "text"
+	},
+	"videoCallMuted": "Muted",
+	"@videoCallMuted": {
+		"type": "text"
+	},
+	"videoCallPeerMuted": "{peerName} is muted",
+	"@videoCallPeerMuted": {
+		"type": "text",
+		"placeholders": {
+			"peerName": {
+				"type": "String"
+			}
+		}
 	}
 }

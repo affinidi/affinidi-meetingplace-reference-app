@@ -3064,16 +3064,10 @@ abstract class AppLocalizations {
   /// **'Show less'**
   String get videoCallShowLess;
 
-  /// No description provided for @videoCallFailedToJoin.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to join: {error}'**
-  String videoCallFailedToJoin(String error);
-
   /// No description provided for @videoCallError.
   ///
   /// In en, this message translates to:
-  /// **'{errorCode, select, networkError{Network error} other{Unknown error}}'**
+  /// **'{errorCode, select, channelNotFound{Call channel not found} tokenFetchFailed{Failed to get call credentials} connectionFailed{Failed to connect to the call. Check room access or try again.} groupCallPermissionDenied{You do not have permission to join this group call. Check room access or ask a group admin.} callInviteFailed{Failed to notify other participants about the call} networkError{Network error} unexpected{Unexpected call error} other{Unknown error}}'**
   String videoCallError(String errorCode);
 
   /// No description provided for @videoCallMicToggleFailed.
@@ -3183,6 +3177,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Call declined'**
   String get videoCallCallDeclined;
+
+  /// No description provided for @videoCallCallFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Call failed'**
+  String get videoCallCallFailed;
 
   /// No description provided for @videoCallCallEnded.
   ///
@@ -3369,6 +3369,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave'**
   String get groupCallLeave;
+
+  /// No description provided for @videoCallMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get videoCallMuted;
+
+  /// No description provided for @videoCallPeerMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'{peerName} is muted'**
+  String videoCallPeerMuted(String peerName);
 }
 
 class _AppLocalizationsDelegate

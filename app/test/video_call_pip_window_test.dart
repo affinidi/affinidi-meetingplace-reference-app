@@ -8,8 +8,8 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_pip_window.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/video_call_pip_window.dart';
 
 import 'fakes/fake_identities.dart';
 
@@ -62,6 +62,35 @@ void main() {
     );
   });
 
+  setUp(resetVideoCallPiPPosition);
+
+  test('reset drops the remembered PiP resting position', () {
+    final remembered = resolveVideoCallPiPRestingPosition(
+      availableSize: const Size(400, 800),
+      windowWidth: 120,
+      baseHeight: 120,
+      bottomInset: 0,
+      showControlsBar: false,
+      systemGestureLeft: 0,
+      rememberedPosition: const Offset(24, 40),
+    );
+
+    expect(remembered, const Offset(24, 40));
+
+    resetVideoCallPiPPosition();
+
+    final reset = resolveVideoCallPiPRestingPosition(
+      availableSize: const Size(400, 800),
+      windowWidth: 120,
+      baseHeight: 120,
+      bottomInset: 0,
+      showControlsBar: false,
+      systemGestureLeft: 0,
+    );
+
+    expect(reset, const Offset(264, 556));
+  });
+
   group('VideoCallPiPWindow self avatar placeholder', () {
     testWidgets('shows ProfileCircleAvatar when camera is disabled', (
       tester,
@@ -77,6 +106,11 @@ void main() {
       await tester.pump();
 
       expect(find.byType(ProfileCircleAvatar), findsOneWidget);
+
+      final avatar = tester.widget<ProfileCircleAvatar>(
+        find.byType(ProfileCircleAvatar),
+      );
+      expect(avatar.radius, 32);
     });
 
     testWidgets(
@@ -94,6 +128,11 @@ void main() {
         // child when no image is set).
         expect(find.byType(ProfileCircleAvatar), findsOneWidget);
         expect(find.byIcon(Icons.person), findsOneWidget);
+
+        final avatar = tester.widget<ProfileCircleAvatar>(
+          find.byType(ProfileCircleAvatar),
+        );
+        expect(avatar.radius, 32);
       },
     );
 

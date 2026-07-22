@@ -2038,14 +2038,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get videoCallShowLess => 'Mostrar menos';
 
   @override
-  String videoCallFailedToJoin(String error) {
-    return 'Error al unirse: $error';
-  }
-
-  @override
   String videoCallError(String errorCode) {
     String _temp0 = intl.Intl.selectLogic(errorCode, {
+      'channelNotFound': 'No se encontró el canal de la llamada',
+      'tokenFetchFailed':
+          'No se pudieron obtener las credenciales de la llamada',
+      'connectionFailed':
+          'No se pudo conectar a la llamada. Revisa el acceso a la sala o inténtalo de nuevo.',
+      'groupCallPermissionDenied':
+          'No tienes permiso para unirte a esta llamada grupal. Revisa el acceso a la sala o pide ayuda a un administrador del grupo.',
+      'callInviteFailed':
+          'No se pudo notificar a los otros participantes sobre la llamada',
       'networkError': 'Error de red',
+      'unexpected': 'Error inesperado en la llamada',
       'other': 'Error desconocido',
     });
     return '$_temp0';
@@ -2119,6 +2124,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get videoCallCallDeclined => 'Llamada rechazada';
+
+  @override
+  String get videoCallCallFailed => 'La llamada falló';
 
   @override
   String get videoCallCallEnded => 'Llamada finalizada';
@@ -2238,4 +2246,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get groupCallLeave => 'Salir';
+
+  @override
+  String get videoCallMuted => 'Silenciado';
+
+  @override
+  String videoCallPeerMuted(String peerName) {
+    return '$peerName está silenciado';
+  }
 }

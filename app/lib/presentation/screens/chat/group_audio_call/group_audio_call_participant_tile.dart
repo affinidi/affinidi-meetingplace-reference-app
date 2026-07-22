@@ -73,7 +73,11 @@ class _ParticipantProfileTile extends StatelessWidget {
           child: _DefaultProfileIcon(size: size),
         ),
         if (isMuted)
-          Positioned(bottom: 0, right: 0, child: _MutedIndicator(size: size)),
+          Positioned(
+            top: size * 0.08,
+            left: size * 0.08,
+            child: _MutedIndicator(size: size),
+          ),
         if (isSelf) const Positioned(top: 0, right: 0, child: _SelfIndicator()),
       ],
     );
@@ -88,8 +92,9 @@ class _MutedIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size * 0.35,
-      height: size * 0.35,
+      width: size * 0.24,
+      height: size * 0.24,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: context.customColors.rose,
@@ -97,7 +102,7 @@ class _MutedIndicator extends StatelessWidget {
       child: Icon(
         Icons.mic_off,
         color: context.customColors.pureWhite,
-        size: size * 0.18,
+        size: size * 0.12,
       ),
     );
   }

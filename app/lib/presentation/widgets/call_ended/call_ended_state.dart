@@ -9,5 +9,6 @@ abstract class CallEndedState with _$CallEndedState {
     required String peerName,
     required int callDurationSeconds,
     required bool isAudioOnly,
+    String? errorMessage,
   }) = _CallEndedState;
 }

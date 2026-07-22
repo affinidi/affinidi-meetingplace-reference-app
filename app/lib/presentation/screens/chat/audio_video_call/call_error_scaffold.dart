@@ -1,16 +1,12 @@
 part of 'audio_video_call_screen.dart';
 
 class _ErrorScaffold extends StatelessWidget {
-  const _ErrorScaffold({this._errorCode});
-
-  final AudioVideoCallErrorCode? _errorCode;
+  const _ErrorScaffold();
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final errorMessage = l10n.videoCallFailedToJoin(
-      l10n.videoCallError(_errorCode?.name ?? ''),
-    );
+    final errorMessage = l10n.videoCallError('channelNotFound');
     return Scaffold(
       backgroundColor: context.customColors.grey900,
       appBar: AppBar(

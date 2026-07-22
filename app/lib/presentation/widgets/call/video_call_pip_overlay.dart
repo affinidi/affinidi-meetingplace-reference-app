@@ -8,20 +8,21 @@ import 'package:meeting_place_livekit_flutter/meeting_place_livekit_flutter.dart
     show AudioVideoCallView;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
-import '../../application/services/identities_service/identities_service.dart';
-import '../../infrastructure/extensions/build_context_extensions.dart';
-import '../../infrastructure/extensions/contact_card_extensions.dart';
-import '../../infrastructure/providers/cache_manager_provider.dart';
-import '../../navigation/navigator.dart';
-import '../../navigation/routes/dashboard_routes.dart';
-import '../app/app_header_banner.dart' show AppHeaderBanner;
-import '../screens/chat/audio_video_call/audio_video_call_screen.dart'
+import '../../../application/services/identities_service/identities_service.dart';
+import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../navigation/navigator.dart';
+import '../../../navigation/routes/dashboard_routes.dart';
+import '../../app/app_header_banner.dart' show AppHeaderBanner;
+import '../../screens/chat/audio_video_call/audio_video_call_screen.dart'
     show AudioVideoCallScreen;
-import '../screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
-import '../screens/chat/audio_video_call/rules/call_ui_rules.dart';
-import '../widgets/banners/active_call/active_call_controller.dart';
-import 'profile_circle_avatar.dart';
+import '../../screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
+import '../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
+import '../banners/active_call/active_call_controller.dart';
+import '../profile_circle_avatar.dart';
 import 'video_call_peer_placeholder.dart';
+import 'video_call_pip_action_buttons.dart';
 import 'video_call_pip_window.dart';
 
 /// Global wrapper that shows [VideoCallPiPWindow] above all routes when a
@@ -31,7 +32,7 @@ import 'video_call_pip_window.dart';
 /// - a call is active and minimized (`isMinimized == true`)
 /// - the call is not audio-only
 ///
-/// The self camera being off does not hide the window — it renders the self
+/// The self camera being off does not hide the window. It renders the self
 /// avatar, matching the in-screen self-view.
 ///
 /// Tapping once expands the window slightly as a hint; tapping again
@@ -122,7 +123,6 @@ class _ExpandableOverlay extends HookConsumerWidget {
       ).select((s) => s.isMicEnabled),
     );
 
-    // Auto-collapse icons after 2 seconds.
     useEffect(() {
       if (!isExpanded.value) return null;
       final timer = Timer(const Duration(seconds: 2), () {
@@ -164,13 +164,13 @@ class _ExpandableOverlay extends HookConsumerWidget {
                 participant: participant,
                 isCameraEnabled: isCameraEnabled,
               ),
-              _PiPMuteButton(
+              VideoCallPiPMuteButton(
                 isMicEnabled: isMicEnabled,
                 isPermissionError: micPermissionError,
                 onTap: controller.toggleMic,
               ),
-              _PiPExpandButton(onTap: maximize),
-              _PiPFlipCameraButton(
+              VideoCallPiPExpandButton(onTap: maximize),
+              VideoCallPiPFlipCameraButton(
                 isPermissionError: cameraPermissionError,
                 onTap: controller.switchCamera,
               ),
@@ -193,7 +193,7 @@ class _MinimizedPeerPrimary extends StatelessWidget {
     required this.peerParticipant,
   });
 
-  static const double _placeholderDiameter = 88;
+  static const double _placeholderDiameter = 64;
 
   final String contactId;
   final AudioVideoCallSession? session;
@@ -258,10 +258,11 @@ class _MinimizedLocalInset extends ConsumerWidget {
         width: _width,
         height: _height,
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: context.customColors.callControlSurface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: context.colorScheme.outline.withValues(alpha: 0.3),
+            color: context.customColors.whiteOverlay30,
+            width: 1,
           ),
         ),
         child: ClipRRect(
@@ -284,116 +285,6 @@ class _MinimizedLocalInset extends ConsumerWidget {
                     ),
                   ),
                 ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PiPMuteButton extends StatelessWidget {
-  const _PiPMuteButton({
-    required this.isMicEnabled,
-    required this.isPermissionError,
-    required this.onTap,
-  });
-
-  final bool isMicEnabled;
-  final bool isPermissionError;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.customColors;
-
-    return Positioned(
-      top: 10,
-      left: 10,
-      child: Opacity(
-        opacity: isPermissionError ? 0.4 : 1.0,
-        child: GestureDetector(
-          onTap: isPermissionError ? null : onTap,
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: isMicEnabled
-                  ? colors.darkGrey.withValues(alpha: 0.75)
-                  : colors.pureWhite,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isMicEnabled ? Icons.mic : Icons.mic_off,
-              color: isMicEnabled ? colors.pureWhite : colors.rose,
-              size: 16,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _PiPExpandButton extends StatelessWidget {
-  const _PiPExpandButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.customColors;
-
-    return Positioned(
-      top: 10,
-      right: 44,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 28,
-          height: 28,
-          decoration: BoxDecoration(
-            color: colors.darkGrey.withValues(alpha: 0.75),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.open_in_full, color: colors.pureWhite, size: 14),
-        ),
-      ),
-    );
-  }
-}
-
-class _PiPFlipCameraButton extends StatelessWidget {
-  const _PiPFlipCameraButton({
-    required this.isPermissionError,
-    required this.onTap,
-  });
-
-  final bool isPermissionError;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.customColors;
-
-    return Positioned(
-      top: 10,
-      right: 10,
-      child: Opacity(
-        opacity: isPermissionError ? 0.4 : 1.0,
-        child: GestureDetector(
-          onTap: isPermissionError ? null : onTap,
-          child: Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: colors.darkGrey.withValues(alpha: 0.75),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.flip_camera_ios,
-              color: colors.pureWhite,
-              size: 16,
-            ),
-          ),
         ),
       ),
     );

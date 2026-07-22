@@ -4,6 +4,15 @@ import 'package:meta/meta.dart';
 
 import 'participant_video_extension.dart';
 
+bool? _participantHasAudio(Participant participant) {
+  final audioPublication = participant.audioTrackPublications.firstOrNull;
+  if (audioPublication == null) {
+    return null;
+  }
+
+  return !audioPublication.muted;
+}
+
 /// Normalizes a MatrixRTC participant identity to its base user ID, stripping
 /// device suffix if present.
 @visibleForTesting
@@ -48,7 +57,7 @@ extension RoomParticipantsExtension on Room {
           participantId: self.identity,
           did: _participantDidForIdentity(self.identity, participantIdToDid),
           hasVideo: self.hasRenderableVideo,
-          hasAudio: self.isMicrophoneEnabled(),
+          hasAudio: _participantHasAudio(self),
           isSpeaking: self.isSpeaking,
           isSelf: true,
         ),
@@ -57,7 +66,7 @@ extension RoomParticipantsExtension on Room {
           participantId: p.identity,
           did: _participantDidForIdentity(p.identity, participantIdToDid),
           hasVideo: p.hasRenderableVideo,
-          hasAudio: p.isMicrophoneEnabled(),
+          hasAudio: _participantHasAudio(p),
           isSpeaking: p.isSpeaking,
         ),
     ];

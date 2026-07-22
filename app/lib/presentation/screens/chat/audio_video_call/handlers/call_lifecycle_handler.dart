@@ -47,14 +47,24 @@ class CallLifecycleHandler {
     final sdk = _getSDK();
     if (sdk == null) {
       _logger.warning('joinCall: SDK not available', name: _logKey);
-      _onUpdate(const CallLifecycleUpdate(status: AudioVideoCallStatus.error));
+      _onUpdate(
+        const CallLifecycleUpdate(
+          status: AudioVideoCallStatus.error,
+          errorCode: AudioVideoCallErrorCode.unexpected,
+        ),
+      );
       return;
     }
 
     final channelDid = _channelDid;
     if (channelDid == null) {
       _logger.warning('joinCall: Contact has no channelDid', name: _logKey);
-      _onUpdate(const CallLifecycleUpdate(status: AudioVideoCallStatus.error));
+      _onUpdate(
+        const CallLifecycleUpdate(
+          status: AudioVideoCallStatus.error,
+          errorCode: AudioVideoCallErrorCode.channelNotFound,
+        ),
+      );
       return;
     }
 
@@ -174,6 +184,7 @@ class CallLifecycleHandler {
         isSpeakerEnabled: speakerphoneEnabled,
       ),
     );
+
     try {
       final session = await sdk.startCall(
         otherPartyChannelDid: channelDid,
@@ -190,7 +201,61 @@ class CallLifecycleHandler {
         name: _logKey,
       );
       await _audioSessionService.release();
-      _onUpdate(const CallLifecycleUpdate(status: AudioVideoCallStatus.error));
+      _onUpdate(
+        CallLifecycleUpdate(
+          status: AudioVideoCallStatus.error,
+          errorCode: _resolveJoinErrorCode(e),
+        ),
+      );
     }
+  }
+
+  AudioVideoCallErrorCode _resolveJoinErrorCode(Object error) {
+    if (_isNetworkJoinError(error)) {
+      return AudioVideoCallErrorCode.networkError;
+    }
+
+    final matrixSdkError = _extractMatrixSdkException(error);
+    if (matrixSdkError != null) {
+      return switch (matrixSdkError.code) {
+        MeetingPlaceMatrixSDKErrorCode.matrixGroupCallPermissionDenied =>
+          AudioVideoCallErrorCode.groupCallPermissionDenied,
+        MeetingPlaceMatrixSDKErrorCode.matrixRoomNotFound =>
+          AudioVideoCallErrorCode.channelNotFound,
+        MeetingPlaceMatrixSDKErrorCode.matrixVoipNotInitialized ||
+        MeetingPlaceMatrixSDKErrorCode.matrixVoipConflictForClient =>
+          AudioVideoCallErrorCode.connectionFailed,
+        _ => AudioVideoCallErrorCode.unexpected,
+      };
+    }
+
+    return AudioVideoCallErrorCode.unexpected;
+  }
+
+  bool _isNetworkJoinError(Object error) {
+    if (error is Exception && error.isNetworkError) {
+      return true;
+    }
+
+    if (error is MeetingPlaceLiveKitCallOperationException &&
+        error.innerException is Exception) {
+      final innerException = error.innerException! as Exception;
+      return innerException.isNetworkError;
+    }
+
+    return false;
+  }
+
+  MatrixSDKException? _extractMatrixSdkException(Object error) {
+    if (error is MatrixSDKException) {
+      return error;
+    }
+
+    if (error is MeetingPlaceLiveKitCallOperationException &&
+        error.innerException is MatrixSDKException) {
+      return error.innerException! as MatrixSDKException;
+    }
+
+    return null;
   }
 }

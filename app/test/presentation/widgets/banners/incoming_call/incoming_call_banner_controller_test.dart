@@ -119,8 +119,8 @@ void main() {
               callId: 'call-1',
               callerPermanentChannelDid: 'did:example:other',
               otherPartyPermanentChannelDid: 'did:example:other',
-              invitedAt: DateTime.utc(2026),
               mediaType: CallMediaType.video,
+              invitedAt: DateTime.now(),
             ),
           );
 
@@ -149,8 +149,8 @@ void main() {
                 callId: 'call-1',
                 callerPermanentChannelDid: 'did:example:other',
                 otherPartyPermanentChannelDid: 'did:example:other',
-                invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.video,
+                invitedAt: DateTime.now(),
               ),
             );
 
@@ -175,8 +175,8 @@ void main() {
                 callId: 'call-1',
                 callerPermanentChannelDid: 'did:example:other',
                 otherPartyPermanentChannelDid: 'did:example:other',
-                invitedAt: DateTime.utc(2026),
                 mediaType: CallMediaType.audio,
+                invitedAt: DateTime.now(),
               ),
             );
 

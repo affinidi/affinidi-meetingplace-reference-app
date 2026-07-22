@@ -66,13 +66,13 @@ dependencies:
   intl: any
   intl_phone_number_input: ^0.7.5
   local_auth: ^2.3.0
-  meeting_place_chat: ^0.0.1-dev.54
+  meeting_place_chat: ^0.0.1-dev.55
   meeting_place_core: ^0.0.1-dev.46
   meeting_place_credentials: ^0.0.1-dev.11
-  meeting_place_drift_repository: ^0.0.1-dev.54
+  meeting_place_drift_repository: ^0.0.1-dev.55
   meeting_place_livekit_flutter: 
     path: ../packages/meeting_place_livekit_flutter
-  meeting_place_matrix: ^0.0.1-dev.6
+  meeting_place_matrix: ^0.0.1-dev.7
   mobile_scanner: ^7.2.0
   mpx_app_core:
     path: ../packages/app-core

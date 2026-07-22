@@ -24,6 +24,7 @@ class CallEndedController extends _$CallEndedController {
     required String peerName,
     required int callDurationSeconds,
     required bool isAudioOnly,
+    String? errorMessage,
   }) {
     _logger.info(
       'show: Displaying Call Ended screen for $peerName '
@@ -35,6 +36,7 @@ class CallEndedController extends _$CallEndedController {
       peerName: peerName,
       callDurationSeconds: callDurationSeconds,
       isAudioOnly: isAudioOnly,
+      errorMessage: errorMessage,
     );
   }
 
