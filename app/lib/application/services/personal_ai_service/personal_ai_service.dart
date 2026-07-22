@@ -204,13 +204,23 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
           ),
         );
         effectiveSetupId = freshSetup.setupId ?? setupId;
-        if (state.setupResult == null) {
-          _updateSetupResult(freshSetup, contextName: setupContextName);
-        }
+        _updateSetupResult(freshSetup, contextName: setupContextName);
 
         await _sdk.uploadPersonalAgentContext(
           setupId: effectiveSetupId,
           content: content,
+        );
+      }
+
+      final setupResult = state.getSetupResultForContext(setupContextName);
+      if (setupResult != null) {
+        await _syncPersonalAiContactForSetup(
+          setupResult,
+          isInitialSetup: false,
+        );
+        await _refreshAuthorizationSnapshotForSetup(
+          setupResult,
+          suppressErrors: false,
         );
       }
 
