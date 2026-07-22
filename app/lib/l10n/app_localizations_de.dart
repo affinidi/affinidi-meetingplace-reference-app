@@ -1107,6 +1107,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get chatMessageActionAskSuggestion => 'Vorschlag anfragen';
 
   @override
+  String get chatSuggestionActionIgnore => 'Ignorieren';
+
+  @override
+  String get chatSuggestionActionEdit => 'Bearbeiten';
+
+  @override
+  String get chatSuggestionActionSendAsMe => 'Als mich senden';
+
+  @override
   String get chatMessageActionEdit => 'Nachricht bearbeiten';
 
   @override
