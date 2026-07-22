@@ -23,8 +23,7 @@ class _SignedDocumentChatItem extends ConsumerStatefulWidget {
 
 class _SignedDocumentChatItemState
     extends ConsumerState<_SignedDocumentChatItem> {
-  bool _detailsExpanded = false;
-  bool _auditExpanded = false;
+  bool _agentDetailsExpanded = false;
   bool _auditLoading = false;
   Map<String, dynamic>? _auditEntry;
   String? _auditError;
@@ -58,7 +57,7 @@ class _SignedDocumentChatItemState
         : issuer;
 
     return Container(
-      constraints: const BoxConstraints(maxWidth: 600),
+      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -73,7 +72,7 @@ class _SignedDocumentChatItemState
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -160,115 +159,136 @@ class _SignedDocumentChatItemState
           ],
           const SizedBox(height: 10),
           _buildVerifyButton(),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () => setState(() => _detailsExpanded = !_detailsExpanded),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _detailsExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.white38,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  _detailsExpanded ? 'Hide details' : 'More details',
-                  style: const TextStyle(color: Colors.white38, fontSize: 11),
-                ),
-              ],
-            ),
-          ),
-          if (_detailsExpanded) ...[
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.black26,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: SelectableText(
-                const JsonEncoder.withIndent('  ').convert(widget.data),
-                style: const TextStyle(
-                  color: Colors.white54,
-                  fontSize: 11,
-                  fontFamily: 'monospace',
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 4),
-          GestureDetector(
-            onTap: _toggleAuditDetails,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _auditExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.white38,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  _auditExpanded
-                      ? 'Hide trust task details'
-                      : 'Trust task details',
-                  style: const TextStyle(color: Colors.white38, fontSize: 11),
-                ),
-              ],
-            ),
-          ),
-          if (_auditExpanded) ...[
-            const SizedBox(height: 8),
-            if (_auditLoading)
-              const Padding(
-                padding: EdgeInsets.all(8),
-                child: SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white38,
-                  ),
-                ),
-              )
-            else if (_auditError != null)
-              Text(
-                _auditError!,
-                style: const TextStyle(color: Colors.redAccent, fontSize: 11),
-              )
-            else if (_auditEntry != null)
-              _buildAuditDetails(_auditEntry!)
-            else
-              const Text(
-                'No audit entry found',
-                style: TextStyle(color: Colors.white38, fontSize: 11),
-              ),
-          ],
           if (issuerName != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white10,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: Colors.white12),
-              ),
-              child: Text(
-                'Signed by Agent using context "$issuerName"',
-                style: const TextStyle(
-                  color: Colors.white54,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.3,
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: _toggleAgentDetails,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.smart_toy_outlined,
+                      color: Colors.white54,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Signed by Agent',
+                      style: TextStyle(
+                        color: Colors.white54,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      _agentDetailsExpanded
+                          ? Icons.expand_less
+                          : Icons.expand_more,
+                      color: Colors.white38,
+                      size: 16,
+                    ),
+                  ],
                 ),
               ),
             ),
+            if (_agentDetailsExpanded) ...[
+              const SizedBox(height: 8),
+              _buildAgentDetailsSection(),
+            ],
           ],
         ],
       ),
     );
+  }
+
+  Widget _buildAgentDetailsSection() {
+    final issuerName = widget.data['issuerName'] as String?;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (issuerName != null) ...[
+            _detailRow('Context', issuerName),
+            const SizedBox(height: 8),
+          ],
+          const Text(
+            'Trust Task',
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          if (_auditLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 4),
+              child: SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white38,
+                ),
+              ),
+            )
+          else if (_auditError != null)
+            Text(
+              _auditError!,
+              style: const TextStyle(color: Colors.redAccent, fontSize: 10),
+            )
+          else if (_auditEntry != null)
+            _buildAuditRows(_auditEntry!)
+          else
+            const Text(
+              'No audit entry found',
+              style: TextStyle(color: Colors.white38, fontSize: 10),
+            ),
+          const SizedBox(height: 10),
+          const Text(
+            'Raw Envelope',
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          SelectableText(
+            const JsonEncoder.withIndent('  ').convert(widget.data),
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 10,
+              fontFamily: 'monospace',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _toggleAgentDetails() {
+    setState(() => _agentDetailsExpanded = !_agentDetailsExpanded);
+    if (_agentDetailsExpanded && _auditEntry == null && !_auditLoading) {
+      _fetchAuditDetails();
+    }
   }
 
   Widget _buildVerifyButton() {
@@ -515,13 +535,6 @@ class _SignedDocumentChatItemState
     }
   }
 
-  void _toggleAuditDetails() {
-    setState(() => _auditExpanded = !_auditExpanded);
-    if (_auditExpanded && _auditEntry == null && !_auditLoading) {
-      _fetchAuditDetails();
-    }
-  }
-
   Future<void> _fetchAuditDetails() async {
     setState(() {
       _auditLoading = true;
@@ -588,7 +601,7 @@ class _SignedDocumentChatItemState
     return closest;
   }
 
-  Widget _buildAuditDetails(Map<String, dynamic> entry) {
+  Widget _buildAuditRows(Map<String, dynamic> entry) {
     final detail = entry['detail'] as Map<String, dynamic>?;
     final items = <MapEntry<String, String>>[
       MapEntry('Operation', entry['action'] as String? ?? 'unknown'),
@@ -627,47 +640,71 @@ class _SignedDocumentChatItemState
       items.add(MapEntry('Timestamp', timestamp));
     }
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.black26,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final item in items)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 100,
+                  child: Text(
+                    item.key,
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: SelectableText(
+                    item.value,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 10,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 3),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
-          for (final item in items)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 100,
-                    child: Text(
-                      item.key,
-                      style: const TextStyle(
-                        color: Colors.white54,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: SelectableText(
-                      item.value,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 10,
-                        fontFamily: 'monospace',
-                      ),
-                    ),
-                  ),
-                ],
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white54,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
               ),
             ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 10,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
         ],
       ),
     );
