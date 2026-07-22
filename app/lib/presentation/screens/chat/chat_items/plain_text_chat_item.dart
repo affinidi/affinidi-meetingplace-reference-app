@@ -111,10 +111,14 @@ class _PlainTextChatItem extends ConsumerWidget {
         emojiCount <= _maximumEmojisForLargeScale;
     final attachments = chatItem.attachments;
     final signatureAttachments = attachments
-        .where((a) => a.format == chat.CiergeSignatureProof.attachmentFormat)
+        .where((a) =>
+            a.format == chat.CiergeSignatureProof.attachmentFormat ||
+            a.format == 'cierge/trust-task')
         .toList(growable: false);
     final nonSignatureAttachments = attachments
-        .where((a) => a.format != chat.CiergeSignatureProof.attachmentFormat)
+        .where((a) =>
+            a.format != chat.CiergeSignatureProof.attachmentFormat &&
+            a.format != 'cierge/trust-task')
         .toList(growable: false);
 
     return LayoutBuilder(
