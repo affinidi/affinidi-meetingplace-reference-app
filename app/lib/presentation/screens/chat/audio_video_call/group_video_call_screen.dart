@@ -156,6 +156,7 @@ class _GroupVideoCallScreenState extends ConsumerState<GroupVideoCallScreen> {
 
   /// Updates header height if it differs from the last stored value.
   void _updateHeaderHeight(double height) {
+    if (!mounted) return;
     if (height != _headerHeight) {
       setState(() => _headerHeight = height);
     }

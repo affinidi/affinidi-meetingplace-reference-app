@@ -393,7 +393,9 @@ class _IndividualAudioMutedPill extends StatelessWidget {
     final colors = context.customColors;
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
-    final label = peerName.isEmpty ? 'Muted' : '$peerName is muted';
+    final label = peerName.isEmpty
+        ? context.l10n.videoCallMuted
+        : context.l10n.videoCallPeerMuted(peerName);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

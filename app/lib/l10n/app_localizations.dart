@@ -3369,6 +3369,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Leave'**
   String get groupCallLeave;
+
+  /// No description provided for @videoCallMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'Muted'**
+  String get videoCallMuted;
+
+  /// No description provided for @videoCallPeerMuted.
+  ///
+  /// In en, this message translates to:
+  /// **'{peerName} is muted'**
+  String videoCallPeerMuted(String peerName);
 }
 
 class _AppLocalizationsDelegate

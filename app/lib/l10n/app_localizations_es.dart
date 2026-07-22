@@ -2246,4 +2246,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get groupCallLeave => 'Salir';
+
+  @override
+  String get videoCallMuted => 'Silenciado';
+
+  @override
+  String videoCallPeerMuted(String peerName) {
+    return '$peerName está silenciado';
+  }
 }

@@ -607,5 +607,7 @@
 	"groupCallEndCall": "Finalizar llamada",
 	"groupCallNoParticipants": "Sin participantes",
 	"groupCallMute": "Silenciar",
-	"groupCallLeave": "Salir"
+	"groupCallLeave": "Salir",
+	"videoCallMuted": "Silenciado",
+	"videoCallPeerMuted": "{peerName} está silenciado"
 }

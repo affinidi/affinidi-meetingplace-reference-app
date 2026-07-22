@@ -2159,5 +2159,18 @@
 	"groupCallLeave": "Leave",
 	"@groupCallLeave": {
 		"type": "text"
+	},
+	"videoCallMuted": "Muted",
+	"@videoCallMuted": {
+		"type": "text"
+	},
+	"videoCallPeerMuted": "{peerName} is muted",
+	"@videoCallPeerMuted": {
+		"type": "text",
+		"placeholders": {
+			"peerName": {
+				"type": "String"
+			}
+		}
 	}
 }

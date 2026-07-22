@@ -94,7 +94,7 @@ Widget _wrap({
       ).overrideWith(() => fixedController),
     ],
     child: MaterialApp(
-      theme: AppTheme.dark,
+      theme: AppTheme.dark.copyWith(splashFactory: NoSplash.splashFactory),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: const MediaQuery(
@@ -149,7 +149,7 @@ void main() {
       final l10n = AppLocalizations.of(
         tester.element(find.byType(AudioVideoCallScreen)),
       )!;
-      final errorMessage = l10n.videoCallError('');
+      final errorMessage = l10n.videoCallError('channelNotFound');
 
       expect(tester.takeException(), isNull);
       expect(find.byType(Scaffold), findsOneWidget);
@@ -1154,7 +1154,9 @@ void main() {
         UncontrolledProviderScope(
           container: container,
           child: MaterialApp(
-            theme: AppTheme.dark,
+            theme: AppTheme.dark.copyWith(
+              splashFactory: NoSplash.splashFactory,
+            ),
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: const AudioVideoCallScreen(contactId: _kContactId),

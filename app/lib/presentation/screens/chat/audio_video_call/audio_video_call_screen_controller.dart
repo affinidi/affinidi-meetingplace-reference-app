@@ -631,7 +631,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
           : update.status ?? state.status;
       state = state.copyWith(
         status: newStatus,
-        errorCode: update.errorCode ?? state.errorCode,
+        errorCode: update.errorCode,
         isSpeakerEnabled: update.isSpeakerEnabled ?? state.isSpeakerEnabled,
       );
     }

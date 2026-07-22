@@ -6,7 +6,7 @@ class _ErrorScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final errorMessage = l10n.videoCallError('');
+    final errorMessage = l10n.videoCallError('channelNotFound');
     return Scaffold(
       backgroundColor: context.customColors.grey900,
       appBar: AppBar(
