@@ -62,6 +62,7 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../infrastructure/providers/chat_repository_provider.dart';
+import '../../../infrastructure/providers/shared_preferences_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../effects/balloon/ballon_effect.dart';
 import '../../effects/confetti/confetti_effect.dart';
