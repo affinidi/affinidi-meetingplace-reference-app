@@ -85,8 +85,15 @@ class PersonalAgentScreen extends ConsumerWidget {
       if (!context.mounted) return;
 
       if (!outcome.uploaded) {
+        final uploadError = ref.read(provider).contextUploadError;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.personalAgentNoContextCreated)),
+          SnackBar(
+            content: Text(
+              uploadError?.trim().isNotEmpty == true
+                  ? uploadError!
+                  : l10n.personalAgentNoContextCreated,
+            ),
+          ),
         );
         return;
       }

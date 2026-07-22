@@ -45,8 +45,7 @@ class _OfferBottomContainer extends ConsumerWidget {
     Future<void> publishOffer() async {
       final formData = ref.read(provider).formData;
       AgentContext? agentContext;
-      if (!formData.isGroupOffer &&
-          ref.read(environmentProvider).personalAiEnabled) {
+      if (ref.read(environmentProvider).personalAiEnabled) {
         agentContext = await selectAgentContext();
         if (agentContext == null) return;
       }

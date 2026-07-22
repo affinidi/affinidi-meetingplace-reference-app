@@ -171,8 +171,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       // If setup record was lost after a backend restart, fallback to
       // re-register + retry once.
       var effectiveSetupId = setupId;
+      PersonalAgentContextStatus uploadStatus;
       try {
-        await _sdk.uploadPersonalAgentContext(
+        uploadStatus = await _sdk.uploadPersonalAgentContext(
           setupId: effectiveSetupId,
           content: content,
         );
@@ -206,10 +207,14 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         effectiveSetupId = freshSetup.setupId ?? setupId;
         _updateSetupResult(freshSetup, contextName: setupContextName);
 
-        await _sdk.uploadPersonalAgentContext(
+        uploadStatus = await _sdk.uploadPersonalAgentContext(
           setupId: effectiveSetupId,
           content: content,
         );
+      }
+
+      if (!uploadStatus.provisioned) {
+        throw StateError('Personal AI context upload was not provisioned.');
       }
 
       final setupResult = state.getSetupResultForContext(setupContextName);
@@ -217,11 +222,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         await _syncPersonalAiContactForSetup(
           setupResult,
           isInitialSetup: false,
-        );
-        await _refreshAuthorizationSnapshotForSetup(
-          setupResult,
-          suppressErrors: false,
-        );
+        ).catchError((_) {});
+        await _refreshAuthorizationSnapshotForSetup(setupResult);
       }
 
       state = state.copyWith(contextProvisioned: true, contextUploading: false);
