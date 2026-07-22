@@ -408,7 +408,10 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     if (setupStatus == 'inaugurated' || setupStatus == 'ready') {
       return true;
     }
-    return false;
+    if (result.mpxConnectionCreated == true) {
+      return true;
+    }
+    return result.availableInContacts == true;
   }
 
   Future<void> _restoreSessionAfterRestart() async {

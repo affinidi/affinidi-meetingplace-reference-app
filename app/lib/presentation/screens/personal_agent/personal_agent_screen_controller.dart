@@ -502,7 +502,10 @@ class PersonalAgentScreenController
     if (setupStatus == 'inaugurated' || setupStatus == 'ready') {
       return true;
     }
-    return false;
+    if (setupResult.mpxConnectionCreated == true) {
+      return true;
+    }
+    return setupResult.availableInContacts == true;
   }
 
   bool _matchesTargetContext(
