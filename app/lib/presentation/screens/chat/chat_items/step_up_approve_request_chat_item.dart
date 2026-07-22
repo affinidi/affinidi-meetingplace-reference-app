@@ -27,10 +27,7 @@ class _StepUpApproveRequestChatItemState
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final signingStatus = ref.watch(
-      signingServiceProvider.select((s) => s.status),
-    );
-    final isOwner = signingStatus == SigningServiceStatus.connected;
+    final isOwner = !widget.chatItem.isFromMe;
 
     final approveRequest =
         widget.chatItem.data['approveRequest'] as Map<String, dynamic>? ?? {};
