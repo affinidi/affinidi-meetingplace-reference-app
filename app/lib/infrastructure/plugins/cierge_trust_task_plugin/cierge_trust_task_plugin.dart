@@ -142,38 +142,7 @@ class _AsyncTrustTaskCardState extends State<_AsyncTrustTaskCard> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          gradient: RadialGradient(
-            center: Alignment.bottomCenter,
-            radius: 2,
-            colors: [
-              Color.fromARGB(255, 36, 76, 56),
-              Color.fromARGB(255, 18, 31, 24),
-            ],
-          ),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.greenAccent,
-              ),
-            ),
-            SizedBox(width: 10),
-            Text(
-              'Loading trust task...',
-              style: TextStyle(color: Colors.white54, fontSize: 12),
-            ),
-          ],
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
     if (_envelope != null) {
@@ -201,7 +170,9 @@ class _TrustTaskCard extends ConsumerStatefulWidget {
 }
 
 class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
-  bool _agentDetailsExpanded = false;
+  static const _accent = Color(0xFF81D4FA);
+
+  bool _expanded = false;
   bool _auditLoading = false;
   Map<String, dynamic>? _auditEntry;
   String? _auditError;
@@ -221,6 +192,45 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_expanded) {
+      return GestureDetector(
+        onTap: _toggle,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: _accent.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: _accent.withValues(alpha: 0.2)),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.smart_toy_outlined,
+                color: _accent,
+                size: 14,
+              ),
+              SizedBox(width: 6),
+              Text(
+                'Signed by Agent',
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(width: 4),
+              Icon(
+                Icons.expand_more,
+                color: Colors.white38,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final proof = widget.envelope['proof'] as Map<String, dynamic>? ?? {};
     final issuer = widget.envelope['issuer'] as String? ?? '';
     final proofType = proof['type'] as String? ?? '';
@@ -240,8 +250,8 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
           center: Alignment.bottomCenter,
           radius: 2,
           colors: [
-            Color.fromARGB(255, 36, 76, 56),
-            Color.fromARGB(255, 18, 31, 24),
+            Color.fromARGB(255, 30, 60, 80),
+            Color.fromARGB(255, 18, 24, 31),
           ],
         ),
       ),
@@ -252,7 +262,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.verified, color: Colors.greenAccent, size: 28),
+              const Icon(Icons.verified, color: _accent, size: 28),
               const SizedBox(width: 12),
               Flexible(
                 child: Column(
@@ -274,14 +284,14 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                       children: [
                         Icon(
                           Icons.check_circle_outline,
-                          color: Colors.greenAccent,
+                          color: _accent,
                           size: 14,
                         ),
                         SizedBox(width: 4),
                         Text(
                           'Signed',
                           style: TextStyle(
-                            color: Colors.greenAccent,
+                            color: _accent,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -298,6 +308,14 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
+                ),
+              ),
+              GestureDetector(
+                onTap: _toggle,
+                child: const Icon(
+                  Icons.expand_less,
+                  color: Colors.white38,
+                  size: 20,
                 ),
               ),
             ],
@@ -335,52 +353,29 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
           const SizedBox(height: 10),
           _buildVerifyButton(),
           const SizedBox(height: 10),
-          GestureDetector(
-            onTap: _toggleAgentDetails,
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.white12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.smart_toy_outlined,
-                    color: Colors.white54,
-                    size: 14,
-                  ),
-                  const SizedBox(width: 6),
-                  const Text(
-                    'Signed by Agent',
-                    style: TextStyle(
-                      color: Colors.white54,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    _agentDetailsExpanded
-                        ? Icons.expand_less
-                        : Icons.expand_more,
-                    color: Colors.white38,
-                    size: 16,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (_agentDetailsExpanded) ...[
-            const SizedBox(height: 8),
-            _buildAgentDetailsSection(),
-          ],
+          _buildAgentDetailsSection(),
         ],
       ),
     );
+  }
+
+  void _toggle() {
+    final wasExpanded = _expanded;
+    setState(() => _expanded = !_expanded);
+    if (_expanded && _auditEntry == null && !_auditLoading) {
+      _fetchAuditDetails();
+    }
+    if (wasExpanded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Scrollable.ensureVisible(
+            context,
+            alignment: 0.5,
+            duration: const Duration(milliseconds: 200),
+          );
+        }
+      });
+    }
   }
 
   Widget _buildAgentDetailsSection() {
@@ -457,24 +452,6 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
     );
   }
 
-  void _toggleAgentDetails() {
-    setState(() => _agentDetailsExpanded = !_agentDetailsExpanded);
-    if (_agentDetailsExpanded && _auditEntry == null && !_auditLoading) {
-      _fetchAuditDetails();
-    }
-    if (!_agentDetailsExpanded) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          Scrollable.ensureVisible(
-            context,
-            alignment: 0.5,
-            duration: const Duration(milliseconds: 200),
-          );
-        }
-      });
-    }
-  }
-
   Widget _buildVerifyButton() {
     if (_verifying) {
       return Container(
@@ -498,7 +475,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                     if (i < _verifyStep)
                       const Icon(
                         Icons.check_circle,
-                        color: Colors.greenAccent,
+                        color: _accent,
                         size: 14,
                       )
                     else if (i == _verifyStep)
@@ -507,7 +484,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                         height: 14,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.greenAccent,
+                          color: _accent,
                         ),
                       )
                     else
@@ -524,7 +501,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                             : _verifySteps[i].replaceAll('...', ''),
                         style: TextStyle(
                           color: i < _verifyStep
-                              ? Colors.greenAccent.withValues(alpha: 0.7)
+                              ? _accent.withValues(alpha: 0.7)
                               : i == _verifyStep
                                   ? Colors.white70
                                   : Colors.white24,
@@ -553,11 +530,11 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: (isValid ? Colors.greenAccent : Colors.redAccent)
+          color: (isValid ? _accent : Colors.redAccent)
               .withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: (isValid ? Colors.greenAccent : Colors.redAccent)
+            color: (isValid ? _accent : Colors.redAccent)
                 .withValues(alpha: 0.3),
           ),
         ),
@@ -570,7 +547,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
               children: [
                 Icon(
                   isValid ? Icons.verified_user : Icons.gpp_bad,
-                  color: isValid ? Colors.greenAccent : Colors.redAccent,
+                  color: isValid ? _accent : Colors.redAccent,
                   size: 18,
                 ),
                 const SizedBox(width: 8),
@@ -579,7 +556,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                       ? 'Cryptographic Signature Verified'
                       : 'Signature Verification Failed',
                   style: TextStyle(
-                    color: isValid ? Colors.greenAccent : Colors.redAccent,
+                    color: isValid ? _accent : Colors.redAccent,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -618,18 +595,18 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.greenAccent.withValues(alpha: 0.5)),
+          border: Border.all(color: _accent.withValues(alpha: 0.5)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.fingerprint, color: Colors.greenAccent, size: 18),
+            Icon(Icons.fingerprint, color: _accent, size: 18),
             SizedBox(width: 8),
             Text(
               'Verify Signature',
               style: TextStyle(
-                color: Colors.greenAccent,
+                color: _accent,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),

@@ -348,6 +348,11 @@ Color _rCardBubbleColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
     return colorScheme.primary;
   }
 
+  if (chatItem is chat.Message &&
+      chatItem.attachments.any((a) => a.format == 'cierge/trust-task')) {
+    return const Color.fromARGB(248, 30, 60, 80);
+  }
+
   return const Color.fromARGB(248, 107, 65, 162);
 }
 
