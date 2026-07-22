@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,14 +30,25 @@ class CiergeTrustTaskPlugin implements AttachmentRenderer {
   Widget renderAttachment(AttachmentRenderRequest request) {
     developer.log(
       'renderAttachment format=${request.attachment.format} '
-      'id=${request.attachment.id}',
+      'id=${request.attachment.id} '
+      'hasData=${request.attachment.data != null} '
+      'hasDownload=${request.download != null}',
       name: 'CiergeTrustTaskPlugin',
     );
 
     final envelope = _parseEnvelope(request.attachment);
-    if (envelope == null) return const SizedBox.shrink();
+    if (envelope != null) {
+      return _TrustTaskCard(envelope: envelope);
+    }
 
-    return _TrustTaskCard(envelope: envelope);
+    if (request.download != null) {
+      return _AsyncTrustTaskCard(
+        attachment: request.attachment,
+        download: request.download!,
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   @override
@@ -70,6 +82,112 @@ class CiergeTrustTaskPlugin implements AttachmentRenderer {
       // ignore
     }
     return null;
+  }
+}
+
+class _AsyncTrustTaskCard extends StatefulWidget {
+  const _AsyncTrustTaskCard({
+    required this.attachment,
+    required this.download,
+  });
+
+  final ChatAttachment attachment;
+  final Future<Uint8List> Function(ChatAttachment) download;
+
+  @override
+  State<_AsyncTrustTaskCard> createState() => _AsyncTrustTaskCardState();
+}
+
+class _AsyncTrustTaskCardState extends State<_AsyncTrustTaskCard> {
+  Map<String, dynamic>? _envelope;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _downloadAndParse();
+  }
+
+  Future<void> _downloadAndParse() async {
+    try {
+      final bytes = await widget.download(widget.attachment);
+      final jsonStr = utf8.decode(bytes);
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is Map<String, dynamic> && mounted) {
+        setState(() {
+          _envelope = decoded;
+          _loading = false;
+        });
+      } else if (mounted) {
+        setState(() {
+          _error = 'Invalid envelope format';
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      developer.log(
+        'Failed to download trust task attachment: $e',
+        name: 'CiergeTrustTaskPlugin',
+      );
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load: $e';
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          gradient: RadialGradient(
+            center: Alignment.bottomCenter,
+            radius: 2,
+            colors: [
+              Color.fromARGB(255, 36, 76, 56),
+              Color.fromARGB(255, 18, 31, 24),
+            ],
+          ),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.greenAccent,
+              ),
+            ),
+            SizedBox(width: 10),
+            Text(
+              'Loading trust task...',
+              style: TextStyle(color: Colors.white54, fontSize: 12),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_envelope != null) {
+      return _TrustTaskCard(envelope: _envelope!);
+    }
+
+    if (_error != null) {
+      developer.log(
+        'Trust task load error: $_error',
+        name: 'CiergeTrustTaskPlugin',
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }
 
