@@ -289,6 +289,17 @@ class _SignedDocumentChatItemState
     if (_agentDetailsExpanded && _auditEntry == null && !_auditLoading) {
       _fetchAuditDetails();
     }
+    if (!_agentDetailsExpanded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Scrollable.ensureVisible(
+            context,
+            alignment: 0.5,
+            duration: const Duration(milliseconds: 200),
+          );
+        }
+      });
+    }
   }
 
   Widget _buildVerifyButton() {
