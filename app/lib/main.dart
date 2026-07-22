@@ -23,6 +23,7 @@ import 'infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin
 import 'infrastructure/plugins/audio_attachments_plugin/local_voice_attachment_store.dart';
 import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
 import 'infrastructure/plugins/cierge_signature_attachments_plugin/cierge_signature_attachments_plugin.dart';
+import 'infrastructure/plugins/cierge_trust_task_plugin/cierge_trust_task_plugin.dart';
 import 'infrastructure/plugins/device_region_plugin/device_region_plugin.dart';
 import 'infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
@@ -117,6 +118,7 @@ void main() async {
               localVoiceStore: ref.read(localVoiceAttachmentStoreProvider),
             ),
             CiergeSignatureAttachmentsPlugin(),
+            CiergeTrustTaskPlugin(),
             SignDocumentPlugin(
               filePickerPlatform: ref.read(filePickerPlatformProvider),
             ),
