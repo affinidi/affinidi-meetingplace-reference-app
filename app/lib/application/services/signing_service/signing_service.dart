@@ -148,8 +148,9 @@ class SigningService extends StateNotifier<SigningServiceState> {
       final authResult = await _authWorkflow!.connect();
       _logger.info('Authenticated, setting up mediator...', name: _logKey);
 
-      final mediatorDidDoc =
-          await UniversalDIDResolver().resolveDid(vtaMediatorDid);
+      final mediatorDidDoc = await UniversalDIDResolver().resolveDid(
+        vtaMediatorDid,
+      );
       final mediatorAccessToken = await MediatorAuthHelper.authenticate(
         mediatorDidDocument: mediatorDidDoc,
         didManager: didManager,

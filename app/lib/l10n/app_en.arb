@@ -953,6 +953,18 @@
 	"@chatMessageActionAskSuggestion": {
 		"type": "text"
 	},
+	"chatSuggestionActionIgnore": "Ignore",
+	"@chatSuggestionActionIgnore": {
+		"type": "text"
+	},
+	"chatSuggestionActionEdit": "Edit",
+	"@chatSuggestionActionEdit": {
+		"type": "text"
+	},
+	"chatSuggestionActionSendAsMe": "Send as Me",
+	"@chatSuggestionActionSendAsMe": {
+		"type": "text"
+	},
 	"chatMessageActionEdit": "Edit message",
 	"@chatMessageActionEdit": {
 		"type": "text"

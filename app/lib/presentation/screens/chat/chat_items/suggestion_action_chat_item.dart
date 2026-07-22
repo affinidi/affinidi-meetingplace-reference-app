@@ -17,6 +17,15 @@ class _SuggestionActionChatItem extends ConsumerWidget {
     Future<void> askForSuggestion() async {
       try {
         await controller.askForSuggestion(messageId);
+      } on TimeoutException {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.chatSuggestionRequestFailed),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        return;
       } catch (_) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(

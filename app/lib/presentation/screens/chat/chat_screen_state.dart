@@ -25,6 +25,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     ContactCard? myCard,
     @Default([]) List<chat.ChatItem> messages,
     ChatSuggestion? latestSuggestion,
+    String? pendingSuggestionMessageId,
     @Default([]) List<String> membersTyping,
     @Default(-1) int selectedReactionIndex,
     @Default(false) bool isActive,

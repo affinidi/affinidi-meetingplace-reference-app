@@ -164,8 +164,10 @@ class _SignedDocumentChatItemState
             GestureDetector(
               onTap: _toggleAgentDetails,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(6),
@@ -234,37 +236,37 @@ class _SignedDocumentChatItemState
             ],
             const Text(
               'Trust Task',
-            style: TextStyle(
-              color: Colors.white54,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 6),
-          if (_auditLoading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
-              child: SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white38,
-                ),
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
               ),
-            )
-          else if (_auditError != null)
-            Text(
-              _auditError!,
-              style: const TextStyle(color: Colors.redAccent, fontSize: 10),
-            )
-          else if (_auditEntry != null)
-            _buildAuditRows(_auditEntry!)
-          else
-            const Text(
-              'No audit entry found',
-              style: TextStyle(color: Colors.white38, fontSize: 10),
             ),
+            const SizedBox(height: 6),
+            if (_auditLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white38,
+                  ),
+                ),
+              )
+            else if (_auditError != null)
+              Text(
+                _auditError!,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 10),
+              )
+            else if (_auditEntry != null)
+              _buildAuditRows(_auditEntry!)
+            else
+              const Text(
+                'No audit entry found',
+                style: TextStyle(color: Colors.white38, fontSize: 10),
+              ),
           ],
           const SizedBox(height: 10),
           const Text(
@@ -358,8 +360,8 @@ class _SignedDocumentChatItemState
                           color: i < _verifyStep
                               ? Colors.greenAccent.withValues(alpha: 0.7)
                               : i == _verifyStep
-                                  ? Colors.white70
-                                  : Colors.white24,
+                              ? Colors.white70
+                              : Colors.white24,
                           fontSize: 11,
                         ),
                       ),
@@ -385,12 +387,14 @@ class _SignedDocumentChatItemState
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: (isValid ? Colors.greenAccent : Colors.redAccent)
-              .withValues(alpha: 0.08),
+          color: (isValid ? Colors.greenAccent : Colors.redAccent).withValues(
+            alpha: 0.08,
+          ),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: (isValid ? Colors.greenAccent : Colors.redAccent)
-                .withValues(alpha: 0.3),
+            color: (isValid ? Colors.greenAccent : Colors.redAccent).withValues(
+              alpha: 0.3,
+            ),
           ),
         ),
         child: Column(
@@ -423,12 +427,8 @@ class _SignedDocumentChatItemState
               _verifyDetailRow('Cryptosuite', cryptosuite),
               _verifyDetailRow('Purpose', proofPurpose),
               _verifyDetailRow('Signer', _truncateDid(issuer)),
-              _verifyDetailRow(
-                'Key',
-                _truncateDid(verificationMethod),
-              ),
-              if (created.isNotEmpty)
-                _verifyDetailRow('Signed at', created),
+              _verifyDetailRow('Key', _truncateDid(verificationMethod)),
+              if (created.isNotEmpty) _verifyDetailRow('Signed at', created),
               const SizedBox(height: 6),
               const Text(
                 'The document has not been tampered with and was signed '
@@ -526,9 +526,7 @@ class _SignedDocumentChatItemState
         setState(() => _verifyStep = i + 1);
       }
 
-      final verifier = DataIntegrityEddsaJcsVerifier(
-        verifierDid: verifierDid,
-      );
+      final verifier = DataIntegrityEddsaJcsVerifier(verifierDid: verifierDid);
       final result = await verifier.verify(widget.data);
 
       await Future<void>.delayed(const Duration(milliseconds: 400));
@@ -536,8 +534,7 @@ class _SignedDocumentChatItemState
         setState(() {
           _verifying = false;
           _verificationResult = result.isValid;
-          _verificationError =
-              result.isValid ? null : result.toString();
+          _verificationError = result.isValid ? null : result.toString();
         });
       }
     } catch (e) {

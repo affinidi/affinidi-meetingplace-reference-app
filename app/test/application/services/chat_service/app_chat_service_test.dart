@@ -780,6 +780,35 @@ void main() {
       );
     });
 
+    test('removes wrapping double quotes from incoming suggestions', () async {
+      await chatService.startChatSession();
+
+      late String relatedMessageId;
+      await waitForState(
+        (state) => state.messages.whereType<Message>().any(
+          (message) => message.value == 'quoted suggestion target',
+        ),
+        () {
+          final message = fakeChatSdk.simulateIncomingTextMessage(
+            text: 'quoted suggestion target',
+            recipientDid: channelDid,
+          );
+          relatedMessageId = message.messageId;
+        },
+      );
+
+      await waitForState(
+        (state) => state.latestSuggestion?.relatedMessageId == relatedMessageId,
+        () => fakeChatSdk.simulateIncomingSuggestion(
+          relatedMessageId: relatedMessageId,
+          text: '"Latest suggestion"',
+          recipientDid: channelDid,
+        ),
+      );
+
+      expect(serviceState().latestSuggestion?.text, 'Latest suggestion');
+    });
+
     test('ignores suggestions whose related message is absent', () async {
       await chatService.startChatSession();
 
@@ -792,6 +821,91 @@ void main() {
 
       expect(serviceState().latestSuggestion, isNull);
     });
+
+    test('dismissSuggestion clears the matching active suggestion', () async {
+      await chatService.startChatSession();
+
+      late String relatedMessageId;
+      await waitForState(
+        (state) => state.messages.whereType<Message>().any(
+          (message) => message.value == 'suggest me later',
+        ),
+        () {
+          final message = fakeChatSdk.simulateIncomingTextMessage(
+            text: 'suggest me later',
+            recipientDid: channelDid,
+          );
+          relatedMessageId = message.messageId;
+        },
+      );
+
+      await waitForState(
+        (state) => state.latestSuggestion?.relatedMessageId == relatedMessageId,
+        () => fakeChatSdk.simulateIncomingSuggestion(
+          relatedMessageId: relatedMessageId,
+          text: 'Dismiss me',
+          recipientDid: channelDid,
+        ),
+      );
+
+      await chatService.dismissSuggestion(relatedMessageId);
+
+      expect(serviceState().latestSuggestion, isNull);
+    });
+
+    test(
+      'dismissSuggestion does not clear a newer active suggestion',
+      () async {
+        await chatService.startChatSession();
+
+        late String firstMessageId;
+        late String secondMessageId;
+        await waitForState(
+          (state) => state.messages.whereType<Message>().length >= 2,
+          () {
+            firstMessageId = fakeChatSdk
+                .simulateIncomingTextMessage(
+                  text: 'first suggestion target',
+                  recipientDid: channelDid,
+                )
+                .messageId;
+            secondMessageId = fakeChatSdk
+                .simulateIncomingTextMessage(
+                  text: 'second suggestion target',
+                  recipientDid: channelDid,
+                )
+                .messageId;
+          },
+        );
+
+        await waitForState(
+          (state) => state.latestSuggestion?.relatedMessageId == firstMessageId,
+          () => fakeChatSdk.simulateIncomingSuggestion(
+            relatedMessageId: firstMessageId,
+            text: 'First suggestion',
+            recipientDid: channelDid,
+          ),
+        );
+
+        await waitForState(
+          (state) =>
+              state.latestSuggestion?.relatedMessageId == secondMessageId,
+          () => fakeChatSdk.simulateIncomingSuggestion(
+            relatedMessageId: secondMessageId,
+            text: 'Second suggestion',
+            recipientDid: channelDid,
+          ),
+        );
+
+        await chatService.dismissSuggestion(firstMessageId);
+
+        expect(
+          serviceState().latestSuggestion?.relatedMessageId,
+          secondMessageId,
+        );
+        expect(serviceState().latestSuggestion?.text, 'Second suggestion');
+      },
+    );
 
     test('clearEffect resets effect in state', () async {
       await chatService.startChatSession();

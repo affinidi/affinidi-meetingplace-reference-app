@@ -14,6 +14,7 @@ class _PlainTextChatItem extends ConsumerWidget {
   final int _index;
   final Color _chatItemColor;
   static const int _maximumEmojisForLargeScale = 8;
+  static const double _maxTextBubbleWidthFactor = 0.67;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -115,58 +116,66 @@ class _PlainTextChatItem extends ConsumerWidget {
     final nonSignatureAttachments = attachments
         .where((a) => a.format != chat.CiergeSignatureProof.attachmentFormat)
         .toList(growable: false);
+    final containsBoundedLayoutAttachment = attachments.any(
+      (attachment) => attachment.isVoice || attachment.isRCard,
+    );
 
-    return GestureDetector(
-      onLongPress: onLongPress,
-      onTap: () async {
-        await copyToClipboard();
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (nonSignatureAttachments.isNotEmpty)
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: nonSignatureAttachments.length,
-              itemBuilder: (context, index) {
-                final attachment = nonSignatureAttachments[index];
-                return _AttachmentWidget(
-                  contactId: _contactId,
-                  chatItem: chatItem,
-                  attachment: attachment,
-                  isFromMe: chatItem.isFromMe,
-                  chatItemColor: _chatItemColor,
-                );
-              },
-            ),
-          if (chatItem.value.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.all(nonSignatureAttachments.isEmpty ? 0 : 8),
-              child: _TextMessage(
-                text: chatItem.value,
-                shouldScaleEmojis: shouldScaleEmojis,
-                isEdited: chatItem.editedAt != null,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxBubbleWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth * _maxTextBubbleWidthFactor
+            : double.infinity;
+
+        Widget bubbleContent = Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final attachment in nonSignatureAttachments)
+              _AttachmentWidget(
+                contactId: _contactId,
+                chatItem: chatItem,
+                attachment: attachment,
+                isFromMe: chatItem.isFromMe,
+                chatItemColor: _chatItemColor,
               ),
-            ),
-          if (signatureAttachments.isNotEmpty)
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: signatureAttachments.length,
-              itemBuilder: (context, index) {
-                final attachment = signatureAttachments[index];
-                return _AttachmentWidget(
-                  contactId: _contactId,
-                  chatItem: chatItem,
-                  attachment: attachment,
-                  isFromMe: chatItem.isFromMe,
-                  chatItemColor: _chatItemColor,
-                );
-              },
-            ),
-        ],
-      ),
+            if (chatItem.value.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.all(
+                  nonSignatureAttachments.isEmpty ? 0 : 8,
+                ),
+                child: _TextMessage(
+                  text: chatItem.value,
+                  shouldScaleEmojis: shouldScaleEmojis,
+                  isEdited: chatItem.editedAt != null,
+                ),
+              ),
+            for (final attachment in signatureAttachments)
+              _AttachmentWidget(
+                contactId: _contactId,
+                chatItem: chatItem,
+                attachment: attachment,
+                isFromMe: chatItem.isFromMe,
+                chatItemColor: _chatItemColor,
+              ),
+          ],
+        );
+
+        if (!containsBoundedLayoutAttachment) {
+          bubbleContent = IntrinsicWidth(child: bubbleContent);
+        }
+
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onLongPress: onLongPress,
+          onTap: () async {
+            await copyToClipboard();
+          },
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+            child: bubbleContent,
+          ),
+        );
+      },
     );
   }
 }

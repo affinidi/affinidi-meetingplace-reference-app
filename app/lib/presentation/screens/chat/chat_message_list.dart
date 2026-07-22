@@ -146,9 +146,9 @@ class _ChatMessageList extends HookConsumerWidget {
 
                   final showSuggestionAction =
                       supportsSuggestionRequests &&
-                      selectedReactionIndex == index &&
                       chatItem is chat.Message &&
                       !chatItem.isFromMe &&
+                      selectedReactionIndex == index &&
                       chatItem.value.trim().isNotEmpty;
                   final showReactionPicker =
                       selectedReactionIndex == index &&
@@ -264,8 +264,20 @@ class _ChatMessageList extends HookConsumerWidget {
                             ),
                           if (matchingSuggestion != null)
                             _SuggestionNoticeChatItem(
+                              contactId: _contactId,
                               suggestion: matchingSuggestion,
                               isFromMe: chatItem.isFromMe,
+                              onSendAsMe: () async {
+                                await controller.sendLatestSuggestionAsMe();
+                                if (!scrollController.hasClients) return;
+                                if (scrollController.offset <= 24) return;
+
+                                await scrollController.animateTo(
+                                  0,
+                                  duration: const Duration(milliseconds: 260),
+                                  curve: Curves.easeOutCubic,
+                                );
+                              },
                             ),
                           thisItemStatus.isNotEmpty
                               ? Align(
