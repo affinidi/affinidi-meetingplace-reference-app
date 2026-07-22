@@ -166,6 +166,9 @@ class _ChatMediaOptions extends ConsumerWidget {
         !isGroupChat &&
         !isOobChat &&
         ref.watch(provider.select((state) => state.shouldEnableVrcAttachment));
+    final isAgentChat =
+      contact?.category == ContactCategory.robot ||
+      contact?.card.type.trim().toLowerCase() == 'ai-agent';
 
     void attachFromPlugin(AttachmentPicker plugin) async {
       if (!context.mounted) return;
@@ -205,6 +208,7 @@ class _ChatMediaOptions extends ConsumerWidget {
       ...availableAttachmentPlugins
           .whereType<AttachmentPicker>()
           .where((plugin) => plugin.includeInMediaOptions)
+          .where((plugin) => !isAgentChat || plugin is! SignDocumentPlugin)
           .where(
             (plugin) =>
                 plugin is! DocumentAttachmentsPlugin ||

@@ -1,8 +1,11 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/plugins/sign_document_plugin/sign_document_plugin.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
+import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
 
@@ -20,6 +23,10 @@ bool _isVrcOptionEnabled(WidgetTester tester, String label) {
 
   return option.onTap != null;
 }
+
+List<SignDocumentPlugin> _signDocumentPlugins() => [
+  SignDocumentPlugin(filePickerPlatform: _UnusedFilePickerPlatform()),
+];
 
 void main() {
   group('Chat attachment VRC option', () {
@@ -80,4 +87,46 @@ void main() {
       expect(enabled, isTrue);
     });
   });
+
+  group('Chat sign document option', () {
+    testWidgets('shows Sign Document in a non-agent chat', (tester) async {
+      await navigateToChat(tester, attachmentPlugins: _signDocumentPlugins());
+      await _openMediaSheet(tester);
+
+      expect(find.text('Sign Document'), findsOneWidget);
+    });
+
+    testWidgets('hides Sign Document in an agent chat', (tester) async {
+      final agentContact = FakeContacts.agentContact;
+
+      await navigateToChat(
+        tester,
+        contactId: agentContact.id,
+        contacts: [agentContact],
+        attachmentPlugins: _signDocumentPlugins(),
+      );
+      await _openMediaSheet(tester);
+
+      expect(find.text('Sign Document'), findsNothing);
+    });
+  });
+}
+
+class _UnusedFilePickerPlatform extends FilePickerPlatform {
+  @override
+  Future<FilePickerResult?> pickFiles({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    dynamic Function(FilePickerStatus)? onFileLoading,
+    AndroidSAFOptions? androidSafOptions,
+    int compressionQuality = 0,
+    bool allowMultiple = false,
+    bool withData = false,
+    bool withReadStream = false,
+    bool lockParentWindow = false,
+    bool readSequential = false,
+    bool cancelUploadOnWindowBlur = true,
+  }) async => null;
 }
