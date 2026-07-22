@@ -1,3 +1,7 @@
+## 0.0.1-dev.3
+
+ - **FEAT**: group video call (#259).
+
 ## 0.0.1-dev.2
 
  - **FIX**: show participant tiles, names, and avatars in group audio calls (#252).

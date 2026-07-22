@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-07-22
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`meeting_place_livekit_flutter` - `v0.0.1-dev.3`](#meeting_place_livekit_flutter---v001-dev3)
+
+---
+
+#### `meeting_place_livekit_flutter` - `v0.0.1-dev.3`
+
+ - **FEAT**: group video call (#259).
+
+
 ## 2026-07-21
 
 ### Changes
