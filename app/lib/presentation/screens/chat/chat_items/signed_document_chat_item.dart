@@ -551,16 +551,47 @@ class _SignedDocumentChatItemState
     }
   }
 
+  static const _auditCachePrefix = 'audit_entry_';
+
+  String? get _auditCacheKey {
+    final id = widget.data['id'] as String?;
+    return id != null ? '$_auditCachePrefix$id' : null;
+  }
+
   Future<void> _fetchAuditDetails() async {
     setState(() {
       _auditLoading = true;
       _auditError = null;
     });
 
+    final cacheKey = _auditCacheKey;
+    if (cacheKey != null) {
+      try {
+        final prefs = ref.read(sharedPreferencesProvider);
+        final cached = prefs.getString(cacheKey);
+        if (cached != null) {
+          final entry = jsonDecode(cached) as Map<String, dynamic>;
+          if (mounted) {
+            setState(() {
+              _auditEntry = entry;
+              _auditLoading = false;
+            });
+          }
+          return;
+        }
+      } catch (_) {}
+    }
+
     try {
       final signingService = ref.read(signingServiceProvider.notifier);
       final logs = await signingService.getSigningAuditLogs();
       final match = _findMatchingAuditEntry(logs);
+      if (match != null && cacheKey != null) {
+        try {
+          final prefs = ref.read(sharedPreferencesProvider);
+          await prefs.setString(cacheKey, jsonEncode(match));
+        } catch (_) {}
+      }
       if (mounted) {
         setState(() {
           _auditEntry = match;
