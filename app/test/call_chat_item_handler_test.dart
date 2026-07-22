@@ -29,7 +29,8 @@ void main() {
         const itemId = 'call-item-123';
         handler = CallChatItemHandler(
           onInitiator: (_) async => itemId,
-          resolveItemId: ({required bool isCaller}) async => null,
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
@@ -49,7 +50,8 @@ void main() {
             callCount++;
             return 'id';
           },
-          resolveItemId: ({required bool isCaller}) async => null,
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
@@ -67,7 +69,8 @@ void main() {
         final logMessages = <String>[];
         handler = CallChatItemHandler(
           onInitiator: (_) async => 'id',
-          resolveItemId: ({required bool isCaller}) async => null,
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
           logger: _LogCapture(logMessages),
@@ -92,7 +95,8 @@ void main() {
             callCount++;
             return 'id';
           },
-          resolveItemId: ({required bool isCaller}) async => null,
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
@@ -110,7 +114,8 @@ void main() {
         final logMessages = <String>[];
         handler = CallChatItemHandler(
           onInitiator: (_) async => 'id',
-          resolveItemId: ({required bool isCaller}) async => null,
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
           logger: _LogCapture(logMessages),
@@ -138,7 +143,8 @@ void main() {
             callCount++;
             return 'id';
           },
-          resolveItemId: ({required bool isCaller}) async => null,
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
@@ -164,7 +170,8 @@ void main() {
           final warnings = <String>[];
           handler = CallChatItemHandler(
             onInitiator: (_) async => 'id',
-            resolveItemId: ({required bool isCaller}) async => null,
+            resolveItemId: ({required bool isCaller, String? callId}) async =>
+                null,
             updateItem: (_, {required status, duration}) async {},
             isDisposed: () => false,
             logger: _WarningCapture(warnings),
@@ -193,7 +200,8 @@ void main() {
               callCount++;
               return 'id';
             },
-            resolveItemId: ({required bool isCaller}) async => null,
+            resolveItemId: ({required bool isCaller, String? callId}) async =>
+                null,
             updateItem: (_, {required status, duration}) async {},
             isDisposed: () => false,
             logger: fakeLogger,
@@ -213,7 +221,8 @@ void main() {
       test('dispose cancels subscription', () async {
         handler = CallChatItemHandler(
           onInitiator: (_) async => 'id',
-          resolveItemId: ({required bool isCaller}) async => null,
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
@@ -228,7 +237,8 @@ void main() {
             callCount++;
             return 'id';
           },
-          resolveItemId: ({required bool isCaller}) async => null,
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              null,
           updateItem: (_, {required status, duration}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
@@ -254,7 +264,8 @@ void main() {
     ) {
       return CallChatItemHandler(
         onInitiator: (_) async => 'msg-1',
-        resolveItemId: ({required bool isCaller}) async => 'msg-1',
+        resolveItemId: ({required bool isCaller, String? callId}) async =>
+            'msg-1',
         updateItem: (id, {required status, duration}) async {
           calls.add((messageId: id, status: status));
         },
@@ -362,7 +373,8 @@ void main() {
     }) {
       return CallChatItemHandler(
         onInitiator: (_) async => 'msg-1',
-        resolveItemId: ({required bool isCaller}) async => 'msg-1',
+        resolveItemId: ({required bool isCaller, String? callId}) async =>
+            'msg-1',
         updateItem: (id, {required status, duration}) async {
           calls.add((messageId: id, status: status, duration: duration));
         },

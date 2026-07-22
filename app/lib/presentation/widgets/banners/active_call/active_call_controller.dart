@@ -166,9 +166,16 @@ class ActiveCallController extends _$ActiveCallController {
     _participantEventSub?.cancel();
     _participantEventSub = null;
     _session = null;
-    _chatItemHandler?.endCall(assumeRole: _ownRole);
-    final pendingEndWrite = _chatItemHandler?.endCallWrite;
-    _chatItemHandler?.dispose();
+    final chatItemHandler = _chatItemHandler;
+    chatItemHandler?.endCall(assumeRole: _ownRole);
+    final pendingEndWrite = chatItemHandler?.endCallWrite;
+    if (chatItemHandler != null) {
+      unawaited(
+        (pendingEndWrite ?? Future<void>.value()).whenComplete(
+          chatItemHandler.dispose,
+        ),
+      );
+    }
     _ownRole = null;
     _chatItemHandler = null;
     _isTerminated = true;
@@ -464,10 +471,13 @@ class ActiveCallController extends _$ActiveCallController {
     );
   }
 
-  Future<String?> _resolveCallChatItemId({required bool isCaller}) {
+  Future<String?> _resolveCallChatItemId({
+    required bool isCaller,
+    String? callId,
+  }) {
     return isCaller
-        ? _chatService!.resolveOutgoingCallChatItemId()
-        : _chatService!.resolveIncomingCallChatItemId();
+        ? _chatService!.resolveOutgoingCallChatItemId(callId: callId)
+        : _chatService!.resolveIncomingCallChatItemId(callId: callId);
   }
 
   Future<void> _updateCallChatItem(

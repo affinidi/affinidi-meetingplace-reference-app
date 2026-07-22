@@ -5,39 +5,30 @@ import 'package:mpx_flutter_reference_app/application/services/chat_service/dele
 import '../mocks/mock_app_logger.dart';
 
 class FakeCallChatItemManager extends CallChatItemManager {
-  FakeCallChatItemManager({
-    this.isStaleReturn = false,
-    this.resolveReturn,
-    this.resolveIdsReturn = const [],
-  }) : super(
-         ensureInitialized: () async {},
-         getChatSdk: () => null,
-         logger: FakeAppLogger(),
-       );
+  FakeCallChatItemManager({this.isStaleReturn = false, this.resolveReturn})
+    : super(
+        ensureInitialized: () async {},
+        getChatSdk: () => null,
+        logger: FakeAppLogger(),
+      );
 
   final bool isStaleReturn;
-  final String? resolveReturn;
-  final List<String> resolveIdsReturn;
+  final Message? resolveReturn;
   int updateCallCount = 0;
   DateTime? lastResolveBound;
+  String? lastResolveCallId;
 
   @override
   bool isStaleIncomingCall(Message message) => isStaleReturn;
 
   @override
-  Future<String?> resolveStaleIncomingCallItemIdBefore(
-    DateTime dateTime,
-  ) async {
-    lastResolveBound = dateTime;
+  Future<Message?> resolveIncomingCallItemBefore(
+    DateTime notAfter, {
+    String? callId,
+  }) async {
+    lastResolveBound = notAfter;
+    lastResolveCallId = callId;
     return resolveReturn;
-  }
-
-  @override
-  Future<List<String>> resolveStaleIncomingCallItemIdsBefore(
-    DateTime dateTime,
-  ) async {
-    lastResolveBound = dateTime;
-    return resolveIdsReturn;
   }
 
   @override

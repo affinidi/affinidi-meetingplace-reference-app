@@ -33,7 +33,10 @@ class FakeChatSessionService extends ChatSessionService {
   bool incomingItemAvailable;
   int resolveCallItemMaxAttempts;
   int markCallAsMissedAttempts = 0;
+  int schedulePendingMissedCallFollowUpCalls = 0;
   int resolveIncomingCallChatItemIdAttempts = 0;
+  String? lastResolveIncomingCallId;
+  String? lastResolveOutgoingCallId;
 
   final List<UpdateCallChatItemCall> updateCalls = [];
 
@@ -147,17 +150,23 @@ class FakeChatSessionService extends ChatSessionService {
   }) async => sendOutgoingResult;
 
   @override
-  Future<String?> resolveIncomingCallChatItemId() => _resolveCallChatItemId(
-    resolve: () => resolveIncomingResult,
-    onAttempt: () => resolveIncomingCallChatItemIdAttempts++,
-    attemptsRemaining: resolveCallItemMaxAttempts,
-  );
+  Future<String?> resolveIncomingCallChatItemId({String? callId}) {
+    lastResolveIncomingCallId = callId;
+    return _resolveCallChatItemId(
+      resolve: () => resolveIncomingResult,
+      onAttempt: () => resolveIncomingCallChatItemIdAttempts++,
+      attemptsRemaining: resolveCallItemMaxAttempts,
+    );
+  }
 
   @override
-  Future<String?> resolveOutgoingCallChatItemId() => _resolveCallChatItemId(
-    resolve: () => resolveOutgoingResult,
-    attemptsRemaining: resolveCallItemMaxAttempts,
-  );
+  Future<String?> resolveOutgoingCallChatItemId({String? callId}) {
+    lastResolveOutgoingCallId = callId;
+    return _resolveCallChatItemId(
+      resolve: () => resolveOutgoingResult,
+      attemptsRemaining: resolveCallItemMaxAttempts,
+    );
+  }
 
   @override
   Future<bool> markCallAsMissed() async {

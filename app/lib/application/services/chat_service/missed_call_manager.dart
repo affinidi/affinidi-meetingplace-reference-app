@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
@@ -10,11 +8,12 @@ import '../contacts_service/contacts_service.dart';
 import '../incoming_call_service/incoming_call_notifier.dart';
 import 'delegates/call_chat_item_manager.dart';
 
-/// Manages missed-call reconciliation: replaying pending markers and healing
-/// stale incoming call items that arrive after the decline is recorded.
+/// Manages missed-call reconciliation: healing stale incoming call items
+/// left behind when a caller hangs up or a decline is recorded off-screen.
 ///
-/// Follows the RCard/VRC replay-on-session-start pattern and mirrors the
-/// lifecycle-aware healing that occurs when items arrive off-screen.
+/// Reconciliation is idempotent and self-clearing: once the referenced call
+/// item is settled (healed to missed, or already terminal in history) the
+/// durable marker is cleared, so reopening the chat does no further work.
 class MissedCallManager {
   MissedCallManager({
     required this.ref,
@@ -22,51 +21,25 @@ class MissedCallManager {
     required this.callChatItemManager,
     required this.onUpsertChatItem,
   });
-  static const _backgroundReplayRetryDelay = Duration(milliseconds: 250);
-  static const _backgroundReplayMaxAttempts = 8;
 
   final Ref ref;
   final String otherPartyPermanentChannelDid;
   final CallChatItemManager callChatItemManager;
   final void Function(ChatItem) onUpsertChatItem;
-  bool _backgroundReplayScheduled = false;
 
   static const _className = 'MissedCallManager';
 
   AppLogger get _logger => ref.read(appLoggerProvider);
 
-  /// Replays a pending missed-call marker and heals stale incoming call items
-  /// at chat open. Marker exists only for unanswered calls; skipped if a call
-  /// is ringing. Durable across restarts.
-  Future<void> replayPendingMissedCall() async {
-    final methodName = 'replayPendingMissedCall';
-    if (!ref.mounted) return;
-    if (_isRingingForContact()) {
-      _logger.info(
-        '$methodName: Skip, call is still ringing',
-        name: _className,
-      );
-      return;
-    }
-    final pendingAt = await _pendingMissedCallAt();
-    if (pendingAt == null) {
-      _logger.info('$methodName: Skip, no pending marker', name: _className);
-      return;
-    }
-    final healedAny = await _healStaleIncomingCallItemsBefore(
-      pendingAt,
-      clearPendingMarker: false,
-    );
-    if (!healedAny) {
-      _logger.info('$methodName: No stale item found', name: _className);
-      return;
-    }
-  }
-
-  /// Attempts immediate reconciliation for an active chat session after the
-  /// durable missed-call marker has been written. If no stale item is available
-  /// yet, a short follow-up window stays armed so delayed history can still be
-  /// healed by this manager instead of by upstream services.
+  /// Reconciles the durable missed-call marker against chat history.
+  ///
+  /// Runs at chat open and after a marker is written. Resolves the incoming
+  /// call item the marker points at and settles it:
+  /// - not synced yet: keeps the marker so the stream can heal it on arrival.
+  /// - stale (still calling/ringing): heals it to missed and clears the marker.
+  /// - already terminal: clears the marker, nothing left to heal.
+  ///
+  /// Skipped while a call is ringing. Returns true only when it heals an item.
   Future<bool> reconcilePendingMissedCall() async {
     const methodName = 'reconcilePendingMissedCall';
     if (!ref.mounted) return false;
@@ -84,66 +57,28 @@ class MissedCallManager {
       return false;
     }
 
-    final healedAny = await _healStaleIncomingCallItemsBefore(
+    final item = await callChatItemManager.resolveIncomingCallItemBefore(
       pendingAt,
-      clearPendingMarker: false,
+      callId: await _pendingMissedCallId(),
     );
-    scheduleReplayPendingMissedCallFollowUp();
-    return healedAny;
-  }
-
-  /// Schedules a short follow-up replay window for chat-open cases where the
-  /// stale call item arrives after the first bootstrap pass.
-  void scheduleReplayPendingMissedCallFollowUp() {
-    if (_backgroundReplayScheduled) return;
-    _backgroundReplayScheduled = true;
-    unawaited(_runReplayPendingMissedCallFollowUp());
-  }
-
-  Future<void> _runReplayPendingMissedCallFollowUp() async {
-    final methodName = '_runReplayPendingMissedCallFollowUp';
-    try {
-      for (var attempt = 0; attempt < _backgroundReplayMaxAttempts; attempt++) {
-        if (!ref.mounted) return;
-        if (!await _hasPendingMissedCallMarker()) {
-          _logger.info(
-            '$methodName: Stop, no pending marker',
-            name: _className,
-          );
-          return;
-        }
-        if (_isRingingForContact()) {
-          _logger.info('$methodName: Stop, call is ringing', name: _className);
-          return;
-        }
-
-        final pendingAt = await _pendingMissedCallAt();
-        if (pendingAt == null) {
-          _logger.info(
-            '$methodName: Stop, no pending marker',
-            name: _className,
-          );
-          return;
-        }
-
-        final healedAny = await _healStaleIncomingCallItemsBefore(
-          pendingAt,
-          clearPendingMarker: false,
-        );
-        if (healedAny && attempt == _backgroundReplayMaxAttempts - 1) {
-          await _clearPendingMissedCall();
-          return;
-        }
-
-        if (attempt < _backgroundReplayMaxAttempts - 1) {
-          await Future<void>.delayed(_backgroundReplayRetryDelay);
-        } else {
-          await _clearPendingMissedCall();
-        }
-      }
-    } finally {
-      _backgroundReplayScheduled = false;
+    if (item == null) {
+      _logger.info(
+        '$methodName: Item not synced yet, keeping marker',
+        name: _className,
+      );
+      return false;
     }
+    if (!callChatItemManager.isStaleIncomingCall(item)) {
+      _logger.info(
+        '$methodName: Item already settled, clearing marker',
+        name: _className,
+      );
+      await _clearPendingMissedCall();
+      return false;
+    }
+
+    await _healIncomingCallItemMissed(item.messageId, clearPendingMarker: true);
+    return true;
   }
 
   /// Heals [message] to `missed` when a stale incoming call item arrives via
@@ -182,7 +117,7 @@ class MissedCallManager {
     }
     await _healIncomingCallItemMissed(
       message.messageId,
-      clearPendingMarker: false,
+      clearPendingMarker: true,
     );
   }
 
@@ -193,10 +128,6 @@ class MissedCallManager {
         .eventOrNull
         ?.otherPartyPermanentChannelDid;
     return ringingDid == otherPartyPermanentChannelDid;
-  }
-
-  Future<bool> _hasPendingMissedCallMarker() async {
-    return await _pendingMissedCallAt() != null;
   }
 
   /// Updates a stale incoming call item to missed.
@@ -226,22 +157,10 @@ class MissedCallManager {
         .getPendingMissedCallAt(otherPartyPermanentChannelDid);
   }
 
-  Future<bool> _healStaleIncomingCallItemsBefore(
-    DateTime notAfter, {
-    required bool clearPendingMarker,
-  }) async {
-    final messageIds = await callChatItemManager
-        .resolveStaleIncomingCallItemIdsBefore(notAfter);
-    if (messageIds.isEmpty) return false;
-
-    for (final messageId in messageIds) {
-      await _healIncomingCallItemMissed(messageId, clearPendingMarker: false);
-    }
-
-    if (clearPendingMarker) {
-      await _clearPendingMissedCall();
-    }
-    return true;
+  Future<String?> _pendingMissedCallId() {
+    return ref
+        .read(contactsServiceProvider.notifier)
+        .getPendingMissedCallId(otherPartyPermanentChannelDid);
   }
 
   Future<void> _clearPendingMissedCall() {

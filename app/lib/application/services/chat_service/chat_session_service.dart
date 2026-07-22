@@ -396,8 +396,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       await chatStreamAttached;
 
       if (_missedCallManager != null) {
-        await _missedCallManager!.replayPendingMissedCall();
-        _missedCallManager!.scheduleReplayPendingMissedCallFollowUp();
+        await _missedCallManager!.reconcilePendingMissedCall();
       }
 
       await _resetBadgeCount();
@@ -785,7 +784,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   void upsertChatItem(ChatItem item) {
     final existing = state.messages;
-    final idx = existing.indexWhere((m) => m.messageId == item.messageId);
+    final idx = _indexOfChatItem(existing, item);
     if (idx != -1 && _shouldKeepExistingChatItem(existing[idx], item)) {
       _logger.info(
         'upsertChatItem: Keeping final call item ${item.messageId} over '
@@ -798,6 +797,25 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         ? existing.insertSorted(item)
         : existing.replaceItemAtIndex(idx, item);
     state = state.copyWith(messages: messages);
+  }
+
+  /// Locates the slot [item] should occupy in [existing].
+  ///
+  /// Matches by `messageId` first. For call items it also matches by the
+  /// shared `callId`, so an optimistic copy and its transport-confirmed copy
+  /// (persisted under different ids) collapse into a single bubble instead of
+  /// duplicating. Returns `-1` when [item] is new.
+  int _indexOfChatItem(List<ChatItem> existing, ChatItem item) {
+    final byId = existing.indexWhere((m) => m.messageId == item.messageId);
+    if (byId != -1) return byId;
+
+    if (item is! Message) return -1;
+    final callId = _callMetadataOf(item)?.callId;
+    if (callId == null || callId.isEmpty) return -1;
+
+    return existing.indexWhere(
+      (m) => m is Message && _callMetadataOf(m)?.callId == callId,
+    );
   }
 
   /// Returns whether [existing] should win over a newer non-final call item.
@@ -1001,12 +1019,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   );
 
   @override
-  Future<String?> resolveIncomingCallChatItemId() =>
-      _callChatItemManager.resolveIncomingCallChatItemId();
+  Future<String?> resolveIncomingCallChatItemId({String? callId}) =>
+      _callChatItemManager.resolveIncomingCallChatItemId(callId: callId);
 
   @override
-  Future<String?> resolveOutgoingCallChatItemId() =>
-      _callChatItemManager.resolveOutgoingCallChatItemId();
+  Future<String?> resolveOutgoingCallChatItemId({String? callId}) =>
+      _callChatItemManager.resolveOutgoingCallChatItemId(callId: callId);
 
   @override
   Future<bool> markCallAsMissed() {

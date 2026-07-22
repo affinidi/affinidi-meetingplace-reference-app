@@ -22,6 +22,7 @@ void main() {
       required bool isFromMe,
       required CallStatus status,
       DateTime? dateCreated,
+      String callId = '',
     }) => Message(
       chatId: 'fake-chat-id',
       messageId: messageId,
@@ -35,7 +36,7 @@ void main() {
           id: const Uuid().v4(),
           mediaType: CallMediaType.video,
           status: status,
-          callId: '',
+          callId: callId,
         ),
       ],
     );
@@ -76,6 +77,49 @@ void main() {
       });
     });
 
+    test('it prefers the item matching the requested callId', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'other-call',
+          isFromMe: false,
+          status: CallStatus.calling,
+          callId: 'call-a',
+          dateCreated: DateTime(2026, 6, 29, 10),
+        ),
+        callMessage(
+          messageId: 'target-call',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          callId: 'call-b',
+          dateCreated: DateTime(2026, 6, 29, 9),
+        ),
+      ];
+
+      final resolved = await manager.resolveIncomingCallChatItemId(
+        callId: 'call-b',
+      );
+
+      expect(resolved, 'target-call');
+    });
+
+    test('it falls back to the latest by direction when the callId '
+        'has no match', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'latest-incoming',
+          isFromMe: false,
+          status: CallStatus.calling,
+          callId: 'call-a',
+        ),
+      ];
+
+      final resolved = await manager.resolveIncomingCallChatItemId(
+        callId: 'call-unknown',
+      );
+
+      expect(resolved, 'latest-incoming');
+    });
+
     test(
       'it waits for a late incoming item before updating to missed call',
       () {
@@ -105,7 +149,7 @@ void main() {
       },
     );
 
-    test('resolveStaleIncomingCallItemIdBefore returns a message created '
+    test('resolveIncomingCallItemBefore returns a message created '
         'exactly at the cutoff', () async {
       final cutoff = DateTime(2026, 6, 29, 11);
       fakeChatSdk.sessionMessages = [
@@ -117,32 +161,29 @@ void main() {
         ),
       ];
 
-      final id = await manager.resolveStaleIncomingCallItemIdBefore(cutoff);
+      final item = await manager.resolveIncomingCallItemBefore(cutoff);
 
-      expect(id, 'at-cutoff-incoming');
+      expect(item?.messageId, 'at-cutoff-incoming');
     });
 
-    test('resolveStaleIncomingCallItemIdBefore waits for a stale item that '
-        'arrives during chat bootstrap', () async {
+    test('resolveIncomingCallItemBefore returns an already-settled item so an '
+        'orphaned marker can be cleared', () async {
       final cutoff = DateTime(2026, 6, 29, 11);
-
-      // The message is added before the resolution call, simulating it arriving
-      // during bootstrap
       fakeChatSdk.sessionMessages = [
         callMessage(
-          messageId: 'bootstrapped-incoming',
+          messageId: 'settled-incoming',
           isFromMe: false,
-          status: CallStatus.ringing,
+          status: CallStatus.missed,
           dateCreated: cutoff,
         ),
       ];
 
-      final id = await manager.resolveStaleIncomingCallItemIdBefore(cutoff);
+      final item = await manager.resolveIncomingCallItemBefore(cutoff);
 
-      expect(id, 'bootstrapped-incoming');
+      expect(item?.messageId, 'settled-incoming');
     });
 
-    test('resolveStaleIncomingCallItemIdBefore ignores items created after '
+    test('resolveIncomingCallItemBefore ignores items created after '
         'the cutoff so a newer ringing call is not marked missed', () async {
       final cutoff = DateTime(2026, 6, 29, 11);
       fakeChatSdk.sessionMessages = [
@@ -154,9 +195,61 @@ void main() {
         ),
       ];
 
-      final id = await manager.resolveStaleIncomingCallItemIdBefore(cutoff);
+      final item = await manager.resolveIncomingCallItemBefore(cutoff);
 
-      expect(id, isNull);
+      expect(item, isNull);
+    });
+
+    test(
+      'resolveIncomingCallItemBefore matches by callId so an older settled '
+      'call is never mistaken for the marker target still in flight',
+      () async {
+        final cutoff = DateTime(2026, 6, 29, 11);
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'older-settled',
+            isFromMe: false,
+            status: CallStatus.missed,
+            dateCreated: DateTime(2026, 6, 29, 9),
+            callId: 'old-call',
+          ),
+        ];
+
+        final item = await manager.resolveIncomingCallItemBefore(
+          cutoff,
+          callId: 'target-call',
+        );
+
+        expect(item, isNull);
+      },
+    );
+
+    test('resolveIncomingCallItemBefore returns the item whose callId matches '
+        'the marker', () async {
+      final cutoff = DateTime(2026, 6, 29, 11);
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'older-settled',
+          isFromMe: false,
+          status: CallStatus.missed,
+          dateCreated: DateTime(2026, 6, 29, 9),
+          callId: 'old-call',
+        ),
+        callMessage(
+          messageId: 'target-ringing',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          dateCreated: DateTime(2026, 6, 29, 10),
+          callId: 'target-call',
+        ),
+      ];
+
+      final item = await manager.resolveIncomingCallItemBefore(
+        cutoff,
+        callId: 'target-call',
+      );
+
+      expect(item?.messageId, 'target-ringing');
     });
   });
 

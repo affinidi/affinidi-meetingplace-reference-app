@@ -41,7 +41,7 @@ class IncomingCallService extends _$IncomingCallService {
   /// Accepts the incoming call and stops ringing.
   ///
   /// The incoming-call state is intentionally left intact so the call screen
-  /// can detect callee context on first build and initialize UI accordingly.
+  /// can detect recipient context on first build and initialize UI accordingly.
   /// The call screen clears it after consuming.
   void accept({required String callId}) {
     _logger.info('Accepting call: $callId', name: _logKey);
@@ -69,7 +69,9 @@ class IncomingCallService extends _$IncomingCallService {
         ?.otherPartyPermanentChannelDid;
     _clearRingState();
     _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
-    if (channelDid != null) unawaited(_markCallAsMissed(channelDid));
+    if (channelDid != null) {
+      unawaited(_markCallAsMissed(channelDid, callId: callId));
+    }
   }
 
   void _bindToSDK(MeetingPlaceMatrixSDK? sdk) {
@@ -93,7 +95,7 @@ class IncomingCallService extends _$IncomingCallService {
       // Active ringing call was cancelled.
       _clearRingState();
       if (channelDid != null) {
-        unawaited(_markCallAsMissed(channelDid));
+        unawaited(_markCallAsMissed(channelDid, callId: event.callId));
       } else {
         _logger.warning(
           'Skip markCallAsMissed: otherPartyChannelDid null for '
@@ -111,7 +113,12 @@ class IncomingCallService extends _$IncomingCallService {
         'for ${event.callerPermanentChannelDid}',
         name: _logKey,
       );
-      unawaited(_markCallAsMissed(event.callerPermanentChannelDid));
+      unawaited(
+        _markCallAsMissed(
+          event.callerPermanentChannelDid,
+          callId: event.callId,
+        ),
+      );
     }
   }
 
@@ -135,7 +142,9 @@ class IncomingCallService extends _$IncomingCallService {
           ?.otherPartyPermanentChannelDid;
       _clearRingState();
       _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
-      if (channelDid != null) unawaited(_markCallAsMissed(channelDid));
+      if (channelDid != null) {
+        unawaited(_markCallAsMissed(channelDid, callId: callId));
+      }
     });
   }
 
@@ -202,12 +211,12 @@ class IncomingCallService extends _$IncomingCallService {
   /// message that already advances the channel sequence number, so the missed
   /// call is counted by the normal unread path. Bumping it again would
   /// double-count.
-  Future<void> _markCallAsMissed(String contactId) async {
+  Future<void> _markCallAsMissed(String contactId, {String? callId}) async {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
     try {
       await ref
           .read(contactsServiceProvider.notifier)
-          .setPendingMissedCall(contactId);
+          .setPendingMissedCall(contactId, callId: callId);
     } catch (e, stackTrace) {
       _logger.error(
         '_markCallAsMissed: Recording missed call failed for $contactId',

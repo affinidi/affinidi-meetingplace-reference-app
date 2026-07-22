@@ -4,7 +4,6 @@ import '../../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../../infrastructure/services/call_audio_session_service/call_audio_session_service.dart';
 import '../audio_video_call_screen_state.dart';
 import '../call_lifecycle_update.dart';
-import '../rules/call_chat_item_rules.dart';
 import '../rules/call_ui_rules.dart';
 
 /// Handles outgoing call lifecycle transitions: join, cancel, leave, and hang
@@ -90,9 +89,7 @@ class CallLifecycleHandler {
         CallLifecycleUpdate(
           status: AudioVideoCallStatus.ended,
           clearIncomingCall: true,
-          endOutcome: hasHadPeer
-              ? CallEndOutcome.hungUp
-              : CallEndOutcome.declined,
+          endOutcome: hasHadPeer ? CallOutcome.ended : CallOutcome.cancelled,
         ),
       );
     }
@@ -142,7 +139,7 @@ class CallLifecycleHandler {
       const CallLifecycleUpdate(
         status: AudioVideoCallStatus.declined,
         clearIncomingCall: true,
-        endOutcome: CallEndOutcome.declined,
+        endOutcome: CallOutcome.declined,
       ),
     );
   }

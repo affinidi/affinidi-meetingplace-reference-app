@@ -1,7 +1,5 @@
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
-import 'rules/call_chat_item_rules.dart';
-
 /// Carries the call-lifecycle side effects produced by one join/cancel/leave
 /// transition.
 ///
@@ -34,7 +32,7 @@ class CallLifecycleUpdate {
   final bool clearIncomingCall;
 
   /// When set, the controller writes the ended call chat item.
-  final CallEndOutcome? endOutcome;
+  final CallOutcome? endOutcome;
 
   /// Whether a non-fatal hang-up failure should be surfaced to the UI.
   final bool reportHangUpFailure;

@@ -11,32 +11,32 @@ import '../../../../../mocks/fake_app_localizations.dart';
 void main() {
   group('resolveEndStatus', () {
     group('caller (isFromMe=true)', () {
-      test('returns declined for declined outcome', () {
+      test('returns declined for an unanswered outcome', () {
         expect(
-          resolveEndStatus(outcome: CallEndOutcome.declined, isFromMe: true),
+          resolveEndStatus(outcome: CallOutcome.declined, isFromMe: true),
           CallStatus.declined,
         );
       });
 
-      test('returns ended for hungUp outcome', () {
+      test('returns ended for ended outcome', () {
         expect(
-          resolveEndStatus(outcome: CallEndOutcome.hungUp, isFromMe: true),
+          resolveEndStatus(outcome: CallOutcome.ended, isFromMe: true),
           CallStatus.ended,
         );
       });
     });
 
     group('receiver (isFromMe=false)', () {
-      test('returns missed for declined outcome', () {
+      test('returns missed for an unanswered outcome', () {
         expect(
-          resolveEndStatus(outcome: CallEndOutcome.declined, isFromMe: false),
+          resolveEndStatus(outcome: CallOutcome.declined, isFromMe: false),
           CallStatus.missed,
         );
       });
 
-      test('returns ended for hungUp outcome', () {
+      test('returns ended for ended outcome', () {
         expect(
-          resolveEndStatus(outcome: CallEndOutcome.hungUp, isFromMe: false),
+          resolveEndStatus(outcome: CallOutcome.ended, isFromMe: false),
           CallStatus.ended,
         );
       });

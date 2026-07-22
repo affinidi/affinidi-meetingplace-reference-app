@@ -34,7 +34,8 @@ class CallChatItemHandler {
   static const _logKey = 'CallChatItemHandler';
 
   final Future<String?> Function(String callId)? _onInitiator;
-  final Future<String?> Function({required bool isCaller}) _resolveItemId;
+  final Future<String?> Function({required bool isCaller, String? callId})
+  _resolveItemId;
   final Future<void> Function(
     String messageId, {
     required CallStatus status,
@@ -48,6 +49,7 @@ class CallChatItemHandler {
   String? _callChatItemId;
   bool _callChatItemEnded = false;
   Future<void>? _endCallWrite;
+  Future<void> _writeQueue = Future<void>.value();
 
   bool _roleResolved = false;
   bool _isCaller = false;
@@ -166,9 +168,9 @@ class CallChatItemHandler {
 
   void _writeInProgressStatus(CallStatus status) {
     unawaited(
-      Future(() async {
+      _enqueueWrite(() async {
         if (_isDisposed() || _callChatItemEnded) return;
-        final messageId = await _resolveId();
+        final messageId = await _resolveId(isCaller: _isCaller);
         if (messageId == null || _callChatItemEnded || _isDisposed()) {
           _logger.info(
             'updateCallChatItemStatus: Skipping update '
@@ -186,7 +188,7 @@ class CallChatItemHandler {
     if (_callChatItemEnded) return;
     _callChatItemEnded = true;
 
-    final outcome = resolveCallEndOutcome(
+    final outcome = resolveCallOutcome(
       lastStatus: finalStatus,
       hasHadPeer: _hasHadPeer,
     );
@@ -194,7 +196,7 @@ class CallChatItemHandler {
     final hasHadPeer = _hasHadPeer;
     final callDuration = _elapsedCallDuration();
 
-    _endCallWrite = Future(() async {
+    _endCallWrite = _enqueueWrite(() async {
       if (_isDisposed()) {
         _logger.info(
           'endCallChatItem: Skipping, controller disposed',
@@ -222,6 +224,26 @@ class CallChatItemHandler {
     unawaited(_endCallWrite);
   }
 
+  /// Serializes chat item writes so they apply in enqueue order. Combined with
+  /// the synchronous [_callChatItemEnded] flag set in [_writeTerminalStatus],
+  /// this guarantees the terminal status is the last write and no in-flight
+  /// in-progress write can overtake it.
+  Future<void> _enqueueWrite(Future<void> Function() op) {
+    final next = _writeQueue.then((_) => op()).catchError((
+      Object error,
+      StackTrace stackTrace,
+    ) {
+      _logger.error(
+        'call chat item write failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    });
+    _writeQueue = next;
+    return next;
+  }
+
   Duration _elapsedCallDuration() {
     final start = _callStartedAt;
     if (start == null) return Duration.zero;
@@ -229,10 +251,14 @@ class CallChatItemHandler {
   }
 
   /// Resolves and caches the call chat item message ID, inferring role
-  /// from the caller flag if needed.
+  /// from the caller flag if needed. When the session callId is known it is
+  /// used to prefer the item for this exact call.
   Future<String?> _resolveId({bool isCaller = false}) async {
     if (_callChatItemId != null) return _callChatItemId;
-    final resolved = await _resolveItemId(isCaller: isCaller);
+    final resolved = await _resolveItemId(
+      isCaller: isCaller,
+      callId: _sessionCallId,
+    );
     _callChatItemId = resolved;
     return resolved;
   }
