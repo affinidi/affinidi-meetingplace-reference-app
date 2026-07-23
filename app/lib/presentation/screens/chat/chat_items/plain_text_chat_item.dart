@@ -128,7 +128,9 @@ class _PlainTextChatItem extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxBubbleWidth = constraints.hasBoundedWidth
-            ? constraints.maxWidth * _maxTextBubbleWidthFactor
+            ? chatItem.isFromMe
+                ? constraints.maxWidth * _maxTextBubbleWidthFactor
+                : constraints.maxWidth
             : double.infinity;
 
         return GestureDetector(
