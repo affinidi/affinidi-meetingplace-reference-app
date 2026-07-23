@@ -244,6 +244,7 @@ class ActiveCallController extends _$ActiveCallController {
       updateItem: _updateCallChatItem,
       isDisposed: () => _isDisposed || _chatService == null,
       logger: _logger,
+      isGroupCall: isGroupContact,
     )..attach(session);
     _sessionStateSub?.cancel();
     _participantEventSub?.cancel();
@@ -484,6 +485,7 @@ class ActiveCallController extends _$ActiveCallController {
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   }) async {
     final chatService = _chatService;
     if (chatService == null) {
@@ -497,6 +499,7 @@ class ActiveCallController extends _$ActiveCallController {
       messageId,
       status: status,
       duration: duration,
+      participation: participation,
     );
   }
 }
