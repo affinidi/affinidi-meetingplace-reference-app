@@ -75,7 +75,7 @@ class CiergeTrustTaskPlugin implements AttachmentRenderer {
   static Map<String, dynamic>? _parseEnvelope(ChatAttachment attachment) {
     final data = attachment.data;
     if (data == null) return null;
-    String? raw = data.json;
+    var raw = data.json;
     if (raw == null) {
       final b64 = data.base64;
       if (b64 != null) {
@@ -597,9 +597,9 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
               Text(
                 _isSignedDocument
                     ? 'The document has not been tampered with and was signed '
-                        'by the holder of the private key.'
+                          'by the holder of the private key.'
                     : 'The response has not been tampered with and was signed '
-                        'by the holder of the private key.',
+                          'by the holder of the private key.',
                 style: const TextStyle(color: Colors.white38, fontSize: 10),
               ),
             ],

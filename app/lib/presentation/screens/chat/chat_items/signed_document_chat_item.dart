@@ -26,7 +26,7 @@ class _SignedDocumentChatItem extends ConsumerStatefulWidget {
     // Match from cierge/trust-task attachment containing a signed-document.
     for (final attachment in item.attachments) {
       if (attachment.format != 'cierge/trust-task') continue;
-      String? raw = attachment.data?.json;
+      var raw = attachment.data?.json;
       if (raw == null) {
         final b64 = attachment.data?.base64;
         if (b64 != null) {

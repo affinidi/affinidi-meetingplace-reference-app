@@ -132,8 +132,8 @@ class _PlainTextChatItem extends ConsumerWidget {
       builder: (context, constraints) {
         final maxBubbleWidth = constraints.hasBoundedWidth
             ? chatItem.isFromMe
-                ? constraints.maxWidth * _maxTextBubbleWidthFactor
-                : constraints.maxWidth
+                  ? constraints.maxWidth * _maxTextBubbleWidthFactor
+                  : constraints.maxWidth
             : double.infinity;
 
         Widget bubbleContent = Column(
