@@ -548,23 +548,52 @@ class PersonalAgentScreenController
     try {
       final signingService = _ref.read(signingServiceProvider.notifier);
       final stepUpEnabled = await signingService.getStepUpEnabled();
-      state = state.copyWith(autoResponseEnabled: !stepUpEnabled);
-    } catch (_) {
-      // VTA not connected yet — leave default
+      final autoResponse = !stepUpEnabled;
+      _logger.info(
+        'Loaded auto response state: stepUpEnabled=$stepUpEnabled, '
+        'autoResponse=$autoResponse',
+        name: _logKey,
+      );
+      state = state.copyWith(autoResponseEnabled: autoResponse);
+    } catch (e) {
+      _logger.info(
+        'Could not load auto response state (VTA not connected): $e',
+        name: _logKey,
+      );
     }
   }
 
   Future<void> toggleAutoResponse() async {
+    final previousValue = state.autoResponseEnabled;
+    _logger.info(
+      'Toggle auto response: current=$previousValue, target=${!previousValue}',
+      name: _logKey,
+    );
     state = state.copyWith(autoResponseLoading: true);
     try {
       final signingService = _ref.read(signingServiceProvider.notifier);
-      final newAutoResponse = !state.autoResponseEnabled;
-      await signingService.setStepUpEnabled(!newAutoResponse);
+      final newAutoResponse = !previousValue;
+      final newStepUp = !newAutoResponse;
+      _logger.info(
+        'Setting step-up enabled=$newStepUp (autoResponse=$newAutoResponse)',
+        name: _logKey,
+      );
+      await signingService.setStepUpEnabled(newStepUp);
+      _logger.info(
+        '''Auto response toggled successfully: $previousValue -> $newAutoResponse''',
+        name: _logKey,
+      );
       state = state.copyWith(
         autoResponseEnabled: newAutoResponse,
         autoResponseLoading: false,
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Auto response toggle failed: $e',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
       state = state.copyWith(
         autoResponseLoading: false,
         errorMessage: 'Auto response toggle failed: $e',

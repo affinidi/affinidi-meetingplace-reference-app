@@ -229,27 +229,6 @@ class PersonalAgentScreen extends ConsumerWidget {
                         onCancel: () =>
                             cancelRoutingContext(AgentContext.personal),
                       ),
-                    const SizedBox(height: 16),
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceContainerHigh,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: colorScheme.outlineVariant),
-                      ),
-                      child: SwitchListTile(
-                        title: const Text('Auto Response'),
-                        subtitle: const Text(
-                          'Agent responds without approval when enabled',
-                        ),
-                        value: ui.autoResponseEnabled,
-                        onChanged: ui.autoResponseLoading
-                            ? null
-                            : (_) => controller.toggleAutoResponse(),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                    ),
                   ],
                 ],
                 _AgentContextSetupCard(
@@ -288,6 +267,31 @@ class PersonalAgentScreen extends ConsumerWidget {
                           cancelRoutingContext(AgentContext.personal),
                     ),
                 ],
+                const SizedBox(height: 16),
+                _GlassPanel(
+                  padding: EdgeInsets.zero,
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(22),
+                    child: SwitchListTile(
+                      title: const Text('Auto Response'),
+                      subtitle: const Text(
+                        'Agent responds without approval when enabled',
+                      ),
+                      value: ui.autoResponseEnabled,
+                      onChanged: ui.autoResponseLoading
+                          ? null
+                          : (_) => controller.toggleAutoResponse(),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
