@@ -73,10 +73,22 @@ class CiergeTrustTaskPlugin implements AttachmentRenderer {
   }
 
   static Map<String, dynamic>? _parseEnvelope(ChatAttachment attachment) {
-    final json = attachment.data?.json;
-    if (json == null) return null;
+    final data = attachment.data;
+    if (data == null) return null;
+    String? raw = data.json;
+    if (raw == null) {
+      final b64 = data.base64;
+      if (b64 != null) {
+        try {
+          raw = utf8.decode(base64Decode(b64));
+        } catch (_) {
+          return null;
+        }
+      }
+    }
+    if (raw == null) return null;
     try {
-      final decoded = jsonDecode(json);
+      final decoded = jsonDecode(raw);
       if (decoded is Map<String, dynamic>) return decoded;
     } on FormatException {
       // ignore
@@ -167,7 +179,7 @@ class _TrustTaskCard extends ConsumerStatefulWidget {
 }
 
 class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
-  static const _accent = Color(0xFF81D4FA);
+  static const _blueAccent = Color(0xFF81D4FA);
 
   bool _expanded = false;
   bool _auditLoading = false;
@@ -187,6 +199,13 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
     'Verifying Ed25519 signature...',
   ];
 
+  bool get _isSignedDocument {
+    final type = widget.envelope['type'] as String? ?? '';
+    return type.contains('signed-document');
+  }
+
+  Color get _accent => _isSignedDocument ? Colors.greenAccent : _blueAccent;
+
   @override
   Widget build(BuildContext context) {
     if (!_expanded) {
@@ -199,21 +218,25 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: _accent.withValues(alpha: 0.2)),
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.smart_toy_outlined, color: _accent, size: 14),
-              SizedBox(width: 6),
+              Icon(
+                _isSignedDocument ? Icons.verified : Icons.smart_toy_outlined,
+                color: _accent,
+                size: 14,
+              ),
+              const SizedBox(width: 6),
               Text(
-                'Signed by Agent',
-                style: TextStyle(
+                _isSignedDocument ? 'Signed Document' : 'Signed by Agent',
+                style: const TextStyle(
                   color: Colors.white54,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(width: 4),
-              Icon(Icons.expand_more, color: Colors.white38, size: 16),
+              const SizedBox(width: 4),
+              const Icon(Icons.expand_more, color: Colors.white38, size: 16),
             ],
           ),
         ),
@@ -221,10 +244,14 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
     }
 
     final proof = widget.envelope['proof'] as Map<String, dynamic>? ?? {};
+    final payload = widget.envelope['payload'] as Map<String, dynamic>? ?? {};
     final issuer = widget.envelope['issuer'] as String? ?? '';
     final proofType = proof['type'] as String? ?? '';
     final cryptosuite = proof['cryptosuite'] as String? ?? '';
     final proofCreated = proof['created'] as String? ?? '';
+    final title = _isSignedDocument
+        ? (payload['title'] as String? ?? 'Untitled Document')
+        : 'VTA Signed Response';
 
     final shortIssuer = issuer.length > 24
         ? '${issuer.substring(0, 12)}...${issuer.substring(issuer.length - 8)}'
@@ -233,15 +260,20 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(10)),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
         gradient: RadialGradient(
           center: Alignment.bottomCenter,
           radius: 2,
-          colors: [
-            Color.fromARGB(255, 30, 60, 80),
-            Color.fromARGB(255, 18, 24, 31),
-          ],
+          colors: _isSignedDocument
+              ? const [
+                  Color.fromARGB(255, 36, 76, 56),
+                  Color.fromARGB(255, 18, 31, 24),
+                ]
+              : const [
+                  Color.fromARGB(255, 30, 60, 80),
+                  Color.fromARGB(255, 18, 24, 31),
+                ],
         ),
       ),
       child: Column(
@@ -251,16 +283,16 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.verified, color: _accent, size: 28),
+              Icon(Icons.verified, color: _accent, size: 28),
               const SizedBox(width: 12),
               Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'VTA Signed Response',
-                      style: TextStyle(
+                    Text(
+                      title,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
@@ -268,7 +300,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    const Row(
+                    Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
@@ -276,7 +308,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                           color: _accent,
                           size: 14,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           'Signed',
                           style: TextStyle(
@@ -433,7 +465,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
           ),
           const SizedBox(height: 6),
           SelectableText(
-            const JsonEncoder.withIndent('  ').convert(widget.envelope),
+            _truncatedEnvelopeJson(widget.envelope),
             style: const TextStyle(
               color: Colors.white54,
               fontSize: 10,
@@ -466,9 +498,9 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (i < _verifyStep)
-                      const Icon(Icons.check_circle, color: _accent, size: 14)
+                      Icon(Icons.check_circle, color: _accent, size: 14)
                     else if (i == _verifyStep)
-                      const SizedBox(
+                      SizedBox(
                         width: 14,
                         height: 14,
                         child: CircularProgressIndicator(
@@ -540,14 +572,16 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                   size: 18,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  isValid
-                      ? 'Cryptographic Signature Verified'
-                      : 'Signature Verification Failed',
-                  style: TextStyle(
-                    color: isValid ? _accent : Colors.redAccent,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    isValid
+                        ? 'Cryptographic Signature Verified'
+                        : 'Signature Verification Failed',
+                    style: TextStyle(
+                      color: isValid ? _accent : Colors.redAccent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -560,10 +594,13 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
               _verifyDetailRow('Key', _truncateDid(verificationMethod)),
               if (created.isNotEmpty) _verifyDetailRow('Signed at', created),
               const SizedBox(height: 6),
-              const Text(
-                'The response has not been tampered with and was signed '
-                'by the holder of the private key.',
-                style: TextStyle(color: Colors.white38, fontSize: 10),
+              Text(
+                _isSignedDocument
+                    ? 'The document has not been tampered with and was signed '
+                        'by the holder of the private key.'
+                    : 'The response has not been tampered with and was signed '
+                        'by the holder of the private key.',
+                style: const TextStyle(color: Colors.white38, fontSize: 10),
               ),
             ],
             if (_verificationError != null) ...[
@@ -586,11 +623,11 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
           border: Border.all(color: _accent.withValues(alpha: 0.5)),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.fingerprint, color: _accent, size: 18),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
               'Verify Signature',
               style: TextStyle(
@@ -855,5 +892,22 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
   static String _truncateDid(String did) {
     if (did.length <= 32) return did;
     return '${did.substring(0, 16)}...${did.substring(did.length - 12)}';
+  }
+
+  static String _truncatedEnvelopeJson(Map<String, dynamic> data) {
+    const maxChars = 200;
+    final copy = Map<String, dynamic>.from(data);
+    for (final key in copy.keys.toList()) {
+      final value = copy[key];
+      if (value is Map<String, dynamic>) {
+        final valJson = jsonEncode(value);
+        if (valJson.length > maxChars) {
+          copy[key] = '${valJson.substring(0, maxChars)}... (truncated)';
+        }
+      } else if (value is String && value.length > maxChars) {
+        copy[key] = '${value.substring(0, maxChars)}... (truncated)';
+      }
+    }
+    return const JsonEncoder.withIndent('  ').convert(copy);
   }
 }

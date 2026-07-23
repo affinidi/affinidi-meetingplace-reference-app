@@ -74,6 +74,17 @@ class ChatItem extends StatelessWidget {
       return _SignedDocumentChatItem(data: parsed);
     }
 
+    if (_SignedDocumentChatItem.matchAttachmentOnly(_chatItem)) {
+      final msg = _chatItem as chat.Message;
+      final attachment = msg.attachments.firstWhere(
+        (a) => a.format == 'cierge/trust-task',
+      );
+      return _SignedDocumentChatItem(
+        attachment: attachment,
+        contactId: _contactId,
+      );
+    }
+
     if (_chatItem is chat.Message) {
       final callAttachment = _chatItem.attachments.firstWhereOrNull(
         CallMetadata.isCall,

@@ -1,9 +1,13 @@
 part of '../chat_screen.dart';
 
 class _SignedDocumentChatItem extends ConsumerStatefulWidget {
-  const _SignedDocumentChatItem({required this.data});
+  const _SignedDocumentChatItem({this.data, this.attachment, this.contactId});
 
-  final Map<String, dynamic> data;
+  final Map<String, dynamic>? data;
+  final ChatAttachment? attachment;
+  final String? contactId;
+
+  static const _signedDocMarker = 'signed-document';
 
   static Map<String, dynamic>? matchPlainMessage(chat.ChatItem item) {
     if (item is! chat.Message) return null;
@@ -12,7 +16,7 @@ class _SignedDocumentChatItem extends ConsumerStatefulWidget {
       final decoded = jsonDecode(item.value);
       if (decoded is Map<String, dynamic>) {
         final type = decoded['type'] as String? ?? '';
-        if (type.contains('signed-document')) return decoded;
+        if (type.contains(_signedDocMarker)) return decoded;
         if (type == 'cierge/trust-task-notification') {
           final envelope = decoded['signedEnvelope'] as Map<String, dynamic>?;
           if (envelope != null) return envelope;
@@ -22,17 +26,36 @@ class _SignedDocumentChatItem extends ConsumerStatefulWidget {
     // Match from cierge/trust-task attachment containing a signed-document.
     for (final attachment in item.attachments) {
       if (attachment.format != 'cierge/trust-task') continue;
-      final json = attachment.data?.json;
-      if (json == null) continue;
+      String? raw = attachment.data?.json;
+      if (raw == null) {
+        final b64 = attachment.data?.base64;
+        if (b64 != null) {
+          try {
+            raw = utf8.decode(base64Decode(b64));
+          } catch (_) {
+            continue;
+          }
+        }
+      }
+      if (raw == null) continue;
       try {
-        final decoded = jsonDecode(json);
+        final decoded = jsonDecode(raw);
         if (decoded is Map<String, dynamic>) {
           final type = decoded['type'] as String? ?? '';
-          if (type.contains('signed-document')) return decoded;
+          if (type.contains(_signedDocMarker)) return decoded;
         }
       } catch (_) {}
     }
     return null;
+  }
+
+  /// Returns true if this message should be rendered as a signed-document
+  /// widget (attachment-only, needs async download).
+  static bool matchAttachmentOnly(chat.ChatItem item) {
+    if (item is! chat.Message) return false;
+    final text = item.value.trim();
+    if (text.isNotEmpty && text != '\u200B') return false;
+    return item.attachments.any((a) => a.format == 'cierge/trust-task');
   }
 
   @override
@@ -50,6 +73,9 @@ class _SignedDocumentChatItemState
   bool? _verificationResult;
   String? _verificationError;
   int _verifyStep = 0;
+  Map<String, dynamic>? _downloadedData;
+  bool _downloading = false;
+  String? _downloadError;
 
   static const _verifySteps = [
     'Canonicalizing document with JCS (RFC 8785)...',
@@ -60,13 +86,91 @@ class _SignedDocumentChatItemState
     'Verifying Ed25519 signature...',
   ];
 
+  Map<String, dynamic>? get _effectiveData => widget.data ?? _downloadedData;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.data == null && widget.attachment != null) {
+      _downloadAttachment();
+    }
+  }
+
+  Future<void> _downloadAttachment() async {
+    if (widget.contactId == null || widget.attachment == null) return;
+    setState(() => _downloading = true);
+    try {
+      final provider = chatScreenControllerProvider(widget.contactId!);
+      final controller = ref.read(provider.notifier);
+      final bytes = await controller.downloadAttachmentForPlugin(
+        widget.attachment!,
+      );
+      final jsonStr = utf8.decode(bytes);
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is Map<String, dynamic> && mounted) {
+        setState(() {
+          _downloadedData = decoded;
+          _downloading = false;
+        });
+      } else if (mounted) {
+        setState(() {
+          _downloadError = 'Invalid envelope format';
+          _downloading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _downloadError = 'Failed to load: $e';
+          _downloading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final payload = widget.data['payload'] as Map<String, dynamic>? ?? {};
-    final proof = widget.data['proof'] as Map<String, dynamic>? ?? {};
+    if (_downloading) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          gradient: RadialGradient(
+            center: Alignment.bottomCenter,
+            radius: 2,
+            colors: [
+              Color.fromARGB(255, 36, 76, 56),
+              Color.fromARGB(255, 18, 31, 24),
+            ],
+          ),
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.greenAccent,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final data = _effectiveData;
+    if (data == null) {
+      if (_downloadError != null) {
+        return const SizedBox.shrink();
+      }
+      return const SizedBox.shrink();
+    }
+
+    final payload = data['payload'] as Map<String, dynamic>? ?? {};
+    final proof = data['proof'] as Map<String, dynamic>? ?? {};
     final title = payload['title'] as String? ?? 'Untitled Document';
-    final issuer = widget.data['issuer'] as String? ?? '';
-    final issuerName = widget.data['issuerName'] as String?;
+    final issuer = data['issuer'] as String? ?? '';
+    final issuerName = data['issuerName'] as String?;
     final proofType = proof['type'] as String? ?? '';
     final cryptosuite = proof['cryptosuite'] as String? ?? '';
     final proofCreated = proof['created'] as String? ?? '';
@@ -232,7 +336,7 @@ class _SignedDocumentChatItemState
   }
 
   Widget _buildAgentDetailsSection() {
-    final issuerName = widget.data['issuerName'] as String?;
+    final issuerName = _effectiveData?['issuerName'] as String?;
     final isOwner =
         ref.watch(signingServiceProvider.select((s) => s.status)) ==
         SigningServiceStatus.connected;
@@ -298,7 +402,7 @@ class _SignedDocumentChatItemState
           ),
           const SizedBox(height: 6),
           SelectableText(
-            _truncatedEnvelopeJson(widget.data),
+            _truncatedEnvelopeJson(_effectiveData!),
             style: const TextStyle(
               color: Colors.white54,
               fontSize: 10,
@@ -395,12 +499,12 @@ class _SignedDocumentChatItemState
 
     if (_verificationResult != null) {
       final isValid = _verificationResult!;
-      final proof = widget.data['proof'] as Map<String, dynamic>? ?? {};
+      final proof = _effectiveData!['proof'] as Map<String, dynamic>? ?? {};
       final verificationMethod = proof['verificationMethod'] as String? ?? '';
       final cryptosuite = proof['cryptosuite'] as String? ?? '';
       final proofPurpose = proof['proofPurpose'] as String? ?? '';
       final created = proof['created'] as String? ?? '';
-      final issuer = widget.data['issuer'] as String? ?? '';
+      final issuer = _effectiveData!['issuer'] as String? ?? '';
 
       return Container(
         width: double.infinity,
@@ -533,7 +637,7 @@ class _SignedDocumentChatItemState
     });
 
     try {
-      final proof = widget.data['proof'] as Map<String, dynamic>? ?? {};
+      final proof = _effectiveData!['proof'] as Map<String, dynamic>? ?? {};
       final verificationMethod = proof['verificationMethod'] as String? ?? '';
       final verifierDid = verificationMethod.contains('#')
           ? verificationMethod.substring(0, verificationMethod.indexOf('#'))
@@ -546,7 +650,7 @@ class _SignedDocumentChatItemState
       }
 
       final verifier = DataIntegrityEddsaJcsVerifier(verifierDid: verifierDid);
-      final result = await verifier.verify(widget.data);
+      final result = await verifier.verify(_effectiveData!);
 
       await Future<void>.delayed(const Duration(milliseconds: 400));
       if (mounted) {
@@ -570,7 +674,7 @@ class _SignedDocumentChatItemState
   static const _auditCachePrefix = 'audit_entry_';
 
   String? get _auditCacheKey {
-    final id = widget.data['id'] as String?;
+    final id = _effectiveData?['id'] as String?;
     return id != null ? '$_auditCachePrefix$id' : null;
   }
 
@@ -627,9 +731,9 @@ class _SignedDocumentChatItemState
   Map<String, dynamic>? _findMatchingAuditEntry(
     List<Map<String, dynamic>> entries,
   ) {
-    final proof = widget.data['proof'] as Map<String, dynamic>? ?? {};
+    final proof = _effectiveData!['proof'] as Map<String, dynamic>? ?? {};
     final proofCreated = proof['created'] as String? ?? '';
-    final envelopeId = widget.data['id'] as String?;
+    final envelopeId = _effectiveData!['id'] as String?;
 
     for (final entry in entries) {
       final detail = entry['detail'] as Map<String, dynamic>?;
