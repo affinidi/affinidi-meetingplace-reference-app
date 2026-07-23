@@ -88,20 +88,21 @@ void main() {
   });
 
   // A group call in which Alice (did:a) has joined and Bob (did:b) has not.
-  AudioVideoCallScreenState groupState() => AudioVideoCallScreenState(
-    status: AudioVideoCallStatus.active,
-    peerName: 'Study Group',
-    isGroupContact: true,
-    isAudioOnly: true,
-    memberContactCards: {
-      'did:a': _card('did:a', 'Alice'),
-      'did:b': _card('did:b', 'Bob'),
-    },
-    participants: const [
-      AudioVideoCallParticipant(participantId: 'self-1', isSelf: true),
-      AudioVideoCallParticipant(participantId: 'p-a', did: 'did:a'),
-    ],
-  );
+  AudioVideoCallScreenState groupState({bool isAudioOnly = true}) =>
+      AudioVideoCallScreenState(
+        status: AudioVideoCallStatus.active,
+        peerName: 'Study Group',
+        isGroupContact: true,
+        isAudioOnly: isAudioOnly,
+        memberContactCards: {
+          'did:a': _card('did:a', 'Alice'),
+          'did:b': _card('did:b', 'Bob'),
+        },
+        participants: const [
+          AudioVideoCallParticipant(participantId: 'self-1', isSelf: true),
+          AudioVideoCallParticipant(participantId: 'p-a', did: 'did:a'),
+        ],
+      );
 
   testWidgets('group call shows the participants button in the top bar', (
     tester,
@@ -145,4 +146,16 @@ void main() {
       );
     },
   );
+
+  testWidgets('video group call participants button opens the sheet', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_wrap(groupState(isAudioOnly: false)));
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.people_alt_outlined));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CallParticipantListSheet), findsOneWidget);
+  });
 }

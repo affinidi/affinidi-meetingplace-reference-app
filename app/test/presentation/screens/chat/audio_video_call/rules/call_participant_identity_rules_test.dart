@@ -42,6 +42,10 @@ String _matrixUserId(String did) {
   return '@${'$did|$_serverName'.toDidSha256}:$_serverName';
 }
 
+String _matrixRtcParticipantId(String did) {
+  return '${_matrixUserId(did)}:DEVICE123';
+}
+
 void main() {
   group('resolveCallParticipantDisplayName', () {
     test('returns the you label for self', () {
@@ -119,6 +123,30 @@ void main() {
       );
 
       expect(resolved, same(card));
+    });
+
+    test('matches a member card by MatrixRTC identity when did is missing', () {
+      const did = 'did:key:peer-1';
+      final card = _card(did: did, displayName: 'Display Peer');
+
+      final resolved = resolveCallParticipantContactCard(
+        _participant(participantId: _matrixRtcParticipantId(did)),
+        memberContactCards: {did: card},
+      );
+
+      expect(resolved, same(card));
+    });
+
+    test('resolves a member DID by MatrixRTC identity when did is missing', () {
+      const did = 'did:key:peer-1';
+      final card = _card(did: did, displayName: 'Display Peer');
+
+      final resolved = resolveCallParticipantDid(
+        _participant(participantId: _matrixRtcParticipantId(did)),
+        memberContactCards: {did: card},
+      );
+
+      expect(resolved, did);
     });
 
     test('finds the matching member card from another did entry', () {

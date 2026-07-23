@@ -20,11 +20,10 @@ String matrixUserIdFromParticipantIdentity(String identity) {
   if (!identity.startsWith('@')) return identity;
   final firstSeparator = identity.indexOf(':');
   if (firstSeparator <= 0) return identity;
-  final homeserverAndMaybeDevice = identity.substring(firstSeparator + 1);
-  final secondSeparator = homeserverAndMaybeDevice.indexOf(':');
-  if (secondSeparator < 0) return identity;
+  final lastSeparator = identity.lastIndexOf(':');
+  if (lastSeparator <= firstSeparator) return identity;
 
-  return identity.substring(0, firstSeparator + 1 + secondSeparator);
+  return identity.substring(0, lastSeparator);
 }
 
 /// Looks up the permanent channel DID for a participant, with fallback

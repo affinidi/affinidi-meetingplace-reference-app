@@ -6,6 +6,7 @@ import '../../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../audio_video_call_screen_controller.dart';
+import '../rules/call_participant_identity_rules.dart';
 import 'call_participant.dart';
 import 'call_participant_list_sheet.dart';
 import 'call_participants_ring_controller.dart';
@@ -76,7 +77,10 @@ List<CallParticipant> buildCallParticipants({
   String? ownDid,
 }) {
   final connectedDids = connected
-      .map((participant) => participant.did)
+      .map(
+        (participant) =>
+            resolveCallParticipantDid(participant, memberContactCards: roster),
+      )
       .whereType<String>()
       .toSet();
 

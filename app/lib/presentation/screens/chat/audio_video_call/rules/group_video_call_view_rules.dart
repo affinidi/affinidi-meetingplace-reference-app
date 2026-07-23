@@ -1,6 +1,7 @@
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../../../domain/models/contact_card/contact_card.dart';
+import 'call_participant_identity_rules.dart';
 import 'group_call_layout_rules.dart';
 
 /// A non-focused participant rendered as a grid tile in the group call.
@@ -184,7 +185,10 @@ String _displayNameFor(
   required String youLabel,
 }) {
   if (participant.isSelf) return youLabel;
-  final did = participant.did;
+  final did = resolveCallParticipantDid(
+    participant,
+    memberContactCards: memberContactCards,
+  );
   final card = did == null ? null : memberContactCards[did];
   final name = card?.displayName;
   if (name != null && name.isNotEmpty) return name;

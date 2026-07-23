@@ -2,10 +2,12 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/did_extensions.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/participants/call_participant.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/participants/call_participants_sheet.dart';
 
 const _avatar = AssetImage('assets/test_avatar.png');
+const _serverName = 'example.org';
 
 ContactCard _card(String did, String firstName) => ContactCard(
   id: did,
@@ -14,6 +16,11 @@ ContactCard _card(String did, String firstName) => ContactCard(
   firstName: firstName,
   displayName: firstName,
 );
+
+String _matrixRtcParticipantId(String did) {
+  final matrixUserId = '@${'$did|$_serverName'.toDidSha256}:$_serverName';
+  return '$matrixUserId:DEVICE123';
+}
 
 void main() {
   ImageProvider<Object> avatarOf(ContactCard _) => _avatar;
@@ -99,6 +106,25 @@ void main() {
 
       expect(result.single.connection, CallParticipantConnection.notConnected);
     });
+
+    test(
+      'treats MatrixRTC participant identity as connected when did is missing',
+      () {
+        final result = buildCallParticipants(
+          roster: {'did:b': _card('did:b', 'Bob')},
+          connected: [
+            AudioVideoCallParticipant(
+              participantId: _matrixRtcParticipantId('did:b'),
+            ),
+          ],
+          ringStates: const {'did:b': CallRingState.ringing},
+          avatarOf: avatarOf,
+        );
+
+        expect(result.single.connection, CallParticipantConnection.connected);
+        expect(result.single.ringState, CallRingState.idle);
+      },
+    );
 
     test(
       'excludes the local user by ownDid even when self has a null participant '
