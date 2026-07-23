@@ -62,6 +62,8 @@ class PersonalAgentScreen extends ConsumerWidget {
           personalContextUploaded: state.personalContextUploaded,
           workContextFileName: state.workContextFileName,
           personalContextFileName: state.personalContextFileName,
+          autoResponseEnabled: state.autoResponseEnabled,
+          autoResponseLoading: state.autoResponseLoading,
         ),
       ),
     );
@@ -204,6 +206,30 @@ class PersonalAgentScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  if (ui.showWorkAuthorization ||
+                      ui.showPersonalAuthorization) ...[
+                    const SizedBox(height: 16),
+                    if (ui.showWorkAuthorization)
+                      _AgentAuthorizationCard(
+                        title: l10n.personalAgentMyWorkAiTitle,
+                        contextLabel: l10n.personalAgentWorkContextLabel,
+                        snapshot: ui.workSnapshot,
+                        contact: ui.workContact,
+                        onCancel: () => cancelRoutingContext(AgentContext.work),
+                      ),
+                    if (ui.showWorkAuthorization &&
+                        ui.showPersonalAuthorization)
+                      const SizedBox(height: 12),
+                    if (ui.showPersonalAuthorization)
+                      _AgentAuthorizationCard(
+                        title: l10n.personalAgentMyPersonalAiTitle,
+                        contextLabel: l10n.personalAgentPersonalContextLabel,
+                        snapshot: ui.personalSnapshot,
+                        contact: ui.personalContact,
+                        onCancel: () =>
+                            cancelRoutingContext(AgentContext.personal),
+                      ),
+                  ],
                 ],
                 _AgentContextSetupCard(
                   workContextUploaded: ui.workContextUploaded,
@@ -241,6 +267,31 @@ class PersonalAgentScreen extends ConsumerWidget {
                           cancelRoutingContext(AgentContext.personal),
                     ),
                 ],
+                const SizedBox(height: 16),
+                _GlassPanel(
+                  padding: EdgeInsets.zero,
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(22),
+                    child: SwitchListTile(
+                      title: const Text('Auto Response'),
+                      subtitle: const Text(
+                        'Agent responds without approval when enabled',
+                      ),
+                      value: ui.autoResponseEnabled,
+                      onChanged: ui.autoResponseLoading
+                          ? null
+                          : (_) => controller.toggleAutoResponse(),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

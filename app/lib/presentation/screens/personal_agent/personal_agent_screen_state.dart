@@ -25,6 +25,8 @@ class PersonalAgentScreenState {
     required this.workContextFileName,
     required this.personalContextFileName,
     this.contextUploadError,
+    this.autoResponseEnabled = false,
+    this.autoResponseLoading = false,
   });
 
   const PersonalAgentScreenState.initial()
@@ -47,7 +49,9 @@ class PersonalAgentScreenState {
       workContextUploaded = false,
       personalContextUploaded = false,
       workContextFileName = null,
-      personalContextFileName = null;
+      personalContextFileName = null,
+      autoResponseEnabled = false,
+      autoResponseLoading = false;
 
   final String? holderDid;
   final bool isReady;
@@ -74,6 +78,8 @@ class PersonalAgentScreenState {
   final bool personalContextUploaded;
   final String? workContextFileName;
   final String? personalContextFileName;
+  final bool autoResponseEnabled;
+  final bool autoResponseLoading;
 
   PersonalAgentScreenState copyWith({
     String? holderDid,
@@ -96,6 +102,8 @@ class PersonalAgentScreenState {
     bool? personalContextUploaded,
     String? workContextFileName,
     String? personalContextFileName,
+    bool? autoResponseEnabled,
+    bool? autoResponseLoading,
     bool clearErrorMessage = false,
     bool clearContextUploadError = false,
     bool clearSetupResult = false,
@@ -134,6 +142,8 @@ class PersonalAgentScreenState {
       workContextFileName: workContextFileName ?? this.workContextFileName,
       personalContextFileName:
           personalContextFileName ?? this.personalContextFileName,
+      autoResponseEnabled: autoResponseEnabled ?? this.autoResponseEnabled,
+      autoResponseLoading: autoResponseLoading ?? this.autoResponseLoading,
     );
   }
 }

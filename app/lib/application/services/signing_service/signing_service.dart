@@ -148,8 +148,9 @@ class SigningService extends StateNotifier<SigningServiceState> {
       final authResult = await _authWorkflow!.connect();
       _logger.info('Authenticated, setting up mediator...', name: _logKey);
 
-      final mediatorDidDoc =
-          await UniversalDIDResolver().resolveDid(vtaMediatorDid);
+      final mediatorDidDoc = await UniversalDIDResolver().resolveDid(
+        vtaMediatorDid,
+      );
       final mediatorAccessToken = await MediatorAuthHelper.authenticate(
         mediatorDidDocument: mediatorDidDoc,
         didManager: didManager,
@@ -420,6 +421,30 @@ class SigningService extends StateNotifier<SigningServiceState> {
         }
     }
     return null;
+  }
+
+  Future<bool> getStepUpEnabled() async {
+    if (_vtaClient == null || _authWorkflow == null) return false;
+    return _withReauth(() async {
+      final policy = await _vtaClient!.stepUpPolicy.getPolicy();
+      return policy['enabled'] as bool? ?? false;
+    });
+  }
+
+  Future<void> setStepUpEnabled(bool enabled) async {
+    if (_vtaClient == null || _authWorkflow == null) {
+      throw StateError('VTA not connected');
+    }
+    await _withReauth(() async {
+      await _vtaClient!.stepUpPolicy.setPolicy(
+        enabled: enabled,
+        floors: enabled
+            ? [
+                {'operation': 'vault/sign-trust-task', 'mode': 'delegated'},
+              ]
+            : [],
+      );
+    });
   }
 
   @override
