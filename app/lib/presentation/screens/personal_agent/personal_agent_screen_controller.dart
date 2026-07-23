@@ -53,16 +53,16 @@ class _RoutingTargetSpec {
 
   factory _RoutingTargetSpec.from(AgentContext target) {
     if (target == AgentContext.work) {
-      return const _RoutingTargetSpec(
+      return _RoutingTargetSpec(
         target: AgentContext.work,
-        contextName: 'work-ai',
+        contextName: AgentContext.work.setupContextName,
         displayName: 'Work AI',
       );
     }
 
-    return const _RoutingTargetSpec(
+    return _RoutingTargetSpec(
       target: AgentContext.personal,
-      contextName: 'personal-ai',
+      contextName: AgentContext.personal.setupContextName,
       displayName: 'Personal AI',
     );
   }
@@ -351,56 +351,23 @@ class PersonalAgentScreenController
         name: _logKey,
       );
 
-      final importResult = await oneDriveAuthService.storeAndImport(
+      await oneDriveAuthService.storeConnection(
         setupId: setupId,
         holderDid: holderDid,
         oauthResult: oauthResult,
       );
 
       _logger.info(
-        'OneDrive OAuth storage and import completed '
-        '(imported=${importResult.importedFileCount}, '
-        'skipped=${importResult.skippedFileCount}).',
+        'OneDrive OAuth storage completed; Work AI will query OneDrive at '
+        'answer time.',
         name: _logKey,
       );
 
-      if (!importResult.hasContent) {
-        const noFilesMessage =
-            'OneDrive connected, but no supported text files were found to '
-            'import into Work AI context.';
-        state = state.copyWith(contextUploadError: noFilesMessage);
-        _clearConnecting();
-        return const WorkOneDriveConnectionOutcome(
-          completed: false,
-          message: noFilesMessage,
-        );
-      }
-
-      await _ref
-          .read(personalAiServiceProvider.notifier)
-          .uploadContext(
-            setupId: setupId,
-            content: importResult.content,
-            setupContextName: spec.contextName,
-            agentDisplayName: spec.displayName,
-          );
-      syncFromDependencies();
-
-      if (state.contextUploadError != null) {
-        _clearConnecting();
-        return WorkOneDriveConnectionOutcome(
-          completed: false,
-          message: state.contextUploadError!,
-        );
-      }
-
-      final importedFileName =
-          'OneDrive import (${importResult.importedFileCount} files)';
       await _ref
           .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
           .markContextUploaded(
             context: spec.target,
-            fileName: importedFileName,
+            fileName: 'OneDrive runtime connection',
           );
 
       await _ref
@@ -410,11 +377,9 @@ class PersonalAgentScreenController
       syncFromDependencies();
 
       _clearConnecting();
-      return WorkOneDriveConnectionOutcome(
+      return const WorkOneDriveConnectionOutcome(
         completed: true,
-        message:
-            'OneDrive imported ${importResult.importedFileCount} file(s) '
-            'into Work AI context.',
+        message: 'OneDrive connected. Work AI will query it at answer time.',
       );
     } catch (error, stackTrace) {
       _logger.error(

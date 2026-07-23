@@ -17,7 +17,27 @@ final contextRoutingStoreProvider = Provider<ContextRoutingStore>(
   name: 'contextRoutingStoreProvider',
 );
 
-enum AgentContext { work, personal }
+enum AgentContext {
+  work('ctx-0', 'work-ai'),
+  personal('ctx-1', 'personal-ai');
+
+  const AgentContext(this.routeKey, this.setupContextName);
+
+  /// Canonical MPX/personal-agent wire context. These are app-level logical
+  /// slots; backend domain mapping may resolve them to different physical VTA
+  /// contexts per app instance.
+  final String routeKey;
+  final String setupContextName;
+
+  static AgentContext fromRouteKey(String value) {
+    final normalized = value.trim().toLowerCase();
+    return switch (normalized) {
+      'ctx-0' || 'work' || 'work-ai' => AgentContext.work,
+      'ctx-1' || 'personal' || 'personal-ai' => AgentContext.personal,
+      _ => AgentContext.personal,
+    };
+  }
+}
 
 class ContextRoutingState {
   const ContextRoutingState({
@@ -176,10 +196,7 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
       if (decoded is! Map<String, dynamic>) return const {};
       final out = <String, AgentContext>{};
       for (final entry in decoded.entries) {
-        final v = entry.value.toString().trim().toLowerCase();
-        out[entry.key] = v == 'work'
-            ? AgentContext.work
-            : AgentContext.personal;
+        out[entry.key] = AgentContext.fromRouteKey(entry.value.toString());
       }
       return out;
     } catch (_) {
@@ -188,9 +205,7 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
   }
 
   String _encodeContactMap(Map<String, AgentContext> map) {
-    final serializable = map.map(
-      (k, v) => MapEntry(k, v == AgentContext.work ? 'work' : 'personal'),
-    );
+    final serializable = map.map((k, v) => MapEntry(k, v.routeKey));
     return jsonEncode(serializable);
   }
 }

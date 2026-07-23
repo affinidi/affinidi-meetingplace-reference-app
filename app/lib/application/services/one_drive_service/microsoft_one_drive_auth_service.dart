@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vta_dart_client/vta_dart_client.dart';
@@ -10,20 +7,6 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 
 final microsoftOneDriveAuthServiceProvider =
     Provider<MicrosoftOneDriveAuthService>(MicrosoftOneDriveAuthService.new);
-
-class OneDriveContextImportResult {
-  const OneDriveContextImportResult({
-    required this.content,
-    required this.importedFileCount,
-    required this.skippedFileCount,
-  });
-
-  final String content;
-  final int importedFileCount;
-  final int skippedFileCount;
-
-  bool get hasContent => content.trim().isNotEmpty;
-}
 
 class MicrosoftOneDriveOAuthResult {
   const MicrosoftOneDriveOAuthResult({
@@ -51,28 +34,22 @@ class MicrosoftOneDriveAuthService {
   MicrosoftOneDriveAuthService(
     this._ref, {
     FlutterAppAuth? appAuth,
-    HttpClient? httpClient,
-  }) : _appAuth = appAuth ?? const FlutterAppAuth(),
-       _httpClient = httpClient ?? HttpClient();
+  }) : _appAuth = appAuth ?? const FlutterAppAuth();
 
   static const _logKey = 'ONEDRIVEAUTH';
-  static const _graphBaseUrl = 'https://graph.microsoft.com/v1.0';
-  static const _maxImportedFiles = 20;
-  static const _maxDownloadedBytesPerFile = 256 * 1024;
 
   final Ref _ref;
   final FlutterAppAuth _appAuth;
-  final HttpClient _httpClient;
 
   Environment get _environment => _ref.read(environmentProvider);
   late final _logger = _ref.read(appLoggerProvider);
 
-  Future<OneDriveContextImportResult> connectStoreAndImport({
+  Future<void> connectAndStore({
     required String setupId,
     required String holderDid,
   }) async {
     final oauthResult = await authorize();
-    return storeAndImport(
+    await storeConnection(
       setupId: setupId,
       holderDid: holderDid,
       oauthResult: oauthResult,
@@ -188,7 +165,7 @@ class MicrosoftOneDriveAuthService {
     );
   }
 
-  Future<OneDriveContextImportResult> storeAndImport({
+  Future<void> storeConnection({
     required String setupId,
     required String holderDid,
     required MicrosoftOneDriveOAuthResult oauthResult,
@@ -268,199 +245,6 @@ class MicrosoftOneDriveAuthService {
       'OneDrive OAuth refresh token stored successfully.',
       name: _logKey,
     );
-
-    return _importOneDriveContext(accessToken: oauthResult.accessToken);
-  }
-
-  Future<OneDriveContextImportResult> _importOneDriveContext({
-    required String accessToken,
-  }) async {
-    _logger.info(
-      'Starting OneDrive context import from Microsoft Graph.',
-      name: _logKey,
-    );
-
-    final imported = <_OneDriveImportedFile>[];
-    var skipped = 0;
-
-    Future<void> visitChildren(String? parentId, {required int depth}) async {
-      if (depth > 4 || imported.length >= _maxImportedFiles) {
-        return;
-      }
-
-      final uri = parentId == null
-          ? Uri.parse('$_graphBaseUrl/me/drive/root/children').replace(
-              queryParameters: const <String, String>{
-                r'$select': 'id,name,file,folder,size',
-                r'$top': '50',
-              },
-            )
-          : Uri.parse(
-              '$_graphBaseUrl/me/drive/items/$parentId/children',
-            ).replace(
-              queryParameters: const <String, String>{
-                r'$select': 'id,name,file,folder,size',
-                r'$top': '50',
-              },
-            );
-
-      final json = await _getGraphJson(accessToken: accessToken, uri: uri);
-      final items = json['value'];
-      if (items is! List) {
-        return;
-      }
-
-      for (final item in items.whereType<Map<String, dynamic>>()) {
-        if (imported.length >= _maxImportedFiles) {
-          return;
-        }
-
-        final id = (item['id'] as String?)?.trim();
-        final name = (item['name'] as String?)?.trim() ?? 'untitled';
-        if (id == null || id.isEmpty) {
-          skipped++;
-          continue;
-        }
-
-        if (item['folder'] is Map<String, dynamic>) {
-          await visitChildren(id, depth: depth + 1);
-          continue;
-        }
-
-        if (!_isSupportedTextFile(name)) {
-          skipped++;
-          continue;
-        }
-
-        final size = item['size'];
-        if (size is num && size > _maxDownloadedBytesPerFile) {
-          skipped++;
-          continue;
-        }
-
-        try {
-          final text = await _downloadTextFile(
-            accessToken: accessToken,
-            itemId: id,
-          );
-          if (text.trim().isEmpty) {
-            skipped++;
-            continue;
-          }
-          imported.add(_OneDriveImportedFile(name: name, text: text));
-          _logger.info(
-            'Imported OneDrive file for Work AI context (name=$name).',
-            name: _logKey,
-          );
-        } catch (error, stackTrace) {
-          skipped++;
-          _logger.warning(
-            'Skipping OneDrive file after download failure '
-            '(name=$name, error=$error).',
-            name: _logKey,
-          );
-          _logger.debug(stackTrace.toString(), name: _logKey);
-        }
-      }
-    }
-
-    await visitChildren(null, depth: 0);
-
-    final content = _renderImportedContext(imported);
-    _logger.info(
-      'Completed OneDrive context import '
-      '(imported=${imported.length}, skipped=$skipped).',
-      name: _logKey,
-    );
-
-    return OneDriveContextImportResult(
-      content: content,
-      importedFileCount: imported.length,
-      skippedFileCount: skipped,
-    );
-  }
-
-  Future<Map<String, dynamic>> _getGraphJson({
-    required String accessToken,
-    required Uri uri,
-  }) async {
-    final request = await _httpClient.getUrl(uri);
-    request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
-    request.headers.set(HttpHeaders.acceptHeader, 'application/json');
-
-    final response = await request.close();
-    final body = await response.transform(utf8.decoder).join();
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw StateError(
-        'Microsoft Graph request failed with status ${response.statusCode}: '
-        '$body',
-      );
-    }
-
-    final decoded = jsonDecode(body);
-    if (decoded is Map<String, dynamic>) {
-      return decoded;
-    }
-    throw StateError('Microsoft Graph returned an unexpected JSON shape.');
-  }
-
-  Future<String> _downloadTextFile({
-    required String accessToken,
-    required String itemId,
-  }) async {
-    final uri = Uri.parse('$_graphBaseUrl/me/drive/items/$itemId/content');
-    final request = await _httpClient.getUrl(uri);
-    request.headers.set(HttpHeaders.authorizationHeader, 'Bearer $accessToken');
-
-    final response = await request.close();
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      final body = await response.transform(utf8.decoder).join();
-      throw StateError(
-        'Microsoft Graph content request failed with status '
-        '${response.statusCode}: $body',
-      );
-    }
-
-    final bytes = <int>[];
-    await for (final chunk in response) {
-      bytes.addAll(chunk);
-      if (bytes.length > _maxDownloadedBytesPerFile) {
-        throw StateError('OneDrive file exceeds import size limit.');
-      }
-    }
-    return utf8.decode(bytes, allowMalformed: true);
-  }
-
-  bool _isSupportedTextFile(String name) {
-    final lower = name.toLowerCase();
-    return lower.endsWith('.txt') ||
-        lower.endsWith('.md') ||
-        lower.endsWith('.markdown') ||
-        lower.endsWith('.csv') ||
-        lower.endsWith('.json') ||
-        lower.endsWith('.yaml') ||
-        lower.endsWith('.yml') ||
-        lower.endsWith('.log');
-  }
-
-  String _renderImportedContext(List<_OneDriveImportedFile> files) {
-    if (files.isEmpty) {
-      return '';
-    }
-
-    final buffer = StringBuffer()
-      ..writeln('Imported OneDrive work context.')
-      ..writeln('Imported files: ${files.length}')
-      ..writeln();
-
-    for (final file in files) {
-      buffer
-        ..writeln('--- OneDrive file: ${file.name} ---')
-        ..writeln(file.text.trim())
-        ..writeln();
-    }
-
-    return buffer.toString().trim();
   }
 
   String _setupResourcePath(String setupId, String suffix) {
@@ -477,11 +261,4 @@ class MicrosoftOneDriveAuthService {
     if (value.length <= 12) return '${value.substring(0, 3)}...';
     return '${value.substring(0, 8)}...${value.substring(value.length - 4)}';
   }
-}
-
-class _OneDriveImportedFile {
-  const _OneDriveImportedFile({required this.name, required this.text});
-
-  final String name;
-  final String text;
 }

@@ -367,11 +367,7 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
         customPhrase: updatedFormData.customPhrase,
         score: updatedFormData.score,
         transport: updatedFormData.transport,
-        contextKey: agentContext == AgentContext.work
-            ? 'work'
-            : agentContext == AgentContext.personal
-            ? 'personal'
-            : null,
+        contextKey: agentContext?.routeKey,
       );
 
       await ref

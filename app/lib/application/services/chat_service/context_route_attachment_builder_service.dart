@@ -21,9 +21,7 @@ class ContextRouteAttachmentBuilderService {
     final routingState = _ref.read(contextRoutingServiceProvider);
     final mappedContext = routingState.contactContexts[contactId];
     final selectedContext = mappedContext ?? _inferDefaultContext(contactId);
-    final contextValue = selectedContext == AgentContext.work
-        ? 'work'
-        : 'personal';
+    final contextValue = selectedContext.routeKey;
     final timestamp = DateTime.now().microsecondsSinceEpoch;
     final payload = jsonEncode({'context': contextValue});
 

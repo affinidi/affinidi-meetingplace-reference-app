@@ -161,6 +161,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     if (!_environment.personalAiEnabled) return;
     if (state.contextUploading) return;
 
+    final contextKey = _routeKeyForSetupContextName(setupContextName);
+
     state = state.copyWith(
       contextUploading: true,
       clearContextUploadError: true,
@@ -176,6 +178,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         uploadStatus = await _sdk.uploadPersonalAgentContext(
           setupId: effectiveSetupId,
           content: content,
+          contextKey: contextKey,
         );
       } on VtaClientException catch (error) {
         if (!_isMissingSetupError(error)) {
@@ -210,6 +213,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         uploadStatus = await _sdk.uploadPersonalAgentContext(
           setupId: effectiveSetupId,
           content: content,
+          contextKey: contextKey,
         );
       }
 
@@ -233,6 +237,13 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         contextUploadError: error.toString(),
       );
     }
+  }
+
+  String _routeKeyForSetupContextName(String setupContextName) {
+    return setupContextName.trim().toLowerCase() ==
+            AgentContext.work.setupContextName
+        ? AgentContext.work.routeKey
+        : AgentContext.personal.routeKey;
   }
 
   bool _isMissingSetupError(VtaClientException error) {
@@ -270,10 +281,6 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     String agentDisplayName = 'My Personal AI',
   }) async {
     if (!_environment.personalAiEnabled) {
-      return;
-    }
-
-    if (state.isSettingUp) {
       return;
     }
 
