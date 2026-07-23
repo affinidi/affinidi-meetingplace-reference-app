@@ -311,7 +311,6 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
           ),
           const SizedBox(height: 10),
           Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(
                 Icons.shield_outlined,
@@ -319,22 +318,27 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                 size: 14,
               ),
               const SizedBox(width: 4),
-              Text(
-                '$proofType · $cryptosuite',
-                style: const TextStyle(color: Colors.white38, fontSize: 11),
+              Flexible(
+                child: Text(
+                  '$proofType · $cryptosuite',
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
           if (proofCreated.isNotEmpty) ...[
             const SizedBox(height: 2),
             Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.access_time, color: Colors.white38, size: 14),
                 const SizedBox(width: 4),
-                Text(
-                  'Signed at $proofCreated',
-                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                Flexible(
+                  child: Text(
+                    'Signed at $proofCreated',
+                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
