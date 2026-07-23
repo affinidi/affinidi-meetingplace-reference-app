@@ -45,6 +45,7 @@ abstract class AudioVideoCallScreenState with _$AudioVideoCallScreenState {
     @Default(false) bool isGroupContact,
     @Default('') String peerName,
     @Default({}) Map<String, ContactCard> memberContactCards,
+    String? ownDid,
     @Default(false) bool isAudioOnly,
     @Default(true) bool isMicEnabled,
     @Default(true) bool isCameraEnabled,

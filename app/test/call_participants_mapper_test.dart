@@ -99,5 +99,28 @@ void main() {
 
       expect(result.single.connection, CallParticipantConnection.notConnected);
     });
+
+    test(
+      'excludes the local user by ownDid even when self has a null participant '
+      'DID',
+      () {
+        final result = buildCallParticipants(
+          roster: {
+            'did:me': _card('did:me', 'Me'),
+            'did:b': _card('did:b', 'Bob'),
+          },
+          connected: const [
+            AudioVideoCallParticipant(participantId: 'self', isSelf: true),
+            AudioVideoCallParticipant(participantId: 'p1', did: 'did:b'),
+          ],
+          ringStates: const {},
+          avatarOf: avatarOf,
+          ownDid: 'did:me',
+        );
+
+        expect(result.map((p) => p.id), ['did:b']);
+        expect(result.single.connection, CallParticipantConnection.connected);
+      },
+    );
   });
 }

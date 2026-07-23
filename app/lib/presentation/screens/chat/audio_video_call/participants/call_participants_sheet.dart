@@ -36,6 +36,7 @@ class CallParticipantsSheet extends ConsumerWidget {
     final provider = audioVideoCallScreenControllerProvider(contactId);
     final roster = ref.watch(provider.select((s) => s.memberContactCards));
     final connected = ref.watch(provider.select((s) => s.participants));
+    final ownDid = ref.watch(provider.select((s) => s.ownDid));
     final ringStates = ref.watch(
       callParticipantsRingControllerProvider(contactId),
     );
@@ -49,6 +50,7 @@ class CallParticipantsSheet extends ConsumerWidget {
       connected: connected,
       ringStates: ringStates,
       avatarOf: (card) => card.image(cacheManager: cacheManager),
+      ownDid: ownDid,
     );
 
     return CallParticipantListSheet(
@@ -61,15 +63,17 @@ class CallParticipantsSheet extends ConsumerWidget {
 
 /// Derives the presentational participant list from group-call state.
 ///
-/// Every roster member is listed. A member is Connected when their DID is
-/// present among the call [connected] participants; otherwise Not connected,
-/// carrying its current entry from [ringStates]. [avatarOf] resolves each
-/// member's avatar image.
+/// Every roster member is listed except the local user ([ownDid]), which is
+/// never shown or rung. A member is Connected when their DID is present among
+/// the call [connected] participants; otherwise Not connected, carrying its
+/// current entry from [ringStates]. [avatarOf] resolves each member's avatar
+/// image.
 List<CallParticipant> buildCallParticipants({
   required Map<String, ContactCard> roster,
   required List<AudioVideoCallParticipant> connected,
   required Map<String, CallRingState> ringStates,
   required ImageProvider<Object> Function(ContactCard) avatarOf,
+  String? ownDid,
 }) {
   final connectedDids = connected
       .map((participant) => participant.did)
@@ -78,20 +82,21 @@ List<CallParticipant> buildCallParticipants({
 
   return [
     for (final entry in roster.entries)
-      if (connectedDids.contains(entry.key))
-        CallParticipant(
-          id: entry.key,
-          firstName: entry.value.firstName,
-          avatar: avatarOf(entry.value),
-          connection: CallParticipantConnection.connected,
-        )
-      else
-        CallParticipant(
-          id: entry.key,
-          firstName: entry.value.firstName,
-          avatar: avatarOf(entry.value),
-          connection: CallParticipantConnection.notConnected,
-          ringState: ringStates[entry.key] ?? CallRingState.idle,
-        ),
+      if (entry.key != ownDid)
+        if (connectedDids.contains(entry.key))
+          CallParticipant(
+            id: entry.key,
+            firstName: entry.value.firstName,
+            avatar: avatarOf(entry.value),
+            connection: CallParticipantConnection.connected,
+          )
+        else
+          CallParticipant(
+            id: entry.key,
+            firstName: entry.value.firstName,
+            avatar: avatarOf(entry.value),
+            connection: CallParticipantConnection.notConnected,
+            ringState: ringStates[entry.key] ?? CallRingState.idle,
+          ),
   ];
 }
