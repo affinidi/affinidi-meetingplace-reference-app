@@ -170,10 +170,11 @@ class FakeChatSessionService extends ChatSessionService {
   }
 
   @override
-  Future<bool> markCallAsMissed() async {
+  Future<bool> markCallAsMissed({String? callId}) async {
     markCallAsMissedAttempts++;
     final messageId =
-        markCallAsMissedMessageId ?? await resolveIncomingCallChatItemId();
+        markCallAsMissedMessageId ??
+        await resolveIncomingCallChatItemId(callId: callId);
     if (!incomingItemAvailable || messageId == null) return false;
     await updateCallChatItem(messageId, status: CallStatus.missed);
     return true;

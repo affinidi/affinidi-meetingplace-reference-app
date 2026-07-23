@@ -1032,9 +1032,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _callChatItemManager.resolveOutgoingCallChatItemId(callId: callId);
 
   @override
-  Future<bool> markCallAsMissed() {
+  Future<bool> markCallAsMissed({String? callId}) {
     if (_chatId == null || _missedCallManager == null) {
       return Future.value(false);
+    }
+    if (callId != null && callId.isNotEmpty) {
+      return _callChatItemManager.markCallAsMissed(callId: callId);
     }
     return _missedCallManager!.reconcilePendingMissedCall();
   }

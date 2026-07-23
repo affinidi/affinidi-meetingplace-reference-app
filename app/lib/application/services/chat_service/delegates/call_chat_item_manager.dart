@@ -208,8 +208,8 @@ class CallChatItemManager {
 
   /// Marks the latest pending incoming call item as `missed`. Returns `true`
   /// when an item was found and updated, `false` otherwise.
-  Future<bool> markCallAsMissed() async {
-    final messageId = await resolveIncomingCallChatItemId();
+  Future<bool> markCallAsMissed({String? callId}) async {
+    final messageId = await resolveIncomingCallChatItemId(callId: callId);
     if (messageId == null) {
       logger.info(
         'markCallAsMissed: No pending incoming call item found',

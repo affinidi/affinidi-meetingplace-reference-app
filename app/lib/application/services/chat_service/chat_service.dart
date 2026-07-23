@@ -121,7 +121,7 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   /// there was nothing to update or the session is not live.
   ///
   /// Called when the ring timer expires or the user declines before answering.
-  Future<bool> markCallAsMissed();
+  Future<bool> markCallAsMissed({String? callId});
 
   /// Updates the local-only [status] and participation [duration] of a
   /// previously emitted call chat item, in place. Per-side and local-only: it

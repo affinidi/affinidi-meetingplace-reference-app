@@ -43,7 +43,8 @@ class MissedCallManager {
   Future<bool> reconcilePendingMissedCall() async {
     const methodName = 'reconcilePendingMissedCall';
     if (!ref.mounted) return false;
-    if (_isRingingForContact()) {
+    final pendingCallId = await _pendingMissedCallId();
+    if (_isRingingForContact(callId: pendingCallId)) {
       _logger.info(
         '$methodName: Skip, call is still ringing',
         name: _className,
@@ -59,7 +60,7 @@ class MissedCallManager {
 
     final item = await callChatItemManager.resolveIncomingCallItemBefore(
       pendingAt,
-      callId: await _pendingMissedCallId(),
+      callId: pendingCallId,
     );
     if (item == null) {
       _logger.info(
@@ -122,12 +123,15 @@ class MissedCallManager {
   }
 
   /// Returns true if a call for this contact is currently ringing.
-  bool _isRingingForContact() {
-    final ringingDid = ref
-        .read(incomingCallProvider)
-        .eventOrNull
-        ?.otherPartyPermanentChannelDid;
-    return ringingDid == otherPartyPermanentChannelDid;
+  bool _isRingingForContact({String? callId}) {
+    final ringingEvent = ref.read(incomingCallProvider).eventOrNull;
+    if (ringingEvent == null) return false;
+    if (ringingEvent.otherPartyPermanentChannelDid !=
+        otherPartyPermanentChannelDid) {
+      return false;
+    }
+    if (callId == null || callId.isEmpty) return true;
+    return ringingEvent.callId == callId;
   }
 
   /// Updates a stale incoming call item to missed.

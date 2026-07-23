@@ -167,7 +167,11 @@ void main() {
       );
 
       final manager = MissedCallManager(
-        ref: _createTestRef(contactsService, ringingDid: channelDid),
+        ref: _createTestRef(
+          contactsService,
+          ringingDid: channelDid,
+          ringingCallId: 'call-123',
+        ),
         otherPartyPermanentChannelDid: channelDid,
         callChatItemManager: callItemManager,
         onUpsertChatItem: (_) {},
@@ -178,6 +182,44 @@ void main() {
       expect(healed, isFalse);
       expect(callItemManager.updateCallCount, 0);
     });
+
+    test(
+      'reconcilePendingMissedCall heals when the current ringing state is for '
+      'the same contact but a different callId',
+      () async {
+        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: channelDid,
+          pendingMissedCallAt: markerTime,
+          pendingMissedCallId: 'cancelled-call-id',
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final callItemManager = FakeCallChatItemManager(
+          isStaleReturn: true,
+          resolveReturn: incomingCallMessage(
+            messageId: 'msg-cancelled',
+            dateCreated: markerTime.subtract(const Duration(seconds: 1)),
+          ),
+        );
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(
+            contactsService,
+            ringingDid: channelDid,
+            ringingCallId: 'new-live-call-id',
+          ),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          onUpsertChatItem: (_) {},
+        );
+
+        final healed = await manager.reconcilePendingMissedCall();
+
+        expect(healed, isTrue);
+        expect(callItemManager.updateCallCount, 1);
+        expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
+      },
+    );
 
     test(
       'reconcilePendingMissedCall heals by direction and marker time even when '
@@ -392,7 +434,11 @@ void main() {
   });
 }
 
-Ref _createTestRef(ContactsService contactsService, {String? ringingDid}) {
+Ref _createTestRef(
+  ContactsService contactsService, {
+  String? ringingDid,
+  String ringingCallId = 'ringing-call-id',
+}) {
   final container = ProviderContainer(
     overrides: [
       contactsServiceProvider.overrideWith(() => contactsService),
@@ -404,7 +450,7 @@ Ref _createTestRef(ContactsService contactsService, {String? ringingDid}) {
         .read(incomingCallProvider.notifier)
         .set(
           IncomingAudioVideoCallEvent(
-            callId: 'ringing-call-id',
+            callId: ringingCallId,
             callerPermanentChannelDid: ringingDid,
             otherPartyPermanentChannelDid: ringingDid,
             mediaType: CallMediaType.video,

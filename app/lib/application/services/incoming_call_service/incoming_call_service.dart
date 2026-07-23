@@ -228,7 +228,7 @@ class IncomingCallService extends _$IncomingCallService {
     try {
       await ref
           .read(chatSessionServiceProvider(contactId).notifier)
-          .markCallAsMissed();
+          .markCallAsMissed(callId: callId);
     } catch (e, stackTrace) {
       _logger.error(
         '_markCallAsMissed: Chat item update failed for $contactId',
