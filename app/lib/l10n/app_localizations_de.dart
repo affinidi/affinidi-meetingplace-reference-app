@@ -2281,22 +2281,22 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String callParticipantsConnectedCount(int count) {
-    return '$count connected';
+    return '$count verbunden';
   }
 
   @override
-  String get callParticipantsConnectedSection => 'Connected';
+  String get callParticipantsConnectedSection => 'Verbunden';
 
   @override
-  String get callParticipantsNotConnectedSection => 'Not connected';
+  String get callParticipantsNotConnectedSection => 'Nicht verbunden';
 
   @override
   String callParticipantCallAction(String name) {
-    return 'Call $name';
+    return '$name anrufen';
   }
 
   @override
   String callParticipantRingingAction(String name) {
-    return 'Ringing $name';
+    return '$name wird angerufen';
   }
 }
