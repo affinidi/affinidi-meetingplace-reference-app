@@ -12,6 +12,10 @@ class _SignedDocumentChatItem extends ConsumerStatefulWidget {
       if (decoded is! Map<String, dynamic>) return null;
       final type = decoded['type'] as String? ?? '';
       if (type.contains('signed-document')) return decoded;
+      if (type == 'cierge/trust-task-notification') {
+        final envelope = decoded['signedEnvelope'] as Map<String, dynamic>?;
+        if (envelope != null) return envelope;
+      }
     } catch (_) {}
     return null;
   }
