@@ -14,6 +14,10 @@ class FakeEnvironment implements Environment {
     this.personalAiEnabled = true,
     this.personalAiBaseUrl = 'http://127.0.0.1:8790',
     this.personalAiSetupEndpoint = '/personal-agent/setup',
+    this.vtaBaseUrl = '',
+    this.vtaDid = '',
+    this.vtaMediatorUrl = '',
+    this.vtaMediatorDid = '',
     this._defaultMediators = const {},
     this.enabledIndividualChatTransports = const [
       ChannelTransport.didcomm,
@@ -49,6 +53,15 @@ class FakeEnvironment implements Environment {
 
   @override
   final List<ChannelTransport> enabledIndividualChatTransports;
+
+  @override
+  String get microsoftOAuthTenantId => 'common';
+
+  @override
+  String get microsoftOAuthClientId => 'test-client-id';
+
+  @override
+  String get microsoftOAuthRedirectUrl => 'mpx://auth/microsoft/callback';
 
   @override
   int get maxLogMemoryEntries => 1000;
@@ -128,18 +141,14 @@ class FakeEnvironment implements Environment {
   Map<String, Map<String, dynamic>> get ciergeEventConfig => const {};
 
   @override
-  // TODO: implement vtaBaseUrl
-  String get vtaBaseUrl => throw UnimplementedError();
+  final String vtaBaseUrl;
 
   @override
-  // TODO: implement vtaDid
-  String get vtaDid => throw UnimplementedError();
+  final String vtaDid;
 
   @override
-  // TODO: implement vtaMediatorDid
-  String get vtaMediatorDid => throw UnimplementedError();
+  final String vtaMediatorUrl;
 
   @override
-  // TODO: implement vtaMediatorUrl
-  String get vtaMediatorUrl => throw UnimplementedError();
+  final String vtaMediatorDid;
 }

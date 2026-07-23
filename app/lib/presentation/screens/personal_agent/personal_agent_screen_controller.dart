@@ -5,10 +5,12 @@ import 'package:meeting_place_personal_agent/meeting_place_personal_agent.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
+import '../../../application/services/one_drive_service/microsoft_one_drive_auth_service.dart';
 import '../../../application/services/personal_ai_service/disconnect_agent_context_service.dart';
 import '../../../application/services/personal_ai_service/personal_ai_authorization_snapshot.dart';
 import '../../../application/services/personal_ai_service/personal_ai_contact_resolution.dart';
 import '../../../application/services/personal_ai_service/personal_ai_service.dart';
+import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'personal_agent_screen_state.dart';
 
 class RoutingContextUploadOutcome {
@@ -29,6 +31,16 @@ class RoutingContextUploadOutcome {
   final bool uploaded;
   final String? fileName;
   final AgentContext? target;
+}
+
+class WorkOneDriveConnectionOutcome {
+  const WorkOneDriveConnectionOutcome({
+    required this.completed,
+    required this.message,
+  });
+
+  final bool completed;
+  final String message;
 }
 
 class _RoutingTargetSpec {
@@ -98,7 +110,10 @@ class PersonalAgentScreenController
   PersonalAgentScreenController(this._ref)
     : super(const PersonalAgentScreenState.initial());
 
+  static const _logKey = 'PAICTL';
+
   final Ref _ref;
+  late final _logger = _ref.read(appLoggerProvider);
 
   void syncFromDependencies() {
     final identity = _ref.read(
@@ -173,8 +188,8 @@ class PersonalAgentScreenController
     final existingSetup = _setupForContext(spec.contextName);
     final canReuseExistingSetup =
         existingSetup != null &&
-        state.isReady &&
         _matchesTargetContext(existingSetup, spec.contextName) &&
+        _isConnectionReady(existingSetup) &&
         (existingSetup.setupId?.trim().isNotEmpty ?? false);
 
     _setConnecting(spec.displayName);
@@ -188,7 +203,7 @@ class PersonalAgentScreenController
       final connected =
           setupResult != null &&
           _matchesTargetContext(setupResult, spec.contextName) &&
-          (_isConnectionReady(setupResult) || state.isReady);
+          _isConnectionReady(setupResult);
       if (!connected) {
         state = state.copyWith(
           contextUploadError: '${spec.displayName} is still connecting.',
@@ -238,10 +253,182 @@ class PersonalAgentScreenController
     }
   }
 
+  Future<WorkOneDriveConnectionOutcome> connectWorkOneDrive() async {
+    final spec = _RoutingTargetSpec.from(AgentContext.work);
+    final holderDid = _currentHolderDid();
+    if (holderDid.isEmpty) {
+      _logger.error(
+        'Cannot connect OneDrive because current holder DID is missing.',
+        name: _logKey,
+      );
+      return const WorkOneDriveConnectionOutcome(
+        completed: false,
+        message:
+            'Unable to connect OneDrive because the current identity is '
+            'missing a DID.',
+      );
+    }
+
+    _logger.info(
+      'Starting Work AI OneDrive connection (holderDid=${_redact(holderDid)})',
+      name: _logKey,
+    );
+
+    final existingSetup = _setupForContext(spec.contextName);
+    final canReuseExistingSetup =
+        existingSetup != null &&
+        _matchesTargetContext(existingSetup, spec.contextName) &&
+        _isConnectionReady(existingSetup) &&
+        (existingSetup.setupId?.trim().isNotEmpty ?? false);
+
+    _setConnecting(spec.displayName);
+
+    try {
+      Object? setupError;
+      StackTrace? setupStackTrace;
+      Future<void>? setupFuture;
+      if (!canReuseExistingSetup) {
+        _logger.info(
+          'Starting Work AI setup while OneDrive OAuth opens.',
+          name: _logKey,
+        );
+        setupFuture =
+            _ensureSetupAndConnection(
+              spec: spec,
+              holderDid: holderDid,
+            ).catchError((Object error, StackTrace stackTrace) {
+              setupError = error;
+              setupStackTrace = stackTrace;
+            });
+      } else {
+        _logger.info(
+          'Reusing existing Work AI setup for OneDrive OAuth '
+          '(setupId=${_redact(existingSetup.setupId ?? '')})',
+          name: _logKey,
+        );
+      }
+
+      final oneDriveAuthService = _ref.read(
+        microsoftOneDriveAuthServiceProvider,
+      );
+      final oauthResult = await oneDriveAuthService.authorize();
+
+      if (setupFuture != null) {
+        await setupFuture;
+        if (setupError != null) {
+          Error.throwWithStackTrace(
+            setupError!,
+            setupStackTrace ?? StackTrace.current,
+          );
+        }
+      }
+
+      final setupId = _setupForContext(spec.contextName)?.setupId?.trim() ?? '';
+      if (setupId.isEmpty) {
+        _logger.error(
+          'Cannot connect OneDrive because Work AI setup id is missing.',
+          name: _logKey,
+        );
+        _clearConnecting();
+        return const WorkOneDriveConnectionOutcome(
+          completed: false,
+          message:
+              'Unable to connect OneDrive because Work AI setup is incomplete.',
+        );
+      }
+
+      _logger.info(
+        'Work AI setup is ready; starting OneDrive OAuth '
+        '(setupId=${_redact(setupId)})',
+        name: _logKey,
+      );
+
+      final importResult = await oneDriveAuthService.storeAndImport(
+        setupId: setupId,
+        holderDid: holderDid,
+        oauthResult: oauthResult,
+      );
+
+      _logger.info(
+        'OneDrive OAuth storage and import completed '
+        '(imported=${importResult.importedFileCount}, '
+        'skipped=${importResult.skippedFileCount}).',
+        name: _logKey,
+      );
+
+      if (!importResult.hasContent) {
+        const noFilesMessage =
+            'OneDrive connected, but no supported text files were found to '
+            'import into Work AI context.';
+        state = state.copyWith(contextUploadError: noFilesMessage);
+        _clearConnecting();
+        return const WorkOneDriveConnectionOutcome(
+          completed: false,
+          message: noFilesMessage,
+        );
+      }
+
+      await _ref
+          .read(personalAiServiceProvider.notifier)
+          .uploadContext(
+            setupId: setupId,
+            content: importResult.content,
+            setupContextName: spec.contextName,
+            agentDisplayName: spec.displayName,
+          );
+      syncFromDependencies();
+
+      if (state.contextUploadError != null) {
+        _clearConnecting();
+        return WorkOneDriveConnectionOutcome(
+          completed: false,
+          message: state.contextUploadError!,
+        );
+      }
+
+      final importedFileName =
+          'OneDrive import (${importResult.importedFileCount} files)';
+      await _ref
+          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
+          .markContextUploaded(
+            context: spec.target,
+            fileName: importedFileName,
+          );
+
+      await _ref
+          .read(personalAiServiceProvider.notifier)
+          .refreshPersonalAiContactSync();
+      await _ref.read(contactsServiceProvider.notifier).fetchContacts();
+      syncFromDependencies();
+
+      _clearConnecting();
+      return WorkOneDriveConnectionOutcome(
+        completed: true,
+        message:
+            'OneDrive imported ${importResult.importedFileCount} file(s) '
+            'into Work AI context.',
+      );
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Work AI OneDrive connection failed.',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      _clearConnecting();
+      rethrow;
+    }
+  }
+
   Future<void> _ensureSetupAndConnection({
     required _RoutingTargetSpec spec,
     required String holderDid,
   }) async {
+    _logger.info(
+      'Ensuring ${spec.displayName} setup '
+      '(context=${spec.contextName}, holderDid=${_redact(holderDid)})',
+      name: _logKey,
+    );
     await _ref
         .read(personalAiServiceProvider.notifier)
         .setupPersonalAi(
@@ -252,10 +439,18 @@ class PersonalAgentScreenController
     syncFromDependencies();
 
     var setupResult = _setupForContext(spec.contextName);
+    _logger.info(
+      '${spec.displayName} setup response '
+      '(setupId=${_redact(setupResult?.setupId ?? '')}, '
+      'contextId=${setupResult?.contextId ?? 'missing'}, '
+      'status=${setupResult?.setupStatus ?? 'missing'}, '
+      'mpxConnectionCreated=${setupResult?.mpxConnectionCreated})',
+      name: _logKey,
+    );
     final connectionKnownReady =
-        state.isReady &&
         setupResult != null &&
-        _matchesTargetContext(setupResult, spec.contextName);
+        _matchesTargetContext(setupResult, spec.contextName) &&
+        _isConnectionReady(setupResult);
 
     if (!connectionKnownReady &&
         (setupResult == null || !_isConnectionReady(setupResult))) {
@@ -267,6 +462,13 @@ class PersonalAgentScreenController
             agentDisplayName: spec.displayName,
           );
       syncFromDependencies();
+      _logger.info(
+        '${spec.displayName} setup poll completed '
+        '(setupId=${_redact(setupResult?.setupId ?? '')}, '
+        'status=${setupResult?.setupStatus ?? 'missing'}, '
+        'mpxConnectionCreated=${setupResult?.mpxConnectionCreated})',
+        name: _logKey,
+      );
     }
   }
 
@@ -313,6 +515,12 @@ class PersonalAgentScreenController
     final normalizedContextId = result.contextId.trim().toLowerCase();
     final normalizedTarget = contextName.trim().toLowerCase();
     return normalizedContextId.startsWith(normalizedTarget);
+  }
+
+  String _redact(String value) {
+    if (value.isEmpty) return '(empty)';
+    if (value.length <= 12) return '${value.substring(0, 3)}...';
+    return '${value.substring(0, 8)}...${value.substring(value.length - 4)}';
   }
 
   Future<void> disconnectRoutingContext(AgentContext target) async {
