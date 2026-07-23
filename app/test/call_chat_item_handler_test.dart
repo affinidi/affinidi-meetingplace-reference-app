@@ -31,7 +31,7 @@ void main() {
           onInitiator: (_) async => itemId,
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               null,
-          updateItem: (_, {required status, duration}) async {},
+          updateItem: (_, {required status, duration, participation}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
         );
@@ -52,7 +52,7 @@ void main() {
           },
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               null,
-          updateItem: (_, {required status, duration}) async {},
+          updateItem: (_, {required status, duration, participation}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
         );
@@ -71,7 +71,7 @@ void main() {
           onInitiator: (_) async => 'id',
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               null,
-          updateItem: (_, {required status, duration}) async {},
+          updateItem: (_, {required status, duration, participation}) async {},
           isDisposed: () => false,
           logger: _LogCapture(logMessages),
         );
@@ -97,7 +97,7 @@ void main() {
           },
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               null,
-          updateItem: (_, {required status, duration}) async {},
+          updateItem: (_, {required status, duration, participation}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
         );
@@ -116,7 +116,7 @@ void main() {
           onInitiator: (_) async => 'id',
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               null,
-          updateItem: (_, {required status, duration}) async {},
+          updateItem: (_, {required status, duration, participation}) async {},
           isDisposed: () => false,
           logger: _LogCapture(logMessages),
         );
@@ -145,7 +145,7 @@ void main() {
           },
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               null,
-          updateItem: (_, {required status, duration}) async {},
+          updateItem: (_, {required status, duration, participation}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
         );
@@ -172,7 +172,8 @@ void main() {
             onInitiator: (_) async => 'id',
             resolveItemId: ({required bool isCaller, String? callId}) async =>
                 null,
-            updateItem: (_, {required status, duration}) async {},
+            updateItem:
+                (_, {required status, duration, participation}) async {},
             isDisposed: () => false,
             logger: _WarningCapture(warnings),
           );
@@ -202,7 +203,8 @@ void main() {
             },
             resolveItemId: ({required bool isCaller, String? callId}) async =>
                 null,
-            updateItem: (_, {required status, duration}) async {},
+            updateItem:
+                (_, {required status, duration, participation}) async {},
             isDisposed: () => false,
             logger: fakeLogger,
           );
@@ -223,7 +225,7 @@ void main() {
           onInitiator: (_) async => 'id',
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               null,
-          updateItem: (_, {required status, duration}) async {},
+          updateItem: (_, {required status, duration, participation}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
         );
@@ -239,7 +241,7 @@ void main() {
           },
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               null,
-          updateItem: (_, {required status, duration}) async {},
+          updateItem: (_, {required status, duration, participation}) async {},
           isDisposed: () => false,
           logger: fakeLogger,
         );
@@ -266,7 +268,7 @@ void main() {
         onInitiator: (_) async => 'msg-1',
         resolveItemId: ({required bool isCaller, String? callId}) async =>
             'msg-1',
-        updateItem: (id, {required status, duration}) async {
+        updateItem: (id, {required status, duration, participation}) async {
           calls.add((messageId: id, status: status));
         },
         isDisposed: () => false,
@@ -375,7 +377,7 @@ void main() {
         onInitiator: (_) async => 'msg-1',
         resolveItemId: ({required bool isCaller, String? callId}) async =>
             'msg-1',
-        updateItem: (id, {required status, duration}) async {
+        updateItem: (id, {required status, duration, participation}) async {
           calls.add((messageId: id, status: status, duration: duration));
         },
         isDisposed: () => isDisposed,

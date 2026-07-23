@@ -244,6 +244,7 @@ class CallChatItemManager {
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -278,6 +279,7 @@ class CallChatItemManager {
         status: status,
         callId: existing.callId,
         durationMs: duration?.inMilliseconds ?? existing.durationMs,
+        participation: participation ?? existing.participation,
         id: callAttachment!.id,
       );
       item.attachments = [
@@ -293,6 +295,125 @@ class CallChatItemManager {
     } catch (e, stackTrace) {
       logger.error(
         'updateCallChatItem failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return null;
+    }
+  }
+
+  /// Resolves this device's own call item for [callId] for outcome
+  /// reconciliation. Matches the exact [callId] across every direction and
+  /// status, including already-settled items, so a device that already ended
+  /// its own item can still converge on the full duration. Prefers the
+  /// device's own outgoing item, then an incoming item. Returns `null` when no
+  /// item carries [callId]; never falls back to a non-matching item.
+  Future<String?> resolveCallItemIdForOutcome(String callId) async {
+    const label = 'resolveCallItemIdForOutcome';
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk == null) {
+      logger.warning('$label: chat SDK unavailable', name: _logKey);
+      return null;
+    }
+    if (callId.isEmpty) return null;
+    try {
+      final items = await chatSdk.messages;
+      Message? outgoing;
+      Message? incoming;
+      for (final message in items.whereType<Message>()) {
+        final attachment = message.attachments.firstWhereOrNull(
+          CallMetadata.isCall,
+        );
+        if (attachment == null) continue;
+        if (CallMetadata.maybeOf(attachment)?.callId != callId) continue;
+        if (message.isFromMe) {
+          outgoing = message;
+        } else {
+          incoming = message;
+        }
+      }
+      final match = outgoing ?? incoming;
+      if (match == null) {
+        logger.info('$label: no call item for callId $callId', name: _logKey);
+        return null;
+      }
+      logger.info('$label: ${match.messageId}', name: _logKey);
+      return match.messageId;
+    } catch (e, stackTrace) {
+      logger.error(
+        '$label failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return null;
+    }
+  }
+
+  /// Reconciles the call item [messageId] to `ended` with the authoritative
+  /// [duration] from a transport-delivered outcome. Clears
+  /// `selfLeftBeforeEnd` on any group participation so a participant who left
+  /// early converges on the full call duration and the "You left" label is
+  /// replaced by the standard duration label. Returns the updated [Message] for
+  /// an immediate UI refresh, or `null` when the item is missing or not a call.
+  Future<Message?> reconcileCallOutcome(
+    String messageId, {
+    Duration? duration,
+  }) async {
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk == null) {
+      logger.warning(
+        'reconcileCallOutcome: Chat SDK unavailable',
+        name: _logKey,
+      );
+      return null;
+    }
+    try {
+      final item = await chatSdk.getMessageById(messageId);
+      if (item is! Message) {
+        logger.warning(
+          'reconcileCallOutcome: message $messageId not found',
+          name: _logKey,
+        );
+        return null;
+      }
+      final callAttachment = item.attachments.firstWhereOrNull(
+        CallMetadata.isCall,
+      );
+      final existing = callAttachment == null
+          ? null
+          : CallMetadata.maybeOf(callAttachment);
+      if (existing == null) {
+        logger.warning(
+          'reconcileCallOutcome: $messageId is not a call item',
+          name: _logKey,
+        );
+        return null;
+      }
+      final convergedParticipation = existing.participation?.copyWith(
+        selfLeftBeforeEnd: false,
+      );
+      final updated = CallMetadata.buildAttachment(
+        mediaType: existing.mediaType,
+        status: CallStatus.ended,
+        callId: existing.callId,
+        durationMs: duration?.inMilliseconds ?? existing.durationMs,
+        participation: convergedParticipation,
+        id: callAttachment!.id,
+      );
+      item.attachments = [
+        for (final a in item.attachments)
+          if (CallMetadata.isCall(a)) updated else a,
+      ];
+      await chatSdk.updateMessage(item);
+      logger.info('reconcileCallOutcome: $messageId -> ended', name: _logKey);
+      return item;
+    } catch (e, stackTrace) {
+      logger.error(
+        'reconcileCallOutcome failed',
         error: e,
         stackTrace: stackTrace,
         name: _logKey,

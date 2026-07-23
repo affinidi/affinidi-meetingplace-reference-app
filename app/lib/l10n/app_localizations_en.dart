@@ -2156,6 +2156,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get callChatItemNotAnswered => 'Not answered';
 
   @override
+  String callChatItemGroupOngoingVideo(int count) {
+    return 'Ongoing video call ($count)';
+  }
+
+  @override
+  String callChatItemGroupOngoingAudio(int count) {
+    return 'Ongoing audio call ($count)';
+  }
+
+  @override
+  String get callChatItemYouLeft => 'You left';
+
+  @override
   String callDurationHourFormat(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

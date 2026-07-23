@@ -21,6 +21,17 @@ class FakeAppLocalizations implements AppLocalizations {
   String get callChatItemMissed => 'Missed';
 
   @override
+  String callChatItemGroupOngoingVideo(int count) =>
+      'Ongoing video call ($count)';
+
+  @override
+  String callChatItemGroupOngoingAudio(int count) =>
+      'Ongoing audio call ($count)';
+
+  @override
+  String get callChatItemYouLeft => 'You left';
+
+  @override
   String callDurationHourFormat(int h) => '${h}h';
 
   @override

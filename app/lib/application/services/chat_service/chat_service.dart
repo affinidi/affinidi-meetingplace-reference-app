@@ -126,9 +126,14 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   /// Updates the local-only [status] and participation [duration] of a
   /// previously emitted call chat item, in place. Per-side and local-only: it
   /// does not propagate to the other party.
+  ///
+  /// For group calls, [participation] carries the group summary (peer count,
+  /// self join/leave). Null leaves any existing participation block untouched,
+  /// so 1:1 calls are unaffected.
   Future<void> updateCallChatItem(
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   });
 }

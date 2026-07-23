@@ -16,7 +16,12 @@ void main() {
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               null,
           updateItem:
-              (_, {required CallStatus status, Duration? duration}) async {},
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {},
           isDisposed: () => false,
           logger: FakeAppLogger(),
         );
@@ -29,7 +34,12 @@ void main() {
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               'msg-123',
           updateItem:
-              (_, {required CallStatus status, Duration? duration}) async {},
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {},
           isDisposed: () => false,
           logger: FakeAppLogger(),
         );
@@ -45,7 +55,12 @@ void main() {
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               'msg-456',
           updateItem:
-              (_, {required CallStatus status, Duration? duration}) async {},
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {},
           isDisposed: () => false,
           logger: FakeAppLogger(),
         );
@@ -61,7 +76,12 @@ void main() {
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               'msg-789',
           updateItem:
-              (_, {required CallStatus status, Duration? duration}) async {
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
                 updateCallCount++;
               },
           isDisposed: () => false,
@@ -86,7 +106,12 @@ void main() {
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               'msg-abc',
           updateItem:
-              (_, {required CallStatus status, Duration? duration}) async {
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
                 updateCallCount++;
               },
           isDisposed: () => false,
@@ -108,7 +133,12 @@ void main() {
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               'msg-def',
           updateItem:
-              (_, {required CallStatus status, Duration? duration}) async {},
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {},
           isDisposed: () => false,
           logger: FakeAppLogger(),
         );
@@ -136,7 +166,12 @@ void main() {
             resolveItemId: ({required bool isCaller, String? callId}) async =>
                 null,
             updateItem:
-                (_, {required CallStatus status, Duration? duration}) async {},
+                (
+                  _, {
+                  required CallStatus status,
+                  Duration? duration,
+                  CallParticipation? participation,
+                }) async {},
             isDisposed: () => false,
             logger: FakeAppLogger(),
           );
@@ -166,7 +201,7 @@ void main() {
         final resolveCalls = <({bool isCaller, String? callId})>[];
         final handler = CallChatItemHandler(
           // Resolve the optimistic id late so the first in-progress write
-          // has to fall back to direction-based resolution.
+          // must wait for it instead of resolving a stale item.
           onInitiator: (_) async {
             await Future<void>.delayed(const Duration(milliseconds: 60));
             return 'outgoing-id';
@@ -176,7 +211,12 @@ void main() {
             return isCaller ? 'outgoing-id' : 'incoming-id';
           },
           updateItem:
-              (id, {required CallStatus status, Duration? duration}) async {
+              (
+                id, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
                 updates.add((id, status));
               },
           isDisposed: () => false,
@@ -222,10 +262,10 @@ void main() {
         );
         expect(
           resolveCalls,
-          contains((isCaller: true, callId: 'test-call-id')),
+          isEmpty,
           reason:
-              'Live call item resolution must prefer '
-              'the current session callId',
+              'The caller resolves its item from the initiator write, never '
+              'from direction-based lookup that could return a stale item',
         );
         expect(updates.last.$2, equals(CallStatus.declined));
       });
@@ -239,7 +279,12 @@ void main() {
             resolveItemId: ({required bool isCaller, String? callId}) async =>
                 'msg-123',
             updateItem:
-                (id, {required CallStatus status, Duration? duration}) async {
+                (
+                  id, {
+                  required CallStatus status,
+                  Duration? duration,
+                  CallParticipation? participation,
+                }) async {
                   updates.add((id, status));
                 },
             isDisposed: () => false,
@@ -290,7 +335,12 @@ void main() {
             resolveItemId: ({required bool isCaller, String? callId}) async =>
                 'msg-race',
             updateItem:
-                (id, {required CallStatus status, Duration? duration}) async {
+                (
+                  id, {
+                  required CallStatus status,
+                  Duration? duration,
+                  CallParticipation? participation,
+                }) async {
                   if (status == CallStatus.ringing) {
                     await Future<void>.delayed(
                       const Duration(milliseconds: 80),
@@ -346,7 +396,12 @@ void main() {
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               'msg-456',
           updateItem:
-              (id, {required CallStatus status, Duration? duration}) async {
+              (
+                id, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
                 updates.add((id, status));
               },
           isDisposed: () => false,
@@ -418,7 +473,12 @@ void main() {
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               'fallback-id',
           updateItem:
-              (id, {required CallStatus status, Duration? duration}) async {
+              (
+                id, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
                 updates.add((id, status));
               },
           isDisposed: () => false,
@@ -450,6 +510,290 @@ void main() {
         expect(updates.last.$1, 'outgoing-id');
         expect(updates.last.$2, CallStatus.declined);
       });
+
+      test(
+        'does not resolve or write any item before ownRole is known',
+        () async {
+          final resolveCalls = <bool>[];
+          final updates = <String>[];
+          final handler = CallChatItemHandler(
+            onInitiator: (_) async => 'outgoing-id',
+            resolveItemId: ({required bool isCaller, String? callId}) async {
+              resolveCalls.add(isCaller);
+              return isCaller ? 'outgoing-id' : 'incoming-id';
+            },
+            updateItem:
+                (
+                  id, {
+                  required CallStatus status,
+                  Duration? duration,
+                  CallParticipation? participation,
+                }) async {
+                  updates.add(id);
+                },
+            isDisposed: () => false,
+            logger: FakeAppLogger(),
+          );
+
+          final session = MockAudioVideoCallSession();
+          handler.attach(session);
+
+          await session.emitState(
+            const AudioVideoCallState(
+              status: AudioVideoCallStatus.connecting,
+              participants: [],
+              callId: 'test-call-id',
+            ),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+
+          expect(resolveCalls, isEmpty);
+          expect(updates, isEmpty);
+
+          await session.emitState(
+            const AudioVideoCallState(
+              status: AudioVideoCallStatus.outgoingRinging,
+              participants: [],
+              ownRole: CallRole.caller,
+              callId: 'test-call-id',
+            ),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+
+          expect(resolveCalls, everyElement(isTrue));
+          expect(updates, everyElement(equals('outgoing-id')));
+        },
+      );
+
+      test(
+        'caller targets the freshly emitted item, never a stale outgoing id',
+        () async {
+          final updates = <String>[];
+          final handler = CallChatItemHandler(
+            onInitiator: (_) async {
+              await Future<void>.delayed(const Duration(milliseconds: 40));
+              return 'fresh-id';
+            },
+            resolveItemId: ({required bool isCaller, String? callId}) async =>
+                'stale-id',
+            updateItem:
+                (
+                  id, {
+                  required CallStatus status,
+                  Duration? duration,
+                  CallParticipation? participation,
+                }) async {
+                  updates.add(id);
+                },
+            isDisposed: () => false,
+            logger: FakeAppLogger(),
+          );
+
+          final session = MockAudioVideoCallSession();
+          handler.attach(session);
+
+          await session.emitState(
+            const AudioVideoCallState(
+              status: AudioVideoCallStatus.outgoingRinging,
+              participants: [],
+              ownRole: CallRole.caller,
+              callId: 'test-call-id',
+            ),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+
+          expect(updates, isNotEmpty);
+          expect(updates, everyElement(equals('fresh-id')));
+        },
+      );
+    });
+
+    group('group call participation', () {
+      AudioVideoCallParticipant self(String did) => AudioVideoCallParticipant(
+        participantId: 'self',
+        did: did,
+        isSelf: true,
+      );
+
+      AudioVideoCallParticipant peer(String id) =>
+          AudioVideoCallParticipant(participantId: id, did: 'did:$id');
+
+      test('leaves participation null for a 1:1 call', () async {
+        final captured = <CallParticipation?>[];
+        final handler = CallChatItemHandler(
+          onInitiator: (_) async => 'msg-1',
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              'msg-1',
+          updateItem:
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
+                captured.add(participation);
+              },
+          isDisposed: () => false,
+          logger: FakeAppLogger(),
+        );
+
+        final session = MockAudioVideoCallSession();
+        final now = DateTime.now();
+        handler.attach(session);
+
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.connected,
+            participants: [self('did:me'), peer('p1')],
+            ownRole: CallRole.caller,
+            callId: 'c',
+            callStartedAt: now,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        expect(captured, isNotEmpty);
+        expect(captured, everyElement(isNull));
+      });
+
+      test('counts distinct peers and latches self join', () async {
+        final captured = <CallParticipation?>[];
+        final handler = CallChatItemHandler(
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              'g-1',
+          updateItem:
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
+                captured.add(participation);
+              },
+          isDisposed: () => false,
+          logger: FakeAppLogger(),
+          isGroupCall: true,
+        );
+
+        final session = MockAudioVideoCallSession();
+        final now = DateTime.now();
+        handler.attach(session);
+
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.connected,
+            participants: [self('did:me'), peer('p1')],
+            ownRole: CallRole.recipient,
+            callId: 'c',
+            callStartedAt: now,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [self('did:me'), peer('p1'), peer('p2')],
+            ownRole: CallRole.recipient,
+            callId: 'c',
+            callStartedAt: now,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        handler.endCall(assumeRole: CallRole.recipient);
+        await handler.endCallWrite;
+
+        final last = captured.whereType<CallParticipation>().last;
+        expect(last.participantCount, 2);
+        expect(last.didSelfJoin, isTrue);
+        expect(last.selfLeftBeforeEnd, isTrue);
+        expect(last.initiatorDid, isNull);
+      });
+
+      test('marks self left before end when hanging up with a peer '
+          'present', () async {
+        final captured = <CallParticipation?>[];
+        final handler = CallChatItemHandler(
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              'g-2',
+          updateItem:
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
+                captured.add(participation);
+              },
+          isDisposed: () => false,
+          logger: FakeAppLogger(),
+          isGroupCall: true,
+        );
+
+        final session = MockAudioVideoCallSession();
+        final now = DateTime.now();
+        handler.attach(session);
+
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [self('did:me'), peer('p1')],
+            ownRole: CallRole.recipient,
+            callId: 'c',
+            callStartedAt: now,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        handler.endCall(assumeRole: CallRole.recipient);
+        await handler.endCallWrite;
+
+        final last = captured.whereType<CallParticipation>().last;
+        expect(last.selfLeftBeforeEnd, isTrue);
+      });
+
+      test(
+        'records initiator did only when this device is the caller',
+        () async {
+          final captured = <CallParticipation?>[];
+          final handler = CallChatItemHandler(
+            onInitiator: (_) async => 'g-3',
+            resolveItemId: ({required bool isCaller, String? callId}) async =>
+                'g-3',
+            updateItem:
+                (
+                  _, {
+                  required CallStatus status,
+                  Duration? duration,
+                  CallParticipation? participation,
+                }) async {
+                  captured.add(participation);
+                },
+            isDisposed: () => false,
+            logger: FakeAppLogger(),
+            isGroupCall: true,
+          );
+
+          final session = MockAudioVideoCallSession();
+          final now = DateTime.now();
+          handler.attach(session);
+
+          await session.emitState(
+            AudioVideoCallState(
+              status: AudioVideoCallStatus.active,
+              participants: [self('did:caller'), peer('p1')],
+              ownRole: CallRole.caller,
+              callId: 'c',
+              callStartedAt: now,
+            ),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+
+          final last = captured.whereType<CallParticipation>().last;
+          expect(last.initiatorDid, 'did:caller');
+        },
+      );
     });
   });
 }

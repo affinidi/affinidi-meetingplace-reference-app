@@ -3310,6 +3310,24 @@ abstract class AppLocalizations {
   /// **'Not answered'**
   String get callChatItemNotAnswered;
 
+  /// No description provided for @callChatItemGroupOngoingVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing video call ({count})'**
+  String callChatItemGroupOngoingVideo(int count);
+
+  /// No description provided for @callChatItemGroupOngoingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing audio call ({count})'**
+  String callChatItemGroupOngoingAudio(int count);
+
+  /// No description provided for @callChatItemYouLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'You left'**
+  String get callChatItemYouLeft;
+
   /// No description provided for @callDurationHourFormat.
   ///
   /// In en, this message translates to:

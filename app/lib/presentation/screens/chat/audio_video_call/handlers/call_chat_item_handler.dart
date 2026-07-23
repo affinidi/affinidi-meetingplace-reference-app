@@ -29,6 +29,7 @@ class CallChatItemHandler {
     required this._updateItem,
     required this._isDisposed,
     required this._logger,
+    this._isGroupCall = false,
   });
 
   static const _logKey = 'CallChatItemHandler';
@@ -40,13 +41,16 @@ class CallChatItemHandler {
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   })
   _updateItem;
   final bool Function() _isDisposed;
   final AppLogger _logger;
+  final bool _isGroupCall;
 
   StreamSubscription<AudioVideoCallState>? _sub;
   String? _callChatItemId;
+  Future<String?>? _initiatorIdFuture;
   bool _callChatItemEnded = false;
   Future<void>? _endCallWrite;
   Future<void> _writeQueue = Future<void>.value();
@@ -58,6 +62,12 @@ class CallChatItemHandler {
   String? _sessionCallId;
   CallStatus? _lastWrittenStatus;
   AudioVideoCallStatus _lastStatus = AudioVideoCallStatus.idle;
+
+  Set<String> _seenPeerIds = {};
+  bool _didSelfJoin = false;
+  bool _selfLeftBeforeEnd = false;
+  bool _peerPresentNow = false;
+  String? _selfDid;
 
   /// The message id of the emitted call chat item, or null if not yet resolved.
   String? get callChatItemId => _callChatItemId;
@@ -105,6 +115,7 @@ class CallChatItemHandler {
     if (assumeRole != null && !_roleResolved) {
       _isCaller = assumeRole == CallRole.caller;
     }
+    if (_isGroupCall && _peerPresentNow) _selfLeftBeforeEnd = true;
     _writeTerminalStatus(_lastStatus);
   }
 
@@ -121,10 +132,25 @@ class CallChatItemHandler {
     );
     _callStartedAt ??= next.callStartedAt;
 
+    if (_isGroupCall) {
+      _seenPeerIds = accumulateSeenPeerIds(
+        previous: _seenPeerIds,
+        participants: next.participants,
+      );
+      _didSelfJoin = computeDidSelfJoin(
+        previous: _didSelfJoin,
+        status: next.status,
+      );
+      _peerPresentNow = hasPeerParticipant(next.participants);
+      _selfDid ??= resolveSelfDid(next.participants);
+    }
+
     if (isEndedCallStatus(next.status)) {
       _writeTerminalStatus(next.status);
       return;
     }
+
+    if (!_roleResolved) return;
 
     final status = resolveInProgressCallChatItemStatus(
       status: next.status,
@@ -159,8 +185,9 @@ class CallChatItemHandler {
       'callChatItemHandler: caller, emitting call chat item',
       name: _logKey,
     );
+    _initiatorIdFuture = _onInitiator(_sessionCallId!);
     unawaited(
-      _onInitiator(_sessionCallId!).then((id) {
+      _initiatorIdFuture!.then((id) {
         if (id != null) _callChatItemId ??= id;
       }),
     );
@@ -179,7 +206,11 @@ class CallChatItemHandler {
           );
           return;
         }
-        await _updateItem(messageId, status: status);
+        await _updateItem(
+          messageId,
+          status: status,
+          participation: _buildParticipation(),
+        );
       }),
     );
   }
@@ -219,6 +250,7 @@ class CallChatItemHandler {
         duration: (endStatus == CallStatus.ended && hasHadPeer)
             ? callDuration
             : null,
+        participation: _buildParticipation(),
       );
     });
     unawaited(_endCallWrite);
@@ -250,16 +282,37 @@ class CallChatItemHandler {
     return clock.now().difference(start);
   }
 
+  /// The group participation summary for this call, or null for a 1:1 call.
+  /// The initiator is the local party only when this device is the caller.
+  CallParticipation? _buildParticipation() {
+    if (!_isGroupCall) return null;
+    return buildCallParticipation(
+      seenPeerIds: _seenPeerIds,
+      didSelfJoin: _didSelfJoin,
+      selfLeftBeforeEnd: _selfLeftBeforeEnd,
+      initiatorDid: _isCaller ? _selfDid : null,
+    );
+  }
+
   /// Resolves and caches the call chat item message ID, inferring role
-  /// from the caller flag if needed. When the session callId is known it is
+  /// from the caller flag if needed. For the caller it prefers the freshly
+  /// emitted item from the initiator write, so a stale outgoing item from a
+  /// previous call is never targeted. When the session callId is known it is
   /// used to prefer the item for this exact call.
   Future<String?> _resolveId({bool isCaller = false}) async {
     if (_callChatItemId != null) return _callChatItemId;
+    if (isCaller && _initiatorIdFuture != null) {
+      final emittedId = await _initiatorIdFuture;
+      if (emittedId != null) {
+        _callChatItemId ??= emittedId;
+        return _callChatItemId;
+      }
+    }
     final resolved = await _resolveItemId(
       isCaller: isCaller,
       callId: _sessionCallId,
     );
-    _callChatItemId = resolved;
-    return resolved;
+    _callChatItemId ??= resolved;
+    return _callChatItemId;
   }
 }

@@ -253,6 +253,164 @@ void main() {
     });
   });
 
+  group('CallChatItemManager outcome reconciliation', () {
+    late FakeChatSdk fakeChatSdk;
+    late CallChatItemManager manager;
+
+    Message callMessage({
+      required String messageId,
+      required bool isFromMe,
+      required CallStatus status,
+      String callId = '',
+      int? durationMs,
+      CallParticipation? participation,
+      DateTime? dateCreated,
+    }) => Message(
+      chatId: 'fake-chat-id',
+      messageId: messageId,
+      value: '',
+      dateCreated: dateCreated ?? DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      isFromMe: isFromMe,
+      senderDid: isFromMe ? 'me' : 'peer',
+      attachments: [
+        CallMetadata.buildAttachment(
+          id: const Uuid().v4(),
+          mediaType: CallMediaType.video,
+          status: status,
+          callId: callId,
+          durationMs: durationMs,
+          participation: participation,
+        ),
+      ],
+    );
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+      );
+    });
+
+    test(
+      'resolveCallItemIdForOutcome finds an ended outgoing item by callId',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'ended-own-item',
+            isFromMe: true,
+            status: CallStatus.ended,
+            callId: 'target-call',
+          ),
+        ];
+
+        final resolved = await manager.resolveCallItemIdForOutcome(
+          'target-call',
+        );
+
+        expect(resolved, 'ended-own-item');
+      },
+    );
+
+    test(
+      'resolveCallItemIdForOutcome prefers own item over peer item',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'peer-item',
+            isFromMe: false,
+            status: CallStatus.ended,
+            callId: 'target-call',
+          ),
+          callMessage(
+            messageId: 'own-item',
+            isFromMe: true,
+            status: CallStatus.ended,
+            callId: 'target-call',
+          ),
+        ];
+
+        final resolved = await manager.resolveCallItemIdForOutcome(
+          'target-call',
+        );
+
+        expect(resolved, 'own-item');
+      },
+    );
+
+    test(
+      'resolveCallItemIdForOutcome never falls back to a non-matching callId',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'wrong-call',
+            isFromMe: true,
+            status: CallStatus.ended,
+            callId: 'other-call',
+          ),
+        ];
+
+        final resolved = await manager.resolveCallItemIdForOutcome(
+          'target-call',
+        );
+
+        expect(resolved, isNull);
+      },
+    );
+
+    test(
+      'reconcileCallOutcome clears selfLeftBeforeEnd and writes full duration',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'msg-1',
+            isFromMe: true,
+            status: CallStatus.ended,
+            callId: 'target-call',
+            durationMs: 1000,
+            participation: CallParticipation(
+              participantCount: 2,
+              didSelfJoin: true,
+              selfLeftBeforeEnd: true,
+            ),
+          ),
+        ];
+
+        final updated = await manager.reconcileCallOutcome(
+          'msg-1',
+          duration: const Duration(minutes: 5),
+        );
+
+        final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+        expect(metadata?.status, CallStatus.ended);
+        expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
+        expect(metadata?.participation?.selfLeftBeforeEnd, isFalse);
+      },
+    );
+
+    test(
+      'reconcileCallOutcome keeps existing duration when none is provided',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'msg-2',
+            isFromMe: true,
+            status: CallStatus.ended,
+            callId: 'target-call',
+            durationMs: 4242,
+          ),
+        ];
+
+        final updated = await manager.reconcileCallOutcome('msg-2');
+        final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+
+        expect(metadata?.durationMs, 4242);
+      },
+    );
+  });
+
   group('CallChatItemManager.sendOutgoingCallMessage', () {
     late FakeChatSdk fakeChatSdk;
     late CallChatItemManager manager;
@@ -438,6 +596,172 @@ void main() {
         isNull,
         reason: 'updateCallChatItem should return null when SDK unavailable',
       );
+    });
+  });
+
+  group('reconcileCallOutcome converges early leavers to the duration', () {
+    late FakeChatSdk fakeChatSdk;
+    late CallChatItemManager manager;
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+      );
+    });
+
+    Message groupCallItem({required bool selfLeftBeforeEnd}) => Message(
+      chatId: 'fake-chat-id',
+      messageId: 'group-call-item',
+      value: '',
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.sent,
+      isFromMe: true,
+      senderDid: 'me',
+      attachments: [
+        CallMetadata.buildAttachment(
+          mediaType: CallMediaType.video,
+          status: CallStatus.ended,
+          callId: 'room@1',
+          durationMs: 16000,
+          id: 'call-attachment-id',
+          participation: CallParticipation(
+            participantCount: 1,
+            didSelfJoin: true,
+            selfLeftBeforeEnd: selfLeftBeforeEnd,
+          ),
+        ),
+      ],
+    );
+
+    test('clears selfLeftBeforeEnd and writes the full duration', () async {
+      fakeChatSdk.sessionMessages = [groupCallItem(selfLeftBeforeEnd: true)];
+
+      final updated = await manager.reconcileCallOutcome(
+        'group-call-item',
+        duration: const Duration(seconds: 25),
+      );
+
+      expect(updated, isNotNull);
+      final attachment = updated!.attachments.firstWhere(CallMetadata.isCall);
+      final call = CallMetadata.maybeOf(attachment)!;
+      expect(call.status, CallStatus.ended);
+      expect(call.durationMs, const Duration(seconds: 25).inMilliseconds);
+      expect(call.participation?.selfLeftBeforeEnd, isFalse);
+      expect(call.participation?.participantCount, 1);
+    });
+
+    test('keeps the existing duration when none is provided', () async {
+      fakeChatSdk.sessionMessages = [groupCallItem(selfLeftBeforeEnd: true)];
+
+      final updated = await manager.reconcileCallOutcome('group-call-item');
+
+      final attachment = updated!.attachments.firstWhere(CallMetadata.isCall);
+      expect(CallMetadata.maybeOf(attachment)!.durationMs, 16000);
+    });
+
+    test('returns null when the item is missing', () async {
+      fakeChatSdk.sessionMessages = [];
+
+      final updated = await manager.reconcileCallOutcome('missing');
+
+      expect(updated, isNull);
+    });
+  });
+
+  group('resolveCallItemIdForOutcome matches settled items by callId', () {
+    late FakeChatSdk fakeChatSdk;
+    late CallChatItemManager manager;
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+      );
+    });
+
+    Message callItem({
+      required String messageId,
+      required bool isFromMe,
+      required CallStatus status,
+      required String callId,
+    }) => Message(
+      chatId: 'fake-chat-id',
+      messageId: messageId,
+      value: '',
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.sent,
+      isFromMe: isFromMe,
+      senderDid: isFromMe ? 'me' : 'peer',
+      attachments: [
+        CallMetadata.buildAttachment(
+          mediaType: CallMediaType.video,
+          status: status,
+          callId: callId,
+          id: const Uuid().v4(),
+        ),
+      ],
+    );
+
+    test('finds this device own already-ended outgoing item', () async {
+      fakeChatSdk.sessionMessages = [
+        callItem(
+          messageId: 'own-outgoing',
+          isFromMe: true,
+          status: CallStatus.ended,
+          callId: 'room@1',
+        ),
+      ];
+
+      final resolved = await manager.resolveCallItemIdForOutcome('room@1');
+
+      expect(resolved, 'own-outgoing');
+    });
+
+    test('prefers the outgoing item over an incoming peer item', () async {
+      fakeChatSdk.sessionMessages = [
+        callItem(
+          messageId: 'peer-incoming',
+          isFromMe: false,
+          status: CallStatus.ended,
+          callId: 'room@1',
+        ),
+        callItem(
+          messageId: 'own-outgoing',
+          isFromMe: true,
+          status: CallStatus.ended,
+          callId: 'room@1',
+        ),
+      ];
+
+      final resolved = await manager.resolveCallItemIdForOutcome('room@1');
+
+      expect(resolved, 'own-outgoing');
+    });
+
+    test('never falls back to a non-matching callId', () async {
+      fakeChatSdk.sessionMessages = [
+        callItem(
+          messageId: 'other-call',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          callId: 'room@other',
+        ),
+      ];
+
+      final resolved = await manager.resolveCallItemIdForOutcome('room@1');
+
+      expect(resolved, isNull);
+    });
+
+    test('returns null for an empty callId', () async {
+      final resolved = await manager.resolveCallItemIdForOutcome('');
+
+      expect(resolved, isNull);
     });
   });
 }

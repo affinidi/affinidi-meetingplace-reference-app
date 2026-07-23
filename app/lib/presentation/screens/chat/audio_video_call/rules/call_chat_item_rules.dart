@@ -58,6 +58,51 @@ CallOutcome resolveCallOutcome({
 }
 
 // =========================================================================
+// Group participation — accumulated off the session state stream
+// =========================================================================
+
+/// Accumulates the running set of distinct peer participant ids seen during a
+/// call, excluding the local party. Drives the "n joined" peer count.
+Set<String> accumulateSeenPeerIds({
+  required Set<String> previous,
+  required List<AudioVideoCallParticipant> participants,
+}) {
+  final next = {...previous};
+  for (final participant in participants) {
+    if (!participant.isSelf) next.add(participant.participantId);
+  }
+  return next;
+}
+
+/// Latch: whether the local party has fully joined the call media session.
+/// Once true, stays true for the rest of the call.
+bool computeDidSelfJoin({
+  required bool previous,
+  required AudioVideoCallStatus status,
+}) => previous || isConnectedCallStatus(status);
+
+/// The local party's DID from the participant list, or null when not resolved.
+String? resolveSelfDid(List<AudioVideoCallParticipant> participants) {
+  for (final participant in participants) {
+    if (participant.isSelf) return participant.did;
+  }
+  return null;
+}
+
+/// Builds the group participation summary from the accumulated call state.
+CallParticipation buildCallParticipation({
+  required Set<String> seenPeerIds,
+  required bool didSelfJoin,
+  required bool selfLeftBeforeEnd,
+  String? initiatorDid,
+}) => CallParticipation(
+  participantCount: seenPeerIds.length,
+  didSelfJoin: didSelfJoin,
+  selfLeftBeforeEnd: selfLeftBeforeEnd,
+  initiatorDid: initiatorDid,
+);
+
+// =========================================================================
 // Render predicates — driven by (status, isFromMe)
 // =========================================================================
 
@@ -136,6 +181,10 @@ String formatCallDuration(
 /// joined), the call's start time is shown as "12:04 PM" with locale-aware
 /// AM/PM formatting. Falls back to current time if null.
 ///
+/// For a group call (non-null [participation]), the group label rules apply
+/// while the call is ongoing or has ended with peers; a group call the local
+/// party never joined falls through to the same "Missed" text as a 1:1 call.
+///
 /// See the display table in `docs/call-chat-item.md` for the full mapping.
 String resolveCallChatItemStatusText({
   required CallStatus status,
@@ -143,7 +192,18 @@ String resolveCallChatItemStatusText({
   required int? durationMs,
   required DateTime? callStartedAt,
   required AppLocalizations l10n,
+  CallMediaType? mediaType,
+  CallParticipation? participation,
 }) {
+  if (participation != null) {
+    final groupText = _resolveGroupCallStatusText(
+      status: status,
+      mediaType: mediaType,
+      participation: participation,
+      l10n: l10n,
+    );
+    if (groupText != null) return groupText;
+  }
   switch (status) {
     case CallStatus.calling:
       return isFromMe ? l10n.callChatItemCalling : l10n.callChatItemRinging;
@@ -165,6 +225,29 @@ String resolveCallChatItemStatusText({
     case CallStatus.missed:
     case CallStatus.declined:
       return isFromMe ? l10n.callChatItemNotAnswered : l10n.callChatItemMissed;
+  }
+}
+
+/// Group-specific status text, or null when the group call should fall back to
+/// the shared 1:1 wording (e.g. a group call the local party never joined).
+String? _resolveGroupCallStatusText({
+  required CallStatus status,
+  required CallMediaType? mediaType,
+  required CallParticipation participation,
+  required AppLocalizations l10n,
+}) {
+  switch (status) {
+    case CallStatus.calling:
+    case CallStatus.ringing:
+      return null;
+    case CallStatus.inProgress:
+      return l10n.callChatItemTapToReturn;
+    case CallStatus.ended:
+      if (!participation.selfLeftBeforeEnd) return null;
+      return l10n.callChatItemYouLeft;
+    case CallStatus.missed:
+    case CallStatus.declined:
+      return null;
   }
 }
 

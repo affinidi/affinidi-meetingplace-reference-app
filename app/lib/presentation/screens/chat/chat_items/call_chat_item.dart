@@ -51,6 +51,8 @@ class _CallChatItem extends ConsumerWidget {
       durationMs: call.durationMs,
       callStartedAt: _message.dateCreated,
       l10n: l10n,
+      mediaType: call.mediaType,
+      participation: call.participation,
     );
 
     return SizedBox(

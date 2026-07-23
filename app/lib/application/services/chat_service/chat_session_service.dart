@@ -48,6 +48,7 @@ import 'delegates/interfaces/group_managing.dart';
 import 'delegates/r_card_manager.dart';
 import 'delegates/vdip_manager.dart';
 import 'delegates/vrc_manager.dart';
+import 'handlers/call_outcome_protocol_handler.dart';
 import 'handlers/chat_message_protocol_handler.dart';
 import 'handlers/contact_card_protocol_handler.dart';
 import 'handlers/effect_protocol_handler.dart';
@@ -205,6 +206,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           logger: _logger,
         ),
         EffectProtocolHandler(onEffect: _onEffect, logger: _logger),
+        CallOutcomeProtocolHandler(
+          callChatItemManager: _callChatItemManager,
+          logger: _logger,
+        ),
         ContactCardProtocolHandler(
           ref: ref,
           isGroupChat: () => _isGroupChat,
@@ -1039,11 +1044,13 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   }) async {
     final updated = await _callChatItemManager.updateCallChatItem(
       messageId,
       status: status,
       duration: duration,
+      participation: participation,
     );
     if (updated != null) upsertChatItem(updated);
   }

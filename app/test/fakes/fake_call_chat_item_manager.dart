@@ -36,6 +36,7 @@ class FakeCallChatItemManager extends CallChatItemManager {
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   }) async {
     updateCallCount++;
     return null;

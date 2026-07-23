@@ -12,6 +12,7 @@ typedef UpdateCallChatItemCall = ({
   String messageId,
   CallStatus status,
   Duration? duration,
+  CallParticipation? participation,
 });
 
 class FakeChatSessionService extends ChatSessionService {
@@ -199,8 +200,14 @@ class FakeChatSessionService extends ChatSessionService {
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   }) async {
-    updateCalls.add((messageId: messageId, status: status, duration: duration));
+    updateCalls.add((
+      messageId: messageId,
+      status: status,
+      duration: duration,
+      participation: participation,
+    ));
   }
 
   @override

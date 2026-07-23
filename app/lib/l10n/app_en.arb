@@ -2105,6 +2105,29 @@
 	"@callChatItemNotAnswered": {
 		"type": "text"
 	},
+	"callChatItemGroupOngoingVideo": "Ongoing video call ({count})",
+	"@callChatItemGroupOngoingVideo": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"callChatItemGroupOngoingAudio": "Ongoing audio call ({count})",
+	"@callChatItemGroupOngoingAudio": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"callChatItemYouLeft": "You left",
+	"@callChatItemYouLeft": {
+		"type": "text",
+		"placeholders": {}
+	},
 	"callDurationHourFormat": "{count, plural, =1{1 h} other{{count} h}}",
 	"@callDurationHourFormat": {
 		"type": "text",
