@@ -7,16 +7,31 @@ class _SignedDocumentChatItem extends ConsumerStatefulWidget {
 
   static Map<String, dynamic>? matchPlainMessage(chat.ChatItem item) {
     if (item is! chat.Message) return null;
+    // Match from message text.
     try {
       final decoded = jsonDecode(item.value);
-      if (decoded is! Map<String, dynamic>) return null;
-      final type = decoded['type'] as String? ?? '';
-      if (type.contains('signed-document')) return decoded;
-      if (type == 'cierge/trust-task-notification') {
-        final envelope = decoded['signedEnvelope'] as Map<String, dynamic>?;
-        if (envelope != null) return envelope;
+      if (decoded is Map<String, dynamic>) {
+        final type = decoded['type'] as String? ?? '';
+        if (type.contains('signed-document')) return decoded;
+        if (type == 'cierge/trust-task-notification') {
+          final envelope = decoded['signedEnvelope'] as Map<String, dynamic>?;
+          if (envelope != null) return envelope;
+        }
       }
     } catch (_) {}
+    // Match from cierge/trust-task attachment containing a signed-document.
+    for (final attachment in item.attachments) {
+      if (attachment.format != 'cierge/trust-task') continue;
+      final json = attachment.data?.json;
+      if (json == null) continue;
+      try {
+        final decoded = jsonDecode(json);
+        if (decoded is Map<String, dynamic>) {
+          final type = decoded['type'] as String? ?? '';
+          if (type.contains('signed-document')) return decoded;
+        }
+      } catch (_) {}
+    }
     return null;
   }
 
