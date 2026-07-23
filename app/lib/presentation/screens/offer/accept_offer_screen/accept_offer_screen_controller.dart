@@ -87,11 +87,7 @@ class AcceptOfferScreenController extends _$AcceptOfferScreenController {
           .acceptOffer(
             offer,
             identity: selectedIdentity,
-            contextKey: agentContext == AgentContext.work
-                ? 'work'
-                : agentContext == AgentContext.personal
-                ? 'personal'
-                : null,
+            contextKey: agentContext?.routeKey,
           );
       await Future(() {
         ref.read(navigatorProvider).go(const ConnectionsRoute().location);

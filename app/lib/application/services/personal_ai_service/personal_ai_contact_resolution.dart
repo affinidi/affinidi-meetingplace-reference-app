@@ -14,18 +14,17 @@ String canonicalPersonalAiContextName({
   }
 
   final normalizedContextId = contextId.trim().toLowerCase();
-  if (normalizedContextId.startsWith('work-ai')) {
-    return 'work-ai';
-  }
-  if (normalizedContextId.startsWith('personal-ai')) {
-    return 'personal-ai';
+  final contextFromRoute = AgentContext.fromRouteKey(normalizedContextId);
+  if (normalizedContextId == contextFromRoute.routeKey ||
+      normalizedContextId == contextFromRoute.setupContextName) {
+    return contextFromRoute.setupContextName;
   }
 
   final normalizedDisplayName = displayName.trim().toLowerCase();
   if (normalizedDisplayName.contains('work')) {
-    return 'work-ai';
+    return AgentContext.work.setupContextName;
   }
-  return 'personal-ai';
+  return AgentContext.personal.setupContextName;
 }
 
 AgentContext agentContextForSetup({
@@ -36,7 +35,9 @@ AgentContext agentContextForSetup({
     contextId: contextId,
     displayName: displayName,
   );
-  return contextName == 'work-ai' ? AgentContext.work : AgentContext.personal;
+  return contextName == AgentContext.work.setupContextName
+      ? AgentContext.work
+      : AgentContext.personal;
 }
 
 bool isAiContactBoundToOtherContext({
