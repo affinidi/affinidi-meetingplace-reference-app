@@ -86,10 +86,7 @@ class CiergeTrustTaskPlugin implements AttachmentRenderer {
 }
 
 class _AsyncTrustTaskCard extends StatefulWidget {
-  const _AsyncTrustTaskCard({
-    required this.attachment,
-    required this.download,
-  });
+  const _AsyncTrustTaskCard({required this.attachment, required this.download});
 
   final ChatAttachment attachment;
   final Future<Uint8List> Function(ChatAttachment) download;
@@ -205,11 +202,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.smart_toy_outlined,
-                color: _accent,
-                size: 14,
-              ),
+              Icon(Icons.smart_toy_outlined, color: _accent, size: 14),
               SizedBox(width: 6),
               Text(
                 'Signed by Agent',
@@ -220,11 +213,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                 ),
               ),
               SizedBox(width: 4),
-              Icon(
-                Icons.expand_more,
-                color: Colors.white38,
-                size: 16,
-              ),
+              Icon(Icons.expand_more, color: Colors.white38, size: 16),
             ],
           ),
         ),
@@ -473,11 +462,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (i < _verifyStep)
-                      const Icon(
-                        Icons.check_circle,
-                        color: _accent,
-                        size: 14,
-                      )
+                      const Icon(Icons.check_circle, color: _accent, size: 14)
                     else if (i == _verifyStep)
                       const SizedBox(
                         width: 14,
@@ -503,8 +488,8 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
                           color: i < _verifyStep
                               ? _accent.withValues(alpha: 0.7)
                               : i == _verifyStep
-                                  ? Colors.white70
-                                  : Colors.white24,
+                              ? Colors.white70
+                              : Colors.white24,
                           fontSize: 11,
                         ),
                       ),
@@ -530,12 +515,12 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: (isValid ? _accent : Colors.redAccent)
-              .withValues(alpha: 0.08),
+          color: (isValid ? _accent : Colors.redAccent).withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: (isValid ? _accent : Colors.redAccent)
-                .withValues(alpha: 0.3),
+            color: (isValid ? _accent : Colors.redAccent).withValues(
+              alpha: 0.3,
+            ),
           ),
         ),
         child: Column(
@@ -569,8 +554,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
               _verifyDetailRow('Purpose', proofPurpose),
               _verifyDetailRow('Signer', _truncateDid(issuer)),
               _verifyDetailRow('Key', _truncateDid(verificationMethod)),
-              if (created.isNotEmpty)
-                _verifyDetailRow('Signed at', created),
+              if (created.isNotEmpty) _verifyDetailRow('Signed at', created),
               const SizedBox(height: 6),
               const Text(
                 'The response has not been tampered with and was signed '
@@ -668,9 +652,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
         setState(() => _verifyStep = i + 1);
       }
 
-      final verifier = DataIntegrityEddsaJcsVerifier(
-        verifierDid: verifierDid,
-      );
+      final verifier = DataIntegrityEddsaJcsVerifier(verifierDid: verifierDid);
       final result = await verifier.verify(widget.envelope);
 
       await Future<void>.delayed(const Duration(milliseconds: 400));
@@ -774,8 +756,7 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
       final ts = entry['timestamp'];
       DateTime? entryTime;
       if (ts is int) {
-        entryTime =
-            DateTime.fromMillisecondsSinceEpoch(ts * 1000, isUtc: true);
+        entryTime = DateTime.fromMillisecondsSinceEpoch(ts * 1000, isUtc: true);
       } else if (ts is String) {
         entryTime = DateTime.tryParse(ts);
       }

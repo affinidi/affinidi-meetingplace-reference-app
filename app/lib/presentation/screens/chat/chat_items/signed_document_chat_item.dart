@@ -767,8 +767,7 @@ class _SignedDocumentChatItemState
       if (value is Map<String, dynamic>) {
         final valJson = jsonEncode(value);
         if (valJson.length > maxChars) {
-          copy[key] =
-              '${valJson.substring(0, maxChars)}... (truncated)';
+          copy[key] = '${valJson.substring(0, maxChars)}... (truncated)';
         }
       } else if (value is String && value.length > maxChars) {
         copy[key] = '${value.substring(0, maxChars)}... (truncated)';

@@ -10,6 +10,7 @@ import '../../../application/services/personal_ai_service/disconnect_agent_conte
 import '../../../application/services/personal_ai_service/personal_ai_authorization_snapshot.dart';
 import '../../../application/services/personal_ai_service/personal_ai_contact_resolution.dart';
 import '../../../application/services/personal_ai_service/personal_ai_service.dart';
+import '../../../application/services/signing_service/signing_service.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'personal_agent_screen_state.dart';
 
@@ -101,6 +102,13 @@ final personalAgentScreenControllerProvider =
         (_, _) => controller.syncFromDependencies(),
         fireImmediately: true,
       );
+
+      ref.listen(signingServiceProvider, (prev, next) {
+        if (prev?.status != SigningServiceStatus.connected &&
+            next.status == SigningServiceStatus.connected) {
+          controller.loadAutoResponseState();
+        }
+      }, fireImmediately: true);
 
       return controller;
     });
@@ -533,6 +541,63 @@ class PersonalAgentScreenController
     } catch (_) {
       _clearConnecting();
       rethrow;
+    }
+  }
+
+  Future<void> loadAutoResponseState() async {
+    try {
+      final signingService = _ref.read(signingServiceProvider.notifier);
+      final stepUpEnabled = await signingService.getStepUpEnabled();
+      final autoResponse = !stepUpEnabled;
+      _logger.info(
+        'Loaded auto response state: stepUpEnabled=$stepUpEnabled, '
+        'autoResponse=$autoResponse',
+        name: _logKey,
+      );
+      state = state.copyWith(autoResponseEnabled: autoResponse);
+    } catch (e) {
+      _logger.info(
+        'Could not load auto response state (VTA not connected): $e',
+        name: _logKey,
+      );
+    }
+  }
+
+  Future<void> toggleAutoResponse() async {
+    final previousValue = state.autoResponseEnabled;
+    _logger.info(
+      'Toggle auto response: current=$previousValue, target=${!previousValue}',
+      name: _logKey,
+    );
+    state = state.copyWith(autoResponseLoading: true);
+    try {
+      final signingService = _ref.read(signingServiceProvider.notifier);
+      final newAutoResponse = !previousValue;
+      final newStepUp = !newAutoResponse;
+      _logger.info(
+        'Setting step-up enabled=$newStepUp (autoResponse=$newAutoResponse)',
+        name: _logKey,
+      );
+      await signingService.setStepUpEnabled(newStepUp);
+      _logger.info(
+        '''Auto response toggled successfully: $previousValue -> $newAutoResponse''',
+        name: _logKey,
+      );
+      state = state.copyWith(
+        autoResponseEnabled: newAutoResponse,
+        autoResponseLoading: false,
+      );
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Auto response toggle failed: $e',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      state = state.copyWith(
+        autoResponseLoading: false,
+        errorMessage: 'Auto response toggle failed: $e',
+      );
     }
   }
 }
