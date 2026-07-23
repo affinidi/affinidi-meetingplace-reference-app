@@ -148,8 +148,9 @@ class SigningService extends StateNotifier<SigningServiceState> {
       final authResult = await _authWorkflow!.connect();
       _logger.info('Authenticated, setting up mediator...', name: _logKey);
 
-      final mediatorDidDoc =
-          await UniversalDIDResolver().resolveDid(vtaMediatorDid);
+      final mediatorDidDoc = await UniversalDIDResolver().resolveDid(
+        vtaMediatorDid,
+      );
       final mediatorAccessToken = await MediatorAuthHelper.authenticate(
         mediatorDidDocument: mediatorDidDoc,
         didManager: didManager,
@@ -444,20 +445,6 @@ class SigningService extends StateNotifier<SigningServiceState> {
             : [],
       );
     });
-  }
-
-  Future<T> _withReauth<T>(Future<T> Function() action) async {
-    try {
-      final token = await _authWorkflow!.getValidAccessToken();
-      _vtaClient!.setAuthToken(token);
-      return await action();
-    } on VtaAuthException {
-      _logger.info('VTA session expired, reconnecting...', name: _logKey);
-      await _authWorkflow!.reconnect();
-      final newToken = await _authWorkflow!.getValidAccessToken();
-      _vtaClient!.setAuthToken(newToken);
-      return action();
-    }
   }
 
   @override

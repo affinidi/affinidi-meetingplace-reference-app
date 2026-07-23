@@ -34,8 +34,7 @@ class _StepUpApproveRequestChatItemState
     final payload =
         approveRequest['payload'] as Map<String, dynamic>? ?? approveRequest;
     final reason = payload['reason'] as String? ?? 'Step-up approval required';
-    final document =
-        widget.chatItem.data['document'] as Map<String, dynamic>?;
+    final document = widget.chatItem.data['document'] as Map<String, dynamic>?;
     final documentTitle = document?['title'] as String?;
     final documentMediaType = document?['mediaType'] as String?;
     final alreadyConfirmed =
