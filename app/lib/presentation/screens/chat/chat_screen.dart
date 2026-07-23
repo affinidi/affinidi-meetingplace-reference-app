@@ -56,6 +56,7 @@ import '../../../infrastructure/media/file_picker/file_picker_platform_provider.
 import '../../../infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import '../../../infrastructure/plugins/sign_document_plugin/sign_document_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachment.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_request_attachment.dart';

@@ -78,6 +78,13 @@ class PersonalAiAuthorizationSnapshot {
   final Map<String, dynamic> domainMap;
   final DateTime? lastUpdated;
 
+  List<Map<String, dynamic>> get entries =>
+      (domainMap['entries'] as List?)
+          ?.whereType<Map>()
+          .map((entry) => entry.map((key, value) => MapEntry('$key', value)))
+          .toList() ??
+      const <Map<String, dynamic>>[];
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'setup_id': setupId,

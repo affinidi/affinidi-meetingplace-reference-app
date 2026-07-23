@@ -171,8 +171,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       // If setup record was lost after a backend restart, fallback to
       // re-register + retry once.
       var effectiveSetupId = setupId;
+      PersonalAgentContextStatus uploadStatus;
       try {
-        await _sdk.uploadPersonalAgentContext(
+        uploadStatus = await _sdk.uploadPersonalAgentContext(
           setupId: effectiveSetupId,
           content: content,
         );
@@ -204,14 +205,25 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
           ),
         );
         effectiveSetupId = freshSetup.setupId ?? setupId;
-        if (state.setupResult == null) {
-          _updateSetupResult(freshSetup, contextName: setupContextName);
-        }
+        _updateSetupResult(freshSetup, contextName: setupContextName);
 
-        await _sdk.uploadPersonalAgentContext(
+        uploadStatus = await _sdk.uploadPersonalAgentContext(
           setupId: effectiveSetupId,
           content: content,
         );
+      }
+
+      if (!uploadStatus.provisioned) {
+        throw StateError('Personal AI context upload was not provisioned.');
+      }
+
+      final setupResult = state.getSetupResultForContext(setupContextName);
+      if (setupResult != null) {
+        await _syncPersonalAiContactForSetup(
+          setupResult,
+          isInitialSetup: false,
+        ).catchError((_) {});
+        await _refreshAuthorizationSnapshotForSetup(setupResult);
       }
 
       state = state.copyWith(contextProvisioned: true, contextUploading: false);
@@ -333,7 +345,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
       _updateSetupResult(setupSnapshot, contextName: contextName);
       state = state.copyWith(
-        status: PersonalAiSetupStatus.ready,
+        status: _isConnectionReady(setupSnapshot)
+            ? PersonalAiSetupStatus.ready
+            : PersonalAiSetupStatus.settingUp,
         showSetupPrompt: false,
         promptDismissed: true,
       );

@@ -14,8 +14,8 @@ class FakeEnvironment implements Environment {
     this.personalAiEnabled = false,
     this.personalAiBaseUrl = 'http://127.0.0.1:8790',
     this.personalAiSetupEndpoint = '/personal-agent/setup',
-    this._vtaBaseUrl = '',
-    this._vtaDid = '',
+    this.vtaBaseUrl = '',
+    this.vtaDid = '',
     this.vtaMediatorUrl = '',
     this.vtaMediatorDid = '',
     this._defaultMediators = const {},
@@ -54,6 +54,15 @@ class FakeEnvironment implements Environment {
 
   @override
   final List<ChannelTransport> enabledIndividualChatTransports;
+
+  @override
+  String get microsoftOAuthTenantId => 'common';
+
+  @override
+  String get microsoftOAuthClientId => 'test-client-id';
+
+  @override
+  String get microsoftOAuthRedirectUrl => 'mpx://auth/microsoft/callback';
 
   @override
   int get maxLogMemoryEntries => 1000;
@@ -148,18 +157,14 @@ class FakeEnvironment implements Environment {
   Map<String, Map<String, dynamic>> get ciergeEventConfig => const {};
 
   @override
-  String get vtaBaseUrl => _vtaBaseUrl;
+  final String vtaBaseUrl;
 
   @override
-  String get vtaDid => _vtaDid;
-
-  final String _vtaBaseUrl;
-
-  final String _vtaDid;
-
-  @override
-  final String vtaMediatorDid;
+  final String vtaDid;
 
   @override
   final String vtaMediatorUrl;
+
+  @override
+  final String vtaMediatorDid;
 }

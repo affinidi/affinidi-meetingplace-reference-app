@@ -144,6 +144,19 @@ class Environment {
 
   String get vtaMediatorDid => const String.fromEnvironment('VTA_MEDIATOR_DID');
 
+  String get microsoftOAuthTenantId => const String.fromEnvironment(
+    'MICROSOFT_OAUTH_TENANT_ID',
+    defaultValue: 'common',
+  );
+
+  String get microsoftOAuthClientId =>
+      const String.fromEnvironment('MICROSOFT_OAUTH_CLIENT_ID');
+
+  String get microsoftOAuthRedirectUrl => const String.fromEnvironment(
+    'MICROSOFT_OAUTH_REDIRECT_URL',
+    defaultValue: 'mpx://auth/microsoft/callback',
+  );
+
   String get appVersionName =>
       const String.fromEnvironment('APP_VERSION_NAME', defaultValue: '');
 
