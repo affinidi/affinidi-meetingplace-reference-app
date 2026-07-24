@@ -38,6 +38,7 @@ class ChatItem extends StatelessWidget {
         title: doc['title'] as String? ?? 'Untitled Document',
         contactId: _contactId,
         messageIndex: _index,
+        senderDid: _chatItem.senderDid,
         status: _chatItem.status,
         rawPayload: data,
       );
@@ -60,6 +61,7 @@ class ChatItem extends StatelessWidget {
         title: parsed.title ?? 'Untitled Document',
         contactId: _contactId,
         messageIndex: _index,
+        senderDid: _chatItem.senderDid,
         status: _chatItem.status,
         rawPayload: parsed.document,
       );
