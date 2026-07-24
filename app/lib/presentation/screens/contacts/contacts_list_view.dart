@@ -1,5 +1,41 @@
 part of 'contacts_screen.dart';
 
+String _resolvePrimaryContactName({
+  required Contact contact,
+  required String fullName,
+  String? displayName,
+  String? defaultGroupName,
+}) {
+  if (contact.isGroup) {
+    if (defaultGroupName != null && defaultGroupName.isNotEmpty) {
+      return defaultGroupName;
+    }
+    if (displayName != null && displayName.isNotEmpty) {
+      return displayName;
+    }
+  }
+
+  return fullName;
+}
+
+String? _resolveSecondaryContactName({
+  required Contact contact,
+  required String primaryName,
+  required String fullName,
+  String? displayName,
+  String? defaultGroupName,
+}) {
+  if (contact.isGroup) {
+    return fullName != primaryName ? fullName : null;
+  }
+
+  return displayName != null &&
+          displayName.isNotEmpty &&
+          displayName != primaryName
+      ? displayName
+      : null;
+}
+
 class _ContactsListView extends ConsumerWidget {
   const _ContactsListView({
     required this.onContactTap,
@@ -63,8 +99,31 @@ class _ContactListItem extends ConsumerWidget {
         (state) => state.contactMediators[contact.mediatorDid],
       ),
     );
-    final fullName = contact.card.displayName;
-    final hasDisplayName = contact.displayName?.isNotEmpty ?? false;
+    final displayName = contact.displayName?.trim();
+    final fullName = contact.card.displayName.trim();
+    final defaultGroupName = contact.isGroup
+        ? ref.watch(
+            connectionsServiceProvider.select(
+              (state) =>
+                  state.getConnectionByOfferLink(contact.offerLink)?.offerName,
+            ),
+          )
+        : null;
+    final trimmedDefaultGroupName = defaultGroupName?.trim();
+    final primaryName = _resolvePrimaryContactName(
+      contact: contact,
+      fullName: fullName,
+      displayName: displayName,
+      defaultGroupName: trimmedDefaultGroupName,
+    );
+    final secondaryName = _resolveSecondaryContactName(
+      contact: contact,
+      primaryName: primaryName,
+      fullName: fullName,
+      displayName: displayName,
+      defaultGroupName: trimmedDefaultGroupName,
+    );
+    final showCustomDisplayName = secondaryName != null;
     final dateAdded = DateFormat.yMMMd(
       Localizations.localeOf(context).toString(),
     ).format(contact.dateAdded);
@@ -75,8 +134,9 @@ class _ContactListItem extends ConsumerWidget {
       isEditMode: isEditMode,
       isSelected: isSelected,
       statusColor: statusColor,
-      fullName: fullName,
-      hasDisplayName: hasDisplayName,
+      primaryName: primaryName,
+      secondaryName: secondaryName,
+      showCustomDisplayName: showCustomDisplayName,
       dateAdded: dateAdded,
       contactMediatorName: contactMediator?.mediatorName,
       onTap: () => onTap(contact: contact, isSelected: isSelected),
@@ -130,8 +190,9 @@ class _ContactTile extends StatelessWidget {
     required this.isEditMode,
     required this.isSelected,
     required this.statusColor,
-    required this.fullName,
-    required this.hasDisplayName,
+    required this.primaryName,
+    required this.secondaryName,
+    required this.showCustomDisplayName,
     required this.dateAdded,
     required this.contactMediatorName,
     required this.onTap,
@@ -144,8 +205,9 @@ class _ContactTile extends StatelessWidget {
   final bool isEditMode;
   final bool isSelected;
   final Color statusColor;
-  final String fullName;
-  final bool hasDisplayName;
+  final String primaryName;
+  final String? secondaryName;
+  final bool showCustomDisplayName;
   final String dateAdded;
   final String? contactMediatorName;
 
@@ -213,9 +275,9 @@ class _ContactTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  if (hasDisplayName) ...[
+                  if (showCustomDisplayName) ...[
                     Text(
-                      contact.displayName!,
+                      secondaryName!,
                       style: context.textTheme.bodyLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: context.colorScheme.primary,
@@ -228,8 +290,8 @@ class _ContactTile extends StatelessWidget {
                     const SizedBox(height: 2),
                   ],
                   Text(
-                    fullName,
-                    style: hasDisplayName
+                    primaryName,
+                    style: showCustomDisplayName
                         ? context.textTheme.labelMedium
                         : context.textTheme.bodyMedium,
                     maxLines: 1,

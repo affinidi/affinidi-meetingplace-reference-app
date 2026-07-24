@@ -59,11 +59,31 @@ class _ContactGridItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final fullName = contact.card.displayName.trim();
     final displayName = contact.displayName?.trim();
-    final hasDisplayName = displayName != null && displayName.isNotEmpty;
-    final shouldShowDisplayName = displayName != fullName;
-    final showCustomDisplayName = hasDisplayName && shouldShowDisplayName;
+    final fullName = contact.card.displayName.trim();
+    final defaultGroupName = contact.isGroup
+        ? ref.watch(
+            connectionsServiceProvider.select(
+              (state) =>
+                  state.getConnectionByOfferLink(contact.offerLink)?.offerName,
+            ),
+          )
+        : null;
+    final trimmedDefaultGroupName = defaultGroupName?.trim();
+    final primaryName = _resolvePrimaryContactName(
+      contact: contact,
+      fullName: fullName,
+      displayName: displayName,
+      defaultGroupName: trimmedDefaultGroupName,
+    );
+    final secondaryName = _resolveSecondaryContactName(
+      contact: contact,
+      primaryName: primaryName,
+      fullName: fullName,
+      displayName: displayName,
+      defaultGroupName: trimmedDefaultGroupName,
+    );
+    final showCustomDisplayName = secondaryName != null;
 
     final isEditMode = ref.watch(
       contactsScreenControllerProvider.select((state) => state.isEditMode),
@@ -136,7 +156,7 @@ class _ContactGridItem extends ConsumerWidget {
                     Column(
                       children: [
                         Text(
-                          contact.displayName!,
+                          secondaryName,
                           style: context.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: context.colorScheme.primary,
@@ -150,15 +170,10 @@ class _ContactGridItem extends ConsumerWidget {
                       ],
                     ),
                   Text(
-                    fullName,
-                    style: contact.type == ContactType.individual
-                        ? (hasDisplayName
-                              ? context.textTheme.labelSmall
-                              : context.textTheme.titleSmall)
-                        : context.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: context.colorScheme.onSurface.withAlpha(179),
-                          ),
+                    primaryName,
+                    style: showCustomDisplayName
+                        ? context.textTheme.labelSmall
+                        : context.textTheme.titleSmall,
                     textAlign: TextAlign.center,
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
