@@ -56,13 +56,6 @@ class _SignDocumentRequestChatItemState
 
   @override
   Widget build(BuildContext context) {
-    final signingStatus = ref.watch(
-      signingServiceProvider.select((s) => s.status),
-    );
-    if (signingStatus == SigningServiceStatus.connected) {
-      return const SizedBox.shrink();
-    }
-
     // Only the device that sent the request should see the signing-request
     // widget. Other participants (e.g. the VTA owner in the same Matrix chat)
     // see this message too but must not see "Signing request sent".
