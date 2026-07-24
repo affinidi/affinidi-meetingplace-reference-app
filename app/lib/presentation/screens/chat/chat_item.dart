@@ -73,7 +73,10 @@ class ChatItem extends StatelessWidget {
 
     if (_SignedDocumentChatItem.matchPlainMessage(_chatItem)
         case final parsed?) {
-      return _SignedDocumentChatItem(data: parsed);
+      return _SignedDocumentChatItem(
+        data: parsed,
+        contactId: _contactId,
+      );
     }
 
     if (_SignedDocumentChatItem.matchAttachmentOnly(_chatItem)) {
