@@ -5,6 +5,7 @@ class _SignDocumentRequestChatItem extends ConsumerStatefulWidget {
     required this.title,
     required this.contactId,
     required this.messageIndex,
+    required this.senderDid,
     this.status,
     this.rawPayload,
   }) : statusColor = null,
@@ -14,6 +15,7 @@ class _SignDocumentRequestChatItem extends ConsumerStatefulWidget {
   final String title;
   final String contactId;
   final int messageIndex;
+  final String senderDid;
   final chat.ChatItemStatus? status;
   final Map<String, dynamic>? rawPayload;
   final String? statusLabel;
@@ -58,6 +60,16 @@ class _SignDocumentRequestChatItemState
       signingServiceProvider.select((s) => s.status),
     );
     if (signingStatus == SigningServiceStatus.connected) {
+      return const SizedBox.shrink();
+    }
+
+    // Only the device that sent the request should see the signing-request
+    // widget. Other participants (e.g. the VTA owner in the same Matrix chat)
+    // see this message too but must not see "Signing request sent".
+    final myDid = ref.watch(
+      chatScreenControllerProvider(widget.contactId).select((s) => s.myDid),
+    );
+    if (myDid != null && widget.senderDid != myDid) {
       return const SizedBox.shrink();
     }
 
