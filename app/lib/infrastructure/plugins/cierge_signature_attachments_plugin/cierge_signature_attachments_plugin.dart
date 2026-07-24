@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
 import '../../extensions/build_context_extensions.dart';
@@ -47,41 +48,13 @@ class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
     final download = request.download;
     if (download == null) return const SizedBox.shrink();
 
-    return FutureBuilder<CiergeSignatureProof?>(
-      future: () async {
-        developer.log(
-          'inline proof missing, attempting download '
-          'id=${request.attachment.id}',
-          name: 'CiergeSignaturePlugin',
-        );
-        final bytes = await download(request.attachment);
-        developer.log(
-          'downloaded ${bytes.length} bytes for id=${request.attachment.id}',
-          name: 'CiergeSignaturePlugin',
-        );
-        if (bytes.isEmpty) return null;
-        final raw = utf8.decode(bytes, allowMalformed: true);
-        return CiergeSignatureProof.fromRawJson(raw);
-      }(),
-      builder: (context, snapshot) {
-        final proof = snapshot.data;
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox.shrink();
-        }
-        if (proof == null) {
-          developer.log(
-            'download path parse failed id=${request.attachment.id}',
-            name: 'CiergeSignaturePlugin',
-          );
-          return const SizedBox.shrink();
-        }
-        developer.log(
-          'download proof parsed '
-          'memory=${proof.memory ?? '-'}',
-          name: 'CiergeSignaturePlugin',
-        );
-        return _SignedResponseBadge(proof: proof);
-      },
+    final attachmentKey = _attachmentCacheKey(request.attachment);
+
+    return _AsyncSignedResponseBadge(
+      key: ValueKey(attachmentKey),
+      attachmentKey: attachmentKey,
+      attachment: request.attachment,
+      download: download,
     );
   }
 
@@ -105,6 +78,17 @@ class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
           .toList(),
     );
   }
+}
+
+String _attachmentCacheKey(ChatAttachment attachment) {
+  final id = attachment.id;
+  if (id.isNotEmpty) return id;
+
+  final transportId = attachment.transportId;
+  if (transportId != null && transportId.isNotEmpty) return transportId;
+
+  return attachment.data?.links?.firstOrNull?.toString() ??
+      identityHashCode(attachment).toString();
 }
 
 class _SignedResponseBadge extends StatelessWidget {
@@ -154,6 +138,59 @@ class _SignedResponseBadge extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _AsyncSignedResponseBadge extends HookWidget {
+  const _AsyncSignedResponseBadge({
+    super.key,
+    required this.attachmentKey,
+    required this.attachment,
+    required this.download,
+  });
+
+  final String attachmentKey;
+  final ChatAttachment attachment;
+  final Future<List<int>> Function(ChatAttachment attachment) download;
+
+  Future<CiergeSignatureProof?> _loadProof() async {
+    developer.log(
+      'inline proof missing, attempting download '
+      'id=${attachment.id}',
+      name: 'CiergeSignaturePlugin',
+    );
+    final bytes = await download(attachment);
+    developer.log(
+      'downloaded ${bytes.length} bytes for id=${attachment.id}',
+      name: 'CiergeSignaturePlugin',
+    );
+    if (bytes.isEmpty) return null;
+    final raw = utf8.decode(bytes, allowMalformed: true);
+    return CiergeSignatureProof.fromRawJson(raw);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final proofFuture = useMemoized(_loadProof, [attachmentKey]);
+    final snapshot = useFuture(proofFuture);
+    final proof = snapshot.data;
+
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const SizedBox.shrink();
+    }
+    if (proof == null) {
+      developer.log(
+        'download path parse failed id=${attachment.id}',
+        name: 'CiergeSignaturePlugin',
+      );
+      return const SizedBox.shrink();
+    }
+    developer.log(
+      'download proof parsed '
+      'memory=${proof.memory ?? '-'}',
+      name: 'CiergeSignaturePlugin',
+    );
+    return _SignedResponseBadge(proof: proof);
   }
 }
 
