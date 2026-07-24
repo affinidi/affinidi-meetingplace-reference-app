@@ -170,10 +170,40 @@ class _SignedDocumentChatItemState
     final proof = data['proof'] as Map<String, dynamic>? ?? {};
     final title = payload['title'] as String? ?? 'Untitled Document';
     final issuer = data['issuer'] as String? ?? '';
-    final issuerName = data['issuerName'] as String?;
     final proofType = proof['type'] as String? ?? '';
     final cryptosuite = proof['cryptosuite'] as String? ?? '';
     final proofCreated = proof['created'] as String? ?? '';
+
+    // Show trust task details only when this device did NOT initiate the sign
+    // request (i.e. it's the VTA owner, not the requester). We detect the
+    // requester by checking whether any message in this conversation was a
+    // sign-document request sent by the current user.
+    final contactId = widget.contactId;
+    final showTrustTask = contactId == null
+        ? true
+        : ref.watch(
+            chatScreenControllerProvider(contactId).select((state) {
+              final myDid = state.myDid;
+              if (myDid == null) return true;
+              final conciergeSignType = chat.ConciergeMessageType.fromJson(
+                chat.CiergeSignDocumentRequest.conciergeTypeName,
+              );
+              final sentSignRequest = state.messages.any((msg) {
+                if (msg.senderDid != myDid) return false;
+                if (msg is chat.ConciergeMessage &&
+                    msg.conciergeType == conciergeSignType) {
+                  return true;
+                }
+                if (msg is chat.Message &&
+                    chat.CiergeSignDocumentRequest.fromMessageText(msg.value) !=
+                        null) {
+                  return true;
+                }
+                return false;
+              });
+              return !sentSignRequest;
+            }),
+          );
 
     final shortIssuer = issuer.length > 24
         ? '${issuer.substring(0, 12)}...${issuer.substring(issuer.length - 8)}'
@@ -282,64 +312,59 @@ class _SignedDocumentChatItemState
           ],
           const SizedBox(height: 10),
           _buildVerifyButton(),
-          if (issuerName != null) ...[
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: _toggleAgentDetails,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.06),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.white12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.smart_toy_outlined,
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: _toggleAgentDetails,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.smart_toy_outlined,
+                    color: Colors.white54,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Signed by Agent',
+                    style: TextStyle(
                       color: Colors.white54,
-                      size: 14,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'Signed by Agent',
-                      style: TextStyle(
-                        color: Colors.white54,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      _agentDetailsExpanded
-                          ? Icons.expand_less
-                          : Icons.expand_more,
-                      color: Colors.white38,
-                      size: 16,
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    _agentDetailsExpanded
+                        ? Icons.expand_less
+                        : Icons.expand_more,
+                    color: Colors.white38,
+                    size: 16,
+                  ),
+                ],
               ),
             ),
-            if (_agentDetailsExpanded) ...[
-              const SizedBox(height: 8),
-              _buildAgentDetailsSection(),
-            ],
+          ),
+          if (_agentDetailsExpanded) ...[
+            const SizedBox(height: 8),
+            _buildAgentDetailsSection(showTrustTask: showTrustTask),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildAgentDetailsSection() {
+  Widget _buildAgentDetailsSection({required bool showTrustTask}) {
     final issuerName = _effectiveData?['issuerName'] as String?;
-    final isOwner =
-        ref.watch(signingServiceProvider.select((s) => s.status)) ==
-        SigningServiceStatus.connected;
 
     return Container(
       width: double.infinity,
@@ -352,7 +377,7 @@ class _SignedDocumentChatItemState
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (isOwner) ...[
+          if (showTrustTask) ...[
             if (issuerName != null) ...[
               _detailRow('Context', issuerName),
               const SizedBox(height: 8),
@@ -390,8 +415,8 @@ class _SignedDocumentChatItemState
                 'No audit entry found',
                 style: TextStyle(color: Colors.white38, fontSize: 10),
               ),
+            const SizedBox(height: 10),
           ],
-          const SizedBox(height: 10),
           const Text(
             'Raw Envelope',
             style: TextStyle(
