@@ -241,7 +241,10 @@ String? _resolveGroupCallStatusText({
     case CallStatus.ringing:
       return null;
     case CallStatus.inProgress:
-      return l10n.callChatItemTapToReturn;
+      final count = participation.participantCount;
+      return mediaType == CallMediaType.audio
+          ? l10n.callChatItemGroupOngoingAudio(count)
+          : l10n.callChatItemGroupOngoingVideo(count);
     case CallStatus.ended:
       if (!participation.selfLeftBeforeEnd) return null;
       return l10n.callChatItemYouLeft;

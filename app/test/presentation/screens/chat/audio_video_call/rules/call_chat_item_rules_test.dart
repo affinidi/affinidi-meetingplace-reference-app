@@ -312,7 +312,7 @@ void main() {
       selfLeftBeforeEnd: selfLeftBeforeEnd,
     );
 
-    test('returns tap to return while in progress', () {
+    test('returns ongoing video text while in progress for video call', () {
       expect(
         resolveCallChatItemStatusText(
           status: CallStatus.inProgress,
@@ -323,7 +323,22 @@ void main() {
           mediaType: CallMediaType.video,
           participation: participation(count: 3),
         ),
-        l10n.callChatItemTapToReturn,
+        l10n.callChatItemGroupOngoingVideo(3),
+      );
+    });
+
+    test('returns ongoing audio text while in progress for audio call', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.inProgress,
+          isFromMe: true,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.audio,
+          participation: participation(count: 2),
+        ),
+        l10n.callChatItemGroupOngoingAudio(2),
       );
     });
 

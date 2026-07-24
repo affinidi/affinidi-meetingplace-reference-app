@@ -176,7 +176,8 @@ class IncomingCallService extends _$IncomingCallService
     if (event == null) return;
 
     final timeout = ref.read(environmentProvider).callRingTimeout;
-    final elapsed = clock.now().difference(event.invitedAt);
+    final rawElapsed = clock.now().difference(event.invitedAt);
+    final elapsed = rawElapsed.isNegative ? Duration.zero : rawElapsed;
     if (elapsed >= timeout) {
       _logger.info(
         'Ring for ${event.callId} expired while backgrounded, cleaning up',
