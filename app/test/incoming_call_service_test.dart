@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_session/audio_session.dart';
+import 'package:clock/clock.dart';
 import 'package:fake_async/fake_async.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
@@ -57,11 +59,12 @@ IncomingAudioVideoCallEvent _event({
   callerPermanentChannelDid: callerPermanentChannelDid,
   otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
   mediaType: mediaType,
-  invitedAt: DateTime.now(),
+  invitedAt: clock.now(),
 );
 
 void main() {
   setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
     AppLogger.initialize(
       File('${Directory.systemTemp.path}/incoming_call_service_test.log'),
     );
@@ -333,6 +336,65 @@ void main() {
                 .incrementMissedCallBadgeCalls,
             isEmpty,
           );
+
+          container.dispose();
+        });
+      });
+    });
+
+    group('and the app resumes from the background', () {
+      test('cleans up a ring that expired while backgrounded', () {
+        fakeAsync((async) {
+          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final container = buildContainer(fakeSDK);
+
+          final service = container.read(incomingCallServiceProvider.notifier);
+          async.flushMicrotasks();
+
+          fakeSDK.emitIncoming(_event());
+          async.flushMicrotasks();
+          expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
+
+          async.elapseBlocking(const Duration(seconds: 61));
+          service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          async.flushMicrotasks();
+
+          expect(container.read(incomingCallProvider).eventOrNull, isNull);
+          expect(fakeSDK.declinedCallIds, ['call-1']);
+          expect(
+            (container.read(contactsServiceProvider.notifier)
+                    as FakeContactsService)
+                .setPendingMissedCallCalls,
+            ['did:key:caller'],
+          );
+
+          container.dispose();
+        });
+      });
+
+      test('re-arms the timer when the ring has not yet expired', () {
+        fakeAsync((async) {
+          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final container = buildContainer(fakeSDK);
+
+          final service = container.read(incomingCallServiceProvider.notifier);
+          async.flushMicrotasks();
+
+          fakeSDK.emitIncoming(_event());
+          async.flushMicrotasks();
+
+          async.elapseBlocking(const Duration(seconds: 30));
+          service.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          async.flushMicrotasks();
+
+          expect(fakeSDK.declinedCallIds, isEmpty);
+          expect(container.read(incomingCallProvider).eventOrNull, isNotNull);
+
+          async.elapse(const Duration(seconds: 30));
+          async.flushMicrotasks();
+
+          expect(fakeSDK.declinedCallIds, ['call-1']);
+          expect(container.read(incomingCallProvider).eventOrNull, isNull);
 
           container.dispose();
         });

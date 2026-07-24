@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
+import 'package:flutter/widgets.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,7 +17,8 @@ import 'incoming_call_state.dart';
 part 'incoming_call_service.g.dart';
 
 @Riverpod(keepAlive: true)
-class IncomingCallService extends _$IncomingCallService {
+class IncomingCallService extends _$IncomingCallService
+    with WidgetsBindingObserver {
   static const _logKey = 'INCOMINGCALLSVC';
 
   late final _logger = ref.read(appLoggerProvider);
@@ -25,6 +28,7 @@ class IncomingCallService extends _$IncomingCallService {
   @override
   void build() {
     _logger.info('Incoming call service initialized', name: _logKey);
+    WidgetsBinding.instance.addObserver(this);
     ref.listen(
       meetingPlaceSdkProvider,
       (_, next) => _bindToSDK(next.value),
@@ -35,7 +39,15 @@ class IncomingCallService extends _$IncomingCallService {
       if (next is IncomingCallIdle) _cancelRingTimer();
     });
 
-    ref.onDispose(_cancelRingTimer);
+    ref.onDispose(() {
+      WidgetsBinding.instance.removeObserver(this);
+      _cancelRingTimer();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _reconcileRingOnResume();
   }
 
   /// Accepts the incoming call and stops ringing.
@@ -131,21 +143,53 @@ class IncomingCallService extends _$IncomingCallService {
 
   void _startRingTimer(String callId) {
     _ringTimer?.cancel();
-    _ringTimer = Timer(ref.read(environmentProvider).callRingTimeout, () {
+    _ringTimer = Timer(
+      ref.read(environmentProvider).callRingTimeout,
+      () => _handleRingTimeout(callId),
+    );
+  }
+
+  void _handleRingTimeout(String callId) {
+    _logger.info('Ring timeout reached for $callId, declining', name: _logKey);
+    final channelDid = ref
+        .read(incomingCallProvider)
+        .eventOrNull
+        ?.otherPartyPermanentChannelDid;
+    _clearRingState();
+    _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
+    if (channelDid != null) {
+      unawaited(_markCallAsMissed(channelDid, callId: callId));
+    }
+  }
+
+  /// Reconciles a ring that may have expired while the app was backgrounded.
+  ///
+  /// Background suspends the ring timer's countdown, so on resume the banner
+  /// can linger for a call that already ended. Elapsed time is measured against
+  /// the event's [IncomingAudioVideoCallEvent.invitedAt] arrival instant, which
+  /// keeps the check correct across background gaps and clock/timezone changes.
+  /// When the ring duration has passed the timeout, this runs the same
+  /// missed-call cleanup so the banner clears and the chat item reconciles to
+  /// missed; otherwise it re-arms the timer for the remaining time.
+  void _reconcileRingOnResume() {
+    final event = ref.read(incomingCallProvider).eventOrNull;
+    if (event == null) return;
+
+    final timeout = ref.read(environmentProvider).callRingTimeout;
+    final elapsed = clock.now().difference(event.invitedAt);
+    if (elapsed >= timeout) {
       _logger.info(
-        'Ring timeout reached for $callId, declining',
+        'Ring for ${event.callId} expired while backgrounded, cleaning up',
         name: _logKey,
       );
-      final channelDid = ref
-          .read(incomingCallProvider)
-          .eventOrNull
-          ?.otherPartyPermanentChannelDid;
-      _clearRingState();
-      _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
-      if (channelDid != null) {
-        unawaited(_markCallAsMissed(channelDid, callId: callId));
-      }
-    });
+      _handleRingTimeout(event.callId);
+    } else {
+      _ringTimer?.cancel();
+      _ringTimer = Timer(
+        timeout - elapsed,
+        () => _handleRingTimeout(event.callId),
+      );
+    }
   }
 
   void _clearRingState() {
