@@ -273,6 +273,7 @@ void main() {
         },
         isDisposed: () => false,
         logger: logger,
+        isGroupCall: true,
       )..attach(session);
     }
 
@@ -289,6 +290,7 @@ void main() {
         const AudioVideoCallState(
           status: AudioVideoCallStatus.outgoingRinging,
           ownRole: CallRole.caller,
+          callId: 'call-1',
         ),
       );
       await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -304,6 +306,7 @@ void main() {
         const AudioVideoCallState(
           status: AudioVideoCallStatus.connected,
           ownRole: CallRole.caller,
+          callId: 'call-1',
           participants: peerParticipants,
         ),
       );
@@ -320,12 +323,14 @@ void main() {
         const AudioVideoCallState(
           status: AudioVideoCallStatus.outgoingRinging,
           ownRole: CallRole.caller,
+          callId: 'call-1',
         ),
       );
       await session.emitState(
         const AudioVideoCallState(
           status: AudioVideoCallStatus.outgoingRinging,
           ownRole: CallRole.caller,
+          callId: 'call-1',
         ),
       );
       await Future<void>.delayed(const Duration(milliseconds: 50));

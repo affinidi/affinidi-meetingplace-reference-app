@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_screen_controller.dart';
@@ -14,7 +15,7 @@ void main() {
         contacts: [FakeContacts.groupContact],
       );
 
-      final context = tester.element(find.byType(ProviderScope));
+      final context = tester.element(find.byType(Scaffold).first);
       final container = ProviderScope.containerOf(context, listen: false);
       final state = container.read(
         chatScreenControllerProvider(FakeContacts.groupContact.id),
