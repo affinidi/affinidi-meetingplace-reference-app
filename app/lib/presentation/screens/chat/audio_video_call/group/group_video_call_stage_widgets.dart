@@ -106,10 +106,8 @@ class _GroupVideoTopBar extends StatelessWidget {
           children: [
             CallTopBarActionButton(
               icon: Icons.people_alt_outlined,
-              onPressed: () => CallParticipantsSheet.show(
-                context,
-                contactId: contactId,
-              ),
+              onPressed: () =>
+                  CallParticipantsSheet.show(context, contactId: contactId),
             ),
             if (showSwitchCamera) ...[
               const SizedBox(height: 8),
