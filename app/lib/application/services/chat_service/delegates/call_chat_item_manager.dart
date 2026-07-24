@@ -313,28 +313,13 @@ class CallChatItemManager {
     const label = 'resolveCallItemIdForOutcome';
     await ensureInitialized();
     final chatSdk = getChatSdk();
-    if (chatSdk == null) {
+    if (chatSdk is! MeetingPlaceMatrixChatSDK) {
       logger.warning('$label: chat SDK unavailable', name: _logKey);
       return null;
     }
     if (callId.isEmpty) return null;
     try {
-      final items = await chatSdk.messages;
-      Message? outgoing;
-      Message? incoming;
-      for (final message in items.whereType<Message>()) {
-        final attachment = message.attachments.firstWhereOrNull(
-          CallMetadata.isCall,
-        );
-        if (attachment == null) continue;
-        if (CallMetadata.maybeOf(attachment)?.callId != callId) continue;
-        if (message.isFromMe) {
-          outgoing = message;
-        } else {
-          incoming = message;
-        }
-      }
-      final match = outgoing ?? incoming;
+      final match = await chatSdk.getCallChatItemByCallId(callId);
       if (match == null) {
         logger.info('$label: no call item for callId $callId', name: _logKey);
         return null;

@@ -34,22 +34,6 @@ class FakeInMemoryChatRepository implements chat.ChatRepository {
   }) async => _store['${chatId}_$messageId'];
 
   @override
-  Future<chat.ChatItem?> getCallChatItemByCallId({
-    required String chatId,
-    required String callId,
-  }) async {
-    return _store.values
-        .whereType<chat.Message>()
-        .cast<chat.ChatItem?>()
-        .firstWhere(
-          (m) => (m as chat.Message).attachments.any(
-            (a) => (a.metadata?['call_id'] as String?) == callId,
-          ),
-          orElse: () => null,
-        );
-  }
-
-  @override
   Future<String?> getSyncMarker(String chatId) async {
     return _syncMarker[chatId];
   }
