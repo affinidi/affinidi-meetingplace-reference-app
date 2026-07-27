@@ -10,6 +10,7 @@ import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
+import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/secure_storage/secure_storage.dart';
@@ -38,6 +39,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   late final _lifecycleObserver = _PersonalAiLifecycleObserver(
     onResumed: _handleAppResumed,
   );
+
+  static const _logKey = 'PERSONAL_AI';
+  late final AppLogger _logger = _ref.read(appLoggerProvider);
 
   Environment get _environment => _ref.read(environmentProvider);
 
@@ -289,6 +293,10 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
     final normalizedHolderDid = holderDid.trim();
     if (normalizedHolderDid.isEmpty) {
+      _logger.error(
+        'Cannot connect Personal AI: holder DID is missing.',
+        name: _logKey,
+      );
       state = state.copyWith(
         status: PersonalAiSetupStatus.failed,
         errorMessage:
@@ -298,12 +306,25 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       return;
     }
 
+    _logger.info(
+      'Connecting to Personal AI URL: '
+      'baseUrl=${_environment.personalAiBaseUrl} '
+      'endpoint=${_environment.personalAiSetupEndpoint} '
+      'context=$contextName '
+      'holderDid=${_redact(normalizedHolderDid)}',
+      name: _logKey,
+    );
+
     state = state.copyWith(
       status: PersonalAiSetupStatus.settingUp,
       clearErrorMessage: true,
     );
 
     try {
+      _logger.info(
+        'Requesting personal agent setup from Personal AI URL...',
+        name: _logKey,
+      );
       final result = await _sdk.ensurePersonalAgentSetup(
         request: PersonalAgentSetupRequest(
           holderDid: normalizedHolderDid,
@@ -311,10 +332,26 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
           agentDisplayName: agentDisplayName,
         ),
       );
+      _logger.info(
+        'Setup response received: '
+        'setupId=${_redact(result.setupId ?? '')} '
+        'contextId=${result.contextId} '
+        'setupStatus=${result.setupStatus ?? '(none)'} '
+        'mpxConnectionCreated=${result.mpxConnectionCreated} '
+        'availableInContacts=${result.availableInContacts}',
+        name: _logKey,
+      );
 
       final offer = await _autoConnectPersonalAgent(
         result: result,
         holderDid: normalizedHolderDid,
+      );
+      _logger.info(
+        'Auto-connect resolved offer: '
+        'status=${offer.status} '
+        'channelDid=${_redact(offer.channelDid ?? '')} '
+        'channelId=${_redact(offer.channelId ?? '')}',
+        name: _logKey,
       );
 
       // Refresh setup status after connect so state carries up-to-date
@@ -328,8 +365,14 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
             agentDisplayName: agentDisplayName,
           ),
         );
-      } catch (_) {
+      } catch (error, stackTrace) {
         // Keep the original setup payload if status refresh fails.
+        _logger.warning(
+          'Post-connect setup status refresh failed, keeping original '
+          'payload: $error',
+          name: _logKey,
+        );
+        _logger.debug('$stackTrace', name: _logKey);
       }
 
       final offerChannelDid = offer.channelDid?.trim();
@@ -354,8 +397,16 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       );
 
       _updateSetupResult(setupSnapshot, contextName: contextName);
+      final isReady = _isConnectionReady(setupSnapshot);
+      _logger.info(
+        'Personal AI connect finished: '
+        'ready=$isReady '
+        'setupStatus=${setupSnapshot.setupStatus ?? '(none)'} '
+        'channelDid=${_redact(offerChannelDid ?? '')}',
+        name: _logKey,
+      );
       state = state.copyWith(
-        status: _isConnectionReady(setupSnapshot)
+        status: isReady
             ? PersonalAiSetupStatus.ready
             : PersonalAiSetupStatus.settingUp,
         showSetupPrompt: false,
@@ -364,7 +415,14 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
       final storage = await _ref.read(secureStorageProvider.future);
       await storage.writePersonalAiHolderDid(normalizedHolderDid);
-    } catch (error) {
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Personal AI connect failed for URL '
+        '${_environment.personalAiBaseUrl}',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
       state = state.copyWith(
         status: PersonalAiSetupStatus.failed,
         errorMessage: error.toString(),
@@ -530,6 +588,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         result.contextId.trim().toLowerCase().startsWith('work-ai')
         ? 'work-ai'
         : 'personal-ai';
+
     final identitiesService = _ref.read(identitiesServiceProvider.notifier);
     await identitiesService.ensureInitialized();
 
@@ -660,6 +719,11 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         );
         final status = offer.status;
         final hasMnemonic = offer.mnemonic?.trim().isNotEmpty ?? false;
+        _logger.info(
+          'Waiting for offer (attempt $attempt/$maxAttempts): '
+          'status=$status hasMnemonic=$hasMnemonic',
+          name: _logKey,
+        );
         if (hasMnemonic || status == 'inaugurated' || status == 'ready') {
           return offer;
         }
@@ -670,6 +734,12 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
             error.statusCode == 404 ||
             body.contains('unknown setup_id') ||
             message.contains('unknown setup_id');
+        _logger.warning(
+          'Offer fetch attempt $attempt/$maxAttempts failed: '
+          'statusCode=${error.statusCode} unknownSetup=$unknownSetup '
+          'message=${error.message}',
+          name: _logKey,
+        );
         if (unknownSetup) {
           try {
             final refreshed = await _sdk.ensurePersonalAgentSetup(
@@ -681,10 +751,20 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
             );
             final refreshedSetupId = refreshed.setupId?.trim();
             if (refreshedSetupId != null && refreshedSetupId.isNotEmpty) {
+              _logger.info(
+                'Refreshed setup id after unknown setup_id: '
+                '${_redact(refreshedSetupId)}',
+                name: _logKey,
+              );
               currentSetupId = refreshedSetupId;
             }
-          } catch (_) {
+          } catch (refreshError) {
             // Best effort; continue polling using the last known setup id.
+            _logger.warning(
+              'Setup id refresh failed, continuing with last known id: '
+              '$refreshError',
+              name: _logKey,
+            );
           }
         }
         // Backend may still be preparing offer state; keep polling briefly.
@@ -693,6 +773,11 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       await Future<void>.delayed(const Duration(seconds: 1));
     }
 
+    _logger.error(
+      'Timed out waiting for Personal AI offer details after '
+      '$maxAttempts attempts.',
+      name: _logKey,
+    );
     throw StateError('Timed out waiting for Personal AI offer details.');
   }
 
@@ -1042,6 +1127,12 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       offerLink: offerLink,
       channelDid: channelDid,
     );
+  }
+
+  String _redact(String value) {
+    if (value.isEmpty) return '(empty)';
+    if (value.length <= 12) return '${value.substring(0, 3)}...';
+    return '${value.substring(0, 8)}...${value.substring(value.length - 4)}';
   }
 }
 

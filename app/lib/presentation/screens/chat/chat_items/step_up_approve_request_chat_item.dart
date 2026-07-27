@@ -20,6 +20,8 @@ class _StepUpApproveRequestChatItemState
   bool _processing = false;
   String? _result;
   bool _vtaExpanded = false;
+  bool _downloading = false;
+  String? _downloadError;
 
   @override
   bool get wantKeepAlive => _result != null || _processing;
@@ -34,9 +36,18 @@ class _StepUpApproveRequestChatItemState
     final payload =
         approveRequest['payload'] as Map<String, dynamic>? ?? approveRequest;
     final reason = payload['reason'] as String? ?? 'Step-up approval required';
-    final document = widget.chatItem.data['document'] as Map<String, dynamic>?;
+    // The connector carries the review document as a `reviewDocument` sibling
+    // of `payload` inside `approveRequest`, because the chat SDK drops the
+    // top-level `document` field when reconstructing this widget. Fall back to
+    // `data['document']` for forward-compatibility.
+    final document =
+        approveRequest['reviewDocument'] as Map<String, dynamic>? ??
+        (widget.chatItem.data['document'] as Map<String, dynamic>?);
     final documentTitle = document?['title'] as String?;
     final documentMediaType = document?['mediaType'] as String?;
+    final documentContent = document?['content'] as String?;
+    final hasDownloadableDocument =
+        documentContent != null && documentContent.isNotEmpty;
     final alreadyConfirmed =
         widget.chatItem.status == chat.ChatItemStatus.confirmed;
     final isActionable =
@@ -160,6 +171,42 @@ class _StepUpApproveRequestChatItemState
                 ],
               ),
             ),
+            if (hasDownloadableDocument) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(0, 38),
+                    side: const BorderSide(color: Colors.white38),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                    ),
+                  ),
+                  onPressed: _downloading
+                      ? null
+                      : () => _downloadInlineDocument(document!),
+                  icon: _downloading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.download_outlined, size: 18),
+                  label: Text(
+                    _downloading ? 'Downloading...' : 'Download to review',
+                  ),
+                ),
+              ),
+              if (_downloadError != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  _downloadError!,
+                  style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+                ),
+              ],
+            ],
           ],
           const SizedBox(height: 8),
           GestureDetector(
@@ -295,5 +342,37 @@ class _StepUpApproveRequestChatItemState
 
   void _handleRejection() {
     setState(() => _result = 'Rejected');
+  }
+
+  Future<void> _downloadInlineDocument(Map<String, dynamic> document) async {
+    setState(() {
+      _downloading = true;
+      _downloadError = null;
+    });
+    try {
+      final content = document['content'] as String;
+      final bytes = base64Decode(content);
+      final title = document['title'] as String? ?? 'document';
+
+      final tempDir = await getTemporaryDirectory();
+      final safeName = path.basename(title);
+      final uniqueName =
+          '${path.basenameWithoutExtension(safeName)}_'
+          '${DateTime.now().millisecondsSinceEpoch}'
+          '${path.extension(safeName)}';
+      final tempFile = File('${tempDir.path}/$uniqueName');
+      await tempFile.writeAsBytes(bytes);
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(tempFile.path)]),
+      );
+      if (mounted) setState(() => _downloading = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _downloading = false;
+          _downloadError = 'Failed to download: $e';
+        });
+      }
+    }
   }
 }
