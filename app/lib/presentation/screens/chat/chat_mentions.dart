@@ -70,6 +70,7 @@ class _ChatMentionSuggestionTile extends StatelessWidget {
       child: ListTile(
         key: Key('chat_mention_suggestion_${candidate.target}'),
         dense: true,
+        leading: ProfileCircleAvatar(radius: 18, image: candidate.avatarImage),
         title: Text(candidate.label),
         subtitle: candidate.subtitle == null ? null : Text(candidate.subtitle!),
         onTap: () => onSelected(candidate),
@@ -139,7 +140,16 @@ class _ChatMentionDraftController extends ChangeNotifier {
     if (!_enabled || query == null) return;
 
     final text = _textController.text;
-    final newText = text.replaceRange(query.start, query.end, candidate.label);
+    final replacementToken = _matchingTokenForQuery(text, query);
+    final replacementEnd = replacementToken?.end ?? query.end;
+    final insertedText = replacementEnd == text.length
+        ? '${candidate.label} '
+        : candidate.label;
+    final newText = text.replaceRange(
+      query.start,
+      replacementEnd,
+      insertedText,
+    );
     final updatedTokens = _reconcileTokens(text, newText, _tokens)
       ..add(
         _ChatMentionToken(
@@ -153,7 +163,7 @@ class _ChatMentionDraftController extends ChangeNotifier {
     final newValue = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(
-        offset: query.start + candidate.label.length,
+        offset: query.start + insertedText.length,
       ),
     );
 
@@ -161,6 +171,29 @@ class _ChatMentionDraftController extends ChangeNotifier {
     _lastValue = newValue;
     _textController.value = newValue;
     _refreshSuggestions(notify: true);
+  }
+
+  _ChatMentionToken? _matchingTokenForQuery(
+    String text,
+    _ChatActiveMentionQuery query,
+  ) {
+    for (final token in _tokens) {
+      if (token.start != query.start || token.end < query.end) continue;
+      if (token.end > text.length) continue;
+      if (text.substring(token.start, token.end) != token.label) continue;
+      return token;
+    }
+    return null;
+  }
+
+  _ChatMentionToken? _matchingTokenAtCursor(String text, int cursor) {
+    for (final token in _tokens) {
+      if (cursor <= token.start || cursor > token.end) continue;
+      if (token.end > text.length) continue;
+      if (text.substring(token.start, token.end) != token.label) continue;
+      return token;
+    }
+    return null;
   }
 
   void _handleTextChanged() {
@@ -171,6 +204,22 @@ class _ChatMentionDraftController extends ChangeNotifier {
     if (!textChanged && !selectionChanged) return;
 
     if (textChanged) {
+      final expandedDeletion = _expandSingleCharacterDeletionOverMention(
+        _lastValue,
+        value,
+      );
+      if (expandedDeletion != null) {
+        _tokens = _reconcileTokens(
+          _lastValue.text,
+          expandedDeletion.text,
+          _tokens,
+        );
+        _lastValue = expandedDeletion;
+        _textController.value = expandedDeletion;
+        _refreshSuggestions(notify: true);
+        return;
+      }
+
       _tokens = _reconcileTokens(_lastValue.text, value.text, _tokens);
       _debouncer.run(() => _refreshSuggestions(notify: true));
     } else {
@@ -180,10 +229,73 @@ class _ChatMentionDraftController extends ChangeNotifier {
     _lastValue = value;
   }
 
+  TextEditingValue? _expandSingleCharacterDeletionOverMention(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (oldValue.text.length != newValue.text.length + 1) return null;
+
+    final oldText = oldValue.text;
+    final newText = newValue.text;
+    var prefix = 0;
+    final sharedPrefixLimit = math.min(oldText.length, newText.length);
+    while (prefix < sharedPrefixLimit && oldText[prefix] == newText[prefix]) {
+      prefix += 1;
+    }
+
+    var suffix = 0;
+    while (suffix < oldText.length - prefix &&
+        suffix < newText.length - prefix &&
+        oldText[oldText.length - 1 - suffix] ==
+            newText[newText.length - 1 - suffix]) {
+      suffix += 1;
+    }
+
+    final deletedStart = prefix;
+    final deletedEnd = oldText.length - suffix;
+    if (deletedEnd - deletedStart != 1) return null;
+
+    final token = _matchingTokenOverlappingRange(
+      oldText,
+      deletedStart,
+      deletedEnd,
+    );
+    if (token == null) return null;
+
+    var removalEnd = token.end;
+    if (removalEnd < oldText.length && _isWhitespace(oldText[removalEnd])) {
+      removalEnd += 1;
+    }
+
+    return TextEditingValue(
+      text: oldText.replaceRange(token.start, removalEnd, ''),
+      selection: TextSelection.collapsed(offset: token.start),
+    );
+  }
+
+  _ChatMentionToken? _matchingTokenOverlappingRange(
+    String text,
+    int start,
+    int end,
+  ) {
+    for (final token in _tokens) {
+      if (token.end <= start || token.start >= end) continue;
+      if (token.end > text.length) continue;
+      if (text.substring(token.start, token.end) != token.label) continue;
+      return token;
+    }
+    return null;
+  }
+
   void _refreshSuggestions({bool notify = false}) {
-    final nextQuery = _enabled
-        ? _findActiveMentionQuery(_textController.value)
-        : null;
+    final value = _textController.value;
+    final cursor = value.selection.extentOffset;
+    final nextQuery =
+        !_enabled ||
+            !value.selection.isCollapsed ||
+            _matchingTokenAtCursor(value.text, cursor) != null
+        ? null
+        : _findActiveMentionQuery(value);
     final nextSuggestions = nextQuery == null
         ? const <ChatMentionCandidate>[]
         : _filterCandidates(nextQuery.query);

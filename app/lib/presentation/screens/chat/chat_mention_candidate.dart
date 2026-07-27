@@ -1,3 +1,5 @@
+import 'package:flutter/painting.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -8,9 +10,13 @@ class ChatMentionCandidate {
     required this.label,
     required this.searchText,
     this.subtitle,
+    this.avatarImage,
   });
 
-  factory ChatMentionCandidate.fromGroupMember(sdk.GroupMember member) {
+  factory ChatMentionCandidate.fromGroupMember(
+    sdk.GroupMember member, {
+    required BaseCacheManager cacheManager,
+  }) {
     final firstName = member.contactCard.firstName.trim();
     final fullName = member.contactCard.fullName.trim();
     final baseLabel = firstName.isNotEmpty
@@ -22,6 +28,7 @@ class ChatMentionCandidate {
       target: member.did,
       label: '@$baseLabel',
       subtitle: fullName.isNotEmpty && fullName != baseLabel ? fullName : null,
+      avatarImage: member.contactCard.image(cacheManager: cacheManager),
       searchText: [
         baseLabel,
         fullName,
@@ -34,4 +41,5 @@ class ChatMentionCandidate {
   final String label;
   final String searchText;
   final String? subtitle;
+  final ImageProvider<Object>? avatarImage;
 }

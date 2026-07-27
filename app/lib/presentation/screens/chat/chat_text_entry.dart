@@ -93,7 +93,9 @@ class _ChatTextEntry extends HookConsumerWidget {
     final supportsMedia = ref.watch(provider.supportsMedia);
     final supportsVoiceMessages = ref.watch(provider.supportsVoiceMessages);
     final supportsMentions = ref.watch(provider.supportsMentions);
-    final mentionCandidates = ref.watch(provider.mentionCandidates);
+    final mentionCandidates = ref.watch(
+      chatMentionCandidatesProvider(_contactId),
+    );
     final focusNode = useFocusNode();
     final mentionDraft = useMemoized(
       () => _ChatMentionDraftController(

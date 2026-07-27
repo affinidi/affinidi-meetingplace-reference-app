@@ -33,7 +33,9 @@ class _ChatMessageActions extends ConsumerWidget {
     final supportsMessageDelete = ref.watch(provider.supportsMessageDelete);
     final supportsMessageEdit = ref.watch(provider.supportsMessageEdit);
     final supportsMentions = ref.watch(provider.supportsMentions);
-    final mentionCandidates = ref.watch(provider.mentionCandidates);
+    final mentionCandidates = ref.watch(
+      chatMentionCandidatesProvider(_contactId),
+    );
 
     Future<void> copy() async {
       if (!context.mounted) return;

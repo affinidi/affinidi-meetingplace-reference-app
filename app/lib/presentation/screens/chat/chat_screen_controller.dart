@@ -36,6 +36,7 @@ import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachm
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
+import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
@@ -49,6 +50,29 @@ import 'chat_zkp_handler.dart';
 import 'proof_flow_controller.dart';
 
 part 'chat_screen_controller.g.dart';
+
+final chatMentionCandidatesProvider =
+    Provider.family<List<ChatMentionCandidate>, String>((ref, contactId) {
+      final state = ref.watch(chatScreenControllerProvider(contactId));
+      final cacheManager = ref.read(cacheManagerProvider);
+      final myDid = state.myDid;
+
+      return state.group?.members
+              .where(
+                (member) =>
+                    member.status == sdk.GroupMemberStatus.approved &&
+                    member.did != myDid,
+              )
+              .map(
+                (member) => ChatMentionCandidate.fromGroupMember(
+                  member,
+                  cacheManager: cacheManager,
+                ),
+              )
+              .where((candidate) => candidate.label.isNotEmpty)
+              .toList() ??
+          const [];
+    });
 
 @riverpod
 /// Controller class for managing the state and logic of the chat screen.
@@ -1499,22 +1523,6 @@ extension ChatScreenControllerProviderSelectors
       (state) =>
           state.capabilities?.supports(chat.ChatFeature.mentions) ?? false,
     );
-  }
-
-  ProviderListenable<List<ChatMentionCandidate>> get mentionCandidates {
-    return select((state) {
-      final myDid = state.myDid;
-      return state.group?.members
-              .where(
-                (member) =>
-                    member.status == sdk.GroupMemberStatus.approved &&
-                    member.did != myDid,
-              )
-              .map(ChatMentionCandidate.fromGroupMember)
-              .where((candidate) => candidate.label.isNotEmpty)
-              .toList() ??
-          const [];
-    });
   }
 
   ProviderListenable<bool> get supportsSuggestionRequests {
