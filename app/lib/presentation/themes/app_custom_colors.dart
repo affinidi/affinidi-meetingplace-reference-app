@@ -63,7 +63,7 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color? _mediaSurfaceOverlay;
   final Color? _mediaSurfaceBorder;
 
-  Color get mention => _mention ?? Colors.cyan;
+  Color get mention => _mention ?? Colors.orange;
   Color get cyan => _cyan ?? Colors.cyan;
   Color get purple => _purple ?? Colors.purple;
   Color get rose => _rose ?? const Color.fromARGB(255, 211, 31, 130);

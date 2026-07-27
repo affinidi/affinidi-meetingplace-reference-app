@@ -220,9 +220,14 @@ class _TextMessage extends StatelessWidget {
       void addMatches(String needle) {
         if (needle.isEmpty) return;
 
+        final normalizedText = _text.toLowerCase();
+        final normalizedNeedle = needle.toLowerCase();
         var searchStart = 0;
         while (searchStart < _text.length) {
-          final matchStart = _text.indexOf(needle, searchStart);
+          final matchStart = normalizedText.indexOf(
+            normalizedNeedle,
+            searchStart,
+          );
           if (matchStart < 0) return;
 
           final matchEnd = matchStart + needle.length;

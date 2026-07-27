@@ -121,6 +121,7 @@ class _ChatMentionDraftController extends ChangeNotifier {
   }
 
   List<chat.ChatMention> mentionsForText(String text) {
+    _syncTokensWithText(text);
     final mentions = <chat.ChatMention>[];
     for (final token in _tokens) {
       final start = token.start;
@@ -300,6 +301,7 @@ class _ChatMentionDraftController extends ChangeNotifier {
 
   void _refreshSuggestions({bool notify = false}) {
     final value = _textController.value;
+    _syncTokensWithText(value.text);
     final cursor = value.selection.extentOffset;
     final nextQuery =
         !_enabled ||
@@ -320,6 +322,55 @@ class _ChatMentionDraftController extends ChangeNotifier {
     if (notify && didChange) {
       notifyListeners();
     }
+  }
+
+  void _syncTokensWithText(String text) {
+    final validTokens =
+        _tokens
+            .where((token) {
+              final start = token.start;
+              final end = token.end;
+              if (start < 0 || end > text.length || start >= end) return false;
+              return text.substring(start, end) == token.label;
+            })
+            .toList(growable: true)
+          ..sort((a, b) => a.start.compareTo(b.start));
+
+    if (!_enabled || _allCandidates.isEmpty) {
+      _tokens = validTokens;
+      return;
+    }
+
+    final candidateLabels = <String, ChatMentionCandidate>{};
+    final ambiguousLabels = <String>{};
+    for (final candidate in _allCandidates) {
+      final key = candidate.label.toLowerCase();
+      if (ambiguousLabels.contains(key)) continue;
+      if (!candidateLabels.containsKey(key)) {
+        candidateLabels[key] = candidate;
+        continue;
+      }
+      candidateLabels.remove(key);
+      ambiguousLabels.add(key);
+    }
+
+    for (final match in RegExp(r'@\S+').allMatches(text)) {
+      final start = match.start;
+      final end = match.end;
+      if (start > 0 && !_isWhitespace(text[start - 1])) continue;
+      if (_rangeOverlapsExistingToken(validTokens, start, end)) continue;
+
+      final label = match.group(0)!;
+      final candidate = candidateLabels[label.toLowerCase()];
+      if (candidate == null) continue;
+
+      validTokens.add(
+        _ChatMentionToken(target: candidate.target, label: label, start: start),
+      );
+    }
+
+    validTokens.sort((a, b) => a.start.compareTo(b.start));
+    _tokens = validTokens;
   }
 
   List<ChatMentionCandidate> _filterCandidates(String query) {
@@ -528,4 +579,16 @@ bool _listShallowEquals<T>(List<T> left, List<T> right) {
     if (left[index] != right[index]) return false;
   }
   return true;
+}
+
+bool _rangeOverlapsExistingToken(
+  List<_ChatMentionToken> tokens,
+  int start,
+  int end,
+) {
+  for (final token in tokens) {
+    if (token.end <= start || token.start >= end) continue;
+    return true;
+  }
+  return false;
 }
