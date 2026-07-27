@@ -76,6 +76,8 @@ class _SignedDocumentChatItemState
   Map<String, dynamic>? _downloadedData;
   bool _downloading = false;
   String? _downloadError;
+  bool _openingDoc = false;
+  String? _openError;
 
   static const _verifySteps = [
     'Canonicalizing document with JCS (RFC 8785)...',
@@ -123,6 +125,83 @@ class _SignedDocumentChatItemState
         setState(() {
           _downloadError = 'Failed to load: $e';
           _downloading = false;
+        });
+      }
+    }
+  }
+
+  Widget _buildOpenDocumentButton(Map<String, dynamic> payload, String title) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.greenAccent,
+            minimumSize: const Size(0, 38),
+            alignment: Alignment.centerLeft,
+            side: const BorderSide(color: Colors.white24),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+          ),
+          onPressed: _openingDoc ? null : () => _openSignedDocument(payload),
+          icon: _openingDoc
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.greenAccent,
+                  ),
+                )
+              : const Icon(Icons.download_outlined, size: 18),
+          label: Text(
+            _openingDoc ? 'Opening...' : 'Open document',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          ),
+        ),
+        if (_openError != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            _openError!,
+            style: const TextStyle(color: Colors.redAccent, fontSize: 12),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Future<void> _openSignedDocument(Map<String, dynamic> payload) async {
+    setState(() {
+      _openingDoc = true;
+      _openError = null;
+    });
+    try {
+      final content = payload['content'] as String;
+      final bytes = base64Decode(content);
+      final title = payload['title'] as String? ?? 'document';
+
+      final tempDir = await getTemporaryDirectory();
+      final safeName = path.basename(title);
+      final uniqueName =
+          '${path.basenameWithoutExtension(safeName)}_'
+          '${DateTime.now().millisecondsSinceEpoch}'
+          '${path.extension(safeName)}';
+      final tempFile = File('${tempDir.path}/$uniqueName');
+      await tempFile.writeAsBytes(bytes);
+      final opened = await OpenFilex.open(tempFile.path);
+      if (opened.type != ResultType.done) {
+        await SharePlus.instance.share(
+          ShareParams(files: [XFile(tempFile.path)]),
+        );
+      }
+      if (mounted) setState(() => _openingDoc = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _openingDoc = false;
+          _openError = 'Failed to open: $e';
         });
       }
     }
@@ -312,14 +391,15 @@ class _SignedDocumentChatItemState
           ],
           const SizedBox(height: 10),
           _buildVerifyButton(),
+          if ((payload['content'] as String?)?.isNotEmpty ?? false) ...[
+            const SizedBox(height: 10),
+            _buildOpenDocumentButton(payload, title),
+          ],
           const SizedBox(height: 10),
           GestureDetector(
             onTap: _toggleAgentDetails,
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 6,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(6),

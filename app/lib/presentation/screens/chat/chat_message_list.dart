@@ -90,7 +90,10 @@ class _ChatMessageList extends HookConsumerWidget {
 
                   if (_isVrcRequestOnlyMessage(chatItem) ||
                       zkpPolicy.shouldHide(chatItem) ||
-                      _isLocalAgentResponseMessage(chatItem)) {
+                      _isLocalAgentResponseMessage(chatItem) ||
+                      _SignDocumentRequestChatItem.matchStatusMessage(
+                        chatItem,
+                      )) {
                     return const SizedBox.shrink();
                   }
                   var nextItemFromSameDid = false;

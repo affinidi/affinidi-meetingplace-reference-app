@@ -32,9 +32,11 @@ class _SignDocumentRequestChatItem extends ConsumerStatefulWidget {
     try {
       final decoded = jsonDecode(item.value);
       if (decoded is! Map<String, dynamic>) return null;
-      if (decoded['type'] == 'cierge/sign-document-status' &&
-          decoded['status'] == 'awaiting_approval') {
-        return decoded;
+      if (decoded['type'] == 'cierge/sign-document-status') {
+        final status = decoded['status'] as String?;
+        if (status == 'awaiting_approval' || status == 'error') {
+          return decoded;
+        }
       }
     } catch (_) {}
     return null;
@@ -69,17 +71,22 @@ class _SignDocumentRequestChatItemState
     final statusData = ref.watch(
       chatScreenControllerProvider(widget.contactId).select((state) {
         final msgs = state.messages;
-        for (var i = widget.messageIndex - 1; i >= 0; i--) {
+        final conciergeSignType = chat.ConciergeMessageType.fromJson(
+          chat.CiergeSignDocumentRequest.conciergeTypeName,
+        );
+        // Messages are reverse-chronological (index 0 = newest).
+        // The status reply (newer) is at a lower index than this sign request.
+        // Search forward from 0 so we find the status before hitting any
+        // ConciergeMessage echo of this same sign request at messageIndex-1.
+        for (var i = 0; i < widget.messageIndex; i++) {
           final msg = msgs[i];
+          // A different, newer sign request — its status is not ours; stop.
           if (_SignDocumentRequestChatItem.matchPlainMessage(msg) != null) {
-            return null;
+            break;
           }
           if (msg is chat.ConciergeMessage &&
-              msg.conciergeType ==
-                  chat.ConciergeMessageType.fromJson(
-                    chat.CiergeSignDocumentRequest.conciergeTypeName,
-                  )) {
-            return null;
+              msg.conciergeType == conciergeSignType) {
+            break;
           }
           final parsed = _SignDocumentRequestChatItem.parseStatusMessage(msg);
           if (parsed != null) return parsed;
@@ -97,9 +104,16 @@ class _SignDocumentRequestChatItemState
       color = widget.statusColor ?? Colors.white54;
       icon = widget.statusIcon ?? Icons.info_outline;
     } else if (statusData != null) {
-      label = 'Awaiting approval';
-      color = Colors.amber;
-      icon = Icons.hourglass_top;
+      final status = statusData['status'] as String?;
+      if (status == 'error') {
+        label = 'Signing failed';
+        color = Colors.redAccent;
+        icon = Icons.error_outline;
+      } else {
+        label = 'Awaiting approval';
+        color = Colors.amber;
+        icon = Icons.hourglass_top;
+      }
     } else {
       (label, color, icon) = switch (widget.status) {
         chat.ChatItemStatus.confirmed => (

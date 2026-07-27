@@ -22,10 +22,12 @@ import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:ssi/ssi.dart' show DataIntegrityEddsaJcsVerifier;
 import 'package:video_player/video_player.dart';
 
@@ -113,6 +115,7 @@ part 'chat_items/concierge_vrc_chat_item.dart';
 part 'chat_items/plain_text_chat_item.dart';
 part 'chat_items/sign_document_request_chat_item.dart';
 part 'chat_items/signed_document_chat_item.dart';
+part 'chat_items/sign_document_review_chat_item.dart';
 part 'chat_items/step_up_approve_request_chat_item.dart';
 part 'chat_items/reaction_picker_chat_item.dart';
 part 'chat_items/suggestion_action_chat_item.dart';
