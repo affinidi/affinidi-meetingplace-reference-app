@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service_state.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
@@ -103,7 +104,7 @@ void main() {
       controller().ring('did:a');
       expect(currentState()['did:a'], CallRingState.ringing);
 
-      async.elapse(const Duration(seconds: 30));
+      async.elapse(container.read(environmentProvider).callRingTimeout);
 
       expect(currentState()['did:a'], CallRingState.timedOut);
     });
@@ -117,7 +118,7 @@ void main() {
       expect(currentState().containsKey('did:a'), isFalse);
 
       // Timer was cancelled: no timedOut transition after the timeout window.
-      async.elapse(const Duration(seconds: 30));
+      async.elapse(container.read(environmentProvider).callRingTimeout);
       expect(currentState().containsKey('did:a'), isFalse);
     });
   });

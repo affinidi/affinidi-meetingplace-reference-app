@@ -1,4 +1,7 @@
 import 'package:flutter/painting.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'call_participant.freezed.dart';
 
 /// Whether a call participant is currently connected to the call.
 enum CallParticipantConnection { connected, notConnected }
@@ -12,54 +15,18 @@ enum CallRingState { idle, ringing, timedOut }
 /// Presentational view-model for a single participant in a group call.
 ///
 /// UI-only; has no SDK or group-call session dependencies.
-class CallParticipant {
-  const CallParticipant({
-    required this.id,
-    required this.firstName,
-    this.avatar,
-    required this.connection,
-    this.ringState = CallRingState.idle,
-  });
+@Freezed(fromJson: false, toJson: false)
+abstract class CallParticipant with _$CallParticipant {
+  const factory CallParticipant({
+    required String id,
+    required String firstName,
 
-  final String id;
-  final String firstName;
-
-  /// Optional avatar image; when null the sheet shows the person placeholder.
-  final ImageProvider? avatar;
-
-  final CallParticipantConnection connection;
-
-  /// Ringing state; only meaningful when [connection] is
-  /// [CallParticipantConnection.notConnected].
-  final CallRingState ringState;
-
-  CallParticipant copyWith({
-    String? id,
-    String? firstName,
+    /// Optional avatar image; when null the sheet shows the person placeholder.
     ImageProvider? avatar,
-    CallParticipantConnection? connection,
-    CallRingState? ringState,
-  }) {
-    return CallParticipant(
-      id: id ?? this.id,
-      firstName: firstName ?? this.firstName,
-      avatar: avatar ?? this.avatar,
-      connection: connection ?? this.connection,
-      ringState: ringState ?? this.ringState,
-    );
-  }
+    required CallParticipantConnection connection,
 
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) return false;
-    return other is CallParticipant &&
-        other.id == id &&
-        other.firstName == firstName &&
-        other.avatar == avatar &&
-        other.connection == connection &&
-        other.ringState == ringState;
-  }
-
-  @override
-  int get hashCode => Object.hash(id, firstName, avatar, connection, ringState);
+    /// Ringing state; only meaningful when [connection] is
+    /// [CallParticipantConnection.notConnected].
+    @Default(CallRingState.idle) CallRingState ringState,
+  }) = _CallParticipant;
 }

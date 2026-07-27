@@ -4,16 +4,13 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../../application/services/contacts_service/contacts_service.dart';
+import '../../../../../infrastructure/configuration/environment.dart';
 import '../../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../audio_video_call_screen_controller.dart';
 import 'call_participant.dart';
 
 part 'call_participants_ring_controller.g.dart';
-
-/// How long a re-ring stays in the ringing state before timing out back to the
-/// idle (bell) state so the user can ring again.
-const _ringTimeout = Duration(seconds: 30);
 
 /// Tracks the per-member re-ring state for a group call's participant list,
 /// keyed by the member's DID.
@@ -46,7 +43,8 @@ class CallParticipantsRingController extends _$CallParticipantsRingController {
   void ring(String memberDid) {
     _timers.remove(memberDid)?.cancel();
     state = {...state, memberDid: CallRingState.ringing};
-    _timers[memberDid] = Timer(_ringTimeout, () {
+    final timeout = ref.read(environmentProvider).callRingTimeout;
+    _timers[memberDid] = Timer(timeout, () {
       _timers.remove(memberDid);
       if (state[memberDid] == CallRingState.ringing) {
         state = {...state, memberDid: CallRingState.timedOut};
