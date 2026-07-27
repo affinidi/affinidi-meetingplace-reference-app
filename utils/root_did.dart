@@ -4,9 +4,10 @@
 //   dart run utils/root_did.dart
 //
 // Output:
-//   mnemonic: <24 words>
-//   sha256:   <hex>
-//   root_did: <did:key:...>
+//   mnemonic:         <24 words>
+//   sha256:           <hex>
+//   root_did:         <did:key:...>   (BIP32Wallet)
+//   root_did_ed25519: <did:key:...>   (BIP32Ed25519Wallet)
 //   wrote mnemonic_qr.png
 
 import 'dart:convert';
@@ -39,11 +40,22 @@ Future<void> main() async {
   await didManager.addVerificationMethod(_rootKeyId);
   final didDoc = await didManager.getDidDocument();
 
+  final ed25519Wallet = Bip32Ed25519Wallet.fromSeed(seed);
+  await ed25519Wallet.generateKey(keyId: _rootKeyId);
+
+  final ed25519DidManager = DidKeyManager(
+    store: InMemoryDidStore(),
+    wallet: ed25519Wallet,
+  );
+  await ed25519DidManager.addVerificationMethod(_rootKeyId);
+  final ed25519DidDoc = await ed25519DidManager.getDidDocument();
+
   final hash = sha256.convert(utf8.encode(sentence)).toString();
 
-  stdout.writeln('mnemonic: $sentence');
-  stdout.writeln('sha256:   $hash');
-  stdout.writeln('root_did: ${didDoc.id}');
+  stdout.writeln('mnemonic:          $sentence');
+  stdout.writeln('sha256:            $hash');
+  stdout.writeln('root_did:          ${didDoc.id}');
+  stdout.writeln('root_did_ed25519:  ${ed25519DidDoc.id}');
   stdout.writeln('');
   stdout.writeln('For development environment, set WALLET_CONFIG to:');
   stdout.writeln(
