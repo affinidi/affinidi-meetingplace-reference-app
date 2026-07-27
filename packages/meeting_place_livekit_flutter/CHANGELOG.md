@@ -1,3 +1,7 @@
+## 0.0.1-dev.4
+
+ - **FIX**: clear stuck incoming call banner and ringing state after app background (#264).
+
 ## 0.0.1-dev.3
 
  - **FEAT**: group video call (#259).

@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-07-27
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`meeting_place_livekit_flutter` - `v0.0.1-dev.4`](#meeting_place_livekit_flutter---v001-dev4)
+
+---
+
+#### `meeting_place_livekit_flutter` - `v0.0.1-dev.4`
+
+ - **FIX**: clear stuck incoming call banner and ringing state after app background (#264).
+
+
 ## 2026-07-22
 
 ### Changes
