@@ -124,17 +124,31 @@ class PersonalAgentScreen extends ConsumerWidget {
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: Text(l10n.personalAgentCancelConnectionTitle(label)),
-          content: Text(l10n.personalAgentCancelConnectionContent(agentLabel)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(l10n.personalAgentKeepConnection),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(l10n.personalAgentCancelConnection),
-            ),
-          ],
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(l10n.personalAgentCancelConnectionContent(agentLabel)),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(false),
+                      child: Text(l10n.generalCancel),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(true),
+                      child: const Text('Disconnect'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       );
 
@@ -243,6 +257,9 @@ class PersonalAgentScreen extends ConsumerWidget {
                   onUploadWork: connectWorkOneDrive,
                   onUploadPersonal: () =>
                       uploadRoutingContext(AgentContext.personal),
+                  onResetWork: () => cancelRoutingContext(AgentContext.work),
+                  onResetPersonal: () =>
+                      cancelRoutingContext(AgentContext.personal),
                 ),
                 if (ui.showWorkAuthorization ||
                     ui.showPersonalAuthorization) ...[
@@ -746,6 +763,8 @@ class _AgentContextSetupCard extends StatelessWidget {
     required this.uploadError,
     required this.onUploadWork,
     required this.onUploadPersonal,
+    required this.onResetWork,
+    required this.onResetPersonal,
   });
 
   final bool workContextUploaded;
@@ -758,6 +777,8 @@ class _AgentContextSetupCard extends StatelessWidget {
   final String? uploadError;
   final VoidCallback onUploadWork;
   final VoidCallback onUploadPersonal;
+  final VoidCallback onResetWork;
+  final VoidCallback onResetPersonal;
 
   @override
   Widget build(BuildContext context) {
@@ -784,6 +805,7 @@ class _AgentContextSetupCard extends StatelessWidget {
       required IconData icon,
       required bool isLocked,
       required VoidCallback onPressed,
+      VoidCallback? onReset,
     }) {
       final disabled = isUploading || isConnecting || isLocked;
       final accentColor = isLocked
@@ -844,11 +866,34 @@ class _AgentContextSetupCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 10),
-                Icon(
-                  isLocked ? Icons.lock_outline : Icons.arrow_forward_rounded,
-                  color: colorScheme.onSurface.withValues(
-                    alpha: disabled ? 0.35 : 0.78,
-                  ),
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: isLocked && onReset != null
+                      ? IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          tooltip: l10n.personalAgentCancelConnection,
+                          onPressed: (isUploading || isConnecting)
+                              ? null
+                              : onReset,
+                          icon: Icon(
+                            Icons.restart_alt_rounded,
+                            color: colorScheme.onSurface.withValues(
+                              alpha: (isUploading || isConnecting)
+                                  ? 0.35
+                                  : 0.78,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          isLocked
+                              ? Icons.lock_outline
+                              : Icons.arrow_forward_rounded,
+                          color: colorScheme.onSurface.withValues(
+                            alpha: disabled ? 0.35 : 0.78,
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -919,6 +964,7 @@ class _AgentContextSetupCard extends StatelessWidget {
             icon: Icons.cloud_sync_outlined,
             isLocked: workContextUploaded,
             onPressed: onUploadWork,
+            onReset: onResetWork,
           ),
           const SizedBox(height: 10),
           buildContextTile(
@@ -927,6 +973,7 @@ class _AgentContextSetupCard extends StatelessWidget {
             icon: Icons.upload_file_outlined,
             isLocked: personalContextUploaded,
             onPressed: onUploadPersonal,
+            onReset: onResetPersonal,
           ),
         ],
       ),

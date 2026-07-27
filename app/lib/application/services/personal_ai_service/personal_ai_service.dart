@@ -10,6 +10,7 @@ import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
+import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/secure_storage/secure_storage.dart';
 import '../connections_service/connections_service.dart';
@@ -30,8 +31,10 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     WidgetsBinding.instance.addObserver(_lifecycleObserver);
     unawaited(_restoreSessionAfterRestart());
   }
+  static const _logKey = 'PAISVC';
 
   final Ref _ref;
+  late final _logger = _ref.read(appLoggerProvider);
   late final _lifecycleObserver = _PersonalAiLifecycleObserver(
     onResumed: _handleAppResumed,
   );
@@ -379,6 +382,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     Duration pollEvery = const Duration(seconds: 1),
   }) async {
     PersonalAgentSetupResult? latest;
+    // Poll setup status while ControlPlaneService continuously advances the
+    // pending OfferFinalised event (so channel inauguration is sent) instead of
+    // waiting for a push notification or app resume/restart.
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         latest = await _sdk.ensurePersonalAgentSetup(
@@ -387,6 +393,16 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
             contextName: contextName,
             agentDisplayName: agentDisplayName,
           ),
+        );
+
+        _logger.info(
+          'Personal AI setup poll '
+          '(attempt=$attempt/$maxAttempts, '
+          'setupId=${latest.setupId?.trim() ?? '-'}, '
+          'status=${latest.setupStatus ?? '-'}, '
+          'mpxConnectionCreated=${latest.mpxConnectionCreated}, '
+          'availableInContacts=${latest.availableInContacts})',
+          name: _logKey,
         );
 
         if (_isConnectionReady(latest)) {
@@ -403,9 +419,15 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
       await Future<void>.delayed(pollEvery);
     }
+    // });
 
-    if (latest != null) {
-      _updateSetupResult(latest, contextName: contextName);
+    if (state.isReady) {
+      return latest;
+    }
+
+    final result = latest;
+    if (result != null) {
+      _updateSetupResult(result, contextName: contextName);
     }
     return latest;
   }
@@ -448,6 +470,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         return;
       }
 
+      var anyConnected = false;
       for (final contextName in const ['work-ai', 'personal-ai']) {
         try {
           final contextResult = await _sdk.ensurePersonalAgentSetup(
@@ -456,10 +479,26 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
               contextName: contextName,
             ),
           );
-          _updateSetupResult(contextResult, contextName: contextName);
+          // Only restore a context as set-up when it is actually connected.
+          // After a reinstall the persisted holder DID survives in the
+          // keychain while the local channel/contact store is wiped and the
+          // connector has published a fresh, unaccepted offer. Restoring such
+          // a context would falsely show "Already set up" with no contact and
+          // block re-setup.
+          if (_isConnectionReady(contextResult)) {
+            _updateSetupResult(contextResult, contextName: contextName);
+            anyConnected = true;
+          }
         } catch (_) {
           // Best-effort restore for each configured context.
         }
+      }
+
+      if (!anyConnected) {
+        // No connected context: the persisted session is stale (e.g. after a
+        // reinstall). Leave state not-ready so the setup prompt returns and
+        // the user can re-run setup.
+        return;
       }
 
       state = state.copyWith(
@@ -481,50 +520,16 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     required PersonalAgentSetupResult result,
     required String holderDid,
   }) async {
-    final setupId = result.setupId?.trim();
-    if (setupId == null || setupId.isEmpty) {
+    final initialSetupId = result.setupId?.trim();
+    if (initialSetupId == null || initialSetupId.isEmpty) {
       throw StateError('Personal AI setup did not return a setup id.');
     }
+    var setupId = initialSetupId;
 
     final contextName =
         result.contextId.trim().toLowerCase().startsWith('work-ai')
         ? 'work-ai'
         : 'personal-ai';
-    final offer = await _waitForOffer(
-      setupId: setupId,
-      holderDid: holderDid,
-      contextName: contextName,
-      agentDisplayName: result.profile.displayName,
-    );
-    final mnemonic = offer.mnemonic?.trim();
-    final status = offer.status.trim().toLowerCase();
-    final isAlreadyConnected =
-        status == 'inaugurated' ||
-        status == 'ready' ||
-        (offer.channelDid?.trim().isNotEmpty ?? false) ||
-        (offer.channelId?.trim().isNotEmpty ?? false);
-
-    // Resumed connector sessions may report a ready/inaugurated channel with
-    // no mnemonic. In that case setup is already connected and no accept-offer
-    // roundtrip is required when the channel belongs to this context.
-    if ((mnemonic == null || mnemonic.isEmpty) && isAlreadyConnected) {
-      final canReuseChannel = await _canReuseConnectedOffer(
-        result: result,
-        offer: offer,
-      );
-      if (canReuseChannel) {
-        return offer;
-      }
-      throw StateError(
-        'AI offer reports connected but no channel is available for '
-        '${result.profile.displayName.trim()}.',
-      );
-    }
-
-    if (mnemonic == null || mnemonic.isEmpty) {
-      throw StateError('Personal AI setup did not return an offer mnemonic.');
-    }
-
     final identitiesService = _ref.read(identitiesServiceProvider.notifier);
     await identitiesService.ensureInitialized();
 
@@ -539,25 +544,81 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     }
 
     final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
-    final findResult = await coreSdk.findOffer(mnemonic: mnemonic);
-    if (findResult.errorCode != null) {
+    for (var attempt = 0; attempt < 2; attempt++) {
+      final offer = await _waitForOffer(
+        setupId: setupId,
+        holderDid: holderDid,
+        contextName: contextName,
+        agentDisplayName: result.profile.displayName,
+      );
+      final mnemonic = offer.mnemonic?.trim();
+      final status = offer.status.trim().toLowerCase();
+      final isAlreadyConnected =
+          status == 'inaugurated' ||
+          status == 'ready' ||
+          (offer.channelDid?.trim().isNotEmpty ?? false) ||
+          (offer.channelId?.trim().isNotEmpty ?? false);
+
+      // Resumed connector sessions may report a ready/inaugurated channel with
+      // no mnemonic. In that case setup is already connected and no accept-offer
+      // roundtrip is required when the channel belongs to this context.
+      if ((mnemonic == null || mnemonic.isEmpty) && isAlreadyConnected) {
+        final canReuseChannel = await _canReuseConnectedOffer(
+          result: result,
+          offer: offer,
+        );
+        if (canReuseChannel) {
+          return offer;
+        }
+        throw StateError(
+          'AI offer reports connected but no channel is available for '
+          '${result.profile.displayName.trim()}.',
+        );
+      }
+
+      if (mnemonic == null || mnemonic.isEmpty) {
+        throw StateError('Personal AI setup did not return an offer mnemonic.');
+      }
+
+      final findResult = await coreSdk.findOffer(mnemonic: mnemonic);
+      if (findResult.errorCode == null && findResult.connectionOffer != null) {
+        final connectionsService = _ref.read(
+          connectionsServiceProvider.notifier,
+        );
+        await connectionsService.acceptOffer(
+          findResult.connectionOffer!,
+          identity: identity,
+        );
+
+        // After accepting, wait for the connector to process inauguration and
+        // write channel_did to the offer file. _waitForOffer would return
+        // immediately (mnemonic still present), leaving channel_did null and
+        // causing the contact name to never be set.
+        return await _waitForOfferChannelDid(setupId: setupId);
+      }
+
+      if (attempt == 0) {
+        final refreshed = await _sdk.ensurePersonalAgentSetup(
+          request: PersonalAgentSetupRequest(
+            holderDid: holderDid,
+            contextName: contextName,
+            agentDisplayName: result.profile.displayName,
+          ),
+        );
+        _updateSetupResult(refreshed, contextName: contextName);
+        final refreshedSetupId = refreshed.setupId?.trim();
+        if (refreshedSetupId != null && refreshedSetupId.isNotEmpty) {
+          setupId = refreshedSetupId;
+          continue;
+        }
+      }
+
       throw StateError(
         'Unable to find Personal AI offer: ${findResult.errorCode}',
       );
     }
-    final foundOffer = findResult.connectionOffer;
-    if (foundOffer == null) {
-      throw StateError('Unable to resolve Personal AI offer from mnemonic.');
-    }
 
-    final connectionsService = _ref.read(connectionsServiceProvider.notifier);
-    await connectionsService.acceptOffer(foundOffer, identity: identity);
-
-    // After accepting, wait for the connector to process inauguration and
-    // write channel_did to the offer file. _waitForOffer would return
-    // immediately (mnemonic still present), leaving channel_did null and
-    // causing the contact name to never be set.
-    return await _waitForOfferChannelDid(setupId: setupId);
+    throw StateError('Unable to resolve Personal AI offer from mnemonic.');
   }
 
   /// Polls the offer until [PersonalAgentOfferResult.channelDid] is populated.
