@@ -19,6 +19,23 @@ Finder findSendButton() => find.byKey(const Key('chat_send_button'));
 Finder findAddMediaButton() => find.byKey(const Key('chat_add_media_button'));
 Finder findGifButton() => find.byKey(const Key('chat_gif_button'));
 
+const groupMentionCapabilities = TransportCapabilities({
+  ChatFeature.textMessaging,
+  ChatFeature.mentions,
+  ChatFeature.imageAttachments,
+  ChatFeature.videoAttachments,
+  ChatFeature.documentAttachments,
+  ChatFeature.voiceMessages,
+  ChatFeature.reactions,
+  ChatFeature.typingIndicators,
+  ChatFeature.deliveryReceipts,
+  ChatFeature.messageEdit,
+  ChatFeature.messageDelete,
+  ChatFeature.effects,
+  ChatFeature.contactDetailsUpdate,
+  ChatFeature.suggestionRequests,
+});
+
 Future<void> enterChatMessage(WidgetTester tester, String message) async {
   await tester.enterText(findChatMessageInput(), message);
   await tester.pumpAndSettle();
@@ -26,6 +43,11 @@ Future<void> enterChatMessage(WidgetTester tester, String message) async {
 
 Future<void> tapSendButton(WidgetTester tester) async {
   await tester.tap(findSendButton());
+}
+
+Future<void> pumpMentionDebounce(WidgetTester tester) async {
+  await tester.pump(const Duration(milliseconds: 900));
+  await tester.pumpAndSettle();
 }
 
 Future<void> simulateIncomingMessage(
@@ -303,6 +325,105 @@ void main() {
         final inputField = findChatMessageInput();
         final textField = tester.widget<TextFormField>(inputField);
         expect(textField.controller?.text, isEmpty);
+      });
+
+      testWidgets('it suggests members and forwards mentions', (tester) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bo');
+        await pumpMentionDebounce(tester);
+
+        expect(
+          find.byKey(const Key('chat_mention_suggestions')),
+          findsOneWidget,
+        );
+        expect(find.text('@Bob'), findsOneWidget);
+
+        await tester.tap(find.text('@Bob'));
+        await tester.pumpAndSettle();
+
+        final inputField = findChatMessageInput();
+        final textField = tester.widget<TextFormField>(inputField);
+        expect(textField.controller?.text, 'Hello @Bob');
+
+        await tapSendButton(tester);
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
+        expect(sendCall['text'], 'Hello @Bob');
+        expect(sendCall['mentions'], isA<List<ChatMention>>());
+        final mentions = sendCall['mentions'] as List<ChatMention>;
+        expect(mentions, hasLength(1));
+        expect(mentions.first.target, FakeGroups.removableMemberDid);
+        expect(mentions.first.start, 6);
+        expect(mentions.first.length, '@Bob'.length);
+        expect(mentions.first.display, '@Bob');
+      });
+
+      testWidgets('it supports mentions in the edit dialog', (tester) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+        final l10n = await getL10n();
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        chatSdk.simulateSentTextMessage(text: 'Hello team');
+        await tester.pumpAndSettle();
+
+        await tester.longPress(find.text('Hello team'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(l10n.chatMessageActionEdit));
+        await tester.pumpAndSettle();
+
+        final dialogFinder = find.byType(AlertDialog);
+        final dialogTextField = find.descendant(
+          of: dialogFinder,
+          matching: find.byType(TextField),
+        );
+
+        await tester.enterText(dialogTextField, 'Hello @Car');
+        await pumpMentionDebounce(tester);
+
+        expect(
+          find.byKey(const Key('chat_mention_suggestions')),
+          findsOneWidget,
+        );
+        expect(find.text('@Carol'), findsOneWidget);
+
+        await tester.tap(find.text('@Carol'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text(l10n.chatMessageEditSave));
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.editTextMessageCalls, hasLength(1));
+        final editCall = chatSdk.editTextMessageCalls.first;
+        expect(editCall['newText'], 'Hello @Carol');
+        expect(editCall['mentions'], isA<List<ChatMention>>());
+        final mentions = editCall['mentions'] as List<ChatMention>;
+        expect(mentions, hasLength(1));
+        expect(mentions.first.target, FakeGroups.adminMemberDid);
+        expect(mentions.first.start, 6);
+        expect(mentions.first.length, '@Carol'.length);
+        expect(mentions.first.display, '@Carol');
       });
     });
 

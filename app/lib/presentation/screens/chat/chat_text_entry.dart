@@ -92,7 +92,22 @@ class _ChatTextEntry extends HookConsumerWidget {
     final shouldDisable = ref.watch(provider.shouldDisable);
     final supportsMedia = ref.watch(provider.supportsMedia);
     final supportsVoiceMessages = ref.watch(provider.supportsVoiceMessages);
+    final supportsMentions = ref.watch(provider.supportsMentions);
+    final mentionCandidates = ref.watch(provider.mentionCandidates);
     final focusNode = useFocusNode();
+    final mentionDraft = useMemoized(
+      () => _ChatMentionDraftController(
+        textController: controller.messageTextController,
+      ),
+      [controller.messageTextController],
+    );
+    useEffect(() {
+      mentionDraft.setEnabled(supportsMentions && isGroupChat);
+      mentionDraft.setCandidates(mentionCandidates);
+      return null;
+    }, [supportsMentions, isGroupChat, mentionCandidates, mentionDraft]);
+    useEffect(() => mentionDraft.dispose, [mentionDraft]);
+    useListenable(mentionDraft);
     final inputDecoration = context.chatInputDecoration;
     final messageTextValue = useValueListenable(
       controller.messageTextController,
@@ -112,9 +127,9 @@ class _ChatTextEntry extends HookConsumerWidget {
       controller.sendChatActivity();
     }
 
-    void sendMessage() {
+    Future<void> sendMessage() async {
       if (!context.mounted) return;
-      controller.sendMessage();
+      await controller.sendMessage(mentions: mentionDraft.mentions);
       showKeyboard();
     }
 
@@ -140,6 +155,14 @@ class _ChatTextEntry extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (mentionDraft.shouldShowSuggestions)
+              _ChatMentionSuggestions(
+                suggestions: mentionDraft.suggestions,
+                onSelected: (candidate) {
+                  mentionDraft.selectCandidate(candidate);
+                  showKeyboard();
+                },
+              ),
             _VoiceRecorder(
               controller: controller,
               shouldDisable: shouldDisable,

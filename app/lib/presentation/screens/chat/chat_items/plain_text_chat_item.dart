@@ -129,8 +129,8 @@ class _PlainTextChatItem extends ConsumerWidget {
       builder: (context, constraints) {
         final maxBubbleWidth = constraints.hasBoundedWidth
             ? chatItem.isFromMe
-                ? constraints.maxWidth * _maxTextBubbleWidthFactor
-                : constraints.maxWidth
+                  ? constraints.maxWidth * _maxTextBubbleWidthFactor
+                  : constraints.maxWidth
             : double.infinity;
 
         return GestureDetector(
@@ -332,16 +332,32 @@ class _AttachmentWidget extends HookConsumerWidget {
 }
 
 class _EditMessageDialog extends StatefulWidget {
-  const _EditMessageDialog({required this.initialText});
+  const _EditMessageDialog({
+    required this.initialText,
+    required this.initialMentions,
+    required this.supportsMentions,
+    required this.mentionCandidates,
+  });
 
   final String initialText;
+  final List<chat.ChatMention> initialMentions;
+  final bool supportsMentions;
+  final List<ChatMentionCandidate> mentionCandidates;
 
-  static Future<String?> show(
+  static Future<_EditMessageResult?> show(
     BuildContext context, {
     required String initialText,
-  }) => showDialog<String>(
+    required List<chat.ChatMention> initialMentions,
+    required bool supportsMentions,
+    required List<ChatMentionCandidate> mentionCandidates,
+  }) => showDialog<_EditMessageResult>(
     context: context,
-    builder: (_) => _EditMessageDialog(initialText: initialText),
+    builder: (_) => _EditMessageDialog(
+      initialText: initialText,
+      initialMentions: initialMentions,
+      supportsMentions: supportsMentions,
+      mentionCandidates: mentionCandidates,
+    ),
   );
 
   @override
@@ -350,15 +366,44 @@ class _EditMessageDialog extends StatefulWidget {
 
 class _EditMessageDialogState extends State<_EditMessageDialog> {
   late final TextEditingController _textController;
+  late final _ChatMentionDraftController _mentionDraft;
 
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController(text: widget.initialText);
+    _textController = TextEditingController(text: widget.initialText)
+      ..selection = TextSelection.collapsed(offset: widget.initialText.length);
+    _mentionDraft =
+        _ChatMentionDraftController(
+            textController: _textController,
+            initialMentions: widget.initialMentions,
+          )
+          ..setEnabled(widget.supportsMentions)
+          ..setCandidates(widget.mentionCandidates)
+          ..addListener(_handleMentionDraftChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant _EditMessageDialog oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.supportsMentions != widget.supportsMentions) {
+      _mentionDraft.setEnabled(widget.supportsMentions);
+    }
+    if (!listEquals(oldWidget.mentionCandidates, widget.mentionCandidates)) {
+      _mentionDraft.setCandidates(widget.mentionCandidates);
+    }
+  }
+
+  void _handleMentionDraftChanged() {
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override
   void dispose() {
+    _mentionDraft
+      ..removeListener(_handleMentionDraftChanged)
+      ..dispose();
     _textController.dispose();
     super.dispose();
   }
@@ -367,11 +412,25 @@ class _EditMessageDialogState extends State<_EditMessageDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(context.l10n.chatMessageActionEdit),
-      content: TextField(
-        controller: _textController,
-        autofocus: true,
-        maxLines: null,
-        decoration: InputDecoration(hintText: context.l10n.chatMessageEditHint),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: _textController,
+            autofocus: true,
+            maxLines: null,
+            decoration: InputDecoration(
+              hintText: context.l10n.chatMessageEditHint,
+            ),
+          ),
+          if (_mentionDraft.shouldShowSuggestions) ...[
+            const SizedBox(height: 12),
+            _ChatMentionSuggestions(
+              suggestions: _mentionDraft.suggestions,
+              onSelected: _mentionDraft.selectCandidate,
+            ),
+          ],
+        ],
       ),
       actions: [
         TextButton(
@@ -381,15 +440,27 @@ class _EditMessageDialogState extends State<_EditMessageDialog> {
         TextButton(
           onPressed: () {
             final value = _textController.text.trim();
-            if (value.isEmpty || value == widget.initialText) {
+            final mentions = _mentionDraft.mentionsForText(value);
+            if (value.isEmpty ||
+                (value == widget.initialText &&
+                    listEquals(mentions, widget.initialMentions))) {
               Navigator.of(context).pop();
               return;
             }
-            Navigator.of(context).pop(value);
+            Navigator.of(
+              context,
+            ).pop(_EditMessageResult(text: value, mentions: mentions));
           },
           child: Text(context.l10n.chatMessageEditSave),
         ),
       ],
     );
   }
+}
+
+class _EditMessageResult {
+  const _EditMessageResult({required this.text, required this.mentions});
+
+  final String text;
+  final List<chat.ChatMention> mentions;
 }
