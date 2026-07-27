@@ -4,6 +4,14 @@ import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 
+String chatMentionDisplayNameForMember(sdk.GroupMember member) {
+  final firstName = member.contactCard.firstName.trim();
+  final fullName = member.contactCard.fullName.trim();
+  if (firstName.isNotEmpty) return firstName;
+  if (fullName.isNotEmpty) return fullName;
+  return member.did;
+}
+
 class ChatMentionCandidate {
   const ChatMentionCandidate({
     required this.target,
@@ -18,13 +26,8 @@ class ChatMentionCandidate {
     sdk.GroupMember member, {
     required BaseCacheManager cacheManager,
   }) {
-    final firstName = member.contactCard.firstName.trim();
     final fullName = member.contactCard.fullName.trim();
-    final baseLabel = firstName.isNotEmpty
-        ? firstName
-        : fullName.isNotEmpty
-        ? fullName
-        : member.did;
+    final baseLabel = chatMentionDisplayNameForMember(member);
     return ChatMentionCandidate(
       target: member.did,
       label: '@$baseLabel',

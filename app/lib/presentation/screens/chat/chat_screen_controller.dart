@@ -44,6 +44,7 @@ import '../../effects/screen_effect.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
 import 'chat_mention_candidate.dart';
+import 'chat_mention_text_spans.dart';
 import 'chat_screen_state.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp_handler.dart';
@@ -88,7 +89,7 @@ class ChatScreenController extends _$ChatScreenController
   static final _maxChatMessageLength = MaxLengthValidatorType.extraLong.value;
   static const _suggestionRequestTimeout = Duration(seconds: 12);
 
-  late final messageTextController = TextEditingController();
+  late final messageTextController = ChatMentionHighlightingTextController();
   late final _logger = ref.read(appLoggerProvider);
   late final _zkpHandler = ChatZkpHandler(
     ref: ref,

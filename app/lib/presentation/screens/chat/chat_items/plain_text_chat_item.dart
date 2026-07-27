@@ -30,6 +30,7 @@ class _PlainTextChatItem extends ConsumerWidget {
                 as chat.Message,
       ),
     );
+    final group = ref.watch(provider.select((state) => state.group));
 
     void selectReaction() {
       if (!context.mounted) return;
@@ -124,6 +125,11 @@ class _PlainTextChatItem extends ConsumerWidget {
               a.format != 'cierge/trust-task',
         )
         .toList(growable: false);
+    final mentionDisplayNames = <String, String>{
+      if (group != null)
+        for (final member in group.members)
+          member.did: '@${chatMentionDisplayNameForMember(member)}',
+    };
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -161,6 +167,8 @@ class _PlainTextChatItem extends ConsumerWidget {
                       ),
                       child: _TextMessage(
                         text: chatItem.value,
+                        mentions: chatItem.mentions,
+                        mentionDisplayNames: mentionDisplayNames,
                         shouldScaleEmojis: shouldScaleEmojis,
                         isEdited: chatItem.editedAt != null,
                       ),
@@ -186,16 +194,74 @@ class _PlainTextChatItem extends ConsumerWidget {
 class _TextMessage extends StatelessWidget {
   const _TextMessage({
     required this._text,
+    required this._mentions,
+    required this._mentionDisplayNames,
     required this._shouldScaleEmojis,
     required this._isEdited,
   });
 
   final String _text;
+  final List<chat.ChatMention> _mentions;
+  final Map<String, String> _mentionDisplayNames;
   final bool _shouldScaleEmojis;
   final bool _isEdited;
 
+  List<chat.ChatMention> get _effectiveMentions {
+    if (_mentions.isNotEmpty ||
+        _mentionDisplayNames.isEmpty ||
+        !_text.contains('@')) {
+      return _mentions;
+    }
+
+    final derivedMentions = <chat.ChatMention>[];
+    final occupiedRanges = <String>{};
+
+    for (final entry in _mentionDisplayNames.entries) {
+      void addMatches(String needle) {
+        if (needle.isEmpty) return;
+
+        var searchStart = 0;
+        while (searchStart < _text.length) {
+          final matchStart = _text.indexOf(needle, searchStart);
+          if (matchStart < 0) return;
+
+          final matchEnd = matchStart + needle.length;
+          final rangeKey = '$matchStart:$matchEnd';
+          if (occupiedRanges.add(rangeKey)) {
+            derivedMentions.add(
+              chat.ChatMention(
+                target: entry.key,
+                start: matchStart,
+                length: needle.length,
+                display: entry.value,
+              ),
+            );
+          }
+
+          searchStart = matchEnd;
+        }
+      }
+
+      addMatches(entry.key);
+      addMatches(entry.value);
+    }
+
+    derivedMentions.sort((a, b) => a.start.compareTo(b.start));
+    return derivedMentions;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final textStyle = TextStyle(
+      color: Colors.white,
+      fontSize: _shouldScaleEmojis ? 42.0 : 14.0,
+      fontWeight: FontWeight.bold,
+    );
+    final mentionStyle = textStyle.copyWith(
+      color: context.customColors.mention,
+      fontWeight: FontWeight.w800,
+    );
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
       child: Container(
@@ -204,14 +270,20 @@ class _TextMessage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              _text,
-              textAlign: _text.length < 6 ? TextAlign.center : TextAlign.start,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: _shouldScaleEmojis ? 42.0 : 14.0,
-                fontWeight: FontWeight.bold,
+            Text.rich(
+              buildMentionTextSpan(
+                text: _text,
+                mentions: _effectiveMentions,
+                style: textStyle,
+                mentionStyle: mentionStyle,
+                withComposing: false,
+                composing: TextRange.empty,
+                mentionTextBuilder: (mention, rawText) =>
+                    _mentionDisplayNames[mention.target] ??
+                    mention.display ??
+                    rawText,
               ),
+              textAlign: _text.length < 6 ? TextAlign.center : TextAlign.start,
             ),
             if (_isEdited)
               Text(
@@ -365,14 +437,15 @@ class _EditMessageDialog extends StatefulWidget {
 }
 
 class _EditMessageDialogState extends State<_EditMessageDialog> {
-  late final TextEditingController _textController;
+  late final ChatMentionHighlightingTextController _textController;
   late final _ChatMentionDraftController _mentionDraft;
 
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController(text: widget.initialText)
-      ..selection = TextSelection.collapsed(offset: widget.initialText.length);
+    _textController = ChatMentionHighlightingTextController(
+      text: widget.initialText,
+    )..selection = TextSelection.collapsed(offset: widget.initialText.length);
     _mentionDraft =
         _ChatMentionDraftController(
             textController: _textController,
@@ -381,6 +454,7 @@ class _EditMessageDialogState extends State<_EditMessageDialog> {
           ..setEnabled(widget.supportsMentions)
           ..setCandidates(widget.mentionCandidates)
           ..addListener(_handleMentionDraftChanged);
+    _textController.setMentionsResolver(_mentionDraft.mentionsForText);
   }
 
   @override
@@ -395,6 +469,7 @@ class _EditMessageDialogState extends State<_EditMessageDialog> {
   }
 
   void _handleMentionDraftChanged() {
+    _textController.setMentionsResolver(_mentionDraft.mentionsForText);
     if (!mounted) return;
     setState(() {});
   }
@@ -410,6 +485,13 @@ class _EditMessageDialogState extends State<_EditMessageDialog> {
 
   @override
   Widget build(BuildContext context) {
+    _textController.setMentionStyle(
+      DefaultTextStyle.of(context).style.copyWith(
+        color: context.customColors.mention,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+
     return AlertDialog(
       title: Text(context.l10n.chatMessageActionEdit),
       content: Column(

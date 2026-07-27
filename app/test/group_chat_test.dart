@@ -21,6 +21,16 @@ Finder findSendButton() => find.byKey(const Key('chat_send_button'));
 Finder findAddMediaButton() => find.byKey(const Key('chat_add_media_button'));
 Finder findGifButton() => find.byKey(const Key('chat_gif_button'));
 
+List<TextSpan> flattenTextSpans(TextSpan span) {
+  final flattened = <TextSpan>[];
+  for (final child in span.children ?? const <InlineSpan>[]) {
+    if (child is! TextSpan) continue;
+    flattened.add(child);
+    flattened.addAll(flattenTextSpans(child));
+  }
+  return flattened;
+}
+
 const groupMentionCapabilities = TransportCapabilities({
   ChatFeature.textMessaging,
   ChatFeature.mentions,
@@ -477,7 +487,7 @@ void main() {
 
         await enterChatMessage(tester, 'Hello @Bo');
         await pumpMentionDebounce(tester);
-        await tester.tap(find.text('@Bob'));
+        await tester.tap(find.text('Bob'));
         await tester.pumpAndSettle();
 
         final inputField = findChatMessageInput();
@@ -523,7 +533,7 @@ void main() {
 
         await enterChatMessage(tester, 'Hello @Bo');
         await pumpMentionDebounce(tester);
-        await tester.tap(find.text('@Bob'));
+        await tester.tap(find.text('Bob'));
         await tester.pumpAndSettle();
 
         final inputField = findChatMessageInput();
@@ -548,6 +558,76 @@ void main() {
         expect(sendCall['text'], 'Hello');
         expect(sendCall['mentions'], isA<List<ChatMention>>());
         expect(sendCall['mentions'], isEmpty);
+      });
+
+      testWidgets('it highlights mentions in the text input', (tester) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bo');
+        await pumpMentionDebounce(tester);
+        await tester.tap(find.text('Bob'));
+        await tester.pumpAndSettle();
+
+        final inputField = findChatMessageInput();
+        final textField = tester.widget<TextFormField>(inputField);
+        final editableText = find.descendant(
+          of: inputField,
+          matching: find.byType(EditableText),
+        );
+        final editableTextWidget = tester.widget<EditableText>(editableText);
+        final textSpan = textField.controller!.buildTextSpan(
+          context: tester.element(editableText),
+          style: editableTextWidget.style,
+          withComposing: false,
+        );
+        final mentionSpan = flattenTextSpans(
+          textSpan,
+        ).firstWhere((span) => span.text == '@Bob');
+
+        expect(mentionSpan.style?.color, isNot(editableTextWidget.style.color));
+        expect(mentionSpan.style?.backgroundColor, isNotNull);
+      });
+
+      testWidgets('it highlights mentions in chat bubbles', (tester) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        chatSdk.simulateSentTextMessage(
+          text: 'Hello ${FakeGroups.removableMemberDid}',
+          mentions: const [],
+        );
+        await tester.pumpAndSettle();
+
+        final bubbleText = find.byWidgetPredicate(
+          (widget) =>
+              widget is RichText && widget.text.toPlainText() == 'Hello @Bob',
+        );
+        final richText = tester.widget<RichText>(bubbleText.first);
+        final mentionSpan = flattenTextSpans(
+          richText.text as TextSpan,
+        ).firstWhere((span) => span.text == '@Bob');
+
+        expect(mentionSpan.style?.color, isNot(Colors.white));
+        expect(mentionSpan.style?.backgroundColor, isNotNull);
       });
 
       testWidgets('it supports mentions in the edit dialog', (tester) async {
@@ -586,9 +666,9 @@ void main() {
           find.byKey(const Key('chat_mention_suggestions')),
           findsOneWidget,
         );
-        expect(find.text('@Carol'), findsOneWidget);
+        expect(find.text('Carol'), findsOneWidget);
 
-        await tester.tap(find.text('@Carol'));
+        await tester.tap(find.text('Carol'));
         await tester.pumpAndSettle();
 
         expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);

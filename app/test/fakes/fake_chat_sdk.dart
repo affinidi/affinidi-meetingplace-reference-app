@@ -88,6 +88,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String text,
     required String recipientDid,
     List<ChatAttachment>? attachments,
+    List<ChatMention> mentions = const [],
     bool isFromMe = false,
     String senderDid = 'fake-sender-did',
   }) {
@@ -119,6 +120,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       isFromMe: isFromMe,
       senderDid: senderDid,
       attachments: normalizedAttachments,
+      mentions: mentions,
     );
 
     final chatEvent = UnhandledChatEvent(
@@ -710,7 +712,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   /// Simulates a sent (own) text message appearing in the stream.
-  void simulateSentTextMessage({required String text}) {
+  void simulateSentTextMessage({
+    required String text,
+    List<ChatMention> mentions = const [],
+  }) {
     final message = Message(
       chatId: 'fake-chat-id',
       messageId: 'msg-sent-${DateTime.now().microsecondsSinceEpoch}',
@@ -720,6 +725,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       isFromMe: true,
       senderDid: 'fake-my-did',
       attachments: [],
+      mentions: mentions,
     );
     final chatEvent = UnhandledChatEvent(
       type: 'https://affinidi.com/chat/1.0/message',

@@ -86,6 +86,7 @@ import 'chat_items/group_deleted_chat_item.dart';
 import 'chat_items/joining_group_chat_item.dart';
 import 'chat_items/leaving_group_chat_item.dart';
 import 'chat_mention_candidate.dart';
+import 'chat_mention_text_spans.dart';
 import 'chat_screen_controller.dart';
 import 'chat_screen_state.dart';
 import 'chat_zkp/chat_zkp_concierge_item.dart';

@@ -149,6 +149,18 @@ class _ChatTextEntry extends HookConsumerWidget {
       overflow: TextOverflow.ellipsis,
       color: context.colorScheme.onSurface,
     );
+    controller.messageTextController
+      ..setMentionsResolver(mentionDraft.mentionsForText)
+      ..setMentionStyle(
+        inputTextStyle?.copyWith(
+              color: context.customColors.mention,
+              fontWeight: FontWeight.w700,
+            ) ??
+            TextStyle(
+              color: context.customColors.mention,
+              fontWeight: FontWeight.w700,
+            ),
+      );
 
     return SafeArea(
       child: Padding(
