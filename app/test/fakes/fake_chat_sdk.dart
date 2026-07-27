@@ -652,6 +652,27 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
       sessionMessages ?? const <ChatItem>[];
 
   @override
+  Future<ChatItem?> getCallChatItemByCallId(String callId) async {
+    if (callId.isEmpty) return null;
+    final items = await messages;
+    Message? outgoing;
+    Message? incoming;
+    for (final message in items.whereType<Message>()) {
+      final matches = message.attachments.any(
+        (a) =>
+            CallMetadata.isCall(a) && CallMetadata.maybeOf(a)?.callId == callId,
+      );
+      if (!matches) continue;
+      if (message.isFromMe) {
+        outgoing = message;
+      } else {
+        incoming = message;
+      }
+    }
+    return outgoing ?? incoming;
+  }
+
+  @override
   Future<Chat> startChatSession() async {
     _chatSessionStartedCalls++;
     if (shouldThrowOnStartSession) {
