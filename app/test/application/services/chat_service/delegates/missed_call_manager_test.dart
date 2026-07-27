@@ -39,7 +39,7 @@ void main() {
       ],
     );
 
-    test('replayPendingMissedCall does nothing when no pending marker is '
+    test('reconcilePendingMissedCall does nothing when no pending marker is '
         'present', () async {
       final contactsService = FakeContactsService();
       final callItemManager = FakeCallChatItemManager();
@@ -51,23 +51,28 @@ void main() {
         onUpsertChatItem: (_) {},
       );
 
-      await manager.replayPendingMissedCall();
+      final healed = await manager.reconcilePendingMissedCall();
 
+      expect(healed, isFalse);
       expect(callItemManager.updateCallCount, 0);
     });
 
-    test('replayPendingMissedCall heals all stale items resolved before the '
-        'persisted marker time', () async {
+    test('reconcilePendingMissedCall heals a stale item resolved before the '
+        'persisted marker time and clears the marker', () async {
       final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
       final contact = FakeContacts.individualContact.copyWith(
         channelDid: channelDid,
         pendingMissedCallAt: markerTime,
+        pendingMissedCallId: 'call-123',
       );
-      final contactsService = FakeContactsService();
+      final contactsService = FakeContactsService(contacts: [contact]);
       final callItemManager = FakeCallChatItemManager(
-        resolveIdsReturn: ['msg-1', 'msg-2'],
+        isStaleReturn: true,
+        resolveReturn: incomingCallMessage(
+          messageId: 'msg-1',
+          dateCreated: markerTime.subtract(const Duration(minutes: 5)),
+        ),
       );
-      contactsService.setContacts([contact]);
 
       final manager = MissedCallManager(
         ref: _createTestRef(contactsService),
@@ -76,75 +81,55 @@ void main() {
         onUpsertChatItem: (_) {},
       );
 
-      await manager.replayPendingMissedCall();
+      final healed = await manager.reconcilePendingMissedCall();
 
-      expect(callItemManager.updateCallCount, 2);
+      expect(healed, isTrue);
+      expect(callItemManager.updateCallCount, 1);
       expect(callItemManager.lastResolveBound, markerTime);
+      expect(callItemManager.lastResolveCallId, 'call-123');
+      expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
+    });
+
+    test('reconcilePendingMissedCall clears an orphaned marker when the item '
+        'is already settled in history', () async {
+      final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+      final contact = FakeContacts.individualContact.copyWith(
+        channelDid: channelDid,
+        pendingMissedCallAt: markerTime,
+        pendingMissedCallId: 'call-123',
+      );
+      final contactsService = FakeContactsService(contacts: [contact]);
+      final callItemManager = FakeCallChatItemManager(
+        isStaleReturn: false,
+        resolveReturn: incomingCallMessage(
+          messageId: 'msg-settled',
+          dateCreated: markerTime.subtract(const Duration(minutes: 5)),
+        ),
+      );
+
+      final manager = MissedCallManager(
+        ref: _createTestRef(contactsService),
+        otherPartyPermanentChannelDid: channelDid,
+        callChatItemManager: callItemManager,
+        onUpsertChatItem: (_) {},
+      );
+
+      final healed = await manager.reconcilePendingMissedCall();
+
+      expect(healed, isFalse);
+      expect(callItemManager.updateCallCount, 0);
+      expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
     });
 
     test(
-      'replayPendingMissedCall leaves the marker intact when it heals during '
-      'the initial replay pass',
-      () async {
-        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
-        final contact = FakeContacts.individualContact.copyWith(
-          channelDid: channelDid,
-          pendingMissedCallAt: markerTime,
-        );
-        final contactsService = FakeContactsService(contacts: [contact]);
-        final callItemManager = FakeCallChatItemManager(
-          resolveIdsReturn: ['msg-missed'],
-        );
-
-        final manager = MissedCallManager(
-          ref: _createTestRef(contactsService),
-          otherPartyPermanentChannelDid: channelDid,
-          callChatItemManager: callItemManager,
-          onUpsertChatItem: (_) {},
-        );
-
-        await manager.replayPendingMissedCall();
-
-        expect(callItemManager.updateCallCount, 1);
-        expect(contactsService.clearPendingMissedCallCalls, isEmpty);
-      },
-    );
-
-    test(
-      'replayPendingMissedCall skips healing while a call is ringing for the '
-      'contact',
-      () async {
-        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
-        final contact = FakeContacts.individualContact.copyWith(
-          channelDid: channelDid,
-          pendingMissedCallAt: markerTime,
-        );
-        final contactsService = FakeContactsService(contacts: [contact]);
-        final callItemManager = FakeCallChatItemManager(
-          resolveIdsReturn: ['msg-ringing'],
-        );
-
-        final manager = MissedCallManager(
-          ref: _createTestRef(contactsService, ringingDid: channelDid),
-          otherPartyPermanentChannelDid: channelDid,
-          callChatItemManager: callItemManager,
-          onUpsertChatItem: (_) {},
-        );
-
-        await manager.replayPendingMissedCall();
-
-        expect(callItemManager.updateCallCount, 0);
-      },
-    );
-
-    test(
-      'replayPendingMissedCall keeps an old marker when the call item has not '
+      'reconcilePendingMissedCall keeps the marker when the call item has not '
       'synced yet',
       () async {
         final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
         final contact = FakeContacts.individualContact.copyWith(
           channelDid: channelDid,
           pendingMissedCallAt: markerTime,
+          pendingMissedCallId: 'call-123',
         );
         final contactsService = FakeContactsService(contacts: [contact]);
         final callItemManager = FakeCallChatItemManager();
@@ -156,10 +141,117 @@ void main() {
           onUpsertChatItem: (_) {},
         );
 
-        await manager.replayPendingMissedCall();
+        final healed = await manager.reconcilePendingMissedCall();
 
+        expect(healed, isFalse);
         expect(callItemManager.updateCallCount, 0);
         expect(contactsService.clearPendingMissedCallCalls, isEmpty);
+      },
+    );
+
+    test('reconcilePendingMissedCall skips healing while a call is ringing for '
+        'the contact', () async {
+      final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+      final contact = FakeContacts.individualContact.copyWith(
+        channelDid: channelDid,
+        pendingMissedCallAt: markerTime,
+        pendingMissedCallId: 'call-123',
+      );
+      final contactsService = FakeContactsService(contacts: [contact]);
+      final callItemManager = FakeCallChatItemManager(
+        isStaleReturn: true,
+        resolveReturn: incomingCallMessage(
+          messageId: 'msg-ringing',
+          dateCreated: markerTime.subtract(const Duration(seconds: 1)),
+        ),
+      );
+
+      final manager = MissedCallManager(
+        ref: _createTestRef(
+          contactsService,
+          ringingDid: channelDid,
+          ringingCallId: 'call-123',
+        ),
+        otherPartyPermanentChannelDid: channelDid,
+        callChatItemManager: callItemManager,
+        onUpsertChatItem: (_) {},
+      );
+
+      final healed = await manager.reconcilePendingMissedCall();
+
+      expect(healed, isFalse);
+      expect(callItemManager.updateCallCount, 0);
+    });
+
+    test(
+      'reconcilePendingMissedCall heals when the current ringing state is for '
+      'the same contact but a different callId',
+      () async {
+        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: channelDid,
+          pendingMissedCallAt: markerTime,
+          pendingMissedCallId: 'cancelled-call-id',
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final callItemManager = FakeCallChatItemManager(
+          isStaleReturn: true,
+          resolveReturn: incomingCallMessage(
+            messageId: 'msg-cancelled',
+            dateCreated: markerTime.subtract(const Duration(seconds: 1)),
+          ),
+        );
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(
+            contactsService,
+            ringingDid: channelDid,
+            ringingCallId: 'new-live-call-id',
+          ),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          onUpsertChatItem: (_) {},
+        );
+
+        final healed = await manager.reconcilePendingMissedCall();
+
+        expect(healed, isTrue);
+        expect(callItemManager.updateCallCount, 1);
+        expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
+      },
+    );
+
+    test(
+      'reconcilePendingMissedCall heals by direction and marker time even when '
+      'the stored callId is the room-id fallback that never matches the item',
+      () async {
+        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: channelDid,
+          pendingMissedCallAt: markerTime,
+          pendingMissedCallId: '!room-id-fallback:synapse',
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final callItemManager = FakeCallChatItemManager(
+          isStaleReturn: true,
+          resolveReturn: incomingCallMessage(
+            messageId: 'msg-healed',
+            dateCreated: markerTime.subtract(const Duration(minutes: 5)),
+          ),
+        );
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(contactsService),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          onUpsertChatItem: (_) {},
+        );
+
+        final healed = await manager.reconcilePendingMissedCall();
+
+        expect(healed, isTrue);
+        expect(callItemManager.updateCallCount, 1);
+        expect(callItemManager.lastResolveBound, markerTime);
       },
     );
 
@@ -310,7 +402,7 @@ void main() {
       expect(callItemManager.updateCallCount, 0);
     });
 
-    test('_healIncomingCallItemMissed does not clear the marker during '
+    test('healArrivedStaleCallItemIfPending clears the marker after '
         'stream-based healing', () async {
       final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
       final contact = FakeContacts.individualContact.copyWith(
@@ -337,12 +429,16 @@ void main() {
 
       expect(callItemManager.updateCallCount, 1);
       expect(upsertCalls, isEmpty);
-      expect(contactsService.clearPendingMissedCallCalls, isEmpty);
+      expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
     });
   });
 }
 
-Ref _createTestRef(ContactsService contactsService, {String? ringingDid}) {
+Ref _createTestRef(
+  ContactsService contactsService, {
+  String? ringingDid,
+  String ringingCallId = 'ringing-call-id',
+}) {
   final container = ProviderContainer(
     overrides: [
       contactsServiceProvider.overrideWith(() => contactsService),
@@ -354,7 +450,7 @@ Ref _createTestRef(ContactsService contactsService, {String? ringingDid}) {
         .read(incomingCallProvider.notifier)
         .set(
           IncomingAudioVideoCallEvent(
-            callId: 'ringing-call-id',
+            callId: ringingCallId,
             callerPermanentChannelDid: ringingDid,
             otherPartyPermanentChannelDid: ringingDid,
             mediaType: CallMediaType.video,

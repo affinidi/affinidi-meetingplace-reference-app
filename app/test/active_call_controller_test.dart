@@ -325,6 +325,40 @@ void main() {
         AudioVideoCallStatus.outgoingRinging,
       );
     });
+
+    test('re-registering the same caller session still ends '
+        'the outgoing item as declined once', () async {
+      final chat = FakeChatSessionService(
+        sendOutgoingResult: 'outgoing-id',
+        resolveOutgoingResult: 'outgoing-id',
+      );
+      final scoped = ProviderContainer(
+        overrides: [
+          chatSessionServiceProvider('did:web:test').overrideWith(() => chat),
+        ],
+      );
+      addTearDown(scoped.dispose);
+      final ctrl = scoped.read(activeCallControllerProvider.notifier);
+      final session = _FakeSession();
+
+      _registerSession(ctrl, session, isMinimized: false);
+      session.emit(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.outgoingRinging,
+          ownRole: CallRole.caller,
+          callId: 'test-call-id',
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      _registerSession(ctrl, session, isMinimized: true);
+
+      await ctrl.endCallChatItem(role: CallRole.caller);
+
+      expect(chat.updateCalls, isNotEmpty);
+      expect(chat.updateCalls.last.messageId, 'outgoing-id');
+      expect(chat.updateCalls.last.status, CallStatus.declined);
+    });
   });
 
   group('session state stream (minimized)', () {

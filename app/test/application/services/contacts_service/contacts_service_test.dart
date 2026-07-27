@@ -182,6 +182,7 @@ void main() {
           origin: FakeContacts.individualContact.origin,
           category: FakeContacts.individualContact.category,
           pendingMissedCallAt: markerTime,
+          pendingMissedCallId: 'call-123',
           currentMessageSeqNo: 5,
         );
         final repository = FakeContactsRepository(contacts: [persistedContact]);
@@ -208,6 +209,13 @@ void main() {
           reason:
               'sequence number update must not overwrite the missed-call '
               'marker with a stale null from provider state',
+        );
+        expect(
+          updated.pendingMissedCallId,
+          'call-123',
+          reason:
+              'sequence number update must preserve the missed-call callId '
+              'so reconciliation can find the exact call item',
         );
       },
     );

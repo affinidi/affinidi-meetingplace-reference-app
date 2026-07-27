@@ -106,7 +106,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
           if (details.velocity.pixelsPerSecond.dy < -300) {
             _slideController.forward().then((_) {
               if (!mounted) return;
-              bannerNotifier.dismiss(callId: event.callId);
+              bannerNotifier.hide(callId: event.callId);
               // Restore the resting position after the banner is hidden so the
               // next call is not left off-screen (behind the notch).
               WidgetsBinding.instance.addPostFrameCallback((_) {

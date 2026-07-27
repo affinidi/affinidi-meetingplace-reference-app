@@ -53,7 +53,7 @@ class FakeContactsService extends ContactsService {
   }
 
   @override
-  Future<void> setPendingMissedCall(String channelDid) async {
+  Future<void> setPendingMissedCall(String channelDid, {String? callId}) async {
     setPendingMissedCallCalls.add(channelDid);
     final contact = getContactByChannelDid(channelDid);
     if (contact == null) return;
@@ -75,6 +75,11 @@ class FakeContactsService extends ContactsService {
   @override
   Future<DateTime?> getPendingMissedCallAt(String channelDid) async {
     return getContactByChannelDid(channelDid)?.pendingMissedCallAt;
+  }
+
+  @override
+  Future<String?> getPendingMissedCallId(String channelDid) async {
+    return getContactByChannelDid(channelDid)?.pendingMissedCallId;
   }
 
   @override

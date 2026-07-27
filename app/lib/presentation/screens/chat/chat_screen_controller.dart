@@ -520,7 +520,12 @@ class ChatScreenController extends _$ChatScreenController
     if (channel.type == sdk.ChannelType.group) {
       final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
       final connection = await coreSdk.getConnectionOffer(channel.offerLink);
-      state = state.copyWith(group: group, offerName: connection?.offerName);
+      state = state.copyWith(
+        group: group,
+        offerName: connection?.offerName,
+        shouldShowVrcBanner: false,
+        shouldEnableVrcAttachment: false,
+      );
     } else if (channel.type == ChannelType.individual) {
       final hasVrc = await ref
           .read(vrcServiceProvider.notifier)

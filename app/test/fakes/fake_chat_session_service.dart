@@ -12,6 +12,7 @@ typedef UpdateCallChatItemCall = ({
   String messageId,
   CallStatus status,
   Duration? duration,
+  CallParticipation? participation,
 });
 
 class FakeChatSessionService extends ChatSessionService {
@@ -33,7 +34,10 @@ class FakeChatSessionService extends ChatSessionService {
   bool incomingItemAvailable;
   int resolveCallItemMaxAttempts;
   int markCallAsMissedAttempts = 0;
+  int schedulePendingMissedCallFollowUpCalls = 0;
   int resolveIncomingCallChatItemIdAttempts = 0;
+  String? lastResolveIncomingCallId;
+  String? lastResolveOutgoingCallId;
 
   final List<UpdateCallChatItemCall> updateCalls = [];
 
@@ -147,23 +151,30 @@ class FakeChatSessionService extends ChatSessionService {
   }) async => sendOutgoingResult;
 
   @override
-  Future<String?> resolveIncomingCallChatItemId() => _resolveCallChatItemId(
-    resolve: () => resolveIncomingResult,
-    onAttempt: () => resolveIncomingCallChatItemIdAttempts++,
-    attemptsRemaining: resolveCallItemMaxAttempts,
-  );
+  Future<String?> resolveIncomingCallChatItemId({String? callId}) {
+    lastResolveIncomingCallId = callId;
+    return _resolveCallChatItemId(
+      resolve: () => resolveIncomingResult,
+      onAttempt: () => resolveIncomingCallChatItemIdAttempts++,
+      attemptsRemaining: resolveCallItemMaxAttempts,
+    );
+  }
 
   @override
-  Future<String?> resolveOutgoingCallChatItemId() => _resolveCallChatItemId(
-    resolve: () => resolveOutgoingResult,
-    attemptsRemaining: resolveCallItemMaxAttempts,
-  );
+  Future<String?> resolveOutgoingCallChatItemId({String? callId}) {
+    lastResolveOutgoingCallId = callId;
+    return _resolveCallChatItemId(
+      resolve: () => resolveOutgoingResult,
+      attemptsRemaining: resolveCallItemMaxAttempts,
+    );
+  }
 
   @override
-  Future<bool> markCallAsMissed() async {
+  Future<bool> markCallAsMissed({String? callId}) async {
     markCallAsMissedAttempts++;
     final messageId =
-        markCallAsMissedMessageId ?? await resolveIncomingCallChatItemId();
+        markCallAsMissedMessageId ??
+        await resolveIncomingCallChatItemId(callId: callId);
     if (!incomingItemAvailable || messageId == null) return false;
     await updateCallChatItem(messageId, status: CallStatus.missed);
     return true;
@@ -190,8 +201,14 @@ class FakeChatSessionService extends ChatSessionService {
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   }) async {
-    updateCalls.add((messageId: messageId, status: status, duration: duration));
+    updateCalls.add((
+      messageId: messageId,
+      status: status,
+      duration: duration,
+      participation: participation,
+    ));
   }
 
   @override

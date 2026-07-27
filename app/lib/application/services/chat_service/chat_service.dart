@@ -95,7 +95,7 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
 
   /// Sends a call chat item over the wire and persists it for the sender,
   /// returning its message id so the call lifecycle can update the item in
-  /// place. The receiver gets the item automatically via the chat transport
+  /// place. The recipient gets the item automatically via the chat transport
   /// (isFromMe: false) and is offline-notified like any other message.
   Future<String?> sendOutgoingCallMessage({
     required CallMediaType mediaType,
@@ -103,29 +103,37 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   });
 
   /// Resolves the message id of the latest incoming (not-from-me) call chat
-  /// item that is still in a non-terminal state, so the receiver can update it
-  /// in place. Returns null when no such item exists.
-  Future<String?> resolveIncomingCallChatItemId();
+  /// item that is still in a non-terminal state, so the recipient can update it
+  /// in place. When [callId] is provided, an item carrying that exact callId is
+  /// preferred, with the direction scan kept as a fallback. Returns null when
+  /// no such item exists.
+  Future<String?> resolveIncomingCallChatItemId({String? callId});
 
   /// Resolves the message id of the latest outgoing (isFromMe) call chat item
   /// that is still in a non-terminal state. Used by the caller when the emitter
   /// has not yet resolved the id (e.g. fast cancel during connecting phase).
+  /// When [callId] is provided, an item with that exact callId is preferred.
   /// Returns null when no such item exists.
-  Future<String?> resolveOutgoingCallChatItemId();
+  Future<String?> resolveOutgoingCallChatItemId({String? callId});
 
-  /// Updates the receiver's pending incoming call chat item to
+  /// Updates the recipient's pending incoming call chat item to
   /// [CallStatus.missed]. Returns `true` when an item was healed, `false` when
   /// there was nothing to update or the session is not live.
   ///
   /// Called when the ring timer expires or the user declines before answering.
-  Future<bool> markCallAsMissed();
+  Future<bool> markCallAsMissed({String? callId});
 
   /// Updates the local-only [status] and participation [duration] of a
   /// previously emitted call chat item, in place. Per-side and local-only: it
   /// does not propagate to the other party.
+  ///
+  /// For group calls, [participation] carries the group summary (peer count,
+  /// self join/leave). Null leaves any existing participation block untouched,
+  /// so 1:1 calls are unaffected.
   Future<void> updateCallChatItem(
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   });
 }

@@ -11,32 +11,32 @@ import '../../../../../mocks/fake_app_localizations.dart';
 void main() {
   group('resolveEndStatus', () {
     group('caller (isFromMe=true)', () {
-      test('returns declined for declined outcome', () {
+      test('returns declined for an unanswered outcome', () {
         expect(
-          resolveEndStatus(outcome: CallEndOutcome.declined, isFromMe: true),
+          resolveEndStatus(outcome: CallOutcome.declined, isFromMe: true),
           CallStatus.declined,
         );
       });
 
-      test('returns ended for hungUp outcome', () {
+      test('returns ended for ended outcome', () {
         expect(
-          resolveEndStatus(outcome: CallEndOutcome.hungUp, isFromMe: true),
+          resolveEndStatus(outcome: CallOutcome.ended, isFromMe: true),
           CallStatus.ended,
         );
       });
     });
 
     group('receiver (isFromMe=false)', () {
-      test('returns missed for declined outcome', () {
+      test('returns missed for an unanswered outcome', () {
         expect(
-          resolveEndStatus(outcome: CallEndOutcome.declined, isFromMe: false),
+          resolveEndStatus(outcome: CallOutcome.declined, isFromMe: false),
           CallStatus.missed,
         );
       });
 
-      test('returns ended for hungUp outcome', () {
+      test('returns ended for ended outcome', () {
         expect(
-          resolveEndStatus(outcome: CallEndOutcome.hungUp, isFromMe: false),
+          resolveEndStatus(outcome: CallOutcome.ended, isFromMe: false),
           CallStatus.ended,
         );
       });
@@ -295,6 +295,175 @@ void main() {
     });
   });
 
+  group('resolveCallChatItemStatusText group calls', () {
+    late AppLocalizations l10n;
+
+    setUp(() {
+      l10n = FakeAppLocalizations();
+    });
+
+    CallParticipation participation({
+      int count = 2,
+      bool didSelfJoin = true,
+      bool selfLeftBeforeEnd = false,
+    }) => CallParticipation(
+      participantCount: count,
+      didSelfJoin: didSelfJoin,
+      selfLeftBeforeEnd: selfLeftBeforeEnd,
+    );
+
+    test('returns ongoing video text while in progress for video call', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.inProgress,
+          isFromMe: true,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.video,
+          participation: participation(count: 3),
+        ),
+        l10n.callChatItemGroupOngoingVideo(3),
+      );
+    });
+
+    test('returns ongoing audio text while in progress for audio call', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.inProgress,
+          isFromMe: true,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.audio,
+          participation: participation(count: 2),
+        ),
+        l10n.callChatItemGroupOngoingAudio(2),
+      );
+    });
+
+    test('group audio ringing falls back to shared ringing text', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.ringing,
+          isFromMe: true,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.audio,
+          participation: participation(count: 2),
+        ),
+        l10n.callChatItemRinging,
+      );
+    });
+
+    test('group video ringing falls back to shared ringing text', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.ringing,
+          isFromMe: true,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.video,
+          participation: participation(count: 2),
+        ),
+        l10n.callChatItemRinging,
+      );
+    });
+
+    test('ended group call where self was last to leave shows duration', () {
+      final sharedEndedText = resolveCallChatItemStatusText(
+        status: CallStatus.ended,
+        isFromMe: true,
+        durationMs: 120000,
+        callStartedAt: null,
+        l10n: l10n,
+      );
+
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.ended,
+          isFromMe: true,
+          durationMs: 120000,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.video,
+          participation: participation(count: 4, selfLeftBeforeEnd: false),
+        ),
+        sharedEndedText,
+      );
+    });
+
+    test('returns you-left label when self left before end', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.ended,
+          isFromMe: true,
+          durationMs: 120000,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.video,
+          participation: participation(count: 2, selfLeftBeforeEnd: true),
+        ),
+        l10n.callChatItemYouLeft,
+      );
+    });
+
+    test('ended group call with no peers falls back to duration text', () {
+      final sharedEndedText = resolveCallChatItemStatusText(
+        status: CallStatus.ended,
+        isFromMe: true,
+        durationMs: 120000,
+        callStartedAt: null,
+        l10n: l10n,
+      );
+
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.ended,
+          isFromMe: true,
+          durationMs: 120000,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.video,
+          participation: participation(count: 0, selfLeftBeforeEnd: false),
+        ),
+        sharedEndedText,
+      );
+    });
+
+    test('a never-joined group call falls back to 1:1 missed text', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.missed,
+          isFromMe: false,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.video,
+          participation: participation(count: 2, didSelfJoin: false),
+        ),
+        l10n.callChatItemMissed,
+      );
+    });
+
+    test('a never-answered group call falls back to 1:1 not answered text', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.declined,
+          isFromMe: true,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.video,
+          participation: participation(count: 2, didSelfJoin: false),
+        ),
+        l10n.callChatItemNotAnswered,
+      );
+    });
+  });
+
   group('resolveCallChatItemColors', () {
     late AppCustomColors customColors;
     late ColorScheme colorScheme;
@@ -386,6 +555,102 @@ void main() {
 
       expect(colors.iconContainer, colorScheme.surface);
       expect(colors.icon, colorScheme.onSurface);
+    });
+  });
+
+  group('group participation rules', () {
+    AudioVideoCallParticipant participant(
+      String id, {
+      String? did,
+      bool isSelf = false,
+    }) =>
+        AudioVideoCallParticipant(participantId: id, did: did, isSelf: isSelf);
+
+    group('accumulateSeenPeerIds', () {
+      test('adds non-self participant ids to the running set', () {
+        final result = accumulateSeenPeerIds(
+          previous: const {},
+          participants: [
+            participant('self', isSelf: true),
+            participant('p1'),
+            participant('p2'),
+          ],
+        );
+
+        expect(result, {'p1', 'p2'});
+      });
+
+      test('merges with the previous set and de-duplicates', () {
+        final result = accumulateSeenPeerIds(
+          previous: const {'p1'},
+          participants: [participant('p1'), participant('p3')],
+        );
+
+        expect(result, {'p1', 'p3'});
+      });
+    });
+
+    group('computeDidSelfJoin', () {
+      test('latches true once a connected status is seen', () {
+        expect(
+          computeDidSelfJoin(
+            previous: false,
+            status: AudioVideoCallStatus.connected,
+          ),
+          isTrue,
+        );
+      });
+
+      test('stays true after connecting even if status regresses', () {
+        expect(
+          computeDidSelfJoin(
+            previous: true,
+            status: AudioVideoCallStatus.outgoingRinging,
+          ),
+          isTrue,
+        );
+      });
+
+      test('stays false while never connected', () {
+        expect(
+          computeDidSelfJoin(
+            previous: false,
+            status: AudioVideoCallStatus.outgoingRinging,
+          ),
+          isFalse,
+        );
+      });
+    });
+
+    group('resolveSelfDid', () {
+      test('returns the self participant did', () {
+        final did = resolveSelfDid([
+          participant('p1', did: 'did:p1'),
+          participant('self', did: 'did:me', isSelf: true),
+        ]);
+
+        expect(did, 'did:me');
+      });
+
+      test('returns null when no self participant is present', () {
+        expect(resolveSelfDid([participant('p1', did: 'did:p1')]), isNull);
+      });
+    });
+
+    group('buildCallParticipation', () {
+      test('maps peer count and flags onto the model', () {
+        final participation = buildCallParticipation(
+          seenPeerIds: const {'p1', 'p2'},
+          didSelfJoin: true,
+          selfLeftBeforeEnd: true,
+          initiatorDid: 'did:caller',
+        );
+
+        expect(participation.participantCount, 2);
+        expect(participation.didSelfJoin, isTrue);
+        expect(participation.selfLeftBeforeEnd, isTrue);
+        expect(participation.initiatorDid, 'did:caller');
+      });
     });
   });
 }

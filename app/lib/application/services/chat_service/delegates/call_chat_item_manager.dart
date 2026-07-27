@@ -78,25 +78,78 @@ class CallChatItemManager {
     }
   }
 
-  /// Returns the ID of the latest incoming call item that has not yet been
-  /// settled (not ended, missed, or declined), or `null` if none exist.
-  Future<String?> resolveIncomingCallChatItemId() => _resolveCallChatItemId(
-    fromMe: false,
-    attemptsRemaining: _resolveCallChatItemMaxAttempts,
-  );
+  /// Resolves the latest unsettled incoming call item, preferring an exact
+  /// callId match when [callId] is provided.
+  Future<String?> resolveIncomingCallChatItemId({String? callId}) =>
+      _resolveCallChatItemId(
+        fromMe: false,
+        attemptsRemaining: _resolveCallChatItemMaxAttempts,
+        callId: callId,
+      );
 
-  /// Returns the ID of the latest outgoing call item that has not yet been
-  /// settled (not ended, missed, or declined), or `null` if none exist.
-  Future<String?> resolveOutgoingCallChatItemId() => _resolveCallChatItemId(
-    fromMe: true,
-    attemptsRemaining: _resolveCallChatItemMaxAttempts,
-  );
+  /// Resolves the latest unsettled outgoing call item, preferring an exact
+  /// callId match when [callId] is provided.
+  Future<String?> resolveOutgoingCallChatItemId({String? callId}) =>
+      _resolveCallChatItemId(
+        fromMe: true,
+        attemptsRemaining: _resolveCallChatItemMaxAttempts,
+        callId: callId,
+      );
 
-  /// Finds the latest call item from the specified sender direction that is
-  /// not yet settled (not ended, missed, or declined).
+  /// Returns the incoming call item matching [callId]
+  /// (or latest by direction when callId absent) created no later than
+  /// [notAfter], or null if not found.
+  Future<Message?> resolveIncomingCallItemBefore(
+    DateTime notAfter, {
+    String? callId,
+  }) async {
+    const label = 'resolveIncomingCallItemBefore';
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk == null) {
+      logger.warning('$label: chat SDK unavailable', name: _logKey);
+      return null;
+    }
+    try {
+      final items = await chatSdk.messages;
+      final boundUtc = notAfter.toUtc();
+      final matchCallId = callId != null && callId.isNotEmpty;
+      final match = items.whereType<Message>().lastWhereOrNull((message) {
+        if (message.isFromMe) return false;
+        if (message.dateCreated.toUtc().isAfter(boundUtc)) return false;
+        final attachment = message.attachments.firstWhereOrNull(
+          CallMetadata.isCall,
+        );
+        if (attachment == null) return false;
+        if (!matchCallId) return true;
+        return CallMetadata.maybeOf(attachment)?.callId == callId;
+      });
+      if (match == null) {
+        logger.info(
+          '$label: no incoming call item at or before $notAfter',
+          name: _logKey,
+        );
+        return null;
+      }
+      logger.info('$label: ${match.messageId}', name: _logKey);
+      return match;
+    } catch (e, stackTrace) {
+      logger.error(
+        '$label failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return null;
+    }
+  }
+
+  /// Finds the latest unsettled call item from [fromMe] direction, preferring
+  /// exact callId match when [callId] is provided.
   Future<String?> _resolveCallChatItemId({
     required bool fromMe,
     required int attemptsRemaining,
+    String? callId,
   }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -109,24 +162,35 @@ class CallChatItemManager {
     }
     try {
       final items = await chatSdk.messages;
-      final match = items.whereType<Message>().lastWhereOrNull((message) {
-        if (message.isFromMe != fromMe) return false;
+      final matchCallId = callId != null && callId.isNotEmpty;
+      Message? directionMatch;
+      Message? callIdMatch;
+      for (final message in items.whereType<Message>()) {
+        if (message.isFromMe != fromMe) continue;
         final attachment = message.attachments.firstWhereOrNull(
           CallMetadata.isCall,
         );
-        if (attachment == null) return false;
+        if (attachment == null) continue;
         final call = CallMetadata.maybeOf(attachment);
-        return call != null &&
-            call.status != CallStatus.ended &&
-            call.status != CallStatus.missed &&
-            call.status != CallStatus.declined;
-      });
+        if (call == null ||
+            call.status == CallStatus.ended ||
+            call.status == CallStatus.missed ||
+            call.status == CallStatus.declined) {
+          continue;
+        }
+        directionMatch = message;
+        if (matchCallId && call.callId == callId) {
+          callIdMatch = message;
+        }
+      }
+      final match = callIdMatch ?? directionMatch;
       if (match == null) {
         if (attemptsRemaining <= 0) return null;
         await Future<void>.delayed(_resolveCallChatItemRetryDelay);
         return _resolveCallChatItemId(
           fromMe: fromMe,
           attemptsRemaining: attemptsRemaining - 1,
+          callId: callId,
         );
       }
       logger.info('$label: ${match.messageId}', name: _logKey);
@@ -144,8 +208,8 @@ class CallChatItemManager {
 
   /// Marks the latest pending incoming call item as `missed`. Returns `true`
   /// when an item was found and updated, `false` otherwise.
-  Future<bool> markCallAsMissed() async {
-    final messageId = await resolveIncomingCallChatItemId();
+  Future<bool> markCallAsMissed({String? callId}) async {
+    final messageId = await resolveIncomingCallChatItemId(callId: callId);
     if (messageId == null) {
       logger.info(
         'markCallAsMissed: No pending incoming call item found',
@@ -171,98 +235,6 @@ class CallChatItemManager {
             call.status == CallStatus.ringing);
   }
 
-  /// Returns the id of the latest stale incoming call item created at or
-  /// before [notAfter], or `null` if none. Retries up to
-  /// [_resolveCallChatItemMaxAttempts] times to handle delayed chat history
-  /// bootstrap. The [notAfter] guard prevents a newer, genuinely ringing call
-  /// from being marked missed.
-  Future<String?> resolveStaleIncomingCallItemIdBefore(
-    DateTime notAfter,
-  ) async {
-    final methodName = 'resolveStaleIncomingCallItemIdBefore';
-    await ensureInitialized();
-    final chatSdk = getChatSdk();
-    if (chatSdk == null) {
-      logger.warning('$methodName: Chat SDK unavailable', name: _logKey);
-      return null;
-    }
-
-    for (
-      var attempt = 0;
-      attempt < _resolveCallChatItemMaxAttempts;
-      attempt++
-    ) {
-      try {
-        final items = await chatSdk.messages;
-        final match = items
-            .whereType<Message>()
-            .where(isStaleIncomingCall)
-            .where((m) => !m.dateCreated.toUtc().isAfter(notAfter.toUtc()))
-            .lastOrNull;
-
-        if (match != null) {
-          logger.info('$methodName: Found ${match.messageId}', name: _logKey);
-          return match.messageId;
-        }
-
-        if (attempt < _resolveCallChatItemMaxAttempts - 1) {
-          await Future<void>.delayed(_resolveCallChatItemRetryDelay);
-        }
-      } catch (e, stackTrace) {
-        logger.error(
-          '$methodName failed',
-          error: e,
-          stackTrace: stackTrace,
-          name: _logKey,
-        );
-        return null;
-      }
-    }
-
-    logger.info('$methodName: No stale item found', name: _logKey);
-    return null;
-  }
-
-  /// Returns all stale incoming call item ids created at or before [notAfter].
-  /// Used by replay healing to settle delayed historical items from the same
-  /// ended call episode before the pending marker is cleared.
-  Future<List<String>> resolveStaleIncomingCallItemIdsBefore(
-    DateTime notAfter,
-  ) async {
-    const methodName = 'resolveStaleIncomingCallItemIdsBefore';
-    await ensureInitialized();
-    final chatSdk = getChatSdk();
-    if (chatSdk == null) {
-      logger.warning('$methodName: Chat SDK unavailable', name: _logKey);
-      return const [];
-    }
-
-    try {
-      final items = await chatSdk.messages;
-      final matches = items
-          .whereType<Message>()
-          .where(isStaleIncomingCall)
-          .where((m) => !m.dateCreated.toUtc().isAfter(notAfter.toUtc()))
-          .map((m) => m.messageId)
-          .toList(growable: false);
-
-      logger.info(
-        '$methodName: Found ${matches.length} item(s) before '
-        '${notAfter.toUtc().toIso8601String()}',
-        name: _logKey,
-      );
-      return matches;
-    } catch (e, stackTrace) {
-      logger.error(
-        '$methodName failed',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      return const [];
-    }
-  }
-
   /// Updates the call item with [messageId] to the specified [status] and
   /// optional [duration]. Persists the change to the SDK and returns the
   /// updated [Message] so callers can refresh the UI immediately instead of
@@ -272,6 +244,7 @@ class CallChatItemManager {
     String messageId, {
     required CallStatus status,
     Duration? duration,
+    CallParticipation? participation,
   }) async {
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -306,6 +279,7 @@ class CallChatItemManager {
         status: status,
         callId: existing.callId,
         durationMs: duration?.inMilliseconds ?? existing.durationMs,
+        participation: participation ?? existing.participation,
         id: callAttachment!.id,
       );
       item.attachments = [
@@ -321,6 +295,110 @@ class CallChatItemManager {
     } catch (e, stackTrace) {
       logger.error(
         'updateCallChatItem failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return null;
+    }
+  }
+
+  /// Resolves this device's own call item for [callId] for outcome
+  /// reconciliation. Matches the exact [callId] across every direction and
+  /// status, including already-settled items, so a device that already ended
+  /// its own item can still converge on the full duration. Prefers the
+  /// device's own outgoing item, then an incoming item. Returns `null` when no
+  /// item carries [callId]; never falls back to a non-matching item.
+  Future<String?> resolveCallItemIdForOutcome(String callId) async {
+    const label = 'resolveCallItemIdForOutcome';
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk is! MeetingPlaceMatrixChatSDK) {
+      logger.warning('$label: chat SDK unavailable', name: _logKey);
+      return null;
+    }
+    if (callId.isEmpty) return null;
+    try {
+      final match = await chatSdk.getCallChatItemByCallId(callId);
+      if (match == null) {
+        logger.info('$label: no call item for callId $callId', name: _logKey);
+        return null;
+      }
+      logger.info('$label: ${match.messageId}', name: _logKey);
+      return match.messageId;
+    } catch (e, stackTrace) {
+      logger.error(
+        '$label failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return null;
+    }
+  }
+
+  /// Reconciles the call item [messageId] to `ended` with the authoritative
+  /// [duration] from a transport-delivered outcome. Clears
+  /// `selfLeftBeforeEnd` on any group participation so a participant who left
+  /// early converges on the full call duration and the "You left" label is
+  /// replaced by the standard duration label. Returns the updated [Message] for
+  /// an immediate UI refresh, or `null` when the item is missing or not a call.
+  Future<Message?> reconcileCallOutcome(
+    String messageId, {
+    Duration? duration,
+  }) async {
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk == null) {
+      logger.warning(
+        'reconcileCallOutcome: Chat SDK unavailable',
+        name: _logKey,
+      );
+      return null;
+    }
+    try {
+      final item = await chatSdk.getMessageById(messageId);
+      if (item is! Message) {
+        logger.warning(
+          'reconcileCallOutcome: message $messageId not found',
+          name: _logKey,
+        );
+        return null;
+      }
+      final callAttachment = item.attachments.firstWhereOrNull(
+        CallMetadata.isCall,
+      );
+      final existing = callAttachment == null
+          ? null
+          : CallMetadata.maybeOf(callAttachment);
+      if (existing == null) {
+        logger.warning(
+          'reconcileCallOutcome: $messageId is not a call item',
+          name: _logKey,
+        );
+        return null;
+      }
+      final convergedParticipation = existing.participation?.copyWith(
+        selfLeftBeforeEnd: false,
+      );
+      final updated = CallMetadata.buildAttachment(
+        mediaType: existing.mediaType,
+        status: CallStatus.ended,
+        callId: existing.callId,
+        durationMs: duration?.inMilliseconds ?? existing.durationMs,
+        participation: convergedParticipation,
+        id: callAttachment!.id,
+      );
+      item.attachments = [
+        for (final a in item.attachments)
+          if (CallMetadata.isCall(a)) updated else a,
+      ];
+      await chatSdk.updateMessage(item);
+      logger.info('reconcileCallOutcome: $messageId -> ended', name: _logKey);
+      return item;
+    } catch (e, stackTrace) {
+      logger.error(
+        'reconcileCallOutcome failed',
         error: e,
         stackTrace: stackTrace,
         name: _logKey,

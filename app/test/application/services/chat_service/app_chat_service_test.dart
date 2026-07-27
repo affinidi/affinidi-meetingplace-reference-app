@@ -1257,6 +1257,49 @@ void main() {
       expect(resolved, 'latest-mine');
     });
 
+    test('updateCallChatItem replaces the existing outgoing call item in state '
+        'with its declined terminal status', () async {
+      ChatServiceState currentState() =>
+          container.read(chatSessionServiceProvider(channelDid));
+
+      final original = callMessage(
+        messageId: 'caller-call-item',
+        isFromMe: true,
+        status: CallStatus.calling,
+      );
+      fakeChatSdk.sessionMessages = [original];
+
+      await chatService.startChatSession();
+
+      expect(
+        currentState().messages.whereType<Message>().single.messageId,
+        'caller-call-item',
+      );
+      expect(
+        CallMetadata.maybeOf(
+          currentState().messages
+              .whereType<Message>()
+              .single
+              .attachments
+              .single,
+        )!.status,
+        CallStatus.calling,
+      );
+
+      await chatService.updateCallChatItem(
+        'caller-call-item',
+        status: CallStatus.declined,
+      );
+
+      final messages = currentState().messages.whereType<Message>().toList();
+      expect(messages, hasLength(1));
+      expect(messages.single.messageId, 'caller-call-item');
+      expect(
+        CallMetadata.maybeOf(messages.single.attachments.single)!.status,
+        CallStatus.declined,
+      );
+    });
+
     test('resolveOutgoingCallChatItemId returns null when only terminal or '
         'incoming call items exist', () async {
       fakeChatSdk.sessionMessages = [

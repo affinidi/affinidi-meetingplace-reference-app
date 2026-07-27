@@ -91,6 +91,25 @@ void main() {
     });
   });
 
+  group('when hide is called', () {
+    test('it sets state to true', () {
+      final container = _makeContainer();
+      container
+          .read(incomingCallBannerControllerProvider.notifier)
+          .hide(callId: _kCallId);
+      expect(container.read(incomingCallBannerControllerProvider), true);
+    });
+
+    test('it does not forward decline to IncomingCallService', () {
+      final service = FakeIncomingCallService();
+      final container = _makeContainer(service: service);
+      container
+          .read(incomingCallBannerControllerProvider.notifier)
+          .hide(callId: _kCallId);
+      expect(service.declinedCallIds, isEmpty);
+    });
+  });
+
   group('when reset is called', () {
     test('it sets state back to false after dismiss', () {
       final container = _makeContainer();

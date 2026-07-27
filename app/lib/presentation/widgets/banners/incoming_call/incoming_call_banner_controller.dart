@@ -33,10 +33,17 @@ class IncomingCallBannerController extends _$IncomingCallBannerController {
     return false;
   }
 
-  /// Marks the banner as dismissed and forwards the decline to
-  /// [IncomingCallService].
+  /// Hides the banner for the current incoming call without declining it.
+  void hide({required String callId}) {
+    ref.read(appLoggerProvider).info('hide callId=$callId', name: _logKey);
+    state = true;
+  }
+
+  /// Declines the incoming call and hides the banner.
   void dismiss({required String callId}) {
-    ref.read(appLoggerProvider).info('dismiss callId=$callId', name: _logKey);
+    ref
+        .read(appLoggerProvider)
+        .info('dismiss and decline callId=$callId', name: _logKey);
     ref.read(incomingCallServiceProvider.notifier).decline(callId: callId);
     state = true;
   }

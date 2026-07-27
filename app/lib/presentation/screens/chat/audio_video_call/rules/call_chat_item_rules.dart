@@ -8,62 +8,99 @@ import '../../../../../presentation/themes/app_custom_colors.dart';
 import 'call_ui_rules.dart';
 
 // =========================================================================
-// Policy — what the SDK persists when a call ends
+// Policy — mapping the shared CallOutcome to the persisted chat item status
 // =========================================================================
 
-/// How a call ended, from the wire's perspective.
+/// Returns the [CallStatus] to persist on the call chat item for a terminal
+/// [CallOutcome].
 ///
-/// Used by [resolveEndStatus] to compute the [CallStatus] to persist on the
-/// call chat item. This is an app-side concept; it is not part of the SDK.
-enum CallEndOutcome {
-  /// The call ended normally after both parties were connected.
-  hungUp,
-
-  /// The call ended without being answered — either the receiver timed out
-  /// or explicitly declined.
-  declined,
-}
-
-/// Returns the [CallStatus] to persist on the call chat item when a call ends.
+/// [CallOutcome] is the shared, wire-level fact both sides agree on. This is
+/// the single authority for the local "who sees what end state" asymmetry, and
+/// is reused by both individual and group calls:
+///   - [CallOutcome.ended] → [CallStatus.ended] on both sides
+///   - any unanswered outcome ([CallOutcome.cancelled], [CallOutcome.declined],
+///     [CallOutcome.timedOut]):
+///       - caller ([isFromMe] true) → [CallStatus.declined] ("Not answered")
+///       - recipient ([isFromMe] false) → [CallStatus.missed] ("Missed")
 ///
-/// [isFromMe] is the `isFromMe` flag of the call chat item owned by this
-/// device. Caller items are `isFromMe=true`;
-/// receiver items are `isFromMe=false`.
-///
-/// This is the single authority for the "who sees what end state" rule:
-///   - Caller (`isFromMe=true`) + [CallEndOutcome.declined]
-///     → [CallStatus.declined] ("Not answered")
-///   - Caller (`isFromMe=true`) + [CallEndOutcome.hungUp]
-///     → [CallStatus.ended]
-///   - Receiver (`isFromMe=false`) + any unanswered outcome
-///     → [CallStatus.missed] ("Missed")
-///   - Receiver (`isFromMe=false`) + [CallEndOutcome.hungUp]
-///     → [CallStatus.ended]
+/// [CallOutcome.ongoing] is not a terminal outcome; it maps defensively to
+/// [CallStatus.inProgress].
 CallStatus resolveEndStatus({
-  required CallEndOutcome outcome,
+  required CallOutcome outcome,
   required bool isFromMe,
-}) => switch ((isFromMe, outcome)) {
-  (true, CallEndOutcome.declined) => CallStatus.declined,
-  (true, CallEndOutcome.hungUp) => CallStatus.ended,
-  (false, CallEndOutcome.declined) => CallStatus.missed,
-  (false, CallEndOutcome.hungUp) => CallStatus.ended,
+}) => switch (outcome) {
+  CallOutcome.ended => CallStatus.ended,
+  CallOutcome.ongoing => CallStatus.inProgress,
+  CallOutcome.cancelled ||
+  CallOutcome.declined ||
+  CallOutcome.timedOut => isFromMe ? CallStatus.declined : CallStatus.missed,
 };
 
-/// Maps how a call ended into the [CallEndOutcome] persisted on the chat item.
+/// Resolves the shared [CallOutcome] from this device's local session history.
 ///
-/// A call counts as unanswered ([CallEndOutcome.declined]) when its last status
-/// was declined or missed, or when no peer ever joined. Otherwise both
-/// parties connected and it is a normal [CallEndOutcome.hungUp].
-CallEndOutcome resolveCallEndOutcome({
+/// A call counts as answered ([CallOutcome.ended]) when a peer joined and the
+/// last status was not an unanswered terminal. Otherwise it maps the local
+/// terminal signal to the matching unanswered outcome: an explicit decline to
+/// [CallOutcome.declined], an unanswered timeout to [CallOutcome.timedOut], and
+/// a caller leaving before answer to [CallOutcome.cancelled].
+CallOutcome resolveCallOutcome({
   required AudioVideoCallStatus lastStatus,
   required bool hasHadPeer,
 }) {
-  final unanswered =
-      lastStatus == AudioVideoCallStatus.declined ||
-      lastStatus == AudioVideoCallStatus.missed ||
-      !hasHadPeer;
-  return unanswered ? CallEndOutcome.declined : CallEndOutcome.hungUp;
+  final answered =
+      hasHadPeer &&
+      lastStatus != AudioVideoCallStatus.declined &&
+      lastStatus != AudioVideoCallStatus.missed;
+  if (answered) return CallOutcome.ended;
+  if (lastStatus == AudioVideoCallStatus.declined) return CallOutcome.declined;
+  if (lastStatus == AudioVideoCallStatus.missed) return CallOutcome.timedOut;
+  return CallOutcome.cancelled;
 }
+
+// =========================================================================
+// Group participation — accumulated off the session state stream
+// =========================================================================
+
+/// Accumulates the running set of distinct peer participant ids seen during a
+/// call, excluding the local party. Drives the "n joined" peer count.
+Set<String> accumulateSeenPeerIds({
+  required Set<String> previous,
+  required List<AudioVideoCallParticipant> participants,
+}) {
+  final next = {...previous};
+  for (final participant in participants) {
+    if (!participant.isSelf) next.add(participant.participantId);
+  }
+  return next;
+}
+
+/// Latch: whether the local party has fully joined the call media session.
+/// Once true, stays true for the rest of the call.
+bool computeDidSelfJoin({
+  required bool previous,
+  required AudioVideoCallStatus status,
+}) => previous || isConnectedCallStatus(status);
+
+/// The local party's DID from the participant list, or null when not resolved.
+String? resolveSelfDid(List<AudioVideoCallParticipant> participants) {
+  for (final participant in participants) {
+    if (participant.isSelf) return participant.did;
+  }
+  return null;
+}
+
+/// Builds the group participation summary from the accumulated call state.
+CallParticipation buildCallParticipation({
+  required Set<String> seenPeerIds,
+  required bool didSelfJoin,
+  required bool selfLeftBeforeEnd,
+  String? initiatorDid,
+}) => CallParticipation(
+  participantCount: seenPeerIds.length,
+  didSelfJoin: didSelfJoin,
+  selfLeftBeforeEnd: selfLeftBeforeEnd,
+  initiatorDid: initiatorDid,
+);
 
 // =========================================================================
 // Render predicates — driven by (status, isFromMe)
@@ -71,7 +108,7 @@ CallEndOutcome resolveCallEndOutcome({
 
 /// Whether the item shows a missed-call (error) visual treatment.
 ///
-/// True for any unanswered ending: `missed` (receiver) or `declined` (caller).
+/// True for any unanswered ending: `missed` (recipient) or `declined` (caller).
 bool isMissedCallDisplay(CallStatus status) =>
     status == CallStatus.missed || status == CallStatus.declined;
 
@@ -144,6 +181,10 @@ String formatCallDuration(
 /// joined), the call's start time is shown as "12:04 PM" with locale-aware
 /// AM/PM formatting. Falls back to current time if null.
 ///
+/// For a group call (non-null [participation]), the group label rules apply
+/// while the call is ongoing or has ended with peers; a group call the local
+/// party never joined falls through to the same "Missed" text as a 1:1 call.
+///
 /// See the display table in `docs/call-chat-item.md` for the full mapping.
 String resolveCallChatItemStatusText({
   required CallStatus status,
@@ -151,7 +192,18 @@ String resolveCallChatItemStatusText({
   required int? durationMs,
   required DateTime? callStartedAt,
   required AppLocalizations l10n,
+  CallMediaType? mediaType,
+  CallParticipation? participation,
 }) {
+  if (participation != null) {
+    final groupText = _resolveGroupCallStatusText(
+      status: status,
+      mediaType: mediaType,
+      participation: participation,
+      l10n: l10n,
+    );
+    if (groupText != null) return groupText;
+  }
   switch (status) {
     case CallStatus.calling:
       return isFromMe ? l10n.callChatItemCalling : l10n.callChatItemRinging;
@@ -173,6 +225,32 @@ String resolveCallChatItemStatusText({
     case CallStatus.missed:
     case CallStatus.declined:
       return isFromMe ? l10n.callChatItemNotAnswered : l10n.callChatItemMissed;
+  }
+}
+
+/// Group-specific status text, or null when the group call should fall back to
+/// the shared 1:1 wording (e.g. a group call the local party never joined).
+String? _resolveGroupCallStatusText({
+  required CallStatus status,
+  required CallMediaType? mediaType,
+  required CallParticipation participation,
+  required AppLocalizations l10n,
+}) {
+  switch (status) {
+    case CallStatus.calling:
+    case CallStatus.ringing:
+      return null;
+    case CallStatus.inProgress:
+      final count = participation.participantCount;
+      return mediaType == CallMediaType.audio
+          ? l10n.callChatItemGroupOngoingAudio(count)
+          : l10n.callChatItemGroupOngoingVideo(count);
+    case CallStatus.ended:
+      if (!participation.selfLeftBeforeEnd) return null;
+      return l10n.callChatItemYouLeft;
+    case CallStatus.missed:
+    case CallStatus.declined:
+      return null;
   }
 }
 
