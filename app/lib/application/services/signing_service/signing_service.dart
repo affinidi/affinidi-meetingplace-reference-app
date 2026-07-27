@@ -282,6 +282,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
 
     await _notifyAgentApproved(
       payload['sessionId'] as String?,
+      challenge: payload['challenge'] as String?,
       mediatorDid: mediatorDid,
     );
   }
@@ -289,6 +290,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
   Future<void> _notifyAgentApproved(
     String? sessionId, {
     required String mediatorDid,
+    String? challenge,
   }) async {
     try {
       final sdk = await _ref.read(meetingPlaceSdkProvider.future);
@@ -317,6 +319,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
         'text': jsonEncode({
           'type': 'cierge/stepUpApproved',
           'sessionId': sessionId,
+          'challenge': ?challenge,
         }),
         'seq_no': 0,
         'timestamp': DateTime.now().toUtc().toIso8601String(),

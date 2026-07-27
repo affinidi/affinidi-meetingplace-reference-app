@@ -73,10 +73,7 @@ class ChatItem extends StatelessWidget {
 
     if (_SignedDocumentChatItem.matchPlainMessage(_chatItem)
         case final parsed?) {
-      return _SignedDocumentChatItem(
-        data: parsed,
-        contactId: _contactId,
-      );
+      return _SignedDocumentChatItem(data: parsed, contactId: _contactId);
     }
 
     if (_SignedDocumentChatItem.matchAttachmentOnly(_chatItem)) {
@@ -85,6 +82,17 @@ class ChatItem extends StatelessWidget {
         (a) => a.format == 'cierge/trust-task',
       );
       return _SignedDocumentChatItem(
+        attachment: attachment,
+        contactId: _contactId,
+      );
+    }
+
+    if (_SignDocumentReviewChatItem.matchAttachment(_chatItem)) {
+      final msg = _chatItem as chat.Message;
+      final attachment = msg.attachments.firstWhere(
+        (a) => a.format == _SignDocumentReviewChatItem.attachmentFormat,
+      );
+      return _SignDocumentReviewChatItem(
         attachment: attachment,
         contactId: _contactId,
       );

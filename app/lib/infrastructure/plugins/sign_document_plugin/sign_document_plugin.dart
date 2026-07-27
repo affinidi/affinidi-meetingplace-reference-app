@@ -6,8 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
+import 'sign_document_attachment.dart';
+
 /// Chat action that picks a document file and sends a
-/// `cierge/sign-document-request` message with the file content.
+/// `cierge/sign-document-request` message. The document bytes travel as an
+/// external attachment (uploaded to media storage) so large documents do not
+/// exceed the transport event-size limit; the message text carries only the
+/// request metadata.
 final class SignDocumentPlugin implements AttachmentPicker {
   SignDocumentPlugin({required this.filePickerPlatform});
 
@@ -46,18 +51,29 @@ final class SignDocumentPlugin implements AttachmentPicker {
     if (filePath == null) return null;
 
     final bytes = await File(filePath).readAsBytes();
-    final content = base64Encode(bytes);
+    final mediaType = _mimeType(file.extension);
 
+    // Metadata only — the document bytes travel as an external attachment.
     final payload = jsonEncode({
       'type': CiergeSignDocumentRequest.messageType,
       'document': {
         'title': file.name,
-        'content': content,
-        'mediaType': _mimeType(file.extension),
+        'mediaType': mediaType,
+        'byteCount': bytes.length,
       },
     });
 
-    return AttachmentPluginPickResult(text: payload, attachments: []);
+    return AttachmentPluginPickResult(
+      text: payload,
+      attachments: [
+        SignDocumentAttachment(
+          base64: base64Encode(bytes),
+          mimeType: mediaType,
+          filename: file.name,
+          byteCount: bytes.length,
+        ),
+      ],
+    );
   }
 
   String _mimeType(String? ext) => switch (ext?.toLowerCase()) {
