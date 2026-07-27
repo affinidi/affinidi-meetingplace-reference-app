@@ -349,7 +349,7 @@ void main() {
           find.byKey(const Key('chat_mention_suggestions')),
           findsOneWidget,
         );
-        expect(find.text('@Bob'), findsOneWidget);
+        expect(find.text('Bob'), findsOneWidget);
         expect(
           find.descendant(
             of: find.byKey(const Key('chat_mention_suggestions')),
@@ -358,7 +358,7 @@ void main() {
           findsWidgets,
         );
 
-        await tester.tap(find.text('@Bob'));
+        await tester.tap(find.text('Bob'));
         await tester.pumpAndSettle();
 
         expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
@@ -382,6 +382,30 @@ void main() {
         expect(mentions.first.display, '@Bob');
       });
 
+      testWidgets('it shows mention suggestions without waiting for debounce', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bo');
+
+        expect(
+          find.byKey(const Key('chat_mention_suggestions')),
+          findsOneWidget,
+        );
+        expect(find.text('Bob'), findsOneWidget);
+      });
+
       testWidgets('it does not reopen suggestions for an existing mention', (
         tester,
       ) async {
@@ -399,7 +423,7 @@ void main() {
 
         await enterChatMessage(tester, 'Hello @Bo');
         await pumpMentionDebounce(tester);
-        await tester.tap(find.text('@Bob'));
+        await tester.tap(find.text('Bob'));
         await tester.pumpAndSettle();
 
         final inputField = findChatMessageInput();

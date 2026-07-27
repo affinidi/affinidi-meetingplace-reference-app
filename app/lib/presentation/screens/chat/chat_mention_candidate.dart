@@ -8,6 +8,7 @@ class ChatMentionCandidate {
   const ChatMentionCandidate({
     required this.target,
     required this.label,
+    required this.normalizedLabel,
     required this.searchText,
     this.subtitle,
     this.avatarImage,
@@ -27,6 +28,7 @@ class ChatMentionCandidate {
     return ChatMentionCandidate(
       target: member.did,
       label: '@$baseLabel',
+      normalizedLabel: baseLabel.toLowerCase(),
       subtitle: fullName.isNotEmpty && fullName != baseLabel ? fullName : null,
       avatarImage: member.contactCard.image(cacheManager: cacheManager),
       searchText: [
@@ -39,6 +41,7 @@ class ChatMentionCandidate {
 
   final String target;
   final String label;
+  final String normalizedLabel;
   final String searchText;
   final String? subtitle;
   final ImageProvider<Object>? avatarImage;

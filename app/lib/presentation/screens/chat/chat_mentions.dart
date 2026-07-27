@@ -15,7 +15,7 @@ class _ChatMentionSuggestions extends StatelessWidget {
       key: const Key('chat_mention_suggestions'),
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: context.colorScheme.surface,
+        color: context.colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: context.colorScheme.outline.withValues(alpha: 0.20),
@@ -65,13 +65,17 @@ class _ChatMentionSuggestionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final displayLabel = candidate.label.startsWith('@')
+        ? candidate.label.substring(1)
+        : candidate.label;
+
     return Material(
       color: Colors.transparent,
       child: ListTile(
         key: Key('chat_mention_suggestion_${candidate.target}'),
         dense: true,
         leading: ProfileCircleAvatar(radius: 18, image: candidate.avatarImage),
-        title: Text(candidate.label),
+        title: Text(displayLabel),
         subtitle: candidate.subtitle == null ? null : Text(candidate.subtitle!),
         onTap: () => onSelected(candidate),
       ),
@@ -221,7 +225,14 @@ class _ChatMentionDraftController extends ChangeNotifier {
       }
 
       _tokens = _reconcileTokens(_lastValue.text, value.text, _tokens);
-      _debouncer.run(() => _refreshSuggestions(notify: true));
+      final wasMentionQueryActive = _findActiveMentionQuery(_lastValue) != null;
+      final isMentionQueryActive = _findActiveMentionQuery(value) != null;
+      if (wasMentionQueryActive || isMentionQueryActive) {
+        _debouncer.cancel();
+        _refreshSuggestions(notify: true);
+      } else {
+        _debouncer.run(() => _refreshSuggestions(notify: true));
+      }
     } else {
       _refreshSuggestions(notify: true);
     }
@@ -313,22 +324,35 @@ class _ChatMentionDraftController extends ChangeNotifier {
 
   List<ChatMentionCandidate> _filterCandidates(String query) {
     final normalizedQuery = query.toLowerCase();
-    final matches = _allCandidates.where((candidate) {
-      if (normalizedQuery.isEmpty) return true;
-      return candidate.searchText.contains(normalizedQuery);
-    }).toList();
+    final prefixMatches = <ChatMentionCandidate>[];
+    final otherMatches = <ChatMentionCandidate>[];
 
-    matches.sort((left, right) {
-      final leftStarts = left.label.toLowerCase().startsWith(
-        '@$normalizedQuery',
-      );
-      final rightStarts = right.label.toLowerCase().startsWith(
-        '@$normalizedQuery',
-      );
-      if (leftStarts != rightStarts) return leftStarts ? -1 : 1;
-      return left.label.compareTo(right.label);
-    });
-    return matches.take(5).toList(growable: false);
+    for (final candidate in _allCandidates) {
+      if (normalizedQuery.isNotEmpty &&
+          !candidate.searchText.contains(normalizedQuery)) {
+        continue;
+      }
+
+      final target =
+          normalizedQuery.isEmpty ||
+              candidate.normalizedLabel.startsWith(normalizedQuery)
+          ? prefixMatches
+          : otherMatches;
+      _insertSortedCandidate(target, candidate);
+    }
+
+    if (prefixMatches.length == _maxMentionSuggestions) {
+      return List<ChatMentionCandidate>.unmodifiable(prefixMatches);
+    }
+
+    if (otherMatches.isEmpty) {
+      return List<ChatMentionCandidate>.unmodifiable(prefixMatches);
+    }
+
+    return List<ChatMentionCandidate>.unmodifiable([
+      ...prefixMatches,
+      ...otherMatches.take(_maxMentionSuggestions - prefixMatches.length),
+    ]);
   }
 
   @override
@@ -357,6 +381,31 @@ class _ChatMentionDraftController extends ChangeNotifier {
     }
     tokens.sort((a, b) => a.start.compareTo(b.start));
     return tokens;
+  }
+}
+
+const _maxMentionSuggestions = 5;
+
+void _insertSortedCandidate(
+  List<ChatMentionCandidate> candidates,
+  ChatMentionCandidate candidate,
+) {
+  var insertAt = candidates.length;
+  for (var index = 0; index < candidates.length; index++) {
+    if (candidate.label.compareTo(candidates[index].label) < 0) {
+      insertAt = index;
+      break;
+    }
+  }
+
+  if (insertAt == candidates.length &&
+      candidates.length >= _maxMentionSuggestions) {
+    return;
+  }
+
+  candidates.insert(insertAt, candidate);
+  if (candidates.length > _maxMentionSuggestions) {
+    candidates.removeLast();
   }
 }
 
