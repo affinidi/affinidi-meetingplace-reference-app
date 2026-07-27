@@ -362,6 +362,7 @@ class _StepUpApproveRequestChatItemState
           '${path.extension(safeName)}';
       final tempFile = File('${tempDir.path}/$uniqueName');
       await tempFile.writeAsBytes(bytes);
+
       final opened = await OpenFilex.open(tempFile.path);
       if (opened.type != ResultType.done) {
         // No app could open the file (or user has none registered) — fall back
