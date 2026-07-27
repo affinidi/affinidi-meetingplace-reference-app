@@ -40,9 +40,6 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     onResumed: _handleAppResumed,
   );
 
-  static const _logKey = 'PERSONAL_AI';
-  late final AppLogger _logger = _ref.read(appLoggerProvider);
-
   Environment get _environment => _ref.read(environmentProvider);
 
   late final MeetingPlacePersonalAgentSDK _sdk =

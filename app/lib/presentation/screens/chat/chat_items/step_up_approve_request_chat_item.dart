@@ -362,9 +362,14 @@ class _StepUpApproveRequestChatItemState
           '${path.extension(safeName)}';
       final tempFile = File('${tempDir.path}/$uniqueName');
       await tempFile.writeAsBytes(bytes);
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(tempFile.path)]),
-      );
+      final opened = await OpenFilex.open(tempFile.path);
+      if (opened.type != ResultType.done) {
+        // No app could open the file (or user has none registered) — fall back
+        // to the share sheet so the approver can still access it.
+        await SharePlus.instance.share(
+          ShareParams(files: [XFile(tempFile.path)]),
+        );
+      }
       if (mounted) setState(() => _downloading = false);
     } catch (e) {
       if (mounted) {

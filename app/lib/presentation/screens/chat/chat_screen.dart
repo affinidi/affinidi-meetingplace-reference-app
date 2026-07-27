@@ -19,6 +19,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show VrcExchangeRole;
 import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';

@@ -154,9 +154,12 @@ class _SignDocumentReviewChatItemState
           '${path.extension(safeName)}';
       final tempFile = File('${tempDir.path}/$uniqueName');
       await tempFile.writeAsBytes(bytes);
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(tempFile.path)]),
-      );
+      final opened = await OpenFilex.open(tempFile.path);
+      if (opened.type != ResultType.done) {
+        await SharePlus.instance.share(
+          ShareParams(files: [XFile(tempFile.path)]),
+        );
+      }
       if (mounted) setState(() => _busy = false);
     } catch (e) {
       if (mounted) {

@@ -85,6 +85,7 @@ dependencies:
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
   pie_menu: ^3.3.0
+  open_filex: ^4.5.0
   qr_flutter: ^4.1.0
   record: ^6.2.1
   riverpod_annotation: ^3.0.3
