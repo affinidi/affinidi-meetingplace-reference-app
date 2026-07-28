@@ -5,9 +5,14 @@ import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 
 String chatMentionDisplayNameForMember(sdk.GroupMember member) {
-  final firstName = member.contactCard.firstName.trim();
-  final fullName = member.contactCard.fullName.trim();
+  String normalize(String value) {
+    final cleaned = value.trim().replaceFirst(RegExp(r'^@+'), '');
+    return cleaned.split(RegExp(r'\s+')).first;
+  }
+
+  final firstName = normalize(member.contactCard.firstName);
   if (firstName.isNotEmpty) return firstName;
+  final fullName = normalize(member.contactCard.fullName);
   if (fullName.isNotEmpty) return fullName;
   return member.did;
 }

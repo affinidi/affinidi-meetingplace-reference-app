@@ -54,11 +54,15 @@ part 'chat_screen_controller.g.dart';
 
 final chatMentionCandidatesProvider =
     Provider.family<List<ChatMentionCandidate>, String>((ref, contactId) {
-      final state = ref.watch(chatScreenControllerProvider(contactId));
+      final group = ref.watch(
+        chatScreenControllerProvider(contactId).select((state) => state.group),
+      );
+      final myDid = ref.watch(
+        chatScreenControllerProvider(contactId).select((state) => state.myDid),
+      );
       final cacheManager = ref.read(cacheManagerProvider);
-      final myDid = state.myDid;
 
-      return state.group?.members
+      return group?.members
               .where(
                 (member) =>
                     member.status == sdk.GroupMemberStatus.approved &&
