@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:meeting_place_personal_agent/meeting_place_personal_agent.dart';
-import 'package:vta_dart_client/vta_dart_client.dart';
+import 'package:meeting_place_vta_client/meeting_place_vta_client.dart';
 
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_category.dart';

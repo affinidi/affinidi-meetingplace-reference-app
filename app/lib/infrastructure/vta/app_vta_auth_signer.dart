@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:meeting_place_vta_client/meeting_place_vta_client.dart';
 import 'package:ssi/ssi.dart';
-import 'package:vta_dart_client/vta_dart_client.dart';
 
 class AppVtaAuthSigner implements VtaAuthSigner {
   AppVtaAuthSigner({

@@ -29,26 +29,26 @@ packages:
     dependency: transitive
     description:
       name: affinidi_tdk_didcomm_mediator_client
-      sha256: e37a49066822055e7c7fff3bf301f9a0e5d5057d0b058918bed06974bc77bb92
+      sha256: ef9df1c5c061f773187efd4e9034bf901a3969d78b71cc001a1d9658a2af97a8
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.3"
   affinidi_tdk_vdip:
     dependency: transitive
     description:
       name: affinidi_tdk_vdip
-      sha256: "2df64df6e950e63c7d74fed05414630a0a21fa45f414513a300b23b7b1d08435"
+      sha256: bc16a2d2f5fff9d3a960adcafcad2b2f5cc55f5b224bb74054b9b5843eb30962
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   affinidi_tdk_vdsp:
     dependency: transitive
     description:
       name: affinidi_tdk_vdsp
-      sha256: cf7449a2a836c73c957cf7169f3d0c7c89528f83ea1bccc8af06ac7f5215ff66
+      sha256: "0000e19f8791ade711086303f0995a585d489f1aa97d9f403eb2348031d36a22"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   analyzer:
     dependency: transitive
     description:
@@ -293,10 +293,10 @@ packages:
     dependency: transitive
     description:
       name: camera_android_camerax
-      sha256: cf6c248ef3d3c4846e99e488de9487d95927437e083c396e5fed2c1ece7f93a7
+      sha256: "4fb17b62dc25f97ec752596b749a31e80ccc9829ef95412badfdf0bc6c43a166"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.4+1"
+    version: "0.7.4+2"
   camera_avfoundation:
     dependency: transitive
     description:
@@ -437,10 +437,10 @@ packages:
     dependency: transitive
     description:
       name: connectivity_plus
-      sha256: "25cebb79dfe304022550e0c3c893ae051ded07183d2607f7b88473cb3ade33cb"
+      sha256: "762c99f890ca8bf87f7337236f99edd42793843bc6c3631da294a76653a54bd0"
       url: "https://pub.dev"
     source: hosted
-    version: "7.3.0"
+    version: "7.3.1"
   connectivity_plus_platform_interface:
     dependency: transitive
     description:
@@ -605,18 +605,18 @@ packages:
     dependency: transitive
     description:
       name: dio
-      sha256: ea2bad3c89a27635ce2d85cce4d6b199da49a5a48ec77b03e45b65a3b90922b0
+      sha256: "0df44ebba85e503958eb75d07eedd3c86275a58c1d3eda2f2ce8f0a2c3abbb3c"
       url: "https://pub.dev"
     source: hosted
-    version: "5.10.0"
+    version: "5.11.0"
   dio_web_adapter:
     dependency: transitive
     description:
       name: dio_web_adapter
-      sha256: dd58dc3861eb36edb13b217efc006a1c21e5bbc341de8c229b85634fa5e362e4
+      sha256: "0786d0b7295a373de356fc0af4f6f1d0ab2844ed31b19dfc5e7556b70e24212c"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.1"
   dlibphonenumber:
     dependency: transitive
     description:
@@ -834,10 +834,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_cache_manager
-      sha256: "400b6592f16a4409a7f2bb929a9a7e38c72cceb8ffb99ee57bbf2cb2cecf8386"
+      sha256: "1de7849213b4c73c85aca7e0ac687a9a5d82ccdb594366b9dcc26cb6a2189cd2"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.1"
+    version: "3.4.2"
   flutter_card_swiper:
     dependency: transitive
     description:
@@ -927,10 +927,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_secure_storage_platform_interface
-      sha256: "8ceea1223bee3c6ac1a22dabd8feefc550e4729b3675de4b5900f55afcb435d6"
+      sha256: "06686df417f34fe9f963ed217b7fdce250e2f637ddd6c374d7eb054549770633"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.2"
   flutter_secure_storage_web:
     dependency: transitive
     description:
@@ -1025,10 +1025,10 @@ packages:
     dependency: transitive
     description:
       name: go_router_builder
-      sha256: d67db3885eb0255e3782369c265be2d56050481ad9e56eec010cbffd7bf53ae2
+      sha256: "53253ae5bd3d3bfc38c5488ca844f6b054c4b905683667db4544e7ab995fddcc"
       url: "https://pub.dev"
     source: hosted
-    version: "4.3.1"
+    version: "4.4.0"
   graphs:
     dependency: transitive
     description:
@@ -1201,10 +1201,10 @@ packages:
     dependency: transitive
     description:
       name: jni
-      sha256: c2230682d5bc2362c1c9e8d3c7f406d9cbba23ab3f2e203a025dd47e0fb2e68f
+      sha256: ca1efa31ef27a0b8ecbb4f8dcf3785e5ad1b8a54c64af9b72d287ae81f93a4f4
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.1"
   jni_flutter:
     dependency: transitive
     description:
@@ -1213,6 +1213,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
+  jni_util:
+    dependency: transitive
+    description:
+      name: jni_util
+      sha256: "1ba86da04a5f2bf18fde2edb235587e70c5b0fc5bd4ba955f46b00942c3fc35f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   json_annotation:
     dependency: "direct overridden"
     description:
@@ -1352,62 +1360,59 @@ packages:
   meeting_place_chat:
     dependency: "direct overridden"
     description:
-      path: "packages/meeting_place_chat"
-      ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      resolved-ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
+      path: "../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_chat"
+      relative: true
+    source: path
     version: "0.0.1-dev.50"
   meeting_place_control_plane:
     dependency: "direct overridden"
     description:
-      path: "packages/meeting_place_control_plane"
-      ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      resolved-ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
+      path: "../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_control_plane"
+      relative: true
+    source: path
     version: "0.0.1-dev.20"
   meeting_place_core:
     dependency: "direct overridden"
     description:
-      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_core"
+      path: "../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_core"
       relative: true
     source: path
     version: "0.0.1-dev.43"
   meeting_place_credentials:
     dependency: "direct overridden"
     description:
-      path: "packages/meeting_place_credentials"
-      ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      resolved-ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
+      path: "../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_credentials"
+      relative: true
+    source: path
     version: "0.0.1-dev.8"
   meeting_place_drift_repository:
     dependency: "direct overridden"
     description:
-      path: "packages/meeting_place_drift_repository"
-      ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      resolved-ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
+      path: "../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_drift_repository"
+      relative: true
+    source: path
     version: "0.0.1-dev.50"
   meeting_place_mediator:
     dependency: "direct overridden"
     description:
-      path: "packages/meeting_place_mediator"
-      ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      resolved-ref: "333c7d548f11ba0207eb1a3e753ce7495dbf5c81"
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
+      path: "../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_mediator"
+      relative: true
+    source: path
     version: "0.0.1-dev.15"
   meeting_place_personal_agent:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      path: "../affinidi-meetingplace-sdk-dart/packages/meeting_place_personal_agent"
+      path: "../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_personal_agent"
       relative: true
     source: path
     version: "0.0.1-dev.1"
+  meeting_place_vta_client:
+    dependency: "direct overridden"
+    description:
+      path: "../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_vta_client"
+      relative: true
+    source: path
+    version: "1.0.0"
   melos:
     dependency: "direct dev"
     description:
@@ -1724,10 +1729,10 @@ packages:
     dependency: transitive
     description:
       name: posix
-      sha256: "185ef7606574f789b40f289c233efa52e96dead518aed988e040a10737febb07"
+      sha256: bc1bad54ad2b735816e31f8d4600cfde6c7839975085ddfbca48b6c9f7c4044e
       url: "https://pub.dev"
     source: hosted
-    version: "6.5.0"
+    version: "6.5.2"
   process:
     dependency: transitive
     description:
@@ -1972,18 +1977,18 @@ packages:
     dependency: transitive
     description:
       name: share_plus
-      sha256: "02180b01c1237b9706b663d9402b2cf2402b3407f48cce99cc19e3200f095b8a"
+      sha256: "34f00f9becd2743c1fb05363d624f9f70d37f7ccdcdda47450bc0b8c9d327b8c"
       url: "https://pub.dev"
     source: hosted
-    version: "13.2.1"
+    version: "13.3.0"
   share_plus_platform_interface:
     dependency: transitive
     description:
       name: share_plus_platform_interface
-      sha256: "7f7ae28cf400d13f811e297ff37742dba83b79e0a6f5dce14eec0248274e6ce9"
+      sha256: "365ef7379fc22507256adda3385152942ffce08935452bc972c2e52a0bebae41"
       url: "https://pub.dev"
     source: hosted
-    version: "7.1.0"
+    version: "7.2.0"
   shared_preferences:
     dependency: transitive
     description:
@@ -2105,10 +2110,10 @@ packages:
     dependency: transitive
     description:
       name: source_gen
-      sha256: ec37cc0e6694374cbef59ed79685572c870a54ede6fa30a3e420feb3adffea02
+      sha256: a603f1fb984a7391ae5978d1b92bfaaa08b350dca5c825256f925818f7943bf5
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.3"
+    version: "4.2.4"
   source_helper:
     dependency: transitive
     description:
@@ -2265,10 +2270,10 @@ packages:
     dependency: transitive
     description:
       name: synchronized
-      sha256: "93b153dcb6a26dcddee6ca087dd634b53e38c10b5aa163e8e49501a776456153"
+      sha256: "61894a1956de6b4fc1aefd0892e109514a1a706cbece3ac59decd90ff5a7a423"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.1"
+    version: "3.4.1+1"
   term_glyph:
     dependency: transitive
     description:
@@ -2453,13 +2458,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.0"
-  vta_dart_client:
-    dependency: "direct overridden"
-    description:
-      path: "../vta-dart-client"
-      relative: true
-    source: path
-    version: "1.0.0"
   watcher:
     dependency: transitive
     description:

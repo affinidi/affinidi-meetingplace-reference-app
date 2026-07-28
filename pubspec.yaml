@@ -19,39 +19,53 @@ dependency_overrides:
   meeting_place_chat:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 333c7d548f11ba0207eb1a3e753ce7495dbf5c81
+      ref: e948494b282910f2f1c2a62103ec4b001b4b48e3
       path: packages/meeting_place_chat
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_chat
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_chat
   meeting_place_control_plane:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 333c7d548f11ba0207eb1a3e753ce7495dbf5c81
+      ref: e948494b282910f2f1c2a62103ec4b001b4b48e3
       path: packages/meeting_place_control_plane
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_control_plane
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_control_plane
   meeting_place_core:
-    path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_core
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: e948494b282910f2f1c2a62103ec4b001b4b48e3
+      path: packages/meeting_place_core
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_core
   meeting_place_credentials:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 333c7d548f11ba0207eb1a3e753ce7495dbf5c81
+      ref: e948494b282910f2f1c2a62103ec4b001b4b48e3
       path: packages/meeting_place_credentials
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_credentials
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_credentials
   meeting_place_drift_repository:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 333c7d548f11ba0207eb1a3e753ce7495dbf5c81
+      ref: e948494b282910f2f1c2a62103ec4b001b4b48e3
       path: packages/meeting_place_drift_repository
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_drift_repository
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_drift_repository
   meeting_place_mediator:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 333c7d548f11ba0207eb1a3e753ce7495dbf5c81
+      ref: e948494b282910f2f1c2a62103ec4b001b4b48e3
       path: packages/meeting_place_mediator
-    # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_mediator
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_mediator
+  meeting_place_personal_agent:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: chore/cierge-integration
+      path: packages/meeting_place_personal_agent
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_personal_agent
+  meeting_place_vta_client:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: chore/cierge-integration
+      path: packages/meeting_place_vta_client
+    # path: ../../../../affinidi-meetingplace-sdk-dart/worktrees/feat/vta-client-sdk/packages/meeting_place_vta_client
   meta: ^1.18.2
   test_api: ^0.7.12
-  vta_dart_client:
-    path: ../vta-dart-client
   
 melos:
   scripts:

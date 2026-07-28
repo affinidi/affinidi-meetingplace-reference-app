@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:vta_dart_client/vta_dart_client.dart';
+import 'package:meeting_place_vta_client/meeting_place_vta_client.dart';
 import 'package:web_socket_channel/io.dart';
 
 class AuthenticatedWebSocketChannel implements VtaDidCommChannel {
