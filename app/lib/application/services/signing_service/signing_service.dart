@@ -10,6 +10,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:ssi/ssi.dart';
 import 'package:vta_dart_client/vta_dart_client.dart';
 
+import '../../../domain/models/trust_task/trust_task_record.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -371,17 +372,50 @@ class SigningService extends StateNotifier<SigningServiceState> {
     }
   }
 
-  Future<List<Map<String, dynamic>>> getSigningAuditLogs({
-    int pageSize = 10,
+  /// Fetches a page of trust-task (document/message signing) history from the
+  /// VTA audit log. Captures both autonomous and step-up gated signings, and
+  /// every outcome (success and denied), newest-first.
+  ///
+  /// Requires the app's VTA identity to hold an admin ACL role (the audit
+  /// endpoint is admin-gated). Returns an empty page when VTA is not connected.
+  Future<TrustTaskHistoryPage> fetchTrustTaskHistory({
+    int page = 1,
+    int pageSize = 20,
   }) async {
-    if (_vtaClient == null || _authWorkflow == null) return [];
+    if (_vtaClient == null || _authWorkflow == null) {
+      return const TrustTaskHistoryPage.empty();
+    }
     return _withReauth(() async {
       final result = await _vtaClient!.auditLog.listLogs(
         action: 'vault.sign-trust-task',
-        outcome: 'success',
+        page: page,
         pageSize: pageSize,
       );
-      return (result['entries'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+      return TrustTaskHistoryPage.fromResponse(result);
+    });
+  }
+
+  /// Returns raw VTA `vault.sign-trust-task` audit-log entries, used to resolve
+  /// verification details for a specific signed document. Returns an empty list
+  /// when the VTA client is not available.
+  Future<List<Map<String, dynamic>>> getSigningAuditLogs({
+    int page = 1,
+    int pageSize = 100,
+  }) async {
+    if (_vtaClient == null || _authWorkflow == null) {
+      return const [];
+    }
+    return _withReauth(() async {
+      final result = await _vtaClient!.auditLog.listLogs(
+        action: 'vault.sign-trust-task',
+        page: page,
+        pageSize: pageSize,
+      );
+      final entries = (result['entries'] as List?) ?? const [];
+      return entries
+          .whereType<Map>()
+          .map((e) => e.cast<String, dynamic>())
+          .toList(growable: false);
     });
   }
 

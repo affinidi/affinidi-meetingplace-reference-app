@@ -612,5 +612,16 @@
 	"mnemonicManualHint": "palabra1 palabra2 palabra3 ...",
 	"mnemonicContinue": "Continuar",
 	"mnemonicSuccessTitle": "¡Todo listo!",
-	"mnemonicSuccessSubtitle": "Disfruta MeetingPlace y conéctate con tu agente de IA personal."
+	"mnemonicSuccessSubtitle": "Disfruta MeetingPlace y conéctate con tu agente de IA personal.",
+	"trustTaskHistoryTitle": "Historial de tareas de confianza",
+	"trustTaskHistoryRefresh": "Actualizar",
+	"trustTaskHistoryEmpty": "Aún no hay tareas de confianza",
+	"trustTaskHistoryError": "No se pudo cargar el historial",
+	"trustTaskHistoryRetry": "Reintentar",
+	"trustTaskHistoryLoadMore": "Cargar más",
+	"trustTaskHistoryItemTitle": "Solicitud de firma",
+	"trustTaskHistoryDetails": "Detalles",
+	"trustTaskStatusSigned": "Firmado",
+	"trustTaskStatusDenied": "Bloqueado",
+	"trustTaskStatusUnknown": "Desconocido"
 }

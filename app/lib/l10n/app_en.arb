@@ -2154,5 +2154,16 @@
 	"mnemonicManualHint": "word1 word2 word3 ...",
 	"mnemonicContinue": "Continue",
 	"mnemonicSuccessTitle": "You're all set!",
-	"mnemonicSuccessSubtitle": "Enjoy MeetingPlace and get engaged\nwith your personal AI agent."
+	"mnemonicSuccessSubtitle": "Enjoy MeetingPlace and get engaged\nwith your personal AI agent.",
+	"trustTaskHistoryTitle": "Trust task history",
+	"trustTaskHistoryRefresh": "Refresh",
+	"trustTaskHistoryEmpty": "No trust tasks yet",
+	"trustTaskHistoryError": "Couldn't load trust task history",
+	"trustTaskHistoryRetry": "Retry",
+	"trustTaskHistoryLoadMore": "Load more",
+	"trustTaskHistoryItemTitle": "Signing request",
+	"trustTaskHistoryDetails": "Details",
+	"trustTaskStatusSigned": "Signed",
+	"trustTaskStatusDenied": "Blocked",
+	"trustTaskStatusUnknown": "Unknown"
 }

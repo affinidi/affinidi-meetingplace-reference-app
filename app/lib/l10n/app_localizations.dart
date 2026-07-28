@@ -3651,6 +3651,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enjoy MeetingPlace and get engaged\nwith your personal AI agent.'**
   String get mnemonicSuccessSubtitle;
+
+  /// No description provided for @trustTaskHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trust task history'**
+  String get trustTaskHistoryTitle;
+
+  /// No description provided for @trustTaskHistoryRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get trustTaskHistoryRefresh;
+
+  /// No description provided for @trustTaskHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No trust tasks yet'**
+  String get trustTaskHistoryEmpty;
+
+  /// No description provided for @trustTaskHistoryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load trust task history'**
+  String get trustTaskHistoryError;
+
+  /// No description provided for @trustTaskHistoryRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get trustTaskHistoryRetry;
+
+  /// No description provided for @trustTaskHistoryLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get trustTaskHistoryLoadMore;
+
+  /// No description provided for @trustTaskHistoryItemTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing request'**
+  String get trustTaskHistoryItemTitle;
+
+  /// No description provided for @trustTaskHistoryDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get trustTaskHistoryDetails;
+
+  /// No description provided for @trustTaskStatusSigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed'**
+  String get trustTaskStatusSigned;
+
+  /// No description provided for @trustTaskStatusDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get trustTaskStatusDenied;
+
+  /// No description provided for @trustTaskStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get trustTaskStatusUnknown;
 }
 
 class _AppLocalizationsDelegate

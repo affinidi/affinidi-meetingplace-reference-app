@@ -2390,4 +2390,37 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get mnemonicSuccessSubtitle =>
       'Disfruta MeetingPlace y conéctate con tu agente de IA personal.';
+
+  @override
+  String get trustTaskHistoryTitle => 'Historial de tareas de confianza';
+
+  @override
+  String get trustTaskHistoryRefresh => 'Actualizar';
+
+  @override
+  String get trustTaskHistoryEmpty => 'Aún no hay tareas de confianza';
+
+  @override
+  String get trustTaskHistoryError => 'No se pudo cargar el historial';
+
+  @override
+  String get trustTaskHistoryRetry => 'Reintentar';
+
+  @override
+  String get trustTaskHistoryLoadMore => 'Cargar más';
+
+  @override
+  String get trustTaskHistoryItemTitle => 'Solicitud de firma';
+
+  @override
+  String get trustTaskHistoryDetails => 'Detalles';
+
+  @override
+  String get trustTaskStatusSigned => 'Firmado';
+
+  @override
+  String get trustTaskStatusDenied => 'Bloqueado';
+
+  @override
+  String get trustTaskStatusUnknown => 'Desconocido';
 }
