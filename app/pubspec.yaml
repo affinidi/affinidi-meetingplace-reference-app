@@ -76,7 +76,10 @@ dependencies:
   meeting_place_credentials: ^0.0.1-dev.8
   meeting_place_drift_repository: ^0.0.1-dev.50
   meeting_place_personal_agent:
-    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_personal_agent
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: chore/cierge-integration
+      path: packages/meeting_place_personal_agent
   mobile_scanner: ^7.2.0
   mpx_app_core:
     path: ../packages/app-core
@@ -102,8 +105,11 @@ dependencies:
   uuid: ^4.5.1
   vc_zkp: ^1.2.5
   video_player: ^2.11.1
-  vta_dart_client:
-    path: ../../vta-dart-client
+  meeting_place_vta_client:
+    git:
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      ref: chore/cierge-integration
+      path: packages/meeting_place_vta_client
   web_socket_channel: ^3.0.3
 
 dependency_overrides:

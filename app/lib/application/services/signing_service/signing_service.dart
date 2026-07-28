@@ -7,8 +7,8 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_vta_client/meeting_place_vta_client.dart';
 import 'package:ssi/ssi.dart';
-import 'package:vta_dart_client/vta_dart_client.dart';
 
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vta_dart_client/vta_dart_client.dart';
+import 'package:meeting_place_vta_client/meeting_place_vta_client.dart';
 
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
