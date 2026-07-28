@@ -9,7 +9,10 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/personal_ai_service/personal_ai_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/personal_ai_service/personal_ai_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/signing_service/signing_service.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/personal_agent/personal_agent_screen_controller.dart';
+
+import '../../../mocks/fake_app_logger.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +31,7 @@ void main() {
 
       final container = ProviderContainer(
         overrides: [
+          appLoggerProvider.overrideWithValue(FakeAppLogger()),
           identitiesServiceProvider.overrideWith(_FakeIdentitiesService.new),
           personalAiServiceProvider.overrideWith(
             (ref) => _FakePersonalAiNotifier(),

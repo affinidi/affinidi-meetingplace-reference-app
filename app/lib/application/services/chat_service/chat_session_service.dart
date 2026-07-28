@@ -529,6 +529,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<void> sendTextMessage(
     String message, {
     List<ChatAttachment>? attachments,
+    List<ChatMention> mentions = const [],
   }) async {
     final sdk = _chatSDK;
     if (sdk == null) {
@@ -536,6 +537,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         id: const Uuid().v4(),
         text: message,
         attachments: List<ChatAttachment>.from(attachments ?? const []),
+        mentions: List<ChatMention>.from(mentions),
       );
       _bufferedOutboundMessages.add(bufferedMessage);
       _logger.info(
@@ -545,7 +547,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       return;
     }
 
-    await sdk.sendTextMessage(message, attachments: attachments ?? const []);
+    await sdk.sendTextMessage(
+      message,
+      attachments: attachments ?? const [],
+      mentions: mentions,
+    );
   }
 
   Future<void> _flushBufferedOutboundMessages() async {
@@ -588,6 +594,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         await currentSdk.sendTextMessage(
           bufferedMessage.text,
           attachments: bufferedMessage.attachments,
+          mentions: bufferedMessage.mentions,
         );
       } catch (error, stackTrace) {
         _bufferedOutboundMessages.insertAll(0, batch.skip(index));
@@ -735,8 +742,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
-  Future<void> editTextMessage(Message message, String newText) async {
-    await _chatSDK?.editTextMessage(message, newText);
+  Future<void> editTextMessage(
+    Message message,
+    String newText, {
+    List<ChatMention>? mentions,
+  }) async {
+    await _chatSDK?.editTextMessage(message, newText, mentions: mentions);
   }
 
   @override
@@ -1231,9 +1242,11 @@ class _BufferedOutboundMessage {
     required this.id,
     required this.text,
     required this.attachments,
+    required this.mentions,
   });
 
   final String id;
   final String text;
   final List<ChatAttachment> attachments;
+  final List<ChatMention> mentions;
 }

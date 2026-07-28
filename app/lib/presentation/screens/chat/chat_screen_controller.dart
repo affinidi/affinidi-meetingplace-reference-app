@@ -37,18 +37,48 @@ import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachm
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
+import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
+import 'chat_mention_candidate.dart';
+import 'chat_mention_text_spans.dart';
 import 'chat_screen_state.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp_handler.dart';
 import 'proof_flow_controller.dart';
 
 part 'chat_screen_controller.g.dart';
+
+final chatMentionCandidatesProvider =
+    Provider.family<List<ChatMentionCandidate>, String>((ref, contactId) {
+      final group = ref.watch(
+        chatScreenControllerProvider(contactId).select((state) => state.group),
+      );
+      final myDid = ref.watch(
+        chatScreenControllerProvider(contactId).select((state) => state.myDid),
+      );
+      final cacheManager = ref.read(cacheManagerProvider);
+
+      return group?.members
+              .where(
+                (member) =>
+                    member.status == sdk.GroupMemberStatus.approved &&
+                    member.did != myDid,
+              )
+              .map(
+                (member) => ChatMentionCandidate.fromGroupMember(
+                  member,
+                  cacheManager: cacheManager,
+                ),
+              )
+              .where((candidate) => candidate.label.isNotEmpty)
+              .toList() ??
+          const [];
+    });
 
 @riverpod
 /// Controller class for managing the state and logic of the chat screen.
@@ -64,7 +94,7 @@ class ChatScreenController extends _$ChatScreenController
   static final _maxChatMessageLength = MaxLengthValidatorType.extraLong.value;
   static const _suggestionRequestTimeout = Duration(seconds: 12);
 
-  late final messageTextController = TextEditingController();
+  late final messageTextController = ChatMentionHighlightingTextController();
   late final _logger = ref.read(appLoggerProvider);
   late final _zkpHandler = ChatZkpHandler(
     ref: ref,
@@ -676,7 +706,7 @@ class ChatScreenController extends _$ChatScreenController
   ///
   /// The message text is trimmed and validated before sending.
   /// Clears the input field upon successful send.
-  Future<void> sendMessage() async {
+  Future<void> sendMessage({List<chat.ChatMention> mentions = const []}) async {
     final originalText = messageTextController.text;
     final trimmedMessage = originalText.trimRight();
     if (trimmedMessage.isEmpty) return;
@@ -691,6 +721,7 @@ class ChatScreenController extends _$ChatScreenController
       await (_chatService?.sendTextMessage(
             trimmedMessage,
             attachments: attachments,
+            mentions: mentions,
           ) ??
           Future<void>.value());
       _sendChatActivityTimedAction?.cancel();
@@ -713,6 +744,7 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> sendMessageDirect(
     String message, {
     List<ChatAttachment>? attachments,
+    List<chat.ChatMention> mentions = const [],
   }) async {
     final trimmedMessage = message.trimRight();
     // Allow empty messages if attachments are present
@@ -730,6 +762,7 @@ class ChatScreenController extends _$ChatScreenController
     await (_chatService?.sendTextMessage(
           trimmedMessage,
           attachments: combinedAttachments,
+          mentions: mentions,
         ) ??
         Future<void>.value());
   }
@@ -1077,7 +1110,11 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  Future<void> editTextMessage(String messageId, String newText) async {
+  Future<void> editTextMessage(
+    String messageId,
+    String newText, {
+    List<chat.ChatMention>? mentions,
+  }) async {
     final idx = state.messages.indexWhere((m) => m.messageId == messageId);
     final message = idx == -1 ? null : state.messages[idx] as chat.Message?;
 
@@ -1088,7 +1125,7 @@ class ChatScreenController extends _$ChatScreenController
       );
     }
 
-    await _chatService?.editTextMessage(message, newText);
+    await _chatService?.editTextMessage(message, newText, mentions: mentions);
   }
 
   /// Sends a [ScreenEffect] to the chat screen.
@@ -1543,6 +1580,13 @@ extension ChatScreenControllerProviderSelectors
     return select(
       (state) =>
           state.capabilities?.supports(chat.ChatFeature.messageEdit) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsMentions {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.mentions) ?? false,
     );
   }
 

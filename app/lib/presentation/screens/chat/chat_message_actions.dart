@@ -32,6 +32,10 @@ class _ChatMessageActions extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final supportsMessageDelete = ref.watch(provider.supportsMessageDelete);
     final supportsMessageEdit = ref.watch(provider.supportsMessageEdit);
+    final supportsMentions = ref.watch(provider.supportsMentions);
+    final mentionCandidates = ref.watch(
+      chatMentionCandidatesProvider(_contactId),
+    );
 
     Future<void> copy() async {
       if (!context.mounted) return;
@@ -51,16 +55,23 @@ class _ChatMessageActions extends ConsumerWidget {
     }
 
     Future<void> edit() async {
-      final newText = await _EditMessageDialog.show(
+      final result = await _EditMessageDialog.show(
         context,
         initialText: _message.value,
+        initialMentions: _message.mentions,
+        supportsMentions: supportsMentions,
+        mentionCandidates: mentionCandidates,
       );
 
-      if (newText == null) return;
+      if (result == null) return;
       Navigator.of(context).pop();
 
       try {
-        await controller.editTextMessage(_message.messageId, newText);
+        await controller.editTextMessage(
+          _message.messageId,
+          result.text,
+          mentions: result.mentions,
+        );
       } catch (_) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
