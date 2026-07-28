@@ -32,10 +32,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     WidgetsBinding.instance.addObserver(_lifecycleObserver);
     unawaited(_restoreSessionAfterRestart());
   }
-  static const _logKey = 'PAISVC';
 
   final Ref _ref;
-  late final _logger = _ref.read(appLoggerProvider);
   late final _lifecycleObserver = _PersonalAiLifecycleObserver(
     onResumed: _handleAppResumed,
   );
