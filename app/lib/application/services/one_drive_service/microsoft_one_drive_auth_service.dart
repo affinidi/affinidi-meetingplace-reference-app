@@ -31,10 +31,8 @@ class MicrosoftOneDriveOAuthResult {
 }
 
 class MicrosoftOneDriveAuthService {
-  MicrosoftOneDriveAuthService(
-    this._ref, {
-    FlutterAppAuth? appAuth,
-  }) : _appAuth = appAuth ?? const FlutterAppAuth();
+  MicrosoftOneDriveAuthService(this._ref, {FlutterAppAuth? appAuth})
+    : _appAuth = appAuth ?? const FlutterAppAuth();
 
   static const _logKey = 'ONEDRIVEAUTH';
 

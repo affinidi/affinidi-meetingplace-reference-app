@@ -88,6 +88,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     required String text,
     required String recipientDid,
     List<ChatAttachment>? attachments,
+    List<ChatMention> mentions = const [],
     bool isFromMe = false,
     String senderDid = 'fake-sender-did',
   }) {
@@ -119,6 +120,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       isFromMe: isFromMe,
       senderDid: senderDid,
       attachments: normalizedAttachments,
+      mentions: mentions,
     );
 
     final chatEvent = UnhandledChatEvent(
@@ -568,6 +570,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   Future<Message> sendTextMessage(
     String text, {
     List<ChatAttachment>? attachments,
+    List<ChatMention> mentions = const [],
   }) async {
     if (sendTextMessageFailuresRemaining > 0) {
       sendTextMessageFailuresRemaining--;
@@ -575,7 +578,11 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
     }
 
     // Track the call
-    sendTextMessageCalls.add({'text': text, 'attachments': attachments});
+    sendTextMessageCalls.add({
+      'text': text,
+      'attachments': attachments,
+      'mentions': mentions,
+    });
 
     var normalizedAttachments = attachments ?? const <ChatAttachment>[];
     final firstAttachment = normalizedAttachments.firstOrNull;
@@ -705,7 +712,10 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   /// Simulates a sent (own) text message appearing in the stream.
-  void simulateSentTextMessage({required String text}) {
+  void simulateSentTextMessage({
+    required String text,
+    List<ChatMention> mentions = const [],
+  }) {
     final message = Message(
       chatId: 'fake-chat-id',
       messageId: 'msg-sent-${DateTime.now().microsecondsSinceEpoch}',
@@ -715,6 +725,7 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
       isFromMe: true,
       senderDid: 'fake-my-did',
       attachments: [],
+      mentions: mentions,
     );
     final chatEvent = UnhandledChatEvent(
       type: 'https://affinidi.com/chat/1.0/message',
@@ -726,8 +737,16 @@ class FakeChatSdk implements MeetingPlaceChatSDK {
   }
 
   @override
-  Future<void> editTextMessage(Message message, String newText) async {
-    editTextMessageCalls.add({'message': message, 'newText': newText});
+  Future<void> editTextMessage(
+    Message message,
+    String newText, {
+    List<ChatMention>? mentions,
+  }) async {
+    editTextMessageCalls.add({
+      'message': message,
+      'newText': newText,
+      'mentions': mentions,
+    });
     message.value = newText;
     message.editedAt = DateTime.now().toUtc();
     _emit(StreamData(chatItem: message));

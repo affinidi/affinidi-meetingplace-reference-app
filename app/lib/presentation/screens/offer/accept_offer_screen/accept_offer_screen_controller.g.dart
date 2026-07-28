@@ -62,7 +62,7 @@ final class AcceptOfferScreenControllerProvider
 }
 
 String _$acceptOfferScreenControllerHash() =>
-    r'a1b2cd9d6c89e62bdf87fd824582a8e8dab71fa0';
+    r'016dfa5462f6dd67c74a19da64d395977503a7b3';
 
 final class AcceptOfferScreenControllerFamily extends $Family
     with

@@ -1,9 +1,11 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
@@ -19,6 +21,33 @@ Finder findSendButton() => find.byKey(const Key('chat_send_button'));
 Finder findAddMediaButton() => find.byKey(const Key('chat_add_media_button'));
 Finder findGifButton() => find.byKey(const Key('chat_gif_button'));
 
+List<TextSpan> flattenTextSpans(TextSpan span) {
+  final flattened = <TextSpan>[];
+  for (final child in span.children ?? const <InlineSpan>[]) {
+    if (child is! TextSpan) continue;
+    flattened.add(child);
+    flattened.addAll(flattenTextSpans(child));
+  }
+  return flattened;
+}
+
+const groupMentionCapabilities = TransportCapabilities({
+  ChatFeature.textMessaging,
+  ChatFeature.mentions,
+  ChatFeature.imageAttachments,
+  ChatFeature.videoAttachments,
+  ChatFeature.documentAttachments,
+  ChatFeature.voiceMessages,
+  ChatFeature.reactions,
+  ChatFeature.typingIndicators,
+  ChatFeature.deliveryReceipts,
+  ChatFeature.messageEdit,
+  ChatFeature.messageDelete,
+  ChatFeature.effects,
+  ChatFeature.contactDetailsUpdate,
+  ChatFeature.suggestionRequests,
+});
+
 Future<void> enterChatMessage(WidgetTester tester, String message) async {
   await tester.enterText(findChatMessageInput(), message);
   await tester.pumpAndSettle();
@@ -26,6 +55,11 @@ Future<void> enterChatMessage(WidgetTester tester, String message) async {
 
 Future<void> tapSendButton(WidgetTester tester) async {
   await tester.tap(findSendButton());
+}
+
+Future<void> pumpMentionDebounce(WidgetTester tester) async {
+  await tester.pump(const Duration(milliseconds: 900));
+  await tester.pumpAndSettle();
 }
 
 Future<void> simulateIncomingMessage(
@@ -303,6 +337,454 @@ void main() {
         final inputField = findChatMessageInput();
         final textField = tester.widget<TextFormField>(inputField);
         expect(textField.controller?.text, isEmpty);
+      });
+
+      testWidgets('it suggests members and forwards mentions', (tester) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bo');
+        await pumpMentionDebounce(tester);
+
+        expect(
+          find.byKey(const Key('chat_mention_suggestions')),
+          findsOneWidget,
+        );
+        expect(find.text('Bob'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('chat_mention_suggestions')),
+            matching: find.byType(ProfileCircleAvatar),
+          ),
+          findsWidgets,
+        );
+
+        await tester.tap(find.text('Bob'));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
+
+        final inputField = findChatMessageInput();
+        final textField = tester.widget<TextFormField>(inputField);
+        expect(textField.controller?.text, 'Hello @Bob ');
+
+        await tapSendButton(tester);
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
+        expect(sendCall['text'], 'Hello @Bob');
+        expect(sendCall['mentions'], isA<List<ChatMention>>());
+        final mentions = sendCall['mentions'] as List<ChatMention>;
+        expect(mentions, hasLength(1));
+        expect(mentions.first.target, FakeGroups.removableMemberDid);
+        expect(mentions.first.start, 6);
+        expect(mentions.first.length, '@Bob'.length);
+        expect(mentions.first.display, '@Bob');
+      });
+
+      testWidgets('it shows mention suggestions without waiting for debounce', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bo');
+
+        expect(
+          find.byKey(const Key('chat_mention_suggestions')),
+          findsOneWidget,
+        );
+        expect(find.text('Bob'), findsOneWidget);
+      });
+
+      testWidgets('it detects fully typed mentions without selection', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bob');
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
+
+        await tapSendButton(tester);
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
+        expect(sendCall['text'], 'Hello @Bob');
+        expect(sendCall['mentions'], isA<List<ChatMention>>());
+        final mentions = sendCall['mentions'] as List<ChatMention>;
+        expect(mentions, hasLength(1));
+        expect(mentions.first.target, FakeGroups.removableMemberDid);
+        expect(mentions.first.start, 6);
+        expect(mentions.first.length, '@Bob'.length);
+        expect(mentions.first.display, '@Bob');
+      });
+
+      testWidgets('it detects fully typed mentions case-insensitively', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @bob');
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
+
+        await tapSendButton(tester);
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
+        expect(sendCall['text'], 'Hello @bob');
+        expect(sendCall['mentions'], isA<List<ChatMention>>());
+        final mentions = sendCall['mentions'] as List<ChatMention>;
+        expect(mentions, hasLength(1));
+        expect(mentions.first.target, FakeGroups.removableMemberDid);
+        expect(mentions.first.start, 6);
+        expect(mentions.first.length, '@bob'.length);
+        expect(mentions.first.display, '@bob');
+      });
+
+      testWidgets('it does not reopen suggestions for an existing mention', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bo');
+        await pumpMentionDebounce(tester);
+        await tester.tap(find.text('Bob'));
+        await tester.pumpAndSettle();
+
+        final inputField = findChatMessageInput();
+        final textField = tester.widget<TextFormField>(inputField);
+        final controller = textField.controller!;
+        final mentionStart = controller.text.indexOf('@Bob');
+        final mentionEnd = mentionStart + '@Bob'.length;
+
+        controller.value = controller.value.copyWith(
+          selection: TextSelection.collapsed(offset: mentionStart + 1),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
+
+        controller.value = controller.value.copyWith(
+          selection: TextSelection.collapsed(offset: mentionEnd),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
+
+        await tapSendButton(tester);
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
+        expect(sendCall['text'], 'Hello @Bob');
+        final mentions = sendCall['mentions'] as List<ChatMention>;
+        expect(mentions, hasLength(1));
+        expect(mentions.first.target, FakeGroups.removableMemberDid);
+        expect(mentions.first.start, 6);
+        expect(mentions.first.length, '@Bob'.length);
+        expect(mentions.first.display, '@Bob');
+      });
+
+      testWidgets('it deletes a whole mention when backspacing after it', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bo');
+        await pumpMentionDebounce(tester);
+        await tester.tap(find.text('Bob'));
+        await tester.pumpAndSettle();
+
+        final inputField = findChatMessageInput();
+        final textField = tester.widget<TextFormField>(inputField);
+        final controller = textField.controller!;
+        final mentionEnd = controller.text.indexOf('@Bob') + '@Bob'.length;
+
+        controller.value = controller.value.copyWith(
+          selection: TextSelection.collapsed(offset: mentionEnd),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+        await tester.pumpAndSettle();
+
+        expect(controller.text, 'Hello ');
+        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
+
+        await tapSendButton(tester);
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
+        expect(sendCall['text'], 'Hello');
+        expect(sendCall['mentions'], isA<List<ChatMention>>());
+        expect(sendCall['mentions'], isEmpty);
+      });
+
+      testWidgets('it deletes a whole mention when deleting its last letter', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bo');
+        await pumpMentionDebounce(tester);
+        await tester.tap(find.text('Bob'));
+        await tester.pumpAndSettle();
+
+        final inputField = findChatMessageInput();
+        final textField = tester.widget<TextFormField>(inputField);
+        final controller = textField.controller!;
+        final mentionEnd = controller.text.indexOf('@Bob') + '@Bob'.length;
+
+        controller.value = TextEditingValue(
+          text: 'Hello @Bo ',
+          selection: TextSelection.collapsed(offset: mentionEnd - 1),
+        );
+        await tester.pumpAndSettle();
+
+        expect(controller.text, 'Hello ');
+        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
+
+        await tapSendButton(tester);
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
+        expect(sendCall['text'], 'Hello');
+        expect(sendCall['mentions'], isA<List<ChatMention>>());
+        expect(sendCall['mentions'], isEmpty);
+      });
+
+      testWidgets('it highlights mentions in the text input', (tester) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Bo');
+        await pumpMentionDebounce(tester);
+        await tester.tap(find.text('Bob'));
+        await tester.pumpAndSettle();
+
+        final inputField = findChatMessageInput();
+        final textField = tester.widget<TextFormField>(inputField);
+        final editableText = find.descendant(
+          of: inputField,
+          matching: find.byType(EditableText),
+        );
+        final editableTextWidget = tester.widget<EditableText>(editableText);
+        final textSpan = textField.controller!.buildTextSpan(
+          context: tester.element(editableText),
+          style: editableTextWidget.style,
+          withComposing: false,
+        );
+        final mentionSpan = flattenTextSpans(
+          textSpan,
+        ).firstWhere((span) => span.text == '@Bob');
+
+        expect(mentionSpan.style?.color, isNot(editableTextWidget.style.color));
+        expect(mentionSpan.style?.backgroundColor, isNotNull);
+      });
+
+      testWidgets('it highlights mentions in chat bubbles', (tester) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        chatSdk.simulateSentTextMessage(text: 'Hello @Bob', mentions: const []);
+        await tester.pumpAndSettle();
+
+        final bubbleText = find.byWidgetPredicate(
+          (widget) =>
+              widget is RichText && widget.text.toPlainText() == 'Hello @Bob',
+        );
+        final richText = tester.widget<RichText>(bubbleText.first);
+        final mentionSpan = flattenTextSpans(
+          richText.text as TextSpan,
+        ).firstWhere((span) => span.text == '@Bob');
+
+        expect(mentionSpan.style?.color, isNot(Colors.white));
+      });
+
+      testWidgets('it highlights mentions in chat bubbles case-insensitively', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        chatSdk.simulateSentTextMessage(text: 'Hello @bob', mentions: const []);
+        await tester.pumpAndSettle();
+
+        final bubbleText = find.byWidgetPredicate(
+          (widget) =>
+              widget is RichText && widget.text.toPlainText() == 'Hello @Bob',
+        );
+        final richText = tester.widget<RichText>(bubbleText.first);
+        final mentionSpan = flattenTextSpans(
+          richText.text as TextSpan,
+        ).firstWhere((span) => span.text == '@Bob');
+
+        expect(mentionSpan.style?.color, isNot(Colors.white));
+      });
+
+      testWidgets('it supports mentions in the edit dialog', (tester) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+        final l10n = await getL10n();
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        chatSdk.simulateSentTextMessage(text: 'Hello team');
+        await tester.pumpAndSettle();
+
+        await tester.longPress(find.text('Hello team'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(l10n.chatMessageActionEdit));
+        await tester.pumpAndSettle();
+
+        final dialogFinder = find.byType(AlertDialog);
+        final dialogTextField = find.descendant(
+          of: dialogFinder,
+          matching: find.byType(TextField),
+        );
+
+        await tester.enterText(dialogTextField, 'Hello @Car');
+        await pumpMentionDebounce(tester);
+
+        expect(
+          find.byKey(const Key('chat_mention_suggestions')),
+          findsOneWidget,
+        );
+        expect(find.text('Carol'), findsOneWidget);
+
+        await tester.tap(find.text('Carol'));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
+
+        final dialogField = tester.widget<TextField>(dialogTextField);
+        expect(dialogField.controller?.text, 'Hello @Carol ');
+
+        await tester.tap(find.text(l10n.chatMessageEditSave));
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.editTextMessageCalls, hasLength(1));
+        final editCall = chatSdk.editTextMessageCalls.first;
+        expect(editCall['newText'], 'Hello @Carol');
+        expect(editCall['mentions'], isA<List<ChatMention>>());
+        final mentions = editCall['mentions'] as List<ChatMention>;
+        expect(mentions, hasLength(1));
+        expect(mentions.first.target, FakeGroups.adminMemberDid);
+        expect(mentions.first.start, 6);
+        expect(mentions.first.length, '@Carol'.length);
+        expect(mentions.first.display, '@Carol');
       });
     });
 

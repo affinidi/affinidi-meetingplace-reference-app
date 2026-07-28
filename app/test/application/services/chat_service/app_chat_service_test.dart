@@ -130,6 +130,22 @@ void main() {
       expect(fakeChatSdk.sendTextMessageCalls.last['text'], 'hello');
     });
 
+    test('delegates sendTextMessage mentions to SDK', () async {
+      await chatService.startChatSession();
+      const mentions = [
+        ChatMention(
+          target: 'did:key:member',
+          start: 0,
+          length: 6,
+          display: '@Alice',
+        ),
+      ];
+
+      await chatService.sendTextMessage('Hello!', mentions: mentions);
+
+      expect(fakeChatSdk.sendTextMessageCalls.last['mentions'], mentions);
+    });
+
     test('delegates sendChatActivity to SDK', () async {
       await chatService.startChatSession();
       await chatService.sendChatActivity();
@@ -238,6 +254,27 @@ void main() {
       expect(fakeChatSdk.sendTextMessageCalls.last['attachments'], isNotEmpty);
     });
 
+    test('delegates editTextMessage mentions to SDK', () async {
+      await chatService.startChatSession();
+      final fakeMessage = fakeChatSdk.fakeMessage();
+      const mentions = [
+        ChatMention(
+          target: 'did:key:member',
+          start: 0,
+          length: 6,
+          display: '@Alice',
+        ),
+      ];
+
+      await chatService.editTextMessage(
+        fakeMessage,
+        'Hello again!',
+        mentions: mentions,
+      );
+
+      expect(fakeChatSdk.editTextMessageCalls.last['mentions'], mentions);
+    });
+
     test(
       'buffers outbound messages while paused and flushes them on resume',
       () async {
@@ -288,6 +325,28 @@ void main() {
       expect(fakeChatSdk.startChatSessionCallCount, equals(3));
       expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
       expect(fakeChatSdk.sendMediaMessageCalls, hasLength(1));
+    });
+
+    test('flushes buffered outbound message mentions on resume', () async {
+      await chatService.startChatSession();
+      await chatService.pauseChat();
+      const mentions = [
+        ChatMention(
+          target: 'did:key:member',
+          start: 0,
+          length: 6,
+          display: '@Alice',
+        ),
+      ];
+
+      await chatService.sendTextMessage('Hello!', mentions: mentions);
+
+      expect(fakeChatSdk.sendTextMessageCalls, isEmpty);
+
+      await chatService.startChatSession();
+
+      expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
+      expect(fakeChatSdk.sendTextMessageCalls.first['mentions'], mentions);
     });
 
     test(
