@@ -1,3 +1,7 @@
+## 0.0.1-dev.5
+
+ - **FEAT**: group call participant list with per-member ring (#261).
+
 ## 0.0.1-dev.4
 
  - **FIX**: clear stuck incoming call banner and ringing state after app background (#264).
