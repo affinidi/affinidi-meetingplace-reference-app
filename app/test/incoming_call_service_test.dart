@@ -194,7 +194,7 @@ void main() {
           (container.read(contactsServiceProvider.notifier)
                   as FakeContactsService)
               .incrementMissedCallBadgeCalls,
-          isEmpty,
+          ['did:key:caller'],
         );
         expect(
           (container.read(contactsServiceProvider.notifier)
@@ -226,7 +226,7 @@ void main() {
           (container.read(contactsServiceProvider.notifier)
                   as FakeContactsService)
               .incrementMissedCallBadgeCalls,
-          isEmpty,
+          ['did:key:caller'],
         );
         expect(
           (container.read(contactsServiceProvider.notifier)
@@ -234,6 +234,43 @@ void main() {
               .setPendingMissedCallCalls,
           ['did:key:caller'],
         );
+      });
+
+      test('distinct incoming calls each bump the badge with a distinct '
+          'episode id, even when the transport call id is identical', () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final container = buildContainer(fakeSDK);
+        addTearDown(container.dispose);
+
+        container.read(incomingCallServiceProvider);
+        await container.read(meetingPlaceSdkProvider.future);
+        await pumpEventQueue();
+
+        final contacts =
+            container.read(contactsServiceProvider.notifier)
+                as FakeContactsService;
+
+        // Two separate calls that reuse the same transport call id (the Matrix
+        // room id is constant for a 1:1 channel).
+        for (var i = 0; i < 2; i++) {
+          fakeSDK.emitIncoming(_event(callId: 'same-room'));
+          await pumpEventQueue();
+          fakeSDK.emitCancelled(_event(callId: 'same-room'));
+          await pumpEventQueue();
+        }
+
+        // Both calls are counted...
+        expect(contacts.incrementMissedCallBadgeCalls, [
+          'did:key:caller',
+          'did:key:caller',
+        ]);
+        // ...and keyed by DISTINCT, non-empty episode ids, so the per-callId
+        // dedup in ContactsService accumulates them instead of collapsing on
+        // the constant room id.
+        final ids = contacts.incrementMissedCallBadgeCallIds;
+        expect(ids, hasLength(2));
+        expect(ids.first, isNotEmpty);
+        expect(ids.first, isNot(ids.last));
       });
 
       test('it marks the third-party call as missed when busy auto-reject fires'
@@ -272,6 +309,60 @@ void main() {
               .setPendingMissedCallCalls,
           [thirdPartyDid],
         );
+        // A busy auto-reject of a third party is recorded only in the chat
+        // log, without an unread badge.
+        expect(
+          (container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService)
+              .incrementMissedCallBadgeCalls,
+          isEmpty,
+        );
+      });
+
+      test('it badges the group contact when a group cancel arrives before '
+          'the incoming banner is emitted', () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final container = buildContainer(fakeSDK);
+        addTearDown(container.dispose);
+
+        container.read(incomingCallServiceProvider);
+        await container.read(meetingPlaceSdkProvider.future);
+        await pumpEventQueue();
+
+        // A group call is cancelled before the incoming banner is emitted, so
+        // there is no active ring. The control-plane decline fans out through
+        // the group channel, exactly as the SDK's CallSignalMapper emits it:
+        //  - callerPermanentChannelDid = the group channel DID (keys the group
+        //    contact),
+        //  - otherPartyPermanentChannelDid = THIS device's own channel DID
+        //    (never a contact — must not be used as the badge target),
+        //  - callId falls back to the caller (group) DID because the transport
+        //    call id is not yet visible.
+        const groupDid = 'did:key:group-channel';
+        const ownDid = 'did:key:own-channel';
+        fakeSDK.emitCancelled(
+          _event(
+            callId: groupDid,
+            callerPermanentChannelDid: groupDid,
+            otherPartyPermanentChannelDid: ownDid,
+          ),
+        );
+        await pumpEventQueue();
+        await pumpEventQueue();
+
+        final contacts =
+            container.read(contactsServiceProvider.notifier)
+                as FakeContactsService;
+        final chatService =
+            container.read(chatSessionServiceProvider(groupDid).notifier)
+                as FakeChatSessionService;
+        // The badge and marker land on the group contact
+        // (callerPermanentChannelDid), not on this device's own DID.
+        expect(contacts.incrementMissedCallBadgeCalls, [groupDid]);
+        expect(contacts.setPendingMissedCallCalls, [groupDid]);
+        expect(contacts.incrementMissedCallBadgeCallIds.single, isNotEmpty);
+        // The caller-DID fallback call id is not persisted as a real marker.
+        expect(chatService.lastResolveIncomingCallId, isNull);
       });
     });
 
@@ -297,7 +388,7 @@ void main() {
             (container.read(contactsServiceProvider.notifier)
                     as FakeContactsService)
                 .incrementMissedCallBadgeCalls,
-            isEmpty,
+            ['did:key:caller'],
           );
           expect(
             (container.read(contactsServiceProvider.notifier)

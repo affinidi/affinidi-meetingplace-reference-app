@@ -57,6 +57,7 @@ import 'handlers/presence_protocol_handler.dart';
 import 'handlers/typing_protocol_handler.dart';
 import 'handlers/zkp_attachment_protocol_handler.dart';
 import 'missed_call_manager.dart';
+import 'open_chat_registry.dart';
 import 'typing_timer.dart';
 
 part 'chat_session_service.g.dart';
@@ -798,10 +799,60 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       );
       return;
     }
+    final prior = idx == -1 ? null : existing[idx];
     final messages = idx == -1
         ? existing.insertSorted(item)
         : existing.replaceItemAtIndex(idx, item);
     state = state.copyWith(messages: messages);
+    _syncOpenCallActivityReadSeqNo(item);
+    _maybeBumpMissedCallBadge(prior, item);
+  }
+
+  void _syncOpenCallActivityReadSeqNo(ChatItem item) {
+    if (_isGroupChat || item is! Message || _callMetadataOf(item) == null) {
+      return;
+    }
+    final contact = ref
+        .read(contactsServiceProvider)
+        .getContactByChannelDid(_otherPartyPermanentChannelDid);
+    if (contact == null ||
+        !ref.read(openChatRegistryProvider.notifier).isOpen(contact.id)) {
+      return;
+    }
+    unawaited(
+      ref
+          .read(contactsServiceProvider.notifier)
+          .syncOpenChannelReadSeqNo(_otherPartyPermanentChannelDid),
+    );
+  }
+
+  /// Bumps the contact's unread badge once when a call chat item first reaches
+  /// the `declined` status while the chat is not open, keyed by the call item
+  /// message id so repeated terminal upserts of the same call count once.
+  ///
+  /// This owns the CALLER side: when the local user cancels an outgoing call,
+  /// or the callee declines it, the call item transitions to `declined`
+  /// locally, so leaving that chat surfaces a badge just as an open chat would
+  /// show the call widget update. The recipient's missed call is badged by
+  /// `IncomingCallService` instead (its `missed` item is often not synced at
+  /// miss time), so `missed` is deliberately not badged here to avoid a
+  /// double-count.
+  void _maybeBumpMissedCallBadge(ChatItem? prior, ChatItem next) {
+    if (_isGroupChat || next is! Message) return;
+    final nextCall = _callMetadataOf(next);
+    if (nextCall == null || nextCall.status != CallStatus.declined) return;
+
+    final priorCall = prior is Message ? _callMetadataOf(prior) : null;
+    if (priorCall != null && _isFinalCallStatus(priorCall.status)) return;
+
+    unawaited(
+      ref
+          .read(contactsServiceProvider.notifier)
+          .incrementMissedCallBadge(
+            _otherPartyPermanentChannelDid,
+            callId: next.messageId,
+          ),
+    );
   }
 
   /// Locates the slot [item] should occupy in [existing].

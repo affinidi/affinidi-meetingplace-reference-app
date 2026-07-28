@@ -79,10 +79,15 @@ class ChatScreenController extends _$ChatScreenController
   TimedAction? _sendChatActivityTimedAction;
   Timer? _saveUnsentMessageDebouncer;
   bool _isPaused = false;
+  bool _isDisposed = false;
+  bool _isReadStatePausedForCoveringCall = false;
   late final _chatResumingLock = Lock();
   StreamSubscription<void>? _vrcPluginSubscription;
   StreamSubscription<Identity>? _rCardPluginSubscription;
   bool _rCardListenerSet = false;
+  late OpenChatRegistry _openChatRegistry;
+  late ContactsService _contactsService;
+  String? _channelDid;
 
   late final Map<String, ProviderSubscription<void>>
   _conciergeLoadingControllersSubscriptions = {};
@@ -109,15 +114,18 @@ class ChatScreenController extends _$ChatScreenController
 
   @override
   ChatScreenState build(String contactId) {
+    _isDisposed = false;
     WidgetsBinding.instance.addObserver(this);
 
-    final openChatRegistry = ref.read(openChatRegistryProvider.notifier);
+    _openChatRegistry = ref.read(openChatRegistryProvider.notifier);
+    _contactsService = ref.read(contactsServiceProvider.notifier);
     Future.microtask(() {
-      if (ref.mounted) openChatRegistry.markOpened(contactId);
+      if (ref.mounted) _openChatRegistry.markOpened(contactId);
     });
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
-    final channelDid = contact?.channelDid;
+    _channelDid = contact?.channelDid;
+    final channelDid = _channelDid;
     var pendingState = ChatScreenState(
       contact: contact,
       isActive: true,
@@ -262,7 +270,13 @@ class ChatScreenController extends _$ChatScreenController
     );
 
     ref.onDispose(() {
-      Future.microtask(() => openChatRegistry.markClosed(contactId));
+      _isDisposed = true;
+      Future.microtask(() {
+        _openChatRegistry.markClosed(contactId);
+        if (channelDid != null) {
+          unawaited(_contactsService.syncChannelReadSeqNo(channelDid));
+        }
+      });
       _vrcPluginSubscription?.cancel();
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
@@ -319,6 +333,34 @@ class ChatScreenController extends _$ChatScreenController
     }
 
     await _restoreUnsentMessage();
+  }
+
+  bool pauseReadStateForCoveringCall() {
+    if (_isDisposed) return false;
+    if (_isReadStatePausedForCoveringCall) return false;
+
+    if (!_openChatRegistry.isOpen(contactId)) return false;
+
+    _isReadStatePausedForCoveringCall = true;
+    Future.microtask(() {
+      if (!_isDisposed) _openChatRegistry.markClosed(contactId);
+    });
+    return true;
+  }
+
+  void restoreReadStateAfterCoveringCall() {
+    if (_isDisposed) return;
+    if (!_isReadStatePausedForCoveringCall) return;
+
+    _isReadStatePausedForCoveringCall = false;
+    final channelDid = _channelDid;
+    Future.microtask(() {
+      if (_isDisposed) return;
+      _openChatRegistry.markOpened(contactId);
+      if (channelDid != null) {
+        unawaited(_contactsService.resetContactBadgeCount(channelDid));
+      }
+    });
   }
 
   @override

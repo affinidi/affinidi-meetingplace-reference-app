@@ -23,8 +23,13 @@ class FakeContactsService extends ContactsService {
   List<Map<String, dynamic>> updateContactCalls = [];
   List<Map<String, dynamic>> resetBadgeCalls = [];
   List<String> incrementMissedCallBadgeCalls = [];
+
+  /// Records the `callId` (dedup key) passed to [incrementMissedCallBadge],
+  /// positionally aligned with [incrementMissedCallBadgeCalls].
+  List<String> incrementMissedCallBadgeCallIds = [];
   List<String> setPendingMissedCallCalls = [];
   List<String> clearPendingMissedCallCalls = [];
+  List<String> syncOpenChannelReadSeqNoCalls = [];
 
   void _syncStateIfReady() {
     try {
@@ -42,14 +47,20 @@ class FakeContactsService extends ContactsService {
     updateContactCalls.clear();
     resetBadgeCalls.clear();
     incrementMissedCallBadgeCalls.clear();
+    incrementMissedCallBadgeCallIds.clear();
     setPendingMissedCallCalls.clear();
     clearPendingMissedCallCalls.clear();
+    syncOpenChannelReadSeqNoCalls.clear();
     resetBadgeCalledWith = null;
   }
 
   @override
-  Future<void> incrementMissedCallBadge(String channelDid) async {
+  Future<void> incrementMissedCallBadge(
+    String channelDid, {
+    required String callId,
+  }) async {
     incrementMissedCallBadgeCalls.add(channelDid);
+    incrementMissedCallBadgeCallIds.add(callId);
   }
 
   @override
@@ -108,6 +119,14 @@ class FakeContactsService extends ContactsService {
   }
 
   @override
+  Future<void> syncOpenChannelReadSeqNo(String channelDid) async {
+    syncOpenChannelReadSeqNoCalls.add(channelDid);
+  }
+
+  @override
+  Future<void> syncChannelReadSeqNo(String channelDid) async {}
+
+  @override
   Future<void> fetchContacts() async {
     contacts = [
       FakeContacts.individualContact,
@@ -130,6 +149,7 @@ class FakeContactsService extends ContactsService {
   Future<void> updateContact(
     Contact contact, {
     bool preservePendingMissedCallState = true,
+    bool preserveBadgeState = true,
   }) async {
     updateContactCalls.add({'contact': contact});
     contacts.removeWhere((c) => c.id == contact.id);
