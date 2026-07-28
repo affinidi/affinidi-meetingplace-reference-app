@@ -617,8 +617,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
           (offer.channelId?.trim().isNotEmpty ?? false);
 
       // Resumed connector sessions may report a ready/inaugurated channel with
-      // no mnemonic. In that case setup is already connected and no accept-offer
-      // roundtrip is required when the channel belongs to this context.
+      // no mnemonic. In that case setup is already connected and
+      // no accept-offer roundtrip is required when the channel belongs
+      // to this context.
       if ((mnemonic == null || mnemonic.isEmpty) && isAlreadyConnected) {
         final canReuseChannel = await _canReuseConnectedOffer(
           result: result,
