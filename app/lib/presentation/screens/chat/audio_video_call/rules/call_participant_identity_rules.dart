@@ -27,30 +27,37 @@ ContactCard? resolveCallParticipantContactCard(
   AudioVideoCallParticipant participant, {
   required Map<String, ContactCard> memberContactCards,
 }) {
+  final did = resolveCallParticipantDid(
+    participant,
+    memberContactCards: memberContactCards,
+  );
+  if (did == null) return null;
+  return memberContactCards[did];
+}
+
+/// Resolves the group member DID for a connected call participant.
+String? resolveCallParticipantDid(
+  AudioVideoCallParticipant participant, {
+  required Map<String, ContactCard> memberContactCards,
+}) {
   final did = participant.did;
-  if (did != null) {
-    final directMatch = memberContactCards[did];
-    if (directMatch != null) return directMatch;
+  if (did != null && did.isNotEmpty && memberContactCards.containsKey(did)) {
+    return did;
   }
 
-  final serverName = _serverNameFromParticipantId(participant.participantId);
-  if (serverName == null || did == null || did.isEmpty) {
-    return null;
-  }
-
-  final derivedUserId = _deriveMatrixUserId(did, serverName);
-  if (derivedUserId == participant.participantId) {
-    return memberContactCards[did];
-  }
-
-  for (final entry in memberContactCards.entries) {
-    if (_deriveMatrixUserId(entry.key, serverName) ==
-        participant.participantId) {
-      return entry.value;
+  for (final matrixUserId in _matrixUserIdCandidates(
+    participant.participantId,
+  )) {
+    final serverName = _serverNameFromMatrixUserId(matrixUserId);
+    if (serverName == null) continue;
+    for (final entry in memberContactCards.entries) {
+      if (_deriveMatrixUserId(entry.key, serverName) == matrixUserId) {
+        return entry.key;
+      }
     }
   }
 
-  return null;
+  return did != null && did.isNotEmpty ? did : null;
 }
 
 /// Picks the best avatar card, preferring one with a profile picture.
@@ -66,10 +73,29 @@ ContactCard? resolveBestAvatarCard(Iterable<ContactCard?> candidates) {
   return null;
 }
 
-String? _serverNameFromParticipantId(String participantId) {
-  final separator = participantId.indexOf(':');
-  if (separator < 0 || separator == participantId.length - 1) return null;
-  return participantId.substring(separator + 1);
+List<String> _matrixUserIdCandidates(String participantId) {
+  final candidates = <String>[participantId];
+  final firstSeparator = participantId.indexOf(':');
+  final lastSeparator = participantId.lastIndexOf(':');
+  if (participantId.startsWith('@') &&
+      firstSeparator > 0 &&
+      lastSeparator > firstSeparator) {
+    final withoutDeviceId = participantId.substring(0, lastSeparator);
+    if (withoutDeviceId != participantId) {
+      candidates.add(withoutDeviceId);
+    }
+  }
+  return candidates;
+}
+
+String? _serverNameFromMatrixUserId(String matrixUserId) {
+  final separator = matrixUserId.indexOf(':');
+  if (!matrixUserId.startsWith('@') ||
+      separator < 0 ||
+      separator == matrixUserId.length - 1) {
+    return null;
+  }
+  return matrixUserId.substring(separator + 1);
 }
 
 String _deriveMatrixUserId(String did, String serverName) {

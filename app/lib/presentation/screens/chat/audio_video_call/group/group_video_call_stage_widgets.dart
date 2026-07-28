@@ -104,9 +104,10 @@ class _GroupVideoTopBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CallTopBarActionButton(
+            CallTopBarActionButton(
               icon: Icons.people_alt_outlined,
-              onPressed: _noop,
+              onPressed: () =>
+                  CallParticipantsSheet.show(context, contactId: contactId),
             ),
             if (showSwitchCamera) ...[
               const SizedBox(height: 8),
@@ -120,8 +121,6 @@ class _GroupVideoTopBar extends StatelessWidget {
       ),
     );
   }
-
-  static void _noop() {}
 }
 
 class _SinglePeerVideoStage extends StatelessWidget {

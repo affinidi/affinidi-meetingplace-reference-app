@@ -2267,4 +2267,25 @@ class AppLocalizationsEs extends AppLocalizations {
   String videoCallPeerMuted(String peerName) {
     return '$peerName está silenciado';
   }
+
+  @override
+  String callParticipantsConnectedCount(int count) {
+    return '$count conectados';
+  }
+
+  @override
+  String get callParticipantsConnectedSection => 'Conectados';
+
+  @override
+  String get callParticipantsNotConnectedSection => 'No conectados';
+
+  @override
+  String callParticipantCallAction(String name) {
+    return 'Llamar a $name';
+  }
+
+  @override
+  String callParticipantRingingAction(String name) {
+    return 'Llamando a $name';
+  }
 }

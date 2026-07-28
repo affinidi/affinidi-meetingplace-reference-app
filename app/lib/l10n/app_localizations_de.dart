@@ -2278,4 +2278,25 @@ class AppLocalizationsDe extends AppLocalizations {
   String videoCallPeerMuted(String peerName) {
     return '$peerName ist stummgeschaltet';
   }
+
+  @override
+  String callParticipantsConnectedCount(int count) {
+    return '$count verbunden';
+  }
+
+  @override
+  String get callParticipantsConnectedSection => 'Verbunden';
+
+  @override
+  String get callParticipantsNotConnectedSection => 'Nicht verbunden';
+
+  @override
+  String callParticipantCallAction(String name) {
+    return '$name anrufen';
+  }
+
+  @override
+  String callParticipantRingingAction(String name) {
+    return '$name wird angerufen';
+  }
 }

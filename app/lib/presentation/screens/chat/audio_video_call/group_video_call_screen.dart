@@ -19,6 +19,7 @@ import '../../../widgets/call/video_call_pip_window.dart';
 import '../../../widgets/profile_circle_avatar.dart';
 import 'audio_video_call_screen_controller.dart';
 import 'extensions/group_video_call_extensions.dart';
+import 'participants/call_participants_sheet.dart';
 import 'rules/call_participant_identity_rules.dart';
 import 'rules/group_call_layout_rules.dart';
 import 'rules/group_call_participant_presentation_rules.dart';

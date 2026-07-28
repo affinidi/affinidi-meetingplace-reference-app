@@ -611,6 +611,11 @@
 	"groupCallNoParticipants": "Keine Teilnehmer",
 	"groupCallMute": "Stummschalten",
 	"groupCallLeave": "Verlassen",
-        "videoCallMuted": "Stummgeschaltet",
-        "videoCallPeerMuted": "{peerName} ist stummgeschaltet"
+	"videoCallMuted": "Stummgeschaltet",
+	"videoCallPeerMuted": "{peerName} ist stummgeschaltet",
+	"callParticipantsConnectedCount": "{count} verbunden",
+	"callParticipantsConnectedSection": "Verbunden",
+	"callParticipantsNotConnectedSection": "Nicht verbunden",
+	"callParticipantCallAction": "{name} anrufen",
+	"callParticipantRingingAction": "{name} wird angerufen"
 }

@@ -704,6 +704,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       _groupMemberDids = {..._groupMemberDids, ...cards.keys};
       if (_isDisposed) return;
       state = state.copyWith(memberContactCards: cards);
+      await _resolveOwnDid(sdk, group);
     } catch (e, stackTrace) {
       _logger.error(
         'Failed to load group member names',
@@ -716,6 +717,32 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
           actionFailure: CallActionFailureEvent(CallActionFailure.memberNames),
         );
       }
+    }
+  }
+
+  /// Resolves the local user's own DID from the group channel and stores it in
+  /// state so the participant sheet can exclude the local user.
+  ///
+  /// Best-effort: a failure here must not affect the group member cards, so the
+  /// participant sheet still works (it just cannot hide the local user).
+  Future<void> _resolveOwnDid(
+    MeetingPlaceMatrixSDK sdk,
+    core.Group group,
+  ) async {
+    try {
+      final ownChannel = await sdk.getChannelByOtherPartyPermanentDid(
+        _cachedChannelDid ?? group.did,
+      );
+      final ownDid = ownChannel?.permanentChannelDid;
+      if (_isDisposed || ownDid == null) return;
+      state = state.copyWith(ownDid: ownDid);
+    } catch (e, stackTrace) {
+      _logger.error(
+        'Failed to resolve own DID for group call',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
     }
   }
 

@@ -3399,6 +3399,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{peerName} is muted'**
   String videoCallPeerMuted(String peerName);
+
+  /// No description provided for @callParticipantsConnectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} connected'**
+  String callParticipantsConnectedCount(int count);
+
+  /// No description provided for @callParticipantsConnectedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get callParticipantsConnectedSection;
+
+  /// No description provided for @callParticipantsNotConnectedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get callParticipantsNotConnectedSection;
+
+  /// No description provided for @callParticipantCallAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Call {name}'**
+  String callParticipantCallAction(String name);
+
+  /// No description provided for @callParticipantRingingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Ringing {name}'**
+  String callParticipantRingingAction(String name);
 }
 
 class _AppLocalizationsDelegate

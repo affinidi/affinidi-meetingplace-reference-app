@@ -11,10 +11,10 @@ void main() {
       );
     });
 
-    test('strips everything after the homeserver separator', () {
+    test('strips the device id while preserving a homeserver port', () {
       expect(
         matrixUserIdFromParticipantIdentity('@abc:localhost:9000:DEVICE123'),
-        '@abc:localhost',
+        '@abc:localhost:9000',
       );
     });
 

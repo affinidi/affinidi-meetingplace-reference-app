@@ -15,9 +15,9 @@ dependencies:
   flutter_webrtc: ^1.4.0
   livekit_client: ^2.8.1
   matrix: ^8.1.0
-  meeting_place_chat: ^0.0.1-dev.56
-  meeting_place_core: ^0.0.1-dev.46
-  meeting_place_matrix: ^0.0.1-dev.8
+  meeting_place_chat: ^0.0.1-dev.57
+  meeting_place_core: ^0.0.1-dev.47
+  meeting_place_matrix: ^0.0.1-dev.9
   meta: ^1.16.0
   permission_handler: ^12.0.1
   riverpod_annotation: ^3.0.3

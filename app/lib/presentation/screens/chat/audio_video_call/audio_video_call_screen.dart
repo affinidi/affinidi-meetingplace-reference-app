@@ -29,6 +29,7 @@ import 'audio_video_call_screen_controller.dart';
 import 'audio_video_call_screen_state.dart';
 import 'call_controls_bar.dart';
 import 'group_video_call_screen.dart';
+import 'participants/call_participants_sheet.dart';
 import 'rules/call_participant_identity_rules.dart';
 import 'rules/call_ui_rules.dart';
 import 'rules/group_audio_call_view_rules.dart';

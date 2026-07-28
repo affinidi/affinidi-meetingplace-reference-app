@@ -612,5 +612,10 @@
 	"groupCallMute": "Silenciar",
 	"groupCallLeave": "Salir",
 	"videoCallMuted": "Silenciado",
-	"videoCallPeerMuted": "{peerName} está silenciado"
+	"videoCallPeerMuted": "{peerName} está silenciado",
+	"callParticipantsConnectedCount": "{count} conectados",
+	"callParticipantsConnectedSection": "Conectados",
+	"callParticipantsNotConnectedSection": "No conectados",
+	"callParticipantCallAction": "Llamar a {name}",
+	"callParticipantRingingAction": "Llamando a {name}"
 }
