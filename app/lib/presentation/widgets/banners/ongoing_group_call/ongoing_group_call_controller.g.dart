@@ -11,10 +11,11 @@ part of 'ongoing_group_call_controller.dart';
 /// Emits the ongoing group audio call banner data for [contactId], or `null`
 /// when the banner must not be shown.
 ///
-/// The banner is shown only when the local user is NOT in a call: while the
-/// user is in any connected call the persistent green active-call banner is
-/// used instead. It is scoped to the open chat, so an ongoing call in another
-/// group is only surfaced once its chat is opened.
+/// The banner is shown only when the local user is NOT in a call: while any
+/// call is active (from the first outgoing attempt through to connected) the
+/// persistent green active-call banner is used instead. It is scoped to the
+/// open chat, so an ongoing call in another group is only surfaced once its
+/// chat is opened.
 
 @ProviderFor(ongoingGroupCallBanner)
 const ongoingGroupCallBannerProvider = OngoingGroupCallBannerFamily._();
@@ -22,10 +23,11 @@ const ongoingGroupCallBannerProvider = OngoingGroupCallBannerFamily._();
 /// Emits the ongoing group audio call banner data for [contactId], or `null`
 /// when the banner must not be shown.
 ///
-/// The banner is shown only when the local user is NOT in a call: while the
-/// user is in any connected call the persistent green active-call banner is
-/// used instead. It is scoped to the open chat, so an ongoing call in another
-/// group is only surfaced once its chat is opened.
+/// The banner is shown only when the local user is NOT in a call: while any
+/// call is active (from the first outgoing attempt through to connected) the
+/// persistent green active-call banner is used instead. It is scoped to the
+/// open chat, so an ongoing call in another group is only surfaced once its
+/// chat is opened.
 
 final class OngoingGroupCallBannerProvider
     extends
@@ -40,10 +42,11 @@ final class OngoingGroupCallBannerProvider
   /// Emits the ongoing group audio call banner data for [contactId], or `null`
   /// when the banner must not be shown.
   ///
-  /// The banner is shown only when the local user is NOT in a call: while the
-  /// user is in any connected call the persistent green active-call banner is
-  /// used instead. It is scoped to the open chat, so an ongoing call in another
-  /// group is only surfaced once its chat is opened.
+  /// The banner is shown only when the local user is NOT in a call: while any
+  /// call is active (from the first outgoing attempt through to connected) the
+  /// persistent green active-call banner is used instead. It is scoped to the
+  /// open chat, so an ongoing call in another group is only surfaced once its
+  /// chat is opened.
   const OngoingGroupCallBannerProvider._({
     required OngoingGroupCallBannerFamily super.from,
     required String super.argument,
@@ -90,15 +93,16 @@ final class OngoingGroupCallBannerProvider
 }
 
 String _$ongoingGroupCallBannerHash() =>
-    r'49e3773d3515bfecaddcd23238383a688eea68d2';
+    r'1714de86c73b6386d9151a4b42d10fb6c4251e5d';
 
 /// Emits the ongoing group audio call banner data for [contactId], or `null`
 /// when the banner must not be shown.
 ///
-/// The banner is shown only when the local user is NOT in a call: while the
-/// user is in any connected call the persistent green active-call banner is
-/// used instead. It is scoped to the open chat, so an ongoing call in another
-/// group is only surfaced once its chat is opened.
+/// The banner is shown only when the local user is NOT in a call: while any
+/// call is active (from the first outgoing attempt through to connected) the
+/// persistent green active-call banner is used instead. It is scoped to the
+/// open chat, so an ongoing call in another group is only surfaced once its
+/// chat is opened.
 
 final class OngoingGroupCallBannerFamily extends $Family
     with
@@ -115,10 +119,11 @@ final class OngoingGroupCallBannerFamily extends $Family
   /// Emits the ongoing group audio call banner data for [contactId], or `null`
   /// when the banner must not be shown.
   ///
-  /// The banner is shown only when the local user is NOT in a call: while the
-  /// user is in any connected call the persistent green active-call banner is
-  /// used instead. It is scoped to the open chat, so an ongoing call in another
-  /// group is only surfaced once its chat is opened.
+  /// The banner is shown only when the local user is NOT in a call: while any
+  /// call is active (from the first outgoing attempt through to connected) the
+  /// persistent green active-call banner is used instead. It is scoped to the
+  /// open chat, so an ongoing call in another group is only surfaced once its
+  /// chat is opened.
 
   OngoingGroupCallBannerProvider call(String contactId) =>
       OngoingGroupCallBannerProvider._(argument: contactId, from: this);

@@ -8,7 +8,6 @@ import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import '../../../screens/chat/chat_screen_controller.dart';
 import '../active_call/active_call_controller.dart';
 import 'ongoing_group_call_banner_state.dart';
@@ -18,19 +17,18 @@ part 'ongoing_group_call_controller.g.dart';
 /// Emits the ongoing group audio call banner data for [contactId], or `null`
 /// when the banner must not be shown.
 ///
-/// The banner is shown only when the local user is NOT in a call: while the
-/// user is in any connected call the persistent green active-call banner is
-/// used instead. It is scoped to the open chat, so an ongoing call in another
-/// group is only surfaced once its chat is opened.
+/// The banner is shown only when the local user is NOT in a call: while any
+/// call is active (from the first outgoing attempt through to connected) the
+/// persistent green active-call banner is used instead. It is scoped to the
+/// open chat, so an ongoing call in another group is only surfaced once its
+/// chat is opened.
 @riverpod
 Stream<OngoingGroupCallBannerData?> ongoingGroupCallBanner(
   Ref ref,
   String contactId,
 ) async* {
   final isInCall = ref.watch(
-    activeCallControllerProvider.select(
-      (state) => state != null && isConnectedCallStatus(state.status),
-    ),
+    activeCallControllerProvider.select((state) => state != null),
   );
   if (isInCall) {
     yield null;

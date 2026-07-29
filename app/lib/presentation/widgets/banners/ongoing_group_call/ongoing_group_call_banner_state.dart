@@ -35,10 +35,10 @@ class OngoingGroupCallAvatar {
 /// call, local user is in a call, or the chat is not a call-capable group).
 @immutable
 class OngoingGroupCallBannerData {
-  const OngoingGroupCallBannerData({
+  OngoingGroupCallBannerData({
     required this.participantCount,
-    required this.avatars,
-  });
+    required List<OngoingGroupCallAvatar> avatars,
+  }) : avatars = List.unmodifiable(avatars);
 
   /// The number of distinct remote people currently in the call. Shown in the
   /// "Ongoing audio call (n)" label.
