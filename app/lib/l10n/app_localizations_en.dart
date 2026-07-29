@@ -2352,4 +2352,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mnemonicSuccessSubtitle =>
       'Enjoy MeetingPlace and get engaged\nwith your personal AI agent.';
+
+  @override
+  String get trustTaskHistoryTitle => 'Trust task history';
+
+  @override
+  String get trustTaskHistoryRefresh => 'Refresh';
+
+  @override
+  String get trustTaskHistoryEmpty => 'No trust tasks yet';
+
+  @override
+  String get trustTaskHistoryError => 'Couldn\'t load trust task history';
+
+  @override
+  String get trustTaskHistoryRetry => 'Retry';
+
+  @override
+  String get trustTaskHistoryLoadMore => 'Load more';
+
+  @override
+  String get trustTaskHistoryItemTitle => 'Signing request';
+
+  @override
+  String get trustTaskHistoryDetails => 'Details';
+
+  @override
+  String get trustTaskStatusSigned => 'Signed';
+
+  @override
+  String get trustTaskStatusDenied => 'Blocked';
+
+  @override
+  String get trustTaskStatusUnknown => 'Unknown';
 }

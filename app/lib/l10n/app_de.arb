@@ -612,5 +612,16 @@
 	"mnemonicManualHint": "wort1 wort2 wort3 ...",
 	"mnemonicContinue": "Weiter",
 	"mnemonicSuccessTitle": "Alles bereit!",
-	"mnemonicSuccessSubtitle": "Viel Freude mit MeetingPlace und Ihrem persönlichen KI-Agenten."
+	"mnemonicSuccessSubtitle": "Viel Freude mit MeetingPlace und Ihrem persönlichen KI-Agenten.",
+	"trustTaskHistoryTitle": "Verlauf der Trust-Aufgaben",
+	"trustTaskHistoryRefresh": "Aktualisieren",
+	"trustTaskHistoryEmpty": "Noch keine Trust-Aufgaben",
+	"trustTaskHistoryError": "Verlauf konnte nicht geladen werden",
+	"trustTaskHistoryRetry": "Erneut versuchen",
+	"trustTaskHistoryLoadMore": "Mehr laden",
+	"trustTaskHistoryItemTitle": "Signaturanfrage",
+	"trustTaskHistoryDetails": "Details",
+	"trustTaskStatusSigned": "Signiert",
+	"trustTaskStatusDenied": "Blockiert",
+	"trustTaskStatusUnknown": "Unbekannt"
 }

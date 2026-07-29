@@ -2402,4 +2402,37 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get mnemonicSuccessSubtitle =>
       'Viel Freude mit MeetingPlace und Ihrem persönlichen KI-Agenten.';
+
+  @override
+  String get trustTaskHistoryTitle => 'Verlauf der Trust-Aufgaben';
+
+  @override
+  String get trustTaskHistoryRefresh => 'Aktualisieren';
+
+  @override
+  String get trustTaskHistoryEmpty => 'Noch keine Trust-Aufgaben';
+
+  @override
+  String get trustTaskHistoryError => 'Verlauf konnte nicht geladen werden';
+
+  @override
+  String get trustTaskHistoryRetry => 'Erneut versuchen';
+
+  @override
+  String get trustTaskHistoryLoadMore => 'Mehr laden';
+
+  @override
+  String get trustTaskHistoryItemTitle => 'Signaturanfrage';
+
+  @override
+  String get trustTaskHistoryDetails => 'Details';
+
+  @override
+  String get trustTaskStatusSigned => 'Signiert';
+
+  @override
+  String get trustTaskStatusDenied => 'Blockiert';
+
+  @override
+  String get trustTaskStatusUnknown => 'Unbekannt';
 }
