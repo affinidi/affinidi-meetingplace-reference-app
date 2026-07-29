@@ -1,3 +1,7 @@
+## 0.0.1-dev.6
+
+ - **FIX**: badge unread missed and declined calls for both parties (#244).
+
 ## 0.0.1-dev.5
 
  - **FEAT**: group call participant list with per-member ring (#261).
