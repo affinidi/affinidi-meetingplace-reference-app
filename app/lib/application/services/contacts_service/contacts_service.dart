@@ -614,16 +614,16 @@ class ContactsService extends _$ContactsService {
 
   /// Increment the unread badge for a missed call, counted once per [callId].
   ///
-  /// Missed calls are not reflected in the channel sequence number, so they are
-  /// tracked in [Contact.missedCallCount] to survive the seqNo-derived badge
-  /// recompute in [updateContactFromChannelActivity]. Both the durable
+  /// Missed calls are tracked separately from message seqNo so delayed terminal
+  /// call updates can be counted idempotently and survive the seqNo-derived
+  /// badge recompute in [updateContactFromChannelActivity]. Both the durable
   /// missed-call counter and the displayed [Contact.badgeCount] are bumped by
   /// one. Cleared together by [resetContactBadgeCount] when the chat is opened.
   ///
   /// [channelDid] - The channel DID of the contact whose call was missed.
-  /// [callId] - The call chat item message id (unique per call). Counting per
-  /// id keeps a single call idempotent across repeated terminal transitions,
-  /// while distinct calls each count.
+  /// [callId] - A unique dedup key for this call episode. Counting per id keeps
+  /// a single call idempotent across repeated terminal transitions, while
+  /// distinct calls each count.
   ///
   /// Returns:
   /// - `Future<void>` completes when the update and refresh finish.

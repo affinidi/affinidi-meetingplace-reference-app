@@ -845,6 +845,14 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     final priorCall = prior is Message ? _callMetadataOf(prior) : null;
     if (priorCall != null && _isFinalCallStatus(priorCall.status)) return;
 
+    final contact = ref
+        .read(contactsServiceProvider)
+        .getContactByChannelDid(_otherPartyPermanentChannelDid);
+    if (contact != null &&
+        ref.read(openChatRegistryProvider.notifier).isOpen(contact.id)) {
+      return;
+    }
+
     unawaited(
       ref
           .read(contactsServiceProvider.notifier)

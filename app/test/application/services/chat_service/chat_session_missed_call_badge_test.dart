@@ -137,6 +137,13 @@ void main() {
       chatService.upsertChatItem(callItem('call-4', CallStatus.inProgress));
       chatService.upsertChatItem(callItem('call-4', CallStatus.ended));
       expect(badgeCallIds(), ['call-1', 'call-2']);
+
+      container
+          .read(openChatRegistryProvider.notifier)
+          .markOpened(testContact.id);
+      chatService.upsertChatItem(callItem('call-5', CallStatus.calling));
+      chatService.upsertChatItem(callItem('call-5', CallStatus.declined));
+      expect(badgeCallIds(), ['call-1', 'call-2']);
     });
 
     test('syncs call activity as read only while the chat is open', () async {
