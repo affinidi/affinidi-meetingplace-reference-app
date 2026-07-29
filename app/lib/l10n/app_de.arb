@@ -706,5 +706,16 @@
 	"callParticipantsConnectedSection": "Verbunden",
 	"callParticipantsNotConnectedSection": "Nicht verbunden",
 	"callParticipantCallAction": "{name} anrufen",
-	"callParticipantRingingAction": "{name} wird angerufen"
+	"callParticipantRingingAction": "{name} wird angerufen",
+	"trustTaskHistoryTitle": "Verlauf der Trust-Aufgaben",
+	"trustTaskHistoryRefresh": "Aktualisieren",
+	"trustTaskHistoryEmpty": "Noch keine Trust-Aufgaben",
+	"trustTaskHistoryError": "Verlauf konnte nicht geladen werden",
+	"trustTaskHistoryRetry": "Erneut versuchen",
+	"trustTaskHistoryLoadMore": "Mehr laden",
+	"trustTaskHistoryItemTitle": "Signaturanfrage",
+	"trustTaskHistoryDetails": "Details",
+	"trustTaskStatusSigned": "Signiert",
+	"trustTaskStatusDenied": "Blockiert",
+	"trustTaskStatusUnknown": "Unbekannt"
 }

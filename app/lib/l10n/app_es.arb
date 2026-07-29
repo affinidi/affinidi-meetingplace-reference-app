@@ -706,5 +706,16 @@
 	"callParticipantsConnectedSection": "Conectados",
 	"callParticipantsNotConnectedSection": "No conectados",
 	"callParticipantCallAction": "Llamar a {name}",
-	"callParticipantRingingAction": "Llamando a {name}"
+	"callParticipantRingingAction": "Llamando a {name}",
+	"trustTaskHistoryTitle": "Historial de tareas de confianza",
+	"trustTaskHistoryRefresh": "Actualizar",
+	"trustTaskHistoryEmpty": "Aún no hay tareas de confianza",
+	"trustTaskHistoryError": "No se pudo cargar el historial",
+	"trustTaskHistoryRetry": "Reintentar",
+	"trustTaskHistoryLoadMore": "Cargar más",
+	"trustTaskHistoryItemTitle": "Solicitud de firma",
+	"trustTaskHistoryDetails": "Detalles",
+	"trustTaskStatusSigned": "Firmado",
+	"trustTaskStatusDenied": "Bloqueado",
+	"trustTaskStatusUnknown": "Desconocido"
 }

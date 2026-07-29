@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
@@ -7,11 +8,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../application/services/personal_ai_service/personal_ai_authorization_snapshot.dart';
 import '../../../domain/models/contacts/contact.dart';
+import '../../../domain/models/trust_task/trust_task_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/media/file_picker/file_picker_platform_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/section_banner.dart';
 import 'personal_agent_screen_controller.dart';
+import 'trust_task_history_controller.dart';
 
 class PersonalAgentScreen extends ConsumerWidget {
   const PersonalAgentScreen({super.key});
@@ -261,29 +265,6 @@ class PersonalAgentScreen extends ConsumerWidget {
                   onResetPersonal: () =>
                       cancelRoutingContext(AgentContext.personal),
                 ),
-                if (ui.showWorkAuthorization ||
-                    ui.showPersonalAuthorization) ...[
-                  const SizedBox(height: 16),
-                  if (ui.showWorkAuthorization)
-                    _AgentAuthorizationCard(
-                      title: l10n.personalAgentMyWorkAiTitle,
-                      contextLabel: l10n.personalAgentWorkContextLabel,
-                      snapshot: ui.workSnapshot,
-                      contact: ui.workContact,
-                      onCancel: () => cancelRoutingContext(AgentContext.work),
-                    ),
-                  if (ui.showWorkAuthorization && ui.showPersonalAuthorization)
-                    const SizedBox(height: 12),
-                  if (ui.showPersonalAuthorization)
-                    _AgentAuthorizationCard(
-                      title: l10n.personalAgentMyPersonalAiTitle,
-                      contextLabel: l10n.personalAgentPersonalContextLabel,
-                      snapshot: ui.personalSnapshot,
-                      contact: ui.personalContact,
-                      onCancel: () =>
-                          cancelRoutingContext(AgentContext.personal),
-                    ),
-                ],
                 const SizedBox(height: 16),
                 _GlassPanel(
                   padding: EdgeInsets.zero,
@@ -309,10 +290,356 @@ class PersonalAgentScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                if (ui.showWorkAuthorization ||
+                    ui.showPersonalAuthorization) ...[
+                  const SizedBox(height: 16),
+                  if (ui.showWorkAuthorization)
+                    _AgentAuthorizationCard(
+                      title: l10n.personalAgentMyWorkAiTitle,
+                      contextLabel: l10n.personalAgentWorkContextLabel,
+                      snapshot: ui.workSnapshot,
+                      contact: ui.workContact,
+                      onCancel: () => cancelRoutingContext(AgentContext.work),
+                    ),
+                  if (ui.showWorkAuthorization && ui.showPersonalAuthorization)
+                    const SizedBox(height: 12),
+                  if (ui.showPersonalAuthorization)
+                    _AgentAuthorizationCard(
+                      title: l10n.personalAgentMyPersonalAiTitle,
+                      contextLabel: l10n.personalAgentPersonalContextLabel,
+                      snapshot: ui.personalSnapshot,
+                      contact: ui.personalContact,
+                      onCancel: () =>
+                          cancelRoutingContext(AgentContext.personal),
+                    ),
+                ],
+                const SizedBox(height: 16),
+                const _TrustTaskHistorySection(),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TrustTaskHistorySection extends ConsumerWidget {
+  const _TrustTaskHistorySection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final colorScheme = context.colorScheme;
+    final state = ref.watch(trustTaskHistoryControllerProvider);
+    final controller = ref.read(trustTaskHistoryControllerProvider.notifier);
+
+    return _GlassPanel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.history, color: colorScheme.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.trustTaskHistoryTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              IconButton(
+                tooltip: l10n.trustTaskHistoryRefresh,
+                onPressed: state.isLoading ? null : controller.refresh,
+                icon: state.isLoading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          _buildBody(context, l10n, colorScheme, state, controller),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    AppLocalizations l10n,
+    ColorScheme colorScheme,
+    TrustTaskHistoryState state,
+    TrustTaskHistoryController controller,
+  ) {
+    if (state.isLoading && state.records.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (state.status == TrustTaskHistoryStatus.error && state.records.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          children: [
+            Text(
+              l10n.trustTaskHistoryError,
+              style: TextStyle(color: colorScheme.error),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: controller.refresh,
+              child: Text(l10n.trustTaskHistoryRetry),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (state.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        child: Center(
+          child: Text(
+            l10n.trustTaskHistoryEmpty,
+            style: TextStyle(color: colorScheme.onSurfaceVariant),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        for (final record in state.records)
+          _TrustTaskHistoryTile(record: record),
+        if (state.hasMore)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: state.isLoadingMore
+                ? const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : TextButton(
+                    onPressed: controller.loadMore,
+                    child: Text(l10n.trustTaskHistoryLoadMore),
+                  ),
+          ),
+      ],
+    );
+  }
+}
+
+class _TrustTaskHistoryTile extends StatelessWidget {
+  const _TrustTaskHistoryTile({required this.record});
+
+  final TrustTaskRecord record;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = context.colorScheme;
+
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(bottom: 12),
+        expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+        leading: Icon(
+          Icons.assignment_turned_in_outlined,
+          color: colorScheme.primary,
+        ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l10n.trustTaskHistoryItemTitle,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontSize: 13),
+              ),
+            ),
+            const SizedBox(width: 8),
+            _StatusChip(record: record),
+          ],
+        ),
+        subtitle: Text(
+          _formatTimestamp(record.timestamp),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
+        ),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: colorScheme.outlineVariant),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.trustTaskHistoryDetails,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                for (final entry in _detailEntries(record))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 3),
+                    child: _DetailRow(label: entry.key, value: entry.value),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Flattens the raw audit entry into ordered `label → value` pairs for the
+  /// expandable details view. Falls back to the mapped fields when the raw map
+  /// is unavailable (e.g. records built directly in tests).
+  static List<MapEntry<String, String>> _detailEntries(TrustTaskRecord record) {
+    final source = record.raw.isNotEmpty
+        ? record.raw
+        : <String, dynamic>{
+            'id': record.id,
+            'timestamp':
+                record.timestamp.toUtc().millisecondsSinceEpoch ~/ 1000,
+            'outcome': record.rawOutcome,
+            if (record.entryId != null) 'resource': record.entryId,
+            if (record.actor != null) 'actor': record.actor,
+            if (record.contextId != null) 'context_id': record.contextId,
+            if (record.detail != null) 'detail': record.detail,
+          };
+
+    final keys = source.keys.toList()..sort();
+    return [
+      for (final key in keys) MapEntry(key, _stringifyValue(source[key])),
+    ];
+  }
+
+  static String _stringifyValue(Object? value) {
+    if (value == null) return '—';
+    if (value is String) return value.isEmpty ? '—' : value;
+    if (value is num || value is bool) return value.toString();
+    try {
+      return const JsonEncoder.withIndent('  ').convert(value);
+    } catch (_) {
+      return value.toString();
+    }
+  }
+
+  static String _formatTimestamp(DateTime timestamp) {
+    String two(int n) => n.toString().padLeft(2, '0');
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final month = months[timestamp.month - 1];
+    return '$month ${timestamp.day}, ${timestamp.year} '
+        '${two(timestamp.hour)}:${two(timestamp.minute)}';
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final theme = Theme.of(context);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 96,
+          child: Text(
+            label,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 11,
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: SelectableText(
+            value,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 11,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.record});
+
+  final TrustTaskRecord record;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colorScheme = context.colorScheme;
+
+    late final Color color;
+    late final String label;
+    switch (record.status) {
+      case TrustTaskStatus.signed:
+        color = Colors.green;
+        label = l10n.trustTaskStatusSigned;
+      case TrustTaskStatus.denied:
+        color = colorScheme.error;
+        label = l10n.trustTaskStatusDenied;
+      case TrustTaskStatus.unknown:
+        color = colorScheme.outline;
+        label = l10n.trustTaskStatusUnknown;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(color: color, fontWeight: FontWeight.w600),
       ),
     );
   }
