@@ -14,7 +14,7 @@ import 'ongoing_group_call_banner_state.dart';
 
 part 'ongoing_group_call_controller.g.dart';
 
-/// Emits the ongoing group audio call banner data for [contactId], or `null`
+/// Emits the ongoing group call banner data for [contactId], or `null`
 /// when the banner must not be shown.
 ///
 /// The banner is shown only when the local user is NOT in a call: while any

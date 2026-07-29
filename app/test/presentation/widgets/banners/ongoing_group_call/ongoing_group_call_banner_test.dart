@@ -87,7 +87,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Ongoing audio call (3)'), findsOneWidget);
+      expect(find.text('Ongoing call (3)'), findsOneWidget);
     });
 
     testWidgets('tapping Join invokes the callback', (tester) async {

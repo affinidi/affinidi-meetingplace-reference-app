@@ -2155,8 +2155,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get videoCallGroupCallActive => 'Gruppenanruf läuft';
 
   @override
-  String videoCallOngoingAudioCall(int count) {
-    return 'Laufender Audioanruf ($count)';
+  String videoCallOngoingCall(int count) {
+    return 'Laufender Anruf ($count)';
   }
 
   @override

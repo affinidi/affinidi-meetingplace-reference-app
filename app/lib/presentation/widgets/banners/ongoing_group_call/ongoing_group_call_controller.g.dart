@@ -8,7 +8,7 @@ part of 'ongoing_group_call_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Emits the ongoing group audio call banner data for [contactId], or `null`
+/// Emits the ongoing group call banner data for [contactId], or `null`
 /// when the banner must not be shown.
 ///
 /// The banner is shown only when the local user is NOT in a call: while any
@@ -20,7 +20,7 @@ part of 'ongoing_group_call_controller.dart';
 @ProviderFor(ongoingGroupCallBanner)
 const ongoingGroupCallBannerProvider = OngoingGroupCallBannerFamily._();
 
-/// Emits the ongoing group audio call banner data for [contactId], or `null`
+/// Emits the ongoing group call banner data for [contactId], or `null`
 /// when the banner must not be shown.
 ///
 /// The banner is shown only when the local user is NOT in a call: while any
@@ -39,7 +39,7 @@ final class OngoingGroupCallBannerProvider
     with
         $FutureModifier<OngoingGroupCallBannerData?>,
         $StreamProvider<OngoingGroupCallBannerData?> {
-  /// Emits the ongoing group audio call banner data for [contactId], or `null`
+  /// Emits the ongoing group call banner data for [contactId], or `null`
   /// when the banner must not be shown.
   ///
   /// The banner is shown only when the local user is NOT in a call: while any
@@ -95,7 +95,7 @@ final class OngoingGroupCallBannerProvider
 String _$ongoingGroupCallBannerHash() =>
     r'1714de86c73b6386d9151a4b42d10fb6c4251e5d';
 
-/// Emits the ongoing group audio call banner data for [contactId], or `null`
+/// Emits the ongoing group call banner data for [contactId], or `null`
 /// when the banner must not be shown.
 ///
 /// The banner is shown only when the local user is NOT in a call: while any
@@ -116,7 +116,7 @@ final class OngoingGroupCallBannerFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Emits the ongoing group audio call banner data for [contactId], or `null`
+  /// Emits the ongoing group call banner data for [contactId], or `null`
   /// when the banner must not be shown.
   ///
   /// The banner is shown only when the local user is NOT in a call: while any

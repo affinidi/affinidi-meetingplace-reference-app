@@ -2106,8 +2106,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoCallGroupCallActive => 'Group call in progress';
 
   @override
-  String videoCallOngoingAudioCall(int count) {
-    return 'Ongoing audio call ($count)';
+  String videoCallOngoingCall(int count) {
+    return 'Ongoing call ($count)';
   }
 
   @override

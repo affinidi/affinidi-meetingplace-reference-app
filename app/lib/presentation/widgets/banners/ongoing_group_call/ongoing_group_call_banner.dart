@@ -40,7 +40,7 @@ int visibleAvatarCount({
   return fit.clamp(1, total);
 }
 
-/// Banner shown below the chat title while a group audio call is in progress
+/// Banner shown below the chat title while a group call is in progress
 /// and the local user has not joined it. Tapping Join opens the call screen.
 class OngoingGroupCallBanner extends ConsumerWidget {
   const OngoingGroupCallBanner({super.key, required this.contactId});
@@ -91,7 +91,7 @@ class OngoingGroupCallBannerView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.l10n.videoCallOngoingAudioCall(data.participantCount),
+                  context.l10n.videoCallOngoingCall(data.participantCount),
                   style: context.textTheme.bodyMedium,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

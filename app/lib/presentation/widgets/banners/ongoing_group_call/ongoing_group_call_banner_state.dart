@@ -29,7 +29,7 @@ class OngoingGroupCallAvatar {
   int get hashCode => Object.hash(id, firstName, image);
 }
 
-/// Presentational data for the ongoing group audio call banner.
+/// Presentational data for the ongoing group call banner.
 ///
 /// `null` from the controller means the banner must not be shown (no ongoing
 /// call, local user is in a call, or the chat is not a call-capable group).
@@ -41,7 +41,7 @@ class OngoingGroupCallBannerData {
   }) : avatars = List.unmodifiable(avatars);
 
   /// The number of distinct remote people currently in the call. Shown in the
-  /// "Ongoing audio call (n)" label.
+  /// "Ongoing call (n)" label.
   final int participantCount;
 
   /// The avatars of the remote people currently in the call, in membership

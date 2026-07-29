@@ -2036,8 +2036,8 @@
 	"@videoCallGroupCallActive": {
 		"type": "text"
 	},
-	"videoCallOngoingAudioCall": "Ongoing audio call ({count})",
-	"@videoCallOngoingAudioCall": {
+	"videoCallOngoingCall": "Ongoing call ({count})",
+	"@videoCallOngoingCall": {
 		"type": "text",
 		"placeholders": {
 			"count": {
