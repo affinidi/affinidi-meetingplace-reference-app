@@ -10,6 +10,7 @@ import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_category.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/configuration/environment.dart';
+import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/secure_storage/secure_storage.dart';
@@ -36,6 +37,9 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   late final _lifecycleObserver = _PersonalAiLifecycleObserver(
     onResumed: _handleAppResumed,
   );
+
+  static const _logKey = 'PERSONAL_AI';
+  late final AppLogger _logger = _ref.read(appLoggerProvider);
 
   Environment get _environment => _ref.read(environmentProvider);
 
