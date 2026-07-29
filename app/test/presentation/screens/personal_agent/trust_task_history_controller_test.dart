@@ -41,7 +41,9 @@ void main() {
   test('load() populates records and hasMore from pagination', () async {
     final fake = _FakeSigning(
       status: SigningServiceStatus.disconnected,
-      pages: {1: pageOf(['a', 'b'], page: 1, totalPages: 2)},
+      pages: {
+        1: pageOf(['a', 'b'], page: 1, totalPages: 2),
+      },
     );
     final container = makeContainer(fake);
     final controller = container.read(
@@ -99,7 +101,9 @@ void main() {
   test('auto-loads once the signing service reports connected', () async {
     final fake = _FakeSigning(
       status: SigningServiceStatus.disconnected,
-      pages: {1: pageOf(['a'], page: 1, totalPages: 1)},
+      pages: {
+        1: pageOf(['a'], page: 1, totalPages: 1),
+      },
     );
     final container = makeContainer(fake);
     // Instantiate the controller (subscribes to signing status).
@@ -128,9 +132,7 @@ class _FakeSigning extends StateNotifier<SigningServiceState>
   final List<int> requestedPages = [];
 
   void markConnected() {
-    state = const SigningServiceState(
-      status: SigningServiceStatus.connected,
-    );
+    state = const SigningServiceState(status: SigningServiceStatus.connected);
   }
 
   @override
