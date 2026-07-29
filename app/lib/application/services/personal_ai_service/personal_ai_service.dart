@@ -13,6 +13,7 @@ import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../infrastructure/providers/mnemonic_hash_provider.dart';
 import '../../../infrastructure/secure_storage/secure_storage.dart';
 import '../connections_service/connections_service.dart';
 import '../contacts_service/contacts_service.dart';
@@ -42,12 +43,54 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   late final AppLogger _logger = _ref.read(appLoggerProvider);
 
   Environment get _environment => _ref.read(environmentProvider);
+  MeetingPlacePersonalAgentSDK? _sdk;
+  Future<MeetingPlacePersonalAgentSDK>? _sdkFuture;
 
-  late final MeetingPlacePersonalAgentSDK _sdk =
-      MeetingPlacePersonalAgentSDK.hosted(
-        baseUrl: _environment.personalAiBaseUrl,
+  Future<String> _resolvePersonalAiBaseUrl() async {
+    final mnemonicHash = (await _ref.read(mnemonicHashProvider.future))?.hash;
+    if (mnemonicHash == null || mnemonicHash.isEmpty) {
+      throw StateError(
+        'Personal AI base URL is unavailable because mnemonic hash is missing.',
+      );
+    }
+
+    final baseUrl = _environment.personalAiBaseUrl(mnemonicHash);
+    if (baseUrl == null || baseUrl.isEmpty) {
+      throw StateError(
+        'Personal AI base URL is not configured for the current wallet.',
+      );
+    }
+    return baseUrl;
+  }
+
+  Future<MeetingPlacePersonalAgentSDK> _loadSdk() {
+    final cachedSdk = _sdk;
+    if (cachedSdk != null) {
+      return Future<MeetingPlacePersonalAgentSDK>.value(cachedSdk);
+    }
+
+    final pendingSdk = _sdkFuture;
+    if (pendingSdk != null) return pendingSdk;
+
+    final future = _createSdk();
+    _sdkFuture = future;
+    return future;
+  }
+
+  Future<MeetingPlacePersonalAgentSDK> _createSdk() async {
+    try {
+      final baseUrl = await _resolvePersonalAiBaseUrl();
+      final sdk = MeetingPlacePersonalAgentSDK.hosted(
+        baseUrl: baseUrl,
         endpoint: _environment.personalAiSetupEndpoint,
       );
+      _sdk = sdk;
+      return sdk;
+    } catch (_) {
+      _sdkFuture = null;
+      rethrow;
+    }
+  }
 
   @override
   void dispose() {
@@ -81,12 +124,13 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     PersonalAgentSetupResult setupResult, {
     required bool isInitialSetup,
   }) async {
+    final sdk = await _loadSdk();
     String? channelDid;
     String? offerLink;
     final setupId = setupResult.setupId?.trim() ?? '';
     if (setupId.isNotEmpty) {
       try {
-        final offer = await _sdk.fetchPersonalAgentOffer(setupId: setupId);
+        final offer = await sdk.fetchPersonalAgentOffer(setupId: setupId);
         final cd = offer.channelDid?.trim() ?? '';
         if (cd.isNotEmpty) {
           channelDid = cd;
@@ -165,6 +209,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   }) async {
     if (!_environment.personalAiEnabled) return;
     if (state.contextUploading) return;
+    final sdk = await _loadSdk();
 
     final contextKey = _routeKeyForSetupContextName(setupContextName);
 
@@ -180,7 +225,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       var effectiveSetupId = setupId;
       PersonalAgentContextStatus uploadStatus;
       try {
-        uploadStatus = await _sdk.uploadPersonalAgentContext(
+        uploadStatus = await sdk.uploadPersonalAgentContext(
           setupId: effectiveSetupId,
           content: content,
           contextKey: contextKey,
@@ -205,7 +250,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
           rethrow;
         }
 
-        final freshSetup = await _sdk.ensurePersonalAgentSetup(
+        final freshSetup = await sdk.ensurePersonalAgentSetup(
           request: PersonalAgentSetupRequest(
             holderDid: holderDid,
             contextName: setupContextName,
@@ -215,7 +260,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         effectiveSetupId = freshSetup.setupId ?? setupId;
         _updateSetupResult(freshSetup, contextName: setupContextName);
 
-        uploadStatus = await _sdk.uploadPersonalAgentContext(
+        uploadStatus = await sdk.uploadPersonalAgentContext(
           setupId: effectiveSetupId,
           content: content,
           contextKey: contextKey,
@@ -269,7 +314,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     if (state.contextProvisioned) return;
 
     try {
-      final status = await _sdk.fetchPersonalAgentContextStatus(
+      final sdk = await _loadSdk();
+      final status = await sdk.fetchPersonalAgentContextStatus(
         setupId: setupId,
       );
       if (status.provisioned && !state.contextProvisioned) {
@@ -304,26 +350,29 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       return;
     }
 
-    _logger.info(
-      'Connecting to Personal AI URL: '
-      'baseUrl=${_environment.personalAiBaseUrl} '
-      'endpoint=${_environment.personalAiSetupEndpoint} '
-      'context=$contextName '
-      'holderDid=${_redact(normalizedHolderDid)}',
-      name: _logKey,
-    );
-
     state = state.copyWith(
       status: PersonalAiSetupStatus.settingUp,
       clearErrorMessage: true,
     );
 
+    String? personalAiBaseUrl;
     try {
+      personalAiBaseUrl = await _resolvePersonalAiBaseUrl();
+      _logger.info(
+        'Connecting to Personal AI URL: '
+        'baseUrl=$personalAiBaseUrl '
+        'endpoint=${_environment.personalAiSetupEndpoint} '
+        'context=$contextName '
+        'holderDid=${_redact(normalizedHolderDid)}',
+        name: _logKey,
+      );
+
+      final sdk = await _loadSdk();
       _logger.info(
         'Requesting personal agent setup from Personal AI URL...',
         name: _logKey,
       );
-      final result = await _sdk.ensurePersonalAgentSetup(
+      final result = await sdk.ensurePersonalAgentSetup(
         request: PersonalAgentSetupRequest(
           holderDid: normalizedHolderDid,
           contextName: contextName,
@@ -356,7 +405,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       // connection flags for follow-up flows (like context upload).
       var setupSnapshot = result;
       try {
-        setupSnapshot = await _sdk.ensurePersonalAgentSetup(
+        setupSnapshot = await sdk.ensurePersonalAgentSetup(
           request: PersonalAgentSetupRequest(
             holderDid: normalizedHolderDid,
             contextName: contextName,
@@ -416,7 +465,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     } catch (error, stackTrace) {
       _logger.error(
         'Personal AI connect failed for URL '
-        '${_environment.personalAiBaseUrl}',
+        '${personalAiBaseUrl ?? '(unresolved)'}',
         error: error,
         stackTrace: stackTrace,
         name: _logKey,
@@ -437,13 +486,14 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     int maxAttempts = 20,
     Duration pollEvery = const Duration(seconds: 1),
   }) async {
+    final sdk = await _loadSdk();
     PersonalAgentSetupResult? latest;
     // Poll setup status while ControlPlaneService continuously advances the
     // pending OfferFinalised event (so channel inauguration is sent) instead of
     // waiting for a push notification or app resume/restart.
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        latest = await _sdk.ensurePersonalAgentSetup(
+        latest = await sdk.ensurePersonalAgentSetup(
           request: PersonalAgentSetupRequest(
             holderDid: holderDid,
             contextName: contextName,
@@ -505,6 +555,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     }
 
     try {
+      final sdk = await _loadSdk();
       final storage = await _ref.read(secureStorageProvider.future);
       final persistedHolderDid = (await storage.readPersonalAiHolderDid())
           ?.trim();
@@ -529,7 +580,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       var anyConnected = false;
       for (final contextName in const ['work-ai', 'personal-ai']) {
         try {
-          final contextResult = await _sdk.ensurePersonalAgentSetup(
+          final contextResult = await sdk.ensurePersonalAgentSetup(
             request: PersonalAgentSetupRequest(
               holderDid: currentHolderDid,
               contextName: contextName,
@@ -576,6 +627,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     required PersonalAgentSetupResult result,
     required String holderDid,
   }) async {
+    final sdk = await _loadSdk();
     final initialSetupId = result.setupId?.trim();
     if (initialSetupId == null || initialSetupId.isEmpty) {
       throw StateError('Personal AI setup did not return a setup id.');
@@ -656,7 +708,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       }
 
       if (attempt == 0) {
-        final refreshed = await _sdk.ensurePersonalAgentSetup(
+        final refreshed = await sdk.ensurePersonalAgentSetup(
           request: PersonalAgentSetupRequest(
             holderDid: holderDid,
             contextName: contextName,
@@ -685,10 +737,11 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   Future<PersonalAgentOfferResult> _waitForOfferChannelDid({
     required String setupId,
   }) async {
+    final sdk = await _loadSdk();
     const maxAttempts = 20;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        final offer = await _sdk.fetchPersonalAgentOffer(setupId: setupId);
+        final offer = await sdk.fetchPersonalAgentOffer(setupId: setupId);
         final hasChannelDid = offer.channelDid?.trim().isNotEmpty ?? false;
         if (hasChannelDid) {
           return offer;
@@ -700,7 +753,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     }
     // Connector did not write channel_did in time — fall back to a plain fetch
     // so setup can still complete (name update may be deferred to next sync).
-    return _sdk.fetchPersonalAgentOffer(setupId: setupId);
+    return sdk.fetchPersonalAgentOffer(setupId: setupId);
   }
 
   Future<PersonalAgentOfferResult> _waitForOffer({
@@ -709,11 +762,12 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     required String contextName,
     required String agentDisplayName,
   }) async {
+    final sdk = await _loadSdk();
     var currentSetupId = setupId;
     const maxAttempts = 12;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
-        final offer = await _sdk.fetchPersonalAgentOffer(
+        final offer = await sdk.fetchPersonalAgentOffer(
           setupId: currentSetupId,
         );
         final status = offer.status;
@@ -741,7 +795,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         );
         if (unknownSetup) {
           try {
-            final refreshed = await _sdk.ensurePersonalAgentSetup(
+            final refreshed = await sdk.ensurePersonalAgentSetup(
               request: PersonalAgentSetupRequest(
                 holderDid: holderDid,
                 contextName: contextName,
@@ -1057,6 +1111,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     String? preferredChannelDid,
     bool suppressErrors = true,
   }) async {
+    final sdk = await _loadSdk();
     final setupId = setupResult.setupId?.trim();
     if (setupId == null || setupId.isEmpty) {
       return;
@@ -1072,7 +1127,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         return;
       }
 
-      final sdkSnapshot = await _sdk.fetchPersonalAgentAuthorizationSnapshot(
+      final sdkSnapshot = await sdk.fetchPersonalAgentAuthorizationSnapshot(
         setupId: setupId,
       );
       final snapshot = PersonalAiAuthorizationSnapshot.fromSdk(sdkSnapshot);
@@ -1099,6 +1154,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     PersonalAgentSetupResult setupResult, {
     String? preferredChannelDid,
   }) async {
+    final sdk = await _loadSdk();
     final routingState = _ref.read(contextRoutingServiceProvider);
     final contactsState = _ref.read(contactsServiceProvider);
     final targetContext = agentContextForSetup(
@@ -1111,7 +1167,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     var channelDid = preferredChannelDid?.trim();
     if (setupId != null && setupId.isNotEmpty) {
       try {
-        final offer = await _sdk.fetchPersonalAgentOffer(setupId: setupId);
+        final offer = await sdk.fetchPersonalAgentOffer(setupId: setupId);
         offerLink = await _resolveOfferLinkForChannelDid(offer.channelDid);
         channelDid ??= offer.channelDid?.trim();
       } catch (_) {

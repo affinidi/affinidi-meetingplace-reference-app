@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:bip39_mnemonic/bip39_mnemonic.dart';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as fvod;
@@ -19,6 +17,7 @@ import 'connection_offer_repository_provider.dart';
 import 'group_repository_provider.dart';
 import 'matrix_config_provider.dart';
 import 'mnemonic_configured_provider.dart';
+import 'mnemonic_hash_provider.dart';
 
 /// Initializes the vodozemac cryptographic library.
 ///
@@ -74,11 +73,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
     try {
       await ref.read(vodozemacInitProvider.future);
 
-      final mnemonic = await secureStorage.getMnemonic();
-      logger.info(
-        'Using mnemonic hash: ${sha256.convert(utf8.encode(mnemonic ?? ''))}',
-        name: logKey,
-      );
+      final mnemonicData = await ref.read(mnemonicHashProvider.future);
+      final mnemonic = mnemonicData?.mnemonic;
+      final mnemonicHash = mnemonicData?.hash ?? '';
+      logger.info('Using mnemonic hash: $mnemonicHash', name: logKey);
       final wallet = Bip32Wallet.fromSeed(
         Uint8List.fromList(
           Mnemonic.fromSentence(mnemonic!, Language.english).seed,
@@ -94,11 +92,9 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceCoreSDK>(
       );
       logger.info('Debug mode: ${settingsState.isDebugMode}', name: logKey);
 
-      final mnemonicHash = sha256.convert(utf8.encode(mnemonic)).toString();
       final environment = ref.read(environmentProvider);
       final eventCfg = environment.ciergeEventConfig;
-      final ciergeConnectorDid =
-          eventCfg[mnemonicHash]?['ciergeConnectorDid'] as String?;
+      final ciergeConnectorDid = environment.ciergeConnectorDid(mnemonicHash);
       final resolvedAgentDid = normalizeCiergeConnectorDid(ciergeConnectorDid);
 
       if (environment.personalAiEnabled &&

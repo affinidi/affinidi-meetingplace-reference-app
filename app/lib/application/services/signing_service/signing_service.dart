@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:bip39_mnemonic/bip39_mnemonic.dart';
-import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
@@ -15,7 +14,7 @@ import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../../../infrastructure/secure_storage/secure_storage.dart';
+import '../../../infrastructure/providers/mnemonic_hash_provider.dart';
 import '../../../infrastructure/vta/app_vta_auth_signer.dart';
 import '../../../infrastructure/vta/authenticated_websocket_channel.dart';
 import '../../../infrastructure/vta/mediator_auth_helper.dart';
@@ -83,14 +82,21 @@ class SigningService extends StateNotifier<SigningServiceState> {
 
   Future<void> _initialize() async {
     final env = _ref.read(environmentProvider);
-    final vtaBaseUrl = env.vtaBaseUrl;
-    final vtaDid = env.vtaDid;
     final vtaMediatorDid = env.vtaMediatorDid;
 
-    if (vtaBaseUrl.isEmpty || vtaDid.isEmpty || vtaMediatorDid.isEmpty) {
+    final mnemonicData = await _ref.read(mnemonicHashProvider.future);
+    final mnemonicHash = mnemonicData?.hash;
+    final vtaBaseUrl = env.vtaBaseUrl(mnemonicHash ?? '');
+    final vtaDid = env.vtaDid(mnemonicHash ?? '');
+
+    if (vtaBaseUrl == null ||
+        vtaBaseUrl.isEmpty ||
+        vtaDid == null ||
+        vtaDid.isEmpty ||
+        vtaMediatorDid.isEmpty) {
       _logger.info(
         'VTA not configured '
-        '(VTA_BASE_URL / VTA_DID / VTA_MEDIATOR_DID missing), '
+        '(WALLET_CONFIG.vtaDid / WALLET_CONFIG.vtaBaseUrl / VTA_MEDIATOR_DID missing), '
         'skipping',
         name: _logKey,
       );
@@ -100,8 +106,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
     state = state.copyWith(status: SigningServiceStatus.connecting);
 
     try {
-      final secureStorage = await _ref.read(secureStorageProvider.future);
-      final mnemonic = await secureStorage.getMnemonic();
+      final mnemonic = mnemonicData?.mnemonic;
       if (mnemonic == null || mnemonic.isEmpty) {
         _logger.warning('No mnemonic available', name: _logKey);
         state = state.copyWith(
@@ -297,15 +302,12 @@ class SigningService extends StateNotifier<SigningServiceState> {
       final sdk = await _ref.read(meetingPlaceSdkProvider.future);
       final env = _ref.read(environmentProvider);
 
-      final secureStorage = await _ref.read(secureStorageProvider.future);
-      final mnemonic = await secureStorage.getMnemonic();
-      if (mnemonic == null || mnemonic.isEmpty) {
+      final mnemonicHash = (await _ref.read(mnemonicHashProvider.future))?.hash;
+      if (mnemonicHash == null || mnemonicHash.isEmpty) {
         _logger.warning('Cannot notify agent: no mnemonic', name: _logKey);
         return;
       }
-      final mnemonicHash = sha256.convert(utf8.encode(mnemonic)).toString();
-      final agentDid =
-          env.ciergeEventConfig[mnemonicHash]?['ciergeConnectorDid'] as String?;
+      final agentDid = env.ciergeConnectorDid(mnemonicHash);
       if (agentDid == null || agentDid.isEmpty) {
         _logger.warning(
           'Cannot notify agent: no ciergeConnectorDid in config',

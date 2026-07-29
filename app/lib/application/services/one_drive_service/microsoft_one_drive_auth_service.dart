@@ -4,6 +4,7 @@ import 'package:meeting_place_vta_client/meeting_place_vta_client.dart';
 
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/providers/mnemonic_hash_provider.dart';
 
 final microsoftOneDriveAuthServiceProvider =
     Provider<MicrosoftOneDriveAuthService>(MicrosoftOneDriveAuthService.new);
@@ -170,15 +171,35 @@ class MicrosoftOneDriveAuthService {
   }) async {
     final normalizedSetupId = setupId.trim();
     final normalizedHolderDid = holderDid.trim();
+    final mnemonicHash = (await _ref.read(mnemonicHashProvider.future))?.hash;
+    if (mnemonicHash == null) {
+      _logger.error(
+        '''Cannot store OneDrive OAuth refresh token: mnemonic hash is not configured.''',
+        name: _logKey,
+      );
+      throw StateError('Mnemonic hash is not configured.');
+    }
+    final personalAiBaseUrl = _environment.personalAiBaseUrl(mnemonicHash);
+    if (personalAiBaseUrl == null || personalAiBaseUrl.trim().isEmpty) {
+      _logger.error(
+        '''Cannot store OneDrive OAuth refresh token: personal AI base URL is not configured for mnemonic hash $mnemonicHash.''',
+        name: _logKey,
+      );
+      throw StateError(
+        'Personal AI base URL is not configured for this wallet. '
+        'Check that WALLET_CONFIG has a non-empty ciergeConsoleUrl for '
+        'mnemonic hash $mnemonicHash.',
+      );
+    }
 
-    final client = VtaClient(baseUrl: _environment.personalAiBaseUrl);
+    final client = VtaClient(baseUrl: personalAiBaseUrl);
     final endpoint = _setupResourcePath(
       setupId,
       '/integrations/microsoft/onedrive',
     );
     _logger.info(
       'Storing OneDrive OAuth refresh token via personal AI endpoint '
-      '(baseUrl=${_environment.personalAiBaseUrl}, endpoint=$endpoint, '
+      '(baseUrl=$personalAiBaseUrl, endpoint=$endpoint, '
       'setupId=${_redact(normalizedSetupId)}, '
       'holderDid=${_redact(normalizedHolderDid)})',
       name: _logKey,
