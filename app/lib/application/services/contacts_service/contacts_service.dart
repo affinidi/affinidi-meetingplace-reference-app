@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
-import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:uuid/uuid.dart';
@@ -85,66 +84,32 @@ class ContactsService extends _$ContactsService {
       Future.microtask(() => updateContactFromChannelActivity(channel));
     });
 
-    ref.listen(
-      meetingPlaceSdkProvider,
-      (_, next) => _bindToCallSignals(next.value),
-      fireImmediately: true,
-    );
-
     return ContactsServiceState(contacts: []);
   }
 
-  StreamSubscription<CallSignal>? _callSignalSub;
-
-  /// Channel DIDs already credited with a missed-call badge bump for their
-  /// current unread episode.
+  /// Missed-call badge credits already applied for the current unread episode,
+  /// keyed by contact channel DID → the set of call-item message ids counted
+  /// for it.
   ///
-  /// A single missed/declined call can surface more than one decline signal on
-  /// this device — for example when the local user is busy and the SDK
-  /// auto-rejects a competing incoming call (call glare): the losing caller's
-  /// decline can be observed alongside the auto-reject, so a naive per-signal
-  /// bump over-counts and the contact badge exceeds its single call chat item.
-  /// Tracking credited contacts keeps the bump idempotent per episode; the
-  /// entry is cleared in [resetContactBadgeCount] when the chat is opened, so a
-  /// later call counts again.
-  final Set<String> _missedCallCreditedChannelDids = {};
+  /// Each call has a unique call chat item message id, and its terminal
+  /// (`missed`/`declined`) transition can be observed more than once (repeated
+  /// upserts, reconciliation, re-sync). Counting per message id keeps a single
+  /// call idempotent while letting distinct calls each count. Entries are
+  /// cleared per channel in [resetContactBadgeCount] when the chat is opened,
+  /// so a later call counts again.
+  final Map<String, Set<String>> _creditedMissedCallIds = {};
+  final Map<String, int> _openChannelReadSeqNos = {};
 
-  /// Subscribes to call signals so the unread badge for an unanswered outgoing
-  /// call is owned here, next to the other channel-event handlers, rather than
-  /// bumped by the call UI.
-  ///
-  /// A [CallDeclineSignal] is only ever received by the caller: the recipient
-  /// emits it, both on an explicit decline and on ring timeout. So receiving
-  /// one always means this device's outgoing call went unanswered.
-  void _bindToCallSignals(MeetingPlaceMatrixSDK? sdk) {
-    if (sdk == null) return;
-    _callSignalSub?.cancel();
-    _callSignalSub = sdk.callSignals.listen((signal) {
-      if (signal is CallDeclineSignal) {
-        Future.microtask(
-          () => _recordDeclinedOutgoingCall(signal.ownChannelDid),
-        );
-      }
-    });
-    ref.onDispose(() => _callSignalSub?.cancel());
-  }
+  /// Serializes badge-affecting read-modify-write flows so a concurrent
+  /// [updateContactFromChannelActivity] recompute cannot clobber a missed-call
+  /// increment (or vice versa) by writing back a value read before the other
+  /// landed.
+  Future<void> _badgeMutationQueue = Future<void>.value();
 
-  /// Bumps the contact's unread badge for an unanswered outgoing call.
-  ///
-  /// [ownChannelDid] is the local channel DID carried by the decline signal; it
-  /// is mapped to the contact through the channel's other-party DID.
-  Future<void> _recordDeclinedOutgoingCall(String ownChannelDid) async {
-    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByDid(ownChannelDid);
-    final otherPartyDid = channel?.otherPartyPermanentChannelDid;
-    if (otherPartyDid == null) {
-      _logger.warning(
-        '_recordDeclinedOutgoingCall: no channel for $ownChannelDid',
-        name: _logKey,
-      );
-      return;
-    }
-    await incrementMissedCallBadge(otherPartyDid);
+  Future<void> _serializeBadgeMutation(Future<void> Function() mutate) {
+    final next = _badgeMutationQueue.then((_) => mutate());
+    _badgeMutationQueue = next.then((_) {}, onError: (_) {});
+    return next;
   }
 
   Future<void>? initializing;
@@ -205,15 +170,46 @@ class ContactsService extends _$ContactsService {
         name: _logKey,
       );
 
-      final calculatedBadgeCount =
-          channel.seqNo - existingContact.currentMessageSeqNo;
-      final updatedContact = existingContact.copyWith(
-        status: ContactStatus.active,
-        badgeCount:
-            max(0, calculatedBadgeCount) + existingContact.missedCallCount,
-        badgeUpdateInProgress: false,
-      );
-      await updateContact(updatedContact);
+      await _serializeBadgeMutation(() async {
+        final current = state.getContactByChannelDid(
+          channel.otherPartyPermanentChannelDid!,
+        );
+        if (current == null) return;
+        final isChatOpen = ref
+            .read(openChatRegistryProvider.notifier)
+            .isOpen(current.id);
+        // The read baseline is established once, when the contact is first
+        // materialised from the channel (see [_makeContactFromChannel]): a
+        // group joins with `channel.seqNo == startSeqNo`, so pre-join history
+        // is already excluded from the unread delta. Post-join inbound messages
+        // then advance `channel.seqNo` and must count as unread until the chat
+        // is opened. While the chat is open the read position tracks the
+        // channel so live messages are not badged.
+        final currentMessageSeqNo = isChatOpen
+            ? max(current.currentMessageSeqNo, channel.seqNo)
+            : current.currentMessageSeqNo;
+        if (isChatOpen) {
+          _openChannelReadSeqNos[channel.otherPartyPermanentChannelDid!] =
+              currentMessageSeqNo;
+        }
+        final calculatedBadgeCount = channel.seqNo - currentMessageSeqNo;
+        final persistedContact = await _getPersistedContactByChannelDid(
+          channel.otherPartyPermanentChannelDid!,
+        );
+        final updatedContact = current.copyWith(
+          status: ContactStatus.active,
+          currentMessageSeqNo: currentMessageSeqNo,
+          badgeCount: max(0, calculatedBadgeCount) + current.missedCallCount,
+          badgeUpdateInProgress: false,
+          pendingMissedCallAt:
+              persistedContact?.pendingMissedCallAt ??
+              current.pendingMissedCallAt,
+          pendingMissedCallId:
+              persistedContact?.pendingMissedCallId ??
+              current.pendingMissedCallId,
+        );
+        await updateContact(updatedContact, preserveBadgeState: false);
+      });
     }
   }
 
@@ -259,6 +255,14 @@ class ContactsService extends _$ContactsService {
       origin: origin,
       category: category,
       notificationBannerDismissed: origin != ContactOrigin.directInteractive,
+      // Baseline the read position to the channel's current seqNo at creation
+      // so a freshly materialised contact does not count pre-existing channel
+      // history as unread. Group channels are created with a non-zero seqNo
+      // (the group's message history at join time); without this baseline the
+      // whole backlog inflates the unread badge on the first channel-activity
+      // recompute. Individual channels start at seqNo 0, so they are
+      // unaffected.
+      currentMessageSeqNo: channel.seqNo,
     );
   }
 
@@ -395,12 +399,15 @@ class ContactsService extends _$ContactsService {
   Future<void> updateContact(
     Contact contact, {
     bool preservePendingMissedCallState = true,
+    bool preserveBadgeState = true,
   }) async {
     _repository ??= await _ensureRepositoryInitialized();
     await _contactWriteLock.synchronized(() async {
-      final mergedContact = preservePendingMissedCallState
-          ? await _mergeContactForPersistence(contact)
-          : contact;
+      final mergedContact = await _mergeContactForPersistence(
+        contact,
+        preservePendingMissedCallState: preservePendingMissedCallState,
+        preserveBadgeState: preserveBadgeState,
+      );
       await _repository!.updateContact(mergedContact);
     });
     await fetchContacts();
@@ -408,25 +415,48 @@ class ContactsService extends _$ContactsService {
 
   /// Preserves durable contact state that should survive concurrent stale
   /// writes from unrelated contact-update flows.
-  Future<Contact> _mergeContactForPersistence(Contact contact) async {
+  Future<Contact> _mergeContactForPersistence(
+    Contact contact, {
+    required bool preservePendingMissedCallState,
+    required bool preserveBadgeState,
+  }) async {
     final channelDid = contact.channelDid;
     if (channelDid == null) return contact;
+    if (!preservePendingMissedCallState && !preserveBadgeState) return contact;
 
     final persistedContact = await _getPersistedContactByChannelDid(channelDid);
-    if (persistedContact?.pendingMissedCallAt == null ||
-        contact.pendingMissedCallAt != null) {
-      return contact;
+    if (persistedContact == null) return contact;
+
+    var mergedContact = contact;
+    if (preservePendingMissedCallState &&
+        persistedContact.pendingMissedCallAt != null &&
+        (contact.pendingMissedCallAt == null ||
+            contact.pendingMissedCallId == null)) {
+      _logger.info(
+        '_mergeContactForPersistence: preserving pending missed-call state for '
+        '${contact.id}',
+        name: _logKey,
+      );
+      mergedContact = mergedContact.copyWith(
+        pendingMissedCallAt: persistedContact.pendingMissedCallAt,
+        pendingMissedCallId: persistedContact.pendingMissedCallId,
+      );
     }
 
-    _logger.info(
-      '_mergeContactForPersistence: preserving pending missed-call state for '
-      '${contact.id}',
-      name: _logKey,
-    );
-    return contact.copyWith(
-      pendingMissedCallAt: persistedContact!.pendingMissedCallAt,
-      pendingMissedCallId: persistedContact.pendingMissedCallId,
-    );
+    if (preserveBadgeState &&
+        (persistedContact.badgeCount != contact.badgeCount ||
+            persistedContact.missedCallCount != contact.missedCallCount)) {
+      _logger.info(
+        '_mergeContactForPersistence: preserving badge state for ${contact.id}',
+        name: _logKey,
+      );
+      mergedContact = mergedContact.copyWith(
+        badgeCount: persistedContact.badgeCount,
+        missedCallCount: persistedContact.missedCallCount,
+      );
+    }
+
+    return mergedContact;
   }
 
   /// Update the contact card for a contact identified by channel DID.
@@ -490,6 +520,70 @@ class ContactsService extends _$ContactsService {
     await updateContact(amendedContact);
   }
 
+  /// Marks the channel as read up to its current sequence number when the chat
+  /// closes, so activity observed while the chat was open that does not flow
+  /// through the message sequence-number path is not recounted as unread after
+  /// leaving.
+  ///
+  /// Incoming chat messages advance [Contact.currentMessageSeqNo] via
+  /// [updateContactSequenceNumber] while the chat is open, but call chat items
+  /// (ringing/calling/declined/missed) and their reconciliation updates do not,
+  /// even though they still advance the channel sequence number. Without this
+  /// sync, a call that is the last activity before the user leaves the chat
+  /// leaks into the seqNo-derived unread count on the next channel-activity
+  /// recompute (e.g. a single later text shows +2). The badge itself is left
+  /// untouched: it is already cleared on chat open and only recomputed on the
+  /// next channel activity, which reads the synced sequence number.
+  Future<void> syncChannelReadSeqNo(String channelDid) async {
+    final readSeqNo = _openChannelReadSeqNos.remove(channelDid);
+    if (readSeqNo == null) return;
+    await _syncChannelReadSeqNoTo(channelDid, readSeqNo);
+  }
+
+  Future<void> syncOpenChannelReadSeqNo(String channelDid) async {
+    if (!ref.mounted) return;
+    if (state.getContactByChannelDid(channelDid) == null) return;
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    if (!ref.mounted) return;
+    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      channelDid,
+    );
+    if (channel == null || !ref.mounted) return;
+    final readSeqNo = channel.seqNo;
+    _openChannelReadSeqNos.update(
+      channelDid,
+      (current) => max(current, readSeqNo),
+      ifAbsent: () => readSeqNo,
+    );
+    await _syncChannelReadSeqNoTo(channelDid, readSeqNo);
+  }
+
+  Future<void> _syncChannelReadSeqNoTo(String channelDid, int readSeqNo) async {
+    if (!ref.mounted) return;
+    if (state.getContactByChannelDid(channelDid) == null) return;
+    await _serializeBadgeMutation(() async {
+      if (!ref.mounted) return;
+      final current = state.getContactByChannelDid(channelDid);
+      if (current == null) return;
+      if (current.currentMessageSeqNo >= readSeqNo) return;
+      final persistedContact = await _getPersistedContactByChannelDid(
+        channelDid,
+      );
+      if (!ref.mounted) return;
+      await updateContact(
+        current.copyWith(
+          currentMessageSeqNo: readSeqNo,
+          pendingMissedCallAt:
+              persistedContact?.pendingMissedCallAt ??
+              current.pendingMissedCallAt,
+          pendingMissedCallId:
+              persistedContact?.pendingMissedCallId ??
+              current.pendingMissedCallId,
+        ),
+      );
+    });
+  }
+
   /// Reset the badge count for a contact.
   ///
   /// [channelDid] - The channel DID of the contact to reset.
@@ -513,23 +607,30 @@ class ContactsService extends _$ContactsService {
       hasBeenOpened: true,
       currentMessageSeqNo: channel?.seqNo ?? contact.currentMessageSeqNo,
     );
-    _missedCallCreditedChannelDids.remove(channelDid);
-    await updateContact(amendedContact);
+    _openChannelReadSeqNos[channelDid] = amendedContact.currentMessageSeqNo;
+    _creditedMissedCallIds.remove(channelDid);
+    await updateContact(amendedContact, preserveBadgeState: false);
   }
 
-  /// Increment the unread badge for a missed call.
+  /// Increment the unread badge for a missed call, counted once per [callId].
   ///
-  /// Missed calls are not reflected in the channel sequence number, so they are
-  /// tracked in [Contact.missedCallCount] to survive the seqNo-derived badge
-  /// recompute in [updateContactFromChannelActivity]. Both the durable
+  /// Missed calls are tracked separately from message seqNo so delayed terminal
+  /// call updates can be counted idempotently and survive the seqNo-derived
+  /// badge recompute in [updateContactFromChannelActivity]. Both the durable
   /// missed-call counter and the displayed [Contact.badgeCount] are bumped by
   /// one. Cleared together by [resetContactBadgeCount] when the chat is opened.
   ///
   /// [channelDid] - The channel DID of the contact whose call was missed.
+  /// [callId] - A unique dedup key for this call episode. Counting per id keeps
+  /// a single call idempotent across repeated terminal transitions, while
+  /// distinct calls each count.
   ///
   /// Returns:
   /// - `Future<void>` completes when the update and refresh finish.
-  Future<void> incrementMissedCallBadge(String channelDid) async {
+  Future<void> incrementMissedCallBadge(
+    String channelDid, {
+    required String callId,
+  }) async {
     final contact = state.getContactByChannelDid(channelDid);
     if (contact == null) {
       _logger.warning(
@@ -551,23 +652,31 @@ class ContactsService extends _$ContactsService {
       return;
     }
 
-    // Idempotent per unread episode: a single missed call can raise more than
-    // one decline signal on this device (e.g. call glare while busy), so credit
-    // the contact at most once until the chat is opened and the badge reset.
-    if (!_missedCallCreditedChannelDids.add(channelDid)) {
+    // Count each call once, keyed by its call-item message id: the terminal
+    // transition can be observed more than once (repeated upserts, re-sync).
+    // Distinct calls carry distinct ids, so each still counts.
+    final creditedForChannel = _creditedMissedCallIds.putIfAbsent(
+      channelDid,
+      () => <String>{},
+    );
+    if (!creditedForChannel.add(callId)) {
       _logger.info(
-        'incrementMissedCallBadge: already credited ${contact.id} this '
-        'episode, skipping bump',
+        'incrementMissedCallBadge: already credited ${contact.id} call '
+        '$callId this episode, skipping bump',
         name: _logKey,
       );
       return;
     }
 
-    final amendedContact = contact.copyWith(
-      missedCallCount: contact.missedCallCount + 1,
-      badgeCount: contact.badgeCount + 1,
-    );
-    await updateContact(amendedContact);
+    await _serializeBadgeMutation(() async {
+      final current = state.getContactByChannelDid(channelDid);
+      if (current == null) return;
+      final amendedContact = current.copyWith(
+        missedCallCount: current.missedCallCount + 1,
+        badgeCount: current.badgeCount + 1,
+      );
+      await updateContact(amendedContact, preserveBadgeState: false);
+    });
   }
 
   /// Records that the current incoming call from [channelDid] was missed, so

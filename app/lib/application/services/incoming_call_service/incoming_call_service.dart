@@ -4,6 +4,7 @@ import 'package:clock/clock.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -24,6 +25,23 @@ class IncomingCallService extends _$IncomingCallService
   late final _logger = ref.read(appLoggerProvider);
 
   Timer? _ringTimer;
+
+  /// Badge dedup id for the in-flight missed call of each contact, generated
+  /// once when the incoming call arrives and reused by every terminal signal of
+  /// that same call.
+  ///
+  /// A missed group call terminates on this device twice: once locally (the
+  /// ring times out or is declined) and once when the caller broadcasts
+  /// `call-decline` to the group channel. The broadcast re-reports the same
+  /// call, but its transport call id falls back to the group DID rather than
+  /// the room id used locally, so the two signals cannot be matched by their
+  /// transport id. A per-call episode id generated at ring time lets both
+  /// signals credit the badge under one key so the call counts once. It is
+  /// generated fresh per incoming call, so two sequential calls that reuse the
+  /// same transport room id still count as two. The trailing broadcast consumes
+  /// it; a cancel that beats its own invite has no entry and counts on its own
+  /// fresh id.
+  final Map<String, String> _missEpisodeIdByContact = {};
 
   @override
   void build() {
@@ -82,7 +100,13 @@ class IncomingCallService extends _$IncomingCallService
     _clearRingState();
     _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
     if (channelDid != null) {
-      unawaited(_markCallAsMissed(channelDid, callId: callId));
+      unawaited(
+        _markCallAsMissed(
+          channelDid,
+          callId: callId,
+          missId: _missEpisodeIdByContact[channelDid] ?? const Uuid().v4(),
+        ),
+      );
     }
   }
 
@@ -107,7 +131,13 @@ class IncomingCallService extends _$IncomingCallService
       // Active ringing call was cancelled.
       _clearRingState();
       if (channelDid != null) {
-        unawaited(_markCallAsMissed(channelDid, callId: event.callId));
+        unawaited(
+          _markCallAsMissed(
+            channelDid,
+            callId: event.callId,
+            missId: _missEpisodeIdByContact[channelDid] ?? const Uuid().v4(),
+          ),
+        );
       } else {
         _logger.warning(
           'Skip markCallAsMissed: otherPartyChannelDid null for '
@@ -116,19 +146,10 @@ class IncomingCallService extends _$IncomingCallService
         );
       }
     } else {
-      // No matching active ring — caller's DID is in callerPermanentChannelDid.
-      // Do NOT use channelDid here: that holds the active call's contact DID
-      // and would mark the wrong contact for a busy auto-reject from a third
-      // party.
-      _logger.info(
-        'No active ring for ${event.callId} — recording missed-call marker '
-        'for ${event.callerPermanentChannelDid}',
-        name: _logKey,
-      );
       unawaited(
-        _markCallAsMissed(
-          event.callerPermanentChannelDid,
-          callId: event.callId,
+        _markUnmatchedCancelledCallAsMissed(
+          event,
+          hasDifferentActiveRing: incomingEvent != null,
         ),
       );
     }
@@ -137,6 +158,11 @@ class IncomingCallService extends _$IncomingCallService
   void _onIncomingCall(IncomingAudioVideoCallEvent event) {
     final log = 'Incoming call received: ${event.callerPermanentChannelDid}';
     _logger.info(log, name: _logKey);
+    // Start a fresh missed-call episode for this ring. Every terminal signal of
+    // this call (local timeout/decline and the caller's trailing `call-decline`
+    // broadcast) credits the badge under this one id.
+    _missEpisodeIdByContact[event.otherPartyPermanentChannelDid] = const Uuid()
+        .v4();
     ref.read(incomingCallProvider.notifier).set(event);
     _startRingTimer(event.callId);
   }
@@ -158,7 +184,13 @@ class IncomingCallService extends _$IncomingCallService
     _clearRingState();
     _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
     if (channelDid != null) {
-      unawaited(_markCallAsMissed(channelDid, callId: callId));
+      unawaited(
+        _markCallAsMissed(
+          channelDid,
+          callId: callId,
+          missId: _missEpisodeIdByContact[channelDid] ?? const Uuid().v4(),
+        ),
+      );
     }
   }
 
@@ -247,17 +279,37 @@ class IncomingCallService extends _$IncomingCallService
     action(sdk);
   }
 
-  /// Records the missed incoming call: sets the durable marker so the chat item
-  /// can be reconciled to `missed`, and heals it immediately via the chat
-  /// session when open. The marker survives restart for event-driven
-  /// reconciliation on the next chat open.
+  /// Records the missed incoming call: bumps the recipient's unread badge
+  /// (keyed by [missId] so a call counts once and distinct calls each count),
+  /// sets the durable marker so the chat item can be reconciled to `missed`,
+  /// and heals it immediately via the chat session when open.
   ///
-  /// The unread badge is not bumped here: the incoming call arrives as a chat
-  /// message that already advances the channel sequence number, so the missed
-  /// call is counted by the normal unread path. Bumping it again would
-  /// double-count.
-  Future<void> _markCallAsMissed(String contactId, {String? callId}) async {
+  /// [missId] is the badge dedup key: the per-call episode id, so the two
+  /// terminal signals of one missed call — the local ring timeout/decline and
+  /// the caller's trailing `call-decline` broadcast — credit the same call once
+  /// (see [_missEpisodeIdByContact]). It is null for unmatched cancels that are
+  /// recorded only as chat markers, such as a busy auto-reject of a third
+  /// party.
+  Future<void> _markCallAsMissed(
+    String contactId, {
+    String? callId,
+    String? missId,
+  }) async {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
+    if (missId != null) {
+      try {
+        await ref
+            .read(contactsServiceProvider.notifier)
+            .incrementMissedCallBadge(contactId, callId: missId);
+      } catch (e, stackTrace) {
+        _logger.error(
+          '_markCallAsMissed: Badge bump failed for $contactId',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
+    }
     try {
       await ref
           .read(contactsServiceProvider.notifier)
@@ -282,5 +334,61 @@ class IncomingCallService extends _$IncomingCallService
         name: _logKey,
       );
     }
+  }
+
+  Future<void> _markUnmatchedCancelledCallAsMissed(
+    IncomingAudioVideoCallEvent event, {
+    required bool hasDifferentActiveRing,
+  }) async {
+    if (hasDifferentActiveRing) {
+      // Busy auto-reject: a third party called while the user was already on a
+      // call. Record the chat marker for that caller, but do not badge a call
+      // the user was too busy to take.
+      _logger.info(
+        'Busy auto-reject for ${event.callId} — recording missed-call marker '
+        'for ${event.callerPermanentChannelDid} without a badge',
+        name: _logKey,
+      );
+      await _markCallAsMissed(
+        event.callerPermanentChannelDid,
+        callId: event.callId,
+      );
+      return;
+    }
+
+    // No active ring existed: the cancel arrived before the incoming banner was
+    // emitted. This is common for the first call in a group, where the
+    // control-plane decline can beat the ring. It is a genuine missed call, so
+    // badge the caller. `callerPermanentChannelDid` keys the contact for both
+    // cases: for a group it is the group channel DID, for a 1:1 the peer DID.
+    // (The receiving `otherPartyPermanentChannelDid` is this device's own
+    // channel DID, so it never resolves to a contact and must not be used.)
+    await ref.read(contactsServiceProvider.notifier).ensureInitialized();
+    if (!ref.mounted) return;
+
+    final targetChannelDid = event.callerPermanentChannelDid;
+    // When the transport could not resolve a call id it falls back to the
+    // caller DID; do not persist that as a real per-call id marker.
+    final isDidFallbackCallId = event.callId == event.callerPermanentChannelDid;
+
+    // If a ring for this contact was already handled locally (timeout, decline,
+    // or matched cancel), this unmatched cancel is the caller's trailing
+    // `call-decline` broadcast for the SAME call, re-reported with a group-DID
+    // fallback id. Consume that call's episode id so it credits the badge under
+    // the same key and counts once. A cancel that beat its own invite has no
+    // episode (its ring never showed), so it counts on a fresh id.
+    final episodeId =
+        _missEpisodeIdByContact.remove(targetChannelDid) ?? const Uuid().v4();
+
+    _logger.info(
+      'No active ring for ${event.callId} — badging missed call for '
+      '$targetChannelDid',
+      name: _logKey,
+    );
+    await _markCallAsMissed(
+      targetChannelDid,
+      callId: isDidFallbackCallId ? null : event.callId,
+      missId: episodeId,
+    );
   }
 }

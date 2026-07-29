@@ -18,6 +18,8 @@ import 'package:mpx_flutter_reference_app/presentation/painting/cached_base64_im
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_screen_controller.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_peer_placeholder.dart';
@@ -67,6 +69,23 @@ class _FixedStateController extends AudioVideoCallScreenController {
 
   @override
   void minimize() => minimizeCalls++;
+}
+
+class _CoveredChatController extends ChatScreenController {
+  int pauseCalls = 0;
+  int restoreCalls = 0;
+
+  @override
+  ChatScreenState build(String contactId) => ChatScreenState();
+
+  @override
+  bool pauseReadStateForCoveringCall() {
+    pauseCalls++;
+    return true;
+  }
+
+  @override
+  void restoreReadStateAfterCoveringCall() => restoreCalls++;
 }
 
 Widget _wrap({
@@ -133,6 +152,77 @@ void main() {
   });
 
   group('AudioVideoCallScreen smoke', () {
+    testWidgets(
+      'delegates covered chat read-state handoff to chat controller',
+      (tester) async {
+        final state = AudioVideoCallScreenState(
+          status: AudioVideoCallStatus.connecting,
+          peerName: 'Alice',
+        );
+        final contact = FakeContacts.newIndividualContact(
+          id: _kContactId,
+          channelDid: 'did:key:call-channel',
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final controller = _FixedStateController(state);
+        final chatController = _CoveredChatController();
+        final container = ProviderContainer(
+          overrides: [
+            appLoggerProvider.overrideWithValue(FakeAppLogger()),
+            contactsServiceProvider.overrideWith(() => contactsService),
+            meetingPlaceSdkProvider.overrideWith(
+              (ref) async => FakeMeetingPlaceMatrixSDK(),
+            ),
+            permissionServiceProvider.overrideWithValue(
+              FakePermissionService(),
+            ),
+            incomingCallProvider.overrideWith(_FakeIncomingCallState.new),
+            activeCallControllerProvider.overrideWith(
+              FakeActiveCallController.new,
+            ),
+            audioVideoCallScreenControllerProvider(
+              _kContactId,
+            ).overrideWith(() => controller),
+            chatScreenControllerProvider(
+              _kContactId,
+            ).overrideWith(() => chatController),
+          ],
+        );
+        addTearDown(container.dispose);
+        container.listen(chatScreenControllerProvider(_kContactId), (_, _) {});
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              theme: AppTheme.dark.copyWith(
+                splashFactory: NoSplash.splashFactory,
+              ),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: const AudioVideoCallScreen(contactId: _kContactId),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+        await tester.pump();
+        expect(chatController.pauseCalls, 1);
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: const SizedBox.shrink(),
+          ),
+        );
+        await tester.pump();
+
+        expect(tester.takeException(), isNull);
+        expect(chatController.restoreCalls, 1);
+        expect(contactsService.resetBadgeCalledWith, isNull);
+      },
+    );
+
     testWidgets('shows error scaffold when contact cannot be resolved', (
       tester,
     ) async {

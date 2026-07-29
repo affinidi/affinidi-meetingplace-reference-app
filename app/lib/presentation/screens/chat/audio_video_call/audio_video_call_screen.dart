@@ -25,6 +25,7 @@ import '../../../../presentation/widgets/call/video_call_pip_window.dart';
 import '../../../../presentation/widgets/images/default_profile_image.dart';
 import '../../../../presentation/widgets/profile_circle_avatar.dart';
 import '../../../widgets/call_ended/call_ended_controller.dart';
+import '../chat_screen_controller.dart';
 import 'audio_video_call_screen_controller.dart';
 import 'audio_video_call_screen_state.dart';
 import 'call_controls_bar.dart';
@@ -79,6 +80,15 @@ class _CallScreenBody extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = audioVideoCallScreenControllerProvider(contactId);
     final controller = ref.read(provider.notifier);
+
+    useEffect(() {
+      final chatProvider = chatScreenControllerProvider(contactId);
+      if (!ref.exists(chatProvider)) return null;
+      final chatController = ref.read(chatProvider.notifier);
+      final coveredChat = chatController.pauseReadStateForCoveringCall();
+      if (!coveredChat) return null;
+      return chatController.restoreReadStateAfterCoveringCall;
+    }, [contactId]);
 
     useEffect(() {
       Future.microtask(() => controller.startCall(isAudioOnly: isAudioOnly));
