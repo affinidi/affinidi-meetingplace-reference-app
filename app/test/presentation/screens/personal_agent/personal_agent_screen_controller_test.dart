@@ -58,6 +58,7 @@ void main() {
 
       final state = container.read(personalAgentScreenControllerProvider);
       expect(state.autoResponseEnabled, isTrue);
+      expect(state.autoResponseAvailable, isTrue);
     });
 
     test('loadAutoResponseState sets autoResponseEnabled to false '
@@ -93,6 +94,47 @@ void main() {
       expect(state.autoResponseLoading, isFalse);
       expect(fakeSigningNotifier.lastSetStepUpEnabled, isFalse);
     });
+
+    test(
+      'toggleAutoResponse fails cleanly when VTA is not connected',
+      () async {
+        fakeSigningNotifier = _FakeSigningNotifier(
+          stepUpEnabled: false,
+          shouldFail: false,
+          status: SigningServiceStatus.disconnected,
+        );
+
+        final container = ProviderContainer(
+          overrides: [
+            identitiesServiceProvider.overrideWith(_FakeIdentitiesService.new),
+            personalAiServiceProvider.overrideWith(
+              (ref) => _FakePersonalAiNotifier(),
+            ),
+            contactsServiceProvider.overrideWith(_FakeContactsService.new),
+            contextRoutingServiceProvider.overrideWith(
+              (ref) => _FakeContextRoutingNotifier(),
+            ),
+            signingServiceProvider.overrideWith((ref) => fakeSigningNotifier),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final controller = container.read(
+          personalAgentScreenControllerProvider.notifier,
+        );
+
+        await controller.toggleAutoResponse();
+
+        final state = container.read(personalAgentScreenControllerProvider);
+        expect(state.autoResponseAvailable, isFalse);
+        expect(
+          state.errorMessage,
+          'Auto response is unavailable until VTA is connected',
+        );
+        expect(state.autoResponseLoading, isFalse);
+        expect(fakeSigningNotifier.lastSetStepUpEnabled, isNull);
+      },
+    );
 
     test('toggleAutoResponse flips from enabled to disabled', () async {
       final container = makeContainer(stepUpEnabled: false);
@@ -158,11 +200,15 @@ void main() {
 
 class _FakeSigningNotifier extends StateNotifier<SigningServiceState>
     implements SigningService {
-  _FakeSigningNotifier({required this.stepUpEnabled, this.shouldFail = false})
-    : super(const SigningServiceState(status: SigningServiceStatus.connected));
+  _FakeSigningNotifier({
+    required this.stepUpEnabled,
+    this.shouldFail = false,
+    this.status = SigningServiceStatus.connected,
+  }) : super(SigningServiceState(status: status));
 
   bool stepUpEnabled;
   final bool shouldFail;
+  final SigningServiceStatus status;
   bool? lastSetStepUpEnabled;
 
   @override
