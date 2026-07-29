@@ -78,6 +78,10 @@ final personalAgentScreenControllerProvider =
       PersonalAgentScreenState
     >((ref) {
       final controller = PersonalAgentScreenController(ref);
+      controller.setAutoResponseAvailability(
+        ref.read(signingServiceProvider).status ==
+            SigningServiceStatus.connected,
+      );
 
       ref.listen(
         identitiesServiceProvider.currentIdentityOrPrimary,
@@ -104,6 +108,9 @@ final personalAgentScreenControllerProvider =
       );
 
       ref.listen(signingServiceProvider, (prev, next) {
+        controller.setAutoResponseAvailability(
+          next.status == SigningServiceStatus.connected,
+        );
         if (prev?.status != SigningServiceStatus.connected &&
             next.status == SigningServiceStatus.connected) {
           controller.loadAutoResponseState();
@@ -122,6 +129,10 @@ class PersonalAgentScreenController
 
   final Ref _ref;
   late final _logger = _ref.read(appLoggerProvider);
+
+  void setAutoResponseAvailability(bool available) {
+    state = state.copyWith(autoResponseAvailable: available);
+  }
 
   void syncFromDependencies() {
     final identity = _ref.read(
@@ -529,6 +540,13 @@ class PersonalAgentScreenController
   }
 
   Future<void> toggleAutoResponse() async {
+    if (!state.autoResponseAvailable) {
+      state = state.copyWith(
+        errorMessage: 'Auto response is unavailable until VTA is connected',
+      );
+      return;
+    }
+
     final previousValue = state.autoResponseEnabled;
     _logger.info(
       'Toggle auto response: current=$previousValue, target=${!previousValue}',
