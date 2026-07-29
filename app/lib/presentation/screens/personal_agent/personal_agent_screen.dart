@@ -64,6 +64,7 @@ class PersonalAgentScreen extends ConsumerWidget {
           personalContextFileName: state.personalContextFileName,
           autoResponseEnabled: state.autoResponseEnabled,
           autoResponseLoading: state.autoResponseLoading,
+          autoResponseAvailable: state.autoResponseAvailable,
         ),
       ),
     );
@@ -296,7 +297,8 @@ class PersonalAgentScreen extends ConsumerWidget {
                         'Agent responds without approval when enabled',
                       ),
                       value: ui.autoResponseEnabled,
-                      onChanged: ui.autoResponseLoading
+                      onChanged:
+                          ui.autoResponseLoading || !ui.autoResponseAvailable
                           ? null
                           : (_) => controller.toggleAutoResponse(),
                       contentPadding: const EdgeInsets.symmetric(
