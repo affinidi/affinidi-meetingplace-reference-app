@@ -1,3 +1,7 @@
+## 0.0.1-dev.7
+
+ - **FEAT**: add ongoing group audio call banner in chat (#268).
+
 ## 0.0.1-dev.6
 
  - **FIX**: badge unread missed and declined calls for both parties (#244).
