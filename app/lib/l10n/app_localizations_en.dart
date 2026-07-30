@@ -2106,6 +2106,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get videoCallGroupCallActive => 'Group call in progress';
 
   @override
+  String videoCallOngoingCall(int count) {
+    return 'Ongoing call ($count)';
+  }
+
+  @override
   String get videoCallSwitch => 'Switch to video';
 
   @override

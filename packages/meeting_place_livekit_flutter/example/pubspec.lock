@@ -708,49 +708,49 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_chat
-      sha256: "30d7ab6bd8974372d15a99ca2ec6ea7401058beeaa76e7b4a6eb95325013b1b6"
+      sha256: "0132b2f18bfefe83088d01a8f40d9a4c7661d596560d4bd121353b8f2a248242"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.56"
+    version: "0.0.1-dev.58"
   meeting_place_control_plane:
     dependency: transitive
     description:
       name: meeting_place_control_plane
-      sha256: a9463ee48cece09c7f2b392f2169a7a349c9f57e6c452cb0cfda2d35e8e65928
+      sha256: "342f26fdf64b1513c8b510095fd79f445133edbdbc65bf4bdbd3cf63c62b9118"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.22"
+    version: "0.0.1-dev.23"
   meeting_place_core:
     dependency: transitive
     description:
       name: meeting_place_core
-      sha256: "122849e6c009ae330ac11acdfaa0cb60e8ae7100081c5b09251b9a714066e801"
+      sha256: cbd1662777c83480ab6835503305b7fa83c73e0dd1e2d8f55a248db70db0eaa7
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.46"
+    version: "0.0.1-dev.48"
   meeting_place_credentials:
     dependency: transitive
     description:
       name: meeting_place_credentials
-      sha256: c62655306b988ae347f4356f8ff0133a142b3f7a459df47c579f58b4cb296f81
+      sha256: "86c08477cd9fc1d58ca4600d4e129f76278909b584b2bb8947edee524a718ab0"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.11"
+    version: "0.0.1-dev.13"
   meeting_place_livekit_flutter:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.0.1-dev.3"
+    version: "0.0.1-dev.6"
   meeting_place_matrix:
     dependency: transitive
     description:
       name: meeting_place_matrix
-      sha256: f8212aa761fa06358ce595e206c12abd3ed3a6d9da9694d2d1f65fbdaf9b6652
+      sha256: c29bb5749de67afde1095f3ad0bda44d1626518b0bf52baad3fde32cf4817ff2
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.8"
+    version: "0.0.1-dev.11"
   meeting_place_mediator:
     dependency: transitive
     description:

@@ -3214,6 +3214,12 @@ abstract class AppLocalizations {
   /// **'Group call in progress'**
   String get videoCallGroupCallActive;
 
+  /// No description provided for @videoCallOngoingCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing call ({count})'**
+  String videoCallOngoingCall(int count);
+
   /// No description provided for @videoCallSwitch.
   ///
   /// In en, this message translates to:

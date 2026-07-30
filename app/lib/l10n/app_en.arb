@@ -2036,6 +2036,15 @@
 	"@videoCallGroupCallActive": {
 		"type": "text"
 	},
+	"videoCallOngoingCall": "Ongoing call ({count})",
+	"@videoCallOngoingCall": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"videoCallSwitch": "Switch to video",
 	"@videoCallSwitch": {
 		"type": "text"

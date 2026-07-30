@@ -1441,10 +1441,10 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_matrix
-      sha256: ce4f85565b5e02b32e417d2e45f76f84f99769034a9a99a08463f22fb8dddcf8
+      sha256: c29bb5749de67afde1095f3ad0bda44d1626518b0bf52baad3fde32cf4817ff2
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.10"
+    version: "0.0.1-dev.11"
   meeting_place_mediator:
     dependency: transitive
     description:

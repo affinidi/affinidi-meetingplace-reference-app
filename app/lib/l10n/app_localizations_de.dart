@@ -2155,6 +2155,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get videoCallGroupCallActive => 'Gruppenanruf läuft';
 
   @override
+  String videoCallOngoingCall(int count) {
+    return 'Laufender Anruf ($count)';
+  }
+
+  @override
   String get videoCallSwitch => 'Wechsel';
 
   @override

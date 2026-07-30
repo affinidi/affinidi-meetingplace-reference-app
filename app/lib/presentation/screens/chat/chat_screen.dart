@@ -60,6 +60,7 @@ import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/banners/active_call/active_call_controller.dart';
+import '../../widgets/banners/ongoing_group_call/ongoing_group_call_banner.dart';
 import '../../widgets/bottom_sheet_menu.dart';
 import '../../widgets/images/default_profile_image.dart';
 import '../../widgets/info_banner.dart';
@@ -289,6 +290,7 @@ class _ChatSection extends StatelessWidget {
           children: [
             ChatActivityProgressIndicator(contactId: _contactId),
             _NotificationsUnavailableWarning(_contactId),
+            OngoingGroupCallBanner(contactId: _contactId),
             _VrcBanner(_contactId),
             if (showHumanZkp) ChatZkpOverlay(contactId: _contactId),
             Expanded(child: _ChatMessageList(_contactId)),

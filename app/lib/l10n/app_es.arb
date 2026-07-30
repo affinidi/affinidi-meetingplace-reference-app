@@ -547,6 +547,7 @@
 	"videoCallAgain": "Volver a llamar",
 	"videoCallGroupCallJoin": "Unirse",
 	"videoCallGroupCallActive": "Llamada grupal en curso",
+	"videoCallOngoingCall": "Llamada en curso ({count})",
 	"videoCallSwitchToVideoTitle": "¿Cambiar a videollamada?",
 	"videoCallSwitch": "Cambiar",
 	"callChatItemAudioCall": "Llamada de audio",
