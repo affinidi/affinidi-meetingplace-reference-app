@@ -82,6 +82,14 @@ class Environment {
     ),
   );
 
+  bool get isBiometricsEnabled =>
+      const bool.fromEnvironment('BIOMETRICS_ENABLED', defaultValue: true);
+  bool get zkpEnabled =>
+      const bool.fromEnvironment('ZKP_ENABLED', defaultValue: false);
+
+  bool get personalAiEnabled =>
+      const bool.fromEnvironment('PERSONAL_AI_ENABLED', defaultValue: true);
+
   /// Event configuration keyed by sha256 hex of the wallet mnemonic.
   ///
   /// Each entry maps to a nested map of event options, e.g.:
@@ -97,31 +105,20 @@ class Environment {
       (k, v) => MapEntry(k as String, Map<String, dynamic>.from(v as Map)),
     );
   }();
-
-  bool get isBiometricsEnabled =>
-      const bool.fromEnvironment('BIOMETRICS_ENABLED', defaultValue: true);
-  bool get zkpEnabled =>
-      const bool.fromEnvironment('ZKP_ENABLED', defaultValue: false);
-  bool get personalAiEnabled =>
-      const bool.fromEnvironment('PERSONAL_AI_ENABLED', defaultValue: true);
-
-  String get personalAiBaseUrl => const String.fromEnvironment(
-    'PERSONAL_AI_BASE_URL',
-    defaultValue: 'http://127.0.0.1:8790',
-  );
-
+  String? personalAiBaseUrl(String mnemonicHash) =>
+      (ciergeEventConfig[mnemonicHash]?['ciergeConsoleUrl'] as String?)?.trim();
+  String? ciergeConnectorDid(String mnemonicHash) =>
+      (ciergeEventConfig[mnemonicHash]?['ciergeConnectorDid'] as String?)
+          ?.trim();
+  String? vtaBaseUrl(String mnemonicHash) =>
+      (ciergeEventConfig[mnemonicHash]?['vtaBaseUrl'] as String?)?.trim();
+  String? vtaDid(String mnemonicHash) =>
+      (ciergeEventConfig[mnemonicHash]?['vtaDid'] as String?)?.trim();
+  String get vtaMediatorDid => const String.fromEnvironment('VTA_MEDIATOR_DID');
   String get personalAiSetupEndpoint => const String.fromEnvironment(
     'PERSONAL_AI_SETUP_ENDPOINT',
     defaultValue: '/personal-agent/setup',
   );
-
-  String get vtaBaseUrl => const String.fromEnvironment('VTA_BASE_URL');
-
-  String get vtaDid => const String.fromEnvironment('VTA_DID');
-
-  String get vtaMediatorUrl => const String.fromEnvironment('VTA_MEDIATOR_URL');
-
-  String get vtaMediatorDid => const String.fromEnvironment('VTA_MEDIATOR_DID');
 
   String get microsoftOAuthTenantId => const String.fromEnvironment(
     'MICROSOFT_OAUTH_TENANT_ID',
