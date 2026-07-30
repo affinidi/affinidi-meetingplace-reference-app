@@ -23,8 +23,7 @@ class TrustTaskHistoryState {
 
   bool get isLoading => status == TrustTaskHistoryStatus.loading;
   bool get isLoadingMore => status == TrustTaskHistoryStatus.loadingMore;
-  bool get isEmpty =>
-      status == TrustTaskHistoryStatus.ready && records.isEmpty;
+  bool get isEmpty => status == TrustTaskHistoryStatus.ready && records.isEmpty;
 
   TrustTaskHistoryState copyWith({
     TrustTaskHistoryStatus? status,
@@ -48,8 +47,7 @@ class TrustTaskHistoryState {
 /// [SigningService]. Auto-loads once the signing service reports connected, and
 /// supports manual refresh and pagination.
 class TrustTaskHistoryController extends StateNotifier<TrustTaskHistoryState> {
-  TrustTaskHistoryController(this._ref)
-    : super(const TrustTaskHistoryState()) {
+  TrustTaskHistoryController(this._ref) : super(const TrustTaskHistoryState()) {
     _init();
   }
 
