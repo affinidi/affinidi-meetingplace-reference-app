@@ -451,63 +451,70 @@ class _TrustTaskHistoryTile extends StatelessWidget {
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
 
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: 12),
-        expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
-        leading: Icon(
-          Icons.assignment_turned_in_outlined,
-          color: colorScheme.primary,
-        ),
-        title: Row(
+    return Material(
+      color: Colors.transparent,
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: const EdgeInsets.only(bottom: 12),
+          expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+          leading: Icon(
+            Icons.assignment_turned_in_outlined,
+            color: colorScheme.primary,
+          ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.trustTaskHistoryItemTitle,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontSize: 13),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _StatusChip(record: record),
+            ],
+          ),
+          subtitle: Text(
+            _formatTimestamp(record.timestamp),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontSize: 11),
+          ),
           children: [
-            Expanded(
-              child: Text(
-                l10n.trustTaskHistoryItemTitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontSize: 13),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.4,
+                ),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: colorScheme.outlineVariant),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.trustTaskHistoryDetails,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontSize: 10,
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  for (final entry in _detailEntries(record))
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 3),
+                      child: _DetailRow(label: entry.key, value: entry.value),
+                    ),
+                ],
               ),
             ),
-            const SizedBox(width: 8),
-            _StatusChip(record: record),
           ],
         ),
-        subtitle: Text(
-          _formatTimestamp(record.timestamp),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 11),
-        ),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: colorScheme.outlineVariant),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.trustTaskHistoryDetails,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                for (final entry in _detailEntries(record))
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3),
-                    child: _DetailRow(label: entry.key, value: entry.value),
-                  ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
