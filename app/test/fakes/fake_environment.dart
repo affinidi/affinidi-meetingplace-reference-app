@@ -12,10 +12,10 @@ class FakeEnvironment implements Environment {
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
     this.personalAiEnabled = false,
-    this.personalAiBaseUrl = 'http://127.0.0.1:8790',
+    this._personalAiBaseUrl = 'http://127.0.0.1:8790',
     this.personalAiSetupEndpoint = '/personal-agent/setup',
-    this.vtaBaseUrl = '',
-    this.vtaDid = '',
+    this._vtaBaseUrl = '',
+    this._vtaDid = '',
     this.vtaMediatorUrl = '',
     this.vtaMediatorDid = '',
     this._defaultMediators = const {},
@@ -46,8 +46,7 @@ class FakeEnvironment implements Environment {
   @override
   final bool personalAiEnabled;
 
-  @override
-  final String personalAiBaseUrl;
+  final String _personalAiBaseUrl;
 
   @override
   final String personalAiSetupEndpoint;
@@ -156,15 +155,24 @@ class FakeEnvironment implements Environment {
   @override
   Map<String, Map<String, dynamic>> get ciergeEventConfig => const {};
 
-  @override
-  final String vtaBaseUrl;
+  final String _vtaBaseUrl;
 
-  @override
-  final String vtaDid;
+  final String _vtaDid;
 
-  @override
   final String vtaMediatorUrl;
 
   @override
   final String vtaMediatorDid;
+
+  @override
+  String? personalAiBaseUrl(String mnemonicHash) => _personalAiBaseUrl;
+
+  @override
+  String? ciergeConnectorDid(String mnemonicHash) => null;
+
+  @override
+  String? vtaBaseUrl(String mnemonicHash) => _vtaBaseUrl;
+
+  @override
+  String? vtaDid(String mnemonicHash) => _vtaDid;
 }
