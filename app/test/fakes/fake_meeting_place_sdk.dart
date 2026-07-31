@@ -20,6 +20,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     this.offerToFind,
     this.findOfferHasError = false,
     this._shouldTimeout = false,
+    this._options = const MeetingPlaceMatrixSdkOptions(),
   }) : _channels = channels ?? {} {
     if (connectionOffers != null) {
       _allConnectionOffers.addAll(connectionOffers);
@@ -36,6 +37,11 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   final Map<String, Channel> _channels;
   @override
   final bool isCallSupported;
+
+  final MeetingPlaceMatrixSdkOptions _options;
+
+  @override
+  MeetingPlaceMatrixSdkOptions get options => _options;
 
   final _incomingCallsController =
       StreamController<IncomingAudioVideoCallEvent>.broadcast();

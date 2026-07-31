@@ -88,7 +88,7 @@ Future<void> startApp(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
-  FakeEnvironment? environment,
+  Environment? environment,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   addTearDown(() async {
@@ -303,7 +303,7 @@ Future<void> navigateToLocation(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
-  FakeEnvironment? environment,
+  Environment? environment,
 }) async {
   await startApp(
     tester,
@@ -363,7 +363,7 @@ Future<void> navigateToChat(
   RCardsService Function()? rCardsServiceFactory,
   List<RCard> rCards = const [],
   MeetingPlaceMatrixSDK? meetingPlaceCoreSDK,
-  FakeEnvironment? environment,
+  Environment? environment,
 }) async {
   await navigateToLocation(
     tester,

@@ -466,6 +466,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
     if (_vtaClient == null || _authWorkflow == null) return false;
     return _withReauth(() async {
       final policy = await _vtaClient!.stepUpPolicy.getPolicy();
+      _logger.info('VTA stepUpPolicy ${policy['enabled']}', name: _logKey);
       return policy['enabled'] as bool? ?? false;
     });
   }
