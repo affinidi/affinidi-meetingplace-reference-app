@@ -371,14 +371,28 @@ class ContactsService extends _$ContactsService {
   ///
   /// Returns:
   /// - `Future<void>` completes when the delete operations and refresh finish.
-  Future<void> deleteContacts(List<Contact> contacts) async {
+  Future<void> deleteContacts(List<Contact> contacts) =>
+      _deleteContacts(contacts, leaveChannel: true);
+
+  /// Removes contacts from local state without leaving their channels.
+  ///
+  /// Used when disconnecting an AI context locally: the connector keeps the
+  /// channel alive for re-arm, so the app keeps it too and a later reconnect
+  /// rebuilds the contact from the live channel instead of re-accepting.
+  Future<void> removeContactsWithoutLeavingChannel(List<Contact> contacts) =>
+      _deleteContacts(contacts, leaveChannel: false);
+
+  Future<void> _deleteContacts(
+    List<Contact> contacts, {
+    required bool leaveChannel,
+  }) async {
     if (contacts.isEmpty) return;
 
     await _markContactsAsDeleted(contacts);
     await fetchContacts();
     await Future<void>.delayed(const Duration(milliseconds: 300));
 
-    await _permanentlyDeleteContacts(contacts);
+    await _permanentlyDeleteContacts(contacts, leaveChannel: leaveChannel);
     await fetchContacts();
   }
 
@@ -394,11 +408,16 @@ class ContactsService extends _$ContactsService {
   }
 
   /// Actually delete a contact that's already marked as deleted
-  Future<void> _permanentlyDeleteContacts(List<Contact> contacts) async {
+  Future<void> _permanentlyDeleteContacts(
+    List<Contact> contacts, {
+    required bool leaveChannel,
+  }) async {
     _repository ??= await _ensureRepositoryInitialized();
 
     for (final contact in contacts) {
-      await _leaveChat(contact);
+      if (leaveChannel) {
+        await _leaveChat(contact);
+      }
       await _repository!.deleteContact(contact);
     }
   }
