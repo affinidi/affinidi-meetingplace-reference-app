@@ -18,6 +18,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
     this.offerToFind,
     this.findOfferHasError = false,
     this._shouldTimeout = false,
+    this._options = const MeetingPlaceCoreSDKOptions(),
   }) : _channels = channels ?? {} {
     if (connectionOffers != null) {
       _allConnectionOffers.addAll(connectionOffers);
@@ -32,6 +33,10 @@ class FakeMeetingPlaceSDK implements MeetingPlaceCoreSDK {
   final bool _isPhraseAvailable;
   final bool _shouldTimeout;
   final Map<String, Channel> _channels;
+  final MeetingPlaceCoreSDKOptions _options;
+
+  @override
+  MeetingPlaceCoreSDKOptions get options => _options;
 
   DidKeyManager? _fakeDidManager;
 

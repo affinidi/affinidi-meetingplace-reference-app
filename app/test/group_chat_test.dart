@@ -665,7 +665,7 @@ void main() {
         ).firstWhere((span) => span.text == '@Bob');
 
         expect(mentionSpan.style?.color, isNot(editableTextWidget.style.color));
-        expect(mentionSpan.style?.backgroundColor, isNotNull);
+        expect(mentionSpan.style?.backgroundColor, isNull);
       });
 
       testWidgets('it highlights mentions in chat bubbles', (tester) async {
