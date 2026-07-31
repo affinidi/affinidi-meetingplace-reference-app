@@ -68,7 +68,7 @@ Future<void> startApp(
   MediaQueryData? data,
   Locale locale = const Locale('en', 'US'),
   bool isAuthenticated = true,
-  bool hasMnemonicConfigured = false,
+  bool hasMnemonicConfigured = true,
   bool hasNetworkConnection = true,
   bool alreadyOnboarded = true,
   PushNotificationMessaging? pushNotificationMessaging,
@@ -284,7 +284,7 @@ Future<void> navigateToLocation(
   WidgetTester tester,
   String location, {
   bool isAuthenticated = true,
-  bool hasMnemonicConfigured = false,
+  bool hasMnemonicConfigured = true,
   bool alreadyOnboarded = true,
   List<Identity> identities = const [],
   List<Mediator> mediators = const [],
