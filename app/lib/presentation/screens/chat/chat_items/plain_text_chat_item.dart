@@ -125,6 +125,9 @@ class _PlainTextChatItem extends ConsumerWidget {
               a.format != 'cierge/trust-task',
         )
         .toList(growable: false);
+    final hasIntrinsicUnsafeAttachment = attachments.any(
+      (attachment) => attachment.isRCard || attachment.isVoice,
+    );
     final mentionDisplayNames = <String, String>{
       if (group != null)
         for (final member in group.members)
@@ -138,6 +141,41 @@ class _PlainTextChatItem extends ConsumerWidget {
                   ? constraints.maxWidth * _maxTextBubbleWidthFactor
                   : constraints.maxWidth
             : double.infinity;
+        final bubbleContent = Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final attachment in nonSignatureAttachments)
+              _AttachmentWidget(
+                contactId: _contactId,
+                chatItem: chatItem,
+                attachment: attachment,
+                isFromMe: chatItem.isFromMe,
+                chatItemColor: _chatItemColor,
+              ),
+            if (chatItem.value.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.all(
+                  nonSignatureAttachments.isEmpty ? 0 : 8,
+                ),
+                child: _TextMessage(
+                  text: chatItem.value,
+                  mentions: chatItem.mentions,
+                  mentionDisplayNames: mentionDisplayNames,
+                  shouldScaleEmojis: shouldScaleEmojis,
+                  isEdited: chatItem.editedAt != null,
+                ),
+              ),
+            for (final attachment in signatureAttachments)
+              _AttachmentWidget(
+                contactId: _contactId,
+                chatItem: chatItem,
+                attachment: attachment,
+                isFromMe: chatItem.isFromMe,
+                chatItemColor: _chatItemColor,
+              ),
+          ],
+        );
 
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -147,43 +185,9 @@ class _PlainTextChatItem extends ConsumerWidget {
           },
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: maxBubbleWidth),
-            child: IntrinsicWidth(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (final attachment in nonSignatureAttachments)
-                    _AttachmentWidget(
-                      contactId: _contactId,
-                      chatItem: chatItem,
-                      attachment: attachment,
-                      isFromMe: chatItem.isFromMe,
-                      chatItemColor: _chatItemColor,
-                    ),
-                  if (chatItem.value.isNotEmpty)
-                    Padding(
-                      padding: EdgeInsets.all(
-                        nonSignatureAttachments.isEmpty ? 0 : 8,
-                      ),
-                      child: _TextMessage(
-                        text: chatItem.value,
-                        mentions: chatItem.mentions,
-                        mentionDisplayNames: mentionDisplayNames,
-                        shouldScaleEmojis: shouldScaleEmojis,
-                        isEdited: chatItem.editedAt != null,
-                      ),
-                    ),
-                  for (final attachment in signatureAttachments)
-                    _AttachmentWidget(
-                      contactId: _contactId,
-                      chatItem: chatItem,
-                      attachment: attachment,
-                      isFromMe: chatItem.isFromMe,
-                      chatItemColor: _chatItemColor,
-                    ),
-                ],
-              ),
-            ),
+            child: hasIntrinsicUnsafeAttachment
+                ? bubbleContent
+                : IntrinsicWidth(child: bubbleContent),
           ),
         );
       },
