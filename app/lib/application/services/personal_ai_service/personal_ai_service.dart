@@ -668,11 +668,11 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
           (offer.channelDid?.trim().isNotEmpty ?? false) ||
           (offer.channelId?.trim().isNotEmpty ?? false);
 
-      // Resumed connector sessions may report a ready/inaugurated channel with
-      // no mnemonic. In that case setup is already connected and
-      // no accept-offer roundtrip is required when the channel belongs
-      // to this context.
-      if ((mnemonic == null || mnemonic.isEmpty) && isAlreadyConnected) {
+      // An already-connected channel needs no accept-offer roundtrip even when
+      // the offer file still carries its original mnemonic (the connector does
+      // not clear it after inauguration). Reuse the live channel so a missing
+      // local contact is rebuilt instead of re-accepting a consumed offer.
+      if (isAlreadyConnected) {
         final canReuseChannel = await _canReuseConnectedOffer(
           result: result,
           offer: offer,
@@ -680,10 +680,15 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
         if (canReuseChannel) {
           return offer;
         }
-        throw StateError(
-          'AI offer reports connected but no channel is available for '
-          '${result.profile.displayName.trim()}.',
-        );
+        // Connected upstream but the channel is not present locally (e.g. it
+        // was removed on disconnect). Re-accept below when the mnemonic is
+        // still known to rebuild the channel; otherwise nothing to recover.
+        if (mnemonic == null || mnemonic.isEmpty) {
+          throw StateError(
+            'AI offer reports connected but no channel is available for '
+            '${result.profile.displayName.trim()}.',
+          );
+        }
       }
 
       if (mnemonic == null || mnemonic.isEmpty) {

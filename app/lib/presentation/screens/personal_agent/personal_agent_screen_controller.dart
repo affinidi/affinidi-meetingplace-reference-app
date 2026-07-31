@@ -204,12 +204,15 @@ class PersonalAgentScreenController
       return const RoutingContextUploadOutcome.skipped();
     }
 
+    await _ref.read(contactsServiceProvider.notifier).ensureInitialized();
+
     final existingSetup = _setupForContext(spec.contextName);
     final canReuseExistingSetup =
         existingSetup != null &&
         _matchesTargetContext(existingSetup, spec.contextName) &&
         _isConnectionReady(existingSetup) &&
-        (existingSetup.setupId?.trim().isNotEmpty ?? false);
+        (existingSetup.setupId?.trim().isNotEmpty ?? false) &&
+        _hasContactForContext(spec.target);
 
     _setConnecting(spec.displayName);
 
@@ -293,12 +296,15 @@ class PersonalAgentScreenController
       name: _logKey,
     );
 
+    await _ref.read(contactsServiceProvider.notifier).ensureInitialized();
+
     final existingSetup = _setupForContext(spec.contextName);
     final canReuseExistingSetup =
         existingSetup != null &&
         _matchesTargetContext(existingSetup, spec.contextName) &&
         _isConnectionReady(existingSetup) &&
-        (existingSetup.setupId?.trim().isNotEmpty ?? false);
+        (existingSetup.setupId?.trim().isNotEmpty ?? false) &&
+        _hasContactForContext(spec.target);
 
     _setConnecting(spec.displayName);
 
@@ -460,6 +466,20 @@ class PersonalAgentScreenController
     final personalAiState = _ref.read(personalAiServiceProvider);
     return personalAiState.getSetupResultForContext(contextName) ??
         personalAiState.setupResult;
+  }
+
+  /// Whether a local Personal AI contact still exists for [target]. When it is
+  /// missing (e.g. after a disconnect or a stuck/incomplete setup), the setup
+  /// must be re-run so the contact is re-materialized from the same channel.
+  bool _hasContactForContext(AgentContext target) {
+    final contactsState = _ref.read(contactsServiceProvider);
+    final routingState = _ref.read(contextRoutingServiceProvider);
+    return findPersonalAiContactForContext(
+          contacts: contactsState.contacts,
+          contactContexts: routingState.contactContexts,
+          targetContext: target,
+        ) !=
+        null;
   }
 
   String _currentHolderDid() {
