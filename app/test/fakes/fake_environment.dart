@@ -11,7 +11,7 @@ class FakeEnvironment implements Environment {
     this.matrixHomeserver = 'https://test-matrix.org',
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
-    this.personalAiEnabled = true,
+    this.personalAiEnabled = false,
     this._personalAiBaseUrl = 'http://127.0.0.1:8790',
     this.personalAiSetupEndpoint = '/personal-agent/setup',
     this._vtaBaseUrl = '',

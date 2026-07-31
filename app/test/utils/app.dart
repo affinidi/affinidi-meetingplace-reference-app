@@ -89,6 +89,7 @@ Future<void> startApp(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
+  Environment? environment,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   addTearDown(() async {
@@ -101,7 +102,7 @@ Future<void> startApp(
   });
   final sharedPreferences = await SharedPreferences.getInstance();
   final cacheManager = FakeCacheManager();
-  final effectiveEnvironment = FakeEnvironment();
+  final effectiveEnvironment = environment ?? FakeEnvironment();
   final effectiveSecureStorage = secureStorage ?? FakeSecureStorage();
   final documentsDirectory = Directory('/tmp');
   final databasePassphrase = await effectiveSecureStorage
@@ -303,6 +304,7 @@ Future<void> navigateToLocation(
   QrCodeViewFactory? qrCodeViewFactory,
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
+  Environment? environment,
 }) async {
   await startApp(
     tester,
@@ -326,6 +328,7 @@ Future<void> navigateToLocation(
     qrCodeViewFactory: qrCodeViewFactory,
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
+    environment: environment,
   );
 
   await tester.pumpAndSettle();
