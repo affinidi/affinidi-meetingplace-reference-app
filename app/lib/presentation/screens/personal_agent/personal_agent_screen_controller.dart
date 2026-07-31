@@ -204,6 +204,8 @@ class PersonalAgentScreenController
       return const RoutingContextUploadOutcome.skipped();
     }
 
+    await _ref.read(contactsServiceProvider.notifier).ensureInitialized();
+
     final existingSetup = _setupForContext(spec.contextName);
     final canReuseExistingSetup =
         existingSetup != null &&
@@ -293,6 +295,8 @@ class PersonalAgentScreenController
       'Starting Work AI OneDrive connection (holderDid=${_redact(holderDid)})',
       name: _logKey,
     );
+
+    await _ref.read(contactsServiceProvider.notifier).ensureInitialized();
 
     final existingSetup = _setupForContext(spec.contextName);
     final canReuseExistingSetup =

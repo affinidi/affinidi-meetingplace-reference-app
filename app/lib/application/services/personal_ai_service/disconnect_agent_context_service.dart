@@ -31,7 +31,5 @@ class DisconnectAgentContextService {
     await _ref
         .read(contextRoutingServiceProvider.notifier)
         .clearContext(context: target);
-
-    await _ref.read(contactsServiceProvider.notifier).fetchContacts();
   }
 }
