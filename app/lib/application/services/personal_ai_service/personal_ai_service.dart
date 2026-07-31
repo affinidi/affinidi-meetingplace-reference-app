@@ -705,11 +705,30 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
           identity: identity,
         );
 
-        // After accepting, wait for the connector to process inauguration and
-        // write channel_did to the offer file. _waitForOffer would return
-        // immediately (mnemonic still present), leaving channel_did null and
-        // causing the contact name to never be set.
-        return await _waitForOfferChannelDid(setupId: setupId);
+        // After accepting, wait for the connector to inaugurate a channel and
+        // write channel_did into the offer file. When the peer reinstalled, its
+        // previous channel is stale: the connector republishes a fresh offer
+        // with a rotated mnemonic, so accept each fresh offer until a new
+        // channel DID appears and pairing completes within this setup pass.
+        return awaitChannelAfterAccept(
+          acceptedMnemonic: mnemonic,
+          previousChannelDid: offer.channelDid?.trim(),
+          fetchOffer: () => sdk.fetchPersonalAgentOffer(setupId: setupId),
+          acceptRotatedOffer: (rotatedMnemonic) async {
+            final rotatedFind = await coreSdk.findOffer(
+              mnemonic: rotatedMnemonic,
+            );
+            if (rotatedFind.errorCode != null ||
+                rotatedFind.connectionOffer == null) {
+              return false;
+            }
+            await connectionsService.acceptOffer(
+              rotatedFind.connectionOffer!,
+              identity: identity,
+            );
+            return true;
+          },
+        );
       }
 
       if (attempt == 0) {
@@ -736,29 +755,66 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     throw StateError('Unable to resolve Personal AI offer from mnemonic.');
   }
 
-  /// Polls the offer until [PersonalAgentOfferResult.channelDid] is populated.
-  /// Used after accepting an offer to wait for the connector's inauguration
-  /// handler to write the permanent channel DID into the offer file.
-  Future<PersonalAgentOfferResult> _waitForOfferChannelDid({
-    required String setupId,
+  /// Waits for the connector to inaugurate a channel after an offer is
+  /// accepted, re-accepting a rotated offer when the peer reinstalled.
+  ///
+  /// After [acceptedMnemonic] is accepted, polls [fetchOffer]. Returns as soon
+  /// as the offer carries a channel DID that differs from [previousChannelDid].
+  /// If instead the connector republishes a fresh pending offer with a new
+  /// mnemonic, [acceptRotatedOffer] is invoked with it; when that returns
+  /// `true` polling continues for the new offer, otherwise the loop stops.
+  /// Falls back to a final [fetchOffer] result if no new channel appears within
+  /// [maxPollsPerRound] polls (per round), for up to [maxRounds] rounds.
+  @visibleForTesting
+  static Future<PersonalAgentOfferResult> awaitChannelAfterAccept({
+    required String acceptedMnemonic,
+    required String? previousChannelDid,
+    required Future<PersonalAgentOfferResult> Function() fetchOffer,
+    required Future<bool> Function(String rotatedMnemonic) acceptRotatedOffer,
+    int maxRounds = 3,
+    int maxPollsPerRound = 20,
+    Duration pollInterval = const Duration(seconds: 1),
   }) async {
-    final sdk = await _loadSdk();
-    const maxAttempts = 20;
-    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        final offer = await sdk.fetchPersonalAgentOffer(setupId: setupId);
-        final hasChannelDid = offer.channelDid?.trim().isNotEmpty ?? false;
-        if (hasChannelDid) {
-          return offer;
+    final acceptedMnemonics = <String>{acceptedMnemonic};
+    var priorChannelDid = previousChannelDid;
+    for (var round = 0; round < maxRounds; round++) {
+      String? rotatedMnemonic;
+      for (var poll = 1; poll <= maxPollsPerRound; poll++) {
+        try {
+          final current = await fetchOffer();
+          final channelDid = current.channelDid?.trim();
+          final hasNewChannel =
+              channelDid != null &&
+              channelDid.isNotEmpty &&
+              (priorChannelDid == null || channelDid != priorChannelDid);
+          if (hasNewChannel) {
+            return current;
+          }
+          final freshMnemonic = current.mnemonic?.trim();
+          if (current.status.trim().toLowerCase() ==
+                  'offer_pending_acceptance' &&
+              freshMnemonic != null &&
+              freshMnemonic.isNotEmpty &&
+              !acceptedMnemonics.contains(freshMnemonic)) {
+            rotatedMnemonic = freshMnemonic;
+            break;
+          }
+        } on VtaClientException catch (_) {
+          // keep polling
         }
-      } on VtaClientException catch (_) {
-        // keep polling
+        await Future<void>.delayed(pollInterval);
       }
-      await Future<void>.delayed(const Duration(seconds: 1));
+      if (rotatedMnemonic == null) {
+        break;
+      }
+      final accepted = await acceptRotatedOffer(rotatedMnemonic);
+      if (!accepted) {
+        break;
+      }
+      acceptedMnemonics.add(rotatedMnemonic);
+      priorChannelDid = null;
     }
-    // Connector did not write channel_did in time — fall back to a plain fetch
-    // so setup can still complete (name update may be deferred to next sync).
-    return sdk.fetchPersonalAgentOffer(setupId: setupId);
+    return fetchOffer();
   }
 
   Future<PersonalAgentOfferResult> _waitForOffer({
