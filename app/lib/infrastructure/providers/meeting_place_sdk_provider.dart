@@ -172,7 +172,14 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
             name: logKey,
           );
         }
-      } catch (_) {
+      } catch (error, stackTrace) {
+        logger.warning(
+          'Warning: MeetingPlaceMatrixSdkOptions constructor does not accept '
+          'agentDid; this is expected for SDK builds that do not yet expose '
+          'the agentDid option. The override will be ignored. Error: $error'
+          'stackTrace: $stackTrace',
+          name: logKey,
+        );
         // Compatibility fallback for SDK builds that do not yet expose
         // `agentDid`.
         sdkOptionsNamed.remove(#agentDid);
