@@ -7,6 +7,7 @@ class RoutePaths {
   static const contacts = '/contacts';
   static const identities = '/identities';
   static const rCards = '/r-cards';
+  static const personalAgent = '/personal-agent';
   static const credentials = '/credentials';
   static const settings = '/settings';
 
@@ -42,6 +43,9 @@ class RoutePaths {
 
   // Authentication
   static const authentication = '/authentication';
+
+  // Mnemonic
+  static const mnemonic = '/mnemonic';
 
   // Onboarding
   static const String onboarding = '/onboarding';

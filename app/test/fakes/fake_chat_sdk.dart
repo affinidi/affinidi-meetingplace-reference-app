@@ -30,6 +30,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     ChatFeature.effects,
     ChatFeature.contactDetailsUpdate,
     ChatFeature.audioVideoCalling,
+    ChatFeature.suggestionRequests,
   });
 
   TransportCapabilities _capabilities;
@@ -64,6 +65,8 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   ConciergeMessage? lastContactDetailsUpdateRejected;
   Message? lastReactionMessage;
   String? lastReaction;
+  String? lastSuggestionRequestMessageId;
+  String? lastSuggestionRequestText;
   bool sessionEnded = false;
   String? lastEffectSent;
   sdk.ContactCard? lastRefreshedCurrentContactCard;
@@ -77,6 +80,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   final List<Map<String, dynamic>> sendTextMessageCalls = [];
   final List<Map<String, dynamic>> sendEffectCalls = [];
   final List<Map<String, dynamic>> reactOnMessageCalls = [];
+  final List<Map<String, dynamic>> sendSuggestionRequestCalls = [];
   final List<Map<String, dynamic>> approveConnectionRequestCalls = [];
   final List<Map<String, dynamic>> rejectConnectionRequestCalls = [];
   final List<Map<String, dynamic>> sendContactDetailsUpdateCalls = [];
@@ -94,10 +98,11 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   int get startedChatPresenceUpdatesCount => _startedChatPresenceUpdates;
 
   /// Simulates an incoming text message by emitting it through the stream
-  void simulateIncomingTextMessage({
+  Message simulateIncomingTextMessage({
     required String text,
     required String recipientDid,
     List<ChatAttachment>? attachments,
+    List<ChatMention> mentions = const [],
     bool isFromMe = false,
     String senderDid = 'fake-sender-did',
   }) {
@@ -122,13 +127,14 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     }
     final message = Message(
       chatId: 'fake-chat-id',
-      messageId: 'msg-incoming-${DateTime.now().millisecondsSinceEpoch}',
+      messageId: 'msg-incoming-${DateTime.now().microsecondsSinceEpoch}',
       value: text,
       dateCreated: DateTime.now(),
       status: ChatItemStatus.confirmed,
       isFromMe: isFromMe,
       senderDid: senderDid,
       attachments: normalizedAttachments,
+      mentions: mentions,
     );
 
     final chatEvent = UnhandledChatEvent(
@@ -139,6 +145,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     );
 
     _emit(StreamData(event: chatEvent, chatItem: message));
+    return message;
   }
 
   /// Simulates an incoming concierge message for join group requests
@@ -499,6 +506,24 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     _emit(StreamData(event: ChatEffectEvent(effectName: effectName)));
   }
 
+  void simulateIncomingSuggestion({
+    required String relatedMessageId,
+    required String text,
+    required String recipientDid,
+    String? senderDid = 'fake-sender-did',
+  }) {
+    _emit(
+      StreamData(
+        event: ChatSuggestionEvent(
+          senderDid: senderDid,
+          relatedMessageId: relatedMessageId,
+          text: text,
+          createdTime: DateTime.now().toUtc(),
+        ),
+      ),
+    );
+  }
+
   void simulateIncomingGroupDetailsUpdate({required String recipientDid}) {
     _emit(StreamData(event: const ChatGroupDetailsUpdateEvent()));
   }
@@ -536,6 +561,16 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     lastReactionMessage = message;
     lastReaction = reaction;
     reactOnMessageCalls.add({'message': message, 'reaction': reaction});
+  }
+
+  @override
+  Future<void> sendSuggestionRequest({
+    required String messageId,
+    required String text,
+  }) async {
+    lastSuggestionRequestMessageId = messageId;
+    lastSuggestionRequestText = text;
+    sendSuggestionRequestCalls.add({'messageId': messageId, 'text': text});
   }
 
   @override
@@ -586,6 +621,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   Future<Message> sendTextMessage(
     String text, {
     List<ChatAttachment>? attachments,
+    List<ChatMention> mentions = const [],
   }) async {
     if (sendTextMessageFailuresRemaining > 0) {
       sendTextMessageFailuresRemaining--;
@@ -593,7 +629,11 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     }
 
     // Track the call
-    sendTextMessageCalls.add({'text': text, 'attachments': attachments});
+    sendTextMessageCalls.add({
+      'text': text,
+      'attachments': attachments,
+      'mentions': mentions,
+    });
 
     var normalizedAttachments = attachments ?? const <ChatAttachment>[];
     final firstAttachment = normalizedAttachments.firstOrNull;
@@ -754,16 +794,20 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   }
 
   /// Simulates a sent (own) text message appearing in the stream.
-  void simulateSentTextMessage({required String text}) {
+  void simulateSentTextMessage({
+    required String text,
+    List<ChatMention> mentions = const [],
+  }) {
     final message = Message(
       chatId: 'fake-chat-id',
-      messageId: 'msg-sent-${DateTime.now().millisecondsSinceEpoch}',
+      messageId: 'msg-sent-${DateTime.now().microsecondsSinceEpoch}',
       value: text,
       dateCreated: DateTime.now(),
       status: ChatItemStatus.confirmed,
       isFromMe: true,
       senderDid: 'fake-my-did',
       attachments: [],
+      mentions: mentions,
     );
     final chatEvent = UnhandledChatEvent(
       type: 'https://affinidi.com/chat/1.0/message',
@@ -775,8 +819,16 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   }
 
   @override
-  Future<void> editTextMessage(Message message, String newText) async {
-    editTextMessageCalls.add({'message': message, 'newText': newText});
+  Future<void> editTextMessage(
+    Message message,
+    String newText, {
+    List<ChatMention>? mentions,
+  }) async {
+    editTextMessageCalls.add({
+      'message': message,
+      'newText': newText,
+      'mentions': mentions,
+    });
     message.value = newText;
     message.editedAt = DateTime.now().toUtc();
     _emit(StreamData(chatItem: message));

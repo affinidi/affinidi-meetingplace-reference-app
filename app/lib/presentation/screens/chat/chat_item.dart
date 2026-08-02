@@ -27,6 +27,77 @@ class ChatItem extends StatelessWidget {
       );
     }
 
+    if (_chatItem is chat.ConciergeMessage &&
+        _chatItem.conciergeType ==
+            chat.ConciergeMessageType.fromJson(
+              chat.CiergeSignDocumentRequest.conciergeTypeName,
+            )) {
+      final data = _chatItem.data;
+      final doc = data['document'] as Map<String, dynamic>? ?? {};
+      return _SignDocumentRequestChatItem(
+        title: doc['title'] as String? ?? 'Untitled Document',
+        contactId: _contactId,
+        messageIndex: _index,
+        senderDid: _chatItem.senderDid,
+        status: _chatItem.status,
+        rawPayload: data,
+      );
+    }
+
+    if (_chatItem is chat.ConciergeMessage &&
+        _chatItem.conciergeType ==
+            chat.ConciergeMessageType.fromJson(
+              chat.CiergeStepUpApproveRequest.conciergeTypeName,
+            )) {
+      return _StepUpApproveRequestChatItem(
+        chatItem: _chatItem,
+        contactId: _contactId,
+      );
+    }
+
+    if (_SignDocumentRequestChatItem.matchPlainMessage(_chatItem)
+        case final parsed?) {
+      return _SignDocumentRequestChatItem(
+        title: parsed.title ?? 'Untitled Document',
+        contactId: _contactId,
+        messageIndex: _index,
+        senderDid: _chatItem.senderDid,
+        status: _chatItem.status,
+        rawPayload: parsed.document,
+      );
+    }
+
+    if (_SignDocumentRequestChatItem.matchStatusMessage(_chatItem)) {
+      return const SizedBox.shrink();
+    }
+
+    if (_SignedDocumentChatItem.matchPlainMessage(_chatItem)
+        case final parsed?) {
+      return _SignedDocumentChatItem(data: parsed, contactId: _contactId);
+    }
+
+    if (_SignedDocumentChatItem.matchAttachmentOnly(_chatItem)) {
+      final msg = _chatItem as chat.Message;
+      final attachment = msg.attachments.firstWhere(
+        (a) => a.format == 'cierge/trust-task',
+      );
+      return _SignedDocumentChatItem(
+        attachment: attachment,
+        contactId: _contactId,
+      );
+    }
+
+    if (_SignDocumentReviewChatItem.matchAttachment(_chatItem)) {
+      final msg = _chatItem as chat.Message;
+      final attachment = msg.attachments.firstWhere(
+        (a) => a.format == _SignDocumentReviewChatItem.attachmentFormat,
+      );
+      return _SignDocumentReviewChatItem(
+        attachment: attachment,
+        contactId: _contactId,
+      );
+    }
+
     if (_chatItem is chat.Message) {
       final callAttachment = _chatItem.attachments.firstWhereOrNull(
         CallMetadata.isCall,

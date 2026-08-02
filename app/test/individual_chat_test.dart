@@ -33,6 +33,11 @@ Future<void> tapSendButton(WidgetTester tester) async {
   await tester.tap(findSendButton());
 }
 
+Future<void> pumpMentionDebounce(WidgetTester tester) async {
+  await tester.pump(const Duration(milliseconds: 900));
+  await tester.pumpAndSettle();
+}
+
 Future<void> simulateIncomingMessage(
   WidgetTester tester,
   FakeChatSdk chatSdk,
@@ -198,6 +203,15 @@ void main() {
         final sendButton = findSendButton();
         expect(sendButton, findsOneWidget);
       });
+
+      testWidgets('it does not show mention suggestions', (tester) async {
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+
+        await enterChatMessage(tester, '@Bo');
+        await pumpMentionDebounce(tester);
+
+        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
+      });
     });
 
     group('and message list is empty', () {
@@ -309,7 +323,8 @@ void main() {
         expect(chatSdk.sendTextMessageCalls, hasLength(1));
         final sendCall = chatSdk.sendTextMessageCalls.first;
         expect(sendCall['text'], testMessage);
-        expect(sendCall['attachments'], isEmpty);
+        expect(sendCall['attachments'], isA<List<ChatAttachment>>());
+        expect(sendCall['attachments'], isNotEmpty);
 
         // Simulate the message appearing in the UI
         chatSdk.simulateIncomingTextMessage(

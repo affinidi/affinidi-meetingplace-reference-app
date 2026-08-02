@@ -18,12 +18,162 @@ class AppLocalizationsDe extends AppLocalizations {
       'contacts': 'Kanäle',
       'identities': 'Identitäten',
       'rCards': 'R-Karten',
+      'personalAgent': 'Agent',
       'credentials': 'Anmeldeinformationen',
       'settings': 'Einstellungen',
       'other': 'Ungültig',
     });
     return '$_temp0';
   }
+
+  @override
+  String get personalAgentPanelSubtitle =>
+      'Richten Sie Ihren persönlichen KI-Agenten ein und verwalten Sie ihn, ohne DID-Details offenzulegen.';
+
+  @override
+  String get personalAgentSetupInProgressButton =>
+      'Einrichtung und Verbindung läuft...';
+
+  @override
+  String get personalAgentReconnectButton =>
+      'Persönlichen Agenten erneut verbinden';
+
+  @override
+  String get personalAgentConnectButton => 'Persönlichen Agenten verbinden';
+
+  @override
+  String get personalAgentReviewSetupPrompt => 'Einrichtungshinweis ansehen';
+
+  @override
+  String get personalAgentConnectedSectionTitle => 'Verbunden';
+
+  @override
+  String personalAgentSummaryContextId(String contextId) {
+    return 'Kontext-ID: $contextId';
+  }
+
+  @override
+  String personalAgentSummaryContextCreated(String value) {
+    return 'Kontext erstellt: $value';
+  }
+
+  @override
+  String personalAgentSummaryProfile(String value) {
+    return 'Agentenprofil: $value';
+  }
+
+  @override
+  String personalAgentSummaryAgentCreated(String value) {
+    return 'Agent erstellt: $value';
+  }
+
+  @override
+  String personalAgentSummaryMode(String value) {
+    return 'Modus: $value';
+  }
+
+  @override
+  String personalAgentSummarySetupStatus(String value) {
+    return 'Einrichtungsstatus: $value';
+  }
+
+  @override
+  String personalAgentSummaryOfferAvailable(String value) {
+    return 'Angebot verfugbar: $value';
+  }
+
+  @override
+  String get personalAgentStatusConnected => 'Persönliche KI verbunden';
+
+  @override
+  String get personalAgentStatusContextRequired => 'Context setup required';
+
+  @override
+  String get personalAgentStatusSettingUp =>
+      'Einrichtung der persönlichen KI läuft';
+
+  @override
+  String get personalAgentStatusNotConnected =>
+      'Persönliche KI nicht verbunden';
+
+  @override
+  String get personalAgentStatusSubtitleConnected =>
+      'Ihr Assistent ist bereit und erscheint in den Kontakten, sobald der Kanal aktiv ist.';
+
+  @override
+  String get personalAgentStatusSubtitleNotConnected =>
+      'Verbinden Sie Ihre persönliche KI mit einem Tippen. MPX bleibt während der Einrichtung nutzbar.';
+
+  @override
+  String get personalAgentContextSetupTitle => 'Set Up Your Personal AI';
+
+  @override
+  String get personalAgentContextSetupDescription =>
+      'Help your Personal AI get to know you. Upload a text file with your background, preferences, and working style. This becomes the AI\'s long-term knowledge about you.';
+
+  @override
+  String get personalAgentContextWhatToIncludeTitle =>
+      'What to include in your file';
+
+  @override
+  String get personalAgentContextWhatToIncludeItem1 =>
+      'Name, role, and professional background';
+
+  @override
+  String get personalAgentContextWhatToIncludeItem2 =>
+      'Working style and communication preferences';
+
+  @override
+  String get personalAgentContextWhatToIncludeItem3 =>
+      'Current responsibilities and focus areas';
+
+  @override
+  String get personalAgentContextWhatToIncludeItem4 =>
+      'Any other context you\'d like the AI to remember';
+
+  @override
+  String get personalAgentContextPickFile => 'Tap to select a .txt file';
+
+  @override
+  String get personalAgentContextFileSelected => 'File selected';
+
+  @override
+  String get personalAgentContextFileTapToChange =>
+      'Tap to choose a different file';
+
+  @override
+  String get personalAgentContextUploadButton => 'Upload Context File';
+
+  @override
+  String get personalAgentContextUploading => 'Uploading...';
+
+  @override
+  String get personalAgentContextUploadSuccess =>
+      'Context uploaded successfully';
+
+  @override
+  String personalAgentContextUploadedFile(String fileName) {
+    return 'Uploaded: $fileName';
+  }
+
+  @override
+  String get personalAgentWhatHappensNext => 'So geht es weiter';
+
+  @override
+  String get personalAgentStepCreateOffer =>
+      'Für Ihre aktuelle Identität wird ein persönliches KI-Angebot erstellt.';
+
+  @override
+  String get personalAgentStepFetchMnemonic =>
+      'MPX ruft die Mnemonik aus der Backend-Angebots-API ab.';
+
+  @override
+  String get personalAgentStepAcceptOffer =>
+      'Die App akzeptiert das Angebot und wartet auf die Kanaleinrichtung.';
+
+  @override
+  String get personalAgentStepContactAppears =>
+      'Die persönliche KI erscheint in den Kontakten, wenn Kanalaktivität eintrifft.';
 
   @override
   String get rCardsPlaceholderMessage => 'R-Cards werden hier angezeigt.';
@@ -954,6 +1104,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get chatMessageActionCopy => 'Nachricht kopieren';
 
   @override
+  String get chatMessageActionAskSuggestion => 'Vorschlag anfragen';
+
+  @override
+  String get chatSuggestionActionIgnore => 'Ignorieren';
+
+  @override
+  String get chatSuggestionActionEdit => 'Bearbeiten';
+
+  @override
+  String get chatSuggestionActionSendAsMe => 'Als mich senden';
+
+  @override
   String get chatMessageActionEdit => 'Nachricht bearbeiten';
 
   @override
@@ -979,6 +1141,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get chatMessageDeleteFailed =>
       'Nachricht konnte nicht gelöscht werden';
+
+  @override
+  String get chatSuggestionRequestFailed =>
+      'Vorschlag konnte nicht angefordert werden';
 
   @override
   String chatItemStatus(String status) {
@@ -2026,6 +2192,218 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get agentContextWorkAiLabel => 'Work AI';
+
+  @override
+  String get agentContextPersonalAiLabel => 'Personal AI';
+
+  @override
+  String contactsChannelContextSet(String label) {
+    return 'Kanal-Kontext gesetzt auf $label';
+  }
+
+  @override
+  String chatContextUploaded(String label, String fileName) {
+    return '$label-Kontext hochgeladen: $fileName';
+  }
+
+  @override
+  String chatUploadFileFirst(String fileName) {
+    return 'Laden Sie zuerst $fileName hoch.';
+  }
+
+  @override
+  String chatChannelUsesContext(String label) {
+    return 'Kanal verwendet jetzt $label.';
+  }
+
+  @override
+  String get chatMenuUseWorkAi => 'Work AI verwenden';
+
+  @override
+  String get chatMenuUsePersonalAi => 'Personal AI verwenden';
+
+  @override
+  String get chatMenuUploadWorkContext => 'work-context.txt hochladen';
+
+  @override
+  String get chatMenuReuploadWorkContext => 'work-context.txt erneut hochladen';
+
+  @override
+  String get chatMenuUploadPersonalContext => 'personal-context.txt hochladen';
+
+  @override
+  String get chatMenuReuploadPersonalContext =>
+      'personal-context.txt erneut hochladen';
+
+  @override
+  String get identitiesSetupMyAgent => 'Meinen Agenten einrichten';
+
+  @override
+  String get identitiesSetupPromptDescription =>
+      'Wählen Sie im Agent-Tab Work oder Personal.';
+
+  @override
+  String get identitiesSettingUp => 'Wird eingerichtet...';
+
+  @override
+  String get identitiesNotNow => 'Nicht jetzt';
+
+  @override
+  String get identitiesAgentConfiguredTooltip => 'Agent eingerichtet';
+
+  @override
+  String get personalAgentNoContextCreated => 'Kein Kontext erstellt';
+
+  @override
+  String personalAgentContextUploadedSnackBar(String label, String fileName) {
+    return '$label hochgeladen: $fileName';
+  }
+
+  @override
+  String get personalAgentSetupSectionSubtitle =>
+      'Richten Sie Ihre KI ein. Wählen Sie, welchen Kontext Sie einrichten möchten.';
+
+  @override
+  String get personalAgentChooseFileToSetUp =>
+      'Wählen Sie eine Datei zur Einrichtung';
+
+  @override
+  String personalAgentAlreadySetUp(String fileName) {
+    return 'Bereits eingerichtet: $fileName';
+  }
+
+  @override
+  String get personalAgentSetupCardTitle => 'Richten Sie Ihre KI ein';
+
+  @override
+  String get personalAgentSetupCardDescription =>
+      'Wählen Sie, welchen Kontext Sie einrichten möchten.';
+
+  @override
+  String personalAgentConnecting(String label) {
+    return 'Verbinde $label...';
+  }
+
+  @override
+  String get personalAgentDefaultConnectingLabel => 'Agent';
+
+  @override
+  String get personalAgentWorkAgentTitle => 'Work Agent';
+
+  @override
+  String get personalAgentPersonalAgentTitle => 'Personal Agent';
+
+  @override
+  String get personalAgentMyWorkAiTitle => 'Meine Work-KI';
+
+  @override
+  String get personalAgentWorkContextLabel => 'Work (Kontext 0)';
+
+  @override
+  String get personalAgentMyPersonalAiTitle => 'Meine persönliche KI';
+
+  @override
+  String get personalAgentPersonalContextLabel => 'Persönlich (Kontext 1)';
+
+  @override
+  String personalAgentCancelConnectionTitle(String label) {
+    return '$label-Verbindung abbrechen?';
+  }
+
+  @override
+  String personalAgentCancelConnectionContent(String agentLabel) {
+    return 'Dies entfernt Ihre Verbindung zum $agentLabel.';
+  }
+
+  @override
+  String get personalAgentKeepConnection => 'Verbindung behalten';
+
+  @override
+  String get personalAgentCancelConnection => 'Verbindung abbrechen';
+
+  @override
+  String personalAgentConnectionCancelled(String label) {
+    return '$label-Verbindung abgebrochen.';
+  }
+
+  @override
+  String personalAgentCancelConnectionError(String label) {
+    return '$label-Verbindung konnte nicht abgebrochen werden.';
+  }
+
+  @override
+  String get personalAgentNotAvailable => 'Nicht verfügbar';
+
+  @override
+  String get personalAgentNoSnapshotYet => 'Noch kein Snapshot';
+
+  @override
+  String get personalAgentNotSetUp => 'Nicht eingerichtet';
+
+  @override
+  String get personalAgentAuthAgentDid => 'Agent-DID';
+
+  @override
+  String get personalAgentAuthAclRole => 'ACL-Rolle';
+
+  @override
+  String get personalAgentAuthCapabilities => 'Fähigkeiten';
+
+  @override
+  String get personalAgentAuthContextScope => 'Kontext-Umfang';
+
+  @override
+  String get personalAgentAuthDomainId => 'Domain-ID';
+
+  @override
+  String get personalAgentAuthProvision => 'Bereitstellung';
+
+  @override
+  String get personalAgentAuthUpdated => 'Aktualisiert';
+
+  @override
+  String get mnemonicErrorOccurred => 'Ein Fehler ist aufgetreten.';
+
+  @override
+  String get mnemonicEntrySelectionTitle =>
+      'Wie möchten Sie\nIhr Wallet eingeben?';
+
+  @override
+  String get mnemonicScanQrTitle => 'QR-Code scannen';
+
+  @override
+  String get mnemonicScanQrSubtitle =>
+      'Verwenden Sie Ihre Kamera, um einen Wallet-QR-Code zu scannen';
+
+  @override
+  String get mnemonicEnterManuallyTitle => 'Manuell eingeben';
+
+  @override
+  String get mnemonicEnterManuallySubtitle =>
+      'Geben Sie die mit Ihnen geteilte Mnemonic-Phrase ein';
+
+  @override
+  String get mnemonicManualEntryTitle => 'Geben Sie Ihre Mnemonic ein';
+
+  @override
+  String get mnemonicManualEntrySubtitle =>
+      'Geben Sie die mit Ihnen geteilte Mnemonic-Phrase ein.';
+
+  @override
+  String get mnemonicManualHint => 'wort1 wort2 wort3 ...';
+
+  @override
+  String get mnemonicContinue => 'Weiter';
+
+  @override
+  String get mnemonicSuccessTitle => 'Alles bereit!';
+
+  @override
+  String get mnemonicSuccessSubtitle =>
+      'Viel Freude mit MeetingPlace und Ihrem persönlichen KI-Agenten.';
+
+  @override
   String get videoCallTitle => 'Anruf';
 
   @override
@@ -2304,4 +2682,37 @@ class AppLocalizationsDe extends AppLocalizations {
   String callParticipantRingingAction(String name) {
     return '$name wird angerufen';
   }
+
+  @override
+  String get trustTaskHistoryTitle => 'Verlauf der Trust-Aufgaben';
+
+  @override
+  String get trustTaskHistoryRefresh => 'Aktualisieren';
+
+  @override
+  String get trustTaskHistoryEmpty => 'Noch keine Trust-Aufgaben';
+
+  @override
+  String get trustTaskHistoryError => 'Verlauf konnte nicht geladen werden';
+
+  @override
+  String get trustTaskHistoryRetry => 'Erneut versuchen';
+
+  @override
+  String get trustTaskHistoryLoadMore => 'Mehr laden';
+
+  @override
+  String get trustTaskHistoryItemTitle => 'Signaturanfrage';
+
+  @override
+  String get trustTaskHistoryDetails => 'Details';
+
+  @override
+  String get trustTaskStatusSigned => 'Signiert';
+
+  @override
+  String get trustTaskStatusDenied => 'Blockiert';
+
+  @override
+  String get trustTaskStatusUnknown => 'Unbekannt';
 }

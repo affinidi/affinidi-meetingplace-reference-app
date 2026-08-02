@@ -84,3 +84,5 @@ coverage/
 .secure_files/
 build/
 app/build/
+
+mnemonic_qr.png

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ConnectionDetailsScreenState {
 
- Contact? get contact; Channel? get channel; ConnectionOffer? get connection; Identity? get identity; Group? get group; bool get showDeletedMembers; String get mediatorName; bool get isDebugMode; bool get showMnemonic; bool get showQrIcon; bool get showQrView;
+ Contact? get contact; Channel? get channel; ConnectionOffer? get connection; Identity? get identity; Group? get group; bool get showDeletedMembers; String get mediatorName; bool get isDebugMode; bool get showMnemonic; bool get showQrIcon; bool get showQrView; bool get authorizationRefreshing; String? get authorizationError;
 /// Create a copy of ConnectionDetailsScreenState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $ConnectionDetailsScreenStateCopyWith<ConnectionDetailsScreenState> get copyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConnectionDetailsScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.channel, channel) || other.channel == channel)&&(identical(other.connection, connection) || other.connection == connection)&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.group, group) || other.group == group)&&(identical(other.showDeletedMembers, showDeletedMembers) || other.showDeletedMembers == showDeletedMembers)&&(identical(other.mediatorName, mediatorName) || other.mediatorName == mediatorName)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.showMnemonic, showMnemonic) || other.showMnemonic == showMnemonic)&&(identical(other.showQrIcon, showQrIcon) || other.showQrIcon == showQrIcon)&&(identical(other.showQrView, showQrView) || other.showQrView == showQrView));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ConnectionDetailsScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.channel, channel) || other.channel == channel)&&(identical(other.connection, connection) || other.connection == connection)&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.group, group) || other.group == group)&&(identical(other.showDeletedMembers, showDeletedMembers) || other.showDeletedMembers == showDeletedMembers)&&(identical(other.mediatorName, mediatorName) || other.mediatorName == mediatorName)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.showMnemonic, showMnemonic) || other.showMnemonic == showMnemonic)&&(identical(other.showQrIcon, showQrIcon) || other.showQrIcon == showQrIcon)&&(identical(other.showQrView, showQrView) || other.showQrView == showQrView)&&(identical(other.authorizationRefreshing, authorizationRefreshing) || other.authorizationRefreshing == authorizationRefreshing)&&(identical(other.authorizationError, authorizationError) || other.authorizationError == authorizationError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contact,channel,connection,identity,group,showDeletedMembers,mediatorName,isDebugMode,showMnemonic,showQrIcon,showQrView);
+int get hashCode => Object.hash(runtimeType,contact,channel,connection,identity,group,showDeletedMembers,mediatorName,isDebugMode,showMnemonic,showQrIcon,showQrView,authorizationRefreshing,authorizationError);
 
 @override
 String toString() {
-  return 'ConnectionDetailsScreenState(contact: $contact, channel: $channel, connection: $connection, identity: $identity, group: $group, showDeletedMembers: $showDeletedMembers, mediatorName: $mediatorName, isDebugMode: $isDebugMode, showMnemonic: $showMnemonic, showQrIcon: $showQrIcon, showQrView: $showQrView)';
+  return 'ConnectionDetailsScreenState(contact: $contact, channel: $channel, connection: $connection, identity: $identity, group: $group, showDeletedMembers: $showDeletedMembers, mediatorName: $mediatorName, isDebugMode: $isDebugMode, showMnemonic: $showMnemonic, showQrIcon: $showQrIcon, showQrView: $showQrView, authorizationRefreshing: $authorizationRefreshing, authorizationError: $authorizationError)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $ConnectionDetailsScreenStateCopyWith<$Res>  {
   factory $ConnectionDetailsScreenStateCopyWith(ConnectionDetailsScreenState value, $Res Function(ConnectionDetailsScreenState) _then) = _$ConnectionDetailsScreenStateCopyWithImpl;
 @useResult
 $Res call({
- Contact? contact, Channel? channel, ConnectionOffer? connection, Identity? identity, Group? group, bool showDeletedMembers, String mediatorName, bool isDebugMode, bool showMnemonic, bool showQrIcon, bool showQrView
+ Contact? contact, Channel? channel, ConnectionOffer? connection, Identity? identity, Group? group, bool showDeletedMembers, String mediatorName, bool isDebugMode, bool showMnemonic, bool showQrIcon, bool showQrView, bool authorizationRefreshing, String? authorizationError
 });
 
 
@@ -62,7 +62,7 @@ class _$ConnectionDetailsScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of ConnectionDetailsScreenState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? contact = freezed,Object? channel = freezed,Object? connection = freezed,Object? identity = freezed,Object? group = freezed,Object? showDeletedMembers = null,Object? mediatorName = null,Object? isDebugMode = null,Object? showMnemonic = null,Object? showQrIcon = null,Object? showQrView = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? contact = freezed,Object? channel = freezed,Object? connection = freezed,Object? identity = freezed,Object? group = freezed,Object? showDeletedMembers = null,Object? mediatorName = null,Object? isDebugMode = null,Object? showMnemonic = null,Object? showQrIcon = null,Object? showQrView = null,Object? authorizationRefreshing = null,Object? authorizationError = freezed,}) {
   return _then(_self.copyWith(
 contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
 as Contact?,channel: freezed == channel ? _self.channel : channel // ignore: cast_nullable_to_non_nullable
@@ -75,7 +75,9 @@ as String,isDebugMode: null == isDebugMode ? _self.isDebugMode : isDebugMode // 
 as bool,showMnemonic: null == showMnemonic ? _self.showMnemonic : showMnemonic // ignore: cast_nullable_to_non_nullable
 as bool,showQrIcon: null == showQrIcon ? _self.showQrIcon : showQrIcon // ignore: cast_nullable_to_non_nullable
 as bool,showQrView: null == showQrView ? _self.showQrView : showQrView // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,authorizationRefreshing: null == authorizationRefreshing ? _self.authorizationRefreshing : authorizationRefreshing // ignore: cast_nullable_to_non_nullable
+as bool,authorizationError: freezed == authorizationError ? _self.authorizationError : authorizationError // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of ConnectionDetailsScreenState
@@ -172,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Contact? contact,  Channel? channel,  ConnectionOffer? connection,  Identity? identity,  Group? group,  bool showDeletedMembers,  String mediatorName,  bool isDebugMode,  bool showMnemonic,  bool showQrIcon,  bool showQrView)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Contact? contact,  Channel? channel,  ConnectionOffer? connection,  Identity? identity,  Group? group,  bool showDeletedMembers,  String mediatorName,  bool isDebugMode,  bool showMnemonic,  bool showQrIcon,  bool showQrView,  bool authorizationRefreshing,  String? authorizationError)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ConnectionDetailsScreenState() when $default != null:
-return $default(_that.contact,_that.channel,_that.connection,_that.identity,_that.group,_that.showDeletedMembers,_that.mediatorName,_that.isDebugMode,_that.showMnemonic,_that.showQrIcon,_that.showQrView);case _:
+return $default(_that.contact,_that.channel,_that.connection,_that.identity,_that.group,_that.showDeletedMembers,_that.mediatorName,_that.isDebugMode,_that.showMnemonic,_that.showQrIcon,_that.showQrView,_that.authorizationRefreshing,_that.authorizationError);case _:
   return orElse();
 
 }
@@ -193,10 +195,10 @@ return $default(_that.contact,_that.channel,_that.connection,_that.identity,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Contact? contact,  Channel? channel,  ConnectionOffer? connection,  Identity? identity,  Group? group,  bool showDeletedMembers,  String mediatorName,  bool isDebugMode,  bool showMnemonic,  bool showQrIcon,  bool showQrView)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Contact? contact,  Channel? channel,  ConnectionOffer? connection,  Identity? identity,  Group? group,  bool showDeletedMembers,  String mediatorName,  bool isDebugMode,  bool showMnemonic,  bool showQrIcon,  bool showQrView,  bool authorizationRefreshing,  String? authorizationError)  $default,) {final _that = this;
 switch (_that) {
 case _ConnectionDetailsScreenState():
-return $default(_that.contact,_that.channel,_that.connection,_that.identity,_that.group,_that.showDeletedMembers,_that.mediatorName,_that.isDebugMode,_that.showMnemonic,_that.showQrIcon,_that.showQrView);case _:
+return $default(_that.contact,_that.channel,_that.connection,_that.identity,_that.group,_that.showDeletedMembers,_that.mediatorName,_that.isDebugMode,_that.showMnemonic,_that.showQrIcon,_that.showQrView,_that.authorizationRefreshing,_that.authorizationError);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +215,10 @@ return $default(_that.contact,_that.channel,_that.connection,_that.identity,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Contact? contact,  Channel? channel,  ConnectionOffer? connection,  Identity? identity,  Group? group,  bool showDeletedMembers,  String mediatorName,  bool isDebugMode,  bool showMnemonic,  bool showQrIcon,  bool showQrView)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Contact? contact,  Channel? channel,  ConnectionOffer? connection,  Identity? identity,  Group? group,  bool showDeletedMembers,  String mediatorName,  bool isDebugMode,  bool showMnemonic,  bool showQrIcon,  bool showQrView,  bool authorizationRefreshing,  String? authorizationError)?  $default,) {final _that = this;
 switch (_that) {
 case _ConnectionDetailsScreenState() when $default != null:
-return $default(_that.contact,_that.channel,_that.connection,_that.identity,_that.group,_that.showDeletedMembers,_that.mediatorName,_that.isDebugMode,_that.showMnemonic,_that.showQrIcon,_that.showQrView);case _:
+return $default(_that.contact,_that.channel,_that.connection,_that.identity,_that.group,_that.showDeletedMembers,_that.mediatorName,_that.isDebugMode,_that.showMnemonic,_that.showQrIcon,_that.showQrView,_that.authorizationRefreshing,_that.authorizationError);case _:
   return null;
 
 }
@@ -228,7 +230,7 @@ return $default(_that.contact,_that.channel,_that.connection,_that.identity,_tha
 
 
 class _ConnectionDetailsScreenState extends ConnectionDetailsScreenState {
-   _ConnectionDetailsScreenState({this.contact, this.channel, this.connection, this.identity, this.group, this.showDeletedMembers = false, this.mediatorName = '', this.isDebugMode = false, this.showMnemonic = false, this.showQrIcon = false, this.showQrView = false}): super._();
+   _ConnectionDetailsScreenState({this.contact, this.channel, this.connection, this.identity, this.group, this.showDeletedMembers = false, this.mediatorName = '', this.isDebugMode = false, this.showMnemonic = false, this.showQrIcon = false, this.showQrView = false, this.authorizationRefreshing = false, this.authorizationError}): super._();
   
 
 @override final  Contact? contact;
@@ -242,6 +244,8 @@ class _ConnectionDetailsScreenState extends ConnectionDetailsScreenState {
 @override@JsonKey() final  bool showMnemonic;
 @override@JsonKey() final  bool showQrIcon;
 @override@JsonKey() final  bool showQrView;
+@override@JsonKey() final  bool authorizationRefreshing;
+@override final  String? authorizationError;
 
 /// Create a copy of ConnectionDetailsScreenState
 /// with the given fields replaced by the non-null parameter values.
@@ -253,16 +257,16 @@ _$ConnectionDetailsScreenStateCopyWith<_ConnectionDetailsScreenState> get copyWi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConnectionDetailsScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.channel, channel) || other.channel == channel)&&(identical(other.connection, connection) || other.connection == connection)&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.group, group) || other.group == group)&&(identical(other.showDeletedMembers, showDeletedMembers) || other.showDeletedMembers == showDeletedMembers)&&(identical(other.mediatorName, mediatorName) || other.mediatorName == mediatorName)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.showMnemonic, showMnemonic) || other.showMnemonic == showMnemonic)&&(identical(other.showQrIcon, showQrIcon) || other.showQrIcon == showQrIcon)&&(identical(other.showQrView, showQrView) || other.showQrView == showQrView));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConnectionDetailsScreenState&&(identical(other.contact, contact) || other.contact == contact)&&(identical(other.channel, channel) || other.channel == channel)&&(identical(other.connection, connection) || other.connection == connection)&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.group, group) || other.group == group)&&(identical(other.showDeletedMembers, showDeletedMembers) || other.showDeletedMembers == showDeletedMembers)&&(identical(other.mediatorName, mediatorName) || other.mediatorName == mediatorName)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.showMnemonic, showMnemonic) || other.showMnemonic == showMnemonic)&&(identical(other.showQrIcon, showQrIcon) || other.showQrIcon == showQrIcon)&&(identical(other.showQrView, showQrView) || other.showQrView == showQrView)&&(identical(other.authorizationRefreshing, authorizationRefreshing) || other.authorizationRefreshing == authorizationRefreshing)&&(identical(other.authorizationError, authorizationError) || other.authorizationError == authorizationError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,contact,channel,connection,identity,group,showDeletedMembers,mediatorName,isDebugMode,showMnemonic,showQrIcon,showQrView);
+int get hashCode => Object.hash(runtimeType,contact,channel,connection,identity,group,showDeletedMembers,mediatorName,isDebugMode,showMnemonic,showQrIcon,showQrView,authorizationRefreshing,authorizationError);
 
 @override
 String toString() {
-  return 'ConnectionDetailsScreenState(contact: $contact, channel: $channel, connection: $connection, identity: $identity, group: $group, showDeletedMembers: $showDeletedMembers, mediatorName: $mediatorName, isDebugMode: $isDebugMode, showMnemonic: $showMnemonic, showQrIcon: $showQrIcon, showQrView: $showQrView)';
+  return 'ConnectionDetailsScreenState(contact: $contact, channel: $channel, connection: $connection, identity: $identity, group: $group, showDeletedMembers: $showDeletedMembers, mediatorName: $mediatorName, isDebugMode: $isDebugMode, showMnemonic: $showMnemonic, showQrIcon: $showQrIcon, showQrView: $showQrView, authorizationRefreshing: $authorizationRefreshing, authorizationError: $authorizationError)';
 }
 
 
@@ -273,7 +277,7 @@ abstract mixin class _$ConnectionDetailsScreenStateCopyWith<$Res> implements $Co
   factory _$ConnectionDetailsScreenStateCopyWith(_ConnectionDetailsScreenState value, $Res Function(_ConnectionDetailsScreenState) _then) = __$ConnectionDetailsScreenStateCopyWithImpl;
 @override @useResult
 $Res call({
- Contact? contact, Channel? channel, ConnectionOffer? connection, Identity? identity, Group? group, bool showDeletedMembers, String mediatorName, bool isDebugMode, bool showMnemonic, bool showQrIcon, bool showQrView
+ Contact? contact, Channel? channel, ConnectionOffer? connection, Identity? identity, Group? group, bool showDeletedMembers, String mediatorName, bool isDebugMode, bool showMnemonic, bool showQrIcon, bool showQrView, bool authorizationRefreshing, String? authorizationError
 });
 
 
@@ -290,7 +294,7 @@ class __$ConnectionDetailsScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of ConnectionDetailsScreenState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? contact = freezed,Object? channel = freezed,Object? connection = freezed,Object? identity = freezed,Object? group = freezed,Object? showDeletedMembers = null,Object? mediatorName = null,Object? isDebugMode = null,Object? showMnemonic = null,Object? showQrIcon = null,Object? showQrView = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? contact = freezed,Object? channel = freezed,Object? connection = freezed,Object? identity = freezed,Object? group = freezed,Object? showDeletedMembers = null,Object? mediatorName = null,Object? isDebugMode = null,Object? showMnemonic = null,Object? showQrIcon = null,Object? showQrView = null,Object? authorizationRefreshing = null,Object? authorizationError = freezed,}) {
   return _then(_ConnectionDetailsScreenState(
 contact: freezed == contact ? _self.contact : contact // ignore: cast_nullable_to_non_nullable
 as Contact?,channel: freezed == channel ? _self.channel : channel // ignore: cast_nullable_to_non_nullable
@@ -303,7 +307,9 @@ as String,isDebugMode: null == isDebugMode ? _self.isDebugMode : isDebugMode // 
 as bool,showMnemonic: null == showMnemonic ? _self.showMnemonic : showMnemonic // ignore: cast_nullable_to_non_nullable
 as bool,showQrIcon: null == showQrIcon ? _self.showQrIcon : showQrIcon // ignore: cast_nullable_to_non_nullable
 as bool,showQrView: null == showQrView ? _self.showQrView : showQrView // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,authorizationRefreshing: null == authorizationRefreshing ? _self.authorizationRefreshing : authorizationRefreshing // ignore: cast_nullable_to_non_nullable
+as bool,authorizationError: freezed == authorizationError ? _self.authorizationError : authorizationError // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

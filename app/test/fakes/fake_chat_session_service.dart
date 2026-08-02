@@ -78,6 +78,7 @@ class FakeChatSessionService extends ChatSessionService {
   Future<void> sendTextMessage(
     String message, {
     List<ChatAttachment>? attachments,
+    List<ChatMention> mentions = const [],
   }) async {}
 
   @override
@@ -109,7 +110,11 @@ class FakeChatSessionService extends ChatSessionService {
   }) async {}
 
   @override
-  Future<void> editTextMessage(Message message, String newText) async {}
+  Future<void> editTextMessage(
+    Message message,
+    String newText, {
+    List<ChatMention>? mentions,
+  }) async {}
 
   @override
   Future<void> sendEffect(Effect effectType) async {}

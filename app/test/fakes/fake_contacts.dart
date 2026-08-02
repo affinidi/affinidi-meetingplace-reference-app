@@ -41,6 +41,35 @@ class FakeContacts {
     hasBeenOpened: true,
   );
 
+  static final agentContact = Contact(
+    id: 'agent-contact-id',
+    channelDid: 'did:key:individual-channel',
+    channelDidSha256: 'individual-channel-sha256',
+    offerLink: 'agent-offer-link',
+    card: const ContactCard(
+      id: 'agent-contact-card-id',
+      did: 'did:key:individual-channel',
+      type: 'ai-agent',
+      firstName: 'Personal AI',
+      displayName: 'Personal AI',
+    ),
+    otherPartyCard: const ContactCard(
+      id: 'agent-other-party-card-id',
+      did: 'did:key:other-party',
+      type: 'ai-agent',
+      firstName: 'Personal AI',
+      displayName: 'Personal AI',
+    ),
+    dateAdded: DateTime(2025, 1, 2),
+    type: ContactType.individual,
+    status: ContactStatus.active,
+    mediatorDid: 'did:key:mediator',
+    origin: ContactOrigin.individualOfferPublished,
+    category: ContactCategory.robot,
+    displayName: 'Personal AI',
+    hasBeenOpened: true,
+  );
+
   static final groupContact = Contact(
     id: 'group-contact-id',
     channelDid: 'did:key:group-channel',

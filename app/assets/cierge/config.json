@@ -1,0 +1,16 @@
+{
+  "0f871c6cd5009717a48da8c0c95c1e3f635dcf20b32a7c4e4d175d2975b2bc70": {
+    "ciergeConnectorDid": "did:key:zQ3shuEeusZN3oX7ZrzD7RPcZZKWDP45T7dojAa8Fz4ZHhfo9",
+    "offers": {
+      "work": "<mnemonic>",
+      "personal": "<mnemonic>"
+    }
+  },
+  "079ebdb59fd54bcd169c8b739642f1eebd0b2ea56a5b7cc8172571010dc07141": {
+    "ciergeConnectorDid": null,
+    "offers": {
+      "work": "<mnemonic>",
+      "personal": "<mnemonic>"
+    }
+  }
+}

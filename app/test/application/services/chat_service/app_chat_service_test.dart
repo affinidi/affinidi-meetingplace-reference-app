@@ -136,6 +136,22 @@ void main() {
       expect(fakeChatSdk.sendTextMessageCalls.last['text'], 'hello');
     });
 
+    test('delegates sendTextMessage mentions to SDK', () async {
+      await chatService.startChatSession();
+      const mentions = [
+        ChatMention(
+          target: 'did:key:member',
+          start: 0,
+          length: 6,
+          display: '@Alice',
+        ),
+      ];
+
+      await chatService.sendTextMessage('Hello!', mentions: mentions);
+
+      expect(fakeChatSdk.sendTextMessageCalls.last['mentions'], mentions);
+    });
+
     test('delegates sendChatActivity to SDK', () async {
       await chatService.startChatSession();
       await chatService.sendChatActivity();
@@ -265,6 +281,16 @@ void main() {
       expect(fakeChatSdk.lastReaction, '👍');
     });
 
+    test('delegates sendSuggestionRequest to SDK', () async {
+      await chatService.startChatSession();
+      await chatService.sendSuggestionRequest(
+        messageId: 'message-123',
+        text: 'Incoming text',
+      );
+      expect(fakeChatSdk.lastSuggestionRequestMessageId, 'message-123');
+      expect(fakeChatSdk.lastSuggestionRequestText, 'Incoming text');
+    });
+
     test('delegates sendEffect to SDK', () async {
       await chatService.startChatSession();
       await chatService.sendEffect(Effect.confetti);
@@ -321,6 +347,27 @@ void main() {
       expect(fakeChatSdk.sendTextMessageCalls.last['attachments'], isNotEmpty);
     });
 
+    test('delegates editTextMessage mentions to SDK', () async {
+      await chatService.startChatSession();
+      final fakeMessage = fakeChatSdk.fakeMessage();
+      const mentions = [
+        ChatMention(
+          target: 'did:key:member',
+          start: 0,
+          length: 6,
+          display: '@Alice',
+        ),
+      ];
+
+      await chatService.editTextMessage(
+        fakeMessage,
+        'Hello again!',
+        mentions: mentions,
+      );
+
+      expect(fakeChatSdk.editTextMessageCalls.last['mentions'], mentions);
+    });
+
     test(
       'buffers outbound messages while paused and flushes them on resume',
       () async {
@@ -371,6 +418,28 @@ void main() {
       expect(fakeChatSdk.startChatSessionCallCount, equals(3));
       expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
       expect(fakeChatSdk.sendMediaMessageCalls, hasLength(1));
+    });
+
+    test('flushes buffered outbound message mentions on resume', () async {
+      await chatService.startChatSession();
+      await chatService.pauseChat();
+      const mentions = [
+        ChatMention(
+          target: 'did:key:member',
+          start: 0,
+          length: 6,
+          display: '@Alice',
+        ),
+      ];
+
+      await chatService.sendTextMessage('Hello!', mentions: mentions);
+
+      expect(fakeChatSdk.sendTextMessageCalls, isEmpty);
+
+      await chatService.startChatSession();
+
+      expect(fakeChatSdk.sendTextMessageCalls, hasLength(1));
+      expect(fakeChatSdk.sendTextMessageCalls.first['mentions'], mentions);
     });
 
     test(
@@ -692,6 +761,210 @@ void main() {
 
       expect(serviceState().effect, Effect.confetti);
     });
+
+    test('stores the latest suggestion for a delivered message', () async {
+      await chatService.startChatSession();
+
+      late String relatedMessageId;
+      await waitForState(
+        (state) => state.messages.whereType<Message>().any(
+          (message) => message.value == 'suggest me',
+        ),
+        () {
+          final message = fakeChatSdk.simulateIncomingTextMessage(
+            text: 'suggest me',
+            recipientDid: channelDid,
+          );
+          relatedMessageId = message.messageId;
+        },
+      );
+
+      await waitForState(
+        (state) => state.latestSuggestion?.relatedMessageId == relatedMessageId,
+        () => fakeChatSdk.simulateIncomingSuggestion(
+          relatedMessageId: relatedMessageId,
+          text: 'Latest suggestion',
+          recipientDid: channelDid,
+        ),
+      );
+
+      expect(serviceState().latestSuggestion?.text, 'Latest suggestion');
+    });
+
+    test('replaces the active suggestion when a newer one arrives', () async {
+      await chatService.startChatSession();
+
+      late String firstMessageId;
+      late String secondMessageId;
+      await waitForState(
+        (state) => state.messages.whereType<Message>().length >= 2,
+        () {
+          firstMessageId = fakeChatSdk
+              .simulateIncomingTextMessage(
+                text: 'first target',
+                recipientDid: channelDid,
+              )
+              .messageId;
+          secondMessageId = fakeChatSdk
+              .simulateIncomingTextMessage(
+                text: 'second target',
+                recipientDid: channelDid,
+              )
+              .messageId;
+        },
+      );
+
+      await waitForState(
+        (state) => state.latestSuggestion?.relatedMessageId == firstMessageId,
+        () => fakeChatSdk.simulateIncomingSuggestion(
+          relatedMessageId: firstMessageId,
+          text: 'First suggestion',
+          recipientDid: channelDid,
+        ),
+      );
+
+      await waitForState(
+        (state) => state.latestSuggestion?.relatedMessageId == secondMessageId,
+        () => fakeChatSdk.simulateIncomingSuggestion(
+          relatedMessageId: secondMessageId,
+          text: 'Second suggestion',
+          recipientDid: channelDid,
+        ),
+      );
+
+      expect(serviceState().latestSuggestion?.text, 'Second suggestion');
+      expect(
+        serviceState().latestSuggestion?.relatedMessageId,
+        secondMessageId,
+      );
+    });
+
+    test('removes wrapping double quotes from incoming suggestions', () async {
+      await chatService.startChatSession();
+
+      late String relatedMessageId;
+      await waitForState(
+        (state) => state.messages.whereType<Message>().any(
+          (message) => message.value == 'quoted suggestion target',
+        ),
+        () {
+          final message = fakeChatSdk.simulateIncomingTextMessage(
+            text: 'quoted suggestion target',
+            recipientDid: channelDid,
+          );
+          relatedMessageId = message.messageId;
+        },
+      );
+
+      await waitForState(
+        (state) => state.latestSuggestion?.relatedMessageId == relatedMessageId,
+        () => fakeChatSdk.simulateIncomingSuggestion(
+          relatedMessageId: relatedMessageId,
+          text: '"Latest suggestion"',
+          recipientDid: channelDid,
+        ),
+      );
+
+      expect(serviceState().latestSuggestion?.text, 'Latest suggestion');
+    });
+
+    test('ignores suggestions whose related message is absent', () async {
+      await chatService.startChatSession();
+
+      fakeChatSdk.simulateIncomingSuggestion(
+        relatedMessageId: 'missing-message-id',
+        text: 'Ignored suggestion',
+        recipientDid: channelDid,
+      );
+      await Future<void>.microtask(() {});
+
+      expect(serviceState().latestSuggestion, isNull);
+    });
+
+    test('dismissSuggestion clears the matching active suggestion', () async {
+      await chatService.startChatSession();
+
+      late String relatedMessageId;
+      await waitForState(
+        (state) => state.messages.whereType<Message>().any(
+          (message) => message.value == 'suggest me later',
+        ),
+        () {
+          final message = fakeChatSdk.simulateIncomingTextMessage(
+            text: 'suggest me later',
+            recipientDid: channelDid,
+          );
+          relatedMessageId = message.messageId;
+        },
+      );
+
+      await waitForState(
+        (state) => state.latestSuggestion?.relatedMessageId == relatedMessageId,
+        () => fakeChatSdk.simulateIncomingSuggestion(
+          relatedMessageId: relatedMessageId,
+          text: 'Dismiss me',
+          recipientDid: channelDid,
+        ),
+      );
+
+      await chatService.dismissSuggestion(relatedMessageId);
+
+      expect(serviceState().latestSuggestion, isNull);
+    });
+
+    test(
+      'dismissSuggestion does not clear a newer active suggestion',
+      () async {
+        await chatService.startChatSession();
+
+        late String firstMessageId;
+        late String secondMessageId;
+        await waitForState(
+          (state) => state.messages.whereType<Message>().length >= 2,
+          () {
+            firstMessageId = fakeChatSdk
+                .simulateIncomingTextMessage(
+                  text: 'first suggestion target',
+                  recipientDid: channelDid,
+                )
+                .messageId;
+            secondMessageId = fakeChatSdk
+                .simulateIncomingTextMessage(
+                  text: 'second suggestion target',
+                  recipientDid: channelDid,
+                )
+                .messageId;
+          },
+        );
+
+        await waitForState(
+          (state) => state.latestSuggestion?.relatedMessageId == firstMessageId,
+          () => fakeChatSdk.simulateIncomingSuggestion(
+            relatedMessageId: firstMessageId,
+            text: 'First suggestion',
+            recipientDid: channelDid,
+          ),
+        );
+
+        await waitForState(
+          (state) =>
+              state.latestSuggestion?.relatedMessageId == secondMessageId,
+          () => fakeChatSdk.simulateIncomingSuggestion(
+            relatedMessageId: secondMessageId,
+            text: 'Second suggestion',
+            recipientDid: channelDid,
+          ),
+        );
+
+        await chatService.dismissSuggestion(firstMessageId);
+
+        expect(
+          serviceState().latestSuggestion?.relatedMessageId,
+          secondMessageId,
+        );
+        expect(serviceState().latestSuggestion?.text, 'Second suggestion');
+      },
+    );
 
     test('clearEffect resets effect in state', () async {
       await chatService.startChatSession();

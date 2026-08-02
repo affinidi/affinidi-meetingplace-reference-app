@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqlcipher_flutter_libs/sqlcipher_flutter_libs.dart';
 import 'package:sqlite3/open.dart' as sqlite_open;
 
+import 'application/services/context_routing_service/context_routing_service.dart';
 import 'infrastructure/configuration/environment.dart';
 import 'infrastructure/firebase_messaging/firebase_options.dart';
 import 'infrastructure/firebase_messaging/firebase_push_notification_messaging.dart';
@@ -21,10 +22,13 @@ import 'infrastructure/media/file_picker/file_picker_platform_provider.dart';
 import 'infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'infrastructure/plugins/audio_attachments_plugin/local_voice_attachment_store.dart';
 import 'infrastructure/plugins/camera_attachments_plugin/camera_attachments_plugin.dart';
+import 'infrastructure/plugins/cierge_signature_attachments_plugin/cierge_signature_attachments_plugin.dart';
+import 'infrastructure/plugins/cierge_trust_task_plugin/cierge_trust_task_plugin.dart';
 import 'infrastructure/plugins/device_region_plugin/device_region_plugin.dart';
 import 'infrastructure/plugins/document_attachments_plugin/document_attachments_plugin.dart';
 import 'infrastructure/plugins/gallery_attachments_plugin/gallery_attachments_plugin.dart';
 import 'infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import 'infrastructure/plugins/sign_document_plugin/sign_document_plugin.dart';
 import 'infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import 'infrastructure/providers/available_attachment_plugins_provider.dart';
 import 'infrastructure/providers/cache_manager_provider.dart';
@@ -32,6 +36,7 @@ import 'infrastructure/providers/channel_repository_provider.dart';
 import 'infrastructure/providers/chat_repository_provider.dart';
 import 'infrastructure/providers/connection_offer_repository_provider.dart';
 import 'infrastructure/providers/contacts_repository_provider.dart';
+import 'infrastructure/providers/context_routing_store_provider.dart';
 import 'infrastructure/providers/group_repository_provider.dart';
 import 'infrastructure/providers/identities_repository_provider.dart';
 import 'infrastructure/providers/liveness_credentials_repository_provider.dart';
@@ -112,6 +117,11 @@ void main() async {
               cacheManager: ref.read(cacheManagerProvider),
               localVoiceStore: ref.read(localVoiceAttachmentStoreProvider),
             ),
+            CiergeSignatureAttachmentsPlugin(),
+            CiergeTrustTaskPlugin(),
+            SignDocumentPlugin(
+              filePickerPlatform: ref.read(filePickerPlatformProvider),
+            ),
           ],
         ),
         channelRepositoryProvider.overrideWith(channelRepositoryDrift),
@@ -133,6 +143,11 @@ void main() async {
                 ..setBackgroundHandler(firebaseMessagingBackgroundHandler),
         ),
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+        contextRoutingStoreProvider.overrideWith(
+          (ref) => SharedPreferencesContextRoutingStore(
+            ref.read(sharedPreferencesProvider),
+          ),
+        ),
       ],
       observers: [ProviderDebugLogger()],
       child: const App(),

@@ -18,6 +18,12 @@ class _ChatMessageList extends HookConsumerWidget {
     final selectedReactionIndex = ref.watch(
       provider.select((state) => state.selectedReactionIndex),
     );
+    final latestSuggestion = ref.watch(
+      provider.select((state) => state.latestSuggestion),
+    );
+    final supportsSuggestionRequests = ref.watch(
+      provider.supportsSuggestionRequests,
+    );
     final zkpPolicy = ChatZkpMessageListPolicy.fromMessages(
       enabled:
           ref.read(environmentProvider).zkpEnabled &&
@@ -83,7 +89,11 @@ class _ChatMessageList extends HookConsumerWidget {
                   final chatItem = sortedMessages[index];
 
                   if (_isVrcRequestOnlyMessage(chatItem) ||
-                      zkpPolicy.shouldHide(chatItem)) {
+                      zkpPolicy.shouldHide(chatItem) ||
+                      _isLocalAgentResponseMessage(chatItem) ||
+                      _SignDocumentRequestChatItem.matchStatusMessage(
+                        chatItem,
+                      )) {
                     return const SizedBox.shrink();
                   }
                   var nextItemFromSameDid = false;
@@ -91,7 +101,10 @@ class _ChatMessageList extends HookConsumerWidget {
                   var nextIndex = index + 1;
                   while (nextIndex < sortedMessages.length &&
                       (_isVrcRequestOnlyMessage(sortedMessages[nextIndex]) ||
-                          zkpPolicy.shouldHide(sortedMessages[nextIndex]))) {
+                          zkpPolicy.shouldHide(sortedMessages[nextIndex]) ||
+                          _isLocalAgentResponseMessage(
+                            sortedMessages[nextIndex],
+                          ))) {
                     nextIndex++;
                   }
 
@@ -134,6 +147,27 @@ class _ChatMessageList extends HookConsumerWidget {
                     }
                   }
 
+                  final showSuggestionAction =
+                      supportsSuggestionRequests &&
+                      chatItem is chat.Message &&
+                      !chatItem.isFromMe &&
+                      selectedReactionIndex == index &&
+                      chatItem.value.trim().isNotEmpty;
+                  final showReactionPicker =
+                      selectedReactionIndex == index &&
+                      chatItem is chat.Message &&
+                      !chatItem.isFromMe;
+                  final matchingSuggestion =
+                      chatItem is chat.Message &&
+                          latestSuggestion?.relatedMessageId ==
+                              chatItem.messageId
+                      ? latestSuggestion
+                      : null;
+                  final showReactionPickerAbove =
+                      showReactionPicker && showSuggestionAction;
+                  final showReactionPickerBelow =
+                      showReactionPicker && !showReactionPickerAbove;
+
                   return Padding(
                     key: ValueKey(chatItem.messageId),
                     padding: zkpPolicy.horizontalPadding(chatItem),
@@ -165,6 +199,11 @@ class _ChatMessageList extends HookConsumerWidget {
                                     chatItem: chatItem,
                                     contactId: _contactId,
                                   ),
+                                ),
+                              if (showReactionPickerAbove)
+                                _ReactionPickerChatItem(
+                                  chatItem: chatItem,
+                                  contactId: _contactId,
                                 ),
                               _isCallOnlyMessage(chatItem)
                                   ? _CallBubble(
@@ -216,10 +255,32 @@ class _ChatMessageList extends HookConsumerWidget {
                                   ),
                                 )
                               : const SizedBox(height: 1),
-                          if (selectedReactionIndex == index)
+                          if (showReactionPickerBelow)
                             _ReactionPickerChatItem(
                               chatItem: chatItem,
                               contactId: _contactId,
+                            ),
+                          if (showSuggestionAction)
+                            _SuggestionActionChatItem(
+                              messageId: chatItem.messageId,
+                              contactId: _contactId,
+                            ),
+                          if (matchingSuggestion != null)
+                            _SuggestionNoticeChatItem(
+                              contactId: _contactId,
+                              suggestion: matchingSuggestion,
+                              isFromMe: chatItem.isFromMe,
+                              onSendAsMe: () async {
+                                await controller.sendLatestSuggestionAsMe();
+                                if (!scrollController.hasClients) return;
+                                if (scrollController.offset <= 24) return;
+
+                                await scrollController.animateTo(
+                                  0,
+                                  duration: const Duration(milliseconds: 260),
+                                  curve: Curves.easeOutCubic,
+                                );
+                              },
                             ),
                           thisItemStatus.isNotEmpty
                               ? Align(
@@ -290,6 +351,11 @@ Color _rCardBubbleColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
     return colorScheme.primary;
   }
 
+  if (chatItem is chat.Message &&
+      chatItem.attachments.any((a) => a.format == 'cierge/trust-task')) {
+    return const Color.fromARGB(248, 30, 60, 80);
+  }
+
   return const Color.fromARGB(248, 107, 65, 162);
 }
 
@@ -314,6 +380,16 @@ bool _isVrcRequestOnlyMessage(chat.ChatItem chatItem) {
   final attachments = chatItem.attachments;
   return attachments.length == 1 &&
       attachments.first.format == VrcRequestAttachment.pluginFormat;
+}
+
+/// Local-only suppression for AI responses generated by this device's agent.
+/// Remote peers still see the signed response message as normal.
+bool _isLocalAgentResponseMessage(chat.ChatItem chatItem) {
+  if (chatItem is! chat.Message || !chatItem.isFromMe) return false;
+  return chatItem.attachments.any(
+    (attachment) =>
+        attachment.format == chat.CiergeSignatureProof.attachmentFormat,
+  );
 }
 
 class _RCardBubble extends StatelessWidget {

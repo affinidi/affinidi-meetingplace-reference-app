@@ -22,6 +22,10 @@ abstract class ContactsServiceState with _$ContactsServiceState {
     return contacts.firstWhereOrNull((c) => c.channelDid == did);
   }
 
+  Contact? getContactByOfferLink(String offerLink) {
+    return contacts.firstWhereOrNull((c) => c.offerLink == offerLink);
+  }
+
   /// Returns the contact whose [Contact.card] DID matches [did].
   ///
   /// Used to look up a contact from an R-Card whose subject DID identifies

@@ -74,7 +74,7 @@ final class ChatScreenControllerProvider
 }
 
 String _$chatScreenControllerHash() =>
-    r'88f2a754a418b25c7b581b27d775914a4f83e4f1';
+    r'3d42796d5db3158fe06d2af3edc6433bb32dfe0e';
 
 /// Controller class for managing the state and logic of the chat screen.
 ///

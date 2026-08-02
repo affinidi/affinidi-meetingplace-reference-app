@@ -34,6 +34,7 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
       );
 
       if (success) {
+        ref.read(personalAiServiceProvider.notifier).onIdentityCreated();
         controller.markAsCurrentIdentity();
       }
     }
